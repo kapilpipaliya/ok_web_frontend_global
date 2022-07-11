@@ -5,6 +5,7 @@ import { TextInput } from "../input/text_input";
 import { Field } from "../field";
 import { BooleanInput } from "../input/boolean_input";
 import { JsonEditor } from "../input/json_editor";
+import { apiPath } from "../../constant";
 
 export default function SchemaDetail(props: any) {
   const params = useParams();
@@ -28,7 +29,7 @@ export default function SchemaDetail(props: any) {
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
-  fetch(`/en/${params.entity}/_attributes`, {
+  fetch(apiPath + `/en/${params.entity}/_attributes`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -53,15 +54,14 @@ export default function SchemaDetail(props: any) {
       form.setControls(groupConstructor);
 
       if (params.id !== "new") {
-        fetch(`/en/${params.entity}/${params.id}`)
+        fetch(apiPath + `/en/${params.entity}/${params.id}`)
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
               form.patchValue(data.data);
 
               if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
-              if (form.controls["_key"])
-                form.controls["_key"].markDisabled(true);
+              if (form.controls["_key"]) form.controls["_key"].markDisabled(true);
             }
             setFetching(false);
           });
@@ -74,7 +74,7 @@ export default function SchemaDetail(props: any) {
     e.preventDefault();
 
     if (params.id == "new") {
-      fetch(`/en/${params.entity}`, {
+      fetch(apiPath + `/en/${params.entity}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -88,7 +88,7 @@ export default function SchemaDetail(props: any) {
           else navigate("../");
         });
     } else {
-      fetch(`/en/${params.entity}/${params.id}`, {
+      fetch(apiPath + `/en/${params.entity}/${params.id}`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -119,10 +119,7 @@ export default function SchemaDetail(props: any) {
   return (
     <>
       <div class="flex justify-center flex-col w-full">
-        <form
-          onSubmit={onSubmit}
-          class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
-        >
+        <form onSubmit={onSubmit} class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
           <Show when={!fetching()} fallback={<>Loading</>}>
             <For each={formData}>
               {(meta) => (
@@ -160,10 +157,7 @@ export default function SchemaDetail(props: any) {
           <br />
           {JSON.stringify(form.value)}
 
-          <button
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            type="submit"
-          >
+          <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
             Save
           </button>
         </form>

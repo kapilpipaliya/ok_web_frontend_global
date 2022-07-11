@@ -1,14 +1,6 @@
-import {
-  untrack,
-  createSignal,
-  For,
-  createEffect,
-  Suspense,
-  onCleanup,
-  Switch,
-  Match,
-} from "solid-js";
+import { untrack, createSignal, For, createEffect, Suspense, onCleanup, Switch, Match } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
+import { apiPath } from "../../constant";
 
 const statusStyles = {
   success: "bg-green-100 text-green-800",
@@ -43,7 +35,7 @@ export default function TableWithStickyHeader() {
   // form.setControls(groupConstructor);
 
   // if (params.id !== "new") {
-  //   fetch(`/en/${params.entity}/${params.id}`)
+  //   fetch(apiPath + `/en/${params.entity}/${params.id}`)
   //     .then((res) => res.json())
   //     .then((data) => {
   //       if (data.success) {
@@ -64,7 +56,7 @@ export default function TableWithStickyHeader() {
       headers: [],
     }));
 
-    fetch(`/en/${params.entity}/_attributes`, {
+    fetch(apiPath + `/en/${params.entity}/_attributes`, {
       method: "GET",
       headers: {
         Accept: "application/json",
@@ -73,7 +65,7 @@ export default function TableWithStickyHeader() {
     })
       .then((res) => res.json())
       .then((headerWithTypes: { key: string; type: string }[]) => {
-        fetch(`/en/${params.entity}`, {
+        fetch(apiPath + `/en/${params.entity}`, {
           method: "GET",
           headers: {
             Accept: "application/json",
@@ -101,7 +93,7 @@ export default function TableWithStickyHeader() {
   });
 
   const deleteObject = (_key) => {
-    fetch(`/en/${params.entity}/${_key}`, {
+    fetch(apiPath + `/en/${params.entity}/${_key}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
@@ -145,16 +137,10 @@ export default function TableWithStickyHeader() {
           <div class="inline-block min-w-full py-2 align-middle">
             <div class="shadow-sm ring-1 ring-black ring-opacity-5">
               {/* <Suspense fallback={<Loader />}> */}
-              <table
-                class="min-w-full border-separate"
-                style={{ borderSpacing: 0 }}
-              >
+              <table class="min-w-full border-separate" style={{ borderSpacing: 0 }}>
                 <thead class="bg-gray-50">
                   <tr>
-                    <For
-                      each={data().headers}
-                      fallback={<div>Loading Header...</div>}
-                    >
+                    <For each={data().headers} fallback={<div>Loading Header...</div>}>
                       {(head) => (
                         <th
                           scope="col"
@@ -172,27 +158,38 @@ export default function TableWithStickyHeader() {
                     {(entity, i) => {
                       return (
                         <tr>
-                          <For
-                            each={data().headers}
-                            fallback={<div>Loading Header...</div>}
-                          >
+                          <For each={data().headers} fallback={<div>Loading Header...</div>}>
                             {(head, rowId) => (
-                              <td
-                                class={classNames(
-                                  true ? "border-b border-gray-200" : "",
-                                  "whitespace-nowrap px-3 py-4 text-sm text-gray-500 hidden sm:table-cell"
-                                )}
-                              >
-                                <Switch fallback={<div onDblClick={() => { console.log("ok1");setEditableCelliIndex(prev => [rowId, head.key]) }}>
-                                  {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                </div>}>
+                              <td class={classNames(true ? "border-b border-gray-200" : "", "whitespace-nowrap px-3 py-4 text-sm text-gray-500 hidden sm:table-cell")}>
+                                <Switch
+                                  fallback={
+                                    <div
+                                      onDblClick={() => {
+                                        console.log("ok1");
+                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
+                                      {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
+                                    </div>
+                                  }
+                                >
                                   <Match when={head.type === "boolean"}>
-                                    <div onDblClick={() => { console.log("ok2");setEditableCelliIndex(prev => [rowId, head.key]) }}>
+                                    <div
+                                      onDblClick={() => {
+                                        console.log("ok2");
+                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
                                       {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
                                     </div>
                                   </Match>
                                   <Match when={head.type === "object"}>
-                                    <div onDblClick={() => { console.log("ok3");setEditableCelliIndex(prev => [rowId, head.key]) }}>
+                                    <div
+                                      onDblClick={() => {
+                                        console.log("ok3");
+                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
                                       {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
                                     </div>
                                   </Match>
