@@ -2,9 +2,9 @@ import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { useParams, useNavigate } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { TextInput } from "../input/text_input";
-import { Field } from "../field";
+import { Field } from "../input/field";
 import { BooleanInput } from "../input/boolean_input";
-import { JsonEditor } from "../input/json_editor";
+import { JsonEditor } from "../input/json_input";
 import { apiPath } from "../../constant";
 
 export default function SchemaDetail(props: any) {

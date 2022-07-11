@@ -8,9 +8,9 @@ import { cash, checkCircle, chevronDown, chevronRight, officeBuilding, search } 
 import clsx from "clsx";
 import { Link, Route, Routes } from "solid-app-router";
 
-import SchemaDetail from "../components/core/schemaDetail";
-import SchemaTable from "../components/core/schemaTable";
-import Page404 from "../errors/404";
+import SchemaDetail from "./core/schemaDetail";
+import SchemaTable from "./core/schemaTable";
+import Page404 from "./errors/404";
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },

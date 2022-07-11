@@ -1,10 +1,11 @@
 /* @refresh reload */
-import "./css_runtime";
 import { render } from "solid-js/web";
 import { Router } from "solid-app-router";
-import App from "./app";
-// const lang = window.location.pathname.split("/")[1];
 
+import { init_unocss_runtime } from "./css_runtime";
+import App from "./app";
+
+init_unocss_runtime();
 render(
   () => (
     <Router>
