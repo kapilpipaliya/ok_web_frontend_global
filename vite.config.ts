@@ -1,9 +1,9 @@
 /// <reference types="vitest" />
 /// <reference types="vite/client" />
 
-import { defineConfig } from 'vite';
-import solidPlugin from 'vite-plugin-solid';
-import UnocssPlugin from 'unocss/vite';
+import { defineConfig } from "vite";
+import solidPlugin from "vite-plugin-solid";
+import UnocssPlugin from "unocss/vite";
 
 export default defineConfig({
   plugins: [
@@ -13,10 +13,10 @@ export default defineConfig({
     }),
   ],
   build: {
-    target: 'esnext',
+    target: "esnext",
     polyfillDynamicImport: false,
   },
-  server: { 
-    host: '0.0.0.0'
-  } 
+  server: {
+    host: "0.0.0.0",
+  },
 });

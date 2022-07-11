@@ -23,7 +23,6 @@
   "dependencies": {
     "@amoutonbrady/solid-heroicons": "^0.8.0",
     "clsx": "^1.2.1",
-    "jsoneditor": "^9.9.0",
     "solid-app-router": "^0.4.1",
     "solid-forms": "^0.3.0",
     "solid-headless": "^0.11.1",

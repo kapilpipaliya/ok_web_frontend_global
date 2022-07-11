@@ -1,10 +1,7 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { useParams, useNavigate } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
-import { TextInput } from "../input/text_input";
-import { Field } from "../input/field";
-import { BooleanInput } from "../input/boolean_input";
-import { JsonEditor } from "../input/json_input";
+import { Field, TextInputField, JsonInput } from "ok_web_components";
 import { apiPath } from "../../constant";
 
 export default function SchemaDetail(props: any) {
@@ -125,25 +122,24 @@ export default function SchemaDetail(props: any) {
               {(meta) => (
                 <Switch>
                   <Match when={meta.type === "string"}>
-                    <Field label={meta.key}>
-                      <TextInput
-                        control={form.controls[meta.key]}
-                        type={getHtmlInputType(meta)}
-                        class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                      />
-                    </Field>
+                    <TextInputField
+                      label={meta.key}
+                      control={form.controls[meta.key]}
+                      type={getHtmlInputType(meta)}
+                      class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                    />
                   </Match>
                   <Match when={meta.type === "boolean"}>
-                    <Field label={meta.key}>
-                      <BooleanInput
-                        control={form.controls[meta.key]}
-                        class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
-                      />
-                    </Field>
+                    <TextInputField
+                      label={meta.key}
+                      type="checkbox"
+                      control={form.controls[meta.key]}
+                      class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                    />
                   </Match>
                   <Match when={meta.type === "object"}>
                     <Field label={meta.key}>
-                      <JsonEditor
+                      <JsonInput
                         control={form.controls[meta.key]}
                         type={getHtmlInputType(meta)}
                         class="form-control block w-full px-4 py-2 text-xl font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
