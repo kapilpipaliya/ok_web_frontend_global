@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { Field, TextInputField, JsonInput } from "ok_web_components";
 import { apiPath } from "../../constant";
+import { fetchAttributes, fetchDocument } from "../api";
 
 export default function SchemaDetail(props: any) {
   const params = useParams();
@@ -26,46 +27,36 @@ export default function SchemaDetail(props: any) {
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
-  fetch(apiPath + `/en/${params.entity}/_attributes`, {
-    method: "GET",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      formData =
-        params.id != "new"
-          ? data
-          : data.filter((d) => {
-              return d.key != "_id" && d.key != "_key";
-            });
-
-      const groupConstructor = formData.reduce((acc, meta) => {
-        const { key, type } = meta;
-        acc[key] = createFormControl(getDefaultValue(meta));
-        return acc;
-      }, {} as { [key: string]: IFormControl });
-
-      form.setControls(groupConstructor);
-
-      if (params.id !== "new") {
-        fetch(apiPath + `/en/${params.entity}/${params.id}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.success) {
-              form.patchValue(data.data);
-
-              if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
-              if (form.controls["_key"]) form.controls["_key"].markDisabled(true);
-            }
-            setFetching(false);
+  fetchAttributes(params.entity).then((data) => {
+    formData =
+      params.id != "new"
+        ? data
+        : data.filter((d) => {
+            return d.key != "_id" && d.key != "_key";
           });
-      } else {
+
+    const groupConstructor = formData.reduce((acc, meta) => {
+      const { key, type } = meta;
+      acc[key] = createFormControl(getDefaultValue(meta));
+      return acc;
+    }, {} as { [key: string]: IFormControl });
+
+    form.setControls(groupConstructor);
+
+    if (params.id !== "new") {
+      fetchDocument(params.entity, params.id).then((data) => {
+        if (data.success) {
+          form.patchValue(data.data);
+
+          if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
+          if (form.controls["_key"]) form.controls["_key"].markDisabled(true);
+        }
         setFetching(false);
-      }
-    });
+      });
+    } else {
+      setFetching(false);
+    }
+  });
 
   const onSubmit = (e) => {
     e.preventDefault();

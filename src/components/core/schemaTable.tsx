@@ -1,6 +1,7 @@
 import { untrack, createSignal, For, createEffect, Suspense, onCleanup, Switch, Match } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
 import { apiPath } from "../../constant";
+import { fetchAttributesData, fetchCollectionData } from "../api";
 
 const statusStyles = {
   success: "bg-green-100 text-green-800",
@@ -56,37 +57,21 @@ export default function TableWithStickyHeader() {
       headers: [],
     }));
 
-    fetch(apiPath + `/en/${params.entity}/_attributes`, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((headerWithTypes: { key: string; type: string }[]) => {
-        fetch(apiPath + `/en/${params.entity}`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            if (!data.success) alert(data.exception);
-            else {
-              const headers = headerWithTypes;
-              headers.push({ key: "edit", type: "actions" });
+    fetchAttributesData(params.entity).then((headerWithTypes: { key: string; type: string }[]) => {
+      fetchCollectionData(params.entity).then((data) => {
+        if (!data.success) alert(data.exception);
+        else {
+          const headers = headerWithTypes;
+          headers.push({ key: "edit", type: "actions" });
 
-              setData((prev) => ({
-                ...prev,
-                data: data.data,
-                headers,
-              }));
-            }
-          });
+          setData((prev) => ({
+            ...prev,
+            data: data.data,
+            headers,
+          }));
+        }
       });
+    });
   };
   createEffect(() => {
     if (params.entity) untrack(getObjectData);
