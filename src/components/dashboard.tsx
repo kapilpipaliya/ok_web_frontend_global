@@ -11,11 +11,13 @@ import { Link, Route, Routes } from "solid-app-router";
 import SchemaDetail from "./core/schemaDetail";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
+import { CollectionEditor } from "./collection_editor";
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
   { name: "Attributes", href: "/attributes", icon: clock, current: false },
   { name: "Collections", href: "/collections", icon: scale, current: false },
+  { name: "New Collection", href: "/collections/new", icon: scale, current: false },
 ];
 
 const secondaryNavigation = [
@@ -535,6 +537,7 @@ export const DashboardView = () => {
         {/* Page header */}
         <Routes>
           <Route path="/" component={() => <Home />} />
+          <Route path="/collections/new" component={() => <CollectionEditor />} />
           <Route path="/:entity" component={() => <SchemaTable />} />
           <Route path="/:entity/:id" component={() => <SchemaDetail />} />
           <Route path="/**" component={() => <Page404 />} />
