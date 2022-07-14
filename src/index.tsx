@@ -1,16 +1,20 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { Router } from "solid-app-router";
+import { HopeProvider } from '@hope-ui/solid'
 
-import { init_uno_css_runtime } from "ok_web_components";
+
 import App from "./app";
 
-init_uno_css_runtime();
 render(
   () => (
-    <Router>
-      <App />
-    </Router>
+
+
+    <HopeProvider>
+      <Router>
+        <App />
+      </Router>
+    </HopeProvider>
   ),
   document.getElementById("root") as HTMLElement
 );
