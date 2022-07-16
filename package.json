@@ -23,6 +23,7 @@
     "solid-forms": "^0.4.3",
     "solid-headless": "^0.11.1",
     "solid-js": "^1.4.7",
+    "solid-styled-components": "^0.28.4",
     "solid-transition-group": "0.0.10"
   }
 }
