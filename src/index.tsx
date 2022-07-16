@@ -3,14 +3,11 @@ import { render } from "solid-js/web";
 import { Router } from "solid-app-router";
 import { HopeProvider } from '@hope-ui/solid'
 
-
 import App from "./app";
 
 render(
   () => (
-
-
-    <HopeProvider>
+  <HopeProvider>
       <Router>
         <App />
       </Router>

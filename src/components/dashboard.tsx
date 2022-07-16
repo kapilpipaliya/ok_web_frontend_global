@@ -529,10 +529,10 @@ const Home = () => {
 export const DashboardView = () => {
   return (
     <div class="lg:pl-64 flex flex-col flex-1">
-      <div class="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-green-200 lg:border-none">
+      {/* <div class="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-green-200 lg:border-none">
         <MenuButtonToggle />
         <SearchBar />
-      </div>
+      </div> */}
       <main class="flex-1 pb-8">
         {/* Page header */}
         <Routes>
@@ -550,7 +550,7 @@ export const DashboardView = () => {
 export const FullDashboard = () => {
   return (
     <div class="min-h-full bg-gray-100">
-      <StaticSideBar isOpen={isSideBarOpen} />
+      {/* <StaticSideBar isOpen={isSideBarOpen} /> */}
       <DashboardView />
     </div>
   );

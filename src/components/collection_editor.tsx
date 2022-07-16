@@ -1,4 +1,4 @@
-import { Field, TextInputField, Button } from "ok_web_components";
+import { Field, TextInputField, Button, Table } from "ok_web_components";
 import { createFormArray, createFormControl, createFormGroup, bindOwner, IFormGroup } from "solid-forms";
 import { batch, createSignal, createUniqueId, For, Switch } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -28,7 +28,7 @@ export interface Relation {
   b?: number;
 }
 interface CollectionEditorProps {
-  id: string;
+  id?: string;
 }
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const [attributes, setAttributes] = createStore({ data: [] as Attribute[] });
@@ -50,6 +50,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       }
     });
   }
+  const [allAttributes, setAllAttributes] = createStore({ data: [] as Attribute[] });
+  fetchCollectionData("attributes").then((data) => {
+    setAllAttributes(data.data);
+  });
 
   const types = {
     _key: createFormControl(createUniqueId()),
@@ -87,46 +91,70 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          {<TextInputField label="" control={attributesControl.controls[p.index()].controls._key} type={"text"} />}
-          <button type="button" onclick={() => clearControl("_key")}>
-            x
-          </button>
+          <TextInputField
+            label=""
+            control={attributesControl.controls[p.index()].controls._key}
+            type={"text"}
+            suffix={
+              <button type="button" onclick={() => clearControl("_key")}>
+                x
+              </button>
+            }
+          />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          {<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"text"} />}{" "}
-          <button type="button" onclick={() => clearControl("id")}>
-            x
-          </button>
+          <TextInputField
+            label=""
+            control={attributesControl.controls[p.index()].controls.id}
+            type={"text"}
+            suffix={
+              <button type="button" onclick={() => clearControl("id")}>
+                x
+              </button>
+            }
+          />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField label="" control={attributesControl.controls[p.index()].controls.selector} type={"text"} />
-          <button type="button" onclick={() => clearControl("selector")}>
-            x
-          </button>
+          <TextInputField
+            label=""
+            control={attributesControl.controls[p.index()].controls.selector}
+            type={"text"}
+            suffix={
+              <button type="button" onclick={() => clearControl("selector")}>
+                x
+              </button>
+            }
+          />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          {<TextInputField label="" control={attributesControl.controls[p.index()].controls.type} type={"text"} />}
-          <button type="button" onclick={() => clearControl("type")}>
-            x
-          </button>
+          <TextInputField
+            label=""
+            control={attributesControl.controls[p.index()].controls.type}
+            type={"text"}
+            suffix={
+              <button type="button" onclick={() => clearControl("type")}>
+                x
+              </button>
+            }
+          />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField label="" control={attributesControl.controls[p.index()].controls.label} type={"text"} />
-          <button type="button" onclick={() => clearControl("label")}>
-            x
-          </button>
+          <TextInputField
+            label=""
+            control={attributesControl.controls[p.index()].controls.label}
+            type={"text"}
+            suffix={
+              <button type="button" onclick={() => clearControl("label")}>
+                x
+              </button>
+            }
+          />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
           <TextInputField label="" control={attributesControl.controls[p.index()].controls.internal} type={"checkbox"} />
-          {/* <button type="button" onclick={() => clearControl("internal")}>
-            x
-          </button> */}
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
           <TextInputField label="" control={attributesControl.controls[p.index()].controls.required} type={"checkbox"} />
-          {/* <button type="button" onclick={() => clearControl("required")}>
-            x
-          </button> */}
         </td>
         {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
         {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
@@ -157,8 +185,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
 
   const name = createFormControl("");
+
   return (
-    <div class="px-3">
+    <div>
       {/* <SectionHeaderWithAction border-b={false}> */}
       {/* <h3 class="text-lg leading-6 font-medium text-gray-900">Layout Editor</h3> */}
       {/* </SectionHeaderWithAction> */}
@@ -166,10 +195,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         <div class="max-w-xs mb-2">
           <TextInputField control={name} label={"Name"}></TextInputField>
         </div>
-        <Button text={"Add New"} onclick={addNew} color="primary" class="mt-3" />
+        <Button text={"Add New"} onclick={addNew} color="primary" size="md" variant="solid" />
       </div>
-      <div class="overflow-x sm:overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300 table-auto overflow-scroll w-full">
+      <div class="overflow-x-auto sm:overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-300">
           <thead class="bg-gray-50">
             <tr>
               <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"></th>
@@ -199,8 +228,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         </table>
       </div>
       <div class="mt-4 pt-5 border-t border-t-gray-200 flex gap-2">
-        <Button text={"Submit"} onclick={onSubmit} color="primary" />
-        <Button text={"Cancel"} onclick={onSubmit} color="secondary" />
+        <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
+        <Button text={"Cancel"} onclick={onSubmit} color="primary" variant="outline" size="md" />
       </div>
     </div>
   );
