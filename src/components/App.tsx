@@ -22,6 +22,7 @@ export const App = () => {
     <Router>
       <div class={css`
         display: grid;
+        grid-template-columns: 100px 1fr;
         grid-template-areas:'menu main';
         gap: 10px;
       `}>
@@ -52,13 +53,17 @@ export const App = () => {
             </For>
           </div>
         </div>
-        <Routes>
-          <Route path="/" component={() => <>Home</>} />
-          <Route path="/collections/new" component={() => <CollectionEditor />} />
-          <Route path="/:entity" component={() => <SchemaTable />} />
-          <Route path="/:entity/:id" component={() => <SchemaDetail />} />
-          <Route path="/**" component={() => <Page404 />} />
-        </Routes>
+        <main class={css`
+          grid-area: main;
+        `}>
+          <Routes>
+            <Route path="/" component={() => <>Home</>} />
+            <Route path="/collections/new" component={() => <CollectionEditor />} />
+            <Route path="/:entity" component={() => <SchemaTable />} />
+            <Route path="/:entity/:id" component={() => <SchemaDetail />} />
+            <Route path="/**" component={() => <Page404 />} />
+          </Routes>
+        </main>
       </div>
     </Router>
   );
