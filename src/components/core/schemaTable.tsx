@@ -3,17 +3,6 @@ import { useNavigate, useParams } from "solid-app-router";
 import { apiPath } from "../../constant";
 import { fetchAttributesData, fetchCollectionData } from "../api";
 
-const statusStyles = {
-  success: "bg-green-100 text-green-800",
-  processing: "bg-yellow-100 text-yellow-800",
-  failed: "bg-gray-100 text-gray-800",
-};
-
-function classNames(...classes: (string | boolean | undefined)[]): string {
-  return classes.filter(Boolean).join(" ");
-}
-
-// TableWithStickyHeader
 export default function TableWithStickyHeader() {
   const navigate = useNavigate();
   const params = useParams();
@@ -23,32 +12,7 @@ export default function TableWithStickyHeader() {
     headers: [] as { key: string; type: string }[],
   });
 
-  const [editableCellIndex, setEditableCelliIndex] = createSignal([null, null]);
-
-  // formData = params.id != "new" ? data : data.filter(d => { return d.key != "_id" && d.key != "_key" });
-
-  // const groupConstructor = formData.reduce((acc, { key, type }) => {
-  //   acc[key] = createFormControl("");
-  //   return acc;
-
-  // }, {} as { [key: string]: IFormControl });
-
-  // form.setControls(groupConstructor);
-
-  // if (params.id !== "new") {
-  //   fetch(apiPath + `/en/${params.entity}/${params.id}`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       if (data.success) {
-
-  //         form.patchValue(data.data);
-
-  //         if (form.controls["_id"]) form.controls["_id"].markDisabled(true)
-  //         if (form.controls["_key"]) form.controls["_key"].markDisabled(true)
-  //       }
-  //     });
-  // }
-  // });
+  const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
 
   const getObjectData = () => {
     setData((prev) => ({
@@ -73,7 +37,9 @@ export default function TableWithStickyHeader() {
       });
     });
   };
+
   createEffect(() => {
+    // clear the state when routes parameter changes.
     if (params.entity) untrack(getObjectData);
   });
 
@@ -145,13 +111,12 @@ export default function TableWithStickyHeader() {
                         <tr>
                           <For each={data().headers} fallback={<div>Loading Header...</div>}>
                             {(head, rowId) => (
-                              <td class={classNames(true ? "border-b border-gray-200" : "", "whitespace-nowrap px-3 py-4 text-sm text-gray-500 hidden sm:table-cell")}>
+                              <td>
                                 <Switch
                                   fallback={
                                     <div
                                       onDblClick={() => {
-                                        console.log("ok1");
-                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
@@ -161,8 +126,7 @@ export default function TableWithStickyHeader() {
                                   <Match when={head.type === "boolean"}>
                                     <div
                                       onDblClick={() => {
-                                        console.log("ok2");
-                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
@@ -171,8 +135,7 @@ export default function TableWithStickyHeader() {
                                   <Match when={head.type === "object"}>
                                     <div
                                       onDblClick={() => {
-                                        console.log("ok3");
-                                        setEditableCelliIndex((prev) => [rowId, head.key]);
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
