@@ -6,6 +6,10 @@ dependencies are maintained via [npm](https://www.npmjs.com/).
 $ npm install
 ```
 
+## testing
+- install cypress using `npm install -g cypress`
+- start cypress using `yarn cypress open`
+
 ## Available Scripts
 
 In the project directory, you can run:
