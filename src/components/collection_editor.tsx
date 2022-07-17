@@ -14,6 +14,7 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
+import { css } from "solid-styled-components";
 
 export interface Attribute {
   _key?: string;
@@ -95,7 +96,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     });
   };
 
- // Todo dont allow duplicate value in the select field
+  // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { index: () => number; metaKey: string }) => {
     const sortable = createSortable(p.metaKey);
 
@@ -103,97 +104,104 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       attributesControl.controls[p.index()].controls[id].setValue(undefined);
     };
 
-    const onSelectChange = (control: IFormControl)=>(selected: null | string) => {
-      control.setValue(selected)
+    const onSelectChange = (control: IFormControl) => (selected: null | string) => {
+      control.setValue(selected);
     };
 
     return (
-      <Show when={attributesControl.controls[p.index()]}><tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
-        <td
-          class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField
-            label=""
-            control={attributesControl.controls[p.index()].controls._key}
-            type={"text"}
-            suffixElement={
-              <button type="button" onclick={() => clearControl("_key")}>
-                x
-              </button>
-            }
-          />
-        </td>
-        <td><Select
-          {...selectOptionProps}
-          initialValue={attributesControl.controls[p.index()].controls.attribute.value}
-          onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
-          optionToValue={(option: Option) => {
-            return option._key; // ["id"]
-          }}
-          format={(optionOrValue, type) => {
-            // value is displayed in the input; option is displayed in the list
-            return type === "option" ? optionOrValue._key : optionOrValue;
-          }} /> <button type="button" onclick={() => clearControl("attribute")}>
-          x
-        </button></td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField
-            label=""
-            control={attributesControl.controls[p.index()].controls.id}
-            type={"text"}
-            suffixElement={
-              <button type="button" onclick={() => clearControl("id")}>
-                x
-              </button>
-            }
-          />
-        </td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField
-            label=""
-            control={attributesControl.controls[p.index()].controls.selector}
-            type={"text"}
-            suffixElement={
-              <button type="button" onclick={() => clearControl("selector")}>
-                x
-              </button>
-            }
-          />
-        </td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField
-            label=""
-            control={attributesControl.controls[p.index()].controls.type}
-            type={"text"}
-            suffixElement={
-              <button type="button" onclick={() => clearControl("type")}>
-                x
-              </button>
-            }
-          />
-        </td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField
-            label=""
-            control={attributesControl.controls[p.index()].controls.label}
-            type={"text"}
-            suffixElement={
-              <button type="button" onclick={() => clearControl("label")}>
-                x
-              </button>
-            }
-          />
-        </td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
-        </td>
-        <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
-        </td>
-        {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
-        {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
-        <td><button onclick={_=>attributesControl.removeControl(p.index())}>x</button></td>
-      </tr></Show>
+      <Show when={attributesControl.controls[p.index()]}>
+        <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
+          <td
+            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <TextInputField
+              label=""
+              control={attributesControl.controls[p.index()].controls._key}
+              type={"text"}
+              suffixElement={
+                <button type="button" onclick={() => clearControl("_key")}>
+                  x
+                </button>
+              }
+            />
+          </td>
+          <td class={css`
+            display: flex;`}><Select
+            {...selectOptionProps}
+            initialValue={attributesControl.controls[p.index()].controls.attribute.value}
+            onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
+            optionToValue={(option: Option) => {
+              return option._key; // ["id"]
+            }}
+            format={(optionOrValue, type) => {
+              // value is displayed in the input; option is displayed in the list
+              return type === "option" ? optionOrValue._key : optionOrValue;
+            }} />
+            <button type="button" onclick={() => clearControl("attribute")}>
+              x
+            </button>
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <TextInputField
+              label=""
+              control={attributesControl.controls[p.index()].controls.id}
+              type={"text"}
+              suffixElement={
+                <button type="button" onclick={() => clearControl("id")}>
+                  x
+                </button>
+              }
+            />
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <TextInputField
+              label=""
+              control={attributesControl.controls[p.index()].controls.selector}
+              type={"text"}
+              suffixElement={
+                <button type="button" onclick={() => clearControl("selector")}>
+                  x
+                </button>
+              }
+            />
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <TextInputField
+              label=""
+              control={attributesControl.controls[p.index()].controls.type}
+              type={"text"}
+              suffixElement={
+                <button type="button" onclick={() => clearControl("type")}>
+                  x
+                </button>
+              }
+            />
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <TextInputField
+              label=""
+              control={attributesControl.controls[p.index()].controls.label}
+              type={"text"}
+              suffixElement={
+                <button type="button" onclick={() => clearControl("label")}>
+                  x
+                </button>
+              }
+            />
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
+          </td>
+          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+            <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
+          </td>
+          {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
+          {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
+          <td>
+            <button onclick={_ => attributesControl.removeControl(p.index())}>x</button>
+          </td>
+        </tr>
+      </Show>
     );
   };
 
@@ -232,8 +240,13 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         </div>
         <Button text={"Add New"} onclick={addNew} color="primary" size="md" variant="solid" />
       </div>
-      <div class="overflow-x-auto sm:overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-300">
+      <div class={css`
+        table, th, td {
+          border: 1px solid rgba(0, 0, 0, .1);
+      border-collapse: collapse;
+        }
+      `}>
+        <table>
           <thead class="bg-gray-50">
           <tr>
             <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"></th>
