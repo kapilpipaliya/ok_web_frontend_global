@@ -1,7 +1,8 @@
-import { untrack, createSignal, For, createEffect, Suspense, onCleanup, Switch, Match } from "solid-js";
+import { createEffect, createSignal, For, Match, onCleanup, Switch, untrack } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
 import { apiPath } from "../../constant";
 import { fetchAttributesData, fetchCollectionData } from "../api";
+import { css } from "solid-styled-components";
 
 export default function TableWithStickyHeader() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export default function TableWithStickyHeader() {
 
   const [data, setData] = createSignal({
     data: [],
-    headers: [] as { key: string; type: string }[],
+    headers: [] as { key: string; type: string }[]
   });
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
@@ -18,7 +19,7 @@ export default function TableWithStickyHeader() {
     setData((prev) => ({
       ...prev,
       data: [],
-      headers: [],
+      headers: []
     }));
 
     fetchAttributesData(params.entity).then((headerWithTypes: { key: string; type: string }[]) => {
@@ -31,7 +32,7 @@ export default function TableWithStickyHeader() {
           setData((prev) => ({
             ...prev,
             data: data.data,
-            headers,
+            headers
           }));
         }
       });
@@ -48,8 +49,8 @@ export default function TableWithStickyHeader() {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
-      },
+        "Content-Type": "application/json"
+      }
     })
       .then((res) => res.json())
       .then((data) => {
@@ -68,80 +69,85 @@ export default function TableWithStickyHeader() {
   };
 
   return (
-    <div class="px-4 sm:px-6 lg:px-8">
-      <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-          <h1 class="text-xl font-semibold text-gray-900">{params.entity}</h1>
+    <div>
+      <div>
+        <div>
+          <h1>{params.entity}</h1>
         </div>
-        <div class="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div>
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+
             onClick={() => navigate("./new")}
           >
             Add new {JSON.stringify(editableCellIndex)}
           </button>
         </div>
       </div>
-      <div class="mt-8 flex flex-col">
-        <div class="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
-          <div class="inline-block min-w-full py-2 align-middle">
-            <div class="shadow-sm ring-1 ring-black ring-opacity-5">
+      <div>
+        <div>
+          <div>
+            <div class={css`
+              table, th, td {
+                border: 1px solid rgba(0, 0, 0, .1);
+                border-collapse: collapse;
+              }
+            `}>
               {/* <Suspense fallback={<Loader />}> */}
-              <table class="min-w-full border-separate" style={{ borderSpacing: 0 }}>
-                <thead class="bg-gray-50">
-                  <tr>
-                    <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                      {(head) => (
-                        <th
-                          scope="col"
-                          class="sticky top-0 z-10 border-b border-gray-300 bg-gray-50 bg-opacity-75 py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 backdrop-blur backdrop-filter sm:pl-6 lg:pl-8"
-                          title={head.type}
-                        >
-                          {head.key}
-                        </th>
-                      )}
-                    </For>
-                  </tr>
+              <table style={{ borderSpacing: 0 }}>
+                <thead>
+                <tr>
+                  <For each={data().headers} fallback={<div>Loading Header...</div>}>
+                    {(head) => (
+                      <th
+                        scope="col"
+
+                        title={head.type}
+                      >
+                        {head.key}
+                      </th>
+                    )}
+                  </For>
+                </tr>
                 </thead>
-                <tbody class="bg-white">
-                  <For each={data().data} fallback={<div></div>}>
-                    {(entity, i) => {
-                      return (
-                        <tr>
-                          <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                            {(head, rowId) => (
-                              <td>
-                                <Switch
-                                  fallback={
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  }
-                                >
-                                  <Match when={head.type === "boolean"}>
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  </Match>
-                                  <Match when={head.type === "object"}>
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  </Match>
-                                  {/* <Match when={head.type === "actions"}>
+                <tbody>
+                <For each={data().data} fallback={<div></div>}>
+                  {(entity, i) => {
+                    return (
+                      <tr>
+                        <For each={data().headers} fallback={<div>Loading Header...</div>}>
+                          {(head, rowId) => (
+                            <td>
+                              <Switch
+                                fallback={
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
+                                  </div>
+                                }
+                              >
+                                <Match when={head.type === "boolean"}>
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
+                                  </div>
+                                </Match>
+                                <Match when={head.type === "object"}>
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
+                                  </div>
+                                </Match>
+                                {/* <Match when={head.type === "actions"}>
                                     <td
                                       class={classNames(
                                         true ? "border-b border-gray-200" : "",
@@ -150,12 +156,12 @@ export default function TableWithStickyHeader() {
                                     >
                                       <a
                                         href={`${window.location.href}/${entity._key}`}
-                                        class="text-indigo-600 hover:text-indigo-900"
+                                        
                                       >
-                                        Edit<span class="sr-only"></span>
+                                        Edit<span ></span>
                                       </a>
                                       <button
-                                        class="pl-3 text-red-600 hover:text-red-900"
+                                        
                                         onClick={() =>
                                           deleteObject(entity._key)
                                         }
@@ -164,14 +170,14 @@ export default function TableWithStickyHeader() {
                                       </button>
                                     </td>
                                   </Match> */}
-                                </Switch>
-                              </td>
-                            )}
-                          </For>
-                        </tr>
-                      );
-                    }}
-                  </For>
+                              </Switch>
+                            </td>
+                          )}
+                        </For>
+                      </tr>
+                    );
+                  }}
+                </For>
                 </tbody>
               </table>
               {/* </Suspense> */}
