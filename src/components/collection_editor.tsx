@@ -1,12 +1,23 @@
-import { Field, TextInputField, Button, Table } from "ok_web_components";
-import { createFormArray, createFormControl, createFormGroup, bindOwner, IFormGroup } from "solid-forms";
-import { batch, createSignal, createUniqueId, For, Switch } from "solid-js";
+import { BooleanInputField, Button, TextInputField } from "ok_web_components";
+import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl } from "solid-forms";
+import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
-import { fetchAttributes, fetchCollectionData, fetchDocument } from "./api";
-import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
+import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
+import "./select.css";
+import { fetchCollectionData, fetchDocument } from "./api";
+import {
+  closestCenter,
+  createSortable,
+  DragDropProvider,
+  DragDropSensors,
+  DragEventHandler,
+  SortableProvider
+} from "@thisbeyond/solid-dnd";
+import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 
 export interface Attribute {
   _key?: string;
+  attribute: string;
   id: string;
   selector: string;
   type: string;
@@ -27,9 +38,11 @@ export interface Relation {
   a?: number;
   b?: number;
 }
+
 interface CollectionEditorProps {
   id?: string;
 }
+
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const [attributes, setAttributes] = createStore({ data: [] as Attribute[] });
   const [sortedKeys, setSortedKeys] = createSignal(attributes.data.map((a) => a._key));
@@ -50,11 +63,12 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       }
     });
   }
-  const [allAttributes, setAllAttributes] = createStore({ data: [] as Attribute[] });
-  fetchCollectionData("attributes").then((data) => {
-    setAllAttributes(data.data);
-  });
+  const fetchData = async (inputValue: string): Promise<any> => {
+    return fetchCollectionData("attributes").then(d => d.data);
+  };
 
+  const selectOptionProps = createAsyncOptions(fetchData);
+  console.log(selectOptionProps);
   const types = {
     _key: createFormControl(createUniqueId()),
     id: "text",
@@ -64,22 +78,24 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     label: "text",
     props: "json",
     relation: "json",
-    required: "checkbox",
+    required: "checkbox"
   };
   const newRow = () => {
     return createFormGroup({
       _key: createFormControl(createUniqueId()),
       id: createFormControl(""),
+      attribute: createFormControl(""),
       selector: createFormControl(""),
       type: createFormControl(""),
       label: createFormControl(""),
       internal: createFormControl(false),
       required: createFormControl(false),
       props: createFormControl({}),
-      relation: createFormControl({}),
+      relation: createFormControl({})
     });
   };
 
+ // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { index: () => number; metaKey: string }) => {
     const sortable = createSortable(p.metaKey);
 
@@ -87,27 +103,45 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       attributesControl.controls[p.index()].controls[id].setValue(undefined);
     };
 
+    const onSelectChange = (control: IFormControl)=>(selected: null | string) => {
+      control.setValue(selected)
+    };
+
     return (
-      <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
-        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
+      <Show when={attributesControl.controls[p.index()]}><tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
+        <td
+          class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
           <TextInputField
             label=""
             control={attributesControl.controls[p.index()].controls._key}
             type={"text"}
-            suffix={
+            suffixElement={
               <button type="button" onclick={() => clearControl("_key")}>
                 x
               </button>
             }
           />
         </td>
+        <td><Select
+          {...selectOptionProps}
+          initialValue={attributesControl.controls[p.index()].controls.attribute.value}
+          onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
+          optionToValue={(option: Option) => {
+            return option._key; // ["id"]
+          }}
+          format={(optionOrValue, type) => {
+            // value is displayed in the input; option is displayed in the list
+            return type === "option" ? optionOrValue._key : optionOrValue;
+          }} /> <button type="button" onclick={() => clearControl("attribute")}>
+          x
+        </button></td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
           <TextInputField
             label=""
             control={attributesControl.controls[p.index()].controls.id}
             type={"text"}
-            suffix={
+            suffixElement={
               <button type="button" onclick={() => clearControl("id")}>
                 x
               </button>
@@ -119,7 +153,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             label=""
             control={attributesControl.controls[p.index()].controls.selector}
             type={"text"}
-            suffix={
+            suffixElement={
               <button type="button" onclick={() => clearControl("selector")}>
                 x
               </button>
@@ -131,7 +165,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             label=""
             control={attributesControl.controls[p.index()].controls.type}
             type={"text"}
-            suffix={
+            suffixElement={
               <button type="button" onclick={() => clearControl("type")}>
                 x
               </button>
@@ -143,7 +177,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             label=""
             control={attributesControl.controls[p.index()].controls.label}
             type={"text"}
-            suffix={
+            suffixElement={
               <button type="button" onclick={() => clearControl("label")}>
                 x
               </button>
@@ -151,14 +185,15 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
           />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField label="" control={attributesControl.controls[p.index()].controls.internal} type={"checkbox"} />
+          <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
         </td>
         <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-          <TextInputField label="" control={attributesControl.controls[p.index()].controls.required} type={"checkbox"} />
+          <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
         </td>
         {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
         {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
-      </tr>
+        <td><button onclick={_=>attributesControl.removeControl(p.index())}>x</button></td>
+      </tr></Show>
     );
   };
 
@@ -200,30 +235,31 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       <div class="overflow-x-auto sm:overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <table class="min-w-full divide-y divide-gray-300">
           <thead class="bg-gray-50">
-            <tr>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"></th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">key</th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">ID</th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Selector</th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Type</th>
+          <tr>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"></th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">key</th>
+            <th>Attributes</th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">ID</th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Selector</th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Type</th>
 
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Label</th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Internal</th>
-              <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Required</th>
-              {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Props</th> */}
-              {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Relation</th> */}
-              <th></th>
-            </tr>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Label</th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Internal</th>
+            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Required</th>
+            {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Props</th> */}
+            {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Relation</th> */}
+            <th></th>
+          </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
-            <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
-              <DragDropSensors />
-              <SortableProvider ids={ids()}>
-                <For each={sortedKeys()} fallback={<div>Loading...</div>}>
-                  {(key, index) => <SortableRow index={index} metaKey={key} />}
-                </For>
-              </SortableProvider>
-            </DragDropProvider>
+          <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
+            <DragDropSensors />
+            <SortableProvider ids={ids()}>
+              <For each={sortedKeys()} fallback={<div>Loading...</div>}>
+                {(key, index) => <SortableRow index={index} metaKey={key} />}
+              </For>
+            </SortableProvider>
+          </DragDropProvider>
           </tbody>
         </table>
       </div>
