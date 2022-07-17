@@ -141,7 +141,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               x
             </button>
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.id}
@@ -153,7 +153,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.selector}
@@ -165,7 +165,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.type}
@@ -177,7 +177,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.label}
@@ -189,14 +189,14 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
           </td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
+          <td >
             <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
           </td>
-          {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
-          {/* <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">{<TextInputField label="" control={attributesControl.controls[p.index()].controls.id} type={"json"}/>}</td> */}
+          {/* <td }/>}</td> */}
+          {/* <td }/>}</td> */}
           <td>
             <button onclick={_ => attributesControl.removeControl(p.index())}>x</button>
           </td>
@@ -232,10 +232,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   return (
     <div>
       {/* <SectionHeaderWithAction border-b={false}> */}
-      {/* <h3 class="text-lg leading-6 font-medium text-gray-900">Layout Editor</h3> */}
+      {/* <h3 >Layout Editor</h3> */}
       {/* </SectionHeaderWithAction> */}
-      <div class="flex gap-2 items-center">
-        <div class="max-w-xs mb-2">
+      <div >
+        <div >
           <TextInputField control={name} label={"Name"}></TextInputField>
         </div>
         <Button text={"Add New"} onclick={addNew} color="primary" size="md" variant="solid" />
@@ -247,24 +247,24 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         }
       `}>
         <table>
-          <thead class="bg-gray-50">
+          <thead >
           <tr>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"></th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">key</th>
+            <th ></th>
+            <th >key</th>
             <th>Attributes</th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">ID</th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Selector</th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Type</th>
+            <th >ID</th>
+            <th >Selector</th>
+            <th >Type</th>
 
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Label</th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Internal</th>
-            <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Required</th>
-            {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Props</th> */}
-            {/* <th class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900">Relation</th> */}
+            <th >Label</th>
+            <th >Internal</th>
+            <th >Required</th>
+            {/* <th >Props</th> */}
+            {/* <th >Relation</th> */}
             <th></th>
           </tr>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
+          <tbody >
           <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
             <DragDropSensors />
             <SortableProvider ids={ids()}>
@@ -276,7 +276,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
           </tbody>
         </table>
       </div>
-      <div class="mt-4 pt-5 border-t border-t-gray-200 flex gap-2">
+      <div >
         <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
         <Button text={"Cancel"} onclick={onSubmit} color="primary" variant="outline" size="md" />
       </div>
