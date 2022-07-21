@@ -1,0 +1,43 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "prettier"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "airbnb-typescript",
+    "prettier",
+    "plugin:import/typescript"
+  ],
+  "rules": {
+    "prettier/prettier": "warn",
+    // "id-length": ["warn", { "min": 2 }],
+    "camelcase": "warn",
+    "new-cap": "warn",
+    "no-underscore-dangle": "warn",
+    "jsx-quotes": "warn",
+    "quotes": ["warn", "double", { "avoidEscape": true }],
+    "@typescript-eslint/quotes": [
+      "error",
+      "double",
+      {
+        "allowTemplateLiterals": true
+      }
+    ],
+    "import/no-extraneous-dependencies": [
+      "off",
+      { "devDependencies": false, "optionalDependencies": false, "peerDependencies": false }
+    ],
+    "react/jsx-filename-extension": "off",
+    "import/extensions": "off",
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "overrides": [
+    {
+      "files": ["*.tsx", "*.ts"]
+    }
+  ]
+}

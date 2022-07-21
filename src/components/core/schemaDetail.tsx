@@ -1,8 +1,8 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { useParams, useNavigate } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
-import { Field, TextInputField, JsonInput, GeneralInput} from "ok_web_components";
-import { apiPath } from "../../constant";
+import { Field, TextInputField, JsonInput, GeneralInput } from "ok_web_components";
+import { API_PATH } from "../../constant";
 import { fetchAttributes, fetchDocument } from "../api";
 
 export default function SchemaDetail(props: any) {
@@ -61,7 +61,7 @@ export default function SchemaDetail(props: any) {
     e.preventDefault();
 
     if (params.id == "new") {
-      fetch(apiPath + `/en/${params.entity}`, {
+      fetch(API_PATH + `/en/${params.entity}`, {
         method: "POST",
         headers: {
           Accept: "application/json",
@@ -75,7 +75,7 @@ export default function SchemaDetail(props: any) {
           else navigate("../");
         });
     } else {
-      fetch(apiPath + `/en/${params.entity}/${params.id}`, {
+      fetch(API_PATH + `/en/${params.entity}/${params.id}`, {
         method: "PATCH",
         headers: {
           Accept: "application/json",
@@ -100,7 +100,7 @@ export default function SchemaDetail(props: any) {
       case "decimal":
         return "number";
       case "json":
-        return "jsoneditor"
+        return "jsoneditor";
       default:
         return meta.type;
         break;
@@ -109,8 +109,8 @@ export default function SchemaDetail(props: any) {
 
   return (
     <>
-      <div >
-        <form onSubmit={onSubmit} >
+      <div>
+        <form onSubmit={onSubmit}>
           <Show when={!fetching()} fallback={<>Loading</>}>
             <For each={formData}>
               {(meta) => (
@@ -120,7 +120,6 @@ export default function SchemaDetail(props: any) {
                       label={meta.key}
                       control={form.controls[meta.key]}
                       type={getHtmlInputType(meta)}
-                      
                     />
                   </Match>
                   <Match when={meta.type === "boolean"}>
@@ -128,16 +127,11 @@ export default function SchemaDetail(props: any) {
                       label={meta.key}
                       type="checkbox"
                       control={form.controls[meta.key]}
-                      
                     />
                   </Match>
                   <Match when={meta.type === "json"}>
                     <Field label={meta.key}>
-                      <JsonInput
-                        control={form.controls[meta.key]}
-                        type={getHtmlInputType(meta)}
-                        
-                      />
+                      <JsonInput control={form.controls[meta.key]} type={getHtmlInputType(meta)} />
                     </Field>
                   </Match>
                   <Match when={meta.type === "dynamic"}>
@@ -155,9 +149,7 @@ export default function SchemaDetail(props: any) {
           <br />
           {JSON.stringify(form.value)}
 
-          <button >
-            Save
-          </button>
+          <button>Save</button>
         </form>
       </div>
     </>

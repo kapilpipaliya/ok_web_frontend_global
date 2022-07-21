@@ -1,7 +1,7 @@
-import { apiPath } from "../constant";
+import { API_PATH } from "../constant";
 
 export function fetchAttributesData(schema) {
-  return fetch(apiPath + `/en/${schema}/_attributes`, {
+  return fetch(API_PATH + `/en/${schema}/_attributes`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -11,7 +11,7 @@ export function fetchAttributesData(schema) {
 }
 
 export function fetchCollectionData(schema) {
-  return fetch(apiPath + `/en/${schema}`, {
+  return fetch(API_PATH + `/en/${schema}`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -21,7 +21,7 @@ export function fetchCollectionData(schema) {
 }
 
 export function fetchAttributes(schema) {
-  return fetch(apiPath + `/en/${schema}/_attributes`, {
+  return fetch(API_PATH + `/en/${schema}/_attributes`, {
     method: "GET",
     headers: {
       Accept: "application/json",
@@ -31,5 +31,5 @@ export function fetchAttributes(schema) {
 }
 
 export function fetchDocument(schema: string, id: string) {
-  return fetch(apiPath + `/en/${schema}/${id}`).then((res) => res.json());
+  return fetch(API_PATH + `/en/${schema}/${id}`).then((res) => res.json());
 }
