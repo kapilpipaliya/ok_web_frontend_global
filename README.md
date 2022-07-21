@@ -14,9 +14,10 @@ npm install
 
 - `npm run dev`: Runs the app in the development mode
 - `npm run build`: Builds the app for production to the `dist` folder
-- `npm run lint`: Find linting errors
-- `npm run lint-and-fix`: Fix linting errors in directory
-- `npm run prettier-format`: Run prettier formatting in project.
+- `npm run lint:check`: Find linting errors
+- `npm run lint:fix`: Fix linting errors in directory
+- `npm run prettier:check`: Find prettier formatting suggestions in project.
+- `npm run prettier:format`: Find & fix prettier formatting suggestions in project.
 
 ## Deployment
 
