@@ -3,16 +3,9 @@ import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormCo
 import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
-import "./select.css";
-import { fetchCollectionData, fetchDocument } from "./api";
-import {
-  closestCenter,
-  createSortable,
-  DragDropProvider,
-  DragDropSensors,
-  DragEventHandler,
-  SortableProvider
-} from "@thisbeyond/solid-dnd";
+// import "./select.css";
+import { addCollection, fetchCollectionData, fetchDocument } from "./api";
+import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 
@@ -48,6 +41,19 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const [attributes, setAttributes] = createStore({ data: [] as Attribute[] });
   const [sortedKeys, setSortedKeys] = createSignal(attributes.data.map((a) => a._key));
   const attributesControl = createFormArray([]);
+  const newRow = () => {
+    return createFormGroup({
+      _key: createFormControl(createUniqueId()),
+      attribute: createFormControl(""),
+      selector: createFormControl(""),
+      type: createFormControl(""),
+      label: createFormControl(""),
+      internal: createFormControl(false),
+      required: createFormControl(false),
+      props: createFormControl({}),
+      relation: createFormControl({}),
+    });
+  };
   const addNew = bindOwner(() => {
     batch(() => {
       attributesControl.push(newRow());
@@ -65,7 +71,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     });
   }
   const fetchData = async (inputValue: string): Promise<any> => {
-    return fetchCollectionData("attributes").then(d => d.data);
+    return fetchCollectionData("attributes").then((d) => d.data);
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
@@ -79,22 +85,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     label: "text",
     props: "json",
     relation: "json",
-    required: "checkbox"
+    required: "checkbox",
   };
-  const newRow = () => {
-    return createFormGroup({
-      _key: createFormControl(createUniqueId()),
-      id: createFormControl(""),
-      attribute: createFormControl(""),
-      selector: createFormControl(""),
-      type: createFormControl(""),
-      label: createFormControl(""),
-      internal: createFormControl(false),
-      required: createFormControl(false),
-      props: createFormControl({}),
-      relation: createFormControl({})
-    });
-  };
+
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { index: () => number; metaKey: string }) => {
@@ -111,8 +104,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     return (
       <Show when={attributesControl.controls[p.index()]}>
         <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
-          <td
-            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
+          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
           <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
             <TextInputField
               label=""
@@ -125,35 +117,28 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td class={css`
-            display: flex;`}><Select
-            {...selectOptionProps}
-            initialValue={attributesControl.controls[p.index()].controls.attribute.value}
-            onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
-            optionToValue={(option: Option) => {
-              return option._key; // ["id"]
-            }}
-            format={(optionOrValue, type) => {
-              // value is displayed in the input; option is displayed in the list
-              return type === "option" ? optionOrValue._key : optionOrValue;
-            }} />
+          <td
+            class={css`
+              display: flex;
+            `}
+          >
+            <Select
+              {...selectOptionProps}
+              initialValue={attributesControl.controls[p.index()].controls.attribute.value}
+              onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
+              optionToValue={(option: Option) => {
+                return option._key; // ["id"]
+              }}
+              format={(optionOrValue, type) => {
+                // value is displayed in the input; option is displayed in the list
+                return type === "option" ? optionOrValue._key : optionOrValue;
+              }}
+            />
             <button type="button" onclick={() => clearControl("attribute")}>
               x
             </button>
           </td>
-          <td >
-            <TextInputField
-              label=""
-              control={attributesControl.controls[p.index()].controls.id}
-              type={"text"}
-              suffixElement={
-                <button type="button" onclick={() => clearControl("id")}>
-                  x
-                </button>
-              }
-            />
-          </td>
-          <td >
+          <td>
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.selector}
@@ -165,7 +150,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td >
+          <td>
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.type}
@@ -177,7 +162,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td >
+          <td>
             <TextInputField
               label=""
               control={attributesControl.controls[p.index()].controls.label}
@@ -189,16 +174,16 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               }
             />
           </td>
-          <td >
+          <td>
             <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
           </td>
-          <td >
+          <td>
             <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
           </td>
           {/* <td }/>}</td> */}
           {/* <td }/>}</td> */}
           <td>
-            <button onclick={_ => attributesControl.removeControl(p.index())}>x</button>
+            <button onclick={(_) => attributesControl.removeControl(p.index())}>x</button>
           </td>
         </tr>
       </Show>
@@ -224,59 +209,71 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     setActiveDragItem(null);
   };
   const onSubmit = () => {
+    addCollection(_key.value, attributesControl.value)
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
+    console.log({ name: _key.value });
     console.log([...attributesControl.value]);
   };
 
-  const name = createFormControl("");
+  const _key = createFormControl("");
 
   return (
     <div>
       {/* <SectionHeaderWithAction border-b={false}> */}
       {/* <h3 >Layout Editor</h3> */}
       {/* </SectionHeaderWithAction> */}
-      <div >
-        <div >
-          <TextInputField control={name} label={"Name"}></TextInputField>
+      <div>
+        <div>
+          <TextInputField control={_key} label={"Key"}></TextInputField>
         </div>
         <Button text={"Add New"} onclick={addNew} color="primary" size="md" variant="solid" />
       </div>
-      <div class={css`
-        table, th, td {
-          border: 1px solid rgba(0, 0, 0, .1);
-      border-collapse: collapse;
-        }
-      `}>
+      <div
+        class={css`
+          table,
+          th,
+          td {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-collapse: collapse;
+          }
+        `}
+      >
         <table>
-          <thead >
-          <tr>
-            <th ></th>
-            <th >key</th>
-            <th>Attributes</th>
-            <th >ID</th>
-            <th >Selector</th>
-            <th >Type</th>
+          <thead>
+            <tr>
+              <th></th>
+              <th>key</th>
+              <th>Attributes</th>
+              <th>Selector</th>
+              <th>Type</th>
 
-            <th >Label</th>
-            <th >Internal</th>
-            <th >Required</th>
-            {/* <th >Props</th> */}
-            {/* <th >Relation</th> */}
-            <th></th>
-          </tr>
+              <th>Label</th>
+              <th>Internal</th>
+              <th>Required</th>
+              {/* <th >Props</th> */}
+              {/* <th >Relation</th> */}
+              <th></th>
+            </tr>
           </thead>
-          <tbody >
-          <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
-            <DragDropSensors />
-            <SortableProvider ids={ids()}>
-              <For each={sortedKeys()} fallback={<div>Loading...</div>}>
-                {(key, index) => <SortableRow index={index} metaKey={key} />}
-              </For>
-            </SortableProvider>
-          </DragDropProvider>
+          <tbody>
+            <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
+              <DragDropSensors />
+              <SortableProvider ids={ids()}>
+                <For each={sortedKeys()} fallback={<div>Loading...</div>}>
+                  {(key, index) => <SortableRow index={index} metaKey={key} />}
+                </For>
+              </SortableProvider>
+            </DragDropProvider>
           </tbody>
         </table>
       </div>
-      <div >
+      <div>
         <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
         <Button text={"Cancel"} onclick={onSubmit} color="primary" variant="outline" size="md" />
       </div>

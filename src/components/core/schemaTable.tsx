@@ -45,6 +45,7 @@ export default function TableWithStickyHeader() {
   });
 
   const deleteObject = (_key) => {
+    if(confirm("are you sure")){
     fetch(apiPath + `/en/${params.entity}/${_key}`, {
       method: "DELETE",
       headers: {
@@ -55,8 +56,9 @@ export default function TableWithStickyHeader() {
       .then((res) => res.json())
       .then((data) => {
         if (!data.success) alert(data.exception);
-        else window.location.reload();
+        else getObjectData()
       });
+    }
   };
 
   const Loader = () => {
@@ -147,13 +149,8 @@ export default function TableWithStickyHeader() {
                                     {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
                                   </div>
                                 </Match>
-                                {/* <Match when={head.type === "actions"}>
-                                    <td
-                                      class={classNames(
-                                        true ? "border-b border-gray-200" : "",
-                                        "relative whitespace-nowrap py-4 pr-4 pl-3 text-right text-sm font-medium sm:pr-6 lg:pr-8"
-                                      )}
-                                    >
+                                <Match when={head.type === "actions"}>
+                                    <td>
                                       <a
                                         href={`${window.location.href}/${entity._key}`}
                                         
@@ -169,7 +166,7 @@ export default function TableWithStickyHeader() {
                                         Delete
                                       </button>
                                     </td>
-                                  </Match> */}
+                                  </Match>
                               </Switch>
                             </td>
                           )}
