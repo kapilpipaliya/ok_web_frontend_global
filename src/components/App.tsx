@@ -70,7 +70,7 @@ export const App = () => {
         >
           <Routes>
             <Route path="/" component={() => <>Home</>} />
-            <Route path="/collections/new" component={() => <CollectionEditor />} />
+            <Route path="/collections/:id" component={() => <CollectionEditor />} />
             <Route path="/:entity" component={() => <SchemaTable />} />
             <Route path="/:entity/:id" component={() => <SchemaDetail />} />
             <Route path="/**" component={() => <Page404 />} />

@@ -3,11 +3,12 @@ import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormCo
 import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
-// import "./select.css";
+import "./select.css";
 import { addCollection, fetchCollectionData, fetchDocument } from "./api";
 import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
+import { useNavigate, useParams } from "solid-app-router";
 
 export interface Attribute {
   _key?: string;
@@ -38,20 +39,21 @@ interface CollectionEditorProps {
 }
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
-  const [attributes, setAttributes] = createStore({ data: [] as Attribute[] });
-  const [sortedKeys, setSortedKeys] = createSignal(attributes.data.map((a) => a._key));
+  const params = useParams();
+  const navigate = useNavigate();
   const attributesControl = createFormArray([]);
-  const newRow = () => {
+  const [sortedKeys, setSortedKeys] = createSignal([]);
+  const newRow = (obj?: { [key: string]: any }) => {
     return createFormGroup({
-      _key: createFormControl(createUniqueId()),
-      attribute: createFormControl(""),
-      selector: createFormControl(""),
-      type: createFormControl(""),
-      label: createFormControl(""),
-      internal: createFormControl(false),
-      required: createFormControl(false),
-      props: createFormControl({}),
-      relation: createFormControl({}),
+      _key: createFormControl(obj?._key || createUniqueId()),
+      attribute: createFormControl(obj?.attribute || ""),
+      selector: createFormControl(obj?.selector || null), //if undefined its internal createEffect not applied
+      type: createFormControl(obj?.type || ""),
+      label: createFormControl(obj?.label || ""),
+      internal: createFormControl(obj?.internal || false),
+      required: createFormControl(obj?.required || false),
+      props: createFormControl(obj?.props || {}),
+      relation: createFormControl(obj?.relation || {}),
     });
   };
   const addNew = bindOwner(() => {
@@ -61,12 +63,12 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     });
   });
 
-  if (props.id) {
-    fetchDocument("collection", props.id).then((data) => {
+  if (params.id && params.id !== "new") {
+    fetchDocument("collections", params.id).then((data) => {
       if (data.success) {
-        // TODO Fix this:
-        setAttributes(data.data);
-        setSortedKeys(data.data.map((a) => a._key));
+        _key.setValue(data.data._key);
+        data.data.attributes.forEach((attribute) => attributesControl.push(newRow(attribute)));
+        setSortedKeys(data.data.attributes.map((a) => a._key));
       }
     });
   }
@@ -87,7 +89,6 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     relation: "json",
     required: "checkbox",
   };
-
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { index: () => number; metaKey: string }) => {
@@ -265,7 +266,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
               <DragDropSensors />
               <SortableProvider ids={ids()}>
-                <For each={sortedKeys()} fallback={<div>Loading...</div>}>
+                <For each={sortedKeys()} fallback={<div>No Attributes</div>}>
                   {(key, index) => <SortableRow index={index} metaKey={key} />}
                 </For>
               </SortableProvider>
@@ -275,7 +276,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       </div>
       <div>
         <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
-        <Button text={"Cancel"} onclick={onSubmit} color="primary" variant="outline" size="md" />
+        <Button text={"Cancel"} onclick={() => history.back()} color="primary" variant="outline" size="md" />
       </div>
     </div>
   );
