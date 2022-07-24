@@ -1,10 +1,9 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
 import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl } from "solid-forms";
-import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
-import { createStore } from "solid-js/store";
+import { batch, createEffect, createMemo, createSignal, createUniqueId, For, getOwner, runWithOwner, Show } from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
-import { addCollection, fetchCollectionData, fetchDocument } from "./api";
+import { addCollection, fetchCollectionData, fetchDocument, updateCollection } from "./api";
 import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
@@ -34,40 +33,47 @@ export interface Relation {
   b?: number;
 }
 
-interface CollectionEditorProps {
-  id?: string;
-}
+interface CollectionEditorProps {}
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
-  const navigate = useNavigate();
-  const attributesControl = createFormArray([]);
+
+  const collectionHasAttributesControl = createFormArray([]);
   const [sortedKeys, setSortedKeys] = createSignal([]);
-  const newRow = (obj?: { [key: string]: any }) => {
+  function newCollectionHasAttributeRow(obj?: { [key: string]: any }, loading = false) {
     return createFormGroup({
-      _key: createFormControl(obj?._key || createUniqueId()),
-      attribute: createFormControl(obj?.attribute || ""),
-      selector: createFormControl(obj?.selector || null), //if undefined its internal createEffect not applied
-      type: createFormControl(obj?.type || ""),
-      label: createFormControl(obj?.label || ""),
-      internal: createFormControl(obj?.internal || false),
-      required: createFormControl(obj?.required || false),
-      props: createFormControl(obj?.props || {}),
-      relation: createFormControl(obj?.relation || {}),
+      _key: createFormControl(obj?._key || createUniqueId(), { readonly: loading && params.id && params.id !== "new" ? true : false }),
+      pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
+      attribute: createFormControl(obj?.attribute),
+      id: createFormControl(obj?.id),
+      selector: createFormControl(obj?.selector),
+      type: createFormControl(obj?.type),
+      label: createFormControl(obj?.label),
+      internal: createFormControl(obj?.internal),
+      unique: createFormControl(obj?.unique),
+      required: createFormControl(obj?.required),
+      readonly: createFormControl(obj?.readonly),
+      props: createFormControl(obj?.props),
+      relation: createFormControl(obj?.relation),
     });
-  };
-  const addNew = bindOwner(() => {
-    batch(() => {
-      attributesControl.push(newRow());
-      setSortedKeys((prev) => [...prev, createUniqueId()]);
+  }
+  const addCollectionHasAttributeNew = bindOwner(() => {
+    batch(function () {
+      const groupControl = newCollectionHasAttributeRow();
+      collectionHasAttributesControl.push(groupControl);
+      setSortedKeys((prev) => [...prev, groupControl.controls._key.value]);
     });
   });
 
   if (params.id && params.id !== "new") {
+    const owner = getOwner();
     fetchDocument("collections", params.id).then((data) => {
       if (data.success) {
         _key.setValue(data.data._key);
-        data.data.attributes.forEach((attribute) => attributesControl.push(newRow(attribute)));
+        // batch not work here:
+        runWithOwner(owner, () => {
+          data.data.attributes.forEach((attribute) => collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true)));
+        });
         setSortedKeys(data.data.attributes.map((a) => a._key));
       }
     });
@@ -77,25 +83,41 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
-  console.log(selectOptionProps);
-  const types = {
-    _key: createFormControl(createUniqueId()),
-    id: "text",
-    selector: "text",
-    type: "text",
-    internal: "checkbox",
-    label: "text",
-    props: "json",
-    relation: "json",
-    required: "checkbox",
-  };
+  const [normalizedSelectOptions, setNormalizedSelectOptions] = createSignal({});
+  createEffect(() => {
+    if (selectOptionProps.options) {
+      setNormalizedSelectOptions(
+        selectOptionProps.options.reduce((acc, curr) => {
+          acc[curr._key] = curr;
+          return acc;
+        }, {})
+      );
+    }
+  });
+
+  // const types = {
+  //   _key: createFormControl(createUniqueId()),
+  //   id: "text",
+  //   pos: "integer",
+  //   selector: "text",
+  //   type: "text",
+  //   internal: "checkbox",
+  //   label: "text",
+  //   props: "json",
+  //   relation: "json",
+  //   required: "checkbox",
+  // };
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { index: () => number; metaKey: string }) => {
     const sortable = createSortable(p.metaKey);
+    const control = createMemo(() => collectionHasAttributesControl.controls.find((control) => control.controls._key.value === p.metaKey));
 
+    const setValue = (id: string, value: any) => {
+      control().controls[id].setValue(value);
+    };
     const clearControl = (id: string) => {
-      attributesControl.controls[p.index()].controls[id].setValue(undefined);
+      control().controls[id].setValue(undefined);
     };
 
     const onSelectChange = (control: IFormControl) => (selected: null | string) => {
@@ -103,88 +125,248 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     };
 
     return (
-      <Show when={attributesControl.controls[p.index()]}>
-        <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
-          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
-          <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
-            <TextInputField
-              label=""
-              control={attributesControl.controls[p.index()].controls._key}
-              type={"text"}
-              suffixElement={
-                <button type="button" onclick={() => clearControl("_key")}>
-                  x
-                </button>
-              }
-            />
-          </td>
+      <Show when={control()}>
+        {/* @ts-ignore */}
+        <tr use:sortable class="" classList={{ "opacity-25": sortable.isActiveDraggable }}>
+          <td>{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
           <td
             class={css`
-              display: flex;
+              max-width: 100px;
             `}
           >
-            <Select
-              {...selectOptionProps}
-              initialValue={attributesControl.controls[p.index()].controls.attribute.value}
-              onChange={onSelectChange(attributesControl.controls[p.index()].controls.attribute)}
-              optionToValue={(option: Option) => {
-                return option._key; // ["id"]
-              }}
-              format={(optionOrValue, type) => {
-                // value is displayed in the input; option is displayed in the list
-                return type === "option" ? optionOrValue._key : optionOrValue;
-              }}
-            />
-            <button type="button" onclick={() => clearControl("attribute")}>
-              x
-            </button>
+            <TextInputField label="" control={control().controls.pos} type={"number"} />
           </td>
           <td>
-            <TextInputField
-              label=""
-              control={attributesControl.controls[p.index()].controls.selector}
-              type={"text"}
-              suffixElement={
-                <button type="button" onclick={() => clearControl("selector")}>
-                  x
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              <Select
+                {...selectOptionProps}
+                initialValue={control().controls.attribute.value}
+                onChange={onSelectChange(control().controls.attribute)}
+                optionToValue={(option: Option) => {
+                  return option._key; // ["id"]
+                }}
+                format={(optionOrValue, type) => {
+                  // value is displayed in the input; option is displayed in the list
+                  return type === "option" ? optionOrValue._key : optionOrValue;
+                }}
+              />
+              <button type="button" onclick={() => clearControl("attribute")}>
+                x
+              </button>
+            </div>
+          </td>
+          <td>
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              <TextInputField label="" control={control().controls._key} type={"text"} />
+              <button type="button" onclick={() => clearControl("_key")}>
+                x
+              </button>
+            </div>
+          </td>
+          <td>
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["id"]}
+              <Show
+                when={control().controls.id.value === undefined}
+                fallback={
+                  <>
+                    <TextInputField label="" control={control().controls.id} type={"text"} />
+                    <button type="button" onclick={() => clearControl("id")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("id", "")}>
+                  O
                 </button>
-              }
-            />
+              </Show>
+            </div>
           </td>
           <td>
-            <TextInputField
-              label=""
-              control={attributesControl.controls[p.index()].controls.type}
-              type={"text"}
-              suffixElement={
-                <button type="button" onclick={() => clearControl("type")}>
-                  x
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["selector"]}
+              <Show
+                when={control().controls.selector.value === undefined}
+                fallback={
+                  <>
+                    <TextInputField label="" control={control().controls.selector} type={"text"} />
+                    <button type="button" onclick={() => clearControl("selector")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("selector", "")}>
+                  O
                 </button>
-              }
-            />
+              </Show>
+            </div>
           </td>
           <td>
-            <TextInputField
-              label=""
-              control={attributesControl.controls[p.index()].controls.label}
-              type={"text"}
-              suffixElement={
-                <button type="button" onclick={() => clearControl("label")}>
-                  x
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["type"]}
+              <Show
+                when={control().controls.type.value === undefined}
+                fallback={
+                  <>
+                    <TextInputField label="" control={control().controls.type} type={"text"} />
+                    <button type="button" onclick={() => clearControl("type")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("type", "")}>
+                  O
                 </button>
-              }
-            />
+              </Show>
+            </div>
           </td>
           <td>
-            <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.internal} />
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["label"]}
+              <Show
+                when={control().controls.label.value === undefined}
+                fallback={
+                  <>
+                    <TextInputField label="" control={control().controls.label} type={"text"} />
+                    <button type="button" onclick={() => clearControl("label")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("label", "")}>
+                  O
+                </button>
+              </Show>
+            </div>
           </td>
           <td>
-            <BooleanInputField label="" control={attributesControl.controls[p.index()].controls.required} />
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["internal"] ? "true" : "false"}
+              <Show
+                when={control().controls.internal.value === undefined}
+                fallback={
+                  <>
+                    <BooleanInputField label="" control={control().controls.internal} />
+                    <button type="button" onclick={() => clearControl("internal")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("internal", "")}>
+                  O
+                </button>
+              </Show>
+            </div>
           </td>
-          {/* <td }/>}</td> */}
-          {/* <td }/>}</td> */}
           <td>
-            <button onclick={(_) => attributesControl.removeControl(p.index())}>x</button>
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["unique"] ? "true" : "false"}
+              <Show
+                when={control().controls.unique.value === undefined}
+                fallback={
+                  <>
+                    <BooleanInputField label="" control={control().controls.unique} />
+                    <button type="button" onclick={() => clearControl("unique")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("unique", "")}>
+                  O
+                </button>
+              </Show>
+            </div>
+          </td>
+          <td>
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["required"] ? "true" : "false"}
+              <Show
+                when={control().controls.required.value === undefined}
+                fallback={
+                  <>
+                    <BooleanInputField label="" control={control().controls.required} />
+                    <button type="button" onclick={() => clearControl("required")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("required", "")}>
+                  O
+                </button>
+              </Show>
+            </div>
+          </td>
+          <td>
+            <div
+              class={css`
+                display: flex;
+              `}
+            >
+              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["readonly"] ? "true" : "false"}
+              <Show
+                when={control().controls.readonly.value === undefined}
+                fallback={
+                  <>
+                    <BooleanInputField label="" control={control().controls.readonly} />
+                    <button type="button" onclick={() => clearControl("readonly")}>
+                      x
+                    </button>
+                  </>
+                }
+              >
+                <button type="button" onclick={() => setValue("readonly", "")}>
+                  O
+                </button>
+              </Show>
+            </div>
+          </td>
+          {/* TODO: <td /></td> */}
+          {/* TODO: <td /></td> */}
+          <td>
+            <button onclick={(_) => collectionHasAttributesControl.removeControl(control())}>x</button>
           </td>
         </tr>
       </Show>
@@ -205,21 +387,41 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         const updatedItems = currentItems.slice();
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
         setSortedKeys(updatedItems);
+        // runWithOwner(owner, () => {
+        batch(() => {
+          // Cannot mutate a Store directly
+          // collectionHasAttributesControl.controls.splice(toIndex, 0, ...collectionHasAttributesControl.controls.splice(fromIndex, 1));
+          updatedItems.forEach((key, index) => {
+            const control = collectionHasAttributesControl.controls.find((control) => control.controls._key.value === key);
+            control.controls.pos.setValue(index + 1);
+          });
+        });
+        // });
       }
     }
     setActiveDragItem(null);
   };
   const onSubmit = () => {
-    addCollection(_key.value, attributesControl.value)
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    if (params.id && params.id !== "new") {
+      updateCollection(_key.value, collectionHasAttributesControl.value)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    } else {
+      addCollection(_key.value, collectionHasAttributesControl.value)
+        .then((res) => {
+          console.log(res);
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
 
     console.log({ name: _key.value });
-    console.log([...attributesControl.value]);
+    console.log([...collectionHasAttributesControl.value]);
   };
 
   const _key = createFormControl("");
@@ -233,7 +435,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         <div>
           <TextInputField control={_key} label={"Key"}></TextInputField>
         </div>
-        <Button text={"Add New"} onclick={addNew} color="primary" size="md" variant="solid" />
+        <Button text={"Add New"} onclick={addCollectionHasAttributeNew} color="primary" size="md" />
       </div>
       <div
         class={css`
@@ -249,25 +451,31 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
           <thead>
             <tr>
               <th></th>
-              <th>key</th>
+              <th>Pos</th>
               <th>Attributes</th>
+              <th>key (Optional)</th>
+              <th>ID</th>
               <th>Selector</th>
               <th>Type</th>
 
               <th>Label</th>
               <th>Internal</th>
+              <th>Unique</th>
               <th>Required</th>
-              {/* <th >Props</th> */}
+              <th>Read Only</th>
+              {/*TODO: <th >Props</th> */}
               {/* <th >Relation</th> */}
               <th></th>
             </tr>
           </thead>
           <tbody>
+            {/* @ts-ignore */}
             <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
               <DragDropSensors />
+              {/* @ts-ignore */}
               <SortableProvider ids={ids()}>
                 <For each={sortedKeys()} fallback={<div>No Attributes</div>}>
-                  {(key, index) => <SortableRow index={index} metaKey={key} />}
+                  {(key) => <SortableRow metaKey={key} />}
                 </For>
               </SortableProvider>
             </DragDropProvider>
@@ -275,9 +483,14 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         </table>
       </div>
       <div>
-        <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
-        <Button text={"Cancel"} onclick={() => history.back()} color="primary" variant="outline" size="md" />
+        <Button text={"Submit"} onclick={onSubmit} color="primary" size="md" />
+        <Button text={"Cancel"} onclick={() => history.back()} color="primary" size="md" />
       </div>
     </div>
   );
 };
+// TODO: add two columns 1.props 2.relation
+// default value is {}
+// when click on "O" button dislpay a "*" gear icon.
+// when click on a gear icon display a modal with json editor and save button.
+// on hover of gear icon show existing json.

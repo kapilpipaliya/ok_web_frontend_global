@@ -7,15 +7,16 @@ import SchemaDetail from "./core/schemaDetail";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { CollectionEditor } from "./collection_editor";
+import { FormLayoutEditor } from "./fom_layout_editor";
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
   { name: "AttributeTypes", href: "/attributesTypes", icon: clock, current: false },
   { name: "Attributes", href: "/attributes", icon: clock, current: false },
   { name: "Collections", href: "/collections", icon: scale, current: false },
-  { name: "Form Layout", href: "/form_layouts", icon: scale, current: false },
-  { name: "Table Layout", href: "/form_layouts", icon: scale, current: false },
-  { name: "Card Layout", href: "/form_layouts", icon: scale, current: false },
+  { name: "Form Layout", href: "/formLayouts", icon: scale, current: false },
+  { name: "Table Layout", href: "/tableLayouts", icon: scale, current: false },
+  { name: "Card Layout", href: "/cardLayouts", icon: scale, current: false },
 ];
 
 export const App = () => {
@@ -71,6 +72,7 @@ export const App = () => {
           <Routes>
             <Route path="/" component={() => <>Home</>} />
             <Route path="/collections/:id" component={() => <CollectionEditor />} />
+            <Route path="/formLayouts/:id" component={() => <FormLayoutEditor />} />
             <Route path="/:entity" component={() => <SchemaTable />} />
             <Route path="/:entity/:id" component={() => <SchemaDetail />} />
             <Route path="/**" component={() => <Page404 />} />
