@@ -424,7 +424,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     console.log([...collectionHasAttributesControl.value]);
   };
 
-  const _key = createFormControl("");
+  const _key = createFormControl("", { readonly: params.id && params.id !== "new" ? true : false });
 
   return (
     <div>
