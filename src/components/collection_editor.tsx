@@ -1,5 +1,5 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
-import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl } from "solid-forms";
+import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl, IFormGroup } from "solid-forms";
 import { batch, createEffect, createMemo, createSignal, createUniqueId, For, getOwner, runWithOwner, Show } from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
@@ -39,10 +39,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
 
   const collectionHasAttributesControl = createFormArray([]);
-  const [sortedKeys, setSortedKeys] = createSignal([]);
-  function newCollectionHasAttributeRow(obj?: { [key: string]: any }, loading = false) {
+  const [sortedIds, setSortedKeys] = createSignal([]);
+  function newCollectionHasAttributeRow(obj?: { [key: string]: any }, isEdit = false) {
     return createFormGroup({
-      _key: createFormControl(obj?._key || createUniqueId(), { readonly: loading && params.id && params.id !== "new" ? true : false }),
+      _id: createFormControl(obj?._id || createUniqueId(), {disabled: true}),
+      _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
       pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
       attribute: createFormControl(obj?.attribute),
       id: createFormControl(obj?.id),
@@ -61,11 +62,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     batch(function () {
       const groupControl = newCollectionHasAttributeRow();
       collectionHasAttributesControl.push(groupControl);
-      setSortedKeys((prev) => [...prev, groupControl.controls._key.value]);
+      setSortedKeys((prev) => [...prev, groupControl.controls._id.value]);
     });
   });
-
-  if (params.id && params.id !== "new") {
+  const isEdit = () => params.id && params.id !== "new"
+  if (isEdit()) {
     const owner = getOwner();
     fetchDocument("collections", params.id).then((data) => {
       if (data.success) {
@@ -74,7 +75,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         runWithOwner(owner, () => {
           data.data.attributes.forEach((attribute) => collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true)));
         });
-        setSortedKeys(data.data.attributes.map((a) => a._key));
+        setSortedKeys(data.data.attributes.map((a) => a._id));
       }
     });
   }
@@ -109,9 +110,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   // };
 
   // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { index: () => number; metaKey: string }) => {
-    const sortable = createSortable(p.metaKey);
-    const control = createMemo(() => collectionHasAttributesControl.controls.find((control) => control.controls._key.value === p.metaKey));
+  const SortableRow = (p: { metaId: string }) => {
+    const sortable = createSortable(p.metaId);
+    
+    const control = createMemo<IFormGroup>(() => collectionHasAttributesControl.controls.find((control) => control.controls._id.value === p.metaId));
 
     const setValue = (id: string, value: any) => {
       control().controls[id].setValue(value);
@@ -134,7 +136,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               max-width: 100px;
             `}
           >
-            <TextInputField label="" control={control().controls.pos} type={"number"} />
+            <TextInputField label="" control={control().controls.pos as IFormControl} type={"number"} />
           </td>
           <td>
             <div
@@ -145,7 +147,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               <Select
                 {...selectOptionProps}
                 initialValue={control().controls.attribute.value}
-                onChange={onSelectChange(control().controls.attribute)}
+                onChange={onSelectChange(control().controls.attribute as IFormControl)}
                 optionToValue={(option: Option) => {
                   return option._key; // ["id"]
                 }}
@@ -165,10 +167,12 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              <TextInputField label="" control={control().controls._key} type={"text"} />
+              <TextInputField label="" control={control().controls._key as IFormControl} type={"text"} />
+              <Show when={!control().controls._key.isReadonly}>
               <button type="button" onclick={() => clearControl("_key")}>
                 x
               </button>
+              </Show>
             </div>
           </td>
           <td>
@@ -182,7 +186,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.id.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.id} type={"text"} />
+                    <TextInputField label="" control={control().controls.id as IFormControl} type={"text"} />
                     <button type="button" onclick={() => clearControl("id")}>
                       x
                     </button>
@@ -206,7 +210,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.selector.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.selector} type={"text"} />
+                    <TextInputField label="" control={control().controls.selector as IFormControl} type={"text"} />
                     <button type="button" onclick={() => clearControl("selector")}>
                       x
                     </button>
@@ -230,7 +234,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.type.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.type} type={"text"} />
+                    <TextInputField label="" control={control().controls.type as IFormControl} type={"text"} />
                     <button type="button" onclick={() => clearControl("type")}>
                       x
                     </button>
@@ -254,7 +258,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.label.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.label} type={"text"} />
+                    <TextInputField label="" control={control().controls.label as IFormControl} type={"text"} />
                     <button type="button" onclick={() => clearControl("label")}>
                       x
                     </button>
@@ -278,7 +282,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.internal.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.internal} />
+                    <BooleanInputField label="" control={control().controls.internal as IFormControl} />
                     <button type="button" onclick={() => clearControl("internal")}>
                       x
                     </button>
@@ -302,7 +306,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.unique.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.unique} />
+                    <BooleanInputField label="" control={control().controls.unique as IFormControl} />
                     <button type="button" onclick={() => clearControl("unique")}>
                       x
                     </button>
@@ -326,7 +330,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.required.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.required} />
+                    <BooleanInputField label="" control={control().controls.required as IFormControl} />
                     <button type="button" onclick={() => clearControl("required")}>
                       x
                     </button>
@@ -350,7 +354,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.readonly.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.readonly} />
+                    <BooleanInputField label="" control={control().controls.readonly as IFormControl} />
                     <button type="button" onclick={() => clearControl("readonly")}>
                       x
                     </button>
@@ -374,7 +378,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
 
   const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
-  const ids = () => sortedKeys();
+  const ids = () => sortedIds();
   const onDragStart: DragEventHandler = ({ draggable }) => {
     setActiveDragItem(draggable.id);
   };
@@ -391,8 +395,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         batch(() => {
           // Cannot mutate a Store directly
           // collectionHasAttributesControl.controls.splice(toIndex, 0, ...collectionHasAttributesControl.controls.splice(fromIndex, 1));
-          updatedItems.forEach((key, index) => {
-            const control = collectionHasAttributesControl.controls.find((control) => control.controls._key.value === key);
+          updatedItems.forEach((_id, index) => {
+            const control = collectionHasAttributesControl.controls.find((control) => control.controls._id.value === _id);
             control.controls.pos.setValue(index + 1);
           });
         });
@@ -420,8 +424,6 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         });
     }
 
-    console.log({ name: _key.value });
-    console.log([...collectionHasAttributesControl.value]);
   };
 
   const _key = createFormControl("", { readonly: params.id && params.id !== "new" ? true : false });
@@ -474,8 +476,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               <DragDropSensors />
               {/* @ts-ignore */}
               <SortableProvider ids={ids()}>
-                <For each={sortedKeys()} fallback={<div>No Attributes</div>}>
-                  {(key) => <SortableRow metaKey={key} />}
+                <For each={sortedIds()} fallback={<div>No Attributes</div>}>
+                  {(_id) => <SortableRow metaId={_id} />}
                 </For>
               </SortableProvider>
             </DragDropProvider>
