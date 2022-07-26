@@ -1,10 +1,12 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
+
 import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl, IFormGroup } from "solid-forms";
 import { batch, createEffect, createMemo, createSignal, createUniqueId, For, getOwner, runWithOwner, Show } from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
 import { addCollection, fetchCollectionData, fetchDocument, updateCollection } from "./api";
 import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
+
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useNavigate, useParams } from "solid-app-router";
@@ -84,6 +86,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
+
   const [normalizedSelectOptions, setNormalizedSelectOptions] = createSignal({});
   createEffect(() => {
     if (selectOptionProps.options) {
@@ -127,6 +130,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     };
 
     return (
+
       <Show when={control()}>
         {/* @ts-ignore */}
         <tr use:sortable class="" classList={{ "opacity-25": sortable.isActiveDraggable }}>
@@ -248,6 +252,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
+
             <div
               class={css`
                 display: flex;
@@ -272,6 +277,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
+
             <div
               class={css`
                 display: flex;
@@ -296,6 +302,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
+
             <div
               class={css`
                 display: flex;
@@ -344,6 +351,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
+
             <div
               class={css`
                 display: flex;
@@ -477,6 +485,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </tr>
           </thead>
           <tbody>
+
             {/* @ts-ignore */}
             <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
               <DragDropSensors />

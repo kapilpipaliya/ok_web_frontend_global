@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, Match, onCleanup, Switch, untrack } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
-import { apiPath } from "../../constant";
+import { API_PATH } from "../../constant";
 import { fetchAttributesData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
 
@@ -10,7 +10,7 @@ export default function TableWithStickyHeader() {
 
   const [data, setData] = createSignal({
     data: [],
-    headers: [] as { key: string; type: string }[]
+    headers: [] as { key: string; type: string }[],
   });
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
@@ -19,7 +19,7 @@ export default function TableWithStickyHeader() {
     setData((prev) => ({
       ...prev,
       data: [],
-      headers: []
+      headers: [],
     }));
 
     fetchAttributesData(params.entity).then((headerWithTypes: { key: string; type: string }[]) => {
@@ -32,7 +32,7 @@ export default function TableWithStickyHeader() {
           setData((prev) => ({
             ...prev,
             data: data.data,
-            headers
+            headers,
           }));
         }
       });
@@ -45,13 +45,14 @@ export default function TableWithStickyHeader() {
   });
 
   const deleteObject = (_key) => {
+
     if(confirm("are you sure")){
     fetch(apiPath + `/en/${params.entity}/${_key}`, {
       method: "DELETE",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json"
-      }
+        "Content-Type": "application/json",
+      },
     })
       .then((res) => res.json())
       .then((data) => {
@@ -77,11 +78,7 @@ export default function TableWithStickyHeader() {
           <h1>{params.entity}</h1>
         </div>
         <div>
-          <button
-            type="button"
-
-            onClick={() => navigate("./new")}
-          >
+          <button type="button" onClick={() => navigate("./new")}>
             Add new {JSON.stringify(editableCellIndex)}
           </button>
         </div>
@@ -89,30 +86,31 @@ export default function TableWithStickyHeader() {
       <div>
         <div>
           <div>
-            <div class={css`
-              table, th, td {
-                border: 1px solid rgba(0, 0, 0, .1);
-                border-collapse: collapse;
-              }
-            `}>
+            <div
+              class={css`
+                table,
+                th,
+                td {
+                  border: 1px solid rgba(0, 0, 0, 0.1);
+                  border-collapse: collapse;
+                }
+              `}
+            >
               {/* <Suspense fallback={<Loader />}> */}
               <table style={{ borderSpacing: 0 }}>
                 <thead>
-                <tr>
-                  <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                    {(head) => (
-                      <th
-                        scope="col"
-
-                        title={head.type}
-                      >
-                        {head.key}
-                      </th>
-                    )}
-                  </For>
-                </tr>
+                  <tr>
+                    <For each={data().headers} fallback={<div>Loading Header...</div>}>
+                      {(head) => (
+                        <th scope="col" title={head.type}>
+                          {head.key}
+                        </th>
+                      )}
+                    </For>
+                  </tr>
                 </thead>
                 <tbody>
+
                 <For each={data().data} fallback={<div></div>}>
                   {(entity, i) => {
                     return (
@@ -166,6 +164,7 @@ export default function TableWithStickyHeader() {
                                         Delete
                                       </button>
                                     </td>
+
                                   </Match>
                               </Switch>
                             </td>
