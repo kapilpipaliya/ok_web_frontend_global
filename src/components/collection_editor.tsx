@@ -44,8 +44,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const [sortedIds, setSortedKeys] = createSignal([]);
   function newCollectionHasAttributeRow(obj?: { [key: string]: any }, isEdit = false) {
     return createFormGroup({
-      _id: createFormControl(obj?._id || createUniqueId(), { disabled: true }),
-      _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
+      _id: createFormControl(obj?._id || createUniqueId(), { readonly: true }),
+      // _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
       pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
       attribute: createFormControl(obj?.attribute),
       id: createFormControl(obj?.id),
@@ -86,11 +86,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
-
-  const [normalizedSelectOptions, setNormalizedSelectOptions] = createSignal({});
+  const [normalizedAttributeSlectOptions, setNormalizedAttributeSelectOptions] = createSignal({});
   createEffect(() => {
     if (selectOptionProps.options) {
-      setNormalizedSelectOptions(
+      setNormalizedAttributeSelectOptions(
         selectOptionProps.options.reduce((acc, curr) => {
           acc[curr._key] = curr;
           return acc;
@@ -165,7 +164,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               </button>
             </div>
           </td>
-          <td>
+          {/* <td>
             <div
               class={css`
                 display: flex;
@@ -178,14 +177,14 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 </button>
               </Show>
             </div>
-          </td>
+          </td> */}
           <td>
             <div
               class={css`
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["id"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["id"]}
               <Show
                 when={control().controls.id.value === undefined}
                 fallback={
@@ -209,7 +208,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["selector"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["selector"]}
               <Show
                 when={control().controls.selector.value === undefined}
                 fallback={
@@ -233,7 +232,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["type"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["type"]}
               <Show
                 when={control().controls.type.value === undefined}
                 fallback={
@@ -258,7 +257,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["label"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["label"]}
               <Show
                 when={control().controls.label.value === undefined}
                 fallback={
@@ -283,7 +282,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["internal"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["internal"] ? "true" : "false"}
               <Show
                 when={control().controls.internal.value === undefined}
                 fallback={
@@ -308,7 +307,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["unique"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["unique"] ? "true" : "false"}
               <Show
                 when={control().controls.unique.value === undefined}
                 fallback={
@@ -332,7 +331,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["required"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["required"] ? "true" : "false"}
               <Show
                 when={control().controls.required.value === undefined}
                 fallback={
@@ -357,7 +356,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedSelectOptions()?.[control().controls.attribute.value]?.["readonly"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["readonly"] ? "true" : "false"}
               <Show
                 when={control().controls.readonly.value === undefined}
                 fallback={
@@ -469,7 +468,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               <th></th>
               <th>Pos</th>
               <th>Attributes</th>
-              <th>key (Optional)</th>
+              {/* <th>key (Optional)</th> */}
               <th>ID</th>
               <th>Selector</th>
               <th>Type</th>
