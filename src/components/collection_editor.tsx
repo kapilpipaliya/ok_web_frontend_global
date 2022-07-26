@@ -33,7 +33,7 @@ export interface Relation {
   b?: number;
 }
 
-interface CollectionEditorProps {}
+interface CollectionEditorProps { }
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
@@ -42,7 +42,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const [sortedIds, setSortedKeys] = createSignal([]);
   function newCollectionHasAttributeRow(obj?: { [key: string]: any }, isEdit = false) {
     return createFormGroup({
-      _id: createFormControl(obj?._id || createUniqueId(), {disabled: true}),
+      _id: createFormControl(obj?._id || createUniqueId(), { disabled: true }),
       _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
       pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
       attribute: createFormControl(obj?.attribute),
@@ -112,7 +112,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { metaId: string }) => {
     const sortable = createSortable(p.metaId);
-    
+
     const control = createMemo<IFormGroup>(() => collectionHasAttributesControl.controls.find((control) => control.controls._id.value === p.metaId));
 
     const setValue = (id: string, value: any) => {
@@ -169,9 +169,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             >
               <TextInputField label="" control={control().controls._key as IFormControl} type={"text"} />
               <Show when={!control().controls._key.isReadonly}>
-              <button type="button" onclick={() => clearControl("_key")}>
-                x
-              </button>
+                <button type="button" onclick={() => clearControl("_key")}>
+                  x
+                </button>
               </Show>
             </div>
           </td>
@@ -409,7 +409,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     if (params.id && params.id !== "new") {
       updateCollection(_key.value, collectionHasAttributesControl.value)
         .then((res) => {
-          console.log(res);
+          if (res.success)
+            console.log(res);
+          else
+            alert(res.error)
         })
         .catch((err) => {
           console.error(err);
@@ -417,7 +420,10 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     } else {
       addCollection(_key.value, collectionHasAttributesControl.value)
         .then((res) => {
-          console.log(res);
+          if (res.success)
+            console.log(res);
+          else
+            alert(res.error)
         })
         .catch((err) => {
           console.error(err);
