@@ -31,7 +31,7 @@ export function fetchAttributes(schema) {
 }
 
 export function addCollection(_key, attributes) {
-  return fetch(apiPath + `/en/collections`, {
+  return fetch(API_PATH + `/en/collections`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -42,7 +42,7 @@ export function addCollection(_key, attributes) {
 }
 
 export function updateCollection(_key, attributes) {
-  return fetch(apiPath + `/en/collections/${_key}`, {
+  return fetch(API_PATH + `/en/collections/${_key}`, {
     method: "PATCH",
     headers: {
       Accept: "application/json",
@@ -53,7 +53,7 @@ export function updateCollection(_key, attributes) {
 }
 
 export function addFormLayout(_key, attributes) {
-  return fetch(apiPath + `/en/formLayouts`, {
+  return fetch(API_PATH + `/en/formLayouts`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -64,7 +64,7 @@ export function addFormLayout(_key, attributes) {
 }
 
 export function updateFormLayout(_key, attributes) {
-  return fetch(apiPath + `/en/formLayouts/${_key}`, {
+  return fetch(API_PATH + `/en/formLayouts/${_key}`, {
     method: "PATCH",
     headers: {
       Accept: "application/json",

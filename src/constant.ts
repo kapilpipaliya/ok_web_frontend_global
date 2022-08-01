@@ -1,1 +1,1 @@
-export const API_PATH = "http://49.12.190.36:8529/_db/swamiji/swamiji";
+export const API_PATH = "http://49.12.190.36:3006/api/v1";
