@@ -22,21 +22,23 @@ export default function TableWithStickyHeader() {
       headers: [],
     }));
 
-    fetchAttributesData(params.entity).then((headerWithTypes: { key: string; type: string }[]) => {
-      fetchCollectionData(params.entity).then((data) => {
-        if (!data.success) alert(data.exception);
-        else {
-          const headers = headerWithTypes;
-          headers.push({ key: "edit", type: "actions" });
+    fetchAttributesData(params.entity).then(
+      (headerWithTypesBody: { data: { key: string; type: string }[] }) => {
+        fetchCollectionData(params.entity).then((body) => {
+          if (!body.success) alert(body.exception);
+          else {
+            const headers = headerWithTypesBody.data;
+            headers.push({ key: "edit", type: "actions" });
 
-          setData((prev) => ({
-            ...prev,
-            data: data.data,
-            headers,
-          }));
-        }
-      });
-    });
+            setData((prev) => ({
+              ...prev,
+              data: body.data,
+              headers,
+            }));
+          }
+        });
+      }
+    );
   };
 
   createEffect(() => {
@@ -44,21 +46,20 @@ export default function TableWithStickyHeader() {
     if (params.entity) untrack(getObjectData);
   });
 
-  const deleteObject = (_key) => {
-
-    if(confirm("are you sure")){
-    fetch(apiPath + `/en/${params.entity}/${_key}`, {
-      method: "DELETE",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (!data.success) alert(data.exception);
-        else getObjectData()
-      });
+  const deleteObject = (id) => {
+    if (confirm("are you sure")) {
+      fetch(API_PATH + `/en/${params.entity}/${id}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.success) alert(data.exception);
+          else getObjectData();
+        });
     }
   };
 
@@ -110,70 +111,69 @@ export default function TableWithStickyHeader() {
                   </tr>
                 </thead>
                 <tbody>
-
-                <For each={data().data} fallback={<div></div>}>
-                  {(entity, i) => {
-                    return (
-                      <tr>
-                        <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                          {(head, rowId) => (
-                            <td>
-                              <Switch
-                                fallback={
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
-                                  >
-                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                  </div>
-                                }
-                              >
-                                <Match when={head.type === "boolean"}>
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
-                                  >
-                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                  </div>
-                                </Match>
-                                <Match when={head.type === "object"}>
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
-                                  >
-                                    {JSON.stringify(editableCellIndex) == JSON.stringify([rowId, head.key]) ? "Editable" : JSON.stringify(entity[head.key])}
-                                  </div>
-                                </Match>
-                                <Match when={head.type === "actions"}>
+                  <For each={data().data} fallback={<div></div>}>
+                    {(entity, i) => {
+                      return (
+                        <tr>
+                          <For each={data().headers} fallback={<div>Loading Header...</div>}>
+                            {(head, rowId) => (
+                              <td>
+                                <Switch
+                                  fallback={
+                                    <div
+                                      onDblClick={() => {
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
+                                      {JSON.stringify(editableCellIndex) ==
+                                      JSON.stringify([rowId, head.key])
+                                        ? "Editable"
+                                        : JSON.stringify(entity[head.key])}
+                                    </div>
+                                  }
+                                >
+                                  <Match when={head.type === "boolean"}>
+                                    <div
+                                      onDblClick={() => {
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
+                                      {JSON.stringify(editableCellIndex) ==
+                                      JSON.stringify([rowId, head.key])
+                                        ? "Editable"
+                                        : JSON.stringify(entity[head.key])}
+                                    </div>
+                                  </Match>
+                                  <Match when={head.type === "object"}>
+                                    <div
+                                      onDblClick={() => {
+                                        setEditableCellIndex((prev) => [rowId, head.key]);
+                                      }}
+                                    >
+                                      {JSON.stringify(editableCellIndex) ==
+                                      JSON.stringify([rowId, head.key])
+                                        ? "Editable"
+                                        : JSON.stringify(entity[head.key])}
+                                    </div>
+                                  </Match>
+                                  <Match when={head.type === "actions"}>
                                     <td>
-                                      <a
-                                        href={`${window.location.href}/${entity._key}`}
-                                        
-                                      >
-                                        Edit<span ></span>
+                                      <a href={`${window.location.href}/${entity.id}`}>
+                                        Edit<span></span>
                                       </a>
-                                      <button
-                                        
-                                        onClick={() =>
-                                          deleteObject(entity._key)
-                                        }
-                                      >
+                                      <button onClick={() => deleteObject(entity.id)}>
                                         Delete
                                       </button>
                                     </td>
-
                                   </Match>
-                              </Switch>
-                            </td>
-                          )}
-                        </For>
-                      </tr>
-                    );
-                  }}
-                </For>
+                                </Switch>
+                              </td>
+                            )}
+                          </For>
+                        </tr>
+                      );
+                    }}
+                  </For>
                 </tbody>
               </table>
               {/* </Suspense> */}

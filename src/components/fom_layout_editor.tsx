@@ -1,11 +1,31 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
-import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl } from "solid-forms";
+import {
+  bindOwner,
+  createFormArray,
+  createFormControl,
+  createFormGroup,
+  IFormControl,
+} from "solid-forms";
 import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
-import { addCollection, addFormLayout, fetchCollectionData, fetchDocument, updateCollection, updateFormLayout } from "./api";
-import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
+import {
+  addCollection,
+  addFormLayout,
+  fetchCollectionData,
+  fetchDocument,
+  updateCollection,
+  updateFormLayout,
+} from "./api";
+import {
+  closestCenter,
+  createSortable,
+  DragDropProvider,
+  DragDropSensors,
+  DragEventHandler,
+  SortableProvider,
+} from "@thisbeyond/solid-dnd";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useNavigate, useParams } from "solid-app-router";
@@ -64,11 +84,13 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
   });
 
   if (params.id && params.id !== "new") {
-    fetchDocument("formLayouts", params.id).then((data) => {
-      if (data.success) {
-        _key.setValue(data.data._key);
-        data.data.attributes.forEach((attribute) => formLayoutHasAttributesControl.push(newRow(attribute)));
-        setSortedKeys(data.data.attributes.map((a) => a._key));
+    fetchDocument("formLayouts", params.id).then((body) => {
+      if (body.success) {
+        _key.setValue(body.data._key);
+        body.data.attributes.forEach((attribute) =>
+          formLayoutHasAttributesControl.push(newRow(attribute))
+        );
+        setSortedKeys(body.data.attributes.map((a) => a._key));
       }
     });
   }
@@ -104,8 +126,14 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
 
     return (
       <Show when={formLayoutHasAttributesControl.controls[p.index()]}>
-        <tr use:sortable class="group sortable" classList={{ "opacity-25": sortable.isActiveDraggable }}>
-          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
+        <tr
+          use:sortable
+          class="group sortable"
+          classList={{ "opacity-25": sortable.isActiveDraggable }}
+        >
+          <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+            {/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}
+          </td>
           <td class="whitespace-nowrap px-1 py-2 text-sm text-gray-500">
             <TextInputField
               label=""
@@ -125,8 +153,12 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
           >
             <Select
               {...selectOptionProps}
-              initialValue={formLayoutHasAttributesControl.controls[p.index()].controls.attribute.value}
-              onChange={onSelectChange(formLayoutHasAttributesControl.controls[p.index()].controls.attribute)}
+              initialValue={
+                formLayoutHasAttributesControl.controls[p.index()].controls.attribute.value
+              }
+              onChange={onSelectChange(
+                formLayoutHasAttributesControl.controls[p.index()].controls.attribute
+              )}
               optionToValue={(option: Option) => {
                 return option._key; // ["id"]
               }}
@@ -176,15 +208,23 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
             />
           </td>
           <td>
-            <BooleanInputField label="" control={formLayoutHasAttributesControl.controls[p.index()].controls.internal} />
+            <BooleanInputField
+              label=""
+              control={formLayoutHasAttributesControl.controls[p.index()].controls.internal}
+            />
           </td>
           <td>
-            <BooleanInputField label="" control={formLayoutHasAttributesControl.controls[p.index()].controls.required} />
+            <BooleanInputField
+              label=""
+              control={formLayoutHasAttributesControl.controls[p.index()].controls.required}
+            />
           </td>
           {/* <td }/>}</td> */}
           {/* <td }/>}</td> */}
           <td>
-            <button onclick={(_) => formLayoutHasAttributesControl.removeControl(p.index())}>x</button>
+            <button onclick={(_) => formLayoutHasAttributesControl.removeControl(p.index())}>
+              x
+            </button>
           </td>
         </tr>
       </Show>
@@ -273,7 +313,11 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
             </tr>
           </thead>
           <tbody>
-            <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
+            <DragDropProvider
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              collisionDetectionAlgorithm={closestCenter}
+            >
               <DragDropSensors />
               <SortableProvider ids={ids()}>
                 <For each={sortedKeys()} fallback={<div>No Attributes</div>}>
@@ -286,7 +330,13 @@ export const FormLayoutEditor = (props: FormLayoutEditorProps) => {
       </div>
       <div>
         <Button text={"Submit"} onclick={onSubmit} color="primary" variant="solid" size="md" />
-        <Button text={"Cancel"} onclick={() => history.back()} color="primary" variant="outline" size="md" />
+        <Button
+          text={"Cancel"}
+          onclick={() => history.back()}
+          color="primary"
+          variant="outline"
+          size="md"
+        />
       </div>
     </div>
   );

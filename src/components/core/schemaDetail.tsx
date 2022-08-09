@@ -17,7 +17,7 @@ export default function SchemaDetail(props: any) {
         return "";
       case "boolean":
         return false;
-      case "object":
+      case "json":
         return {};
       default:
         return "";
@@ -26,11 +26,11 @@ export default function SchemaDetail(props: any) {
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
-  fetchAttributes(params.entity).then((data) => {
+  fetchAttributes(params.entity).then((body) => {
     formData =
       params.id != "new"
-        ? data
-        : data.filter((d) => {
+        ? body.data
+        : body.data.filter((d) => {
             return d.key != "_id" && d.key != "_key";
           });
 
@@ -43,9 +43,9 @@ export default function SchemaDetail(props: any) {
     form.setControls(groupConstructor);
 
     if (params.id !== "new") {
-      fetchDocument(params.entity, params.id).then((data) => {
-        if (data.success) {
-          form.patchValue(data.data);
+      fetchDocument(params.entity, params.id).then((body) => {
+        if (body.success) {
+          form.patchValue(body.data);
 
           if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
           if (form.controls["_key"]) form.controls["_key"].markDisabled(true);

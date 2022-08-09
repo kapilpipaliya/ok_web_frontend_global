@@ -1,11 +1,35 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
 
-import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl, IFormGroup } from "solid-forms";
-import { batch, createEffect, createMemo, createSignal, createUniqueId, For, getOwner, runWithOwner, Show } from "solid-js";
+import {
+  bindOwner,
+  createFormArray,
+  createFormControl,
+  createFormGroup,
+  IFormControl,
+  IFormGroup,
+} from "solid-forms";
+import {
+  batch,
+  createEffect,
+  createMemo,
+  createSignal,
+  createUniqueId,
+  For,
+  getOwner,
+  runWithOwner,
+  Show,
+} from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
 import { addCollection, fetchCollectionData, fetchDocument, updateCollection } from "./api";
-import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
+import {
+  closestCenter,
+  createSortable,
+  DragDropProvider,
+  DragDropSensors,
+  DragEventHandler,
+  SortableProvider,
+} from "@thisbeyond/solid-dnd";
 
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
@@ -35,7 +59,7 @@ export interface Relation {
   b?: number;
 }
 
-interface CollectionEditorProps { }
+interface CollectionEditorProps {}
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
@@ -67,17 +91,19 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       setSortedKeys((prev) => [...prev, groupControl.controls._id.value]);
     });
   });
-  const isEdit = () => params.id && params.id !== "new"
+  const isEdit = () => params.id && params.id !== "new";
   if (isEdit()) {
     const owner = getOwner();
-    fetchDocument("collections", params.id).then((data) => {
-      if (data.success) {
-        _key.setValue(data.data._key);
+    fetchDocument("collections", params.id).then((body) => {
+      if (body.success) {
+        _key.setValue(body.data._key);
         // batch not work here:
         runWithOwner(owner, () => {
-          data.data.attributes.forEach((attribute) => collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true)));
+          body.data.attributes.forEach((attribute) =>
+            collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true))
+          );
         });
-        setSortedKeys(data.data.attributes.map((a) => a._id));
+        setSortedKeys(body.data.attributes.map((a) => a._id));
       }
     });
   }
@@ -115,7 +141,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const SortableRow = (p: { metaId: string }) => {
     const sortable = createSortable(p.metaId);
 
-    const control = createMemo<IFormGroup>(() => collectionHasAttributesControl.controls.find((control) => control.controls._id.value === p.metaId));
+    const control = createMemo<IFormGroup>(() =>
+      collectionHasAttributesControl.controls.find(
+        (control) => control.controls._id.value === p.metaId
+      )
+    );
 
     const setValue = (id: string, value: any) => {
       control().controls[id].setValue(value);
@@ -129,7 +159,6 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     };
 
     return (
-
       <Show when={control()}>
         {/* @ts-ignore */}
         <tr use:sortable class="" classList={{ "opacity-25": sortable.isActiveDraggable }}>
@@ -139,7 +168,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               max-width: 100px;
             `}
           >
-            <TextInputField label="" control={control().controls.pos as IFormControl} type={"number"} />
+            <TextInputField
+              label=""
+              control={control().controls.pos as IFormControl}
+              type={"number"}
+            />
           </td>
           <td>
             <div
@@ -189,7 +222,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.id.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.id as IFormControl} type={"text"} />
+                    <TextInputField
+                      label=""
+                      control={control().controls.id as IFormControl}
+                      type={"text"}
+                    />
                     <button type="button" onclick={() => clearControl("id")}>
                       x
                     </button>
@@ -208,12 +245,20 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["selector"]}
+              {
+                normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.[
+                  "selector"
+                ]
+              }
               <Show
                 when={control().controls.selector.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.selector as IFormControl} type={"text"} />
+                    <TextInputField
+                      label=""
+                      control={control().controls.selector as IFormControl}
+                      type={"text"}
+                    />
                     <button type="button" onclick={() => clearControl("selector")}>
                       x
                     </button>
@@ -237,7 +282,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.type.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.type as IFormControl} type={"text"} />
+                    <TextInputField
+                      label=""
+                      control={control().controls.type as IFormControl}
+                      type={"text"}
+                    />
                     <button type="button" onclick={() => clearControl("type")}>
                       x
                     </button>
@@ -251,7 +300,6 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
-
             <div
               class={css`
                 display: flex;
@@ -262,7 +310,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 when={control().controls.label.value === undefined}
                 fallback={
                   <>
-                    <TextInputField label="" control={control().controls.label as IFormControl} type={"text"} />
+                    <TextInputField
+                      label=""
+                      control={control().controls.label as IFormControl}
+                      type={"text"}
+                    />
                     <button type="button" onclick={() => clearControl("label")}>
                       x
                     </button>
@@ -276,18 +328,22 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
-
             <div
               class={css`
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["internal"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["internal"]
+                ? "true"
+                : "false"}
               <Show
                 when={control().controls.internal.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.internal as IFormControl} />
+                    <BooleanInputField
+                      label=""
+                      control={control().controls.internal as IFormControl}
+                    />
                     <button type="button" onclick={() => clearControl("internal")}>
                       x
                     </button>
@@ -301,18 +357,22 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
-
             <div
               class={css`
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["unique"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["unique"]
+                ? "true"
+                : "false"}
               <Show
                 when={control().controls.unique.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.unique as IFormControl} />
+                    <BooleanInputField
+                      label=""
+                      control={control().controls.unique as IFormControl}
+                    />
                     <button type="button" onclick={() => clearControl("unique")}>
                       x
                     </button>
@@ -331,12 +391,17 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["required"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["required"]
+                ? "true"
+                : "false"}
               <Show
                 when={control().controls.required.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.required as IFormControl} />
+                    <BooleanInputField
+                      label=""
+                      control={control().controls.required as IFormControl}
+                    />
                     <button type="button" onclick={() => clearControl("required")}>
                       x
                     </button>
@@ -350,18 +415,22 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </div>
           </td>
           <td>
-
             <div
               class={css`
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["readonly"] ? "true" : "false"}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["readonly"]
+                ? "true"
+                : "false"}
               <Show
                 when={control().controls.readonly.value === undefined}
                 fallback={
                   <>
-                    <BooleanInputField label="" control={control().controls.readonly as IFormControl} />
+                    <BooleanInputField
+                      label=""
+                      control={control().controls.readonly as IFormControl}
+                    />
                     <button type="button" onclick={() => clearControl("readonly")}>
                       x
                     </button>
@@ -377,7 +446,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
           {/* TODO: <td /></td> */}
           {/* TODO: <td /></td> */}
           <td>
-            <button onclick={(_) => collectionHasAttributesControl.removeControl(control())}>x</button>
+            <button onclick={(_) => collectionHasAttributesControl.removeControl(control())}>
+              x
+            </button>
           </td>
         </tr>
       </Show>
@@ -403,7 +474,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
           // Cannot mutate a Store directly
           // collectionHasAttributesControl.controls.splice(toIndex, 0, ...collectionHasAttributesControl.controls.splice(fromIndex, 1));
           updatedItems.forEach((_id, index) => {
-            const control = collectionHasAttributesControl.controls.find((control) => control.controls._id.value === _id);
+            const control = collectionHasAttributesControl.controls.find(
+              (control) => control.controls._id.value === _id
+            );
             control.controls.pos.setValue(index + 1);
           });
         });
@@ -416,10 +489,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     if (params.id && params.id !== "new") {
       updateCollection(_key.value, collectionHasAttributesControl.value)
         .then((res) => {
-          if (res.success)
-            console.log(res);
-          else
-            alert(res.error)
+          if (res.success) console.log(res);
+          else alert(res.error);
         })
         .catch((err) => {
           console.error(err);
@@ -427,16 +498,13 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     } else {
       addCollection(_key.value, collectionHasAttributesControl.value)
         .then((res) => {
-          if (res.success)
-            console.log(res);
-          else
-            alert(res.error)
+          if (res.success) console.log(res);
+          else alert(res.error);
         })
         .catch((err) => {
           console.error(err);
         });
     }
-
   };
 
   const _key = createFormControl("", { readonly: params.id && params.id !== "new" ? true : false });
@@ -484,9 +552,12 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             </tr>
           </thead>
           <tbody>
-
             {/* @ts-ignore */}
-            <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetectionAlgorithm={closestCenter}>
+            <DragDropProvider
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              collisionDetectionAlgorithm={closestCenter}
+            >
               <DragDropSensors />
               {/* @ts-ignore */}
               <SortableProvider ids={ids()}>
