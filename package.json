@@ -9,7 +9,9 @@
     "lint:check": "eslint . --ext .ts --ext .tsx",
     "lint:fix": "eslint . --ext .ts --ext .tsx --fix",
     "prettier:check": "prettier --check 'src/**/*'",
-    "prettier:fix": "prettier --config .prettierrc 'src/**/*' --write"
+    "prettier:fix": "prettier --config .prettierrc 'src/**/*' --write",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "license": "MIT",
   "devDependencies": {
@@ -22,7 +24,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "typescript": "^4.7.4",
     "vite": "^3.0.4",
-    "vite-plugin-solid": "^2.3.0"
+    "vite-plugin-solid": "^2.3.0",
+    "vitest": "^0.21.1"
   },
   "dependencies": {
     "@hope-ui/solid": "^0.6.7",
