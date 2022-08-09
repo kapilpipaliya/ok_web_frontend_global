@@ -8,6 +8,9 @@ import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { CollectionEditor } from "./collection_editor";
 import { FormLayoutEditor } from "./fom_layout_editor";
+import { run } from "../db/db_utils";
+
+run('');
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
