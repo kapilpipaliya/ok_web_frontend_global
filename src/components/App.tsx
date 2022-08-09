@@ -1,8 +1,8 @@
 import { For } from "solid-js";
 import { Link, Route, Router, Routes } from "solid-app-router";
 import { css } from "solid-styled-components";
-import { Icon } from "@amoutonbrady/solid-heroicons";
-import { clock, home, scale } from "@amoutonbrady/solid-heroicons/outline";
+import { Icon } from "solid-heroicons";
+import { clock, home, scale } from "solid-heroicons/outline";
 import SchemaDetail from "./core/schemaDetail";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
