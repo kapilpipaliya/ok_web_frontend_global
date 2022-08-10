@@ -10,7 +10,7 @@ import { CollectionEditor } from "./collection_editor";
 import { FormLayoutEditor } from "./fom_layout_editor";
 import { run } from "../db/db_utils";
 
-run('');
+run('merge (n:Test{what:"Hello World"}) return n');
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },

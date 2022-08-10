@@ -18,10 +18,9 @@ const options = {
 const cypher = new Cypher(options);
 
 export const run = (q: string) =>{
-  const query = 'merge (n:Test{what:"Hello World"}) return n';
-
+  // const query = 'merge (n:Test{what:"Hello World"}) return n';
   cypher.execute(
-    query,
+    q,
     function(results) {
       console.log(results);
     },
