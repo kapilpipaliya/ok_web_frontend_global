@@ -126,7 +126,7 @@ export default function TableWithStickyHeader() {
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) ==
-                                      JSON.stringify([rowId, head.key])
+                                        JSON.stringify([rowId, head.key])
                                         ? "Editable"
                                         : JSON.stringify(entity[head.key])}
                                     </div>
@@ -139,7 +139,7 @@ export default function TableWithStickyHeader() {
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) ==
-                                      JSON.stringify([rowId, head.key])
+                                        JSON.stringify([rowId, head.key])
                                         ? "Editable"
                                         : JSON.stringify(entity[head.key])}
                                     </div>
@@ -151,7 +151,7 @@ export default function TableWithStickyHeader() {
                                       }}
                                     >
                                       {JSON.stringify(editableCellIndex) ==
-                                      JSON.stringify([rowId, head.key])
+                                        JSON.stringify([rowId, head.key])
                                         ? "Editable"
                                         : JSON.stringify(entity[head.key])}
                                     </div>
