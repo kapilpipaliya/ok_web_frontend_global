@@ -10,7 +10,7 @@ const options = {
   // and must return the data from the URL to download.
   // Also it should add the "Access-Control-Allow-Origin: *" http header to the response
   // if the proxy is not served from same url as Cypher.js script is run from
-  dataDownloadProxy: "http://proxy_url?u=",
+  dataDownloadProxy: "http://proxy_url?u="
 };
 // @ts-ignore
 const cypher = new Cypher(options);
@@ -21,16 +21,16 @@ export const run = (q: string) => {
   return new Promise((resolve, reject) => {
     cypher.execute(
       q,
-      function (results) {
-        console.log(results)
-        resolve(results.output);
+      function(results) {
+        console.log("fetching query: (" + q + ") result: ", results);
+        resolve(results);
       },
-      function (errorText) {
-        console.error(errorText);
-        reject(errorText)
+      function(errorText) {
+        console.error("fetching query: (" + q + ") result: ", errorText);
+        reject(errorText);
       }
     );
-  })
+  });
 };
 const bootstrap = () => {
   run("");

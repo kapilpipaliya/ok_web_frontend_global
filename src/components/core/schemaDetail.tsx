@@ -1,32 +1,52 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
 import { useParams, useNavigate } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
-import { Field, TextInputField, JsonInput, GeneralInput } from "ok_web_components";
+import { Field, TextInputField, BooleanInputField, JsonInput, GeneralInput } from "ok_web_components";
 import { API_PATH } from "../../constant";
-import { fetchAttributes, fetchDocument } from "../api";
+import { addNode, fetchAttributesTableData, fetchDocument, updateNode } from "../api";
 
-export default function SchemaDetail(props: any) {
+interface AttributeMetaType {
+  key: string;
+  type: string
+}
+const getDefaultValue = (meta: AttributeMetaType) => {
+  switch (meta.type) {
+    case "string":
+      return "";
+    case "boolean":
+      return false;
+    case "json":
+      return {};
+    default:
+      return "";
+  }
+};
+
+const getHtmlInputType = (meta: AttributeMetaType) => {
+  switch (meta.type) {
+    case "string":
+      return "text";
+    case "integer":
+      return "number";
+    case "decimal":
+      return "number";
+    case "json":
+      return "jsoneditor";
+    default:
+      return meta.type;
+  }
+};
+
+export default function SchemaDetail(props: {}) {
   const params = useParams();
   const navigate = useNavigate();
   const form = createFormGroup({});
 
-  let formData = [] as Array<{ key: string; type: string }>;
-  const getDefaultValue = (meta: { key: string; type: string }) => {
-    switch (meta.type) {
-      case "string":
-        return "";
-      case "boolean":
-        return false;
-      case "json":
-        return {};
-      default:
-        return "";
-    }
-  };
+  let formData = [] as AttributeMetaType[];
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
-  fetchAttributes(params.entity).then((body) => {
+  fetchAttributesTableData(params.entity).then((body) => {
     formData =
       params.id != "new"
         ? body.data
@@ -35,8 +55,7 @@ export default function SchemaDetail(props: any) {
           });
 
     const groupConstructor = formData.reduce((acc, meta) => {
-      const { key, type } = meta;
-      acc[key] = createFormControl(getDefaultValue(meta));
+      acc[meta.key] = createFormControl(getDefaultValue(meta));
       return acc;
     }, {} as { [key: string]: IFormControl });
 
@@ -45,7 +64,11 @@ export default function SchemaDetail(props: any) {
     if (params.id !== "new") {
       fetchDocument(params.entity, params.id).then((body) => {
         if (body.success) {
-          form.patchValue(body.data);
+          if(!body.data.length) {
+            alert(`document with id: ${params.id} not exist`);
+            return;
+          }
+          form.patchValue(body.data[0]['properties']);
 
           if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
           if (form.controls["_key"]) form.controls["_key"].markDisabled(true);
@@ -61,49 +84,17 @@ export default function SchemaDetail(props: any) {
     e.preventDefault();
 
     if (params.id == "new") {
-      fetch(API_PATH + `/en/${params.entity}`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form.value),
-      })
-        .then((res) => res.json())
+      addNode(params.entity, form.value)
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate("../");
+          else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
         });
     } else {
-      fetch(API_PATH + `/en/${params.entity}/${params.id}`, {
-        method: "PATCH",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form.value),
-      })
-        .then((res) => res.json())
+      updateNode(params.entity,params.id, form.value)
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate("../");
+          else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
         });
-    }
-  };
-
-  const getHtmlInputType = (meta: { key: string; type: string }) => {
-    switch (meta.type) {
-      case "string":
-        return "text";
-      case "integer":
-        return "number";
-      case "decimal":
-        return "number";
-      case "json":
-        return "jsoneditor";
-      default:
-        return meta.type;
-        break;
     }
   };
 
@@ -123,7 +114,7 @@ export default function SchemaDetail(props: any) {
                     />
                   </Match>
                   <Match when={meta.type === "boolean"}>
-                    <TextInputField
+                    <BooleanInputField
                       label={meta.key}
                       type="checkbox"
                       control={form.controls[meta.key]}

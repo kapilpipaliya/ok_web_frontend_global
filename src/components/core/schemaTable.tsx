@@ -1,16 +1,16 @@
-import { createEffect, createSignal, For, Match, onCleanup, Switch, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, Show, onCleanup, Switch, untrack } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
 import { API_PATH } from "../../constant";
-import { fetchAttributesData, fetchCollectionData } from "../api";
+import { fetchAttributesTableData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
 
-export default function TableWithStickyHeader() {
+export default function SchemaTable() {
   const navigate = useNavigate();
   const params = useParams();
 
   const [data, setData] = createSignal({
     data: [],
-    headers: [] as { key: string; type: string }[],
+    headers: [] as { key: string; type: string }[]
   });
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
@@ -19,21 +19,26 @@ export default function TableWithStickyHeader() {
     setData((prev) => ({
       ...prev,
       data: [],
-      headers: [],
+      headers: []
     }));
 
-    fetchAttributesData(params.entity).then(
-      (headerWithTypesBody: { data: { key: string; type: string }[] }) => {
+    fetchAttributesTableData(params.entity).then(
+      (headerWithTypesBody) => {
+        if (!headerWithTypesBody) {
+          alert("header data not available");
+          return;
+        }
         fetchCollectionData(params.entity).then((body) => {
-          if (!body.success) alert(body.exception);
-          else {
+          if (!body.success) {
+            alert(body.exception);
+          } else {
             const headers = headerWithTypesBody.data;
             headers.push({ key: "edit", type: "actions" });
 
             setData((prev) => ({
               ...prev,
               data: body.data,
-              headers,
+              headers
             }));
           }
         });
@@ -52,8 +57,8 @@ export default function TableWithStickyHeader() {
         method: "DELETE",
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"
+        }
       })
         .then((res) => res.json())
         .then((data) => {
@@ -63,14 +68,6 @@ export default function TableWithStickyHeader() {
     }
   };
 
-  const Loader = () => {
-    console.log("ok");
-    const [count, setCount] = createSignal(0),
-      interval = setInterval(() => setCount((c) => c + 1), 1000);
-    onCleanup(() => clearInterval(interval));
-
-    return <div>Loading... {count()}</div>;
-  };
 
   return (
     <div>
@@ -98,82 +95,85 @@ export default function TableWithStickyHeader() {
               `}
             >
               {/* <Suspense fallback={<Loader />}> */}
+              <Show when={!data().headers.length}>No Data</Show>
               <table style={{ borderSpacing: 0 }}>
                 <thead>
-                  <tr>
-                    <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                      {(head) => (
-                        <th scope="col" title={head.type}>
-                          {head.key}
-                        </th>
-                      )}
-                    </For>
-                  </tr>
+                <tr>
+                  <th>ID</th>
+                  <For each={data().headers}>
+                    {(head) => (
+                      <th scope="col" title={head.type}>
+                        {head.key}
+                      </th>
+                    )}
+                  </For>
+                </tr>
                 </thead>
                 <tbody>
-                  <For each={data().data} fallback={<div></div>}>
-                    {(entity, i) => {
-                      return (
-                        <tr>
-                          <For each={data().headers} fallback={<div>Loading Header...</div>}>
-                            {(head, rowId) => (
-                              <td>
-                                <Switch
-                                  fallback={
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) ==
-                                        JSON.stringify([rowId, head.key])
-                                        ? "Editable"
-                                        : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  }
-                                >
-                                  <Match when={head.type === "boolean"}>
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) ==
-                                        JSON.stringify([rowId, head.key])
-                                        ? "Editable"
-                                        : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  </Match>
-                                  <Match when={head.type === "object"}>
-                                    <div
-                                      onDblClick={() => {
-                                        setEditableCellIndex((prev) => [rowId, head.key]);
-                                      }}
-                                    >
-                                      {JSON.stringify(editableCellIndex) ==
-                                        JSON.stringify([rowId, head.key])
-                                        ? "Editable"
-                                        : JSON.stringify(entity[head.key])}
-                                    </div>
-                                  </Match>
-                                  <Match when={head.type === "actions"}>
-                                    <td>
-                                      <a href={`${window.location.href}/${entity.id}`}>
-                                        Edit<span></span>
-                                      </a>
-                                      <button onClick={() => deleteObject(entity.id)}>
-                                        Delete
-                                      </button>
-                                    </td>
-                                  </Match>
-                                </Switch>
-                              </td>
-                            )}
-                          </For>
-                        </tr>
-                      );
-                    }}
-                  </For>
+                <For each={data().data} fallback={<div></div>}>
+                  {(entity, i) => {
+                    return (
+                      <tr>
+                        <td>{entity["id"]}</td>
+                        <For each={data().headers}>
+                          {(head, rowId) => (
+                            <td>
+                              <Switch
+                                fallback={
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) ==
+                                    JSON.stringify([rowId, head.key])
+                                      ? "Editable"
+                                      : JSON.stringify(entity['properties'][head.key])}
+                                  </div>
+                                }
+                              >
+                                <Match when={head.type === "boolean"}>
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) ==
+                                    JSON.stringify([rowId, head.key])
+                                      ? "Editable"
+                                      : JSON.stringify(entity['properties'][head.key])}
+                                  </div>
+                                </Match>
+                                <Match when={head.type === "object"}>
+                                  <div
+                                    onDblClick={() => {
+                                      setEditableCellIndex((prev) => [rowId, head.key]);
+                                    }}
+                                  >
+                                    {JSON.stringify(editableCellIndex) ==
+                                    JSON.stringify([rowId, head.key])
+                                      ? "Editable"
+                                      : JSON.stringify(entity['properties'][head.key])}
+                                  </div>
+                                </Match>
+                                <Match when={head.type === "actions"}>
+                                  <td>
+                                    <a href={`${window.location.href}/${entity['properties']['id']}`}>
+                                      Edit<span></span>
+                                    </a>
+                                    <button onClick={() => deleteObject(entity['properties']['id'])}>
+                                      Delete
+                                    </button>
+                                  </td>
+                                </Match>
+                              </Switch>
+                            </td>
+                          )}
+                        </For>
+                      </tr>
+                    );
+                  }}
+                </For>
                 </tbody>
               </table>
               {/* </Suspense> */}

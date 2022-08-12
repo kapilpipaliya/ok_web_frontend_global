@@ -11,12 +11,12 @@ import { FormLayoutEditor } from "./fom_layout_editor";
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
-  { name: "AttributeTypes", href: "/attributesTypes", icon: clock, current: false },
-  { name: "Attributes", href: "/attributes", icon: clock, current: false },
-  { name: "Collections", href: "/collections", icon: scale, current: false },
-  { name: "Form Layout", href: "/formLayouts", icon: scale, current: false },
-  { name: "Table Layout", href: "/tableLayouts", icon: scale, current: false },
-  { name: "Card Layout", href: "/cardLayouts", icon: scale, current: false },
+  { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
+  { name: "Attributes", href: "/Attribute", icon: clock, current: false },
+  { name: "Collections", href: "/Collection", icon: scale, current: false },
+  { name: "Form Layout", href: "/formLayout", icon: scale, current: false },
+  { name: "Table Layout", href: "/TableLayout", icon: scale, current: false },
+  { name: "Card Layout", href: "/CardLayout", icon: scale, current: false },
 ];
 
 export const App = () => {

@@ -41,3 +41,6 @@ ESLint is configured as following
 - Optionally uppercase const only if it is
   -- Exported
   -- is constant
+
+### Domain Logic Rules:
+- always handle node object like: {id: 0, labels: [], properties: {}}
