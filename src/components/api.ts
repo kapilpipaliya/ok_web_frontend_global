@@ -1,19 +1,20 @@
-import jju from 'jju';
+import jju from "jju";
 import { API_PATH } from "../constant";
-import { run } from "../db/db_utils";
+
 import {
-  addNewVertex, deleteVertex,
+  addNewVertex,
+  deleteVertex,
   findVertexIdsByLabel,
   getNewGraphId,
   graph,
   newVertex,
-  replaceVertexProperties
+  replaceVertexProperties,
 } from "../db/graph";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
-  return jju.stringify(json, {quote:"'"}).replace(/"/g,'\\x22')
-}
+  return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
+};
 
 const ServerAttributeType = {
   String: "string",
@@ -21,10 +22,12 @@ const ServerAttributeType = {
   Boolean: "boolean",
   Integer: "integer",
   Decimal: "decimal",
-  Json: "json"
+  Json: "json",
 };
 
-export async function fetchAttributesTableData(schema: string): Promise<{ data: { key: string; type: string }[] }> {
+export async function fetchAttributesTableData(
+  schema: string
+): Promise<{ data: { key: string; type: string }[] }> {
   switch (schema) {
     case "AttributesType": {
       return { data: [{ key: "id", type: ServerAttributeType.String }] };
@@ -40,59 +43,64 @@ export async function fetchAttributesTableData(schema: string): Promise<{ data: 
           { key: "required", type: ServerAttributeType.Boolean },
           { key: "internal", type: ServerAttributeType.Boolean },
           { key: "props", type: ServerAttributeType.Json },
-          { key: "relation", type: ServerAttributeType.Json }
-        ]
+          { key: "relation", type: ServerAttributeType.Json },
+        ],
       };
     }
     case "Collection": {
       return {
         data: [
           { key: "_key", type: "string" },
-          { key: "attributes", type: "stringify" }
-        ]
+          { key: "attributes", type: "stringify" },
+        ],
       };
     }
   }
 }
 
 export async function fetchCollectionData(schema) {
-  return {
-    success: true,
-    data: findVertexIdsByLabel(schema)
-  };
+  // const data =await run(`
+  //   MATCH (n:${schema})
+  //   RETURN properties(n);
+  // `)
+  // console.log({
+  //   schema,
+  //   data
+  // })
+  // return {
+  //   success: true,
+  //   data: findVertexIdsByLabel(schema)
+  // };
 }
 
-
 export async function addNode(schema: string, body: any) {
-    return {
-      success: true,
-      data: addNewVertex(newVertex(getNewGraphId(), [schema], body))
-    };
-  }
+  return {
+    success: true,
+    data: addNewVertex(newVertex(getNewGraphId(), [schema], body)),
+  };
+}
 
 export async function fetchDocument(schema: string, id: number) {
   return {
     success: true,
-    data: graph.vertexes[id]
+    data: graph.vertexes[id],
   };
-
 }
 
 export async function updateNode(schema: string, id: number, body: any) {
   return {
     success: true,
-    data: replaceVertexProperties(id, body)
+    data: replaceVertexProperties(id, body),
   };
 }
 export async function deleteNode(schema: string, id: number) {
   return {
     success: true,
-    data: deleteVertex(id)
+    data: deleteVertex(id),
   };
 }
 
 export function addCollection(_key, attributes) {
-
   console.log({ _key, attributes });
 
   // return fetch(API_PATH + `/en/collections`, {
@@ -110,9 +118,9 @@ export function updateCollection(_key, attributes) {
     method: "PATCH",
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ attributes })
+    body: JSON.stringify({ attributes }),
   }).then((res) => res.json());
 }
 
@@ -121,9 +129,9 @@ export function addFormLayout(_key, attributes) {
     method: "POST",
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ _key: _key, attributes })
+    body: JSON.stringify({ _key: _key, attributes }),
   }).then((res) => res.json());
 }
 
@@ -132,8 +140,8 @@ export function updateFormLayout(_key, attributes) {
     method: "PATCH",
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ attributes })
+    body: JSON.stringify({ attributes }),
   }).then((res) => res.json());
 }

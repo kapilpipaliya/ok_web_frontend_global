@@ -10,7 +10,21 @@ import { CollectionEditor } from "./collection_editor";
 import { FormLayoutEditor } from "./fom_layout_editor";
 import { useDebugger } from "./core/SolidDebug";
 import { graph } from "../db/graph";
+import { Menu } from "./core/Menu";
 
+const navigationNew = {
+  Dashboard: [
+    { name: "Home", href: "/", icon: home, current: true },
+    { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
+    { name: "Attributes", href: "/Attribute", icon: clock, current: false },
+  ],
+  "Control Panel": [
+    { name: "Collections", href: "/Collection", icon: scale, current: false },
+    { name: "Form Layout", href: "/formLayout", icon: scale, current: false },
+    { name: "Table Layout", href: "/TableLayout", icon: scale, current: false },
+    { name: "Card Layout", href: "/CardLayout", icon: scale, current: false },
+  ],
+};
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
   { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
@@ -22,7 +36,7 @@ const navigation = [
 ];
 
 export const App = () => {
-  const debugGraph = useDebugger('graph');
+  const debugGraph = useDebugger("graph");
   debugGraph(graph);
 
   return (
@@ -40,34 +54,7 @@ export const App = () => {
             grid-area: menu;
           `}
         >
-          <div
-            class={css`
-              display: flex;
-              flex-direction: column;
-            `}
-          >
-            <For each={navigation} fallback={<div>Loading...</div>}>
-              {(item) => (
-                <Link
-                  href={item.href}
-                  class={css`
-                    ${item.current ? "" : ""}
-                  `}
-                  aria-current={item.current ? "page" : undefined}
-                >
-                  <Icon
-                    path={item.icon}
-                    class={css`
-                      width: 10px;
-                      height: 10px;
-                    `}
-                    aria-hidden="true"
-                  />
-                  {item.name}
-                </Link>
-              )}
-            </For>
-          </div>
+          <Menu items={navigation} />
         </div>
         <main
           class={css`
