@@ -59,18 +59,10 @@ export async function fetchAttributesTableData(
 }
 
 export async function fetchCollectionData(schema) {
-  // const data =await run(`
-  //   MATCH (n:${schema})
-  //   RETURN properties(n);
-  // `)
-  // console.log({
-  //   schema,
-  //   data
-  // })
-  // return {
-  //   success: true,
-  //   data: findVertexIdsByLabel(schema)
-  // };
+  return {
+    success: true,
+    data: findVertexIdsByLabel(schema)
+  };
 }
 
 export async function addNode(schema: string, body: any) {
