@@ -3,13 +3,14 @@ import { useNavigate, useParams } from "solid-app-router";
 import { API_PATH } from "../../constant";
 import { deleteNode, fetchAttributesTableData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
+import { graph } from "../../db/graph";
 
 export default function SchemaTable() {
   const navigate = useNavigate();
   const params = useParams();
 
   const [data, setData] = createSignal({
-    data: [],
+    data: [] as number[],
     headers: [] as { key: string; type: string }[]
   });
 
@@ -104,13 +105,13 @@ export default function SchemaTable() {
                 </thead>
                 <tbody>
                 <For each={data().data} fallback={<div></div>}>
-                  {(entity, i) => {
+                  {(id, i) => {
                     return (
                       <tr>
-                        <td>{entity["id"]}</td>
+                        <td>{graph.vertexes[id]?.["id"]}</td>
                         <For each={data().headers}>
                           {(head, rowId) => (
-                            <td>
+                            <Show when={graph.vertexes[id]}><td>
                               <Switch
                                 fallback={
                                   <div
@@ -121,7 +122,7 @@ export default function SchemaTable() {
                                     {JSON.stringify(editableCellIndex) ==
                                     JSON.stringify([rowId, head.key])
                                       ? "Editable"
-                                      : JSON.stringify(entity['properties'][head.key])}
+                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
                                   </div>
                                 }
                               >
@@ -134,7 +135,7 @@ export default function SchemaTable() {
                                     {JSON.stringify(editableCellIndex) ==
                                     JSON.stringify([rowId, head.key])
                                       ? "Editable"
-                                      : JSON.stringify(entity['properties'][head.key])}
+                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
                                   </div>
                                 </Match>
                                 <Match when={head.type === "object"}>
@@ -146,21 +147,21 @@ export default function SchemaTable() {
                                     {JSON.stringify(editableCellIndex) ==
                                     JSON.stringify([rowId, head.key])
                                       ? "Editable"
-                                      : JSON.stringify(entity['properties'][head.key])}
+                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
                                   </div>
                                 </Match>
                                 <Match when={head.type === "actions"}>
                                   <td>
-                                    <a href={`${window.location.href}/${entity['properties']['id']}`}>
+                                    <a href={`${window.location.href}/${id}`}>
                                       Edit<span></span>
                                     </a>
-                                    <button onClick={() => deleteObject(entity['properties']['id'])}>
+                                    <button onClick={() => deleteObject(id)}>
                                       Delete
                                     </button>
                                   </td>
                                 </Match>
                               </Switch>
-                            </td>
+                            </td></Show>
                           )}
                         </For>
                       </tr>

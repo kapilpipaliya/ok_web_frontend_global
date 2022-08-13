@@ -64,11 +64,11 @@ export default function SchemaDetail(props: {}) {
     if (params.id !== "new") {
       fetchDocument(params.entity, params.id).then((body) => {
         if (body.success) {
-          if(!body.data.length) {
+          if(!body.data) {
             alert(`document with id: ${params.id} not exist`);
             return;
           }
-          form.patchValue(body.data[0]['properties']);
+          form.patchValue(body.data['properties']);
 
           if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
           if (form.controls["_key"]) form.controls["_key"].markDisabled(true);

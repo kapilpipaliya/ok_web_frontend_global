@@ -1,6 +1,14 @@
 import jju from 'jju';
 import { API_PATH } from "../constant";
 import { run } from "../db/db_utils";
+import {
+  addNewVertex, deleteVertex,
+  findVertexIdsByLabel,
+  getNewGraphId,
+  graph,
+  newVertex,
+  replaceVertexProperties
+} from "../db/graph";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -48,53 +56,38 @@ export async function fetchAttributesTableData(schema: string): Promise<{ data: 
 }
 
 export async function fetchCollectionData(schema) {
-  const data = await run(`MATCH (n:${schema}) RETURN n`);
   return {
     success: true,
-    data: data['output'].map(resultItem=>resultItem['n'])
+    data: findVertexIdsByLabel(schema)
   };
 }
 
 
 export async function addNode(schema: string, body: any) {
-  const query = `CREATE (n:${schema} ${JSONToCypherMap(body)}) return n`;
-    const data = await run(query);
     return {
       success: true,
-      data: data['output'].map(resultItem=>resultItem['n'])
+      data: addNewVertex(newVertex(getNewGraphId(), [schema], body))
     };
   }
 
-export async function fetchDocument(schema: string, id: string) {
-  const query = `MATCH (n:${schema}) where n.id = '${id}' RETURN n`;
-  const data = await run(query);
+export async function fetchDocument(schema: string, id: number) {
   return {
     success: true,
-    data: data['output'].map(resultItem=>resultItem['n'])
+    data: graph.vertexes[id]
   };
 
 }
 
-export async function updateNode(schema: string, id: string, body: any) {
-  const query = `MATCH (n:${schema})
-  where n.id = '${id}'
-SET n=${JSONToCypherMap(body)}
-RETURN n`;
-  const data = await run(query);
+export async function updateNode(schema: string, id: number, body: any) {
   return {
     success: true,
-    data: data['output'].map(resultItem=>resultItem['n'])
+    data: replaceVertexProperties(id, body)
   };
 }
-export async function deleteNode(schema: string, id: string) {
-  const query = `MATCH (n:${schema})
-  where n.id = '${id}'
-DELETE n`;
-  debugger
-  const data = await run(query);
+export async function deleteNode(schema: string, id: number) {
   return {
     success: true,
-    data: data['output'].map(resultItem=>resultItem['n'])
+    data: deleteVertex(id)
   };
 }
 
