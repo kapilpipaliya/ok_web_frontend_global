@@ -34,6 +34,7 @@ import {
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useNavigate, useParams } from "solid-app-router";
+import { graph } from "../db/graph";
 
 export interface Attribute {
   _key?: string;
@@ -94,7 +95,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const isEdit = () => params.id && params.id !== "new";
   if (isEdit()) {
     const owner = getOwner();
-    fetchDocument("collections", params.id).then((body) => {
+    fetchDocument("Collection", params.id).then((body) => {
       if (body.success) {
         _key.setValue(body.data._key);
         // batch not work here:
@@ -108,7 +109,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     });
   }
   const fetchData = async (inputValue: string): Promise<any> => {
-    return fetchCollectionData("attributes").then((d) => d.data);
+    return fetchCollectionData("Attribute").then((d) => d.data);
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
@@ -116,8 +117,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   createEffect(() => {
     if (selectOptionProps.options) {
       setNormalizedAttributeSelectOptions(
-        selectOptionProps.options.reduce((acc, curr) => {
-          acc[curr._key] = curr;
+        selectOptionProps.options.reduce((acc, currId) => {
+          const newCurr= graph.vertexes[currId]['properties']
+          acc[currId.id] = newCurr;
           return acc;
         }, {})
       );
@@ -185,11 +187,11 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 initialValue={control().controls.attribute.value}
                 onChange={onSelectChange(control().controls.attribute as IFormControl)}
                 optionToValue={(option: Option) => {
-                  return option._key; // ["id"]
+                  return option.id; // ["id"]
                 }}
                 format={(optionOrValue, type) => {
                   // value is displayed in the input; option is displayed in the list
-                  return type === "option" ? optionOrValue._key : optionOrValue;
+                  return type === "option" ? optionOrValue.id : optionOrValue;
                 }}
               />
               <button type="button" onclick={() => clearControl("attribute")}>
@@ -573,6 +575,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         <Button text={"Submit"} onclick={onSubmit} color="primary" size="md" />
         <Button text={"Cancel"} onclick={() => history.back()} color="primary" size="md" />
       </div>
+      {JSON.stringify(collectionHasAttributesControl.value)}
     </div>
   );
 };

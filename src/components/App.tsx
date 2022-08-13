@@ -30,7 +30,7 @@ const navigation = [
   { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
   { name: "Attributes", href: "/Attribute", icon: clock, current: false },
   { name: "Collections", href: "/Collection", icon: scale, current: false },
-  { name: "Form Layout", href: "/formLayout", icon: scale, current: false },
+  { name: "Form Layout", href: "/FormLayout", icon: scale, current: false },
   { name: "Table Layout", href: "/TableLayout", icon: scale, current: false },
   { name: "Card Layout", href: "/CardLayout", icon: scale, current: false },
 ];
@@ -63,8 +63,8 @@ export const App = () => {
         >
           <Routes>
             <Route path="/" component={() => <>Home</>} />
-            <Route path="/collections/:id" component={() => <CollectionEditor />} />
-            <Route path="/formLayouts/:id" component={() => <FormLayoutEditor />} />
+            <Route path="/Collection/:id" component={() => <CollectionEditor />} />
+            <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
             <Route path="/:entity" component={() => <SchemaTable />} />
             <Route path="/:entity/:id" component={() => <SchemaDetail />} />
             <Route path="/**" component={() => <Page404 />} />
