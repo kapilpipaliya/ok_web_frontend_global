@@ -1,7 +1,7 @@
 import { createEffect, createSignal, For, Match, Show, onCleanup, Switch, untrack } from "solid-js";
 import { useNavigate, useParams } from "solid-app-router";
 import { API_PATH } from "../../constant";
-import { fetchAttributesTableData, fetchCollectionData } from "../api";
+import { deleteNode, fetchAttributesTableData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
 
 export default function SchemaTable() {
@@ -53,14 +53,7 @@ export default function SchemaTable() {
 
   const deleteObject = (id) => {
     if (confirm("are you sure")) {
-      fetch(API_PATH + `/en/${params.entity}/${id}`, {
-        method: "DELETE",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        }
-      })
-        .then((res) => res.json())
+      deleteNode(params.entity, id)
         .then((data) => {
           if (!data.success) alert(data.exception);
           else getObjectData();

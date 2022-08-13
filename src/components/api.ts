@@ -66,7 +66,7 @@ export async function addNode(schema: string, body: any) {
   }
 
 export async function fetchDocument(schema: string, id: string) {
-  const query = `MATCH (n:${schema} {id: '${id}'}) RETURN n`;
+  const query = `MATCH (n:${schema}) where n.id = '${id}' RETURN n`;
   const data = await run(query);
   return {
     success: true,
@@ -76,10 +76,21 @@ export async function fetchDocument(schema: string, id: string) {
 }
 
 export async function updateNode(schema: string, id: string, body: any) {
-  const query = `MATCH (n:${schema} {id: '${id}'})
-SET n+=${JSONToCypherMap(body)}
+  const query = `MATCH (n:${schema})
+  where n.id = '${id}'
+SET n=${JSONToCypherMap(body)}
 RETURN n`;
-  debugger;
+  const data = await run(query);
+  return {
+    success: true,
+    data: data['output'].map(resultItem=>resultItem['n'])
+  };
+}
+export async function deleteNode(schema: string, id: string) {
+  const query = `MATCH (n:${schema})
+  where n.id = '${id}'
+DELETE n`;
+  debugger
   const data = await run(query);
   return {
     success: true,
