@@ -35,6 +35,7 @@
     "@thisbeyond/solid-select": "^0.12.0",
     "clsx": "^1.2.1",
     "jju": "^1.4.0",
+    "klona": "^2.0.5",
     "solid-app-router": "^0.4.2",
     "solid-forms": "^0.4.5",
     "solid-headless": "^0.12.6",

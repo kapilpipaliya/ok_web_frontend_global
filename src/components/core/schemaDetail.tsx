@@ -4,6 +4,7 @@ import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { Field, TextInputField, BooleanInputField, JsonInput, GeneralInput } from "ok_web_components";
 import { API_PATH } from "../../constant";
 import { addNode, fetchAttributesTableData, fetchDocument, updateNode } from "../api";
+import { klona } from 'klona/json';
 
 interface AttributeMetaType {
   key: string;
@@ -82,15 +83,14 @@ export default function SchemaDetail(props: {}) {
 
   const onSubmit = (e) => {
     e.preventDefault();
-
     if (params.id == "new") {
-      addNode(params.entity, form.value)
+      addNode(params.entity, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
           else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
         });
     } else {
-      updateNode(params.entity,params.id, form.value)
+      updateNode(params.entity,params.id, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
           else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
