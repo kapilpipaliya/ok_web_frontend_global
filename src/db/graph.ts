@@ -63,14 +63,14 @@ export const addNewVertex = (vertex: Vertex) => {
 };
 
 export const replaceVertexProperties = (id: number, properties: {}) => {
-  setGraph("vertexes", id, "properties", reconcile(properties));
+  setGraph("vertexes", id, "properties", reconcile(properties, ));
 };
 
 export const deleteVertex = (id: number) => {
   batch(() => {
     graph.vertexes[id].labels.forEach(label => {
       setGraph("vertexLabelIdMap", label, ids => {
-        if (!ids.includes(id)) {
+        if (ids.includes(id)) {
           return ids.filter(id_ => id_ !== id);
         } else {
           return ids;

@@ -8,6 +8,8 @@ import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { CollectionEditor } from "./collection_editor";
 import { FormLayoutEditor } from "./fom_layout_editor";
+import { useDebugger } from "./core/SolidDebug";
+import { graph } from "../db/graph";
 
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
@@ -20,6 +22,9 @@ const navigation = [
 ];
 
 export const App = () => {
+  const debugGraph = useDebugger('graph');
+  debugGraph(graph);
+
   return (
     <Router>
       <div

@@ -1,5 +1,6 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
 import { App } from "./components/App";
+import { DebugProvider, useDebugger } from './components/core/SolidDebug';
 
-render(() => <App />, document.getElementById("root") as HTMLElement);
+render(() => <DebugProvider><App /></DebugProvider>, document.getElementById("root") as HTMLElement);
