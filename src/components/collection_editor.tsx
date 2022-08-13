@@ -21,7 +21,13 @@ import {
 } from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
-import { addCollection, fetchCollectionData, fetchDocument, updateCollection } from "./api";
+import {
+  addCollection,
+  addNode,
+  fetchCollectionData,
+  fetchDocument,
+  updateCollection,
+} from "./api";
 import {
   closestCenter,
   createSortable,
@@ -31,10 +37,11 @@ import {
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
 
+import { klona } from "klona/json";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useNavigate, useParams } from "solid-app-router";
-import { graph } from "../db/graph";
+import { addNewEdge, graph } from "../db/graph";
 
 export interface Attribute {
   _key?: string;
@@ -64,6 +71,7 @@ interface CollectionEditorProps {}
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
+  const navigate = useNavigate();
 
   const collectionHasAttributesControl = createFormArray([]);
   const [sortedIds, setSortedKeys] = createSignal([]);
@@ -109,17 +117,19 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     });
   }
   const fetchData = async (inputValue: string): Promise<any> => {
-    return fetchCollectionData("Attribute").then((d) => d.data);
+    return fetchCollectionData("Attribute").then((d) => {
+      return d.data.map((id) => graph.vertexes[id]["properties"]);
+    });
   };
 
   const selectOptionProps = createAsyncOptions(fetchData);
   const [normalizedAttributeSlectOptions, setNormalizedAttributeSelectOptions] = createSignal({});
+
   createEffect(() => {
     if (selectOptionProps.options) {
       setNormalizedAttributeSelectOptions(
-        selectOptionProps.options.reduce((acc, currId) => {
-          const newCurr= graph.vertexes[currId]['properties']
-          acc[currId.id] = newCurr;
+        selectOptionProps.options.reduce((acc, curr) => {
+          acc[curr.id] = curr;
           return acc;
         }, {})
       );
@@ -489,23 +499,28 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
   const onSubmit = () => {
     if (params.id && params.id !== "new") {
-      updateCollection(_key.value, collectionHasAttributesControl.value)
-        .then((res) => {
-          if (res.success) console.log(res);
-          else alert(res.error);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      //   updateCollection(_key.value, collectionHasAttributesControl.value)
+      //     .then((res) => {
+      //       if (res.success) console.log(res);
+      //       else alert(res.error);
+      //     })
+      //     .catch((err) => {
+      //       console.error(err);
+      //     });
     } else {
-      addCollection(_key.value, collectionHasAttributesControl.value)
-        .then((res) => {
-          if (res.success) console.log(res);
-          else alert(res.error);
-        })
-        .catch((err) => {
-          console.error(err);
-        });
+      addNode("Collection", { id: _key.value }).then((data) => {
+        if (data.error) alert(data.exception);
+        else {
+          addNewEdge(klona(collectionHasAttributesControl.value));
+          navigate(window.location.pathname.split("/").slice(0, -1).join("/"));
+        }
+      });
+
+      // addNode("Collection", klona(collectionHasAttributesControl.value))
+      //   .then((data) => {
+      //     if (data.error) alert(data.exception);
+      //     else navigate(window.location.pathname.split('/').slice(0, -1).join('/'));
+      //   })
     }
   };
 

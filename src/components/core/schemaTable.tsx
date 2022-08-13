@@ -11,7 +11,7 @@ export default function SchemaTable() {
 
   const [data, setData] = createSignal({
     data: [] as number[],
-    headers: [] as { key: string; type: string }[]
+    headers: [] as { key: string; type: string }[],
   });
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
@@ -20,31 +20,29 @@ export default function SchemaTable() {
     setData((prev) => ({
       ...prev,
       data: [],
-      headers: []
+      headers: [],
     }));
 
-    fetchAttributesTableData(params.entity).then(
-      (headerWithTypesBody) => {
-        if (!headerWithTypesBody) {
-          alert("header data not available");
-          return;
-        }
-        fetchCollectionData(params.entity).then((body) => {
-          if (!body.success) {
-            alert(body.exception);
-          } else {
-            const headers = headerWithTypesBody.data;
-            headers.push({ key: "edit", type: "actions" });
-
-            setData((prev) => ({
-              ...prev,
-              data: body.data,
-              headers
-            }));
-          }
-        });
+    fetchAttributesTableData(params.entity).then((headerWithTypesBody) => {
+      if (!headerWithTypesBody) {
+        alert("header data not available");
+        return;
       }
-    );
+      fetchCollectionData(params.entity).then((body) => {
+        if (!body.success) {
+          alert(body.exception);
+        } else {
+          const headers = headerWithTypesBody.data;
+          headers.push({ key: "edit", type: "actions" });
+
+          setData((prev) => ({
+            ...prev,
+            data: body.data,
+            headers,
+          }));
+        }
+      });
+    });
   };
 
   createEffect(() => {
@@ -54,14 +52,12 @@ export default function SchemaTable() {
 
   const deleteObject = (id) => {
     if (confirm("are you sure")) {
-      deleteNode(params.entity, id)
-        .then((data) => {
-          if (!data.success) alert(data.exception);
-          else getObjectData();
-        });
+      deleteNode(params.entity, id).then((data) => {
+        if (!data.success) alert(data.exception);
+        else getObjectData();
+      });
     }
   };
-
 
   return (
     <div>
@@ -92,82 +88,88 @@ export default function SchemaTable() {
               <Show when={!data().headers.length}>No Data</Show>
               <table style={{ borderSpacing: 0 }}>
                 <thead>
-                <tr>
-                  <th>ID</th>
-                  <For each={data().headers}>
-                    {(head) => (
-                      <th scope="col" title={head.type}>
-                        {head.key}
-                      </th>
-                    )}
-                  </For>
-                </tr>
+                  <tr>
+                    <th>ID</th>
+                    <For each={data().headers}>
+                      {(head) => (
+                        <th scope="col" title={head.type}>
+                          {head.key}
+                        </th>
+                      )}
+                    </For>
+                  </tr>
                 </thead>
                 <tbody>
-                <For each={data().data} fallback={<div></div>}>
-                  {(id, i) => {
-                    return (
-                      <tr>
-                        <td>{graph.vertexes[id]?.["id"]}</td>
-                        <For each={data().headers}>
-                          {(head, rowId) => (
-                            <Show when={graph.vertexes[id]}><td>
-                              <Switch
-                                fallback={
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
+                  <For each={data().data} fallback={<div></div>}>
+                    {(id, i) => {
+                      return (
+                        <tr>
+                          <td>{graph.vertexes[id]?.["id"]}</td>
+                          <For each={data().headers}>
+                            {(head, rowId) => (
+                              <Show when={graph.vertexes[id]}>
+                                <td>
+                                  <Switch
+                                    fallback={
+                                      <div
+                                        onDblClick={() => {
+                                          setEditableCellIndex((prev) => [rowId, head.key]);
+                                        }}
+                                      >
+                                        {JSON.stringify(editableCellIndex) ==
+                                        JSON.stringify([rowId, head.key])
+                                          ? "Editable"
+                                          : JSON.stringify(
+                                              graph.vertexes[id]["properties"][head.key]
+                                            )}
+                                      </div>
+                                    }
                                   >
-                                    {JSON.stringify(editableCellIndex) ==
-                                    JSON.stringify([rowId, head.key])
-                                      ? "Editable"
-                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
-                                  </div>
-                                }
-                              >
-                                <Match when={head.type === "boolean"}>
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
-                                  >
-                                    {JSON.stringify(editableCellIndex) ==
-                                    JSON.stringify([rowId, head.key])
-                                      ? "Editable"
-                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
-                                  </div>
-                                </Match>
-                                <Match when={head.type === "object"}>
-                                  <div
-                                    onDblClick={() => {
-                                      setEditableCellIndex((prev) => [rowId, head.key]);
-                                    }}
-                                  >
-                                    {JSON.stringify(editableCellIndex) ==
-                                    JSON.stringify([rowId, head.key])
-                                      ? "Editable"
-                                      : JSON.stringify(graph.vertexes[id]['properties'][head.key])}
-                                  </div>
-                                </Match>
-                                <Match when={head.type === "actions"}>
-                                  <td>
-                                    <a href={`${window.location.href}/${id}`}>
-                                      Edit<span></span>
-                                    </a>
-                                    <button onClick={() => deleteObject(id)}>
-                                      Delete
-                                    </button>
-                                  </td>
-                                </Match>
-                              </Switch>
-                            </td></Show>
-                          )}
-                        </For>
-                      </tr>
-                    );
-                  }}
-                </For>
+                                    <Match when={head.type === "boolean"}>
+                                      <div
+                                        onDblClick={() => {
+                                          setEditableCellIndex((prev) => [rowId, head.key]);
+                                        }}
+                                      >
+                                        {JSON.stringify(editableCellIndex) ==
+                                        JSON.stringify([rowId, head.key])
+                                          ? "Editable"
+                                          : JSON.stringify(
+                                              graph.vertexes[id]["properties"][head.key]
+                                            )}
+                                      </div>
+                                    </Match>
+                                    <Match when={head.type === "object"}>
+                                      <div
+                                        onDblClick={() => {
+                                          setEditableCellIndex((prev) => [rowId, head.key]);
+                                        }}
+                                      >
+                                        {JSON.stringify(editableCellIndex) ==
+                                        JSON.stringify([rowId, head.key])
+                                          ? "Editable"
+                                          : JSON.stringify(
+                                              graph.vertexes[id]["properties"][head.key]
+                                            )}
+                                      </div>
+                                    </Match>
+                                    <Match when={head.type === "actions"}>
+                                      <td>
+                                        <a href={`${window.location.href}/${id}`}>
+                                          Edit<span></span>
+                                        </a>
+                                        <button onClick={() => deleteObject(id)}>Delete</button>
+                                      </td>
+                                    </Match>
+                                  </Switch>
+                                </td>
+                              </Show>
+                            )}
+                          </For>
+                        </tr>
+                      );
+                    }}
+                  </For>
                 </tbody>
               </table>
               {/* </Suspense> */}

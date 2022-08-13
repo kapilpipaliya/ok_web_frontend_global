@@ -50,7 +50,7 @@ export async function fetchAttributesTableData(
     case "Collection": {
       return {
         data: [
-          { key: "_key", type: "string" },
+          { key: "id", type: "string" },
           { key: "attributes", type: "stringify" },
         ],
       };
@@ -61,7 +61,7 @@ export async function fetchAttributesTableData(
 export async function fetchCollectionData(schema) {
   return {
     success: true,
-    data: findVertexIdsByLabel(schema)
+    data: findVertexIdsByLabel(schema),
   };
 }
 
