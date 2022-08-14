@@ -66,9 +66,11 @@ export async function fetchCollectionData(schema) {
 }
 
 export async function addNode(schema: string, body: any) {
+  const newId = getNewGraphId();
   return {
     success: true,
-    data: addNewVertex(newVertex(getNewGraphId(), [schema], body)),
+    id: newId,
+    data: addNewVertex(newVertex(newId, [schema], body)),
   };
 }
 

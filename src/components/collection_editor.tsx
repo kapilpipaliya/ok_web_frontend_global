@@ -40,8 +40,8 @@ import {
 import { klona } from "klona/json";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
-import { useNavigate, useParams } from "solid-app-router";
-import { addNewEdge, graph } from "../db/graph";
+import { useLocation, useNavigate, useParams } from "solid-app-router";
+import { addNewEdge, getNewGraphId, graph, newEdge } from "../db/graph";
 
 export interface Attribute {
   _key?: string;
@@ -72,6 +72,7 @@ interface CollectionEditorProps {}
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const collectionHasAttributesControl = createFormArray([]);
   const [sortedIds, setSortedKeys] = createSignal([]);
@@ -118,7 +119,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   }
   const fetchData = async (inputValue: string): Promise<any> => {
     return fetchCollectionData("Attribute").then((d) => {
-      return d.data.map((id) => graph.vertexes[id]["properties"]);
+      return d.data.map((id) => graph.vertexes[id]);
     });
   };
 
@@ -165,6 +166,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     const clearControl = (id: string) => {
       control().controls[id].setValue(undefined);
     };
+    const clearSelectControl = (id: string) => {
+      control().controls[id].setValue(null);
+    };
 
     const onSelectChange = (control: IFormControl) => (selected: null | string) => {
       control.setValue(selected);
@@ -201,10 +205,18 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 }}
                 format={(optionOrValue, type) => {
                   // value is displayed in the input; option is displayed in the list
-                  return type === "option" ? optionOrValue.id : optionOrValue;
+                  if (type === "option") {
+                    return optionOrValue["properties"]["id"];
+                  } else {
+                    if (optionOrValue) {
+                      return graph.vertexes[optionOrValue]['properties']['id']
+                    } else {
+                      return optionOrValue;
+                    }
+                  }
                 }}
               />
-              <button type="button" onclick={() => clearControl("attribute")}>
+              <button type="button" onclick={() => clearSelectControl("attribute")}>
                 x
               </button>
             </div>
@@ -229,7 +241,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["id"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["id"]}
               <Show
                 when={control().controls.id.value === undefined}
                 fallback={
@@ -258,7 +270,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
               `}
             >
               {
-                normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.[
+                normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.[
                   "selector"
                 ]
               }
@@ -289,7 +301,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["type"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["type"]}
               <Show
                 when={control().controls.type.value === undefined}
                 fallback={
@@ -317,7 +329,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["label"]}
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["label"]}
               <Show
                 when={control().controls.label.value === undefined}
                 fallback={
@@ -345,7 +357,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["internal"]
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["internal"]
                 ? "true"
                 : "false"}
               <Show
@@ -374,7 +386,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["unique"]
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["unique"]
                 ? "true"
                 : "false"}
               <Show
@@ -403,7 +415,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["required"]
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["required"]
                 ? "true"
                 : "false"}
               <Show
@@ -432,7 +444,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
                 display: flex;
               `}
             >
-              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.["readonly"]
+              {normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.["readonly"]
                 ? "true"
                 : "false"}
               <Show
@@ -511,15 +523,20 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       addNode("Collection", { id: _key.value }).then((data) => {
         if (data.error) alert(data.exception);
         else {
-          addNewEdge(klona(collectionHasAttributesControl.value));
-          navigate(window.location.pathname.split("/").slice(0, -1).join("/"));
+          batch(()=>{
+            collectionHasAttributesControl.value.forEach(row=>{
+              addNewEdge(newEdge(getNewGraphId(), "CollectionHasAttribute", klona(row), data.id, row.attribute));
+            })
+          })
+
+          navigate(location.pathname.split("/").slice(0, -1).join("/"));
         }
       });
 
       // addNode("Collection", klona(collectionHasAttributesControl.value))
       //   .then((data) => {
       //     if (data.error) alert(data.exception);
-      //     else navigate(window.location.pathname.split('/').slice(0, -1).join('/'));
+      //     else navigate(location.pathname.split('/').slice(0, -1).join('/'));
       //   })
     }
   };

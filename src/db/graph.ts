@@ -24,8 +24,8 @@ interface Edge {
   id: number;
   properties: {},
   label: string;
-  start: string;
-  end: string;
+  start: number;
+  end: number;
 }
 
 export const newVertex = (id: number, labels: string[], properties: {}): Vertex => {
@@ -37,13 +37,13 @@ export const newVertex = (id: number, labels: string[], properties: {}): Vertex 
     out_edges: []
   };
 };
-export const newEdge = (id: number): Edge => {
+export const newEdge = (id: number, label: string, properties: {}, start: number, end: number): Edge => {
   return {
     id,
-    label: "",
-    properties: {},
-    start: "",
-    end: ""
+    label,
+    properties,
+    start,
+    end
   };
 };
 
@@ -103,5 +103,5 @@ export const addNewEdge = (edge: Edge) => {
 };
 
 export const findVertexIdsByLabel = (label: string) => {
-  return graph.vertexLabelIdMap[label];
+  return graph.vertexLabelIdMap[label] || [];
 };

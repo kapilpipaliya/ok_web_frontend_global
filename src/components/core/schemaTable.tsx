@@ -1,12 +1,12 @@
 import { createEffect, createSignal, For, Match, Show, onCleanup, Switch, untrack } from "solid-js";
-import { useNavigate, useParams } from "solid-app-router";
-import { API_PATH } from "../../constant";
+import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { deleteNode, fetchAttributesTableData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
 import { graph } from "../../db/graph";
 
 export default function SchemaTable() {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
 
   const [data, setData] = createSignal({
@@ -155,7 +155,7 @@ export default function SchemaTable() {
                                     </Match>
                                     <Match when={head.type === "actions"}>
                                       <td>
-                                        <a href={`${window.location.href}/${id}`}>
+                                        <a href={`${location.pathname}/${id}`}>
                                           Edit<span></span>
                                         </a>
                                         <button onClick={() => deleteObject(id)}>Delete</button>

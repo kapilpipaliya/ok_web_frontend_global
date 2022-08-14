@@ -1,8 +1,7 @@
 import { createSignal, For, Match, Show, Switch } from "solid-js";
-import { useParams, useNavigate } from "solid-app-router";
+import { useParams, useNavigate, useLocation } from "solid-app-router";
 import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { Field, TextInputField, BooleanInputField, JsonInput, GeneralInput } from "ok_web_components";
-import { API_PATH } from "../../constant";
 import { addNode, fetchAttributesTableData, fetchDocument, updateNode } from "../api";
 import { klona } from 'klona/json';
 
@@ -41,6 +40,7 @@ const getHtmlInputType = (meta: AttributeMetaType) => {
 export default function SchemaDetail(props: {}) {
   const params = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const form = createFormGroup({});
 
   let formData = [] as AttributeMetaType[];
@@ -87,13 +87,13 @@ export default function SchemaDetail(props: {}) {
       addNode(params.entity, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
+          else navigate(location.pathname.split('/').slice(0,-1).join('/'));
         });
     } else {
       updateNode(params.entity,params.id, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate(window.location.pathname.split('/').slice(0,-1).join('/'));
+          else navigate(location.pathname.split('/').slice(0,-1).join('/'));
         });
     }
   };
