@@ -1,4 +1,5 @@
 import { For } from "solid-js";
+import { styled, ThemeProvider, DefaultTheme } from "solid-styled-components";
 import { Link, Route, Router, Routes } from "solid-app-router";
 import { css } from "solid-styled-components";
 import { Icon } from "solid-heroicons";
@@ -16,14 +17,14 @@ const navigationNew = {
   Dashboard: [
     { name: "Home", href: "/", icon: home, current: true },
     { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
-    { name: "Attributes", href: "/Attribute", icon: clock, current: false },
+    { name: "Attributes", href: "/Attribute", icon: clock, current: false }
   ],
   "Control Panel": [
     { name: "Collections", href: "/Collection", icon: scale, current: false },
     { name: "Form Layout", href: "/formLayout", icon: scale, current: false },
     { name: "Table Layout", href: "/TableLayout", icon: scale, current: false },
-    { name: "Card Layout", href: "/CardLayout", icon: scale, current: false },
-  ],
+    { name: "Card Layout", href: "/CardLayout", icon: scale, current: false }
+  ]
 };
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
@@ -32,45 +33,53 @@ const navigation = [
   { name: "Collections", href: "/Collection", icon: scale, current: false },
   { name: "Form Layout", href: "/FormLayout", icon: scale, current: false },
   { name: "Table Layout", href: "/TableLayout", icon: scale, current: false },
-  { name: "Card Layout", href: "/CardLayout", icon: scale, current: false },
+  { name: "Card Layout", href: "/CardLayout", icon: scale, current: false }
 ];
+
+const theme: DefaultTheme = {
+  colors: {
+    primary: "hotpink"
+  }
+};
 
 export const App = () => {
   const debugGraph = useDebugger("graph");
   debugGraph(graph);
 
   return (
-    <Router>
-      <div
-        class={css`
-          display: grid;
-          grid-template-columns: 100px 1fr;
-          grid-template-areas: "menu main";
-          gap: 10px;
-        `}
-      >
+    <ThemeProvider theme={theme}>
+      <Router>
         <div
           class={css`
-            grid-area: menu;
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            grid-template-areas: "menu main";
+            gap: 10px;
           `}
         >
-          <Menu items={navigation} />
+          <div
+            class={css`
+              grid-area: menu;
+            `}
+          >
+            <Menu items={navigation} />
+          </div>
+          <main
+            class={css`
+              grid-area: main;
+            `}
+          >
+            <Routes>
+              <Route path="/" component={() => <>Home</>} />
+              <Route path="/Collection/:id" component={() => <CollectionEditor />} />
+              <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
+              <Route path="/:entity" component={() => <SchemaTable />} />
+              <Route path="/:entity/:id" component={() => <SchemaDetail />} />
+              <Route path="/**" component={() => <Page404 />} />
+            </Routes>
+          </main>
         </div>
-        <main
-          class={css`
-            grid-area: main;
-          `}
-        >
-          <Routes>
-            <Route path="/" component={() => <>Home</>} />
-            <Route path="/Collection/:id" component={() => <CollectionEditor />} />
-            <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
-            <Route path="/:entity" component={() => <SchemaTable />} />
-            <Route path="/:entity/:id" component={() => <SchemaDetail />} />
-            <Route path="/**" component={() => <Page404 />} />
-          </Routes>
-        </main>
-      </div>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 };
