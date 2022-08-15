@@ -28,22 +28,23 @@ export const Menu = (props: MenuProps) => {
         padding: 0;
         background: #688CB0;
         position: absolute;
+ 
       `}
     >
       <For each={props.items} fallback={<div>Loading...</div>}>
-        {(item) => (
-          <Link
+        {(item) => (<Link
             href={item.href}
               class={css`
+              display: flex;
+              align-items: center; 
                 color: gren;
                 text-decoration: none;
                 list-style: none;
                 transition: all 0.5s ease;
-                display: block;
                 padding: 10px 10px;
                 font-size: 18px;
                 position: relative;
-                color: #EEF4FA;   
+                color: #EEF4FA;
                 ${item.current ? "" : ""}
               `}
             aria-current={item.current ? "page" : undefined}
@@ -53,6 +54,7 @@ export const Menu = (props: MenuProps) => {
               class={css`
                 width: 18px;
                 height: 18px;
+                margin-right: 0.25em;
               `}
               aria-hidden="true"
             />

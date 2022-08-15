@@ -16,8 +16,8 @@ import { Menu } from "./core/Menu";
 const navigationNew = {
   Dashboard: [
     { name: "Home", href: "/", icon: home, current: true },
-    { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
-    { name: "Attributes", href: "/Attribute", icon: clock, current: false }
+    { name: "FormAttributeTypes", href: "/FormAttributeType", icon: clock, current: false },
+    { name: "Attributes", href: "/Attribute", icon: clock, current: false },
   ],
   "Control Panel": [
     { name: "Collections", href: "/Collection", icon: scale, current: false },
@@ -28,7 +28,7 @@ const navigationNew = {
 };
 const navigation = [
   { name: "Home", href: "/", icon: home, current: true },
-  { name: "AttributeTypes", href: "/AttributesType", icon: clock, current: false },
+  { name: "FormAttributeTypes", href: "/FormAttributeType", icon: clock, current: false },
   { name: "Attributes", href: "/Attribute", icon: clock, current: false },
   { name: "Collections", href: "/Collection", icon: scale, current: false },
   { name: "Form Layout", href: "/FormLayout", icon: scale, current: false },
@@ -52,7 +52,7 @@ export const App = () => {
         <div
           class={css`
             display: grid;
-            grid-template-columns: 100px 1fr;
+            grid-template-columns: 220px 1fr;
             grid-template-areas: "menu main";
             gap: 10px;
           `}
