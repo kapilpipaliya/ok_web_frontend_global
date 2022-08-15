@@ -16,7 +16,7 @@ export const JSONToCypherMap = (json: object) => {
   return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
 };
 
-const ServerAttributeType = {
+const ServerFormAttributeType = {
   String: "string",
   Dynamic: "dynamic",
   Boolean: "boolean",
@@ -29,21 +29,21 @@ export async function fetchAttributesTableData(
   schema: string
 ): Promise<{ data: { key: string; type: string }[] }> {
   switch (schema) {
-    case "AttributesType": {
-      return { data: [{ key: "id", type: ServerAttributeType.String }] };
+    case "FormAttributeType": {
+      return { data: [{ key: "id", type: ServerFormAttributeType.String }] };
     }
     case "Attribute": {
       return {
         data: [
-          { key: "id", type: ServerAttributeType.String },
-          { key: "selector", type: ServerAttributeType.String },
-          { key: "label", type: ServerAttributeType.String },
-          { key: "type", type: ServerAttributeType.String },
-          { key: "default", type: ServerAttributeType.Dynamic },
-          { key: "required", type: ServerAttributeType.Boolean },
-          { key: "internal", type: ServerAttributeType.Boolean },
-          { key: "props", type: ServerAttributeType.Json },
-          { key: "relation", type: ServerAttributeType.Json },
+          { key: "id", type: ServerFormAttributeType.String },
+          { key: "selector", type: ServerFormAttributeType.String },
+          { key: "label", type: ServerFormAttributeType.String },
+          { key: "type", type: ServerFormAttributeType.String },
+          { key: "default", type: ServerFormAttributeType.Dynamic },
+          { key: "required", type: ServerFormAttributeType.Boolean },
+          { key: "internal", type: ServerFormAttributeType.Boolean },
+          { key: "props", type: ServerFormAttributeType.Json },
+          { key: "relation", type: ServerFormAttributeType.Json },
         ],
       };
     }

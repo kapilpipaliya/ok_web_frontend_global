@@ -67,7 +67,7 @@ export interface Relation {
   b?: number;
 }
 
-interface CollectionEditorProps {}
+interface CollectionEditorProps { }
 
 export const CollectionEditor = (props: CollectionEditorProps) => {
   const params = useParams();
@@ -106,14 +106,20 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     const owner = getOwner();
     fetchDocument("Collection", params.id).then((body) => {
       if (body.success) {
-        _key.setValue(body.data._key);
-        // batch not work here:
-        runWithOwner(owner, () => {
-          body.data.attributes.forEach((attribute) =>
-            collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true))
-          );
+        console.log(klona(body.data))
+        _key.setValue(body.data.properties.id);
+        body.data.out_edges.forEach((d) => {
+          collectionHasAttributesControl.push(newCollectionHasAttributeRow(graph.edges[d].properties, true))
         });
-        setSortedKeys(body.data.attributes.map((a) => a._id));
+
+        // _key.setValue(body.data._key);
+        // // batch not work here:
+        // runWithOwner(owner, () => {
+        //   body.data.attributes.forEach((attribute) =>
+        //     collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true))
+        //   );
+        // });
+        // setSortedKeys(body.data.attributes.map((a) => a._id));
       }
     });
   }
@@ -271,7 +277,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
             >
               {
                 normalizedAttributeSlectOptions()?.[control().controls.attribute.value]?.['properties']?.[
-                  "selector"
+                "selector"
                 ]
               }
               <Show
@@ -523,8 +529,8 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       addNode("Collection", { id: _key.value }).then((data) => {
         if (data.error) alert(data.exception);
         else {
-          batch(()=>{
-            collectionHasAttributesControl.value.forEach(row=>{
+          batch(() => {
+            collectionHasAttributesControl.value.forEach(row => {
               addNewEdge(newEdge(getNewGraphId(), "CollectionHasAttribute", klona(row), data.id, row.attribute));
             })
           })
