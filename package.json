@@ -19,7 +19,7 @@
     "@typescript-eslint/eslint-plugin": "^5.33.0",
     "@typescript-eslint/parser": "^5.33.0",
     "cypress": "^10.3.0",
-    "eslint": "^8.21.0",
+    "eslint": "^8.22.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -29,6 +29,7 @@
     "vitest": "^0.21.1"
   },
   "dependencies": {
+    "@bedrock-layout/solid": "^0.11.10",
     "@hope-ui/solid": "^0.6.7",
     "@stitches/core": "^1.2.8",
     "@thisbeyond/solid-dnd": "^0.6.1",
@@ -37,6 +38,7 @@
     "jju": "^1.4.0",
     "klona": "^2.0.5",
     "solid-app-router": "^0.4.2",
+    "solid-boundaries": "^2.1.0",
     "solid-forms": "^0.4.5",
     "solid-headless": "^0.12.6",
     "solid-heroicons": "^2.0.3",
