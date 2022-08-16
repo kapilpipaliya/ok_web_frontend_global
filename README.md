@@ -42,5 +42,8 @@ ESLint is configured as following
   -- Exported
   -- is constant
 
-### Domain Logic Rules:
+### Graph Logic Rules:
 - always handle node object like: {id: 0, labels: [], properties: {}}
+
+### css rules
+- don't use css child selectors.

@@ -41,7 +41,7 @@ import { klona } from "klona/json";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
-import { addNewEdge, getNewGraphId, graph, newEdge } from "../db/graph";
+import { addNewEdge, Edges, getNewGraphId, getOutEdgeOfType, graph, newEdge } from "../db/graph";
 
 export interface Attribute {
   _key?: string;
@@ -78,7 +78,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   const [sortedIds, setSortedKeys] = createSignal([]);
   function newCollectionHasAttributeRow(obj?: { [key: string]: any }, isEdit = false) {
     return createFormGroup({
-      _id: createFormControl(obj?._id || createUniqueId(), { readonly: true }),
+      _id: createFormControl(obj?._id || createUniqueId(), { disabled: true }),
       // _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
       pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
       attribute: createFormControl(obj?.attribute),
@@ -106,20 +106,16 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
     const owner = getOwner();
     fetchDocument("Collection", params.id).then((body) => {
       if (body.success) {
-        console.log(klona(body.data))
         _key.setValue(body.data.properties.id);
-        body.data.out_edges.forEach((d) => {
-          collectionHasAttributesControl.push(newCollectionHasAttributeRow(graph.edges[d].properties, true))
-        });
-
-        // _key.setValue(body.data._key);
-        // // batch not work here:
-        // runWithOwner(owner, () => {
-        //   body.data.attributes.forEach((attribute) =>
-        //     collectionHasAttributesControl.push(newCollectionHasAttributeRow(attribute, true))
-        //   );
-        // });
-        // setSortedKeys(body.data.attributes.map((a) => a._id));
+        const AttributeEdges = getOutEdgeOfType(body.data.id, Edges.CollectionHasAttribute); // todo sort by pos
+        const AttributeEdgesCloned = AttributeEdges.map(att=> newCollectionHasAttributeRow(klona(att.properties, true)))
+        // batch not work here:
+        runWithOwner(owner, () => {
+          AttributeEdgesCloned.forEach((attribute) => {
+            collectionHasAttributesControl.push(attribute)
+          });
+        })
+        setSortedKeys(collectionHasAttributesControl.controls.map((a) => a.controls._id.value));
       }
     });
   }
@@ -531,7 +527,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
         else {
           batch(() => {
             collectionHasAttributesControl.value.forEach(row => {
-              addNewEdge(newEdge(getNewGraphId(), "CollectionHasAttribute", klona(row), data.id, row.attribute));
+              addNewEdge(newEdge(getNewGraphId(), Edges.CollectionHasAttribute, klona(row), data.id, row.attribute));
             })
           })
 

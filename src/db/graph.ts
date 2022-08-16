@@ -28,6 +28,18 @@ interface Edge {
   end: number;
 }
 
+export enum Vertexs {
+  FormAttributeType= "FormAttributeType",
+  Attributes = "Attributes",
+  Collection = "Collection",
+  FormLayout = "FormLayout",
+  TableLayout = "TableLayout",
+  CardLayout = "CardLayout"
+}
+export enum Edges  {
+  CollectionHasAttribute = "CollectionHasAttribute"
+}
+
 export const newVertex = (id: number, labels: string[], properties: {}): Vertex => {
   return {
     id,
@@ -105,3 +117,7 @@ export const addNewEdge = (edge: Edge) => {
 export const findVertexIdsByLabel = (label: string) => {
   return graph.vertexLabelIdMap[label] || [];
 };
+
+export const getOutEdgeOfType = (id: number, edgeLabel: string): Edge[] => {
+  return graph.vertexes[id].out_edges.filter(edge=>graph.edges[edge].label == edgeLabel).map(edge=>graph.edges[edge])
+}
