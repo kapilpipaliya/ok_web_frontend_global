@@ -27,7 +27,6 @@ export const Menu = (props: MenuProps) => {
         height: 100%;
         padding: 0;
         background: #688CB0;
-        position: absolute;
  
       `}
     >

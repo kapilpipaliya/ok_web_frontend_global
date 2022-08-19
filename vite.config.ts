@@ -3,6 +3,7 @@
 
 import { defineConfig } from "vite";
 import solidPlugin from "vite-plugin-solid";
+import solidStyled from 'babel-plugin-solid-styled';
 
 export default defineConfig({
   plugins: [
@@ -16,6 +17,7 @@ export default defineConfig({
               env: "development",
             },
           ],
+           [solidStyled, {}]
         ],
       },
     }),

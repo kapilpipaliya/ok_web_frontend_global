@@ -1,7 +1,9 @@
 /* @refresh reload */
 import './index.css';
 import { render } from "solid-js/web";
-import { App } from "./components/App";
 import { DebugProvider } from './components/core/SolidDebug';
+import { StyleRegistry } from 'solid-styled';
+import { FullDashboard } from "./components/Dashboard";
+import {  Router } from "solid-app-router";
 
-render(() => <DebugProvider><App /></DebugProvider>, document.getElementById("root") as HTMLElement);
+render(() => <DebugProvider><StyleRegistry><Router><FullDashboard /></Router></StyleRegistry></DebugProvider>, document.getElementById("root") as HTMLElement);

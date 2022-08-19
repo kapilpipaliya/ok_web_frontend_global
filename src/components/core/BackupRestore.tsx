@@ -1,5 +1,6 @@
 import { JSX } from "solid-js";
 import { backupToIndexDB, backupToJson, restoreFromIndexDB, restoreFromJson } from "../api";
+import { resetDatabase } from "../../db/graph";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob,
@@ -81,5 +82,7 @@ export const BackupRestore = () => {
 
     <button type="button" onclick={downloadJson}>Download Json</button>
     <input type="file" onchange={restoreFromFile}>Restore From JSON</input>
+
+    <button type="button" onclick={resetDatabase}>clear</button>
   </div>;
 };
