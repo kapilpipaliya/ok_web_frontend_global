@@ -2,13 +2,13 @@ import jju from "jju";
 import { API_PATH } from "../constant";
 
 import {
-  addNewVertex,
+  addNewVertex, deleteEdge,
   deleteVertex,
   findVertexIdsByLabel,
   getNewGraphId,
-  graph,
-  newVertex,
-  replaceVertexProperties,
+  graph, Id,
+  newVertex, replaceEdgeProperties,
+  replaceVertexProperties
 } from "../db/graph";
 
 export const JSONToCypherMap = (json: object) => {
@@ -74,26 +74,38 @@ export async function addNode(schema: string, body: any) {
   };
 }
 
-export async function fetchDocument(schema: string, id: number) {
+export async function fetchDocument(schema: string, id: Id) {
   return {
     success: true,
     data: graph.vertexes[id],
   };
 }
 
-export async function updateNode(schema: string, id: number, body: any) {
+export async function updateNode(schema: string, id: Id, body: any) {
   return {
     success: true,
     data: replaceVertexProperties(id, body),
   };
 }
-export async function deleteNode(schema: string, id: number) {
+export async function updateEdge(schema: string, id: Id, body: any) {
+  return {
+    success: true,
+    data: replaceEdgeProperties(id, body),
+  };
+}
+
+export async function deleteNode(schema: string, id: Id) {
   return {
     success: true,
     data: deleteVertex(id),
   };
 }
-
+export async function deleteEdge_(schema: string, id: string) {
+  return {
+    success: true,
+    data: deleteEdge(id),
+  };
+}
 export function addCollection(_key, attributes) {
   console.log({ _key, attributes });
 

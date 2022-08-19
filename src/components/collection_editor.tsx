@@ -1,4 +1,5 @@
 import { BooleanInputField, Button, TextInputField } from "ok_web_components";
+import { A } from "@mobily/ts-belt";
 
 import {
   bindOwner,
@@ -23,10 +24,10 @@ import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
 import {
   addCollection,
-  addNode,
+  addNode, deleteEdge_,
   fetchCollectionData,
   fetchDocument,
-  updateCollection,
+  updateCollection, updateEdge, updateNode
 } from "./api";
 import {
   closestCenter,
@@ -41,7 +42,8 @@ import { klona } from "klona/json";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
-import { addNewEdge, Edges, getNewGraphId, getOutEdgeOfType, graph, newEdge } from "../db/graph";
+import { addNewEdge, Edges, getNewGraphId, getOutEdgeOfType, getOutEdgeOfTypeIds, graph, newEdge } from "../db/graph";
+import { intersection } from "@mobily/ts-belt/dist/types/Array";
 
 export interface Attribute {
   _key?: string;
@@ -76,10 +78,9 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
 
   const collectionHasAttributesControl = createFormArray([]);
   const [sortedIds, setSortedKeys] = createSignal([]);
-  function newCollectionHasAttributeRow(obj?: { [key: string]: any }, isEdit = false) {
+  function newCollectionHasAttributeRow(obj?: { [key: string]: any }, id? : number) {
     return createFormGroup({
-      _id: createFormControl(obj?._id || createUniqueId(), { disabled: true }),
-      // _key: createFormControl(obj?._key, { readonly: isEdit && params.id && params.id !== "new" ? true : false }),
+      _id: createFormControl(id || createUniqueId(), { disabled: true }),
       pos: createFormControl(obj?.pos || collectionHasAttributesControl.controls.length + 1),
       attribute: createFormControl(obj?.attribute),
       id: createFormControl(obj?.id),
@@ -108,7 +109,7 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
       if (body.success) {
         _key.setValue(body.data.properties.id);
         const AttributeEdges = getOutEdgeOfType(body.data.id, Edges.CollectionHasAttribute); // todo sort by pos
-        const AttributeEdgesCloned = AttributeEdges.map(att=> newCollectionHasAttributeRow(klona(att.properties, true)))
+        const AttributeEdgesCloned = AttributeEdges.map(att=> newCollectionHasAttributeRow(klona(att.properties), att.id))
         // batch not work here:
         runWithOwner(owner, () => {
           AttributeEdgesCloned.forEach((attribute) => {
@@ -513,14 +514,28 @@ export const CollectionEditor = (props: CollectionEditorProps) => {
   };
   const onSubmit = () => {
     if (params.id && params.id !== "new") {
-      //   updateCollection(_key.value, collectionHasAttributesControl.value)
-      //     .then((res) => {
-      //       if (res.success) console.log(res);
-      //       else alert(res.error);
-      //     })
-      //     .catch((err) => {
-      //       console.error(err);
-      //     });
+      const normalizedEdgesValue = collectionHasAttributesControl.controls.reduce((acc, curr)=>{
+        acc[curr.controls._id.value] = klona(curr.value);
+        return acc;
+      }, {});
+
+      // new ids:
+      const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
+      const existingAttributeEdgeIds = getOutEdgeOfTypeIds(params.id, Edges.CollectionHasAttribute).map(x=>`${x}`) as Array<string>;
+
+      const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
+      const deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
+      const updatedAttributeIds = A.intersection(newIds, existingAttributeEdgeIds);
+
+
+      batch(() => {
+        deletedAttributeIds.forEach(id=>deleteEdge_(Edges.CollectionHasAttribute, id));
+        insertedAttributeIds.forEach(id => {
+          addNewEdge(newEdge(getNewGraphId(), Edges.CollectionHasAttribute, klona(normalizedEdgesValue[id]), params.id, normalizedEdgesValue[id].attribute));
+        });
+        updatedAttributeIds.forEach(id=>{
+          updateEdge(Edges.CollectionHasAttribute,id, klona(normalizedEdgesValue[id]))})
+      })
     } else {
       addNode("Collection", { id: _key.value }).then((data) => {
         if (data.error) alert(data.exception);

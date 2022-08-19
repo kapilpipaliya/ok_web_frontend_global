@@ -1,31 +1,37 @@
 import { createStore, reconcile } from "solid-js/store";
 import { batch } from "solid-js";
 
+export type Id = string;
 let id = 0;
-export const getNewGraphId = () => {
-  return ++id;
+export const getNewGraphId = ():Id => {
+  return `${++id}`;
 };
 
 export const [graph, setGraph] = createStore({
   vertexes: {} as { [key: string]: Vertex },
   edges: {} as { [key: string]: Edge },
-  vertexLabelIdMap: {} as { [key: string]: number[] }
+  vertexLabelIdMap: {} as { [key: string]: Id[] }
 });
+export const resetDatabase = ()=> setGraph(reconcile({
+  vertexes: {} as { [key: string]: Vertex },
+  edges: {} as { [key: string]: Edge },
+  vertexLabelIdMap: {} as { [key: string]: Id[] }
+}));
 
 interface Vertex {
-  id: number;
+  id: Id;
   labels: string[];
   properties: {},
-  in_edges: number[],
-  out_edges: number[]
+  in_edges: Id[],
+  out_edges: Id[]
 }
 
 interface Edge {
-  id: number;
+  id: Id;
   properties: {},
   label: string;
-  start: number;
-  end: number;
+  start: Id;
+  end: Id;
 }
 
 export enum Vertexs {
@@ -40,7 +46,7 @@ export enum Edges  {
   CollectionHasAttribute = "CollectionHasAttribute"
 }
 
-export const newVertex = (id: number, labels: string[], properties: {}): Vertex => {
+export const newVertex = (id: Id, labels: string[], properties: {}): Vertex => {
   return {
     id,
     labels,
@@ -49,7 +55,7 @@ export const newVertex = (id: number, labels: string[], properties: {}): Vertex 
     out_edges: []
   };
 };
-export const newEdge = (id: number, label: string, properties: {}, start: number, end: number): Edge => {
+export const newEdge = (id: Id, label: string, properties: {}, start: Id, end: Id): Edge => {
   return {
     id,
     label,
@@ -74,11 +80,14 @@ export const addNewVertex = (vertex: Vertex) => {
   });
 };
 
-export const replaceVertexProperties = (id: number, properties: {}) => {
+export const replaceVertexProperties = (id: Id, properties: {}) => {
   setGraph("vertexes", id, "properties", reconcile(properties, ));
 };
+export const replaceEdgeProperties = (id: Id, properties: {}) => {
+  setGraph("edges", id, "properties", reconcile(properties, ));
+};
 
-export const deleteVertex = (id: number) => {
+export const deleteVertex = (id: Id) => {
   batch(() => {
     graph.vertexes[id].labels.forEach(label => {
       setGraph("vertexLabelIdMap", label, ids => {
@@ -90,6 +99,26 @@ export const deleteVertex = (id: number) => {
       });
     });
     setGraph("vertexes", id, undefined);
+  });
+};
+export const deleteEdge = (id: Id) => {
+  batch(() => {
+    setGraph('vertexes', graph.edges[id].start,'out_edges', (ids)=> {
+      if (ids.includes(id)) {
+        return ids.filter(id_ => id_ !== id);
+      } else {
+        return ids;
+      }
+    });
+
+    setGraph('vertexes', graph.edges[id].end,'in_edges', (ids)=> {
+      if (ids.includes(id)) {
+        return ids.filter(id_ => id_ !== id);
+      } else {
+        return ids;
+      }
+    });
+    setGraph("edges", id, undefined);
   });
 };
 
@@ -118,6 +147,10 @@ export const findVertexIdsByLabel = (label: string) => {
   return graph.vertexLabelIdMap[label] || [];
 };
 
-export const getOutEdgeOfType = (id: number, edgeLabel: string): Edge[] => {
+export const getOutEdgeOfTypeIds = (id: Id | string, edgeLabel: string): Id[] => {
+  return graph.vertexes[id].out_edges.filter(edge=>graph.edges[edge].label == edgeLabel)
+}
+/** depricated */
+export const getOutEdgeOfType = (id: Id | string, edgeLabel: string): Edge[] => {
   return graph.vertexes[id].out_edges.filter(edge=>graph.edges[edge].label == edgeLabel).map(edge=>graph.edges[edge])
 }
