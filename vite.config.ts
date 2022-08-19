@@ -9,6 +9,7 @@ export default defineConfig({
     solidPlugin({
       babel: {
         plugins: [
+          // Locator JS
           [
             "@locator/babel-jsx/dist",
             {
