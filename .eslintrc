@@ -32,6 +32,7 @@
     ],
     "react/jsx-filename-extension": "off",
     "import/extensions": "off",
+    "no-lone-blocks": "off" // solid-labels
   },
   "parserOptions": {
     "project": "./tsconfig.json"
