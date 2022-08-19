@@ -8,8 +8,10 @@ import {
   getNewGraphId,
   graph, Id,
   newVertex, replaceEdgeProperties,
-  replaceVertexProperties
+  replaceVertexProperties, resetDatabase, setGraph
 } from "../db/graph";
+import { get, set } from 'idb-keyval';
+import { klona } from "klona";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -151,3 +153,23 @@ export function updateFormLayout(_key, attributes) {
     body: JSON.stringify({ attributes }),
   }).then((res) => res.json());
 }
+// Backup graphDb to IndexDB using idb-keyval key-value store
+export const backupToIndexDB = () => {
+  set('graph', klona(graph)).then(()=>alert('graph is stored in indexDB'));
+}
+
+export const restoreFromIndexDB = () => {
+  resetDatabase();
+  get('graph').then(setGraph);
+}
+
+export const backupToJson = () => {
+  return klona(graph);
+}
+
+export const restoreFromJson = (json: {[key:string]:any}) => {
+  resetDatabase();
+  setGraph(json);
+}
+
+
