@@ -101,55 +101,62 @@ export default function SchemaDetail(props: {}) {
         });
     }
   };
-  /* @mount */
-  {
-    // Todo: Focus first form element, hint: think to use a library
-  }
+
+  const Form = () => {
+    const [formRef, setFormRef] = createSignal<HTMLFormElement>();
+    /* @mount */
+    {
+      const form = formRef();
+      form.querySelector("input").focus();
+    }
+    return <form onSubmit={onSubmit} ref={setFormRef}><For each={formData}>
+      {(meta) => (
+        <Switch>
+          <Match when={meta.type === "string"}>
+            <TextInputField
+              label={meta.key}
+              control={form.controls[meta.key]}
+              type={getHtmlInputType(meta)}
+            />
+          </Match>
+          <Match when={meta.type === "boolean"}>
+            <BooleanInputField
+              label={meta.key}
+              type="checkbox"
+              control={form.controls[meta.key]}
+            />
+          </Match>
+          <Match when={meta.type === "json"}>
+            <Field label={meta.key}>
+              <JsonInput control={form.controls[meta.key]} type={getHtmlInputType(meta)} />
+            </Field>
+          </Match>
+          <Match when={meta.type === "dynamic"}>
+            <Field label={meta.key}>
+              <GeneralInput
+                control={form.controls[meta.key]}
+                type={getHtmlInputType(meta)}
+              />
+            </Field>
+          </Match>
+        </Switch>
+      )}
+    </For>
+      <button type="submit" class="hidden">submit</button>
+      <ui5-button onclick={onSubmit}>Save</ui5-button>
+    </form>;
+  };
   return (
     <>
       <div>
-        <form onSubmit={onSubmit}>
-          <Show when={!fetching()} fallback={<>Loading</>}>
-            <For each={formData}>
-              {(meta) => (
-                <Switch>
-                  <Match when={meta.type === "string"}>
-                    <TextInputField
-                      label={meta.key}
-                      control={form.controls[meta.key]}
-                      type={getHtmlInputType(meta)}
-                    />
-                  </Match>
-                  <Match when={meta.type === "boolean"}>
-                    <BooleanInputField
-                      label={meta.key}
-                      type="checkbox"
-                      control={form.controls[meta.key]}
-                    />
-                  </Match>
-                  <Match when={meta.type === "json"}>
-                    <Field label={meta.key}>
-                      <JsonInput control={form.controls[meta.key]} type={getHtmlInputType(meta)} />
-                    </Field>
-                  </Match>
-                  <Match when={meta.type === "dynamic"}>
-                    <Field label={meta.key}>
-                      <GeneralInput
-                        control={form.controls[meta.key]}
-                        type={getHtmlInputType(meta)}
-                      />
-                    </Field>
-                  </Match>
-                </Switch>
-              )}
-            </For>
-          </Show>
-          <br />
-          {JSON.stringify(form.value)}
 
-          <button type="submit" class="hidden">submit</button>
-          <ui5-button onclick={onSubmit}>Save</ui5-button>
-        </form>
+        <Show when={!fetching()} fallback={<>Loading</>}>
+          <Form />
+        </Show>
+        <br />
+        {JSON.stringify(form.value)}
+
+
       </div>
     </>
   );
