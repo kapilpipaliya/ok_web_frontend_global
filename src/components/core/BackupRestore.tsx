@@ -64,7 +64,7 @@ export const BackupRestore = () => {
 
   const downloadJson = () => {
     const json = backupToJson();
-    fileDownloader({data: JSON.stringify(json), title: "Download Json", filename: "graph.json"});
+    fileDownloader({ data: JSON.stringify(json), title: "Download Json", filename: "graph.json" });
   };
   const restoreFromFile: JSX.EventHandlerUnion<HTMLInputElement, Event> = (e) => {
     const file = (e.target as HTMLInputElement).files[0];
@@ -76,13 +76,35 @@ export const BackupRestore = () => {
     }
   };
 
-  return <div>
-    <button type="button" onclick={backupToIndexDB}>Backup To IndexDB</button>
-    <button type="button" onclick={restoreFromIndexDB}>Restore From IndexDB</button>
+  // @ts-ignore
+  return <div class="flex flex-wrap gap-4">
+    <ui5-card class="w-96">
+      <ui5-card-header slot="header" title-text="Backup" interactive
+                       subtitle-text="Backup in memory graph to different targets"></ui5-card-header>
+      <div class="m-4 flex gap-2">
+        <ui5-button design="Default" onclick={backupToIndexDB}>Backup To IndexDB</ui5-button>
+        <ui5-button design="Default" onclick={downloadJson}>Download Json</ui5-button>
+      </div>
 
-    <button type="button" onclick={downloadJson}>Download Json</button>
-    <input type="file" onchange={restoreFromFile}>Restore From JSON</input>
+    </ui5-card>
 
-    <button type="button" onclick={resetDatabase}>clear</button>
+    <ui5-card class="w-96">
+      <ui5-card-header slot="header" title-text="Restore" interactive
+                       subtitle-text="Restore graph from different targets to the memory"></ui5-card-header>
+      <div class="m-4 flex flex-wrap gap-2">
+        <ui5-button design="Default" onclick={restoreFromIndexDB} >Restore From IndexDB</ui5-button>
+        <ui5-file-uploader accept="image/*" multiple="true" hide-input>
+          <ui5-button icon="upload" onchange={restoreFromFile}>Restore From JSON</ui5-button>
+        </ui5-file-uploader>
+      </div>
+    </ui5-card>
+
+    <ui5-card class="w-96">
+      <ui5-card-header slot="header" title-text="Graph Functions" interactive
+                       subtitle-text="Other graph functions"></ui5-card-header>
+      <div class="m-4 flex flex-wrap gap-2">
+        <ui5-button design="Default" onclick={resetDatabase}>Clear in memory store</ui5-button>
+      </div>
+    </ui5-card>
   </div>;
 };

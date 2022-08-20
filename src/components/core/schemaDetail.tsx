@@ -1,14 +1,15 @@
-import { createSignal, For, Match, Show, Switch } from "solid-js";
+import { createSignal, For, getOwner, Match, runWithOwner, Show, Switch } from "solid-js";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
-import { createFormControl, createFormGroup, IFormControl } from "solid-forms";
+import { bindOwner, createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { Field, TextInputField, BooleanInputField, JsonInput, GeneralInput } from "ok_web_components";
 import { addNode, fetchAttributesTableData, fetchDocument, updateNode } from "../api";
-import { klona } from 'klona/json';
+import { klona } from "klona/json";
 
 interface AttributeMetaType {
   key: string;
   type: string
 }
+
 const getDefaultValue = (meta: AttributeMetaType) => {
   switch (meta.type) {
     case "string":
@@ -47,16 +48,19 @@ export default function SchemaDetail(props: {}) {
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
+  const owner = getOwner();
   fetchAttributesTableData(params.entity).then((body) => {
     formData =
       params.id != "new"
         ? body.data
         : body.data.filter((d) => {
-            return d.key != "_id" && d.key != "_key";
-          });
+          return d.key != "_id" && d.key != "_key";
+        });
 
     const groupConstructor = formData.reduce((acc, meta) => {
-      acc[meta.key] = createFormControl(getDefaultValue(meta));
+      runWithOwner(owner, () => {
+        acc[meta.key] = createFormControl(getDefaultValue(meta));
+      });
       return acc;
     }, {} as { [key: string]: IFormControl });
 
@@ -65,11 +69,11 @@ export default function SchemaDetail(props: {}) {
     if (params.id !== "new") {
       fetchDocument(params.entity, params.id).then((body) => {
         if (body.success) {
-          if(!body.data) {
+          if (!body.data) {
             alert(`document with id: ${params.id} not exist`);
             return;
           }
-          form.patchValue(body.data['properties']);
+          form.patchValue(body.data["properties"]);
 
           if (form.controls["_id"]) form.controls["_id"].markDisabled(true);
           if (form.controls["_key"]) form.controls["_key"].markDisabled(true);
@@ -87,17 +91,20 @@ export default function SchemaDetail(props: {}) {
       addNode(params.entity, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate(location.pathname.split('/').slice(0,-1).join('/'));
+          else navigate(location.pathname.split("/").slice(0, -1).join("/"));
         });
     } else {
-      updateNode(params.entity,params.id, klona(form.value))
+      updateNode(params.entity, params.id, klona(form.value))
         .then((data) => {
           if (data.error) alert(data.exception);
-          else navigate(location.pathname.split('/').slice(0,-1).join('/'));
+          else navigate(location.pathname.split("/").slice(0, -1).join("/"));
         });
     }
   };
-
+  /* @mount */
+  {
+    // Todo: Focus first form element, hint: think to use a library
+  }
   return (
     <>
       <div>
@@ -140,7 +147,8 @@ export default function SchemaDetail(props: {}) {
           <br />
           {JSON.stringify(form.value)}
 
-          <button>Save</button>
+          <button type="submit" class="hidden">submit</button>
+          <ui5-button onclick={onSubmit}>Save</ui5-button>
         </form>
       </div>
     </>

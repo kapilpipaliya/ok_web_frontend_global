@@ -66,9 +66,9 @@ export default function SchemaTable() {
           <h1>{params.entity}</h1>
         </div>
         <div>
-          <button type="button" onClick={() => navigate("./new")}>
+          <ui5-button onClick={() => navigate("./new")}>
             Add new {JSON.stringify(editableCellIndex)}
-          </button>
+          </ui5-button>
         </div>
       </div>
       <div>

@@ -2,7 +2,7 @@ import { createSignal, For } from "solid-js";
 import { Icon } from "solid-heroicons";
 import { clock, cog, home, menuAlt_1, questionMarkCircle, scale, shieldCheck } from "solid-heroicons/outline";
 import clsx from "clsx";
-import { Link, Route, Routes } from "solid-app-router";
+import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
 import SchemaDetail from "./core/schemaDetail";
 import SchemaTable from "./core/schemaTable";
@@ -34,10 +34,8 @@ const secondaryNavigation = [
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 
-export const StaticSideBar = (props: {isOpen: boolean}) => {
-  return (
-      <solid:show when={props.isOpen}>
-      <div class={"flex w-64 flex-col fixed inset-y-0"}>
+export const StaticSideBar = () => {
+  return (<>
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div class="flex flex-col flex-grow bg-cyan-700 pt-5 pb-4 overflow-y-auto">
           <div class="flex items-center flex-shrink-0 px-4">
@@ -75,10 +73,57 @@ export const StaticSideBar = (props: {isOpen: boolean}) => {
             </div>
           </nav>
         </div>
-      </div>
-      </solid:show>
+      </>
   );
 };
+
+// https://sap.github.io/ui5-webcomponents/playground/components/SideNavigation/
+export const UI5StaticSideBar = () => {
+  const navigate = useNavigate();
+  const onMenuItemClick = (e: any) => {
+    if(e.detail?.item?.href){
+      navigate(e.detail.item.href);
+    }
+  }
+  /* @mount */ {
+    const sideNavigation = document.querySelector("ui5-side-navigation");
+    // document.querySelector("#startButton").addEventListener("click", event => sideNavigation.collapsed = !sideNavigation.collapsed);
+    // sideNavigation.addEventListener('selection-change', (...e)=>console.log('hi', e))
+  }
+  return <>
+    {/*<ui5-shellbar*/}
+    {/*  primary-title="UI5 Web Components"*/}
+    {/*  secondary-title="The Best Run SAP"*/}
+    {/*  show-co-pilot*/}
+    {/*>*/}
+    {/*  <ui5-button icon="menu" slot="startButton" id="startButton"></ui5-button>*/}
+    {/*</ui5-shellbar>*/}
+
+    <ui5-side-navigation  onselection-change={onMenuItemClick}>
+      <For each={navigation} fallback={<div>Loading...</div>}>
+        {(item) => <ui5-side-navigation-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-item>}
+      </For>
+      {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
+      {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
+      {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
+      {/*</ui5-side-navigation-item>*/}
+      {/*<ui5-side-navigation-item text="Locations" icon="locate-me" selected></ui5-side-navigation-item>*/}
+      {/*<ui5-side-navigation-item text="Events" icon="calendar">*/}
+      {/*  <ui5-side-navigation-sub-item text="Local"></ui5-side-navigation-sub-item>*/}
+      {/*  <ui5-side-navigation-sub-item text="Others"></ui5-side-navigation-sub-item>*/}
+      {/*</ui5-side-navigation-item>*/}
+
+      {/*<ui5-side-navigation-item slot="fixedItems" text="Useful Links" icon="chain-link"></ui5-side-navigation-item>*/}
+      {/*<ui5-side-navigation-item slot="fixedItems" text="History" icon="history"></ui5-side-navigation-item>*/}
+    </ui5-side-navigation>
+
+    <style>{`
+      ui5-shellbar::part(root) {
+      padding-left: .5rem;
+    }`}
+    </style>
+  </>
+}
 
 export const MenuButtonToggle = () => {
   return (
@@ -119,8 +164,10 @@ export const FullDashboard = () => {
   const debugGraph = useDebugger("graph");
   debugGraph(graph);
   return (
-    <div class="min-h-full bg-gray-100">
-       <StaticSideBar isOpen={isSideBarOpen()} />
+    <div class="min-h-full">
+      <solid:show when={isSideBarOpen()}>
+        <div class={"flex w-64 flex-col fixed inset-y-0"}><UI5StaticSideBar /></div>
+      </solid:show>
       <DashboardView />
     </div>
   );
