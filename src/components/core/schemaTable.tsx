@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { deleteNode, fetchAttributesTableData, fetchCollectionData, FormMetaData } from "../api";
 import { css } from "solid-styled-components";
 import { graph, Id } from "../../lib/graph";
+import { reconcile } from "solid-js/store";
 
 export default function SchemaTable() {
   const navigate = useNavigate();
@@ -13,23 +14,20 @@ export default function SchemaTable() {
     data: [] as (Id[] | (() => Id[])),
     headers: [] as { key: string; type: string }[]
   });
-  const tableMetaData = fetchAttributesTableData(params.entity)[0] as FormMetaData;
+
+  let [tableMetaData, setTableMetaData] = createSignal({} as FormMetaData);
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
 
   const getObjectData = () => {
-    setData((prev) => ({
-      ...prev,
-      data: [],
-      headers: []
-    }));
-
-    const headers = tableMetaData.attributes;
+    // use local variable because Signal is not updated instantly
+    const tableMetaData_ = fetchAttributesTableData(params.entity)[0] as FormMetaData;
+    setTableMetaData(tableMetaData_);
+    const headers = [...tableMetaData_.attributes];
     headers.push({ key: "edit", type: "actions" });
 
     // For async data get operation, we will handle it differently
-    setData((prev) => ({
-      ...prev,
+    setData(({
       data: () => fetchCollectionData(params.entity),
       headers
     }));
@@ -42,8 +40,8 @@ export default function SchemaTable() {
 
   const deleteObject = (id) => {
     if (confirm("are you sure")) {
-      if (tableMetaData.save[0] === "vertex") {
-        const deleteResult = deleteNode(tableMetaData.save[1], id);
+      if (tableMetaData().save[0] === "vertex") {
+        const deleteResult = deleteNode(tableMetaData().save[1], id);
         // @ts-ignore
         if (deleteResult?.error) alert(data.message);
         else getObjectData();
@@ -55,7 +53,7 @@ export default function SchemaTable() {
     <div>
       <div>
         <div>
-          <h1>{tableMetaData.title}</h1>
+          <h1>{tableMetaData().title}</h1>
         </div>
         <div>
           <ui5-button onClick={() => navigate("./new")}>
