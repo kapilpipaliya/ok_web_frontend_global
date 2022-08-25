@@ -9,7 +9,7 @@ import {
   graph, Id,
   newVertex, replaceEdgeProperties,
   replaceVertexProperties, resetDatabase, setGraph
-} from "../db/graph";
+} from "../lib/graph";
 import { get, set } from 'idb-keyval';
 import { klona } from "klona";
 
@@ -31,6 +31,9 @@ export async function fetchAttributesTableData(
   schema: string
 ): Promise<{ data: { key: string; type: string }[] }> {
   switch (schema) {
+    case "ServerAttributeType": {
+      return { data: [{ key: "id", type: ServerFormAttributeType.String }] };
+    }
     case "FormAttributeType": {
       return { data: [{ key: "id", type: ServerFormAttributeType.String }] };
     }

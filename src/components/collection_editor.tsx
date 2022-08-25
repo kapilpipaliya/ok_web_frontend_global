@@ -42,7 +42,7 @@ import { klona } from "klona/json";
 import { Option } from "@thisbeyond/solid-select/dist/types/create-select";
 import { css } from "solid-styled-components";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
-import { addNewEdge, Edges, getNewGraphId, getOutEdgeOfType, getOutEdgeOfTypeIds, graph, newEdge } from "../db/graph";
+import { addNewEdge, Edges, getNewGraphId, getOutEdgeOfType, getOutEdgeOfTypeIds, graph, newEdge } from "../lib/graph";
 import { intersection } from "@mobily/ts-belt/dist/types/Array";
 
 export interface Attribute {

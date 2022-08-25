@@ -35,15 +35,21 @@ interface Edge {
 }
 
 export enum Vertexs {
-  FormAttributeType= "FormAttributeType",
+  // Base
+  ServerAttributeType= "ServerAttributeType", // all type of the server
+  FormAttributeType= "FormAttributeType", // all input components for the servertype
   Attributes = "Attributes",
   Collection = "Collection",
   FormLayout = "FormLayout",
   TableLayout = "TableLayout",
-  CardLayout = "CardLayout"
+  CardLayout = "CardLayout",
+  // Auth
+  User = "User",
+  Role = "Role",
+  Permission = "Permission",
 }
 export enum Edges  {
-  CollectionHasAttribute = "CollectionHasAttribute"
+  ServerToFormAttributeType = "ServerToFormAttributeType"
 }
 
 export const newVertex = (id: Id, labels: string[], properties: {}): Vertex => {

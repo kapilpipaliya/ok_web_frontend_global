@@ -2,7 +2,7 @@ import { createEffect, createSignal, For, Match, Show, onCleanup, Switch, untrac
 import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { deleteNode, fetchAttributesTableData, fetchCollectionData } from "../api";
 import { css } from "solid-styled-components";
-import { graph } from "../../db/graph";
+import { graph } from "../../lib/graph";
 
 export default function SchemaTable() {
   const navigate = useNavigate();
