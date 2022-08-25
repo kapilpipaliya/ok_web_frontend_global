@@ -4,7 +4,7 @@ import { clock, cog, home, menuAlt_1, questionMarkCircle, scale, shieldCheck } f
 import clsx from "clsx";
 import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
-import SchemaDetail from "./core/schemaDetail";
+import { DynamicFormSequence } from "./core/schemaDetail";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { CollectionEditor } from "./collection_editor";
@@ -193,7 +193,7 @@ export const DashboardView = () => {
           <Route path="/Collection/:id" component={() => <CollectionEditor />} />
           <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
           <Route path="/:entity" component={() => <SchemaTable />} />
-          <Route path="/:entity/:id" component={() => <SchemaDetail />} />
+          <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />
           <Route path="/backup_restore" component={() => <BackupRestore />} />
           <Route path="/**" component={() => <Page404 />} />
         </Routes>

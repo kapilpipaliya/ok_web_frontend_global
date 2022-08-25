@@ -133,6 +133,7 @@ export function deleteVertex(id: Id) {
     });
     setGraph("vertexes", id, undefined);
   });
+  return true;
 }
 
 export function deleteEdge(id: Id) {

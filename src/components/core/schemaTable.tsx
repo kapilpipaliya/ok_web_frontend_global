@@ -13,7 +13,7 @@ export default function SchemaTable() {
     data: [] as (Id[] | (() => Id[])),
     headers: [] as { key: string; type: string }[]
   });
-  const tableMetaData = fetchAttributesTableData(params.entity) as FormMetaData;
+  const tableMetaData = fetchAttributesTableData(params.entity)[0] as FormMetaData;
 
   const [editableCellIndex, setEditableCellIndex] = createSignal([null, null]);
 
@@ -42,11 +42,11 @@ export default function SchemaTable() {
 
   const deleteObject = (id) => {
     if (confirm("are you sure")) {
-      if(tableMetaData.save[0] === "vertex"){
-        deleteNode(tableMetaData.save[1], id).then((data) => {
-          if (!data.success) alert(data.exception);
-          else getObjectData();
-        });
+      if (tableMetaData.save[0] === "vertex") {
+        const deleteResult = deleteNode(tableMetaData.save[1], id);
+        // @ts-ignore
+        if (deleteResult?.error) alert(data.message);
+        else getObjectData();
       }
     }
   };

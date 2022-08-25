@@ -25,7 +25,7 @@ const ServerFormAttributeType = {
   Boolean: "boolean",
   Integer: "integer",
   Decimal: "decimal",
-  Json: "json",
+  Object: "object",
 };
 
 export interface FieldAttribute {
@@ -44,13 +44,13 @@ export function fetchAttributesTableData(
 ): FormMetaData | FormMetaData[] {
   switch (schema) {
     case "ServerAttributeType": {
-      return { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] };
+      return [{ id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
     }
     case "FormAttributeType": {
-      return { id: "0", title: "FormAttributeType", save: ["vertex", Vertexs.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] };
+      return [{ id: "0", title: "FormAttributeType", save: ["vertex", Vertexs.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
     }
     case "Attribute": {
-      return {
+      return [{
         id: "0", title: "Attribute", save: ["vertex", Vertexs.Attribute], attributes: [
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
@@ -59,18 +59,18 @@ export function fetchAttributesTableData(
           { key: "default", type: ServerFormAttributeType.Dynamic },
           { key: "required", type: ServerFormAttributeType.Boolean },
           { key: "internal", type: ServerFormAttributeType.Boolean },
-          { key: "props", type: ServerFormAttributeType.Json },
-          { key: "relation", type: ServerFormAttributeType.Json },
+          { key: "props", type: ServerFormAttributeType.Object },
+          { key: "relation", type: ServerFormAttributeType.Object },
         ],
-      };
+      }];
     }
     case "Collection": {
-      return {
+      return [{
         id: "0", title: "Collection", save: ["vertex", Vertexs.Collection], attributes: [
           { key: "id", type: "string" },
           { key: "attributes", type: "stringify" },
         ],
-      };
+      }];
     }
   }
 }
@@ -79,46 +79,29 @@ export function fetchCollectionData(schema:string) {
   return findVertexIdsByLabel(schema);
 }
 
-export async function addNode(schema: string, body: any) {
-  const newId = getNewGraphId();
-  return {
-    success: true,
-    id: newId,
-    data: addNewVertex(newVertex(newId, [schema], body)),
-  };
+export function addNode(schema: string, body: any) {
+  const newId = getNewGraphId()
+  addNewVertex(newVertex(newId, [schema], body))
+  return newId;
 }
 
-export async function fetchDocument(schema: string, id: Id) {
-  return {
-    success: true,
-    data: graph.vertexes[id],
-  };
+export function fetchDocument(schema: string, id: Id) {
+  return graph.vertexes[id];
 }
 
-export async function updateNode(schema: string, id: Id, body: any) {
-  return {
-    success: true,
-    data: replaceVertexProperties(id, body),
-  };
+export function updateNode(schema: string, id: Id, body: any) {
+    replaceVertexProperties(id, body);
+    return id;
 }
-export async function updateEdge(schema: string, id: Id, body: any) {
-  return {
-    success: true,
-    data: replaceEdgeProperties(id, body),
-  };
+export function updateEdge(schema: string, id: Id, body: any) {
+    return replaceEdgeProperties(id, body);
 }
 
-export async function deleteNode(schema: string, id: Id) {
-  return {
-    success: true,
-    data: deleteVertex(id),
-  };
+export function deleteNode(schema: string, id: Id) {
+    return deleteVertex(id);
 }
-export async function deleteEdge_(schema: string, id: string) {
-  return {
-    success: true,
-    data: deleteEdge(id),
-  };
+export function deleteEdge_(schema: string, id: string) {
+    return deleteEdge(id);
 }
 export function addCollection(_key, attributes) {
   console.log({ _key, attributes });
