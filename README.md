@@ -47,3 +47,6 @@ ESLint is configured as following
 
 ### css rules
 - don't use css child selectors.
+
+### fast development:
+https://github.com/lxsmnsyc/solid-labels/blob/main/docs/comments.md

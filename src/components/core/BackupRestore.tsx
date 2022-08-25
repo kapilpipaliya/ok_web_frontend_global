@@ -1,6 +1,6 @@
 import { JSX } from "solid-js";
 import { backupToIndexDB, backupToJson, restoreFromIndexDB, restoreFromJson } from "../api";
-import { resetDatabase } from "../../db/graph";
+import { resetDatabase } from "../../lib/graph";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob,

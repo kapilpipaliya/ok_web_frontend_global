@@ -12,6 +12,7 @@ declare module "solid-js" {
       "ui5-side-navigation": JSX.IntrinsicElements["div"] & {};
       "ui5-side-navigation-item": JSX.IntrinsicElements["div"] & {text: string};
       "ui5-side-navigation-sub-item": JSX.IntrinsicElements["div"] & {text: string};
+      "ui5-busy-indicator": JSX.IntrinsicElements["div"] & {text: string};
     }
   }
 }
