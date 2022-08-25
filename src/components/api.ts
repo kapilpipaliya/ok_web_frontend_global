@@ -2,16 +2,17 @@ import jju from "jju";
 import { API_PATH } from "../constant";
 
 import {
-  addNewVertex, deleteEdge,
+  addNewVertex,
+  deleteEdge,
   deleteVertex,
   findVertexIdsByLabel,
   getNewGraphId,
-  graph, Id,
-  newVertex, replaceEdgeProperties,
-  replaceVertexProperties, resetDatabase, setGraph
+  graph,
+  Id,
+  newVertex,
+  replaceEdgeProperties,
+  replaceVertexProperties, Vertexs
 } from "../lib/graph";
-import { get, set } from 'idb-keyval';
-import { klona } from "klona";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -27,19 +28,30 @@ const ServerFormAttributeType = {
   Json: "json",
 };
 
-export async function fetchAttributesTableData(
+export interface FieldAttribute {
+  key: string;
+  type: string;
+  editable?: boolean;
+}
+export interface FormMetaData {
+  id: Id;
+  title: string;
+  attributes: FieldAttribute[];
+  save: ["vertex"|"edge", string];
+}
+export function fetchAttributesTableData(
   schema: string
-): Promise<{ data: { key: string; type: string }[] }> {
+): FormMetaData | FormMetaData[] {
   switch (schema) {
     case "ServerAttributeType": {
-      return { data: [{ key: "id", type: ServerFormAttributeType.String }] };
+      return { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] };
     }
     case "FormAttributeType": {
-      return { data: [{ key: "id", type: ServerFormAttributeType.String }] };
+      return { id: "0", title: "FormAttributeType", save: ["vertex", Vertexs.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] };
     }
     case "Attribute": {
       return {
-        data: [
+        id: "0", title: "Attribute", save: ["vertex", Vertexs.Attribute], attributes: [
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
           { key: "label", type: ServerFormAttributeType.String },
@@ -54,7 +66,7 @@ export async function fetchAttributesTableData(
     }
     case "Collection": {
       return {
-        data: [
+        id: "0", title: "Collection", save: ["vertex", Vertexs.Collection], attributes: [
           { key: "id", type: "string" },
           { key: "attributes", type: "stringify" },
         ],
@@ -63,11 +75,8 @@ export async function fetchAttributesTableData(
   }
 }
 
-export async function fetchCollectionData(schema) {
-  return {
-    success: true,
-    data: findVertexIdsByLabel(schema),
-  };
+export function fetchCollectionData(schema:string) {
+  return findVertexIdsByLabel(schema);
 }
 
 export async function addNode(schema: string, body: any) {
@@ -155,24 +164,6 @@ export function updateFormLayout(_key, attributes) {
     },
     body: JSON.stringify({ attributes }),
   }).then((res) => res.json());
-}
-// Backup graphDb to IndexDB using idb-keyval key-value store
-export const backupToIndexDB = () => {
-  set('graph', klona(graph)).then(()=>alert('graph is stored in indexDB'));
-}
-
-export const restoreFromIndexDB = () => {
-  resetDatabase();
-  get('graph').then(setGraph);
-}
-
-export const backupToJson = () => {
-  return klona(graph);
-}
-
-export const restoreFromJson = (json: {[key:string]:any}) => {
-  resetDatabase();
-  setGraph(json);
 }
 
 

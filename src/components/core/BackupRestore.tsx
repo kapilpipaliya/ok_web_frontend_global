@@ -1,6 +1,5 @@
 import { JSX } from "solid-js";
-import { backupToIndexDB, backupToJson, restoreFromIndexDB, restoreFromJson } from "../api";
-import { resetDatabase } from "../../lib/graph";
+import { backupToIndexDB, backupToJson, resetDatabase, restoreFromIndexDB, restoreFromJson } from "../../lib/graph";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob,
@@ -66,6 +65,9 @@ export const BackupRestore = () => {
     const json = backupToJson();
     fileDownloader({ data: JSON.stringify(json), title: "Download Json", filename: "graph.json" });
   };
+  const backupToIndexDB_ = () => {
+    backupToIndexDB().then(() => alert("graph is stored in indexDB"));
+  }
   const restoreFromFile: JSX.EventHandlerUnion<HTMLInputElement, Event> = (e) => {
     const file = (e.target as HTMLInputElement).files[0];
 
@@ -82,7 +84,7 @@ export const BackupRestore = () => {
       <ui5-card-header slot="header" title-text="Backup" interactive
                        subtitle-text="Backup in memory graph to different targets"></ui5-card-header>
       <div class="m-4 flex gap-2">
-        <ui5-button design="Default" onclick={backupToIndexDB}>Backup To IndexDB</ui5-button>
+        <ui5-button design="Default" onclick={backupToIndexDB_}>Backup To IndexDB</ui5-button>
         <ui5-button design="Default" onclick={downloadJson}>Download Json</ui5-button>
       </div>
 

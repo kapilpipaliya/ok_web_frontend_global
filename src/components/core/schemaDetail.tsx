@@ -2,7 +2,7 @@ import { createSignal, For, getOwner, Match, runWithOwner, Show, Switch } from "
 import { useParams, useNavigate, useLocation } from "solid-app-router";
 import { bindOwner, createFormControl, createFormGroup, IFormControl } from "solid-forms";
 import { Field, TextInputField, BooleanInputField, JsonInput, GeneralInput } from "ok_web_components";
-import { addNode, fetchAttributesTableData, fetchDocument, updateNode } from "../api";
+import { addNode, fetchAttributesTableData, fetchDocument, FormMetaData, updateNode } from "../api";
 import { klona } from "klona/json";
 
 interface AttributeMetaType {
@@ -44,17 +44,18 @@ export default function SchemaDetail(props: {}) {
   const location = useLocation();
   const form = createFormGroup({});
 
+  const formMetaData = fetchAttributesTableData(params.entity) as FormMetaData;
   let formData = [] as AttributeMetaType[];
 
   // use a signal to show form because `Object.keys(form.controls).length` is not reactive
   const [fetching, setFetching] = createSignal(true);
   const owner = getOwner();
-  fetchAttributesTableData(params.entity).then((body) => {
+  {
     formData =
       params.id != "new"
-        ? body.data
-        : body.data.filter((d) => {
-          return d.key != "_id" && d.key != "_key";
+        ? formMetaData.attributes
+        : formMetaData.attributes.filter((d) => {
+          return !d.editable //key != "_id" && d.key != "_key";
         });
 
     const groupConstructor = formData.reduce((acc, meta) => {
@@ -83,23 +84,25 @@ export default function SchemaDetail(props: {}) {
     } else {
       setFetching(false);
     }
-  });
+  }
 
   const onSubmit = (e) => {
     e.preventDefault();
+    if(formMetaData.save[0] === "vertex"){
     if (params.id == "new") {
-      addNode(params.entity, klona(form.value))
-        .then((data) => {
-          if (data.error) alert(data.exception);
-          else navigate(location.pathname.split("/").slice(0, -1).join("/"));
-        });
-    } else {
-      updateNode(params.entity, params.id, klona(form.value))
-        .then((data) => {
-          if (data.error) alert(data.exception);
-          else navigate(location.pathname.split("/").slice(0, -1).join("/"));
-        });
-    }
+        addNode(formMetaData.save[1], klona(form.value))
+          .then((data) => {
+            if (data.error) alert(data.exception);
+            else navigate(location.pathname.split("/").slice(0, -1).join("/"));
+          });
+      } else {
+        updateNode(formMetaData.save[1], params.id, klona(form.value))
+          .then((data) => {
+            if (data.error) alert(data.exception);
+            else navigate(location.pathname.split("/").slice(0, -1).join("/"));
+          });
+      }
+      }
   };
 
   const Form = () => {
@@ -160,4 +163,13 @@ export default function SchemaDetail(props: {}) {
       </div>
     </>
   );
+}
+interface DynamicFormItem {
+
+}
+interface DynamicFormSequenceProps {
+  forms: DynamicFormItem[]
+}
+export const DynamicFormSequence = () => {
+
 }

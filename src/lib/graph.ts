@@ -1,22 +1,11 @@
 import { createStore, reconcile } from "solid-js/store";
-import { batch } from "solid-js";
+import { batch, createComputed } from "solid-js";
+import { get, set } from "idb-keyval";
+import { klona } from "klona";
 
-export type Id = string;
-let id = 0;
-export const getNewGraphId = ():Id => {
-  return `${++id}`;
-};
-
-export const [graph, setGraph] = createStore({
-  vertexes: {} as { [key: string]: Vertex },
-  edges: {} as { [key: string]: Edge },
-  vertexLabelIdMap: {} as { [key: string]: Id[] }
-});
-export const resetDatabase = ()=> setGraph(reconcile({
-  vertexes: {} as { [key: string]: Vertex },
-  edges: {} as { [key: string]: Edge },
-  vertexLabelIdMap: {} as { [key: string]: Id[] }
-}));
+// ********
+// Types
+// ********
 
 interface Vertex {
   id: Id;
@@ -36,9 +25,9 @@ interface Edge {
 
 export enum Vertexs {
   // Base
-  ServerAttributeType= "ServerAttributeType", // all type of the server
-  FormAttributeType= "FormAttributeType", // all input components for the servertype
-  Attributes = "Attributes",
+  ServerAttributeType = "ServerAttributeType", // all type of the server
+  FormAttributeType = "FormAttributeType", // all input components for the servertype
+  Attribute = "Attribute",
   Collection = "Collection",
   FormLayout = "FormLayout",
   TableLayout = "TableLayout",
@@ -48,11 +37,47 @@ export enum Vertexs {
   Role = "Role",
   Permission = "Permission",
 }
-export enum Edges  {
+
+export enum Edges {
   ServerToFormAttributeType = "ServerToFormAttributeType"
 }
 
-export const newVertex = (id: Id, labels: string[], properties: {}): Vertex => {
+// ********
+
+// Id is used as string because its used as object keys.
+export type Id = string;
+
+let id = 0;
+
+export function getNewGraphId(): Id {
+  return `${++id}`;
+}
+
+// this is the In-Memory Graph Store, entire application will be based on this to work offline.
+export const [graph, setGraph] = createStore({
+  vertexes: {} as { [key: string]: Vertex },
+  edges: {} as { [key: string]: Edge },
+  vertexLabelIdMap: {} as { [key: string]: Id[] }
+});
+
+// ***********
+// Development
+// ***********
+restoreFromIndexDB();
+createComputed(() => {
+  backupToIndexDB();
+});
+// ***********
+
+export function resetDatabase() {
+  setGraph(reconcile({
+    vertexes: {} as { [key: string]: Vertex },
+    edges: {} as { [key: string]: Edge },
+    vertexLabelIdMap: {} as { [key: string]: Id[] }
+  }));
+}
+
+export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
   return {
     id,
     labels,
@@ -60,8 +85,9 @@ export const newVertex = (id: Id, labels: string[], properties: {}): Vertex => {
     in_edges: [],
     out_edges: []
   };
-};
-export const newEdge = (id: Id, label: string, properties: {}, start: Id, end: Id): Edge => {
+}
+
+export function newEdge(id: Id, label: string, properties: {}, start: Id, end: Id): Edge {
   return {
     id,
     label,
@@ -69,9 +95,9 @@ export const newEdge = (id: Id, label: string, properties: {}, start: Id, end: I
     start,
     end
   };
-};
+}
 
-export const addNewVertex = (vertex: Vertex) => {
+export function addNewVertex(vertex: Vertex) {
   setGraph("vertexes", vertex.id, vertex);
   vertex.labels.forEach(label => {
     setGraph("vertexLabelIdMap", label, ids => {
@@ -84,16 +110,17 @@ export const addNewVertex = (vertex: Vertex) => {
       }
     });
   });
-};
+}
 
-export const replaceVertexProperties = (id: Id, properties: {}) => {
-  setGraph("vertexes", id, "properties", reconcile(properties, ));
-};
-export const replaceEdgeProperties = (id: Id, properties: {}) => {
-  setGraph("edges", id, "properties", reconcile(properties, ));
-};
+export function replaceVertexProperties(id: Id, properties: {}) {
+  setGraph("vertexes", id, "properties", reconcile(properties));
+}
 
-export const deleteVertex = (id: Id) => {
+export function replaceEdgeProperties(id: Id, properties: {}) {
+  setGraph("edges", id, "properties", reconcile(properties));
+}
+
+export function deleteVertex(id: Id) {
   batch(() => {
     graph.vertexes[id].labels.forEach(label => {
       setGraph("vertexLabelIdMap", label, ids => {
@@ -106,10 +133,11 @@ export const deleteVertex = (id: Id) => {
     });
     setGraph("vertexes", id, undefined);
   });
-};
-export const deleteEdge = (id: Id) => {
+}
+
+export function deleteEdge(id: Id) {
   batch(() => {
-    setGraph('vertexes', graph.edges[id].start,'out_edges', (ids)=> {
+    setGraph("vertexes", graph.edges[id].start, "out_edges", (ids) => {
       if (ids.includes(id)) {
         return ids.filter(id_ => id_ !== id);
       } else {
@@ -117,7 +145,7 @@ export const deleteEdge = (id: Id) => {
       }
     });
 
-    setGraph('vertexes', graph.edges[id].end,'in_edges', (ids)=> {
+    setGraph("vertexes", graph.edges[id].end, "in_edges", (ids) => {
       if (ids.includes(id)) {
         return ids.filter(id_ => id_ !== id);
       } else {
@@ -129,7 +157,7 @@ export const deleteEdge = (id: Id) => {
 };
 
 
-export const addNewEdge = (edge: Edge) => {
+export function addNewEdge(edge: Edge) {
   batch(() => {
     setGraph("edges", edge.id, edge);
     setGraph("vertexes", edge.start, "out_edges", out_edges => {
@@ -147,16 +175,35 @@ export const addNewEdge = (edge: Edge) => {
       }
     });
   });
-};
-
-export const findVertexIdsByLabel = (label: string) => {
-  return graph.vertexLabelIdMap[label] || [];
-};
-
-export const getOutEdgeOfTypeIds = (id: Id | string, edgeLabel: string): Id[] => {
-  return graph.vertexes[id].out_edges.filter(edge=>graph.edges[edge].label == edgeLabel)
 }
+
+export function findVertexIdsByLabel(label: string) {
+  return graph.vertexLabelIdMap[label] || [];
+}
+
+export function getOutEdgeOfTypeIds(id: Id | string, edgeLabel: string): Id[] {
+  return graph.vertexes[id].out_edges.filter(edge => graph.edges[edge].label == edgeLabel);
+}
+
 /** depricated */
-export const getOutEdgeOfType = (id: Id | string, edgeLabel: string): Edge[] => {
-  return graph.vertexes[id].out_edges.filter(edge=>graph.edges[edge].label == edgeLabel).map(edge=>graph.edges[edge])
+export function getOutEdgeOfType(id: Id | string, edgeLabel: string): Edge[] {
+  return graph.vertexes[id].out_edges.filter(edge => graph.edges[edge].label == edgeLabel).map(edge => graph.edges[edge]);
+}
+
+// Backup graphDb to IndexDB using idb-keyval key-value store
+export function backupToIndexDB() {
+  return set("graph", klona(graph));
+}
+
+export function restoreFromIndexDB() {
+  get("graph").then((data)=>setGraph(reconcile(data)));
+}
+
+export function backupToJson() {
+  return klona(graph);
+}
+
+export function restoreFromJson(json: { [key: string]: any }) {
+  resetDatabase();
+  setGraph(json);
 }
