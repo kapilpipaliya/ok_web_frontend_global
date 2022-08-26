@@ -4,7 +4,7 @@ import { API_PATH } from "../constant";
 import {
   addNewVertex,
   deleteEdge,
-  deleteVertex,
+  deleteVertex, Edges,
   findVertexIdsByLabel,
   getNewGraphId,
   graph,
@@ -28,16 +28,22 @@ const ServerFormAttributeType = {
   Object: "object",
 };
 
-export interface FieldAttribute {
+interface BaseField {
   key: string;
   type: string;
   editable?: boolean;
 }
+
+export interface SelectField extends BaseField {
+  collection: string;
+}
+export type FieldAttribute = BaseField | SelectField
+
 export interface FormMetaData {
   id: Id;
   title: string;
   attributes: FieldAttribute[];
-  save: ["vertex"|"edge", string];
+  save: ["vertex", string] | ['edge', string, (result: any[])=> Id, (result: any[], row: object)=> Id];
 }
 export function fetchAttributesTableData(
   schema: string
@@ -67,10 +73,22 @@ export function fetchAttributesTableData(
     case "Collection": {
       return [{
         id: "0", title: "Collection", save: ["vertex", Vertexs.Collection], attributes: [
-          { key: "id", type: "string" },
-          { key: "attributes", type: "stringify" },
+          { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
         ],
       }];
+    }
+    case "Collection2": {
+      return [{
+        id: "0", title: "Collection1", save: ["vertex", Vertexs.Collection], attributes: [
+          { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
+        ],
+      },
+        {
+          id: "0", title: "Collection2", save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']], attributes: [
+            { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
+            { key: "attribute", type: "select", collection: "Attribute"}
+          ],
+        }];
     }
   }
 }

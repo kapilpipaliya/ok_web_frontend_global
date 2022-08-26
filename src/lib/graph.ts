@@ -39,7 +39,8 @@ export enum Vertexs {
 }
 
 export enum Edges {
-  ServerToFormAttributeType = "ServerToFormAttributeType"
+  ServerToFormAttributeType = "ServerToFormAttributeType",
+  CollectionHasAttribute = "CollectionHasAttribute"
 }
 
 // ********

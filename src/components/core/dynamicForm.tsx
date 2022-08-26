@@ -1,4 +1,5 @@
 import {
+ createEffect,
  createSignal,
  For,
  getOwner,
@@ -19,18 +20,21 @@ import {
  TextInputField,
  BooleanInputField,
  JsonInput,
- GeneralInput
+ GeneralInput,
+ SelectInputField
 } from "ok_web_components";
+import {SelectInputFieldProps} from 'ok_web_components/src/components/input/select_input_field'
 import {
  addNode,
- fetchAttributesTableData,
+ fetchAttributesTableData, fetchCollectionData,
  fetchDocument,
  FieldAttribute,
- FormMetaData,
+ FormMetaData, SelectField,
  updateNode
 } from "../api";
 import { klona } from "klona/json";
-import { Id } from "../../lib/graph";
+import { graph, Id } from "../../lib/graph";
+import { createAsyncOptions } from "@thisbeyond/solid-select";
 
 const getDefaultValue = (meta: FieldAttribute) => {
  switch (meta.type) {
@@ -59,6 +63,16 @@ const getHtmlInputType = (meta: FieldAttribute) => {
    return meta.type;
  }
 };
+export interface SelectInputProps extends SelectInputFieldProps {
+  collection: string;
+}
+const SelectInput = (props: SelectInputProps)=>{
+ const fetchOptions = async (inputValue: string): Promise<any[]> => {
+  return fetchCollectionData(props.collection).map((id) => graph.vertexes[id]);
+ };
+
+  return <SelectInputField fetchOptions={fetchOptions} control={props.control}/>
+}
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -139,6 +153,15 @@ export function DynamicForm(props: DynamicFormProps) {
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
         type={getHtmlInputType(meta)}
+       />
+      </Field>
+     </Match>
+     <Match when={meta.type === "select"}>
+      <Field label={meta.key}>
+       <SelectInput
+        // @ts-ignore
+        control={props.formGroup.controls[meta.key]}
+        collection={(meta as SelectField).collection}
        />
       </Field>
      </Match>

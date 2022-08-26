@@ -25,6 +25,7 @@ interface NavigationItem {
 // hint: Make a Menu Collection and save it in database.
 const navigation = [
   { name: "Home", href: "/", icon: home },
+  { name: "Collection2", href: "/Collection2", icon: clock },
   {
     name: "Base",
     type: "group",
