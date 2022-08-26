@@ -34,7 +34,13 @@ import {
 } from "../api";
 import { klona } from "klona/json";
 import { graph, Id } from "../../lib/graph";
-import {BaseField, SelectField, TableField, FieldAttribute, FormMetaData} from 'ok_web_components/src/components/input/Form';
+import {
+ BaseField,
+ SelectField,
+ TableField,
+ FieldAttribute,
+ FormMetaData
+} from "ok_web_components/src/components/input/Form";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -45,47 +51,8 @@ interface DynamicFormProps {
 export function DynamicForm(props: DynamicFormProps) {
  let formData = props.formMetaData.attributes;
 
- // use a signal to show form because `Object.keys(form.controls).length` is not reactive
- const [fetching, setFetching] = createSignal(true);
-
- const owner = getOwner();
- {
-  const groupConstructor = formData.reduce((acc, meta) => {
-   runWithOwner(owner, () => {
-    if(meta.type === "table"){
-     acc[meta.key] = createFormArray([])
-    } else {
-     acc[meta.key] = createFormControl(getDefaultValue(meta.type));
-    }
-   });
-   return acc;
-  }, {} as { [key: string]: IFormControl | ReturnType<typeof createFormArray>});
-
-  props.formGroup.setControls(groupConstructor);
-
-  if (props.id !== "new") {
-   // used FormMetaData.save attribute temporary.
-   if (props.formMetaData.save[0] === "vertex") {
-    const vertex = fetchDocument(props.formMetaData.save[1], props.id);
-
-    if (!vertex) {
-     alert(`document with id: ${props.id} not exist`);
-     return;
-    }
-    props.formGroup.patchValue(D.selectKeys(vertex.properties, Object.keys(props.formMetaData)));
-    if (props.formGroup.controls["_id"])
-     props.formGroup.controls["_id"].markDisabled(true);
-    if (props.formGroup.controls["_key"])
-     props.formGroup.controls["_key"].markDisabled(true);
-   }
-   setFetching(false);
-  } else {
-   setFetching(false);
-  }
- }
-
  const Form = () => {
-  return <><Show when={!fetching()} fallback={<>Loading</>}><For
+  return <><For
    each={formData}>
    {(meta) => (
     <Switch>
@@ -94,7 +61,7 @@ export function DynamicForm(props: DynamicFormProps) {
        label={meta.key}
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
-       type={'text'}
+       type={"text"}
       />
      </Match>
      <Match when={meta.type === "boolean"}>
@@ -142,7 +109,7 @@ export function DynamicForm(props: DynamicFormProps) {
     </Switch>
    )}
   </For>
-  </Show>
+
   </>;
  };
  return <Form />;
@@ -170,6 +137,47 @@ export const DynamicFormSequence = (props) => {
   return acc;
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
+
+ // use a signal to show form because `Object.keys(form.controls).length` is not reactive
+ const [fetching, setFetching] = createSignal(true);
+ // Todo make any fetching is true, dont display the forms:
+ // setValuesToEach Form:
+ const owner = getOwner();
+ formMetaData.forEach((form) => {
+  const formGroup = formValues.controls[form.id];
+  const groupConstructor = form.attributes.reduce((acc, meta) => {
+   runWithOwner(owner, () => {
+    if (meta.type === "table") {
+     acc[meta.key] = createFormArray([]);
+    } else {
+     acc[meta.key] = createFormControl(getDefaultValue(meta.type));
+    }
+   });
+   return acc;
+  }, {} as { [key: string]: IFormControl | ReturnType<typeof createFormArray> });
+
+  formGroup.setControls(groupConstructor);
+
+  if (params.id !== "new") {
+   // used FormMetaData.save attribute temporary.
+   if (form.save[0] === "vertex") {
+    const vertex = fetchDocument(form.save[1], params.id);
+
+    if (!vertex) {
+     alert(`document with id: ${params.id} not exist`);
+     return;
+    }
+
+    formGroup.patchValue(D.selectKeys(vertex.properties, Object.keys(form)));
+    if (formGroup.controls["_id"])
+     formGroup.controls["_id"].markDisabled(true);
+    if (formGroup.controls["_key"])
+     formGroup.controls["_key"].markDisabled(true);
+   }
+   // setFetching(false);
+  }
+ });
+ setFetching(false);
 
  const onSubmit = (e) => {
   e.preventDefault();
@@ -212,13 +220,16 @@ export const DynamicFormSequence = (props) => {
    navigate(location.pathname.split("/").slice(0, -1).join("/"));
   });
  };
- return <form onSubmit={onSubmit} ref={setFormRef}>
-  <For each={formMetaData}>
-   {item => <DynamicForm formMetaData={item} id={params.id}
-                         formGroup={formValues.controls[item.id]} />}
-  </For>
-  <button type="submit" class="hidden">submit</button>
-  <ui5-button onclick={onSubmit}>Save</ui5-button>
-  {JSON.stringify(formValues.value)}
- </form>;
+
+ return <Show when={!fetching()} fallback={<>Loading</>}>
+  <form onSubmit={onSubmit} ref={setFormRef}>
+   <For each={formMetaData}>
+    {item => <DynamicForm formMetaData={item} id={params.id}
+                          formGroup={formValues.controls[item.id]} />}
+   </For>
+   <button type="submit" class="hidden">submit</button>
+   <ui5-button onclick={onSubmit}>Save</ui5-button>
+   {JSON.stringify(formValues.value)}
+  </form>
+ </Show>;
 };
