@@ -9,7 +9,7 @@ import {
 import { batch, createSignal, createUniqueId, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
-import "./select.css";
+
 import {
   addCollection,
   addFormLayout,

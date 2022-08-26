@@ -10,69 +10,31 @@ import {
 } from "solid-js";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
 import {
- bindOwner,
+ bindOwner, createFormArray,
  createFormControl,
  createFormGroup,
  IFormControl
 } from "solid-forms";
+import { G, D } from "@mobily/ts-belt";
 import {
  Field,
  TextInputField,
  BooleanInputField,
  JsonInput,
  GeneralInput,
- SelectInputField
+ SelectInputField,
+ TableInputField,
+ getDefaultValue
 } from "ok_web_components";
-import {SelectInputFieldProps} from 'ok_web_components/src/components/input/select_input_field'
 import {
  addNode,
  fetchAttributesTableData, fetchCollectionData,
  fetchDocument,
- FieldAttribute,
- FormMetaData, SelectField,
  updateNode
 } from "../api";
 import { klona } from "klona/json";
 import { graph, Id } from "../../lib/graph";
-import { createAsyncOptions } from "@thisbeyond/solid-select";
-
-const getDefaultValue = (meta: FieldAttribute) => {
- switch (meta.type) {
-  case "string":
-   return "";
-  case "boolean":
-   return false;
-  case "object":
-   return {};
-  default:
-   return "";
- }
-};
-
-const getHtmlInputType = (meta: FieldAttribute) => {
- switch (meta.type) {
-  case "string":
-   return "text";
-  case "integer":
-   return "number";
-  case "decimal":
-   return "number";
-  case "object":
-   return "jsoneditor";
-  default:
-   return meta.type;
- }
-};
-export interface SelectInputProps extends SelectInputFieldProps {
-  collection: string;
-}
-const SelectInput = (props: SelectInputProps)=>{
- const fetchOptions = async (inputValue: string): Promise<any[]> => {
-  return fetchCollectionData(props.collection).map((id) => graph.vertexes[id]);
- };
-
-  return <SelectInputField fetchOptions={fetchOptions} control={props.control}/>
-}
+import {BaseField, SelectField, TableField, FieldAttribute, FormMetaData} from 'ok_web_components/src/components/input/Form';
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -90,10 +52,14 @@ export function DynamicForm(props: DynamicFormProps) {
  {
   const groupConstructor = formData.reduce((acc, meta) => {
    runWithOwner(owner, () => {
-    acc[meta.key] = createFormControl(getDefaultValue(meta));
+    if(meta.type === "table"){
+     acc[meta.key] = createFormArray([])
+    } else {
+     acc[meta.key] = createFormControl(getDefaultValue(meta.type));
+    }
    });
    return acc;
-  }, {} as { [key: string]: IFormControl });
+  }, {} as { [key: string]: IFormControl | ReturnType<typeof createFormArray>});
 
   props.formGroup.setControls(groupConstructor);
 
@@ -106,7 +72,7 @@ export function DynamicForm(props: DynamicFormProps) {
      alert(`document with id: ${props.id} not exist`);
      return;
     }
-    props.formGroup.patchValue(vertex.properties);
+    props.formGroup.patchValue(D.selectKeys(vertex.properties, Object.keys(props.formMetaData)));
     if (props.formGroup.controls["_id"])
      props.formGroup.controls["_id"].markDisabled(true);
     if (props.formGroup.controls["_key"])
@@ -128,7 +94,7 @@ export function DynamicForm(props: DynamicFormProps) {
        label={meta.key}
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
-       type={getHtmlInputType(meta)}
+       type={'text'}
       />
      </Match>
      <Match when={meta.type === "boolean"}>
@@ -143,8 +109,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <Field label={meta.key}>
        <JsonInput
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
-        type={getHtmlInputType(meta)} />
+        control={props.formGroup.controls[meta.key]} />
       </Field>
      </Match>
      <Match when={meta.type === "dynamic"}>
@@ -152,16 +117,25 @@ export function DynamicForm(props: DynamicFormProps) {
        <GeneralInput
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
-        type={getHtmlInputType(meta)}
        />
       </Field>
      </Match>
      <Match when={meta.type === "select"}>
       <Field label={meta.key}>
-       <SelectInput
+       <SelectInputField
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
-        collection={(meta as SelectField).collection}
+        fetchOptions={(meta as SelectField).fetchOptions}
+       />
+      </Field>
+     </Match>
+     <Match when={meta.type === "table"}>
+      <Field label={meta.key}>
+       <TableInputField
+        // @ts-ignore
+        control={props.formGroup.controls[meta.key]}
+        attributes={(meta as TableField).attributes}
+        defaultValue="undefined"
        />
       </Field>
      </Match>

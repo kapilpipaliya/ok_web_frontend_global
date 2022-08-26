@@ -21,7 +21,7 @@ import {
   Show,
 } from "solid-js";
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
-import "./select.css";
+
 import {
   addCollection,
   addNode, deleteEdge_,

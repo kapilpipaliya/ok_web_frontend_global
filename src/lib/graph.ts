@@ -10,7 +10,7 @@ import { klona } from "klona";
 interface Vertex {
   id: Id;
   labels: string[];
-  properties: {},
+  properties: {[key: string]: any},
   in_edges: Id[],
   out_edges: Id[]
 }

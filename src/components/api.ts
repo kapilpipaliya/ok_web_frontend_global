@@ -13,6 +13,9 @@ import {
   replaceEdgeProperties,
   replaceVertexProperties, Vertexs
 } from "../lib/graph";
+import { createUniqueId } from "solid-js";
+import { createFormArray } from "solid-forms";
+import { FormMetaData } from 'ok_web_components/src/components/input/Form';
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -28,23 +31,6 @@ const ServerFormAttributeType = {
   Object: "object",
 };
 
-interface BaseField {
-  key: string;
-  type: string;
-  editable?: boolean;
-}
-
-export interface SelectField extends BaseField {
-  collection: string;
-}
-export type FieldAttribute = BaseField | SelectField
-
-export interface FormMetaData {
-  id: Id;
-  title: string;
-  attributes: FieldAttribute[];
-  save: ["vertex", string] | ['edge', string, (result: any[])=> Id, (result: any[], row: object)=> Id];
-}
 export function fetchAttributesTableData(
   schema: string
 ): FormMetaData | FormMetaData[] {
@@ -84,9 +70,24 @@ export function fetchAttributesTableData(
         ],
       },
         {
-          id: "0", title: "Collection2", save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']], attributes: [
-            { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
-            { key: "attribute", type: "select", collection: "Attribute"}
+          id: "1", title: "Collection2", save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']], attributes: [
+           // { key: "attributes", type: "stringify" },
+            { key: "CollectionHasAttribute", type: "table", edge: "CollectionHasAttribute",defaultValue: "undefined", attributes: [
+              // _id is important, used for sorting
+              { key: "_id", type: ServerFormAttributeType.String, default: (control, id: string)=>id || createUniqueId(), hidden: true },
+              { key: "pos", type: ServerFormAttributeType.Integer, default: (control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+              { key: "attribute", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
+              { key: "id", type: ServerFormAttributeType.String },
+              { key: "selector", type: ServerFormAttributeType.String},
+              { key: "type", type: ServerFormAttributeType.String },
+              { key: "label", type: ServerFormAttributeType.String },
+              { key: "internal", type: ServerFormAttributeType.Boolean },
+              { key: "unique", type: ServerFormAttributeType.Boolean },
+              { key: "required", type: ServerFormAttributeType.Boolean },
+              { key: "readonly", type: ServerFormAttributeType.Boolean },
+              { key: "props", type: ServerFormAttributeType.Object },
+              { key: "relation", type: ServerFormAttributeType.Object },
+            ], },
           ],
         }];
     }
