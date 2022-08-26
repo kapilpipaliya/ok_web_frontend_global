@@ -4,7 +4,7 @@ import { clock, cog, home, menuAlt_1, questionMarkCircle, scale, shieldCheck } f
 import clsx from "clsx";
 import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
-import { DynamicFormSequence } from "./core/schemaDetail";
+import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { CollectionEditor } from "./collection_editor";
