@@ -2,13 +2,14 @@ import jju from "jju";
 import { API_PATH } from "../constant";
 
 import {
+  addNewEdge,
   addNewVertex,
   deleteEdge,
   deleteVertex, Edges,
   findVertexIdsByLabel,
   getNewGraphId, getOutEdgeOfType, getOutEdgeOfTypeIds,
   graph,
-  Id,
+  Id, newEdge,
   newVertex,
   replaceEdgeProperties,
   replaceVertexProperties, Vertexs
@@ -16,6 +17,7 @@ import {
 import { createUniqueId } from "solid-js";
 import { createFormArray } from "solid-forms";
 import { FormMetaData } from 'ok_web_components/src/components/input/Form';
+import { klona } from "klona/json";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -71,7 +73,7 @@ export function fetchAttributesTableData(
       },
         {
           id: "1", title: "Collection2",
-          save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']],
+          save: ["edge", Edges.CollectionHasAttribute,(results)=>results[0].id, (results, formValue)=>formValue['attribute']],
           // idFn: (idMap)=>
           data: (id: Map<string, string>) => {
             const AttributeEdges = getOutEdgeOfTypeIds(id.get('0'), Edges.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
@@ -79,7 +81,13 @@ export function fetchAttributesTableData(
           },
           attributes: [
            // { key: "attributes", type: "stringify" },
-            { key: "CollectionHasAttribute", type: "table", edge: "CollectionHasAttribute",defaultValue: "undefined", attributes: [
+            { key: "CollectionHasAttribute", type: "table", edge: "CollectionHasAttribute",defaultValue: "undefined",
+              save: (results: {[key: string]: any}, tableData: any[])=>{
+                tableData.forEach(row => {
+                  addNewEdge(newEdge(getNewGraphId(), Edges.CollectionHasAttribute, klona(row), results["0"].id, row.attribute));
+                })
+              },
+              attributes: [
               // _id is important, used for sorting
               { key: "_id", type: ServerFormAttributeType.String, default: (control, id: string)=>id || createUniqueId(), hidden: true },
               { key: "pos", type: ServerFormAttributeType.Integer, default: (control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
@@ -104,13 +112,6 @@ export function fetchAttributesTableData(
 export function fetchCollectionData(schema:string) {
   return findVertexIdsByLabel(schema);
 }
-
-export function addNode(schema: string, body: any) {
-  const newId = getNewGraphId()
-  addNewVertex(newVertex(newId, [schema], body))
-  return newId;
-}
-
 export function fetchDocument(schema: string, id: Id) {
   return graph.vertexes[id];
 }
@@ -118,12 +119,28 @@ export function fetchEdge(schema: string, id: Id) {
   return graph.edges[id];
 }
 
+export function addNode(schema: string, body: any) {
+  const newId = getNewGraphId()
+  addNewVertex(newVertex(newId, [schema], body))
+  return newId;
+}
+export function addEdge(schema: string, body: any, start: Id, end: Id) {
+  const newId = getNewGraphId()
+  addNewEdge(newEdge(newId, schema, body, start, end));
+  return newId;
+}
 export function updateNode(schema: string, id: Id, body: any) {
     replaceVertexProperties(id, body);
     return id;
 }
 export function updateEdge(schema: string, id: Id, body: any) {
-    return replaceEdgeProperties(id, body);
+    replaceEdgeProperties(id, body);
+    return id;
+}
+export function updateEdgeWithStartAndEnd(schema: string, id: Id, body: any, start: Id, end: Id) {
+    replaceEdgeProperties(id, body);
+    // TODO write function to replace from and start Ids for edge.
+    return id;
 }
 
 export function deleteNode(schema: string, id: Id) {

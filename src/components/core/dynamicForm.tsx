@@ -27,13 +27,14 @@ import {
  getDefaultValue
 } from "ok_web_components";
 import {
+ addEdge,
  addNode,
  fetchAttributesTableData, fetchCollectionData,
- fetchDocument, fetchEdge,
+ fetchDocument, fetchEdge, updateEdgeWithStartAndEnd,
  updateNode
 } from "../api";
 import { klona } from "klona/json";
-import { graph, Id } from "../../lib/graph";
+import { addNewEdge, graph, Id } from "../../lib/graph";
 import {
  BaseField,
  SelectField,
@@ -213,17 +214,29 @@ export const DynamicFormSequence = (props) => {
   e.preventDefault();
   let index = 0;
   const length = formMetaData.length;
-  const results = [];
+  const results = {} as {[key: string]: any};
   const callMethod = (): Promise<any> => {
    const form = formMetaData[index++];
    if (form) {
+    const formValue = klona(formValues.controls[form.id].value);
+    const value = D.selectKeys(formValue, Object.keys(form).filter(key=>form[key].type !== "table"));
     if (form.save[0] === "vertex") {
      if (params.id == "new") {
       return Promise.resolve(
-       addNode(form.save[1], klona(formValues.controls[form.id].value)));
+       addNode(form.save[1], value));
      } else {
       return Promise.resolve(
-       updateNode(form.save[1], params.id, klona(formValues.controls[form.id].value)));
+       updateNode(form.save[1], params.id, value));
+     }
+    } else if (form.save[0] === "edge") {
+     if (params.id == "new") {
+      return Promise.resolve(
+       addEdge(form.save[1], value, form.save[2](results, formValue), form.save[3](results, formValue))
+      );
+     } else {
+      return Promise.resolve(
+       updateEdgeWithStartAndEnd(form.save[1], params.id, value, form.save[2](results, formValue), form.save[3](results, formValue))
+      );
      }
     } else {
      return Promise.resolve({});
@@ -233,11 +246,11 @@ export const DynamicFormSequence = (props) => {
    }
   };
 
-  return new Promise<any[]>((res) => {
+  return new Promise<{[key: string]: any}>((res) => {
    const checkAndCall = () => {
     if (index < length) {
      callMethod().then(result => {
-      results.push(result);
+      results[formMetaData[index - 1].id] = result;
       checkAndCall();
      });
     } else {
