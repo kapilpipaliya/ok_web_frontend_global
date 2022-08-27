@@ -29,7 +29,7 @@ import {
 import {
  addNode,
  fetchAttributesTableData, fetchCollectionData,
- fetchDocument,
+ fetchDocument, fetchEdge,
  updateNode
 } from "../api";
 import { klona } from "klona/json";
@@ -103,6 +103,7 @@ export function DynamicForm(props: DynamicFormProps) {
         control={props.formGroup.controls[meta.key]}
         attributes={(meta as TableField).attributes}
         defaultValue="undefined"
+        data={(meta as TableField).data}
        />
       </Field>
      </Match>
@@ -138,6 +139,15 @@ export const DynamicFormSequence = (props) => {
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
 
+ const idMap = new Map<string, string>();
+ formMetaData.forEach(form=>{
+  if(form.idFn){
+   idMap.set(form.id, form.idFn(idMap));
+  } else {
+   idMap.set(form.id, params.id)
+  }
+ })
+
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
  // Todo make any fetching is true, dont display the forms:
@@ -158,21 +168,41 @@ export const DynamicFormSequence = (props) => {
 
   formGroup.setControls(groupConstructor);
 
-  if (params.id !== "new") {
-   // used FormMetaData.save attribute temporary.
-   if (form.save[0] === "vertex") {
+  if (params.id && params.id !== "new") {
+   if (form.data) {
+    const data = form.data(idMap);
+    const value = D.selectKeys(data, Object.keys(form).filter(key=>form[key].type !== "table"))
+    if(D.isNotEmpty(value)) formGroup.patchValue(value);
+    if (formGroup.controls["_id"])
+     formGroup.controls["_id"].markDisabled(true);
+
+    const tableKeys = Object.keys(form).filter(key=>form[key].type === "table");
+    if(D.isNotEmpty(tableKeys)){
+     tableKeys.forEach(key=>form[key].data = data[key]);
+    }
+
+   } else if (form.save[0] === "vertex") {
+    // used FormMetaData.save attribute temporary.
     const vertex = fetchDocument(form.save[1], params.id);
 
     if (!vertex) {
      alert(`document with id: ${params.id} not exist`);
      return;
     }
-
-    formGroup.patchValue(D.selectKeys(vertex.properties, Object.keys(form)));
+    const value = D.selectKeys(vertex.properties, Object.keys(form).filter(key=>form[key].type !== "table"))
+    if(D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
-    if (formGroup.controls["_key"])
-     formGroup.controls["_key"].markDisabled(true);
+   } else if (form.save[0] === "edge") {
+    const edge = fetchEdge(form.save[1], params.id);
+
+    if (!edge) {
+     alert(`Edge with id: ${params.id} not exist`);
+     return;
+    }
+    const value = D.selectKeys(edge.properties, Object.keys(form).filter(key=>form[key].type !== "table"))
+    if(D.isNotEmpty(value)) formGroup.patchValue(edge);
+
    }
    // setFetching(false);
   }

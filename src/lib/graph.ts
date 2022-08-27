@@ -17,7 +17,7 @@ interface Vertex {
 
 interface Edge {
   id: Id;
-  properties: {},
+  properties: {[key: string]: any},
   label: string;
   start: Id;
   end: Id;

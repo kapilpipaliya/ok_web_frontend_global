@@ -6,7 +6,7 @@ import {
   deleteEdge,
   deleteVertex, Edges,
   findVertexIdsByLabel,
-  getNewGraphId,
+  getNewGraphId, getOutEdgeOfType, getOutEdgeOfTypeIds,
   graph,
   Id,
   newVertex,
@@ -70,7 +70,14 @@ export function fetchAttributesTableData(
         ],
       },
         {
-          id: "1", title: "Collection2", save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']], attributes: [
+          id: "1", title: "Collection2",
+          save: ["edge", Edges.CollectionHasAttribute,(result)=>result[0].id, (result, row)=>row['id']],
+          // idFn: (idMap)=>
+          data: (id: Map<string, string>) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id.get('0'), Edges.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            return {CollectionHasAttribute: AttributeEdges}
+          },
+          attributes: [
            // { key: "attributes", type: "stringify" },
             { key: "CollectionHasAttribute", type: "table", edge: "CollectionHasAttribute",defaultValue: "undefined", attributes: [
               // _id is important, used for sorting
@@ -106,6 +113,9 @@ export function addNode(schema: string, body: any) {
 
 export function fetchDocument(schema: string, id: Id) {
   return graph.vertexes[id];
+}
+export function fetchEdge(schema: string, id: Id) {
+  return graph.edges[id];
 }
 
 export function updateNode(schema: string, id: Id, body: any) {
