@@ -87,6 +87,7 @@
     "solid-wavify": "^1.0.4",
     "solidjs-div-100vh": "^1.0.0",
     "solidjs-hooks": "^1.1.2",
-    "solidjs-icons": "^1.0.11"
+    "solidjs-icons": "^1.0.11",
+    "ulid": "^2.3.0"
   }
 }

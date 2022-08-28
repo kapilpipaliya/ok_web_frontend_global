@@ -25,7 +25,6 @@ interface NavigationItem {
 // hint: Make a Menu Collection and save it in database.
 const navigation = [
   { name: "Home", href: "/", icon: home },
-  { name: "Collection2", href: "/Collection2", icon: clock },
   {
     name: "Base",
     type: "group",
@@ -191,7 +190,6 @@ export const DashboardView = () => {
       <main class="flex-1 pb-8 pl-2 pt-2">
         <Routes>
           <Route path="/" component={() => <><Home /></>} />
-          <Route path="/Collection/:id" component={() => <CollectionEditor />} />
           <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
           <Route path="/:entity" component={() => <SchemaTable />} />
           <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />

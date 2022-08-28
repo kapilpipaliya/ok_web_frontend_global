@@ -15,7 +15,7 @@ import {
  createFormGroup,
  IFormControl
 } from "solid-forms";
-import { G, D } from "@mobily/ts-belt";
+import { A, D } from "@mobily/ts-belt";
 import {
  Field,
  TextInputField,
@@ -141,13 +141,13 @@ export const DynamicFormSequence = (props) => {
  const formValues = createFormGroup(formValuesConstructor);
 
  const idMap = new Map<string, string>();
- formMetaData.forEach(form=>{
-  if(form.idFn){
+ formMetaData.forEach(form => {
+  if (form.idFn) {
    idMap.set(form.id, form.idFn(idMap));
   } else {
-   idMap.set(form.id, params.id)
+   idMap.set(form.id, params.id);
   }
- })
+ });
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
@@ -172,16 +172,15 @@ export const DynamicFormSequence = (props) => {
   if (params.id && params.id !== "new") {
    if (form.data) {
     const data = form.data(idMap);
-    const value = D.selectKeys(data, Object.keys(form).filter(key=>form[key].type !== "table"))
-    if(D.isNotEmpty(value)) formGroup.patchValue(value);
+    const value = D.selectKeys(data, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
+    if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
 
-    const tableKeys = Object.keys(form).filter(key=>form[key].type === "table");
-    if(D.isNotEmpty(tableKeys)){
-     tableKeys.forEach(key=>form[key].data = data[key]);
+    const tableAttributes = form.attributes.filter(attr => attr.type === "table");
+    if (tableAttributes.length) {
+     tableAttributes.forEach((attr: TableField) => attr.data = data[attr.key]);
     }
-
    } else if (form.save[0] === "vertex") {
     // used FormMetaData.save attribute temporary.
     const vertex = fetchDocument(form.save[1], params.id);
@@ -190,8 +189,8 @@ export const DynamicFormSequence = (props) => {
      alert(`document with id: ${params.id} not exist`);
      return;
     }
-    const value = D.selectKeys(vertex.properties, Object.keys(form).filter(key=>form[key].type !== "table"))
-    if(D.isNotEmpty(value)) formGroup.patchValue(value);
+    const value = D.selectKeys(vertex.properties, Object.keys(form).filter(key => form[key].type !== "table"));
+    if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
    } else if (form.save[0] === "edge") {
@@ -201,8 +200,8 @@ export const DynamicFormSequence = (props) => {
      alert(`Edge with id: ${params.id} not exist`);
      return;
     }
-    const value = D.selectKeys(edge.properties, Object.keys(form).filter(key=>form[key].type !== "table"))
-    if(D.isNotEmpty(value)) formGroup.patchValue(edge);
+    const value = D.selectKeys(edge.properties, Object.keys(form).filter(key => form[key].type !== "table"));
+    if (D.isNotEmpty(value)) formGroup.patchValue(edge);
 
    }
    // setFetching(false);
@@ -214,30 +213,37 @@ export const DynamicFormSequence = (props) => {
   e.preventDefault();
   let index = 0;
   const length = formMetaData.length;
-  const results = {} as {[key: string]: any};
+  const results = {} as { [key: string]: any };
   const callMethod = (): Promise<any> => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const value = D.selectKeys(formValue, Object.keys(form).filter(key=>form[key].type !== "table"));
+    const value = D.selectKeys(formValue, Object.keys(form).filter(key => form[key].type !== "table"));
     if (form.save[0] === "vertex") {
+     const result_ = {};
      if (params.id == "new") {
-      return Promise.resolve(
-       addNode(form.save[1], value));
+      result_["id"] = addNode(form.save[1], value);
      } else {
-      return Promise.resolve(
-       updateNode(form.save[1], params.id, value));
+      // TODO if value is not changed dont update it.
+      result_["id"] = updateNode(form.save[1], params.id, value);
      }
+     return Promise.resolve(result_);
     } else if (form.save[0] === "edge") {
-     if (params.id == "new") {
-      return Promise.resolve(
-       addEdge(form.save[1], value, form.save[2](results, formValue), form.save[3](results, formValue))
-      );
-     } else {
-      return Promise.resolve(
-       updateEdgeWithStartAndEnd(form.save[1], params.id, value, form.save[2](results, formValue), form.save[3](results, formValue))
-      );
+     const start = form.save[2]?.(results, formValue);
+     const end = form.save[3]?.(results, formValue);
+     const result_ = {};
+     if (start && end) {
+      if (params.id == "new") {
+       result_["id"] = addEdge(form.save[1], value, start, end);
+      } else {
+       // TODO if start, end or value is not changed dont update it.
+       result_["id"] = updateEdgeWithStartAndEnd(form.save[1], params.id, value, start, end);
+      }
      }
+     form.attributes.filter(form_ => form_.type === "table").forEach(attr => {
+      result_[attr.key] = attr.save(results, formValue[attr.key]);
+     });
+     return Promise.resolve(result_);
     } else {
      return Promise.resolve({});
     }
@@ -246,7 +252,7 @@ export const DynamicFormSequence = (props) => {
    }
   };
 
-  return new Promise<{[key: string]: any}>((res) => {
+  return new Promise<{ [key: string]: any }>((res) => {
    const checkAndCall = () => {
     if (index < length) {
      callMethod().then(result => {
