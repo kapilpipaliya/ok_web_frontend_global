@@ -12,13 +12,13 @@ export default defineConfig({
       babel: {
         plugins: [
           [solidLabels, { dev: false }],
-          // Locator JS
-          [
-            "@locator/babel-jsx/dist",
-            {
-              env: "development",
-            },
-          ],
+          // Locator JS giving error in windows
+          // [
+          //   "@locator/babel-jsx/dist",
+          //   {
+          //     env: "development",
+          //   },
+          // ],
            [solidStyled, {}]
         ],
       },

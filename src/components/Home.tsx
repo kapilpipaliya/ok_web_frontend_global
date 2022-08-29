@@ -1,5 +1,5 @@
 import { Icon } from "solid-heroicons";
-import { cash, checkCircle, chevronRight, officeBuilding } from "solid-heroicons/solid";
+import { currencyDollar, checkCircle, chevronRight, buildingOffice } from "solid-heroicons/solid";
 import { createMemo, For, JSX } from "solid-js";
 import { creditCard, home } from "solid-heroicons/outline";
 import { FragmentProps } from "solid-headless/src/utils/Fragment";
@@ -56,7 +56,7 @@ export const Home = () => {
                   <dl class="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">
                     <dt class="sr-only">Company</dt>
                     <dd class="flex items-center text-sm text-gray-500 font-medium capitalize sm:mr-6">
-                      <Icon path={officeBuilding} class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                      <Icon path={buildingOffice} class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
                             aria-hidden="true" />
                       Duke street studio
                     </dd>
@@ -135,7 +135,7 @@ export const Home = () => {
                   <a href={transaction.href} class="block px-4 py-4 bg-white hover:bg-gray-50">
                     <span class="flex items-center space-x-4">
                       <span class="flex-1 flex space-x-2 truncate">
-                        <Icon path={cash} class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <Icon path={currencyDollar} class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
                         <span class="flex flex-col text-gray-500 text-sm truncate">
                           <span class="truncate">{transaction.name}</span>
                           <span>
@@ -204,7 +204,7 @@ export const Home = () => {
                         <td class="max-w-0 w-full px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div class="flex">
                             <a href={transaction.href} class="group inline-flex space-x-2 truncate text-sm">
-                              <Icon path={cash} class="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                              <Icon path={currencyDollar} class="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500"
                                     aria-hidden="true" />
                               <p class="text-gray-500 truncate group-hover:text-gray-900">{transaction.name}</p>
                             </a>

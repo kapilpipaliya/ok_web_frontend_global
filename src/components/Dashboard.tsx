@@ -1,6 +1,6 @@
 import { JSX, createSignal, For } from "solid-js";
 import { Icon } from "solid-heroicons";
-import { clock, cog, home, menuAlt_1, questionMarkCircle, scale, shieldCheck } from "solid-heroicons/outline";
+import { clock, cog, home, lifebuoy, questionMarkCircle, scale, shieldCheck } from "solid-heroicons/outline";
 import clsx from "clsx";
 import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
@@ -175,7 +175,7 @@ export const MenuButtonToggle = () => {
       }}
     >
       <span class="sr-only">Open sidebar</span>
-      <Icon path={menuAlt_1} class="h-6 w-6" aria-hidden="true" />
+      <Icon path={lifebuoy} class="h-6 w-6" aria-hidden="true" />
     </button>
   );
 };
