@@ -1,7 +1,7 @@
 import jju from "jju";
-import { API_PATH } from "../constant";
-import { ulid } from 'ulid'
 
+import { ulid } from 'ulid'
+export const API_PATH = "http://49.12.190.36:3006/api/v1";
 import {
   addNewEdge,
   addNewVertex,
@@ -51,8 +51,9 @@ export function fetchAttributesTableData(
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
           { key: "label", type: ServerFormAttributeType.String },
-          { key: "type", type: ServerFormAttributeType.String },
-          { key: "default", type: ServerFormAttributeType.Dynamic },
+          { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+          { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+          { key: "default", type: ServerFormAttributeType.Object }, // TODO: make a function, that accept value and based on serverType display different component.
           { key: "required", type: ServerFormAttributeType.Boolean },
           { key: "internal", type: ServerFormAttributeType.Boolean },
           { key: "props", type: ServerFormAttributeType.Object },
@@ -111,7 +112,9 @@ export function fetchAttributesTableData(
               { key: "attribute", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
               { key: "id", type: ServerFormAttributeType.String },
               { key: "selector", type: ServerFormAttributeType.String},
-              { key: "type", type: ServerFormAttributeType.String },
+              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: ServerFormAttributeType.String },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },
               { key: "unique", type: ServerFormAttributeType.Boolean },
