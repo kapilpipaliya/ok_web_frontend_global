@@ -106,6 +106,7 @@ export function DynamicForm(props: DynamicFormProps) {
         attributes={(meta as TableField).attributes}
         defaultValue="undefined"
         data={(meta as TableField).data}
+        defaultValueFn={(meta as TableField).defaultValueFn}
        />
       </Field>
      </Match>
@@ -190,7 +191,7 @@ export const DynamicFormSequence = (props) => {
      alert(`document with id: ${params.id} not exist`);
      return;
     }
-    const value = D.selectKeys(vertex.properties, Object.keys(form).filter(key => form[key].type !== "table"));
+    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
@@ -201,7 +202,7 @@ export const DynamicFormSequence = (props) => {
      alert(`Edge with id: ${params.id} not exist`);
      return;
     }
-    const value = D.selectKeys(edge.properties, Object.keys(form).filter(key => form[key].type !== "table"));
+    const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(edge);
 
    }
@@ -219,7 +220,7 @@ export const DynamicFormSequence = (props) => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const value = D.selectKeys(formValue, Object.keys(form).filter(key => form[key].type !== "table"));
+    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table").map(attr=>attr.key));
     if (form.save[0] === "vertex") {
      const result_ = {};
      if (params.id == "new") {

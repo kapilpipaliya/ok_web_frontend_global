@@ -16,7 +16,7 @@ import {
   replaceVertexProperties, updateEdgeStartAndEnd, Vertexs
 } from "../lib/graph";
 import { batch, createUniqueId } from "solid-js";
-import { createFormArray } from "solid-forms";
+import { createFormArray, IFormGroup } from "solid-forms";
 import { FormMetaData } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
@@ -163,6 +163,14 @@ export function fetchAttributesTableData(
                 })
 
                 return [];
+              },
+              defaultValueFn: (control: IFormGroup, key: string) => {
+                const value = graph.vertexes[control.controls.attribute.value]?.["properties"]?.[key];
+                if (typeof value === "boolean") {
+                  return value === true ? "true" : "false"
+                } else {
+                  return value;
+                }
               },
               attributes: [
               // _id is important, used for sorting
