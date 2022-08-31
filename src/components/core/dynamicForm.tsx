@@ -73,7 +73,7 @@ export function DynamicForm(props: DynamicFormProps) {
        control={props.formGroup.controls[meta.key]}
       />
      </Match>
-     <Match when={meta.type === "json"}>
+     <Match when={meta.type === "object"}>
       <Field label={meta.key}>
        <JsonInput
         // @ts-ignore
@@ -93,6 +93,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <SelectInputField
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
+        valueKey={(meta as SelectField).valueKey}
         fetchOptions={(meta as SelectField).fetchOptions}
        />
       </Field>

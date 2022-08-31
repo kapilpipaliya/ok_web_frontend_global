@@ -121,6 +121,31 @@ export function replaceEdgeProperties(id: Id, properties: {}) {
   setGraph("edges", id, "properties", reconcile(properties));
 }
 
+export function updateEdgeStartAndEnd(id: Id, start: Id, end: Id) {
+  batch(() => {
+    const edge = graph.edges[id];
+    const oldStartId = edge.start;
+    const oldEndId = edge.end;
+    const isStartChanged = start && oldStartId !== start
+    const isEndChanged = end && oldEndId !== end
+    if(isStartChanged){
+      // remove from old start vertex's out_edges
+      setGraph("vertexes", oldStartId, "out_edges", (v)=>v.filter(e=>e!==id));
+      // add to new start vertex's out_edges
+      setGraph("vertexes", start, "out_edges", (v)=>[...v, id]);
+    }
+    if(isEndChanged){
+      // remove from old end vertex's in_edges
+      setGraph("vertexes", oldEndId, "in_edges", (v)=>v.filter(e=>e!==id));
+      // add to new end vertex's in_edges
+      setGraph("vertexes", end, "in_edges", (v)=>[...v, id]);
+    }
+    if(isStartChanged || isEndChanged){
+      setGraph('edges', id, {start, end});
+    }
+  })
+}
+
 export function deleteVertex(id: Id) {
   batch(() => {
     graph.vertexes[id].labels.forEach(label => {

@@ -13,13 +13,13 @@ import {
   Id, newEdge,
   newVertex,
   replaceEdgeProperties,
-  replaceVertexProperties, Vertexs
+  replaceVertexProperties, updateEdgeStartAndEnd, Vertexs
 } from "../lib/graph";
 import { batch, createUniqueId } from "solid-js";
 import { createFormArray } from "solid-forms";
 import { FormMetaData } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
-import { A } from "@mobily/ts-belt";
+import { A, D } from "@mobily/ts-belt";
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -40,7 +40,65 @@ export function fetchAttributesTableData(
 ): FormMetaData | FormMetaData[] {
   switch (schema) {
     case "ServerAttributeType": {
-      return [{ id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
+      return [
+       { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] },
+        {
+          id: "1", title: "FormAttributeType",
+          // save: ["edge", Edges.CollectionHasAttribute,(results)=>results[0], (results, formValue)=>formValue['attribute']],
+          save: ["edge", Edges.ServerToFormAttributeType],
+          // idFn: (idMap)=>
+          data: (id: Map<string, string>) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id.get('0'), Edges.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
+            return {ServerToFormAttributeType: AttributeEdges}
+          },
+          attributes: [
+            // { key: "attributes", type: "stringify" },
+            { key: "ServerToFormAttributeType", type: "table", edge: "ServerToFormAttributeType",defaultValue: "undefined",
+              save: (results: {[key: string]: any}, tableData: any[])=>{
+               const edge = Edges.ServerToFormAttributeType;
+                const endIdAttribute = "FormAttributeType";
+                const normalizedEdgesValue = tableData.reduce((acc, curr)=>{
+                  acc[curr._id] = D.deleteKeys(klona(curr), ['_id']);
+                  // if(curr[endIdAttribute]){
+                  //   acc[curr[endIdAttribute] = D.deleteKeys(klona(curr), ['_id']);
+                  // }
+                  return acc;
+                }, {});
+
+                const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
+                const existingAttributeEdgeIds = getOutEdgeOfTypeIds(results["0"].id, edge).map(x=>`${x}`) as Array<string>;
+
+                const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
+                let deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
+                let updatedAttributeIds = A.intersection(newIds, existingAttributeEdgeIds);
+
+                const endIdExist = (id_) => !!normalizedEdgesValue[id_][endIdAttribute];
+                const deleteInvalidUpdate = updatedAttributeIds.filter(id_=>!endIdExist(id_));
+                deletedAttributeIds = A.concat(deletedAttributeIds, deleteInvalidUpdate);
+                updatedAttributeIds = A.difference(updatedAttributeIds, deleteInvalidUpdate);
+
+
+                batch(() => {
+                  deletedAttributeIds.forEach(id=>deleteEdge_(edge, id));
+                  insertedAttributeIds.forEach(id_ => {
+                    if(!endIdExist(id_)) return;
+                    addNewEdge(newEdge(getNewGraphId(), edge, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results["0"].id, normalizedEdgesValue[id_][endIdAttribute]));
+                  });
+                  updatedAttributeIds.forEach(id_=>{
+                    updateEdgeWithStartAndEnd(edge,id_, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results["0"].id, normalizedEdgesValue[id_][endIdAttribute] )})
+                })
+
+                return [];
+              },
+              attributes: [
+                // _id is important, used for sorting
+                { key: "_id", type: ServerFormAttributeType.String, default: (control, id: string)=>id || ulid(), hidden: true },
+                { key: "pos", type: ServerFormAttributeType.Integer, default: (control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+                { key: "FormAttributeType", type: "select", valueKey: "id", default: (control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              ], },
+          ],
+        }
+      ];
     }
     case "FormAttributeType": {
       return [{ id: "0", title: "FormAttributeType", save: ["vertex", Vertexs.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
@@ -53,9 +111,9 @@ export function fetchAttributesTableData(
           { key: "label", type: ServerFormAttributeType.String },
           { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
           { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
-          { key: "default", type: ServerFormAttributeType.Object }, // TODO: make a function, that accept value and based on serverType display different component.
           { key: "required", type: ServerFormAttributeType.Boolean },
           { key: "internal", type: ServerFormAttributeType.Boolean },
+          { key: "default", type: ServerFormAttributeType.Object }, // TODO: make a function, that accept value and based on serverType display different component.
           { key: "props", type: ServerFormAttributeType.Object },
           { key: "relation", type: ServerFormAttributeType.Object },
         ],
@@ -80,13 +138,14 @@ export function fetchAttributesTableData(
            // { key: "attributes", type: "stringify" },
             { key: "CollectionHasAttribute", type: "table", edge: "CollectionHasAttribute",defaultValue: "undefined",
               save: (results: {[key: string]: any}, tableData: any[])=>{
+                const edge = Edges.CollectionHasAttribute;
                 const normalizedEdgesValue = tableData.reduce((acc, curr)=>{
                   acc[curr._id] = klona(curr);
                   return acc;
                 }, {});
 
                 const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
-                const existingAttributeEdgeIds = getOutEdgeOfTypeIds(results["0"].id, Edges.CollectionHasAttribute).map(x=>`${x}`) as Array<string>;
+                const existingAttributeEdgeIds = getOutEdgeOfTypeIds(results["0"].id, edge).map(x=>`${x}`) as Array<string>;
 
                 const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
                 const deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
@@ -94,13 +153,13 @@ export function fetchAttributesTableData(
 
 
                 batch(() => {
-                  deletedAttributeIds.forEach(id=>deleteEdge_(Edges.CollectionHasAttribute, id));
+                  deletedAttributeIds.forEach(id=>deleteEdge_(edge, id));
                   insertedAttributeIds.forEach(id => {
                     if(!normalizedEdgesValue[id].attribute) return;
-                    addNewEdge(newEdge(getNewGraphId(), Edges.CollectionHasAttribute, klona(normalizedEdgesValue[id]), results["0"].id, normalizedEdgesValue[id].attribute));
+                    addNewEdge(newEdge(getNewGraphId(), edge, klona(normalizedEdgesValue[id]), results["0"].id, normalizedEdgesValue[id].attribute));
                   });
                   updatedAttributeIds.forEach(id=>{
-                    updateEdge(Edges.CollectionHasAttribute,id, klona(normalizedEdgesValue[id]))})
+                    updateEdgeWithStartAndEnd(edge,id, klona(normalizedEdgesValue[id]))})
                 })
 
                 return [];
@@ -114,7 +173,6 @@ export function fetchAttributesTableData(
               { key: "selector", type: ServerFormAttributeType.String},
               { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
               { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "formType", type: ServerFormAttributeType.String },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },
               { key: "unique", type: ServerFormAttributeType.Boolean },
@@ -153,14 +211,14 @@ export function updateNode(schema: string, id: Id, body: any) {
     replaceVertexProperties(id, body);
     return id;
 }
+// deprecated: use updateEdgeWithStartAndEnd instead
 export function updateEdge(schema: string, id: Id, body: any) {
     replaceEdgeProperties(id, body);
     return id;
 }
 export function updateEdgeWithStartAndEnd(schema: string, id: Id, body: any, start: Id, end: Id) {
     replaceEdgeProperties(id, body);
-    // TODO write function to replace from and start Ids for edge.
-    // when replace start and end txn become complex.
+    updateEdgeStartAndEnd(id, start, end);
     return id;
 }
 

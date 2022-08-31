@@ -29,8 +29,8 @@ const navigation = [
     name: "Base",
     type: "group",
     children: [
-      { name: "ServerAttributeTypes", href: "/ServerAttributeType", icon: clock },
       { name: "FormAttributeTypes", href: "/FormAttributeType", icon: clock },
+      { name: "ServerAttributeTypes", href: "/ServerAttributeType", icon: clock },
       { name: "Attributes", href: "/Attribute", icon: clock },
       { name: "Collections", href: "/Collection", icon: scale },
       { name: "Form Layout", href: "/FormLayout", icon: scale },
