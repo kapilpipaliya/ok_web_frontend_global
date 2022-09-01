@@ -88,6 +88,7 @@
     "solidjs-div-100vh": "^1.0.0",
     "solidjs-hooks": "^1.1.2",
     "solidjs-icons": "^1.0.11",
+    "title-case": "^3.0.3",
     "ulid": "^2.3.0"
   }
 }

@@ -33,10 +33,10 @@ import {
  fetchDocument, fetchEdge, updateEdgeWithStartAndEnd,
  updateNode
 } from "../api";
+import { titleCase } from "title-case";
 import { klona } from "klona/json";
 import { addNewEdge, graph, Id } from "../../lib/graph";
 import {
- BaseField,
  SelectField,
  TableField,
  FieldAttribute,
@@ -59,7 +59,7 @@ export function DynamicForm(props: DynamicFormProps) {
     <Switch>
      <Match when={meta.type === "string"}>
       <TextInputField
-       label={meta.key}
+       label={titleCase(meta.label || meta.key)}
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
        type={"text"}
@@ -67,21 +67,21 @@ export function DynamicForm(props: DynamicFormProps) {
      </Match>
      <Match when={meta.type === "boolean"}>
       <BooleanInputField
-       label={meta.key}
+       label={titleCase(meta.label || meta.key)}
        type="checkbox"
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
       />
      </Match>
      <Match when={meta.type === "object"}>
-      <Field label={meta.key}>
+      <Field label={titleCase(meta.label || meta.key)}>
        <JsonInput
         // @ts-ignore
         control={props.formGroup.controls[meta.key]} />
       </Field>
      </Match>
      <Match when={meta.type === "dynamic"}>
-      <Field label={meta.key}>
+      <Field label={titleCase(meta.label || meta.key)}>
        <GeneralInput
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
@@ -89,7 +89,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </Field>
      </Match>
      <Match when={meta.type === "select"}>
-      <Field label={meta.key}>
+      <Field label={titleCase(meta.label || meta.key)}>
        <SelectInputField
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
@@ -99,7 +99,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </Field>
      </Match>
      <Match when={meta.type === "table"}>
-      <Field label={meta.key}>
+      <Field label={titleCase(meta.label || meta.key)}>
        <TableInputField
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
