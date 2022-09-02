@@ -94,7 +94,7 @@ export function fetchAttributesTableData(
                 // _id is important, used for sorting
                 { key: "_id", type: ServerFormAttributeType.String, default: (control, id: string)=>id || ulid(), hidden: true },
                 { key: "pos", type: ServerFormAttributeType.Integer, default: (control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-                { key: "FormAttributeType", type: "select", valueKey: "id", default: (control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+                { key: "FormAttributeType", type: "select", valueKey: "id", default: (control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formGroup, inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
               ], },
           ],
         }
@@ -109,8 +109,16 @@ export function fetchAttributesTableData(
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
           { key: "label", type: ServerFormAttributeType.String },
-          { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
-          { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+          { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formGroup, inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]),
+            onchange: (formGroup, value) => {
+              formGroup.controls['formType'].setValue(null);
+            } },
+          { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formGroup, inputValue: string)=>{
+            console.log('fetching form type options')
+            const serverTypeValue = formGroup.controls['serverType'].value;
+            if(!serverTypeValue) return [];
+            return graph.vertexes[serverTypeValue].out_edges.filter(id=>graph.edges[id].label === Edges.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
+            } },
           { key: "required", type: ServerFormAttributeType.Boolean },
           { key: "internal", type: ServerFormAttributeType.Boolean },
           { key: "default", type: ServerFormAttributeType.Object }, // TODO: make a function, that accept value and based on serverType display different component.
@@ -176,11 +184,11 @@ export function fetchAttributesTableData(
               // _id is important, used for sorting
               { key: "_id", type: ServerFormAttributeType.String, default: (control, id: string)=>id || ulid(), hidden: true },
               { key: "pos", type: ServerFormAttributeType.Integer, default: (control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { key: "attribute", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
+              { key: "attribute", type: "select", valueKey: "id", fetchOptions:  async (formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
               { key: "id", type: ServerFormAttributeType.String },
               { key: "selector", type: ServerFormAttributeType.String},
-              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },
               { key: "unique", type: ServerFormAttributeType.Boolean },

@@ -3,7 +3,7 @@ import {
  createSignal,
  For,
  getOwner,
- Match,
+ Match, on,
  runWithOwner,
  Show,
  Switch
@@ -94,7 +94,7 @@ export function DynamicForm(props: DynamicFormProps) {
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
         valueKey={(meta as SelectField).valueKey}
-        fetchOptions={(meta as SelectField).fetchOptions}
+        fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formGroup, inputValue)}
        />
       </Field>
      </Match>
@@ -142,18 +142,18 @@ export const DynamicFormSequence = (props) => {
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
 
- const idMap = new Map<string, string>();
+ const formToIdMap = new Map<string, string>();
  formMetaData.forEach(form => {
   if (form.idFn) {
-   idMap.set(form.id, form.idFn(idMap));
+   formToIdMap.set(form.id, form.idFn(formToIdMap));
   } else {
-   idMap.set(form.id, params.id);
+   formToIdMap.set(form.id, params.id);
   }
  });
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
- // Todo make any fetching is true, dont display the forms:
+ // Todo when any fetching is true, dont display the forms:
  // setValuesToEach Form:
  const owner = getOwner();
  formMetaData.forEach((form) => {
@@ -163,7 +163,11 @@ export const DynamicFormSequence = (props) => {
     if (meta.type === "table") {
      acc[meta.key] = createFormArray([]);
     } else {
-     acc[meta.key] = createFormControl(getDefaultValue(meta.type));
+     const iFormControl = createFormControl(getDefaultValue(meta.type));
+     acc[meta.key] = iFormControl;
+     if(meta.onchange){
+      createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
+     }
     }
    });
    return acc;
@@ -173,7 +177,7 @@ export const DynamicFormSequence = (props) => {
 
   if (params.id && params.id !== "new") {
    if (form.data) {
-    const data = form.data(idMap);
+    const data = form.data(formToIdMap);
     const value = D.selectKeys(data, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
