@@ -7,8 +7,6 @@ import { Link, Route, Routes, useNavigate } from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
-import { CollectionEditor } from "./collection_editor";
-import { FormLayoutEditor } from "./fom_layout_editor";
 import { BackupRestore } from "./core/BackupRestore";
 import { useDebugger } from "./core/SolidDebug";
 import { graph } from "../lib/graph";
@@ -190,7 +188,6 @@ export const DashboardView = () => {
       <main class="flex-1 pb-8 pl-2 pt-2">
         <Routes>
           <Route path="/" component={() => <><Home /></>} />
-          <Route path="/FormLayout/:id" component={() => <FormLayoutEditor />} />
           <Route path="/:entity" component={() => <SchemaTable />} />
           <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />
           <Route path="/backup_restore" component={() => <BackupRestore />} />

@@ -40,15 +40,17 @@ import {
  SelectField,
  TableField,
  FieldAttribute,
- FormMetaData
+ FormMetaData,
+ FormToIdMap
 } from "ok_web_components/src/components/input/Form";
+import {equals} from 'rambda';
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
  id?: Id;
  formGroup: ReturnType<typeof createFormGroup>
  // all forms options:
- formToIdMap: Map<string, Id>;
+ formToIdMap: FormToIdMap;
  formValues: IFormGroup;
 }
 
@@ -147,14 +149,16 @@ export const DynamicFormSequence = (props) => {
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
 
- const formToIdMap = new Map<string, string>();
+ const formToIdMap: FormToIdMap = new Map();
  formMetaData.forEach(form => {
   if (form.idFn) {
-   formToIdMap.set(form.id, form.idFn(formToIdMap));
+   formToIdMap.set(form.id, {id: form.idFn(formToIdMap)});
   } else {
-   formToIdMap.set(form.id, params.id);
+   formToIdMap.set(form.id, {id: params.id});
   }
  });
+
+ const initialValues = {} as {[key: string]: {start?: Id, end?: Id, properties: {[key: string]: any}}}
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
@@ -180,10 +184,21 @@ export const DynamicFormSequence = (props) => {
 
   formGroup.setControls(groupConstructor);
 
+  const setDefaultValue = (value: {[key: string]: any}) => {
+   form.attributes.forEach(meta=>{
+    if (meta.default){
+     if(!value[meta.key])
+      value[meta.key] = meta.default(formToIdMap, formValues, formGroup )
+    }
+   })
+  }
   if (params.id && params.id !== "new") {
    if (form.data) {
     const data = form.data(formToIdMap);
     const value = D.selectKeys(data, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
+    setDefaultValue(value);
+    const results = formToIdMap;
+    initialValues[form.id] = {properties: value, start: form.save[2]?.(results, value), end: form.save[3]?.(results, value)};
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
@@ -201,6 +216,9 @@ export const DynamicFormSequence = (props) => {
      return;
     }
     const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
+    setDefaultValue(value);
+   
+    initialValues[form.id] = {properties: value};
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
     if (formGroup.controls["_id"])
      formGroup.controls["_id"].markDisabled(true);
@@ -212,6 +230,9 @@ export const DynamicFormSequence = (props) => {
      return;
     }
     const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table").map(attr => attr.key));
+    setDefaultValue(value);
+
+    initialValues[form.id] = {start: edge.start, end: edge.end, properties: value};
     if (D.isNotEmpty(value)) formGroup.patchValue(edge);
 
    }
@@ -219,12 +240,14 @@ export const DynamicFormSequence = (props) => {
   }
  });
  setFetching(false);
+  console.log(initialValues)
 
  const onSubmit = (e) => {
   e.preventDefault();
   let index = 0;
   const length = formMetaData.length;
-  const results = {} as { [key: string]: any };
+  const results: FormToIdMap = new Map();
+
   const callMethod = (): Promise<any> => {
    const form = formMetaData[index++];
    if (form) {
@@ -235,8 +258,12 @@ export const DynamicFormSequence = (props) => {
      if (params.id == "new") {
       result_["id"] = addNode(form.save[1], value);
      } else {
-      // TODO if value is not changed dont update it.
-      result_["id"] = updateNode(form.save[1], params.id, value);
+      const initialValue = initialValues[form.id];
+      if(D.isNotEmpty(value) && !equals(initialValue.properties, value)) {
+       result_["id"] = updateNode(form.save[1], formToIdMap.get(form.id).id, value);
+      } else {
+       result_["id"] = formToIdMap.get(form.id).id;
+      }
      }
      return Promise.resolve(result_);
     } else if (form.save[0] === "edge") {
@@ -247,12 +274,16 @@ export const DynamicFormSequence = (props) => {
       if (params.id == "new") {
        result_["id"] = addEdge(form.save[1], value, start, end);
       } else {
-       // TODO if start, end or value is not changed dont update it.
-       result_["id"] = updateEdgeWithStartAndEnd(form.save[1], params.id, value, start, end);
+       const initialValue = initialValues[form.id];
+       if((D.isNotEmpty(value) && !equals(initialValue.properties, value)) || initialValue.start !== start || initialValue.end !== end) {
+        result_["id"] = updateEdgeWithStartAndEnd(form.save[1], formToIdMap.get(form.id).id, value, start, end);
+       } else {
+        result_["id"] = formToIdMap.get(form.id)
+       }
       }
      }
      form.attributes.filter(form_ => form_.type === "table").forEach(attr => {
-      result_[attr.key] = attr.save(results, formValue[attr.key]);
+      result_[attr.key] = (attr as TableField).save(results, formValue[attr.key]);
      });
      return Promise.resolve(result_);
     } else {
@@ -267,7 +298,7 @@ export const DynamicFormSequence = (props) => {
    const checkAndCall = () => {
     if (index < length) {
      callMethod().then(result => {
-      results[formMetaData[index - 1].id] = result;
+      results.set(formMetaData[index - 1].id, result);
       checkAndCall();
      });
     } else {
@@ -276,7 +307,6 @@ export const DynamicFormSequence = (props) => {
    };
    checkAndCall();
   }).then((result) => {
-   console.log(result);
    navigate(location.pathname.split("/").slice(0, -1).join("/"));
   });
  };

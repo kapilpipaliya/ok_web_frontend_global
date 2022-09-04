@@ -41,7 +41,8 @@ export enum Vertexs {
 export enum Edges {
   ServerToFormAttributeType = "ServerToFormAttributeType",
   CollectionHasAttribute = "CollectionHasAttribute",
-  CollectionHasFormLayout = "CollectionHasFormLayout",
+  FormLayoutHasCollection = "FormLayoutHasCollection",
+  FormLayoutHasAttribute = "FormLayoutHasAttribute",
 }
 
 // ********
@@ -90,6 +91,11 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
 }
 
 export function newEdge(id: Id, label: string, properties: {}, start: Id, end: Id): Edge {
+  [start, end].forEach(id=>{
+    if(typeof id !== "string" && typeof id !== "number"){
+      alert(`edge Id should be string or number, but received ${id}`);
+    }
+  })
   return {
     id,
     label,
