@@ -13,7 +13,7 @@ import {
  bindOwner, createFormArray,
  createFormControl,
  createFormGroup,
- IFormControl
+ IFormControl, IFormGroup
 } from "solid-forms";
 import { A, D } from "@mobily/ts-belt";
 import {
@@ -47,6 +47,9 @@ interface DynamicFormProps {
  formMetaData: FormMetaData;
  id?: Id;
  formGroup: ReturnType<typeof createFormGroup>
+ // all forms options:
+ formToIdMap: Map<string, Id>;
+ formValues: IFormGroup;
 }
 
 export function DynamicForm(props: DynamicFormProps) {
@@ -94,7 +97,7 @@ export function DynamicForm(props: DynamicFormProps) {
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
         valueKey={(meta as SelectField).valueKey}
-        fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formGroup, inputValue)}
+        fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formToIdMap, props.formValues, props.formGroup, inputValue)}
        />
       </Field>
      </Match>
@@ -107,6 +110,8 @@ export function DynamicForm(props: DynamicFormProps) {
         defaultValue="undefined"
         data={(meta as TableField).data}
         defaultValueFn={(meta as TableField).defaultValueFn}
+        formToIdMap={props.formToIdMap}
+        formValues={props.formValues}
        />
       </Field>
      </Match>
@@ -280,7 +285,10 @@ export const DynamicFormSequence = (props) => {
   <form onSubmit={onSubmit} ref={setFormRef}>
    <For each={formMetaData}>
     {item => <DynamicForm formMetaData={item} id={params.id}
-                          formGroup={formValues.controls[item.id]} />}
+                          formGroup={formValues.controls[item.id]}
+                          formToIdMap={formToIdMap}
+                          formValues={formValues}
+    />}
    </For>
    <button type="submit" class="hidden">submit</button>
    <ui5-button onclick={onSubmit}>Save</ui5-button>
