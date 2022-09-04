@@ -10,9 +10,9 @@ import { klona } from "klona";
 interface Vertex {
   id: Id;
   labels: string[];
-  properties: {[key: string]: any},
-  in_edges: Id[],
-  out_edges: Id[]
+  properties: {[key: string]: Id[]},
+  in_edges: {[key: string]: Id[]},
+  out_edges: {[key: string]: Id[]}
 }
 
 interface Edge {
@@ -83,8 +83,8 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
     id,
     labels,
     properties,
-    in_edges: [],
-    out_edges: []
+    in_edges: {},
+    out_edges: {}
   };
 }
 
@@ -128,17 +128,18 @@ export function updateEdgeStartAndEnd(id: Id, start: Id, end: Id) {
     const oldEndId = edge.end;
     const isStartChanged = start && oldStartId !== start
     const isEndChanged = end && oldEndId !== end
+    const type = graph.edges[id].label;
     if(isStartChanged){
       // remove from old start vertex's out_edges
-      setGraph("vertexes", oldStartId, "out_edges", (v)=>v.filter(e=>e!==id));
+      setGraph("vertexes", oldStartId, "out_edges",type, (v)=>v.filter(e=>e!==id));
       // add to new start vertex's out_edges
-      setGraph("vertexes", start, "out_edges", (v)=>[...v, id]);
+      setGraph("vertexes", start, "out_edges", type, (v)=> v ? [...v, id] : [id]);
     }
     if(isEndChanged){
       // remove from old end vertex's in_edges
-      setGraph("vertexes", oldEndId, "in_edges", (v)=>v.filter(e=>e!==id));
+      setGraph("vertexes", oldEndId, "in_edges",type, (v)=>v.filter(e=>e!==id));
       // add to new end vertex's in_edges
-      setGraph("vertexes", end, "in_edges", (v)=>[...v, id]);
+      setGraph("vertexes", end, "in_edges", type, (v)=> v ? [...v, id] : [id]);
     }
     if(isStartChanged || isEndChanged){
       setGraph('edges', id, {start, end});
@@ -162,24 +163,25 @@ export function deleteVertex(id: Id) {
   return true;
 }
 
-export function deleteEdge(id: Id) {
+export function deleteEdge(edgeId: Id) {
   batch(() => {
-    setGraph("vertexes", graph.edges[id].start, "out_edges", (ids) => {
-      if (ids.includes(id)) {
-        return ids.filter(id_ => id_ !== id);
+    const type = graph.edges[edgeId].label;
+    setGraph("vertexes", graph.edges[edgeId].start, "out_edges",type, (ids) => {
+      if (ids && ids.includes(edgeId)) {
+        return ids.filter(id_ => id_ !== edgeId);
       } else {
         return ids;
       }
     });
 
-    setGraph("vertexes", graph.edges[id].end, "in_edges", (ids) => {
-      if (ids.includes(id)) {
-        return ids.filter(id_ => id_ !== id);
+    setGraph("vertexes", graph.edges[edgeId].end, "in_edges", type,(ids) => {
+      if (ids && ids.includes(edgeId)) {
+        return ids.filter(id_ => id_ !== edgeId);
       } else {
         return ids;
       }
     });
-    setGraph("edges", id, undefined);
+    setGraph("edges", edgeId, undefined);
   });
 };
 
@@ -187,15 +189,19 @@ export function deleteEdge(id: Id) {
 export function addNewEdge(edge: Edge) {
   batch(() => {
     setGraph("edges", edge.id, edge);
-    setGraph("vertexes", edge.start, "out_edges", out_edges => {
-      if (!out_edges.includes(edge.id)) {
+    setGraph("vertexes", edge.start, "out_edges", edge.label, out_edges => {
+      if(!out_edges){
+        return [edge.id];
+      } else if (!out_edges.includes(edge.id)) {
         return [...out_edges, edge.id];
       } else {
         return out_edges;
       }
     });
-    setGraph("vertexes", edge.end, "in_edges", in_edges => {
-      if (!in_edges.includes(edge.id)) {
+    setGraph("vertexes", edge.end, "in_edges",edge.label,  in_edges => {
+      if(!in_edges){
+        return [edge.id];
+      } else if (!in_edges.includes(edge.id)) {
         return [...in_edges, edge.id];
       } else {
         return in_edges;
@@ -209,12 +215,12 @@ export function findVertexIdsByLabel(label: string) {
 }
 
 export function getOutEdgeOfTypeIds(id: Id | string, edgeLabel: string): Id[] {
-  return graph.vertexes[id].out_edges.filter(edge => graph.edges[edge].label == edgeLabel);
+  return graph.vertexes[id].out_edges[edgeLabel] || [];
 }
 
 /** depricated */
 export function getOutEdgeOfType(id: Id | string, edgeLabel: string): Edge[] {
-  return graph.vertexes[id].out_edges.filter(edge => graph.edges[edge].label == edgeLabel).map(edge => graph.edges[edge]);
+  return (graph.vertexes[id].out_edges[edgeLabel] || []).map(edge => graph.edges[edge]);
 }
 
 // Backup graphDb to IndexDB using idb-keyval key-value store
