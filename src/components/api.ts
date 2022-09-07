@@ -168,10 +168,10 @@ export function fetchAttributesTableData(
               // _id is important, used for sorting
               { key: "_id", type: ServerFormAttributeType.String, default: (formToIdMap, formValues, control, id: string)=>id || ulid(), hidden: true },
               { key: "pos", type: ServerFormAttributeType.Integer, default: (formToIdMap, formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { key: "attribute", type: "select", valueKey: "id", default: (formToIdMap, formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
+              { key: "attribute", type: "select", valueKey: "id",noOverWrite: true, default: (formToIdMap, formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
               { key: "id", type: ServerFormAttributeType.String },
               { key: "selector", type: ServerFormAttributeType.String},
-              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "serverType", type: "select", valueKey: "id", options: {disabled: true}, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
               { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },

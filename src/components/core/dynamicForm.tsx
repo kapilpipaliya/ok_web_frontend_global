@@ -170,9 +170,9 @@ export const DynamicFormSequence = (props) => {
   const groupConstructor = form.attributes.reduce((acc, meta) => {
    runWithOwner(owner, () => {
     if (meta.type === "table") {
-     acc[meta.key] = createFormArray([]);
+     acc[meta.key] = createFormArray([], meta.options);
     } else {
-     const iFormControl = createFormControl(getDefaultValue(meta.type));
+     const iFormControl = createFormControl(getDefaultValue(meta.type), meta.options);
      acc[meta.key] = iFormControl;
      if(meta.onchange){
       createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
