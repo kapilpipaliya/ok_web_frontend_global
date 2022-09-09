@@ -1,5 +1,6 @@
 /* @refresh reload */
 import './index.css';
+import './unocss'
 import { render } from "solid-js/web";
 import { DebugProvider } from './components/core/SolidDebug';
 import { StyleRegistry } from 'solid-styled';
