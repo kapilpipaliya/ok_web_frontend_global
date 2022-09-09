@@ -1,4 +1,6 @@
 import "duecss/base.css";
+import "duecss/reset.css";
+
 import initUnoCssRuntime from "@unocss/runtime";
 
 import { defineConfig, presetUno } from "unocss";
