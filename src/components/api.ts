@@ -129,6 +129,7 @@ export function fetchAttributesTableData(
         ],
       }];
     }
+    // TODO: Collection has only one attribute. Add validation for that.
     case "Collection": {
       return [{
         id: "0", title: "Collection1", save: ["vertex", Vertexs.Collection], attributes: [
@@ -190,6 +191,7 @@ export function fetchAttributesTableData(
           { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
           { key: "title", type: "string" },
           { key: "description", type: "string" },
+          { key: "buttongroup", type: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
         ],
       },
         {

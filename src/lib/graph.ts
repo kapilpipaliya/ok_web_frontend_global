@@ -79,7 +79,10 @@ export function resetDatabase() {
     vertexLabelIdMap: {} as { [key: string]: Id[] }
   }));
 }
-
+/* Overwrite:
+ vertex: { properties: {} },
+ edges:  { start: Id, end: Id, properties: {} }
+ */
 export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
   return {
     id,

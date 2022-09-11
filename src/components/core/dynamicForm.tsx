@@ -24,7 +24,8 @@ import {
  GeneralInput,
  SelectInputField,
  TableInputField,
- getDefaultValue
+ getDefaultValue,
+ ButtonGroup
 } from "ok_web_components";
 import {
  addEdge,
@@ -41,7 +42,8 @@ import {
  TableField,
  FieldAttribute,
  FormMetaData,
- FormToIdMap
+ FormToIdMap,
+ ButtonGroupField
 } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
 
@@ -117,6 +119,15 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
+     <Match when={meta.type === "buttongroup"}>
+      <Field label={toTitle(meta.label || meta.key)}>
+       <ButtonGroup
+        // @ts-ignore
+        control={props.formGroup}
+        items={(meta as ButtonGroupField).buttons}
+       />
+      </Field>
+     </Match>
     </Switch>
    )}
   </For>
@@ -169,7 +180,9 @@ export const DynamicFormSequence = (props) => {
   const formGroup = formValues.controls[form.id];
   const groupConstructor = form.attributes.reduce((acc, meta) => {
    runWithOwner(owner, () => {
-    if (meta.type === "table") {
+    if(meta.type === "buttongroup"){
+     console.log('buttongroup skipped')
+    } else if (meta.type === "table") {
      acc[meta.key] = createFormArray([], meta.options);
     } else {
      const iFormControl = createFormControl(getDefaultValue(meta.type), meta.options);
