@@ -45,7 +45,7 @@ const navigation = [
       { name: "Permissions", href: "/Permission", icon: scale }
     ]
   },
-  { name: "Backup & Restore", href: "/backup_restore", icon: scale }
+  { name: "Backup & Restore", href: "/backup_restore", icon: scale },
 ];
 
 const secondaryNavigation = [
@@ -185,7 +185,7 @@ export const DashboardView = () => {
         <MenuButtonToggle />
         <SearchBar />
       </div>
-      <main class="flex-1 pb-8 pl-2 pt-2">
+      <main class="flex-1 pb-8 p-2">
         <Routes>
           <Route path="/" component={() => <><Home /></>} />
           <Route path="/:entity" component={() => <SchemaTable />} />
@@ -200,7 +200,7 @@ export const DashboardView = () => {
 
 export const FullDashboard = () => {
   const debugGraph = useDebugger("graph");
-  debugGraph(graph);
+  // debugGraph(graph);
   return (
     <div class="min-h-full">
       <solid:show when={isSideBarOpen()}>

@@ -1,5 +1,13 @@
-import { JSX } from "solid-js";
-import { backupToIndexDB, backupToJson, resetDatabase, restoreFromIndexDB, restoreFromJson } from "../../lib/graph";
+import { createEffect, createSignal, JSX, Show } from "solid-js";
+import {
+  backupToIndexDB,
+  backupToJson,
+  graph,
+  resetDatabase,
+  restoreFromIndexDB,
+  restoreFromJson
+} from "../../lib/graph";
+import {GraphView} from 'ok_web_components';
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob,
@@ -77,9 +85,20 @@ export const BackupRestore = () => {
       });
     }
   };
+  // Hack to remount the component
+  const [load, setLoad] = createSignal(false);
+  createEffect(()=>{
+    if(graph.vertexes && graph.edges) {
+      setLoad(false);
+      setTimeout(()=>setLoad(true),0);
+      console.log('reloading')
+    }
+  })
+
 
   // @ts-ignore
-  return <div class="flex flex-wrap gap-4">
+  return <div>
+    <div class="flex flex-wrap gap-4">
     <ui5-card class="w-96">
       <ui5-card-header slot="header" title-text="Backup" interactive
                        subtitle-text="Backup in memory graph to different targets"></ui5-card-header>
@@ -108,5 +127,9 @@ export const BackupRestore = () => {
         <ui5-button design="Default" onclick={resetDatabase}>Clear in memory store</ui5-button>
       </div>
     </ui5-card>
-  </div>;
+  </div>
+    <Show when={load()}>
+      <GraphView edges={Object.entries(graph.edges).map(([key, value])=>({ ...value }))} nodes={Object.entries(graph.vertexes).map(([key, value])=>({...value, label: value.labels[0]}))}/>}
+    </Show>
+  </div>
 };
