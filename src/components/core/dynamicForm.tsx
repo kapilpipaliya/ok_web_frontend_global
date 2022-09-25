@@ -286,8 +286,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      } else {
       if(D.isNotEmpty(value) && !equals(initialValue.properties, value)) {
        result_["id"] = updateNode(form.save[1], initialValue.id, value);
-      } else {
-       result_["id"] = initialValue.id;
       }
      }
      return Promise.resolve(result_);
@@ -304,27 +302,21 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        if((D.isNotEmpty(value) && !equals(initialValue.properties, value)) || initialValue.start !== start || initialValue.end !== end) {
         const newId = updateEdgeWithStartAndEnd(form.save[1], initialValue.id, value, start, end);
         result_ = {id: newId, properties: value, start, end};
-       } else {
-        result_ = initialValue
        }
       }
      }
-     // TODO if this isnot updated than not save again:
      form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attr => {
       const tableValue = formValue[attr.key];
-      const initValue = initialValue.properties[attr.key].map(edge=>edge.properties);
+      const initValue = initialValue.properties[attr.key];
       if(!equals(initValue, tableValue)) {
        const newSavedIds = (attr as TableField).save(results, formValue[attr.key]);
        if(!result_['properties']) result_['properties'] = {};
        result_['properties'][attr.key] = formValue[attr.key].map((row, index)=>{
-        row.ID = newSavedIds[index];
-        formValues.controls[form.id].controls[attr.key].controls[index].controls["ID"].setValue(row.ID);
-        return {properties: row};
+        row.id = newSavedIds[index];
+        formValues.controls[form.id].controls[attr.key].controls[index].controls["id"].setValue(row.id);
+        return row;
        })
-      } else {
-       // result_['properties'][attr.key] = tableValue
       }
-
      });
      return Promise.resolve(result_);
     } else {
