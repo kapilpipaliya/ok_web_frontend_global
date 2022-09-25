@@ -17,7 +17,7 @@ import {
 } from "../lib/graph";
 import { batch, createUniqueId } from "solid-js";
 import { createFormArray, IFormGroup } from "solid-forms";
-import { FormMetaData, FormToIdMap } from 'ok_web_components/src/components/input/Form';
+import { FormMetaData, FormResult } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
 
@@ -35,9 +35,9 @@ const ServerFormAttributeType = {
   Object: "object",
 };
 
-function saveTableDataToEdge(tableData: any[], results: FormToIdMap, edge: string, endIdAttribute: string) {
+function saveTableDataToEdge(tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
-    acc[curr._id] = D.deleteKeys(klona(curr), ["_id"]);
+    acc[curr.ID] = D.deleteKeys(klona(curr), ["ID", '_id']);
     // if(curr[endIdAttribute]){
     //   acc[curr[endIdAttribute] = D.deleteKeys(klona(curr), ['_id']);
     // }
@@ -56,33 +56,40 @@ function saveTableDataToEdge(tableData: any[], results: FormToIdMap, edge: strin
   deletedAttributeIds = A.concat(deletedAttributeIds, deleteInvalidUpdate);
   updatedAttributeIds = A.difference(updatedAttributeIds, deleteInvalidUpdate);
 
+  const insertAndUpdatedIds = A.difference(newIds, deletedAttributeIds);
+  const result = {};
 
   batch(() => {
     deletedAttributeIds.forEach(id => deleteEdge_(edge, id));
     insertedAttributeIds.forEach(id_ => {
-      if (!endIdExist(id_)) return;
-      addNewEdge(newEdge(getNewGraphId(), edge, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id_][endIdAttribute]));
+      if (!endIdExist(id_)) {
+        result[id_] = id_;
+        return;
+      }
+      result[id_] = addNewEdge(newEdge(getNewGraphId(), edge, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id_][endIdAttribute]));
     });
     updatedAttributeIds.forEach(id_ => {
-      updateEdgeWithStartAndEnd(edge, id_, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id_][endIdAttribute]);
+      result[id_] = updateEdgeWithStartAndEnd(edge, id_, D.deleteKeys(normalizedEdgesValue[id_], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id_][endIdAttribute]);
     });
   });
+
+  return insertAndUpdatedIds.map(_id=>result[_id]);
 }
 
 export function fetchAttributesTableData(
   schema: string
-): FormMetaData | FormMetaData[] {
+): FormMetaData[] {
   switch (schema) {
     case "ServerAttributeType": {
       return [
        { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] },
         {
           id: "1", title: "FormAttributeType",
-          // save: ["edge", Edges.CollectionHasAttribute,(results)=>results.get('0').id, (results, formValue)=>formValue['attribute']],
+          // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", Edges.ServerToFormAttributeType],
-          data: (formToIdMap: FormToIdMap) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(formToIdMap.get('0').id, Edges.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
-            return {ServerToFormAttributeType: AttributeEdges}
+          data: (id) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id, Edges.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
+            return {properties: {ServerToFormAttributeType: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, FormAttributeType: edge.end, _id: edge.id, ID: edge.id}}))}}
           },
           attributes: [
             // { key: "attributes", type: "stringify" },
@@ -90,14 +97,14 @@ export function fetchAttributesTableData(
               save: (results, tableData)=>{
                const edge = Edges.ServerToFormAttributeType;
                 const endIdAttribute = "FormAttributeType";
-                saveTableDataToEdge(tableData, results, edge, endIdAttribute);
-                return [];
+                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
               },
               attributes: [
                 // _id is important, used for sorting
-                { key: "_id", type: ServerFormAttributeType.String, default: (formToIdMap, formValues, control, id: string)=>id || ulid(), hidden: true },
-                { key: "pos", type: ServerFormAttributeType.Integer, default: (formToIdMap, formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-                { key: "FormAttributeType", type: "select", valueKey: "id", default: (formToIdMap, formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+                { key: "_id", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || ulid(), hidden: true },
+                { key: "ID", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || ulid(), hidden: true },
+                { key: "pos", type: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+                { key: "FormAttributeType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
               ], },
           ],
         }
@@ -112,11 +119,11 @@ export function fetchAttributesTableData(
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
           { key: "label", type: ServerFormAttributeType.String },
-          { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]),
+          { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]),
             onchange: (formGroup, value) => {
               formGroup.controls['formType'].setValue(null);
             } },
-          { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue: string)=>{
+          { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>{
             const serverTypeValue = formGroup.controls['serverType'].value;
             if(!serverTypeValue) return [];
             return getOutEdgeOfTypeIds(serverTypeValue,  Edges.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
@@ -138,11 +145,11 @@ export function fetchAttributesTableData(
       },
         {
           id: "1", title: "Collection2",
-          // save: ["edge", Edges.CollectionHasAttribute,(results)=>results[0], (results, formValue)=>formValue['attribute']],
+          // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", Edges.CollectionHasAttribute],
-          data: (formToIdMap:FormToIdMap) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(formToIdMap.get('0').id, Edges.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
-            return {CollectionHasAttribute: AttributeEdges}
+          data: (id) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id, Edges.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            return {properties: {CollectionHasAttribute: AttributeEdges}}
           },
           attributes: [
            // { key: "attributes", type: "stringify" },
@@ -150,8 +157,7 @@ export function fetchAttributesTableData(
               save: (results, tableData)=>{
                 const edge = Edges.CollectionHasAttribute;
                 const endIdAttribute = "attribute";
-                saveTableDataToEdge(tableData, results, edge, endIdAttribute);
-                return [];
+                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
               },
               defaultValueFn: (control: IFormGroup, key: string) => {
                 const value = graph.vertexes[control.controls.attribute.value]?.["properties"]?.[key];
@@ -167,13 +173,81 @@ export function fetchAttributesTableData(
               },
               attributes: [
               // _id is important, used for sorting
-              { key: "_id", type: ServerFormAttributeType.String, default: (formToIdMap, formValues, control, id: string)=>id || ulid(), hidden: true },
-              { key: "pos", type: ServerFormAttributeType.Integer, default: (formToIdMap, formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { key: "attribute", type: "select", valueKey: "id",noOverWrite: true, default: (formToIdMap, formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
+              { key: "_id", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || ulid(), hidden: true },
+              { key: "pos", type: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+              { key: "attribute", type: "select", valueKey: "id",noOverWrite: true, default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
               { key: "id", type: ServerFormAttributeType.String },
               { key: "selector", type: ServerFormAttributeType.String},
-              { key: "serverType", type: "select", valueKey: "id", options: {disabled: true}, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "serverType", type: "select", valueKey: "id", options: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "label", type: ServerFormAttributeType.String },
+              { key: "internal", type: ServerFormAttributeType.Boolean },
+              { key: "unique", type: ServerFormAttributeType.Boolean },
+              { key: "required", type: ServerFormAttributeType.Boolean },
+              { key: "readonly", type: ServerFormAttributeType.Boolean },
+              { key: "props", type: ServerFormAttributeType.Object },
+              { key: "relation", type: ServerFormAttributeType.Object },
+            ], },
+          ],
+        }];
+    }
+    case "FormLayoutItem": {
+      return [{
+        id: "0", title: "FormLayoutItem1", save: ["vertex", Vertexs.FormLayoutItem], attributes: [
+          { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
+          { key: "title", type: "string" },
+          { key: "description", type: "string" },
+          // { key: "buttongroup", type: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
+        ],
+      },
+        {
+          id: "1", title: "", save: ["edge", Edges.FormLayoutItemHasCollection, (results)=>results.get('0')?.id, (results, formValue)=>formValue['collection']],
+          data: (id)=>{
+            if(id){
+              const formVertex = graph.vertexes[id];
+              const collectionEdges = formVertex.out_edges[Edges.FormLayoutItemHasCollection]
+              const edge = graph.edges[collectionEdges[0]];
+              return {...edge, properties: {collection: edge.end}}
+            }
+          },
+          attributes: [
+            { key: "collection", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("Collection").map((id) => graph.vertexes[id]) },
+          ],
+        },
+        {
+          id: "2", title: "Attributes",
+          save: ["edge", Edges.FormLayoutItemHasAttribute],
+          data: (id) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id, Edges.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            return {properties: {FormLayoutItemHasAttribute: AttributeEdges}}
+          },
+          attributes: [
+           // { key: "attributes", type: "stringify" },
+            { key: "FormLayoutItemHasAttribute", type: "table", edge: "FormLayoutItemHasAttribute",defaultValue: "undefined",
+              save: (results, tableData)=>{
+                const edge = Edges.FormLayoutItemHasAttribute;
+                const endIdAttribute = "attribute";
+                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+              },
+              defaultValueFn: (control: IFormGroup, key: string) => {
+                const value = graph.vertexes[control.controls.attribute.value]?.["properties"]?.[key];
+                if (typeof value === "boolean") {
+                  return value === true ? "true" : "false"
+                } else if(typeof value === "string"){
+                  return value;
+                } else {
+                  return JSON.stringify(value);
+                }
+              },
+              attributes: [
+              // _id is important, used for sorting
+              { key: "_id", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || ulid(), hidden: true },
+              { key: "pos", type: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+              { key: "attribute", type: "select", valueKey: "id", default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
+              { key: "id", type: ServerFormAttributeType.String },
+              { key: "selector", type: ServerFormAttributeType.String},
+              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },
               { key: "unique", type: ServerFormAttributeType.Boolean },
@@ -188,70 +262,40 @@ export function fetchAttributesTableData(
     case "FormLayout": {
       return [{
         id: "0", title: "FormLayout1", save: ["vertex", Vertexs.FormLayout], attributes: [
-          { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
+          { key: "id", type: "string" },
           { key: "title", type: "string" },
           { key: "description", type: "string" },
-          { key: "buttongroup", type: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
+          // { key: "forms", type: "table_forms" },
+          // { key: "buttongroup", type: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
         ],
       },
         {
-          id: "1", title: "", save: ["edge", Edges.FormLayoutHasCollection, (results)=>results.get('0')?.id, (results, formValue)=>formValue['collection']],
-          data: (formToIdMap)=>{
-            if(formToIdMap.get("1")){
-              const formVertex = graph.vertexes[formToIdMap.get("1").id];
-              const collectionEdges = formVertex.out_edges[Edges.FormLayoutHasCollection]
-              return {collection: graph.edges[collectionEdges[0]].end}
-            } else {
-              return {collection: null}
-            }
+          id: "1", title: "Forms",
+          save: ["edge", Edges.FormLayoutHasItem],
+          data: (id) => {
+            const AttributeEdges = getOutEdgeOfTypeIds(id, Edges.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
+            return {properties: {FormLayoutItem: AttributeEdges}}
           },
           attributes: [
-            { key: "collection", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("Collection").map((id) => graph.vertexes[id]) },
-          ],
-        },
-        {
-          id: "2", title: "Attributes",
-          save: ["edge", Edges.FormLayoutHasAttribute],
-          data: (formToIdMap: FormToIdMap) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(formToIdMap.get('0').id, Edges.FormLayoutHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
-            return {FormLayoutHasAttribute: AttributeEdges}
-          },
-          attributes: [
-           // { key: "attributes", type: "stringify" },
-            { key: "FormLayoutHasAttribute", type: "table", edge: "FormLayoutHasAttribute",defaultValue: "undefined",
-              save: (results, tableData)=>{
-                const edge = Edges.FormLayoutHasAttribute;
-                const endIdAttribute = "attribute";
-                saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+            // { key: "attributes", type: "stringify" },
+            { key: "FormLayoutItem", type: "table_forms", form: "FormLayoutItem",defaultValue: "undefined",
+              postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
+              tableItemFormGroup.controls['id'].setValue(values.get("0").id)
+              // get id and set it to the control
+              },
+              save: (results, tableData)=> {
+                const edge = Edges.FormLayoutHasItem;
+                // const endIdAttribute = "attribute";
+                // return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+                // TODO just check if any id is deleted then delete the edge.
                 return [];
               },
-              defaultValueFn: (control: IFormGroup, key: string) => {
-                const value = graph.vertexes[control.controls.attribute.value]?.["properties"]?.[key];
-                if (typeof value === "boolean") {
-                  return value === true ? "true" : "false"
-                } else if(typeof value === "string"){
-                  return value;
-                } else {
-                  return JSON.stringify(value);
-                }
-              },
               attributes: [
-              // _id is important, used for sorting
-              { key: "_id", type: ServerFormAttributeType.String, default: (formToIdMap, formValues, control, id: string)=>id || ulid(), hidden: true },
-              { key: "pos", type: ServerFormAttributeType.Integer, default: (formToIdMap, formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { key: "attribute", type: "select", valueKey: "id", default: (formToIdMap, formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
-              { key: "id", type: ServerFormAttributeType.String },
-              { key: "selector", type: ServerFormAttributeType.String},
-              { key: "serverType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formToIdMap, formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "label", type: ServerFormAttributeType.String },
-              { key: "internal", type: ServerFormAttributeType.Boolean },
-              { key: "unique", type: ServerFormAttributeType.Boolean },
-              { key: "required", type: ServerFormAttributeType.Boolean },
-              { key: "readonly", type: ServerFormAttributeType.Boolean },
-              { key: "props", type: ServerFormAttributeType.Object },
-              { key: "relation", type: ServerFormAttributeType.Object },
-            ], },
+                // _id is important, used for sorting
+                { key: "_id", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || ulid(), hidden: true },
+                { key: "id", type: ServerFormAttributeType.String, default: (formValues, control, id: string)=>id || null, hidden: true },
+                { key: "pos", type: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
+              ], },
           ],
         }];
     }
