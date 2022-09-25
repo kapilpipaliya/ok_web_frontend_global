@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { Icon } from "solid-heroicons";
-import { chevronDown, eye } from "solid-heroicons/solid";
+import { chevronDown, eye, magnifyingGlass } from "solid-heroicons/solid";
 import { bell } from "solid-heroicons/outline";
 import { Menu, MenuItem, Popover, PopoverButton, PopoverPanel, Transition } from "solid-headless";
 import clsx from "clsx";
@@ -17,7 +17,7 @@ export const SearchBar = () => {
           </label>
           <div class="relative w-full text-gray-400 focus-within:text-gray-600">
             <div class="absolute inset-y-0 left-0 flex items-center pointer-events-none" aria-hidden="true">
-              <Icon path={eye} class="h-5 w-5" aria-hidden="true" />
+              <Icon path={magnifyingGlass} class="h-5 w-5" aria-hidden="true" />
             </div>
             <input
               id="search-field"

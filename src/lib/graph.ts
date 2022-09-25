@@ -10,7 +10,7 @@ import { klona } from "klona";
 interface Vertex {
   id: Id;
   labels: string[];
-  properties: {[key: string]: Id[]},
+  properties: {[key: string]: any},
   in_edges: {[key: string]: Id[]},
   out_edges: {[key: string]: Id[]}
 }
@@ -30,6 +30,7 @@ export enum Vertexs {
   Attribute = "Attribute",
   Collection = "Collection",
   FormLayout = "FormLayout",
+  FormLayoutItem = "FormLayoutItem",
   TableLayout = "TableLayout",
   CardLayout = "CardLayout",
   // Auth
@@ -41,8 +42,9 @@ export enum Vertexs {
 export enum Edges {
   ServerToFormAttributeType = "ServerToFormAttributeType",
   CollectionHasAttribute = "CollectionHasAttribute",
-  FormLayoutHasCollection = "FormLayoutHasCollection",
-  FormLayoutHasAttribute = "FormLayoutHasAttribute",
+  FormLayoutItemHasCollection = "FormLayoutItemHasCollection",
+  FormLayoutItemHasAttribute = "FormLayoutItemHasAttribute",
+  FormLayoutHasItem = "FormLayoutHasItem",
 }
 
 // ********
@@ -50,14 +52,14 @@ export enum Edges {
 // Id is used as string because its used as object keys.
 export type Id = string;
 
-let id = 0;
-
 export function getNewGraphId(): Id {
-  return `${++id}`;
+  setGraph('id', graph.id + 1)
+  return `${graph.id}`;
 }
 
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 export const [graph, setGraph] = createStore({
+  id: 0,
   vertexes: {} as { [key: string]: Vertex },
   edges: {} as { [key: string]: Edge },
   vertexLabelIdMap: {} as { [key: string]: Id[] }
@@ -74,6 +76,7 @@ createComputed(() => {
 
 export function resetDatabase() {
   setGraph(reconcile({
+    id: 0,
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] }
@@ -218,6 +221,7 @@ export function addNewEdge(edge: Edge) {
       }
     });
   });
+  return edge.id;
 }
 
 export function findVertexIdsByLabel(label: string) {
