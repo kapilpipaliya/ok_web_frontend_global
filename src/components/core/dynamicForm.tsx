@@ -47,6 +47,7 @@ import {
  ButtonGroupField
 } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
+import { DEBUG } from "../../config";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -346,7 +347,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     props.postSubmit(result);
     console.log(initialValues);
    } else {
-    // navigate(location.pathname.split("/").slice(0, -1).join("/"));
+    navigate(location.pathname.split("/").slice(0, -1).join("/"));
    }
   });
  };
@@ -361,7 +362,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    </For>
    <button type="submit" class="hidden">submit</button>
    <ui5-button design="Positive" onclick={onSubmit}>Save</ui5-button>
-   {JSON.stringify(formValues.value)}
+   {DEBUG && JSON.stringify(formValues.value)}
   </form>
  </Show>;
 };
