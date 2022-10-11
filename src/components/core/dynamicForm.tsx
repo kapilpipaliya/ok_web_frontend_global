@@ -352,6 +352,14 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   });
  };
 
+ const isValid = () => {
+  return formMetaData.map(form=> formValues.controls[form.id].isValid).every(v=>v === true)
+ }
+ const isDataChanged = () => {
+  const result = formMetaData.map(form => equals(initialValues[form.id].properties, formValues.controls[form.id].value));
+  return result.some(v=>v === false)
+ }
+
  return <Show when={!fetching()} fallback={<>Loading</>}>
   <form onSubmit={onSubmit} ref={setFormRef}>
    <For each={formMetaData}>
@@ -361,7 +369,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     />}
    </For>
    <button type="submit" class="hidden">submit</button>
-   <ui5-button design="Positive" onclick={onSubmit}>Save</ui5-button>
+   <ui5-button design="Positive" onclick={onSubmit} disabled={!isValid() || !isDataChanged()}>Save</ui5-button>
    {DEBUG && JSON.stringify(formValues.value)}
   </form>
  </Show>;
