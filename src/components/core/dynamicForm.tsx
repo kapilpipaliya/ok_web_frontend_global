@@ -172,7 +172,15 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const navigate = useNavigate();
  const location = useLocation();
  const entity = () => props.entity || params.entity;
- const mainId = () => props.id === undefined ? (params.id === "new" ? undefined : params.id) : props.id;
+ const mainId = () => {
+  if (props.id === undefined && params.id === "new") {
+   return undefined;
+  } else if(props.id == "new") {
+   return undefined;
+  } else {
+   return props.id === undefined ? params.id : props.id;
+  }
+ }
 
  const formMetaData = props.forms || fetchAttributesTableData(entity()) as FormMetaData[];
 

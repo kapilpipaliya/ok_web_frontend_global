@@ -20,6 +20,7 @@ import { createFormArray, IFormGroup } from "solid-forms";
 import { FormMetaData, FormResult } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
+import { IoInformationCircle } from 'solid-icons/io'
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -97,7 +98,6 @@ function saveFormLayoutTableDataToEdge(tableData: any[], results: FormResult, ed
     deletedAttributeIds.forEach(id => deleteEdge_(edge, id));
 
     insertedAttributeIds.forEach(id => {
-      debugger
       if (!endIdExist(id)) {
         result[id] = id;
         return;
@@ -201,9 +201,13 @@ export function fetchAttributesTableData(
                 if (typeof value === "boolean") {
                   return value === true ? "true" : "false"
                 } else if (key === "serverType") {
-                  // TODO
+                  return graph.vertexes[value]['properties']['id']
                 } else if (key === "formType") {
-                  // TODO
+                  return  graph.vertexes[value]['properties']['id']
+                } else if (key === "props") {
+                  return <span title={JSON.stringify(value)}><IoInformationCircle /></span>
+                } else if (key === "relation") {
+                  return <span title={JSON.stringify(value)}><IoInformationCircle /></span>
                 } else {
                   return JSON.stringify(value);
                 }
@@ -213,8 +217,16 @@ export function fetchAttributesTableData(
               { key: "attribute", type: "select", valueKey: "id",noOverWrite: true, default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("Attribute").map((id) => graph.vertexes[id]) },
               { key: "id", type: ServerFormAttributeType.String },
               { key: "selector", type: ServerFormAttributeType.String},
-              { key: "serverType", type: "select", valueKey: "id", options: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "serverType", type: "select", valueKey: "id", noInput: true, options: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>fetchCollectionData("ServerAttributeType").map((id) => graph.vertexes[id]) },
+              { key: "formType", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
+                const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]['serverType'];
+                if(serverTypeValue) {
+                  return (graph.vertexes[serverTypeValue].out_edges['ServerToFormAttributeType'] || []).map(edgeId => graph.edges[edgeId].end).map(id=>graph.vertexes[id]);
+                } else {
+                  return [];
+                }
+               }
+              },
               { key: "label", type: ServerFormAttributeType.String },
               { key: "internal", type: ServerFormAttributeType.Boolean },
               { key: "unique", type: ServerFormAttributeType.Boolean },
@@ -241,8 +253,12 @@ export function fetchAttributesTableData(
             if(id){
               const formVertex = graph.vertexes[id];
               const collectionEdges = formVertex.out_edges[Edges.FormLayoutItemHasCollection]
-              const edge = graph.edges[collectionEdges[0]];
-              return {...edge, properties: {collection: edge.end}}
+              if(collectionEdges && collectionEdges[0]) {
+                const edge = graph.edges[collectionEdges[0]];
+                return {...edge, properties: {collection: edge.end}}
+              } else {
+                return {properties: {}}
+              }
             }
           },
           attributes: [
