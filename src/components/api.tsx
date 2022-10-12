@@ -201,9 +201,9 @@ export function fetchAttributesTableData(
                 if (typeof value === "boolean") {
                   return value === true ? "true" : "false"
                 } else if (key === "serverType") {
-                  return graph.vertexes[value]['properties']['id']
+                  return value ? graph.vertexes[value]['properties']['id'] : '';
                 } else if (key === "formType") {
-                  return  graph.vertexes[value]['properties']['id']
+                  return  value ? graph.vertexes[value]['properties']['id'] : '';
                 } else if (key === "props") {
                   return <span title={JSON.stringify(value)}><IoInformationCircle /></span>
                 } else if (key === "relation") {
@@ -329,6 +329,7 @@ export function fetchAttributesTableData(
           attributes: [
             // { key: "attributes", type: "stringify" },
             { key: "FormLayoutItem", type: "table_forms", form: "FormLayoutItem",defaultValue: "undefined",
+              noSort: true,
               postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
               tableItemFormGroup.controls['id'].setValue(values.get("0").id)
               // get id and set it to the control

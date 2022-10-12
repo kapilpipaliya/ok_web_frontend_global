@@ -49,6 +49,7 @@ import {
 } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
 import { DEBUG } from "../../config";
+import { createStore, reconcile } from "solid-js/store";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -117,6 +118,7 @@ export function DynamicForm(props: DynamicFormProps) {
         data={(meta as TableField).data}
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
+        noSort={meta.noSort}
        />
       </Field>
      </Match>
@@ -134,6 +136,7 @@ export function DynamicForm(props: DynamicFormProps) {
         data={(meta as TableField).data}
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
+        noSort={meta.noSort}
        />
       </Field>
      </Match>
@@ -191,7 +194,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
 
- const initialValues = {} as InitialValues
+ const [initialValues, setInitialValues] = createStore({} as InitialValues)
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
@@ -231,7 +234,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const data = form.data?.(mainId());
    if (data) {
     setDefaultValue(data.properties);
-    initialValues[form.id] = data;
+    setInitialValues(form.id, reconcile(data));
     const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
@@ -249,7 +252,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      return;
     }
     setDefaultValue(vertex.properties);
-    initialValues[form.id] = vertex;
+    setInitialValues(form.id, reconcile(vertex));
     const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table"  && attr.type !== "table_forms").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
@@ -262,7 +265,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      return;
     }
     setDefaultValue(edge.properties);
-    initialValues[form.id] = data;
+    setInitialValues(form.id, reconcile(data));
     const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attr => attr.key));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
@@ -270,7 +273,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    }
    // setFetching(false);
   } else {
-   initialValues[form.id] = {id: undefined, properties: formGroup.value}
+   setInitialValues(form.id, reconcile({id: undefined, properties: formGroup.value}));
   }
  });
  setFetching(false);
@@ -342,7 +345,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if (index < length) {
      callMethod().then(result => {
       const formId = formMetaData[index - 1].id;
-      initialValues[formId] = Object.assign({}, initialValues[formId], {properties: formValues.controls[formId].value}, result);
+      setInitialValues(formId, reconcile(Object.assign({}, initialValues[formId], {properties: formValues.controls[formId].value}, result)));
       results.set(formId, initialValues[formId]);
       checkAndCall();
      });
