@@ -15,7 +15,7 @@ import {
  createFormGroup,
  IFormControl, IFormGroup
 } from "solid-forms";
-import { A, D } from "@mobily/ts-belt";
+import { A, D, F } from "@mobily/ts-belt";
 import {
  Field,
  TextInputField,
@@ -37,6 +37,7 @@ import {
 import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
 import { addNewEdge, graph, Id } from "../../lib/graph";
+import {removeUndefinedProperties} from 'ok_web_components';
 import {
  SelectField,
  TableField,
@@ -293,7 +294,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      if (!id) {
       result_["id"] = addNode(form.save[1], value);
      } else {
-      if(D.isNotEmpty(value) && !equals(initialValue.properties, value)) {
+      if(D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
        result_["id"] = updateNode(form.save[1], initialValue.id, value);
       }
      }
@@ -308,7 +309,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        result_ = {id: newId, properties: value, start, end};
       } else {
        // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
-       if((D.isNotEmpty(value) && !equals(initialValue.properties, value)) || initialValue.start !== start || initialValue.end !== end) {
+       if((D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) || initialValue.start !== start || initialValue.end !== end) {
         const newId = updateEdgeWithStartAndEnd(form.save[1], initialValue.id, value, start, end);
         result_ = {id: newId, properties: value, start, end};
        }
@@ -317,7 +318,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attr => {
       const tableValue = formValue[attr.key];
       const initValue = initialValue.properties[attr.key];
-      if(!equals(initValue, tableValue)) {
+      if(!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
        const newSavedIds = (attr as TableField).save(results, formValue[attr.key]);
        if(!result_['properties']) result_['properties'] = {};
        result_['properties'][attr.key] = formValue[attr.key].map((row, index)=>{
@@ -364,7 +365,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   return formMetaData.map(form=> formValues.controls[form.id].isValid).every(v=>v === true)
  }
  const isDataChanged = () => {
-  const result = formMetaData.map(form => equals(initialValues[form.id].properties, formValues.controls[form.id].value));
+  const result = formMetaData.map(form => equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10)));
   return result.some(v=>v === false)
  }
 

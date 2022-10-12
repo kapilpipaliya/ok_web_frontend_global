@@ -68,6 +68,7 @@ export const [graph, setGraph] = createStore({
 // ***********
 // Development
 // ***********
+window.graph = graph;
 restoreFromIndexDB();
 createComputed(() => {
   backupToIndexDB();
