@@ -382,7 +382,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    </For>
    <button type="submit" class="hidden">submit</button>
    <ui5-button design="Positive" onclick={onSubmit} disabled={!isValid() || !isDataChanged()}>Save</ui5-button>
-   {DEBUG && JSON.stringify(formValues.value)}
+   <pre>
+    {DEBUG && <br/>}
+    {DEBUG && JSON.stringify(initialValues)}
+    {DEBUG && <>InitialValues:<br/></>}
+    {DEBUG && JSON.stringify(formValues.value)}
+   </pre>
   </form>
  </Show>;
 };
