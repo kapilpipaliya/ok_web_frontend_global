@@ -1,6 +1,4 @@
 import { JSX, createSignal, For } from "solid-js";
-import { Icon } from "solid-heroicons";
-import { clock, cog, home, lifebuoy, questionMarkCircle, scale, shieldCheck } from "solid-heroicons/outline";
 import clsx from "clsx";
 import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
@@ -11,7 +9,6 @@ import { BackupRestore } from "./core/BackupRestore";
 import { useDebugger } from "./core/SolidDebug";
 import { graph } from "../lib/graph";
 import { Home } from "./Home";
-import { SearchBar } from "./SearchBar";
 
 interface NavigationItem {
   name: string;
@@ -22,36 +19,36 @@ interface NavigationItem {
 
 // hint: Make a Menu Collection and save it in database.
 const navigation = [
-  { name: "Home", href: "/", icon: home },
+  { name: "Home", href: "/" },
   {
     name: "Base",
     type: "group",
     children: [
-      { name: "FormAttributeTypes", href: "/FormAttributeType", icon: clock },
-      { name: "ServerAttributeTypes", href: "/ServerAttributeType", icon: clock },
-      { name: "Attributes", href: "/Attribute", icon: clock },
-      { name: "Collections", href: "/Collection", icon: scale },
-      { name: "Form Layout", href: "/FormLayout", icon: scale },
-      { name: "Table Layout", href: "/TableLayout", icon: scale },
-      { name: "Card Layout", href: "/CardLayout", icon: scale }
+      { name: "FormAttributeTypes", href: "/FormAttributeType" },
+      { name: "ServerAttributeTypes", href: "/ServerAttributeType" },
+      { name: "Attributes", href: "/Attribute" },
+      { name: "Collections", href: "/Collection" },
+      { name: "Form Layout", href: "/FormLayout" },
+      { name: "Table Layout", href: "/TableLayout" },
+      { name: "Card Layout", href: "/CardLayout" }
     ]
   },
   {
     name: "Auth",
     type: "group",
     children: [
-      { name: "Users", href: "/User", icon: clock },
-      { name: "Roles", href: "/Role", icon: scale },
-      { name: "Permissions", href: "/Permission", icon: scale }
+      { name: "Users", href: "/User" },
+      { name: "Roles", href: "/Role" },
+      { name: "Permissions", href: "/Permission" }
     ]
   },
-  { name: "Backup & Restore", href: "/backup_restore", icon: scale },
+  { name: "Backup & Restore", href: "/backup_restore" },
 ];
 
 const secondaryNavigation = [
-  { name: "Settings", href: "#", icon: cog },
-  { name: "Help", href: "#", icon: questionMarkCircle },
-  { name: "Privacy", href: "#", icon: shieldCheck }
+  { name: "Settings", href: "#" },
+  { name: "Help", href: "#" },
+  { name: "Privacy", href: "#" }
 ];
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
@@ -76,7 +73,7 @@ export const StaticSideBar = () => {
                   )}
                   aria-current={item.current ? "page" : undefined}
                 >
-                  <Icon path={item.icon} class="mr-4 flex-shrink-0 h-6 w-6 text-cyan-200" aria-hidden="true" />
+                  <span class="mr-4 flex-shrink-0 h-6 w-6 text-cyan-200" aria-hidden="true" >{item.icon}</span>
                   {item.name}
                 </Link>
               )}
@@ -88,7 +85,7 @@ export const StaticSideBar = () => {
                 {(item) => (
                   <a href={item.href}
                      class="group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md text-cyan-100 hover:text-white hover:bg-cyan-600">
-                    <Icon path={item.icon} class="mr-4 h-6 w-6 text-cyan-200" aria-hidden="true" />
+                    <span class="mr-4 h-6 w-6 text-cyan-200" aria-hidden="true" >{item.icon}</span>
                     {item.name}
                   </a>
                 )}
@@ -173,7 +170,7 @@ export const MenuButtonToggle = () => {
       }}
     >
       <span class="sr-only">Open sidebar</span>
-      <Icon path={lifebuoy} class="h-6 w-6" aria-hidden="true" />
+      <span class="h-6 w-6" aria-hidden="true" >Sidebar</span>
     </button>
   );
 };
@@ -183,7 +180,6 @@ export const DashboardView = () => {
     <div class="flex flex-col flex-1" classList={{ "pl-64": isSideBarOpen() }}>
       <div class="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-green-200 lg:border-none">
         <MenuButtonToggle />
-        <SearchBar />
       </div>
       <main class="flex-1 pb-8 p-2">
         <Routes>

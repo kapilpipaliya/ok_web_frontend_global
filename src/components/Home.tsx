@@ -1,14 +1,12 @@
-import { Icon } from "solid-heroicons";
-import { currencyDollar, checkCircle, chevronRight, buildingOffice } from "solid-heroicons/solid";
 import { createMemo, For, JSX } from "solid-js";
-import { creditCard, home } from "solid-heroicons/outline";
+
 import { FragmentProps } from "solid-headless/src/utils/Fragment";
 import clsx from "clsx";
 function Fragment(props: FragmentProps): JSX.Element {
   return createMemo(() => props.children);
 }
 const cards = [
-  { name: "Account balance", href: "#", icon: home, amount: "$30,659.45" },
+  { name: "Account balance", href: "#", amount: "$30,659.45" },
   // More items...
 ];
 const transactions = [
@@ -56,13 +54,13 @@ export const Home = () => {
                   <dl class="mt-6 flex flex-col sm:ml-3 sm:mt-1 sm:flex-row sm:flex-wrap">
                     <dt class="sr-only">Company</dt>
                     <dd class="flex items-center text-sm text-gray-500 font-medium capitalize sm:mr-6">
-                      <Icon path={buildingOffice} class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                      <span class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
                             aria-hidden="true" />
                       Duke street studio
                     </dd>
                     <dt class="sr-only">Account status</dt>
                     <dd class="mt-3 flex items-center text-sm text-gray-500 font-medium sm:mr-6 sm:mt-0 capitalize">
-                      <Icon path={checkCircle} class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-400" aria-hidden="true" />
+                      <span class="flex-shrink-0 mr-1.5 h-5 w-5 text-green-400" aria-hidden="true" ></span>
                       Verified account
                     </dd>
                   </dl>
@@ -98,7 +96,7 @@ export const Home = () => {
                   <div class="p-5">
                     <div class="flex items-center">
                       <div class="flex-shrink-0">
-                        <Icon path={creditCard} class="h-6 w-6 text-gray-400" aria-hidden="true" />
+                        <span class="h-6 w-6 text-gray-400" aria-hidden="true" ></span>
                       </div>
                       <div class="ml-5 w-0 flex-1">
                         <dl>
@@ -135,7 +133,7 @@ export const Home = () => {
                   <a href={transaction.href} class="block px-4 py-4 bg-white hover:bg-gray-50">
                     <span class="flex items-center space-x-4">
                       <span class="flex-1 flex space-x-2 truncate">
-                        <Icon path={currencyDollar} class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <span class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" ></span>
                         <span class="flex flex-col text-gray-500 text-sm truncate">
                           <span class="truncate">{transaction.name}</span>
                           <span>
@@ -144,7 +142,7 @@ export const Home = () => {
                           <time dateTime={transaction.datetime}>{transaction.date}</time>
                         </span>
                       </span>
-                      <Icon path={chevronRight} class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" />
+                      <span class="flex-shrink-0 h-5 w-5 text-gray-400" aria-hidden="true" >{"->"}</span>
                     </span>
                   </a>
                 </li>
@@ -204,8 +202,8 @@ export const Home = () => {
                         <td class="max-w-0 w-full px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <div class="flex">
                             <a href={transaction.href} class="group inline-flex space-x-2 truncate text-sm">
-                              <Icon path={currencyDollar} class="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500"
-                                    aria-hidden="true" />
+                              <span class="flex-shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500"
+                                    aria-hidden="true" ></span>
                               <p class="text-gray-500 truncate group-hover:text-gray-900">{transaction.name}</p>
                             </a>
                           </div>
