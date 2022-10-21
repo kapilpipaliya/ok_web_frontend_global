@@ -38,6 +38,7 @@
   "dependencies": {
     "@bedrock-layout/solid": "^0.12.0",
     "@hope-ui/core": "^1.0.0-next.5",
+    "@iconify-icon/solid": "^1.0.1",
     "@memgraph/orb": "^0.1.2",
     "@mobily/ts-belt": "^3.13.1",
     "@orbit/data": "^0.17.0",

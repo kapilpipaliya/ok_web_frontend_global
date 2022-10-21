@@ -20,7 +20,7 @@ import { createFormArray, IFormGroup } from "solid-forms";
 import { FormMetaData, FormResult } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
-import { IoInformationCircle } from 'solid-icons/io'
+import { Icon } from '@iconify-icon/solid';
 
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -122,9 +122,9 @@ function tableOverwriteDefaultValueFn() {
     } else if (key === "formType") {
       return value ? graph.vertexes[value]["properties"]["id"] : "";
     } else if (key === "props") {
-      return <span title={JSON.stringify(value)}><IoInformationCircle /></span>;
+      return <span title={JSON.stringify(value)}><Icon icon="ion:information-circle-outline" /></span>;
     } else if (key === "relation") {
-      return <span title={JSON.stringify(value)}><IoInformationCircle /></span>;
+      return <span title={JSON.stringify(value)}><Icon icon="ion:information-circle-outline" /></span>;
     } else {
       return JSON.stringify(value);
     }

@@ -99,6 +99,7 @@ export const StaticSideBar = () => {
 };
 
 // https://sap.github.io/ui5-webcomponents/playground/components/SideNavigation/
+// TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 export const UI5StaticSideBar = () => {
   const navigate = useNavigate();
   const onMenuItemClick = (e: any) => {
@@ -138,6 +139,10 @@ export const UI5StaticSideBar = () => {
             </solid:match>
           </solid:switch>}
       </For>
+      <ui5-side-navigation-item text={"Forms"} icon="group">
+        {/*TODO*/}
+        {/*<Children items={graph.vertexLabelIdMap['FormLayout'].map()} />*/}
+      </ui5-side-navigation-item>
       {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
       {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
       {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
@@ -194,6 +199,7 @@ export const DashboardView = () => {
   );
 };
 
+// Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
   const debugGraph = useDebugger("graph");
   // debugGraph(graph);
