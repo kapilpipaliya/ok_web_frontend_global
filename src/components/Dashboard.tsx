@@ -1,4 +1,4 @@
-import { JSX, createSignal, For } from "solid-js";
+import { JSX, createSignal, For, Switch, Match, Show } from "solid-js";
 import clsx from "clsx";
 import { Link, Route, Routes, useNavigate } from "solid-app-router";
 
@@ -131,13 +131,13 @@ export const UI5StaticSideBar = () => {
     <ui5-side-navigation onselection-change={onMenuItemClick}>
       <For each={navigation} fallback={<div>Loading...</div>}>
         {(item) =>
-          <solid:switch fallback={<ui5-side-navigation-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-item>}>
-            <solid:match when={item.type === "group"}>
+          <Switch fallback={<ui5-side-navigation-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-item>}>
+            <Match when={item.type === "group"}>
               <ui5-side-navigation-item text={item.name} icon="group">
                 <Children items={item.children} />
               </ui5-side-navigation-item>
-            </solid:match>
-          </solid:switch>}
+            </Match>
+          </Switch>}
       </For>
       <ui5-side-navigation-item text={"Forms"} icon="group">
         {/*TODO*/}
@@ -205,9 +205,9 @@ export const FullDashboard = () => {
   // debugGraph(graph);
   return (
     <div class="min-h-full">
-      <solid:show when={isSideBarOpen()}>
+      <Show when={isSideBarOpen()}>
         <div class={"flex w-64 flex-col fixed inset-y-0"}><UI5StaticSideBar /></div>
-      </solid:show>
+      </Show>
       <DashboardView />
     </div>
   );

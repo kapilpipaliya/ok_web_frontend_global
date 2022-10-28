@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 ui5-button {
     border-width: 1px;
     border-color: unset;

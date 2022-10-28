@@ -1,11 +1,10 @@
 /* @refresh reload */
 import './index.css';
-import './unocss'
+import '@master/css';
 import { render } from "solid-js/web";
 import { DebugProvider } from './components/core/SolidDebug';
-import { StyleRegistry } from 'solid-styled';
 import { FullDashboard } from "./components/Dashboard";
 import {  Router } from "solid-app-router";
 import './webcomponents'
 
-render(() => <DebugProvider><StyleRegistry><Router><FullDashboard /></Router></StyleRegistry></DebugProvider>, document.getElementById("root") as HTMLElement);
+render(() => <DebugProvider><Router><FullDashboard /></Router></DebugProvider>, document.getElementById("root") as HTMLElement);
