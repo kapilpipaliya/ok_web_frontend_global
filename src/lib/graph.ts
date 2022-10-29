@@ -2,56 +2,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { batch, createComputed } from "solid-js";
 import { get, set } from "idb-keyval";
 import { klona } from "klona";
-
-// ********
-// Types
-// ********
-
-export interface Vertex {
-  id: Id;
-  labels: string[];
-  properties: {[key: string]: any},
-  in_edges: {[key: string]: Id[]},
-  out_edges: {[key: string]: Id[]}
-}
-
-interface Edge {
-  id: Id;
-  properties: {[key: string]: any},
-  label: string;
-  start: Id;
-  end: Id;
-}
-
-export enum Vertexes {
-  // Base
-  ServerAttributeType = "ServerAttributeType", // all type of the server
-  FormAttributeType = "FormAttributeType", // all input components for the servertype
-  Attribute = "Attribute",
-  Collection = "Collection",
-  FormLayout = "FormLayout",
-  FormLayoutItem = "FormLayoutItem",
-  TableLayout = "TableLayout",
-  CardLayout = "CardLayout",
-  // Auth
-  User = "User",
-  Role = "Role",
-  Permission = "Permission",
-}
-
-export enum Edges {
-  ServerToFormAttributeType = "ServerToFormAttributeType",
-  CollectionHasAttribute = "CollectionHasAttribute",
-  FormLayoutItemHasCollection = "FormLayoutItemHasCollection",
-  FormLayoutItemHasAttribute = "FormLayoutItemHasAttribute",
-  FormLayoutHasItem = "FormLayoutHasItem",
-}
-
-// ********
-
-// Id is used as string because its used as object keys.
-export type Id = string;
-
+import { Id, Vertex, Edge } from 'ok_web_components/src/components/input/Form';
 export function getNewGraphId(): Id {
   setGraph('id', graph.id + 1)
   return `${graph.id}`;

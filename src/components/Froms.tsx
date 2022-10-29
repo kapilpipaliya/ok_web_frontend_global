@@ -36,8 +36,7 @@ export const SingleForm = (props: SingleFormProps) => {
    }, {} as {[key: Id]: {[p: string]: any}})
 
    const formLayoutItemAttributeIds = vertexFormLayoutItem.out_edges[Edges.FormLayoutItemHasAttribute];
-
-   return formLayoutItemAttributeIds.map(formLayoutItemAttributeId => {
+   const attributes  = formLayoutItemAttributeIds.map(formLayoutItemAttributeId => {
     const edgeFormLayoutItemAttribute = graph.edges[formLayoutItemAttributeId];
 
     const attributeId = edgeFormLayoutItemAttribute.end;
@@ -45,6 +44,7 @@ export const SingleForm = (props: SingleFormProps) => {
     const collectionAttribute = collectionAttributeAndPropertiesMap[attributeId];
     return Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));
    })
+   return {id: vertexFormLayoutItem.properties.id, title: vertexFormLayoutItem.properties.title, attributes}
   })
   return forms;
  }

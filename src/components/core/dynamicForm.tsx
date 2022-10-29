@@ -36,15 +36,17 @@ import {
 } from "../api";
 import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
-import { Id } from "../../lib/graph";
+
 import {removeUndefinedProperties} from 'ok_web_components';
 import {
+ Id,
  SelectField,
  TableField,
  FormMetaData,
  InitialValues,
  FormResult,
- ButtonGroupField
+ ButtonGroupField,
+ ServerFormAttributeType
 } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
 import { DEBUG } from "../../config";
@@ -66,7 +68,7 @@ export function DynamicForm(props: DynamicFormProps) {
    each={formData}>
    {(meta) => (
     <Switch>
-     <Match when={meta.type === "string"}>
+     <Match when={meta.type === ServerFormAttributeType.String}>
       <TextInputField
        label={toTitle(meta.label || meta.key)}
        // @ts-ignore
@@ -74,7 +76,7 @@ export function DynamicForm(props: DynamicFormProps) {
        type={"text"}
       />
      </Match>
-     <Match when={meta.type === "boolean"}>
+     <Match when={meta.type === ServerFormAttributeType.Boolean}>
       <BooleanInputField
        label={toTitle(meta.label || meta.key)}
        type="checkbox"
@@ -82,14 +84,14 @@ export function DynamicForm(props: DynamicFormProps) {
        control={props.formGroup.controls[meta.key]}
       />
      </Match>
-     <Match when={meta.type === "object"}>
+     <Match when={meta.type === ServerFormAttributeType.Object}>
       <Field label={toTitle(meta.label || meta.key)}>
        <JsonInput
         // @ts-ignore
         control={props.formGroup.controls[meta.key]} />
       </Field>
      </Match>
-     <Match when={meta.type === "dynamic"}>
+     <Match when={meta.type === ServerFormAttributeType.Dynamic}>
       <Field label={toTitle(meta.label || meta.key)}>
        <GeneralInput
         // @ts-ignore
@@ -97,7 +99,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === "select"}>
+     <Match when={meta.type === ServerFormAttributeType.Select}>
       <Field label={toTitle(meta.label || meta.key)}>
        <SelectInputField
         // @ts-ignore
@@ -107,7 +109,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === "table"}>
+     <Match when={meta.type === ServerFormAttributeType.Table}>
       <Field label={toTitle(meta.label || meta.key)}>
        <TableInputField
         // @ts-ignore
@@ -121,7 +123,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === "table_forms"}>
+     <Match when={meta.type === ServerFormAttributeType.TableForm}>
       <Field label={toTitle(meta.label || meta.key)}>
        <TableInputField
         type={"form"}
@@ -139,7 +141,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === "buttongroup"}>
+     <Match when={meta.type === ServerFormAttributeType.ButtonGroup}>
       <Field label={toTitle(meta.label || meta.key)}>
        <ButtonGroup
         // @ts-ignore
