@@ -1,6 +1,5 @@
 import jju from "jju";
 
-import { ulid } from 'ulid'
 export const API_PATH = "http://49.12.190.36:3006/api/v1";
 import {
   addNewEdge,
@@ -13,7 +12,7 @@ import {
   Id, newEdge,
   newVertex,
   replaceEdgeProperties,
-  replaceVertexProperties, updateEdgeStartAndEnd, Vertexs
+  replaceVertexProperties, updateEdgeStartAndEnd, Vertexes
 } from "../lib/graph";
 import { batch, createUniqueId } from "solid-js";
 import { createFormArray, IFormGroup } from "solid-forms";
@@ -137,7 +136,7 @@ export function fetchAttributesTableData(
   switch (schema) {
     case "ServerAttributeType": {
       return [
-       { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexs.ServerAttributeType],
+       { id: "0", title: "ServerFormAttributeType", save: ["vertex", Vertexes.ServerAttributeType],
          attributes: [
            { key: "id", type: ServerFormAttributeType.String },
            { key: "default", type: "select", valueKey: "id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>fetchCollectionData("FormAttributeType").map((id) => graph.vertexes[id]), },
@@ -167,11 +166,11 @@ export function fetchAttributesTableData(
       ];
     }
     case "FormAttributeType": {
-      return [{ id: "0", title: "FormAttributeType", save: ["vertex", Vertexs.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
+      return [{ id: "0", title: "FormAttributeType", save: ["vertex", Vertexes.FormAttributeType], attributes: [{ key: "id", type: ServerFormAttributeType.String }] }];
     }
     case "Attribute": {
       return [{
-        id: "0", title: "Attribute", save: ["vertex", Vertexs.Attribute], attributes: [
+        id: "0", title: "Attribute", save: ["vertex", Vertexes.Attribute], attributes: [
           { key: "id", type: ServerFormAttributeType.String },
           { key: "selector", type: ServerFormAttributeType.String },
           { key: "label", type: ServerFormAttributeType.String },
@@ -195,7 +194,7 @@ export function fetchAttributesTableData(
     // TODO: Collection has only one attribute. Add validation for that.
     case "Collection": {
       return [{
-        id: "0", title: "Collection1", save: ["vertex", Vertexs.Collection], attributes: [
+        id: "0", title: "Collection1", save: ["vertex", Vertexes.Collection], attributes: [
           { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
         ],
       },
@@ -244,7 +243,7 @@ export function fetchAttributesTableData(
     }
     case "FormLayoutItem": {
       return [{
-        id: "0", title: "FormLayoutItem1", save: ["vertex", Vertexs.FormLayoutItem], attributes: [
+        id: "0", title: "FormLayoutItem1", save: ["vertex", Vertexes.FormLayoutItem], attributes: [
           // { key: "id", type: "string" }, // { key: "attributes", type: "stringify" },
           // TODO: make title required
           { key: "title", type: "string" },
@@ -313,7 +312,7 @@ export function fetchAttributesTableData(
     }
     case "FormLayout": {
       return [{
-        id: "0", title: "FormLayout1", save: ["vertex", Vertexs.FormLayout], attributes: [
+        id: "0", title: "FormLayout1", save: ["vertex", Vertexes.FormLayout], attributes: [
           { key: "id", type: "string" },
           { key: "title", type: "string" },
           { key: "description", type: "string" },

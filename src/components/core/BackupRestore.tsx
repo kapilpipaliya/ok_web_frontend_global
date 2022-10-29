@@ -102,11 +102,11 @@ export const BackupRestore = () => {
 
  // @ts-ignore
  return <div>
-  <div class="flex flex-wrap gap-4">
-   <ui5-card class="w-96">
+  <div class="flex flex:wrap gap:0.25rem">
+   <ui5-card class="w:24rem">
     <ui5-card-header slot="header" title-text="Backup" interactive
                      subtitle-text="Backup in memory graph to different targets"></ui5-card-header>
-    <div class="m-4 flex gap-2">
+    <div class="m:1rem flex gap:0.5rem">
      <ui5-button design="Default" onclick={backupToIndexDB_}>Backup To IndexDB
      </ui5-button>
      <ui5-button design="Default" onclick={downloadJson}>Download Json
@@ -115,24 +115,25 @@ export const BackupRestore = () => {
 
    </ui5-card>
 
-   <ui5-card class="w-96">
+   <ui5-card class="w:24rem">
     <ui5-card-header slot="header" title-text="Restore" interactive
                      subtitle-text="Restore graph from different targets to the memory"></ui5-card-header>
-    <div class="m-4 flex flex-wrap gap-2">
+    <div class="m:1rem flex flex-wrap gap:0.5rem">
      <ui5-button design="Default" onclick={restoreFromIndexDB}>Restore From
       IndexDB
      </ui5-button>
      <ui5-file-uploader accept="image/*" multiple="true" hide-input>
-      <ui5-button icon="upload" onchange={restoreFromFile}>Restore From JSON
+      <ui5-button icon="upload" onchange={restoreFromFile}>
+       <span>Restore From JSON</span>
       </ui5-button>
      </ui5-file-uploader>
     </div>
    </ui5-card>
 
-   <ui5-card class="w-96">
+   <ui5-card class="w:24rem">
     <ui5-card-header slot="header" title-text="Graph Functions" interactive
                      subtitle-text="Other graph functions"></ui5-card-header>
-    <div class="m-4 flex flex-wrap gap-2">
+    <div class="m:1rem flex flex:wrap gap:0.5rem">
      <ui5-button design="Default" onclick={resetDatabase}>Clear in memory
       store
      </ui5-button>

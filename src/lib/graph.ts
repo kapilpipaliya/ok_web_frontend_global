@@ -23,7 +23,7 @@ interface Edge {
   end: Id;
 }
 
-export enum Vertexs {
+export enum Vertexes {
   // Base
   ServerAttributeType = "ServerAttributeType", // all type of the server
   FormAttributeType = "FormAttributeType", // all input components for the servertype
@@ -68,6 +68,7 @@ export const [graph, setGraph] = createStore({
 // ***********
 // Development
 // ***********
+// @ts-ignore
 window.graph = graph;
 restoreFromIndexDB();
 createComputed(() => {
@@ -197,8 +198,7 @@ export function deleteEdge(edgeId: Id) {
     });
     setGraph("edges", edgeId, undefined);
   });
-};
-
+}
 
 export function addNewEdge(edge: Edge) {
   batch(() => {

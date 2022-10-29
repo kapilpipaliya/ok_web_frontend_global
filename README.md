@@ -47,9 +47,3 @@ ESLint is configured as following
 
 ### css rules
 - don't use css child selectors.
-
-### fast development:
-https://github.com/lxsmnsyc/solid-labels/blob/main/docs/comments.md
-
-### note: 
-currently "@bedrock-layout/solid" have issue, use npm i --force to bypass it.

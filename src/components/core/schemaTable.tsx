@@ -4,7 +4,6 @@ import {
  For,
  Match,
  Show,
- onCleanup,
  Switch,
  untrack
 } from "solid-js";
@@ -13,8 +12,8 @@ import {
  deleteNode,
  fetchAttributesTableData,
  fetchCollectionData,
- FormMetaData
 } from "../api";
+import { FormMetaData } from 'ok_web_components/src/components/input/Form';
 import { css } from "solid-styled-components";
 import { graph, Id } from "../../lib/graph";
 
@@ -63,12 +62,12 @@ export default function SchemaTable() {
   return <tbody>
   <For each={typeof data().data === "function" ? (data().data as (() => Id[]))()
    : data().data as Id[]} fallback={<></>}>
-   {(id, i) => {
+   {(id) => {
     return (
      <tr>
       <td>{graph.vertexes[id]?.["id"]}</td>
       <For each={data().headers}>
-       {(head, rowId) => (
+       {(head) => (
         <Show when={graph.vertexes[id]}>
          <td>
           <Switch
@@ -127,7 +126,7 @@ export default function SchemaTable() {
       >
        {/* <Suspense fallback={<Loader />}> */}
        <Show when={!data().headers.length}>No Data</Show>
-       <table style={{ borderSpacing: 0 }}>
+       <table style={{ "border-spacing": 0 }}>
         <thead>
         <tr>
          <th>ID</th>

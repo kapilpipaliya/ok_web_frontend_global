@@ -1,23 +1,20 @@
-import { JSX, createSignal, For, Switch, Match, Show } from "solid-js";
-import clsx from "clsx";
-import { Link, Route, Routes, useNavigate } from "solid-app-router";
-
+import { JSX, createSignal, For, Switch, Match, Show, onMount } from "solid-js";
+import { Route, Routes, useNavigate } from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { BackupRestore } from "./core/BackupRestore";
 import { useDebugger } from "./core/SolidDebug";
 import { graph } from "../lib/graph";
-import { Home } from "./Home";
 
 interface NavigationItem {
   name: string;
   href?: string;
-  icon: () => JSX.Element;
+  icon?: () => JSX.Element;
   children?: NavigationItem[]
 }
 
-// hint: Make a Menu Collection and save it in database.
+// TODO: Make a Menu Collection and save it in database.
 const navigation = [
   { name: "Home", href: "/" },
   {
@@ -45,61 +42,11 @@ const navigation = [
   { name: "Backup & Restore", href: "/backup_restore" },
 ];
 
-const secondaryNavigation = [
-  { name: "Settings", href: "#" },
-  { name: "Help", href: "#" },
-  { name: "Privacy", href: "#" }
-];
-
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
-
-export const StaticSideBar = () => {
-  return (<>
-      {/* Sidebar component, swap this element with another sidebar if you like */}
-      <div class="flex flex-col flex-grow bg-cyan-700 pt-5 pb-4 overflow-y-auto">
-        <div class="flex items-center flex-shrink-0 px-4">
-          <img class="h-8 w-auto" src="https://tailwindui.com/img/logos/easywire-logo-cyan-300-mark-white-text.svg"
-               alt="Easywire logo" />
-        </div>
-        <nav class="mt-5 flex-1 flex flex-col divide-y divide-cyan-800 overflow-y-auto" aria-label="Sidebar">
-          <div class="px-2 space-y-1">
-            <For each={navigation} fallback={<div>Loading...</div>}>
-              {(item) => (
-                <Link
-                  href={item.href}
-                  class={clsx(
-                    item.current ? "bg-cyan-800 text-white" : "text-cyan-100 hover:text-white hover:bg-cyan-600",
-                    "group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md"
-                  )}
-                  aria-current={item.current ? "page" : undefined}
-                >
-                  <span class="mr-4 flex-shrink-0 h-6 w-6 text-cyan-200" aria-hidden="true" >{item.icon}</span>
-                  {item.name}
-                </Link>
-              )}
-            </For>
-          </div>
-          <div class="mt-6 pt-6">
-            <div class="px-2 space-y-1">
-              <For each={secondaryNavigation} fallback={<div>Loading...</div>}>
-                {(item) => (
-                  <a href={item.href}
-                     class="group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md text-cyan-100 hover:text-white hover:bg-cyan-600">
-                    <span class="mr-4 h-6 w-6 text-cyan-200" aria-hidden="true" >{item.icon}</span>
-                    {item.name}
-                  </a>
-                )}
-              </For>
-            </div>
-          </div>
-        </nav>
-      </div>
-    </>
-  );
-};
 
 // https://sap.github.io/ui5-webcomponents/playground/components/SideNavigation/
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
+// Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const UI5StaticSideBar = () => {
   const navigate = useNavigate();
   const onMenuItemClick = (e: any) => {
@@ -107,14 +54,8 @@ export const UI5StaticSideBar = () => {
       navigate(e.detail.item.href);
     }
   };
-  /* @mount */
-  {
-    const sideNavigation = document.querySelector("ui5-side-navigation");
-    // document.querySelector("#startButton").addEventListener("click", event => sideNavigation.collapsed = !sideNavigation.collapsed);
-    // sideNavigation.addEventListener('selection-change', (...e)=>console.log('hi', e))
-  }
 
-  const Children = (props: { items: NavigationItem[] }) => {
+  const Children = (props: { items: NavigationItem[]; }) => {
     return <For each={props.items} fallback={<div>Loading...</div>}>
       {(item) => <ui5-side-navigation-sub-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-sub-item>}
     </For>;
@@ -167,28 +108,22 @@ export const UI5StaticSideBar = () => {
 
 export const MenuButtonToggle = () => {
   return (
-    <button
-      type="button"
-      class="px-4 border-r border-gray-200 text-gray-400 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-cyan-500"
-      onClick={() => {
-        setSidebarOpen(v => !v);
-      }}
-    >
+    <button type="button" class="" onClick={() => {setSidebarOpen(v => !v);}}>
       <span class="sr-only">Open sidebar</span>
-      <span class="h-6 w-6" aria-hidden="true" >Sidebar</span>
+      <span class="h-6 w-6" aria-hidden="true" >☰</span>
     </button>
   );
 };
 
 export const DashboardView = () => {
   return (
-    <div class="flex flex-col flex-1" classList={{ "pl-64": isSideBarOpen() }}>
-      <div class="relative z-10 flex-shrink-0 flex h-16 bg-white border-b border-green-200 lg:border-none">
+    <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
+      <div class="">
         <MenuButtonToggle />
       </div>
-      <main class="flex-1 pb-8 p-2">
+      <main class="">
         <Routes>
-          <Route path="/" component={() => <><Home /></>} />
+          <Route path="/" component={() => <>Home Page</>} />
           <Route path="/:entity" component={() => <SchemaTable />} />
           <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />
           <Route path="/backup_restore" component={() => <BackupRestore />} />
@@ -204,9 +139,9 @@ export const FullDashboard = () => {
   const debugGraph = useDebugger("graph");
   // debugGraph(graph);
   return (
-    <div class="min-h-full">
+    <div class="min-h:full">
       <Show when={isSideBarOpen()}>
-        <div class={"flex w-64 flex-col fixed inset-y-0"}><UI5StaticSideBar /></div>
+        <div class={"w:15rem fixed inset:0"}><UI5StaticSideBar /></div>
       </Show>
       <DashboardView />
     </div>

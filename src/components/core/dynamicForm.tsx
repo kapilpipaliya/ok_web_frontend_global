@@ -3,19 +3,19 @@ import {
  createSignal,
  For,
  getOwner,
- Match, on,
+ Match, on, onMount,
  runWithOwner,
  Show,
  Switch
 } from "solid-js";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
 import {
- bindOwner, createFormArray,
+ createFormArray,
  createFormControl,
- createFormGroup,
+ createFormGroup, IFormArray,
  IFormControl, IFormGroup
 } from "solid-forms";
-import { A, D, F } from "@mobily/ts-belt";
+import { D } from "@mobily/ts-belt";
 import {
  Field,
  TextInputField,
@@ -30,18 +30,17 @@ import {
 import {
  addEdge,
  addNode,
- fetchAttributesTableData, fetchCollectionData,
+ fetchAttributesTableData,
  fetchDocument, fetchEdge, updateEdgeWithStartAndEnd,
  updateNode
 } from "../api";
 import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
-import { addNewEdge, graph, Id } from "../../lib/graph";
+import { Id } from "../../lib/graph";
 import {removeUndefinedProperties} from 'ok_web_components';
 import {
  SelectField,
  TableField,
- FieldAttribute,
  FormMetaData,
  InitialValues,
  FormResult,
@@ -118,7 +117,7 @@ export function DynamicForm(props: DynamicFormProps) {
         data={(meta as TableField).data}
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
-        noSort={meta.noSort}
+        noSort={(meta as TableField).noSort}
        />
       </Field>
      </Match>
@@ -136,7 +135,7 @@ export function DynamicForm(props: DynamicFormProps) {
         data={(meta as TableField).data}
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
-        noSort={meta.noSort}
+        noSort={(meta as TableField).noSort}
        />
       </Field>
      </Match>
@@ -166,11 +165,10 @@ interface DynamicFormSequenceProps {
 }
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
- /* @mount */
- {
+ onMount(()=>{
   const form = formRef();
   form.querySelector("input").focus();
- }
+ })
 
  const params = useParams();
  const navigate = useNavigate();
@@ -326,7 +324,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        if(!result_['properties']) result_['properties'] = {};
        result_['properties'][attr.key] = formValue[attr.key].map((row, index)=>{
         row.id = newSavedIds[index];
-        formValues.controls[form.id].controls[attr.key].controls[index].controls["id"].setValue(row.id);
+        ((formValues.controls[form.id].controls[attr.key] as IFormArray).controls[index] as IFormGroup).controls["id"].setValue(row.id);
         return row;
        })
       }
