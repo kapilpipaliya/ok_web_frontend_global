@@ -71,53 +71,53 @@ export function DynamicForm(props: DynamicFormProps) {
     <Switch>
      <Match when={meta.type === ServerFormAttributeType.String}>
       <TextInputField
-       label={toTitle(meta.label || meta.key)}
+       label={toTitle(meta.label || meta.id)}
        // @ts-ignore
-       control={props.formGroup.controls[meta.key]}
+       control={props.formGroup.controls[meta.id]}
        type={"text"}
        {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.type === ServerFormAttributeType.JsCode}>
       <TextAreaField
-       label={toTitle(meta.label || meta.key)}
+       label={toTitle(meta.label || meta.id)}
        // @ts-ignore
-       control={props.formGroup.controls[meta.key]}
+       control={props.formGroup.controls[meta.id]}
        {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Boolean}>
       <BooleanInputField
-       label={toTitle(meta.label || meta.key)}
+       label={toTitle(meta.label || meta.id)}
        type="checkbox"
        // @ts-ignore
-       control={props.formGroup.controls[meta.key]}
+       control={props.formGroup.controls[meta.id]}
        {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Object}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
+        control={props.formGroup.controls[meta.id]}
         {...(meta.props || {})}
        />
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Dynamic}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <GeneralInput
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
+        control={props.formGroup.controls[meta.id]}
         {...(meta.props || {})}
        />
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Select}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <SelectInputField
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
+        control={props.formGroup.controls[meta.id]}
         valueKey={(meta as SelectField).valueKey}
         fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, props.formGroup, inputValue)}
         {...(meta.props || {})}
@@ -125,10 +125,10 @@ export function DynamicForm(props: DynamicFormProps) {
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Table}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <TableInputField
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
+        control={props.formGroup.controls[meta.id]}
         attributes={(meta as TableField).attributes}
         defaultValue="undefined"
         data={(meta as TableField).data}
@@ -140,14 +140,14 @@ export function DynamicForm(props: DynamicFormProps) {
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.TableForm}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <TableInputField
         type={"form"}
         component={DynamicFormSequence}
         forms={fetchAttributesTableData((meta as TableField).form!)}
         postSubmit={(tableItemFormGroup, values)=>(meta as TableField).postSubmit(props.formValues, props.formGroup,tableItemFormGroup, values)}
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]}
+        control={props.formGroup.controls[meta.id]}
         attributes={(meta as TableField).attributes}
         defaultValue="undefined"
         data={(meta as TableField).data}
@@ -159,7 +159,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.ButtonGroup}>
-      <Field label={toTitle(meta.label || meta.key)}>
+      <Field label={toTitle(meta.label || meta.id)}>
        <ButtonGroup
         // @ts-ignore
         control={props.formGroup}
@@ -226,10 +226,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if(meta.type === "buttongroup"){
      console.log('buttongroup skipped')
     } else if (meta.type === "table" || meta.type === "table_forms") {
-     acc[meta.key] = createFormArray([], meta.fieldOptions);
+     acc[meta.id] = createFormArray([], meta.fieldOptions);
     } else {
      const iFormControl = createFormControl(getDefaultValue(meta.type), meta.fieldOptions);
-     acc[meta.key] = iFormControl;
+     acc[meta.id] = iFormControl;
      if(meta.onchange){
       createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
      }
@@ -243,8 +243,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const setDefaultValue = (value: {[key: string]: any}) => {
    form.attributes.forEach(meta=>{
     if (meta.default){
-     if(!value[meta.key])
-      value[meta.key] = meta.default(formValues, formGroup )
+     if(!value[meta.id])
+      value[meta.id] = meta.default(formValues, formGroup )
     }
    })
   }
@@ -253,13 +253,13 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    if (data) {
     setDefaultValue(data.properties);
     setInitialValues(form.id, reconcile(data));
-    const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attr => attr.key));
+    const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
     // table will load data themself
     const tableAttributes = form.attributes.filter(attr => attr.type === "table" || attr.type === "table_forms");
     if (tableAttributes.length) {
-     tableAttributes.forEach((tableAttr: TableField) => tableAttr.data = data.properties[tableAttr.key]);
+     tableAttributes.forEach((tableAttrMeta: TableField) => tableAttrMeta.data = data.properties[tableAttrMeta.id]);
     }
    } else if (form.save[0] === "vertex") {
     // used FormMetaData.save attribute temporary.
@@ -271,7 +271,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
     setDefaultValue(vertex.properties);
     setInitialValues(form.id, reconcile(vertex));
-    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table"  && attr.type !== "table_forms").map(attr => attr.key));
+    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table"  && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
     // load table data when required
@@ -284,7 +284,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
     setDefaultValue(edge.properties);
     setInitialValues(form.id, reconcile(data));
-    const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attr => attr.key));
+    const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
     // load table data when required
@@ -307,7 +307,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attr=>attr.key));
+    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta=>attrMeta.id));
     const initialValue = initialValues[form.id];
     const id = initialValue['id'] || mainId();
     if (form.save[0] === "vertex") {
@@ -336,15 +336,15 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        }
       }
      }
-     form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attr => {
-      const tableValue = formValue[attr.key];
-      const initValue = initialValue.properties[attr.key];
+     form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attrMeta => {
+      const tableValue = formValue[attrMeta.id];
+      const initValue = initialValue.properties[attrMeta.id];
       if(!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
-       const newSavedIds = (attr as TableField).save(results, formValue[attr.key]);
+       const newSavedIds = (attrMeta as TableField).save(results, formValue[attrMeta.id]);
        if(!result_['properties']) result_['properties'] = {};
-       result_['properties'][attr.key] = formValue[attr.key].map((row, index)=>{
+       result_['properties'][attrMeta.id] = formValue[attrMeta.id].map((row, index)=>{
         row.id = newSavedIds[index];
-        ((formValues.controls[form.id].controls[attr.key] as IFormArray).controls[index] as IFormGroup).controls["id"].setValue(row.id);
+        ((formValues.controls[form.id].controls[attrMeta.id] as IFormArray).controls[index] as IFormGroup).controls["id"].setValue(row.id);
         return row;
        })
       }
