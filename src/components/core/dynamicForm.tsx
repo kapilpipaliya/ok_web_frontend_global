@@ -378,7 +378,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                           formValues={formValues}
     />}
    </For>
-   <button type="submit" class="hidden">submit</button>
    <ui5-button design="Positive" onclick={onSubmit} disabled={!isValid() || !isDataChanged()}>Save</ui5-button>
    <pre>
     {DEBUG && <br/>}

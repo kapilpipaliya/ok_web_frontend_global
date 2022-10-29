@@ -6,6 +6,7 @@ import Page404 from "./errors/404";
 import { BackupRestore } from "./core/BackupRestore";
 import { useDebugger } from "./core/SolidDebug";
 import { graph } from "../lib/graph";
+import { AllForms, SingleForm } from "./Froms";
 
 interface NavigationItem {
   name: string;
@@ -40,6 +41,7 @@ const navigation = [
     ]
   },
   { name: "Backup & Restore", href: "/backup_restore" },
+  { name: "Forms", href: "/forms" },
 ];
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
@@ -108,9 +110,9 @@ export const UI5StaticSideBar = () => {
 
 export const MenuButtonToggle = () => {
   return (
-    <button type="button" class="" onClick={() => {setSidebarOpen(v => !v);}}>
+    <button type="button" class="border:0 cursor:pointer" onClick={() => {setSidebarOpen(v => !v);}}>
       <span class="sr-only">Open sidebar</span>
-      <span class="h-6 w-6" aria-hidden="true" >☰</span>
+      <span aria-hidden="true" >☰</span>
     </button>
   );
 };
@@ -127,6 +129,8 @@ export const DashboardView = () => {
           <Route path="/:entity" component={() => <SchemaTable />} />
           <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />
           <Route path="/backup_restore" component={() => <BackupRestore />} />
+          <Route path="/forms" component={() => <AllForms />} />
+          <Route path="/form/:id" component={() => <SingleForm />} />
           <Route path="/**" component={() => <Page404 />} />
         </Routes>
       </main>

@@ -7,7 +7,7 @@ import { klona } from "klona";
 // Types
 // ********
 
-interface Vertex {
+export interface Vertex {
   id: Id;
   labels: string[];
   properties: {[key: string]: any},
