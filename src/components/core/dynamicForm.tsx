@@ -19,6 +19,7 @@ import { D } from "@mobily/ts-belt";
 import {
  Field,
  TextInputField,
+ TextAreaField,
  BooleanInputField,
  JsonInput,
  GeneralInput,
@@ -74,6 +75,15 @@ export function DynamicForm(props: DynamicFormProps) {
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
        type={"text"}
+       {...(meta.props || {})}
+      />
+     </Match>
+     <Match when={meta.type === ServerFormAttributeType.JsCode}>
+      <TextAreaField
+       label={toTitle(meta.label || meta.key)}
+       // @ts-ignore
+       control={props.formGroup.controls[meta.key]}
+       {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Boolean}>
@@ -82,13 +92,16 @@ export function DynamicForm(props: DynamicFormProps) {
        type="checkbox"
        // @ts-ignore
        control={props.formGroup.controls[meta.key]}
+       {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Object}>
       <Field label={toTitle(meta.label || meta.key)}>
        <JsonInput
         // @ts-ignore
-        control={props.formGroup.controls[meta.key]} />
+        control={props.formGroup.controls[meta.key]}
+        {...(meta.props || {})}
+       />
       </Field>
      </Match>
      <Match when={meta.type === ServerFormAttributeType.Dynamic}>
@@ -96,6 +109,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <GeneralInput
         // @ts-ignore
         control={props.formGroup.controls[meta.key]}
+        {...(meta.props || {})}
        />
       </Field>
      </Match>
@@ -106,6 +120,7 @@ export function DynamicForm(props: DynamicFormProps) {
         control={props.formGroup.controls[meta.key]}
         valueKey={(meta as SelectField).valueKey}
         fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, props.formGroup, inputValue)}
+        {...(meta.props || {})}
        />
       </Field>
      </Match>
@@ -120,6 +135,7 @@ export function DynamicForm(props: DynamicFormProps) {
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
         noSort={(meta as TableField).noSort}
+        {...(meta.props || {})}
        />
       </Field>
      </Match>
@@ -138,6 +154,7 @@ export function DynamicForm(props: DynamicFormProps) {
         defaultValueFn={(meta as TableField).defaultValueFn}
         formValues={props.formValues}
         noSort={(meta as TableField).noSort}
+        {...(meta.props || {})}
        />
       </Field>
      </Match>
@@ -147,6 +164,7 @@ export function DynamicForm(props: DynamicFormProps) {
         // @ts-ignore
         control={props.formGroup}
         items={(meta as ButtonGroupField).buttons}
+        {...(meta.props || {})}
        />
       </Field>
      </Match>
@@ -208,9 +226,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if(meta.type === "buttongroup"){
      console.log('buttongroup skipped')
     } else if (meta.type === "table" || meta.type === "table_forms") {
-     acc[meta.key] = createFormArray([], meta.options);
+     acc[meta.key] = createFormArray([], meta.fieldOptions);
     } else {
-     const iFormControl = createFormControl(getDefaultValue(meta.type), meta.options);
+     const iFormControl = createFormControl(getDefaultValue(meta.type), meta.fieldOptions);
      acc[meta.key] = iFormControl;
      if(meta.onchange){
       createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
