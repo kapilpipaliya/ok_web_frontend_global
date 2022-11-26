@@ -1,9 +1,9 @@
 import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
-import { deleteNode, fetchAttributesTableData, fetchCollectionData, } from "../api";
-import { FormMetaData } from 'ok_web_components/src/components/input/Form';
+import { fetchAttributesTableData, } from "../api";
+import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
 import { css } from "solid-styled-components";
-import { graph, Id } from "../../lib/graph";
+import { deleteVertex, graph, findVertexIdsByLabel } from "../../lib/graph";
 
 export default function SchemaTable() {
  const navigate = useNavigate();
@@ -12,7 +12,7 @@ export default function SchemaTable() {
 
  const [data, setData] = createSignal({
   data: [] as (Id[] | (() => Id[])),
-  headers: [] as { key: string; type: string }[]
+  headers: [] as FieldAttribute[]
  });
 
  let [tableMetaData, setTableMetaData] = createSignal({} as FormMetaData);
@@ -25,10 +25,10 @@ export default function SchemaTable() {
   headers.push({ key: "edit", type: "actions" });
 
   // For async data get operation, we will handle it differently
-  setData(({
-   data: () => fetchCollectionData(params.entity),
+  setData({
+   data: () => findVertexIdsByLabel(params.entity),
    headers
-  }));
+  });
  };
 
  createEffect(() => {
@@ -39,7 +39,7 @@ export default function SchemaTable() {
  const deleteObject = (id) => {
   if (confirm("are you sure")) {
    if (tableMetaData().save[0] === "vertex") {
-    const deleteResult = deleteNode(tableMetaData().save[1], id);
+    const deleteResult = deleteVertex(id);
     // @ts-ignore
     if (deleteResult?.error) alert(data.message);
     else getObjectData();

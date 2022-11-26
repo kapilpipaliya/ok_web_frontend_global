@@ -1,17 +1,17 @@
 import { createEffect, createSignal, For, getOwner, Match, on, onMount, runWithOwner, Show, Switch } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
 import { createFormArray, createFormControl, createFormGroup, IFormArray, IFormControl, IFormGroup } from "solid-forms";
 import { D } from "@mobily/ts-belt";
-import { Field, TextInputField, TextAreaField, BooleanInputField, JsonInput, GeneralInput, SelectInputField, TableInputField, getDefaultValue, ButtonGroup } from "ok_web_components";
-import { addEdge, addNode, fetchAttributesTableData, fetchDocument, fetchEdge, updateEdgeWithStartAndEnd, updateNode } from "../api";
-import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
-
-import {removeUndefinedProperties} from 'ok_web_components';
-import { Id, SelectField, TableField, FormMetaData, InitialValues, FormResult, ButtonGroupField, ServerFormAttributeType } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
+
+import { Field, TextInputField, TextAreaField, BooleanInputField, JsonInput, GeneralInput, SelectInputField, TableInputField, getDefaultValue, ButtonGroup, removeUndefinedProperties } from "ok_web_components";
+import { Id, SelectField, TableField, FormMetaData, InitialValues, FormResult, ButtonGroupField, ServerFormAttributeType } from "ok_web_components/src/components/input/Form";
+import { fetchAttributesTableData } from "../api";
+import { toTitle } from "case-switcher-js";
+import { addNewEdge, addNewVertex, getNewGraphId, graph, newEdge, newVertex, replaceEdgeProperties, replaceVertexProperties, updateEdgeStartAndEnd } from "../../lib/graph";
 import { DEBUG } from "../../config";
-import { createStore, reconcile } from "solid-js/store";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -223,7 +223,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
    } else if (form.save[0] === "vertex") {
     // used FormMetaData.save attribute temporary.
-    const vertex = fetchDocument(form.save[1], mainId());
+    const vertex = graph.vertexes[mainId()];
 
     if (!vertex) {
      alert(`document with id: ${mainId()} not exist`);
@@ -236,7 +236,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
     // load table data when required
    } else if (form.save[0] === "edge") {
-    const edge = fetchEdge(form.save[1], mainId());
+    const edge = graph.edges[mainId()];
 
     if (!edge) {
      alert(`Edge with id: ${mainId()} not exist`);
@@ -273,10 +273,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if (form.save[0] === "vertex") {
      const result_ = {};
      if (!id) {
-      result_["id"] = addNode(form.save[1], value);
+      result_["id"] = getNewGraphId();
+      addNewVertex(newVertex(result_["id"], [form.save[1]], value));
      } else {
       if(D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
-       result_["id"] = updateNode(form.save[1], initialValue.id, value);
+       replaceVertexProperties(initialValue.id, value);
+       result_["id"] = initialValue.id;
       }
      }
      return Promise.resolve(result_);
@@ -286,14 +288,18 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      let result_ = {} as typeof initialValue;
      if (start && end) {
       if (!id) {
-       const newId = addEdge(form.save[1], value, start, end);
+       const newId = getNewGraphId();
+       addNewEdge(newEdge(newId, form.save[1], value, start, end));
        result_ = {id: newId, properties: value, start, end};
       } else {
        // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
-       if((D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) || initialValue.start !== start || initialValue.end !== end) {
-        const newId = updateEdgeWithStartAndEnd(form.save[1], initialValue.id, value, start, end);
-        result_ = {id: newId, properties: value, start, end};
+       if(D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
+        replaceEdgeProperties(initialValue.id, value);
        }
+       if(initialValue.start !== start || initialValue.end !== end) {
+        updateEdgeStartAndEnd(initialValue.id, start, end);
+       }
+       result_ = {id: initialValue.id, properties: value, start, end};
       }
      }
      form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attrMeta => {
