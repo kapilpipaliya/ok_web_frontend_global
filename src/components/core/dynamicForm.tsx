@@ -1,54 +1,14 @@
-import {
- createEffect,
- createSignal,
- For,
- getOwner,
- Match, on, onMount,
- runWithOwner,
- Show,
- Switch
-} from "solid-js";
+import { createEffect, createSignal, For, getOwner, Match, on, onMount, runWithOwner, Show, Switch } from "solid-js";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
-import {
- createFormArray,
- createFormControl,
- createFormGroup, IFormArray,
- IFormControl, IFormGroup
-} from "solid-forms";
+import { createFormArray, createFormControl, createFormGroup, IFormArray, IFormControl, IFormGroup } from "solid-forms";
 import { D } from "@mobily/ts-belt";
-import {
- Field,
- TextInputField,
- TextAreaField,
- BooleanInputField,
- JsonInput,
- GeneralInput,
- SelectInputField,
- TableInputField,
- getDefaultValue,
- ButtonGroup
-} from "ok_web_components";
-import {
- addEdge,
- addNode,
- fetchAttributesTableData,
- fetchDocument, fetchEdge, updateEdgeWithStartAndEnd,
- updateNode
-} from "../api";
+import { Field, TextInputField, TextAreaField, BooleanInputField, JsonInput, GeneralInput, SelectInputField, TableInputField, getDefaultValue, ButtonGroup } from "ok_web_components";
+import { addEdge, addNode, fetchAttributesTableData, fetchDocument, fetchEdge, updateEdgeWithStartAndEnd, updateNode } from "../api";
 import { toTitle } from "case-switcher-js";
 import { klona } from "klona/json";
 
 import {removeUndefinedProperties} from 'ok_web_components';
-import {
- Id,
- SelectField,
- TableField,
- FormMetaData,
- InitialValues,
- FormResult,
- ButtonGroupField,
- ServerFormAttributeType
-} from "ok_web_components/src/components/input/Form";
+import { Id, SelectField, TableField, FormMetaData, InitialValues, FormResult, ButtonGroupField, ServerFormAttributeType } from "ok_web_components/src/components/input/Form";
 import {equals} from 'rambda';
 import { DEBUG } from "../../config";
 import { createStore, reconcile } from "solid-js/store";

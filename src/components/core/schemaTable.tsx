@@ -1,18 +1,6 @@
-import {
- createEffect,
- createSignal,
- For,
- Match,
- Show,
- Switch,
- untrack
-} from "solid-js";
+import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
-import {
- deleteNode,
- fetchAttributesTableData,
- fetchCollectionData,
-} from "../api";
+import { deleteNode, fetchAttributesTableData, fetchCollectionData, } from "../api";
 import { FormMetaData } from 'ok_web_components/src/components/input/Form';
 import { css } from "solid-styled-components";
 import { graph, Id } from "../../lib/graph";
