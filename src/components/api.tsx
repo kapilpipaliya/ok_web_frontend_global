@@ -1,11 +1,18 @@
 import jju from "jju";
-import { addNewEdge, deleteEdge, findVertexIdsByLabel, getNewGraphId, getOutEdgeOfTypeIds, graph, newEdge, replaceEdgeProperties, updateEdgeStartAndEnd, } from "../lib/graph";
+import { getNewGraphId, graph,  } from "../lib/graph";
 import { batch } from "solid-js";
 import { createFormArray, IFormGroup } from "solid-forms";
 import { FormMetaData, FormResult, ServerFormAttributeType, VertexLabels, EdgeLabels, Id } from 'ok_web_components/src/components/input/Form';
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
 import { Icon } from '@iconify-icon/solid';
+import { findVertexIdsByLabel } from "../lib/Vertex";
+import {
+  addNewEdge,
+  deleteEdge,
+  getOutEdgeIdsOfType, newEdge, replaceEdgeProperties,
+  updateEdgeStartAndEnd
+} from "../lib/Edge";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
@@ -20,7 +27,7 @@ function saveTableDataToEdge(tableData: any[], results: FormResult, edge: string
   }, {});
 
   const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
-  const existingAttributeEdgeIds = getOutEdgeOfTypeIds(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
+  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
 
   const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
   let deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
@@ -61,7 +68,7 @@ function saveFormLayoutTableDataToEdge(tableData: any[], results: FormResult, ed
   }, {});
 
   const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
-  const existingAttributeEdgeIds = getOutEdgeOfTypeIds(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
+  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
 
   const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
   let deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
@@ -132,7 +139,7 @@ export function fetchAttributesTableData(
           // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.ServerToFormAttributeType],
           data: (id) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(id, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {ServerToFormAttributeType: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, formAttributeType: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -165,7 +172,7 @@ export function fetchAttributesTableData(
           { id: "formType", type: ServerFormAttributeType.Select, valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>{
             const serverTypeValue = formGroup.controls['serverType'].value;
             if(!serverTypeValue) return [];
-            return getOutEdgeOfTypeIds(serverTypeValue,  EdgeLabels.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
+            return getOutEdgeIdsOfType(serverTypeValue,  EdgeLabels.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
             } },
           { id: "label", type: ServerFormAttributeType.String },
           // { id: "internal", type: ServerFormAttributeType.Boolean },
@@ -193,7 +200,7 @@ export function fetchAttributesTableData(
           // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.CollectionHasAttribute],
           data: (id) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(id, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -270,7 +277,7 @@ export function fetchAttributesTableData(
           id: "2", title: "Attributes",
           save: ["edge", EdgeLabels.FormLayoutItemHasAttribute],
           data: (id) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(id, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -324,7 +331,7 @@ export function fetchAttributesTableData(
           id: "1", title: "Forms",
           save: ["edge", EdgeLabels.FormLayoutHasItem],
           data: (id) => {
-            const AttributeEdges = getOutEdgeOfTypeIds(id, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
             // return {properties: {FormLayoutItem: AttributeEdges}}
           },

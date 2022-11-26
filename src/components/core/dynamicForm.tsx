@@ -10,8 +10,18 @@ import { Field, TextInputField, TextAreaField, BooleanInputField, JsonInput, Gen
 import { Id, SelectField, TableField, FormMetaData, InitialValues, FormResult, ButtonGroupField, ServerFormAttributeType } from "ok_web_components/src/components/input/Form";
 import { fetchAttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
-import { addNewEdge, addNewVertex, getNewGraphId, graph, newEdge, newVertex, replaceEdgeProperties, replaceVertexProperties, updateEdgeStartAndEnd } from "../../lib/graph";
+import { getNewGraphId, graph } from "../../lib/graph";
 import { DEBUG } from "../../config";
+import {
+ addNewVertex,
+ newVertex,
+ replaceVertexProperties
+} from "../../lib/Vertex";
+import {
+ addNewEdge, newEdge,
+ replaceEdgeProperties,
+ updateEdgeStartAndEnd
+} from "../../lib/Edge";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -191,6 +201,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      const iFormControl = createFormControl(getDefaultValue(meta.type), meta.fieldOptions);
      acc[meta.id] = iFormControl;
      if(meta.onchange){
+      // if problem occur use rawValue
       createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
      }
     }
@@ -200,19 +211,20 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   formGroup.setControls(groupConstructor);
 
-  const setDefaultValue = (value: {[key: string]: any}) => {
+  const setDefaultValueIfEmpty = (properties: {[key: string]: any}) => {
    form.attributes.forEach(meta=>{
     if (meta.default){
-     if(!value[meta.id])
-      value[meta.id] = meta.default(formValues, formGroup )
+     if(!properties[meta.id])
+      properties[meta.id] = meta.default(formValues, formGroup )
     }
    })
   }
   if (mainId()) {
    const data = form.data?.(mainId());
    if (data) {
-    setDefaultValue(data.properties);
+    setDefaultValueIfEmpty(data.properties);
     setInitialValues(form.id, reconcile(data));
+    // set non table values
     const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
@@ -229,7 +241,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      alert(`document with id: ${mainId()} not exist`);
      return;
     }
-    setDefaultValue(vertex.properties);
+    setDefaultValueIfEmpty(vertex.properties);
     setInitialValues(form.id, reconcile(vertex));
     const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table"  && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
@@ -242,7 +254,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      alert(`Edge with id: ${mainId()} not exist`);
      return;
     }
-    setDefaultValue(edge.properties);
+    setDefaultValueIfEmpty(edge.properties);
     setInitialValues(form.id, reconcile(data));
     const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);

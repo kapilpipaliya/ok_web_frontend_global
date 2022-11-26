@@ -3,7 +3,8 @@ import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { fetchAttributesTableData, } from "../api";
 import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
 import { css } from "solid-styled-components";
-import { deleteVertex, graph, findVertexIdsByLabel } from "../../lib/graph";
+import { graph } from "../../lib/graph";
+import { deleteVertex, findVertexIdsByLabel } from "../../lib/Vertex";
 
 export default function SchemaTable() {
  const navigate = useNavigate();
