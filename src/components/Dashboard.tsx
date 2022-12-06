@@ -140,6 +140,13 @@ export const DashboardView = () => {
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
+  onMount(() => {
+    const meta = document.createElement('meta');
+    meta.name = "version";
+    meta.content = __APP_VERSION__;
+    document.getElementsByTagName('head')[0].appendChild(meta);
+  });
+
   const debugGraph = useDebugger("graph");
   // debugGraph(graph);
   return (

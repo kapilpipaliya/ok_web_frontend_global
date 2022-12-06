@@ -4,9 +4,11 @@ import { klona } from "klona";
 import { get, set } from "idb-keyval";
 import { Edge, Id, Vertex } from "ok_web_components/src/components/input/Form";
 
+// implement changes feed like: https://pouchdb.com/guides/changes.html
+// '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 export const [graph, setGraph] = createStore({
-  id: 0,
+  uniqueId: 0,
   vertexes: {} as { [key: string]: Vertex },
   edges: {} as { [key: string]: Edge },
   vertexLabelIdMap: {} as { [key: string]: Id[] },
@@ -16,13 +18,13 @@ export type RevertTransaction = () => void;
 export const transactions = new Map<string, RevertTransaction[]>();
 
 export function getNewGraphId(): Id {
-  setGraph('id', graph.id + 1)
-  return `${graph.id}`;
+  setGraph('uniqueId', graph.uniqueId + 1);
+  return `${graph.uniqueId}`;
 }
 
 export function resetDatabase() {
   setGraph(reconcile({
-    id: 0,
+    uniqueId: 0,
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },
