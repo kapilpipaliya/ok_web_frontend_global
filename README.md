@@ -47,3 +47,9 @@ ESLint is configured as following
 
 ### css rules
 - don't use css child selectors.
+
+### Eval Libs
+https://www.npmjs.com/package/@nx-js/compiler-util
+evalute in a window:
+https://github.com/amasad/context-eval/blob/master/lib/context-browser.js
+https://github.com/ttessarolo/safe-evaluate-expression

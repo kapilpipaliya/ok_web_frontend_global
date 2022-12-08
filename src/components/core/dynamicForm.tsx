@@ -1,13 +1,52 @@
-import { createEffect, createSignal, For, getOwner, Match, on, onMount, runWithOwner, Show, Switch } from "solid-js";
+import {
+ createEffect,
+ createSignal,
+ For,
+ getOwner,
+ Match,
+ on,
+ onMount,
+ runWithOwner,
+ Show,
+ Switch
+} from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { useParams, useNavigate, useLocation } from "solid-app-router";
-import { createFormArray, createFormControl, createFormGroup, IFormArray, IFormControl, IFormGroup } from "solid-forms";
+import {
+ createFormArray,
+ createFormControl,
+ createFormGroup,
+ IFormArray,
+ IFormControl,
+ IFormGroup
+} from "solid-forms";
 import { D } from "@mobily/ts-belt";
 import { klona } from "klona/json";
-import {equals} from 'rambda';
+import { equals } from "rambda";
 
-import { Field, TextInputField, TextAreaField, BooleanInputField, JsonInput, GeneralInput, SelectInputField, TableInputField, getDefaultValue, ButtonGroup, removeUndefinedProperties } from "ok_web_components";
-import { Id, SelectField, TableField, FormMetaData, InitialValues, FormResult, ButtonGroupField, ServerFormAttributeType } from "ok_web_components/src/components/input/Form";
+import {
+ Field,
+ TextInputField,
+ TextAreaField,
+ BooleanInputField,
+ JsonInput,
+ GeneralInput,
+ SelectInputField,
+ TableInputField,
+ getDefaultValue,
+ ButtonGroup,
+ removeUndefinedProperties
+} from "ok_web_components";
+import {
+ Id,
+ SelectField,
+ TableField,
+ FormMetaData,
+ InitialValues,
+ FormResult,
+ ButtonGroupField,
+ ServerFormAttributeType
+} from "ok_web_components/src/components/input/Form";
 import { fetchAttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
 import { getNewGraphId, graph } from "../../lib/graph";
@@ -26,7 +65,7 @@ import {
 interface DynamicFormProps {
  formMetaData: FormMetaData;
  id?: Id;
- formGroup: ReturnType<typeof createFormGroup>
+ formGroup: ReturnType<typeof createFormGroup>;
  // all forms options:
  formValues: IFormGroup;
 }
@@ -115,7 +154,7 @@ export function DynamicForm(props: DynamicFormProps) {
         type={"form"}
         component={DynamicFormSequence}
         forms={fetchAttributesTableData((meta as TableField).form!)}
-        postSubmit={(tableItemFormGroup, values)=>(meta as TableField).postSubmit(props.formValues, props.formGroup,tableItemFormGroup, values)}
+        postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(props.formValues, props.formGroup, tableItemFormGroup, values)}
         // @ts-ignore
         control={props.formGroup.controls[meta.id]}
         attributes={(meta as TableField).attributes}
@@ -148,33 +187,23 @@ export function DynamicForm(props: DynamicFormProps) {
 }
 
 interface DynamicFormSequenceProps {
-  forms?: FormMetaData[]
-  entity?: string; // currently not used
-  postSubmit?: (values: FormResult)=>void
-  id?: Id;
+ // either entity or forms is required
+ entity?: string;
+ forms?: FormMetaData[];
+ postSubmit?: (values: FormResult) => void;
+ id?: Id;
 }
+
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
- onMount(()=>{
+ onMount(() => {
   const form = formRef();
   form.querySelector("input").focus();
- })
-
- const params = useParams();
- const navigate = useNavigate();
+ });
  const location = useLocation();
- const entity = () => props.entity || params.entity;
- const mainId = () => {
-  if (props.id === undefined && params.id === "new") {
-   return undefined;
-  } else if(props.id == "new") {
-   return undefined;
-  } else {
-   return props.id === undefined ? params.id : props.id;
-  }
- }
+ const navigate = useNavigate();
 
- const formMetaData = props.forms || fetchAttributesTableData(entity()) as FormMetaData[];
+ const formMetaData = props.forms || fetchAttributesTableData(props.entity) as FormMetaData[];
 
  const formValuesConstructor = formMetaData.reduce((acc, curr) => {
   acc[curr.id] = createFormGroup({});
@@ -182,7 +211,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  }, {} as { [key: string]: ReturnType<typeof createFormGroup> });
  const formValues = createFormGroup(formValuesConstructor);
 
- const [initialValues, setInitialValues] = createStore({} as InitialValues)
+ const [initialValues, setInitialValues] = createStore({} as InitialValues);
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
@@ -193,14 +222,14 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const formGroup = formValues.controls[form.id];
   const groupConstructor = form.attributes.reduce((acc, meta) => {
    runWithOwner(owner, () => {
-    if(meta.type === "buttongroup"){
-     console.log('buttongroup skipped')
+    if (meta.type === "buttongroup") {
+     console.log("buttongroup skipped");
     } else if (meta.type === "table" || meta.type === "table_forms") {
      acc[meta.id] = createFormArray([], meta.fieldOptions);
     } else {
      const iFormControl = createFormControl(getDefaultValue(meta.type), meta.fieldOptions);
      acc[meta.id] = iFormControl;
-     if(meta.onchange){
+     if (meta.onchange) {
       // if problem occur use rawValue
       createEffect(on(() => iFormControl.value, (v) => meta.onchange?.(formGroup, v as Id), { defer: true }));
      }
@@ -211,16 +240,16 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   formGroup.setControls(groupConstructor);
 
-  const setDefaultValueIfEmpty = (properties: {[key: string]: any}) => {
-   form.attributes.forEach(meta=>{
-    if (meta.default){
-     if(!properties[meta.id])
-      properties[meta.id] = meta.default(formValues, formGroup )
+  const setDefaultValueIfEmpty = (properties: { [key: string]: any }) => {
+   form.attributes.forEach(meta => {
+    if (meta.default) {
+     if (!properties[meta.id])
+      properties[meta.id] = meta.default(formValues, formGroup);
     }
-   })
-  }
-  if (mainId()) {
-   const data = form.data?.(mainId());
+   });
+  };
+  if (props.id) {
+   const data = form.data?.(props.id);
    if (data) {
     setDefaultValueIfEmpty(data.properties);
     setInitialValues(form.id, reconcile(data));
@@ -235,23 +264,23 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
    } else if (form.save[0] === "vertex") {
     // used FormMetaData.save attribute temporary.
-    const vertex = graph.vertexes[mainId()];
+    const vertex = graph.vertexes[props.id];
 
     if (!vertex) {
-     alert(`document with id: ${mainId()} not exist`);
+     alert(`document with id: ${props.id} not exist`);
      return;
     }
     setDefaultValueIfEmpty(vertex.properties);
     setInitialValues(form.id, reconcile(vertex));
-    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table"  && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
     // load table data when required
    } else if (form.save[0] === "edge") {
-    const edge = graph.edges[mainId()];
+    const edge = graph.edges[props.id];
 
     if (!edge) {
-     alert(`Edge with id: ${mainId()} not exist`);
+     alert(`Edge with id: ${props.id} not exist`);
      return;
     }
     setDefaultValueIfEmpty(edge.properties);
@@ -263,11 +292,14 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    }
    // setFetching(false);
   } else {
-   setInitialValues(form.id, reconcile({id: undefined, properties: formGroup.value}));
+   setInitialValues(form.id, reconcile({
+    id: undefined,
+    properties: formGroup.value
+   }));
   }
  });
  setFetching(false);
- console.log('initialValues: ', initialValues);
+ console.log("initialValues: ", initialValues);
 
  const onSubmit = (e) => {
   e.preventDefault();
@@ -279,16 +311,16 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta=>attrMeta.id));
+    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     const initialValue = initialValues[form.id];
-    const id = initialValue['id'] || mainId();
+    const id = initialValue["id"] || props.id;
     if (form.save[0] === "vertex") {
      const result_ = {};
      if (!id) {
       result_["id"] = getNewGraphId();
       addNewVertex(newVertex(result_["id"], [form.save[1]], value));
      } else {
-      if(D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
+      if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
        replaceVertexProperties(initialValue.id, value);
        result_["id"] = initialValue.id;
       }
@@ -302,29 +334,29 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       if (!id) {
        const newId = getNewGraphId();
        addNewEdge(newEdge(newId, form.save[1], value, start, end));
-       result_ = {id: newId, properties: value, start, end};
+       result_ = { id: newId, properties: value, start, end };
       } else {
        // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
-       if(D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
+       if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
         replaceEdgeProperties(initialValue.id, value);
        }
-       if(initialValue.start !== start || initialValue.end !== end) {
+       if (initialValue.start !== start || initialValue.end !== end) {
         updateEdgeStartAndEnd(initialValue.id, start, end);
        }
-       result_ = {id: initialValue.id, properties: value, start, end};
+       result_ = { id: initialValue.id, properties: value, start, end };
       }
      }
      form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attrMeta => {
       const tableValue = formValue[attrMeta.id];
       const initValue = initialValue.properties[attrMeta.id];
-      if(!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
+      if (!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
        const newSavedIds = (attrMeta as TableField).save(results, formValue[attrMeta.id]);
-       if(!result_['properties']) result_['properties'] = {};
-       result_['properties'][attrMeta.id] = formValue[attrMeta.id].map((row, index)=>{
+       if (!result_["properties"]) result_["properties"] = {};
+       result_["properties"][attrMeta.id] = formValue[attrMeta.id].map((row, index) => {
         row.id = newSavedIds[index];
         ((formValues.controls[form.id].controls[attrMeta.id] as IFormArray).controls[index] as IFormGroup).controls["id"].setValue(row.id);
         return row;
-       })
+       });
       }
      });
      return Promise.resolve(result_);
@@ -341,7 +373,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if (index < length) {
      callMethod().then(result => {
       const formId = formMetaData[index - 1].id;
-      setInitialValues(formId, reconcile(Object.assign({}, initialValues[formId], {properties: formValues.controls[formId].value}, result)));
+      setInitialValues(formId, reconcile(Object.assign({}, initialValues[formId], { properties: formValues.controls[formId].value }, result)));
       results.set(formId, initialValues[formId]);
       checkAndCall();
      });
@@ -351,7 +383,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    };
    checkAndCall();
   }).then((result) => {
-   if(props.postSubmit) {
+   if (props.postSubmit) {
     props.postSubmit(result);
     console.log(initialValues);
    } else {
@@ -361,26 +393,28 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  };
 
  const isValid = () => {
-  return formMetaData.map(form=> formValues.controls[form.id].isValid).every(v=>v === true)
- }
+  return formMetaData.map(form => formValues.controls[form.id].isValid).every(v => v === true);
+ };
  const isDataChanged = () => {
   const result = formMetaData.map(form => equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10)));
-  return result.some(v=>v === false)
- }
+  return result.some(v => v === false);
+ };
 
  return <Show when={!fetching()} fallback={<>Loading</>}>
   <form onSubmit={onSubmit} ref={setFormRef}>
    <For each={formMetaData}>
-    {item => <DynamicForm formMetaData={item} id={mainId()}
+    {item => <DynamicForm formMetaData={item} id={props.id}
                           formGroup={formValues.controls[item.id]}
                           formValues={formValues}
     />}
    </For>
-   <ui5-button design="Positive" onclick={onSubmit} disabled={!isValid() || !isDataChanged()}>Save</ui5-button>
+   <ui5-button design="Positive" onclick={onSubmit}
+               disabled={!isValid() || !isDataChanged()}>Save
+   </ui5-button>
    <pre>
-    {DEBUG && <br/>}
+    {DEBUG && <br />}
     {DEBUG && JSON.stringify(initialValues)}
-    {DEBUG && <>InitialValues:<br/></>}
+    {DEBUG && <>InitialValues:<br /></>}
     {DEBUG && JSON.stringify(formValues.value)}
    </pre>
   </form>

@@ -1,5 +1,10 @@
 import { JSX, createSignal, For, Switch, Match, Show, onMount } from "solid-js";
-import { Route, Routes, useNavigate } from "solid-app-router";
+import {
+ Route,
+ Routes,
+ useNavigate,
+ useParams
+} from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
@@ -9,39 +14,39 @@ import { graph } from "../lib/graph";
 import { AllForms, SingleForm } from "./Froms";
 
 interface NavigationItem {
-  name: string;
-  href?: string;
-  icon?: () => JSX.Element;
-  children?: NavigationItem[]
+ name: string;
+ href?: string;
+ icon?: () => JSX.Element;
+ children?: NavigationItem[];
 }
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
-  { name: "Home", href: "/" },
-  {
-    name: "Base",
-    type: "group",
-    children: [
-      { name: "FormAttributeTypes", href: "/FormAttributeType" },
-      { name: "ServerAttributeTypes", href: "/ServerAttributeType" },
-      { name: "Attributes", href: "/Attribute" },
-      { name: "Collections", href: "/Collection" },
-      { name: "Form Layout", href: "/FormLayout" },
-      { name: "Table Layout", href: "/TableLayout" },
-      { name: "Card Layout", href: "/CardLayout" }
-    ]
-  },
-  {
-    name: "Auth",
-    type: "group",
-    children: [
-      { name: "Users", href: "/User" },
-      { name: "Roles", href: "/Role" },
-      { name: "Permissions", href: "/Permission" }
-    ]
-  },
-  { name: "Backup & Restore", href: "/backup_restore" },
-  { name: "Forms", href: "/forms" },
+ { name: "Home", href: "/" },
+ {
+  name: "Base",
+  type: "group",
+  children: [
+   { name: "FormAttributeTypes", href: "/FormAttributeType" },
+   { name: "ServerAttributeTypes", href: "/ServerAttributeType" },
+   { name: "Attributes", href: "/Attribute" },
+   { name: "Collections", href: "/Collection" },
+   { name: "Form Layout", href: "/FormLayout" },
+   { name: "Table Layout", href: "/TableLayout" },
+   { name: "Card Layout", href: "/CardLayout" }
+  ]
+ },
+ {
+  name: "Auth",
+  type: "group",
+  children: [
+   { name: "Users", href: "/User" },
+   { name: "Roles", href: "/Role" },
+   { name: "Permissions", href: "/Permission" }
+  ]
+ },
+ { name: "Backup & Restore", href: "/backup_restore" },
+ { name: "Forms", href: "/forms" }
 ];
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
@@ -50,111 +55,120 @@ const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const UI5StaticSideBar = () => {
-  const navigate = useNavigate();
-  const onMenuItemClick = (e: any) => {
-    if (e.detail?.item?.href) {
-      navigate(e.detail.item.href);
-    }
-  };
+ const navigate = useNavigate();
+ const onMenuItemClick = (e: any) => {
+  if (e.detail?.item?.href) {
+   navigate(e.detail.item.href);
+  }
+ };
 
-  const Children = (props: { items: NavigationItem[]; }) => {
-    return <For each={props.items} fallback={<div>Loading...</div>}>
-      {(item) => <ui5-side-navigation-sub-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-sub-item>}
-    </For>;
-  };
-  return <>
-    {/*<ui5-shellbar*/}
-    {/*  primary-title="UI5 Web Components"*/}
-    {/*  secondary-title="The Best Run SAP"*/}
-    {/*  show-co-pilot*/}
-    {/*>*/}
-    {/*  <ui5-button icon="menu" slot="startButton" id="startButton"></ui5-button>*/}
-    {/*</ui5-shellbar>*/}
+ const Children = (props: { items: NavigationItem[]; }) => {
+  return <For each={props.items} fallback={<div>Loading...</div>}>
+   {(item) => <ui5-side-navigation-sub-item text={item.name} icon="home"
+                                            href={item.href}></ui5-side-navigation-sub-item>}
+  </For>;
+ };
+ return <>
+  {/*<ui5-shellbar*/}
+  {/*  primary-title="UI5 Web Components"*/}
+  {/*  secondary-title="The Best Run SAP"*/}
+  {/*  show-co-pilot*/}
+  {/*>*/}
+  {/*  <ui5-button icon="menu" slot="startButton" id="startButton"></ui5-button>*/}
+  {/*</ui5-shellbar>*/}
 
-    <ui5-side-navigation onselection-change={onMenuItemClick}>
-      <For each={navigation} fallback={<div>Loading...</div>}>
-        {(item) =>
-          <Switch fallback={<ui5-side-navigation-item text={item.name} icon="home" href={item.href}></ui5-side-navigation-item>}>
-            <Match when={item.type === "group"}>
-              <ui5-side-navigation-item text={item.name} icon="group">
-                <Children items={item.children} />
-              </ui5-side-navigation-item>
-            </Match>
-          </Switch>}
-      </For>
-      <ui5-side-navigation-item text={"Forms"} icon="group">
-        {/*TODO*/}
-        {/*<Children items={graph.vertexLabelIdMap['FormLayout'].map()} />*/}
-      </ui5-side-navigation-item>
-      {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
-      {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
-      {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
-      {/*</ui5-side-navigation-item>*/}
-      {/*<ui5-side-navigation-item text="Locations" icon="locate-me" selected></ui5-side-navigation-item>*/}
-      {/*<ui5-side-navigation-item text="Events" icon="calendar">*/}
-      {/*  <ui5-side-navigation-sub-item text="Local"></ui5-side-navigation-sub-item>*/}
-      {/*  <ui5-side-navigation-sub-item text="Others"></ui5-side-navigation-sub-item>*/}
-      {/*</ui5-side-navigation-item>*/}
+  <ui5-side-navigation onselection-change={onMenuItemClick}>
+   <For each={navigation} fallback={<div>Loading...</div>}>
+    {(item) =>
+     <Switch fallback={<ui5-side-navigation-item text={item.name} icon="home"
+                                                 href={item.href}></ui5-side-navigation-item>}>
+      <Match when={item.type === "group"}>
+       <ui5-side-navigation-item text={item.name} icon="group">
+        <Children items={item.children} />
+       </ui5-side-navigation-item>
+      </Match>
+     </Switch>}
+   </For>
+   <ui5-side-navigation-item text={"Forms"} icon="group">
+    {/*TODO*/}
+    {/*<Children items={graph.vertexLabelIdMap['FormLayout'].map()} />*/}
+   </ui5-side-navigation-item>
+   {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
+   {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
+   {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
+   {/*</ui5-side-navigation-item>*/}
+   {/*<ui5-side-navigation-item text="Locations" icon="locate-me" selected></ui5-side-navigation-item>*/}
+   {/*<ui5-side-navigation-item text="Events" icon="calendar">*/}
+   {/*  <ui5-side-navigation-sub-item text="Local"></ui5-side-navigation-sub-item>*/}
+   {/*  <ui5-side-navigation-sub-item text="Others"></ui5-side-navigation-sub-item>*/}
+   {/*</ui5-side-navigation-item>*/}
 
-      {/*<ui5-side-navigation-item slot="fixedItems" text="Useful Links" icon="chain-link"></ui5-side-navigation-item>*/}
-      {/*<ui5-side-navigation-item slot="fixedItems" text="History" icon="history"></ui5-side-navigation-item>*/}
-    </ui5-side-navigation>
+   {/*<ui5-side-navigation-item slot="fixedItems" text="Useful Links" icon="chain-link"></ui5-side-navigation-item>*/}
+   {/*<ui5-side-navigation-item slot="fixedItems" text="History" icon="history"></ui5-side-navigation-item>*/}
+  </ui5-side-navigation>
 
-    <style>{`
+  <style>{`
       ui5-shellbar::part(root) {
       padding-left: .5rem;
     }`}
-    </style>
-  </>;
+  </style>
+ </>;
 };
 
 export const MenuButtonToggle = () => {
-  return (
-    <button type="button" class="border:0 cursor:pointer" onClick={() => {setSidebarOpen(v => !v);}}>
-      <span class="sr-only">Open sidebar</span>
-      <span aria-hidden="true" >☰</span>
-    </button>
-  );
+ return (
+  <button type="button" class="border:0 cursor:pointer" onClick={() => {
+   setSidebarOpen(v => !v);
+  }}>
+   <span class="sr-only">Open sidebar</span>
+   <span aria-hidden="true">☰</span>
+  </button>
+ );
 };
 
 export const DashboardView = () => {
-  return (
-    <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
-      <div class="">
-        <MenuButtonToggle />
-      </div>
-      <main class="">
-        <Routes>
-          <Route path="/" component={() => <>Home Page</>} />
-          <Route path="/:entity" component={() => <SchemaTable />} />
-          <Route path="/:entity/:id" component={() => <DynamicFormSequence />} />
-          <Route path="/backup_restore" component={() => <BackupRestore />} />
-          <Route path="/forms" component={() => <AllForms />} />
-          <Route path="/form/:id" component={() => <SingleForm />} />
-          <Route path="/**" component={() => <Page404 />} />
-        </Routes>
-      </main>
-    </div>
-  );
+ return (
+  <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
+   <div class="">
+    <MenuButtonToggle />
+   </div>
+   <main class="">
+    <Routes>
+     <Route path="/" component={() => <>Home Page</>} />
+     <Route path="/:entity" component={() => <SchemaTable />} />
+     <Route path="/:entity/:id" component={() => {
+      const params = useParams();
+      return <DynamicFormSequence
+       id={params.id === "new" ? undefined : params.id}
+       entity={params.entity} />;
+     }} />
+     <Route path="/backup_restore" component={() => <BackupRestore />} />
+     <Route path="/forms" component={() => <AllForms />} />
+     <Route path="/form/:id" component={() => <SingleForm />} />
+     <Route path="/**" component={() => <Page404 />} />
+    </Routes>
+   </main>
+  </div>
+ );
 };
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
-  onMount(() => {
-    const meta = document.createElement('meta');
-    meta.name = "version";
-    meta.content = __APP_VERSION__;
-    document.getElementsByTagName('head')[0].appendChild(meta);
-  });
+ onMount(() => {
+  const meta = document.createElement("meta");
+  meta.name = "version";
+  meta.content = __APP_VERSION__;
+  document.getElementsByTagName("head")[0].appendChild(meta);
+ });
 
-  const debugGraph = useDebugger("graph");
-  // debugGraph(graph);
-  return (
-    <div class="min-h:full">
-      <Show when={isSideBarOpen()}>
-        <div class={"w:15rem fixed inset:0"}><UI5StaticSideBar /></div>
-      </Show>
-      <DashboardView />
-    </div>
-  );
+ const debugGraph = useDebugger("graph");
+ // debugGraph(graph);
+ return (
+  <div class="min-h:full">
+   <Show when={isSideBarOpen()}>
+    <div class={"w:15rem fixed inset:0"}><UI5StaticSideBar /></div>
+   </Show>
+   <DashboardView />
+  </div>
+ );
 };

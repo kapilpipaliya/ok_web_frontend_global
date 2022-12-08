@@ -138,8 +138,8 @@ export function fetchAttributesTableData(
           id: "1", title: "FormAttributeType",
           // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.ServerToFormAttributeType],
-          data: (id) => {
-            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
+          data: (mainId) => {
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {ServerToFormAttributeType: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, formAttributeType: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -199,8 +199,8 @@ export function fetchAttributesTableData(
           id: "1", title: "Collection2",
           // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.CollectionHasAttribute],
-          data: (id) => {
-            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+          data: (mainId) => {
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -276,8 +276,8 @@ export function fetchAttributesTableData(
         {
           id: "2", title: "Attributes",
           save: ["edge", EdgeLabels.FormLayoutItemHasAttribute],
-          data: (id) => {
-            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+          data: (mainId) => {
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -330,8 +330,8 @@ export function fetchAttributesTableData(
         {
           id: "1", title: "Forms",
           save: ["edge", EdgeLabels.FormLayoutHasItem],
-          data: (id) => {
-            const AttributeEdges = getOutEdgeIdsOfType(id, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
+          data: (mainId) => {
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
             return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
             // return {properties: {FormLayoutItem: AttributeEdges}}
           },

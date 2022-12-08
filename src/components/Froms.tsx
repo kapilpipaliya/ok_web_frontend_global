@@ -3,6 +3,7 @@ import { Link, useParams } from "solid-app-router";
 import { graph } from "../lib/graph";
 import {removeUndefinedProperties} from 'ok_web_components';
 import { VertexLabels, EdgeLabels, Id } from 'ok_web_components/src/components/input/Form';
+import { convertToJS } from "./utils";
 
 export const AllForms = () => {
  const allFormLayouts = graph.vertexLabelIdMap[VertexLabels.FormLayout].map(formLayoutVertex => graph.vertexes[formLayoutVertex]);
@@ -50,7 +51,7 @@ export const SingleForm = (props: SingleFormProps) => {
    })
    const from = vertexFormLayoutItem.properties.from
    const to = vertexFormLayoutItem.properties.to
-   const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? eval(from) : undefined, to ? eval(to) : undefined];
+   const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? convertToJS(from) : undefined, to ? convertToJS(to) : undefined];
    return {id: vertexFormLayoutItem.properties.id, title: vertexFormLayoutItem.properties.title, attributes, save}
   })
   return forms;
