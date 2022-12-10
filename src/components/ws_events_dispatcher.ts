@@ -6,6 +6,7 @@ Simplified WebSocket events dispatcher
 // import { decode } from '@msgpack/msgpack';
 
 import { createSignal } from "solid-js";
+import { atom } from 'solid-use';
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
@@ -51,8 +52,9 @@ export class ServerEventsDispatcher {
  isFirst: boolean;
  firstCancelTimeout: number;
  firstPayload: Array<[WSEvent, any]>;
- conn?: WebSocket;
+ socket?: WebSocket;
  lm_handle: ReturnType<typeof window.setTimeout>;
+ state = atom(WebSocket.CLOSED);
 
  constructor(path: string) {
   this.path = path;
@@ -63,10 +65,8 @@ export class ServerEventsDispatcher {
   this.lm_handle = setTimeout(_ => 0, 0);
 
   this.bind = this.bind.bind(this);
-  // this.bind_F = this.bind_F.bind(this)
   this.unbind = this.unbind.bind(this);
   this.trigger = this.trigger.bind(this);
-  // this.triggerFile = this.triggerFile.bind(this)
   this.onmessage = this.onmessage.bind(this);
   this.onclose = this.onclose.bind(this);
   this.onopen = this.onopen.bind(this);
@@ -75,9 +75,10 @@ export class ServerEventsDispatcher {
   this.delay_send = this.delay_send.bind(this);
   this.heartbeat = this.heartbeat.bind(this);
 
+
   if (IS_PRODUCTION) {
    if (window.navigator.onLine) {
-    this.conn = this.setupConnection();
+    this.socket = this.setupConnection();
    }
    window.addEventListener("online", () => {
     this.isOnline = true;
@@ -96,19 +97,19 @@ export class ServerEventsDispatcher {
  }
 
  setupConnection() {
-  // if (this.conn) {
+  // if (this.socket) {
   //   return;
   // }
-  this.conn = new WebSocket(this.path, []);
+  this.socket = new WebSocket(this.path, []);
   // dispatch to the right handlers
-  this.conn.onmessage = this.onmessage;
-  this.conn.onclose = this.onclose;
-  // this.conn.onopen = this.onopen;
-  this.conn.addEventListener("open", this.onopen);
-  this.conn.onerror = e => {
+  this.socket.onmessage = this.onmessage;
+  this.socket.onclose = this.onclose;
+  // this.socket.onopen = this.onopen;
+  this.socket.addEventListener("open", this.onopen);
+  this.socket.onerror = e => {
    // console.log(e);
   };
-  return this.conn;
+  return this.socket;
  }
 
  heartbeat() {
@@ -118,11 +119,11 @@ export class ServerEventsDispatcher {
  }
 
  destroy() {
-  if (this.conn) {
-   this.conn.onmessage = null;
-   this.conn.onclose = null;
-   this.conn.removeEventListener("open", this.onopen);
-   this.conn.close();
+  if (this.socket) {
+   this.socket.onmessage = null;
+   this.socket.onclose = null;
+   this.socket.removeEventListener("open", this.onopen);
+   this.socket.close();
   }
  }
 
@@ -139,8 +140,8 @@ export class ServerEventsDispatcher {
 
  private delay_send() {
   if (this.firstPayload.length) {
-   if(this.conn) {
-    this.conn.send(JSON.stringify(this.firstPayload));
+   if(this.socket) {
+    this.socket.send(JSON.stringify(this.firstPayload));
     this.firstPayload = [];
    } else {
     return;
@@ -152,8 +153,9 @@ export class ServerEventsDispatcher {
  private onopen(evt: Event) {
   clearTimeout(this.lm_handle);
   setWsConnected(true);
+  this.state(WebSocket.OPEN);
   this.isFirst = true;
-  // console.log(this.conn.extensions);
+  // console.log(this.socket.extensions);
   // console.log("Server Opened")
   this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
   // if (token) {
@@ -166,6 +168,7 @@ export class ServerEventsDispatcher {
  private onclose(ev: CloseEvent) {
   clearTimeout(this.lm_handle);
   setWsConnected(false); // this.dispatch(['close', '', 0], []);
+  this.state(WebSocket.CLOSED)
   const waitMs = 2000;
   // console.log(`close ${ev.code}, trying to reconnect ${new Date().toISOString()}... (waiting ${waitMs}ms)`);
   if (ev.code !== 1006 && ev.code !== 1001) {
@@ -186,10 +189,10 @@ export class ServerEventsDispatcher {
  }
 
  trigger(payload: Array<[WSEvent, any]>) {
-  if (!this.conn) {
+  if (!this.socket) {
    this.firstPayload.push(...payload);
   } else {
-   switch (this.conn.readyState) {
+   switch (this.socket.readyState) {
     case WebSocket.CONNECTING:
      this.firstPayload.push(...payload);
      return;
@@ -201,7 +204,7 @@ export class ServerEventsDispatcher {
       clearTimeout(this.firstCancelTimeout);
       this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
      } else {
-      this.conn.send(JSON.stringify(payload)); // <= send JSON data to socket server
+      this.socket.send(JSON.stringify(payload)); // <= send JSON data to socket server
      }
      return;
     case WebSocket.CLOSING:
