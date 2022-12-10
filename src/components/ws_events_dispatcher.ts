@@ -6,7 +6,8 @@ Simplified WebSocket events dispatcher
 // import { decode } from '@msgpack/msgpack';
 
 import { createSignal } from "solid-js";
-import { atom } from 'solid-use';
+import { atom } from "solid-use";
+
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
@@ -20,8 +21,6 @@ const ws_proto = http_proto == "http:" ? "ws" : "wss";
 const BACKEND = `${domain}${port}`;
 export const WS_PATH = `${ws_proto}://${BACKEND}/ws`;
 export const SERVER_PATH = `${http_proto}://${BACKEND}`;
-
-const [getWsConnected, setWsConnected] = createSignal(IS_PRODUCTION);
 
 export enum BindType {
  Once = 0,
@@ -43,39 +42,33 @@ export enum BindType {
 type callBack = (d: any) => void;
 export type WSEvent = [string, string, number];
 
-export class ServerEventsDispatcher {
+class WSBase {
  private id_ = 0;
+ private readonly path: string;
+ socket?: WebSocket;
+ state = atom(WebSocket.CLOSED);
  // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
  private isOnline = window.navigator.onLine;
- path: string;
- callbacks: Record<string, any> = { open: [], close: [], error: [] };
- isFirst: boolean;
- firstCancelTimeout: number;
- firstPayload: Array<[WSEvent, any]>;
- socket?: WebSocket;
- lm_handle: ReturnType<typeof window.setTimeout>;
- state = atom(WebSocket.CLOSED);
+ private onOpen_: () => void;
+ private onClose_: () => void;
 
  constructor(path: string) {
   this.path = path;
-  this.callbacks = {};
-  this.isFirst = false;
-  this.firstCancelTimeout = 0;
-  this.firstPayload = [];
-  this.lm_handle = setTimeout(_ => 0, 0);
-
-  this.bind = this.bind.bind(this);
-  this.unbind = this.unbind.bind(this);
-  this.trigger = this.trigger.bind(this);
-  this.onmessage = this.onmessage.bind(this);
-  this.onclose = this.onclose.bind(this);
+  this.start = this.start.bind(this);
   this.onopen = this.onopen.bind(this);
+  this.onOpen_ = this.onOpen_.bind(this);
+  this.onclose = this.onclose.bind(this);
+  this.onClose_ = this.onClose_.bind(this);
   this.onerror = this.onerror.bind(this);
-  this.dispatch = this.dispatch.bind(this);
-  this.delay_send = this.delay_send.bind(this);
-  this.heartbeat = this.heartbeat.bind(this);
+  this.setOnMessage = this.setOnMessage.bind(this);
+  this.destroy = this.destroy.bind(this);
+ }
 
+ get uid() {
+  return ++this.id_;
+ }
 
+ start() {
   if (IS_PRODUCTION) {
    if (window.navigator.onLine) {
     this.socket = this.setupConnection();
@@ -92,30 +85,22 @@ export class ServerEventsDispatcher {
   }
  }
 
- get uid() {
-  return ++this.id_;
- }
-
  setupConnection() {
-  // if (this.socket) {
-  //   return;
-  // }
+  if (this.socket) {
+   return;
+  }
   this.socket = new WebSocket(this.path, []);
-  // dispatch to the right handlers
-  this.socket.onmessage = this.onmessage;
-  this.socket.onclose = this.onclose;
-  // this.socket.onopen = this.onopen;
+  this.socket.onopen = this.onopen;
   this.socket.addEventListener("open", this.onopen);
+  this.socket.onclose = this.onclose;
   this.socket.onerror = e => {
-   // console.log(e);
+   console.log(e);
   };
   return this.socket;
  }
 
- heartbeat() {
-  // console.log("heartbeat send");
-  // this.trigger(['heartbeat', Date.now()]);
-  this.lm_handle = setTimeout(this.heartbeat, 30 * 1000);
+ setOnMessage(onMessage: (message: MessageEvent) => void) {
+  this.socket.onmessage = onMessage;
  }
 
  destroy() {
@@ -124,7 +109,89 @@ export class ServerEventsDispatcher {
    this.socket.onclose = null;
    this.socket.removeEventListener("open", this.onopen);
    this.socket.close();
+   this.socket = null;
   }
+ }
+
+ private onopen(evt: Event) {
+  this.state(WebSocket.OPEN);
+  this.onOpen_?.();
+ }
+
+ setOnOpen(onOpen: () => void) {
+  this.onOpen_ = onOpen;
+ }
+
+ private onclose(ev: CloseEvent) {
+  this.state(WebSocket.CLOSED);
+  const waitMs = 2000;
+  if (ev.code !== 1006 && ev.code !== 1001) {
+   console.log(ev);
+  }
+  this.onClose_?.();
+  setTimeout(() => {
+   if (this.isOnline) {
+    this.setupConnection();
+   }
+  }, waitMs);
+ }
+
+ setOnClose(onClose: () => void) {
+  this.onClose_ = onClose;
+ }
+
+ private onerror(event: Event) {
+  console.warn("WebSocket error:", event);
+  this.setupConnection();
+ }
+}
+
+export class ServerEventsDispatcher extends WSBase {
+ callbacks: Record<string, any> = { open: [], close: [], error: [] };
+ lm_handle: ReturnType<typeof window.setTimeout>;
+ isFirstTriggers: boolean;
+ firstPayload: Array<[WSEvent, any]>;
+ firstCancelTimeout: number;
+ constructor(path: string) {
+  super(path);
+  this.callbacks = {};
+  this.firstCancelTimeout = 0;
+  this.onmessage = this.onmessage.bind(this);
+  this.setOnMessage(this.onmessage);
+  this.isFirstTriggers = false;
+  this.firstPayload = [];
+  this.lm_handle = setTimeout(_ => 0, 0);
+  this.setOnOpen(this.onOpen.bind(this));
+  this.setOnClose(this.onClose.bind(this));
+
+  this.bind = this.bind.bind(this);
+  this.unbind = this.unbind.bind(this);
+  this.trigger = this.trigger.bind(this);
+  this.dispatch = this.dispatch.bind(this);
+  this.delay_send = this.delay_send.bind(this);
+  this.heartbeat = this.heartbeat.bind(this);
+  this.start();
+ }
+
+ onOpen() {
+  clearTimeout(this.lm_handle);
+  this.isFirstTriggers = true;
+  this.heartbeat();
+  this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
+  // if (token) {
+  //   this.sendMessage('authentication_challenge', {token});
+  // }
+  this.dispatch(["open", "", 0], []);
+ }
+
+ onClose() {
+  clearTimeout(this.lm_handle);
+  // this.dispatch(['close', '', 0], []);
+ }
+
+ heartbeat() {
+  // this.trigger(['heartbeat', Date.now()]);
+  this.lm_handle = setTimeout(this.heartbeat, 30 * 1000);
  }
 
  bind(event: WSEvent, callback: callBack, handleMultiple = BindType.Permanent) {
@@ -140,52 +207,14 @@ export class ServerEventsDispatcher {
 
  private delay_send() {
   if (this.firstPayload.length) {
-   if(this.socket) {
+   if (this.socket) {
     this.socket.send(JSON.stringify(this.firstPayload));
     this.firstPayload = [];
    } else {
     return;
    }
   }
-  this.isFirst = false;
- }
-
- private onopen(evt: Event) {
-  clearTimeout(this.lm_handle);
-  setWsConnected(true);
-  this.state(WebSocket.OPEN);
-  this.isFirst = true;
-  // console.log(this.socket.extensions);
-  // console.log("Server Opened")
-  this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
-  // if (token) {
-  //   this.sendMessage('authentication_challenge', {token});
-  // }
-  this.dispatch(["open", "", 0], []);
-  this.heartbeat();
- }
-
- private onclose(ev: CloseEvent) {
-  clearTimeout(this.lm_handle);
-  setWsConnected(false); // this.dispatch(['close', '', 0], []);
-  this.state(WebSocket.CLOSED)
-  const waitMs = 2000;
-  // console.log(`close ${ev.code}, trying to reconnect ${new Date().toISOString()}... (waiting ${waitMs}ms)`);
-  if (ev.code !== 1006 && ev.code !== 1001) {
-   console.log(ev);
-  }
-  setTimeout(() => {
-   if (this.isOnline) {
-    this.setupConnection();
-   }
-  }, waitMs);
-  // on reconnection all subscribtion needs to resubscribe.
- }
-
- private onerror(event: Event) {
-  console.warn("WebSocket error:", event);
-  // todo depend on error try to reconnect
-  this.dispatch(["error", "", 0], []);
+  this.isFirstTriggers = false;
  }
 
  trigger(payload: Array<[WSEvent, any]>) {
@@ -197,7 +226,7 @@ export class ServerEventsDispatcher {
      this.firstPayload.push(...payload);
      return;
     case WebSocket.OPEN:
-     if (this.isFirst) {
+     if (this.isFirstTriggers) {
       for (let i = 0; i < payload.length; i++) {
        this.firstPayload.push(payload[i]);
       }
@@ -209,8 +238,6 @@ export class ServerEventsDispatcher {
      return;
     case WebSocket.CLOSING:
     case WebSocket.CLOSED:
-     // try to reconnect
-     this.setupConnection();
      this.firstPayload.push(...payload);
      return;
     default:
@@ -298,7 +325,3 @@ export function clearCookie(d) {
 
 // export const [getIsLoggedIn, setIsLoggedIn] = createSignal(null);
 // Ws.bind$([ET[ET.get], "is_logged_in", 0], isLoggedIn, 1);
-
-
-
-export { getWsConnected, setWsConnected };
