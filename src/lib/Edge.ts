@@ -11,12 +11,12 @@ import {
 } from "./graph";
 import { Edge, Id } from "../../../ok_web_components/src/components/input/Form";
 
-export function newEdge(edgeId: Id, label: string, properties: {}, startVertexId: Id, endVertexId: Id): Edge {
+export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId: Id, endVertexId: Id): Edge {
  !isValidId(startVertexId) && console.error(`edge startId should be string, but received ${startVertexId}`);
  !isValidId(endVertexId) && console.error(`edge endId and endId should be string, but received ${endVertexId}`);
  return {
   id: edgeId,
-  label,
+  type,
   properties,
   start: startVertexId,
   end: endVertexId
@@ -27,8 +27,8 @@ export function addNewEdge(edge: Edge): [Id, RevertTransaction[]] {
  const edgeId = edge.id ? edge.id : getNewGraphId();
  batch(() => {
   setGraph("edges", edgeId, klona(edge));
-  setGraph("vertexes", edge.start, "out_edges", edge.label, out_edges => G.isArray(out_edges) ? !out_edges.includes(edgeId) ? [...out_edges, edgeId] : out_edges : [edgeId]);
-  setGraph("vertexes", edge.end, "in_edges", edge.label, in_edges => G.isArray(in_edges) ? !in_edges.includes(edgeId) ? [...in_edges, edgeId] : in_edges : [edgeId]);
+  setGraph("vertexes", edge.start, "out_edges", edge.type, out_edges => G.isArray(out_edges) ? !out_edges.includes(edgeId) ? [...out_edges, edgeId] : out_edges : [edgeId]);
+  setGraph("vertexes", edge.end, "in_edges", edge.type, in_edges => G.isArray(in_edges) ? !in_edges.includes(edgeId) ? [...in_edges, edgeId] : in_edges : [edgeId]);
  });
  return [edgeId, [() => deleteEdge(edgeId)]];
 }
@@ -62,7 +62,7 @@ export function updateEdgeStartAndEnd(edgeId: Id, start: Id, end: Id): [Id, Reve
   const oldEndId = edge.end;
   const isStartChanged = start && oldStartId !== start;
   const isEndChanged = end && oldEndId !== end;
-  const type = graph.edges[edgeId].label;
+  const type = graph.edges[edgeId].type;
   isStartChanged && revertTransactions.push(replaceEdgeStart(type, edgeId, oldStartId, start));
   isEndChanged && revertTransactions.push(replaceEdgeEnd(type, edgeId, oldEndId, end));
   if (isStartChanged || isEndChanged) {
@@ -79,7 +79,7 @@ export function updateEdgeStartAndEnd(edgeId: Id, start: Id, end: Id): [Id, Reve
 export function deleteEdge(edgeId: Id): [Id, RevertTransaction[]] {
  const edge = klona(graph.edges[edgeId]);
  batch(() => {
-  const type = graph.edges[edgeId].label;
+  const type = graph.edges[edgeId].type;
   setGraph("vertexes", graph.edges[edgeId].start, "out_edges", type, (ids) => G.isArray(ids) && ids.includes(edgeId) ? pipe(ids.filter(id_ => id_ !== edgeId), newIds => newIds.length ? newIds : undefined) : ids);
   setGraph("vertexes", graph.edges[edgeId].end, "in_edges", type, (ids) => G.isArray(ids) && ids.includes(edgeId) ? pipe(ids.filter(id_ => id_ !== edgeId), newIds => newIds.length ? newIds : undefined) : ids);
   setGraph("edges", edgeId, undefined);

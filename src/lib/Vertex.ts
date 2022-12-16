@@ -14,15 +14,19 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
 
 export function addNewVertex(vertex: Vertex): [Id, RevertTransaction[]] {
  const vertexId = vertex.id ? vertex.id : getNewGraphId();
+ const existedVertexes = vertex.labels.filter(label => G.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id))
+ if(existedVertexes.length) {
+  return [{error: 'vertex already existing while adding new vertex'}]
+ }
  setGraph("vertexes", vertexId, klona(vertex));
- vertex.labels.forEach(label => setGraph("vertexLabelIdMap", label, vertexIds => G.isArray(vertexIds) ? !vertexIds.includes(vertexId) ? [...vertexIds, vertexId] : vertexIds : [vertexId]));
- return [vertexId, [() => deleteVertex(vertexId)]];
+ vertex.labels.forEach(label => setGraph("vertexLabelIdMap", label, vertexIds => G.isArray(vertexIds) ? [...vertexIds, vertexId] : [vertexId]));
+ return [vertexId, [{insert: klonw(vertex)}, () => deleteVertex(vertexId)]];
 }
 
 export function replaceVertexProperties(vertexId: Id, properties: {}): [Id, RevertTransaction[]] {
  const originalProperties = klona(graph.vertexes[vertexId].properties);
  setGraph("vertexes", vertexId, "properties", reconcile(properties));
- return [vertexId, [() => replaceVertexProperties(vertexId, originalProperties)]];
+ return [vertexId, [{replace: klona(vertex)}, () => replaceVertexProperties(vertexId, originalProperties)]];
 }
 
 export function deleteVertex(vertexId: Id): [Id, RevertTransaction[]] {
@@ -31,7 +35,7 @@ export function deleteVertex(vertexId: Id): [Id, RevertTransaction[]] {
   graph.vertexes[vertexId].labels.forEach(label => setGraph("vertexLabelIdMap", label, vertexIds => G.isArray(vertexIds) && vertexIds.includes(vertexId) ? pipe(vertexIds.filter(vId => vId !== vertexId), fIds => fIds.length ? fIds : undefined) : vertexIds));
   setGraph("vertexes", vertexId, undefined);
  });
- return [vertexId, [() => addNewVertex(vertex)]];
+ return [vertexId, [{deleteVertex: klona(vertex)}, () => addNewVertex(vertex)]];
 }
 
 export function findVertexIdsByLabel(label: string): Id[] {

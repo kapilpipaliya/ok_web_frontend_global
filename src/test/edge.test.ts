@@ -24,7 +24,6 @@ describe('addNewEdge', () => {
   Edge1.properties.a = 3;
   expect(graph.edges[Edge1.id].properties.a).to.eq(11);
  })
-
  test('Edge revert transaction', async() => {
   const vertex1 = newVertex(createUniqueId(), ['hello'], {a: 1, b: 2, c: [3, 4, 5]});
   const vertex2 = newVertex(createUniqueId(), ['hello'], {a: 6, b: 7, c: [8, 9, 10]});

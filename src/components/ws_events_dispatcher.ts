@@ -3,11 +3,11 @@ Simplified WebSocket events dispatcher
 */
 // import IsomorphicWs from 'isomorphic-ws'
 
-// import { decode } from '@msgpack/msgpack';
+// import { decode } from '@msgpack/msgpack'; import {WSBase} from "./ws_reconnect";
 
-import { createSignal } from "solid-js";
+import { WSBase } from "./ws_reconnect";
+import { createContext, createSignal } from "solid-js";
 import { atom } from "solid-use";
-
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
@@ -37,113 +37,24 @@ export enum BindType {
 // A WebSocket JavaScript library https://sarus.anephenix.com
 // https://github.com/anephenix/sarus
 // API: https://www.w3.org/TR/websockets/
-
-// TODO: see https://github.com/titoBouzout/angelia.io
+// see: https://github.com/discord/sample-game-integration/blob/master/client/src/App.js
+// see https://github.com/titoBouzout/angelia.io
 type callBack = (d: any) => void;
 export type WSEvent = [string, string, number];
 
-class WSBase {
- private id_ = 0;
- private readonly path: string;
- socket?: WebSocket;
- state = atom(WebSocket.CLOSED);
- // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
- private isOnline = window.navigator.onLine;
- private onOpen_: () => void;
- private onClose_: () => void;
 
- constructor(path: string) {
-  this.path = path;
-  this.start = this.start.bind(this);
-  this.onopen = this.onopen.bind(this);
-  this.onOpen_ = this.onOpen_.bind(this);
-  this.onclose = this.onclose.bind(this);
-  this.onClose_ = this.onClose_.bind(this);
-  this.onerror = this.onerror.bind(this);
-  this.setOnMessage = this.setOnMessage.bind(this);
-  this.destroy = this.destroy.bind(this);
- }
+// read more: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
+export function saveCookie(name: string, value: string, max_age: number) {
+ document.cookie = `${name}=${value}; path=/; max-age=${max_age}`;
+}
 
- get uid() {
-  return ++this.id_;
- }
-
- start() {
-  if (IS_PRODUCTION) {
-   if (window.navigator.onLine) {
-    this.socket = this.setupConnection();
-   }
-   window.addEventListener("online", () => {
-    this.isOnline = true;
-    this.setupConnection();
-   });
-   window.addEventListener("offline", () => {
-    this.isOnline = false;
-   });
-  } else {
-   this.setupConnection();
-  }
- }
-
- setupConnection() {
-  if (this.socket) {
-   return;
-  }
-  this.socket = new WebSocket(this.path, []);
-  this.socket.onopen = this.onopen;
-  this.socket.addEventListener("open", this.onopen);
-  this.socket.onclose = this.onclose;
-  this.socket.onerror = e => {
-   console.log(e);
-  };
-  return this.socket;
- }
-
- setOnMessage(onMessage: (message: MessageEvent) => void) {
-  this.socket.onmessage = onMessage;
- }
-
- destroy() {
-  if (this.socket) {
-   this.socket.onmessage = null;
-   this.socket.onclose = null;
-   this.socket.removeEventListener("open", this.onopen);
-   this.socket.close();
-   this.socket = null;
-  }
- }
-
- private onopen(evt: Event) {
-  this.state(WebSocket.OPEN);
-  this.onOpen_?.();
- }
-
- setOnOpen(onOpen: () => void) {
-  this.onOpen_ = onOpen;
- }
-
- private onclose(ev: CloseEvent) {
-  this.state(WebSocket.CLOSED);
-  const waitMs = 2000;
-  if (ev.code !== 1006 && ev.code !== 1001) {
-   console.log(ev);
-  }
-  this.onClose_?.();
-  setTimeout(() => {
-   if (this.isOnline) {
-    this.setupConnection();
-   }
-  }, waitMs);
- }
-
- setOnClose(onClose: () => void) {
-  this.onClose_ = onClose;
- }
-
- private onerror(event: Event) {
-  console.warn("WebSocket error:", event);
-  this.setupConnection();
- }
+export function clearCookie(d) {
+ document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+}
+function saveCookies(data: { max_age: number; cookie: { jwt: string } }) {
+ Object.keys(data.cookie).forEach(key => {
+  saveCookie(key, data.cookie[key] as string, data.max_age);
+ });
 }
 
 export class ServerEventsDispatcher extends WSBase {
@@ -152,6 +63,9 @@ export class ServerEventsDispatcher extends WSBase {
  isFirstTriggers: boolean;
  firstPayload: Array<[WSEvent, any]>;
  firstCancelTimeout: number;
+ lastMessageTimeStamp = 0;
+ subscriptions: string[];
+ isLoggedIn =  atom<boolean>(false);
  constructor(path: string) {
   super(path);
   this.callbacks = {};
@@ -170,6 +84,9 @@ export class ServerEventsDispatcher extends WSBase {
   this.dispatch = this.dispatch.bind(this);
   this.delay_send = this.delay_send.bind(this);
   this.heartbeat = this.heartbeat.bind(this);
+  this.subscribe = this.subscribe.bind(this);
+  this.bind(["get", "cookie_event", 0], saveCookies);
+  this.bind(["get", "is_logged_in", 0], this.isLoggedIn);
   this.start();
  }
 
@@ -182,6 +99,7 @@ export class ServerEventsDispatcher extends WSBase {
   //   this.sendMessage('authentication_challenge', {token});
   // }
   this.dispatch(["open", "", 0], []);
+  this.trigger([[['get', 'sync', 0], {from: this.lastMessageTimeStamp - 4000, subscriptions: this.subscriptions}]]); // TODO fix time
  }
 
  onClose() {
@@ -203,6 +121,9 @@ export class ServerEventsDispatcher extends WSBase {
  unbind(event: WSEvent) {
   this.callbacks[JSON.stringify(event)] = undefined;
   return this;
+ }
+ subscribe(args: any) {
+  this.trigger([['get', 'sync', 0], args]);
  }
 
  private delay_send() {
@@ -268,6 +189,7 @@ export class ServerEventsDispatcher extends WSBase {
  }
 
  private async onmessage(evt: MessageEvent) {
+  this.lastMessageTimeStamp = Date.now();
   if (typeof evt.data === "string") {
    const data = JSON.parse(evt.data);
    this.stringHandle(data);
@@ -303,25 +225,8 @@ export class ServerEventsDispatcher extends WSBase {
   }
  }
 }
-
-export const Ws = new ServerEventsDispatcher(WS_PATH);
-
-// read more: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
-export function saveCookie(name: string, value: string, max_age: number) {
- document.cookie = `${name}=${value}; path=/; max-age=${max_age}`;
-}
-
-export function clearCookie(d) {
- document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
-}
-
-// Ws.bind$([ET[ET.get], "cookie_event", 0], saveCookies, 1);
 //
-// function saveCookies(data: { max_age: number; cookie: { jwt: string } }) {
-//  Object.keys(data.cookie).forEach(key => {
-//   saveCookie(key, data.cookie[key] as string, data.max_age);
-//  });
-// }
+// export const Ws = new ServerEventsDispatcher(WS_PATH);
 
-// export const [getIsLoggedIn, setIsLoggedIn] = createSignal(null);
-// Ws.bind$([ET[ET.get], "is_logged_in", 0], isLoggedIn, 1);
+export const WsContext = createContext({} as { Ws: ServerEventsDispatcher });
+

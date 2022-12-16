@@ -396,7 +396,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   return formMetaData.map(form => formValues.controls[form.id].isValid).every(v => v === true);
  };
  const isDataChanged = () => {
-  const result = formMetaData.map(form => equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10)));
+  const result = formMetaData.map(form => {
+   console.log(1, 2, removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10))
+   return equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10))
+  });
   return result.some(v => v === false);
  };
 

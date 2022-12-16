@@ -162,7 +162,7 @@ export const FullDashboard = () => {
  });
 
  const debugGraph = useDebugger("graph");
- // debugGraph(graph);
+ debugGraph(graph);
  return (
   <div class="min-h:full">
    <Show when={isSideBarOpen()}>
