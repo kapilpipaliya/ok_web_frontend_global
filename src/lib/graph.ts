@@ -16,9 +16,31 @@ export const [graph, setGraph] = createStore({
   vertexLabelIdMap: {} as { [key: string]: Id[] },
   syncing: false
 });
-export type RevertTransaction = {Id: string, insert: () => any, revert: () => any} | {id: Id, error: string};
-export const updateTransactions = new Map<string, RevertTransaction[]>();
-export const revertTransactions = new Map<string, RevertTransaction[]>();
+export type Revert = {revert: () => any}
+export type InsertFn = {
+  [key in "insert" | "replace" | "deleteVertex" | "insertEdge" | 'replaceEdge' | 'replaceEdgeStart' | 'replaceEdgeEnd' | 'deleteEdge']?: () => any;
+};
+export type TransactionValue = InsertFn & Revert;
+export const transactions = new Map<number, TransactionValue[]>();
+export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
+  if(!txnId) return;
+  const existingTxnValue = transactions.get(txnId) || [];
+  transactions.set(txnId, [...existingTxnValue, txnValue])
+}
+export const revertOneTransaction = (txnId: number, txnIndex: number) => {
+  if(!txnId) return;
+  const existingTxnValue = transactions.get(txnId) || [];
+  const newTxnValue = existingTxnValue.splice(txnIndex, 1);
+  newTxnValue[0]?.revert();
+  transactions.set(txnId, newTxnValue)
+}
+export const revertTransaction = (txnId: number) => {
+  if(!txnId) return;
+  const existingTxnValue = transactions.get(txnId) || [];
+  existingTxnValue.forEach(txn => txn.revert());
+  transactions.delete(txnId);
+}
+export const deleteVertex = new Map<string, Transaction[]>();
 
 export function getNewGraphId(): Id {
   setGraph('uniqueId', graph.uniqueId + 1);
