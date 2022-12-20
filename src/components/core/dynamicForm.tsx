@@ -20,7 +20,7 @@ import {
  IFormControl,
  IFormGroup
 } from "solid-forms";
-import { D } from "@mobily/ts-belt";
+import { D, F, flow, pipe } from "@mobily/ts-belt";
 import { klona } from "klona/json";
 import { equals } from "rambda";
 
@@ -242,14 +242,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   formGroup.setControls(groupConstructor);
 
-  const setDefaultValueIfEmpty = (properties: { [key: string]: any }) => {
-   form.attributes.forEach(meta => {
-    if (meta.default) {
-     if (!properties[meta.id])
-      properties[meta.id] = meta.default(formValues, formGroup);
-    }
-   });
-  };
+  const setDefaultValueIfEmpty = (properties: { [key: string]: any }) => form.attributes.forEach(meta => (meta.default && !properties[meta.id]) && (properties[meta.id] = meta.default(formValues, formGroup)));
   if (props.id) {
    const data = form.data?.(props.id);
    if (data) {
@@ -273,10 +266,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      return;
     }
     setDefaultValueIfEmpty(vertex.properties);
-    setInitialValues(form.id, reconcile(vertex));
-    const value = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
-    if (D.isNotEmpty(value)) formGroup.patchValue(value);
-
+    setInitialValues(form.id, reconcile(klona(vertex)));
+    {
+     const nonTableValue = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+     if (D.isNotEmpty(nonTableValue)) formGroup.patchValue(nonTableValue);
+    }
     // load table data when required
    } else if (form.save[0] === "edge") {
     const edge = graph.edges[props.id];
@@ -286,10 +280,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      return;
     }
     setDefaultValueIfEmpty(edge.properties);
-    setInitialValues(form.id, reconcile(data));
-    const value = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
-    if (D.isNotEmpty(value)) formGroup.patchValue(value);
-
+    setInitialValues(form.id, reconcile(klona(data)));
+    {
+     const nonTableValue = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+     if (D.isNotEmpty(nonTableValue)) formGroup.patchValue(nonTableValue);
+    }
     // load table data when required
    }
    // setFetching(false);
@@ -313,39 +308,40 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const value = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+    const nonTableValue = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
     const initialValue = initialValues[form.id];
     const id = initialValue["id"] || props.id;
     if (form.save[0] === "vertex") {
      const result_ = {};
-     if (!id) {
+     if (!id) { // new
       result_["id"] = getNewGraphId();
-      addNewVertex(txnId, newVertex(result_["id"], [form.save[1]], value));
-     } else {
-      if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
-       replaceVertexProperties(txnId, initialValue.id, value);
+      addNewVertex(txnId, newVertex(result_["id"], [form.save[1]], nonTableValue));
+     } else { // edit
+      if (D.isNotEmpty(nonTableValue) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(nonTableValue, false, 10))) {
+       replaceVertexProperties(txnId, initialValue.id, nonTableValue);
        result_["id"] = initialValue.id;
       }
      }
+     // not update table values for now, but do it when required.
      return Promise.resolve(result_);
     } else if (form.save[0] === "edge") {
      const start = form.save[2]?.(results, formValue);
      const end = form.save[3]?.(results, formValue);
      let result_ = {} as typeof initialValue;
      if (start && end) {
-      if (!id) {
+      if (!id) { // new
        const newId = getNewGraphId();
-       addNewEdge(txnId, newEdge(newId, form.save[1], value, start, end));
-       result_ = { id: newId, properties: value, start, end };
-      } else {
+       addNewEdge(txnId, newEdge(newId, form.save[1], nonTableValue, start, end));
+       result_ = { id: newId, properties: nonTableValue, start, end };
+      } else { // edit
        // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
-       if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
-        replaceEdgeProperties(txnId, initialValue.id, value);
+       if (D.isNotEmpty(nonTableValue) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(nonTableValue, false, 10))) {
+        replaceEdgeProperties(txnId, initialValue.id, nonTableValue);
        }
        if (initialValue.start !== start || initialValue.end !== end) {
         updateEdgeStartAndEnd(txnId, initialValue.id, start, end);
        }
-       result_ = { id: initialValue.id, properties: value, start, end };
+       result_ = { id: initialValue.id, properties: nonTableValue, start, end };
       }
      }
      form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attrMeta => {
@@ -376,7 +372,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      callMethod().then(result => {
       const formId = formMetaData[index - 1].id;
       setInitialValues(formId, reconcile(Object.assign({}, initialValues[formId], { properties: formValues.controls[formId].value }, result)));
-      results.set(formId, initialValues[formId]);
+      results.set(formId, klona(initialValues[formId]));
       checkAndCall();
      });
     } else {
@@ -384,9 +380,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
    };
    checkAndCall();
-  }).then((result) => {
+  }).then((results) => {
    if (props.postSubmit) {
-    props.postSubmit(result);
+    props.postSubmit(results);
     console.log(initialValues);
    } else {
     navigate(location.pathname.split("/").slice(0, -1).join("/"));
@@ -399,8 +395,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  };
  const isDataChanged = () => {
   const result = formMetaData.map(form => {
-   console.log(1, 2, removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10))
-   return equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10))
+   console.log(1, 2, removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10));
+   return equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10));
   });
   return result.some(v => v === false);
  };
