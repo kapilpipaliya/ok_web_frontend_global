@@ -27,20 +27,28 @@ export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) 
   const existingTxnValue = transactions.get(txnId) || [];
   transactions.set(txnId, [...existingTxnValue, txnValue])
 }
-export const revertOneTransaction = (txnId: number, txnIndex: number) => {
+let txnNo = 1;
+export const getTxnId = () => ++txnNo
+export const revertOneTransactionUnSafe = (txnId: number, txnIndex: number) => {
   if(!txnId) return;
   const existingTxnValue = transactions.get(txnId) || [];
   const newTxnValue = existingTxnValue.splice(txnIndex, 1);
   newTxnValue[0]?.revert();
   transactions.set(txnId, newTxnValue)
 }
-export const revertTransaction = (txnId: number) => {
+export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
   if(!txnId) return;
   const existingTxnValue = transactions.get(txnId) || [];
-  existingTxnValue.forEach(txn => txn.revert());
+  const newTxnValue = existingTxnValue.splice(txnIndex );
+  newTxnValue.reverse().forEach(x=>x.revert());
+  transactions.set(txnId, newTxnValue)
+}
+export const revertTransaction = (txnId: number) => {
+  if(!txnId) return;
+  const existingTxnValue = [...transactions.get(txnId) || []];
+  existingTxnValue.reverse().forEach(txn => txn.revert());
   transactions.delete(txnId);
 }
-export const deleteVertex = new Map<string, Transaction[]>();
 
 export function getNewGraphId(): Id {
   setGraph('uniqueId', graph.uniqueId + 1);

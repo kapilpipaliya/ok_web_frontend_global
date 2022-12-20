@@ -20,7 +20,7 @@ export const JSONToCypherMap = (json: object) => {
   return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
 };
 */
-function saveTableDataToEdge(tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
+function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
     acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
     return acc;
@@ -42,26 +42,26 @@ function saveTableDataToEdge(tableData: any[], results: FormResult, edge: string
   const result = {};
 
   batch(() => {
-    deletedAttributeIds.forEach(id => deleteEdge(id));
+    deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
       if (!endIdExist(id)) {
         result[id] = id;
         return;
       }
       const newId = getNewGraphId();
-      addNewEdge(newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]));
+      addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]));
       result[id] = newId;
     });
     updatedAttributeIds.forEach(id => {
-      replaceEdgeProperties(id, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]));
-      updateEdgeStartAndEnd(id, results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]);
+      replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]));
+      updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]);
       result[id] = id;
     });
   });
 
   return insertAndUpdatedIds.map(id=>result[id]);
 }
-function saveFormLayoutTableDataToEdge(tableData: any[], results: FormResult, edge: string) {
+function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
     acc[curr.end] = klona(curr);
     return acc;
@@ -83,7 +83,7 @@ function saveFormLayoutTableDataToEdge(tableData: any[], results: FormResult, ed
   const result = {};
 
   batch(() => {
-    deletedAttributeIds.forEach(id => deleteEdge(id));
+    deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
 
     insertedAttributeIds.forEach(id => {
       if (!endIdExist(id)) {
@@ -91,12 +91,12 @@ function saveFormLayoutTableDataToEdge(tableData: any[], results: FormResult, ed
         return;
       }
       const newId = getNewGraphId();
-      addNewEdge(newEdge(newId, edge, normalizedEdgesValue[id]['properties'], results.get("0").id, id));
+      addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]['properties'], results.get("0").id, id));
       result[id] = newId;
     });
     updatedAttributeIds.forEach(id => {
-      replaceEdgeProperties(id, normalizedEdgesValue[id]['properties']);
-      updateEdgeStartAndEnd(id, results.get("0").id, id);
+      replaceEdgeProperties(txnId, id, normalizedEdgesValue[id]['properties']);
+      updateEdgeStartAndEnd(txnId, id, results.get("0").id, id);
       result[id] = id;
     });
   });
@@ -144,10 +144,10 @@ export function fetchAttributesTableData(
           },
           attributes: [
             { id: "ServerToFormAttributeType", type: ServerFormAttributeType.Table, edge: "ServerToFormAttributeType",defaultValue: "undefined",
-              save: (results, tableData)=>{
+              save: (txnId, results, tableData)=>{
                const edge = EdgeLabels.ServerToFormAttributeType;
                 const endIdAttribute = "formAttributeType";
-                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
               },
               attributes: [
                 { id: "pos", type: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
@@ -205,10 +205,10 @@ export function fetchAttributesTableData(
           },
           attributes: [
             { id: "CollectionHasAttribute", type: ServerFormAttributeType.Table, edge: "CollectionHasAttribute",defaultValue: "undefined",
-              save: (results, tableData)=>{
+              save: (txnId, results, tableData)=>{
                 const edge = EdgeLabels.CollectionHasAttribute;
                 const endIdAttribute = "attribute";
-                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
               },
               defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
@@ -282,10 +282,10 @@ export function fetchAttributesTableData(
           },
           attributes: [
             { id: "FormLayoutItemHasAttribute", type: ServerFormAttributeType.Table, edge: "FormLayoutItemHasAttribute",defaultValue: "undefined",
-              save: (results, tableData)=>{
+              save: (txnId, results, tableData)=>{
                 const edge = EdgeLabels.FormLayoutItemHasAttribute;
                 const endIdAttribute = "attribute";
-                return saveTableDataToEdge(tableData, results, edge, endIdAttribute);
+                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
               },
               defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
@@ -338,9 +338,9 @@ export function fetchAttributesTableData(
           attributes: [
             { id: "FormLayoutItem", type: ServerFormAttributeType.TableForm, form: "FormLayoutItem",defaultValue: "undefined",
               noSort: true,
-              save: (results, tableData)=> {
+              save: (txnId, results, tableData)=> {
                 const edge = EdgeLabels.FormLayoutHasItem;
-                return saveFormLayoutTableDataToEdge(tableData, results, edge);
+                return saveFormLayoutTableDataToEdge(txnId, tableData, results, edge);
               },
               postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
                 // tableItemFormGroup =  FormLayoutHasItem

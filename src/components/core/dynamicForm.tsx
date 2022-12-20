@@ -49,7 +49,7 @@ import {
 } from "ok_web_components/src/components/input/Form";
 import { fetchAttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
-import { getNewGraphId, graph } from "../../lib/graph";
+import { getNewGraphId, getTxnId, graph } from "../../lib/graph";
 import { DEBUG } from "../../config";
 import {
  addNewVertex,
@@ -192,9 +192,11 @@ interface DynamicFormSequenceProps {
  forms?: FormMetaData[];
  postSubmit?: (values: FormResult) => void;
  id?: Id;
+ txnId?: number;
 }
 
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
+ const txnId = props.txnId || getTxnId();
  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
  onMount(() => {
   const form = formRef();
@@ -318,10 +320,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      const result_ = {};
      if (!id) {
       result_["id"] = getNewGraphId();
-      addNewVertex(newVertex(result_["id"], [form.save[1]], value));
+      addNewVertex(txnId, newVertex(result_["id"], [form.save[1]], value));
      } else {
       if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
-       replaceVertexProperties(initialValue.id, value);
+       replaceVertexProperties(txnId, initialValue.id, value);
        result_["id"] = initialValue.id;
       }
      }
@@ -333,15 +335,15 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      if (start && end) {
       if (!id) {
        const newId = getNewGraphId();
-       addNewEdge(newEdge(newId, form.save[1], value, start, end));
+       addNewEdge(txnId, newEdge(newId, form.save[1], value, start, end));
        result_ = { id: newId, properties: value, start, end };
       } else {
        // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
        if (D.isNotEmpty(value) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(value, false, 10))) {
-        replaceEdgeProperties(initialValue.id, value);
+        replaceEdgeProperties(txnId, initialValue.id, value);
        }
        if (initialValue.start !== start || initialValue.end !== end) {
-        updateEdgeStartAndEnd(initialValue.id, start, end);
+        updateEdgeStartAndEnd(txnId, initialValue.id, start, end);
        }
        result_ = { id: initialValue.id, properties: value, start, end };
       }
@@ -350,7 +352,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       const tableValue = formValue[attrMeta.id];
       const initValue = initialValue.properties[attrMeta.id];
       if (!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
-       const newSavedIds = (attrMeta as TableField).save(results, formValue[attrMeta.id]);
+       const newSavedIds = (attrMeta as TableField).save(txnId, results, formValue[attrMeta.id]);
        if (!result_["properties"]) result_["properties"] = {};
        result_["properties"][attrMeta.id] = formValue[attrMeta.id].map((row, index) => {
         row.id = newSavedIds[index];

@@ -3,7 +3,7 @@ import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { fetchAttributesTableData, } from "../api";
 import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
 import { css } from "solid-styled-components";
-import { graph } from "../../lib/graph";
+import { getTxnId, graph } from "../../lib/graph";
 import { deleteVertex, findVertexIdsByLabel } from "../../lib/Vertex";
 
 export default function SchemaTable() {
@@ -23,6 +23,7 @@ export default function SchemaTable() {
   const tableMetaData_ = fetchAttributesTableData(params.entity)[0] as FormMetaData;
   setTableMetaData(tableMetaData_);
   const headers = [...tableMetaData_.attributes];
+  // @ts-ignore
   headers.push({ key: "edit", type: "actions" });
 
   // For async data get operation, we will handle it differently
@@ -40,7 +41,7 @@ export default function SchemaTable() {
  const deleteObject = (id) => {
   if (confirm("are you sure")) {
    if (tableMetaData().save[0] === "vertex") {
-    const deleteResult = deleteVertex(id);
+    const deleteResult = deleteVertex(getTxnId(), id);
     // @ts-ignore
     if (deleteResult?.error) alert(data.message);
     else getObjectData();
@@ -61,15 +62,16 @@ export default function SchemaTable() {
          <td>
           <Switch
            fallback={
-            <div>{graph.vertexes[id]["properties"][head.key]}</div>
+            <div>{graph.vertexes[id]["properties"][head.id]}</div>
            }
           >
            <Match when={head.type === "boolean"}>
-            <div>{graph.vertexes[id]["properties"][head.key]}</div>
+            <div>{graph.vertexes[id]["properties"][head.id]}</div>
            </Match>
            <Match when={head.type === "object"}>
-            <div>{graph.vertexes[id]["properties"][head.key]}</div>
+            <div>{graph.vertexes[id]["properties"][head.id]}</div>
            </Match>
+           {/* @ts-ignore */}
            <Match when={head.type === "actions"}>
             <td>
              <a href={`${location.pathname}/${id}`}>Edit</a>
@@ -122,7 +124,7 @@ export default function SchemaTable() {
          <For each={data().headers}>
           {(head) => (
            <th scope="col" title={head.type}>
-            {head.key}
+            {head.id}
            </th>
           )}
          </For>

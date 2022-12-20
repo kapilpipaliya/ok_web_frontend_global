@@ -194,7 +194,7 @@ describe("addNewVertex", () => {
   ]);
  })
 
- test(("abcd"), () => {
+ test(("abcd1"), () => {
   const tableData = [[[[["account","anyof","2"],"AND",[[[["account","anyof","1"]]]],"OR",["account","anyof","3"]]]]]
 
   expect(transform(tableData)).toEqual([

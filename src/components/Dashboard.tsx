@@ -157,6 +157,7 @@ export const FullDashboard = () => {
  onMount(() => {
   const meta = document.createElement("meta");
   meta.name = "version";
+  // @ts-ignore
   meta.content = __APP_VERSION__;
   document.getElementsByTagName("head")[0].appendChild(meta);
  });
