@@ -6,6 +6,7 @@ import "@ui5/webcomponents/dist/FileUploader.js";
 import "@ui5/webcomponents/dist/Card.js";
 import "@ui5/webcomponents/dist/CardHeader.js";
 import "@ui5/webcomponents/dist/BusyIndicator.js";
+import "@ui5/webcomponents/dist/MessageStrip";
 //fiori: https://sap.github.io/ui5-webcomponents/playground/getting-started/importing-components/
 import "@ui5/webcomponents-fiori/dist/SideNavigation.js";
 import "@ui5/webcomponents-fiori/dist/SideNavigationItem.js";

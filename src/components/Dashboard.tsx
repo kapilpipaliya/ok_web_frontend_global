@@ -1,4 +1,13 @@
-import { JSX, createSignal, For, Switch, Match, Show, onMount } from "solid-js";
+import {
+ JSX,
+ createSignal,
+ For,
+ Switch,
+ Match,
+ Show,
+ onMount,
+ useContext
+} from "solid-js";
 import {
  Route,
  Routes,
@@ -10,8 +19,22 @@ import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { BackupRestore } from "./core/BackupRestore";
 import { useDebugger } from "./core/SolidDebug";
-import { graph } from "../lib/graph";
+import {
+ commitTransaction,
+ edgeOldIdToNewIdMap,
+ graph,
+ ProcessStatus,
+ transactions,
+ vertexOldIdToNewIdMap
+} from "../lib/graph";
 import { AllForms, SingleForm } from "./Froms";
+import { WsContext } from "./ws_events_dispatcher";
+import {
+ updateVertexId
+} from "../lib/Vertex";
+import { updateEdgeId } from "../lib/Edge";
+import { fetchAttributesTableData } from "./api";
+import { G } from "@mobily/ts-belt";
 
 interface NavigationItem {
  name: string;
@@ -140,7 +163,7 @@ export const DashboardView = () => {
       const params = useParams();
       return <DynamicFormSequence
        id={params.id === "new" ? undefined : params.id}
-       entity={params.entity} />;
+       formMetaData={fetchAttributesTableData(params.entity)} />;
      }} />
      <Route path="/backup_restore" component={() => <BackupRestore />} />
      <Route path="/forms" component={() => <AllForms />} />
@@ -162,6 +185,70 @@ export const FullDashboard = () => {
   document.getElementsByTagName("head")[0].appendChild(meta);
  });
 
+ const { Ws } = useContext(WsContext);
+ Ws.bind(["post", "mutate", 0], (d: [number, {
+  [key in "insert" | "replace" | "deleteVertex" | "insertEdge" | "replaceEdge" | "replaceEdgeStart" | "replaceEdgeEnd" | "deleteEdge"]?: any;
+ }[]][]) => {
+  if (G.isObject(d) && d.ack) {
+   if (Array.isArray(d.txnIds)) {
+    for (const txnId of d.txnIds as number[]) {
+     transactions.get(txnId).status = ProcessStatus.AckReceived;
+    }
+   }
+  }
+  if (Array.isArray(d)) {
+   for (const [txnId, txnResult] of d) {
+    transactions.get(txnId).status = ProcessStatus.Processed;
+    for (const txnObject of txnResult) {
+     if (txnObject.insert) {
+      vertexOldIdToNewIdMap.set(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      updateVertexId(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     }
+     if (txnObject.insertEdge) {
+      edgeOldIdToNewIdMap.set(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      updateEdgeId(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     }
+     if (txnObject.replace) {
+      // TODO: handle on backend
+      // replaceVertexProperties(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     }
+     if (txnObject.deleteVertex) {
+      if(txnObject.deleteVertex.error) {
+       alert(txnObject.deleteVertex.message);
+      }
+      // TODO: handle on backend
+      // deleteVertex(0, `${txnObject.insert[0]}`);
+     }
+     if (txnObject.replaceEdge) {
+      // TODO: handle on backend
+      // replaceEdgeProperties(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     }
+     // if(txnObject.replaceEdgeStart){
+     //  replaceEdgeStart(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     // }
+     // if(txnObject.replaceEdgeEnd){
+     //  replaceEdgeEnd(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     // }
+     if (txnObject.deleteEdge) {
+      // TODO: handle on backend
+      // deleteEdge(0, `${txnObject.insert[0]}`);
+     }
+    }
+   }
+  }
+  let allTxnProcessed = true;
+  for (const [txnId, value] of transactions.entries()) {
+   if (value.status !== ProcessStatus.Processed) {
+    allTxnProcessed = false;
+    break;
+   }
+  }
+  if (allTxnProcessed) {
+   vertexOldIdToNewIdMap.clear();
+   edgeOldIdToNewIdMap.clear();
+  } else
+   commitTransaction(Ws);
+ });
  const debugGraph = useDebugger("graph");
  debugGraph(graph);
  return (

@@ -8,6 +8,7 @@ Simplified WebSocket events dispatcher
 import { WSBase } from "./ws_reconnect";
 import { createContext, createSignal } from "solid-js";
 import { atom } from "solid-use";
+import { commitTransaction } from "../lib/graph";
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
@@ -99,7 +100,10 @@ export class ServerEventsDispatcher extends WSBase {
   //   this.sendMessage('authentication_challenge', {token});
   // }
   this.dispatch(["open", "", 0], []);
+  // TODO: We dont need fresh sync but from last timestamp sync
   this.trigger([[['get', 'sync', 0], {from: this.lastMessageTimeStamp - 4000, subscriptions: this.subscriptions}]]); // TODO fix time
+  // Todo: Think about what will happen if ack is not received(but server actually sends it) and internet is disconnected.
+  commitTransaction(this);
  }
 
  onClose() {

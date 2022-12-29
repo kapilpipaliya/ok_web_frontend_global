@@ -1,15 +1,31 @@
-import { createEffect, createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import {
+ createEffect,
+ createSignal,
+ For,
+ Match,
+ Show,
+ Switch,
+ untrack,
+ useContext
+} from "solid-js";
 import { useLocation, useNavigate, useParams } from "solid-app-router";
 import { fetchAttributesTableData, } from "../api";
 import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
 import { css } from "solid-styled-components";
-import { getTxnId, graph } from "../../lib/graph";
+import {
+ commitTransaction,
+ getNewTxnId,
+ graph, ProcessStatus,
+ transactions
+} from "../../lib/graph";
 import { deleteVertex, findVertexIdsByLabel } from "../../lib/Vertex";
+import { WsContext } from "../ws_events_dispatcher";
 
 export default function SchemaTable() {
  const navigate = useNavigate();
  const location = useLocation();
  const params = useParams();
+ const {Ws} = useContext(WsContext);
 
  const [data, setData] = createSignal({
   data: [] as (Id[] | (() => Id[])),
@@ -41,10 +57,13 @@ export default function SchemaTable() {
  const deleteObject = (id) => {
   if (confirm("are you sure")) {
    if (tableMetaData().save[0] === "vertex") {
-    const deleteResult = deleteVertex(getTxnId(), id);
+    const txnId = getNewTxnId();
+    const deleteResult = deleteVertex(txnId, id);
     // @ts-ignore
     if (deleteResult?.error) alert(data.message);
     else getObjectData();
+    transactions.get(txnId).status = ProcessStatus.Ready;
+    commitTransaction(Ws);
    }
   }
  };

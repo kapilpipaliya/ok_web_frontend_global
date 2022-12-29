@@ -22,6 +22,10 @@ export const JSONToCypherMap = (json: object) => {
 */
 function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
+    if(!curr.id) {
+      return {error: 'Save Edge Id must no be undefined.'}
+      return;
+    }
     acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
     return acc;
   }, {});
