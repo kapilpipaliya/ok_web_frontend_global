@@ -47,7 +47,14 @@ export const SingleForm = (props: SingleFormProps) => {
     // get touched, dirty, submitted, errors, validators and set to fieldOptions
     // pass other property to attributes
     // if props is string eval it else if its object use it
-    return Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));
+    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));
+    if(attribute.formType) {
+     attribute.formType = graph.vertexes[attribute.formType].properties.id;
+    }
+    if(attribute.serverType) {
+     attribute.serverType = graph.vertexes[attribute.serverType].properties.id;
+    }
+    return attribute;
    })
    const from = vertexFormLayoutItem.properties.from
    const to = vertexFormLayoutItem.properties.to

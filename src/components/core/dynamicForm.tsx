@@ -87,7 +87,7 @@ export function DynamicForm(props: DynamicFormProps) {
    each={props.formMetaData.attributes}>
    {(meta) => (
     <Switch>
-     <Match when={meta.type === ServerFormAttributeType.String}>
+     <Match when={meta.serverType === ServerFormAttributeType.String || meta.component === "TextInput"}>
       <TextInputField
        label={toTitle(meta.label || meta.id)}
        // @ts-ignore
@@ -97,7 +97,7 @@ export function DynamicForm(props: DynamicFormProps) {
        {...(meta.props || {})}
       />
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.JsCode}>
+     <Match when={meta.component === "JsCode"}>
       <TextAreaField
        label={toTitle(meta.label || meta.id)}
        // @ts-ignore
@@ -106,7 +106,7 @@ export function DynamicForm(props: DynamicFormProps) {
        {...(meta.props || {})}
       />
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.Boolean}>
+     <Match when={meta.serverType === ServerFormAttributeType.Boolean || meta.component === "Boolean"}>
       <BooleanInputField
        label={toTitle(meta.label || meta.id)}
        type="checkbox"
@@ -116,7 +116,7 @@ export function DynamicForm(props: DynamicFormProps) {
        {...(meta.props || {})}
       />
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.Object}>
+     <Match when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         // @ts-ignore
@@ -126,7 +126,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.Dynamic}>
+     <Match when={meta.component === "Dynamic"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <GeneralInput
         // @ts-ignore
@@ -136,7 +136,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.Select}>
+     <Match when={meta.component === "Select"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <SelectInputField
         // @ts-ignore
@@ -148,7 +148,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.Table}>
+     <Match when={meta.component === "Table"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <TableInputField
         // @ts-ignore
@@ -165,7 +165,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.TableForm}>
+     <Match when={meta.component === "TableForm"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <TableInputField
         type={"form"}
@@ -186,7 +186,7 @@ export function DynamicForm(props: DynamicFormProps) {
        />
       </Field>
      </Match>
-     <Match when={meta.type === ServerFormAttributeType.ButtonGroup}>
+     <Match when={meta.component === "ButtonGroup"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <ButtonGroup
         // @ts-ignore
@@ -219,7 +219,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
  onMount(() => {
   const form = formRef();
-  form.querySelector("input").focus();
+  form.querySelector("input")?.focus();
  });
  const location = useLocation();
  const navigate = useNavigate();
@@ -235,6 +235,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
  // use a signal to show form because `Object.keys(form.controls).length` is not reactive
  const [fetching, setFetching] = createSignal(true);
+ let isTableForm = false;
  // Todo when any fetching is true, dont display the forms:
  // setValuesToEach Form:
  const owner = getOwner();
@@ -242,12 +243,13 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const formGroup = formValues.controls[form.id];
   const groupConstructor = form.attributes.reduce((acc, meta) => {
    runWithOwner(owner, () => {
-    if (meta.type === "buttongroup") {
+    if (meta.component === "ButtonGroup") {
      console.log("buttongroup skipped");
-    } else if (meta.type === "table" || meta.type === "table_forms") {
+    } else if (meta.component === "Table" || meta.component === "TableForm") {
+     if(meta.component === "TableForm") isTableForm = true;
      acc[meta.id] = createFormArray([], meta.fieldOptions);
     } else {
-     const iFormControl = createFormControl(getDefaultValue(meta.type), meta.fieldOptions);
+     const iFormControl = createFormControl(getDefaultValue(meta.serverType), meta.fieldOptions);
      acc[meta.id] = iFormControl;
      if (meta.onchange) {
       // if problem occur use rawValue
@@ -267,11 +269,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     setDefaultValueIfEmpty(data.properties);
     setInitialValues(form.id, reconcile(data));
     // set non table values
-    const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+    const value = D.selectKeys(data.properties, form.attributes.filter(attr => attr.component !== "Table" && attr.component !== "TableForm").map(attrMeta => attrMeta.id));
     if (D.isNotEmpty(value)) formGroup.patchValue(value);
 
     // table will load data themself
-    const tableAttributes = form.attributes.filter(attr => attr.type === "table" || attr.type === "table_forms");
+    const tableAttributes = form.attributes.filter(attr => attr.component === "Table" || attr.component === "TableForm");
     if (tableAttributes.length) {
      tableAttributes.forEach((tableAttrMeta: TableField) => tableAttrMeta.data = data.properties[tableAttrMeta.id]);
     }
@@ -286,7 +288,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     setDefaultValueIfEmpty(vertex.properties);
     setInitialValues(form.id, reconcile(klona(vertex)));
     {
-     const nonTableValue = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+     const nonTableValue = D.selectKeys(vertex.properties, form.attributes.filter(attr => attr.component !== "Table" && attr.component !== "TableForm").map(attrMeta => attrMeta.id));
      if (D.isNotEmpty(nonTableValue)) formGroup.patchValue(nonTableValue);
     }
     // load table data when required
@@ -300,7 +302,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     setDefaultValueIfEmpty(edge.properties);
     setInitialValues(form.id, reconcile(klona(data)));
     {
-     const nonTableValue = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+     const nonTableValue = D.selectKeys(edge.properties, form.attributes.filter(attr => attr.component !== "Table" && attr.component !== "TableForm").map(attrMeta => attrMeta.id));
      if (D.isNotEmpty(nonTableValue)) formGroup.patchValue(nonTableValue);
     }
     // load table data when required
@@ -326,7 +328,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const form = formMetaData[index++];
    if (form) {
     const formValue = klona(formValues.controls[form.id].value);
-    const nonTableValue = D.selectKeys(formValue, form.attributes.filter(attr => attr.type !== "table" && attr.type !== "table_forms").map(attrMeta => attrMeta.id));
+    const nonTableValue = D.selectKeys(formValue, form.attributes.filter(attr => attr.component !== "Table" && attr.component !== "TableForm").map(attrMeta => attrMeta.id));
     const initialValue = initialValues[form.id];
     const id = initialValue["id"] || props.id;
     if (form.save[0] === "vertex") {
@@ -362,7 +364,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        result_ = { id: initialValue.id, start, end };
       }
      }
-     form.attributes.filter(form_ => form_.type === "table" || form_.type == "table_forms").forEach(attrMeta => {
+     form.attributes.filter(form_ => form_.component === "Table" || form_.component == "TableForm").forEach(attrMeta => {
       const tableValue = formValue[attrMeta.id];
       const initValue = initialValue.properties[attrMeta.id];
       if (!equals(removeUndefinedProperties(initValue, false, 10), removeUndefinedProperties(tableValue, false, 10))) {
@@ -399,7 +401,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    } else{
     alert('Txn not found! This should not happen');
    }
-   commitTransaction(Ws);
+   if(!props.txnId) commitTransaction(Ws);
    // TODO: If we have Internet active wait to get response else assume as saved.
    if (props.postSubmit) {
     props.postSubmit(results);
@@ -431,7 +433,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     />}
    </For>
    <ui5-button design="Positive" onclick={onSubmit}
-               disabled={!isValid() || !isDataChanged()}>Save
+               disabled={!isValid() || isTableForm ? false : !isDataChanged()}
+   >Save
    </ui5-button>
    <pre>
     {DEBUG && <br />}
