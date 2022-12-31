@@ -1,9 +1,15 @@
-import { For } from "solid-js";
+import { createUniqueId, For } from "solid-js";
 import { Link, useParams } from "solid-app-router";
 import { graph } from "../lib/graph";
 import {removeUndefinedProperties} from 'ok_web_components';
-import { VertexLabels, EdgeLabels, Id } from 'ok_web_components/src/components/input/Form';
+import {
+ VertexLabels,
+ EdgeLabels,
+ Id,
+ FormMetaData
+} from "ok_web_components/src/components/input/Form";
 import { convertToJS } from "./utils";
+import { DynamicFormSequence } from "./core/dynamicForm";
 
 export const AllForms = () => {
  const allFormLayouts = graph.vertexLabelIdMap[VertexLabels.FormLayout].map(formLayoutVertex => graph.vertexes[formLayoutVertex]);
@@ -48,8 +54,8 @@ export const SingleForm = (props: SingleFormProps) => {
     // pass other property to attributes
     // if props is string eval it else if its object use it
     const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));
-    if(attribute.formType) {
-     attribute.formType = graph.vertexes[attribute.formType].properties.id;
+    if(attribute.component) {
+     attribute.component = graph.vertexes[attribute.component].properties.id;
     }
     if(attribute.serverType) {
      attribute.serverType = graph.vertexes[attribute.serverType].properties.id;
@@ -59,7 +65,7 @@ export const SingleForm = (props: SingleFormProps) => {
    const from = vertexFormLayoutItem.properties.from
    const to = vertexFormLayoutItem.properties.to
    const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? convertToJS(from) : undefined, to ? convertToJS(to) : undefined];
-   return {id: vertexFormLayoutItem.properties.id, title: vertexFormLayoutItem.properties.title, attributes, save}
+   return {id: vertexFormLayoutItem.properties.id, title: vertexFormLayoutItem.properties.title, attributes, save} as FormMetaData
   })
   return forms;
  }
@@ -67,6 +73,6 @@ export const SingleForm = (props: SingleFormProps) => {
  console.log(forms);
 
  return <div class="flex flex:row flex:wrap">
-  Hello
+  <DynamicFormSequence formMetaData={forms}/>
  </div>
 }

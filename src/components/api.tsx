@@ -115,7 +115,7 @@ function tableOverwriteDefaultValueFn() {
       return value === true ? "true" : "false";
     } else if (key === "serverType") {
       return value ? graph.vertexes[value]["properties"]["id"] : "";
-    } else if (key === "formType") {
+    } else if (key === "component") {
       return value ? graph.vertexes[value]["properties"]["id"] : "";
     } else if (key === "props") {
       return <span title={JSON.stringify(value)}><Icon icon="ion:information-circle-outline" /></span>;
@@ -171,9 +171,9 @@ export function fetchAttributesTableData(
           // { id: "selector", type: ServerFormAttributeType.String },
           { id: "serverType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]),
             onchange: (formGroup, value) => {
-              formGroup.controls['formType'].setValue(null);
+              formGroup.controls['component'].setValue(null);
             } },
-          { id: "formType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>{
+          { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>{
             const serverTypeValue = formGroup.controls['serverType'].value;
             if(!serverTypeValue) return [];
             return getOutEdgeIdsOfType(serverTypeValue,  EdgeLabels.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
@@ -222,7 +222,7 @@ export function fetchAttributesTableData(
               { id: "id", serverType: ServerFormAttributeType.String },
               // { id: "selector", type: ServerFormAttributeType.String},
               { id: "serverType", component: 'Select', valueKey: "properties.id", noInput: true, fieldOptions: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { id: "formType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
+              { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
                 const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]['serverType'];
                 if(serverTypeValue) {
                   return (graph.vertexes[serverTypeValue].out_edges['ServerToFormAttributeType'] || []).map(edgeId => graph.edges[edgeId].end).map(id=>graph.vertexes[id]);
@@ -299,7 +299,7 @@ export function fetchAttributesTableData(
               { id: "id", serverType: ServerFormAttributeType.String },
               // { id: "selector", type: ServerFormAttributeType.String},
               { id: "serverType", component: 'Select', valueKey: "properties.id", noInput: true, fieldOptions: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { id: "formType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
+              { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
                   const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]['serverType'];
                   if(serverTypeValue) {
                     return (graph.vertexes[serverTypeValue].out_edges['ServerToFormAttributeType'] || []).map(edgeId => graph.edges[edgeId].end).map(id=>graph.vertexes[id]);
