@@ -1,6 +1,7 @@
 import {
+ createEffect,
  createSignal,
- JSX,
+ JSX, on,
  onCleanup,
  onMount,
  Show,
@@ -28,6 +29,7 @@ import { fetchAttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
 import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
+import Drawer from "devextreme/ui/drawer";
 
 interface NavigationItem {
  name: string;
@@ -104,17 +106,15 @@ export const DashboardView = () => {
  const { Ws } = useContext(WsContext);
  const { alerts } = useContext(AlertMessageContext);
  return (
-  <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
+  <div class="flex flex:col flex:1">
    {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
+   <MenuButtonToggle />
    <Show when={Ws.isLoggedIn()} fallback={<>
     <Link href={`/signup`}>Signup</Link>
     <Link href={`/login`}>Login</Link>
    </>}>
     <Link href={`/logout`}>Logout</Link>
    </Show>
-   <div class="">
-    <MenuButtonToggle />
-   </div>
    <main class="">
     <Show when={graph.initialSynced}>
      <Routes>
@@ -217,11 +217,22 @@ export const FullDashboard = () => {
  const debugGraph = useDebugger("graph");
  debugGraph(graph);
  return (
-  <div class="min-h:full">
-   <Show when={isSideBarOpen()}>
-    <div class={"w:15rem fixed inset:0"}><StaticSideBar /></div>
-   </Show>
-   <DashboardView />
+  <div>
+   <div ref={el => {
+    onMount(() => {
+     const instance = new Drawer(el, {
+      // @ts-ignore
+      template: <StaticSideBar />,
+      height: "100vh",
+      maxSize: 200,
+      revealMode: "expand",
+
+     });
+     createEffect(on(isSideBarOpen, _ => instance.toggle()));
+    });
+   }}>
+    <DashboardView />
+   </div>
   </div>
  );
 };
