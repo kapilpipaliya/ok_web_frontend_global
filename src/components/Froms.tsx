@@ -1,31 +1,43 @@
-import { createUniqueId, For } from "solid-js";
-import { Link, useParams } from "solid-app-router";
-import { graph } from "../lib/graph";
-import {removeUndefinedProperties} from 'ok_web_components';
 import {
- VertexLabels,
+ createUniqueId,
+ For,
+ onCleanup,
+ splitProps,
+ useContext
+} from "solid-js";
+import { Link, useNavigate, useParams } from "solid-app-router";
+import { graph, revertTransaction } from "../lib/graph";
+import { removeUndefinedProperties } from "ok_web_components";
+import {
  EdgeLabels,
+ FormMetaData,
  Id,
- FormMetaData
+ VertexLabels
 } from "ok_web_components/src/components/input/Form";
 import { convertToJS } from "./utils";
-import { DynamicFormSequence } from "./core/dynamicForm";
+import {
+ DynamicFormSequence,
+ DynamicFormSequenceProps
+} from "./core/dynamicForm";
+import { AlertMessageContext } from "../appState";
+import { Alert } from "../Type";
+import { WsContext, WSEvent } from "./ws_events_dispatcher";
 
 export const AllForms = () => {
- const allFormLayouts = graph.vertexLabelIdMap[VertexLabels.FormLayout].map(formLayoutVertex => graph.vertexes[formLayoutVertex]);
+ const allFormLayouts = () => graph.vertexLabelIdMap[VertexLabels.FormLayout]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
 
  return <div class="flex flex:row flex:wrap">
-  <For each={allFormLayouts}>
-   {formLayout => <Link href={`/form/${formLayout.id}`}>{formLayout.properties.id}</Link>}
+  <For each={allFormLayouts()}>
+   {formLayout => <Link href={`/form/${formLayout.properties.id}`}>{formLayout.properties.id}</Link>}
   </For>
  </div>
 }
-interface SingleFormProps {
+interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'formMetaData'>{
+ formId: string;
 }
-export const SingleForm = (props: SingleFormProps) => {
- const params = useParams();
-
- const formLayout = graph.vertexes[params.id];
+export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
+ const formLayoutId = () => graph.vertexLabelIdMap[VertexLabels.FormLayout].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.formId)
+ const formLayout = graph.vertexes[props.formId] || graph.vertexes[formLayoutId()];
  const formLayoutHasItems = formLayout.out_edges[EdgeLabels.FormLayoutHasItem];
 
  const generateNewApi = () => {
@@ -72,7 +84,84 @@ export const SingleForm = (props: SingleFormProps) => {
  const forms = generateNewApi();
  console.log(forms);
 
+ const [selectedProps, customProps] = splitProps(props, ['formId']);
  return <div class="flex flex:row flex:wrap">
-  <DynamicFormSequence formMetaData={forms}/>
+  <DynamicFormSequence formMetaData={forms} {...customProps}/>
  </div>
+}
+export interface SingleFormProps {}
+export const SingleForm = (props: SingleFormProps) => {
+ const params = useParams();
+ return <div class="flex flex:row flex:wrap">
+  <AbstractSingleForm formId={params.id}/>
+ </div>
+}
+
+
+
+export const Login = (props: {}) => {
+ const {setAlert} = useContext(AlertMessageContext);
+ const {Ws} = useContext(WsContext);
+ const navigate = useNavigate();
+ const event = ["post", "login", 0] as WSEvent;
+ Ws.bind(event, (data)=>{
+  if(data.error){
+   setAlert(prev => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}])
+  } else {
+   navigate('/');
+  }
+ })
+ onCleanup(() => Ws.unbind(event))
+ return <AbstractSingleForm formId={"login"} handleSubmit={(txnId, data) => {
+  const email = data.get("0").properties.email;
+  const password = data.get("0").properties.password;
+  Ws.trigger([[event, {body: { email, password } }]])
+  revertTransaction(txnId)
+
+ }}/>
+}
+export const Logout = (props: {}) => {
+ const {setAlert} = useContext(AlertMessageContext);
+ const {Ws} = useContext(WsContext);
+ const navigate = useNavigate();
+ const event = ["post", "logout", 0] as WSEvent;
+
+ Ws.bind(event, (data)=>{
+  if(data.error){
+   setAlert(prev => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}])
+  } else {
+   Ws.isLoggedIn(false);
+   navigate('/');
+  }
+ })
+ Ws.trigger([[event, {} ]]);
+ onCleanup(() => Ws.unbind(event))
+ return <>Logging out...</>
+}
+export const SignUp = (props: {}) => {
+ const {setAlert} = useContext(AlertMessageContext);
+ const {Ws} = useContext(WsContext);
+ const navigate = useNavigate();
+ const event = ["post", "register", 0] as WSEvent;
+ Ws.bind(event, (data)=>{
+  if(data.error){
+   setAlert(prev => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}])
+  } else {
+   navigate('/');
+  }
+ })
+ onCleanup(() => Ws.unbind(event))
+ // TODO:
+ // 1. Save button text
+ // 2. disable save button when submitting
+ // 3. validations
+ // 4. clear form on success
+ // 5. make password not visible
+ return <AbstractSingleForm formId={"signup"} handleSubmit={(txnId, data) => {
+  const email = data.get("0").properties.email;
+  const password = data.get("0").properties.password;
+  Ws.trigger([[event, {body: { email, password } }]])
+  revertTransaction(txnId)
+
+ }}/>
 }

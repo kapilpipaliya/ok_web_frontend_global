@@ -9,6 +9,7 @@ import {
  useContext
 } from "solid-js";
 import {
+ Link,
  Route,
  Routes,
  useNavigate,
@@ -27,7 +28,7 @@ import {
  transactions,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
-import { AllForms, SingleForm } from "./Froms";
+import { AllForms, Login, Logout, SignUp, SingleForm } from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
 import {
  updateVertexId
@@ -35,6 +36,7 @@ import {
 import { updateEdgeId } from "../lib/Edge";
 import { fetchAttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
+import { AlertMessageContext } from "../appState";
 
 interface NavigationItem {
  name: string;
@@ -112,10 +114,10 @@ export const UI5StaticSideBar = () => {
       </Match>
      </Switch>}
    </For>
-   <ui5-side-navigation-item text={"Forms"} icon="group">
+   {/*<ui5-side-navigation-item text={"Forms"} icon="group">*/}
     {/*TODO*/}
     {/*<Children items={graph.vertexLabelIdMap['FormLayout'].map()} />*/}
-   </ui5-side-navigation-item>
+   {/*</ui5-side-navigation-item>*/}
    {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
    {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
    {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
@@ -150,26 +152,40 @@ export const MenuButtonToggle = () => {
 };
 
 export const DashboardView = () => {
+ const { Ws } = useContext(WsContext);
+ const {alerts} = useContext(AlertMessageContext);
  return (
   <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
+   {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
+   <Show when={Ws.isLoggedIn()} fallback={<>
+    <Link href={`/signup`}>Signup</Link>
+    <Link href={`/login`}>Login</Link>
+   </>}>
+    <Link href={`/logout`}>Logout</Link>
+   </Show>
    <div class="">
     <MenuButtonToggle />
    </div>
    <main class="">
-    <Routes>
-     <Route path="/" component={() => <>Home Page</>} />
-     <Route path="/:entity" component={() => <SchemaTable />} />
-     <Route path="/:entity/:id" component={() => {
-      const params = useParams();
-      return <DynamicFormSequence
-       id={params.id === "new" ? undefined : params.id}
-       formMetaData={fetchAttributesTableData(params.entity)} />;
-     }} />
-     <Route path="/backup_restore" component={() => <BackupRestore />} />
-     <Route path="/forms" component={() => <AllForms />} />
-     <Route path="/form/:id" component={() => <SingleForm />} />
-     <Route path="/**" component={() => <Page404 />} />
-    </Routes>
+    <Show when={graph.initialSynced}>
+     <Routes>
+      <Route path="/" component={() => <>Home Page</>} />
+      <Route path="/:entity" component={() => <SchemaTable />} />
+      <Route path="/:entity/:id" component={() => {
+       const params = useParams();
+       return <DynamicFormSequence
+        id={params.id === "new" ? undefined : params.id}
+        formMetaData={fetchAttributesTableData(params.entity)} />;
+      }} />
+      <Route path="/backup_restore" component={() => <BackupRestore />} />
+      <Route path="/forms" component={() => <AllForms />} />
+      <Route path="/form/:id" component={() => <SingleForm />} />
+      <Route path="/login" component={() => <Login />} />
+      <Route path="/logout" component={() => <Logout />} />
+      <Route path="/signup" component={() => <SignUp />} />
+      <Route path="/**" component={() => <Page404 />} />
+     </Routes>
+    </Show>
    </main>
   </div>
  );

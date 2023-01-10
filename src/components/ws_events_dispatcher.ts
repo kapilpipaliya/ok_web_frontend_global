@@ -8,7 +8,8 @@ Simplified WebSocket events dispatcher
 import { WSBase } from "./ws_reconnect";
 import { createContext, createSignal } from "solid-js";
 import { atom } from "solid-use";
-import { commitTransaction } from "../lib/graph";
+import { commitTransaction, graph } from "../lib/graph";
+
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
@@ -52,6 +53,7 @@ export function saveCookie(name: string, value: string, max_age: number) {
 export function clearCookie(d) {
  document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
 }
+
 function saveCookies(data: { max_age: number; cookie: { jwt: string } }) {
  Object.keys(data.cookie).forEach(key => {
   saveCookie(key, data.cookie[key] as string, data.max_age);
@@ -64,9 +66,9 @@ export class ServerEventsDispatcher extends WSBase {
  isFirstTriggers: boolean;
  firstPayload: Array<[WSEvent, any]>;
  firstCancelTimeout: number;
- lastMessageTimeStamp = 0;
  subscriptions: string[];
- isLoggedIn =  atom<boolean>(false);
+ isLoggedIn = atom<boolean>(false);
+
  constructor(path: string) {
   super(path);
   this.callbacks = {};
@@ -87,7 +89,10 @@ export class ServerEventsDispatcher extends WSBase {
   this.heartbeat = this.heartbeat.bind(this);
   this.subscribe = this.subscribe.bind(this);
   this.bind(["get", "cookie_event", 0], saveCookies);
-  this.bind(["get", "is_logged_in", 0], this.isLoggedIn);
+  this.bind(["get", "is_logged_in", 0], (data: any) => {
+   if (data.error) this.isLoggedIn(false);
+   else this.isLoggedIn(true);
+  });
   this.start();
  }
 
@@ -101,7 +106,11 @@ export class ServerEventsDispatcher extends WSBase {
   // }
   this.dispatch(["open", "", 0], []);
   // TODO: We dont need fresh sync but from last timestamp sync
-  this.trigger([[['get', 'sync', 0], {from: this.lastMessageTimeStamp - 4000, subscriptions: this.subscriptions}]]); // TODO fix time
+
+  this.trigger([[["get", "sync", 0], {
+   from: graph.lastSyncedTime && graph.lastSyncedTime - 4000,
+   subscriptions: this.subscriptions
+  }]]); // TODO fix time
   // Todo: Think about what will happen if ack is not received(but server actually sends it) and internet is disconnected.
   commitTransaction(this);
  }
@@ -126,8 +135,9 @@ export class ServerEventsDispatcher extends WSBase {
   this.callbacks[JSON.stringify(event)] = undefined;
   return this;
  }
+
  subscribe(args: any) {
-  this.trigger([['get', 'sync', 0], args]);
+  this.trigger([["get", "sync", 0], args]);
  }
 
  private delay_send() {
@@ -142,6 +152,7 @@ export class ServerEventsDispatcher extends WSBase {
   this.isFirstTriggers = false;
  }
 
+ // to handle trigger response, needs to bind first
  trigger(payload: Array<[WSEvent, any]>) {
   if (!this.socket) {
    this.firstPayload.push(...payload);
@@ -193,7 +204,6 @@ export class ServerEventsDispatcher extends WSBase {
  }
 
  private async onmessage(evt: MessageEvent) {
-  this.lastMessageTimeStamp = Date.now();
   if (typeof evt.data === "string") {
    const data = JSON.parse(evt.data);
    this.stringHandle(data);

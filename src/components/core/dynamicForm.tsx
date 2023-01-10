@@ -206,8 +206,9 @@ export function DynamicForm(props: DynamicFormProps) {
  return <Form />;
 }
 
-interface DynamicFormSequenceProps {
+export interface DynamicFormSequenceProps {
  formMetaData: FormMetaData[];
+ handleSubmit?: (txnId: number, values: FormResult) => void;
  postSubmit?: (values: FormResult) => void;
  id?: Id;
  txnId?: number;
@@ -250,6 +251,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      acc[meta.id] = createFormArray([], meta.fieldOptions);
     } else {
      const iFormControl = createFormControl(getDefaultValue(meta.serverType), meta.fieldOptions);
+     iFormControl.setData('serverType', meta.serverType);
      acc[meta.id] = iFormControl;
      if (meta.onchange) {
       // if problem occur use rawValue
@@ -279,10 +281,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
    } else if (form.save[0] === "vertex") {
     // used FormMetaData.save attribute temporary.
-    const vertex = graph.vertexes[props.id];
+    const vertex = graph.vertexes[props.id]; // TODO: why props.id? it means we can only have one vertex
 
     if (!vertex) {
-     alert(`document with id: ${props.id} not exist`); // TODO: display proper error: Message Strip on top
+     alert(`document with id: ${props.id} not exist when getting form data`); // TODO: display proper error: Message Strip on top
      return;
     }
     setDefaultValueIfEmpty(vertex.properties);
@@ -293,7 +295,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     }
     // load table data when required
    } else if (form.save[0] === "edge") {
-    const edge = graph.edges[props.id];
+    const edge = graph.edges[props.id];  // TODO: why props.id? it means we can only have one edge when data() is not in attributes. also we can either have vertex or edge.
 
     if (!edge) {
      alert(`Edge with id: ${props.id} not exist`); // TODO: display proper error: Message Strip on top
@@ -306,6 +308,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      if (D.isNotEmpty(nonTableValue)) formGroup.patchValue(nonTableValue);
     }
     // load table data when required
+   } else {
+    console.error(`not able to set data for ${form.title}`);
    }
    // setFetching(false);
   } else {
@@ -316,7 +320,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   }
  });
  setFetching(false);
- console.log("initialValues: ", initialValues);
 
  const onSubmit = (e) => {
   e.preventDefault();
@@ -330,10 +333,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     const formValue = klona(formValues.controls[form.id].value);
     const nonTableValue = D.selectKeys(formValue, form.attributes.filter(attr => attr.component !== "Table" && attr.component !== "TableForm").map(attrMeta => attrMeta.id));
     const initialValue = initialValues[form.id];
-    const id = initialValue["id"] || props.id;
-    if (form.save[0] === "vertex") {
+    const formDataId = initialValue["id"];
+    if (form.postSubmit) {
+     form.postSubmit(formValue);
+    } else if (form.save[0] === "vertex") {
      const result_ = {};
-     if (!id) { // new
+     if (!formDataId) { // new
       result_["id"] = getNewGraphId(); // TODO: Think how we sync with server
       addNewVertex(txnId, newVertex(result_["id"], [form.save[1]], nonTableValue));
      } else { // edit
@@ -349,12 +354,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
      const end = form.save[3]?.(results, formValue);
      let result_ = {} as Omit<typeof initialValue, 'properties'>;
      if (start && end) {
-      if (!id) { // new
-       const newId = getNewGraphId(); // TODO: Think how we sync with server
-       addNewEdge(txnId, newEdge(newId, form.save[1], nonTableValue, start, end));
-       result_ = { id: newId, start, end };
+      if (!formDataId) { // new
+       const newVertexId = getNewGraphId(); // TODO: Think how we sync with server
+       addNewEdge(txnId, newEdge(newVertexId, form.save[1], nonTableValue, start, end));
+       result_ = { id: newVertexId, start, end };
       } else { // edit
-       // currently not removing table properties because we dont have a case where we have an edge(with start and end functions) with table attribute
        if (D.isNotEmpty(nonTableValue) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(nonTableValue, false, 10))) {
         replaceEdgeProperties(txnId, initialValue.id, nonTableValue);
        }
@@ -381,7 +385,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    }
   };
 
-  return new Promise<FormResult>((res) => {
+  return new Promise<FormResult>((resolve) => {
    const checkAndCall = () => {
     if (index < length) {
      callMethod().then(result => {
@@ -391,7 +395,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       checkAndCall();
      });
     } else {
-     res(results);
+     resolve(results);
     }
    };
    checkAndCall();
@@ -401,11 +405,14 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    } else{
     alert('Txn not found! This should not happen');
    }
+   if (props.handleSubmit) {
+    props.handleSubmit(txnId, results);
+    return;
+   }
    if(!props.txnId) commitTransaction(Ws);
    // TODO: If we have Internet active wait to get response else assume as saved.
    if (props.postSubmit) {
     props.postSubmit(results);
-    console.log(initialValues);
    } else {
     navigate(location.pathname.split("/").slice(0, -1).join("/"));
    }

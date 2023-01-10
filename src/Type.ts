@@ -6,6 +6,7 @@ export enum Alert {
 }
 
 export interface AlertMessage {
+ id: string;
  hideIcon?: boolean;
  hideCloseButton?: boolean;
  message: string;

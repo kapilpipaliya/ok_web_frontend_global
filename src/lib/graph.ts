@@ -14,10 +14,12 @@ export type EdgeMap = { [key: string]: Edge };
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 export const [graph, setGraph] = createStore({
   uniqueId: 0,
+ _isPartialSynced: false,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },
-  syncing: false
+  initialSynced: false, // TODO: Display initialSynced status to the UI
+  lastSyncedTime: 0
 });
 export type Revert = {revert: () => any}
 export type InsertFn = {
@@ -108,10 +110,12 @@ export function getNewGraphId(): Id {
 export function resetDatabase() {
   setGraph(reconcile({
     uniqueId: 0,
+   _isPartialSynced: false,
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    syncing: false
+    initialSynced: false,
+   lastSyncedTime: 0
   }));
 }
 
@@ -125,6 +129,7 @@ export function isValidId(startVertexId: string) {
 // ***********
 // @ts-ignore
 window.graph = graph;
+// to safely persist to indexDB from different tabs need to use Ws Layer in PWA manifest.
 // restoreFromIndexDB();
 // This is not proper only for development
 restoreFromIndexDB().then(data=>{

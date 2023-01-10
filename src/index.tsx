@@ -5,7 +5,7 @@ import { render } from "solid-js/web";
 import { DebugProvider } from "./components/core/SolidDebug";
 import { FullDashboard } from "./components/Dashboard";
 import { Router } from "solid-app-router";
-import "./webcomponents";
+
 import {
  ServerEventsDispatcher,
  WS_PATH,
@@ -21,23 +21,25 @@ import { addNewEdge, deleteEdge, newEdge } from "./lib/Edge";
 import { AlertMessage } from "./Type";
 import { AlertMessageContext } from "./appState";
 import { createStore } from "solid-js/store";
+import { setGraph } from "./lib/graph";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const [alerts, setAlert] = createStore([] as AlertMessage[]);
 
-  const setGraphData = (args: { vertexes: Vertex[], edges: Edge[], deleted_vertexes: string[], deleted_edges: string[] }) => {
+  const setGraphData = (args: { timestamp: number, vertexes: Vertex[], edges: Edge[], deleted_vertexes: string[], deleted_edges: string[] }) => {
    batch(() => {
+    if(args.timestamp) setGraph('lastSyncedTime', args.timestamp);
     args.vertexes?.map(v => addNewVertex(0, newVertex(v.id, v.labels, v.properties)));
     args.edges?.map(e => addNewEdge(0, newEdge(e.id, e.type, e.properties, e.start, e.end)));
     args.deleted_edges?.map(edgeId => deleteEdge(0, edgeId));
     args.deleted_vertexes?.map(vertexId => deleteVertex(0, vertexId));
+    setGraph('initialSynced', true);
    });
   };
   Ws.bind(["get", "sync", 0], setGraphData);
   return <WsContext.Provider value={{ Ws }}>
    <AlertMessageContext.Provider value={{ alerts, setAlert }}>
-    <For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>
     <DebugProvider>
      <Router>
       <FullDashboard />
