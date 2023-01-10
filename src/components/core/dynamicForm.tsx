@@ -4,7 +4,7 @@ import {
  For,
  getOwner,
  Match,
- on,
+ on, onCleanup,
  onMount,
  runWithOwner,
  Show,
@@ -71,6 +71,7 @@ import {
  updateEdgeStartAndEnd
 } from "../../lib/Edge";
 import { WsContext } from "../ws_events_dispatcher";
+import Button, { ClickEvent } from "devextreme/ui/button";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;
@@ -87,7 +88,8 @@ export function DynamicForm(props: DynamicFormProps) {
    each={props.formMetaData.attributes}>
    {(meta) => (
     <Switch>
-     <Match when={meta.serverType === ServerFormAttributeType.String || meta.component === "TextInput"}>
+     <Match
+      when={meta.serverType === ServerFormAttributeType.String || meta.component === "TextInput"}>
       <TextInputField
        label={toTitle(meta.label || meta.id)}
        // @ts-ignore
@@ -106,7 +108,8 @@ export function DynamicForm(props: DynamicFormProps) {
        {...(meta.props || {})}
       />
      </Match>
-     <Match when={meta.serverType === ServerFormAttributeType.Boolean || meta.component === "Boolean"}>
+     <Match
+      when={meta.serverType === ServerFormAttributeType.Boolean || meta.component === "Boolean"}>
       <BooleanInputField
        label={toTitle(meta.label || meta.id)}
        type="checkbox"
@@ -116,7 +119,8 @@ export function DynamicForm(props: DynamicFormProps) {
        {...(meta.props || {})}
       />
      </Match>
-     <Match when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
+     <Match
+      when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         // @ts-ignore
@@ -216,7 +220,7 @@ export interface DynamicFormSequenceProps {
 
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const txnId = props.txnId || getNewTxnId();
- const {Ws} = useContext(WsContext);
+ const { Ws } = useContext(WsContext);
  const [formRef, setFormRef] = createSignal<HTMLFormElement>();
  onMount(() => {
   const form = formRef();
@@ -224,7 +228,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  });
  const location = useLocation();
  const navigate = useNavigate();
- const formMetaData = klona(props.formMetaData)
+ const formMetaData = klona(props.formMetaData);
 
  const formValuesConstructor = formMetaData.reduce((acc, curr) => {
   acc[curr.id] = createFormGroup({});
@@ -247,11 +251,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if (meta.component === "ButtonGroup") {
      console.log("buttongroup skipped");
     } else if (meta.component === "Table" || meta.component === "TableForm") {
-     if(meta.component === "TableForm") isTableForm = true;
+     if (meta.component === "TableForm") isTableForm = true;
      acc[meta.id] = createFormArray([], meta.fieldOptions);
     } else {
      const iFormControl = createFormControl(getDefaultValue(meta.serverType), meta.fieldOptions);
-     iFormControl.setData('serverType', meta.serverType);
+     iFormControl.setData("serverType", meta.serverType);
      acc[meta.id] = iFormControl;
      if (meta.onchange) {
       // if problem occur use rawValue
@@ -321,8 +325,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  });
  setFetching(false);
 
- const onSubmit = (e) => {
-  e.preventDefault();
+ const onSubmit = (e: ClickEvent) => {
+  e.event.preventDefault();
   let index = 0;
   const length = formMetaData.length;
   const results: FormResult = new Map();
@@ -352,7 +356,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     } else if (form.save[0] === "edge") {
      const start = form.save[2]?.(results, formValue);
      const end = form.save[3]?.(results, formValue);
-     let result_ = {} as Omit<typeof initialValue, 'properties'>;
+     let result_ = {} as Omit<typeof initialValue, "properties">;
      if (start && end) {
       if (!formDataId) { // new
        const newVertexId = getNewGraphId(); // TODO: Think how we sync with server
@@ -400,16 +404,16 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    };
    checkAndCall();
   }).then((results) => {
-   if(transactions.get(txnId)){
+   if (transactions.get(txnId)) {
     transactions.get(txnId).status = ProcessStatus.Ready;
-   } else{
-    alert('Txn not found! This should not happen');
+   } else {
+    alert("Txn not found! This should not happen");
    }
    if (props.handleSubmit) {
     props.handleSubmit(txnId, results);
     return;
    }
-   if(!props.txnId) commitTransaction(Ws);
+   if (!props.txnId) commitTransaction(Ws);
    // TODO: If we have Internet active wait to get response else assume as saved.
    if (props.postSubmit) {
     props.postSubmit(results);
@@ -424,6 +428,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  };
  const isDataChanged = () => {
   const result = formMetaData.map(form => {
+   // TODO!!!: Bug When The form dont render all the inputs it will always be changed
+   // TODO!!!: Dont consider null values also. for e.g. for ServerAttributeType if Default select field has null value, Save Button is enabled.
    console.log(1, 2, removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10));
    return equals(removeUndefinedProperties(initialValues[form.id].properties, false, 10), removeUndefinedProperties(formValues.controls[form.id].value, false, 10));
   });
@@ -431,7 +437,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  };
 
  return <Show when={!fetching()} fallback={<>Loading</>}>
-  <form onSubmit={onSubmit} ref={setFormRef}>
+  <form
+   // onSubmit={onSubmit}
+   ref={setFormRef}>
    <For each={formMetaData}>
     {item => <DynamicForm formMetaData={item} id={props.id}
                           formGroup={formValues.controls[item.id]}
@@ -439,10 +447,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                           formValues={formValues}
     />}
    </For>
-   <button type="button" onclick={onSubmit}
-               disabled={!isValid() || isTableForm ? false : !isDataChanged()}
-   >Save
-   </button>
+   <div ref={el => {
+    const instance = new Button(el, { type: "success", onClick: onSubmit, text: "Save" });
+    createEffect(() => instance.option("disabled", !isValid() || isTableForm ? false : !isDataChanged()));
+    onCleanup(() => instance.dispose());
+   }} />
    <pre>
     {DEBUG && <br />}
     {DEBUG && JSON.stringify(initialValues)}

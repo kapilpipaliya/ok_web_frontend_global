@@ -1,20 +1,12 @@
 import {
- JSX,
  createSignal,
- For,
- Switch,
- Match,
- Show,
+ JSX,
+ onCleanup,
  onMount,
+ Show,
  useContext
 } from "solid-js";
-import {
- Link,
- Route,
- Routes,
- useNavigate,
- useParams
-} from "solid-app-router";
+import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
@@ -30,13 +22,12 @@ import {
 } from "../lib/graph";
 import { AllForms, Login, Logout, SignUp, SingleForm } from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
-import {
- updateVertexId
-} from "../lib/Vertex";
+import { updateVertexId } from "../lib/Vertex";
 import { updateEdgeId } from "../lib/Edge";
 import { fetchAttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
 import { AlertMessageContext } from "../appState";
+import TreeView from "devextreme/ui/tree_view";
 
 interface NavigationItem {
  name: string;
@@ -80,32 +71,21 @@ const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
  const navigate = useNavigate();
- const onMenuItemClick = (e: any) => {
-  if (e.detail?.item?.href) {
-   navigate(e.detail.item.href);
-  }
- };
-
- const Children = (props: { items: NavigationItem[]; }) => {
-  return <For each={props.items} fallback={<div>Loading...</div>}>
-   {(item) => <div><a href={item.href}>{item.name}</a></div>}
-  </For>;
- };
  return <>
-
-  <div onselection-change={onMenuItemClick}>
-   <For each={navigation} fallback={<div>Loading...</div>}>
-    {(item) =>
-     <Switch fallback={<a href={item.href}>{item.name}</a>}>
-      <Match when={item.type === "group"}>
-       <div data-icon="group">
-        {item.name}
-        <Children items={item.children} />
-       </div>
-      </Match>
-     </Switch>}
-   </For>
-   </div>
+  <div ref={el => {
+   const instance = new TreeView(el, {
+    dataSource: navigation,
+    dataStructure: "tree",
+    keyExpr: "href",
+    displayExpr: "name",
+    itemsExpr: "children",
+    onItemClick(e) {
+     if (e.itemData.href) navigate(e.itemData.href);
+    }
+   });
+   onCleanup(() => instance.dispose());
+  }}>
+  </div>
  </>;
 };
 
@@ -122,7 +102,7 @@ export const MenuButtonToggle = () => {
 
 export const DashboardView = () => {
  const { Ws } = useContext(WsContext);
- const {alerts} = useContext(AlertMessageContext);
+ const { alerts } = useContext(AlertMessageContext);
  return (
   <div class="flex flex:col flex:1" classList={{ "pl:15rem": isSideBarOpen() }}>
    {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
@@ -198,7 +178,7 @@ export const FullDashboard = () => {
       // replaceVertexProperties(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
      }
      if (txnObject.deleteVertex) {
-      if(txnObject.deleteVertex.error) {
+      if (txnObject.deleteVertex.error) {
        alert(txnObject.deleteVertex.message);
       }
       // TODO: handle on backend

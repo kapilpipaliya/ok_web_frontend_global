@@ -5,6 +5,8 @@ import { render } from "solid-js/web";
 import { DebugProvider } from "./components/core/SolidDebug";
 import { FullDashboard } from "./components/Dashboard";
 import { Router } from "solid-app-router";
+// import 'devextreme/scss/bundles/dx.light.scss'
+import 'devextreme/dist/css/dx.light.css'
 
 import {
  ServerEventsDispatcher,
