@@ -103,42 +103,42 @@ export const BackupRestore = () => {
  // @ts-ignore
  return <div>
   <div class="flex flex:wrap gap:0.25rem">
-   <ui5-card class="w:24rem">
-    <ui5-card-header slot="header" title-text="Backup" interactive
-                     subtitle-text="Backup in memory graph to different targets"></ui5-card-header>
+   <div class="w:24rem">
+    <div slot="header" title-text="Backup"
+                     subtitle-text="Backup in memory graph to different targets"></div>
     <div class="m:1rem flex gap:0.5rem">
-     <ui5-button design="Default" onclick={backupToIndexDB_}>Backup To IndexDB
-     </ui5-button>
-     <ui5-button design="Default" onclick={downloadJson}>Download Json
-     </ui5-button>
+     <button type="button" onclick={backupToIndexDB_}>Backup To IndexDB
+     </button>
+     <button type="button" onclick={downloadJson}>Download Json
+     </button>
     </div>
 
-   </ui5-card>
+   </div>
 
-   <ui5-card class="w:24rem">
-    <ui5-card-header slot="header" title-text="Restore" interactive
-                     subtitle-text="Restore graph from different targets to the memory"></ui5-card-header>
+   <div class="w:24rem">
+    <div slot="header" title-text="Restore"
+                     subtitle-text="Restore graph from different targets to the memory"></div>
     <div class="m:1rem flex flex-wrap gap:0.5rem">
-     <ui5-button design="Default" onclick={restoreFromIndexDB}>Restore From
+     <button type="button" onclick={restoreFromIndexDB}>Restore From
       IndexDB
-     </ui5-button>
-     <ui5-file-uploader accept="image/*" multiple="true" hide-input>
-      <ui5-button icon="upload" onchange={restoreFromFile}>
+     </button>
+     <input type="file" accept="image/*" multiple hide-input>
+      <button data-icon="upload" onchange={restoreFromFile}>
        <span>Restore From JSON</span>
-      </ui5-button>
-     </ui5-file-uploader>
+      </button>
+     </input>
     </div>
-   </ui5-card>
+   </div>
 
-   <ui5-card class="w:24rem">
-    <ui5-card-header slot="header" title-text="Graph Functions" interactive
-                     subtitle-text="Other graph functions"></ui5-card-header>
+   <div class="w:24rem">
+    <div slot="header" title-text="Graph Functions"
+                     subtitle-text="Other graph functions"></div>
     <div class="m:1rem flex flex:wrap gap:0.5rem">
-     <ui5-button design="Default" onclick={resetDatabase}>Clear in memory
+     <button type="button" onclick={resetDatabase}>Clear in memory
       store
-     </ui5-button>
+     </button>
     </div>
-   </ui5-card>
+   </div>
   </div>
   <Show when={load()}>
    <GraphView

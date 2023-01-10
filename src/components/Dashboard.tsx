@@ -76,10 +76,9 @@ const navigation = [
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 
-// https://sap.github.io/ui5-webcomponents/playground/components/SideNavigation/
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
-export const UI5StaticSideBar = () => {
+export const StaticSideBar = () => {
  const navigate = useNavigate();
  const onMenuItemClick = (e: any) => {
   if (e.detail?.item?.href) {
@@ -89,54 +88,24 @@ export const UI5StaticSideBar = () => {
 
  const Children = (props: { items: NavigationItem[]; }) => {
   return <For each={props.items} fallback={<div>Loading...</div>}>
-   {(item) => <ui5-side-navigation-sub-item text={item.name} icon="home"
-                                            href={item.href}></ui5-side-navigation-sub-item>}
+   {(item) => <div><a href={item.href}>{item.name}</a></div>}
   </For>;
  };
  return <>
-  {/*<ui5-shellbar*/}
-  {/*  primary-title="UI5 Web Components"*/}
-  {/*  secondary-title="The Best Run SAP"*/}
-  {/*  show-co-pilot*/}
-  {/*>*/}
-  {/*  <ui5-button icon="menu" slot="startButton" id="startButton"></ui5-button>*/}
-  {/*</ui5-shellbar>*/}
 
-  <ui5-side-navigation onselection-change={onMenuItemClick}>
+  <div onselection-change={onMenuItemClick}>
    <For each={navigation} fallback={<div>Loading...</div>}>
     {(item) =>
-     <Switch fallback={<ui5-side-navigation-item text={item.name} icon="home"
-                                                 href={item.href}></ui5-side-navigation-item>}>
+     <Switch fallback={<a href={item.href}>{item.name}</a>}>
       <Match when={item.type === "group"}>
-       <ui5-side-navigation-item text={item.name} icon="group">
+       <div data-icon="group">
+        {item.name}
         <Children items={item.children} />
-       </ui5-side-navigation-item>
+       </div>
       </Match>
      </Switch>}
    </For>
-   {/*<ui5-side-navigation-item text={"Forms"} icon="group">*/}
-    {/*TODO*/}
-    {/*<Children items={graph.vertexLabelIdMap['FormLayout'].map()} />*/}
-   {/*</ui5-side-navigation-item>*/}
-   {/*<ui5-side-navigation-item text="People" expanded icon="group">*/}
-   {/*  <ui5-side-navigation-sub-item text="From My Team"></ui5-side-navigation-sub-item>*/}
-   {/*  <ui5-side-navigation-sub-item text="From Other Teams"></ui5-side-navigation-sub-item>*/}
-   {/*</ui5-side-navigation-item>*/}
-   {/*<ui5-side-navigation-item text="Locations" icon="locate-me" selected></ui5-side-navigation-item>*/}
-   {/*<ui5-side-navigation-item text="Events" icon="calendar">*/}
-   {/*  <ui5-side-navigation-sub-item text="Local"></ui5-side-navigation-sub-item>*/}
-   {/*  <ui5-side-navigation-sub-item text="Others"></ui5-side-navigation-sub-item>*/}
-   {/*</ui5-side-navigation-item>*/}
-
-   {/*<ui5-side-navigation-item slot="fixedItems" text="Useful Links" icon="chain-link"></ui5-side-navigation-item>*/}
-   {/*<ui5-side-navigation-item slot="fixedItems" text="History" icon="history"></ui5-side-navigation-item>*/}
-  </ui5-side-navigation>
-
-  <style>{`
-      ui5-shellbar::part(root) {
-      padding-left: .5rem;
-    }`}
-  </style>
+   </div>
  </>;
 };
 
@@ -270,7 +239,7 @@ export const FullDashboard = () => {
  return (
   <div class="min-h:full">
    <Show when={isSideBarOpen()}>
-    <div class={"w:15rem fixed inset:0"}><UI5StaticSideBar /></div>
+    <div class={"w:15rem fixed inset:0"}><StaticSideBar /></div>
    </Show>
    <DashboardView />
   </div>

@@ -116,9 +116,9 @@ export default function SchemaTable() {
      <h1>{tableMetaData().title}</h1>
     </div>
     <div>
-     <ui5-button onClick={() => navigate("./new")}>
+     <button onClick={() => navigate("./new")}>
       Add new
-     </ui5-button>
+     </button>
     </div>
    </div>
    <div>

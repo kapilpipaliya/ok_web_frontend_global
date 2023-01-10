@@ -439,10 +439,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                           formValues={formValues}
     />}
    </For>
-   <ui5-button design="Positive" onclick={onSubmit}
+   <button type="button" onclick={onSubmit}
                disabled={!isValid() || isTableForm ? false : !isDataChanged()}
    >Save
-   </ui5-button>
+   </button>
    <pre>
     {DEBUG && <br />}
     {DEBUG && JSON.stringify(initialValues)}
