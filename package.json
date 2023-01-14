@@ -49,6 +49,7 @@
     "@solid-aria/primitives": "^0.4.0",
     "@solid-bricks/barcode": "^1.0.1",
     "@soliduse/core": "^0.0.0-alpha.2",
+    "@spicainternational/sds-devextreme": "^5.1.1",
     "@stitches/core": "^1.2.8",
     "@thisbeyond/solid-dnd": "^0.7.3",
     "@thisbeyond/solid-select": "^0.13.0",

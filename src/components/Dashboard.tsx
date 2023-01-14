@@ -30,6 +30,7 @@ import { G } from "@mobily/ts-belt";
 import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
+import { DataGrid, TableDashboard } from "./Grids";
 
 interface NavigationItem {
  name: string;
@@ -119,6 +120,7 @@ export const DashboardView = () => {
     <Show when={graph.initialSynced}>
      <Routes>
       <Route path="/" component={() => <>Home Page</>} />
+      {/* TODO: when incorrect entity is rendered it gives error*/}
       <Route path="/:entity" component={() => <SchemaTable />} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
@@ -129,6 +131,9 @@ export const DashboardView = () => {
       <Route path="/backup_restore" component={() => <BackupRestore />} />
       <Route path="/forms" component={() => <AllForms />} />
       <Route path="/form/:id" component={() => <SingleForm />} />
+      <Route path="/sample_grid" component={() => <DataGrid />} />
+      <Route path="/grids" component={() => <TableDashboard />} />
+      <Route path="/grid/:id" component={() => <DataGrid />} />
       <Route path="/login" component={() => <Login />} />
       <Route path="/logout" component={() => <Logout />} />
       <Route path="/signup" component={() => <SignUp />} />
