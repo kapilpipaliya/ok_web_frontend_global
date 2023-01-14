@@ -36,7 +36,8 @@ import {
  SelectInputField,
  TableInputField,
  TextAreaField,
- TextInputField
+ TextInputField,
+ NumberInputField
 } from "ok_web_components";
 import {
  ButtonGroupField,
@@ -89,12 +90,21 @@ export function DynamicForm(props: DynamicFormProps) {
    {(meta) => (
     <Switch>
      <Match
-      when={meta.serverType === ServerFormAttributeType.String || meta.component === "TextInput"}>
+      when={meta.component === "TextInput" && (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
       <TextInputField
        label={toTitle(meta.label || meta.id)}
        // @ts-ignore
        control={props.formGroup.controls[meta.id]}
-       type={"text"}
+       id={props.formMetaData.id + meta.id}
+       {...(meta.props || {})}
+      />
+     </Match>
+     <Match
+      when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
+      <NumberInputField
+       label={toTitle(meta.label || meta.id)}
+       // @ts-ignore
+       control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
       />
@@ -109,10 +119,9 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.serverType === ServerFormAttributeType.Boolean || meta.component === "Boolean"}>
+      when={meta.component === "Boolean" || (!meta.component && meta.serverType === ServerFormAttributeType.Boolean)}>
       <BooleanInputField
-       label={toTitle(meta.label || meta.id)}
-       type="checkbox"
+       text={toTitle(meta.label || meta.id)}
        // @ts-ignore
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
@@ -120,7 +129,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
+      when={meta.component === "Json" && (!meta.component && meta.serverType === ServerFormAttributeType.Map)}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         // @ts-ignore
@@ -146,7 +155,7 @@ export function DynamicForm(props: DynamicFormProps) {
         // @ts-ignore
         control={props.formGroup.controls[meta.id]}
         id={props.formMetaData.id + meta.id}
-        valueKey={(meta as SelectField).valueKey}
+        displayExpr={(meta as SelectField).valueKey}
         fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, props.formGroup, inputValue)}
         {...(meta.props || {})}
        />

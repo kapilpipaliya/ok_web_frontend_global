@@ -57,7 +57,8 @@ export const DataGrid = (props: {}) => {
    showBorders: true,
    rowAlternationEnabled: true,
    showRowLines: true,
-   showColumnLines: true
+   showColumnLines: true,
+   width: '800'
   });
  }}/>
 }

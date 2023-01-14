@@ -120,7 +120,7 @@ export const DashboardView = () => {
     <Show when={graph.initialSynced}>
      <Routes>
       <Route path="/" component={() => <>Home Page</>} />
-      {/* TODO: when incorrect entity is rendered it gives error*/}
+      {/* TODO: when incorrect entity is rended*/}
       <Route path="/:entity" component={() => <SchemaTable />} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();

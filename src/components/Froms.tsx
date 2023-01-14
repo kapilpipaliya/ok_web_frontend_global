@@ -22,6 +22,7 @@ import {
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
+import { G } from "@mobily/ts-belt";
 
 export const AllForms = () => {
  const allFormLayouts = () => graph.vertexLabelIdMap[VertexLabels.FormLayout]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
@@ -71,6 +72,19 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     }
     if(attribute.serverType) {
      attribute.serverType = graph.vertexes[attribute.serverType].properties.id;
+    if(attribute.props){
+     attribute.props = convertToJS(attribute.props);
+    }
+     if(attribute.code){
+      attribute.code = convertToJS(attribute.code);
+     }
+     if(attribute.meta) {
+      const meta = convertToJS(attribute.meta);
+      if(G.isObject(meta)){
+       Object.assign(attribute, meta);
+       delete attribute.meta;
+      }
+     }
     }
     return attribute;
    })

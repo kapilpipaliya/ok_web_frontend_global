@@ -24,34 +24,29 @@ function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResul
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
     if(!curr.id) {
       return {error: 'Save Edge Id must no be undefined.'}
-      return;
     }
     acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
     return acc;
   }, {});
 
-  const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
+  // remove rows that doesn't set endIdAttribute
+  const endIdExist = (id) => !!normalizedEdgesValue[id]['properties'][endIdAttribute];
+
+  const allIdsOriginal = Object.keys(normalizedEdgesValue) as Array<string>;
+  const allIds = allIdsOriginal.filter(id => endIdExist(id))
   const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
 
-  const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
-  let deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
-  let updatedAttributeIds = A.intersection(newIds, existingAttributeEdgeIds);
+  const deletedAttributeIds = A.difference(existingAttributeEdgeIds, allIds);
+  const insertedAttributeIds = A.difference(allIds, existingAttributeEdgeIds);
+  const updatedAttributeIds = A.intersection(allIds, existingAttributeEdgeIds);
 
-  const endIdExist = (id) => !!normalizedEdgesValue[id]['properties'][endIdAttribute];
-  const deleteInvalidUpdate = updatedAttributeIds.filter(id => !endIdExist(id));
-  deletedAttributeIds = A.concat(deletedAttributeIds, deleteInvalidUpdate);
-  updatedAttributeIds = A.difference(updatedAttributeIds, deleteInvalidUpdate);
-
-  const insertAndUpdatedIds = A.difference(newIds, deletedAttributeIds);
   const result = {};
+  // return same id for rows that doesn't set endIdAttribute
+  for(const id of allIdsOriginal) if (!endIdExist(id)) result[id] = id;
 
   batch(() => {
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
-      if (!endIdExist(id)) {
-        result[id] = id;
-        return;
-      }
       const newId = getNewGraphId();
       addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]));
       result[id] = newId;
@@ -63,49 +58,47 @@ function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResul
     });
   });
 
-  return insertAndUpdatedIds.map(id=>result[id]);
+  return allIdsOriginal.map(id=>result[id]);
 }
 function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
-    acc[curr.end] = klona(curr);
+    if(!curr.id) {
+      return {error: 'Save Edge Id must no be undefined.'}
+    }
+    acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
     return acc;
   }, {});
 
-  const newIds = Object.keys(normalizedEdgesValue) as Array<string>;
+  // remove rows that doesn't set end value set
+  const endIdExist = (id) => !!normalizedEdgesValue[id]['end'];
+
+  const allIdsOriginal = Object.keys(normalizedEdgesValue) as Array<string>;
+  const allIds = allIdsOriginal.filter(id => endIdExist(id))
   const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
 
-  const insertedAttributeIds = A.difference(newIds, existingAttributeEdgeIds);
-  let deletedAttributeIds = A.difference(existingAttributeEdgeIds, newIds);
-  let updatedAttributeIds = A.intersection(newIds, existingAttributeEdgeIds);
+  const deletedAttributeIds = A.difference(existingAttributeEdgeIds, allIds);
+  const insertedAttributeIds = A.difference(allIds, existingAttributeEdgeIds);
+  const updatedAttributeIds = A.intersection(allIds, existingAttributeEdgeIds);
 
-  const endIdExist = (id) => !!normalizedEdgesValue[id]['end'];
-  const deleteInvalidUpdate = updatedAttributeIds.filter(id => !endIdExist(id));
-  deletedAttributeIds = A.concat(deletedAttributeIds, deleteInvalidUpdate);
-  updatedAttributeIds = A.difference(updatedAttributeIds, deleteInvalidUpdate);
-
-  const insertAndUpdatedIds = A.difference(newIds, deletedAttributeIds);
   const result = {};
+  // return same id for rows that doesn't set endIdAttribute
+  for(const id of allIdsOriginal) if (!endIdExist(id)) result[id] = id;
 
   batch(() => {
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
-
     insertedAttributeIds.forEach(id => {
-      if (!endIdExist(id)) {
-        result[id] = id;
-        return;
-      }
       const newId = getNewGraphId();
-      addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]['properties'], results.get("0").id, id));
+      addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]['properties'], results.get("0").id, normalizedEdgesValue[id]['end']));
       result[id] = newId;
     });
     updatedAttributeIds.forEach(id => {
       replaceEdgeProperties(txnId, id, normalizedEdgesValue[id]['properties']);
-      updateEdgeStartAndEnd(txnId, id, results.get("0").id, id);
+      updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]['end']);
       result[id] = id;
     });
   });
 
-  return insertAndUpdatedIds.map(id=>result[id]);
+  return allIdsOriginal.map(id=>result[id]);
 }
 
 function tableOverwriteDefaultValueFn() {
@@ -189,6 +182,7 @@ export function fetchAttributesTableData(
           { id: "onChange", component: 'JsCode' },
           { id: "props", component: 'JsCode' },
           { id: "code", component: 'JsCode', props: {placeholder: "write attributes for non base field"} },
+          { id: "meta", component: 'JsCode' },
         ],
       }];
     }
@@ -241,7 +235,8 @@ export function fetchAttributesTableData(
               { id: "onChange", component: 'JsCode' },
               { id: "props", component: 'JsCode' },
               { id: "code", component: 'JsCode' },
-            ], },
+              { id: "meta", component: 'JsCode' },
+              ], },
           ],
         }];
     }
@@ -294,7 +289,17 @@ export function fetchAttributesTableData(
               defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
               { id: "pos", serverType: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { id: "attribute", component: 'Select', valueKey: "properties.id", default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id]) },
+              { id: "attribute", component: 'Select', valueKey: "properties.id", default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>{
+                const collectionId = formValues.controls["1"].controls.collection.value;
+                if(collectionId){
+                  const collectionVertex = graph.vertexes[collectionId];
+                  if(collectionVertex) {
+                    return (collectionVertex.out_edges[EdgeLabels.CollectionHasAttribute] || []).map(id => graph.vertexes[graph.edges[id].end])
+                  }
+                }
+                return []
+                // findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
+                } },
 
               { id: "id", serverType: ServerFormAttributeType.String },
               // { id: "selector", type: ServerFormAttributeType.String},
@@ -317,7 +322,8 @@ export function fetchAttributesTableData(
               { id: "onChange", component: 'JsCode' },
               { id: "props", component: 'JsCode' },
               { id: "code", component: 'JsCode' },
-            ], },
+              { id: "meta", component: 'JsCode' },
+            ],},
           ],
         }];
     }
