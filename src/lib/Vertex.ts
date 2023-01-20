@@ -1,21 +1,16 @@
-import {
- Id,
- Vertex
-} from "../../../ok_web_components/src/components/input/Form";
+import { Id, Vertex } from "../../../ok_web_components/src/components/input/Form";
 import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile } from "solid-js/store";
-import {
- graph,
- setGraph, transactionDetailAdd,
- transactions
-} from "./graph";
+import { graph, setGraph, transactionDetailAdd, transactions } from "./graph";
 import { G, pipe } from "@mobily/ts-belt";
 
+// return a new Vertex
 export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
  return { id, labels, properties, in_edges: {}, out_edges: {} };
 }
 
+// add a new vertex to the graph
 export function addNewVertex(txnId: number, vertex: Vertex): {error: string | boolean, txnDetailIndex?: number} {
  if(!vertex.id) {
   return {error: "ID is not valid"};
@@ -30,6 +25,7 @@ export function addNewVertex(txnId: number, vertex: Vertex): {error: string | bo
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 }
 
+// replace a vertex properties
 export function replaceVertexProperties(txnId: number, vertexId: Id, properties: {}): {error: string | boolean, txnDetailIndex?: number} {
  if(!graph.vertexes[vertexId]) {
   return {error: "Vertex ID is not valid"};
@@ -40,6 +36,7 @@ export function replaceVertexProperties(txnId: number, vertexId: Id, properties:
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 }
 
+// delete a vertex
 export function deleteVertex(txnId: number, vertexId: Id): {error: string | boolean, txnDetailIndex?: number} {
  if(!graph.vertexes[vertexId]) {
   return {error: "ID is not valid"};
@@ -52,6 +49,7 @@ export function deleteVertex(txnId: number, vertexId: Id): {error: string | bool
  transactionDetailAdd(txnId, {deleteVertex: () => klona(vertex), revert: () => addNewVertex(0, vertex)});
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 }
+// update vertex id when we receive new id from api response
 export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
  if(!graph.vertexes[oldVertexId]) {
   return {error: "ID is not valid"};
@@ -74,7 +72,7 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
   setGraph('edges', edgeIds, 'end', newVertexId )
  })
 }
-
+// helper function to find all the vertex ids of the label
 export function findVertexIdsByLabel(label: string): Id[] {
  return graph.vertexLabelIdMap[label] || [];
 }
