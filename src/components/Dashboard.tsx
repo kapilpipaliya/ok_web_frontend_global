@@ -1,7 +1,7 @@
 import {
  createEffect, createMemo,
  createSignal,
- JSX, Match, on,
+ Match, on,
  onCleanup,
  onMount,
  Show, Switch,
@@ -38,13 +38,6 @@ import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, DataGrid, TableDashboard } from "./Grids";
-
-interface NavigationItem {
- name: string;
- href?: string;
- icon?: () => JSX.Element;
- children?: NavigationItem[];
-}
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -92,7 +85,7 @@ export const StaticSideBar = () => {
     displayExpr: "name",
     itemsExpr: "children",
     onItemClick(e) {
-     if (e.itemData.href) navigate(e.itemData.href);
+     if (e.itemData?.href) navigate(e.itemData.href);
     }
    });
    onCleanup(() => instance.dispose());
@@ -147,11 +140,11 @@ export const DashboardView = () => {
        const formMeta = createMemo(()=>fetchAttributesTableData(params.entity));
        return <Switch>
         <Match when={!formMeta() || (params.entity === "TableLayout")}>
-         <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : params.id}/>
+         <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : parseInt(params.id)}/>
         </Match>
         <Match when={formMeta()}>
          <DynamicFormSequence
-          id={params.id === "new" ? undefined : params.id}
+          id={params.id === "new" ? undefined : parseInt(params.id)}
           formMetaData={formMeta()} />
         </Match>
         </Switch>;
@@ -195,46 +188,46 @@ export const FullDashboard = () => {
   if (G.isObject(d) && d.ack) {
    if (Array.isArray(d.txnIds)) {
     for (const txnId of d.txnIds as number[]) {
-     transactions.get(txnId).status = ProcessStatus.AckReceived;
+     if(transactions.has(txnId)) transactions.get(txnId)!.status = ProcessStatus.AckReceived;
     }
    }
   }
   if (Array.isArray(d)) {
    for (const [txnId, txnResult] of d) {
-    transactions.get(txnId).status = ProcessStatus.Processed;
+    if(transactions.has(txnId)) transactions.get(txnId)!.status = ProcessStatus.Processed;
     for (const txnObject of txnResult) {
      if (txnObject.insert) {
-      vertexOldIdToNewIdMap.set(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
-      updateVertexId(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      vertexOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
+      updateVertexId(txnObject.insert[0], txnObject.insert[1]);
      }
      if (txnObject.insertEdge) {
-      edgeOldIdToNewIdMap.set(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
-      updateEdgeId(`${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      edgeOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
+      updateEdgeId(txnObject.insert[0], txnObject.insert[1]);
      }
      if (txnObject.replace) {
       // TODO: handle on backend
-      // replaceVertexProperties(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
      }
      if (txnObject.deleteVertex) {
       if (txnObject.deleteVertex.error) {
        alert(txnObject.deleteVertex.message);
       }
       // TODO: handle on backend
-      // deleteVertex(0, `${txnObject.insert[0]}`);
+      // deleteVertex(0, txnObject.insert[0]);
      }
      if (txnObject.replaceEdge) {
       // TODO: handle on backend
-      // replaceEdgeProperties(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+      // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
      }
      // if(txnObject.replaceEdgeStart){
-     //  replaceEdgeStart(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
      // }
      // if(txnObject.replaceEdgeEnd){
-     //  replaceEdgeEnd(0, `${txnObject.insert[0]}`, `${txnObject.insert[1]}`);
+     //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
      // }
      if (txnObject.deleteEdge) {
       // TODO: handle on backend
-      // deleteEdge(0, `${txnObject.insert[0]}`);
+      // deleteEdge(0, txnObject.insert[0]);
      }
     }
    }

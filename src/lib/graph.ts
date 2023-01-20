@@ -83,8 +83,8 @@ export const getTransactionData = (txnId: number) => {
   }));
   return existingTxnValue;
 }
-export let vertexOldIdToNewIdMap = new Map<string, string>();
-export let edgeOldIdToNewIdMap = new Map<string, string>();
+export let vertexOldIdToNewIdMap = new Map<Id, Id>();
+export let edgeOldIdToNewIdMap = new Map<Id, Id>();
 export const commitTransaction = (Ws: ServerEventsDispatcher) => {
  let firstReadyTxn = 0;
  // If any pending transaction exist don't send it.

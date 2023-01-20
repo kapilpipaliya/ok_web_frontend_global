@@ -6,7 +6,8 @@ import {
   FormMetaData,
   FormResult,
   ServerFormAttributeType,
-  VertexLabels
+  VertexLabels,
+ Id
 } from "ok_web_components/src/components/input/Form";
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
@@ -27,91 +28,91 @@ export const JSONToCypherMap = (json: object) => {
   return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
 };
 */
-export function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
-  const normalizedEdgesValue = tableData.reduce((acc, curr) => {
-    if (!curr.id) {
-      return { error: "Save Edge Id must no be undefined." };
-    }
-    acc[curr.id] = D.deleteKeys(klona(curr), ["id", "_id"]);
+export function saveTableDataToEdge(txnId: number, tableData: {[key: string]: any}[], results: FormResult, edge: string, endIdAttribute: string) {
+  if(tableData.some(row=>!row.id)){
+    return { error: "Save Edge Id must no be undefined." };
+  }
+  const normalizedEdgesValue = tableData.reduce<Map<Id, {[key: string]: any}>>((acc, curr) => {
+    acc.set(curr.id, D.deleteKeys(klona(curr), ["id", "_id"]));
     return acc;
-  }, {});
+  }, new Map<Id, {[key: string]: any}>());
 
   // remove rows that doesn't set endIdAttribute
-  const endIdExist = (id) => !!normalizedEdgesValue[id]["properties"][endIdAttribute];
+  const endIdExist = (id: Id) => !!normalizedEdgesValue.get(id)!["properties"][endIdAttribute];
 
-  const allIdsOriginal = Object.keys(normalizedEdgesValue) as Array<string>;
+  const allIdsOriginal = [...normalizedEdgesValue.keys()];
   const allIds = allIdsOriginal.filter(id => endIdExist(id))
-  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
+  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0")!.id, edge);
 
   const deletedAttributeIds = A.difference(existingAttributeEdgeIds, allIds);
   const insertedAttributeIds = A.difference(allIds, existingAttributeEdgeIds);
   const updatedAttributeIds = A.intersection(allIds, existingAttributeEdgeIds);
 
-  const result = {};
+  const result = new Map<Id,Id>();
   // return same id for rows that doesn't set endIdAttribute
-  for(const id of allIdsOriginal) if (!endIdExist(id)) result[id] = id;
+  for(const id of allIdsOriginal) if (!endIdExist(id)) result.set(id, id);
 
   batch(() => {
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
       const newId = getNewGraphId();
-      const { error } = addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]["properties"], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]["properties"][endIdAttribute]));
+      const { error } = addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue.get(id)!["properties"], [endIdAttribute]), results.get("0")!.id, normalizedEdgesValue.get(id)!["properties"][endIdAttribute]));
       if (error) alert(error);
-      result[id] = newId;
+      result.set(id, newId);
     });
     updatedAttributeIds.forEach(id => {
-      const { error: error1 } = replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue[id]["properties"], [endIdAttribute]));
+      const { error: error1 } = replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue.get(id)!["properties"], [endIdAttribute]));
       if (error1) alert(error1);
-      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]["properties"][endIdAttribute]);
+      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0")!.id, normalizedEdgesValue.get(id)!["properties"][endIdAttribute]);
       if (error2) alert(error2);
-      result[id] = id;
+      result.set(id, id);
     });
   });
 
-  return allIdsOriginal.map(id=>result[id]);
+  return allIdsOriginal.map(id=>result.get(id));
 }
 function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string) {
-  const normalizedEdgesValue = tableData.reduce((acc, curr) => {
-    if(!curr.id) {
-      return {error: 'Save Edge Id must no be undefined.'}
-    }
-    acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
+  if(tableData.some(row=>!row.id)){
+    return { error: "Save Edge Id must no be undefined." };
+  }
+  const normalizedEdgesValue = tableData.reduce<Map<Id, {[key: string]: any}>>((acc, curr) => {
+    acc.set(curr.id, D.deleteKeys(klona(curr), ["id", "_id"]));
     return acc;
-  }, {});
+  }, new Map<Id, {[key: string]: any}>());
 
   // remove rows that doesn't set end value set
-  const endIdExist = (id) => !!normalizedEdgesValue[id]['end'];
+  const endIdExist = (id: Id) => !!normalizedEdgesValue.get(id)!['end'];
 
-  const allIdsOriginal = Object.keys(normalizedEdgesValue) as Array<string>;
+  const allIdsOriginal = [...normalizedEdgesValue.keys()];
   const allIds = allIdsOriginal.filter(id => endIdExist(id))
-  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0").id, edge).map(x => `${x}`) as Array<string>;
+  const existingAttributeEdgeIds = getOutEdgeIdsOfType(results.get("0")!.id, edge);
 
   const deletedAttributeIds = A.difference(existingAttributeEdgeIds, allIds);
   const insertedAttributeIds = A.difference(allIds, existingAttributeEdgeIds);
   const updatedAttributeIds = A.intersection(allIds, existingAttributeEdgeIds);
 
-  const result = {};
+  const result = new Map<Id,Id>();
   // return same id for rows that doesn't set endIdAttribute
-  for(const id of allIdsOriginal) if (!endIdExist(id)) result[id] = id;
+  for(const id of allIdsOriginal) if (!endIdExist(id)) result.set(id, id);
 
   batch(() => {
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
       const newId = getNewGraphId();
-      const { error } = addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]["properties"], results.get("0").id, normalizedEdgesValue[id]["end"]));
+      const { error } = addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue.get(id)!["properties"], results.get("0")!.id, normalizedEdgesValue.get(id)!["end"]));
       if (error) alert(error);
-      result[id] = newId;
+      result.set(id, newId);
     });
     updatedAttributeIds.forEach(id => {
-      const { error: error1 } = replaceEdgeProperties(txnId, id, normalizedEdgesValue[id]["properties"]);
+      const { error: error1 } = replaceEdgeProperties(txnId, id, normalizedEdgesValue.get(id)!["properties"]);
       if (error1) alert(error1);
-      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]["end"]);
+      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0")!.id, normalizedEdgesValue.get(id)!["end"]);
       if (error2) alert(error2);
-      result[id] = id;
+      result.set(id, id);
     });
   });
 
-  return allIdsOriginal.map(id=>result[id]);
+  return allIdsOriginal.map(id=>result.get(id));
 }
 
 function tableOverwriteDefaultValueFn() {
