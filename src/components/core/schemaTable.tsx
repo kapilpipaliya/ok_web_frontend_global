@@ -21,10 +21,9 @@ import {
 import { deleteVertex, findVertexIdsByLabel } from "../../lib/Vertex";
 import { WsContext } from "../ws_events_dispatcher";
 
-export default function SchemaTable() {
+export default function SchemaTable(props: {entity: string}) {
  const navigate = useNavigate();
  const location = useLocation();
- const params = useParams();
  const {Ws} = useContext(WsContext);
 
  const [data, setData] = createSignal({
@@ -36,7 +35,7 @@ export default function SchemaTable() {
 
  const getObjectData = () => {
   // use local variable because Signal is not updated instantly
-  const tableMetaData_ = fetchAttributesTableData(params.entity)[0] as FormMetaData;
+  const tableMetaData_ = fetchAttributesTableData(props.entity)[0] as FormMetaData;
   setTableMetaData(tableMetaData_);
   const headers = [...tableMetaData_.attributes];
   // @ts-ignore
@@ -44,14 +43,14 @@ export default function SchemaTable() {
 
   // For async data get operation, we will handle it differently
   setData({
-   data: () => findVertexIdsByLabel(params.entity),
+   data: () => findVertexIdsByLabel(props.entity),
    headers
   });
  };
 
  createEffect(() => {
   // clear the state when routes parameter changes.
-  if (params.entity) untrack(getObjectData);
+  if (props.entity) untrack(getObjectData);
  });
 
  const deleteObject = (id) => {
@@ -85,7 +84,7 @@ export default function SchemaTable() {
            }
           >
            <Match when={head.serverType === "Boolean"}>
-            <div>{graph.vertexes[id]["properties"][head.id]}</div>
+            <div>{graph.vertexes[id]["properties"][head.id] ? "true" : "false"}</div>
            </Match>
            <Match when={head.serverType === "Map"}>
             <div>{graph.vertexes[id]["properties"][head.id]}</div>

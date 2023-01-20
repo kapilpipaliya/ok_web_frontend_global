@@ -1,10 +1,10 @@
 import {
- createEffect,
+ createEffect, createMemo,
  createSignal,
- JSX, on,
+ JSX, Match, on,
  onCleanup,
  onMount,
- Show,
+ Show, Switch,
  useContext
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
@@ -21,7 +21,14 @@ import {
  transactions,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
-import { AllForms, Login, Logout, SignUp, SingleForm } from "./Froms";
+import {
+ AbstractSingleForm,
+ AllForms,
+ Login,
+ Logout,
+ SignUp,
+ SingleForm
+} from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
 import { updateVertexId } from "../lib/Vertex";
 import { updateEdgeId } from "../lib/Edge";
@@ -30,7 +37,7 @@ import { G } from "@mobily/ts-belt";
 import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
-import { DataGrid, TableDashboard } from "./Grids";
+import { AbstractSingleGrid, DataGrid, TableDashboard } from "./Grids";
 
 interface NavigationItem {
  name: string;
@@ -49,6 +56,7 @@ const navigation = [
    { name: "FormAttributeTypes", href: "/FormAttributeType" },
    { name: "ServerAttributeTypes", href: "/ServerAttributeType" },
    { name: "Attributes", href: "/Attribute" },
+   { name: "Collection Category", href: "/CollectionCategory" },
    { name: "Collections", href: "/Collection" },
    { name: "Form Layout", href: "/FormLayout" },
    { name: "Table Layout", href: "/TableLayout" },
@@ -65,7 +73,8 @@ const navigation = [
   ]
  },
  { name: "Backup & Restore", href: "/backup_restore" },
- { name: "Forms", href: "/forms" }
+ { name: "Forms", href: "/forms" },
+ { name: "Grids", href: "/grids" }
 ];
 
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
@@ -121,18 +130,42 @@ export const DashboardView = () => {
      <Routes>
       <Route path="/" component={() => <>Home Page</>} />
       {/* TODO: when incorrect entity is rended*/}
-      <Route path="/:entity" component={() => <SchemaTable />} />
+      <Route path="/:entity" component={() => {
+       const params = useParams();
+       const formMeta = createMemo(()=>fetchAttributesTableData(params.entity));
+       return <Switch>
+        <Match when={!formMeta()}>
+         <AbstractSingleGrid tableId={params.entity}/>
+        </Match>
+        <Match when={formMeta()}>
+         <SchemaTable entity={params.entity}/>
+        </Match>
+       </Switch>
+      }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
-       return <DynamicFormSequence
-        id={params.id === "new" ? undefined : params.id}
-        formMetaData={fetchAttributesTableData(params.entity)} />;
+       const formMeta = createMemo(()=>fetchAttributesTableData(params.entity));
+       return <Switch>
+        <Match when={!formMeta() || (params.entity === "TableLayout")}>
+         <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : params.id}/>
+        </Match>
+        <Match when={formMeta()}>
+         <DynamicFormSequence
+          id={params.id === "new" ? undefined : params.id}
+          formMetaData={formMeta()} />
+        </Match>
+        </Switch>;
       }} />
       <Route path="/backup_restore" component={() => <BackupRestore />} />
+      {/* Depricated */}
       <Route path="/forms" component={() => <AllForms />} />
+      {/* Depricated */}
       <Route path="/form/:id" component={() => <SingleForm />} />
+      {/* Depricated */}
       <Route path="/sample_grid" component={() => <DataGrid />} />
+      {/* Depricated */}
       <Route path="/grids" component={() => <TableDashboard />} />
+      {/* Depricated */}
       <Route path="/grid/:id" component={() => <DataGrid />} />
       <Route path="/login" component={() => <Login />} />
       <Route path="/logout" component={() => <Logout />} />
@@ -220,7 +253,7 @@ export const FullDashboard = () => {
    commitTransaction(Ws);
  });
  const debugGraph = useDebugger("graph");
- debugGraph(graph);
+ // debugGraph(graph);
  return (
   <div>
    <div ref={el => {

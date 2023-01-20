@@ -1,0 +1,213 @@
+
+.index.view-content {
+    padding: 0
+}
+
+.index p {
+    font-size: 14px;
+    margin: 0;
+    max-width: 1000px;
+    line-height: 16px;
+    color: #333
+}
+
+.index h1 {
+    font-size: 60px;
+    line-height: 80px;
+    color: #627789;
+    margin: 0 0 30px
+}
+
+.index h2 {
+    font-size: 40px;
+    margin: 0
+}
+
+.index .title {
+    padding: 20px 30px 25px
+}
+
+.index .title>p {
+    margin-bottom: 20px
+}
+
+.index .title .block-content {
+    display: block;
+    display: flex;
+    flex-wrap: wrap
+}
+
+.index .title .block-content .content-item {
+    display: inline-block;
+    vertical-align: top;
+    width: 275px;
+    height: 90px;
+    flex: 1 1 275px;
+    margin: 0 10px 10px 0
+}
+
+.index .title .block-content .content-item:empty {
+    height: 0
+}
+
+.index .title .block-content .content-item a {
+    display: block;
+    background: #f7f8f8;
+    text-decoration: none;
+    padding: 26px 0 26px 30px;
+    height: 90px;
+    box-sizing: border-box;
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1)
+}
+
+.index .title .block-content .content-item a div {
+    background-repeat: no-repeat;
+    float: left;
+    width: 40px;
+    height: 40px
+}
+
+.index .title .block-content .content-item a div rect,.index .title .block-content .content-item a div path,.index .title .block-content .content-item a div polygon,.index .title .block-content .content-item a div circle {
+    fill: #1b4461
+}
+
+.index .title .block-content .content-item a h3 {
+    font-size: 1.5em;
+    line-height: 1.1em;
+    color: #1b4461;
+    margin: 5px 0 0 50px
+}
+
+.index .title .block-content .content-item a h3.multi-line {
+    margin-top: -8px
+}
+
+.index .title .block-content .content-item a:hover {
+    background: #f05b41
+}
+
+.index .title .block-content .content-item a:hover div rect,.index .title .block-content .content-item a:hover div path,.index .title .block-content .content-item a:hover div polygon,.index .title .block-content .content-item a:hover div circle {
+    fill: white
+}
+
+.index .title .block-content .content-item a:hover h3 {
+    color: #fff
+}
+
+.index .marketing-demos {
+    padding: 40px 20px;
+    background: #eef0f2
+}
+
+.index .marketing-demos>p {
+    margin-bottom: 25px
+}
+
+.index .marketing-demos>p,.index .marketing-demos h2 {
+    padding-left: 10px
+}
+
+.index .marketing-demos .demos-container {
+    display: block;
+    display: flex;
+    flex-wrap: wrap
+}
+
+.index .marketing-demos .demos-container .demo {
+    margin: 0 10px 20px;
+    vertical-align: top;
+    display: inline-block;
+    width: 400px;
+    flex: 1 1 400px;
+    box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
+    cursor: pointer;
+    position: relative
+}
+
+.index .marketing-demos .demos-container .demo a {
+    text-decoration: none
+}
+
+.index .marketing-demos .demos-container .demo:empty {
+    height: 0;
+    margin-bottom: 0
+}
+
+.index .marketing-demos .demos-container .demo:hover {
+    box-shadow: 0 0 0 2px #f05b41
+}
+
+.index .marketing-demos .demos-container .demo:hover .top {
+    background-color: #f05b41
+}
+
+.index .marketing-demos .demos-container .demo:hover .top .demo-name,.index .marketing-demos .demos-container .demo:hover .top p {
+    color: #fff
+}
+
+.index .marketing-demos .demos-container .demo .top {
+    background-color: #fff;
+    padding: 15px 110px 22px 35px;
+    position: relative
+}
+
+.index .marketing-demos .demos-container .demo .top .demo-name {
+    color: #1b4461;
+    font-size: 28px;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0
+}
+
+.index .marketing-demos .demos-container .demo .top p {
+    height: 30px;
+    color: #627789
+}
+
+.index .marketing-demos .demos-container .demo .top .qr {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    padding: 10px;
+    height: 85px;
+    z-index: 2
+}
+
+.index .marketing-demos .demos-container .demo .top .qr img {
+    width: 85px
+}
+
+.index .marketing-demos .demos-container .demo .center {
+    max-width: 600px
+}
+
+.index .marketing-demos .demos-container .demo .center img {
+    width: 100%;
+    display: block
+}
+
+.index .marketing-demos .demos-container .demo .widgets {
+    position: absolute;
+    width: 125px;
+    right: 10px;
+    bottom: 10px;
+    text-align: right
+}
+
+.index .marketing-demos .demos-container .demo .widgets .widget {
+    background-color: #899eac;
+    color: #fff;
+    text-decoration: none;
+    padding: 1px 10px 3px 10px;
+    border-radius: 60px;
+    white-space: nowrap;
+    margin: 0 0 5px 7px;
+    display: inline-block;
+    font-size: 14px
+}
+
+.index .marketing-demos .demos-container .demo .widgets .widget:hover {
+    background-color: #f05b41;
+    color: #fff
+}
