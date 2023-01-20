@@ -1,16 +1,23 @@
-import jju from "jju";
-import { getNewGraphId, graph,  } from "../lib/graph";
+import { getNewGraphId, graph } from "../lib/graph";
 import { batch } from "solid-js";
 import { createFormArray, IFormGroup } from "solid-forms";
-import { FormMetaData, FormResult, ServerFormAttributeType, VertexLabels, EdgeLabels, Id } from 'ok_web_components/src/components/input/Form';
+import {
+  EdgeLabels,
+  FormMetaData,
+  FormResult,
+  ServerFormAttributeType,
+  VertexLabels
+} from "ok_web_components/src/components/input/Form";
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
-import { Icon } from '@iconify-icon/solid';
+import { Icon } from "@iconify-icon/solid";
 import { findVertexIdsByLabel } from "../lib/Vertex";
 import {
   addNewEdge,
   deleteEdge,
-  getOutEdgeIdsOfType, newEdge, replaceEdgeProperties,
+  getOutEdgeIdsOfType,
+  newEdge,
+  replaceEdgeProperties,
   updateEdgeStartAndEnd
 } from "../lib/Edge";
 
@@ -20,17 +27,17 @@ export const JSONToCypherMap = (json: object) => {
   return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
 };
 */
-function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
+export function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResult, edge: string, endIdAttribute: string) {
   const normalizedEdgesValue = tableData.reduce((acc, curr) => {
-    if(!curr.id) {
-      return {error: 'Save Edge Id must no be undefined.'}
+    if (!curr.id) {
+      return { error: "Save Edge Id must no be undefined." };
     }
-    acc[curr.id] = D.deleteKeys(klona(curr), ["id", '_id']);
+    acc[curr.id] = D.deleteKeys(klona(curr), ["id", "_id"]);
     return acc;
   }, {});
 
   // remove rows that doesn't set endIdAttribute
-  const endIdExist = (id) => !!normalizedEdgesValue[id]['properties'][endIdAttribute];
+  const endIdExist = (id) => !!normalizedEdgesValue[id]["properties"][endIdAttribute];
 
   const allIdsOriginal = Object.keys(normalizedEdgesValue) as Array<string>;
   const allIds = allIdsOriginal.filter(id => endIdExist(id))
@@ -48,12 +55,15 @@ function saveTableDataToEdge(txnId: number, tableData: any[], results: FormResul
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
       const newId = getNewGraphId();
-      addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]));
+      const { error } = addNewEdge(txnId, newEdge(newId, edge, D.deleteKeys(normalizedEdgesValue[id]["properties"], [endIdAttribute]), results.get("0").id, normalizedEdgesValue[id]["properties"][endIdAttribute]));
+      if (error) alert(error);
       result[id] = newId;
     });
     updatedAttributeIds.forEach(id => {
-      replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue[id]['properties'], [endIdAttribute]));
-      updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]['properties'][endIdAttribute]);
+      const { error: error1 } = replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue[id]["properties"], [endIdAttribute]));
+      if (error1) alert(error1);
+      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]["properties"][endIdAttribute]);
+      if (error2) alert(error2);
       result[id] = id;
     });
   });
@@ -88,12 +98,15 @@ function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results:
     deletedAttributeIds.forEach(id => deleteEdge(txnId, id));
     insertedAttributeIds.forEach(id => {
       const newId = getNewGraphId();
-      addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]['properties'], results.get("0").id, normalizedEdgesValue[id]['end']));
+      const { error } = addNewEdge(txnId, newEdge(newId, edge, normalizedEdgesValue[id]["properties"], results.get("0").id, normalizedEdgesValue[id]["end"]));
+      if (error) alert(error);
       result[id] = newId;
     });
     updatedAttributeIds.forEach(id => {
-      replaceEdgeProperties(txnId, id, normalizedEdgesValue[id]['properties']);
-      updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]['end']);
+      const { error: error1 } = replaceEdgeProperties(txnId, id, normalizedEdgesValue[id]["properties"]);
+      if (error1) alert(error1);
+      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0").id, normalizedEdgesValue[id]["end"]);
+      if (error2) alert(error2);
       result[id] = id;
     });
   });
@@ -126,33 +139,55 @@ export function fetchAttributesTableData(
   switch (schema) {
     case "ServerAttributeType": {
       return [
-       { id: "0", title: "ServerFormAttributeType", save: ["vertex", VertexLabels.ServerAttributeType],
-         attributes: [
-           { id: "id", serverType: ServerFormAttributeType.String },
-           { id: "default", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id]), },
-         ] },
         {
-          id: "1", title: "FormAttributeType",
+          id: "0",
+          title: "ServerFormAttributeType",
+          save: ["vertex", VertexLabels.ServerAttributeType],
+          attributes: [
+            { id: "id", serverType: ServerFormAttributeType.String },
+            {
+              id: "default",
+              component: "Select",
+              displayExpr: "properties.id",
+              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id])
+            }
+          ]
+        },
+        {
+          id: "ServerToFormAttributeType",
+          component: "Table",
+          edge: "ServerToFormAttributeType",
+          defaultValue: "undefined",
           // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
-          save: ["edge", EdgeLabels.ServerToFormAttributeType],
+          // save: ["edge", EdgeLabels.ServerToFormAttributeType],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]); // todo sort by pos
-            return {properties: {ServerToFormAttributeType: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, formAttributeType: edge.end}, _id: edge.id}))}}
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            return AttributeEdges.map(edge => ({
+              ...edge,
+              properties: { ...edge.properties, formAttributeType: edge.end },
+              _id: edge.id
+            }));
+          },
+          save: (txnId, results, tableData) => {
+            const edge = EdgeLabels.ServerToFormAttributeType;
+            const endIdAttribute = "formAttributeType";
+            return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
           },
           attributes: [
-            { id: "ServerToFormAttributeType", component: 'Table', edge: "ServerToFormAttributeType",defaultValue: "undefined",
-              save: (txnId, results, tableData)=>{
-               const edge = EdgeLabels.ServerToFormAttributeType;
-                const endIdAttribute = "formAttributeType";
-                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
-              },
-              attributes: [
-                { id: "pos", serverType: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-                { id: "formAttributeType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id]) },
-              ], },
-          ],
-        }
-      ];
+            {
+              id: "pos",
+              serverType: ServerFormAttributeType.Integer,
+              default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+              hidden: true
+            },
+            {
+              id: "formAttributeType",
+              component: "Select",
+              displayExpr: "properties.id",
+              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id])
+            }
+          ]
+        }];
     }
     case "FormAttributeType": {
       return [{ id: "0", title: "FormAttributeType", save: ["vertex", VertexLabels.FormAttributeType], attributes: [{ id: "id", serverType: ServerFormAttributeType.String }] }];
@@ -162,15 +197,25 @@ export function fetchAttributesTableData(
         id: "0", title: "Attribute", save: ["vertex", VertexLabels.Attribute], attributes: [
           { id: "id", serverType: ServerFormAttributeType.String },
           // { id: "selector", type: ServerFormAttributeType.String },
-          { id: "serverType", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]),
+          {
+            id: "serverType",
+            component: "Select",
+            displayExpr: "properties.id",
+            fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]),
             onchange: (formGroup, value) => {
-              formGroup.controls['component'].setValue(null);
-            } },
-          { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue: string)=>{
-            const serverTypeValue = formGroup.controls['serverType'].value;
-            if(!serverTypeValue) return [];
-            return getOutEdgeIdsOfType(serverTypeValue,  EdgeLabels.ServerToFormAttributeType).map(id=> graph.vertexes[graph.edges[id].end])
-            } },
+              formGroup.controls["component"].setValue(null);
+            }
+          },
+          {
+            id: "component",
+            component: "Select",
+            displayExpr: "properties.id",
+            fetchOptions: async (formValues, formGroup, inputValue: string) => {
+              const serverTypeValue = formGroup.controls["serverType"].value;
+              if (!serverTypeValue) return [];
+              return getOutEdgeIdsOfType(serverTypeValue, EdgeLabels.ServerToFormAttributeType).map(id => graph.vertexes[graph.edges[id].end]);
+            }
+          },
           { id: "label", serverType: ServerFormAttributeType.String },
           // { id: "internal", type: ServerFormAttributeType.Boolean },
           { id: "unique", serverType: ServerFormAttributeType.Boolean },
@@ -179,26 +224,51 @@ export function fetchAttributesTableData(
           { id: "disabled", serverType: ServerFormAttributeType.Boolean },
           // { id: "internal", type: ServerFormAttributeType.Boolean },
           { id: "default", serverType: ServerFormAttributeType.Map }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-          { id: "onChange", component: 'JsCode' },
-          { id: "props", component: 'JsCode' },
-          { id: "code", component: 'JsCode', props: {placeholder: "write attributes for non base field"} },
-          { id: "meta", component: 'JsCode' },
+          { id: "onChange", component: "JsCode" },
+          { id: "props", component: "JsCode" },
+          {
+            id: "code",
+            component: "JsCode",
+            props: { placeholder: "write attributes for non base field" }
+          },
+          { id: "meta", component: "JsCode" }
         ],
       }];
     }
-    // TODO: Collection has only one attribute. Add validation for that.
+    case "CollectionCategory": {
+      return [{
+        id: "0",
+        title: "Collection Category",
+        save: ["vertex", VertexLabels.CollectionCategory],
+        attributes: [
+          { id: "id", serverType: ServerFormAttributeType.String },
+          { id: "description", component: "TextArea" }
+        ]
+      }];
+    }
+   // TODO: Collection has only one attribute. Add validation for that.
     case "Collection": {
       return [{
-        id: "0", title: "Collection1", save: ["vertex", VertexLabels.Collection], attributes: [
+        id: "0",
+        title: "Collection1",
+        save: ["vertex", VertexLabels.Collection],
+        attributes: [
           { id: "id", serverType: ServerFormAttributeType.String },
-        ],
+          {
+            id: "category",
+            component: "Select",
+            displayExpr: "properties.id",
+            fetchOptions: async () => (graph.vertexLabelIdMap["CollectionCategory"] || []).map(id => graph.vertexes[id])
+          },
+          { id: "description", component: "TextArea" }
+        ]
       },
         {
           id: "1", title: "Collection2",
           // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.CollectionHasAttribute],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
             return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -210,23 +280,46 @@ export function fetchAttributesTableData(
               },
               defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
-              { id: "pos", serverType: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { id: "attribute", component: 'Select', valueKey: "properties.id",noOverWrite: true, default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id]) },
+                {
+                  id: "pos",
+                  serverType: ServerFormAttributeType.Integer,
+                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                  hidden: true
+                },
+                {
+                  id: "attribute",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  noOverWrite: true,
+                  default: (formValues, control, id: string) => id && graph.edges[id].end,
+                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
+                },
 
-              { id: "id", serverType: ServerFormAttributeType.String },
-              // { id: "selector", type: ServerFormAttributeType.String},
-              { id: "serverType", component: 'Select', valueKey: "properties.id", noInput: true, fieldOptions: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
-                const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]['serverType'];
-                if(serverTypeValue) {
-                  return (graph.vertexes[serverTypeValue].out_edges['ServerToFormAttributeType'] || []).map(edgeId => graph.edges[edgeId].end).map(id=>graph.vertexes[id]);
-                } else {
-                  return [];
-                }
-               }
-              },
-              { id: "label", serverType: ServerFormAttributeType.String },
-              // { id: "internal", type: ServerFormAttributeType.Boolean },
+                { id: "id", serverType: ServerFormAttributeType.String },
+                // { id: "selector", type: ServerFormAttributeType.String},
+                {
+                  id: "serverType",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  noInput: true,
+                  fieldOptions: { disabled: true },
+                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id])
+                },
+                {
+                  id: "component",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  fetchOptions: async (formValues, formGroup, inputValue) => {
+                    const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]["serverType"];
+                    if (serverTypeValue) {
+                      return (graph.vertexes[serverTypeValue].out_edges["ServerToFormAttributeType"] || []).map(edgeId => graph.edges[edgeId].end).map(id => graph.vertexes[id]);
+                    } else {
+                      return [];
+                    }
+                  }
+                },
+                { id: "label", serverType: ServerFormAttributeType.String },
+                // { id: "internal", type: ServerFormAttributeType.Boolean },
               { id: "unique", serverType: ServerFormAttributeType.Boolean },
               { id: "required", serverType: ServerFormAttributeType.Boolean },
               { id: "readonly", serverType: ServerFormAttributeType.Boolean },
@@ -238,6 +331,44 @@ export function fetchAttributesTableData(
               { id: "meta", component: 'JsCode' },
               ], },
           ],
+        }, {
+          id: "2",
+          component: "Table",
+          edge: "CollectionHasChild",
+          defaultValue: "undefined",
+          // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
+          // save: ["edge", EdgeLabels.ServerToFormAttributeType],
+          data: (mainId) => {
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasChild).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            return AttributeEdges.map(edge => ({
+              ...edge,
+              properties: { ...edge.properties, collection: edge.end },
+              _id: edge.id
+            }));
+          },
+          save: (txnId, results, tableData) => {
+            const edge = EdgeLabels.CollectionHasChild;
+            const endIdAttribute = "collection";
+            return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+          },
+          attributes: [
+            {
+              id: "pos",
+              serverType: ServerFormAttributeType.Integer,
+              default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+              hidden: true
+            },
+            {
+              id: "collection",
+              component: "Select",
+              displayExpr: "properties.id",
+              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("Collection").map((id) => graph.vertexes[id])
+            },
+            {
+              id: "type",
+              component: "TextInput"
+            }
+          ]
         }];
     }
     case "FormLayoutItem": {
@@ -246,11 +377,29 @@ export function fetchAttributesTableData(
           { id: "id", serverType: ServerFormAttributeType.String },
           // TODO: make title required
           { id: "title", serverType: ServerFormAttributeType.String },
-          { id: "description", serverType: ServerFormAttributeType.String },
-          { id: "labelType", component: 'Select', valueKey: "id", fetchOptions:  async () => [{id: 'vertex'}, {id: 'edge' }] },
+          { id: "description", component: "TextArea" },
+          { id: "component", serverType: ServerFormAttributeType.String },
+          {
+            id: "labelType",
+            component: "Select",
+            displayExpr: "id",
+            fetchOptions: async () => [{ id: "vertex" }, { id: "edge" }]
+          },
+          // TODO: add support for Select component, it will fetch from Vertex collection
           { id: "labelName", serverType: ServerFormAttributeType.String },
-          { id: "from", component: 'JsCode', label: "From Function", props: {placeholder: "(results: FormResult, formValue: object)=> Id"} },
-          { id: "to", component: 'JsCode', label: "To Function", props: {placeholder: "(results: FormResult, formValue: object)=> Id"} },
+          {
+            id: "from",
+            component: "JsCode",
+            label: "From Function",
+            props: { placeholder: "(results: FormResult, formValue: object)=> Id" }
+          },
+          {
+            id: "to",
+            component: "JsCode",
+            label: "To Function",
+            props: { placeholder: "(results: FormResult, formValue: object)=> Id" }
+          },
+          { id: "meta", component: "JsCode", props: { placeholder: "({})" } }
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
         ],
       },
@@ -269,14 +418,19 @@ export function fetchAttributesTableData(
             }
           },
           attributes: [
-            { id: "collection", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("Collection").map((id) => graph.vertexes[id]) },
+            {
+              id: "collection",
+              component: "Select",
+              displayExpr: "properties.id",
+              fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("Collection").map((id) => graph.vertexes[id])
+            }
           ],
         },
         {
           id: "2", title: "Attributes",
           save: ["edge", EdgeLabels.FormLayoutItemHasAttribute],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
             return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
@@ -288,33 +442,56 @@ export function fetchAttributesTableData(
               },
               defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
-              { id: "pos", serverType: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              { id: "attribute", component: 'Select', valueKey: "properties.id", default: (formValues, control, id: string)=>id && graph.edges[id].end, fetchOptions:  async (formValues, formGroup, inputValue)=>{
-                const collectionId = formValues.controls["1"].controls.collection.value;
-                if(collectionId){
-                  const collectionVertex = graph.vertexes[collectionId];
-                  if(collectionVertex) {
-                    return (collectionVertex.out_edges[EdgeLabels.CollectionHasAttribute] || []).map(id => graph.vertexes[graph.edges[id].end])
-                  }
-                }
-                return []
-                // findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
-                } },
-
-              { id: "id", serverType: ServerFormAttributeType.String },
-              // { id: "selector", type: ServerFormAttributeType.String},
-              { id: "serverType", component: 'Select', valueKey: "properties.id", noInput: true, fieldOptions: {disabled: true}, fetchOptions:  async (formValues, formGroup, inputValue)=>findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]) },
-              { id: "component", component: 'Select', valueKey: "properties.id", fetchOptions:  async (formValues, formGroup, inputValue)=>{
-                  const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]['serverType'];
-                  if(serverTypeValue) {
-                    return (graph.vertexes[serverTypeValue].out_edges['ServerToFormAttributeType'] || []).map(edgeId => graph.edges[edgeId].end).map(id=>graph.vertexes[id]);
-                  } else {
+                {
+                  id: "pos",
+                  serverType: ServerFormAttributeType.Integer,
+                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                  hidden: true
+                },
+                {
+                  id: "attribute",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  default: (formValues, control, id: string) => id && graph.edges[id].end,
+                  fetchOptions: async (formValues, formGroup, inputValue) => {
+                    const collectionId = (formValues.controls["1"] as IFormGroup).controls.collection.value;
+                    if (collectionId) {
+                      const collectionVertex = graph.vertexes[collectionId];
+                      if (collectionVertex) {
+                        return (collectionVertex.out_edges[EdgeLabels.CollectionHasAttribute] || []).map(id => graph.vertexes[graph.edges[id].end]);
+                      }
+                    }
                     return [];
+                    // findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
                   }
-                } },
-              { id: "label", serverType: ServerFormAttributeType.String },
-              // { id: "internal", type: ServerFormAttributeType.Boolean },
-              { id: "unique", serverType: ServerFormAttributeType.Boolean },
+                },
+
+                { id: "id", serverType: ServerFormAttributeType.String },
+                // { id: "selector", type: ServerFormAttributeType.String},
+                {
+                  id: "serverType",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  noInput: true,
+                  fieldOptions: { disabled: true },
+                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id])
+                },
+                {
+                  id: "component",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  fetchOptions: async (formValues, formGroup, inputValue) => {
+                    const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]["serverType"];
+                    if (serverTypeValue) {
+                      return (graph.vertexes[serverTypeValue].out_edges["ServerToFormAttributeType"] || []).map(edgeId => graph.edges[edgeId].end).map(id => graph.vertexes[id]);
+                    } else {
+                      return [];
+                    }
+                  }
+                },
+                { id: "label", serverType: ServerFormAttributeType.String },
+                // { id: "internal", type: ServerFormAttributeType.Boolean },
+                { id: "unique", serverType: ServerFormAttributeType.Boolean },
               { id: "required", serverType: ServerFormAttributeType.Boolean },
               { id: "readonly", serverType: ServerFormAttributeType.Boolean },
               { id: "disabled", serverType: ServerFormAttributeType.Boolean },
@@ -332,7 +509,8 @@ export function fetchAttributesTableData(
         id: "0", title: "FormLayout1", save: ["vertex", VertexLabels.FormLayout], attributes: [
           { id: "id", serverType: ServerFormAttributeType.String },
           { id: "title", serverType: ServerFormAttributeType.String },
-          { id: "description", serverType: ServerFormAttributeType.String },
+          { id: "description", component: "TextArea" },
+          { id: "meta", component: "JsCode" }
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
         ],
@@ -341,7 +519,7 @@ export function fetchAttributesTableData(
           id: "1", title: "Forms",
           save: ["edge", EdgeLabels.FormLayoutHasItem],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]); // todo sort by pos
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
             return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
             // return {properties: {FormLayoutItem: AttributeEdges}}
           },
@@ -355,13 +533,29 @@ export function fetchAttributesTableData(
               postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
                 // tableItemFormGroup =  FormLayoutHasItem
                 // values = all the form values
-                tableItemFormGroup.controls['end'].setValue(values.get("0").id)
+                tableItemFormGroup.controls["end"].setValue(values.get("0").id);
               },
               attributes: [
-                { id: "pos", serverType: ServerFormAttributeType.Integer, default: (formValues, control)=>(control as ReturnType<typeof createFormArray>).controls.length + 1, hidden: true },
-              ], },
+                {
+                  id: "pos",
+                  serverType: ServerFormAttributeType.Integer,
+                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                  hidden: true
+                }
+              ]
+            },
           ],
         }];
+    }
+    case "TableLayout": {
+      return [{
+        id: "0",
+        title: "FormLayout1",
+        save: ["vertex", "TableLayout"],
+        attributes: [
+          { id: "id", serverType: ServerFormAttributeType.String }
+        ]
+      }];
     }
   }
 }

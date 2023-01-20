@@ -107,6 +107,8 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
 export function getNewGraphId(): Id {
   setGraph('uniqueId', graph.uniqueId + 1);
   return `${graph.uniqueId}`;
+ // Muration Actor Exception Error : Integer overflow -
+ // return `${new Date().getTime()}`;
 }
 
 export function resetDatabase() {
@@ -124,7 +126,7 @@ export function resetDatabase() {
 export function isValidId(startVertexId: string) {
   return G.isString(startVertexId) || G.isNumber(startVertexId);
 }
-
+window.graph = graph;
 /*
 // ***********
 // Development

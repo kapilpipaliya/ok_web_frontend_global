@@ -14,7 +14,7 @@ import {
  Id,
  VertexLabels
 } from "ok_web_components/src/components/input/Form";
-import { convertToJS } from "./utils";
+import { evalImpl } from "./utils";
 import {
  DynamicFormSequence,
  DynamicFormSequenceProps
@@ -39,14 +39,17 @@ interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'formMe
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  const formLayoutId = () => graph.vertexLabelIdMap[VertexLabels.FormLayout].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.formId)
  const formLayout = graph.vertexes[props.formId] || graph.vertexes[formLayoutId()];
- const formLayoutHasItems = formLayout.out_edges[EdgeLabels.FormLayoutHasItem];
+ if(!formLayout) {
+  alert('form dont found');
+  return;
+ }
+ const formLayoutHasItems = formLayout.out_edges[EdgeLabels.FormLayoutHasItem].map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
 
  const generateNewApi = () => {
-  const forms = formLayoutHasItems.map(edgeFormLayoutItemId=> {
-
-   const edgeFormLayoutHasItem = graph.edges[edgeFormLayoutItemId];
+  const forms = formLayoutHasItems.map(edgeFormLayoutHasItem=> {
    const vertexFormLayoutItem = graph.vertexes[edgeFormLayoutHasItem.end];
 
+   // assume collection is always set, and single select
    const edgeFormLayoutItemHasCollectionId = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasCollection][0]
    const vertexCollection = graph.vertexes[graph.edges[edgeFormLayoutItemHasCollectionId].end];
    const collectionAttributeAndPropertiesMap = vertexCollection.out_edges[EdgeLabels.CollectionHasAttribute].reduce((acc, collectionHasAttributeId)=>{
@@ -56,7 +59,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     return acc;
    }, {} as {[key: Id]: {[p: string]: any}})
 
-   const formLayoutItemAttributeIds = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasAttribute];
+   const formLayoutItemAttributeIds = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasAttribute] || [];
    const attributes  = formLayoutItemAttributeIds.map(formLayoutItemAttributeId => {
     const edgeFormLayoutItemAttribute = graph.edges[formLayoutItemAttributeId];
 
@@ -73,13 +76,13 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     if(attribute.serverType) {
      attribute.serverType = graph.vertexes[attribute.serverType].properties.id;
     if(attribute.props){
-     attribute.props = convertToJS(attribute.props);
+     attribute.props = evalImpl(attribute.props);
     }
      if(attribute.code){
-      attribute.code = convertToJS(attribute.code);
+      attribute.code = evalImpl(attribute.code);
      }
      if(attribute.meta) {
-      const meta = convertToJS(attribute.meta);
+      const meta = evalImpl(attribute.meta);
       if(G.isObject(meta)){
        Object.assign(attribute, meta);
        delete attribute.meta;
@@ -87,11 +90,19 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
      }
     }
     return attribute;
-   })
+   }).sort((a,b)=>a.pos-b.pos);
    const from = vertexFormLayoutItem.properties.from
    const to = vertexFormLayoutItem.properties.to
-   const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? convertToJS(from) : undefined, to ? convertToJS(to) : undefined];
-   return {id: vertexFormLayoutItem.properties.id, title: vertexFormLayoutItem.properties.title, attributes, save} as FormMetaData
+   const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? evalImpl(from) : undefined, to ? evalImpl(to) : undefined];
+   const formLayoutItemProperties = { ...vertexFormLayoutItem.properties };
+   if(formLayoutItemProperties.meta) {
+    const meta = evalImpl(formLayoutItemProperties.meta);
+    if(G.isObject(meta)){
+     Object.assign(formLayoutItemProperties, meta);
+     delete formLayoutItemProperties.meta;
+    }
+   }
+   return {save, ...formLayoutItemProperties, attributes} as FormMetaData
   })
   return forms;
  }
@@ -99,8 +110,16 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  console.log(forms);
 
  const [selectedProps, customProps] = splitProps(props, ['formId']);
+ const {id, ...formLayoutProperties} = formLayout.properties;
+ if(formLayoutProperties.meta) {
+  const meta = evalImpl(formLayoutProperties.meta);
+  if(G.isObject(meta)){
+   Object.assign(formLayoutProperties, meta);
+   delete formLayoutProperties.meta;
+  }
+ }
  return <div class="flex flex:row flex:wrap">
-  <DynamicFormSequence formMetaData={forms} {...customProps}/>
+  <DynamicFormSequence formMetaData={forms} {...formLayoutProperties} {...customProps}/>
  </div>
 }
 export interface SingleFormProps {}

@@ -34,11 +34,11 @@ export function addNewEdge(txnId: number, edge: Edge): {error: string | boolean,
  if(!graph.vertexes[edge.end]) {
   return {error: 'Edge End Vertex not exist while adding new edge'}
  }
- if(G.isArray(graph.vertexes[edge.start].out_edges[edge.type]) && graph.vertexes[edge.start].out_edges[edge.type].includes(edge.start)) {
-  return {error: 'Edge ID already exist in out_edges of the vertex'}
+ if(G.isArray(graph.vertexes[edge.start].out_edges[edge.type]) && graph.vertexes[edge.start].out_edges[edge.type].includes(edge.id)) {
+  return {error: `Edge ID ${edge.id} already exist in out_edges of the Start vertex ${edge.start}`}
  }
- if(G.isArray(graph.vertexes[edge.end].in_edges[edge.type]) && graph.vertexes[edge.end].in_edges[edge.type].includes(edge.end)) {
-  return {error: 'Edge ID already exist in in_edges of the vertex'}
+ if(G.isArray(graph.vertexes[edge.end].in_edges[edge.type]) && graph.vertexes[edge.end].in_edges[edge.type].includes(edge.id)) {
+  return {error: `Edge ID ${edge.id} already exist in in_edges of the End vertex ${edge.end}`}
  }
  batch(() => {
   setGraph("edges", edge.id, klona(edge));
@@ -59,8 +59,8 @@ export function replaceEdgeProperties(txnId: number, edgeId: Id, properties: {})
  transactionDetailAdd(txnId, {replaceEdge: () =>klona(graph.edges[edgeId]), revert: () => replaceEdgeProperties(0, edgeId, originalProperties)});
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 }
-
-const replaceEdgeStart = (txnId: number, type: string, edgeId: Id, newStartVertexId: Id): {error: string | boolean, txnDetailIndex?: number} => {
+// private
+export const replaceEdgeStart = (txnId: number, type: string, edgeId: Id, newStartVertexId: Id): {error: string | boolean, txnDetailIndex?: number} => {
  if(!graph.edges[edgeId]) {
   return {error: "Edge ID is not valid"};
  }
@@ -71,10 +71,11 @@ const replaceEdgeStart = (txnId: number, type: string, edgeId: Id, newStartVerte
   setGraph("vertexes", oldStartVertexId, "out_edges", type, (v) => G.isArray(v) ? pipe(v.filter(e => e !== edgeId), f => f.length ? f : undefined) : v);
   setGraph("vertexes", newStartVertexId, "out_edges", type, (v) => G.isArray(v) ? [...v, edgeId] : [edgeId]);
  });
- transactionDetailAdd(txnId, {replaceEdgeStart: () => klona(graph.vertexes[edgeId]), revert: () => replaceEdgeStart(0, type, edgeId, oldStartVertexId)});
+ transactionDetailAdd(txnId, {replaceEdgeStart: () => klona(graph.edges[edgeId]), revert: () => replaceEdgeStart(0, type, edgeId, oldStartVertexId)});
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 };
-const replaceEdgeEnd = (txnId: number, type: string, edgeId: Id, newEndVertexId: Id): {error: string | boolean, txnDetailIndex?: number} => {
+//private
+export const replaceEdgeEnd = (txnId: number, type: string, edgeId: Id, newEndVertexId: Id): {error: string | boolean, txnDetailIndex?: number} => {
  if(!graph.edges[edgeId]) {
   return {error: "Edge ID is not valid"};
  }
@@ -85,7 +86,7 @@ const replaceEdgeEnd = (txnId: number, type: string, edgeId: Id, newEndVertexId:
   setGraph("vertexes", oldEndVertexId, "in_edges", type, (v) => G.isArray(v) ? pipe(v.filter(e => e !== edgeId), f => f.length ? f : undefined) : v);
   setGraph("vertexes", newEndVertexId, "in_edges", type, (v) => G.isArray(v) ? [...v, edgeId] : [edgeId]);
  });
- transactionDetailAdd(txnId, {replaceEdgeEnd: () => klona(graph.vertexes[edgeId]), revert: () => replaceEdgeEnd(0, type, edgeId, oldEndVertexId)});
+ transactionDetailAdd(txnId, {replaceEdgeEnd: () => klona(graph.edges[edgeId]), revert: () => replaceEdgeEnd(0, type, edgeId, oldEndVertexId)});
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId).steps.length - 1 : -1};
 };
 
