@@ -1,4 +1,4 @@
-import { createEffect, createSignal, JSX, Show } from "solid-js";
+import { createEffect, createSignal, Show } from "solid-js";
 import {
  backupToIndexDB,
  backupToJson,
@@ -16,7 +16,7 @@ function fileDownloader(opt: {
  mime?: string,
  bom?: string
 }) {
- const throwError = function(name) {
+ const throwError = function(name: string) {
   throw new Error("No " + name + " provided to generate-download-link.");
  };
 
@@ -30,17 +30,17 @@ function fileDownloader(opt: {
  const blob = new Blob(blobData, { type: opt.mime || "application/octet-stream" });
  const blobURL = (window.URL && window.URL.createObjectURL) ? window.URL.createObjectURL(blob) : window.webkitURL.createObjectURL(blob);
 
- const attachDataAsOctetStream = function(data) {
+ const attachDataAsOctetStream = function(data: any) {
   // const link = 'data:application/octet-stream,' + encodeURIComponent(data);
   // anchor.setAttribute('href', link);
   anchor.href = blobURL;
  };
 
- const setFilename = function(filename) {
+ const setFilename = function(filename: string) {
   anchor.setAttribute("download", filename);
  };
 
- const setTitle = function(title) {
+ const setTitle = function(title: string) {
   anchor.appendChild(document.createTextNode(title));
  };
 
@@ -68,7 +68,7 @@ function fileDownloader(opt: {
 
 
 export const BackupRestore = () => {
-
+ let fileInputRef: HTMLInputElement;
  const downloadJson = () => {
   const json = backupToJson();
   fileDownloader({
@@ -80,8 +80,8 @@ export const BackupRestore = () => {
  const backupToIndexDB_ = () => {
   backupToIndexDB().then(() => alert("graph is stored in indexDB"));
  };
- const restoreFromFile: JSX.EventHandlerUnion<HTMLInputElement, Event> = (e) => {
-  const file = (e.target as HTMLInputElement).files[0];
+ const restoreFromFile = () => {
+  const file = (fileInputRef)!.files![0];
 
   if (file) {
    file.text().then(json => {
@@ -122,11 +122,11 @@ export const BackupRestore = () => {
      <button type="button" onclick={restoreFromIndexDB}>Restore From
       IndexDB
      </button>
-     <input type="file" accept="image/*" multiple hide-input>
-      <button data-icon="upload" onchange={restoreFromFile}>
-       <span>Restore From JSON</span>
-      </button>
+     <input ref={fileInputRef!} type="file" accept="image/*" multiple style="display: hidden">
      </input>
+     <button type="button" onClick={restoreFromFile}>
+      <span>Restore From JSON</span>
+     </button>
     </div>
    </div>
 

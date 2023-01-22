@@ -17,9 +17,8 @@ import {
   addNewEdge,
   deleteEdge,
   getOutEdgeIdsOfType,
-  newEdge,
-  replaceEdgeProperties,
-  updateEdgeStartAndEnd
+  newEdge, replaceEdgeEnd,
+  replaceEdgeProperties, replaceEdgeStart,
 } from "../lib/Edge";
 
 /* use in c++
@@ -63,8 +62,10 @@ export function saveTableDataToEdge(txnId: number, tableData: {[key: string]: an
     updatedAttributeIds.forEach(id => {
       const { error: error1 } = replaceEdgeProperties(txnId, id, D.deleteKeys(normalizedEdgesValue.get(id)!["properties"], [endIdAttribute]));
       if (error1) alert(error1);
-      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0")!.id, normalizedEdgesValue.get(id)!["properties"][endIdAttribute]);
-      if (error2) alert(error2);
+      const { error: errorStartId } = replaceEdgeStart(txnId, id, results.get("0")!.id);
+      if (errorStartId) alert(errorStartId);
+      const { error: errorEndId } = replaceEdgeEnd(txnId, id, normalizedEdgesValue.get(id)!["properties"][endIdAttribute]);
+      if (errorEndId) alert(errorEndId);
       result.set(id, id);
     });
   });
@@ -106,8 +107,10 @@ function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results:
     updatedAttributeIds.forEach(id => {
       const { error: error1 } = replaceEdgeProperties(txnId, id, normalizedEdgesValue.get(id)!["properties"]);
       if (error1) alert(error1);
-      const { error: error2 } = updateEdgeStartAndEnd(txnId, id, results.get("0")!.id, normalizedEdgesValue.get(id)!["end"]);
-      if (error2) alert(error2);
+      const { error: errorStartId } = replaceEdgeStart(txnId, id, results.get("0")!.id);
+      if (errorStartId) alert(errorStartId);
+      const { error: errorEndId } = replaceEdgeEnd(txnId, id, normalizedEdgesValue.get(id)!["end"]);
+      if (errorEndId) alert(errorEndId);
       result.set(id, id);
     });
   });
@@ -386,8 +389,7 @@ export function fetchAttributesTableData(
             displayExpr: "id",
             fetchOptions: async () => [{ id: "vertex" }, { id: "edge" }]
           },
-          // TODO: add support for Select component, it will fetch from Vertex collection
-          { id: "labelName", serverType: ServerFormAttributeType.String },
+          { id: "labelName", component: "Select", fetchOptions: async () => graph.vertexLabelIdMap["Collection"].map(id => graph.vertexes[id]), displayExpr: "properties.id", },
           {
             id: "from",
             component: "JsCode",

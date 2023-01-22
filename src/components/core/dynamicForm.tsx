@@ -68,9 +68,8 @@ import {
 } from "../../lib/Vertex";
 import {
  addNewEdge,
- newEdge,
- replaceEdgeProperties,
- updateEdgeStartAndEnd
+ newEdge, replaceEdgeEnd,
+ replaceEdgeProperties, replaceEdgeStart
 } from "../../lib/Edge";
 import { WsContext } from "../ws_events_dispatcher";
 import Button, { ClickEvent } from "devextreme/ui/button";
@@ -427,8 +426,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
        if (D.isNotEmpty(nonTableValue) && !equals(removeUndefinedProperties(initialValue.properties, false, 10), removeUndefinedProperties(nonTableValue, false, 10))) {
         replaceEdgeProperties(txnId, initialValue.id, nonTableValue);
        }
-       if (initialValue.start !== start || initialValue.end !== end) {
-        updateEdgeStartAndEnd(txnId, initialValue.id, start, end);
+       if (initialValue.start !== start) {
+        replaceEdgeStart(txnId, initialValue.id, start);
+       }
+       if (initialValue.end !== end) {
+        replaceEdgeEnd(txnId, initialValue.id, end);
        }
        result_ = { id: initialValue.id, start, end };
       }

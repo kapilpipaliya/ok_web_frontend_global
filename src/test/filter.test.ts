@@ -1,13 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { graph } from "../lib/graph";
-import { createUniqueId } from "solid-js";
-import { klona } from "klona";
-import {
- addNewVertex,
- deleteVertex,
- newVertex,
- replaceVertexProperties
-} from "../lib/Vertex";
 
 interface TableDataType {
  leftParens?: string;

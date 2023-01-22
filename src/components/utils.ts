@@ -14,11 +14,11 @@ import {
  addNewEdge, deleteEdge, getOutEdgeIdsOfType,
  newEdge, replaceEdgeEnd,
  replaceEdgeProperties,
- replaceEdgeStart, updateEdgeId, updateEdgeStartAndEnd
+ replaceEdgeStart, updateEdgeId,
 } from "../lib/Edge";
 import { saveTableDataToEdge } from "./api";
 
-export function convertToJS(jsString) {
+export function convertToJS(jsString: string) {
  if (jsString === "" || jsString === null) {
   return undefined;
  }
@@ -49,7 +49,7 @@ const evalCache = {};
  *
  * @return {any}
  */
-const doEval = (code) => {
+const doEval = (code: string) => {
  /**
   * @type {Store}
   */
@@ -75,7 +75,6 @@ const doEval = (code) => {
  replaceEdgeProperties
  replaceEdgeStart
  replaceEdgeEnd
- updateEdgeStartAndEnd
  deleteEdge
  updateEdgeId
  getOutEdgeIdsOfType
@@ -84,7 +83,7 @@ const doEval = (code) => {
 
  // ----------------------------------------------------------------------------------------------------------------------
 
- const raise = (error) => {
+ const raise = (error: any) => {
   throw new Error(error ? error.toString() : "unknown error");
  };
 
@@ -105,11 +104,12 @@ Example:
  * @param {string} code
  * @return {any}
  */
-export const evalImpl = (code) => {
+export const evalImpl = (code: string) => {
 
  const codeStr = "" + code;
 
  if (evalCache.hasOwnProperty(codeStr)) {
+  // @ts-ignore
   return evalCache[codeStr];
  }
 
@@ -122,6 +122,7 @@ export const evalImpl = (code) => {
   console.error("[Evaljs] Error compiling code", err, codeStr);
  }
 
+ // @ts-ignore
  evalCache[codeStr] = evaled;
 
  return evaled;
@@ -134,7 +135,8 @@ export const evalImpl = (code) => {
  *
  * @return {{}}
  */
-const run = (code, callback, fallback) => {
+// @ts-ignore
+const run = (code: string, callback: (result: any) => void, fallback: any) => {
 
  let evaled = evalImpl(code);
 

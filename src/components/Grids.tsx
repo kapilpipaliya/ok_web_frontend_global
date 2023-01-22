@@ -10,7 +10,7 @@ import {
  transactions
 } from "../lib/graph";
 import {
- EdgeLabels, FormMetaData, Id,
+ EdgeLabels, Id,
  VertexLabels
 } from "../../../ok_web_components/src/components/input/Form";
 import { createEffect, For, on, splitProps, useContext } from "solid-js";
@@ -19,12 +19,12 @@ import { Link, useNavigate } from "solid-app-router";
 import { removeUndefinedProperties } from "../../../ok_web_components";
 import { evalImpl } from "./utils";
 import { G } from "@mobily/ts-belt";
-import { DynamicFormSequence } from "./core/dynamicForm";
+
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import './Grid.css'
 export const SampleDataGrid = (props: {}) => {
- const data = [];
+ const data = [] as {[key: string]: any}[];
  const dataArrayStore = new ArrayStore({
   data: data,
   key: "id",
@@ -52,6 +52,7 @@ export const SampleDataGrid = (props: {}) => {
   setGraph('vertexes', graph.vertexLabelIdMap[VertexLabels.Attribute][0], 'properties', {id: "Kapil"});
  }, 3000);
  return <div ref={el => {
+  // @ts-ignore
   const instance = new DxDataGrid(el, {
    dataSource: dataDataSource,
    // keyExpr: 'id',
@@ -84,9 +85,12 @@ interface DataGridProps {
 }
 
 export const DataGrid = (props: DataGridProps) => {
- console.log(1, JSON.stringify(props))
+ if(!props.collection) {
+  return <>Incorrect Configuration</>
+ }
+ // console.log(1, JSON.stringify(props))
  const {Ws} = useContext(WsContext);
- const data = [];
+ const data = [] as {[key: string]: any}[];
  const dataArrayStore = new ArrayStore({
   data: data,
   key: "id",
@@ -120,6 +124,7 @@ export const DataGrid = (props: DataGridProps) => {
  const [p, customProps] = splitProps(props, ['collection', 'columns'])
 
  return <div ref={el => {
+  // @ts-ignore
   const instance = new DxDataGrid(el, {
    dataSource: dataDataSource,
    // keyExpr: 'id',
@@ -148,7 +153,7 @@ export const DataGrid = (props: DataGridProps) => {
    showColumnLines: true,
    ...customProps
   });
-  const deleteObject = (id) => {
+  const deleteObject = (id: Id) => {
    if (confirm("are you sure")) {
     const txnId = getNewTxnId();
     const deleteResult = deleteVertex(txnId, id);
@@ -158,7 +163,7 @@ export const DataGrid = (props: DataGridProps) => {
      dataArrayStore.remove(id);
      dataDataSource.reload();
     }
-    transactions.get(txnId).status = ProcessStatus.Ready;
+    transactions.get(txnId)!.status = ProcessStatus.Ready;
     commitTransaction(Ws);
    }
   };
@@ -169,7 +174,10 @@ interface AbstractSingleGridProps {
 }
 export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
  const tableLayoutId = () => graph.vertexLabelIdMap[VertexLabels.TableLayout].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.tableId)
- const tableLayout = graph.vertexes[props.tableId] || graph.vertexes[tableLayoutId()];
+ const tableLayout = graph.vertexes[props.tableId] || graph.vertexes[tableLayoutId()!];
+ if(!tableLayout) {
+  return <>Incorrect Configuration</>
+ }
  const tableLayoutHasAttributes = (tableLayout.out_edges[EdgeLabels.TableLayoutHasAttribute] || []).map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
 
  const generateNewApi = () => {
@@ -194,7 +202,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
  }
  const tableColumns = generateNewApi();
 
- const [selectedProps, customProps] = splitProps(props, ['tableId']);
+ const [_selectedProps, customProps] = splitProps(props, ['tableId']);
  const {id, ...tableLayoutProperties} = tableLayout.properties;
  if(tableLayoutProperties.meta) {
   const meta = evalImpl(tableLayoutProperties.meta);
@@ -210,7 +218,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     Add new
    </button>
   </div>
-  <DataGrid columns={tableColumns} {...tableLayoutProperties} {...customProps}/>
+  {/* @ts-ignore*/}
+  <DataGrid columns={tableColumns} {...tableLayoutProperties} {...customProps} />
  </div>
 }
 

@@ -6,7 +6,7 @@ Simplified WebSocket events dispatcher
 // import { decode } from '@msgpack/msgpack'; import {WSBase} from "./ws_reconnect";
 
 import { WSBase } from "./ws_reconnect";
-import { createContext, createSignal } from "solid-js";
+import { createContext } from "solid-js";
 import { atom } from "solid-use";
 import { commitTransaction, graph } from "../lib/graph";
 
@@ -50,11 +50,11 @@ export function saveCookie(name: string, value: string, max_age: number) {
  document.cookie = `${name}=${value}; path=/; max-age=${max_age}`;
 }
 
-export function clearCookie(d) {
+export function clearCookie(d: any) {
  document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
 }
 
-function saveCookies(data: { max_age: number; cookie: { jwt: string } }) {
+function saveCookies(data: { max_age: number; cookie: { [key: string]: string; jwt: string } }) {
  Object.keys(data.cookie).forEach(key => {
   saveCookie(key, data.cookie[key] as string, data.max_age);
  });
@@ -66,7 +66,8 @@ export class ServerEventsDispatcher extends WSBase {
  isFirstTriggers: boolean;
  firstPayload: Array<[WSEvent, any]>;
  firstCancelTimeout: number;
- subscriptions: string[];
+ // TODO: implement this:
+ subscriptions: string[] = [];
  isLoggedIn = atom<boolean>(false);
 
  constructor(path: string) {
@@ -210,8 +211,8 @@ export class ServerEventsDispatcher extends WSBase {
   }
   // if(evt.data instanceof ArrayBuffer ){
   else {
-   const blob = evt.data;
-   const buffer = await blob.arrayBuffer();
+   // const blob = evt.data;
+   // const buffer = await blob.arrayBuffer();
    /// /const data = decode(buffer);
    /// /this.stringHandle(data);
    // console.log('Received arraybuffer')

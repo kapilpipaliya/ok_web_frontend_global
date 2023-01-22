@@ -9,13 +9,13 @@ import {
 
 export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };
+let uniqueId = 0;
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export const [graph, setGraph] = createStore({
-  uniqueId: 0,
  _isPartialSynced: false,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
@@ -65,13 +65,14 @@ export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
 }
 export const revertTransaction = (txnId: number) => {
   if(!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = [...transactions.get(txnId).steps || []];
+  const existingTxnValue = [...transactions.get(txnId)!.steps || []];
   existingTxnValue.reverse().forEach(txn => txn.revert());
   transactions.delete(txnId);
 }
 
 export const getTransactionData = (txnId: number) => {
-  const existingTxnValue = [...transactions.get(txnId).steps || []].map(txnDetail => ({
+ if(!transactions.has(txnId)) return [];
+  const existingTxnValue = [...transactions.get(txnId)!.steps || []].map(txnDetail => ({
     insert: txnDetail.insert?.(),
     replace: txnDetail.replace?.(),
     deleteVertex: txnDetail.deleteVertex?.(),
@@ -97,7 +98,7 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
  }
  if(firstReadyTxn){
   const existingTxnValue = getTransactionData(firstReadyTxn);
-  transactions.get(firstReadyTxn).status = ProcessStatus.Sent
+  transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent
   if(existingTxnValue.length) {
    Ws.trigger([[['post', 'mutate', 0], [[firstReadyTxn,[...vertexOldIdToNewIdMap], [...edgeOldIdToNewIdMap], existingTxnValue]]]])
   }
@@ -105,8 +106,8 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
 }
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 export function getNewGraphId(): Id {
-  setGraph('uniqueId', graph.uniqueId + 1);
-  return `${graph.uniqueId}`;
+ uniqueId = uniqueId + 1;
+  return uniqueId;
  // Muration Actor Exception Error : Integer overflow -
  // return `${new Date().getTime()}`;
 }
@@ -123,10 +124,10 @@ export function resetDatabase() {
   }));
 }
 
-export function isValidId(startVertexId: string) {
+export function isValidId(startVertexId: Id) {
   return G.isString(startVertexId) || G.isNumber(startVertexId);
 }
-window.graph = graph;
+// window.graph = graph;
 /*
 // ***********
 // Development

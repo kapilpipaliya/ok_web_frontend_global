@@ -12,7 +12,7 @@ import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
 import Page404 from "./errors/404";
 import { BackupRestore } from "./core/BackupRestore";
-import { useDebugger } from "./core/SolidDebug";
+// import { useDebugger } from "./core/SolidDebug";
 import {
  commitTransaction,
  edgeOldIdToNewIdMap,
@@ -34,10 +34,10 @@ import { updateVertexId } from "../lib/Vertex";
 import { updateEdgeId } from "../lib/Edge";
 import { fetchAttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
-import { AlertMessageContext } from "../appState";
+// import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
-import { AbstractSingleGrid, DataGrid, TableDashboard } from "./Grids";
+import { AbstractSingleGrid, TableDashboard } from "./Grids";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -107,7 +107,7 @@ export const MenuButtonToggle = () => {
 
 export const DashboardView = () => {
  const { Ws } = useContext(WsContext);
- const { alerts } = useContext(AlertMessageContext);
+ // const { alerts } = useContext(AlertMessageContext);
  return (
   <div class="flex flex:col flex:1">
    {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
@@ -150,16 +150,11 @@ export const DashboardView = () => {
         </Switch>;
       }} />
       <Route path="/backup_restore" component={() => <BackupRestore />} />
-      {/* Depricated */}
+      {/* Deprecated */}
       <Route path="/forms" component={() => <AllForms />} />
-      {/* Depricated */}
+      {/* Deprecated */}
       <Route path="/form/:id" component={() => <SingleForm />} />
-      {/* Depricated */}
-      <Route path="/sample_grid" component={() => <DataGrid />} />
-      {/* Depricated */}
       <Route path="/grids" component={() => <TableDashboard />} />
-      {/* Depricated */}
-      <Route path="/grid/:id" component={() => <DataGrid />} />
       <Route path="/login" component={() => <Login />} />
       <Route path="/logout" component={() => <Logout />} />
       <Route path="/signup" component={() => <SignUp />} />
@@ -188,6 +183,7 @@ export const FullDashboard = () => {
   if (G.isObject(d) && d.ack) {
    if (Array.isArray(d.txnIds)) {
     for (const txnId of d.txnIds as number[]) {
+     // what if ack is not received?
      if(transactions.has(txnId)) transactions.get(txnId)!.status = ProcessStatus.AckReceived;
     }
    }
@@ -233,7 +229,7 @@ export const FullDashboard = () => {
    }
   }
   let allTxnProcessed = true;
-  for (const [txnId, value] of transactions.entries()) {
+  for (const [_txnId, value] of transactions.entries()) {
    if (value.status !== ProcessStatus.Processed) {
     allTxnProcessed = false;
     break;
@@ -245,7 +241,7 @@ export const FullDashboard = () => {
   } else
    commitTransaction(Ws);
  });
- const debugGraph = useDebugger("graph");
+ // const debugGraph = useDebugger("graph");
  // debugGraph(graph);
  return (
   <div>

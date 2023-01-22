@@ -1,13 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { graph } from "../lib/graph";
-import { createUniqueId } from "solid-js";
-import { klona } from "klona";
-import {
- addNewVertex,
- deleteVertex,
- newVertex,
- replaceVertexProperties
-} from "../lib/Vertex";
 
 interface TableDataType {
  leftParens?: string;
@@ -20,6 +11,7 @@ interface TableDataType {
 }
 
 const transform = (filterData: any[]) => {
+ // @ts-ignore
  const numberArrayRegex = /^\d+(,\d+)+$/;
 
  const rows = [] as TableDataType[];
@@ -49,6 +41,7 @@ const transform = (filterData: any[]) => {
    default: return ""
   }
  }
+ // @ts-ignore:
  const getRightParens = (num: number) => {
   switch (num) {
    case 1: return ')'

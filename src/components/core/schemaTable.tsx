@@ -8,7 +8,7 @@ import {
  untrack,
  useContext
 } from "solid-js";
-import { useLocation, useNavigate, useParams } from "solid-app-router";
+import { useLocation, useNavigate } from "solid-app-router";
 import { fetchAttributesTableData, } from "../api";
 import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
 import { css } from "solid-styled-components";
@@ -53,7 +53,7 @@ export default function SchemaTable(props: {entity: string}) {
   if (props.entity) untrack(getObjectData);
  });
 
- const deleteObject = (id) => {
+ const deleteObject = (id: Id) => {
   if (confirm("are you sure")) {
    if (tableMetaData().save[0] === "vertex") {
     const txnId = getNewTxnId();
@@ -61,7 +61,7 @@ export default function SchemaTable(props: {entity: string}) {
     // @ts-ignore
     if (deleteResult?.error) alert(data.message);
     else getObjectData();
-    transactions.get(txnId).status = ProcessStatus.Ready;
+    transactions.get(txnId)!.status = ProcessStatus.Ready;
     commitTransaction(Ws);
    }
   }

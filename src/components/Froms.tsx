@@ -48,6 +48,9 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  const generateNewApi = () => {
   const forms = formLayoutHasItems.map(edgeFormLayoutHasItem=> {
    const vertexFormLayoutItem = graph.vertexes[edgeFormLayoutHasItem.end];
+   if(typeof vertexFormLayoutItem.properties['labelName'] === "number") {
+    vertexFormLayoutItem.properties['labelName'] = graph.vertexes[vertexFormLayoutItem.properties['labelName']].properties.id;
+   }
 
    // assume collection is always set, and single select
    const edgeFormLayoutItemHasCollectionId = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasCollection][0]
@@ -109,7 +112,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  const forms = generateNewApi();
  console.log(forms);
 
- const [selectedProps, customProps] = splitProps(props, ['formId']);
+ const [_, customProps] = splitProps(props, ['formId']);
  const {id, ...formLayoutProperties} = formLayout.properties;
  if(formLayoutProperties.meta) {
   const meta = evalImpl(formLayoutProperties.meta);
@@ -146,11 +149,13 @@ export const Login = (props: {}) => {
  })
  onCleanup(() => Ws.unbind(event))
  return <AbstractSingleForm formId={"login"} handleSubmit={(txnId, data) => {
-  const email = data.get("0").properties.email;
-  const password = data.get("0").properties.password;
-  Ws.trigger([[event, {body: { email, password } }]])
-  revertTransaction(txnId)
-
+  const formData = data.get("0");
+  if(formData) {
+   const email = formData.properties.email;
+   const password = formData.properties.password;
+   Ws.trigger([[event, {body: { email, password } }]])
+   revertTransaction(txnId)
+  }
  }}/>
 }
 export const Logout = (props: {}) => {
@@ -191,10 +196,12 @@ export const SignUp = (props: {}) => {
  // 4. clear form on success
  // 5. make password not visible
  return <AbstractSingleForm formId={"signup"} handleSubmit={(txnId, data) => {
-  const email = data.get("0").properties.email;
-  const password = data.get("0").properties.password;
-  Ws.trigger([[event, {body: { email, password } }]])
-  revertTransaction(txnId)
-
+  const formData = data.get("0");
+  if(formData) {
+   const email = formData.properties.email;
+   const password = formData.properties.password;
+   Ws.trigger([[event, { body: { email, password } }]])
+   revertTransaction(txnId)
+  }
  }}/>
 }
