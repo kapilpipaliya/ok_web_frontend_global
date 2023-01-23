@@ -153,7 +153,7 @@ export function fetchAttributesTableData(
               id: "default",
               component: "Select",
               displayExpr: "properties.id",
-              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id])
+              collection: "FormAttributeType",
             }
           ]
         },
@@ -188,7 +188,7 @@ export function fetchAttributesTableData(
               id: "formAttributeType",
               component: "Select",
               displayExpr: "properties.id",
-              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("FormAttributeType").map((id) => graph.vertexes[id])
+              collection: "FormAttributeType",
             }
           ]
         }];
@@ -205,7 +205,7 @@ export function fetchAttributesTableData(
             id: "serverType",
             component: "Select",
             displayExpr: "properties.id",
-            fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id]),
+            collection: "ServerAttributeType",
             onchange: (formGroup, value) => {
               formGroup.controls["component"].setValue(null);
             }
@@ -214,6 +214,7 @@ export function fetchAttributesTableData(
             id: "component",
             component: "Select",
             displayExpr: "properties.id",
+            // TODO: make this fetchOptions supported by form too automatically
             fetchOptions: async (formValues, formGroup, inputValue: string) => {
               const serverTypeValue = formGroup.controls["serverType"].value;
               if (!serverTypeValue) return [];
@@ -261,8 +262,8 @@ export function fetchAttributesTableData(
           {
             id: "category",
             component: "Select",
+            collection: "CollectionCategory",
             displayExpr: "properties.id",
-            fetchOptions: async () => (graph.vertexLabelIdMap["CollectionCategory"] || []).map(id => graph.vertexes[id])
           },
           { id: "description", component: "TextArea" }
         ]
@@ -293,10 +294,10 @@ export function fetchAttributesTableData(
                 {
                   id: "attribute",
                   component: "Select",
+                  collection: "Attribute",
                   displayExpr: "properties.id",
                   noOverWrite: true,
                   default: (formValues, control, id: string) => id && graph.edges[id].end,
-                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
                 },
 
                 { id: "id", serverType: ServerFormAttributeType.String },
@@ -304,10 +305,10 @@ export function fetchAttributesTableData(
                 {
                   id: "serverType",
                   component: "Select",
+                  collection: "ServerAttributeType",
                   displayExpr: "properties.id",
                   noInput: true,
                   fieldOptions: { disabled: true },
-                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id])
                 },
                 {
                   id: "component",
@@ -365,8 +366,8 @@ export function fetchAttributesTableData(
             {
               id: "collection",
               component: "Select",
+              collection: "Collection",
               displayExpr: "properties.id",
-              fetchOptions: async (formValues, formGroup, inputValue: string) => findVertexIdsByLabel("Collection").map((id) => graph.vertexes[id])
             },
             {
               id: "type",
@@ -389,7 +390,9 @@ export function fetchAttributesTableData(
             displayExpr: "id",
             fetchOptions: async () => [{ id: "vertex" }, { id: "edge" }]
           },
-          { id: "labelName", component: "Select", fetchOptions: async () => graph.vertexLabelIdMap["Collection"].map(id => graph.vertexes[id]), displayExpr: "properties.id", },
+          { id: "labelName", component: "Select",
+          collection: "Collection",
+             displayExpr: "properties.id", },
           {
             id: "from",
             component: "JsCode",
@@ -424,8 +427,8 @@ export function fetchAttributesTableData(
             {
               id: "collection",
               component: "Select",
-              displayExpr: "properties.id",
-              fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("Collection").map((id) => graph.vertexes[id])
+              collection: "Collection",
+              displayExpr: "properties.id"
             }
           ],
         },
@@ -474,10 +477,10 @@ export function fetchAttributesTableData(
                 {
                   id: "serverType",
                   component: "Select",
+                  collection: "ServerAttributeType",
                   displayExpr: "properties.id",
                   noInput: true,
                   fieldOptions: { disabled: true },
-                  fetchOptions: async (formValues, formGroup, inputValue) => findVertexIdsByLabel("ServerAttributeType").map((id) => graph.vertexes[id])
                 },
                 {
                   id: "component",

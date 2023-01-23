@@ -62,7 +62,7 @@ import {
 } from "../../lib/graph";
 import { DEBUG } from "../../config";
 import {
- addNewVertex,
+ addNewVertex, findVertexIdsByLabel,
  newVertex,
  replaceVertexProperties
 } from "../../lib/Vertex";
@@ -194,19 +194,25 @@ export function DynamicForm(props: DynamicFormProps) {
      </Match>
      <Match when={meta.component === "Table"}>
       <Field label={toTitle(meta.label || meta.id)}>
-       <TableInputField
-        // @ts-ignore
-        control={props.formGroup.controls[meta.id]}
-        id={props.formMetaData.id + meta.id}
-        txnId={props.txnId}
-        attributes={(meta as TableField).attributes}
-        defaultValue="undefined"
-        data={(meta as TableField).data}
-        defaultValueFn={(meta as TableField).defaultValueFn}
-        formValues={props.formValues}
-        noSort={(meta as TableField).noSort}
-        {...(meta.props || {})}
-       />
+       {() => {
+        const newMeta = (meta as TableField).attributes.map(attr => {
+         if(attr.component === "Select") updateSelectFieldMeta(attr as SelectField);
+         return attr;
+        })
+        return <TableInputField
+         // @ts-ignore
+         control={props.formGroup.controls[meta.id]}
+         id={props.formMetaData.id + meta.id}
+         txnId={props.txnId}
+         attributes={newMeta}
+         defaultValue="undefined"
+         data={(meta as TableField).data}
+         defaultValueFn={(meta as TableField).defaultValueFn}
+         formValues={props.formValues}
+         noSort={(meta as TableField).noSort}
+         {...(meta.props || {})}
+        />
+       }}
       </Field>
      </Match>
      <Match when={meta.component === "TableForm"}>
@@ -259,6 +265,25 @@ export interface DynamicFormSequenceProps {
  txnId?: number;
 }
 
+function updateSelectFieldMeta(meta: SelectField) {
+ if (typeof meta.collection === "number") {
+  meta.fetchOptions = async (formValues, formGroup, inputValue) => {
+   const vertex = graph.vertexes[meta.collection];
+   // assume that vertex is of label Collection
+   return vertex ? findVertexIdsByLabel(vertex.properties.id).map((id) => graph.vertexes[id]) : [];
+  };
+ }
+ if (typeof meta.collection === "string") {
+  if ((meta.collection as string).includes("[")) {
+   // TODO
+  } else {
+   meta.fetchOptions = async (formValues, formGroup, inputValue) => {
+    return findVertexIdsByLabel(meta.collection as string).map((id) => graph.vertexes[id]);
+   };
+  }
+ }
+}
+
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const txnId = props.txnId || getNewTxnId();
  const { Ws } = useContext(WsContext);
@@ -293,14 +318,17 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const formGroup = formValues.controls[form.id];
   if(!(form.component === "Table" || form.component === "TableForm")) {
    const groupConstructor = form.attributes.reduce((acc, meta) => {
-    runWithOwner(owner, () => {
+    runWithOwner(owner!, () => {
      if (meta.component === "ButtonGroup") {
       console.log("buttongroup skipped");
      } else if (meta.component === "Table" || meta.component === "TableForm") {
       if (meta.component === "TableForm") isTableForm = true;
       acc[meta.id] = createFormArray([], meta.fieldOptions);
      } else {
-      const iFormControl = createFormControl(getDefaultValue(meta.serverType), meta.fieldOptions);
+      if(meta.component === "Select"){
+       updateSelectFieldMeta(meta as SelectField);
+      }
+      const iFormControl = createFormControl(getDefaultValue(meta.serverType, meta.component), meta.fieldOptions);
       iFormControl.setData("serverType", meta.serverType);
       acc[meta.id] = iFormControl;
       if (meta.onchange) {
@@ -515,19 +543,25 @@ console.log(formMetaData)
     {meta => <Switch>
      <Match when={meta.component === "Table"}>
       <Field label={toTitle(meta.title || '')}>
-       <TableInputField
-        // @ts-ignore
-        control={formValues.controls[meta.id]}
-        id={meta.id}
-        txnId={txnId}
-        attributes={meta.attributes}
-        defaultValue="undefined"
-        data={meta.data}
-        defaultValueFn={meta.defaultValueFn}
-        formValues={formValues}
-        noSort={meta.noSort}
-        {...(meta.props || {})}
-       />
+       {() => {
+        const newMeta = meta.attributes.map(attr => {
+         if(attr.component === "Select") updateSelectFieldMeta(attr as SelectField);
+         return attr;
+        })
+        return <TableInputField
+         // @ts-ignore
+         control={formValues.controls[meta.id]}
+         id={meta.id}
+         txnId={txnId}
+         attributes={newMeta}
+         defaultValue="undefined"
+         data={meta.data}
+         defaultValueFn={meta.defaultValueFn}
+         formValues={formValues}
+         noSort={meta.noSort}
+         {...(meta.props || {})}
+        />
+       }}
       </Field>
      </Match>
      <Match when={meta.component === "TableForm"}>
