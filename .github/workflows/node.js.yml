@@ -34,6 +34,6 @@ jobs:
       env:
 #        webhook_url: ${{ secrets.WEBHOOK_URL }}
         webhook_url: '49.12.190.36:3000/'
-        webhook_secret: ''
+        webhook_secret: 'ABC'
 #        webhook_secret: ${{ secrets.WEBHOOK_SECRET }}
         data: '{ "weapon": "hammer", "drink" : "beer" }'
