@@ -12,8 +12,11 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
 
 // add a new vertex to the graph
 export function addNewVertex(txnId: number, vertex: Vertex): {error: string | boolean, txnDetailIndex?: number} {
- if(!vertex.id) {
+ if(vertex.id === 0) {
   return {error: "ID is not valid"};
+ }
+ if (graph.vertexes[vertex.id]) {
+  return {error: "ID Already exist"};
  }
  const existedVertexes = vertex.labels.filter(label => G.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id))
  if(existedVertexes.length) {

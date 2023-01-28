@@ -54,6 +54,7 @@ export const getExistingOrDefaultTxnValue = (txnId: number) => transactions.get(
 export const revertOneTransactionUnSafe = (txnId: number, txnIndex: number) => {
  if(!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+  // todo dont use splice
   const newTxnValue = existingTxnValue.steps.splice(txnIndex, 1);
   newTxnValue[0]?.revert();
 }

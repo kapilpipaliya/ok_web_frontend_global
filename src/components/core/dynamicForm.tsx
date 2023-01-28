@@ -21,7 +21,7 @@ import {
  IFormControl,
  IFormGroup
 } from "solid-forms";
-import { D, G } from "@mobily/ts-belt";
+import { D, G , S} from "@mobily/ts-belt";
 import { klona } from "klona/json";
 import { equals } from "rambda";
 
@@ -48,7 +48,7 @@ import {
  InitialValues,
  SelectField,
  ServerFormAttributeType,
- TableField,
+ TableField
 } from "ok_web_components/src/components/input/Form";
 import { fetchAttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
@@ -61,13 +61,14 @@ import {
  transactions
 } from "../../lib/graph";
 import { DEBUG } from "../../config";
+import {path} from 'rambda';
 import {
  addNewVertex, findVertexIdsByLabel,
  newVertex,
  replaceVertexProperties
 } from "../../lib/Vertex";
 import {
- addNewEdge,
+ addNewEdge, getOutEdgeIdsOfType,
  newEdge, replaceEdgeEnd,
  replaceEdgeProperties, replaceEdgeStart
 } from "../../lib/Edge";
@@ -274,8 +275,46 @@ function updateSelectFieldMeta(meta: SelectField) {
   };
  }
  if (typeof meta.collection === "string") {
-  if ((meta.collection as string).includes("[")) {
-   // TODO
+  if ((meta.collection as string).startsWith("[")) {
+   meta.fetchOptions = async () => {
+    try {
+      return JSON.parse(meta.collection as string);
+     } catch (e) {
+     console.warn(e)
+     return [];
+     }
+    }
+
+  } else if ((meta.collection as string).includes("[")) {
+   const from = /\(([\w\.]+:)?(\w+)(:[\w\.]+)?\)->/
+   const edge = /\[(\w+)\]/
+   const fromResult = meta.collection.match(from);
+   const edgeName = meta.collection.match(edge)?.[1];
+
+   if(fromResult && edgeName) {
+    let selector = S.removeAll(fromResult[1] || '', ":");
+    const attribute = fromResult[2];
+    const projection = S.removeAll(fromResult[3] || '', ":");
+
+    meta.fetchOptions = async (formValues, formGroup, inputValue) => {
+     let fromVertexId: number;
+     try{
+      let control:IFormGroup;
+      control = selector ? formValues.controls[selector] as IFormGroup : formGroup;
+      fromVertexId = control.controls[attribute].value;
+     } catch (e) {
+      console.warn('error', e);
+      return [];
+     }
+
+     if (!fromVertexId) return [];
+     const fromVertex = graph.vertexes[fromVertexId];
+     if(!fromVertex) return [];
+     const projectedId: number|undefined = projection ? path(projection, fromVertex) : fromVertexId;
+     if(!projectedId) return [];
+     return getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]);
+    };
+   }
   } else {
    meta.fetchOptions = async (formValues, formGroup, inputValue) => {
     return findVertexIdsByLabel(meta.collection as string).map((id) => graph.vertexes[id]);

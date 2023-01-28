@@ -213,13 +213,8 @@ export function fetchAttributesTableData(
           {
             id: "component",
             component: "Select",
+            collection: "(serverType)->[ServerToFormAttributeType]",
             displayExpr: "properties.id",
-            // TODO: make this fetchOptions supported by form too automatically
-            fetchOptions: async (formValues, formGroup, inputValue: string) => {
-              const serverTypeValue = formGroup.controls["serverType"].value;
-              if (!serverTypeValue) return [];
-              return getOutEdgeIdsOfType(serverTypeValue, EdgeLabels.ServerToFormAttributeType).map(id => graph.vertexes[graph.edges[id].end]);
-            }
           },
           { id: "label", serverType: ServerFormAttributeType.String },
           // { id: "internal", type: ServerFormAttributeType.Boolean },
@@ -273,8 +268,11 @@ export function fetchAttributesTableData(
           // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           save: ["edge", EdgeLabels.CollectionHasAttribute],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge =>
+             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({
+                  ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id
+            }))}}
           },
           attributes: [
             { id: "CollectionHasAttribute", component: 'Table', edge: "CollectionHasAttribute",defaultValue: "undefined",
@@ -314,14 +312,7 @@ export function fetchAttributesTableData(
                   id: "component",
                   component: "Select",
                   displayExpr: "properties.id",
-                  fetchOptions: async (formValues, formGroup, inputValue) => {
-                    const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]["serverType"];
-                    if (serverTypeValue) {
-                      return (graph.vertexes[serverTypeValue].out_edges["ServerToFormAttributeType"] || []).map(edgeId => graph.edges[edgeId].end).map(id => graph.vertexes[id]);
-                    } else {
-                      return [];
-                    }
-                  }
+                  collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
                 },
                 { id: "label", serverType: ServerFormAttributeType.String },
                 // { id: "internal", type: ServerFormAttributeType.Boolean },
@@ -344,7 +335,8 @@ export function fetchAttributesTableData(
           // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
           // save: ["edge", EdgeLabels.ServerToFormAttributeType],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasChild).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasChild).map(edge =>
+             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
             return AttributeEdges.map(edge => ({
               ...edge,
               properties: { ...edge.properties, collection: edge.end },
@@ -388,7 +380,7 @@ export function fetchAttributesTableData(
             id: "labelType",
             component: "Select",
             displayExpr: "id",
-            fetchOptions: async () => [{ id: "vertex" }, { id: "edge" }]
+            collection: '[{"id":"vertex"},{"id":"edge"}]'
           },
           { id: "labelName", component: "Select",
           collection: "Collection",
@@ -436,8 +428,10 @@ export function fetchAttributesTableData(
           id: "2", title: "Attributes",
           save: ["edge", EdgeLabels.FormLayoutItemHasAttribute],
           data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
+            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge =>
+             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({
+                  ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
           },
           attributes: [
             { id: "FormLayoutItemHasAttribute", component: 'Table', edge: "FormLayoutItemHasAttribute",defaultValue: "undefined",
@@ -459,17 +453,7 @@ export function fetchAttributesTableData(
                   component: "Select",
                   displayExpr: "properties.id",
                   default: (formValues, control, id: string) => id && graph.edges[id].end,
-                  fetchOptions: async (formValues, formGroup, inputValue) => {
-                    const collectionId = (formValues.controls["1"] as IFormGroup).controls.collection.value;
-                    if (collectionId) {
-                      const collectionVertex = graph.vertexes[collectionId];
-                      if (collectionVertex) {
-                        return (collectionVertex.out_edges[EdgeLabels.CollectionHasAttribute] || []).map(id => graph.vertexes[graph.edges[id].end]);
-                      }
-                    }
-                    return [];
-                    // findVertexIdsByLabel("Attribute").map((id) => graph.vertexes[id])
-                  }
+                  collection: "(1:collection)->[CollectionHasAttribute]",
                 },
 
                 { id: "id", serverType: ServerFormAttributeType.String },
@@ -486,14 +470,7 @@ export function fetchAttributesTableData(
                   id: "component",
                   component: "Select",
                   displayExpr: "properties.id",
-                  fetchOptions: async (formValues, formGroup, inputValue) => {
-                    const serverTypeValue = graph.vertexes[formGroup.controls.attribute.value]?.["properties"]["serverType"];
-                    if (serverTypeValue) {
-                      return (graph.vertexes[serverTypeValue].out_edges["ServerToFormAttributeType"] || []).map(edgeId => graph.edges[edgeId].end).map(id => graph.vertexes[id]);
-                    } else {
-                      return [];
-                    }
-                  }
+                  collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
                 },
                 { id: "label", serverType: ServerFormAttributeType.String },
                 // { id: "internal", type: ServerFormAttributeType.Boolean },
