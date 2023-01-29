@@ -16,15 +16,13 @@ import {
 } from "./components/ws_events_dispatcher";
 import { batch, createSignal, For } from "solid-js";
 import { addNewVertex, deleteVertex, newVertex } from "./lib/Vertex";
-import {
- Edge,
- Vertex
-} from "../../ok_web_components/src/components/input/Form";
+
 import { addNewEdge, deleteEdge, newEdge } from "./lib/Edge";
 import { AlertMessage } from "./Type";
 import { AlertMessageContext } from "./appState";
 import { createStore } from "solid-js/store";
 import { setGraph } from "./lib/graph";
+import { Edge, Vertex } from "./components/input/Form";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);

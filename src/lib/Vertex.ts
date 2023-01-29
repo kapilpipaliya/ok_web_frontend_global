@@ -1,4 +1,4 @@
-import { Id, Vertex } from "../../../ok_web_components/src/components/input/Form";
+import { Id, Vertex } from "../components/input/Form";
 import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile } from "solid-js/store";

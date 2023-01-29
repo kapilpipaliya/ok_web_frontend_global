@@ -7,13 +7,13 @@ import {
 } from "solid-js";
 import { Link, useNavigate, useParams } from "solid-app-router";
 import { graph, revertTransaction } from "../lib/graph";
-import { removeUndefinedProperties } from "ok_web_components";
+import { removeUndefinedProperties } from "../utils/functions";
 import {
  EdgeLabels,
  FormMetaData,
  Id,
  VertexLabels
-} from "ok_web_components/src/components/input/Form";
+} from "./input/Form";
 import { evalImpl } from "./utils";
 import {
  DynamicFormSequence,

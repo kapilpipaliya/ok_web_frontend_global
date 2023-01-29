@@ -12,11 +12,11 @@ import {
 import {
  EdgeLabels, Id,
  VertexLabels
-} from "../../../ok_web_components/src/components/input/Form";
+} from "./input/Form";
 import { createEffect, For, on, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "solid-app-router";
-import { removeUndefinedProperties } from "../../../ok_web_components";
+import { removeUndefinedProperties } from "../utils/functions";
 import { evalImpl } from "./utils";
 import { G } from "@mobily/ts-belt";
 

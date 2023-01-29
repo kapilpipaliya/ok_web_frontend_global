@@ -7,7 +7,7 @@ import {
  restoreFromIndexDB,
  restoreFromJson
 } from "../../lib/graph";
-import { GraphView } from "ok_web_components";
+import { GraphView } from "../GraphView";
 
 function fileDownloader(opt: {
  data: string | ArrayBuffer | ArrayBufferView | Blob,

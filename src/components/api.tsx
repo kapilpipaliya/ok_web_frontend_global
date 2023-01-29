@@ -8,7 +8,7 @@ import {
   ServerFormAttributeType,
   VertexLabels,
  Id
-} from "ok_web_components/src/components/input/Form";
+} from "./input/Form";
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
 import { Icon } from "@iconify-icon/solid";

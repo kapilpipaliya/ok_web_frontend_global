@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import { useLocation, useNavigate } from "solid-app-router";
 import { fetchAttributesTableData, } from "../api";
-import { FieldAttribute, FormMetaData, Id } from "ok_web_components/src/components/input/Form";
+import { FieldAttribute, FormMetaData, Id } from "../components/input/Form";
 import { css } from "solid-styled-components";
 import {
  commitTransaction,

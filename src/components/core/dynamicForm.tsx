@@ -26,21 +26,6 @@ import { klona } from "klona/json";
 import { equals } from "rambda";
 
 import {
- BooleanInputField,
- ButtonGroup,
- Field,
- GeneralInput,
- getDefaultValue,
- JsonInput,
- removeUndefinedProperties,
- SelectInputField,
- TableInputField,
- TextAreaField,
- TextInputField,
- NumberInputField,
- DateInputField
-} from "ok_web_components";
-import {
  ButtonGroupField,
  FormMetaData,
  FormResult,
@@ -49,7 +34,7 @@ import {
  SelectField,
  ServerFormAttributeType,
  TableField
-} from "ok_web_components/src/components/input/Form";
+} from "../input/Form";
 import { fetchAttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
 import {
@@ -74,6 +59,19 @@ import {
 } from "../../lib/Edge";
 import { WsContext } from "../ws_events_dispatcher";
 import Button, { ClickEvent } from "devextreme/ui/button";
+import { TextInputField } from "../input/TextInputField";
+import { TextAreaField } from "../input/TextAreaField";
+import { NumberInputField } from "../input/NumberInputField";
+import { DateInputField } from "../input/DateInputField";
+import { BooleanInputField } from "../input/BooleanInputField";
+import { Field } from "../input/core/Field";
+import { JsonInput } from "../input/JsonInput";
+import { GeneralInput } from "../input/GeneralInput";
+import { SelectInputField } from "../input/SelectInputField2";
+import { TableInputField } from "../input/TableInputField";
+import { ButtonGroup } from "../input/core/ButtonGroup";
+import { getDefaultValue } from "../../utils/form";
+import { removeUndefinedProperties } from "../../utils/functions";
 
 interface DynamicFormProps {
  formMetaData: FormMetaData;

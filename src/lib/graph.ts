@@ -2,7 +2,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { G } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { get, set } from "idb-keyval";
-import { Edge, Id, Vertex } from "ok_web_components/src/components/input/Form";
+import { Edge, Id, Vertex } from "../components/input/Form";
 import {
   ServerEventsDispatcher,
 } from "../components/ws_events_dispatcher";
