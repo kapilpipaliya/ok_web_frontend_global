@@ -10,12 +10,18 @@ import { createContext } from "solid-js";
 import { atom } from "solid-use";
 import { commitTransaction, graph } from "../lib/graph";
 
+// automatically set NODE_ENV == 'production' when we build the project.
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
 const domain = window.location.hostname;
-
-const port = location.protocol == "http:" ? (IS_PRODUCTION ? "" : ":8500") : IS_PRODUCTION ? "" : ":8504";
+let port = '';
+if(window.location.hostname == 'localhost'){
+ port = ':8500';
+} else if(IS_PRODUCTION) {
+ port = `:${window.location.port}`;
+}
+// const port = location.protocol == "http:" ? (IS_PRODUCTION ? "" : ":8500") : IS_PRODUCTION ? "" : ":8504";
 // const port = ''; // ':8500';
 const ws_proto = http_proto == "http:" ? "ws" : "wss";
 

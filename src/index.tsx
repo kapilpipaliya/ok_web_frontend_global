@@ -44,7 +44,7 @@ render(() => {
   return <WsContext.Provider value={{ Ws }}>
    <AlertMessageContext.Provider value={{ alerts, setAlert }}>
     <DebugProvider>
-     <Router>
+     <Router  base={"/admin"}>
       <FullDashboard />
      </Router>
     </DebugProvider>

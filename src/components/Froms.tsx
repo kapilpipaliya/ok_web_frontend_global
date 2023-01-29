@@ -37,7 +37,7 @@ interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'formMe
  formId: string;
 }
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
- const formLayoutId = () => graph.vertexLabelIdMap[VertexLabels.FormLayout].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.formId)
+ const formLayoutId = () => (graph.vertexLabelIdMap[VertexLabels.FormLayout] || []).find(vertexId => graph.vertexes[vertexId].properties['id'] === props.formId)
  const formLayout = graph.vertexes[props.formId] || graph.vertexes[`${formLayoutId()}`];
  if(!formLayout) {
   alert('form dont found');
