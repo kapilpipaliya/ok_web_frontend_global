@@ -249,7 +249,7 @@ export const FullDashboard = () => {
     onMount(() => {
      const instance = new Drawer(el, {
       // @ts-ignore
-      template: <StaticSideBar />,
+      template: StaticSideBar,
       height: "100vh",
       maxSize: 200,
       revealMode: "expand",
