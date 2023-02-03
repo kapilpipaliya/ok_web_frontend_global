@@ -1,18 +1,15 @@
 import { getNewGraphId, graph } from "../lib/graph";
 import { batch } from "solid-js";
-import { createFormArray, IFormGroup } from "solid-forms";
+
 import {
-  EdgeLabels,
   FormMetaData,
   FormResult,
-  ServerFormAttributeType,
-  VertexLabels,
  Id
 } from "./input/Form";
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
 import { Icon } from "@iconify-icon/solid";
-import { findVertexIdsByLabel } from "../lib/Vertex";
+
 import {
   addNewEdge,
   deleteEdge,
@@ -146,69 +143,67 @@ export function fetchAttributesTableData(
         {
           id: "0",
           title: "ServerFormAttributeType",
-          save: ["vertex", VertexLabels.ServerAttributeType],
+          label: "ServerAttributeType",
           attributes: [
-            { id: "id", serverType: ServerFormAttributeType.String },
+            { id: "id", serverType: "String" },
             {
               id: "default",
               component: "Select",
               displayExpr: "properties.id",
               collection: "FormAttributeType",
-            }
-          ]
-        },
-        {
-          id: "ServerToFormAttributeType",
-          component: "Table",
-          edge: "ServerToFormAttributeType",
-          defaultValue: "undefined",
-          // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
-          // save: ["edge", EdgeLabels.ServerToFormAttributeType],
-          data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.ServerToFormAttributeType).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return AttributeEdges.map(edge => ({
-              ...edge,
-              properties: { ...edge.properties, formAttributeType: edge.end },
-              _id: edge.id
-            }));
-          },
-          save: (txnId, results, tableData) => {
-            const edge = EdgeLabels.ServerToFormAttributeType;
-            const endIdAttribute = "formAttributeType";
-            return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
-          },
-          attributes: [
-            {
-              id: "pos",
-              serverType: ServerFormAttributeType.Integer,
-              default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-              hidden: true
             },
             {
-              id: "formAttributeType",
-              component: "Select",
-              displayExpr: "properties.id",
-              collection: "FormAttributeType",
+              id: "ServerToFormAttributeType",
+              component: "Table",
+              edge: "ServerToFormAttributeType",
+              defaultValue: "undefined",
+              // data: (mainId) => {
+              //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "ServerToFormAttributeType").map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+              //   return AttributeEdges.map(edge => ({
+              //     ...edge,
+              //     properties: { ...edge.properties, formAttributeType: edge.end },
+              //     _id: edge.id
+              //   }));
+              // },
+              // save: (txnId, results, tableData) => {
+              //   const edge = "ServerToFormAttributeType";
+              //   const endIdAttribute = "formAttributeType";
+              //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+              // },
+              attributes: [
+                {
+                  id: "pos",
+                  serverType: "Integer",
+                  // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                  hidden: true
+                },
+                {
+                  id: "formAttributeType",
+                  component: "Select",
+                  displayExpr: "properties.id",
+                  collection: "FormAttributeType",
+                }
+              ]
             }
           ]
-        }];
+        }
+        ];
     }
     case "FormAttributeType": {
-      return [{ id: "0", title: "FormAttributeType", save: ["vertex", VertexLabels.FormAttributeType], attributes: [{ id: "id", serverType: ServerFormAttributeType.String }] }];
+      return [{ id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] }];
     }
     case "Attribute": {
       return [{
-        id: "0", title: "Attribute", save: ["vertex", VertexLabels.Attribute], attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String },
-          // { id: "selector", type: ServerFormAttributeType.String },
+        id: "0", title: "Attribute", label: "Attribute", attributes: [
+          { id: "id", serverType: "String" },
           {
             id: "serverType",
             component: "Select",
             displayExpr: "properties.id",
             collection: "ServerAttributeType",
-            onchange: (formGroup, value) => {
-              formGroup.controls["component"].setValue(null);
-            }
+            // onchange: (formGroup, value) => {
+            //   formGroup.controls["component"].setValue(null);
+            // }
           },
           {
             id: "component",
@@ -216,14 +211,14 @@ export function fetchAttributesTableData(
             collection: "(serverType)->[ServerToFormAttributeType]",
             displayExpr: "properties.id",
           },
-          { id: "label", serverType: ServerFormAttributeType.String },
-          // { id: "internal", type: ServerFormAttributeType.Boolean },
-          { id: "unique", serverType: ServerFormAttributeType.Boolean },
-          { id: "required", serverType: ServerFormAttributeType.Boolean },
-          { id: "readonly", serverType: ServerFormAttributeType.Boolean },
-          { id: "disabled", serverType: ServerFormAttributeType.Boolean },
-          // { id: "internal", type: ServerFormAttributeType.Boolean },
-          { id: "default", serverType: ServerFormAttributeType.Map }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+          { id: "label", serverType: "String" },
+          // { id: "internal", type: "Boolean" },
+          { id: "unique", serverType: "Boolean" },
+          { id: "required", serverType: "Boolean" },
+          { id: "readonly", serverType: "Boolean" },
+          { id: "disabled", serverType: "Boolean" },
+          // { id: "internal", type: "Boolean" },
+          { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
           { id: "onChange", component: "JsCode" },
           { id: "props", component: "JsCode" },
           {
@@ -239,9 +234,9 @@ export function fetchAttributesTableData(
       return [{
         id: "0",
         title: "Collection Category",
-        save: ["vertex", VertexLabels.CollectionCategory],
+        label: "CollectionCategory",
         attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String },
+          { id: "id", serverType: "String" },
           { id: "description", component: "TextArea" }
         ]
       }];
@@ -251,131 +246,131 @@ export function fetchAttributesTableData(
       return [{
         id: "0",
         title: "Collection1",
-        save: ["vertex", VertexLabels.Collection],
+        label: "Collection",
         attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String },
+          { id: "id", serverType: "String" },
           {
             id: "category",
             component: "Select",
             collection: "CollectionCategory",
             displayExpr: "properties.id",
           },
-          { id: "description", component: "TextArea" }
-        ]
-      },
-        {
-          id: "1", title: "Collection2",
-          // save: ["edge", Edges.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
-          save: ["edge", EdgeLabels.CollectionHasAttribute],
-          data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasAttribute).map(edge =>
-             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({
-                  ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id
-            }))}}
-          },
-          attributes: [
-            { id: "CollectionHasAttribute", component: 'Table', edge: "CollectionHasAttribute",defaultValue: "undefined",
-              save: (txnId, results, tableData)=>{
-                const edge = EdgeLabels.CollectionHasAttribute;
-                const endIdAttribute = "attribute";
-                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+          { id: "description", component: "TextArea" },
+          {
+            id: "CollectionHasAttribute",
+            title: "Collection2",
+            component: "Table",
+            edge: "CollectionHasAttribute",
+            defaultValue: "undefined",
+            // save: ["edge", "CollectionHasAttribute"],
+            // data: (mainId) => {
+            //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "CollectionHasAttribute").map(edge =>
+            //    graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            //   return {properties: {CollectionHasAttribute: AttributeEdges.map(edge=>({
+            //         ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id
+            //   }))}}
+            // },
+            // save: (txnId, results, tableData)=>{
+            //   const edge = "CollectionHasAttribute";
+            //   const endIdAttribute = "attribute";
+            //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+            // },
+            // defaultValueFn: tableOverwriteDefaultValueFn(),
+            attributes: [
+              {
+                id: "pos",
+                serverType: "Integer",
+                // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                hidden: true
               },
-              defaultValueFn: tableOverwriteDefaultValueFn(),
-              attributes: [
-                {
-                  id: "pos",
-                  serverType: ServerFormAttributeType.Integer,
-                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                  hidden: true
-                },
-                {
-                  id: "attribute",
-                  component: "Select",
-                  collection: "Attribute",
-                  displayExpr: "properties.id",
-                  noOverWrite: true,
-                  default: (formValues, control, id: string) => id && graph.edges[id].end,
-                },
+              {
+                id: "attribute",
+                component: "Select",
+                collection: "Attribute",
+                displayExpr: "properties.id",
+                noOverWrite: true,
+                // default: (formValues, control, id: string) => id && graph.edges[id].end,
+              },
 
-                { id: "id", serverType: ServerFormAttributeType.String },
-                // { id: "selector", type: ServerFormAttributeType.String},
-                {
-                  id: "serverType",
-                  component: "Select",
-                  collection: "ServerAttributeType",
-                  displayExpr: "properties.id",
-                  noInput: true,
-                  fieldOptions: { disabled: true },
-                },
-                {
-                  id: "component",
-                  component: "Select",
-                  displayExpr: "properties.id",
-                  collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
-                },
-                { id: "label", serverType: ServerFormAttributeType.String },
-                // { id: "internal", type: ServerFormAttributeType.Boolean },
-              { id: "unique", serverType: ServerFormAttributeType.Boolean },
-              { id: "required", serverType: ServerFormAttributeType.Boolean },
-              { id: "readonly", serverType: ServerFormAttributeType.Boolean },
-              { id: "disabled", serverType: ServerFormAttributeType.Boolean },
-              { id: "default", serverType: ServerFormAttributeType.Map }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+              { id: "id", serverType: "String" },
+              // { id: "selector", type: "String"},
+              {
+                id: "serverType",
+                component: "Select",
+                collection: "ServerAttributeType",
+                displayExpr: "properties.id",
+                noInput: true,
+                fieldOptions: { disabled: true },
+              },
+              {
+                id: "component",
+                component: "Select",
+                displayExpr: "properties.id",
+                collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
+              },
+              { id: "label", serverType: "String" },
+              // { id: "internal", type: "Boolean" },
+              { id: "unique", serverType: "Boolean" },
+              { id: "required", serverType: "Boolean" },
+              { id: "readonly", serverType: "Boolean" },
+              { id: "disabled", serverType: "Boolean" },
+              { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
               { id: "onChange", component: 'JsCode' },
               { id: "props", component: 'JsCode' },
               { id: "code", component: 'JsCode' },
               { id: "meta", component: 'JsCode' },
-              ], },
-          ],
-        }, {
-          id: "2",
-          component: "Table",
-          edge: "CollectionHasChild",
-          defaultValue: "undefined",
-          // save: ["edge", EdgeLabels.CollectionHasAttribute,(id)=>id, (results, formValue)=>formValue['attribute']],
-          // save: ["edge", EdgeLabels.ServerToFormAttributeType],
-          data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.CollectionHasChild).map(edge =>
-             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return AttributeEdges.map(edge => ({
-              ...edge,
-              properties: { ...edge.properties, collection: edge.end },
-              _id: edge.id
-            }));
+            ],
+
           },
-          save: (txnId, results, tableData) => {
-            const edge = EdgeLabels.CollectionHasChild;
-            const endIdAttribute = "collection";
-            return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
-          },
-          attributes: [
-            {
-              id: "pos",
-              serverType: ServerFormAttributeType.Integer,
-              default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-              hidden: true
-            },
-            {
-              id: "collection",
-              component: "Select",
-              collection: "Collection",
-              displayExpr: "properties.id",
-            },
-            {
-              id: "type",
-              component: "TextInput"
-            }
-          ]
-        }];
+          {
+            id: "2",
+            component: "Table",
+            edge: "CollectionHasChild",
+            defaultValue: "undefined",
+            // data: (mainId) => {
+            //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "CollectionHasChild").map(edge =>
+            //    graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            //   return AttributeEdges.map(edge => ({
+            //     ...edge,
+            //     properties: { ...edge.properties, collection: edge.end },
+            //     _id: edge.id
+            //   }));
+            // },
+            // save: (txnId, results, tableData) => {
+            //   const edge = "CollectionHasChild";
+            //   const endIdAttribute = "collection";
+            //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+            // },
+            attributes: [
+              {
+                id: "pos",
+                serverType: "Integer",
+                // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                hidden: true
+              },
+              {
+                id: "collection",
+                component: "Select",
+                collection: "Collection",
+                displayExpr: "properties.id",
+              },
+              {
+                id: "type",
+                component: "TextInput"
+              }
+            ]
+          }
+        ]
+      }];
     }
     case "FormLayoutItem": {
       return [{
-        id: "0", title: "FormLayoutItem1", save: ["vertex", VertexLabels.FormLayoutItem], attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String },
+        id: "0", title: "FormLayoutItem1", label: "FormLayoutItem", attributes: [
+          { id: "id", serverType: "String" },
           // TODO: make title required
-          { id: "title", serverType: ServerFormAttributeType.String },
+          { id: "title", serverType: "String" },
           { id: "description", component: "TextArea" },
-          { id: "component", serverType: ServerFormAttributeType.String },
+          { id: "component", serverType: "String" },
           {
             id: "labelType",
             component: "Select",
@@ -385,36 +380,27 @@ export function fetchAttributesTableData(
           { id: "labelName", component: "Select",
           collection: "Collection",
              displayExpr: "properties.id", },
-          {
-            id: "from",
-            component: "JsCode",
-            label: "From Function",
-            props: { placeholder: "(results: FormResult, formValue: object)=> Id" }
-          },
-          {
-            id: "to",
-            component: "JsCode",
-            label: "To Function",
-            props: { placeholder: "(results: FormResult, formValue: object)=> Id" }
-          },
           { id: "meta", component: "JsCode", props: { placeholder: "({})" } }
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
         ],
       },
         {
-          id: "1", title: "", save: ["edge", EdgeLabels.FormLayoutItemHasCollection, (results)=>results.get('0')?.id, (results, formValue)=>formValue['collection']],
-          data: (id)=>{
-            if(id){
-              const formVertex = graph.vertexes[id];
-              const collectionEdges = formVertex.out_edges[EdgeLabels.FormLayoutItemHasCollection]
-              if(collectionEdges && collectionEdges[0]) {
-                const edge = graph.edges[collectionEdges[0]];
-                return {...edge, properties: {collection: edge.end}}
-              } else {
-                return {properties: {}}
-              }
-            }
-          },
+          id: "1",
+          title: "",
+          label: "",
+          // save: ["edge", "FormLayoutItemHasCollection", (results)=>results.get('0')?.id, (results, formValue)=>formValue['collection']],
+          // data: (id)=>{
+          //   if(id){
+          //     const formVertex = graph.vertexes[id];
+          //     const collectionEdges = formVertex.out_edges["FormLayoutItemHasCollection"]
+          //     if(collectionEdges && collectionEdges[0]) {
+          //       const edge = graph.edges[collectionEdges[0]];
+          //       return {...edge, properties: {collection: edge.end}}
+          //     } else {
+          //       return {properties: {}}
+          //     }
+          //   }
+          // },
           attributes: [
             {
               id: "collection",
@@ -426,38 +412,36 @@ export function fetchAttributesTableData(
         },
         {
           id: "2", title: "Attributes",
-          save: ["edge", EdgeLabels.FormLayoutItemHasAttribute],
-          data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutItemHasAttribute).map(edge =>
-             graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({
-                  ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
-          },
-          attributes: [
-            { id: "FormLayoutItemHasAttribute", component: 'Table', edge: "FormLayoutItemHasAttribute",defaultValue: "undefined",
-              save: (txnId, results, tableData)=>{
-                const edge = EdgeLabels.FormLayoutItemHasAttribute;
-                const endIdAttribute = "attribute";
-                return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
-              },
-              defaultValueFn: tableOverwriteDefaultValueFn(),
+          component: 'Table', edge: "FormLayoutItemHasAttribute",defaultValue: "undefined",
+          // data: (mainId) => {
+          //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "FormLayoutItemHasAttribute").map(edge =>
+          //    graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+          //   return {properties: {FormLayoutItemHasAttribute: AttributeEdges.map(edge=>({
+          //         ...edge, properties: {...edge.properties, attribute: edge.end}, _id: edge.id}))}}
+          // },
+          // save: (txnId, results, tableData)=>{
+          //   const edge = "FormLayoutItemHasAttribute";
+          //   const endIdAttribute = "attribute";
+          //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
+          // },
+          defaultValueFn: tableOverwriteDefaultValueFn(),
               attributes: [
                 {
                   id: "pos",
-                  serverType: ServerFormAttributeType.Integer,
-                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                  serverType: "Integer",
+                  // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
                   hidden: true
                 },
                 {
                   id: "attribute",
                   component: "Select",
                   displayExpr: "properties.id",
-                  default: (formValues, control, id: string) => id && graph.edges[id].end,
+                  // default: (formValues, control, id: string) => id && graph.edges[id].end,
                   collection: "(1:collection)->[CollectionHasAttribute]",
                 },
 
-                { id: "id", serverType: ServerFormAttributeType.String },
-                // { id: "selector", type: ServerFormAttributeType.String},
+                { id: "id", serverType: "String" },
+                // { id: "selector", type: "String"},
                 {
                   id: "serverType",
                   component: "Select",
@@ -472,73 +456,69 @@ export function fetchAttributesTableData(
                   displayExpr: "properties.id",
                   collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
                 },
-                { id: "label", serverType: ServerFormAttributeType.String },
-                // { id: "internal", type: ServerFormAttributeType.Boolean },
-                { id: "unique", serverType: ServerFormAttributeType.Boolean },
-              { id: "required", serverType: ServerFormAttributeType.Boolean },
-              { id: "readonly", serverType: ServerFormAttributeType.Boolean },
-              { id: "disabled", serverType: ServerFormAttributeType.Boolean },
-              { id: "default", serverType: ServerFormAttributeType.Map }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+                { id: "label", serverType: "String" },
+                // { id: "internal", type: "Boolean" },
+                { id: "unique", serverType: "Boolean" },
+              { id: "required", serverType: "Boolean" },
+              { id: "readonly", serverType: "Boolean" },
+              { id: "disabled", serverType: "Boolean" },
+              { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
               { id: "onChange", component: 'JsCode' },
               { id: "props", component: 'JsCode' },
               { id: "code", component: 'JsCode' },
               { id: "meta", component: 'JsCode' },
-            ],},
-          ],
+            ],
         }];
     }
     case "FormLayout": {
       return [{
-        id: "0", title: "FormLayout1", save: ["vertex", VertexLabels.FormLayout], attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String },
-          { id: "title", serverType: ServerFormAttributeType.String },
+        id: "0", title: "FormLayout1", label: "FormLayout", attributes: [
+          { id: "id", serverType: "String" },
+          { id: "title", serverType: "String" },
           { id: "description", component: "TextArea" },
-          { id: "meta", component: "JsCode" }
+          { id: "meta", component: "JsCode" },
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
+          {
+            id: "FormLayoutHasItem", title: "Forms",
+            component: 'TableForm', form: "FormLayoutItem",defaultValue: "undefined",
+            edge: "FormLayoutHasItem",
+            // data: (mainId) => {
+            //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "FormLayoutHasItem").map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
+            //   return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
+            // },
+            noSort: true,
+            // save: (txnId, results, tableData)=> {
+            //   const edge = "FormLayoutHasItem";
+            //   return saveFormLayoutTableDataToEdge(txnId, tableData, results, edge);
+            // },
+            // postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
+            //   tableItemFormGroup.controls["end"].setValue(values.get("0").id);
+            // },
+            attributes: [
+              {
+                id: "pos",
+                serverType: "Integer",
+                // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+                hidden: true
+              }
+            ]
+          }
         ],
       },
-        {
-          id: "1", title: "Forms",
-          save: ["edge", EdgeLabels.FormLayoutHasItem],
-          data: (mainId) => {
-            const AttributeEdges = getOutEdgeIdsOfType(mainId, EdgeLabels.FormLayoutHasItem).map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
-            // return {properties: {FormLayoutItem: AttributeEdges}}
-          },
-          attributes: [
-            { id: "FormLayoutItem", component: 'TableForm', form: "FormLayoutItem",defaultValue: "undefined",
-              noSort: true,
-              save: (txnId, results, tableData)=> {
-                const edge = EdgeLabels.FormLayoutHasItem;
-                return saveFormLayoutTableDataToEdge(txnId, tableData, results, edge);
-              },
-              postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
-                // tableItemFormGroup =  FormLayoutHasItem
-                // values = all the form values
-                tableItemFormGroup.controls["end"].setValue(values.get("0").id);
-              },
-              attributes: [
-                {
-                  id: "pos",
-                  serverType: ServerFormAttributeType.Integer,
-                  default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                  hidden: true
-                }
-              ]
-            },
-          ],
-        }];
+      ];
     }
     case "TableLayout": {
       return [{
         id: "0",
         title: "FormLayout1",
-        save: ["vertex", "TableLayout"],
+        label: "TableLayout",
         attributes: [
-          { id: "id", serverType: ServerFormAttributeType.String }
+          { id: "id", serverType: "String" }
         ]
       }];
     }
   }
 }
+
+window.w = fetchAttributesTableData
