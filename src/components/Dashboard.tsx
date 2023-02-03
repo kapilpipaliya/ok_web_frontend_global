@@ -32,7 +32,7 @@ import {
 import { WsContext } from "./ws_events_dispatcher";
 import { updateVertexId } from "../lib/Vertex";
 import { updateEdgeId } from "../lib/Edge";
-import { fetchAttributesTableData } from "./api";
+import { AttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
 // import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
@@ -125,7 +125,7 @@ export const DashboardView = () => {
       {/* TODO: when incorrect entity is rended*/}
       <Route path="/:entity" component={() => {
        const params = useParams();
-       const formMeta = createMemo(()=>fetchAttributesTableData(params.entity));
+       const formMeta = createMemo(()=>AttributesTableData[params.entity]);
        return <Switch>
         <Match when={!formMeta()}>
          <AbstractSingleGrid tableId={params.entity}/>
@@ -137,7 +137,7 @@ export const DashboardView = () => {
       }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
-       const formMeta = createMemo(()=>fetchAttributesTableData(params.entity));
+       const formMeta = createMemo(()=>AttributesTableData[params.entity]);
        return <Switch>
         <Match when={!formMeta() || (params.entity === "TableLayout")}>
          <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : parseInt(params.id)}/>
