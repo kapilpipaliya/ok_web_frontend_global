@@ -99,8 +99,8 @@ export type FormFields = {
   [id: string]: {
     label: string;
     type: FieldType;
-    isRequired: boolean;
-    isDisabled: boolean;
+    required: boolean;
+    disabled: boolean;
     description: string;
     props: { dp?: string };
   };

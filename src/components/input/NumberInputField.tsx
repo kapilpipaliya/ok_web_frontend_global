@@ -1,34 +1,26 @@
 import { createEffect, For, Show, splitProps } from "solid-js";
-import { IFormControl } from "solid-forms";
 
 import NumberBox, { Properties } from "devextreme/ui/number_box";
-import { NativeEventInfo } from "devextreme/events";
 
 export interface NumberInputFieldProps extends Properties {
-  control: IFormControl;
+  required?: boolean;
+  errors: string[];
+  setValue: (value: string) => void;
 }
 
 export function NumberInputField(props: NumberInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["control"]);
+  const [p, customProps] = splitProps(props, []);
   return (
-    <div
-      classList={{
-        "is-invalid": !!p.control.errors,
-        "is-touched": p.control.isTouched,
-        "is-required": p.control.isRequired,
-        "is-disabled": p.control.isDisabled
-      }}
-    >
+    <div>
       <div ref={el => {
         const instance = new NumberBox(el, {
           ...customProps,
-          value: p.control.value,
+          value: props.value,
           onValueChanged: (e) => {
-            p.control.setValue(e.value);
+            props.setValue(e.value);
           },
-          // onblur: () => p.control.markTouched(true),
-          // required: p.control.isRequired,
-          disabled: p.control.isDisabled || p.control.isReadonly
+          // required: props.required,
+          disabled: props.disabled
         });
         createEffect(() => {
           for(const property in p as Properties) {
@@ -36,11 +28,11 @@ export function NumberInputField(props: NumberInputFieldProps) {
             instance.option(property, p[property]);
           }
         })
-        createEffect(()=>instance.option('required', p.control.isRequired))
-        createEffect(()=>instance.option('disabled', p.control.isDisabled || p.control.isReadonly))
+        createEffect(()=>instance.option('required', props.required))
+        createEffect(()=>instance.option('disabled', props.disabled))
       }} />
-      <Show when={p.control.isTouched && !p.control.isValid && p.control.errors}>
-        <For each={Object.values(p.control.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+      <Show when={props.errors}>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

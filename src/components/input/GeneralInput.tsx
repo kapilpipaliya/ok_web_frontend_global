@@ -1,12 +1,12 @@
 import { Match, Switch } from "solid-js";
-import { IFormControl } from "solid-forms";
-import { TextInputField } from "./TextInputField";
-import { BooleanInputField } from "./BooleanInputField";
-import { TextAreaField } from "./TextAreaField";
-import { JsonInput } from "./JsonInput";
+
+// import { TextInputField } from "./TextInputField";
+// import { BooleanInputField } from "./BooleanInputField";
+// import { TextAreaField } from "./TextAreaField";
+// import { JsonInput } from "./JsonInput";
 
 interface Properties {
-  control: IFormControl;
+  
   disabled?: boolean;
   dom?: HTMLElement | ((e: HTMLElement) => void);
   h?: boolean;
@@ -21,36 +21,36 @@ export const GeneralInput = (props: Properties) => {
 
   return (
     <Switch fallback={<div>Unknown Component type: {props.type}</div>}>
-      <Match when={props.type === "color"}>
-        <TextInputField control={props.control} type={"color"} />
-      </Match>
-      <Match when={props.type === "email"}>
-        <TextInputField control={props.control} type={"color"} />
-      </Match>
-      <Match when={props.type === "number" || props.type === "serial"}>
-        <TextInputField control={props.control} type={"number"} />
-      </Match>
-      <Match when={props.type === "password"}>
-        <TextInputField control={props.control} type={"password"} />
-      </Match>
-      <Match when={props.type === "range"}>
-        <TextInputField control={props.control} type={"range"} />
-      </Match>
-      <Match when={props.type === "search"}>
-        <TextInputField control={props.control} type={"search"} />
-      </Match>
-      <Match when={props.type === "text"}>
-        <TextInputField control={props.control} type={"text"} />
-      </Match>
-      <Match when={props.type === "checkbox"}>
-        <BooleanInputField control={props.control} />
-      </Match>
-      <Match when={props.type === "radio"}>
-        <TextInputField control={props.control} type={"radio"} />
-      </Match>
-      <Match when={props.type === "textarea" || props.type === "codemirror"}>
-        <TextAreaField control={props.control} type={"text"} />
-      </Match>
+      {/*<Match when={props.type === "color"}>*/}
+      {/*  <TextInputField control={props.control} type={"color"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "email"}>*/}
+      {/*  <TextInputField control={props.control} type={"color"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "number" || props.type === "serial"}>*/}
+      {/*  <TextInputField control={props.control} type={"number"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "password"}>*/}
+      {/*  <TextInputField control={props.control} type={"password"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "range"}>*/}
+      {/*  <TextInputField control={props.control} type={"range"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "search"}>*/}
+      {/*  <TextInputField control={props.control} type={"search"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "text"}>*/}
+      {/*  <TextInputField control={props.control} type={"text"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "checkbox"}>*/}
+      {/*  <BooleanInputField control={props.control} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "radio"}>*/}
+      {/*  <TextInputField control={props.control} type={"radio"} />*/}
+      {/*</Match>*/}
+      {/*<Match when={props.type === "textarea" || props.type === "codemirror"}>*/}
+      {/*  <TextAreaField control={props.control} type={"text"} />*/}
+      {/*</Match>*/}
       <Match when={props.type === "chatInput"}>{/*<ChatInput control={props.control} onChange={e => props.onChange(e.target.value)} />*/}</Match>
       <Match when={props.type === "select"}>
         {/*<SingleSelect*/}
@@ -60,7 +60,7 @@ export const GeneralInput = (props: Properties) => {
         {/*  onChange={props.onChange}*/}
         {/*  onBlur={props.control.onBlur}*/}
         {/*  onFocus={props.control.onFocus}*/}
-        {/*  required={props.control.isRequired}*/}
+        {/*  required={props.control.required}*/}
         {/*  disabled={props.disabled}*/}
         {/*  error={props.control.error}*/}
         {/*  isInvalid={props.control.error}*/}
@@ -76,7 +76,7 @@ export const GeneralInput = (props: Properties) => {
         {/*  onChange={props.onChange}*/}
         {/*  onBlur={props.field.onBlur}*/}
         {/*  onFocus={props.field.onFocus}*/}
-        {/*  required={props.field.isRequired}*/}
+        {/*  required={props.field.required}*/}
         {/*  disabled={props.disabled}*/}
         {/*  error={props.field.error}*/}
         {/*  isInvalid={props.field.error}*/}
@@ -91,7 +91,7 @@ export const GeneralInput = (props: Properties) => {
         {/*  onChange={props.onChange}*/}
         {/*  onBlur={props.control.onBlur}*/}
         {/*  onFocus={props.control.onFocus}*/}
-        {/*  required={props.control.isRequired}*/}
+        {/*  required={props.control.required}*/}
         {/*  disabled={props.disabled}*/}
         {/*  error={props.control.error}*/}
         {/*  isInvalid={props.control.error}*/}
@@ -106,7 +106,7 @@ export const GeneralInput = (props: Properties) => {
         {/*  onChange={props.onChange}*/}
         {/*  onBlur={props.control.onBlur}*/}
         {/*  onFocus={props.control.onFocus}*/}
-        {/*  required={props.control.isRequired}*/}
+        {/*  required={props.control.required}*/}
         {/*  disabled={props.disabled}*/}
         {/*  error={props.control.error}*/}
         {/*  isInvalid={props.control.error}*/}
@@ -114,7 +114,7 @@ export const GeneralInput = (props: Properties) => {
         {/*/>*/}
       </Match>
       <Match when={props.type === "json_editor"}>
-        <JsonInput control={props.control} disabled={props.disabled} />
+        {/*<JsonInput control={props.control} disabled={props.disabled} />*/}
       </Match>
       <Match when={props.type === "flat_picker"}>
         {/*<DateTimePicker*/}
@@ -124,7 +124,7 @@ export const GeneralInput = (props: Properties) => {
         {/*  onChange={getFirstValue}*/}
         {/*  onBlur={props.control.onBlur}*/}
         {/*  onFocus={props.control.onFocus}*/}
-        {/*  required={props.control.isRequired}*/}
+        {/*  required={props.control.required}*/}
         {/*  disabled={props.disabled}*/}
         {/*  f*/}
         {/*  error={props.control.error}*/}

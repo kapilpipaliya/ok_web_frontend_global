@@ -17,7 +17,7 @@ const http_proto = location.protocol;
 const domain = window.location.hostname;
 let port = '';
 if(window.location.hostname == 'localhost'){
- port = ':8500';
+ port = ':1101';
 } else if(IS_PRODUCTION) {
  port = `:${window.location.port}`;
 }

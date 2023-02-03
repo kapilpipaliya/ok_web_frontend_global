@@ -5,7 +5,7 @@ import {BooleanInputField} from "./BooleanInputField";
 import {TextInputField} from "./TextInputField";
 import { Icon } from '@iconify-icon/solid';
 
-import { bindOwner, createFormArray, createFormControl, createFormGroup, IFormControl, IFormGroup } from "solid-forms";
+
 import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
 import {css} from "solid-styled-components";
 import {getDefaultValue} from "../../utils/form";
@@ -229,13 +229,13 @@ export function TableInputField(props: TableInputFieldProps) {
 
     const DisplayProperties = (p: { attributes: FieldAttribute[], control: IFormGroup }) => {
       const setValue = (id: string, value: any) => {
-        p.control.controls[id].setValue(value);
+        props.controls[id].setValue(value);
       };
       const clearControl = (id: string) => {
-        p.control.controls[id].setValue(undefined);
+        props.controls[id].setValue(undefined);
       };
       const clearSelectControl = (id: string) => {
-        p.control.controls[id].setValue(null);
+        props.controls[id].setValue(null);
       };
       return <For each={p.attributes}>
         {(meta) => (
@@ -244,7 +244,7 @@ export function TableInputField(props: TableInputFieldProps) {
               <></>
             </Match>
             <Match when={meta.id === "properties"}>
-              <DisplayProperties attributes={(meta as TableField).attributes} control={p.control.controls['properties'] as IFormGroup}/>
+              <DisplayProperties attributes={(meta as TableField).attributes} control={props.controls['properties'] as IFormGroup}/>
             </Match>
             <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
               <OverWriteableCell
@@ -254,7 +254,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 onClearOverWriteClick={() => clearControl(meta.id)}
                 onOverwriteClick={() => setValue(meta.id, "")}
               >
-                <TextInputField label="" control={p.control.controls[meta.id] as IFormControl} />
+                <TextInputField label="" control={props.controls[meta.id] as IFormControl} />
               </OverWriteableCell>
             </Match>
             <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
@@ -265,7 +265,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 onClearOverWriteClick={() => clearControl(meta.id)}
                 onOverwriteClick={() => setValue(meta.id, "")}
               >
-                <NumberInputField label="" control={p.control.controls[meta.id] as IFormControl} />
+                <NumberInputField label="" control={props.controls[meta.id] as IFormControl} />
               </OverWriteableCell>
             </Match>
             <Match when={meta.component === "Select"}>
@@ -277,7 +277,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 onOverwriteClick={() => clearSelectControl(meta.id)}
               >
                 <SelectInputField
-                  control={p.control.controls[meta.id] as IFormControl}
+                  control={props.controls[meta.id] as IFormControl}
                   displayExpr={(meta as SelectField).displayExpr}
                   fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, p.control, inputValue)}
                 />
@@ -291,7 +291,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 onClearOverWriteClick={() => clearControl(meta.id)}
                 onOverwriteClick={() => setValue(meta.id, false)}
               >
-                <BooleanInputField control={p.control.controls[meta.id] as IFormControl}/>
+                <BooleanInputField control={props.controls[meta.id] as IFormControl}/>
               </OverWriteableCell>
             </Match>
             <Match when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
@@ -304,7 +304,7 @@ export function TableInputField(props: TableInputFieldProps) {
                   onOverwriteClick={() => setValue(meta.id, {})}
                 >
                   <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
-                    <JsonInput control={p.control.controls[meta.id] as IFormControl}/>
+                    <JsonInput control={props.controls[meta.id] as IFormControl}/>
                   </ModalInput>
                 </OverWriteableCell>
               </td>
@@ -318,7 +318,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 onOverwriteClick={() => setValue(meta.id, "")}
               >
                 <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
-                  <TextAreaField control={p.control.controls[meta.id] as IFormControl}/>
+                  <TextAreaField control={props.controls[meta.id] as IFormControl}/>
                 </ModalInput>
               </OverWriteableCell>
             </Match>
@@ -411,10 +411,10 @@ export function TableInputField(props: TableInputFieldProps) {
     return (
       <div
         classList={{
-          "is-invalid": !!p.control.errors,
-          "is-touched": p.control.isTouched,
-          "is-required": p.control.isRequired,
-          "is-disabled": p.control.isDisabled,
+          "is-invalid": !!props.errors,
+          "is-touched": props.isTouched,
+          "is-required": props.required,
+          "is-disabled": props.disabled,
         }}
       >
         <div>
@@ -440,22 +440,15 @@ export function TableInputField(props: TableInputFieldProps) {
           {DEBUG && JSON.stringify(props.control.value)}
         </div>
 
-        <Show when={p.control.isTouched && !p.control.isValid && p.control.errors}>
-          <For each={Object.values(p.control.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+        <Show when={props.errors}>
+          <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
         </Show>
       </div>
     );
   }
 
   return (
-    <div
-      classList={{
-        "is-invalid": !!p.control.errors,
-        "is-touched": p.control.isTouched,
-        "is-required": p.control.isRequired,
-        "is-disabled": p.control.isDisabled,
-      }}
-    >
+    <div>
       <div>
         {/* <SectionHeaderWithAction border-b={false}> */}
         {/* <h3 >Layout Editor</h3> */}
@@ -506,8 +499,8 @@ export function TableInputField(props: TableInputFieldProps) {
         {DEBUG && JSON.stringify(props.control.value)}
       </div>
 
-      <Show when={p.control.isTouched && !p.control.isValid && p.control.errors}>
-        <For each={Object.values(p.control.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+      <Show when={props.errors}>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

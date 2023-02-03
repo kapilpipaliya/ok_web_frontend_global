@@ -1,17 +1,24 @@
+//This library jsoneditor has a successor: svelte-jsoneditor. TODO: Migrate to it
+// @ts-ignore
 import JSONEditor, { JSONEditorOptions } from "jsoneditor";
 import "jsoneditor/dist/jsoneditor.css";
 // TODO: move to new beta version of jsonEditor:
 // https://github.com/josdejong/jsoneditor/issues/1223
-import { createComputed, createSignal, For, onCleanup, Show, untrack } from "solid-js";
+import { createSignal, For, onCleanup, Show, untrack } from "solid-js";
 // import { Label } from '../Label';
 // import { Field } from '../../form2';
-import { IFormControl } from "solid-forms";
+
 
 interface Properties {
-  control: IFormControl<{ [key: string]: unknown }>;
+
   name?: string;
   class?: string;
   disabled?: boolean;
+
+  required?: boolean;
+  errors: string[];
+  setValue: (value: string) => void;
+  value: string;
 }
 
 export const JsonInput = (props: Properties) => {
@@ -20,25 +27,25 @@ export const JsonInput = (props: Properties) => {
   let jsonEditor: JSONEditor;
 
   const options: JSONEditorOptions = {
-    mode: props.control.isDisabled ? "view" : "text", // code
+    mode: props.disabled ? "view" : "text", // code
     modes: ["code", "tree", "text"],
     onChange() {
       try {
         const value = jsonEditor.get();
         untrack(() => {
           // reconcile not working here:
-          props.control.setValue(value);
+          props.setValue(value);
         });
 
         setHasError("");
-      } catch (err) {
+      } catch (err: any) {
         setHasError(err.message);
       }
     },
   };
 
   const createEditor = (el: HTMLDivElement) => {
-    jsonEditor = new JSONEditor(el, options, props.control.value || {});
+    jsonEditor = new JSONEditor(el, options, props.value || {});
   };
   /* let updatePropsValue = true;
    createComputed(() => {
@@ -47,7 +54,7 @@ export const JsonInput = (props: Properties) => {
   }); */
   // Temporary commenting this:
   //createComputed(() => {
-    // if (props.control.value && jsonEditor) jsonEditor.set(props.control.value);
+    // if (props.value && jsonEditor) jsonEditor.set(props.value);
   //});
 
   onCleanup(() => {
@@ -60,8 +67,8 @@ export const JsonInput = (props: Properties) => {
       <div ref={createEditor} style="width: 600px; height: 400px; display: inline-block;" />
       <span>{hasError()}</span>
 
-      <Show when={props.control.isTouched && !props.control.isValid}>
-        <For each={Object.values(props.control.errors)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+      <Show when={props.errors}>
+        <For each={Object.values(props.errors)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </>
   );
