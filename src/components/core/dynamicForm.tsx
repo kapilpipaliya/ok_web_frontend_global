@@ -13,14 +13,7 @@ import {
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { useLocation, useNavigate } from "solid-app-router";
-import {
- createFormArray,
- createFormControl,
- createFormGroup,
- IFormArray,
- IFormControl,
- IFormGroup
-} from "solid-forms";
+
 import { D, G , S} from "@mobily/ts-belt";
 import { klona } from "klona/json";
 import { equals } from "rambda";
@@ -77,9 +70,9 @@ interface DynamicFormProps {
  formMetaData: FormMetaData;
  id?: Id;
  txnId: number;
- formGroup: ReturnType<typeof createFormGroup>;
+ // formGroup: ReturnType<typeof createFormGroup>;
  // all forms options:
- formValues: IFormGroup;
+ // formValues: IFormGroup;
 }
 
 export function DynamicForm(props: DynamicFormProps) {
@@ -92,7 +85,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
       <TextInputField
        label={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -102,7 +95,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "TextArea"}>
       <TextAreaField
        label={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -112,7 +105,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
       <NumberInputField
        label={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -122,7 +115,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "DateInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Date))}>
       <DateInputField
        label={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -133,7 +126,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <DateInputField
        label={toTitle(meta.label || meta.id)}
        type="datetime"
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -142,7 +135,7 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "JsCode"}>
       <TextAreaField
        label={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -152,7 +145,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "Boolean" || (!meta.component && meta.serverType === ServerFormAttributeType.Boolean)}>
       <BooleanInputField
        text={toTitle(meta.label || meta.id)}
-       // @ts-ignore
+       
        control={props.formGroup.controls[meta.id]}
        id={props.formMetaData.id + meta.id}
        {...(meta.props || {})}
@@ -162,7 +155,7 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "Json" && (!meta.component && meta.serverType === ServerFormAttributeType.Map)}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
-        // @ts-ignore
+        
         control={props.formGroup.controls[meta.id]}
         id={props.formMetaData.id + meta.id}
         {...(meta.props || {})}
@@ -172,7 +165,7 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "Dynamic"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <GeneralInput
-        // @ts-ignore
+        
         control={props.formGroup.controls[meta.id]}
         id={props.formMetaData.id + meta.id}
         {...(meta.props || {})}
@@ -182,7 +175,7 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "Select"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <SelectInputField
-        // @ts-ignore
+        
         control={props.formGroup.controls[meta.id]}
         id={props.formMetaData.id + meta.id}
         displayExpr={(meta as SelectField).displayExpr}
@@ -199,7 +192,7 @@ export function DynamicForm(props: DynamicFormProps) {
          return attr;
         })
         return <TableInputField
-         // @ts-ignore
+         
          control={props.formGroup.controls[meta.id]}
          id={props.formMetaData.id + meta.id}
          txnId={props.txnId}
@@ -224,7 +217,7 @@ export function DynamicForm(props: DynamicFormProps) {
         // TODO: fix this for all the form types:
         formMetaData={fetchAttributesTableData((meta as TableField).form!)}
         postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(props.formValues, props.formGroup, tableItemFormGroup, values)}
-        // @ts-ignore
+        
         control={props.formGroup.controls[meta.id]}
         attributes={(meta as TableField).attributes}
         defaultValue="undefined"
@@ -239,7 +232,7 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "ButtonGroup"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <ButtonGroup
-        // @ts-ignore
+        
         control={props.formGroup}
         id={props.formMetaData.id + meta.id}
         items={(meta as ButtonGroupField).buttons}
@@ -586,7 +579,7 @@ console.log(formMetaData)
          return attr;
         })
         return <TableInputField
-         // @ts-ignore
+         
          control={formValues.controls[meta.id]}
          id={meta.id}
          txnId={txnId}
@@ -611,7 +604,7 @@ console.log(formMetaData)
         // TODO: fix this for all the form types:
         formMetaData={fetchAttributesTableData(meta.form!)}
         postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(formValues, formValues.controls[meta.id], tableItemFormGroup, values)}
-        // @ts-ignore
+        
         control={formValues.controls[meta.id]}
         attributes={meta.attributes}
         defaultValue="undefined"

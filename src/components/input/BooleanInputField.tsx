@@ -1,41 +1,35 @@
 import { createEffect, splitProps } from "solid-js";
-import { IFormControl } from "solid-forms";
+
 import CheckBox, { Properties } from "devextreme/ui/check_box";
 
 export interface BooleanInputFieldProps extends Properties {
-  control: IFormControl;
+  required?: boolean;
+  errors: string[];
+  setValue: (value: string) => void;
 }
 
 export function BooleanInputField(props: BooleanInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["control"]);
+  const [_, customProps] = splitProps(props, []);
 
   return (
-    <div
-      classList={{
-        "is-invalid": !!p.control.errors,
-        "is-touched": p.control.isTouched,
-        "is-required": p.control.isRequired,
-        "is-disabled": p.control.isDisabled
-      }}
-    >
+    <div>
       <div ref={el => {
         const instance = new CheckBox(el, {
           ...customProps,
-          value: p.control.value,
+          value: props.value,
           onValueChanged: (e) => {
-            p.control.setValue(e.value);
-            // p.control.setValue((e.event?.currentTarget as HTMLInputElement).checked);
+            props.setValue(e.value);
+            // props.setValue((e.event?.currentTarget as HTMLInputElement).checked);
           },
-          onOptionChanged: () => p.control.markTouched(true),
-          // required: p.control.isRequired,
-          disabled: p.control.isDisabled || p.control.isReadonly
+          // required: props.required,
+          disabled: props.disabled
         });
         createEffect(() => {
-          instance.option("validationStatus", p.control.errors ? "invalid" : "valid");
+          instance.option("validationStatus", props.errors ? "invalid" : "valid");
         });
         createEffect(() => {
-          if (p.control.isTouched && !p.control.isValid && p.control.errors) {
-            instance.option("validationErrors", p.control.errors.map((error: string) => {error}));
+          if (props.errors) {
+            instance.option("validationErrors", props.errors.map((error: string) => {error}));
           } else {
             instance.option("validationErrors", undefined);
           }

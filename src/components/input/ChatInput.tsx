@@ -82,7 +82,7 @@ export const ChatInput = (props: Properties) => {
         onChange={props.onChange}
         onBlur={props.field.onBlur}
         onFocus={props.field.onFocus}
-        required={props.field.isRequired}
+        required={props.field.required}
         disabled={props.disabled}
         error={props.field.error}
         isInvalid={props.field.error}

@@ -35,7 +35,7 @@ export enum ServerFormAttributeType {
 interface BaseField {
   id: string;
   // one of type or component is required.
-  serverType?: ServerFormAttributeType;
+  serverType?: string;
   component?: string;
   label?: string;
   hidden?: boolean;
@@ -91,11 +91,12 @@ export interface FormMetaData {
   id: string;
   title: string;
   attributes: FieldAttribute[];
-  save: ["vertex", VertexLabels]
-      // we can pass initialValues to start and end function when needed
-      | ['edge', EdgeLabels, ((results: FormResult, formValue: object)=> Id) | undefined, ((results: FormResult, formValue: object)=> Id) | undefined]
-      // if start and end function are not provided than it will not save anything
-      | ['edge', EdgeLabels]
+  label: string;
+  // save: ["vertex", VertexLabels]
+  //     // we can pass initialValues to start and end function when needed
+  //     | ['edge', EdgeLabels, ((results: FormResult, formValue: object)=> Id) | undefined, ((results: FormResult, formValue: object)=> Id) | undefined]
+  //     // if start and end function are not provided than it will not save anything
+  //     | ['edge', EdgeLabels]
   // when there is more than one forms we provide data fn for each form
   // for vertex and edges we return data in Vertex and Edge format
   data?: (id: Id) => any

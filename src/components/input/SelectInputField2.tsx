@@ -1,5 +1,5 @@
 import {createEffect, createSignal, createUniqueId, For, JSX, Show, splitProps} from "solid-js";
-import { createFormControl } from "solid-forms";
+
 import { createAsyncOptions, Select } from "@thisbeyond/solid-select";
 import "./select.css";
 import { Value } from "@thisbeyond/solid-select/dist/types/create-select";
@@ -39,34 +39,26 @@ export function SelectInputField(props: SelectInputFieldProps) {
     }
   });
 
-  const initialValue = p.control.value;
+  const initialValue = props.value;
   let runOnce = false;
   // solid-select has bug that call onChange when we set initialValue
   const onChange = (value: Value) => {
     if (!runOnce && value === initialValue) {
       runOnce = true;
     } else {
-      p.control.setValue(value);
+      props.setValue(value);
     }
   };
 
   return (
-    <div
-      classList={{
-        "is-invalid": !!p.control.errors,
-        "is-touched": p.control.isTouched,
-        "is-required": p.control.isRequired,
-        "is-disabled": p.control.isDisabled,
-      }}
-    >
+    <div>
       <Select
         {...selectOptionProps}
-        initialValue={p.control.value}
+        initialValue={props.value}
         onChange={onChange}
         // hack to Re-fetch Options
         onFocus={()=>selectOptionProps.onInput(createUniqueId())}
-        onBlur={() => p.control.markTouched(true)}
-        disabled={p.control.isDisabled || p.control.isReadonly}
+        disabled={props.disabled}
         optionToValue={(option: Option) => {
           return option.id; // ["id"]
         }}
@@ -85,8 +77,8 @@ export function SelectInputField(props: SelectInputFieldProps) {
         }}
         {...customProps}
       />
-      <Show when={p.control.isTouched && !p.control.isValid && p.control.errors}>
-        <For each={Object.values(p.control.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+      <Show when={props.errors}>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );
