@@ -9,7 +9,7 @@ import {
  useContext
 } from "solid-js";
 import { useLocation, useNavigate } from "solid-app-router";
-import { fetchAttributesTableData, } from "../api";
+import { AttributesTableData, } from "../api";
 import { FieldAttribute, FormMetaData, Id } from "../components/input/Form";
 import { css } from "solid-styled-components";
 import {
@@ -35,7 +35,7 @@ export default function SchemaTable(props: {entity: string}) {
 
  const getObjectData = () => {
   // use local variable because Signal is not updated instantly
-  const tableMetaData_ = fetchAttributesTableData(props.entity)[0] as FormMetaData;
+  const tableMetaData_ = AttributesTableData[props.entity][0] as FormMetaData;
   setTableMetaData(tableMetaData_);
   const headers = [...tableMetaData_.attributes];
   // @ts-ignore

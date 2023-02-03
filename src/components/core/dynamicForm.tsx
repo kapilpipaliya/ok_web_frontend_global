@@ -28,7 +28,7 @@ import {
  ServerFormAttributeType,
  TableField
 } from "../input/Form";
-import { fetchAttributesTableData } from "../api";
+import { AttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
 import {
  commitTransaction,
@@ -215,7 +215,7 @@ export function DynamicForm(props: DynamicFormProps) {
         txnId={props.txnId}
         component={DynamicFormSequence}
         // TODO: fix this for all the form types:
-        formMetaData={fetchAttributesTableData((meta as TableField).form!)}
+        formMetaData={AttributesTableData[(meta as TableField).form!]}
         postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(props.formValues, props.formGroup, tableItemFormGroup, values)}
         
         control={props.formGroup.controls[meta.id]}
@@ -602,7 +602,7 @@ console.log(formMetaData)
         txnId={txnId}
         component={DynamicFormSequence}
         // TODO: fix this for all the form types:
-        formMetaData={fetchAttributesTableData(meta.form!)}
+        formMetaData={AttributesTableData[meta.form!]}
         postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(formValues, formValues.controls[meta.id], tableItemFormGroup, values)}
         
         control={formValues.controls[meta.id]}

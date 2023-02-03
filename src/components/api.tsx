@@ -134,12 +134,9 @@ function tableOverwriteDefaultValueFn() {
   };
 }
 
-export function fetchAttributesTableData(
-  schema: string
-): FormMetaData[] {
-  switch (schema) {
-    case "ServerAttributeType": {
-      return [
+export const AttributesTableData: {[key: string]: FormMetaData[]} = {
+    "ServerAttributeType":
+      [
         {
           id: "0",
           title: "ServerFormAttributeType",
@@ -187,13 +184,11 @@ export function fetchAttributesTableData(
             }
           ]
         }
-        ];
-    }
-    case "FormAttributeType": {
-      return [{ id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] }];
-    }
-    case "Attribute": {
-      return [{
+        ],
+
+    "FormAttributeType": [{ id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] }];
+
+    "Attribute": [{
         id: "0", title: "Attribute", label: "Attribute", attributes: [
           { id: "id", serverType: "String" },
           {
@@ -228,10 +223,8 @@ export function fetchAttributesTableData(
           },
           { id: "meta", component: "JsCode" }
         ],
-      }];
-    }
-    case "CollectionCategory": {
-      return [{
+      }],
+    "CollectionCategory": [{
         id: "0",
         title: "Collection Category",
         label: "CollectionCategory",
@@ -239,11 +232,10 @@ export function fetchAttributesTableData(
           { id: "id", serverType: "String" },
           { id: "description", component: "TextArea" }
         ]
-      }];
-    }
+      }],
+
    // TODO: Collection has only one attribute. Add validation for that.
-    case "Collection": {
-      return [{
+    "Collection": [{
         id: "0",
         title: "Collection1",
         label: "Collection",
@@ -361,10 +353,8 @@ export function fetchAttributesTableData(
             ]
           }
         ]
-      }];
-    }
-    case "FormLayoutItem": {
-      return [{
+      }],
+    "FormLayoutItem": [{
         id: "0", title: "FormLayoutItem1", label: "FormLayoutItem", attributes: [
           { id: "id", serverType: "String" },
           // TODO: make title required
@@ -468,10 +458,8 @@ export function fetchAttributesTableData(
               { id: "code", component: 'JsCode' },
               { id: "meta", component: 'JsCode' },
             ],
-        }];
-    }
-    case "FormLayout": {
-      return [{
+        }],
+    "FormLayout": [{
         id: "0", title: "FormLayout1", label: "FormLayout", attributes: [
           { id: "id", serverType: "String" },
           { id: "title", serverType: "String" },
@@ -480,7 +468,8 @@ export function fetchAttributesTableData(
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
           {
-            id: "FormLayoutHasItem", title: "Forms",
+            id: "FormLayoutHasItem",
+            title: "Forms",
             component: 'TableForm', form: "FormLayoutItem",defaultValue: "undefined",
             edge: "FormLayoutHasItem",
             // data: (mainId) => {
@@ -506,19 +495,14 @@ export function fetchAttributesTableData(
           }
         ],
       },
-      ];
-    }
-    case "TableLayout": {
-      return [{
+      ],
+   "TableLayout": [{
         id: "0",
         title: "FormLayout1",
         label: "TableLayout",
         attributes: [
           { id: "id", serverType: "String" }
         ]
-      }];
-    }
-  }
-}
+      }]
+  };
 
-window.w = fetchAttributesTableData
