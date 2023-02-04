@@ -128,7 +128,7 @@ export function resetDatabase() {
 }
 
 export function isValidId(startVertexId: Id) {
-  return G.isString(startVertexId) || G.isNumber(startVertexId);
+  return G.isNumber(startVertexId);
 }
 // window.graph = graph;
 /*

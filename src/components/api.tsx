@@ -149,37 +149,10 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
               collection: "FormAttributeType",
             },
             {
-              id: "ServerToFormAttributeType",
-              component: "Table",
-              edge: "ServerToFormAttributeType",
-              defaultValue: "undefined",
-              // data: (mainId) => {
-              //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "ServerToFormAttributeType").map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-              //   return AttributeEdges.map(edge => ({
-              //     ...edge,
-              //     properties: { ...edge.properties, formAttributeType: edge.end },
-              //     _id: edge.id
-              //   }));
-              // },
-              // save: (txnId, results, tableData) => {
-              //   const edge = "ServerToFormAttributeType";
-              //   const endIdAttribute = "formAttributeType";
-              //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
-              // },
-              attributes: [
-                {
-                  id: "pos",
-                  serverType: "Integer",
-                  // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                  hidden: true
-                },
-                {
-                  id: "formAttributeType",
-                  component: "Select",
-                  displayExpr: "properties.id",
-                  collection: "FormAttributeType",
-                }
-              ]
+              id: "FormAttributeType",
+              component: "Tag",
+              displayExpr: "properties.id",
+              collection: "FormAttributeType",
             }
           ]
         },

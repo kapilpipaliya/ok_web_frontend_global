@@ -49,7 +49,7 @@ interface BaseField {
 }
 
 export interface SelectField extends BaseField {
-  component: 'Select';
+  component: 'Select' | 'Tag';
   collection: number | string;
   displayExpr: string;
   fetchOptions: (formValues: IFormGroup, formGroup: IFormGroup, inputValue: string) => Promise<any[]>;

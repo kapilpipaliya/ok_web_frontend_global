@@ -9,7 +9,7 @@ import { Icon } from '@iconify-icon/solid';
 import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
 import {css} from "solid-styled-components";
 import {getDefaultValue} from "../../utils/form";
-import {SelectInputField} from "./SelectInputField2";
+import {SelectInputField} from "./SelectInputField";
 import {A, D} from "@mobily/ts-belt";
 import {
   FieldAttribute,
@@ -18,7 +18,7 @@ import {
   TableFieldAttributes,
   FormMetaData,
   FormResult,
-  ServerFormAttributeType
+  ServerFormAttributeType, Vertex
 } from "./Form";
 import {klona} from "klona";
 import {toTitle} from "case-switcher-js";
@@ -48,19 +48,21 @@ const ModalInput = (props: {btnContent: JSXElement; children: JSXElement}) => {
 }
 
 export interface TableInputFieldProps {
-  control: ReturnType<typeof createFormArray>;
+  txnId: number,
+  meta: SelectField
+  vertex: Vertex;
+
   attributes: FieldAttribute[];
   defaultValue: "undefined" | "default";
   data: any[];
-  defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
+  // defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
   type?: string;
   component?: Component<any>;
   form?: FormMetaData[];
-  postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
-  // all forms options:
-  formValues: IFormGroup;
+  // postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
+
   noSort?: boolean;
-  txnId?: number
+
 }
 
 function OverWriteableCell(props: {
@@ -168,7 +170,7 @@ const tableAttributes = (attributes: FieldAttribute[]):FieldAttribute[]  => {
 }
 
 export function TableInputField(props: TableInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["control", "attributes", "defaultValue", "formValues"]);
+  const [p, customProps] = splitProps(props, ["vertex", "attributes", "defaultValue", "formValues"]);
 
   const [sortedIds, setSortedKeys] = createSignal([] as string[]);
 
@@ -494,7 +496,7 @@ export function TableInputField(props: TableInputFieldProps) {
               </SortableProvider>
             </DragDropProvider>
             </tbody>
-          </table>
+          </table>N
         </div>
         {DEBUG && JSON.stringify(props.control.value)}
       </div>
