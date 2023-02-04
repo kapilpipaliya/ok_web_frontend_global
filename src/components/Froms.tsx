@@ -33,7 +33,7 @@ export const AllForms = () => {
   </For>
  </div>
 }
-interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'formMetaData'>{
+interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'form'>{
  formId: string;
 }
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
@@ -122,7 +122,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   }
  }
  return <div class="flex flex:row flex:wrap">
-  <DynamicFormSequence formMetaData={forms} {...formLayoutProperties} {...customProps}/>
+  <DynamicFormSequence form={forms} {...formLayoutProperties} {...customProps}/>
  </div>
 }
 export interface SingleFormProps {}

@@ -134,9 +134,8 @@ function tableOverwriteDefaultValueFn() {
   };
 }
 
-export const AttributesTableData: {[key: string]: FormMetaData[]} = {
+export const AttributesTableData: {[key: string]: FormMetaData} = {
     "ServerAttributeType":
-      [
         {
           id: "0",
           title: "ServerFormAttributeType",
@@ -183,12 +182,11 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
               ]
             }
           ]
-        }
-        ],
+        },
 
-    "FormAttributeType": [{ id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] }];
+    "FormAttributeType": { id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] },
 
-    "Attribute": [{
+    "Attribute": {
         id: "0", title: "Attribute", label: "Attribute", attributes: [
           { id: "id", serverType: "String" },
           {
@@ -223,8 +221,8 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
           },
           { id: "meta", component: "JsCode" }
         ],
-      }],
-    "CollectionCategory": [{
+      },
+    "CollectionCategory": {
         id: "0",
         title: "Collection Category",
         label: "CollectionCategory",
@@ -232,10 +230,10 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
           { id: "id", serverType: "String" },
           { id: "description", component: "TextArea" }
         ]
-      }],
+      },
 
    // TODO: Collection has only one attribute. Add validation for that.
-    "Collection": [{
+    "Collection":{
         id: "0",
         title: "Collection1",
         label: "Collection",
@@ -353,8 +351,8 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
             ]
           }
         ]
-      }],
-    "FormLayoutItem": [{
+      },
+    "FormLayoutItem": {
         id: "0", title: "FormLayoutItem1", label: "FormLayoutItem", attributes: [
           { id: "id", serverType: "String" },
           // TODO: make title required
@@ -370,10 +368,8 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
           { id: "labelName", component: "Select",
           collection: "Collection",
              displayExpr: "properties.id", },
-          { id: "meta", component: "JsCode", props: { placeholder: "({})" } }
+          { id: "meta", component: "JsCode", props: { placeholder: "({})" } },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
-        ],
-      },
         {
           id: "1",
           title: "",
@@ -415,51 +411,55 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
           //   return saveTableDataToEdge(txnId, tableData, results, edge, endIdAttribute);
           // },
           defaultValueFn: tableOverwriteDefaultValueFn(),
-              attributes: [
-                {
-                  id: "pos",
-                  serverType: "Integer",
-                  // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                  hidden: true
-                },
-                {
-                  id: "attribute",
-                  component: "Select",
-                  displayExpr: "properties.id",
-                  // default: (formValues, control, id: string) => id && graph.edges[id].end,
-                  collection: "(1:collection)->[CollectionHasAttribute]",
-                },
+          attributes: [
+            {
+              id: "pos",
+              serverType: "Integer",
+              // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
+              hidden: true
+            },
+            {
+              id: "attribute",
+              component: "Select",
+              displayExpr: "properties.id",
+              // default: (formValues, control, id: string) => id && graph.edges[id].end,
+              collection: "(1:collection)->[CollectionHasAttribute]",
+            },
 
-                { id: "id", serverType: "String" },
-                // { id: "selector", type: "String"},
-                {
-                  id: "serverType",
-                  component: "Select",
-                  collection: "ServerAttributeType",
-                  displayExpr: "properties.id",
-                  noInput: true,
-                  fieldOptions: { disabled: true },
-                },
-                {
-                  id: "component",
-                  component: "Select",
-                  displayExpr: "properties.id",
-                  collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
-                },
-                { id: "label", serverType: "String" },
-                // { id: "internal", type: "Boolean" },
-                { id: "unique", serverType: "Boolean" },
-              { id: "required", serverType: "Boolean" },
-              { id: "readonly", serverType: "Boolean" },
-              { id: "disabled", serverType: "Boolean" },
-              { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-              { id: "onChange", component: 'JsCode' },
-              { id: "props", component: 'JsCode' },
-              { id: "code", component: 'JsCode' },
-              { id: "meta", component: 'JsCode' },
-            ],
-        }],
-    "FormLayout": [{
+            { id: "id", serverType: "String" },
+            // { id: "selector", type: "String"},
+            {
+              id: "serverType",
+              component: "Select",
+              collection: "ServerAttributeType",
+              displayExpr: "properties.id",
+              noInput: true,
+              fieldOptions: { disabled: true },
+            },
+            {
+              id: "component",
+              component: "Select",
+              displayExpr: "properties.id",
+              collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
+            },
+            { id: "label", serverType: "String" },
+            // { id: "internal", type: "Boolean" },
+            { id: "unique", serverType: "Boolean" },
+            { id: "required", serverType: "Boolean" },
+            { id: "readonly", serverType: "Boolean" },
+            { id: "disabled", serverType: "Boolean" },
+            { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+            { id: "onChange", component: 'JsCode' },
+            { id: "props", component: 'JsCode' },
+            { id: "code", component: 'JsCode' },
+            { id: "meta", component: 'JsCode' },
+          ],
+        }
+        ],
+      },
+
+
+    "FormLayout": {
         id: "0", title: "FormLayout1", label: "FormLayout", attributes: [
           { id: "id", serverType: "String" },
           { id: "title", serverType: "String" },
@@ -495,8 +495,7 @@ export const AttributesTableData: {[key: string]: FormMetaData[]} = {
           }
         ],
       },
-      ],
-   "TableLayout": [{
+         "TableLayout": [{
         id: "0",
         title: "FormLayout1",
         label: "TableLayout",
