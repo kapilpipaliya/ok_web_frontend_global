@@ -19,7 +19,7 @@ export function TextInputField(props: TextInputFieldProps) {
           ...customProps,
 
           value: props.value,
-          onKeyUp: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
+          onChange: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
             // props.setValue(e.component.option("value"));
             props.setValue((e.event?.currentTarget as HTMLInputElement).value);
           },

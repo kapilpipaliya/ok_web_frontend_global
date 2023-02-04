@@ -39,6 +39,19 @@ export function replaceVertexProperties(txnId: number, vertexId: Id, properties:
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1};
 }
 
+export function mergeVertexProperties(txnId: number, vertexId: Id, properties: {}): {error: string | boolean, txnDetailIndex?: number} {
+ if(!graph.vertexes[vertexId]) {
+  return {error: "Vertex ID is not valid"};
+ }
+ const originalProperties = {} as {[key: string]: any};
+ for (const property in properties) {
+  originalProperties[property] = graph.vertexes[vertexId].properties[property]
+ }
+ setGraph("vertexes", vertexId, "properties", properties);
+ transactionDetailAdd(txnId, {merge: () =>properties, revert: () => mergeVertexProperties(0, vertexId, originalProperties)});
+ return {error: false, txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1};
+}
+
 // delete a vertex
 export function deleteVertex(txnId: number, vertexId: Id): {error: string | boolean, txnDetailIndex?: number} {
  if(!graph.vertexes[vertexId]) {

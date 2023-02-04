@@ -9,7 +9,8 @@ import {
 
 export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };
-let uniqueId = 0;
+// temporary we start from 500000 because newId should not conflict with existing Ids
+let uniqueId = 50000;
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
@@ -25,7 +26,7 @@ export const [graph, setGraph] = createStore({
 });
 export type Revert = {revert: () => any}
 export type InsertFn = {
-  [key in "insert" | "replace" | "deleteVertex" | "insertEdge" | 'replaceEdge' | 'replaceEdgeStart' | 'replaceEdgeEnd' | 'deleteEdge']?: () => any;
+  [key in "insert" | "replace" | "merge" | "deleteVertex" | "insertEdge" | 'replaceEdge' | 'replaceEdgeStart' | 'replaceEdgeEnd' | 'deleteEdge']?: () => any;
 };
 export enum ProcessStatus {
  Unset,
@@ -36,7 +37,7 @@ export enum ProcessStatus {
 }
 export type TransactionValue = InsertFn & Revert;
 export const transactions = new Map<number, {status: ProcessStatus, steps: TransactionValue[]}>();
-
+window.t = transactions;
 export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
  if(!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {status: ProcessStatus.Unset, steps: []};
@@ -76,6 +77,7 @@ export const getTransactionData = (txnId: number) => {
   const existingTxnValue = [...transactions.get(txnId)!.steps || []].map(txnDetail => ({
     insert: txnDetail.insert?.(),
     replace: txnDetail.replace?.(),
+    merge: txnDetail.merge?.(),
     deleteVertex: txnDetail.deleteVertex?.(),
     insertEdge: txnDetail.insertEdge?.(),
     replaceEdge: txnDetail.replaceEdge?.(),

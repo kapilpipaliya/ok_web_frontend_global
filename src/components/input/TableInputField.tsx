@@ -55,7 +55,7 @@ export interface TableInputFieldProps {
   defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
   type?: string;
   component?: Component<any>;
-  formMetaData?: FormMetaData[];
+  form?: FormMetaData[];
   postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
   // all forms options:
   formValues: IFormGroup;
@@ -363,7 +363,7 @@ export function TableInputField(props: TableInputFieldProps) {
         {/* @ts-ignore */}
         <div ref={el=>props.noSort ? undefined : sortable(el)} class="border rounded-2 border-gray-300 p-2"
              classList={{"opacity-25": sortable.isActiveDraggable}}>
-          <Dynamic component={props.component!} formMetaData={props.formMetaData!}
+          <Dynamic component={props.component!} form={props.form!}
                    postSubmit={(values: FormResult) => props.postSubmit?.(control()!, values)}
                    id={(control()!.controls['end'] as IFormControl).value}
                    txnId={props.txnId}

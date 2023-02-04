@@ -1,4 +1,5 @@
 import {
+ batch,
  createEffect, createMemo,
  createSignal,
  Match, on,
@@ -17,7 +18,7 @@ import {
  commitTransaction,
  edgeOldIdToNewIdMap,
  graph,
- ProcessStatus,
+ ProcessStatus, setGraph,
  transactions,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
@@ -30,14 +31,20 @@ import {
  SingleForm
 } from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
-import { updateVertexId } from "../lib/Vertex";
-import { updateEdgeId } from "../lib/Edge";
+import {
+ addNewVertex,
+ deleteVertex,
+ newVertex,
+ updateVertexId
+} from "../lib/Vertex";
+import { addNewEdge, deleteEdge, newEdge, updateEdgeId } from "../lib/Edge";
 import { AttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
 // import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
+import { Edge, Vertex } from "./input/Form";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -137,15 +144,15 @@ export const DashboardView = () => {
       }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
-       const formMeta = createMemo(()=>AttributesTableData[params.entity]);
+       const form = createMemo(()=>AttributesTableData[params.entity]);
        return <Switch>
-        <Match when={!formMeta() || (params.entity === "TableLayout")}>
+        <Match when={!form() || (params.entity === "TableLayout")}>
          <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : parseInt(params.id)}/>
         </Match>
-        <Match when={formMeta()}>
+        <Match when={form()}>
          <DynamicFormSequence
           id={params.id === "new" ? undefined : parseInt(params.id)}
-          formMetaData={formMeta()} />
+          form={form()} />
         </Match>
         </Switch>;
       }} />
@@ -241,6 +248,18 @@ export const FullDashboard = () => {
   } else
    commitTransaction(Ws);
  });
+
+ const setGraphData = (args: { timestamp: number, vertexes: Vertex[], edges: Edge[], deleted_vertexes: string[], deleted_edges: string[] }) => {
+  batch(() => {
+   if(args.timestamp) setGraph('lastSyncedTime', args.timestamp);
+   args.vertexes?.map(v => addNewVertex(0, newVertex(v.id, v.labels, v.properties)));
+   args.edges?.map(e => addNewEdge(0, newEdge(e.id, e.type, e.properties, e.start, e.end)));
+   args.deleted_edges?.map(edgeId => deleteEdge(0, parseInt(edgeId)));
+   args.deleted_vertexes?.map(vertexId => deleteVertex(0, parseInt(vertexId)));
+   setGraph('initialSynced', true);
+  });
+ };
+ Ws.bind(["get", "sync", 0], setGraphData);
  // const debugGraph = useDebugger("graph");
  // debugGraph(graph);
  return (
