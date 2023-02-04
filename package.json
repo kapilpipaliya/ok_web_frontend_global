@@ -52,7 +52,6 @@
     "@spicainternational/sds-devextreme": "^5.1.1",
     "@stitches/core": "^1.2.8",
     "@thisbeyond/solid-dnd": "^0.7.3",
-    "@thisbeyond/solid-select": "^0.13.0",
     "@untemps/solid-readotron": "^1.0.2",
     "case-switcher-js": "^1.1.10",
     "clsx": "^1.2.1",

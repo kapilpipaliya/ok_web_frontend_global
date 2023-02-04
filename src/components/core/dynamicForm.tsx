@@ -1,29 +1,25 @@
 import {
- createEffect,
  createSignal,
  For,
- getOwner,
  Match,
- on, onCleanup,
+ onCleanup,
  onMount,
- runWithOwner,
  Show,
  Switch,
  useContext
 } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
-import { useLocation, useNavigate } from "solid-app-router";
+import { useLocation, useNavigate, useParams } from "solid-app-router";
 
-import { D, G , S} from "@mobily/ts-belt";
+import { S } from "@mobily/ts-belt";
 import { klona } from "klona/json";
-import { equals } from "rambda";
+import { path } from "rambda";
 
 import {
- ButtonGroupField, FieldAttribute,
+ ButtonGroupField,
+ FieldAttribute,
  FormMetaData,
  FormResult,
  Id,
- InitialValues,
  SelectField,
  ServerFormAttributeType,
  TableField, Vertex
@@ -38,18 +34,13 @@ import {
  ProcessStatus,
  transactions
 } from "../../lib/graph";
-import { DEBUG } from "../../config";
-import {path} from 'rambda';
 import {
- addNewVertex, findVertexIdsByLabel, mergeVertexProperties,
- newVertex,
- replaceVertexProperties
+ addNewVertex,
+ findVertexIdsByLabel,
+ mergeVertexProperties,
+ newVertex
 } from "../../lib/Vertex";
-import {
- addNewEdge, getOutEdgeIdsOfType,
- newEdge, replaceEdgeEnd,
- replaceEdgeProperties, replaceEdgeStart
-} from "../../lib/Edge";
+import { getOutEdgeIdsOfType } from "../../lib/Edge";
 import { WsContext } from "../ws_events_dispatcher";
 import Button, { ClickEvent } from "devextreme/ui/button";
 import { TextInputField } from "../input/TextInputField";
@@ -60,10 +51,14 @@ import { BooleanInputField } from "../input/BooleanInputField";
 import { Field } from "../input/core/Field";
 import { JsonInput } from "../input/JsonInput";
 import { GeneralInput } from "../input/GeneralInput";
-import { SelectInputField } from "../input/SelectInputField2";
+import { SelectInputField } from "../input/SelectInputField";
 import { TableInputField } from "../input/TableInputField";
 import { ButtonGroup } from "../input/core/ButtonGroup";
-import { getDefaultValue } from "../../utils/form";
+import { TagField } from "../input/TagField";
+
+
+
+
 
 interface DynamicFormProps {
  form: FormMetaData;
@@ -75,6 +70,7 @@ interface DynamicFormProps {
 }
 
 export function DynamicForm(props: DynamicFormProps) {
+ const vertex = graph.vertexes[props.id];
  const setValue = (attribute: FieldAttribute, data: any) => {
   mergeVertexProperties(props.txnId,props.id, {[attribute.id]: data})
  }
@@ -86,69 +82,70 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match
       when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
       <TextInputField
-       label={toTitle(meta.label || meta.id)}
-       setValue={(value) => setValue(meta, value)}
        name={props.form.id + meta.id}
+       label={toTitle(meta.label || meta.id)}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match
       when={meta.component === "TextArea"}>
       <TextAreaField
-       label={toTitle(meta.label || meta.id)}
-       
-       
        id={props.form.id + meta.id}
+       label={toTitle(meta.label || meta.id)}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match
       when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
       <NumberInputField
+       name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
-       
-       
-       id={props.form.id + meta.id}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match
       when={meta.component === "DateInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Date))}>
       <DateInputField
+       name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
-       
-       
-       id={props.form.id + meta.id}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match
       when={meta.component === "DateTimeInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.LocalDateTime || meta.serverType === ServerFormAttributeType.LocalTime))}>
       <DateInputField
+       name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
        type="datetime"
-       
-       
-       id={props.form.id + meta.id}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.component === "JsCode"}>
       <TextAreaField
+       name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
-       
-       
-       id={props.form.id + meta.id}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
      <Match
       when={meta.component === "Boolean" || (!meta.component && meta.serverType === ServerFormAttributeType.Boolean)}>
       <BooleanInputField
+       name={props.form.id + meta.id}
        text={toTitle(meta.label || meta.id)}
-       
-       
-       id={props.form.id + meta.id}
+       value={vertex.properties[meta.id]}
+       setValue={(value) => setValue(meta, value)}
        {...(meta.props || {})}
       />
      </Match>
@@ -156,9 +153,9 @@ export function DynamicForm(props: DynamicFormProps) {
       when={meta.component === "Json" && (!meta.component && meta.serverType === ServerFormAttributeType.Map)}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
-        
-        
-        id={props.form.id + meta.id}
+        name={props.form.id + meta.id}
+        value={vertex.properties[meta.id]}
+        setValue={(value) => setValue(meta, value)}
         {...(meta.props || {})}
        />
       </Field>
@@ -166,9 +163,9 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "Dynamic"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <GeneralInput
-        
-        
         id={props.form.id + meta.id}
+        value={vertex.properties[meta.id]}
+        setValue={(value) => setValue(meta, value)}
         {...(meta.props || {})}
        />
       </Field>
@@ -176,28 +173,30 @@ export function DynamicForm(props: DynamicFormProps) {
      <Match when={meta.component === "Select"}>
       <Field label={toTitle(meta.label || meta.id)}>
        <SelectInputField
-        
-        
-        id={props.form.id + meta.id}
-        displayExpr={(meta as SelectField).displayExpr}
-        fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, props.formGroup, inputValue)}
-        {...(meta.props || {})}
+        txnId={props.txnId}
+        vertex={vertex}
+        meta={meta as SelectField}
+        name={props.form.id + meta.id}
+       />
+      </Field>
+     </Match>
+     <Match when={meta.component === "Tag"}>
+      <Field label={toTitle(meta.label || meta.id)}>
+       <TagField
+        txnId={props.txnId}
+        vertex={vertex}
+        meta={meta as SelectField}
+        name={props.form.id + meta.id}
        />
       </Field>
      </Match>
      <Match when={meta.component === "Table"}>
       <Field label={toTitle(meta.label || meta.id)}>
        {() => {
-        const newMeta = (meta as TableField).attributes.map(attr => {
-         if(attr.component === "Select") updateSelectFieldMeta(attr as SelectField);
-         return attr;
-        })
         return <TableInputField
-         
-         
          id={props.form.id + meta.id}
          txnId={props.txnId}
-         attributes={newMeta}
+         attributes={meta}
          defaultValue="undefined"
          data={(meta as TableField).data}
          defaultValueFn={(meta as TableField).defaultValueFn}
@@ -252,91 +251,30 @@ export function DynamicForm(props: DynamicFormProps) {
 
 export interface DynamicFormSequenceProps {
  form: FormMetaData;
- handleSubmit?: (txnId: number, values: FormResult) => void;
- postSubmit?: (values: FormResult) => void;
  id?: Id;
  txnId?: number;
-}
-
-function updateSelectFieldMeta(meta: SelectField) {
- if (typeof meta.collection === "number") {
-  meta.fetchOptions = async (formValues, formGroup, inputValue) => {
-   const vertex = graph.vertexes[meta.collection];
-   // assume that vertex is of label Collection
-   return vertex ? findVertexIdsByLabel(vertex.properties.id).map((id) => graph.vertexes[id]) : [];
-  };
- }
- if (typeof meta.collection === "string") {
-  if ((meta.collection as string).startsWith("[")) {
-   meta.fetchOptions = async () => {
-    try {
-      return JSON.parse(meta.collection as string);
-     } catch (e) {
-     console.warn(e)
-     return [];
-     }
-    }
-
-  } else if ((meta.collection as string).includes("[")) {
-   const from = /\(([\w\.]+:)?(\w+)(:[\w\.]+)?\)->/
-   const edge = /\[(\w+)\]/
-   const fromResult = meta.collection.match(from);
-   const edgeName = meta.collection.match(edge)?.[1];
-
-   if(fromResult && edgeName) {
-    let selector = S.removeAll(fromResult[1] || '', ":");
-    const attribute = fromResult[2];
-    const projection = S.removeAll(fromResult[3] || '', ":");
-
-    meta.fetchOptions = async (formValues, formGroup, inputValue) => {
-     let fromVertexId: number;
-     try{
-      let control:IFormGroup;
-      control = selector ? formValues.controls[selector] as IFormGroup : formGroup;
-      fromVertexId = control.controls[attribute].value;
-     } catch (e) {
-      console.warn('error', e);
-      return [];
-     }
-
-     if (!fromVertexId) return [];
-     const fromVertex = graph.vertexes[fromVertexId];
-     if(!fromVertex) return [];
-     const projectedId: number|undefined = projection ? path(projection, fromVertex) : fromVertexId;
-     if(!projectedId) return [];
-     return getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]);
-    };
-   }
-  } else {
-   meta.fetchOptions = async (formValues, formGroup, inputValue) => {
-    return findVertexIdsByLabel(meta.collection as string).map((id) => graph.vertexes[id]);
-   };
-  }
- }
+ // very rare cases
+ handleSubmit?: (txnId: number, values: FormResult) => void;
+ postSubmit?: (values: FormResult) => void;
 }
 
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  let id = props.id!;
  const txnId = props.txnId || getNewTxnId();
+ const form = klona(props.form);
+ const params = useParams();
  const { Ws } = useContext(WsContext);
- const [formRef, setFormRef] = createSignal<HTMLFormElement>();
- onMount(() => {
-  const form_ = formRef();
-  form_?.querySelector("input")?.focus();
- });
+
  const location = useLocation();
  const navigate = useNavigate();
- const form = klona(props.form);
- const actionType = props.id ? "edit" : "create";
+
+ const [divRef, setDivRef] = createSignal<HTMLFormElement>();
+ onMount(() => {divRef()?.querySelector("input")?.focus();});
 
  if ( !props.id ) {
    // create a new vertex, but don't commit
    const newVertexObj = newVertex(getNewGraphId(), [form.label], {});
-   // set default values if empty
-  // TODO: make default working based on string, its not a function.
-  // const formValues = 1;
-  // form.attributes.forEach(meta => (meta.default && !newVertexObj.properties[meta.id]) && (newVertexObj.properties[meta.id] = meta.default(formValues)));
-
+   // TODO: Do Create Transformation for the vertex
   const {error} = addNewVertex(txnId, newVertexObj);
   if (error) {
    alert(error);
@@ -360,20 +298,19 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     // @ts-ignore
     props.postSubmit(id);
    } else {
-    navigate(location.pathname.split("/").slice(0, -1).join("/"));
+    navigate(`/${params.entity}`);
    }
-
  };
 
- return <form
-        // onSubmit={onSubmit}
-        ref={setFormRef}>
-       <DynamicForm form={form} id={id} txnId={txnId} />
-         <Show when={actionType === "create"}>
+ return <div ref={setDivRef}>
+
+   <DynamicForm form={form} id={id} txnId={txnId} />
+
+  <Show when={!props.id}>
           <div ref={el => {
            const instance = new Button(el, { type: "success", onClick: onSubmit, text: "Save" });
            onCleanup(() => instance.dispose());
           }} />
          </Show>
-  </form>
+  </div>
 };

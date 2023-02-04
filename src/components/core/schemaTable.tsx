@@ -10,7 +10,7 @@ import {
 } from "solid-js";
 import { useLocation, useNavigate } from "solid-app-router";
 import { AttributesTableData, } from "../api";
-import { FieldAttribute, FormMetaData, Id } from "../components/input/Form";
+import { FieldAttribute, FormMetaData, Id } from "../input/Form";
 import { css } from "solid-styled-components";
 import {
  commitTransaction,
@@ -53,17 +53,15 @@ export default function SchemaTable(props: {entity: string}) {
   if (props.entity) untrack(getObjectData);
  });
 
- const deleteObject = (id: Id) => {
+ const deleteObject = (vertexId: Id) => {
   if (confirm("are you sure")) {
-   if (tableMetaData().save[0] === "vertex") {
     const txnId = getNewTxnId();
-    const deleteResult = deleteVertex(txnId, id);
-    // @ts-ignore
-    if (deleteResult?.error) alert(data.message);
+   const deleteResult = deleteVertex(txnId, vertexId);
+    if (deleteResult?.error) alert(deleteResult.error);
     else getObjectData();
     transactions.get(txnId)!.status = ProcessStatus.Ready;
     commitTransaction(Ws);
-   }
+
   }
  };
  const TableBody = () => {
