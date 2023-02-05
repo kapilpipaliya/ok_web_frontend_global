@@ -21,7 +21,7 @@ import {
  FormResult,
  Id,
  SelectField,
- ServerFormAttributeType,
+ DataType,
  TableField, Vertex
 } from "../input/Form";
 import { AttributesTableData } from "../api";
@@ -40,7 +40,7 @@ import {
  mergeVertexProperties,
  newVertex
 } from "../../lib/Vertex";
-import { getOutEdgeIdsOfType } from "../../lib/Edge";
+import { deleteEdge, getOutEdgeIdsOfType } from "../../lib/Edge";
 import { WsContext } from "../ws_events_dispatcher";
 import Button, { ClickEvent } from "devextreme/ui/button";
 import { TextInputField } from "../input/TextInputField";
@@ -51,10 +51,11 @@ import { BooleanInputField } from "../input/BooleanInputField";
 import { Field } from "../input/core/Field";
 import { JsonInput } from "../input/JsonInput";
 import { GeneralInput } from "../input/GeneralInput";
-import { SelectInputField } from "../input/SelectInputField";
+import { SelectInputField, setSelectionValue } from "../input/SelectInputField";
 import { TableInputField } from "../input/TableInputField";
 import { ButtonGroup } from "../input/core/ButtonGroup";
 import { TagField } from "../input/TagField";
+import { capitalizeFirstLetter } from "../utils";
 
 
 
@@ -68,11 +69,39 @@ interface DynamicFormProps {
  // all forms options:
  // formValues: IFormGroup;
 }
+// memorize this function
+const normalizeFormMetaData = (form: FormMetaData) => {
+ return form.attributes.reduce((acc,curr) => {
+  acc[curr.id] = curr;
+  return acc;
+ }, {} as {[key: string]: FieldAttribute})
+}
+
+//'setValue(component,null)'
+export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaData, changedFieldAttribute: FieldAttribute) {
+ if(!changedFieldAttribute.onchange) return;
+ try{
+  const args = JSON.parse(changedFieldAttribute.onchange);
+   const attribute = path(args[0], normalizeFormMetaData(form));
+   let value = args[1];
+
+  if (value === null ) value = undefined;
+  if(attribute.component == "Select" || attribute.component === "Tag") {
+     setSelectionValue(txnId, vertex, attribute, 0, value)
+   } else {
+    mergeVertexProperties(txnId, vertex.id, { [attribute.id]: value });
+   }
+ } catch (e) {
+
+ }
+
+}
 
 export function DynamicForm(props: DynamicFormProps) {
  const vertex = graph.vertexes[props.id];
  const setValue = (attribute: FieldAttribute, data: any) => {
   mergeVertexProperties(props.txnId,props.id, {[attribute.id]: data})
+  onChangeHandler(props.txnId, vertex, props.form, attribute);
  }
  const Form = () => {
   return <><For
@@ -80,7 +109,7 @@ export function DynamicForm(props: DynamicFormProps) {
    {(meta) => (
     <Switch>
      <Match
-      when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
+      when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
       <TextInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -100,7 +129,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
+      when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
       <NumberInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -110,24 +139,22 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "DateInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Date))}>
+      when={meta.component === "DateInput" || (!meta.component && (meta.serverType === DataType.Date))}>
       <DateInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
        value={vertex.properties[meta.id]}
        setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
       />
      </Match>
      <Match
-      when={meta.component === "DateTimeInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.LocalDateTime || meta.serverType === ServerFormAttributeType.LocalTime))}>
+      when={meta.component === "DateTimeInput" || (!meta.component && (meta.serverType === DataType.LocalDateTime || meta.serverType === DataType.LocalTime))}>
       <DateInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
        type="datetime"
        value={vertex.properties[meta.id]}
        setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
       />
      </Match>
      <Match when={meta.component === "JsCode"}>
@@ -140,7 +167,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "Boolean" || (!meta.component && meta.serverType === ServerFormAttributeType.Boolean)}>
+      when={meta.component === "Boolean" || (!meta.component && meta.serverType === DataType.Boolean)}>
       <BooleanInputField
        name={props.form.id + meta.id}
        text={toTitle(meta.label || meta.id)}
@@ -150,7 +177,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "Json" && (!meta.component && meta.serverType === ServerFormAttributeType.Map)}>
+      when={meta.component === "Json" && (!meta.component && meta.serverType === DataType.Map)}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         name={props.form.id + meta.id}
@@ -177,6 +204,7 @@ export function DynamicForm(props: DynamicFormProps) {
         vertex={vertex}
         meta={meta as SelectField}
         name={props.form.id + meta.id}
+        form={props.form}
        />
       </Field>
      </Match>

@@ -53,8 +53,8 @@ const navigation = [
   name: "Base",
   type: "group",
   children: [
-   { name: "FormAttributeTypes", href: "/FormAttributeType" },
-   { name: "ServerAttributeTypes", href: "/ServerAttributeType" },
+   { name: "Components", href: "/Component" },
+   { name: "DataTypes", href: "/DataType" },
    { name: "Attributes", href: "/Attribute" },
    { name: "Collection Category", href: "/CollectionCategory" },
    { name: "Collections", href: "/Collection" },
