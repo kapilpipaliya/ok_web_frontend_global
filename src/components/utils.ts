@@ -1,20 +1,31 @@
 // https://github.com/diondree/javascript-from-string/blob/master/index.js
 import {
  commitTransaction,
- getExistingOrDefaultTxnValue, getNewGraphId, getTransactionData,
- graph, isValidId, revertTransaction,
+ getExistingOrDefaultTxnValue,
+ getNewGraphId,
+ getTransactionData,
+ graph,
+ isValidId,
+ revertTransaction,
  transactionDetailAdd
 } from "../lib/graph";
 import {
- addNewVertex, deleteVertex, findVertexIdsByLabel,
+ addNewVertex,
+ deleteVertex,
+ findVertexIdsByLabel,
  newVertex,
- replaceVertexProperties, updateVertexId
+ replaceVertexProperties,
+ updateVertexId
 } from "../lib/Vertex";
 import {
- addNewEdge, deleteEdge, getOutEdgeIdsOfType,
- newEdge, replaceEdgeEnd,
+ addNewEdge,
+ deleteEdge,
+ getOutEdgeIdsOfType,
+ newEdge,
+ replaceEdgeEnd,
  replaceEdgeProperties,
- replaceEdgeStart, updateEdgeId,
+ replaceEdgeStart,
+ updateEdgeId
 } from "../lib/Edge";
 import { saveTableDataToEdge } from "./api";
 
@@ -156,3 +167,7 @@ const run = (code: string, callback: (result: any) => void, fallback: any) => {
   return fallback;
  }
 };
+
+export function capitalizeFirstLetter(string: string) {
+ return string.charAt(0).toUpperCase() + string.slice(1);
+}

@@ -4,7 +4,7 @@ import CheckBox, { Properties } from "devextreme/ui/check_box";
 
 export interface BooleanInputFieldProps extends Properties {
   required?: boolean;
-  errors: string[];
+  errors?: string[];
   setValue: (value: string) => void;
 }
 

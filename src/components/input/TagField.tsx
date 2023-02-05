@@ -4,7 +4,7 @@ import TagBox, { Properties } from "devextreme/ui/tag_box";
 import { SelectField, Vertex } from "./Form";
 import { getNewGraphId, graph } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { getSelectionOptions } from "./SelectInputField";
+import { getSelectedValue, getSelectionOptions } from "./SelectInputField";
 
 export interface SelectInputFieldProps extends Properties {
   txnId: number,
@@ -15,40 +15,20 @@ function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-function getSelectedValue(vertex: Vertex, attribute: {id: string; component?: string}){
-  if (!attribute.component) return [];
-  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
 
-  // if (attribute.component === "select" || attribute.component === "multi-select") {
-  //  return vertex.out_edges[type]
-  // } else if (attribute.component === "Table") {
-  //  return vertex.out_edges[type].map(edgeId => {
-  //   const firstEdge = graph.edges[edgeId];
-  //   const joinVertex = graph.vertexes[firstEdge.end];
-  //   const secondEdgeId = joinVertex.out_edges[type][0];
-  //   const secondEdge = graph.edges[secondEdgeId];
-  //   const newProperties = Object.assign({}, joinVertex.properties, {[attribute.id]: secondEdge.end})
-  //   return {id: joinVertex.id, properties: newProperties}
-  //  })
-  // } else if (attribute.component === "TableForm") {
-  //  return [];
-  // }
-  // return [];
-}
 function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number[], value: number[]) {
   // delete all previous edges:
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
   const previousEdge = vertex.out_edges[type] || [];
   for (const edgeId of previousEdge) {
-    const deleteResult = deleteEdge(txnId, edgeId)
-    if (deleteResult?.error) alert(deleteResult.error);
+    const deleteEdgeResult = deleteEdge(txnId, edgeId)
+    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
   // add all edges:
   for (const vertexId of value) {
-    const insertResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
-    if(insertResult.error) alert(insertResult.error);
+    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
+    if(insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
 // TODO: Test when use case come
@@ -63,7 +43,7 @@ export function TagField(props: SelectInputFieldProps) {
         const instance = new TagBox(el, {
           ...customProps,
           searchEnabled: true,
-          value: getSelectedValue(props.vertex, props.meta),
+          value: getSelectedValue(props.vertex, props.meta.id),
           onValueChanged: function(e) {
             setSelectionValue(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
           },

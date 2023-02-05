@@ -16,7 +16,7 @@ interface Properties {
   disabled?: boolean;
 
   required?: boolean;
-  errors: string[];
+  errors?: string[];
   setValue: (value: string) => void;
   value: string;
 }

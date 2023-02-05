@@ -194,15 +194,10 @@ export function DynamicForm(props: DynamicFormProps) {
       <Field label={toTitle(meta.label || meta.id)}>
        {() => {
         return <TableInputField
-         id={props.form.id + meta.id}
+         // id={props.form.id + meta.id}
          txnId={props.txnId}
-         attributes={meta}
-         defaultValue="undefined"
-         data={(meta as TableField).data}
-         defaultValueFn={(meta as TableField).defaultValueFn}
-         formValues={props.formValues}
-         noSort={(meta as TableField).noSort}
-         {...(meta.props || {})}
+         meta={meta as TableField}
+         vertex={vertex}
         />
        }}
       </Field>

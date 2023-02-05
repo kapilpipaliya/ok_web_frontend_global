@@ -4,7 +4,7 @@ import NumberBox, { Properties } from "devextreme/ui/number_box";
 
 export interface NumberInputFieldProps extends Properties {
   required?: boolean;
-  errors: string[];
+  errors?: string[];
   setValue: (value: string) => void;
 }
 

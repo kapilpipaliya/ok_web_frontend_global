@@ -12,14 +12,12 @@ import {
   getOutEdgeIdsOfType,
   newEdge
 } from "../../lib/Edge";
+import { capitalizeFirstLetter } from "../utils";
 
 export interface SelectInputFieldProps extends Properties {
   txnId: number,
   meta: SelectField
   vertex: Vertex;
-}
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
 }
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string) {
   // TOOD: make input filter working:
@@ -52,15 +50,20 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
         const projection = S.removeAll(fromResult[3] || '', ":");
 
         const fromVertexId = vertex.properties[attribute];
-        if (!fromVertexId) return [];
+        const fromVertexIds = fromVertexId ? [fromVertexId] : getSelectedValue(vertex, attribute);
 
-        const fromVertex = graph.vertexes[fromVertexId];
-        if(!fromVertex) return [];
+        const result = [] as Vertex[];
+        for (const fromVertexId_ of fromVertexIds ) {
+          const fromVertex = graph.vertexes[fromVertexId_];
+          if(!fromVertex) continue;
 
-        const projectedId: number|undefined = projection ? path(projection, fromVertex) : fromVertexId;
-        if(!projectedId) return [];
+          const projectedId: number|undefined = projection ? path(projection, fromVertex) : fromVertexId_;
+          if(!projectedId) continue;
 
-        return getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]);
+          result.push(...getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]));
+        }
+
+        return result;
       } else {
         return [];
       }
@@ -71,10 +74,9 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
 }
 
 // currently used vertexId, because it's not to use edge id
-function getSelectedValue(vertex: Vertex, attribute: {id: string; component?: string}){
-  if (!attribute.component) return [];
-  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end)[0];
+export function getSelectedValue(vertex: Vertex, attributeId: string){
+  const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
+  return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
 
   // if (attribute.component === "select" || attribute.component === "multi-select") {
   //  return vertex.out_edges[type]
@@ -92,16 +94,19 @@ function getSelectedValue(vertex: Vertex, attribute: {id: string; component?: st
   // }
   // return [];
 }
-function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
+export function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
   const previousEdge = vertex.out_edges[type] || [];
   for (const edgeId of previousEdge) {
-    const deleteResult = deleteEdge(txnId, edgeId)
-    if (deleteResult?.error) alert(deleteResult.error);
+    const deleteEdgeResult = deleteEdge(txnId, edgeId)
+    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
-  const insertResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, value));
-  if(insertResult.error) alert(insertResult.error);
+  if (value) {
+    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, value));
+    if(insertEdgeResult.error) alert(insertEdgeResult.error);
+  }
+
 }
 export function SelectInputField(props: SelectInputFieldProps) {
   const [p, customProps] = splitProps(props, ["vertex"]);
@@ -115,7 +120,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
         const instance = new SelectBox(el, {
           ...customProps,
           searchEnabled: true,
-          value: getSelectedValue(props.vertex, props.meta),
+          value: getSelectedValue(props.vertex, props.meta.id)[0],
           onValueChanged: function(e) {
             setSelectionValue(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
           },
@@ -123,7 +128,10 @@ export function SelectInputField(props: SelectInputFieldProps) {
           disabled: props.meta.disabled,
           valueExpr: "id",
           displayExpr: "properties.id",
-          labelMode: 'floating'
+          labelMode: 'floating',
+          onFocusIn: function(e) {
+            refetch()
+          }
         });
         createEffect(() => {
           for(const property in p as Properties) {
