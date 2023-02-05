@@ -14,7 +14,7 @@ export type FormResult = Map<string, {[key: string]: any}>;
 export interface InitialValues {
   [formId: string]: {id: Id, start?: Id, end?: Id, properties: {[key: string]: any}}
 }
-export enum ServerFormAttributeType {
+export enum DataType {
     String= "String",
     Boolean= "Boolean",
     Integer= "Integer",
@@ -44,7 +44,7 @@ interface BaseField {
   disabled?: boolean;
   default?: (formValues: IFormGroup, control: ReturnType<typeof createFormGroup> | ReturnType<typeof createFormArray>, id?: Id) => any;
   fieldOptions?: IFormControlOptions;
-  onchange?: (form: IFormGroup, value: Id)=>void
+  onchange?: string
   props?: {[key: string]: any}
 }
 
@@ -126,8 +126,8 @@ export interface Edge {
 
 export enum VertexLabels {
   // Base
-  ServerAttributeType = "ServerAttributeType", // all type of the server
-  FormAttributeType = "FormAttributeType", // all input components for the servertype
+  DataType = "DataType", // all type of the server
+  Component = "Component", // all input components for the servertype
   Attribute = "Attribute",
   CollectionCategory = "CollectionCategory",
   Collection = "Collection",
@@ -142,7 +142,7 @@ export enum VertexLabels {
 }
 
 export enum EdgeLabels {
-  ServerToFormAttributeType = "ServerToFormAttributeType",
+  DataTypeComponent = "DataTypeComponent",
   CollectionHasChild = "CollectionHasChild",
   CollectionHasAttribute = "CollectionHasAttribute",
   FormLayoutItemHasCollection = "FormLayoutItemHasCollection",

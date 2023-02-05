@@ -135,29 +135,29 @@ function tableOverwriteDefaultValueFn() {
 }
 
 export const AttributesTableData: {[key: string]: FormMetaData} = {
-    "ServerAttributeType":
+    "DataType":
         {
           id: "0",
-          title: "ServerFormAttributeType",
-          label: "ServerAttributeType",
+          title: "DataType",
+          label: "DataType",
           attributes: [
             { id: "id", serverType: "String" },
             {
               id: "default",
               component: "Select",
               displayExpr: "properties.id",
-              collection: "FormAttributeType",
+              collection: "Component",
             },
             {
-              id: "FormAttributeType",
+              id: "Component",
               component: "Tag",
               displayExpr: "properties.id",
-              collection: "FormAttributeType",
+              collection: "Component",
             }
           ]
         },
 
-    "FormAttributeType": { id: "0", title: "FormAttributeType", label: "FormAttributeType", attributes: [{ id: "id", serverType: "String" }] },
+    "Component": { id: "0", title: "Component", label: "Component", attributes: [{ id: "id", serverType: "String" }] },
 
     "Attribute": {
         id: "0", title: "Attribute", label: "Attribute", attributes: [
@@ -166,7 +166,8 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             id: "serverType",
             component: "Select",
             displayExpr: "properties.id",
-            collection: "ServerAttributeType",
+            collection: "DataType",
+            onchange: '["component",null]',
             // onchange: (formGroup, value) => {
             //   formGroup.controls["component"].setValue(null);
             // }
@@ -174,7 +175,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           {
             id: "component",
             component: "Select",
-            collection: "(serverType)->[ServerToFormAttributeType]",
+            collection: "(serverType)->[DataTypeComponent]",
             displayExpr: "properties.id",
           },
           { id: "label", serverType: "String" },
@@ -260,7 +261,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
               {
                 id: "serverType",
                 component: "Select",
-                collection: "ServerAttributeType",
+                collection: "DataType",
                 displayExpr: "properties.id",
                 noInput: true,
                 fieldOptions: { disabled: true },
@@ -269,7 +270,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 id: "component",
                 component: "Select",
                 displayExpr: "properties.id",
-                collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
+                collection: "(attribute:properties.serverType)->[DataTypeComponent]",
               },
               { id: "label", serverType: "String" },
               // { id: "internal", type: "Boolean" },
@@ -404,7 +405,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             {
               id: "serverType",
               component: "Select",
-              collection: "ServerAttributeType",
+              collection: "DataType",
               displayExpr: "properties.id",
               noInput: true,
               fieldOptions: { disabled: true },
@@ -413,7 +414,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
               id: "component",
               component: "Select",
               displayExpr: "properties.id",
-              collection: "(attribute:properties.serverType)->[ServerToFormAttributeType]",
+              collection: "(attribute:properties.serverType)->[DataTypeComponent]",
             },
             { id: "label", serverType: "String" },
             // { id: "internal", type: "Boolean" },

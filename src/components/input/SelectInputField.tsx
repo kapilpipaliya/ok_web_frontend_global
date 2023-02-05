@@ -1,7 +1,7 @@
 import { createEffect, createResource, splitProps } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { SelectField, Vertex } from "./Form";
+import { FormMetaData, SelectField, Vertex } from "./Form";
 import { getNewGraphId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { S } from "@mobily/ts-belt";
@@ -13,8 +13,10 @@ import {
   newEdge
 } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../utils";
+import { onChangeHandler } from "../core/dynamicForm";
 
 export interface SelectInputFieldProps extends Properties {
+  form: FormMetaData;
   txnId: number,
   meta: SelectField
   vertex: Vertex;
@@ -123,6 +125,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
           value: getSelectedValue(props.vertex, props.meta.id)[0],
           onValueChanged: function(e) {
             setSelectionValue(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
+            onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
           },
           required: props.meta.required,
           disabled: props.meta.disabled,
@@ -139,9 +142,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
             instance.option(property, p[property]);
           }
         })
-        // createEffect(()=>instance.option('value', props.value))
-        // when the value is changed by other components, we want to refetch the options
-        // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+        createEffect(()=>instance.option('value', getSelectedValue(props.vertex, props.meta.id)[0]))
         // createEffect(()=>instance.option('required', props.required))
         // createEffect(()=>instance.option('disabled', props.disabled))
         createEffect(() => {

@@ -5,7 +5,7 @@ import DateBox, { Properties } from "devextreme/ui/date_box";
 
 export interface TextInputFieldProps extends Properties {
   required?: boolean;
-  errors: string[];
+  errors?: string[];
   setValue: (value: string) => void;
 }
 

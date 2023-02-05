@@ -32,7 +32,7 @@ import {
   FieldAttribute,
   FormResult, Id,
   SelectField,
-  ServerFormAttributeType, TableField,
+  DataType, TableField,
   TableFieldAttributes,
   Vertex
 } from "./Form";
@@ -242,7 +242,7 @@ export function TableInputField(props: TableInputFieldProps) {
               <></>
             </Match>
 
-           <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
+           <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
              <OverWriteableCell
               txnId={props.txnId}
               joinVertex={vertex}
@@ -258,7 +258,7 @@ export function TableInputField(props: TableInputFieldProps) {
                />
              </OverWriteableCell>
             </Match>
-            <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
+            <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
               <OverWriteableCell
                txnId={props.txnId}
                joinVertex={vertex}
@@ -317,7 +317,7 @@ export function TableInputField(props: TableInputFieldProps) {
                                    setValue={(value) => setValue(meta, value)} />
               </OverWriteableCell>
             </Match>
-            <Match when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
+            <Match when={meta.serverType === DataType.Map || meta.component === "Json"}>
               <td>
                 <OverWriteableCell
                  txnId={props.txnId}
