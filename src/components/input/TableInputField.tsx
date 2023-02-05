@@ -1,38 +1,64 @@
-import { JSX, Component, batch, createMemo, createSignal, For, getOwner, runWithOwner, Show, splitProps, Switch, Match, JSXElement } from "solid-js";
-import {Dynamic} from 'solid-js/web';
-import {ulid} from 'ulid'
-import {BooleanInputField} from "./BooleanInputField";
-import {TextInputField} from "./TextInputField";
-import { Icon } from '@iconify-icon/solid';
+import {
+  batch,
+  createMemo,
+  createSignal,
+  For,
+  getOwner,
+  JSX,
+  JSXElement,
+  Match,
+  Show,
+  splitProps,
+  Switch
+} from "solid-js";
+import { Dynamic } from "solid-js/web";
+import { ulid } from "ulid";
+import { BooleanInputField } from "./BooleanInputField";
+import { TextInputField } from "./TextInputField";
+import { Icon } from "@iconify-icon/solid";
 
 
-import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider } from "@thisbeyond/solid-dnd";
-import {css} from "solid-styled-components";
-import {getDefaultValue} from "../../utils/form";
-import {SelectInputField} from "./SelectInputField";
-import {A, D} from "@mobily/ts-belt";
+import {
+  closestCenter,
+  createSortable,
+  DragDropProvider,
+  DragDropSensors,
+  DragEventHandler,
+  SortableProvider
+} from "@thisbeyond/solid-dnd";
+import { css } from "solid-styled-components";
+import { SelectInputField, setSelectionValue } from "./SelectInputField";
 import {
   FieldAttribute,
+  FormResult, Id,
   SelectField,
-  TableField,
+  ServerFormAttributeType, TableField,
   TableFieldAttributes,
-  FormMetaData,
-  FormResult,
-  ServerFormAttributeType, Vertex
+  Vertex
 } from "./Form";
-import {klona} from "klona";
-import {toTitle} from "case-switcher-js";
-import {DEBUG} from "../../utils/config";
+import { toTitle } from "case-switcher-js";
+import { DEBUG } from "../../utils/config";
 import usePopper from "solid-popper";
-import {JsonInput} from "./JsonInput";
+import { JsonInput } from "./JsonInput";
 import { TextAreaField } from "./TextAreaField";
 import { NumberInputField } from "./NumberInputField";
-const ModalInput = (props: {btnContent: JSXElement; children: JSXElement}) => {
+import {
+  addNewVertex, deleteVertex,
+  mergeVertexProperties,
+  newVertex
+} from "../../lib/Vertex";
+import { capitalizeFirstLetter } from "../utils";
+import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
+import { getNewGraphId, graph } from "../../lib/graph";
+import { bindOwner } from "solid-forms";
+import { TagField } from "./TagField";
+
+const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => {
   const [isVisible, setIsVisible] = createSignal(false);
   const [target, setTarget] = createSignal<HTMLDivElement>();
   const [popper, setPopper] = createSignal<HTMLDivElement>();
   usePopper(target, popper, {
-    placement: "bottom",
+    placement: "bottom"
   });
   return <>
     {/* @ts-ignore */}
@@ -49,45 +75,48 @@ const ModalInput = (props: {btnContent: JSXElement; children: JSXElement}) => {
 
 export interface TableInputFieldProps {
   txnId: number,
-  meta: SelectField
+  meta: TableField
   vertex: Vertex;
 
-  attributes: FieldAttribute[];
-  defaultValue: "undefined" | "default";
-  data: any[];
+  // attributes: FieldAttribute[];
+  // defaultValue: "undefined" | "default";
+  // data: any[];
   // defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
-  type?: string;
-  component?: Component<any>;
-  form?: FormMetaData[];
+  // type?: string;
+  // component?: Component<any>;
+  // form?: FormMetaData[];
   // postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
-
-  noSort?: boolean;
+  //
+  // noSort?: boolean;
 
 }
 
 function OverWriteableCell(props: {
+  txnId: number;
   meta: TableFieldAttributes;
-  defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
-  control: IFormGroup;
-  onClearOverWriteClick: () => void;
+  defaultValueFn: (joinVertex: Vertex, key: string) => JSXElement;
   onOverwriteClick: () => void;
   children?: JSX.Element;
+  joinVertex: Vertex;
 }) {
+  const clearValue = () => {
+    mergeVertexProperties(props.txnId, props.joinVertex.id, { [props.meta.id]: undefined });
+  };
   return (
-    <Switch>
-      <Match when={props.meta.noInput}>
-        <td
+   <Switch>
+     <Match when={props.meta.noInput}>
+       <td
+        class={css`
+          max-width: 100px;
+        `}
+       >
+         <div
           class={css`
-            max-width: 100px;
-          `}
-        >
-          <div
-            class={css`
               max-width: 100px;
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.control, props.meta.id)}
+           {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
           </div>
         </td>
       </Match>
@@ -103,7 +132,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.control, props.meta.id)}
+            {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
             {props.children}
           </div>
         </td>
@@ -125,14 +154,14 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.control, props.meta.id)}
+            {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
             <Show
-              when={props.control.controls[props.meta.id].value === undefined}
+              when={props.joinVertex.properties[props.meta.id].value === undefined}
               fallback={
                 <>
                   {props.children}
-                  <button type="button" onClick={props.onClearOverWriteClick}>
-                    <Icon icon="mdi:close-circle-outline"/>
+                  <button type="button" onClick={clearValue}>
+                    <Icon icon="mdi:close-circle-outline" />
                   </button>
                 </>
               }
@@ -148,179 +177,178 @@ function OverWriteableCell(props: {
   );
 }
 
-const tableAttributes = (attributes: FieldAttribute[]):FieldAttribute[]  => {
-  return [
-    // _id is important, used for sorting
-    {
-      id: "_id",
-      serverType: ServerFormAttributeType.String,
-      default: (formValues, control, id) => id || ulid(),
-      hidden: true
-    },
-    {id: "id", serverType: ServerFormAttributeType.String, default: (formValues, control, id) => id || ulid(), hidden: true},
-    {id: "start", serverType: ServerFormAttributeType.String, hidden: true},
-    {id: "end", serverType: ServerFormAttributeType.String, hidden: true},
-    {id: "type", serverType: ServerFormAttributeType.String, hidden: true},
-    {
-      id: "properties",
-      component: "Table",
-      attributes
-    },
-  ]
+function newRow(txnId: number, vertex: Vertex, attribute: TableField) {
+  const name = capitalizeFirstLetter(attribute.id);
+  const type = vertex.labels[0] + name;
+
+  const vertexNew = newVertex(getNewGraphId(), [name], {});
+  const insertVertex = addNewVertex(txnId, vertexNew);
+  if (insertVertex.error) {
+    alert(insertVertex.error);
+    return;
+  }
+
+  const edgeNew = newEdge(getNewGraphId(), type, {}, vertex.id, vertexNew.id);
+  const insertEdgeResult = addNewEdge(txnId, edgeNew);
+  if (insertEdgeResult.error) {
+    alert(insertEdgeResult.error);
+    return;
+  }
+  return edgeNew.id;
+}
+
+
+function getTableValue(vertex: Vertex, attribute: TableField) {
+  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
+  return (vertex.out_edges[type] || []);
 }
 
 export function TableInputField(props: TableInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["vertex", "attributes", "defaultValue", "formValues"]);
+  // const [p, customProps] = splitProps(props, ["vertex"]);
 
-  const [sortedIds, setSortedKeys] = createSignal([] as string[]);
+  const [sortedIds, setSortedKeys] = createSignal([] as number[]);
 
   const owner = getOwner();
 
-  function newRow(attributes: FieldAttribute[], obj?: { [key: string]: any }, id?: string) {
-    const groupConstructor = attributes.reduce((acc, meta) => {
-      runWithOwner(owner!, () => {
-        if (meta.component === "Table") {
-          acc[meta.id] = createFormArray([]);
-        }
-        if (meta.id === "properties") {
-          acc[meta.id] = newRow((meta as TableField).attributes, obj?.[meta.id], id);
-        } else {
-          if (meta.default) {
-            acc[meta.id] = createFormControl(obj?.[meta.id] === undefined ? meta.default(p.formValues, p.control, id) : obj[meta.id], meta.fieldOptions);
-          } else if (p.defaultValue === "undefined") {
-            acc[meta.id] = createFormControl(obj?.[meta.id], meta.fieldOptions);
-          } else if (p.defaultValue === "default") {
-            acc[meta.id] = createFormControl(getDefaultValue(meta.serverType!), meta.fieldOptions);
-          }
-        }
-      });
-      return acc;
-    }, {} as { [key: string]: IFormControl | ReturnType<typeof createFormArray> | IFormGroup });
-
-    return createFormGroup(groupConstructor);
-  }
-
-  const attributes = tableAttributes(p.attributes);
+  // todo check bindOwner and fix it
   const addNew = bindOwner(() => {
-    batch(function () {
-      const groupControl = newRow(attributes);
-      props.control.push(groupControl);
-      setSortedKeys((prev) => [...prev, groupControl.controls._id.value]);
+    batch(function() {
+      const edgeId = newRow(props.txnId, props.vertex, props.meta);
+      if (edgeId) {
+        setSortedKeys((prev) => [...prev, edgeId]);
+      }
     });
   });
 
-  if (props.data) {
-    const clonedData = props.data.map((att) => {
-      const value = D.selectKeys(att, attributes.map(attrMeta => attrMeta.id));
-      return newRow(attributes, klona(value), att.id);
-    });
-    // batch not work here:
-    runWithOwner(owner!, () => {
-      clonedData.forEach((attribute) => {
-        props.control.push(attribute);
-      });
-    });
-    setSortedKeys((props.control.controls as ReadonlyArray<IFormGroup>).map((a) => a.controls._id.value));
-  }
+  setSortedKeys(getTableValue(props.vertex, props.meta));
 
   // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { metaId: string }) => {
-    const sortable = createSortable(p.metaId);
+  const SortableRow = (p: { edgeId: Id }) => {
+    const sortable = createSortable(p.edgeId);
+    const edge = graph.edges[p.edgeId];
+    if (!edge) return "NO edge Found";
 
-    const control = createMemo(() => (props.control.controls as ReadonlyArray<IFormGroup>).find((control) => control.controls._id.value === p.metaId));
+    const vertex = graph.vertexes[edge.end];
 
-    const DisplayProperties = (p: { attributes: FieldAttribute[], control: IFormGroup }) => {
-      const setValue = (id: string, value: any) => {
-        props.controls[id].setValue(value);
+    const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
+      const setValue = (attribute: FieldAttribute, value: any) => {
+        mergeVertexProperties(props.txnId, vertex.id, { [attribute.id]: value });
       };
-      const clearControl = (id: string) => {
-        props.controls[id].setValue(undefined);
-      };
-      const clearSelectControl = (id: string) => {
-        props.controls[id].setValue(null);
-      };
+
       return <For each={p.attributes}>
         {(meta) => (
-          <Switch>
-            <Match when={meta.hidden}>
+         <Switch>
+           <Match when={meta.hidden}>
               <></>
             </Match>
-            <Match when={meta.id === "properties"}>
-              <DisplayProperties attributes={(meta as TableField).attributes} control={props.controls['properties'] as IFormGroup}/>
-            </Match>
-            <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
-              <OverWriteableCell
-                meta={meta}
-                defaultValueFn={props.defaultValueFn}
-                control={p.control}
-                onClearOverWriteClick={() => clearControl(meta.id)}
-                onOverwriteClick={() => setValue(meta.id, "")}
-              >
-                <TextInputField label="" control={props.controls[meta.id] as IFormControl} />
-              </OverWriteableCell>
+
+           <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === ServerFormAttributeType.String)}>
+             <OverWriteableCell
+              txnId={props.txnId}
+              joinVertex={vertex}
+              meta={meta}
+              defaultValueFn={props.defaultValueFn}
+              onOverwriteClick={() => setValue(meta, "")}
+             >
+               <TextInputField
+                label=""
+                // name=
+                value={vertex.properties[meta.id]}
+                setValue={(value) => setValue(meta, value)}
+               />
+             </OverWriteableCell>
             </Match>
             <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === ServerFormAttributeType.Integer || meta.serverType === ServerFormAttributeType.Float))}>
               <OverWriteableCell
-                meta={meta}
-                defaultValueFn={props.defaultValueFn}
-                control={p.control}
-                onClearOverWriteClick={() => clearControl(meta.id)}
-                onOverwriteClick={() => setValue(meta.id, "")}
+               txnId={props.txnId}
+               joinVertex={vertex}
+               meta={meta}
+               defaultValueFn={props.defaultValueFn}
+               onOverwriteClick={() => setValue(meta, "")}
               >
-                <NumberInputField label="" control={props.controls[meta.id] as IFormControl} />
+                <NumberInputField
+                 label=""
+                 value={vertex.properties[meta.id]}
+                 setValue={(value) => setValue(meta, value)}
+                />
               </OverWriteableCell>
             </Match>
             <Match when={meta.component === "Select"}>
               <OverWriteableCell
-                meta={meta}
-                defaultValueFn={props.defaultValueFn}
-                control={p.control}
-                onClearOverWriteClick={() => clearControl(meta.id)}
-                onOverwriteClick={() => clearSelectControl(meta.id)}
+               txnId={props.txnId}
+               joinVertex={vertex}
+               meta={meta}
+               defaultValueFn={props.defaultValueFn}
+               onOverwriteClick={() => setSelectionValue(props.txnId, vertex, meta, 0, 0)}
               >
                 <SelectInputField
-                  control={props.controls[meta.id] as IFormControl}
-                  displayExpr={(meta as SelectField).displayExpr}
-                  fetchOptions={async (inputValue: string) => (meta as SelectField).fetchOptions(props.formValues, p.control, inputValue)}
+                 txnId={props.txnId}
+                 vertex={vertex}
+                 meta={meta as SelectField}
+                 // name={props.form.id + meta.id}
+                />
+              </OverWriteableCell>
+            </Match>
+            <Match when={meta.component === "Tag"}>
+              <OverWriteableCell
+               txnId={props.txnId}
+               joinVertex={vertex}
+               meta={meta}
+               defaultValueFn={props.defaultValueFn}
+               onOverwriteClick={() => setSelectionValue(props.txnId, vertex, meta, 0, 0)}
+              >
+                <TagField
+                 txnId={props.txnId}
+                 vertex={vertex}
+                 meta={meta as SelectField}
+                 // name={props.form.id + meta.id}
                 />
               </OverWriteableCell>
             </Match>
             <Match when={meta.serverType === "Boolean"}>
               <OverWriteableCell
-                meta={meta}
-                defaultValueFn={props.defaultValueFn}
-                control={p.control}
-                onClearOverWriteClick={() => clearControl(meta.id)}
-                onOverwriteClick={() => setValue(meta.id, false)}
+               txnId={props.txnId}
+               joinVertex={vertex}
+               meta={meta}
+               defaultValueFn={props.defaultValueFn}
+               onOverwriteClick={() => setValue(meta, false)}
               >
-                <BooleanInputField control={props.controls[meta.id] as IFormControl}/>
+                <BooleanInputField value={vertex.properties[meta.id]}
+                                   setValue={(value) => setValue(meta, value)} />
               </OverWriteableCell>
             </Match>
             <Match when={meta.serverType === ServerFormAttributeType.Map || meta.component === "Json"}>
               <td>
                 <OverWriteableCell
-                  meta={meta}
-                  defaultValueFn={props.defaultValueFn}
-                  control={p.control}
-                  onClearOverWriteClick={() => clearControl(meta.id)}
-                  onOverwriteClick={() => setValue(meta.id, {})}
+                 txnId={props.txnId}
+                 joinVertex={vertex}
+                 meta={meta}
+                 defaultValueFn={props.defaultValueFn}
+                 onOverwriteClick={() => setValue(meta, {})}
                 >
-                  <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
-                    <JsonInput control={props.controls[meta.id] as IFormControl}/>
+                  <ModalInput btnContent={<Icon
+                   icon="material-symbols:edit-square-outline-sharp" />}>
+                    <JsonInput
+                     value={vertex.properties[meta.id]}
+                     setValue={(value) => setValue(meta, value)}
+                    />
                   </ModalInput>
                 </OverWriteableCell>
               </td>
             </Match>
             <Match when={meta.component === "JsCode"}>
               <OverWriteableCell
-                meta={meta}
-                defaultValueFn={props.defaultValueFn}
-                control={p.control}
-                onClearOverWriteClick={() => clearControl(meta.id)}
-                onOverwriteClick={() => setValue(meta.id, "")}
+               txnId={props.txnId}
+               joinVertex={vertex}
+               meta={meta}
+               defaultValueFn={props.defaultValueFn}
+               onOverwriteClick={() => setValue(meta, "")}
               >
                 <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
-                  <TextAreaField control={props.controls[meta.id] as IFormControl}/>
+                  <TextAreaField
+                   value={vertex.properties[meta.id]}
+                   setValue={(value) => setValue(meta, value)}
+                  />
                 </ModalInput>
               </OverWriteableCell>
             </Match>
@@ -328,44 +356,63 @@ export function TableInputField(props: TableInputFieldProps) {
         )}
       </For>
     }
+    const deleteRow = () => {
+      // delete all vertex in edges
+      const inEdges = vertex.in_edges;
+      for (const type in inEdges) {
+        for (const edgeId of inEdges[type]) {
+          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        }
+      }
+      // delete all outEdges of vertex
+      const outEdge = vertex.out_edges;
+      for (const type in outEdge) {
+        for (const edgeId of outEdge[type]) {
+          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        }
+      }
+
+      // delete vertex:
+      deleteVertex(props.txnId, vertex.id);
+    }
 
     return (
-      <Show when={control()}>
-        {/* @ts-ignore */}
         <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
           <td>{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
-          <DisplayProperties attributes={attributes} control={control()!}/>
+          <DisplayProperties attributes={props.meta.attributes}/>
           <td>
-            <button type="button" onclick={(_) => props.control.removeControl(control()!)} title="Delete Row">
+            <button type="button" onclick={deleteRow} title="Delete Row">
               <Icon icon="ion:close-circle-outline"/>
             </button>
           </td>
         </tr>
-      </Show>
     );
   };
-  const SortableRowForm = (p: { metaId: string }) => {
-    const sortable = createSortable(p.metaId);
+  const SortableRowForm = (p: { edgeId: Id }) => {
+    const sortable = createSortable(p.edgeId);
 
-    const control = createMemo(() => (props.control.controls as ReadonlyArray<IFormGroup>).find((control) => control.controls._id.value === p.metaId));
-    if(!control()) return <>Cant Find SortableRow Form</>
+    const edge = graph.edges[p.edgeId];
+    if (!edge) return "NO edge Found";
 
-    const setValue = (id: string, value: any) => {
-      control()!.controls[id].setValue(value);
+    const vertex = graph.vertexes[edge.end];
+
+    const setValue = (attribute: FieldAttribute, value: any) => {
+      mergeVertexProperties(props.txnId, vertex.id, { [attribute.id]: value });
     };
     const clearControl = (id: string) => {
-      control()!.controls[id].setValue(undefined);
+      mergeVertexProperties(props.txnId, vertex.id, { [id]: undefined });
     };
     const clearSelectControl = (id: string) => {
-      control()!.controls[id].setValue(null);
+
     };
 
     return (
-      <Show when={control()}>
-        {/* @ts-ignore */}
-        <div ref={el=>props.noSort ? undefined : sortable(el)} class="border rounded-2 border-gray-300 p-2"
+        <div ref={el=>props.meta.noSort ? undefined : sortable(el)} class="border rounded-2 border-gray-300 p-2"
              classList={{"opacity-25": sortable.isActiveDraggable}}>
-          <Dynamic component={props.component!} form={props.form!}
+          <Dynamic component={props.component!}
+                   form={props.form!}
                    postSubmit={(values: FormResult) => props.postSubmit?.(control()!, values)}
                    id={(control()!.controls['end'] as IFormControl).value}
                    txnId={props.txnId}
@@ -376,7 +423,6 @@ export function TableInputField(props: TableInputFieldProps) {
             </button>
           </div>
         </div>
-      </Show>
     );
   };
 
@@ -393,58 +439,44 @@ export function TableInputField(props: TableInputFieldProps) {
       if (fromIndex !== toIndex) {
         const updatedItems = currentItems.slice();
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
-        setSortedKeys(updatedItems);
         // runWithOwner(owner, () => {
         batch(() => {
-          // Cannot mutate a Store directly
-          // props.control.controls.splice(toIndex, 0, ...props.control.controls.splice(fromIndex, 1));
+          setSortedKeys(updatedItems);
           updatedItems.forEach((_id, index) => {
-            const control = (props.control.controls as ReadonlyArray<IFormGroup>).find((control) => control.controls._id.value === _id);
-            (control!.controls.properties as IFormGroup).controls.pos.setValue(index + 1);
+            const vertex = graph.edges[_id];
+            mergeVertexProperties(props.txnId, vertex.id, { pos: index + 1 });
           });
         });
-        // });
       }
     }
     setActiveDragItem(null);
   };
 
-  if (props.type === "form") {
+  if (props.meta.component === "TableForm") {
     return (
-      <div
-        classList={{
-          "is-invalid": !!props.errors,
-          "is-touched": props.isTouched,
-          "is-required": props.required,
-          "is-disabled": props.disabled,
-        }}
-      >
+      <div>
         <div>
           <div>
-            {/* @ts-ignore */}
-            <button type="button" design="Default" onclick={addNew}>Add New</button>
+            <button type="button" onclick={addNew}>Add New</button>
           </div>
           <div>
-            {/* @ts-ignore */}
             <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd}
                               collisionDetector={closestCenter}>
               <DragDropSensors/>
-              {/* @ts-ignore */}
               <SortableProvider ids={ids()}>
                 <div class="flex flex-col gap-2">
                   <For each={sortedIds()} fallback={<div>No Attributes</div>}>
-                    {(_id) => <SortableRowForm metaId={_id}/>}
+                    {(edgeId) => <SortableRowForm edgeId={edgeId}/>}
                   </For>
                 </div>
               </SortableProvider>
             </DragDropProvider>
           </div>
-          {DEBUG && JSON.stringify(props.control.value)}
         </div>
 
-        <Show when={props.errors}>
-          <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-        </Show>
+        {/*<Show when={props.errors}>*/}
+        {/*  <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+        {/*</Show>*/}
       </div>
     );
   }
@@ -452,9 +484,6 @@ export function TableInputField(props: TableInputFieldProps) {
   return (
     <div>
       <div>
-        {/* <SectionHeaderWithAction border-b={false}> */}
-        {/* <h3 >Layout Editor</h3> */}
-        {/* </SectionHeaderWithAction> */}
         <div>
           {/* @ts-ignore */}
           <button type="button" design="Default" onclick={addNew}>Add New</button>
@@ -473,7 +502,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <thead>
             <tr>
               <th></th>
-              <For each={props.attributes}>
+              <For each={props.meta.attributes}>
                 {(attribute) => (
                   <Show when={!attribute.hidden}>
                     <th>{toTitle(attribute.label || attribute.id)}</th>
@@ -484,26 +513,23 @@ export function TableInputField(props: TableInputFieldProps) {
             </tr>
             </thead>
             <tbody>
-            {/* @ts-ignore */}
             <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd}
                               collisionDetector={closestCenter}>
               <DragDropSensors/>
-              {/* @ts-ignore */}
               <SortableProvider ids={ids()}>
                 <For each={sortedIds()} fallback={<div>No Attributes</div>}>
-                  {(_id) => <SortableRow metaId={_id}/>}
+                  {(edgeId) => <SortableRow edgeId={edgeId} />}
                 </For>
               </SortableProvider>
             </DragDropProvider>
             </tbody>
-          </table>N
+          </table>
         </div>
-        {DEBUG && JSON.stringify(props.control.value)}
       </div>
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+      {/*<Show when={props.errors}>*/}
+      {/*  <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+      {/*</Show>*/}
     </div>
   );
 }
