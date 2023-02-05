@@ -4,7 +4,7 @@ import { TextArea, TextAreaProps } from "./core/TextArea";
 
 export interface TextInputField extends TextAreaProps {
  required?: boolean;
- errors: string[];
+ errors?: string[];
  setValue: (value: string) => void;
 }
 
