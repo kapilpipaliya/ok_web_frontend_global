@@ -11,7 +11,7 @@ import {
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
 import SchemaTable from "./core/schemaTable";
-import Page404 from "./errors/404";
+import Page404 from "./page/404";
 import { BackupRestore } from "./core/BackupRestore";
 // import { useDebugger } from "./core/SolidDebug";
 import {

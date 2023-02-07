@@ -9,7 +9,7 @@ import {
   Match,
   Show,
   splitProps,
-  Switch
+  Switch, useContext
 } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { ulid } from "ulid";
@@ -27,7 +27,7 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import { SelectInputField, setSelectionValue } from "./SelectInputField";
+import { SelectInputField, setSelectionValueOne } from "./SelectInputField";
 import {
   FieldAttribute,
   FormResult, Id,
@@ -49,9 +49,15 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { getNewGraphId, graph } from "../../lib/graph";
+import {
+  commitTransaction,
+  commitTxn,
+  getNewGraphId,
+  graph
+} from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { TagField } from "./TagField";
+import { WsContext } from "../ws_events_dispatcher";
 
 const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => {
   const [isVisible, setIsVisible] = createSignal(false);
@@ -77,6 +83,7 @@ export interface TableInputFieldProps {
   txnId: number,
   meta: TableField
   vertex: Vertex;
+  commit: boolean
 
   // attributes: FieldAttribute[];
   // defaultValue: "undefined" | "default";
@@ -98,6 +105,7 @@ function OverWriteableCell(props: {
   onOverwriteClick: () => void;
   children?: JSX.Element;
   joinVertex: Vertex;
+  commit: boolean
 }) {
   const clearValue = () => {
     mergeVertexProperties(props.txnId, props.joinVertex.id, { [props.meta.id]: undefined });
@@ -156,7 +164,7 @@ function OverWriteableCell(props: {
           >
             {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
             <Show
-              when={props.joinVertex.properties[props.meta.id].value === undefined}
+              when={props.joinVertex.properties[props.meta.id] === undefined}
               fallback={
                 <>
                   {props.children}
@@ -204,9 +212,11 @@ function getTableValue(vertex: Vertex, attribute: TableField) {
 }
 
 export function TableInputField(props: TableInputFieldProps) {
+  const { Ws } = useContext(WsContext);
+
   // const [p, customProps] = splitProps(props, ["vertex"]);
 
-  const [sortedIds, setSortedKeys] = createSignal([] as number[]);
+  const [sortedIds, setSortedIds] = createSignal([] as number[]);
 
   const owner = getOwner();
 
@@ -214,16 +224,18 @@ export function TableInputField(props: TableInputFieldProps) {
   const addNew = bindOwner(() => {
     batch(function() {
       const edgeId = newRow(props.txnId, props.vertex, props.meta);
+      if(props.commit) commitTxn(props.txnId, Ws);
       if (edgeId) {
-        setSortedKeys((prev) => [...prev, edgeId]);
+        setSortedIds((prev) => [...prev, edgeId]);
       }
     });
   });
 
-  setSortedKeys(getTableValue(props.vertex, props.meta));
-
+  setSortedIds(getTableValue(props.vertex, props.meta));
+console.log('table')
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { edgeId: Id }) => {
+    console.log('row')
     const sortable = createSortable(p.edgeId);
     const edge = graph.edges[p.edgeId];
     if (!edge) return "NO edge Found";
@@ -233,6 +245,7 @@ export function TableInputField(props: TableInputFieldProps) {
     const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
       const setValue = (attribute: FieldAttribute, value: any) => {
         mergeVertexProperties(props.txnId, vertex.id, { [attribute.id]: value });
+        if(props.commit) commitTxn(props.txnId, Ws);
       };
 
       return <For each={p.attributes}>
@@ -279,7 +292,7 @@ export function TableInputField(props: TableInputFieldProps) {
                joinVertex={vertex}
                meta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValue(props.txnId, vertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(props.txnId, vertex, meta, 0, 0)}
               >
                 <SelectInputField
                  txnId={props.txnId}
@@ -295,7 +308,7 @@ export function TableInputField(props: TableInputFieldProps) {
                joinVertex={vertex}
                meta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValue(props.txnId, vertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(props.txnId, vertex, meta, 0, 0)}
               >
                 <TagField
                  txnId={props.txnId}
@@ -376,6 +389,8 @@ export function TableInputField(props: TableInputFieldProps) {
 
       // delete vertex:
       deleteVertex(props.txnId, vertex.id);
+      setSortedIds(prev=>prev.filter(edgeId => edgeId !== p.edgeId))
+      if(props.commit) commitTxn(props.txnId, Ws);
     }
 
     return (
@@ -441,13 +456,14 @@ export function TableInputField(props: TableInputFieldProps) {
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
         // runWithOwner(owner, () => {
         batch(() => {
-          setSortedKeys(updatedItems);
+          setSortedIds(updatedItems);
           updatedItems.forEach((_id, index) => {
             const vertex = graph.edges[_id];
             mergeVertexProperties(props.txnId, vertex.id, { pos: index + 1 });
           });
         });
       }
+      if(props.commit) commitTxn(props.txnId, Ws);
     }
     setActiveDragItem(null);
   };
@@ -474,8 +490,8 @@ export function TableInputField(props: TableInputFieldProps) {
           </div>
         </div>
 
-        {/*<Show when={props.errors}>*/}
-        {/*  <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+        {/*<Show when={props.page}>*/}
+        {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
         {/*</Show>*/}
       </div>
     );
@@ -527,8 +543,8 @@ export function TableInputField(props: TableInputFieldProps) {
         </div>
       </div>
 
-      {/*<Show when={props.errors}>*/}
-      {/*  <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+      {/*<Show when={props.page}>*/}
+      {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
       {/*</Show>*/}
     </div>
   );

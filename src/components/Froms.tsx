@@ -69,7 +69,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     const attributeId = edgeFormLayoutItemAttribute.end;
     const vertexAttribute = graph.vertexes[attributeId];
     const collectionAttribute = collectionAttributeAndPropertiesMap[attributeId];
-    // get touched, dirty, submitted, errors, validators and set to fieldOptions
+    // get touched, dirty, submitted, page, validators and set to fieldOptions
     // pass other property to attributes
     // if props is string eval it else if its object use it
     const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));

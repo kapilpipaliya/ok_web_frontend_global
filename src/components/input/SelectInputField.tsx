@@ -1,8 +1,8 @@
-import { createEffect, createResource, splitProps } from "solid-js";
+import { createEffect, createResource, splitProps, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { FormMetaData, SelectField, Vertex } from "./Form";
-import { getNewGraphId, graph } from "../../lib/graph";
+import { FormMetaData, Id, SelectField, Vertex } from "./Form";
+import { commitTxn, getNewGraphId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { S } from "@mobily/ts-belt";
 import { path } from "rambda";
@@ -14,12 +14,14 @@ import {
 } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../utils";
 import { onChangeHandler } from "../core/dynamicForm";
+import { WsContext } from "../ws_events_dispatcher";
 
 export interface SelectInputFieldProps extends Properties {
   form: FormMetaData;
   txnId: number,
   meta: SelectField
   vertex: Vertex;
+  commit: boolean
 }
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string) {
   // TOOD: make input filter working:
@@ -52,7 +54,7 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
         const projection = S.removeAll(fromResult[3] || '', ":");
 
         const fromVertexId = vertex.properties[attribute];
-        const fromVertexIds = fromVertexId ? [fromVertexId] : getSelectedValue(vertex, attribute);
+        const fromVertexIds = fromVertexId ? [fromVertexId] : getSelectedVertexValue(vertex, attribute);
 
         const result = [] as Vertex[];
         for (const fromVertexId_ of fromVertexIds ) {
@@ -74,58 +76,59 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
     }
   }
 }
-
-// currently used vertexId, because it's not to use edge id
-export function getSelectedValue(vertex: Vertex, attributeId: string){
+export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
   const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
   return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
-
-  // if (attribute.component === "select" || attribute.component === "multi-select") {
-  //  return vertex.out_edges[type]
-  // } else if (attribute.component === "Table") {
-  //  return vertex.out_edges[type].map(edgeId => {
-  //   const firstEdge = graph.edges[edgeId];
-  //   const joinVertex = graph.vertexes[firstEdge.end];
-  //   const secondEdgeId = joinVertex.out_edges[type][0];
-  //   const secondEdge = graph.edges[secondEdgeId];
-  //   const newProperties = Object.assign({}, joinVertex.properties, {[attribute.id]: secondEdge.end})
-  //   return {id: joinVertex.id, properties: newProperties}
-  //  })
-  // } else if (attribute.component === "TableForm") {
-  //  return [];
-  // }
-  // return [];
 }
-export function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
+
+export function getSelectedValue(vertex: Vertex, attributeId: string){
+  const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
+  const edges = (vertex.out_edges[type] || [])
+  return [edges, edges.map(edgeId => graph.edges[edgeId].end)];
+}
+export function setSelectionValueOne(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  const previousEdge = vertex.out_edges[type] || [];
-  for (const edgeId of previousEdge) {
+  const previousEdges = vertex.out_edges[type] || [];
+  for (const edgeId of previousEdges) {
+    // if (value && edgeId === previousEdge) return;
+    // we should not delete edge that end to same vertex
+    const edge = graph.edges[edgeId];
+    if(edge.end === value) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId)
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
-  if (value) {
+  if (value && !(vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(value)) {
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, value));
     if(insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 
 }
 export function SelectInputField(props: SelectInputFieldProps) {
+  const { Ws } = useContext(WsContext);
+
   const [p, customProps] = splitProps(props, ["vertex"]);
-  // @ts-ignore
   const [selectOptions, {refetch}] = createResource(() => {
     return getSelectionOptions(props.vertex, props.meta.collection, "")
   });
+  // let edge: Id;
+  // let isChangedByUser = true;
   return (
     <div>
       <div ref={el => {
+        const selectedValue = getSelectedValue(props.vertex, props.meta.id);
+        // edge = selectedValue[1][0];
         const instance = new SelectBox(el, {
           ...customProps,
           searchEnabled: true,
-          value: getSelectedValue(props.vertex, props.meta.id)[0],
+          value: selectedValue[1][0],
           onValueChanged: function(e) {
-            setSelectionValue(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
-            onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
+            // batch(() => {
+            //   isChangedByUser = true;
+              setSelectionValueOne(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
+              onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
+              if(props.commit) commitTxn(props.txnId, Ws);
+            // })
           },
           required: props.meta.required,
           disabled: props.meta.disabled,
@@ -142,7 +145,15 @@ export function SelectInputField(props: SelectInputFieldProps) {
             instance.option(property, p[property]);
           }
         })
-        createEffect(()=>instance.option('value', getSelectedValue(props.vertex, props.meta.id)[0]))
+        createEffect(()=>{
+          // if (!isChangedByUser) {
+          const selectedValue = getSelectedValue(props.vertex, props.meta.id);
+          // edge = selectedValue[0][0];
+            instance.option('value', selectedValue[1][0])
+          // } else {
+          //   isChangedByUser = false;
+          // }
+        })
         // createEffect(()=>instance.option('required', props.required))
         // createEffect(()=>instance.option('disabled', props.disabled))
         createEffect(() => {
@@ -152,8 +163,8 @@ export function SelectInputField(props: SelectInputFieldProps) {
         })
       }} />
       {/* Todo: think about validations */}
-      {/*<Show when={props.errors}>*/}
-      {/*  <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+      {/*<Show when={props.page}>*/}
+      {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
       {/*</Show>*/}
     </div>
   );

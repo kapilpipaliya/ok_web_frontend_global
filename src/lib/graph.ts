@@ -89,6 +89,7 @@ export const getTransactionData = (txnId: number) => {
 }
 export let vertexOldIdToNewIdMap = new Map<Id, Id>();
 export let edgeOldIdToNewIdMap = new Map<Id, Id>();
+
 export const commitTransaction = (Ws: ServerEventsDispatcher) => {
  let firstReadyTxn = 0;
  // If any pending transaction exist don't send it.
@@ -105,6 +106,12 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
   if(existingTxnValue.length) {
    Ws.trigger([[['post', 'mutate', 0], [[firstReadyTxn,[...vertexOldIdToNewIdMap], [...edgeOldIdToNewIdMap], existingTxnValue]]]])
   }
+ }
+}
+export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
+ if (transactions.has(txnId)) {
+  transactions.get(txnId)!.status = ProcessStatus.Ready;
+  commitTransaction(Ws);
  }
 }
 // TODO: future plan: once committed current system should be able to revert and sync to server too.

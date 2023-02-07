@@ -4,7 +4,7 @@ import { batch } from "solid-js";
 import {
   FormMetaData,
   FormResult,
- Id
+  Id, Vertex
 } from "./input/Form";
 import { klona } from "klona/json";
 import { A, D } from "@mobily/ts-belt";
@@ -116,8 +116,8 @@ function saveFormLayoutTableDataToEdge(txnId: number, tableData: any[], results:
 }
 
 function tableOverwriteDefaultValueFn() {
-  return (control: IFormGroup, key: string) => {
-    const value = graph.vertexes[control.controls.attribute.value]?.["properties"]?.[key];
+  return (joinVertex: Vertex, key: string) => {
+    const value = graph.vertexes[joinVertex.properties.attribute]?.[key];
     if (typeof value === "boolean") {
       return value === true ? "true" : "false";
     } else if (key === "serverType") {
@@ -185,15 +185,15 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           { id: "readonly", serverType: "Boolean" },
           { id: "disabled", serverType: "Boolean" },
           // { id: "internal", type: "Boolean" },
-          { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-          { id: "onChange", component: "JsCode" },
-          { id: "props", component: "JsCode" },
-          {
-            id: "code",
-            component: "JsCode",
-            props: { placeholder: "write attributes for non base field" }
-          },
-          { id: "meta", component: "JsCode" }
+          // { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+          // { id: "onChange", component: "JsCode" },
+          // { id: "props", component: "JsCode" },
+          // {
+          //   id: "code",
+          //   component: "JsCode",
+          //   props: { placeholder: "write attributes for non base field" }
+          // },
+          // { id: "meta", component: "JsCode" }
         ],
       },
     "CollectionCategory": {
@@ -479,3 +479,4 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
       }]
   };
 
+window.a = AttributesTableData
