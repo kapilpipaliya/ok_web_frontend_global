@@ -1,5 +1,5 @@
 import {
-  batch,
+  batch, createEffect,
   createMemo,
   createSignal,
   For,
@@ -187,7 +187,7 @@ function newRow(txnId: number, vertex: Vertex, meta: TableField) {
   const name = capitalizeFirstLetter(meta.id);
   const type = vertex.labels[0] + name;
 
-  const vertexNew = newVertex(getNewGraphId(), [name], {});
+  const vertexNew = newVertex(getNewGraphId(), [type], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
     alert(insertVertex.error);
@@ -206,30 +206,28 @@ function newRow(txnId: number, vertex: Vertex, meta: TableField) {
 
 function getTableValue(vertex: Vertex, attribute: TableField) {
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  return (vertex.out_edges[type] || []);
+  return (vertex.out_edges[type] || []).map(edgeId => [edgeId, graph.vertexes[graph.edges[edgeId].end]] as [number, Vertex]).filter(tuple => tuple[1]).sort((tuple) => (tuple[1].properties.pos || 0) - (tuple[1].properties.pos || 0)).map(tuple => tuple[0]);
 }
 
 export function TableInputField(props: TableInputFieldProps) {
   const { Ws } = useContext(WsContext);
-
-  // const [p, customProps] = splitProps(props, ["vertex"]);
-
-  const [sortedIds, setSortedIds] = createSignal([] as number[]);
 
   const owner = getOwner();
 
   // todo check bindOwner and fix it
   const addNew = bindOwner(() => {
     batch(function() {
-      const edgeId = newRow(props.txnId, props.vertex, props.meta);
+      newRow(props.txnId, props.vertex, props.meta);
       if(props.commit) commitTxn(props.txnId, Ws);
-      if (edgeId) {
-        setSortedIds((prev) => [...prev, edgeId]);
-      }
     });
   });
 
-  setSortedIds(getTableValue(props.vertex, props.meta));
+  const [sortedIds, setSortedIds] = createSignal([] as number[]);
+
+  createEffect(() => {
+    setSortedIds(getTableValue(props.vertex, props.meta));
+  })
+
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { edgeId: Id }) => {
@@ -260,7 +258,6 @@ export function TableInputField(props: TableInputFieldProps) {
 
       // delete vertex:
       deleteVertex(props.txnId, joinVertex.id);
-      setSortedIds(prev=>prev.filter(edgeId => edgeId !== p.edgeId))
       if(props.commit) commitTxn(props.txnId, Ws);
     }
 
@@ -399,7 +396,7 @@ export function TableInputField(props: TableInputFieldProps) {
 
     return (
         <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
-          <td>{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</td>
+          <td>{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}{p.edgeId}</td>
           <DisplayProperties attributes={props.meta.attributes}/>
           <td>
             <button type="button" onclick={deleteRow} title="Delete Row">
@@ -460,7 +457,6 @@ export function TableInputField(props: TableInputFieldProps) {
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
         // runWithOwner(owner, () => {
         batch(() => {
-          setSortedIds(updatedItems);
           updatedItems.forEach((_id, index) => {
             const vertex = graph.edges[_id];
             mergeVertexProperties(props.txnId, vertex.id, { pos: index + 1 });
