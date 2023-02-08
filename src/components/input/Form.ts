@@ -1,9 +1,4 @@
-import {
-  createFormArray,
-  createFormControl, createFormGroup,
-  IFormControlOptions,
-  IFormGroup
-} from "solid-forms";
+
 import {JSX, JSXElement} from "solid-js";
 
 // Id is used as string because its used as object keys.
@@ -43,7 +38,6 @@ interface BaseField {
   required?: boolean;
   disabled?: boolean;
   default?: (formValues: IFormGroup, control: ReturnType<typeof createFormGroup> | ReturnType<typeof createFormArray>, id?: Id) => any;
-  fieldOptions?: IFormControlOptions;
   onchange?: string
   props?: {[key: string]: any}
 }

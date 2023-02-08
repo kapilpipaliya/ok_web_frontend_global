@@ -67,13 +67,11 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
     placement: "bottom"
   });
   return <>
-    {/* @ts-ignore */}
-    <button type="button" ref={setTarget} design="Default" onClick={()=>setIsVisible(true)}>{props.btnContent}</button>
+    <button type="button" ref={setTarget} onClick={()=>setIsVisible(true)}>{props.btnContent}</button>
     <Show when={isVisible()}>
       <div ref={setPopper}>
         {props.children}
-        {/* @ts-ignore */}
-        <button type="button" design="Default" onClick={()=>setIsVisible(false)}>Close</button>
+        <button type="button" onClick={()=>setIsVisible(false)}>Close</button>
       </div>
     </Show>
   </>
@@ -100,7 +98,7 @@ export interface TableInputFieldProps {
 
 function OverWriteableCell(props: {
   txnId: number;
-  meta: TableFieldAttributes;
+  cellMeta: TableFieldAttributes;
   defaultValueFn: (joinVertex: Vertex, key: string) => JSXElement;
   onOverwriteClick: () => void;
   children?: JSX.Element;
@@ -108,11 +106,11 @@ function OverWriteableCell(props: {
   commit: boolean
 }) {
   const clearValue = () => {
-    mergeVertexProperties(props.txnId, props.joinVertex.id, { [props.meta.id]: undefined });
+    mergeVertexProperties(props.txnId, props.joinVertex.id, { [props.cellMeta.id]: undefined });
   };
   return (
    <Switch>
-     <Match when={props.meta.noInput}>
+     <Match when={props.cellMeta.noInput}>
        <td
         class={css`
           max-width: 100px;
@@ -124,11 +122,11 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-           {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
+           {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
           </div>
         </td>
       </Match>
-      <Match when={props.meta.fieldOptions?.disabled}>
+      <Match when={props.cellMeta.disabled}>
         <td
           class={css`
             max-width: 100px;
@@ -140,12 +138,12 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
+            {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
             {props.children}
           </div>
         </td>
       </Match>
-      <Match when={props.meta.noOverWrite}>
+      <Match when={props.cellMeta.noOverWrite}>
         <td
           class={css`
             max-width: 100px;
@@ -154,7 +152,7 @@ function OverWriteableCell(props: {
           {props.children}
         </td>
       </Match>
-      <Match when={props.meta.id}>
+      <Match when={props.cellMeta.id}>
         <td>
           <div
             class={css`
@@ -162,9 +160,9 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.joinVertex, props.meta.id)}
+            {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
             <Show
-              when={props.joinVertex.properties[props.meta.id] === undefined}
+              when={props.joinVertex.properties[props.cellMeta.id] === undefined}
               fallback={
                 <>
                   {props.children}
@@ -185,8 +183,8 @@ function OverWriteableCell(props: {
   );
 }
 
-function newRow(txnId: number, vertex: Vertex, attribute: TableField) {
-  const name = capitalizeFirstLetter(attribute.id);
+function newRow(txnId: number, vertex: Vertex, meta: TableField) {
+  const name = capitalizeFirstLetter(meta.id);
   const type = vertex.labels[0] + name;
 
   const vertexNew = newVertex(getNewGraphId(), [name], {});
@@ -232,22 +230,47 @@ export function TableInputField(props: TableInputFieldProps) {
   });
 
   setSortedIds(getTableValue(props.vertex, props.meta));
-console.log('table')
+
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { edgeId: Id }) => {
-    console.log('row')
+
     const sortable = createSortable(p.edgeId);
     const edge = graph.edges[p.edgeId];
     if (!edge) return "NO edge Found";
 
-    const vertex = graph.vertexes[edge.end];
+    const joinVertex = graph.vertexes[edge.end];
+
+    const deleteRow = () => {
+      // delete all vertex in edges
+      const inEdges = joinVertex.in_edges;
+      for (const type in inEdges) {
+        for (const edgeId of inEdges[type]) {
+          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        }
+      }
+      // delete all outEdges of vertex
+      const outEdge = joinVertex.out_edges;
+      for (const type in outEdge) {
+        for (const edgeId of outEdge[type]) {
+          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        }
+      }
+
+      // delete vertex:
+      deleteVertex(props.txnId, joinVertex.id);
+      setSortedIds(prev=>prev.filter(edgeId => edgeId !== p.edgeId))
+      if(props.commit) commitTxn(props.txnId, Ws);
+    }
 
     const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
       const setValue = (attribute: FieldAttribute, value: any) => {
-        mergeVertexProperties(props.txnId, vertex.id, { [attribute.id]: value });
+        mergeVertexProperties(props.txnId, joinVertex.id, { [attribute.id]: value });
         if(props.commit) commitTxn(props.txnId, Ws);
       };
 
+      // TODO: Fix all setValue functions, it should set as undefined or null, make sure all components support null.
       return <For each={p.attributes}>
         {(meta) => (
          <Switch>
@@ -258,15 +281,15 @@ console.log('table')
            <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
              <OverWriteableCell
               txnId={props.txnId}
-              joinVertex={vertex}
-              meta={meta}
+              joinVertex={joinVertex}
+              cellMeta={meta}
               defaultValueFn={props.defaultValueFn}
               onOverwriteClick={() => setValue(meta, "")}
              >
                <TextInputField
                 label=""
                 // name=
-                value={vertex.properties[meta.id]}
+                value={joinVertex.properties[meta.id]}
                 setValue={(value) => setValue(meta, value)}
                />
              </OverWriteableCell>
@@ -274,14 +297,14 @@ console.log('table')
             <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
               <OverWriteableCell
                txnId={props.txnId}
-               joinVertex={vertex}
-               meta={meta}
+               joinVertex={joinVertex}
+               cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <NumberInputField
                  label=""
-                 value={vertex.properties[meta.id]}
+                 value={joinVertex.properties[meta.id]}
                  setValue={(value) => setValue(meta, value)}
                 />
               </OverWriteableCell>
@@ -289,44 +312,48 @@ console.log('table')
             <Match when={meta.component === "Select"}>
               <OverWriteableCell
                txnId={props.txnId}
-               joinVertex={vertex}
-               meta={meta}
+               joinVertex={joinVertex}
+               cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValueOne(props.txnId, vertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(props.txnId, joinVertex, meta, 0, 0)}
               >
                 <SelectInputField
                  txnId={props.txnId}
-                 vertex={vertex}
+                 vertex={joinVertex}
                  meta={meta as SelectField}
                  // name={props.form.id + meta.id}
+                 // form={props.form}
+                 commit={props.commit}
                 />
               </OverWriteableCell>
             </Match>
             <Match when={meta.component === "Tag"}>
               <OverWriteableCell
                txnId={props.txnId}
-               joinVertex={vertex}
-               meta={meta}
+               joinVertex={joinVertex}
+               cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValueOne(props.txnId, vertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(props.txnId, joinVertex, meta, 0, 0)}
               >
                 <TagField
                  txnId={props.txnId}
-                 vertex={vertex}
+                 vertex={joinVertex}
                  meta={meta as SelectField}
                  // name={props.form.id + meta.id}
+                 // form={props.form}
+                 commit={props.commit}
                 />
               </OverWriteableCell>
             </Match>
             <Match when={meta.serverType === "Boolean"}>
               <OverWriteableCell
                txnId={props.txnId}
-               joinVertex={vertex}
-               meta={meta}
+               joinVertex={joinVertex}
+               cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
                onOverwriteClick={() => setValue(meta, false)}
               >
-                <BooleanInputField value={vertex.properties[meta.id]}
+                <BooleanInputField value={joinVertex.properties[meta.id]}
                                    setValue={(value) => setValue(meta, value)} />
               </OverWriteableCell>
             </Match>
@@ -334,15 +361,15 @@ console.log('table')
               <td>
                 <OverWriteableCell
                  txnId={props.txnId}
-                 joinVertex={vertex}
-                 meta={meta}
+                 joinVertex={joinVertex}
+                 cellMeta={meta}
                  defaultValueFn={props.defaultValueFn}
                  onOverwriteClick={() => setValue(meta, {})}
                 >
                   <ModalInput btnContent={<Icon
                    icon="material-symbols:edit-square-outline-sharp" />}>
                     <JsonInput
-                     value={vertex.properties[meta.id]}
+                     value={joinVertex.properties[meta.id]}
                      setValue={(value) => setValue(meta, value)}
                     />
                   </ModalInput>
@@ -352,14 +379,14 @@ console.log('table')
             <Match when={meta.component === "JsCode"}>
               <OverWriteableCell
                txnId={props.txnId}
-               joinVertex={vertex}
-               meta={meta}
+               joinVertex={joinVertex}
+               cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
                   <TextAreaField
-                   value={vertex.properties[meta.id]}
+                   value={joinVertex.properties[meta.id]}
                    setValue={(value) => setValue(meta, value)}
                   />
                 </ModalInput>
@@ -368,29 +395,6 @@ console.log('table')
           </Switch>
         )}
       </For>
-    }
-    const deleteRow = () => {
-      // delete all vertex in edges
-      const inEdges = vertex.in_edges;
-      for (const type in inEdges) {
-        for (const edgeId of inEdges[type]) {
-          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
-          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-        }
-      }
-      // delete all outEdges of vertex
-      const outEdge = vertex.out_edges;
-      for (const type in outEdge) {
-        for (const edgeId of outEdge[type]) {
-          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
-          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-        }
-      }
-
-      // delete vertex:
-      deleteVertex(props.txnId, vertex.id);
-      setSortedIds(prev=>prev.filter(edgeId => edgeId !== p.edgeId))
-      if(props.commit) commitTxn(props.txnId, Ws);
     }
 
     return (
