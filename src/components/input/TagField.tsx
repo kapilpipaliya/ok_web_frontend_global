@@ -8,7 +8,7 @@ import {
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
 import { FormMetaData, Id, SelectField, Vertex } from "./Form";
-import { commitTxn, getNewGraphId, graph } from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { getSelectedValue, getSelectionOptions } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
@@ -16,10 +16,9 @@ import { onChangeHandler } from "../core/dynamicForm";
 
 export interface SelectInputFieldProps extends Properties {
   form: FormMetaData;
-  txnId: number,
   meta: SelectField
   vertex: Vertex;
-  commit: boolean
+  
 }
 function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
@@ -54,7 +53,7 @@ export function TagField(props: SelectInputFieldProps) {
     return getSelectionOptions(props.vertex, props.meta.collection, "")
   });
   let edge: Id[];
-  let isChangedByUser = true;
+  // let isChangedByUser = true;
   return (
     <div>
       <div ref={el => {
@@ -65,11 +64,12 @@ export function TagField(props: SelectInputFieldProps) {
           searchEnabled: true,
           value: selectedValue[1],
           onValueChanged: function(e) {
+            const txnId = getNewTxnId();
             // batch(() => {
             //   if(e.event) isChangedByUser = true;
-              setSelectionValue(props.txnId, props.vertex, props.meta, e.previousValue, edge, e.value);
-              onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
-              if (props.commit) commitTxn(props.txnId, Ws);
+              setSelectionValue(txnId, props.vertex, props.meta, e.previousValue, edge, e.value);
+              onChangeHandler(Ws, txnId, props.vertex, props.form, props.meta);
+              commitTxn(txnId, Ws);
             // })
           },
           // required: props.meta.required,

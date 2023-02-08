@@ -52,7 +52,7 @@ import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import {
   commitTransaction,
   commitTxn,
-  getNewGraphId,
+  getNewGraphId, getNewTxnId,
   graph
 } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
@@ -78,10 +78,9 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
 }
 
 export interface TableInputFieldProps {
-  txnId: number,
   meta: TableField
   vertex: Vertex;
-  commit: boolean
+  
 
   // attributes: FieldAttribute[];
   // defaultValue: "undefined" | "default";
@@ -97,16 +96,17 @@ export interface TableInputFieldProps {
 }
 
 function OverWriteableCell(props: {
-  txnId: number;
   cellMeta: TableFieldAttributes;
   defaultValueFn: (joinVertex: Vertex, key: string) => JSXElement;
   onOverwriteClick: () => void;
   children?: JSX.Element;
   joinVertex: Vertex;
-  commit: boolean
+  
 }) {
   const clearValue = () => {
-    mergeVertexProperties(props.txnId, props.joinVertex.id, { [props.cellMeta.id]: undefined });
+    const txnId = getNewTxnId();
+    mergeVertexProperties(txnId, props.joinVertex.id, { [props.cellMeta.id]: undefined });
+    commitTxn(txnId, Ws)
   };
   return (
    <Switch>
@@ -217,8 +217,9 @@ export function TableInputField(props: TableInputFieldProps) {
   // todo check bindOwner and fix it
   const addNew = bindOwner(() => {
     batch(function() {
-      newRow(props.txnId, props.vertex, props.meta);
-      if(props.commit) commitTxn(props.txnId, Ws);
+      const txnId = getNewTxnId();
+      newRow(txnId, props.vertex, props.meta);
+      commitTxn(txnId, Ws);
     });
   });
 
@@ -239,11 +240,12 @@ export function TableInputField(props: TableInputFieldProps) {
     const joinVertex = graph.vertexes[edge.end];
 
     const deleteRow = () => {
+      const txnId = getNewTxnId();
       // delete all vertex in edges
       const inEdges = joinVertex.in_edges;
       for (const type in inEdges) {
         for (const edgeId of inEdges[type]) {
-          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          const deleteEdgeResult = deleteEdge(txnId, edgeId)
           if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
         }
       }
@@ -251,20 +253,21 @@ export function TableInputField(props: TableInputFieldProps) {
       const outEdge = joinVertex.out_edges;
       for (const type in outEdge) {
         for (const edgeId of outEdge[type]) {
-          const deleteEdgeResult = deleteEdge(props.txnId, edgeId)
+          const deleteEdgeResult = deleteEdge(txnId, edgeId)
           if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
         }
       }
 
       // delete vertex:
-      deleteVertex(props.txnId, joinVertex.id);
-      if(props.commit) commitTxn(props.txnId, Ws);
+      deleteVertex(txnId, joinVertex.id);
+      commitTxn(txnId, Ws);
     }
 
     const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
       const setValue = (attribute: FieldAttribute, value: any) => {
-        mergeVertexProperties(props.txnId, joinVertex.id, { [attribute.id]: value });
-        if(props.commit) commitTxn(props.txnId, Ws);
+        const txnId = getNewTxnId();
+        mergeVertexProperties(txnId, joinVertex.id, { [attribute.id]: value });
+        commitTxn(txnId, Ws);
       };
 
       // TODO: Fix all setValue functions, it should set as undefined or null, make sure all components support null.
@@ -277,7 +280,7 @@ export function TableInputField(props: TableInputFieldProps) {
 
            <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
              <OverWriteableCell
-              txnId={props.txnId}
+              
               joinVertex={joinVertex}
               cellMeta={meta}
               defaultValueFn={props.defaultValueFn}
@@ -293,7 +296,7 @@ export function TableInputField(props: TableInputFieldProps) {
             </Match>
             <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
               <OverWriteableCell
-               txnId={props.txnId}
+               
                joinVertex={joinVertex}
                cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
@@ -308,43 +311,43 @@ export function TableInputField(props: TableInputFieldProps) {
             </Match>
             <Match when={meta.component === "Select"}>
               <OverWriteableCell
-               txnId={props.txnId}
+               
                joinVertex={joinVertex}
                cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValueOne(props.txnId, joinVertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <SelectInputField
-                 txnId={props.txnId}
+                 
                  vertex={joinVertex}
                  meta={meta as SelectField}
                  // name={props.form.id + meta.id}
                  // form={props.form}
-                 commit={props.commit}
+                 
                 />
               </OverWriteableCell>
             </Match>
             <Match when={meta.component === "Tag"}>
               <OverWriteableCell
-               txnId={props.txnId}
+               
                joinVertex={joinVertex}
                cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
-               onOverwriteClick={() => setSelectionValueOne(props.txnId, joinVertex, meta, 0, 0)}
+               onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <TagField
-                 txnId={props.txnId}
+                 
                  vertex={joinVertex}
                  meta={meta as SelectField}
                  // name={props.form.id + meta.id}
                  // form={props.form}
-                 commit={props.commit}
+                 
                 />
               </OverWriteableCell>
             </Match>
             <Match when={meta.serverType === "Boolean"}>
               <OverWriteableCell
-               txnId={props.txnId}
+               
                joinVertex={joinVertex}
                cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
@@ -357,7 +360,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <Match when={meta.serverType === DataType.Map || meta.component === "Json"}>
               <td>
                 <OverWriteableCell
-                 txnId={props.txnId}
+                 
                  joinVertex={joinVertex}
                  cellMeta={meta}
                  defaultValueFn={props.defaultValueFn}
@@ -375,7 +378,7 @@ export function TableInputField(props: TableInputFieldProps) {
             </Match>
             <Match when={meta.component === "JsCode"}>
               <OverWriteableCell
-               txnId={props.txnId}
+               
                joinVertex={joinVertex}
                cellMeta={meta}
                defaultValueFn={props.defaultValueFn}
@@ -415,10 +418,14 @@ export function TableInputField(props: TableInputFieldProps) {
     const vertex = graph.vertexes[edge.end];
 
     const setValue = (attribute: FieldAttribute, value: any) => {
-      mergeVertexProperties(props.txnId, vertex.id, { [attribute.id]: value });
+      const txnId = getNewTxnId();
+      mergeVertexProperties(txnId, vertex.id, { [attribute.id]: value });
+      commitTxn(txnId, Ws)
     };
     const clearControl = (id: string) => {
-      mergeVertexProperties(props.txnId, vertex.id, { [id]: undefined });
+      const txnId = getNewTxnId();
+      mergeVertexProperties(txnId, vertex.id, { [id]: undefined });
+      commitTxn(txnId, Ws)
     };
     const clearSelectControl = (id: string) => {
 
@@ -431,7 +438,7 @@ export function TableInputField(props: TableInputFieldProps) {
                    form={props.form!}
                    postSubmit={(values: FormResult) => props.postSubmit?.(control()!, values)}
                    id={(control()!.controls['end'] as IFormControl).value}
-                   txnId={props.txnId}
+                   
           />
           <div>
             <button type="button" onclick={(_) => props.control.removeControl(control()!)} title="Delete Row">
@@ -452,6 +459,7 @@ export function TableInputField(props: TableInputFieldProps) {
       const currentItems = ids();
       const fromIndex = currentItems.indexOf(draggable.id as string);
       const toIndex = currentItems.indexOf(droppable.id as string);
+      const txnId = getNewTxnId();
       if (fromIndex !== toIndex) {
         const updatedItems = currentItems.slice();
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
@@ -459,11 +467,11 @@ export function TableInputField(props: TableInputFieldProps) {
         batch(() => {
           updatedItems.forEach((_id, index) => {
             const vertex = graph.edges[_id];
-            mergeVertexProperties(props.txnId, vertex.id, { pos: index + 1 });
+            mergeVertexProperties(txnId, vertex.id, { pos: index + 1 });
           });
         });
       }
-      if(props.commit) commitTxn(props.txnId, Ws);
+      commitTxn(txnId, Ws);
     }
     setActiveDragItem(null);
   };
