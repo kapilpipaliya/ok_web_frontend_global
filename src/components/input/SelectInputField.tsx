@@ -17,7 +17,8 @@ import { onChangeHandler } from "../core/dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 
 export interface SelectInputFieldProps extends Properties {
-  form: FormMetaData;
+  // TODO: MAKE THIS COMPULSORY
+  form?: FormMetaData;
   txnId: number,
   meta: SelectField
   vertex: Vertex;
@@ -126,7 +127,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
             // batch(() => {
             //   isChangedByUser = true;
               setSelectionValueOne(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
-              onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
+              props.form && onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
               if(props.commit) commitTxn(props.txnId, Ws);
             // })
           },

@@ -222,7 +222,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           { id: "description", component: "TextArea" },
           {
             id: "CollectionHasAttribute",
-            title: "Collection2",
+            label: "Collection2",
             component: "Table",
             edge: "CollectionHasAttribute",
             defaultValue: "undefined",
@@ -242,18 +242,11 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             // defaultValueFn: tableOverwriteDefaultValueFn(),
             attributes: [
               {
-                id: "pos",
-                serverType: "Integer",
-                // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                hidden: true
-              },
-              {
                 id: "attribute",
                 component: "Select",
                 collection: "Attribute",
                 displayExpr: "properties.id",
                 noOverWrite: true,
-                // default: (formValues, control, id: string) => id && graph.edges[id].end,
               },
 
               { id: "id", serverType: "String" },
@@ -264,7 +257,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 collection: "DataType",
                 displayExpr: "properties.id",
                 noInput: true,
-                fieldOptions: { disabled: true },
+                disabled: true,
               },
               {
                 id: "component",

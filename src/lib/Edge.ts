@@ -29,7 +29,7 @@ export function addNewEdge(txnId: number, edge: Edge): {error: string | boolean,
   return {error: 'Edge ID already exist while adding new edge'}
  }
  if(!graph.vertexes[edge.start]) {
-  return {error: 'Edge Start Vertex not exist while adding new edge'}
+  return {error: `Edge Start Vertex ${edge.start} not exist while adding new edge`}
  }
  if(!graph.vertexes[edge.end]) {
   return {error: 'Edge End Vertex not exist while adding new edge'}
