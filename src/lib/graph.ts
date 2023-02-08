@@ -18,6 +18,7 @@ let uniqueId = 50000;
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export const [graph, setGraph] = createStore({
  _isPartialSynced: false,
+  tmpVertexes: {} as VertexMap,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },

@@ -1,8 +1,8 @@
 import { createEffect, createResource, splitProps, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { FormMetaData, Id, SelectField, Vertex } from "./Form";
-import { commitTxn, getNewGraphId, graph } from "../../lib/graph";
+import { FormMetaData, SelectField, Vertex } from "./Form";
+import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { S } from "@mobily/ts-belt";
 import { path } from "rambda";
@@ -14,15 +14,14 @@ import {
 } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../utils";
 import { onChangeHandler } from "../core/dynamicForm";
-import { WsContext } from "../ws_events_dispatcher";
+import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 
 export interface SelectInputFieldProps extends Properties {
   // TODO: MAKE THIS COMPULSORY
   form?: FormMetaData;
-  txnId: number,
   meta: SelectField
   vertex: Vertex;
-  commit: boolean
+  
 }
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string) {
   // TOOD: make input filter working:
@@ -87,7 +86,8 @@ export function getSelectedValue(vertex: Vertex, attributeId: string){
   const edges = (vertex.out_edges[type] || [])
   return [edges, edges.map(edgeId => graph.edges[edgeId].end)];
 }
-export function setSelectionValueOne(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
+export function setSelectionValueOne(Ws: ServerEventsDispatcher, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
+  const txnId = getNewTxnId();
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
   const previousEdges = vertex.out_edges[type] || [];
   for (const edgeId of previousEdges) {
@@ -103,7 +103,7 @@ export function setSelectionValueOne(txnId: number, vertex: Vertex, attribute: {
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, value));
     if(insertEdgeResult.error) alert(insertEdgeResult.error);
   }
-
+  commitTxn(txnId, Ws)
 }
 export function SelectInputField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
@@ -126,9 +126,10 @@ export function SelectInputField(props: SelectInputFieldProps) {
           onValueChanged: function(e) {
             // batch(() => {
             //   isChangedByUser = true;
-              setSelectionValueOne(props.txnId, props.vertex, props.meta, e.previousValue, e.value);
-              props.form && onChangeHandler(props.txnId, props.vertex, props.form, props.meta);
-              if(props.commit) commitTxn(props.txnId, Ws);
+              setSelectionValueOne(Ws, props.vertex, props.meta, e.previousValue, e.value);
+              const txnId = getNewTxnId();
+              props.form && onChangeHandler(txnId, props.vertex, props.form, props.meta);
+              commitTxn(txnId, Ws);
             // })
           },
           required: props.meta.required,
