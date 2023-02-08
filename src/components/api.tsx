@@ -221,10 +221,9 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           },
           { id: "description", component: "TextArea" },
           {
-            id: "CollectionHasAttribute",
-            label: "Collection2",
+            id: "Attribute",
+            label: "Collection",
             component: "Table",
-            edge: "CollectionHasAttribute",
             defaultValue: "undefined",
             // save: ["edge", "CollectionHasAttribute"],
             // data: (mainId) => {
