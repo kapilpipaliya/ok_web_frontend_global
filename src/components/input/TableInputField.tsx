@@ -27,7 +27,11 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import { SelectInputField, setSelectionValueOne } from "./SelectInputField";
+import {
+  getSelectedValue, getSelectedVertexValue,
+  SelectInputField,
+  setSelectionValueOne
+} from "./SelectInputField";
 import {
   FieldAttribute,
   FormResult, Id,
@@ -80,19 +84,12 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
 export interface TableInputFieldProps {
   meta: TableField
   vertex: Vertex;
-  
-
   // attributes: FieldAttribute[];
-  // defaultValue: "undefined" | "default";
-  // data: any[];
-  // defaultValueFn: (control: IFormGroup, key: string) => JSXElement;
   // type?: string;
   // component?: Component<any>;
   // form?: FormMetaData[];
   // postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
-  //
   // noSort?: boolean;
-
 }
 
 function OverWriteableCell(props: {
@@ -103,9 +100,10 @@ function OverWriteableCell(props: {
   joinVertex: Vertex;
   
 }) {
+  const { Ws } = useContext(WsContext);
   const clearValue = () => {
     const txnId = getNewTxnId();
-    mergeVertexProperties(txnId, props.joinVertex.id, { [props.cellMeta.id]: undefined });
+    mergeVertexProperties(txnId, props.joinVertex.id, { [props.cellMeta.id]: null });
     commitTxn(txnId, Ws)
   };
   return (
@@ -162,7 +160,7 @@ function OverWriteableCell(props: {
           >
             {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
             <Show
-              when={props.joinVertex.properties[props.cellMeta.id] === undefined}
+              when={props.joinVertex.properties[props.cellMeta.id] === undefined || props.joinVertex.properties[props.cellMeta.id] === null}
               fallback={
                 <>
                   {props.children}
@@ -263,6 +261,34 @@ export function TableInputField(props: TableInputFieldProps) {
       commitTxn(txnId, Ws);
     }
 
+    const getSelectValueofVertex = (fromVertex: Vertex, key: string, key2: string) => {
+      const vertexId = getSelectedVertexValue(fromVertex,key)?.[0];
+      if (vertexId) {
+        const vertex = graph.vertexes[vertexId];
+        const value = vertex?.properties?.[key2];
+        if (typeof value === "boolean") {
+          return value === true ? "true" : "false";
+        }
+        return value;
+      }
+    }
+    const defaultValue = (pattern?: string) => (fromVertex: Vertex) =>  {
+      if(!pattern) return;
+      const result = pattern.split('->');
+      if(result.length === 2) {
+        return getSelectValueofVertex(fromVertex, result[0],result[1])
+      }
+      if(result.length === 3) {
+        const vertexId = getSelectedVertexValue(fromVertex,result[0])?.[0];
+        if (vertexId) {
+          const vertex = graph.vertexes[vertexId];
+          if (vertex) {
+            return getSelectValueofVertex(vertex, result[1],result[2])
+          }
+        }
+      }
+    }
+
     const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
       const setValue = (attribute: FieldAttribute, value: any) => {
         const txnId = getNewTxnId();
@@ -283,7 +309,7 @@ export function TableInputField(props: TableInputFieldProps) {
               
               joinVertex={joinVertex}
               cellMeta={meta}
-              defaultValueFn={props.defaultValueFn}
+              defaultValueFn={defaultValue(meta.defaultValue)}
               onOverwriteClick={() => setValue(meta, "")}
              >
                <TextInputField
@@ -299,7 +325,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={props.defaultValueFn}
+               defaultValueFn={defaultValue(meta.defaultValue)}
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <NumberInputField
@@ -314,7 +340,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={props.defaultValueFn}
+               defaultValueFn={defaultValue(meta.defaultValue)}
                onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <SelectInputField
@@ -332,7 +358,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={props.defaultValueFn}
+               defaultValueFn={defaultValue(meta.defaultValue)}
                onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <TagField
@@ -350,7 +376,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={props.defaultValueFn}
+               defaultValueFn={defaultValue(meta.defaultValue)}
                onOverwriteClick={() => setValue(meta, false)}
               >
                 <BooleanInputField value={joinVertex.properties[meta.id]}
@@ -363,7 +389,7 @@ export function TableInputField(props: TableInputFieldProps) {
                  
                  joinVertex={joinVertex}
                  cellMeta={meta}
-                 defaultValueFn={props.defaultValueFn}
+                 defaultValueFn={defaultValue(meta.defaultValue)}
                  onOverwriteClick={() => setValue(meta, {})}
                 >
                   <ModalInput btnContent={<Icon
@@ -381,7 +407,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={props.defaultValueFn}
+               defaultValueFn={defaultValue(meta.defaultValue)}
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
@@ -424,7 +450,7 @@ export function TableInputField(props: TableInputFieldProps) {
     };
     const clearControl = (id: string) => {
       const txnId = getNewTxnId();
-      mergeVertexProperties(txnId, vertex.id, { [id]: undefined });
+      mergeVertexProperties(txnId, vertex.id, { [id]: null });
       commitTxn(txnId, Ws)
     };
     const clearSelectControl = (id: string) => {

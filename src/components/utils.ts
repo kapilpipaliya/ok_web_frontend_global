@@ -27,7 +27,6 @@ import {
  replaceEdgeStart,
  updateEdgeId
 } from "../lib/Edge";
-import { saveTableDataToEdge } from "./api";
 
 export function convertToJS(jsString: string) {
  if (jsString === "" || jsString === null) {
@@ -89,8 +88,6 @@ const doEval = (code: string) => {
  deleteEdge
  updateEdgeId
  getOutEdgeIdsOfType
-
- saveTableDataToEdge
 
  // ----------------------------------------------------------------------------------------------------------------------
 
