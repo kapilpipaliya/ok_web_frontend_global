@@ -137,6 +137,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "Select",
                 collection: "Collection",
                 displayExpr: "properties.id",
+               noOverWrite: true,
               },
               {
                 id: "type",

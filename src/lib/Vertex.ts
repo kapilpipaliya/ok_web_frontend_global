@@ -43,7 +43,7 @@ export function replaceVertexProperties(txnId: number, vertexId: Id, properties:
 export function mergeVertexProperties(txnId: number, vertexId: Id, properties: {}): {error: string | boolean, txnDetailIndex?: number} {
  const vertex = graph.vertexes[vertexId];
  if(!vertex) {
-  return {error: "Vertex ID is not valid"};
+  return {error:   `Vertex ID is not valid ${vertexId}`};
  }
  const originalProperties = {} as {[key: string]: any};
  for (const property in properties) {
