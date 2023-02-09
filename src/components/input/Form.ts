@@ -37,16 +37,15 @@ interface BaseField {
   readonly ?: boolean;
   required?: boolean;
   disabled?: boolean;
-  default?: (formValues: IFormGroup, control: ReturnType<typeof createFormGroup> | ReturnType<typeof createFormArray>, id?: Id) => any;
   onchange?: string
   props?: {[key: string]: any}
+  defaultValue?: string;
 }
 
 export interface SelectField extends BaseField {
   component: 'Select' | 'Tag';
   collection: number | string;
   displayExpr: string;
-  fetchOptions: (formValues: IFormGroup, formGroup: IFormGroup, inputValue: string) => Promise<any[]>;
 }
 
 export interface TableFieldAttributeBase {
@@ -62,7 +61,7 @@ export interface TableField extends BaseField {
   form?: string;
   postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes: TableFieldAttributes[];
-  defaultValue: "undefined" | 'default';
+
   data: {properties: {}}[]; // Edges[]
   defaultValueFn: (control: IFormGroup, key: string)=>JSXElement;
   save: (txnId: number, results: FormResult, tableData: any[]) => any;
@@ -82,7 +81,6 @@ export interface ButtonGroupField extends BaseField {
 export type FieldAttribute = BaseField | SelectField | TableField | ButtonGroupField
 
 export interface FormMetaData {
-  id: string;
   title: string;
   attributes: FieldAttribute[];
   label: string;
