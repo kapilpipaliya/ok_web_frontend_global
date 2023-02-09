@@ -204,7 +204,7 @@ function newRow(txnId: number, vertex: Vertex, meta: TableField) {
 
 function getTableValue(vertex: Vertex, attribute: TableField) {
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  return (vertex.out_edges[type] || []).map(edgeId => [edgeId, graph.vertexes[graph.edges[edgeId].end]] as [number, Vertex]).filter(tuple => tuple[1]).sort((tuple) => (tuple[1].properties.pos || 0) - (tuple[1].properties.pos || 0)).map(tuple => tuple[0]);
+  return (vertex.out_edges[type] || []).map(edgeId => [edgeId, graph.vertexes[graph.edges[edgeId].end]] as [number, Vertex]).filter(tuple => tuple[1]).sort((tuple1, tuple2) => (tuple1[1].properties.pos || 0) - (tuple2[1].properties.pos || 0)).map(tuple => tuple[0]);
 }
 
 export function TableInputField(props: TableInputFieldProps) {
@@ -492,8 +492,9 @@ export function TableInputField(props: TableInputFieldProps) {
         // runWithOwner(owner, () => {
         batch(() => {
           updatedItems.forEach((_id, index) => {
-            const vertex = graph.edges[_id];
-            mergeVertexProperties(txnId, vertex.id, { pos: index + 1 });
+            const vertexId = graph.edges[_id].end;
+            const {error} = mergeVertexProperties(txnId, vertexId, { pos: index + 1 });
+            if(error) alert(error)
           });
         });
       }
