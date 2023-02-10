@@ -73,8 +73,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
 
    // TODO: Collection has only one attribute. Add validation for that.
     "Collection":{
-
-        title: "Collection1",
+        title: "Collection",
         label: "Collection",
         attributes: [
           { id: "id", serverType: "String" },
@@ -97,7 +96,20 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 displayExpr: "properties.id",
                 noOverWrite: true,
               },
-
+             {
+              id: "tab",
+              component: "Select",
+              collection: "Attribute",
+              displayExpr: "properties.id",
+              noOverWrite: true,
+             },
+             {
+              id: "attribute",
+              component: "Select",
+              collection: "Attribute",
+              displayExpr: "properties.id",
+              noOverWrite: true,
+             },
               { id: "id", serverType: "String" },
               {
                 id: "serverType",
@@ -144,104 +156,39 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "TextInput"
               }
             ]
-          }
+          },
+          {
+            id: "Tab",
+            component: "Table",
+
+            attributes: [
+              {
+                id: "type",
+                component: "TextInput"
+              },
+             {
+              id: "label",
+              component: "TextInput"
+             }
+            ]
+          },
+         {
+          id: "Group",
+          component: "Table",
+
+          attributes: [
+           {
+            id: "type",
+            component: "TextInput"
+           },
+           {
+            id: "label",
+            component: "TextInput"
+           }
+          ]
+         }
         ]
       },
-    "FormLayoutItem": {
-         title: "FormLayoutItem", label: "FormLayoutItem", attributes: [
-          { id: "id", serverType: "String" },
-          // TODO: make title required
-          { id: "title", serverType: "String" },
-          { id: "description", component: "TextArea" },
-          { id: "component", serverType: "String" },
-          {
-            id: "labelType",
-            component: "Select",
-            displayExpr: "id",
-            collection: '[{"id":"vertex"},{"id":"edge"}]'
-          },
-          { id: "labelName", component: "Select",
-          collection: "Collection",
-             displayExpr: "properties.id", },
-          { id: "meta", component: "JsCode", props: { placeholder: "({})" } },
-          // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
-        {
-          id: "1",
-          title: "",
-          label: "",
-          // save: ["edge", "FormLayoutItemHasCollection", (results)=>results.get('0')?.id, (results, formValue)=>formValue['collection']],
-          // data: (id)=>{
-          //   if(id){
-          //     const formVertex = graph.vertexes[id];
-          //     const collectionEdges = formVertex.out_edges["FormLayoutItemHasCollection"]
-          //     if(collectionEdges && collectionEdges[0]) {
-          //       const edge = graph.edges[collectionEdges[0]];
-          //       return {...edge, properties: {collection: edge.end}}
-          //     } else {
-          //       return {properties: {}}
-          //     }
-          //   }
-          // },
-          attributes: [
-            {
-              id: "collection",
-              component: "Select",
-              collection: "Collection",
-              displayExpr: "properties.id"
-            }
-          ],
-        },
-        {
-          id: "2", title: "Attributes",
-          component: 'Table', edge: "FormLayoutItemHasAttribute",
-          // defaultValueFn: tableOverwriteDefaultValueFn(),
-          attributes: [
-            {
-              id: "pos",
-              serverType: "Integer",
-              // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-              hidden: true
-            },
-            {
-              id: "attribute",
-              component: "Select",
-              displayExpr: "properties.id",
-              // default: (formValues, control, id: string) => id && graph.edges[id].end,
-              collection: "(1:collection)->[CollectionHasAttribute]",
-            },
-
-            { id: "id", serverType: "String" },
-            // { id: "selector", type: "String"},
-            {
-              id: "serverType",
-              component: "Select",
-              collection: "DataType",
-              displayExpr: "properties.id",
-              noInput: true,
-              disabled: true,
-            },
-            {
-              id: "component",
-              component: "Select",
-              displayExpr: "properties.id",
-              collection: "(attribute:properties.serverType)->[DataTypeComponent]",
-            },
-            { id: "label", serverType: "String" },
-            // { id: "internal", type: "Boolean" },
-            { id: "unique", serverType: "Boolean" },
-            { id: "required", serverType: "Boolean" },
-            { id: "readonly", serverType: "Boolean" },
-            { id: "disabled", serverType: "Boolean" },
-            { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-            { id: "onChange", component: 'JsCode' },
-            { id: "props", component: 'JsCode' },
-            { id: "code", component: 'JsCode' },
-            { id: "meta", component: 'JsCode' },
-          ],
-        }
-        ],
-      },
-
 
     "FormLayout": {
          title: "FormLayout1", label: "FormLayout", attributes: [
@@ -251,32 +198,52 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           { id: "meta", component: "JsCode" },
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
-          {
-            id: "FormLayoutHasItem",
-            title: "Forms",
-            component: 'TableForm', form: "FormLayoutItem",
-            edge: "FormLayoutHasItem",
-            // data: (mainId) => {
-            //   const AttributeEdges = getOutEdgeIdsOfType(mainId, "FormLayoutHasItem").map(edge => graph.edges[edge]).sort((a, b) => a.properties.pos - b.properties.pos);
-            //   return {properties: {FormLayoutItem: AttributeEdges.map(edge=>({...edge, properties: {...edge.properties}, _id: edge.id}))}}
-            // },
-            noSort: true,
-            // save: (txnId, results, tableData)=> {
-            //   const edge = "FormLayoutHasItem";
-            //   return saveFormLayoutTableDataToEdge(txnId, tableData, results, edge);
-            // },
-            // postSubmit: (formValues, formGroup, tableItemFormGroup, values)=>{
-            //   tableItemFormGroup.controls["end"].setValue(values.get("0").id);
-            // },
-            attributes: [
-              {
-                id: "pos",
-                serverType: "Integer",
-                // default: (formValues, control) => (control as ReturnType<typeof createFormArray>).controls.length + 1,
-                hidden: true
-              }
-            ]
-          }
+      { id: "labelName",
+       component: "Select",
+       collection: "Collection",
+       displayExpr: "properties.id", },
+      // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
+
+      {
+       id: "Attribute",
+       label: "Attributes",
+       component: 'Table',
+       attributes: [
+        {
+         id: "attribute",
+         component: "Select",
+         displayExpr: "properties.id",
+         // default: (formValues, control, id: string) => id && graph.edges[id].end,
+         collection: "(1:collection)->[CollectionHasAttribute]",
+        },
+
+        { id: "id", serverType: "String" },
+        {
+         id: "serverType",
+         component: "Select",
+         collection: "DataType",
+         displayExpr: "properties.id",
+         noInput: true,
+         disabled: true,
+        },
+        {
+         id: "component",
+         component: "Select",
+         displayExpr: "properties.id",
+         collection: "(attribute:properties.serverType)->[DataTypeComponent]",
+        },
+        { id: "label", serverType: "String" },
+        { id: "unique", serverType: "Boolean" },
+        { id: "required", serverType: "Boolean" },
+        { id: "readonly", serverType: "Boolean" },
+        { id: "disabled", serverType: "Boolean" },
+        // { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+        // { id: "onChange", component: 'JsCode' },
+        // { id: "props", component: 'JsCode' },
+        // { id: "code", component: 'JsCode' },
+        // { id: "meta", component: 'JsCode' },
+       ],
+      }
         ],
       },
          "TableLayout": {

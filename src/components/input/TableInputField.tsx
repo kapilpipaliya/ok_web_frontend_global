@@ -80,7 +80,33 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
     </Show>
   </>
 }
-
+const getSelectValueofVertex = (fromVertex: Vertex, key: string, key2: string) => {
+  const vertexId = getSelectedVertexValue(fromVertex,key)?.[0];
+  if (vertexId) {
+    const vertex = graph.vertexes[vertexId];
+    const value = vertex?.properties?.[key2];
+    if (typeof value === "boolean") {
+      return value === true ? "true" : "false";
+    }
+    return value;
+  }
+}
+const defaultValue = (pattern: string, fromVertex: Vertex) =>  {
+  if(!pattern) return;
+  const result = pattern.split('->');
+  if(result.length === 2) {
+    return getSelectValueofVertex(fromVertex, result[0],result[1])
+  }
+  if(result.length === 3) {
+    const vertexId = getSelectedVertexValue(fromVertex,result[0])?.[0];
+    if (vertexId) {
+      const vertex = graph.vertexes[vertexId];
+      if (vertex) {
+        return getSelectValueofVertex(vertex, result[1],result[2])
+      }
+    }
+  }
+}
 export interface TableInputFieldProps {
   meta: TableField
   vertex: Vertex;
@@ -94,7 +120,6 @@ export interface TableInputFieldProps {
 
 function OverWriteableCell(props: {
   cellMeta: TableFieldAttributes;
-  defaultValueFn: (joinVertex: Vertex, key: string) => JSXElement;
   onOverwriteClick: () => void;
   children?: JSX.Element;
   joinVertex: Vertex;
@@ -106,8 +131,18 @@ function OverWriteableCell(props: {
     mergeVertexProperties(txnId, props.joinVertex.id, { [props.cellMeta.id]: null });
     commitTxn(txnId, Ws)
   };
+
   return (
    <Switch>
+     <Match when={!props.cellMeta.defaultValue}>
+       <td
+        class={css`
+          max-width: 100px;
+        `}
+       >
+         {props.children}
+       </td>
+     </Match>
      <Match when={props.cellMeta.noInput}>
        <td
         class={css`
@@ -120,10 +155,11 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-           {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
+           {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
           </div>
         </td>
       </Match>
+      {/* For Disabled Attribute we dont required overwrite button */}
       <Match when={props.cellMeta.disabled}>
         <td
           class={css`
@@ -136,7 +172,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
+            {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
             {props.children}
           </div>
         </td>
@@ -158,7 +194,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.defaultValueFn?.(props.joinVertex, props.cellMeta.id)}
+            {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
             <Show
               when={props.joinVertex.properties[props.cellMeta.id] === undefined || props.joinVertex.properties[props.cellMeta.id] === null}
               fallback={
@@ -261,33 +297,7 @@ export function TableInputField(props: TableInputFieldProps) {
       commitTxn(txnId, Ws);
     }
 
-    const getSelectValueofVertex = (fromVertex: Vertex, key: string, key2: string) => {
-      const vertexId = getSelectedVertexValue(fromVertex,key)?.[0];
-      if (vertexId) {
-        const vertex = graph.vertexes[vertexId];
-        const value = vertex?.properties?.[key2];
-        if (typeof value === "boolean") {
-          return value === true ? "true" : "false";
-        }
-        return value;
-      }
-    }
-    const defaultValue = (pattern?: string) => (fromVertex: Vertex) =>  {
-      if(!pattern) return;
-      const result = pattern.split('->');
-      if(result.length === 2) {
-        return getSelectValueofVertex(fromVertex, result[0],result[1])
-      }
-      if(result.length === 3) {
-        const vertexId = getSelectedVertexValue(fromVertex,result[0])?.[0];
-        if (vertexId) {
-          const vertex = graph.vertexes[vertexId];
-          if (vertex) {
-            return getSelectValueofVertex(vertex, result[1],result[2])
-          }
-        }
-      }
-    }
+
 
     const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
       const setValue = (attribute: FieldAttribute, value: any) => {
@@ -309,7 +319,7 @@ export function TableInputField(props: TableInputFieldProps) {
               
               joinVertex={joinVertex}
               cellMeta={meta}
-              defaultValueFn={defaultValue(meta.defaultValue)}
+
               onOverwriteClick={() => setValue(meta, "")}
              >
                <TextInputField
@@ -325,7 +335,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={defaultValue(meta.defaultValue)}
+
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <NumberInputField
@@ -340,7 +350,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={defaultValue(meta.defaultValue)}
+
                onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <SelectInputField
@@ -358,7 +368,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={defaultValue(meta.defaultValue)}
+
                onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
               >
                 <TagField
@@ -376,7 +386,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={defaultValue(meta.defaultValue)}
+
                onOverwriteClick={() => setValue(meta, false)}
               >
                 <BooleanInputField value={joinVertex.properties[meta.id]}
@@ -389,7 +399,7 @@ export function TableInputField(props: TableInputFieldProps) {
                  
                  joinVertex={joinVertex}
                  cellMeta={meta}
-                 defaultValueFn={defaultValue(meta.defaultValue)}
+
                  onOverwriteClick={() => setValue(meta, {})}
                 >
                   <ModalInput btnContent={<Icon
@@ -407,7 +417,7 @@ export function TableInputField(props: TableInputFieldProps) {
                
                joinVertex={joinVertex}
                cellMeta={meta}
-               defaultValueFn={defaultValue(meta.defaultValue)}
+
                onOverwriteClick={() => setValue(meta, "")}
               >
                 <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
@@ -433,45 +443,6 @@ export function TableInputField(props: TableInputFieldProps) {
             </button>
           </td>
         </tr>
-    );
-  };
-  const SortableRowForm = (p: { edgeId: Id }) => {
-    const sortable = createSortable(p.edgeId);
-
-    const edge = graph.edges[p.edgeId];
-    if (!edge) return "NO edge Found";
-
-    const vertex = graph.vertexes[edge.end];
-
-    const setValue = (attribute: FieldAttribute, value: any) => {
-      const txnId = getNewTxnId();
-      mergeVertexProperties(txnId, vertex.id, { [attribute.id]: value });
-      commitTxn(txnId, Ws)
-    };
-    const clearControl = (id: string) => {
-      const txnId = getNewTxnId();
-      mergeVertexProperties(txnId, vertex.id, { [id]: null });
-      commitTxn(txnId, Ws)
-    };
-    const clearSelectControl = (id: string) => {
-
-    };
-
-    return (
-        <div ref={el=>props.meta.noSort ? undefined : sortable(el)} class="border rounded-2 border-gray-300 p-2"
-             classList={{"opacity-25": sortable.isActiveDraggable}}>
-          <Dynamic component={props.component!}
-                   form={props.form!}
-                   postSubmit={(values: FormResult) => props.postSubmit?.(control()!, values)}
-                   id={(control()!.controls['end'] as IFormControl).value}
-                   
-          />
-          <div>
-            <button type="button" onclick={(_) => props.control.removeControl(control()!)} title="Delete Row">
-              <Icon icon="ion:close-circle-outline"/>
-            </button>
-          </div>
-        </div>
     );
   };
 
@@ -502,35 +473,6 @@ export function TableInputField(props: TableInputFieldProps) {
     }
     setActiveDragItem(null);
   };
-
-  if (props.meta.component === "TableForm") {
-    return (
-      <div>
-        <div>
-          <div>
-            <button type="button" onclick={addNew}>Add New</button>
-          </div>
-          <div>
-            <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd}
-                              collisionDetector={closestCenter}>
-              <DragDropSensors/>
-              <SortableProvider ids={ids()}>
-                <div class="flex flex-col gap-2">
-                  <For each={sortedIds()} fallback={<div>No Attributes</div>}>
-                    {(edgeId) => <SortableRowForm edgeId={edgeId}/>}
-                  </For>
-                </div>
-              </SortableProvider>
-            </DragDropProvider>
-          </div>
-        </div>
-
-        {/*<Show when={props.page}>*/}
-        {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
-        {/*</Show>*/}
-      </div>
-    );
-  }
 
   return (
     <div>
