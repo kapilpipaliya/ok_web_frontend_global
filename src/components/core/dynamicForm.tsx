@@ -14,7 +14,6 @@ import {
  DataType,
  FieldAttribute,
  FormMetaData,
- FormResult,
  Id,
  SelectField,
  TableField,
@@ -45,15 +44,6 @@ import { TableInputField } from "../input/TableInputField";
 import { ButtonGroup } from "../input/core/ButtonGroup";
 import { TagField } from "../input/TagField";
 
-
-interface DynamicFormProps {
- form: FormMetaData;
- vertex: Vertex;
- 
- // formGroup: ReturnType<typeof createFormGroup>;
- // all forms options:
- // formValues: IFormGroup;
-}
 // memorize this function
 const normalizeFormMetaData = (form: FormMetaData) => {
  return form.attributes.reduce((acc,curr) => {
@@ -79,7 +69,11 @@ export function onChangeHandler(Ws: ServerEventsDispatcher, txnId: number, verte
  } catch (e) {
 
  }
+}
 
+interface DynamicFormProps {
+ form: FormMetaData;
+ vertex: Vertex;
 }
 
 export function DynamicForm(props: DynamicFormProps) {
@@ -266,18 +260,11 @@ export function DynamicForm(props: DynamicFormProps) {
 export interface DynamicFormSequenceProps {
  form: FormMetaData;
  id?: Id;
- // very rare cases
- handleSubmit?: (txnId: number, values: FormResult) => void;
- postSubmit?: (values: FormResult) => void;
 }
 
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
- let id = props.id!;
  const form = klona(props.form);
  const { Ws } = useContext(WsContext);
-
- const [divRef, setDivRef] = createSignal<HTMLFormElement>();
- onMount(() => {divRef()?.querySelector("input")?.focus();});
 
  let vertex: Vertex;
  if ( !props.id ) {
@@ -290,15 +277,17 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    return;
   }
   commitTxn(txnId, Ws);
-  id = newVertexObj.id;
-  vertex = graph.tmpVertexes[id];
+  vertex = graph.tmpVertexes[newVertexObj.id];
  } else {
-  if(!graph.vertexes[id]) {
+  if(!graph.vertexes[props.id]) {
    alert('vertex not found');
    return;
   }
-  vertex = graph.vertexes[id];
+  vertex = graph.vertexes[props.id];
  }
+
+ const [divRef, setDivRef] = createSignal<HTMLFormElement>();
+ onMount(() => {divRef()?.querySelector("input")?.focus();});
 
  return <div ref={setDivRef}>
 

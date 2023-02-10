@@ -128,7 +128,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
             //   isChangedByUser = true;
               setSelectionValueOne(Ws, props.vertex, props.meta, e.previousValue, e.value);
               const txnId = getNewTxnId();
-              props.form && onChangeHandler(txnId, props.vertex, props.form, props.meta);
+              props.form && onChangeHandler(Ws, txnId, props.vertex, props.form, props.meta);
               commitTxn(txnId, Ws);
             // })
           },
