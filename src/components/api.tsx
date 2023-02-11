@@ -84,9 +84,39 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             displayExpr: "properties.id",
           },
           { id: "description", component: "TextArea" },
+         {
+          id: "Tab",
+          component: "Table",
+
+          attributes: [
+           {
+            id: "id",
+            component: "TextInput"
+           },
+           {
+            id: "label",
+            component: "TextInput"
+           }
+          ]
+         },
+         {
+          id: "Group",
+          component: "Table",
+
+          attributes: [
+           {
+            id: "id",
+            component: "TextInput"
+           },
+           {
+            id: "label",
+            component: "TextInput"
+           }
+          ]
+         },
           {
             id: "Attribute",
-            label: "Collection",
+            label: "Attributes",
             component: "Table",
             attributes: [
               {
@@ -99,14 +129,14 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
              {
               id: "tab",
               component: "Select",
-              collection: "Attribute",
+              collection: "<-Tab",
               displayExpr: "properties.id",
               noOverWrite: true,
              },
              {
-              id: "attribute",
+              id: "group",
               component: "Select",
-              collection: "Attribute",
+              collection: "<-Group",
               displayExpr: "properties.id",
               noOverWrite: true,
              },
@@ -156,37 +186,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "TextInput"
               }
             ]
-          },
-          {
-            id: "Tab",
-            component: "Table",
-
-            attributes: [
-              {
-                id: "type",
-                component: "TextInput"
-              },
-             {
-              id: "label",
-              component: "TextInput"
-             }
-            ]
-          },
-         {
-          id: "Group",
-          component: "Table",
-
-          attributes: [
-           {
-            id: "type",
-            component: "TextInput"
-           },
-           {
-            id: "label",
-            component: "TextInput"
-           }
-          ]
-         }
+          }
         ]
       },
 
@@ -195,7 +195,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           { id: "id", serverType: "String" },
           { id: "title", serverType: "String" },
           { id: "description", component: "TextArea" },
-          { id: "meta", component: "JsCode" },
+          // { id: "meta", component: "JsCode" },
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
       { id: "labelName",
@@ -212,9 +212,10 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
         {
          id: "attribute",
          component: "Select",
-         displayExpr: "properties.id",
+         // TODO: fix this make a function to return nested projection id:
+         displayExpr: "id",
          // default: (formValues, control, id: string) => id && graph.edges[id].end,
-         collection: "(1:collection)->[CollectionHasAttribute]",
+         collection: "<-labelName->attribute->id",
         },
 
         { id: "id", serverType: "String" },

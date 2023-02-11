@@ -1,4 +1,39 @@
 import { describe, expect, test } from "vitest";
+function getUserDynamicFilters({ filterExpression, userLookupResponse, currentFormValue }) {
+ console.log(filterExpression)
+ if (typeof filterExpression === 'string') {
+  try {
+   filterExpression = JSON.parse(filterExpression);
+  } catch {
+   return filterExpression
+  }
+ }
+ if (!filterExpression || typeof filterExpression[filterExpression.length - 1] !== 'string') {
+  return filterExpression;
+ }
+
+ let sourceField;
+ let fieldValue;
+
+ if (filterExpression[filterExpression.length - 1]?.indexOf('$user.') !== -1) {
+  sourceField = filterExpression[filterExpression.length - 1]
+   ?.replace('$user.', '')
+   .trim();
+
+  fieldValue = userLookupResponse[sourceField];
+ } else if (filterExpression[filterExpression.length - 1]?.indexOf('$record.') > -1) {
+  sourceField = filterExpression[filterExpression.length - 1]
+   ?.replace('$record.', '')
+   .trim();
+
+
+
+
+
+ }
+ filterExpression[filterExpression.length - 1] = "ABC";
+}
+
 
 const processOneFilter = (filter) => {
  expect(filter.length).toBe(3);
@@ -12,15 +47,16 @@ const processOneFilter = (filter) => {
 const ReplaceDynamicFieldsInFilterExpression = (data: any[]) => {
  if (Array.isArray(data)) {
   if (typeof data[0] === "string") {
-   return processOneFilter(data);
+    getUserDynamicFilters({filterExpression: data});
   } else {
    for (let i = 0; i < data.length; i++) {
-    data[i] = ReplaceDynamicFieldsInFilterExpression(data[i]);
+    ReplaceDynamicFieldsInFilterExpression( data[i]);
    }
   }
  }
  return data;
 };
+
 
 const dependantfields = (data: any[]) => {
  const searchColumnsList = [];
@@ -43,6 +79,7 @@ const dependantfields = (data: any[]) => {
   }
  return searchColumnsList;
 };
+
 
 describe("ReplaceDynamicFieldsInFilterExpression", () => {
  test("modifying vertex dont change store", async () => {
