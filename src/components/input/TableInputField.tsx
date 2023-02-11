@@ -1,6 +1,6 @@
 import {
-  batch, createEffect,
-  createMemo,
+  batch,
+  createEffect,
   createSignal,
   For,
   getOwner,
@@ -8,11 +8,9 @@ import {
   JSXElement,
   Match,
   Show,
-  splitProps,
-  Switch, useContext
+  Switch,
+  useContext
 } from "solid-js";
-import { Dynamic } from "solid-js/web";
-import { ulid } from "ulid";
 import { BooleanInputField } from "./BooleanInputField";
 import { TextInputField } from "./TextInputField";
 import { Icon } from "@iconify-icon/solid";
@@ -28,37 +26,33 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import {
-  getSelectedValue, getSelectedVertexValue,
+  getSelectedVertexValue,
   SelectInputField,
   setSelectionValueOne
 } from "./SelectInputField";
 import {
+  DataType,
   FieldAttribute,
-  FormResult, Id,
+  Id,
   SelectField,
-  DataType, TableField,
+  TableField,
   TableFieldAttributes,
   Vertex
 } from "./Form";
 import { toTitle } from "case-switcher-js";
-import { DEBUG } from "../../utils/config";
 import usePopper from "solid-popper";
 import { JsonInput } from "./JsonInput";
 import { TextAreaField } from "./TextAreaField";
 import { NumberInputField } from "./NumberInputField";
 import {
-  addNewVertex, deleteVertex,
+  addNewVertex,
+  deleteVertex,
   mergeVertexProperties,
   newVertex
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import {
-  commitTransaction,
-  commitTxn,
-  getNewGraphId, getNewTxnId,
-  graph
-} from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
@@ -110,12 +104,6 @@ const defaultValue = (pattern: string, fromVertex: Vertex) =>  {
 export interface TableInputFieldProps {
   meta: TableField
   vertex: Vertex;
-  // attributes: FieldAttribute[];
-  // type?: string;
-  // component?: Component<any>;
-  // form?: FormMetaData[];
-  // postSubmit?: (tableItemFormGroup: IFormGroup, values: FormResult) => void
-  // noSort?: boolean;
 }
 
 function OverWriteableCell(props: {
@@ -143,6 +131,7 @@ function OverWriteableCell(props: {
          {props.children}
        </td>
      </Match>
+     {/* TODO: Think how I will make this in Form Layout*/}
      <Match when={props.cellMeta.noInput}>
        <td
         class={css`
@@ -177,7 +166,8 @@ function OverWriteableCell(props: {
           </div>
         </td>
       </Match>
-      <Match when={props.cellMeta.noOverWrite}>
+     {/* TODO: Think how I will make this in Form Layout*/}
+     <Match when={props.cellMeta.noOverWrite}>
         <td
           class={css`
             max-width: 100px;
@@ -478,7 +468,6 @@ export function TableInputField(props: TableInputFieldProps) {
     <div>
       <div>
         <div>
-          {/* @ts-ignore */}
           <button type="button" design="Default" onclick={addNew}>Add New</button>
         </div>
         <div

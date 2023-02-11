@@ -4,7 +4,6 @@ import SelectBox, { Properties } from "devextreme/ui/select_box";
 import { FormMetaData, SelectField, Vertex } from "./Form";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
-import { S } from "@mobily/ts-belt";
 import { path } from "rambda";
 import {
   addNewEdge,
@@ -19,10 +18,30 @@ import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 export interface SelectInputFieldProps extends Properties {
   // TODO: MAKE THIS COMPULSORY
   form?: FormMetaData;
-  meta: SelectField
+  meta: SelectField;
   vertex: Vertex;
-  
+
 }
+
+// "(serverType)->[DataTypeComponent]"
+function getVertexes(vertex: Vertex, attribute: string, projection: string, edgeName: string) {
+  const fromVertexIds = getSelectedVertexValue(vertex, attribute);
+
+  const result = [] as Vertex[];
+  for (const fromVertexId_ of fromVertexIds) {
+    const fromVertex = graph.vertexes[fromVertexId_];
+    if (!fromVertex) continue;
+
+    // TODO: Make this work. this is broken we dont save id in properties.
+    const projectedId: number | undefined = projection ? path(projection, fromVertex) : fromVertexId_;
+    if (!projectedId) continue;
+
+    result.push(...getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]));
+  }
+
+  return result;
+}
+
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string) {
   // TOOD: make input filter working:
   if (typeof collection === "number") {
@@ -40,41 +59,51 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
         console.warn(e)
         return [];
       }
-    } else if ((collection).includes("[")) {
-      // "(selector:attribute:projection)->[edgeName]"
-      const from = /\(([\w\.]+:)?(\w+)(:[\w\.]+)?\)->/
-      const edge = /\[(\w+)\]/
-      const fromResult = collection.match(from);
-      const edgeName = collection.match(edge)?.[1];
-
-      if(fromResult && edgeName) {
-        // @ts-ignore
-        const selector = S.removeAll(fromResult[1] || '', ":");
-        const attribute = fromResult[2];
-        const projection = S.removeAll(fromResult[3] || '', ":");
-
-        const fromVertexId = vertex.properties[attribute];
-        const fromVertexIds = fromVertexId ? [fromVertexId] : getSelectedVertexValue(vertex, attribute);
-
-        const result = [] as Vertex[];
-        for (const fromVertexId_ of fromVertexIds ) {
-          const fromVertex = graph.vertexes[fromVertexId_];
-          if(!fromVertex) continue;
-
-          const projectedId: number|undefined = projection ? path(projection, fromVertex) : fromVertexId_;
-          if(!projectedId) continue;
-
-          result.push(...getOutEdgeIdsOfType(projectedId, edgeName).map(id => graph.vertexes[graph.edges[id].end]));
-        }
-
-        return result;
-      } else {
-        return [];
+    } else if ((collection).includes("->")) {
+      let collection_ = collection;
+      let parentLabel = "";
+      if (collection.includes("<-")) {
+        const parentEdge = collection.split("<-");
+        parentLabel = parentEdge[0] || "_";
+        collection_ = parentEdge[1];
       }
+      // "Label<-a->b->c"
+
+      let newVertex: Vertex | undefined;
+
+      if (parentLabel) {
+        const type = vertex.labels[0];
+        const edgeId = (vertex.in_edges[type] || [])[0];
+        if (edgeId) {
+          const edge = graph.edges[edgeId];
+          if (edge) {
+            newVertex = graph.vertexes[edge.start];
+          }
+        }
+      }
+      if (!newVertex) newVertex = vertex;
+
+      const path_ = collection_.split("->");
+
+      let prevVertex = [newVertex];
+      for (let i = 0; i < path_.length - 1; i++) {
+        const result = [];
+        for (const v of prevVertex) {
+          result.push(...getSelectedVertexValue(v, path_[i]).map(id => graph.vertexes[id]));
+        }
+        prevVertex = result;
+      }
+      // if (path_[path_.length - 1]) {
+      //   return prevVertex.map(vertex => path(path_[path_.length - 1], vertex));
+      // } else {
+      //   return prevVertex.map(vertex => vertex.id);
+      // }
+      return prevVertex;
     } else {
       return findVertexIdsByLabel(collection).map((id) => graph.vertexes[id]);
     }
   }
+  return []
 }
 export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
   const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
@@ -135,7 +164,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
           required: props.meta.required,
           disabled: props.meta.disabled,
           valueExpr: "id",
-          displayExpr: "properties.id",
+          displayExpr: props.meta.displayExpr || "properties.id",
           labelMode: 'floating',
           onFocusIn: function(e) {
             refetch()

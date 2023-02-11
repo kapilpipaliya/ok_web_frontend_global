@@ -204,8 +204,8 @@ export const FullDashboard = () => {
       updateVertexId(txnObject.insert[0], txnObject.insert[1]);
      }
      if (txnObject.insertEdge) {
-      edgeOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
-      updateEdgeId(txnObject.insert[0], txnObject.insert[1]);
+      edgeOldIdToNewIdMap.set(txnObject.insertEdge[0], txnObject.insertEdge[1]);
+      updateEdgeId(txnObject.insertEdge[0], txnObject.insertEdge[1]);
      }
      if (txnObject.replace) {
       // TODO: handle on backend
