@@ -93,10 +93,11 @@ export let edgeOldIdToNewIdMap = new Map<Id, Id>();
 
 export const commitTransaction = (Ws: ServerEventsDispatcher) => {
  let firstReadyTxn = 0;
- // If any pending transaction exist don't send it.
+ // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
  for(const [txnId, value] of transactions.entries()) {
   if(value.status === ProcessStatus.Ready) {
    if(!firstReadyTxn) firstReadyTxn = txnId;
+   break;
   } else if(value.status === ProcessStatus.AckReceived || value.status === ProcessStatus.Sent){
    return;
   }
