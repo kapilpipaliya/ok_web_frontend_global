@@ -84,7 +84,7 @@ export function DynamicForm(props: DynamicFormProps) {
   onChangeHandler(Ws, txnId, props.vertex, props.form, attribute);
   commitTxn(txnId, Ws);
  }
- const Form = () => {
+
   return <><For
    each={props.form.attributes}>
    {(meta) => (
@@ -253,8 +253,7 @@ export function DynamicForm(props: DynamicFormProps) {
   </For>
 
   </>;
- };
- return <Form />;
+
 }
 
 export interface DynamicFormSequenceProps {
@@ -268,6 +267,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
  let vertex: Vertex;
  if ( !props.id ) {
+  if (!form["label"]) {
+   return "Label not found"
+  }
   const txnId = getNewTxnId();
    const newVertexObj = newVertex(getNewGraphId(), [form.label], {});
    // TODO: Do Create Transformation for the vertex
