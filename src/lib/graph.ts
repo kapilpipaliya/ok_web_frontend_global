@@ -10,7 +10,7 @@ import {
 export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };
 // temporary we start from 500000 because newId should not conflict with existing Ids
-let uniqueId = 50000;
+let uniqueId = -50000;
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
@@ -126,8 +126,8 @@ export function getNewGraphId(): Id {
 
 export function resetDatabase() {
   setGraph(reconcile({
-    uniqueId: 0,
    _isPartialSynced: false,
+    tmpVertexes: {},
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },

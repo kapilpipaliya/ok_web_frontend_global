@@ -13,6 +13,7 @@ import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { getSelectedValue, getSelectionOptions } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
 import { onChangeHandler } from "../core/dynamicForm";
+import { capitalizeFirstLetter } from "../utils";
 
 export interface SelectInputFieldProps extends Properties {
   form: FormMetaData;
@@ -20,12 +21,9 @@ export interface SelectInputFieldProps extends Properties {
   vertex: Vertex;
   
 }
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
-
-function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number[], _edges: Id[], value: number[]) {
+// This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
+function setSelectionValueMulti(txnId: number, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number[], _edges: Id[], value: number[]) {
   // delete removed edges:
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
   const previousEdges = vertex.out_edges[type] || [];
@@ -36,12 +34,10 @@ function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string
   }
 
   // add added edges:
-  if(value) {
-    for (const vertexId of value) {
-      if ((vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(vertexId)) continue
-      const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
-      if(insertEdgeResult.error) alert(insertEdgeResult.error);
-    }
+  for (const vertexId of value) {
+    if ((vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(vertexId)) continue
+    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
+    if(insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
 
@@ -67,7 +63,7 @@ export function TagField(props: SelectInputFieldProps) {
             const txnId = getNewTxnId();
             // batch(() => {
             //   if(e.event) isChangedByUser = true;
-              setSelectionValue(txnId, props.vertex, props.meta, e.previousValue, edge, e.value);
+              setSelectionValueMulti(txnId, props.vertex, props.meta, e.previousValue, edge, e.value);
               onChangeHandler(Ws, txnId, props.vertex, props.form, props.meta);
               commitTxn(txnId, Ws);
             // })

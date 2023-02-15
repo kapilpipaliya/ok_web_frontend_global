@@ -115,7 +115,9 @@ export function getSelectedValue(vertex: Vertex, attributeId: string){
   const edges = (vertex.out_edges[type] || [])
   return [edges, edges.map(edgeId => graph.edges[edgeId].end)];
 }
-export function setSelectionValueOne(Ws: ServerEventsDispatcher, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number) {
+
+// This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
+export function setSelectionValueOne(Ws: ServerEventsDispatcher, vertex: Vertex, attribute: {id: string; component?: string}, previousValue: number, value: number | null) {
   const txnId = getNewTxnId();
   const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
   const previousEdges = vertex.out_edges[type] || [];
@@ -128,7 +130,7 @@ export function setSelectionValueOne(Ws: ServerEventsDispatcher, vertex: Vertex,
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
-  if (value && !(vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(value)) {
+  if (value !== null && value !== undefined && !(vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(value)) {
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, value));
     if(insertEdgeResult.error) alert(insertEdgeResult.error);
   }
