@@ -76,11 +76,11 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
 }
 const getSelectValueofVertex = (fromVertex: Vertex, key: string, key2: string) => {
   const vertexId = getSelectedVertexValue(fromVertex,key)?.[0];
-  if (vertexId) {
+  if (vertexId !== undefined) {
     const vertex = graph.vertexes[vertexId];
     const value = vertex?.properties?.[key2];
     if (typeof value === "boolean") {
-      return value === true ? "true" : "false";
+      return value ? "true" : "false";
     }
     return value;
   }
@@ -93,7 +93,7 @@ const defaultValue = (pattern: string, fromVertex: Vertex) =>  {
   }
   if(result.length === 3) {
     const vertexId = getSelectedVertexValue(fromVertex,result[0])?.[0];
-    if (vertexId) {
+    if (vertexId !== undefined) {
       const vertex = graph.vertexes[vertexId];
       if (vertex) {
         return getSelectValueofVertex(vertex, result[1],result[2])
