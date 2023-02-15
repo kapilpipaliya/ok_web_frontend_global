@@ -12,11 +12,8 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
 
 // add a new vertex to the graph
 export function addNewVertex(txnId: number, vertex: Vertex): {error: string | boolean, txnDetailIndex?: number} {
- if(vertex.id === 0) {
-  return {error: "ID is not valid"};
- }
  if (graph.vertexes[vertex.id]) {
-  return {error: "ID Already exist"};
+  return {error: "Vertex ID Already exist"};
  }
  const existedVertexes = vertex.labels.filter(label => G.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id))
  if(existedVertexes.length) {
@@ -57,7 +54,7 @@ export function mergeVertexProperties(txnId: number, vertexId: Id, properties: {
 // delete a vertex
 export function deleteVertex(txnId: number, vertexId: Id): {error: string | boolean, txnDetailIndex?: number} {
  if(!graph.vertexes[vertexId]) {
-  return {error: "ID is not valid"};
+  return {error: "Vertex ID is not valid"};
  }
  const vertex = klona(graph.vertexes[vertexId]);
  batch(() => {
@@ -72,13 +69,13 @@ export function deleteVertex(txnId: number, vertexId: Id): {error: string | bool
 // update vertex id when we receive new id from api response
 export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
  if(!graph.vertexes[oldVertexId]) {
-  return {error: "ID is not valid"};
+  return {error: "Vertex ID is not valid"};
  }
  if(graph.vertexes[newVertexId]) {
-  return {error: "new ID is not valid"};
+  return {error: "new Vertex ID is not valid"};
  }
  if(graph.edges[newVertexId]) {
-  return {error: "new ID is not valid as Its used in Edge"};
+  return {error: "new Vertex ID is not valid as Its used in Edge"};
  }
  setGraph('vertexes', newVertexId, {...klona(graph.vertexes[oldVertexId]), id: newVertexId});
  // @ts-ignore
