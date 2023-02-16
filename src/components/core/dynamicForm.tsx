@@ -279,7 +279,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    return;
   }
   commitTxn(txnId, Ws);
-  vertex = graph.tmpVertexes[newVertexObj.id];
+  vertex = graph.vertexes[newVertexObj.id];
  } else {
   if(!graph.vertexes[props.id]) {
    alert('vertex not found');

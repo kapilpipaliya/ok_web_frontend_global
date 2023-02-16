@@ -44,12 +44,6 @@ function getVertexes(vertex: Vertex, attribute: string, projection: string, edge
 
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string) {
   // TOOD: make input filter working:
-  if (typeof collection === "number") {
-    const collectionVertex = graph.vertexes[collection];
-    // assume that vertex is of label Collection
-    return collectionVertex ? findVertexIdsByLabel(collectionVertex.properties.id).map((id) => graph.vertexes[id]) : [];
-  }
-
   if (typeof collection === "string") {
     // JSON.parse options:
     if (collection.startsWith("[")) {
