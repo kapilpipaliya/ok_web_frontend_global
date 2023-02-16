@@ -27,7 +27,7 @@ import {
  mergeVertexProperties,
  newVertex
 } from "../../lib/Vertex";
-import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
+import { WsContext } from "../ws_events_dispatcher";
 import { TextInputField } from "../input/TextInputField";
 import { TextAreaField } from "../input/TextAreaField";
 import { NumberInputField } from "../input/NumberInputField";
@@ -38,7 +38,7 @@ import { JsonInput } from "../input/JsonInput";
 import { GeneralInput } from "../input/GeneralInput";
 import {
  SelectInputField,
- setSelectionValueOne
+ setSelectionValue
 } from "../input/SelectInputField";
 import { TableInputField } from "../input/TableInputField";
 import { ButtonGroup } from "../input/core/ButtonGroup";
@@ -53,7 +53,7 @@ const normalizeFormMetaData = (form: FormMetaData) => {
 }
 
 //'setValue(component,null)'
-export function onChangeHandler(Ws: ServerEventsDispatcher, txnId: number, vertex: Vertex, form: FormMetaData, changedFieldAttribute: FieldAttribute) {
+export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaData, changedFieldAttribute: FieldAttribute) {
  if(!changedFieldAttribute.onchange) return;
  try{
   const args = JSON.parse(changedFieldAttribute.onchange);
@@ -62,7 +62,7 @@ export function onChangeHandler(Ws: ServerEventsDispatcher, txnId: number, verte
 
   if (value === null ) value = undefined;
   if(attribute.component == "Select" || attribute.component === "Tag") {
-     setSelectionValueOne(Ws, vertex, attribute, 0, value)
+     setSelectionValue(txnId, vertex, attribute,  value)
    } else {
     mergeVertexProperties(txnId, vertex.id, { [attribute.id]: value });
    }
@@ -81,7 +81,7 @@ export function DynamicForm(props: DynamicFormProps) {
  const setValue = (attribute: FieldAttribute, data: any) => {
   const txnId = getNewTxnId();
   mergeVertexProperties(txnId,props.vertex.id, {[attribute.id]: data})
-  onChangeHandler(Ws, txnId, props.vertex, props.form, attribute);
+  onChangeHandler(txnId, props.vertex, props.form, attribute);
   commitTxn(txnId, Ws);
  }
 

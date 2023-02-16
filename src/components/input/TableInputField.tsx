@@ -28,7 +28,7 @@ import { css } from "solid-styled-components";
 import {
   getSelectedVertexValue,
   SelectInputField,
-  setSelectionValueOne
+  setSelectionValue
 } from "./SelectInputField";
 import {
   DataType,
@@ -341,7 +341,11 @@ export function TableInputField(props: TableInputFieldProps) {
                joinVertex={joinVertex}
                cellMeta={meta}
 
-               onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
+               onOverwriteClick={() => {
+                 const txnId = getNewTxnId();
+                 setSelectionValue(txnId, joinVertex, meta,  undefined)
+                 commitTxn(txnId, Ws);
+               }}
               >
                 <SelectInputField
                  
@@ -359,7 +363,11 @@ export function TableInputField(props: TableInputFieldProps) {
                joinVertex={joinVertex}
                cellMeta={meta}
 
-               onOverwriteClick={() => setSelectionValueOne(Ws, joinVertex, meta, 0, 0)}
+               onOverwriteClick={() => {
+                 const txnId = getNewTxnId();
+                 setSelectionValue(txnId, joinVertex, meta,  undefined)
+                 commitTxn(txnId, Ws);
+               }}
               >
                 <TagField
                  
@@ -468,7 +476,7 @@ export function TableInputField(props: TableInputFieldProps) {
     <div>
       <div>
         <div>
-          <button type="button" design="Default" onclick={addNew}>Add New</button>
+          <button type="button" onclick={addNew}>Add New</button>
         </div>
         <div
           class={css`
