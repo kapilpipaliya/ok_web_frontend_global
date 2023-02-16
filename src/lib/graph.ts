@@ -18,7 +18,6 @@ let uniqueId = -50000;
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export const [graph, setGraph] = createStore({
  _isPartialSynced: false,
-  tmpVertexes: {} as VertexMap,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },
@@ -127,7 +126,6 @@ export function getNewGraphId(): Id {
 export function resetDatabase() {
   setGraph(reconcile({
    _isPartialSynced: false,
-    tmpVertexes: {},
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },

@@ -20,7 +20,6 @@ export function addNewVertex(txnId: number, vertex: Vertex): {error: string | bo
   return {error: 'vertex ID already exist while adding new vertex'}
  }
  setGraph("vertexes", vertex.id, klona(vertex));
- setGraph("tmpVertexes", vertex.id, graph.vertexes[vertex.id]);
  vertex.labels.forEach(label => setGraph("vertexLabelIdMap", label, vertexIds => G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id]));
  transactionDetailAdd(txnId, {insert: () => klona(vertex), revert: () => deleteVertex(0, vertex.id)});
  return {error: false, txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1};
@@ -77,7 +76,8 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
  if(graph.edges[newVertexId]) {
   return {error: "new Vertex ID is not valid as Its used in Edge"};
  }
- setGraph('vertexes', newVertexId, {...klona(graph.vertexes[oldVertexId]), id: newVertexId});
+ setGraph('vertexes', newVertexId, graph.vertexes[oldVertexId]);
+ setGraph('vertexes', newVertexId, 'id', newVertexId);
  // @ts-ignore
  setGraph('vertexes', oldVertexId, undefined);
  // TODO: replace id exactly at same position
@@ -90,7 +90,6 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
  Object.entries(graph.vertexes[newVertexId].in_edges).forEach(([edgeType, edgeIds]) => {
   setGraph('edges', edgeIds, 'end', newVertexId )
  })
- setGraph("tmpVertexes", oldVertexId, graph.vertexes[newVertexId]);
  return {error: ""};
 }
 // helper function to find all the vertex ids of the label
