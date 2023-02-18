@@ -1,5 +1,5 @@
-export const getDefaultValue = (serverType?: string, component?: string) => {
- if (!serverType)
+export const getDefaultValue = (dataType?: string, component?: string) => {
+ if (!dataType)
   switch (component) {
    case "Select": return undefined;
    case "TexInput": return "";
@@ -8,7 +8,7 @@ export const getDefaultValue = (serverType?: string, component?: string) => {
    case "Json": return {};
    default: return undefined;
   }
- switch (serverType) {
+ switch (dataType) {
   case "string":
    return "";
   case "boolean":

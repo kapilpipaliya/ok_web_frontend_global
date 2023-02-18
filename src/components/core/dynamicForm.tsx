@@ -90,7 +90,7 @@ export function DynamicForm(props: DynamicFormProps) {
    {(meta) => (
     <Switch>
      <Match
-      when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
+      when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
       <TextInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -110,7 +110,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
+      when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
       <NumberInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -120,7 +120,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "DateInput" || (!meta.component && (meta.serverType === DataType.Date))}>
+      when={meta.component === "DateInput" || (!meta.component && (meta.dataType === DataType.Date))}>
       <DateInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -129,7 +129,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "DateTimeInput" || (!meta.component && (meta.serverType === DataType.LocalDateTime || meta.serverType === DataType.LocalTime))}>
+      when={meta.component === "DateTimeInput" || (!meta.component && (meta.dataType === DataType.LocalDateTime || meta.dataType === DataType.LocalTime))}>
       <DateInputField
        name={props.form.id + meta.id}
        label={toTitle(meta.label || meta.id)}
@@ -148,7 +148,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "Boolean" || (!meta.component && meta.serverType === DataType.Boolean)}>
+      when={meta.component === "Boolean" || (!meta.component && meta.dataType === DataType.Boolean)}>
       <BooleanInputField
        name={props.form.id + meta.id}
        text={toTitle(meta.label || meta.id)}
@@ -158,7 +158,7 @@ export function DynamicForm(props: DynamicFormProps) {
       />
      </Match>
      <Match
-      when={meta.component === "Json" && (!meta.component && meta.serverType === DataType.Map)}>
+      when={meta.component === "Json" && (!meta.component && meta.dataType === DataType.Map)}>
       <Field label={toTitle(meta.label || meta.id)}>
        <JsonInput
         name={props.form.id + meta.id}

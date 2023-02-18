@@ -30,7 +30,7 @@ export enum DataType {
 interface BaseField {
   id: string;
   // one of type or component is required.
-  serverType?: string;
+  dataType?: string;
   component?: string;
   label?: string;
   hidden?: boolean;
@@ -119,7 +119,7 @@ export interface Edge {
 export enum VertexLabels {
   // Base
   DataType = "DataType", // all type of the server
-  Component = "Component", // all input components for the servertype
+  Component = "Component", // all input components for the dataType
   Attribute = "Attribute",
   CollectionCategory = "CollectionCategory",
   Collection = "Collection",

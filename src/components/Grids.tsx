@@ -191,11 +191,11 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
      delete attributeProperties.meta;
     }
    }
-   const {id, code, component, default: default_, serverType, label, disabled, onChange, props, readonly, required, unique, ...customAttributeProperties} = attributeProperties;
+   const {id, code, component, default: default_, dataType, label, disabled, onChange, props, readonly, required, unique, ...customAttributeProperties} = attributeProperties;
    //  {caption: "id", dataField: "id", dataType: "string", fixed: true, sortIndex: 0, width: 70},
    customAttributeProperties['dataField'] = `properties.${id}`;
    customAttributeProperties['caption'] = label;
-   customAttributeProperties['dataType'] = serverTypeToDataGrid(graph.vertexes[serverType].properties.id);
+   customAttributeProperties['dataType'] = dataTypeToDataGrid(graph.vertexes[dataType].properties.id);
    return {...customAttributeProperties}
   })
   return tables;
@@ -242,7 +242,7 @@ export const TableDashboard = () => {
   </div>
  </div>
 }
-const serverTypeToDataGrid = (type: string) => {
+const dataTypeToDataGrid = (type: string) => {
  switch (type) {
   case 'String': return 'string'
   case 'Boolean': return 'boolean'
