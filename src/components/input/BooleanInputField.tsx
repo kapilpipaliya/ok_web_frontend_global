@@ -17,6 +17,7 @@ export function BooleanInputField(props: BooleanInputFieldProps) {
         const instance = new CheckBox(el, {
           ...customProps,
           value: props.value,
+          enableThreeStateBehavior: true,
           onValueChanged: (e) => {
             props.setValue(e.value);
             // props.setValue((e.event?.currentTarget as HTMLInputElement).checked);
