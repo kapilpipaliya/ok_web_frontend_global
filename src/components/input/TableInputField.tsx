@@ -4,7 +4,6 @@ import {
   createSignal,
   For,
   getOwner,
-  JSX,
   JSXElement,
   Match,
   Show,
@@ -25,19 +24,13 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import {
-  getOptionLabel,
-  getSelectedVertexValue,
-  SelectInputField,
-  setSelectionValue
-} from "./SelectInputField";
+import { getOptionLabel, SelectInputField } from "./SelectInputField";
 import {
   DataType,
   FieldAttribute,
   Id,
   SelectField,
   TableField,
-  TableFieldAttributes,
   Vertex
 } from "./Form";
 import { toTitle } from "case-switcher-js";
@@ -79,107 +72,6 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
 export interface TableInputFieldProps {
   meta: TableField
   vertex: Vertex;
-}
-
-function OverWriteableCell(props: {
-  cellMeta: TableFieldAttributes;
-  onOverwriteClick: () => void;
-  children?: JSX.Element;
-  joinVertex: Vertex;
-  
-}) {
-  const { Ws } = useContext(WsContext);
-  const clearValue = () => {
-    const txnId = getNewTxnId();
-    mergeVertexProperties(txnId, props.joinVertex.id, { [props.cellMeta.id]: null });
-    commitTxn(txnId, Ws)
-  };
-
-  return (
-   <Switch>
-     <Match when={!props.cellMeta.defaultValue}>
-       <td
-        class={css`
-          max-width: 100px;
-        `}
-       >
-         {props.children}
-       </td>
-     </Match>
-     {/* TODO: Think how I will make this in Form Layout*/}
-     <Match when={props.cellMeta.noInput}>
-       <td
-        class={css`
-          max-width: 100px;
-        `}
-       >
-         <div
-          class={css`
-              max-width: 100px;
-              display: flex;
-            `}
-          >
-           {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
-          </div>
-        </td>
-      </Match>
-      {/* For Disabled Attribute we dont required overwrite button */}
-      <Match when={props.cellMeta.disabled}>
-        <td
-          class={css`
-            max-width: 100px;
-          `}
-        >
-          <div
-            class={css`
-              max-width: 100px;
-              display: flex;
-            `}
-          >
-            {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
-            {props.children}
-          </div>
-        </td>
-      </Match>
-     {/* TODO: Think how I will make this in Form Layout*/}
-     <Match when={props.cellMeta.noOverWrite}>
-        <td
-          class={css`
-            max-width: 100px;
-          `}
-        >
-          {props.children}
-        </td>
-      </Match>
-      <Match when={props.cellMeta.id}>
-        <td>
-          <div
-            class={css`
-              max-width: 100px;
-              display: flex;
-            `}
-          >
-            {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
-            <Show
-              when={props.joinVertex.properties[props.cellMeta.id] === undefined || props.joinVertex.properties[props.cellMeta.id] === null}
-              fallback={
-                <>
-                  {props.children}
-                  <button type="button" onClick={clearValue}>
-                    <Icon icon="mdi:close-circle-outline" />
-                  </button>
-                </>
-              }
-            >
-              <button type="button" onClick={props.onOverwriteClick}>
-                <Icon icon="mdi:debug-step-over"/>
-              </button>
-            </Show>
-          </div>
-        </td>
-      </Match>
-    </Switch>
-  );
 }
 
 function newRow(txnId: number, vertex: Vertex, meta: TableField) {
@@ -276,131 +168,117 @@ export function TableInputField(props: TableInputFieldProps) {
         {(meta) => (
          <Switch>
            <Match when={meta.hidden}>
-              <></>
+             <td>
+               <div
+                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}</div>
+             </td>
             </Match>
 
-           <Match when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
-             <OverWriteableCell
-              
-              joinVertex={joinVertex}
-              cellMeta={meta}
+           <Match
+            when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
 
-              onOverwriteClick={() => setValue(meta, "")}
-             >
-               <TextInputField
-                label=""
-                // name=
-                value={joinVertex.properties[meta.id]}
-                setValue={(value) => setValue(meta, value)}
-               />
-             </OverWriteableCell>
-            </Match>
-            <Match when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
-              <OverWriteableCell
-               
-               joinVertex={joinVertex}
-               cellMeta={meta}
+             <td>
+               <div
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <TextInputField
+                  label=""
+                  // name=
+                  value={joinVertex.properties[meta.id]}
+                  setValue={(value) => setValue(meta, value)}
+                 />
 
-               onOverwriteClick={() => setValue(meta, "")}
-              >
-                <NumberInputField
-                 label=""
-                 value={joinVertex.properties[meta.id]}
-                 setValue={(value) => setValue(meta, value)}
-                />
-              </OverWriteableCell>
-            </Match>
-            <Match when={meta.component === "Select"}>
-              <OverWriteableCell
-               
-               joinVertex={joinVertex}
-               cellMeta={meta}
+               </div>
+             </td>
+           </Match>
+           <Match
+            when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
+             <td>
+               <div
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <NumberInputField
+                  label=""
+                  value={joinVertex.properties[meta.id]}
+                  setValue={(value) => setValue(meta, value)}
+                 />
 
-               onOverwriteClick={() => {
-                 const txnId = getNewTxnId();
-                 setSelectionValue(txnId, joinVertex, meta,  undefined)
-                 commitTxn(txnId, Ws);
-               }}
-              >
-                <SelectInputField
-                 
-                 vertex={joinVertex}
-                 meta={meta as SelectField}
-                 // name={props.form.id + meta.id}
-                 // form={props.form}
-                 
-                />
-              </OverWriteableCell>
-            </Match>
-            <Match when={meta.component === "Tag"}>
-              <OverWriteableCell
-               
-               joinVertex={joinVertex}
-               cellMeta={meta}
+               </div>
+             </td>
+           </Match>
+           <Match when={meta.component === "Select"}>
+             <td>
+               <div
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <SelectInputField
 
-               onOverwriteClick={() => {
-                 const txnId = getNewTxnId();
-                 setSelectionValue(txnId, joinVertex, meta,  undefined)
-                 commitTxn(txnId, Ws);
-               }}
-              >
-                <TagField
-                 
-                 vertex={joinVertex}
-                 meta={meta as SelectField}
-                 // name={props.form.id + meta.id}
-                 // form={props.form}
-                 
-                />
-              </OverWriteableCell>
-            </Match>
-            <Match when={meta.dataType === "Boolean"}>
-              <OverWriteableCell
-               
-               joinVertex={joinVertex}
-               cellMeta={meta}
+                  vertex={joinVertex}
+                  meta={meta as SelectField}
+                  // name={props.form.id + meta.id}
+                  // form={props.form}
 
-               onOverwriteClick={() => setValue(meta, false)}
-              >
-                <BooleanInputField value={joinVertex.properties[meta.id]}
-                                   setValue={(value) => setValue(meta, value)} />
-              </OverWriteableCell>
-            </Match>
-            <Match when={meta.dataType === DataType.Map || meta.component === "Json"}>
-              <td>
-                <OverWriteableCell
-                 
-                 joinVertex={joinVertex}
-                 cellMeta={meta}
+                 />
 
-                 onOverwriteClick={() => setValue(meta, {})}
-                >
-                  <ModalInput btnContent={<Icon
-                   icon="material-symbols:edit-square-outline-sharp" />}>
-                    <JsonInput
-                     value={joinVertex.properties[meta.id]}
-                     setValue={(value) => setValue(meta, value)}
-                    />
-                  </ModalInput>
-                </OverWriteableCell>
-              </td>
-            </Match>
-            <Match when={meta.component === "JsCode"}>
-              <OverWriteableCell
-               
-               joinVertex={joinVertex}
-               cellMeta={meta}
+               </div>
+             </td>
+           </Match>
+           <Match when={meta.component === "Tag"}>
+             <td>
+               <div
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <TagField
 
-               onOverwriteClick={() => setValue(meta, "")}
-              >
-                <ModalInput btnContent={<Icon icon="material-symbols:edit-square-outline-sharp" />}>
-                  <TextAreaField
-                   value={joinVertex.properties[meta.id]}
-                   setValue={(value) => setValue(meta, value)}
-                  />
-                </ModalInput>
-              </OverWriteableCell>
-            </Match>
+                  vertex={joinVertex}
+                  meta={meta as SelectField}
+                  // name={props.form.id + meta.id}
+                  // form={props.form}
+
+                 />
+
+               </div>
+             </td>
+           </Match>
+           <Match when={meta.dataType === "Boolean"}>
+             <td>
+               <div
+                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <BooleanInputField value={joinVertex.properties[meta.id]}
+                                    setValue={(value) => setValue(meta, value)} />
+
+               </div>
+             </td>
+           </Match>
+           <Match
+            when={meta.dataType === DataType.Map || meta.component === "Json"}>
+
+             <td>
+               <div
+                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <ModalInput btnContent={<Icon
+                  icon="material-symbols:edit-square-outline-sharp" />}>
+                   <JsonInput
+                    value={joinVertex.properties[meta.id]}
+                    setValue={(value) => setValue(meta, value)}
+                   />
+                 </ModalInput>
+
+
+               </div>
+             </td>
+           </Match>
+           <Match when={meta.component === "JsCode"}>
+             <td>
+               <div
+                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <ModalInput btnContent={<Icon
+                  icon="material-symbols:edit-square-outline-sharp" />}>
+                   <TextAreaField
+                    value={joinVertex.properties[meta.id]}
+                    setValue={(value) => setValue(meta, value)}
+                   />
+                 </ModalInput>
+
+               </div>
+             </td>
+           </Match>
           </Switch>
         )}
       </For>
@@ -408,12 +286,17 @@ export function TableInputField(props: TableInputFieldProps) {
 
     return (
         <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
-          <td>{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}{p.edgeId}</td>
-          <DisplayProperties attributes={props.meta.attributes}/>
           <td>
-            <button type="button" onclick={deleteRow} title="Delete Row">
-              <Icon icon="ion:close-circle-outline"/>
-            </button>
+            <div
+             class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}{p.edgeId}</div>
+          </td>
+          <DisplayProperties attributes={props.meta.attributes} />
+          <td>
+            <div class="flex">
+              <button type="button" onclick={deleteRow} title="Delete Row">
+                <Icon icon="ion:close-circle-outline" />
+              </button>
+            </div>
           </td>
         </tr>
     );
@@ -469,9 +352,9 @@ export function TableInputField(props: TableInputFieldProps) {
               <th></th>
               <For each={props.meta.attributes}>
                 {(attribute) => (
-                  <Show when={!attribute.hidden}>
-                    <th>{toTitle(attribute.label || attribute.id)}</th>
-                  </Show>
+                 <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
+                   <th>{toTitle(attribute.label || attribute.id)}</th>
+                 </Show>
                 )}
               </For>
               <th></th>

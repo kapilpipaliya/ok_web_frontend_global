@@ -114,28 +114,28 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "Select",
                 collection: "Attribute",
                 displayExpr: "properties.id",
-                noOverWrite: true,
+                
               },
              {
               id: "tab",
               component: "Select",
               collection: "CollectionAttribute<-CollectionTab",
               displayExpr: "properties.id",
-              noOverWrite: true,
+              
              },
              {
               id: "group",
               component: "Select",
               collection: "CollectionAttribute<-CollectionGroup",
               displayExpr: "properties.id",
-              noOverWrite: true,
+              
              },
               {
                 id: "dataType",
                 component: "Select",
                 collection: "DataType",
                 displayExpr: "properties.id",
-                noInput: true,
+                hidden: true,
                 disabled: true,
                 defaultValue: "->CollectionAttributeAttribute->AttributeDataType:properties.id"
               },
@@ -143,7 +143,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 id: "component",
                 component: "Select",
                 displayExpr: "properties.id",
-               noOverWrite: true,
+
                 collection: "CollectionAttributeAttribute->AttributeDataType->DataTypeComponent", defaultValue: "->CollectionAttributeAttribute->AttributeComponent:properties.id"
               },
               { id: "title", dataType: "String", defaultValue: "->CollectionAttributeAttribute:properties.title" },
@@ -164,12 +164,22 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "Select",
                 collection: "Collection",
                 displayExpr: "properties.id",
-               noOverWrite: true,
+               
               },
-              {
-                id: "type",
-                component: "TextInput"
-              }
+             {
+              id: "tab",
+              component: "Select",
+              collection: "CollectionChild<-CollectionTab",
+              displayExpr: "properties.id",
+
+             },
+             {
+              id: "group",
+              component: "Select",
+              collection: "CollectionChild<-CollectionGroup",
+              displayExpr: "properties.id",
+
+             },
             ]
           }
         ]
@@ -180,15 +190,10 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           { id: "id", dataType: "String" },
           { id: "title", dataType: "String" },
           { id: "description", component: "TextArea" },
-          // { id: "meta", component: "JsCode" },
-          // { id: "forms", component: "table_forms" },
-          // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
       { id: "collection",
        component: "Select",
        collection: "Collection",
        displayExpr: "properties.id", },
-      // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
-
       {
        id: "Attribute",
        label: "Attributes",
@@ -197,7 +202,6 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
         {
          id: "attribute",
          component: "Select",
-         // TODO: fix this make a function to return nested projection id:
          displayExpr: "properties.id",
          collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionAttribute",
         },
@@ -206,8 +210,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
          component: "Select",
          collection: "DataType",
          displayExpr: "properties.id",
-         noInput: true,
-         disabled: true,
+         hidden: true,
         },
         {
          id: "component",
