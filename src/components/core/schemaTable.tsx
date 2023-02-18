@@ -39,7 +39,7 @@ export default function SchemaTable(props: {entity: string}) {
   setTableMetaData(tableMetaData_);
   const headers = [...tableMetaData_.attributes];
   // @ts-ignore
-  headers.push({ key: "edit", serverType: "actions" });
+  headers.push({ key: "edit", dataType: "actions" });
 
   // For async data get operation, we will handle it differently
   setData({
@@ -81,14 +81,14 @@ export default function SchemaTable(props: {entity: string}) {
             <div>{graph.vertexes[id]["properties"][head.id]}</div>
            }
           >
-           <Match when={head.serverType === "Boolean"}>
+           <Match when={head.dataType === "Boolean"}>
             <div>{graph.vertexes[id]["properties"][head.id] ? "true" : "false"}</div>
            </Match>
-           <Match when={head.serverType === "Map"}>
+           <Match when={head.dataType === "Map"}>
             <div>{graph.vertexes[id]["properties"][head.id]}</div>
            </Match>
            {/* @ts-ignore */}
-           <Match when={head.serverType === "actions"}>
+           <Match when={head.dataType === "actions"}>
             <td>
              <a href={`${location.pathname}/${id}`}>Edit</a>
              <button onClick={() => deleteObject(id)}>Delete
@@ -139,7 +139,7 @@ export default function SchemaTable(props: {entity: string}) {
          <th>ID</th>
          <For each={data().headers}>
           {(head) => (
-           <th scope="col" title={head.serverType}>
+           <th scope="col" title={head.dataType}>
             {head.id}
            </th>
           )}

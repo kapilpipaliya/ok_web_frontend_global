@@ -13,7 +13,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
          title: "DataType",
          label: "DataType",
          attributes: [
-           { id: "id", serverType: "String" },
+           { id: "id", dataType: "String" },
            {
              id: "default",
              component: "Select",
@@ -28,12 +28,12 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
            }
          ]
        },
-    "Component": {  title: "Component", label: "Component", attributes: [{ id: "id", serverType: "String" }] },
+    "Component": {  title: "Component", label: "Component", attributes: [{ id: "id", dataType: "String" }] },
     "Attribute": {
          title: "Attribute", label: "Attribute", attributes: [
-          { id: "id", serverType: "String" },
+          { id: "id", dataType: "String" },
           {
-            id: "serverType",
+            id: "dataType",
             component: "Select",
             displayExpr: "properties.id",
             collection: "DataType",
@@ -42,31 +42,21 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           {
             id: "component",
             component: "Select",
-            collection: "(serverType)->[DataTypeComponent]",
+            collection: "AttributeDataType->DataTypeComponent",
             displayExpr: "properties.id",
           },
-          { id: "label", serverType: "String" },
-          // { id: "internal", type: "Boolean" },
-          { id: "unique", serverType: "Boolean" },
-          { id: "required", serverType: "Boolean" },
-          { id: "readonly", serverType: "Boolean" },
-          { id: "disabled", serverType: "Boolean" },
-          // { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-          // { id: "onChange", component: "JsCode" },
-          // { id: "props", component: "JsCode" },
-          // {
-          //   id: "code",
-          //   component: "JsCode",
-          //   props: { placeholder: "write attributes for non base field" }
-          // },
-          // { id: "meta", component: "JsCode" }
+          { id: "title", dataType: "String" },
+          { id: "unique", dataType: "Boolean" },
+          { id: "required", dataType: "Boolean" },
+          { id: "readonly", dataType: "Boolean" },
+          { id: "disabled", dataType: "Boolean" },
         ],
       },
     "CollectionCategory": {
         title: "Collection Category",
         label: "CollectionCategory",
         attributes: [
-          { id: "id", serverType: "String" },
+          { id: "id", dataType: "String" },
           { id: "description", component: "TextArea" }
         ]
       },
@@ -76,7 +66,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
         title: "Collection",
         label: "Collection",
         attributes: [
-          { id: "id", serverType: "String" },
+          { id: "id", dataType: "String" },
           {
             id: "category",
             component: "Select",
@@ -94,7 +84,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             component: "TextInput"
            },
            {
-            id: "label",
+            id: "name",
             component: "TextInput"
            }
           ]
@@ -109,7 +99,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             component: "TextInput"
            },
            {
-            id: "label",
+            id: "name",
             component: "TextInput"
            }
           ]
@@ -129,43 +119,38 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
              {
               id: "tab",
               component: "Select",
-              collection: "<-Tab",
+              collection: "CollectionAttribute<-CollectionTab",
               displayExpr: "properties.id",
               noOverWrite: true,
              },
              {
               id: "group",
               component: "Select",
-              collection: "<-Group",
+              collection: "CollectionAttribute<-CollectionGroup",
               displayExpr: "properties.id",
               noOverWrite: true,
              },
-              { id: "id", serverType: "String" },
               {
-                id: "serverType",
+                id: "dataType",
                 component: "Select",
                 collection: "DataType",
                 displayExpr: "properties.id",
                 noInput: true,
                 disabled: true,
-                defaultValue: "attribute->serverType->id"
+                defaultValue: "->CollectionAttributeAttribute->AttributeDataType:properties.id"
               },
               {
                 id: "component",
                 component: "Select",
                 displayExpr: "properties.id",
-                collection: "(attribute:properties.serverType)->[DataTypeComponent]", defaultValue: "attribute->component->id"
+               noOverWrite: true,
+                collection: "CollectionAttributeAttribute->AttributeDataType->DataTypeComponent", defaultValue: "->CollectionAttributeAttribute->AttributeComponent:properties.id"
               },
-              { id: "label", serverType: "String", defaultValue: "attribute->label" },
-              { id: "unique", serverType: "Boolean", defaultValue: "attribute->unique" },
-              { id: "required", serverType: "Boolean", defaultValue: "attribute->required" },
-              { id: "readonly", serverType: "Boolean", defaultValue: "attribute->readonly" },
-              { id: "disabled", serverType: "Boolean", defaultValue: "attribute->disabled" },
-              { id: "default", serverType: "Map", defaultValue: "attribute->default" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
-              { id: "onChange", component: 'JsCode', defaultValue: "attribute->onChange" },
-              { id: "props", component: 'JsCode', defaultValue: "attribute->props" },
-              { id: "code", component: 'JsCode', defaultValue: "attribute->code" },
-              { id: "meta", component: 'JsCode', defaultValue: "attribute->meta" },
+              { id: "title", dataType: "String", defaultValue: "->CollectionAttributeAttribute:properties.title" },
+              { id: "unique", dataType: "Boolean", defaultValue: "->CollectionAttributeAttribute:properties.unique" },
+              { id: "required", dataType: "Boolean", defaultValue: "->CollectionAttributeAttribute:properties.required" },
+              { id: "readonly", dataType: "Boolean", defaultValue: "->CollectionAttributeAttribute:properties.readonly" },
+              { id: "disabled", dataType: "Boolean", defaultValue: "->CollectionAttributeAttribute:properties.disabled" },
             ],
 
           },
@@ -192,13 +177,13 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
 
     "FormLayout": {
          title: "FormLayout1", label: "FormLayout", attributes: [
-          { id: "id", serverType: "String" },
-          { id: "title", serverType: "String" },
+          { id: "id", dataType: "String" },
+          { id: "title", dataType: "String" },
           { id: "description", component: "TextArea" },
           // { id: "meta", component: "JsCode" },
           // { id: "forms", component: "table_forms" },
           // { id: "buttongroup", component: "buttongroup", buttons: [{design: "Default", children: "OK", class: "mr-2"}, {design: "Negative", children: "Cancel"}] },
-      { id: "labelName",
+      { id: "collection",
        component: "Select",
        collection: "Collection",
        displayExpr: "properties.id", },
@@ -213,14 +198,11 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
          id: "attribute",
          component: "Select",
          // TODO: fix this make a function to return nested projection id:
-         displayExpr: "id",
-         // default: (formValues, control, id: string) => id && graph.edges[id].end,
-         collection: "<-labelName->attribute->id",
+         displayExpr: "properties.id",
+         collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionAttribute",
         },
-
-        { id: "id", serverType: "String" },
         {
-         id: "serverType",
+         id: "dataType",
          component: "Select",
          collection: "DataType",
          displayExpr: "properties.id",
@@ -231,14 +213,14 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
          id: "component",
          component: "Select",
          displayExpr: "properties.id",
-         collection: "(attribute:properties.serverType)->[DataTypeComponent]",
+         collection: "(attribute:properties.dataType)->[DataTypeComponent]",
         },
-        { id: "label", serverType: "String" },
-        { id: "unique", serverType: "Boolean" },
-        { id: "required", serverType: "Boolean" },
-        { id: "readonly", serverType: "Boolean" },
-        { id: "disabled", serverType: "Boolean" },
-        // { id: "default", serverType: "Map" }, // TODO: make a function, that accept value and based on serverType display different component (and convert to value in new type).
+        { id: "title", dataType: "String" },
+        { id: "unique", dataType: "Boolean" },
+        { id: "required", dataType: "Boolean" },
+        { id: "readonly", dataType: "Boolean" },
+        { id: "disabled", dataType: "Boolean" },
+        // { id: "default", dataType: "Map" }, // TODO: make a function, that accept value and based on dataType display different component (and convert to value in new type).
         // { id: "onChange", component: 'JsCode' },
         // { id: "props", component: 'JsCode' },
         // { id: "code", component: 'JsCode' },
@@ -252,7 +234,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
         title: "FormLayout1",
         label: "TableLayout",
         attributes: [
-          { id: "id", serverType: "String" }
+          { id: "id", dataType: "String" }
         ]
       }
   };

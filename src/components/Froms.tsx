@@ -76,8 +76,8 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     if(attribute.component) {
      attribute.component = graph.vertexes[attribute.component].properties.id;
     }
-    if(attribute.serverType) {
-     attribute.serverType = graph.vertexes[attribute.serverType].properties.id;
+    if(attribute.dataType) {
+     attribute.dataType = graph.vertexes[attribute.dataType].properties.id;
     if(attribute.props){
      attribute.props = evalImpl(attribute.props);
     }

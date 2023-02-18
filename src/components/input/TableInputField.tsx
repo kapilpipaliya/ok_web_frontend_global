@@ -26,6 +26,7 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import {
+  getOptionLabel,
   getSelectedVertexValue,
   SelectInputField,
   setSelectionValue
@@ -74,33 +75,7 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
     </Show>
   </>
 }
-const getSelectValueofVertex = (fromVertex: Vertex, key: string, key2: string) => {
-  const vertexId = getSelectedVertexValue(fromVertex,key)?.[0];
-  if (vertexId !== undefined) {
-    const vertex = graph.vertexes[vertexId];
-    const value = vertex?.properties?.[key2];
-    if (typeof value === "boolean") {
-      return value ? "true" : "false";
-    }
-    return value;
-  }
-}
-const defaultValue = (pattern: string, fromVertex: Vertex) =>  {
-  if(!pattern) return;
-  const result = pattern.split('->');
-  if(result.length === 2) {
-    return getSelectValueofVertex(fromVertex, result[0],result[1])
-  }
-  if(result.length === 3) {
-    const vertexId = getSelectedVertexValue(fromVertex,result[0])?.[0];
-    if (vertexId !== undefined) {
-      const vertex = graph.vertexes[vertexId];
-      if (vertex) {
-        return getSelectValueofVertex(vertex, result[1],result[2])
-      }
-    }
-  }
-}
+
 export interface TableInputFieldProps {
   meta: TableField
   vertex: Vertex;
@@ -144,7 +119,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-           {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
+           {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
           </div>
         </td>
       </Match>
@@ -161,7 +136,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
+            {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
             {props.children}
           </div>
         </td>
@@ -184,7 +159,7 @@ function OverWriteableCell(props: {
               display: flex;
             `}
           >
-            {props.cellMeta.defaultValue && defaultValue(props.cellMeta.defaultValue, props.joinVertex)}
+            {props.cellMeta.defaultValue && getOptionLabel(props.joinVertex, props.cellMeta.defaultValue)}
             <Show
               when={props.joinVertex.properties[props.cellMeta.id] === undefined || props.joinVertex.properties[props.cellMeta.id] === null}
               fallback={
@@ -304,7 +279,7 @@ export function TableInputField(props: TableInputFieldProps) {
               <></>
             </Match>
 
-           <Match when={meta.component === "TextInput" || (!meta.component && meta.serverType === DataType.String)}>
+           <Match when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
              <OverWriteableCell
               
               joinVertex={joinVertex}
@@ -320,7 +295,7 @@ export function TableInputField(props: TableInputFieldProps) {
                />
              </OverWriteableCell>
             </Match>
-            <Match when={meta.component === "NumberInput" || (!meta.component && (meta.serverType === DataType.Integer || meta.serverType === DataType.Float))}>
+            <Match when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
               <OverWriteableCell
                
                joinVertex={joinVertex}
@@ -379,7 +354,7 @@ export function TableInputField(props: TableInputFieldProps) {
                 />
               </OverWriteableCell>
             </Match>
-            <Match when={meta.serverType === "Boolean"}>
+            <Match when={meta.dataType === "Boolean"}>
               <OverWriteableCell
                
                joinVertex={joinVertex}
@@ -391,7 +366,7 @@ export function TableInputField(props: TableInputFieldProps) {
                                    setValue={(value) => setValue(meta, value)} />
               </OverWriteableCell>
             </Match>
-            <Match when={meta.serverType === DataType.Map || meta.component === "Json"}>
+            <Match when={meta.dataType === DataType.Map || meta.component === "Json"}>
               <td>
                 <OverWriteableCell
                  
