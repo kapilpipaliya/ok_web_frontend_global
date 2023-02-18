@@ -78,7 +78,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           id: "Tab",
           component: "Table",
 
-          attributes: [
+          columns: [
            {
             id: "id",
             component: "TextInput"
@@ -93,7 +93,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
           id: "Group",
           component: "Table",
 
-          attributes: [
+          columns: [
            {
             id: "id",
             component: "TextInput"
@@ -108,7 +108,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             id: "Attribute",
             label: "Attributes",
             component: "Table",
-            attributes: [
+            columns: [
               {
                 id: "attribute",
                 component: "Select",
@@ -158,7 +158,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
             id: "Child",
             component: "Table",
 
-            attributes: [
+            columns: [
               {
                 id: "collection",
                 component: "Select",
@@ -198,7 +198,7 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
        id: "Attribute",
        label: "Attributes",
        component: 'Table',
-       attributes: [
+       columns: [
         {
          id: "attribute",
          component: "Select",
