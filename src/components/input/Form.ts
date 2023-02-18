@@ -59,8 +59,9 @@ export interface TableField extends BaseField {
   collection?: string;
   edge?: string;
   form?: string;
-  postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
+  // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes: TableFieldAttributes[];
+  columns: TableFieldAttributes[];
 
   data: {properties: {}}[]; // Edges[]
   defaultValueFn: (control: IFormGroup, key: string)=>JSXElement;

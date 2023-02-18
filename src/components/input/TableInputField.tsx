@@ -154,17 +154,14 @@ export function TableInputField(props: TableInputFieldProps) {
       commitTxn(txnId, Ws);
     }
 
-
-
-    const DisplayProperties = (p: { attributes: FieldAttribute[] }) => {
+    const DisplayProperties = () => {
       const setValue = (attribute: FieldAttribute, value: any) => {
         const txnId = getNewTxnId();
         mergeVertexProperties(txnId, joinVertex.id, { [attribute.id]: value });
         commitTxn(txnId, Ws);
       };
 
-      // TODO: Fix all setValue functions, it should set as undefined or null, make sure all components support null.
-      return <For each={p.attributes}>
+      return <For each={props.meta.columns}>
         {(meta) => (
          <Switch>
            <Match when={meta.hidden}>
@@ -290,7 +287,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <div
              class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}{p.edgeId}</div>
           </td>
-          <DisplayProperties attributes={props.meta.attributes} />
+          <DisplayProperties />
           <td>
             <div class="flex">
               <button type="button" onclick={deleteRow} title="Delete Row">
@@ -333,6 +330,8 @@ export function TableInputField(props: TableInputFieldProps) {
   return (
     <div>
       <div>
+
+
         <div>
           <button type="button" onclick={addNew}>Add New</button>
         </div>
@@ -350,7 +349,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <thead>
             <tr>
               <th></th>
-              <For each={props.meta.attributes}>
+              <For each={props.meta.columns}>
                 {(attribute) => (
                  <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
                    <th>{toTitle(attribute.label || attribute.id)}</th>
@@ -365,7 +364,7 @@ export function TableInputField(props: TableInputFieldProps) {
                               collisionDetector={closestCenter}>
               <DragDropSensors/>
               <SortableProvider ids={ids()}>
-                <For each={sortedIds()} fallback={<div>No Attributes</div>}>
+                <For each={sortedIds()} fallback={<div>No Columns</div>}>
                   {(edgeId) => <SortableRow edgeId={edgeId} />}
                 </For>
               </SortableProvider>
