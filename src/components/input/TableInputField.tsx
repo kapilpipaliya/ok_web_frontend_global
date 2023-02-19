@@ -276,6 +276,21 @@ export function TableInputField(props: TableInputFieldProps) {
                </div>
              </td>
            </Match>
+           <Match when={meta.component === "Table"}>
+             <td>
+               <div
+                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                 <TableInputField
+                  // id={props.form.id + meta.id}
+
+                  meta={meta as TableField}
+                  vertex={joinVertex}
+
+                 />
+
+               </div>
+             </td>
+           </Match>
           </Switch>
         )}
       </For>
@@ -330,7 +345,9 @@ export function TableInputField(props: TableInputFieldProps) {
   return (
     <div>
       <div>
-
+        {/*<Show when={props.meta.attributes}>*/}
+        {/*  <DynamicForm form={{title: '', label: props.meta.label || props.meta.id, attributes: props.meta.attributes}} vertex={props.vertex}/>*/}
+        {/*</Show>*/}
 
         <div>
           <button type="button" onclick={addNew}>Add New</button>
