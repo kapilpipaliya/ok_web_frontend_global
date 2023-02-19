@@ -144,7 +144,8 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
                 component: "Select",
                 displayExpr: "properties.id",
 
-                collection: "CollectionAttributeAttribute->AttributeDataType->DataTypeComponent", defaultValue: "->CollectionAttributeAttribute->AttributeComponent:properties.id"
+                collection: "CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
+               defaultValue: "->CollectionAttributeAttribute->AttributeComponent:properties.id"
               },
               { id: "title", dataType: "String", defaultValue: "->CollectionAttributeAttribute:properties.title" },
               { id: "unique", dataType: "Boolean", defaultValue: "->CollectionAttributeAttribute:properties.unique" },
@@ -202,8 +203,22 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
         {
          id: "attribute",
          component: "Select",
-         displayExpr: "properties.id",
+         displayExpr: "->CollectionAttributeAttribute:properties.id",
          collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionAttribute",
+        },
+        {
+         id: "tab",
+         component: "Select",
+         collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionTab",
+         displayExpr: "properties.id",
+         defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeTab:properties.id"
+        },
+        {
+         id: "group",
+         component: "Select",
+         collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionGroup",
+         displayExpr: "properties.id",
+         defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeGroup:properties.id"
         },
         {
          id: "dataType",
@@ -211,23 +226,79 @@ export const AttributesTableData: {[key: string]: FormMetaData} = {
          collection: "DataType",
          displayExpr: "properties.id",
          hidden: true,
+         defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType:properties.id"
         },
         {
          id: "component",
          component: "Select",
          displayExpr: "properties.id",
-         collection: "(attribute:properties.dataType)->[DataTypeComponent]",
+         collection: "FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
+         defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeComponent:properties.id||FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeComponent:properties.id"
         },
-        { id: "title", dataType: "String" },
-        { id: "unique", dataType: "Boolean" },
-        { id: "required", dataType: "Boolean" },
-        { id: "readonly", dataType: "Boolean" },
-        { id: "disabled", dataType: "Boolean" },
-        // { id: "default", dataType: "Map" }, // TODO: make a function, that accept value and based on dataType display different component (and convert to value in new type).
-        // { id: "onChange", component: 'JsCode' },
-        // { id: "props", component: 'JsCode' },
-        // { id: "code", component: 'JsCode' },
-        // { id: "meta", component: 'JsCode' },
+        { id: "title", dataType: "String",  defaultValue: "->FormLayoutAttributeAttribute:properties.title||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.title"  },
+        { id: "unique", dataType: "Boolean",  defaultValue: "->FormLayoutAttributeAttribute:properties.unique||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.unique"  },
+        { id: "required", dataType: "Boolean",  defaultValue: "->FormLayoutAttributeAttribute:properties.required||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.required"  },
+        { id: "readonly", dataType: "Boolean",  defaultValue: "->FormLayoutAttributeAttribute:properties.readonly||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.readonly"  },
+        { id: "disabled", dataType: "Boolean",  defaultValue: "->FormLayoutAttributeAttribute:properties.disabled||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.disabled"  },
+       ],
+      },
+      {
+       id: "Child",
+       label: "Children",
+       component: 'Table',
+       columns: [
+        {
+         id: "Collection",
+         component: "Select",
+         displayExpr: "->CollectionChildCollection:properties.id",
+         collection: "FormLayoutChild<-FormLayoutCollection->CollectionChild",
+        },
+        {
+         id: "tab",
+         component: "Select",
+         collection: "FormLayoutChild<-FormLayoutCollection->CollectionTab",
+         displayExpr: "properties.id",
+         defaultValue: "FormLayoutChildCollection->CollectionChildTab:properties.id"
+        },
+        {
+         id: "group",
+         component: "Select",
+         collection: "FormLayoutChild<-FormLayoutCollection->CollectionGroup",
+         displayExpr: "properties.id",
+         defaultValue: "FormLayoutChildCollection->CollectionChildGroup:properties.id"
+        },
+        {
+         id: "attribute",
+         component: "Table",
+         columns: [
+          {
+           id: "attribute",
+           component: "Select",
+           displayExpr: "->CollectionAttributeAttribute:properties.id",
+           collection: "FormLayoutChildAttribute<-FormLayoutChildCollection->CollectionChildCollection->CollectionAttribute",
+          },
+          {
+           id: "dataType",
+           component: "Select",
+           collection: "DataType",
+           displayExpr: "properties.id",
+           hidden: true,
+           defaultValue: "FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeDataType:properties.id",
+          },
+          {
+           id: "component",
+           component: "Select",
+           displayExpr: "properties.id",
+           collection: "FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
+           defaultValue: "FormLayoutChildAttributeAttribute->CollectionAttributeComponent:properties.id||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeComponent:properties.id"
+          },
+          { id: "title", dataType: "String",  defaultValue: "->FormLayoutChildAttributeAttribute:properties.title||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.title"  },
+          { id: "unique", dataType: "Boolean",  defaultValue: "->FormLayoutChildAttributeAttribute:properties.unique||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.unique"  },
+          { id: "required", dataType: "Boolean",  defaultValue: "->FormLayoutChildAttributeAttribute:properties.required||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.required"  },
+          { id: "readonly", dataType: "Boolean",  defaultValue: "->FormLayoutChildAttributeAttribute:properties.readonly||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.readonly"  },
+          { id: "disabled", dataType: "Boolean",  defaultValue: "->FormLayoutChildAttributeAttribute:properties.disabled||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.disabled"  },
+         ],
+        }
        ],
       }
         ],

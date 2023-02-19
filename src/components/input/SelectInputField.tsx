@@ -204,7 +204,16 @@ const getTextValue = (value: any) => {
 }
 
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
-  if(!vertex) return ''
+  if(!vertex) return '';
+  if(displayExpr.includes('||')) {
+    for (const displayExprElement of displayExpr.split('||')) {
+      const value = getOptionLabel(vertex, displayExprElement);
+      if(value !== undefined && value !== null && value !== '') {
+        return value;
+      }
+    }
+  }
+
     let pattern = '';
     let projection = ''
     if (displayExpr.includes(":")) {
