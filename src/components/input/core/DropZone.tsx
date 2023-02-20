@@ -8,7 +8,6 @@ options={{ clickable: true, acceptedFiles: 'text/javascript', maxFilesize: 256, 
 */
 import { JSX } from "solid-js";
 import Dropzone from "dropzone";
-import { Label } from "./Label";
 
 /*
 <style>
@@ -100,7 +99,6 @@ export const DropZone = (props: Properties) => {
   };
   return (
     <>
-      <Label name={props.label || ""} />
       <div class={props.dropzoneClass || "dropzone"} ref={handleNodeChange}>
         {props.children ? props.children : <p>Drop files here to upload</p>}
         <input hidden name="sites_data" type="file" />

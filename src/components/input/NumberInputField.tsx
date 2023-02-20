@@ -6,12 +6,13 @@ export interface NumberInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
+  "aria-labeledby": string
 }
 
 export function NumberInputField(props: NumberInputFieldProps) {
-  const [p, customProps] = splitProps(props, []);
+  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
   return (
-    <div>
+    <div aria-labeledby={p["aria-labeledby"]}>
       <div ref={el => {
         const instance = new NumberBox(el, {
           ...customProps,

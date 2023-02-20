@@ -6,13 +6,14 @@ export interface BooleanInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
+  "aria-labeledby": string
 }
 
 export function BooleanInputField(props: BooleanInputFieldProps) {
-  const [_, customProps] = splitProps(props, []);
+  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
 
   return (
-    <div>
+    <div aria-labeledby={p["aria-labeledby"]}>
       <div ref={el => {
         const instance = new CheckBox(el, {
           ...customProps,

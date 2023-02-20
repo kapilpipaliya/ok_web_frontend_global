@@ -73,9 +73,6 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
  if(graph.vertexes[newVertexId]) {
   return {error: "new Vertex ID is not valid"};
  }
- if(graph.edges[newVertexId]) {
-  return {error: "new Vertex ID is not valid as Its used in Edge"};
- }
  setGraph('vertexes', newVertexId, graph.vertexes[oldVertexId]);
  setGraph('vertexes', newVertexId, 'id', newVertexId);
  // @ts-ignore

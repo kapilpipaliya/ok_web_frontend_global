@@ -5,7 +5,6 @@
  */
 import { createSignal, JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
-import { Label } from "./Label";
 
 interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
   name?: string;
@@ -105,7 +104,6 @@ export const File = (props: Properties) => {
 
   return (
     <>
-      <Label name={props.label || ""} />
       <progress value={progressBar.value} max={progressBar.max} style="width: 300px;" />
       <span>{percentageText()}</span>
       <span>{speedText()}</span>

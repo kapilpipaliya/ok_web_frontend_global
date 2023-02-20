@@ -8,13 +8,7 @@ import {
 import { Link, useNavigate, useParams } from "solid-app-router";
 import { graph, revertTransaction } from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
-import {
- EdgeLabels,
- FormMetaData,
- Id,
- VertexLabels
-} from "./input/Form";
-import { evalImpl } from "./utils";
+
 import {
  DynamicFormSequence,
  DynamicFormSequenceProps
@@ -22,108 +16,97 @@ import {
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
-import { G } from "@mobily/ts-belt";
+import { getSelectionOptions } from "./input/SelectInputField";
+import { FieldAttribute, FormMetaData, TableField } from "./input/Form";
 
 export const AllForms = () => {
- const allFormLayouts = () => graph.vertexLabelIdMap[VertexLabels.FormLayout]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
+ const allFormLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
 
  return <div class="flex flex:row flex:wrap">
   <For each={allFormLayouts()}>
-   {formLayout => <Link href={`/form/${formLayout.properties.id}`}>{formLayout.properties.id}</Link>}
+   {formLayout => <Link
+    href={`/form/${formLayout.properties.id}`}>{formLayout.properties.id}</Link>}
   </For>
- </div>
-}
+ </div>;
+};
 interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'form'>{
  formId: string;
 }
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
- const formLayoutId = () => (graph.vertexLabelIdMap[VertexLabels.FormLayout] || []).find(vertexId => graph.vertexes[vertexId].properties['id'] === props.formId)
+ const formLayoutId = () => (graph.vertexLabelIdMap["FormLayout"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === props.formId);
  const formLayout = graph.vertexes[props.formId] || graph.vertexes[`${formLayoutId()}`];
- if(!formLayout) {
-  alert('form dont found');
+ if (!formLayout) {
+  alert("form dont found");
   return;
  }
- const formLayoutHasItems = formLayout.out_edges[EdgeLabels.FormLayoutHasItem].map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
 
- const generateNewApi = () => {
-  const forms = formLayoutHasItems.map(edgeFormLayoutHasItem=> {
-   const vertexFormLayoutItem = graph.vertexes[edgeFormLayoutHasItem.end];
-   if(typeof vertexFormLayoutItem.properties['labelName'] === "number") {
-    vertexFormLayoutItem.properties['labelName'] = graph.vertexes[vertexFormLayoutItem.properties['labelName']].properties.id;
-   }
+ const formLayoutCollection = getSelectionOptions(formLayout, "->FormLayoutCollection", "")[0];
 
-   // assume collection is always set, and single select
-   const edgeFormLayoutItemHasCollectionId = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasCollection][0]
-   const vertexCollection = graph.vertexes[graph.edges[edgeFormLayoutItemHasCollectionId].end];
-   const collectionAttributeAndPropertiesMap = vertexCollection.out_edges[EdgeLabels.CollectionHasAttribute].reduce((acc, collectionHasAttributeId)=>{
-    const edgeCollectionHasAttribute = graph.edges[collectionHasAttributeId];
-    const attribute = graph.vertexes[edgeCollectionHasAttribute.end]
-    acc[attribute.id] = edgeCollectionHasAttribute.properties;
-    return acc;
-   }, {} as {[key: Id]: {[p: string]: any}})
+ const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormLayoutAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
-   const formLayoutItemAttributeIds = vertexFormLayoutItem.out_edges[EdgeLabels.FormLayoutItemHasAttribute] || [];
-   const attributes  = formLayoutItemAttributeIds.map(formLayoutItemAttributeId => {
-    const edgeFormLayoutItemAttribute = graph.edges[formLayoutItemAttributeId];
+ const attributes: FieldAttribute[] = FormLayoutAttributes.map(vertexFormLayoutAttribute => {
+  const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeAttribute", "")[0];
+  const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+  const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutAttribute.properties, false, 10));
 
-    const attributeId = edgeFormLayoutItemAttribute.end;
-    const vertexAttribute = graph.vertexes[attributeId];
-    const collectionAttribute = collectionAttributeAndPropertiesMap[attributeId];
-    // get touched, dirty, submitted, page, validators and set to fieldOptions
-    // pass other property to attributes
-    // if props is string eval it else if its object use it
-    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(collectionAttribute, false, 10), removeUndefinedProperties(edgeFormLayoutItemAttribute.properties, false, 10));
-    if(attribute.component) {
-     attribute.component = graph.vertexes[attribute.component].properties.id;
-    }
-    if(attribute.dataType) {
-     attribute.dataType = graph.vertexes[attribute.dataType].properties.id;
-    if(attribute.props){
-     attribute.props = evalImpl(attribute.props);
-    }
-     if(attribute.code){
-      attribute.code = evalImpl(attribute.code);
-     }
-     if(attribute.meta) {
-      const meta = evalImpl(attribute.meta);
-      if(G.isObject(meta)){
-       Object.assign(attribute, meta);
-       delete attribute.meta;
-      }
-     }
-    }
-    return attribute;
-   }).sort((a,b)=>a.pos-b.pos);
-   const from = vertexFormLayoutItem.properties.from
-   const to = vertexFormLayoutItem.properties.to
-   const save = [vertexFormLayoutItem.properties.labelType, vertexFormLayoutItem.properties.labelName, from ? evalImpl(from) : undefined, to ? evalImpl(to) : undefined];
-   const formLayoutItemProperties = { ...vertexFormLayoutItem.properties };
-   if(formLayoutItemProperties.meta) {
-    const meta = evalImpl(formLayoutItemProperties.meta);
-    if(G.isObject(meta)){
-     Object.assign(formLayoutItemProperties, meta);
-     delete formLayoutItemProperties.meta;
-    }
-   }
-   return {save, ...formLayoutItemProperties, attributes} as FormMetaData
-  })
-  return forms;
- }
- const forms = generateNewApi();
- console.log(forms);
 
- const [_, customProps] = splitProps(props, ['formId']);
- const {id, ...formLayoutProperties} = formLayout.properties;
- if(formLayoutProperties.meta) {
-  const meta = evalImpl(formLayoutProperties.meta);
-  if(G.isObject(meta)){
-   Object.assign(formLayoutProperties, meta);
-   delete formLayoutProperties.meta;
-  }
- }
+  const formAttributeComponent = () => getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeComponent", "")[0];
+  const collectionAttributeComponent = () => getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0];
+  const attributeComponent = () => getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+
+  const component = formAttributeComponent() || collectionAttributeComponent() || attributeComponent();
+  attribute.component = component.properties.id;
+
+  attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+  return attribute;
+ }).sort((a, b) => a.pos - b.pos);
+
+
+ const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
+
+ const tableAttributes: FieldAttribute[] = FormLayoutChilds.map(vertexFormLayoutChild => {
+
+  const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
+  const tableAttributes: FieldAttribute[] = formLayoutChildAttributes.map(vertexFormLayoutChildAttribute => {
+   const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeAttribute", "")[0];
+   const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+   const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutChildAttribute.properties, false, 10));
+
+
+   const formAttributeComponent = () => getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeComponent", "")[0];
+   const collectionAttributeComponent = () => getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0];
+   const attributeComponent = () => getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+
+   const component = formAttributeComponent() || collectionAttributeComponent() || attributeComponent();
+   attribute.component = component.properties.id;
+
+   attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+   return attribute;
+  }).sort((a, b) => a.pos - b.pos);
+
+  const label = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
+  return {
+   columns: tableAttributes,
+   component: "Table",
+   label,
+   id: label
+  } as TableField;
+ })
+
+ const [_, customProps] = splitProps(props, ["formId"]);
+
+ const form: FormMetaData = {
+  attributes: [...attributes, ...tableAttributes],
+  label: formLayoutCollection.properties.id,
+  title: formLayout.properties.title
+ };
+
+ console.log(form);
+
  return <div class="flex flex:row flex:wrap">
-  <DynamicFormSequence form={forms} {...formLayoutProperties} {...customProps}/>
- </div>
+  <DynamicFormSequence
+   form={form} {...customProps} />
+ </div>;
 }
 export interface SingleFormProps {}
 export const SingleForm = (props: SingleFormProps) => {

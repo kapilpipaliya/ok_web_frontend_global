@@ -137,7 +137,7 @@ export function resetDatabase() {
 export function isValidId(startVertexId: Id) {
   return G.isNumber(startVertexId);
 }
-// window.graph = graph;
+window.graph = graph;
 /*
 // ***********
 // Development

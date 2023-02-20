@@ -8,12 +8,13 @@ export interface TextInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
+  "aria-labeledby": string
 }
 
 export function TextInputField(props: TextInputFieldProps) {
-  const [p, customProps] = splitProps(props, []);
+  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
   return (
-    <div>
+    <div aria-labeledby={p['aria-labeledby']}>
       <div ref={el => {
         const instance = new TextBox(el, {
           ...customProps,

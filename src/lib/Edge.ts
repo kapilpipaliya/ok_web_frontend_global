@@ -122,9 +122,6 @@ export function updateEdgeId(oldEdgeId: Id, newEdgeId: Id) {
  if(graph.edges[newEdgeId]) {
   return {error: "new Edge ID is not valid"};
  }
- if(graph.vertexes[newEdgeId]) {
-  return {error: "new ID is not valid as Its used in Vertex"};
- }
  setGraph('edges', newEdgeId, {...klona(graph.edges[oldEdgeId]), id: newEdgeId});
  setGraph('vertexes', graph.edges[oldEdgeId].start, 'out_edges', graph.edges[oldEdgeId].type, ids => [...ids.filter(id => id !== oldEdgeId), newEdgeId]);
  setGraph('vertexes', graph.edges[oldEdgeId].end, 'in_edges', graph.edges[oldEdgeId].type, ids => [...ids.filter(id => id !== oldEdgeId), newEdgeId]);
