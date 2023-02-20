@@ -11,7 +11,6 @@ import { klona } from "klona/json";
 import { path } from "rambda";
 
 import {
- ButtonGroupField,
  DataType,
  FieldAttribute,
  FormMetaData,
