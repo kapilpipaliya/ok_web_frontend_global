@@ -24,7 +24,11 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import { getOptionLabel, SelectInputField } from "./SelectInputField";
+import {
+  getOptionLabel,
+  getSelectionOptions,
+  SelectInputField
+} from "./SelectInputField";
 import {
   DataType,
   FieldAttribute,
@@ -94,12 +98,6 @@ function newRow(txnId: number, vertex: Vertex, meta: TableField) {
   return edgeNew.id;
 }
 
-
-function getTableValue(vertex: Vertex, attribute: TableField) {
-  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
-  return (vertex.out_edges[type] || []).map(edgeId => [edgeId, graph.vertexes[graph.edges[edgeId].end]] as [number, Vertex]).filter(tuple => tuple[1]).sort((tuple1, tuple2) => (tuple1[1].properties.pos || 0) - (tuple2[1].properties.pos || 0)).map(tuple => tuple[0]);
-}
-
 export function TableInputField(props: TableInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
@@ -114,26 +112,24 @@ export function TableInputField(props: TableInputFieldProps) {
     });
   });
 
-  const [sortedIds, setSortedIds] = createSignal([] as number[]);
+  const [sortedVertexes, setSortedIds] = createSignal([] as Vertex[]);
 
   createEffect(() => {
-    setSortedIds(getTableValue(props.vertex, props.meta));
+    const type = props.vertex.labels[0] + capitalizeFirstLetter(props.meta.id);
+    const vertexes = getSelectionOptions(props.vertex, `->${type}`, "").sort((a, b) => a.properties.pos - b.properties.pos);
+    setSortedIds(vertexes);
   })
 
 
   // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { edgeId: Id }) => {
+  const SortableRow = (p: { joinVertex: Vertex }) => {
 
-    const sortable = createSortable(p.edgeId);
-    const edge = graph.edges[p.edgeId];
-    if (!edge) return "NO edge Found";
-
-    const joinVertex = graph.vertexes[edge.end];
+    const sortable = createSortable(p.joinVertex.id);
 
     const deleteRow = () => {
       const txnId = getNewTxnId();
       // delete all vertex in edges
-      const inEdges = joinVertex.in_edges;
+      const inEdges = p.joinVertex.in_edges;
       for (const type in inEdges) {
         for (const edgeId of inEdges[type]) {
           const deleteEdgeResult = deleteEdge(txnId, edgeId)
@@ -141,7 +137,7 @@ export function TableInputField(props: TableInputFieldProps) {
         }
       }
       // delete all outEdges of vertex
-      const outEdge = joinVertex.out_edges;
+      const outEdge = p.joinVertex.out_edges;
       for (const type in outEdge) {
         for (const edgeId of outEdge[type]) {
           const deleteEdgeResult = deleteEdge(txnId, edgeId)
@@ -150,14 +146,15 @@ export function TableInputField(props: TableInputFieldProps) {
       }
 
       // delete vertex:
-      deleteVertex(txnId, joinVertex.id);
+      const deleteResult = deleteVertex(txnId, p.joinVertex.id);
+      if (deleteResult.error) alert(deleteResult.error)
       commitTxn(txnId, Ws);
     }
 
     const DisplayProperties = () => {
       const setValue = (attribute: FieldAttribute, value: any) => {
         const txnId = getNewTxnId();
-        mergeVertexProperties(txnId, joinVertex.id, { [attribute.id]: value });
+        mergeVertexProperties(txnId, p.joinVertex.id, { [attribute.id]: value });
         commitTxn(txnId, Ws);
       };
 
@@ -167,7 +164,7 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.hidden}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}</div>
+                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}</div>
              </td>
             </Match>
 
@@ -176,11 +173,11 @@ export function TableInputField(props: TableInputFieldProps) {
 
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <TextInputField
                   label=""
                   // name=
-                  value={joinVertex.properties[meta.id]}
+                  value={p.joinVertex.properties[meta.id]}
                   setValue={(value) => setValue(meta, value)}
                  />
 
@@ -191,10 +188,10 @@ export function TableInputField(props: TableInputFieldProps) {
             when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <NumberInputField
                   label=""
-                  value={joinVertex.properties[meta.id]}
+                  value={p.joinVertex.properties[meta.id]}
                   setValue={(value) => setValue(meta, value)}
                  />
 
@@ -204,10 +201,10 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.component === "Select"}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <SelectInputField
 
-                  vertex={joinVertex}
+                  vertex={p.joinVertex}
                   meta={meta as SelectField}
                   // name={props.form.id + meta.id}
                   // form={props.form}
@@ -220,10 +217,10 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.component === "Tag"}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <TagField
 
-                  vertex={joinVertex}
+                  vertex={p.joinVertex}
                   meta={meta as SelectField}
                   // name={props.form.id + meta.id}
                   // form={props.form}
@@ -236,8 +233,8 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.dataType === "Boolean"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
-                 <BooleanInputField value={joinVertex.properties[meta.id]}
+                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                 <BooleanInputField value={p.joinVertex.properties[meta.id]}
                                     setValue={(value) => setValue(meta, value)} />
 
                </div>
@@ -248,11 +245,11 @@ export function TableInputField(props: TableInputFieldProps) {
 
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <ModalInput btnContent={<Icon
                   icon="material-symbols:edit-square-outline-sharp" />}>
                    <JsonInput
-                    value={joinVertex.properties[meta.id]}
+                    value={p.joinVertex.properties[meta.id]}
                     setValue={(value) => setValue(meta, value)}
                    />
                  </ModalInput>
@@ -264,11 +261,11 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.component === "JsCode"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <ModalInput btnContent={<Icon
                   icon="material-symbols:edit-square-outline-sharp" />}>
                    <TextAreaField
-                    value={joinVertex.properties[meta.id]}
+                    value={p.joinVertex.properties[meta.id]}
                     setValue={(value) => setValue(meta, value)}
                    />
                  </ModalInput>
@@ -279,12 +276,12 @@ export function TableInputField(props: TableInputFieldProps) {
            <Match when={meta.component === "Table"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(joinVertex, meta.defaultValue)}
+                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
                  <TableInputField
                   // id={props.form.id + meta.id}
 
                   meta={meta as TableField}
-                  vertex={joinVertex}
+                  vertex={p.joinVertex}
 
                  />
 
@@ -300,7 +297,7 @@ export function TableInputField(props: TableInputFieldProps) {
         <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
           <td>
             <div
-             class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}{p.edgeId}</div>
+             class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</div>
           </td>
           <DisplayProperties />
           <td>
@@ -315,7 +312,7 @@ export function TableInputField(props: TableInputFieldProps) {
   };
 
   const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
-  const ids = () => sortedIds();
+  const ids = () => sortedVertexes().map(vertex=>vertex.id);
   const onDragStart: DragEventHandler = ({draggable}) => {
     setActiveDragItem(draggable.id);
   };
@@ -330,8 +327,7 @@ export function TableInputField(props: TableInputFieldProps) {
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
         // runWithOwner(owner, () => {
         batch(() => {
-          updatedItems.forEach((_id, index) => {
-            const vertexId = graph.edges[_id].end;
+          updatedItems.forEach((vertexId, index) => {
             const {error} = mergeVertexProperties(txnId, vertexId, { pos: index + 1 });
             if(error) alert(error)
           });
@@ -381,8 +377,8 @@ export function TableInputField(props: TableInputFieldProps) {
                               collisionDetector={closestCenter}>
               <DragDropSensors/>
               <SortableProvider ids={ids()}>
-                <For each={sortedIds()} fallback={<div>No Columns</div>}>
-                  {(edgeId) => <SortableRow edgeId={edgeId} />}
+                <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
+                  {(vertex) => <SortableRow joinVertex={vertex} />}
                 </For>
               </SortableProvider>
             </DragDropProvider>

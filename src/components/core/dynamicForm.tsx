@@ -3,6 +3,7 @@ import {
  For,
  Match,
  onMount,
+ Show,
  Switch,
  useContext
 } from "solid-js";
@@ -19,7 +20,6 @@ import {
  TableField,
  Vertex
 } from "../input/Form";
-import { AttributesTableData } from "../api";
 import { toTitle } from "case-switcher-js";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import {
@@ -33,24 +33,22 @@ import { TextAreaField } from "../input/TextAreaField";
 import { NumberInputField } from "../input/NumberInputField";
 import { DateInputField } from "../input/DateInputField";
 import { BooleanInputField } from "../input/BooleanInputField";
-import { Field } from "../input/core/Field";
 import { JsonInput } from "../input/JsonInput";
-import { GeneralInput } from "../input/GeneralInput";
-import {
- SelectInputField,
- setSelectionValue
-} from "../input/SelectInputField";
+import { SelectInputField, setSelectionValue } from "../input/SelectInputField";
 import { TableInputField } from "../input/TableInputField";
-import { ButtonGroup } from "../input/core/ButtonGroup";
+
 import { TagField } from "../input/TagField";
+import Tabs from "devextreme/ui/tabs";
+import { A } from "@mobily/ts-belt";
+
 
 // memorize this function
 const normalizeFormMetaData = (form: FormMetaData) => {
- return form.attributes.reduce((acc,curr) => {
+ return form.attributes.reduce((acc, curr) => {
   acc[curr.id] = curr;
   return acc;
- }, {} as {[key: string]: FieldAttribute})
-}
+ }, {} as { [key: string]: FieldAttribute });
+};
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaData, changedFieldAttribute: FieldAttribute) {
@@ -72,187 +70,166 @@ export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaDat
 }
 
 interface DynamicFormProps {
- form: FormMetaData;
+ attributes: FieldAttribute[];
  vertex: Vertex;
+
+ setValue(attribute: FieldAttribute, data: any): void;
 }
 
 export function DynamicForm(props: DynamicFormProps) {
- const { Ws } = useContext(WsContext);
- const setValue = (attribute: FieldAttribute, data: any) => {
-  const txnId = getNewTxnId();
-  mergeVertexProperties(txnId,props.vertex.id, {[attribute.id]: data})
-  onChangeHandler(txnId, props.vertex, props.form, attribute);
-  commitTxn(txnId, Ws);
- }
 
-  return <><For
-   each={props.form.attributes}>
-   {(meta) => (
+
+ return <For
+  each={props.attributes}>
+  {(meta) => {
+   const id = props.vertex.id + meta.id + "Label";
+   return (
+
     <Switch>
      <Match
       when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
-      <TextInputField
-       name={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value">
+        <TextInputField
+         aria-labeledby={id}
+         value={props.vertex.properties[meta.id]}
+         setValue={(value) => props.setValue(meta, value)}
+         
+        /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "TextArea"}>
-      <TextAreaField
-       id={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><TextAreaField
+        aria-labeledby={id}
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+        
+       /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
-      <NumberInputField
-       name={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><NumberInputField
+        aria-labeledby={id}
+        label={toTitle(meta.label || meta.id)}
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+        
+       /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "DateInput" || (!meta.component && (meta.dataType === DataType.Date))}>
-      <DateInputField
-       name={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><DateInputField
+        aria-labeledby={id}
+        label={toTitle(meta.label || meta.id)}
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+       /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "DateTimeInput" || (!meta.component && (meta.dataType === DataType.LocalDateTime || meta.dataType === DataType.LocalTime))}>
-      <DateInputField
-       name={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       type="datetime"
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><DateInputField
+        aria-labeledby={id}
+        label={toTitle(meta.label || meta.id)}
+        type="datetime"
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+       /></div>
+      </div>
      </Match>
      <Match when={meta.component === "JsCode"}>
-      <TextAreaField
-       name={props.form.id + meta.id}
-       label={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><TextAreaField
+        aria-labeledby={id}
+        label={toTitle(meta.label || meta.id)}
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+        
+       /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "Boolean" || (!meta.component && meta.dataType === DataType.Boolean)}>
-      <BooleanInputField
-       name={props.form.id + meta.id}
-       text={toTitle(meta.label || meta.id)}
-       value={props.vertex.properties[meta.id]}
-       setValue={(value) => setValue(meta, value)}
-       {...(meta.props || {})}
-      />
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value"><BooleanInputField
+        aria-labeledby={id}
+        text={toTitle(meta.label || meta.id)}
+        value={props.vertex.properties[meta.id]}
+        setValue={(value) => props.setValue(meta, value)}
+        
+       /></div>
+      </div>
      </Match>
      <Match
       when={meta.component === "Json" && (!meta.component && meta.dataType === DataType.Map)}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <JsonInput
-        name={props.form.id + meta.id}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => setValue(meta, value)}
-        {...(meta.props || {})}
-       />
-      </Field>
-     </Match>
-     <Match when={meta.component === "Dynamic"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <GeneralInput
-        id={props.form.id + meta.id}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => setValue(meta, value)}
-        {...(meta.props || {})}
-       />
-      </Field>
-     </Match>
-     <Match when={meta.component === "Select"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <SelectInputField
-
-        vertex={props.vertex}
-        meta={meta as SelectField}
-        name={props.form.id + meta.id}
-        form={props.form}
-        
-       />
-      </Field>
-     </Match>
-     <Match when={meta.component === "Tag"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <TagField
-        
-        vertex={props.vertex}
-        meta={meta as SelectField}
-        name={props.form.id + meta.id}
-        form={props.form}
-        
-       />
-      </Field>
-     </Match>
-     <Match when={meta.component === "Table"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       {() => {
-        return <TableInputField
-         // id={props.form.id + meta.id}
-         
-         meta={meta as TableField}
-         vertex={props.vertex}
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value">
+        <JsonInput
+         aria-labeledby={id}
+         value={props.vertex.properties[meta.id]}
+         setValue={(value) => props.setValue(meta, value)}
          
         />
-       }}
-      </Field>
+       </div>
+      </div>
      </Match>
-     <Match when={meta.component === "TableForm"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <TableInputField
-        type={"form"}
-        id={props.form.id + meta.id}
-        
-        component={DynamicFormSequence}
-        // TODO: fix this for all the form types:
-        form={AttributesTableData[(meta as TableField).form!]}
-        postSubmit={(tableItemFormGroup, values) => (meta as TableField).postSubmit(props.formValues, props.formGroup, tableItemFormGroup, values)}
+     <Match when={meta.component === "Select"}>
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value">
+        <SelectInputField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={meta as SelectField}
 
+         form={props.attributes}
 
-        attributes={(meta as TableField).attributes}
-        defaultValue="undefined"
-        data={(meta as TableField).data}
-        defaultValueFn={(meta as TableField).defaultValueFn}
-        formValues={props.formValues}
-        noSort={(meta as TableField).noSort}
-        {...(meta.props || {})}
-       />
-      </Field>
+        />
+       </div>
+      </div>
      </Match>
-     <Match when={meta.component === "ButtonGroup"}>
-      <Field label={toTitle(meta.label || meta.id)}>
-       <ButtonGroup
+     <Match when={meta.component === "Tag"}>
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-value">
+        <TagField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={meta as SelectField}
 
-        control={props.formGroup}
-        id={props.form.id + meta.id}
-        items={(meta as ButtonGroupField).buttons}
-        {...(meta.props || {})}
-       />
-      </Field>
+         form={props.attributes}
+
+        />
+       </div>
+      </div>
+     </Match>
+     <Match when={meta.component === "Table"}>
+      <h3>{toTitle(meta.label || meta.id)}</h3>
+      <TableInputField
+       meta={meta as TableField}
+       vertex={props.vertex}
+      />
+
      </Match>
     </Switch>
-   )}
+   )
+  }}
   </For>
-
-  </>;
 
 }
 
@@ -281,19 +258,91 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   commitTxn(txnId, Ws);
   vertex = graph.vertexes[newVertexObj.id];
  } else {
-  if(!graph.vertexes[props.id]) {
-   alert('vertex not found');
+  if (!graph.vertexes[props.id]) {
+   alert("vertex not found");
    return;
   }
   vertex = graph.vertexes[props.id];
  }
 
  const [divRef, setDivRef] = createSignal<HTMLFormElement>();
- onMount(() => {divRef()?.querySelector("input")?.focus();});
+ onMount(() => {
+  divRef()?.querySelector("input")?.focus();
+ });
 
- return <div ref={setDivRef}>
+ for (const attribute of form.attributes) {
+  if (!attribute.tab) attribute.tab = "main";
+  if (!attribute.group) attribute.group = "main";
+  // if(attribute.component === "Table") attribute.group = attribute.id;
+ }
 
-   <DynamicForm form={form} vertex={vertex}/>
-  
-  </div>
+ const groupByTabs = A.groupBy(form.attributes, (item => item.tab!)) as unknown as { [tab: string]: FieldAttribute[] };
+
+ const groupByTabsAndGroup = {} as { [tab: string]: { [group: string]: FieldAttribute[] } };
+ for (const tab in groupByTabs) {
+  groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, item => item.group!) as unknown as { [group: string]: FieldAttribute[] };
+ }
+
+ const tabs = Object.keys(groupByTabs).filter(tab => tab !== "main");
+
+ const [activeTab, setActiveTab] = createSignal(tabs[0]);
+
+
+ const setValue = (attribute: FieldAttribute, data: any) => {
+  const txnId = getNewTxnId();
+  mergeVertexProperties(txnId, vertex.id, { [attribute.id]: data });
+  onChangeHandler(txnId, vertex, form, attribute);
+  commitTxn(txnId, Ws);
+ };
+
+ return <div ref={setDivRef} class="form">
+
+  <Show when={groupByTabsAndGroup["main"]["main"]}>
+   <For each={Object.keys(groupByTabsAndGroup["main"])}>
+    {group => <>
+     <div class="dx-fieldset" style={{
+      "max-width": groupByTabsAndGroup["main"][group].filter(attribute => attribute.component === "Table").length ? "100%" : "600px"
+     }}>
+      {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+      <DynamicForm attributes={groupByTabsAndGroup["main"][group]}
+                   vertex={vertex} setValue={setValue} />
+     </div>
+    </>}
+   </For>
+  </Show>
+
+  <Show when={tabs.length}>
+   <div ref={el => {
+    // https://js.devexpress.com/Demos/WidgetsGallery/Demo/Tabs/Overview/jQuery/Light/
+    // @ts-ignore
+    const tabsInstance = new Tabs(el, {
+     dataSource: tabs,
+     width: 800,
+     scrollByContent: true,
+     showNavButtons: true,
+     selectedIndex: 0,
+     onItemClick(e) {
+      setActiveTab(e.itemData);
+     }
+    });
+   }
+   } />
+
+   <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>{group => {
+    return <div class="dx-fieldset" style={{
+     "max-width": groupByTabsAndGroup[activeTab()][group].filter(attribute => attribute.component === "Table").length ? "100%" : "600px"
+    }}>
+     <Show when={group !== "main"}>
+      <div class="dx-fieldset-header">{group}</div>
+     </Show>
+     <DynamicForm attributes={groupByTabsAndGroup[activeTab()][group]}
+                  vertex={vertex} setValue={setValue} />
+    </div>;
+   }}</For>
+
+
+  </Show>
+
+
+ </div>;
 };

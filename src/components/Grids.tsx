@@ -10,14 +10,13 @@ import {
  transactions
 } from "../lib/graph";
 import {
- EdgeLabels, Id,
- VertexLabels
+ Id,
 } from "./input/Form";
 import { createEffect, For, on, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "solid-app-router";
 import { removeUndefinedProperties } from "../utils/functions";
-import { evalImpl } from "./utils";
+
 import { G } from "@mobily/ts-belt";
 
 import { deleteVertex } from "../lib/Vertex";
@@ -37,10 +36,10 @@ export const SampleDataGrid = (props: {}) => {
   store: dataArrayStore,
   // sort: "LastName"
  });
- for(const id of graph.vertexLabelIdMap[VertexLabels.Attribute]) {
+ for(const id of graph.vertexLabelIdMap["Attribute"]) {
   dataArrayStore.insert(klona(graph.vertexes[id]))
  }
- for(const id of graph.vertexLabelIdMap[VertexLabels.Attribute]) {
+ for(const id of graph.vertexLabelIdMap["Attribute"]) {
   // clone accesses every property -> subscribes to the whole store
   // update(v.id, v) gives error: Cannot mutate a Store directly, if we previously inserted proxy
   createEffect(on(() => klona(graph.vertexes[id]), (v) => {
@@ -49,7 +48,7 @@ export const SampleDataGrid = (props: {}) => {
   }, {defer: true}));
  }
  setTimeout(()=>{
-  setGraph('vertexes', graph.vertexLabelIdMap[VertexLabels.Attribute][0], 'properties', {id: "Kapil"});
+  setGraph('vertexes', graph.vertexLabelIdMap["Attribute"][0], 'properties', {id: "Kapil"});
  }, 3000);
  return <div ref={el => {
   // @ts-ignore
@@ -173,23 +172,23 @@ interface AbstractSingleGridProps {
  tableId: string;
 }
 export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
- const tableLayoutId = () => graph.vertexLabelIdMap[VertexLabels.TableLayout].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.tableId)
+ const tableLayoutId = () => graph.vertexLabelIdMap["TableLayout"].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.tableId)
  const tableLayout = graph.vertexes[props.tableId] || graph.vertexes[tableLayoutId()!];
  if(!tableLayout) {
   return <>Incorrect Configuration</>
  }
- const tableLayoutHasAttributes = (tableLayout.out_edges[EdgeLabels.TableLayoutHasAttribute] || []).map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
+ const tableLayoutHasAttributes = (tableLayout.out_edges["TableLayoutHasAttribute"] || []).map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
 
  const generateNewApi = () => {
   const tables = tableLayoutHasAttributes.map(edgeTableLayoutHasAttribute=> {
    const vertexAttribute = graph.vertexes[edgeTableLayoutHasAttribute.end];
    const attributeProperties = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(edgeTableLayoutHasAttribute.properties, false, 10));
    if(attributeProperties.meta) {
-    const meta = evalImpl(attributeProperties.meta);
-    if(G.isObject(meta)){
-     Object.assign(attributeProperties, meta);
-     delete attributeProperties.meta;
-    }
+    // const meta = evalImpl(attributeProperties.meta);
+    // if(G.isObject(meta)){
+    //  Object.assign(attributeProperties, meta);
+    //  delete attributeProperties.meta;
+    // }
    }
    const {id, code, component, default: default_, dataType, label, disabled, onChange, props, readonly, required, unique, ...customAttributeProperties} = attributeProperties;
    //  {caption: "id", dataField: "id", dataType: "string", fixed: true, sortIndex: 0, width: 70},
@@ -205,11 +204,11 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
  const [_selectedProps, customProps] = splitProps(props, ['tableId']);
  const {id, ...tableLayoutProperties} = tableLayout.properties;
  if(tableLayoutProperties.meta) {
-  const meta = evalImpl(tableLayoutProperties.meta);
-  if(G.isObject(meta)){
-   Object.assign(tableLayoutProperties, meta);
-   delete tableLayoutProperties.meta;
-  }
+  // const meta = evalImpl(tableLayoutProperties.meta);
+  // if(G.isObject(meta)){
+  //  Object.assign(tableLayoutProperties, meta);
+  //  delete tableLayoutProperties.meta;
+  // }
  }
  const navigate = useNavigate();
  return <div class="">
@@ -224,7 +223,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 }
 
 export const TableDashboard = () => {
- const allTableLayouts = () => graph.vertexLabelIdMap[VertexLabels.TableLayout]?.map(tableLayoutVertex => graph.vertexes[tableLayoutVertex]) || [];
+ const allTableLayouts = () => graph.vertexLabelIdMap["TableLayout"]?.map(tableLayoutVertex => graph.vertexes[tableLayoutVertex]) || [];
 
  return <div class="index">
   <div class="title">

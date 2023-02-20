@@ -81,7 +81,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    {
     id: "Tab",
     component: "Table",
-
+    tab: 'Organize',
     columns: [
      {
       id: "id",
@@ -96,7 +96,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    {
     id: "Group",
     component: "Table",
-
+    tab: 'Organize',
     columns: [
      {
       id: "id",
@@ -112,6 +112,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     id: "Attribute",
     label: "Attributes",
     component: "Table",
+    tab: "Attribute",
     columns: [
      {
       id: "attribute",
@@ -182,7 +183,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    {
     id: "Child",
     component: "Table",
-
+    tab: "Child",
     columns: [
      {
       id: "collection",
@@ -225,6 +226,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     id: "Attribute",
     label: "Attributes",
     component: "Table",
+    tab: "Attribute",
     columns: [
      {
       id: "attribute",
@@ -292,6 +294,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     id: "Child",
     label: "Children",
     component: "Table",
+    tab: "Children",
     columns: [
      {
       id: "Collection",

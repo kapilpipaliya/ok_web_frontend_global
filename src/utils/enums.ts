@@ -10,19 +10,6 @@ export enum SortDirection {
   Descending,
 }
 
-// table:
-export enum DisplayType {
-  UNINITIALIZED,
-  Checkbox = 1,
-  Number,
-  Text,
-  Double,
-  Date,
-  DateTime,
-  Url,
-  Color,
-}
-
 export enum FieldType {
   button = 1,
   checkbox,

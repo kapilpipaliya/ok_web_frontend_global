@@ -21,18 +21,19 @@ export interface SelectInputFieldProps extends Properties {
   form: FormMetaData;
   meta: SelectField
   vertex: Vertex;
+  "aria-labeledby": string
 }
 
 export function TagField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
-  const [p, customProps] = splitProps(props, ["vertex"]);
+  const [p, customProps] = splitProps(props, ["vertex", "aria-labeledby"]);
   const [selectOptions, {refetch}] = createResource(() => {
     return getSelectionOptions(props.vertex, props.meta.collection, "")
   });
 
   return (
-    <div>
+    <div aria-labeledby={p["aria-labeledby"]}>
       <div ref={el => {
         const selectedValue = getSelectedVertexValue(props.vertex, props.meta.id);
 

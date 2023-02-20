@@ -4,12 +4,12 @@ import { IS_PRODUCTION } from "./ws_events_dispatcher";
 export class WSBase {
  private id_ = 0;
  private readonly path: string;
- socket?: WebSocket;
+ socket?: WebSocket | null;
  state = atom(WebSocket.CLOSED);
  // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
  private isOnline = window.navigator.onLine;
- private onOpen_: () => void;
- private onClose_: () => void;
+ private onOpen_: (() => void) | undefined;
+ private onClose_: (() => void) | undefined;
  private onMessage_: (message: MessageEvent) => void;
 
  constructor(path: string) {
