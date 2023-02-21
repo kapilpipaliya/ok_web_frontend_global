@@ -126,7 +126,7 @@ export const DashboardView = () => {
     <Link href={`/logout`}>Logout</Link>
    </Show>
    <main class="">
-    <Show when={1}>
+    <Show when={graph.initialSynced}>
      <Routes>
       <Route path="/" component={() => <>Home Page</>} />
       {/* TODO: when incorrect entity is rended*/}
