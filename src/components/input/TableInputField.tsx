@@ -24,6 +24,7 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import {
+  getChildVertex, getChildVertexes,
   getOptionLabel,
   getSelectionOptions,
   SelectInputField
@@ -42,10 +43,11 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId } from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
+import { klona } from "klona";
 
 const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => {
   const [isVisible, setIsVisible] = createSignal(false);
@@ -154,8 +156,26 @@ export function TableInputField(props: TableInputFieldProps) {
     }
 
     // columns
-    const tableColumns = getSelectionOptions(props.meta, "->Attribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+    const tableColumnsTemplate = getSelectionOptions(props.meta, "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
 
+    const rowMetaAttributeInstance = getChildVertex(["AttributeInstance"], p.joinVertex );
+
+    if(rowMetaAttributeInstance.error) {
+      const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttributeInstance");
+      if (metaInstanceResult.error) { alert ("Error creating a row for attribute instance")}
+
+      for (const attrColumn of tableColumnsTemplate) {
+        const attrInstanceResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttribute");
+        if (attrInstanceResult.error) {
+          alert(attrInstanceResult.error)
+        }
+        mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, klona(attrColumn.properties));
+      }
+    }
+
+    const attributesResult = getChildVertexes(["AttributeInstance", "MetaAttribute"], [p.joinVertex]);
+    if(attributesResult.error) alert("Error getting attributes");
+    const rowColumnsMetaAttributes = attributesResult.vertexes!;
 
     const DisplayProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
@@ -164,7 +184,7 @@ export function TableInputField(props: TableInputFieldProps) {
         commitTxn(txnId, Ws);
       };
 
-      return <For each={tableColumns}>
+      return <For each={rowColumnsMetaAttributes}>
         {(metaVertex) => (
          <Switch>
            <Match when={metaVertex.properties.hidden}>
