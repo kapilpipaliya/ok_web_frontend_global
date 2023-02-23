@@ -6,7 +6,7 @@ export interface BooleanInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
-  "aria-labeledby": string
+  "aria-labeledby"?: string
 }
 
 export function BooleanInputField(props: BooleanInputFieldProps) {

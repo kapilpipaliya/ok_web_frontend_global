@@ -31,7 +31,28 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  "Component": {
   title: "Component",
   label: "Component",
-  attributes: [{ id: "id", dataType: "String" }]
+  attributes: [
+   { id: "id", dataType: "String" },
+   {
+    id: "Property",
+    component: "Table",
+    tab: 'Properties',
+    columns: [
+     {
+      id: "id",
+      component: "TextInput"
+     },
+     {
+      id: "dataType",
+      component: "Select"
+     },
+     {
+      id: "dataType",
+      component: "Select"
+     }
+    ]
+   }
+  ]
  },
  "Attribute": {
   title: "Attribute", label: "Attribute", attributes: [
@@ -110,7 +131,6 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    },
    {
     id: "Attribute",
-    label: "Attributes",
     component: "Table",
     tab: "Attribute",
     columns: [
@@ -224,7 +244,6 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    },
    {
     id: "Attribute",
-    label: "Attributes",
     component: "Table",
     tab: "Attribute",
     columns: [
@@ -292,7 +311,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    },
    {
     id: "Child",
-    label: "Children",
+    title: "Children",
     component: "Table",
     tab: "Children",
     columns: [
@@ -382,4 +401,4 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  }
 };
 
-window.a = AttributesTableData;
+// window.a = AttributesTableData;

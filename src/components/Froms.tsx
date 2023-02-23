@@ -65,11 +65,11 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
  const tableAttributes: FieldAttribute[] = FormLayoutChilds.map(vertexFormLayoutChild => {
-
   const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
   const tableAttributes: FieldAttribute[] = formLayoutChildAttributes.map(vertexFormLayoutChildAttribute => {
    const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeAttribute", "")[0];
    const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+
    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutChildAttribute.properties, false, 10));
 
 
@@ -86,6 +86,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
   const label = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
   return {
+   attributes: [],
    columns: tableAttributes,
    component: "Table",
    label,

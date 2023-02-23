@@ -7,7 +7,7 @@ export interface TextInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
-  "aria-labeledby": string
+  "aria-labeledby"?: string
 }
 
 export function DateInputField(props: TextInputFieldProps) {

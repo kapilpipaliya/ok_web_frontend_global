@@ -6,7 +6,7 @@ export interface NumberInputFieldProps extends Properties {
   required?: boolean;
   errors?: string[];
   setValue: (value: string) => void;
-  "aria-labeledby": string
+  "aria-labeledby"?: string
 }
 
 export function NumberInputField(props: NumberInputFieldProps) {
