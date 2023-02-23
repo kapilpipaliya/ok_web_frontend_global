@@ -8,14 +8,12 @@ import {
  useContext
 } from "solid-js";
 import { klona } from "klona/json";
-import { path } from "rambda";
 
 import {
  DataType,
  FieldAttribute,
  FormMetaData,
  Id,
- SelectField,
  TableField,
  Vertex
 } from "../input/Form";
@@ -33,35 +31,34 @@ import { NumberInputField } from "../input/NumberInputField";
 import { DateInputField } from "../input/DateInputField";
 import { BooleanInputField } from "../input/BooleanInputField";
 import { JsonInput } from "../input/JsonInput";
-import { SelectInputField, setSelectionValue } from "../input/SelectInputField";
-import { TableInputField } from "../input/TableInputField";
+import {
+ getSelectionOptions,
+ SelectInputField,
+ setSelectionValue
+} from "../input/SelectInputField";
+import { newRow, TableInputField } from "../input/TableInputField";
 
 import { TagField } from "../input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 
-
-// memorize this function
-const normalizeFormMetaData = (form: FormMetaData) => {
- return form.attributes.reduce((acc, curr) => {
-  acc[curr.id] = curr;
-  return acc;
- }, {} as { [key: string]: FieldAttribute });
-};
-
 //'setValue(component,null)'
-export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaData, changedFieldAttribute: FieldAttribute) {
- if(!changedFieldAttribute.onchange) return;
+export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
+ if(!changedFieldAttribute.properties.onchange) return;
  try{
-  const args = JSON.parse(changedFieldAttribute.onchange);
-   const attribute = path(args[0], normalizeFormMetaData(form));
+  const args = JSON.parse(changedFieldAttribute.properties.onchange);
+  
+  const attribute = getSelectionOptions(changedFieldAttribute, "MetaAttribute<-MetaAttribute", "").find(vertex => vertex.properties.id === args[0]);
+  if(!attribute) {
+   return;
+  }
    let value = args[1];
 
   if (value === null ) value = undefined;
-  if(attribute.component == "Select" || attribute.component === "Tag") {
+  if(attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
      setSelectionValue(txnId, vertex, attribute,  value)
    } else {
-    mergeVertexProperties(txnId, vertex.id, { [attribute.id]: value });
+    mergeVertexProperties(txnId, vertex.id, { [attribute.properties.id]: value });
    }
  } catch (e) {
 
@@ -69,10 +66,10 @@ export function onChangeHandler(txnId: number, vertex: Vertex, form: FormMetaDat
 }
 
 interface DynamicFormProps {
- attributes: FieldAttribute[];
+ attributes: Vertex[];
  vertex: Vertex;
 
- setValue(attribute: FieldAttribute, data: any): void;
+ setValue(attribute: Vertex, data: any): void;
 }
 
 export function DynamicForm(props: DynamicFormProps) {
@@ -80,147 +77,141 @@ export function DynamicForm(props: DynamicFormProps) {
 
  return <For
   each={props.attributes}>
-  {(meta) => {
-   const id = props.vertex.id + meta.id + "Label";
+  {(metaVertex) => {
+   const id = props.vertex.id + metaVertex.properties.id + "Label";
    return (
 
     <Switch>
      <Match
-      when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
+      when={metaVertex.properties.component === "TextInput" || (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.String)}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
         <TextInputField
          aria-labeledby={id}
-         value={props.vertex.properties[meta.id]}
-         setValue={(value) => props.setValue(meta, value)}
+         value={props.vertex.properties[metaVertex.properties.id]}
+         setValue={(value) => props.setValue(metaVertex, value)}
          
         /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "TextArea"}>
+      when={metaVertex.properties.component === "TextArea"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><TextAreaField
         aria-labeledby={id}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
         
        /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
+      when={metaVertex.properties.component === "NumberInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.Integer || metaVertex.properties.dataType === DataType.Float))}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><NumberInputField
         aria-labeledby={id}
-        label={toTitle(meta.label || meta.id)}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
         
        /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "DateInput" || (!meta.component && (meta.dataType === DataType.Date))}>
+      when={metaVertex.properties.component === "DateInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.Date))}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><DateInputField
         aria-labeledby={id}
-        label={toTitle(meta.label || meta.id)}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
        /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "DateTimeInput" || (!meta.component && (meta.dataType === DataType.LocalDateTime || meta.dataType === DataType.LocalTime))}>
+      when={metaVertex.properties.component === "DateTimeInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.LocalDateTime || metaVertex.properties.dataType === DataType.LocalTime))}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><DateInputField
         aria-labeledby={id}
-        label={toTitle(meta.label || meta.id)}
+        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
         type="datetime"
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
        /></div>
       </div>
      </Match>
-     <Match when={meta.component === "JsCode"}>
+     <Match when={metaVertex.properties.component === "JsCode"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><TextAreaField
         aria-labeledby={id}
-        label={toTitle(meta.label || meta.id)}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
         
        /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "Boolean" || (!meta.component && meta.dataType === DataType.Boolean)}>
+      when={metaVertex.properties.component === "Boolean" || (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.Boolean)}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><BooleanInputField
         aria-labeledby={id}
-        text={toTitle(meta.label || meta.id)}
-        value={props.vertex.properties[meta.id]}
-        setValue={(value) => props.setValue(meta, value)}
+        text={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
+        value={props.vertex.properties[metaVertex.properties.id]}
+        setValue={(value) => props.setValue(metaVertex, value)}
         
        /></div>
       </div>
      </Match>
      <Match
-      when={meta.component === "Json" && (!meta.component && meta.dataType === DataType.Map)}>
+      when={metaVertex.properties.component === "Json" && (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.Map)}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
         <JsonInput
          aria-labeledby={id}
-         value={props.vertex.properties[meta.id]}
-         setValue={(value) => props.setValue(meta, value)}
+         value={props.vertex.properties[metaVertex.properties.id]}
+         setValue={(value) => props.setValue(metaVertex, value)}
          
         />
        </div>
       </div>
      </Match>
-     <Match when={meta.component === "Select"}>
+     <Match when={metaVertex.properties.component === "Select"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
         <SelectInputField
          aria-labeledby={id}
          vertex={props.vertex}
-         meta={meta as SelectField}
-
-         form={props.attributes}
-
+         meta={metaVertex}
         />
        </div>
       </div>
      </Match>
-     <Match when={meta.component === "Tag"}>
+     <Match when={metaVertex.properties.component === "Tag"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(meta.label || meta.id)}</div>
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
         <TagField
          aria-labeledby={id}
          vertex={props.vertex}
-         meta={meta as SelectField}
-
-         form={props.attributes}
-
+         meta={metaVertex}
         />
        </div>
       </div>
      </Match>
-     <Match when={meta.component === "Table"}>
-      <h3>{toTitle(meta.label || meta.id)}</h3>
+     <Match when={metaVertex.properties.component === "Table"}>
+      <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
       <TableInputField
-       meta={meta as TableField}
+       meta={metaVertex}
        vertex={props.vertex}
       />
 
@@ -269,17 +260,46 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   divRef()?.querySelector("input")?.focus();
  });
 
- for (const attribute of form.attributes) {
-  if (!attribute.tab) attribute.tab = "main";
-  if (!attribute.group) attribute.group = "main";
-  // if(attribute.component === "Table") attribute.group = attribute.id;
+ const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], {});
+ const { error } = addNewVertex(getNewTxnId(), metaMainVertex);
+ if (error) {
+  alert(error);
+  return;
  }
 
- const groupByTabs = A.groupBy(form.attributes, (item => item.tab!)) as unknown as { [tab: string]: FieldAttribute[] };
+ const addMetaVertexes = (vertexId: Id, attributes: FieldAttribute[]) => {
+  for (const attribute of attributes) {
+   const addAttributeResult = newRow(getNewTxnId(), graph.vertexes[vertexId], "MetaAttribute");
+   if (addAttributeResult.error) {
+    alert(addAttributeResult.error);
+   }
+   // todo discard transaction
 
- const groupByTabsAndGroup = {} as { [tab: string]: { [group: string]: FieldAttribute[] } };
+   const attr = klona(attribute);
+   if (!attr.tab) attr.tab = "main";
+   if (!attr.group) attr.group = "main";
+   // if(attribute.component === "Table") attribute.group = attribute.id;
+
+
+   mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
+
+   if (attribute.component === "Table") {
+    addMetaVertexes(addAttributeResult.vertexId!, (attribute as TableField).columns);
+   }
+   // todo discard transaction
+  }
+ };
+ addMetaVertexes(metaMainVertex.id, form.attributes);
+
+ const mainAttributes = getSelectionOptions(graph.vertexes[metaMainVertex.id], "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+
+ 
+
+ const groupByTabs = A.groupBy(mainAttributes, (item => item.properties.tab!)) as unknown as { [tab: string]: Vertex[] };
+
+ const groupByTabsAndGroup = {} as { [tab: string]: { [group: string]: Vertex[] } };
  for (const tab in groupByTabs) {
-  groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, item => item.group!) as unknown as { [group: string]: FieldAttribute[] };
+  groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, item => item.properties.group!) as unknown as { [group: string]: Vertex[] };
  }
 
  const tabs = Object.keys(groupByTabs).filter(tab => tab !== "main");
@@ -287,20 +307,21 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
 
- const setValue = (attribute: FieldAttribute, data: any) => {
+ const setValue = (attribute: Vertex, data: any) => {
   const txnId = getNewTxnId();
-  mergeVertexProperties(txnId, vertex.id, { [attribute.id]: data });
-  onChangeHandler(txnId, vertex, form, attribute);
+  mergeVertexProperties(txnId, vertex.id, { [attribute.properties.id]: data });
+  onChangeHandler(txnId, vertex, attribute);
   commitTxn(txnId, Ws);
  };
 
  return <div ref={setDivRef} class="form">
 
-  <Show when={groupByTabsAndGroup["main"]["main"]}>
+  {/* Main Tab is display as top level fields */}
+  <Show when={groupByTabsAndGroup["main"]}>
    <For each={Object.keys(groupByTabsAndGroup["main"])}>
     {group => <>
      <div class="dx-fieldset" style={{
-      "max-width": groupByTabsAndGroup["main"][group].filter(attribute => attribute.component === "Table").length ? "100%" : "600px"
+      "max-width": groupByTabsAndGroup["main"][group].filter(attribute => attribute.properties.component === "Table").length ? "100%" : "600px"
      }}>
       {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
       <DynamicForm attributes={groupByTabsAndGroup["main"][group]}
@@ -329,7 +350,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
    <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>{group => {
     return <div class="dx-fieldset" style={{
-     "max-width": groupByTabsAndGroup[activeTab()][group].filter(attribute => attribute.component === "Table").length ? "100%" : "600px"
+     "max-width": groupByTabsAndGroup[activeTab()][group].filter(attribute => attribute.properties.component === "Table").length ? "100%" : "600px"
     }}>
      <Show when={group !== "main"}>
       <div class="dx-fieldset-header">{group}</div>

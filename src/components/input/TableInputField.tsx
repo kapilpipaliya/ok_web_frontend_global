@@ -3,7 +3,6 @@ import {
   createEffect,
   createSignal,
   For,
-  getOwner,
   JSXElement,
   Match,
   Show,
@@ -29,14 +28,7 @@ import {
   getSelectionOptions,
   SelectInputField
 } from "./SelectInputField";
-import {
-  DataType,
-  FieldAttribute,
-  Id,
-  SelectField,
-  TableField,
-  Vertex
-} from "./Form";
+import { DataType, Vertex } from "./Form";
 import { toTitle } from "case-switcher-js";
 import usePopper from "solid-popper";
 import { JsonInput } from "./JsonInput";
@@ -50,7 +42,7 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
@@ -74,40 +66,50 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
 }
 
 export interface TableInputFieldProps {
-  meta: TableField
+  meta: Vertex
   vertex: Vertex;
 }
 
-function newRow(txnId: number, vertex: Vertex, meta: TableField) {
-  const name = capitalizeFirstLetter(meta.id);
-  const type = vertex.labels[0] + name;
-
+export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
     alert(insertVertex.error);
-    return;
+    return {
+      error: true,
+    };
   }
 
-  const edgeNew = newEdge(getNewGraphId(), type, {}, vertex.id, vertexNew.id);
+  const edgeNew = newEdge(getNewGraphId(), type, {}, parentVertex.id, vertexNew.id);
   const insertEdgeResult = addNewEdge(txnId, edgeNew);
   if (insertEdgeResult.error) {
     alert(insertEdgeResult.error);
-    return;
+    return {
+      error: true,
+      vertexId: vertexNew.id,
+    };
   }
-  return edgeNew.id;
+  return {
+    error: false,
+    vertexId: vertexNew.id,
+    edgeId: edgeNew.id
+  };
 }
 
 export function TableInputField(props: TableInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
-  const owner = getOwner();
+  // const owner = getOwner();
 
   // todo check bindOwner and fix it
   const addNew = bindOwner(() => {
     batch(function() {
       const txnId = getNewTxnId();
-      newRow(txnId, props.vertex, props.meta);
+
+      const name = capitalizeFirstLetter(props.meta.properties.id);
+      const type = props.vertex.labels[0] + name;
+
+      newRow(txnId, props.vertex, type);
       commitTxn(txnId, Ws);
     });
   });
@@ -115,7 +117,7 @@ export function TableInputField(props: TableInputFieldProps) {
   const [sortedVertexes, setSortedIds] = createSignal([] as Vertex[]);
 
   createEffect(() => {
-    const type = props.vertex.labels[0] + capitalizeFirstLetter(props.meta.id);
+    const type = props.vertex.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
     const vertexes = getSelectionOptions(props.vertex, `->${type}`, "").sort((a, b) => a.properties.pos - b.properties.pos);
     setSortedIds(vertexes);
   })
@@ -151,62 +153,66 @@ export function TableInputField(props: TableInputFieldProps) {
       commitTxn(txnId, Ws);
     }
 
+    // columns
+    const tableColumns = getSelectionOptions(props.meta, "->Attribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+
+
     const DisplayProperties = () => {
-      const setValue = (attribute: FieldAttribute, value: any) => {
+      const setValue = (attribute: Vertex, value: any) => {
         const txnId = getNewTxnId();
-        mergeVertexProperties(txnId, p.joinVertex.id, { [attribute.id]: value });
+        mergeVertexProperties(txnId, p.joinVertex.id, { [attribute.properties.id]: value });
         commitTxn(txnId, Ws);
       };
 
-      return <For each={props.meta.columns}>
-        {(meta) => (
+      return <For each={tableColumns}>
+        {(metaVertex) => (
          <Switch>
-           <Match when={meta.hidden}>
+           <Match when={metaVertex.properties.hidden}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}</div>
+                class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}</div>
              </td>
             </Match>
 
            <Match
-            when={meta.component === "TextInput" || (!meta.component && meta.dataType === DataType.String)}>
+            when={metaVertex.properties.component === "TextInput" || (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.String)}>
 
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <TextInputField
                   label=""
                   // name=
-                  value={p.joinVertex.properties[meta.id]}
-                  setValue={(value) => setValue(meta, value)}
+                  value={p.joinVertex.properties[metaVertex.properties.id]}
+                  setValue={(value) => setValue(metaVertex, value)}
                  />
 
                </div>
              </td>
            </Match>
            <Match
-            when={meta.component === "NumberInput" || (!meta.component && (meta.dataType === DataType.Integer || meta.dataType === DataType.Float))}>
+            when={metaVertex.properties.component === "NumberInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.Integer || metaVertex.properties.dataType === DataType.Float))}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <NumberInputField
                   label=""
-                  value={p.joinVertex.properties[meta.id]}
-                  setValue={(value) => setValue(meta, value)}
+                  value={p.joinVertex.properties[metaVertex.properties.id]}
+                  setValue={(value) => setValue(metaVertex, value)}
                  />
 
                </div>
              </td>
            </Match>
-           <Match when={meta.component === "Select"}>
+           <Match when={metaVertex.properties.component === "Select"}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <SelectInputField
 
                   vertex={p.joinVertex}
-                  meta={meta as SelectField}
-                  // name={props.form.id + meta.id}
+                  meta={metaVertex}
+                  // name={props.form.id + metaVertex.properties.id}
                   // form={props.form}
 
                  />
@@ -214,15 +220,15 @@ export function TableInputField(props: TableInputFieldProps) {
                </div>
              </td>
            </Match>
-           <Match when={meta.component === "Tag"}>
+           <Match when={metaVertex.properties.component === "Tag"}>
              <td>
                <div
-                class="flex align-items:center">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <TagField
 
                   vertex={p.joinVertex}
-                  meta={meta as SelectField}
-                  // name={props.form.id + meta.id}
+                  meta={metaVertex}
+                  // name={props.form.id + metaVertex.properties.id}
                   // form={props.form}
 
                  />
@@ -230,27 +236,27 @@ export function TableInputField(props: TableInputFieldProps) {
                </div>
              </td>
            </Match>
-           <Match when={meta.dataType === "Boolean"}>
+           <Match when={metaVertex.properties.dataType === "Boolean"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
-                 <BooleanInputField value={p.joinVertex.properties[meta.id]}
-                                    setValue={(value) => setValue(meta, value)} />
+                class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                 <BooleanInputField value={p.joinVertex.properties[metaVertex.properties.id]}
+                                    setValue={(value) => setValue(metaVertex, value)} />
 
                </div>
              </td>
            </Match>
            <Match
-            when={meta.dataType === DataType.Map || meta.component === "Json"}>
+            when={metaVertex.properties.dataType === DataType.Map || metaVertex.properties.component === "Json"}>
 
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <ModalInput btnContent={<Icon
                   icon="material-symbols:edit-square-outline-sharp" />}>
                    <JsonInput
-                    value={p.joinVertex.properties[meta.id]}
-                    setValue={(value) => setValue(meta, value)}
+                    value={p.joinVertex.properties[metaVertex.properties.id]}
+                    setValue={(value) => setValue(metaVertex, value)}
                    />
                  </ModalInput>
 
@@ -258,29 +264,29 @@ export function TableInputField(props: TableInputFieldProps) {
                </div>
              </td>
            </Match>
-           <Match when={meta.component === "JsCode"}>
+           <Match when={metaVertex.properties.component === "JsCode"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <ModalInput btnContent={<Icon
                   icon="material-symbols:edit-square-outline-sharp" />}>
                    <TextAreaField
-                    value={p.joinVertex.properties[meta.id]}
-                    setValue={(value) => setValue(meta, value)}
+                    value={p.joinVertex.properties[metaVertex.properties.id]}
+                    setValue={(value) => setValue(metaVertex, value)}
                    />
                  </ModalInput>
 
                </div>
              </td>
            </Match>
-           <Match when={meta.component === "Table"}>
+           <Match when={metaVertex.properties.component === "Table"}>
              <td>
                <div
-                class="flex">{meta.defaultValue && getOptionLabel(p.joinVertex, meta.defaultValue)}
+                class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                  <TableInputField
-                  // id={props.form.id + meta.id}
+                  // id={props.form.id + metaVertex.properties.id}
 
-                  meta={meta as TableField}
+                  meta={metaVertex}
                   vertex={p.joinVertex}
 
                  />
@@ -294,7 +300,8 @@ export function TableInputField(props: TableInputFieldProps) {
     }
 
     return (
-        <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
+     // @ts-ignore
+     <tr use:sortable class="" classList={{"opacity-25": sortable.isActiveDraggable}}>
           <td>
             <div
              class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</div>
@@ -311,6 +318,7 @@ export function TableInputField(props: TableInputFieldProps) {
     );
   };
 
+  // @ts-ignore
   const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
   const ids = () => sortedVertexes().map(vertex=>vertex.id);
   const onDragStart: DragEventHandler = ({draggable}) => {
@@ -319,8 +327,8 @@ export function TableInputField(props: TableInputFieldProps) {
   const onDragEnd: DragEventHandler = ({draggable, droppable}) => {
     if (draggable && droppable) {
       const currentItems = ids();
-      const fromIndex = currentItems.indexOf(draggable.id as string);
-      const toIndex = currentItems.indexOf(droppable.id as string);
+      const fromIndex = currentItems.indexOf(draggable.id as number);
+      const toIndex = currentItems.indexOf(droppable.id as number);
       const txnId = getNewTxnId();
       if (fromIndex !== toIndex) {
         const updatedItems = currentItems.slice();
@@ -341,8 +349,8 @@ export function TableInputField(props: TableInputFieldProps) {
   return (
     <div>
       <div>
-        {/*<Show when={props.meta.attributes}>*/}
-        {/*  <DynamicForm form={{title: '', label: props.meta.label || props.meta.id, attributes: props.meta.attributes}} vertex={props.vertex}/>*/}
+        {/*<Show when={props.meta.properties.attributes}>*/}
+        {/*  <DynamicForm form={{title: '', label: props.meta.properties.label || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
         {/*</Show>*/}
 
         <div>
@@ -362,7 +370,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <thead>
             <tr>
               <th></th>
-              <For each={props.meta.columns}>
+              <For each={props.meta.properties.columns}>
                 {(attribute) => (
                  <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
                    <th>{toTitle(attribute.label || attribute.id)}</th>

@@ -68,7 +68,7 @@ export const JsonInput = (props: Properties) => {
       <span>{hasError()}</span>
 
       <Show when={props.errors}>
-        <For each={Object.values(props.errors)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </>
   );

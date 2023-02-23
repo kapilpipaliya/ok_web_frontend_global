@@ -1,9 +1,9 @@
 import { createEffect, createResource, splitProps, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { FormMetaData, Id, SelectField, Vertex } from "./Form";
+import { Vertex } from "./Form";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
-import { findVertexIdsByLabel, newVertex } from "../../lib/Vertex";
+import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../utils";
 import { onChangeHandler } from "../core/dynamicForm";
@@ -11,11 +11,9 @@ import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 
 export interface SelectInputFieldProps extends Properties {
-  // TODO: MAKE THIS COMPULSORY
-  form?: FormMetaData;
-  meta: SelectField;
+  meta: Vertex;
   vertex: Vertex;
-  "aria-labeledby": string
+  "aria-labeledby"?: string
 }
 
 export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
@@ -260,9 +258,9 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
 
 }
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(txnId: number, vertex: Vertex, attribute: {id: string; component?: string},  value?: number[] | number) {
+export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vertex,  value?: number[] | number) {
   // delete removed edges:
-  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.id);
+  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.properties.id);
   const previousEdges = vertex.out_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -292,13 +290,17 @@ export function SelectInputField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
   const [p, customProps] = splitProps(props, ["vertex", "aria-labeledby"]);
+  if(!props.meta.properties.collection) {
+    return "Collection Not Defined."
+  }
+  
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.vertex, props.meta.collection, "")
+    return getSelectionOptions(props.vertex, props.meta.properties.collection, "")
   });
   return (
     <div aria-labeledby={p["aria-labeledby"]}>
       <div ref={el => {
-        const selectedValue = getSelectedVertexValue(props.vertex, props.meta.id);
+        const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
         const instance = new SelectBox(el, {
           ...customProps,
           searchEnabled: true,
@@ -307,14 +309,14 @@ export function SelectInputField(props: SelectInputFieldProps) {
             // batch(() => {
               const txnId = getNewTxnId();
               setSelectionValue(txnId, props.vertex, props.meta,  e.value);
-              props.form && onChangeHandler(txnId, props.vertex, props.form, props.meta);
+              onChangeHandler(txnId, props.vertex, props.meta);
               commitTxn(txnId, Ws);
             // })
           },
-          required: props.meta.required,
-          disabled: props.meta.disabled,
+          required: props.meta.properties.required,
+          disabled: props.meta.properties.disabled,
           valueExpr: "id",
-          displayExpr: item => getOptionLabel(item, props.meta.displayExpr || "properties.id"),
+          displayExpr: item => getOptionLabel(item, props.meta.properties.displayExpr || "properties.id"),
           labelMode: 'floating',
           onFocusIn: function(e) {
             refetch()
@@ -327,7 +329,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
           }
         })
         createEffect(()=>{
-          const selectedValue = getSelectedVertexValue(props.vertex, props.meta.id);
+          const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
             instance.option('value', selectedValue[0])
         })
         // createEffect(()=>instance.option('required', props.required))

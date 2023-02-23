@@ -1,5 +1,5 @@
 
-import {JSX, JSXElement} from "solid-js";
+import {JSX} from "solid-js";
 
 // Id is used as string because its used as object keys.
 export type Id = number;
@@ -34,7 +34,7 @@ interface BaseField {
   // one of type or component is required.
   dataType?: string;
   component?: string;
-  label?: string;
+  title?: string;
   hidden?: boolean;
   readonly ?: boolean;
   required?: boolean;
@@ -50,11 +50,12 @@ export interface SelectField extends BaseField {
   displayExpr: string;
 }
 
-export interface TableFieldAttributeBase {
-  noOverWrite?: boolean;
-  noInput?: boolean;
-}
-export type TableFieldAttributes = (BaseField & TableFieldAttributeBase) | (SelectField & TableFieldAttributeBase) | (TableField & TableFieldAttributeBase)
+// export interface TableFieldAttributeBase {
+//   noOverWrite?: boolean;
+//   noInput?: boolean;
+// }
+// export type TableFieldAttributes = (BaseField & TableFieldAttributeBase) | (SelectField & TableFieldAttributeBase) | (TableField & TableFieldAttributeBase)
+export type TableFieldAttributes = FieldAttribute;
 
 export interface TableField extends BaseField {
   component: 'Table' | 'TableForm';
