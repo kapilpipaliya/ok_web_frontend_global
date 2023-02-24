@@ -44,11 +44,21 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "dataType",
-      component: "Select"
+      component: "Select",
+      displayExpr: "properties.id",
+      collection: "DataType",
+      onchange: "[\"component\",null]"
      },
      {
-      id: "dataType",
-      component: "Select"
+      id: "component",
+      component: "Select",
+      collection: "ComponentPropertyDataType->DataTypeComponent",
+      displayExpr: "properties.id"
+     },
+     {
+      id: "value",
+      // component: "MetaAttribute<-MetaAttribute[*properties:id=type]:properties.id",
+      component: "->ComponentPropertyComponent:properties.id",
      }
     ]
    }

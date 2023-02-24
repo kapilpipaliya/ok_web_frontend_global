@@ -74,16 +74,31 @@ export function getParentVertex(path: string[], currentVertex: Vertex): {error:b
 }
 
 export function getChildVertex(path: string[], currentVertex: Vertex): {error:boolean, vertex?: Vertex} {
-  const type = path[0];
-  const edges = currentVertex.out_edges[type];
-  if(!edges || (edges && edges.length != 1)) {
+  if(path.length === 0) return {
+    error: true,
+  };
+
+  let type = path[0];
+  let filter = '';
+
+  const filterIndex = type.indexOf('[');
+  if(filterIndex > -1) {
+    filter = type.slice(filterIndex)
+    // modify the variable itself
+    type = type.slice(0, filterIndex);
+  }
+  let vertexes = (currentVertex.out_edges[type] || []).map(edgeId => graph.vertexes[graph.edges[edgeId].end]);
+
+  if (filter) {
+    // TODO:
+    // vertexes = vertexes.filter(x=>x.properties.id === 'component')
+  }
+  if(vertexes.length != 1) {
     return {
       error: true,
     }
   } else {
-    const edge = graph.edges[edges[0]];
-    if (edge) {
-      const newVertex = graph.vertexes[edge.end];
+    const newVertex = vertexes[0];
       if(newVertex) {
         if(path.length > 1) {
           return getChildVertex(path.slice(1), newVertex);
@@ -98,12 +113,8 @@ export function getChildVertex(path: string[], currentVertex: Vertex): {error:bo
           error: true,
         }
       }
-    } else {
-      return {
-        error: true,
-      }
     }
-  }
+
 }
 export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {error:boolean, vertexes?: Vertex[]} {
   const stepVertexes = {} as {[id: string]: Vertex};
@@ -215,7 +226,9 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
     let pattern = '';
     let projection = ''
     if (displayExpr.includes(":")) {
-      [pattern, projection] = displayExpr.split(":");
+      const columnIndex = displayExpr.lastIndexOf(":");
+      pattern = displayExpr.slice(0, columnIndex);
+      projection = displayExpr.slice(columnIndex + 1);
     }
     if(!pattern) {
       pattern = displayExpr;
@@ -233,7 +246,7 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
         childrenCollection = parentEdges[parentEdges.length - 1];
         const  parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
         if(parentVertexResult.error) {
-          return getTextValue(path(projection, vertex)!);
+          return '';
         } else {
           parentVertex = parentVertexResult.vertex;
         }
@@ -249,7 +262,7 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
 
       const childrenResult = getChildVertex(path_, parentVertex);
       if(childrenResult.error) {
-        return getTextValue(path(projection, vertex)!);
+        return '';
       } else {
         return getTextValue(path(projection, childrenResult.vertex)!);
       }
