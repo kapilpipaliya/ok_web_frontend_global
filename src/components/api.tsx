@@ -32,7 +32,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   title: "Component",
   label: "Component",
   attributes: [
-   { id: "id", dataType: "String" },
+   { id: "id", component: "TextInput" },
    {
     id: "Property",
     component: "Table",
@@ -66,7 +66,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  },
  "Attribute": {
   title: "Attribute", label: "Attribute", attributes: [
-   { id: "id", dataType: "String" },
+   { id: "id", component: "TextInput" },
    {
     id: "dataType",
     component: "Select",
@@ -80,18 +80,18 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     collection: "AttributeDataType->DataTypeComponent",
     displayExpr: "properties.id"
    },
-   { id: "title", dataType: "String" },
-   { id: "unique", dataType: "Boolean" },
-   { id: "required", dataType: "Boolean" },
-   { id: "readonly", dataType: "Boolean" },
-   { id: "disabled", dataType: "Boolean" }
+   { id: "title", component: "TextInput" },
+   { id: "unique", component: "CheckBox" },
+   { id: "required", component: "CheckBox" },
+   { id: "readonly", component: "CheckBox" },
+   { id: "disabled", component: "CheckBox" }
   ]
  },
  "CollectionCategory": {
   title: "Collection Category",
   label: "CollectionCategory",
   attributes: [
-   { id: "id", dataType: "String" },
+   { id: "id", component: "TextInput" },
    { id: "description", component: "TextArea" }
   ]
  },
@@ -101,7 +101,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   title: "Collection",
   label: "Collection",
   attributes: [
-   { id: "id", dataType: "String" },
+   { id: "id", component: "TextInput" },
    {
     id: "category",
     component: "Select",
@@ -184,27 +184,27 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "title",
-      dataType: "String",
+      component: "TextInput",
       defaultValue: "->CollectionAttributeAttribute:properties.title"
      },
      {
       id: "unique",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->CollectionAttributeAttribute:properties.unique"
      },
      {
       id: "required",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->CollectionAttributeAttribute:properties.required"
      },
      {
       id: "readonly",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->CollectionAttributeAttribute:properties.readonly"
      },
      {
       id: "disabled",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->CollectionAttributeAttribute:properties.disabled"
      }
     ]
@@ -243,8 +243,8 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
 
  "FormLayout": {
   title: "FormLayout1", label: "FormLayout", attributes: [
-   { id: "id", dataType: "String" },
-   { id: "title", dataType: "String" },
+   { id: "id", component: "TextInput" },
+   { id: "title", component: "TextInput" },
    { id: "description", component: "TextArea" },
    {
     id: "collection",
@@ -294,27 +294,27 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "title",
-      dataType: "String",
+      component: "TextInput",
       defaultValue: "->FormLayoutAttributeAttribute:properties.title||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.title"
      },
      {
       id: "unique",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.unique||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.unique"
      },
      {
       id: "required",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.required||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.required"
      },
      {
       id: "readonly",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.readonly||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.readonly"
      },
      {
       id: "disabled",
-      dataType: "Boolean",
+      component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.disabled||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
      }
     ]
@@ -372,27 +372,27 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "title",
-        dataType: "String",
+        component: "TextInput",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.title||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.title"
        },
        {
         id: "unique",
-        dataType: "Boolean",
+        component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.unique||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.unique"
        },
        {
         id: "required",
-        dataType: "Boolean",
+        component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.required||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.required"
        },
        {
         id: "readonly",
-        dataType: "Boolean",
+        component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.readonly||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.readonly"
        },
        {
         id: "disabled",
-        dataType: "Boolean",
+        component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.disabled||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
        }
       ]
@@ -406,7 +406,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   title: "FormLayout1",
   label: "TableLayout",
   attributes: [
-   { id: "id", dataType: "String" }
+   { id: "id", component: "TextInput" }
   ]
  }
 };

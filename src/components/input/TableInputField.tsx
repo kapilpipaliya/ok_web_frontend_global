@@ -235,7 +235,7 @@ export function TableInputField(props: TableInputFieldProps) {
                </td>
              </Match>
              <Match
-              when={component() === "NumberInput" || (!component() && (metaVertex.properties.dataType === DataType.Integer || metaVertex.properties.dataType === DataType.Float))}>
+              when={component() === "NumberInput"}>
                <td>
                  <div
                   class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
@@ -280,7 +280,7 @@ export function TableInputField(props: TableInputFieldProps) {
                  </div>
                </td>
              </Match>
-             <Match when={metaVertex.properties.dataType === "Boolean"}>
+             <Match when={metaVertex.properties.dataType === "CheckBox"}>
                <td>
                  <div
                   class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
