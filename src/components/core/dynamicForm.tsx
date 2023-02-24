@@ -83,7 +83,7 @@ export function DynamicForm(props: DynamicFormProps) {
 
     <Switch>
      <Match
-      when={metaVertex.properties.component === "TextInput" || (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.String)}>
+      when={metaVertex.properties.component === "TextInput"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
@@ -108,7 +108,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
      </Match>
      <Match
-      when={metaVertex.properties.component === "NumberInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.Integer || metaVertex.properties.dataType === DataType.Float))}>
+      when={metaVertex.properties.component === "NumberInput"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><NumberInputField
@@ -121,7 +121,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
      </Match>
      <Match
-      when={metaVertex.properties.component === "DateInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.Date))}>
+      when={metaVertex.properties.component === "DateInput"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><DateInputField
@@ -133,7 +133,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
      </Match>
      <Match
-      when={metaVertex.properties.component === "DateTimeInput" || (!metaVertex.properties.component && (metaVertex.properties.dataType === DataType.LocalDateTime || metaVertex.properties.dataType === DataType.LocalTime))}>
+      when={metaVertex.properties.component === "DateTimeInput"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><DateInputField
@@ -158,7 +158,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
      </Match>
      <Match
-      when={metaVertex.properties.component === "Boolean" || (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.Boolean)}>
+      when={metaVertex.properties.component === "CheckBox"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value"><BooleanInputField
@@ -171,7 +171,7 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
      </Match>
      <Match
-      when={metaVertex.properties.component === "Json" && (!metaVertex.properties.component && metaVertex.properties.dataType === DataType.Map)}>
+      when={metaVertex.properties.component === "Json"}>
       <div class="dx-field">
        <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
        <div class="dx-field-value">
