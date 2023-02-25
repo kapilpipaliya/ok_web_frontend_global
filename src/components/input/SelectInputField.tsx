@@ -1,4 +1,4 @@
-import { createEffect, createResource, splitProps, useContext } from "solid-js";
+import { createEffect, createResource, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import { Vertex } from "./Form";
@@ -158,37 +158,47 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
 }
 export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string): Vertex[] {
   // TOOD: make input filter working:
-  if (typeof collection === "string") {
-    // JSON.parse options:
-    if (collection.startsWith("[")) {
-      try {
-        return JSON.parse(collection);
-      } catch (e) {
-        console.warn(e)
+  if (typeof collection !== "string") return [];
+
+  if (collection.includes("||")) {
+    for (const coll of collection.split("||")) {
+      const value = getSelectionOptions(vertex, coll, "");
+      if (value.length != 0) {
+        return value;
+      }
+    }
+  }
+
+  // JSON.parse options:
+  if (collection.startsWith("[")) {
+    try {
+      return JSON.parse(collection);
+    } catch (e) {
+      console.warn(e);
+      return [];
+    }
+  } else if ((collection).includes("->") || (collection).includes("<-")) {
+    let parentVertex: Vertex | undefined;
+
+    let childrenCollection = collection;
+    if (collection.includes("<-")) {
+      const parentEdges = collection.split("<-");
+      childrenCollection = parentEdges[parentEdges.length - 1];
+      const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
+      if (parentVertexResult.error) {
         return [];
+      } else {
+        parentVertex = parentVertexResult.vertex;
       }
-    } else if ((collection).includes("->") || (collection).includes("<-")) {
-      let parentVertex: Vertex | undefined;
+    }
 
-      let childrenCollection = collection;
-      if (collection.includes("<-")) {
-        const parentEdges = collection.split("<-");
-        childrenCollection = parentEdges[parentEdges.length - 1];
-        const  parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
-        if(parentVertexResult.error) {
-          return [];
-        } else {
-          parentVertex = parentVertexResult.vertex;
-        }
-      }
+    if (!parentVertex) parentVertex = vertex;
 
-      if (!parentVertex) parentVertex = vertex;
+    if (childrenCollection.startsWith("->")) {
+      childrenCollection = childrenCollection.slice(2);
+    }
 
-      if(childrenCollection.startsWith('->')) {
-        childrenCollection = childrenCollection.slice(2);
-      }
-
-      const path_ = childrenCollection.split("->");
+    const path_ = childrenCollection.split("->");
 
       const childrenResult = getChildVertexes(path_, [parentVertex]);
       if(childrenResult.error) {
@@ -199,8 +209,6 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
     } else {
       return findVertexIdsByLabel(collection).map((id) => graph.vertexes[id]);
     }
-  }
-  return []
 }
 
 const getTextValue = (value: any) => {
@@ -302,7 +310,6 @@ export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vert
 export function SelectInputField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
-  const [p, customProps] = splitProps(props, ["vertex", "aria-labeledby"]);
   if(!props.meta.properties.collection) {
     return "Collection Not Defined."
   }
@@ -311,18 +318,17 @@ export function SelectInputField(props: SelectInputFieldProps) {
     return getSelectionOptions(props.vertex, props.meta.properties.collection, "")
   });
   return (
-    <div aria-labeledby={p["aria-labeledby"]}>
-      <div ref={el => {
-        const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
-        const instance = new SelectBox(el, {
-          ...customProps,
-          searchEnabled: true,
-          value: selectedValue[0],
-          onValueChanged: function(e) {
-            // batch(() => {
-              const txnId = getNewTxnId();
-              setSelectionValue(txnId, props.vertex, props.meta,  e.value);
-              onChangeHandler(txnId, props.vertex, props.meta);
+   <div aria-labeledby={props["aria-labeledby"]}>
+     <div ref={el => {
+       const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
+       const instance = new SelectBox(el, {
+         searchEnabled: true,
+         value: selectedValue[0],
+         onValueChanged: function(e) {
+           // batch(() => {
+           const txnId = getNewTxnId();
+           setSelectionValue(txnId, props.vertex, props.meta, e.value);
+           onChangeHandler(txnId, props.vertex, props.meta);
               commitTxn(txnId, Ws);
             // })
           },
@@ -335,16 +341,15 @@ export function SelectInputField(props: SelectInputFieldProps) {
             refetch()
           }
         });
-        createEffect(() => {
-          for(const property in p as Properties) {
-            // @ts-ignore
-            instance.option(property, p[property]);
-          }
-        })
-        createEffect(()=>{
-          const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
-            instance.option('value', selectedValue[0])
-        })
+       createEffect(() => {
+         for (const property in props.meta.properties.props as Properties) {
+           instance.option(property, props.meta.properties.props[property]);
+         }
+       });
+       createEffect(() => {
+         const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
+         instance.option("value", selectedValue[0]);
+       });
         // createEffect(()=>instance.option('required', props.required))
         // createEffect(()=>instance.option('disabled', props.disabled))
         createEffect(() => {

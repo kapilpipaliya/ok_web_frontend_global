@@ -1,5 +1,5 @@
 import { createSignal, JSX } from "solid-js";
-import { throttle, debounce } from "lodash";
+import { throttle } from "lodash";
 import { TextareaField } from "../../UI/core/form-textarea/src/TextareaField";
 import { Ws } from "../../utils/ws_events_dispatcher";
 
@@ -7,7 +7,7 @@ interface Properties {
   disabled?: boolean;
   onChange: JSX.EventHandler<HTMLTextAreaElement, Event>;
   // isSaving?: boolean
-  required?: boolean;
+
   value: string;
   error?: string;
   placeholder?: string;

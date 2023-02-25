@@ -1,44 +1,39 @@
-import { createEffect, For, Show, splitProps } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 
 
 import DateBox, { Properties } from "devextreme/ui/date_box";
+import { Vertex } from "./Form";
 
 export interface TextInputFieldProps extends Properties {
-  required?: boolean;
-  errors?: string[];
-  setValue: (value: string) => void;
-  "aria-labeledby"?: string
+ meta: Vertex;
+ vertex: Vertex;
+ errors?: string[];
+ "aria-labeledby"?: string;
+
+ setValue(attribute: Vertex, data: any): void;
 }
 
 export function DateInputField(props: TextInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
   return (
-    <div aria-labeledby={p["aria-labeledby"]}>
-      <div ref={el => {
-        const instance = new DateBox(el, {
-          ...customProps,
-          value: props.value,
-          onValueChanged: (e) => {
-            // props.setValue(e.component.option("value"));
-            props.setValue((e.value));
-          },
-          // required: props.required,
-          disabled: props.disabled
-        });
-        createEffect(() => {
-          for(const property in p as Properties) {
-            // @ts-ignore
-            instance.option(property, p[property]);
-          }
-        })
-        createEffect(()=>instance.option('value', props.value))
-        createEffect(()=>instance.option('required', props.required))
-        createEffect(()=>instance.option('disabled', props.disabled))
-      }} />
+   <div aria-labeledby={props["aria-labeledby"]}>
+    <div ref={el => {
+     const instance = new DateBox(el, {
+      onValueChanged: (e) => {
+       props.setValue(props.meta, (e.value));
+      }
+     });
+     createEffect(() => instance.option("value", props.vertex.properties[props.meta.properties.id]));
+     createEffect(() => {
+      for (const property in props.meta.properties.props as Properties) {
+       instance.option(property, props.meta.properties.props[property]);
+      }
+     });
+    }} />
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
-    </div>
+    <Show when={props.errors}>
+     <For each={Object.values(props.errors!)}>{(errorMsg: string) =>
+      <small>{errorMsg}</small>}</For>
+    </Show>
+   </div>
   );
 }

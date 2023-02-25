@@ -5,20 +5,22 @@ import "jsoneditor/dist/jsoneditor.css";
 // TODO: move to new beta version of jsonEditor:
 // https://github.com/josdejong/jsoneditor/issues/1223
 import { createSignal, For, onCleanup, Show, untrack } from "solid-js";
+import { Vertex } from "./Form";
 // import { Label } from '../Label';
 // import { Field } from '../../form2';
 
 
 interface Properties {
-
+  meta: Vertex;
+  vertex: Vertex;
   name?: string;
   class?: string;
   disabled?: boolean;
 
-  required?: boolean;
+
   errors?: string[];
-  setValue: (value: string) => void;
-  value: string;
+
+  setValue(attribute: Vertex, data: any): void;
 }
 
 export const JsonInput = (props: Properties) => {
@@ -34,7 +36,7 @@ export const JsonInput = (props: Properties) => {
         const value = jsonEditor.get();
         untrack(() => {
           // reconcile not working here:
-          props.setValue(value);
+          props.setValue(props.meta, value);
         });
 
         setHasError("");
@@ -45,17 +47,13 @@ export const JsonInput = (props: Properties) => {
   };
 
   const createEditor = (el: HTMLDivElement) => {
-    jsonEditor = new JSONEditor(el, options, props.value || {});
+    jsonEditor = new JSONEditor(el, options, props.vertex.properties[props.meta.properties.id] || {});
   };
   /* let updatePropsValue = true;
    createComputed(() => {
     // reset editor focus when editor value change
     if (typeof props.field.value === 'object' && jsonEditor && updatePropsValue) jsonEditor.set(props.field.value);
   }); */
-  // Temporary commenting this:
-  //createComputed(() => {
-    // if (props.value && jsonEditor) jsonEditor.set(props.value);
-  //});
 
   onCleanup(() => {
     if (jsonEditor) jsonEditor.destroy();

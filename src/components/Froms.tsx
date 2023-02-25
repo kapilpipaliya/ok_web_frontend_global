@@ -16,7 +16,7 @@ import {
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
-import { getSelectionOptions } from "./input/SelectInputField";
+import { getOptionLabel, getSelectionOptions } from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData, TableField } from "./input/Form";
 
 export const AllForms = () => {
@@ -50,17 +50,49 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutAttribute.properties, false, 10));
 
 
-  const formAttributeComponent = () => getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeComponent", "")[0];
-  const collectionAttributeComponent = () => getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0];
-  const attributeComponent = () => getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+  const attributeComponent = getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+  const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0] || attributeComponent;
+  const formAttributeComponent = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeComponent", "")[0] || collectionAttributeComponent;
 
-  const component = formAttributeComponent() || collectionAttributeComponent() || attributeComponent();
-  attribute.component = component.properties.id;
+  attribute.component = collectionAttributeComponent.properties.id;
 
   attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+
+  let props = {} as { [key: string]: any };
+
+  const formLayoutProps = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeProperty", "").reduce((acc, curr) => {
+   const key = getOptionLabel(curr, "->FormLayoutAttributePropertyKey:properties.key");
+   if (key) {
+    acc[key] = curr.properties.value;
+   }
+   return acc;
+  }, {} as { [key: string]: any });
+
+  if (formAttributeComponent === collectionAttributeComponent) {
+   const collectionProps = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeAttribute->CollectionAttributeProperty", "").reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->CollectionAttributePropertyKey:properties.key");
+    if (key) {
+     acc[key] = curr.properties.value;
+    }
+    return acc;
+   }, {} as { [key: string]: any });
+   props = Object.assign({}, removeUndefinedProperties(collectionProps, false, 10), removeUndefinedProperties(formLayoutProps, false, 10));
+  }
+
+  const comp = (formAttributeComponent === attributeComponent) ? attributeComponent : formAttributeComponent;
+
+  const componentProps = getSelectionOptions(comp, "->ComponentProperty", "").reduce((acc, curr) => {
+   if (curr.properties.key) {
+    acc[curr.properties.key] = curr.properties.value;
+   }
+   return acc;
+  }, {} as { [key: string]: any });
+  props = Object.assign({}, removeUndefinedProperties(componentProps, false, 10),props );
+
+  attribute.props = props;
+
   return attribute;
  }).sort((a, b) => a.pos - b.pos);
-
 
  const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
@@ -73,14 +105,48 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutChildAttribute.properties, false, 10));
 
 
-   const formAttributeComponent = () => getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeComponent", "")[0];
-   const collectionAttributeComponent = () => getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0];
-   const attributeComponent = () => getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+   const attributeComponent = getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
+   const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0] || attributeComponent;
+   const formAttributeComponent = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeComponent", "")[0] || collectionAttributeComponent;
 
-   const component = formAttributeComponent() || collectionAttributeComponent() || attributeComponent();
+   const component = formAttributeComponent || collectionAttributeComponent || attributeComponent;
    attribute.component = component.properties.id;
 
    attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+
+   let props = {} as { [key: string]: any };
+
+   const formLayoutProps = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttributeProperty", "").reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->FormLayoutChildAttributePropertyKey:properties.key");
+    if (key) {
+     acc[key] = curr.properties.value;
+    }
+    return acc;
+   }, {} as { [key: string]: any });
+
+   if (formAttributeComponent === collectionAttributeComponent) {
+    const collectionProps = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttributeAttribute->CollectionAttributeProperty", "").reduce((acc, curr) => {
+     const key = getOptionLabel(curr, "->CollectionAttributePropertyKey:properties.key");
+     if (key) {
+      acc[key] = curr.properties.value;
+     }
+     return acc;
+    }, {} as { [key: string]: any });
+    props = Object.assign({}, removeUndefinedProperties(collectionProps, false, 10), removeUndefinedProperties(formLayoutProps, false, 10));
+   }
+
+   const comp = (formAttributeComponent === attributeComponent) ? attributeComponent : formAttributeComponent;
+
+   const componentProps = getSelectionOptions(comp, "->ComponentProperty", "").reduce((acc, curr) => {
+    if (curr.properties.key) {
+     acc[curr.properties.key] = curr.properties.value;
+    }
+    return acc;
+   }, {} as { [key: string]: any });
+   props = Object.assign({}, removeUndefinedProperties(componentProps, false, 10),props );
+
+   attribute.props = props;
+
    return attribute;
   }).sort((a, b) => a.pos - b.pos);
 
@@ -101,8 +167,6 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   label: formLayoutCollection.properties.id,
   title: formLayout.properties.title
  };
-
- console.log(form);
 
  return <div class="flex flex:row flex:wrap">
   <DynamicFormSequence

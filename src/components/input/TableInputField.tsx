@@ -25,12 +25,13 @@ import {
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import {
-  getChildVertex, getChildVertexes,
+  getChildVertex,
+  getChildVertexes,
   getOptionLabel,
   getSelectionOptions,
   SelectInputField
 } from "./SelectInputField";
-import { DataType, Vertex } from "./Form";
+import { Vertex } from "./Form";
 import { toTitle } from "case-switcher-js";
 import usePopper from "solid-popper";
 import { JsonInput } from "./JsonInput";
@@ -125,7 +126,6 @@ export function TableInputField(props: TableInputFieldProps) {
     setSortedIds(vertexes);
   })
 
-
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex }) => {
 
@@ -162,16 +162,22 @@ export function TableInputField(props: TableInputFieldProps) {
     const rowMetaAttributeInstance = getChildVertex(["AttributeInstance"], p.joinVertex );
 
     if(rowMetaAttributeInstance.error) {
-      const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttributeInstance");
-      if (metaInstanceResult.error) { alert ("Error creating a row for attribute instance")}
-
-      for (const attrColumn of tableColumnsTemplate) {
-        const attrInstanceResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttribute");
-        if (attrInstanceResult.error) {
-          alert(attrInstanceResult.error)
+      batch(() => {
+        const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttributeInstance");
+        if (metaInstanceResult.error) {
+          alert("Error creating a row for attribute instance");
         }
-        mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, klona(attrColumn.properties));
-      }
+        mergeVertexProperties(getNewTxnId(), metaInstanceResult.vertexId!, { templateId: props.meta.id });
+
+        for (const attrColumn of tableColumnsTemplate) {
+          const attrInstanceResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttribute");
+          if (attrInstanceResult.error) {
+            alert(attrInstanceResult.error);
+          }
+          mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, klona(attrColumn.properties));
+          mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, { templateId: attrColumn.id });
+        }
+      });
     }
 
     const attributesResult = getChildVertexes(["AttributeInstance", "MetaAttribute"], [p.joinVertex]);
@@ -205,15 +211,16 @@ export function TableInputField(props: TableInputFieldProps) {
              </Match>
 
              <Match
-              when={component() === "TextInput" || (!component() && metaVertex.properties.dataType === DataType.String)}>
+              when={component() === "TextInput"}>
                <td>
                  <div
                   class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                    <TextInputField
                     label=""
                     // name=
-                    value={p.joinVertex.properties[metaVertex.properties.id]}
-                    setValue={(value) => setValue(metaVertex, value)}
+                    meta={metaVertex}
+                    vertex={p.joinVertex}
+                    setValue={setValue}
                    />
 
                  </div>
@@ -226,9 +233,9 @@ export function TableInputField(props: TableInputFieldProps) {
                   class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                    <TextAreaField
                     label=""
-                    // name=
-                    value={p.joinVertex.properties[metaVertex.properties.id]}
-                    setValue={(value) => setValue(metaVertex, value)}
+                    meta={metaVertex}
+                    vertex={p.joinVertex}
+                    setValue={setValue}
                    />
 
                  </div>
@@ -241,8 +248,9 @@ export function TableInputField(props: TableInputFieldProps) {
                   class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                    <NumberInputField
                     label=""
-                    value={p.joinVertex.properties[metaVertex.properties.id]}
-                    setValue={(value) => setValue(metaVertex, value)}
+                    meta={metaVertex}
+                    vertex={p.joinVertex}
+                    setValue={setValue}
                    />
 
                  </div>
@@ -280,19 +288,20 @@ export function TableInputField(props: TableInputFieldProps) {
                  </div>
                </td>
              </Match>
-             <Match when={metaVertex.properties.dataType === "CheckBox"}>
+             <Match when={component() === "CheckBox"}>
                <td>
                  <div
                   class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
                    <BooleanInputField
-                    value={p.joinVertex.properties[metaVertex.properties.id]}
-                    setValue={(value) => setValue(metaVertex, value)} />
+                    meta={metaVertex}
+                    vertex={p.joinVertex}
+                    setValue={setValue} />
 
                  </div>
                </td>
              </Match>
              <Match
-              when={metaVertex.properties.dataType === DataType.Map || component() === "Json"}>
+              when={component() === "Json"}>
 
                <td>
                  <div
@@ -300,8 +309,9 @@ export function TableInputField(props: TableInputFieldProps) {
                    <ModalInput btnContent={<Icon
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <JsonInput
-                      value={p.joinVertex.properties[metaVertex.properties.id]}
-                      setValue={(value) => setValue(metaVertex, value)}
+                      meta={metaVertex}
+                      vertex={p.joinVertex}
+                      setValue={setValue}
                      />
                    </ModalInput>
 
@@ -316,8 +326,9 @@ export function TableInputField(props: TableInputFieldProps) {
                    <ModalInput btnContent={<Icon
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <TextAreaField
-                      value={p.joinVertex.properties[metaVertex.properties.id]}
-                      setValue={(value) => setValue(metaVertex, value)}
+                      meta={metaVertex}
+                      vertex={p.joinVertex}
+                      setValue={setValue}
                      />
                    </ModalInput>
 
@@ -331,7 +342,7 @@ export function TableInputField(props: TableInputFieldProps) {
                    <TableInputField
                     // id={props.form.id + metaVertex.properties.id}
 
-                    meta={metaVertex}
+                    meta={graph.vertexes[metaVertex.properties.templateId]}
                     vertex={p.joinVertex}
 
                    />

@@ -1,40 +1,35 @@
-import { createEffect, For, Show, splitProps } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 
 
 import TextArea, { Properties } from "devextreme/ui/text_area";
+import { Vertex } from "./Form";
 
 export interface TextInputFieldProps extends Properties {
-  required?: boolean;
+  meta: Vertex;
+  vertex: Vertex;
+
   errors?: string[];
-  setValue: (value: string) => void;
-  "aria-labeledby"?: string
+  "aria-labeledby"?: string;
+
+  setValue(attribute: Vertex, data: any): void;
 }
 
 export function TextAreaField(props: TextInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
   return (
-    <div aria-labeledby={p["aria-labeledby"]}>
-      <div ref={el => {
-        const instance = new TextArea(el, {
-          ...customProps,
+   <div aria-labeledby={props["aria-labeledby"]}>
+     <div ref={el => {
+       const instance = new TextArea(el, {
+         onChange: e => {
 
-          value: props.value,
-          onChange: e => {
-            // props.setValue(e.component.option("value"));
-            props.setValue((e.event?.currentTarget as HTMLInputElement).value);
-          },
-          // @ts-ignore
-          required: props.required,
-          disabled: props.disabled
-        });
-        createEffect(() => {
-          for(const property in p as Properties) {
-            // @ts-ignore
-            instance.option(property, p[property]);
-          }
-        })
-        createEffect(()=>instance.option('required', props.required))
-        createEffect(()=>instance.option('disabled', props.disabled))
+           props.setValue(props.meta, e.component.option("value"));
+         }
+       });
+       createEffect(() => instance.option("value", props.vertex.properties[props.meta.properties.id]));
+       createEffect(() => {
+         for (const property in props.meta.properties.props as Properties) {
+           instance.option(property, props.meta.properties.props[property]);
+         }
+       });
       }} />
 
       <Show when={props.errors}>
