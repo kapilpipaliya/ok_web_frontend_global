@@ -1,5 +1,4 @@
-
-import {JSX} from "solid-js";
+import { JSX } from "solid-js";
 
 // Id is used as string because its used as object keys.
 export type Id = number;
@@ -37,8 +36,8 @@ interface BaseField {
   title?: string;
   hidden?: boolean;
   readonly ?: boolean;
-  required?: boolean;
-  disabled?: boolean;
+
+ disabled?: boolean;
   onchange?: string
   props?: {[key: string]: any}
   defaultValue?: string;

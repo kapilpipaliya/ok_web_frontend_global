@@ -1,45 +1,41 @@
-import { createEffect, For, Show, splitProps } from "solid-js";
+import { createEffect, For, Show } from "solid-js";
 
 
 import TextBox, { Properties } from "devextreme/ui/text_box";
 import { NativeEventInfo } from "devextreme/events";
+import { Vertex } from "./Form";
 
 export interface TextInputFieldProps extends Properties {
-  required?: boolean;
-  errors?: string[];
-  setValue: (value: string) => void;
-  "aria-labeledby"?: string
+ meta: Vertex;
+ vertex: Vertex;
+
+ errors?: string[];
+ "aria-labeledby"?: string;
+
+ setValue(attribute: Vertex, data: any): void;
 }
 
 export function TextInputField(props: TextInputFieldProps) {
-  const [p, customProps] = splitProps(props, ["aria-labeledby"]);
   return (
-    <div aria-labeledby={p['aria-labeledby']}>
-      <div ref={el => {
-        const instance = new TextBox(el, {
-          ...customProps,
+   <div aria-labeledby={props["aria-labeledby"]}>
+    <div ref={el => {
+     const instance = new TextBox(el, {
+      onChange: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
+       props.setValue(props.meta, e.component.option("value"));
+      },
+     });
+     createEffect(() => instance.option("value", props.vertex.properties[props.meta.properties.id]));
+     createEffect(() => {
+      for (const property in props.meta.properties.props as Properties) {
+       instance.option(property, props.meta.properties.props[property]);
+      }
+     });
+    }} />
 
-          value: props.value,
-          onChange: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
-            // props.setValue(e.component.option("value"));
-            props.setValue((e.event?.currentTarget as HTMLInputElement).value);
-          },
-          required: props.required,
-          disabled: props.disabled
-        });
-        createEffect(() => {
-          for(const property in p as Properties) {
-            // @ts-ignore
-            instance.option(property, p[property]);
-          }
-        })
-        createEffect(()=>instance.option('required', props.required))
-        createEffect(()=>instance.option('disabled', props.disabled))
-      }} />
-
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
-    </div>
+    <Show when={props.errors}>
+     <For each={Object.values(props.errors!)}>{(errorMsg: string) =>
+      <small>{errorMsg}</small>}</For>
+    </Show>
+   </div>
   );
 }

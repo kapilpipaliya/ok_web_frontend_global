@@ -10,7 +10,6 @@ import {
 import { klona } from "klona/json";
 
 import {
- DataType,
  FieldAttribute,
  FormMetaData,
  Id,
@@ -89,85 +88,95 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <TextInputField
          aria-labeledby={id}
-         value={props.vertex.properties[metaVertex.properties.id]}
-         setValue={(value) => props.setValue(metaVertex, value)}
-         
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
         /></div>
       </div>
      </Match>
      <Match
       when={metaVertex.properties.component === "TextArea"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><TextAreaField
-        aria-labeledby={id}
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-        
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <TextAreaField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+
+        /></div>
       </div>
      </Match>
      <Match
       when={metaVertex.properties.component === "NumberInput"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><NumberInputField
-        aria-labeledby={id}
-        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-        
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <NumberInputField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+        /></div>
       </div>
      </Match>
      <Match
       when={metaVertex.properties.component === "DateInput"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><DateInputField
-        aria-labeledby={id}
-        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <DateInputField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+        /></div>
       </div>
      </Match>
      <Match
       when={metaVertex.properties.component === "DateTimeInput"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><DateInputField
-        aria-labeledby={id}
-        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
-        type="datetime"
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <DateInputField
+         aria-labeledby={id}
+         type="datetime"
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+        /></div>
       </div>
      </Match>
      <Match when={metaVertex.properties.component === "JsCode"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><TextAreaField
-        aria-labeledby={id}
-        label={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-        
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <TextAreaField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+        /></div>
       </div>
      </Match>
      <Match
       when={metaVertex.properties.component === "CheckBox"}>
       <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value"><BooleanInputField
-        aria-labeledby={id}
-        text={toTitle(metaVertex.properties.title || metaVertex.properties.id)}
-        value={props.vertex.properties[metaVertex.properties.id]}
-        setValue={(value) => props.setValue(metaVertex, value)}
-        
-       /></div>
+       <div class="dx-field-label"
+            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <BooleanInputField
+         aria-labeledby={id}
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
+        /></div>
       </div>
      </Match>
      <Match
@@ -177,9 +186,9 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <JsonInput
          aria-labeledby={id}
-         value={props.vertex.properties[metaVertex.properties.id]}
-         setValue={(value) => props.setValue(metaVertex, value)}
-         
+         vertex={props.vertex}
+         meta={metaVertex}
+         setValue={props.setValue}
         />
        </div>
       </div>
@@ -214,7 +223,6 @@ export function DynamicForm(props: DynamicFormProps) {
        meta={metaVertex}
        vertex={props.vertex}
       />
-
      </Match>
     </Switch>
    )

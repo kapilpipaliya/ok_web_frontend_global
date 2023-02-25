@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  createResource,
-  on,
-  splitProps,
-  useContext
-} from "solid-js";
+import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
 import { Vertex } from "./Form";
@@ -26,18 +20,16 @@ export interface SelectInputFieldProps extends Properties {
 export function TagField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
-  const [p, customProps] = splitProps(props, ["vertex", "aria-labeledby"]);
   const [selectOptions, {refetch}] = createResource(() => {
     return getSelectionOptions(props.vertex, props.meta.properties.collection, "")
   });
 
   return (
-    <div aria-labeledby={p["aria-labeledby"]}>
+    <div aria-labeledby={props["aria-labeledby"]}>
       <div ref={el => {
         const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
 
         const instance = new TagBox(el, {
-          ...customProps,
           searchEnabled: true,
           value: selectedValue,
           onValueChanged: function(e) {
@@ -59,14 +51,13 @@ export function TagField(props: SelectInputFieldProps) {
           }
         });
         createEffect(() => {
-          for(const property in p as Properties) {
-            // @ts-ignore
-            instance.option(property, p[property]);
+          for (const property in props.meta.properties.props as Properties) {
+            instance.option(property, props.meta.properties.props[property]);
           }
-        })
-        createEffect(on(()  => getSelectedVertexValue(props.vertex, props.meta.properties.id), selectedValue =>{
-            instance.option('value', selectedValue)
-        }, {defer: true}))
+        });
+        createEffect(on(() => getSelectedVertexValue(props.vertex, props.meta.properties.id), selectedValue => {
+          instance.option("value", selectedValue);
+        }, { defer: true }));
         // when the value is changed by other components, we want to refetch the options
         // createEffect(on(() => props.rawValue, (v) => refetch(v)))
         // createEffect(()=>instance.option('required', props.required))

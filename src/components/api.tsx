@@ -39,7 +39,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     tab: 'Properties',
     columns: [
      {
-      id: "id",
+      id: "key",
       component: "TextInput"
      },
      {
@@ -83,7 +83,6 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    { id: "title", component: "TextInput" },
    { id: "unique", component: "CheckBox" },
    { id: "required", component: "CheckBox" },
-   { id: "readonly", component: "CheckBox" },
    { id: "disabled", component: "CheckBox" }
   ]
  },
@@ -198,16 +197,26 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       defaultValue: "->CollectionAttributeAttribute:properties.required"
      },
      {
-      id: "readonly",
-      component: "CheckBox",
-      defaultValue: "->CollectionAttributeAttribute:properties.readonly"
-     },
-     {
       id: "disabled",
       component: "CheckBox",
       defaultValue: "->CollectionAttributeAttribute:properties.disabled"
-     }
-    ]
+     },  {
+      id: "Property",
+      component: "Table",
+      columns: [
+       {
+        id: "key",
+        component: "Select",
+        displayExpr: "properties.key",
+        collection: "CollectionAttributeProperty<-CollectionAttributeComponent->ComponentProperty||CollectionAttributeProperty<-CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+       },
+       {
+        id: "value",
+        component: "->CollectionAttributePropertyKey->ComponentPropertyComponent:properties.id",
+       }
+      ]
+    }
+   ]
 
    },
    {
@@ -298,24 +307,29 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       defaultValue: "->FormLayoutAttributeAttribute:properties.title||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.title"
      },
      {
-      id: "unique",
-      component: "CheckBox",
-      defaultValue: "->FormLayoutAttributeAttribute:properties.unique||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.unique"
-     },
-     {
       id: "required",
       component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.required||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.required"
      },
      {
-      id: "readonly",
-      component: "CheckBox",
-      defaultValue: "->FormLayoutAttributeAttribute:properties.readonly||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.readonly"
-     },
-     {
       id: "disabled",
       component: "CheckBox",
       defaultValue: "->FormLayoutAttributeAttribute:properties.disabled||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
+     },  {
+      id: "Property",
+      component: "Table",
+      columns: [
+       {
+        id: "key",
+        component: "Select",
+        displayExpr: "properties.key",
+        collection: "FormLayoutAttributeProperty<-FormLayoutAttributeComponent->ComponentProperty||FormLayoutAttributeProperty<-FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+       },
+       {
+        id: "value",
+        component: "->FormLayoutAttributePropertyKey->ComponentPropertyComponent:properties.id",
+       }
+      ]
      }
     ]
    },
@@ -376,24 +390,29 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.title||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.title"
        },
        {
-        id: "unique",
-        component: "CheckBox",
-        defaultValue: "->FormLayoutChildAttributeAttribute:properties.unique||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.unique"
-       },
-       {
         id: "required",
         component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.required||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.required"
        },
        {
-        id: "readonly",
-        component: "CheckBox",
-        defaultValue: "->FormLayoutChildAttributeAttribute:properties.readonly||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.readonly"
-       },
-       {
         id: "disabled",
         component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.disabled||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
+       },  {
+        id: "Property",
+        component: "Table",
+        columns: [
+         {
+          id: "key",
+          component: "Select",
+          displayExpr: "properties.key",
+          collection: "FormLayoutChildAttributeProperty<-FormLayoutChildAttributeComponent->ComponentProperty||FormLayoutChildAttributeProperty<-FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+         },
+         {
+          id: "value",
+          component: "->FormLayoutChildAttributePropertyKey->ComponentPropertyComponent:properties.id",
+         }
+        ]
        }
       ]
      }

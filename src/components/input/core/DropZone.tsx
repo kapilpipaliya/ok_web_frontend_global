@@ -32,7 +32,7 @@ interface Properties {
   disabled?: boolean;
   onChange: JSX.EventHandler<HTMLInputElement, Event>;
   //isSaving?: boolean
-  required?: boolean;
+
   value: string;
   error?: string;
   placeholder?: string;

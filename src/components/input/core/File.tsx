@@ -8,7 +8,7 @@ import { createStore } from "solid-js/store";
 
 interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
   name?: string;
-  required?: boolean;
+
   disabled?: boolean;
   value?: string;
   props: {};
