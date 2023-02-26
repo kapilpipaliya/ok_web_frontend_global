@@ -398,7 +398,14 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         id: "disabled",
         component: "CheckBox",
         defaultValue: "->FormLayoutChildAttributeAttribute:properties.disabled||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
-       },  {
+       },
+       {
+        id: "child",
+        component: "Select",
+        displayExpr: "properties.id",
+        collection: "FormLayout"
+       },
+       {
         id: "Property",
         component: "Table",
         columns: [
