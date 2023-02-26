@@ -203,10 +203,10 @@ export function TableInputField(props: TableInputFieldProps) {
           })
           return (
            <Switch>
-             <Match when={metaVertex.properties.hidden}>
+             <Match when={metaVertex.properties.props?.hidden}>
                <td>
                  <div
-                  class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}</div>
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</div>
                </td>
              </Match>
 
@@ -214,7 +214,7 @@ export function TableInputField(props: TableInputFieldProps) {
               when={component() === "TextInput"}>
                <td>
                  <div
-                  class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TextInputField
                     label=""
                     // name=
@@ -230,7 +230,7 @@ export function TableInputField(props: TableInputFieldProps) {
               when={component() === "TextArea"}>
                <td>
                  <div
-                  class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TextAreaField
                     label=""
                     meta={metaVertex}
@@ -245,7 +245,7 @@ export function TableInputField(props: TableInputFieldProps) {
               when={component() === "NumberInput"}>
                <td>
                  <div
-                  class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <NumberInputField
                     label=""
                     meta={metaVertex}
@@ -259,7 +259,7 @@ export function TableInputField(props: TableInputFieldProps) {
              <Match when={component() === "Select"}>
                <td>
                  <div
-                  class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <SelectInputField
 
                     vertex={p.joinVertex}
@@ -275,7 +275,7 @@ export function TableInputField(props: TableInputFieldProps) {
              <Match when={component() === "Tag"}>
                <td>
                  <div
-                  class="flex align-items:center">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TagField
 
                     vertex={p.joinVertex}
@@ -291,7 +291,7 @@ export function TableInputField(props: TableInputFieldProps) {
              <Match when={component() === "CheckBox"}>
                <td>
                  <div
-                  class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <BooleanInputField
                     meta={metaVertex}
                     vertex={p.joinVertex}
@@ -305,7 +305,7 @@ export function TableInputField(props: TableInputFieldProps) {
 
                <td>
                  <div
-                  class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <ModalInput btnContent={<Icon
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <JsonInput
@@ -322,7 +322,7 @@ export function TableInputField(props: TableInputFieldProps) {
              <Match when={component() === "JsCode"}>
                <td>
                  <div
-                  class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <ModalInput btnContent={<Icon
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <TextAreaField
@@ -338,7 +338,7 @@ export function TableInputField(props: TableInputFieldProps) {
              <Match when={component() === "Table"}>
                <td>
                  <div
-                  class="flex">{metaVertex.properties.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.defaultValue)}
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TableInputField
                     // id={props.form.id + metaVertex.properties.id}
 

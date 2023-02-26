@@ -310,12 +310,12 @@ export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vert
 export function SelectInputField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
-  if(!props.meta.properties.collection) {
+  if(!props.meta.properties.props?.collection) {
     return "Collection Not Defined."
   }
   
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.vertex, props.meta.properties.collection, "")
+    return getSelectionOptions(props.vertex, props.meta.properties.props.collection, "")
   });
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
@@ -332,10 +332,8 @@ export function SelectInputField(props: SelectInputFieldProps) {
               commitTxn(txnId, Ws);
             // })
           },
-          required: props.meta.properties.required,
-          disabled: props.meta.properties.disabled,
           valueExpr: "id",
-          displayExpr: item => getOptionLabel(item, props.meta.properties.displayExpr || "properties.id"),
+          displayExpr: item => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
           labelMode: 'floating',
           onFocusIn: function(e) {
             refetch()
@@ -343,6 +341,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
         });
        createEffect(() => {
          for (const property in props.meta.properties.props as Properties) {
+           if(property === "displayExpr") continue;
            instance.option(property, props.meta.properties.props[property]);
          }
        });
@@ -350,8 +349,6 @@ export function SelectInputField(props: SelectInputFieldProps) {
          const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
          instance.option("value", selectedValue[0]);
        });
-        // createEffect(()=>instance.option('required', props.required))
-        // createEffect(()=>instance.option('disabled', props.disabled))
         createEffect(() => {
           if(selectOptions()) {
             instance.option('dataSource', selectOptions());

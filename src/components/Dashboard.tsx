@@ -76,7 +76,7 @@ const navigation = [
  { name: "Forms", href: "/forms" },
  { name: "Grids", href: "/grids" }
 ];
-window.n = navigation
+// window.n = navigation
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!

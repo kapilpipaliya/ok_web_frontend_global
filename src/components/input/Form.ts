@@ -1,82 +1,29 @@
-import { JSX } from "solid-js";
-
-// Id is used as string because its used as object keys.
 export type Id = number;
 
-export type FormResult = Map<string, {[key: string]: any}>;
+export const DataType = [
+ "String",
+ "Boolean",
+ "Integer",
+ "Float",
+ "List",
+ "Map",
+ "Duration",
+ "Date",
+ "LocalTime",
+ "LocalDateTime"
+];
 
-export interface InitialValues {
-  [formId: string]: {id: Id, start?: Id, end?: Id, properties: {[key: string]: any}}
+export interface FieldAttribute {
+ id: string;
+ tab?: string;
+ group?: string;
+ dataType?: string;
+ component: string;
+ title?: string;
+ props?: { [key: string]: any };
+ // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
+ attributes?: FieldAttribute[];
 }
-export enum DataType {
-    String= "String",
-    Boolean= "Boolean",
-    Integer= "Integer",
-    Float= "Float",
-    List= "List",
-    Map= "Map",
-    Duration = "Duration",
-    Date = "Date",
-    LocalTime = "LocalTime",
-    LocalDateTime = "LocalDateTime",
-  // Table= "table",
-  // TableForm= "table_forms",
-  // Select= "select",
-  // ButtonGroup= "buttongroup",
-
-}
-
-interface BaseField {
-  id: string;
-  tab?: string;
-  group?: string;
-  // one of type or component is required.
-  dataType?: string;
-  component?: string;
-  title?: string;
-  hidden?: boolean;
-  readonly ?: boolean;
-
- disabled?: boolean;
-  onchange?: string
-  props?: {[key: string]: any}
-  defaultValue?: string;
-}
-
-export interface SelectField extends BaseField {
-  component: 'Select' | 'Tag';
-  collection: number | string;
-  displayExpr: string;
-}
-
-// export interface TableFieldAttributeBase {
-//   noOverWrite?: boolean;
-//   noInput?: boolean;
-// }
-// export type TableFieldAttributes = (BaseField & TableFieldAttributeBase) | (SelectField & TableFieldAttributeBase) | (TableField & TableFieldAttributeBase)
-export type TableFieldAttributes = FieldAttribute;
-
-export interface TableField extends BaseField {
-  component: 'Table' | 'TableForm';
-
-  // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
-  attributes: TableFieldAttributes[];
-  columns: TableFieldAttributes[];
-
-  noSort?: boolean;
-}
-// - if label is "save" and we don't pass a onclick function, it runs a default save function.
-// - the save button should be disabled until anything changed.
-export interface ButtonItem {
-  design: "Default" | "Transparent" | "Positive" | "Negative" | "Attention" | "Emphasized";
-  onclick: () => void;
-  children?: JSX.Element;
-}
-export interface ButtonGroupField extends BaseField {
-  component: 'ButtonGroup';
-  buttons: ButtonItem[]
-}
-export type FieldAttribute = BaseField | SelectField | TableField | ButtonGroupField
 
 export interface FormMetaData {
   title: string;
@@ -84,7 +31,6 @@ export interface FormMetaData {
   label: string; // required to create new vertex
   // postSubmit?: (data: any) => any
 }
-
 
 // ********
 // Types

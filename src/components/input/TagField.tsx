@@ -4,6 +4,7 @@ import TagBox, { Properties } from "devextreme/ui/tag_box";
 import { Vertex } from "./Form";
 import { commitTxn, getNewTxnId } from "../../lib/graph";
 import {
+  getOptionLabel,
   getSelectedVertexValue,
   getSelectionOptions,
   setSelectionValue
@@ -20,8 +21,13 @@ export interface SelectInputFieldProps extends Properties {
 export function TagField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
+
+  if(!props.meta.properties.props?.collection) {
+    return "Collection Not Defined."
+  }
+
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.vertex, props.meta.properties.collection, "")
+    return getSelectionOptions(props.vertex, props.meta.properties.props.collection, "")
   });
 
   return (
@@ -41,10 +47,8 @@ export function TagField(props: SelectInputFieldProps) {
               commitTxn(txnId, Ws);
             // })
           },
-          // required: props.meta.properties.required,
-          disabled: props.meta.properties.disabled,
           valueExpr: "id",
-          displayExpr: "properties.id",
+          displayExpr: item => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
           labelMode: 'floating',
           onFocusIn: function(e) {
             refetch()
@@ -52,6 +56,7 @@ export function TagField(props: SelectInputFieldProps) {
         });
         createEffect(() => {
           for (const property in props.meta.properties.props as Properties) {
+            if(property === "displayExpr") continue;
             instance.option(property, props.meta.properties.props[property]);
           }
         });
@@ -60,8 +65,6 @@ export function TagField(props: SelectInputFieldProps) {
         }, { defer: true }));
         // when the value is changed by other components, we want to refetch the options
         // createEffect(on(() => props.rawValue, (v) => refetch(v)))
-        // createEffect(()=>instance.option('required', props.required))
-        // createEffect(()=>instance.option('disabled', props.disabled))
         createEffect(() => {
           if(selectOptions()) {
             instance.option('dataSource', selectOptions());
