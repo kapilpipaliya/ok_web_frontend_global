@@ -17,7 +17,7 @@ import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
 import { getOptionLabel, getSelectionOptions } from "./input/SelectInputField";
-import { FieldAttribute, FormMetaData, TableField } from "./input/Form";
+import { FieldAttribute, FormMetaData } from "./input/Form";
 
 export const AllForms = () => {
  const allFormLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
@@ -44,7 +44,9 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
  const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormLayoutAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
- const attributes: FieldAttribute[] = FormLayoutAttributes.map(vertexFormLayoutAttribute => {
+ let attributes: FieldAttribute[] = [];
+
+ for(const vertexFormLayoutAttribute of FormLayoutAttributes) {
   const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeAttribute", "")[0];
   const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
   const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutAttribute.properties, false, 10));
@@ -91,15 +93,20 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
   attribute.props = props;
 
-  return attribute;
- }).sort((a, b) => a.pos - b.pos);
+  attributes.push(attribute);
+ }
+ // @ts-ignore
+ attributes = attributes.sort((a, b) => a.pos - b.pos);
 
  const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
- const tableAttributes: FieldAttribute[] = FormLayoutChilds.map(vertexFormLayoutChild => {
+ const childAttributes: FieldAttribute[] = FormLayoutChilds.map(vertexFormLayoutChild => {
   const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
-  const tableAttributes: FieldAttribute[] = formLayoutChildAttributes.map(vertexFormLayoutChildAttribute => {
+
+  let tableAttributes: FieldAttribute[] = [];
+  for(const vertexFormLayoutChildAttribute of formLayoutChildAttributes) {
    const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeAttribute", "")[0];
+   if(!vertexCollectionAttribute) continue;
    const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
 
    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutChildAttribute.properties, false, 10));
@@ -147,23 +154,23 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
    attribute.props = props;
 
-   return attribute;
-  }).sort((a, b) => a.pos - b.pos);
+   tableAttributes.push(attribute);
+  }
+  // @ts-ignore
+  tableAttributes = tableAttributes.sort((a, b) => a.pos - b.pos);
 
   const label = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
   return {
-   attributes: [],
-   columns: tableAttributes,
+   attributes: tableAttributes,
    component: "Table",
-   label,
    id: label
-  } as TableField;
+  };
  })
 
  const [_, customProps] = splitProps(props, ["formId"]);
 
  const form: FormMetaData = {
-  attributes: [...attributes, ...tableAttributes],
+  attributes: [...attributes, ...childAttributes],
   label: formLayoutCollection.properties.id,
   title: formLayout.properties.title
  };

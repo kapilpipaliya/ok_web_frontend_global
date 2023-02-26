@@ -13,7 +13,6 @@ import {
  FieldAttribute,
  FormMetaData,
  Id,
- TableField,
  Vertex
 } from "../input/Form";
 import { toTitle } from "case-switcher-js";
@@ -43,9 +42,9 @@ import { A } from "@mobily/ts-belt";
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
- if(!changedFieldAttribute.properties.onchange) return;
+ if(!changedFieldAttribute.properties.props?.onchange) return;
  try{
-  const args = JSON.parse(changedFieldAttribute.properties.onchange);
+  const args = JSON.parse(changedFieldAttribute.properties.props.onchange);
   
   const attribute = getSelectionOptions(changedFieldAttribute, "MetaAttribute<-MetaAttribute", "").find(vertex => vertex.properties.id === args[0]);
   if(!attribute) {
@@ -291,8 +290,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
    mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
 
-   if (attribute.component === "Table") {
-    addMetaVertexes(addAttributeResult.vertexId!, (attribute as TableField).columns);
+   if (attribute.component === "Table" && attribute.attributes) {
+    addMetaVertexes(addAttributeResult.vertexId!, attribute.attributes);
    }
    // todo discard transaction
   }
