@@ -21,6 +21,10 @@ export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
   return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
 }
 
+export function getParentVertexValue(vertex: Vertex, attributeId: string){
+  const type = capitalizeFirstLetter(attributeId) + vertex.labels[0];
+  return (vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start);
+}
 // "(dataType)->[DataTypeComponent]"
 // function getVertexes(vertex: Vertex, attribute: string, projection: string, edgeName: string) {
 //   const fromVertexIds = getSelectedVertexValue(vertex, attribute);
@@ -72,7 +76,46 @@ export function getParentVertex(path: string[], currentVertex: Vertex): {error:b
     }
   }
 }
+export function getParentVertexes(path: string[], currentVertexes: Vertex[]): {error:boolean, vertexes?: Vertex[]} {
+  const stepVertexes = {} as {[id: string]: Vertex};
+  if(path.length == 0) {
+    return {error: true}
+  }
+  const type = path[path.length -1];
+  for (const currentVertex of currentVertexes) {
+    const edgeIds = currentVertex.in_edges[type];
+    if(!edgeIds) {
+      continue;
+    }
 
+    for (const edgeId of edgeIds) {
+      const edge = graph.edges[edgeId];
+      if (edge) {
+        const newVertex = graph.vertexes[edge.start];
+        if(newVertex) {
+          stepVertexes[newVertex.id] = newVertex;
+        } else {
+          return {
+            error: true,
+          }
+        }
+      } else {
+        return {
+          error: true,
+        }
+      }
+    }
+  }
+
+  if(path.length > 1) {
+    return getParentVertexes(path.slice(0, -1), Object.values(stepVertexes));
+  } else {
+    return {
+      error: false,
+      vertexes: Object.values(stepVertexes),
+    }
+  }
+}
 export function getChildVertex(path: string[], currentVertex: Vertex): {error:boolean, vertex?: Vertex} {
   if(path.length === 0) return {
     error: true,
@@ -156,7 +199,7 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
     }
   }
 }
-export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string): Vertex[] {
+export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string, inwardMulti = false): Vertex[] {
   // TOOD: make input filter working:
   if (typeof collection !== "string") return [];
 
@@ -178,21 +221,36 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
       return [];
     }
   } else if ((collection).includes("->") || (collection).includes("<-")) {
-    let parentVertex: Vertex | undefined;
+    let parentVertex: Vertex[] | undefined;
 
     let childrenCollection = collection;
     if (collection.includes("<-")) {
       const parentEdges = collection.split("<-");
       childrenCollection = parentEdges[parentEdges.length - 1];
-      const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
-      if (parentVertexResult.error) {
-        return [];
+
+      if(!inwardMulti) {
+        const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
+        if (parentVertexResult.error) {
+          return [];
+        } else {
+          parentVertex = [parentVertexResult.vertex!];
+        }
       } else {
-        parentVertex = parentVertexResult.vertex;
+        const parentVertexResult = getParentVertexes(parentEdges.slice(0, -1), [vertex]);
+        if (parentVertexResult.error) {
+          return [];
+        } else {
+          parentVertex = parentVertexResult.vertexes!;
+        }
       }
     }
 
-    if (!parentVertex) parentVertex = vertex;
+    if (childrenCollection.length === 0 && parentVertex) {
+      return parentVertex;
+    }
+
+    if (!parentVertex) parentVertex = [vertex];
+
 
     if (childrenCollection.startsWith("->")) {
       childrenCollection = childrenCollection.slice(2);
@@ -200,7 +258,7 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
 
     const path_ = childrenCollection.split("->");
 
-      const childrenResult = getChildVertexes(path_, [parentVertex]);
+      const childrenResult = getChildVertexes(path_, parentVertex);
       if(childrenResult.error) {
         return [];
       } else {
@@ -307,6 +365,35 @@ export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vert
   }
 }
 
+// This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
+export function setParentValue(txnId: number, vertex: Vertex, attribute: Vertex,  value?: number[] | number) {
+  // delete removed edges:
+  const type = capitalizeFirstLetter(attribute.properties.id) + vertex.labels[0];
+  const previousEdges = vertex.in_edges[type] || [];
+
+  if (!Array.isArray(value)) {
+    if ( value !== null && value !== undefined) {
+      value = [value];
+    } else {
+      value = [];
+    }
+  }
+
+  for (const edgeId of previousEdges) {
+    // we should not delete edge that end to same vertex
+    if (value.includes(graph.edges[edgeId].start)) continue;
+    const deleteEdgeResult = deleteEdge(txnId, edgeId)
+    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+  }
+
+  // add added edges:
+  for (const vertexId of value) {
+    if ((vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start).includes(vertexId)) continue
+    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id ));
+    if(insertEdgeResult.error) alert(insertEdgeResult.error);
+  }
+}
+
 export function SelectInputField(props: SelectInputFieldProps) {
   const { Ws } = useContext(WsContext);
 
@@ -315,19 +402,21 @@ export function SelectInputField(props: SelectInputFieldProps) {
   }
   
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.vertex, props.meta.properties.props.collection, "")
+    return getSelectionOptions(props.vertex, props.meta.properties.props.collection, "", props.meta.properties.props.inward)
   });
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
      <div ref={el => {
-       const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
        const instance = new SelectBox(el, {
          searchEnabled: true,
-         value: selectedValue[0],
          onValueChanged: function(e) {
            // batch(() => {
            const txnId = getNewTxnId();
-           setSelectionValue(txnId, props.vertex, props.meta, e.value);
+           if(props.meta.properties.props.inward) {
+             setParentValue(txnId, props.vertex, props.meta, e.value);
+           } else {
+             setSelectionValue(txnId, props.vertex, props.meta, e.value);
+           }
            onChangeHandler(txnId, props.vertex, props.meta);
               commitTxn(txnId, Ws);
             // })
@@ -346,7 +435,7 @@ export function SelectInputField(props: SelectInputFieldProps) {
          }
        });
        createEffect(() => {
-         const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
+         const selectedValue = props.meta.properties.props.inward ? getParentVertexValue(props.vertex, props.meta.properties.id) : getSelectedVertexValue(props.vertex, props.meta.properties.id);
          instance.option("value", selectedValue[0]);
        });
         createEffect(() => {
