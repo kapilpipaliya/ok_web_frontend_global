@@ -19,10 +19,6 @@ export function BooleanInputField(props: BooleanInputFieldProps) {
     <div ref={el => {
      const instance = new CheckBox(el, {
       enableThreeStateBehavior: true,
-      onValueChanged: (e) => {
-       props.setValue(props.meta, e.value);
-       // props.setValue((e.event?.currentTarget as HTMLInputElement).checked);
-      }
      });
      createEffect(() => instance.option("value", props.vertex.properties[props.meta.properties.id]));
      createEffect(() => {
@@ -30,6 +26,12 @@ export function BooleanInputField(props: BooleanInputFieldProps) {
        instance.option(property, props.meta.properties.props[property]);
       }
      });
+     createEffect(() => {
+      instance.option("onValueChanged", (e) => {
+       props.setValue(props.meta, e.value);
+       // props.setValue((e.event?.currentTarget as HTMLInputElement).checked);
+      });
+     })
      createEffect(() => {
       instance.option("validationStatus", props.errors ? "invalid" : "valid");
      });

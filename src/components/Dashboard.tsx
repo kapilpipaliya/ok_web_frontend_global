@@ -63,15 +63,15 @@ const navigation = [
    // { name: "Card Layout", href: "/CardLayout" }
   ]
  },
- // {
- //  name: "Auth",
- //  type: "group",
- //  children: [
- //   { name: "Users", href: "/User" },
- //   { name: "Roles", href: "/Role" },
- //   { name: "Permissions", href: "/Permission" }
- //  ]
- // },
+ {
+  name: "Auth",
+  type: "group",
+  children: [
+   { name: "Users", href: "/User" },
+   { name: "Roles", href: "/Role" },
+   { name: "Permissions", href: "/Perm" }
+  ]
+ },
  { name: "Backup & Restore", href: "/backup_restore" },
  { name: "Forms", href: "/forms" },
  { name: "Grids", href: "/grids" }

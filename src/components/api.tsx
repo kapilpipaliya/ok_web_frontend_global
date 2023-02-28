@@ -152,6 +152,35 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
      }
     ]
    },
+     {
+      id: "Role",
+      component: "Table",
+      tab: "Permission",
+      attributes: [
+       {
+        id: "role",
+        component: "Select",
+        props: {
+         displayExpr: "properties.id",
+         collection: "Role"
+        },
+       },
+       {
+        id: "Perm",
+        component: "Table",
+        attributes: [
+         {
+          id: "perm",
+          component: "Select",
+          props: {
+           displayExpr: "properties.id",
+           collection: "Perm"
+          },
+         },
+        ]
+       }
+      ]
+     },
    {
     id: "Attribute",
     component: "Table",
@@ -246,7 +275,34 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         component: "->CollectionAttributePropertyKey->ComponentPropertyComponent:properties.id",
        }
       ]
-    }
+    },  {
+      id: "Role",
+      component: "Table",
+      attributes: [
+       {
+        id: "role",
+        component: "Select",
+        props: {
+         displayExpr: "properties.id",
+         collection: "Role"
+        },
+       },
+       {
+        id: "Perm",
+        component: "Table",
+        attributes: [
+         {
+          id: "perm",
+          component: "Select",
+          props: {
+           displayExpr: "properties.id",
+           collection: "Perm"
+          },
+         },
+        ]
+       }
+      ]
+     }
    ]
 
    },
@@ -295,6 +351,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     props: {
      displayExpr: "properties.id",
      collection: "Collection",
+     inward: true
     },
    },
    {
@@ -307,14 +364,14 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "->CollectionAttributeAttribute:properties.id",
-       collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionAttribute"
+       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionAttribute"
       },
      },
      {
       id: "tab",
       component: "Select",
       props: {
-       collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionTab",
+       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionTab",
        displayExpr: "properties.id",
        defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeTab:properties.id"
       },
@@ -323,7 +380,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       id: "group",
       component: "Select",
       props: {
-       collection: "FormLayoutAttribute<-FormLayoutCollection->CollectionGroup",
+       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionGroup",
        displayExpr: "properties.id",
        defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeGroup:properties.id"
       },
@@ -399,7 +456,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "->CollectionChildCollection:properties.id",
-       collection: "FormLayoutChild<-FormLayoutCollection->CollectionChild"
+       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionChild"
       },
 
      },
@@ -407,7 +464,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       id: "tab",
       component: "Select",
       props: {
-       collection: "FormLayoutChild<-FormLayoutCollection->CollectionTab",
+       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionTab",
        displayExpr: "properties.id",
        defaultValue: "FormLayoutChildCollection->CollectionChildTab:properties.id"
       },
@@ -416,7 +473,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       id: "group",
       component: "Select",
       props: {
-       collection: "FormLayoutChild<-FormLayoutCollection->CollectionGroup",
+       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionGroup",
        displayExpr: "properties.id",
        defaultValue: "FormLayoutChildCollection->CollectionChildGroup:properties.id"
       },
@@ -507,8 +564,40 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    }
   ]
  },
- "TableLayout": {
+ "User": {
+   title: "User",
+   label: "User",
+   attributes: [
+    { id: "id", component: "TextInput" },
+    {
+     id: "role",
+     component: "Tag",
+     props: {
+      displayExpr: "properties.id",
+      collection: "Role"
+     }
+    }
+   ]
+  },
+ "Perm":
+  {
+   title: "Perm",
+   label: "Perm",
+   attributes: [
+    { id: "id", component: "TextInput" },
+   ]
+  },
+ "Role":
+  {
+   title: "Role",
+   label: "Role",
+   attributes: [
+    { id: "id", component: "TextInput" },
+   ]
+  },
 
+ "TableLayout": {
+  // TODO: Dynamic Filter: Role->Filter
   title: "FormLayout1",
   label: "TableLayout",
   attributes: [
