@@ -427,7 +427,7 @@ export function TableInputField(props: TableInputFieldProps) {
             <thead>
             <tr>
               <th></th>
-              <For each={props.meta.properties.columns}>
+              <For each={props.meta.properties.attributes}>
                 {(attribute) => (
                  <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
                    <th>{toTitle(attribute.label || attribute.id)}</th>

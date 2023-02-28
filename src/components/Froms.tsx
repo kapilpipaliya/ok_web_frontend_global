@@ -16,7 +16,11 @@ import {
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
-import { getOptionLabel, getSelectionOptions } from "./input/SelectInputField";
+import {
+ getOptionLabel,
+ getParentVertex,
+ getSelectionOptions
+} from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData } from "./input/Form";
 
 export const AllForms = () => {
@@ -40,7 +44,9 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   return;
  }
 
- const formLayoutCollection = getSelectionOptions(formLayout, "->FormLayoutCollection", "")[0];
+ const formLayoutCollectionResult = getParentVertex(['CollectionFormLayout'], formLayout);
+ if(formLayoutCollectionResult.error) { return "Please Configure Collection"; }
+ const formLayoutCollection = formLayoutCollectionResult.vertex!
 
  const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormLayoutAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
