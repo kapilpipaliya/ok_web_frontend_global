@@ -49,6 +49,7 @@ import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { ModalInput } from "./ModalInput";
+import { CollectionOptionField } from "./CollectionOption";
 
 export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
@@ -282,6 +283,25 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                    <ModalInput btnContent={<Icon
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <JsonInput
+                      meta={metaVertex}
+                      vertex={p.joinVertex}
+                      setValue={setValue}
+                     />
+                   </ModalInput>
+
+
+                 </div>
+               </td>
+             </Match>
+             <Match
+              when={component() === "CollectionOption"}>
+
+               <td>ff
+                 <div
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                   <ModalInput btnContent={<Icon
+                    icon="material-symbols:edit-square-outline-sharp" />}>
+                     <CollectionOptionField
                       meta={metaVertex}
                       vertex={p.joinVertex}
                       setValue={setValue}
