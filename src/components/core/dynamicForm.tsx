@@ -277,7 +277,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   divRef()?.querySelector("input")?.focus();
  });
 
- const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], {});
+ const {attributes: _, ...custom} = props.form;
+ const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
+
  const { error } = addNewVertex(getNewTxnId(), metaMainVertex);
  if (error) {
   alert(error);
