@@ -251,11 +251,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
  let vertex: Vertex;
  if ( !props.id ) {
-  if (!form["label"]) {
-   return "Label not found"
+  if (!form["id"]) {
+   return "Id not found"
   }
   const txnId = getNewTxnId();
-   const newVertexObj = newVertex(getNewGraphId(), [form.label], {});
+   const newVertexObj = newVertex(getNewGraphId(), [form.id], {});
    // TODO: Do Create Transformation for the vertex
   const {error} = addNewVertex(txnId, newVertexObj);
   if (error) {

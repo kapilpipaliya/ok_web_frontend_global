@@ -403,7 +403,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               <For each={props.meta.properties.attributes}>
                 {(attribute) => (
                  <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
-                   <th>{toTitle(attribute.label || attribute.id)}</th>
+                   <th>{toTitle(attribute.title || attribute.id)}</th>
                  </Show>
                 )}
               </For>

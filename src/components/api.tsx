@@ -11,7 +11,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  "DataType":
   {
    title: "DataType",
-   label: "DataType",
+   id: "DataType",
    attributes: [
     { id: "id", component: "TextInput" },
     {
@@ -34,7 +34,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   },
  "Component": {
   title: "Component",
-  label: "Component",
+  id: "Component",
   attributes: [
    { id: "id", component: "TextInput" },
    {
@@ -73,7 +73,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   ]
  },
  "Attribute": {
-  title: "Attribute", label: "Attribute", attributes: [
+  title: "Attribute", id: "Attribute", attributes: [
    { id: "id", component: "TextInput" },
    {
     id: "dataType",
@@ -100,7 +100,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  },
  "CollectionCategory": {
   title: "Collection Category",
-  label: "CollectionCategory",
+  id: "CollectionCategory",
   attributes: [
    { id: "id", component: "TextInput" },
    { id: "description", component: "TextArea" }
@@ -110,7 +110,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  // TODO: Collection has only one attribute. Add validation for that.
  "Collection": {
   title: "Collection",
-  label: "Collection",
+  id: "Collection",
   attributes: [
    { id: "id", component: "TextInput" },
    {
@@ -341,7 +341,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  },
 
  "FormLayout": {
-  title: "FormLayout1", label: "FormLayout", attributes: [
+  title: "FormLayout1", id: "FormLayout", attributes: [
    { id: "id", component: "TextInput" },
    { id: "title", component: "TextInput" },
    { id: "description", component: "TextArea" },
@@ -566,7 +566,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  },
  "User": {
    title: "User",
-   label: "User",
+   id: "User",
    attributes: [
     { id: "id", component: "TextInput" },
     {
@@ -582,7 +582,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  "Perm":
   {
    title: "Perm",
-   label: "Perm",
+   id: "Perm",
    attributes: [
     { id: "id", component: "TextInput" },
    ]
@@ -590,7 +590,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  "Role":
   {
    title: "Role",
-   label: "Role",
+   id: "Role",
    attributes: [
     { id: "id", component: "TextInput" },
    ]
@@ -599,7 +599,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
  "TableLayout": {
   // TODO: Dynamic Filter: Role->Filter
   title: "FormLayout1",
-  label: "TableLayout",
+  id: "TableLayout",
   attributes: [
    { id: "id", component: "TextInput" }
   ]

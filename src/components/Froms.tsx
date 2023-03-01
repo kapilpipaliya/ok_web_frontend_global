@@ -172,11 +172,11 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   // @ts-ignore
   tableAttributes = tableAttributes.sort((a, b) => a.pos - b.pos);
 
-  const label = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
+  const id = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
   return {
    attributes: tableAttributes,
    component: "Table",
-   id: label
+   id
   };
  })
 
@@ -184,7 +184,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
  const form: FormMetaData = {
   attributes: [...attributes, ...childAttributes],
-  label: formLayoutCollection.properties.id,
+  id: formLayoutCollection.properties.id,
   title: formLayout.properties.title
  };
 
