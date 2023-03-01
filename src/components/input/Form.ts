@@ -38,7 +38,7 @@ export interface FieldAttribute {
 export interface FormMetaData {
   title: string;
   attributes: FieldAttribute[];
-  label: string; // required to create new vertex
+  id: string; // required to create new vertex
   // postSubmit?: (data: any) => any
 }
 
