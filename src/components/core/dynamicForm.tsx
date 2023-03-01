@@ -145,7 +145,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <DateInputField
          aria-labeledby={id}
-         type="datetime"
+         // type="datetime"
          vertex={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
