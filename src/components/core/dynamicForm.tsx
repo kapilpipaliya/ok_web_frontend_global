@@ -39,6 +39,7 @@ import { newRow, TableInputField } from "../input/TableInputField";
 import { TagField } from "../input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
+import { CollectionOptionField } from "../input/CollectionOption";
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
@@ -221,6 +222,15 @@ export function DynamicForm(props: DynamicFormProps) {
       <TableInputField
        meta={metaVertex}
        vertex={props.vertex}
+      />
+     </Match>
+     <Match when={metaVertex.properties.component === "CollectionOption"}>
+      <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
+      <CollectionOptionField
+       aria-labeledby={id}
+       meta={metaVertex}
+       vertex={props.vertex}
+       setValue={props.setValue}
       />
      </Match>
     </Switch>

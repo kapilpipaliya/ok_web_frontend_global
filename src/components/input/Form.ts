@@ -13,6 +13,16 @@ export const DataType = [
  "LocalDateTime"
 ];
 
+export interface ComponentProps {
+ meta: Vertex;
+ vertex: Vertex;
+
+ errors?: string[];
+ "aria-labeledby"?: string;
+
+ setValue(attribute: Vertex, data: any): void;
+}
+
 export interface FieldAttribute {
  id: string;
  tab?: string;
