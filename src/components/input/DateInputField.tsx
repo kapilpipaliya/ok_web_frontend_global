@@ -1,19 +1,9 @@
 import { createEffect, For, Show } from "solid-js";
 
-
 import DateBox, { Properties } from "devextreme/ui/date_box";
-import { Vertex } from "./Form";
+import { ComponentProps } from "./Form";
 
-export interface TextInputFieldProps extends Properties {
- meta: Vertex;
- vertex: Vertex;
- errors?: string[];
- "aria-labeledby"?: string;
-
- setValue(attribute: Vertex, data: any): void;
-}
-
-export function DateInputField(props: TextInputFieldProps) {
+export function DateInputField(props: ComponentProps) {
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
     <div ref={el => {

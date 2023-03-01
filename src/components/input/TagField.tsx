@@ -1,7 +1,7 @@
 import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
-import { Vertex } from "./Form";
+import { ComponentProps } from "./Form";
 import { commitTxn, getNewTxnId } from "../../lib/graph";
 import {
   getOptionLabel,
@@ -12,13 +12,7 @@ import {
 import { WsContext } from "../ws_events_dispatcher";
 import { onChangeHandler } from "../core/dynamicForm";
 
-export interface SelectInputFieldProps extends Properties {
-  meta: Vertex
-  vertex: Vertex;
-  "aria-labeledby"?: string
-}
-
-export function TagField(props: SelectInputFieldProps) {
+export function TagField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
 

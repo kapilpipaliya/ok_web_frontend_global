@@ -1,7 +1,7 @@
 import { createEffect, createResource, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { Vertex } from "./Form";
+import { ComponentProps, Vertex } from "./Form";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
@@ -9,12 +9,6 @@ import { capitalizeFirstLetter } from "../utils";
 import { onChangeHandler } from "../core/dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
-
-export interface SelectInputFieldProps extends Properties {
-  meta: Vertex;
-  vertex: Vertex;
-  "aria-labeledby"?: string
-}
 
 export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
   const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
@@ -394,7 +388,7 @@ export function setParentValue(txnId: number, vertex: Vertex, attribute: Vertex,
   }
 }
 
-export function SelectInputField(props: SelectInputFieldProps) {
+export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
   if(!props.meta.properties.props?.collection) {

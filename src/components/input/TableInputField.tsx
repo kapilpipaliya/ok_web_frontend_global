@@ -31,7 +31,7 @@ import {
   getSelectionOptions,
   SelectInputField
 } from "./SelectInputField";
-import { Vertex } from "./Form";
+import { ComponentProps, Vertex } from "./Form";
 import { toTitle } from "case-switcher-js";
 import usePopper from "solid-popper";
 import { JsonInput } from "./JsonInput";
@@ -69,11 +69,6 @@ const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => 
   </>
 }
 
-export interface TableInputFieldProps {
-  meta: Vertex
-  vertex: Vertex;
-}
-
 export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
@@ -100,7 +95,7 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   };
 }
 
-export function TableInputField(props: TableInputFieldProps) {
+export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
   // const owner = getOwner();
@@ -216,7 +211,6 @@ export function TableInputField(props: TableInputFieldProps) {
                  <div
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TextInputField
-                    label=""
                     // name=
                     meta={metaVertex}
                     vertex={p.joinVertex}
@@ -232,7 +226,6 @@ export function TableInputField(props: TableInputFieldProps) {
                  <div
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TextAreaField
-                    label=""
                     meta={metaVertex}
                     vertex={p.joinVertex}
                     setValue={setValue}
@@ -247,7 +240,6 @@ export function TableInputField(props: TableInputFieldProps) {
                  <div
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <NumberInputField
-                    label=""
                     meta={metaVertex}
                     vertex={p.joinVertex}
                     setValue={setValue}

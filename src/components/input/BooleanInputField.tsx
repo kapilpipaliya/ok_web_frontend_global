@@ -1,19 +1,9 @@
 import { createEffect } from "solid-js";
 
 import CheckBox, { Properties } from "devextreme/ui/check_box";
-import { Vertex } from "./Form";
+import { ComponentProps } from "./Form";
 
-export interface BooleanInputFieldProps extends Properties {
- meta: Vertex;
- vertex: Vertex;
- errors?: string[];
- "aria-labeledby"?: string;
-
- setValue(attribute: Vertex, data: any): void;
-}
-
-export function BooleanInputField(props: BooleanInputFieldProps) {
-
+export function BooleanInputField(props: ComponentProps) {
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
     <div ref={el => {

@@ -1,21 +1,10 @@
 import { createEffect, For, Show } from "solid-js";
 
-
 import TextBox, { Properties } from "devextreme/ui/text_box";
 import { NativeEventInfo } from "devextreme/events";
-import { Vertex } from "./Form";
+import { ComponentProps } from "./Form";
 
-export interface TextInputFieldProps extends Properties {
- meta: Vertex;
- vertex: Vertex;
-
- errors?: string[];
- "aria-labeledby"?: string;
-
- setValue(attribute: Vertex, data: any): void;
-}
-
-export function TextInputField(props: TextInputFieldProps) {
+export function TextInputField(props: ComponentProps) {
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
     <div ref={el => {
