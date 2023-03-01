@@ -54,15 +54,22 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
  for(const vertexFormLayoutAttribute of FormLayoutAttributes) {
   const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeAttribute", "")[0];
+  if(!vertexCollectionAttribute) continue;
   const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+  if(!vertexAttribute) continue;
   const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutAttribute.properties, false, 10));
-
 
   const attributeComponent = getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
   const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0] || attributeComponent;
   const formAttributeComponent = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeComponent", "")[0] || collectionAttributeComponent;
 
-  attribute.component = collectionAttributeComponent.properties.id;
+  if (formAttributeComponent === undefined) {
+   const vertexDefaultAttribute = getSelectionOptions(vertexAttribute, "->AttributeDefault", "")[0];
+   if (!vertexDefaultAttribute) continue;
+   attribute.component = vertexDefaultAttribute.properties.id;
+  } else {
+   attribute.component = formAttributeComponent.properties.id;
+  }
 
   attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
 

@@ -4,7 +4,6 @@ import {
   createMemo,
   createSignal,
   For,
-  JSXElement,
   Match,
   Show,
   Switch,
@@ -33,7 +32,6 @@ import {
 } from "./SelectInputField";
 import { ComponentProps, Vertex } from "./Form";
 import { toTitle } from "case-switcher-js";
-import usePopper from "solid-popper";
 import { JsonInput } from "./JsonInput";
 import { TextAreaField } from "./TextAreaField";
 import { NumberInputField } from "./NumberInputField";
@@ -50,24 +48,7 @@ import { bindOwner } from "solid-forms";
 import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-
-const ModalInput = (props: { btnContent: JSXElement; children: JSXElement }) => {
-  const [isVisible, setIsVisible] = createSignal(false);
-  const [target, setTarget] = createSignal<HTMLDivElement>();
-  const [popper, setPopper] = createSignal<HTMLDivElement>();
-  usePopper(target, popper, {
-    placement: "bottom"
-  });
-  return <>
-    <button type="button" ref={setTarget} onClick={()=>setIsVisible(true)}>{props.btnContent}</button>
-    <Show when={isVisible()}>
-      <div ref={setPopper}>
-        {props.children}
-        <button type="button" onClick={()=>setIsVisible(false)}>Close</button>
-      </div>
-    </Show>
-  </>
-}
+import { ModalInput } from "./ModalInput";
 
 export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
