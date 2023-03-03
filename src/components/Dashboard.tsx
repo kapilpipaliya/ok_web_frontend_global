@@ -10,7 +10,6 @@ import {
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import { DynamicFormSequence } from "./core/dynamicForm";
-import SchemaTable from "./core/schemaTable";
 import Page404 from "./page/404";
 import { BackupRestore } from "./core/BackupRestore";
 // import { useDebugger } from "./core/SolidDebug";
@@ -131,15 +130,7 @@ export const DashboardView = () => {
       {/* TODO: when incorrect entity is rended*/}
       <Route path="/:entity" component={() => {
        const params = useParams();
-       const formMeta = createMemo(()=>AttributesTableData[params.entity]);
-       return <Switch>
-        <Match when={!formMeta()}>
-         <AbstractSingleGrid tableId={params.entity}/>
-        </Match>
-        <Match when={formMeta()}>
-         <SchemaTable entity={params.entity}/>
-        </Match>
-       </Switch>
+       return <AbstractSingleGrid tableId={params.entity}/>
       }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
