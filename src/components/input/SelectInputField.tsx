@@ -401,8 +401,11 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
      <div ref={el => {
+       const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
        const instance = new SelectBox(el, {
          searchEnabled: true,
+         // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
+         value: selectedValue[0],
          onValueChanged: function(e) {
            // batch(() => {
            const txnId = getNewTxnId();

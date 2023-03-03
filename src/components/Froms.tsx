@@ -113,7 +113,9 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
  const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
- const childAttributes: FieldAttribute[] = FormLayoutChilds.map(vertexFormLayoutChild => {
+ const childAttributes = [] as FieldAttribute[];
+
+ for(const vertexFormLayoutChild of FormLayoutChilds) {
   const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
   let tableAttributes: FieldAttribute[] = [];
@@ -136,7 +138,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
    let props = {} as { [key: string]: any };
 
-   const formLayoutProps = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttributeProperty", "").reduce((acc, curr) => {
+   const formLayoutProps = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeProperty", "").reduce((acc, curr) => {
     const key = getOptionLabel(curr, "->FormLayoutChildAttributePropertyKey:properties.key");
     if (key) {
      acc[key] = curr.properties.value;
@@ -145,7 +147,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
    }, {} as { [key: string]: any });
 
    if (formAttributeComponent === collectionAttributeComponent) {
-    const collectionProps = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttributeAttribute->CollectionAttributeProperty", "").reduce((acc, curr) => {
+    const collectionProps = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeAttribute->CollectionAttributeProperty", "").reduce((acc, curr) => {
      const key = getOptionLabel(curr, "->CollectionAttributePropertyKey:properties.key");
      if (key) {
       acc[key] = curr.properties.value;
@@ -172,13 +174,16 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   // @ts-ignore
   tableAttributes = tableAttributes.sort((a, b) => a.pos - b.pos);
 
-  const id = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0].properties.id;
-  return {
+  const formLayoutChildCollection = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0];
+  if(!formLayoutChildCollection) {
+   continue;
+  }
+  childAttributes.push({
    attributes: tableAttributes,
    component: "Table",
-   id
-  };
- })
+   id: formLayoutChildCollection.properties.id
+  });
+ }
 
  const [_, customProps] = splitProps(props, ["formId"]);
 
@@ -187,6 +192,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   id: formLayoutCollection.properties.id,
   title: formLayout.properties.title
  };
+ console.log(form)
 
  return <div class="flex flex:row flex:wrap">
   <DynamicFormSequence
