@@ -36,16 +36,16 @@ export const AllForms = () => {
 interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'form'>{
  formId: string;
 }
-export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
- const formLayoutId = () => (graph.vertexLabelIdMap["FormLayout"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === props.formId);
- const formLayout = graph.vertexes[props.formId] || graph.vertexes[`${formLayoutId()}`];
+
+export const getFormApiFromFormLayout = (formId: string): { error: string, form?: FormMetaData} => {
+ const formLayoutId = () => (graph.vertexLabelIdMap["FormLayout"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === formId);
+ const formLayout = graph.vertexes[formId] || graph.vertexes[`${formLayoutId()}`];
  if (!formLayout) {
-  alert("form dont found");
-  return;
+  return { error: "form dont found"};
  }
 
  const formLayoutCollectionResult = getParentVertex(['CollectionFormLayout'], formLayout);
- if(formLayoutCollectionResult.error) { return "Please Configure Collection"; }
+ if(formLayoutCollectionResult.error) { return {error: "Please Configure Collection"}; }
  const formLayoutCollection = formLayoutCollectionResult.vertex!
 
  const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormLayoutAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
@@ -185,18 +185,26 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   });
  }
 
- const [_, customProps] = splitProps(props, ["formId"]);
-
- const form: FormMetaData = {
-  attributes: [...attributes, ...childAttributes],
-  id: formLayoutCollection.properties.id,
-  title: formLayout.properties.title
+ return {
+  error: "", form: {
+   attributes: [...attributes, ...childAttributes],
+   id: formLayoutCollection.properties.id,
+   title: formLayout.properties.title,
+   // collection use in Grid
+   // @ts-ignore
+   collection: formLayoutCollection.properties.id
+  }
  };
+}
+export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
+ const form = getFormApiFromFormLayout(props.formId);
+ if(form.error) return form.error;
  console.log(form)
+ const [_, customProps] = splitProps(props, ["formId"]);
 
  return <div class="flex flex:row flex:wrap">
   <DynamicFormSequence
-   form={form} {...customProps} />
+   form={form.form!} {...customProps} />
  </div>;
 }
 export interface SingleFormProps {}

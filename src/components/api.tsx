@@ -345,6 +345,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
    { id: "id", component: "TextInput" },
    { id: "title", component: "TextInput" },
    { id: "description", component: "TextArea" },
+   { id: "table", component: "CheckBox" },
    {
     id: "collection",
     component: "Select",
@@ -595,15 +596,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     { id: "id", component: "TextInput" },
    ]
   },
-
- "TableLayout": {
-  // TODO: Dynamic Filter: Role->Filter
-  title: "FormLayout1",
-  id: "TableLayout",
-  attributes: [
-   { id: "id", component: "TextInput" }
-  ]
- }
+// TODO: Dynamic Filter on Grid: Role->Filter
 };
 
 // window.a = AttributesTableData;

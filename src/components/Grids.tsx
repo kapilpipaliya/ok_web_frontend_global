@@ -10,18 +10,18 @@ import {
  transactions
 } from "../lib/graph";
 import {
- Id,
+ Id
 } from "./input/Form";
 import { createEffect, For, on, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "solid-app-router";
-import { removeUndefinedProperties } from "../utils/functions";
 
 import { G } from "@mobily/ts-belt";
 
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import './Grid.css'
+import { getFormApiFromFormLayout } from "./Froms";
 export const SampleDataGrid = (props: {}) => {
  const data = [] as {[key: string]: any}[];
  const dataArrayStore = new ArrayStore({
@@ -171,45 +171,27 @@ export const DataGrid = (props: DataGridProps) => {
 interface AbstractSingleGridProps {
  tableId: string;
 }
-export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
- const tableLayoutId = () => graph.vertexLabelIdMap["TableLayout"].find(vertexId => graph.vertexes[vertexId].properties['id'] === props.tableId)
- const tableLayout = graph.vertexes[props.tableId] || graph.vertexes[tableLayoutId()!];
- if(!tableLayout) {
-  return <>Incorrect Configuration</>
- }
- const tableLayoutHasAttributes = (tableLayout.out_edges["TableLayoutHasAttribute"] || []).map(edge=>graph.edges[edge]).sort((a,b)=>a.properties.pos - b.properties.pos);
 
- const generateNewApi = () => {
-  const tables = tableLayoutHasAttributes.map(edgeTableLayoutHasAttribute=> {
-   const vertexAttribute = graph.vertexes[edgeTableLayoutHasAttribute.end];
-   const attributeProperties = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(edgeTableLayoutHasAttribute.properties, false, 10));
-   if(attributeProperties.meta) {
-    // const meta = evalImpl(attributeProperties.meta);
-    // if(G.isObject(meta)){
-    //  Object.assign(attributeProperties, meta);
-    //  delete attributeProperties.meta;
-    // }
-   }
-   const {id, code, component, default: default_, dataType, label, disabled, onChange, props, readonly, required, unique, ...customAttributeProperties} = attributeProperties;
-   //  {caption: "id", dataField: "id", dataType: "string", fixed: true, sortIndex: 0, width: 70},
-   customAttributeProperties['dataField'] = `properties.${id}`;
-   customAttributeProperties['caption'] = label;
-   customAttributeProperties['dataType'] = dataTypeToDataGrid(graph.vertexes[dataType].properties.id);
-   return {...customAttributeProperties}
-  })
-  return tables;
+export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
+ const form = getFormApiFromFormLayout(props.tableId);
+ if(form.error) return form.error;
+ console.log(form);
+ // @ts-ignore
+ const collection = form.form.collection as string;
+
+ const tableColumns = [];
+ for (const attribute of form.form!.attributes) {
+  if(attribute.component === "Table") continue;
+  // @ts-ignore
+  attribute['dataField'] = `properties.${attribute.id}`;
+  // @ts-ignore
+  attribute['caption'] = attribute.title;
+  attribute['dataType'] = dataTypeToDataGrid(attribute.dataType!);
+  tableColumns.push(attribute);
  }
- const tableColumns = generateNewApi();
 
  const [_selectedProps, customProps] = splitProps(props, ['tableId']);
- const {id, ...tableLayoutProperties} = tableLayout.properties;
- if(tableLayoutProperties.meta) {
-  // const meta = evalImpl(tableLayoutProperties.meta);
-  // if(G.isObject(meta)){
-  //  Object.assign(tableLayoutProperties, meta);
-  //  delete tableLayoutProperties.meta;
-  // }
- }
+
  const navigate = useNavigate();
  return <div class="">
   <div>
@@ -218,19 +200,19 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
    </button>
   </div>
   {/* @ts-ignore*/}
-  <DataGrid columns={tableColumns} {...tableLayoutProperties} {...customProps} />
+  <DataGrid collection={collection} columns={tableColumns} {...customProps}/>
  </div>
 }
 
 export const TableDashboard = () => {
- const allTableLayouts = () => graph.vertexLabelIdMap["TableLayout"]?.map(tableLayoutVertex => graph.vertexes[tableLayoutVertex]) || [];
+ const allTableLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]).filter(v => v.properties.table) || [];
 
  return <div class="index">
   <div class="title">
    <div class="block-content main-sections">
     <For each={allTableLayouts()}>
      {tableLayout => <div class="content-item"> <Link href={`/${tableLayout.properties.id}`}>  <div>
-     </div>  <h3 class="multi-line">{tableLayout.properties.label || tableLayout.properties.id}</h3>  </Link>
+     </div>  <h3 class="multi-line">{tableLayout.properties.title || tableLayout.properties.id}</h3>  </Link>
      </div>}
     </For>
     <div class="content-item"></div>
