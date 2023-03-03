@@ -59,7 +59,6 @@ const navigation = [
    { name: "Collection Category", href: "/CollectionCategory" },
    { name: "Collections", href: "/Collection" },
    { name: "Form Layout", href: "/FormLayout" },
-   { name: "Table Layout", href: "/TableLayout" },
    // { name: "Card Layout", href: "/CardLayout" }
   ]
  },
@@ -146,7 +145,7 @@ export const DashboardView = () => {
        const params = useParams();
        const form = createMemo(()=>AttributesTableData[params.entity]);
        return <Switch>
-        <Match when={!form() || (params.entity === "TableLayout")}>
+        <Match when={!form()}>
          <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : parseInt(params.id)}/>
         </Match>
         <Match when={form()}>
