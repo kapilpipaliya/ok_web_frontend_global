@@ -1,4 +1,4 @@
-import DxDataGrid, { Column } from "devextreme/ui/data_grid";
+import DxDataGrid, { Column, DataType } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
 import {
@@ -9,10 +9,16 @@ import {
  setGraph,
  transactions
 } from "../lib/graph";
+import { FormMetaData, Id } from "./input/Form";
 import {
- Id
-} from "./input/Form";
-import { createEffect, For, on, splitProps, useContext } from "solid-js";
+ createEffect,
+ createSignal,
+ For,
+ on,
+ Show,
+ splitProps,
+ useContext
+} from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "solid-app-router";
 
@@ -20,10 +26,12 @@ import { G } from "@mobily/ts-belt";
 
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
-import './Grid.css'
+import "./Grid.css";
 import { getFormApiFromFormLayout } from "./Froms";
+import { AttributesTableData } from "./api";
+
 export const SampleDataGrid = (props: {}) => {
- const data = [] as {[key: string]: any}[];
+ const data = [] as { [key: string]: any }[];
  const dataArrayStore = new ArrayStore({
   data: data,
   key: "id",
@@ -79,17 +87,48 @@ export const SampleDataGrid = (props: {}) => {
  }}/>
 }
 interface DataGridProps {
- columns:  Array<Column<any, any>>;
- collection: string;
+ tableId: string;
 }
 
 export const DataGrid = (props: DataGridProps) => {
- if(!props.collection) {
-  return <>Incorrect Configuration</>
+
+ const form = getFormApiFromFormLayout(props.tableId);
+ let formNew: FormMetaData;
+ let collection: string;
+
+ if (form.error) {
+  if (AttributesTableData[props.tableId]) {
+   formNew = AttributesTableData[props.tableId];
+   collection = props.tableId;
+  } else {
+   return form.error;
+  }
+ } else {
+  formNew = form.form!;
+  // @ts-ignore
+  collection = form.form.collection as string;
+ }
+ console.log(formNew);
+
+ const tableColumns = [] as Array<Column<any, any>>;
+ for (const attribute of formNew!.attributes) {
+  if (attribute.component === "Table") continue;
+  // @ts-ignore
+  attribute["dataField"] = `properties.${attribute.id}`;
+  // @ts-ignore
+  attribute["caption"] = attribute.title;
+  attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
+  // @ts-ignore
+  tableColumns.push(attribute);
+ }
+
+
+ if (!collection) {
+  return <>Incorrect Configuration</>;
  }
  // console.log(1, JSON.stringify(props))
- const {Ws} = useContext(WsContext);
- const data = [] as {[key: string]: any}[];
+ const { Ws } = useContext(WsContext);
+ const data = [] as { [key: string]: any }[];
  const dataArrayStore = new ArrayStore({
   data: data,
   key: "id",
@@ -99,10 +138,10 @@ export const DataGrid = (props: DataGridProps) => {
  });
 
  const dataDataSource = new DataSource({
-  store: dataArrayStore,
+  store: dataArrayStore
   // sort: "LastName"
  });
- const coll = G.isNumber(props.collection) ? graph.vertexes[props.collection].properties.id : props.collection
+ const coll = G.isNumber(collection) ? graph.vertexes[collection].properties.id : collection;
  // if(!graph.vertexLabelIdMap[coll]) {
  //  alert(`collection not found ${coll}`)
  //  return;
@@ -120,23 +159,26 @@ export const DataGrid = (props: DataGridProps) => {
    dataDataSource.reload();
   }, {defer: true}));
  }
- const [p, customProps] = splitProps(props, ['collection', 'columns'])
+ const [_, customProps] = splitProps(props, ["tableId"]);
 
  return <div ref={el => {
   // @ts-ignore
   const instance = new DxDataGrid(el, {
    dataSource: dataDataSource,
    // keyExpr: 'id',
-   columns: [...p.columns, {
+   columns: [...tableColumns, {
     type: "buttons",
     buttons: ["edit", "delete", {
-     template: function (cellElement, cellInfo) {
-      return <span><a href={/*@once*/ `${location.pathname}/${cellInfo.row.key}`}>Edit</a>
+     template: function(cellElement, cellInfo) {
+      return <span><a
+       href={/*@once*/ `${location.pathname}/${cellInfo.row.key}`}>Edit</a>
    <button onClick={/*@once*/ () => deleteObject(/*@once*/cellInfo.row.key)}>Delete
    </button>
   </span>;
-     }}]}
-    ],
+     }
+    }]
+   }
+   ],
    allowColumnReordering: true,
    allowColumnResizing: true,
    columnAutoWidth: true,
@@ -173,35 +215,26 @@ interface AbstractSingleGridProps {
 }
 
 export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
- const form = getFormApiFromFormLayout(props.tableId);
- if(form.error) return form.error;
- console.log(form);
- // @ts-ignore
- const collection = form.form.collection as string;
-
- const tableColumns = [];
- for (const attribute of form.form!.attributes) {
-  if(attribute.component === "Table") continue;
-  // @ts-ignore
-  attribute['dataField'] = `properties.${attribute.id}`;
-  // @ts-ignore
-  attribute['caption'] = attribute.title;
-  attribute['dataType'] = dataTypeToDataGrid(attribute.dataType!);
-  tableColumns.push(attribute);
- }
-
- const [_selectedProps, customProps] = splitProps(props, ['tableId']);
-
  const navigate = useNavigate();
+ // used to refresh table:
+ const [tableId, setTableId] = createSignal("");
+ createEffect(() => {
+  // clear the state when routes parameter changes.
+  setTableId("");
+  props.tableId;
+  setTimeout(() => setTableId(props.tableId));
+ });
+
  return <div class="">
   <div>
    <button onClick={() => navigate("./new")}>
     Add new
    </button>
   </div>
-  {/* @ts-ignore*/}
-  <DataGrid collection={collection} columns={tableColumns} {...customProps}/>
- </div>
+  <Show when={tableId()}>
+   <DataGrid tableId={tableId()} />
+  </Show>
+ </div>;
 }
 
 export const TableDashboard = () => {
@@ -223,17 +256,26 @@ export const TableDashboard = () => {
   </div>
  </div>
 }
-const dataTypeToDataGrid = (type: string) => {
+const dataTypeToDataGrid = (type: string): DataType => {
  switch (type) {
-  case 'String': return 'string'
-  case 'Boolean': return 'boolean'
-  case 'Integer': return 'number'
-  case 'Float': return 'number'
-  case 'List': return 'object'
-  case 'Map': return 'object'
-  case 'Duration': return 'string'
-  case 'Date': return 'datetime'
-  case 'LocalTime': return 'datetime'
+  case "String":
+   return "string";
+  case "Boolean":
+   return "boolean";
+  case "Integer":
+   return "number";
+  case "Float":
+   return "number";
+  case "List":
+   return "object";
+  case "Map":
+   return "object";
+  case "Duration":
+   return "string";
+  case "Date":
+   return "datetime";
+  case "LocalTime":
+   return "datetime";
   case 'LocalDateTime': return 'datetime'
   default: return 'string';
  }
