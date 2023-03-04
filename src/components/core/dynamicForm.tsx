@@ -88,7 +88,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <TextInputField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -102,7 +102,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <TextAreaField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
 
@@ -117,7 +117,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <NumberInputField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -131,7 +131,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <DateInputField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -146,7 +146,7 @@ export function DynamicForm(props: DynamicFormProps) {
         <DateInputField
          aria-labeledby={id}
          // type="datetime"
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -159,7 +159,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <TextAreaField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -173,7 +173,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <BooleanInputField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
          setValue={props.setValue}
         /></div>
@@ -199,7 +199,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <SelectInputField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
         />
        </div>
@@ -211,7 +211,7 @@ export function DynamicForm(props: DynamicFormProps) {
        <div class="dx-field-value">
         <TagField
          aria-labeledby={id}
-         vertex={props.vertex}
+         data={props.vertex}
          meta={metaVertex}
         />
        </div>
@@ -221,7 +221,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
       <TableInputField
        meta={metaVertex}
-       vertex={props.vertex}
+       data={props.vertex}
       />
      </Match>
      <Match when={metaVertex.properties.component === "CollectionOption"}>
@@ -229,7 +229,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <CollectionOptionField
        aria-labeledby={id}
        meta={metaVertex}
-       vertex={props.vertex}
+       data={props.vertex}
        setValue={props.setValue}
       />
      </Match>

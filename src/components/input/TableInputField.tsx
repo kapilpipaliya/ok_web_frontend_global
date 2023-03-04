@@ -88,9 +88,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       const txnId = getNewTxnId();
 
       const name = capitalizeFirstLetter(props.meta.properties.id);
-      const type = props.vertex.labels[0] + name;
+      const type = props.data.labels[0] + name;
 
-      newRow(txnId, props.vertex, type);
+      newRow(txnId, props.data, type);
       commitTxn(txnId, Ws);
     });
   });
@@ -98,8 +98,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const [sortedVertexes, setSortedIds] = createSignal([] as Vertex[]);
 
   createEffect(() => {
-    const type = props.vertex.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
-    const vertexes = getSelectionOptions(props.vertex, `->${type}`, "").sort((a, b) => a.properties.pos - b.properties.pos);
+    const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
+    const vertexes = getSelectionOptions(props.data, `->${type}`, "").sort((a, b) => a.properties.pos - b.properties.pos);
     setSortedIds(vertexes);
   })
 
@@ -195,7 +195,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                    <TextInputField
                     // name=
                     meta={metaVertex}
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     setValue={setValue}
                    />
 
@@ -209,7 +209,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TextAreaField
                     meta={metaVertex}
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     setValue={setValue}
                    />
 
@@ -223,7 +223,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <NumberInputField
                     meta={metaVertex}
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     setValue={setValue}
                    />
 
@@ -236,7 +236,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <SelectInputField
 
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     meta={metaVertex}
                     // name={props.form.id + metaVertex.properties.id}
                     // form={props.form}
@@ -252,7 +252,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <TagField
 
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     meta={metaVertex}
                     // name={props.form.id + metaVertex.properties.id}
                     // form={props.form}
@@ -268,7 +268,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                    <BooleanInputField
                     meta={metaVertex}
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
                     setValue={setValue} />
 
                  </div>
@@ -303,7 +303,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <CollectionOptionField
                       meta={metaVertex}
-                      vertex={p.joinVertex}
+                      data={p.joinVertex}
                       setValue={setValue}
                      />
                    </ModalInput>
@@ -320,7 +320,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     icon="material-symbols:edit-square-outline-sharp" />}>
                      <TextAreaField
                       meta={metaVertex}
-                      vertex={p.joinVertex}
+                      data={p.joinVertex}
                       setValue={setValue}
                      />
                    </ModalInput>
@@ -336,7 +336,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     // id={props.form.id + metaVertex.properties.id}
 
                     meta={graph.vertexes[metaVertex.properties.templateId]}
-                    vertex={p.joinVertex}
+                    data={p.joinVertex}
 
                    />
 

@@ -64,7 +64,8 @@ function createContextStore() {
 const DebugContext = createContext<ReturnType<typeof createContextStore>>();
 
 export const useDebugger = (ctx?: string) => {
-  const [, fn] = useContext(DebugContext);
+  // @ts-ignore
+ const [, fn] = useContext(DebugContext);
 
   return (v: any) => fn(v, ctx);
 };
