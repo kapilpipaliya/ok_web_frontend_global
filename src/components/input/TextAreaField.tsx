@@ -13,7 +13,7 @@ export function TextAreaField(props: ComponentProps) {
            props.setValue(props.meta, e.component.option("value"));
          }
        });
-       createEffect(() => instance.option("value", props.vertex.properties[props.meta.properties.id]));
+       createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
        createEffect(() => {
          for (const property in props.meta.properties.props as Properties) {
            instance.option(property, props.meta.properties.props[property]);

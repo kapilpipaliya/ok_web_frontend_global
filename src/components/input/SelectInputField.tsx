@@ -396,12 +396,12 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   }
   
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.vertex, props.meta.properties.props.collection, "", props.meta.properties.props.inward)
+    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta.properties.props.inward)
   });
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
      <div ref={el => {
-       const selectedValue = getSelectedVertexValue(props.vertex, props.meta.properties.id);
+       const selectedValue = getSelectedVertexValue(props.data, props.meta.properties.id);
        const instance = new SelectBox(el, {
          searchEnabled: true,
          // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
@@ -410,11 +410,11 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
            // batch(() => {
            const txnId = getNewTxnId();
            if(props.meta.properties.props.inward) {
-             setParentValue(txnId, props.vertex, props.meta, e.value);
+             setParentValue(txnId, props.data, props.meta, e.value);
            } else {
-             setSelectionValue(txnId, props.vertex, props.meta, e.value);
+             setSelectionValue(txnId, props.data, props.meta, e.value);
            }
-           onChangeHandler(txnId, props.vertex, props.meta);
+           onChangeHandler(txnId, props.data, props.meta);
               commitTxn(txnId, Ws);
             // })
           },
@@ -432,7 +432,7 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
          }
        });
        createEffect(() => {
-         const selectedValue = props.meta.properties.props.inward ? getParentVertexValue(props.vertex, props.meta.properties.id) : getSelectedVertexValue(props.vertex, props.meta.properties.id);
+         const selectedValue = props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta.properties.id) : getSelectedVertexValue(props.data, props.meta.properties.id);
          instance.option("value", selectedValue[0]);
        });
         createEffect(() => {

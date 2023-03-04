@@ -15,7 +15,7 @@ export const DataType = [
 
 export interface ComponentProps {
  meta: Vertex;
- vertex: Vertex;
+ data: Vertex;
 
  errors?: string[];
  "aria-labeledby"?: string;
