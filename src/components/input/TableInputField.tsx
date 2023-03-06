@@ -51,6 +51,7 @@ import { klona } from "klona";
 import { ModalInput } from "./ModalInput";
 import { CollectionOptionField } from "./CollectionOption";
 import { AbstractSingleForm } from "../Froms";
+import { onChangeHandler } from "../core/dynamicForm";
 
 export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
@@ -76,20 +77,31 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string) {
     vertexId: vertexNew.id,
     edgeId: edgeNew.id
   };
-}
-const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
-  const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
-  const vertexes = getSelectionOptions(props.data, "->Property", "");
+  }
+  const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
+    const { Ws } = useContext(WsContext);
+    const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
 
-  const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
-  const newVertex = vertexes.length ? vertexes[0] : graph.vertexes[newRow(getNewTxnId(), props.data, "Property").vertexId!];
+    const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
+    const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
+    mergeVertexProperties(getNewTxnId(), newMeta.id,{id: type});
 
-  return <AbstractSingleForm
-   meta={newMeta}
-   formId={props.formId}
-   id={newVertex.id}
-  />;
-}
+    const vertexes = getSelectionOptions(props.data, `->${type}`, "");
+    let newVertex: any;
+    if (vertexes.length) {
+      newVertex = vertexes[0];
+    } else {
+      const txnId = getNewTxnId();
+      newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
+      commitTxn(txnId, Ws);
+    }
+
+    return <AbstractSingleForm
+     meta={newMeta}
+     formId={props.formId}
+     id={newVertex.id}
+    />;
+  }
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
