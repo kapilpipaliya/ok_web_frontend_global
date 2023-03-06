@@ -1,15 +1,14 @@
 import {
  batch,
- createEffect, createMemo,
+ createEffect,
  createSignal,
- Match, on,
+ on,
  onCleanup,
  onMount,
- Show, Switch,
+ Show,
  useContext
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
-import { DynamicFormSequence } from "./core/dynamicForm";
 import Page404 from "./page/404";
 import { BackupRestore } from "./core/BackupRestore";
 // import { useDebugger } from "./core/SolidDebug";
@@ -17,18 +16,12 @@ import {
  commitTransaction,
  edgeOldIdToNewIdMap,
  graph,
- ProcessStatus, setGraph,
+ ProcessStatus,
+ setGraph,
  transactions,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
-import {
- AbstractSingleForm,
- AllForms,
- Login,
- Logout,
- SignUp,
- SingleForm
-} from "./Froms";
+import { AbstractSingleForm, AllForms, Login, Logout, SignUp } from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
 import {
  addNewVertex,
@@ -37,7 +30,6 @@ import {
  updateVertexId
 } from "../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge, updateEdgeId } from "../lib/Edge";
-import { AttributesTableData } from "./api";
 import { G } from "@mobily/ts-belt";
 // import { AlertMessageContext } from "../appState";
 import TreeView from "devextreme/ui/tree_view";
@@ -134,23 +126,12 @@ export const DashboardView = () => {
       }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
-       const form = createMemo(()=>AttributesTableData[params.entity]);
-       return <Switch>
-        <Match when={!form()}>
-         <AbstractSingleForm formId={params.entity} id={params.id === "new" ? undefined : parseInt(params.id)}/>
-        </Match>
-        <Match when={form()}>
-         <DynamicFormSequence
-          id={params.id === "new" ? undefined : parseInt(params.id)}
-          form={form()} />
-        </Match>
-        </Switch>;
+       return <AbstractSingleForm formId={params.entity} id={params.id}/>
       }} />
       <Route path="/backup_restore" component={() => <BackupRestore />} />
       {/* Deprecated */}
       <Route path="/forms" component={() => <AllForms />} />
       {/* Deprecated */}
-      <Route path="/form/:id" component={() => <SingleForm />} />
       <Route path="/grids" component={() => <TableDashboard />} />
       <Route path="/login" component={() => <Login />} />
       <Route path="/logout" component={() => <Logout />} />

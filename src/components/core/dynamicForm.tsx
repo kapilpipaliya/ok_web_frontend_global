@@ -1,7 +1,7 @@
 import {
  createSignal,
  For,
- Match,
+ Match, onCleanup,
  onMount,
  Show,
  Switch,
@@ -241,6 +241,7 @@ export function DynamicForm(props: DynamicFormProps) {
 }
 
 export interface DynamicFormSequenceProps {
+ meta?: Vertex;
  form: FormMetaData;
  id?: Id;
 }
@@ -249,6 +250,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const form = klona(props.form);
  const { Ws } = useContext(WsContext);
 
+ // create a new vertex or use existing vertex
  let vertex: Vertex;
  if ( !props.id ) {
   if (!form["id"]) {
@@ -272,18 +274,27 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   vertex = graph.vertexes[props.id];
  }
 
+ // focus first input
  const [divRef, setDivRef] = createSignal<HTMLFormElement>();
  onMount(() => {
   divRef()?.querySelector("input")?.focus();
  });
 
  const {attributes: _, ...custom} = props.form;
- const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
 
- const { error } = addNewVertex(getNewTxnId(), metaMainVertex);
- if (error) {
-  alert(error);
-  return;
+ // save attributes to vertexes
+ let metaVertexId: Id;
+ if (props.meta) {
+  metaVertexId = props.meta.id;
+ } else {
+
+  const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
+  const { error } = addNewVertex(getNewTxnId(), metaMainVertex);
+  if (error) {
+   alert(error);
+   return;
+  }
+  metaVertexId = metaMainVertex.id;
  }
 
  const addMetaVertexes = (vertexId: Id, attributes: FieldAttribute[]) => {
@@ -308,11 +319,16 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    // todo discard transaction
   }
  };
- addMetaVertexes(metaMainVertex.id, form.attributes);
+ addMetaVertexes(metaVertexId, form.attributes);
 
- const mainAttributes = getSelectionOptions(graph.vertexes[metaMainVertex.id], "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+ onCleanup(() => {
+  if(!props.meta) {
+   // TODO: Remove all the meta
+  }
+ })
 
- 
+ const mainAttributes = getSelectionOptions(graph.vertexes[metaVertexId], "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+
 
  const groupByTabs = A.groupBy(mainAttributes, (item => item.properties.tab!)) as unknown as { [tab: string]: Vertex[] };
 
