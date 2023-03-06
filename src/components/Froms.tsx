@@ -1,11 +1,12 @@
 import {
+ createMemo,
  createUniqueId,
  For,
  onCleanup,
  splitProps,
  useContext
 } from "solid-js";
-import { Link, useNavigate, useParams } from "solid-app-router";
+import { Link, useNavigate } from "solid-app-router";
 import { graph, revertTransaction } from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
@@ -22,6 +23,7 @@ import {
  getSelectionOptions
 } from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData } from "./input/Form";
+import { AttributesTableData } from "./api";
 
 export const AllForms = () => {
  const allFormLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
@@ -29,18 +31,16 @@ export const AllForms = () => {
  return <div class="flex flex:row flex:wrap">
   <For each={allFormLayouts()}>
    {formLayout => <Link
-    href={`/form/${formLayout.properties.id}`}>{formLayout.properties.id}</Link>}
+    href={`/${formLayout.properties.id}/new`}>{formLayout.properties.id}</Link>}
   </For>
  </div>;
 };
-interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, 'form'>{
- formId: string;
-}
 
 export const getFormApiFromFormLayout = (formId: string): { error: string, form?: FormMetaData} => {
  const formLayoutId = () => (graph.vertexLabelIdMap["FormLayout"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === formId);
  const formLayout = graph.vertexes[formId] || graph.vertexes[`${formLayoutId()}`];
  if (!formLayout) {
+  console.warn(formId, "form not found");
   return { error: "form dont found"};
  }
 
@@ -190,32 +190,36 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
    attributes: [...attributes, ...childAttributes],
    id: formLayoutCollection.properties.id,
    title: formLayout.properties.title,
-   // collection use in Grid
+   // collection used in Grid, its same like id key
    // @ts-ignore
    collection: formLayoutCollection.properties.id
   }
  };
 }
-export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
- const form = getFormApiFromFormLayout(props.formId);
- if(form.error) return form.error;
- console.log(form)
- const [_, customProps] = splitProps(props, ["formId"]);
 
+interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, "form" | "id"> {
+ formId: string;
+ id: string | number;
+}
+
+export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
+
+ let form = AttributesTableData[props.formId];
+
+ if (!form) {
+  const formResult = getFormApiFromFormLayout(props.formId);
+  if (formResult.error) return formResult.error;
+  form = formResult.form!;
+ }
+ console.log(form);
+ const [p, customProps] = splitProps(props, ["formId", "id"]);
+
+ const id = createMemo(() => p.id === "new" ? undefined : parseInt(p.id as string));
  return <div class="flex flex:row flex:wrap">
   <DynamicFormSequence
-   form={form.form!} {...customProps} />
+   form={form!} id={id()} {...customProps} />
  </div>;
-}
-export interface SingleFormProps {}
-export const SingleForm = (props: SingleFormProps) => {
- const params = useParams();
- return <div class="flex flex:row flex:wrap">
-  <AbstractSingleForm formId={params.id}/>
- </div>
-}
-
-
+};
 
 export const Login = (props: {}) => {
  const {setAlert} = useContext(AlertMessageContext);

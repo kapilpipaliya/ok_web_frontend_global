@@ -50,6 +50,7 @@ import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { ModalInput } from "./ModalInput";
 import { CollectionOptionField } from "./CollectionOption";
+import { AbstractSingleForm } from "../Froms";
 
 export function newRow(txnId: number, parentVertex: Vertex, type: string) {
   const vertexNew = newVertex(getNewGraphId(), [type], {});
@@ -76,7 +77,19 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string) {
     edgeId: edgeNew.id
   };
 }
+const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
+  const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
+  const vertexes = getSelectionOptions(props.data, "->Property", "");
 
+  const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
+  const newVertex = vertexes.length ? vertexes[0] : graph.vertexes[newRow(getNewTxnId(), props.data, "Property").vertexId!];
+
+  return <AbstractSingleForm
+   meta={newMeta}
+   formId={props.formId}
+   id={newVertex.id}
+  />;
+}
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
@@ -340,6 +353,14 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
                    />
 
+                 </div>
+               </td>
+             </Match>
+             <Match when={component().startsWith("Form")}>
+               <td>
+                 <div
+                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                   <FormComponent meta={metaVertex} data={p.joinVertex} formId={component().slice(4)}/>
                  </div>
                </td>
              </Match>
