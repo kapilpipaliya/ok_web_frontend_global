@@ -27,7 +27,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <div ref={el => {
-        const selectedValue = getSelectedVertexValue(props.data, props.meta.properties.id);
+        const selectedValue = getSelectedVertexValue(props.data, props.meta);
 
         const instance = new TagBox(el, {
           searchEnabled: true,
@@ -54,7 +54,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
             instance.option(property, props.meta.properties.props[property]);
           }
         });
-        createEffect(on(() => getSelectedVertexValue(props.data, props.meta.properties.id), selectedValue => {
+        createEffect(on(() => getSelectedVertexValue(props.data, props.meta), selectedValue => {
           instance.option("value", selectedValue);
         }, { defer: true }));
         // when the value is changed by other components, we want to refetch the options

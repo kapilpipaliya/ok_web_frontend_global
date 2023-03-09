@@ -40,6 +40,7 @@ import { TagField } from "../input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 import { CollectionOptionField } from "../input/CollectionOption";
+import {  useNavigate } from "solid-app-router";
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
@@ -249,6 +250,7 @@ export interface DynamicFormSequenceProps {
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const form = klona(props.form);
  const { Ws } = useContext(WsContext);
+ const navigate = useNavigate();
 
  // create a new vertex or use existing vertex
  let vertex: Vertex;
@@ -397,7 +399,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
 
   </Show>
-
+  <button type="button" class="border:0 cursor:pointer" onClick={() => {
+    navigate(-1)
+  }}>Back</button>
 
  </div>;
 };

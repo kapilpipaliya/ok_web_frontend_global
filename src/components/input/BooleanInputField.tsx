@@ -8,6 +8,8 @@ export function BooleanInputField(props: ComponentProps) {
    <div aria-labeledby={props["aria-labeledby"]}>
     <div ref={el => {
      const instance = new CheckBox(el, {
+      // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
+      value: props.data.properties[props.meta.properties.id],
       enableThreeStateBehavior: true,
       onValueChanged: e => {
        props.setValue(props.meta, e.value);

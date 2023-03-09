@@ -10,13 +10,15 @@ import { onChangeHandler } from "../core/dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 
-export function getSelectedVertexValue(vertex: Vertex, attributeId: string){
-  const type = vertex.labels[0] + capitalizeFirstLetter(attributeId);
+export function getSelectedVertexValue(vertex: Vertex, meta: Vertex){
+  const attributeId = meta.properties.id
+  const type = (meta.properties.props.label || vertex.labels[0]) + capitalizeFirstLetter(attributeId);
   return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
 }
 
-export function getParentVertexValue(vertex: Vertex, attributeId: string){
-  const type = capitalizeFirstLetter(attributeId) + vertex.labels[0];
+export function getParentVertexValue(vertex: Vertex, meta: Vertex){
+  const attributeId = meta.properties.id
+  const type = capitalizeFirstLetter(attributeId) + (meta.properties.props.label || vertex.labels[0]);
   return (vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start);
 }
 // "(dataType)->[DataTypeComponent]"
@@ -193,9 +195,9 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
     }
   }
 }
-export function getSelectionOptions(vertex: Vertex, collection: number | string, input: string, inwardMulti = false): Vertex[] {
+export function getSelectionOptions(vertex: Vertex, collection: string, input: string, meta?: Vertex): Vertex[] {
+  const inwardMulti = meta?.properties.props.inward ?? false
   // TOOD: make input filter working:
-  if (typeof collection !== "string") return [];
 
   if (collection.includes("||")) {
     for (const coll of collection.split("||")) {
@@ -235,6 +237,22 @@ export function getSelectionOptions(vertex: Vertex, collection: number | string,
           return [];
         } else {
           parentVertex = parentVertexResult.vertexes!;
+        }
+      }
+    } else {
+      if (!childrenCollection.startsWith("->")) {
+        const rootEdges = collection.split("->");
+        childrenCollection = rootEdges.slice(1).join('->');
+        let parentEdge = rootEdges[0];
+        const filterIndex = parentEdge.indexOf('[');
+        let filter = '';
+        if(filterIndex > -1) {
+          filter = parentEdge.slice(filterIndex + 1).replace(']', '');
+          // modify the variable itself
+          parentEdge = parentEdge.slice(0, filterIndex);
+          parentVertex = findVertexIdsByLabel(parentEdge).map((id) => graph.vertexes[id]).filter(vertex => vertex.properties.id === filter);
+        } else {
+          parentVertex = findVertexIdsByLabel(parentEdge).map((id) => graph.vertexes[id])
         }
       }
     }
@@ -331,9 +349,9 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
 
 }
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vertex,  value?: number[] | number) {
+export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
   // delete removed edges:
-  const type = vertex.labels[0] + capitalizeFirstLetter(attribute.properties.id);
+  const type = (meta.properties.props.label || vertex.labels[0]) + capitalizeFirstLetter(meta.properties.id);
   const previousEdges = vertex.out_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -360,9 +378,9 @@ export function setSelectionValue(txnId: number, vertex: Vertex, attribute: Vert
 }
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setParentValue(txnId: number, vertex: Vertex, attribute: Vertex,  value?: number[] | number) {
+export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
   // delete removed edges:
-  const type = capitalizeFirstLetter(attribute.properties.id) + vertex.labels[0];
+  const type = capitalizeFirstLetter(meta.properties.id) + (meta.properties.props.label || vertex.labels[0]);
   const previousEdges = vertex.in_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -396,16 +414,16 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   }
   
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta.properties.props.inward)
+    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta)
   });
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
      <div ref={el => {
-       const selectedValue = getSelectedVertexValue(props.data, props.meta.properties.id);
+       const selectedValue = () => props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta) : getSelectedVertexValue(props.data, props.meta);
        const instance = new SelectBox(el, {
          searchEnabled: true,
          // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-         value: selectedValue[0],
+         value: selectedValue()[0],
          onValueChanged: function(e) {
            // batch(() => {
            const txnId = getNewTxnId();
@@ -432,8 +450,7 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
          }
        });
        createEffect(() => {
-         const selectedValue = props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta.properties.id) : getSelectedVertexValue(props.data, props.meta.properties.id);
-         instance.option("value", selectedValue[0]);
+         instance.option("value", selectedValue()[0]);
        });
         createEffect(() => {
           if(selectOptions()) {

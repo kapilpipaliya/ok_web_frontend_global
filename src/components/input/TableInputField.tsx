@@ -51,10 +51,10 @@ import { klona } from "klona";
 import { ModalInput } from "./ModalInput";
 import { CollectionOptionField } from "./CollectionOption";
 import { AbstractSingleForm } from "../Froms";
-import { onChangeHandler } from "../core/dynamicForm";
+// import { onChangeHandler } from "../core/dynamicForm";
 
-export function newRow(txnId: number, parentVertex: Vertex, type: string) {
-  const vertexNew = newVertex(getNewGraphId(), [type], {});
+export function newRow(txnId: number, parentVertex: Vertex, type: string, label?: string) {
+  const vertexNew = newVertex(getNewGraphId(), [label || type], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
     alert(insertVertex.error);
@@ -112,10 +112,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     batch(function() {
       const txnId = getNewTxnId();
 
-      const name = capitalizeFirstLetter(props.meta.properties.id);
-      const type = props.data.labels[0] + name;
+      const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
+      const label = props.meta.properties.props?.label;
 
-      newRow(txnId, props.data, type);
+      newRow(txnId, props.data, type, label);
       commitTxn(txnId, Ws);
     });
   });
@@ -433,7 +433,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     <div>
       <div>
         {/*<Show when={props.meta.properties.attributes}>*/}
-        {/*  <DynamicForm form={{title: '', label: props.meta.properties.label || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
+        {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
         {/*</Show>*/}
 
         <div>

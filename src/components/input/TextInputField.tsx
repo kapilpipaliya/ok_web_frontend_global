@@ -9,6 +9,7 @@ export function TextInputField(props: ComponentProps) {
    <div aria-labeledby={props["aria-labeledby"]}>
     <div ref={el => {
      const instance = new TextBox(el, {
+      // value: props.data.properties[props.meta.properties.id],
       onChange: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
        props.setValue(props.meta, e.component.option("value"));
       },
