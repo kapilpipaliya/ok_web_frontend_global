@@ -1,18 +1,5 @@
 export type Id = number;
 
-export const DataType = [
- "String",
- "Boolean",
- "Integer",
- "Float",
- "List",
- "Map",
- "Duration",
- "Date",
- "LocalTime",
- "LocalDateTime"
-];
-
 export interface ComponentProps {
  meta: Vertex;
  data: Vertex;

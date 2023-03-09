@@ -23,10 +23,10 @@ import {
  getSelectionOptions
 } from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData } from "./input/Form";
-import { AttributesTableData } from "./api";
+import { AttrsTableData } from "./api";
 
 export const AllForms = () => {
- const allFormLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
+ const allFormLayouts = () => graph.vertexLabelIdMap["Form"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
 
  return <div class="flex flex:row flex:wrap">
   <For each={allFormLayouts()}>
@@ -37,7 +37,7 @@ export const AllForms = () => {
 };
 
 export const getFormApiFromFormLayout = (formId: string): { error: string, form?: FormMetaData} => {
- const formLayoutId = () => (graph.vertexLabelIdMap["FormLayout"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === formId);
+ const formLayoutId = () => (graph.vertexLabelIdMap["Form"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === formId);
  const formLayout = graph.vertexes[formId] || graph.vertexes[`${formLayoutId()}`];
  if (!formLayout) {
   console.warn(formId, "form not found");
@@ -217,7 +217,7 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
 
   childAttributes.push({
    attributes: tableAttributes,
-   component: "Table",
+   component: "TableField",
    id: formLayoutChildCollection.properties.id,
    props: collectionChildProps
   });
@@ -242,7 +242,7 @@ interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, "form" 
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
- let form = AttributesTableData[props.formId];
+ let form = AttrsTableData[props.formId];
 
  if (!form) {
   const formResult = getFormApiFromFormLayout(props.formId);

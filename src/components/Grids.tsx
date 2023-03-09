@@ -28,7 +28,7 @@ import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
 import { getFormApiFromFormLayout } from "./Froms";
-import { AttributesTableData } from "./api";
+import { AttrsTableData } from "./api";
 
 export const SampleDataGrid = (props: {}) => {
  const data = [] as { [key: string]: any }[];
@@ -44,10 +44,10 @@ export const SampleDataGrid = (props: {}) => {
   store: dataArrayStore,
   // sort: "LastName"
  });
- for(const id of graph.vertexLabelIdMap["Attribute"]) {
+ for(const id of graph.vertexLabelIdMap["Attr"]) {
   dataArrayStore.insert(klona(graph.vertexes[id]))
  }
- for(const id of graph.vertexLabelIdMap["Attribute"]) {
+ for(const id of graph.vertexLabelIdMap["Attr"]) {
   // clone accesses every property -> subscribes to the whole store
   // update(v.id, v) gives error: Cannot mutate a Store directly, if we previously inserted proxy
   createEffect(on(() => klona(graph.vertexes[id]), (v) => {
@@ -56,7 +56,7 @@ export const SampleDataGrid = (props: {}) => {
   }, {defer: true}));
  }
  setTimeout(()=>{
-  setGraph('vertexes', graph.vertexLabelIdMap["Attribute"][0], 'properties', {id: "Kapil"});
+  setGraph('vertexes', graph.vertexLabelIdMap["Attr"][0], 'properties', {id: "Kapil"});
  }, 3000);
  return <div ref={el => {
   // @ts-ignore
@@ -98,8 +98,8 @@ export const DataGrid = (props: DataGridProps) => {
  let collection: string;
 
  if (form.error) {
-  if (AttributesTableData[props.tableId]) {
-   formNew = AttributesTableData[props.tableId];
+  if (AttrsTableData[props.tableId]) {
+   formNew = AttrsTableData[props.tableId];
    collection = props.tableId;
   } else {
    return form.error;
@@ -239,7 +239,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 }
 
 export const TableDashboard = () => {
- const allTableLayouts = () => graph.vertexLabelIdMap["FormLayout"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]).filter(v => v.properties.table) || [];
+ const allTableLayouts = () => graph.vertexLabelIdMap["Form"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]).filter(v => v.properties.table) || [];
 
  return <div class="index">
   <div class="title">
