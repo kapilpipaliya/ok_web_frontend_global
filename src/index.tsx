@@ -1,6 +1,5 @@
 /* @refresh reload */
 import { render } from "solid-js/web";
-import { DebugProvider } from "./components/core/SolidDebug";
 import { FullDashboard } from "./components/Dashboard";
 import { Router } from "solid-app-router";
 // import 'devextreme/scss/bundles/dx.light.scss'
@@ -24,11 +23,9 @@ render(() => {
 
   return <WsContext.Provider value={{ Ws }}>
    <AlertMessageContext.Provider value={{ alerts, setAlert }}>
-    <DebugProvider>
      <Router  base={"/admin"}>
       <FullDashboard />
      </Router>
-    </DebugProvider>
    </AlertMessageContext.Provider>
   </WsContext.Provider>;
  },

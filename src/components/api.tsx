@@ -7,7 +7,7 @@ export const JSONToCypherMap = (json: object) => {
 };
 */
 
-export const AttributesTableData: { [key: string]: FormMetaData } = {
+export const AttrsTableData: { [key: string]: FormMetaData } = {
  "DataType":
   {
    title: "DataType",
@@ -19,26 +19,27 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
      component: "Select",
      props: {
       displayExpr: "properties.id",
-      collection: "Component"
+      collection: "Comp"
      }
     },
     {
-     id: "Component",
+     id: "Comp",
+     title: "Component",
      component: "Tag",
      props: {
       displayExpr: "properties.id",
-      collection: "Component"
+      collection: "Comp"
      }
     }
    ]
   },
- "Component": {
+ "Comp": {
   title: "Component",
-  id: "Component",
+  id: "Comp",
   attributes: [
    { id: "id", component: "TextInput" },
    {
-    id: "Property",
+    id: "Prop",
     component: "Table",
     tab: 'Properties',
     attributes: [
@@ -52,28 +53,29 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       props: {
        displayExpr: "properties.id",
        collection: "DataType",
-       onchange: "[\"component\",null]"
+       onchange: "[\"Comp\",null]"
       },
      },
      {
-      id: "component",
+      id: "Comp",
+      title: "Component",
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "->$0DataType->DataTypeComponent",
+       collection: "->$0DataType->DataTypeComp",
       },
      },
      {
       id: "value",
-      // component: "MetaAttribute<-MetaAttribute[*properties:id=type]:properties.id",
-      component: "->$0Component:properties.id",
+      // component: "MetaAttr<-MetaAttr[*properties:id=type]:properties.id",
+      component: "->$0Comp:properties.id",
      }
     ]
    }
   ]
  },
- "Attribute": {
-  title: "Attribute", id: "Attribute", attributes: [
+ "Attr": {
+  title: "Attribute", id: "Attr", attributes: [
    { id: "id", component: "TextInput" },
    {
     id: "dataType",
@@ -81,22 +83,23 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     props: {
      displayExpr: "properties.id",
      collection: "DataType",
-     onchange: "[\"component\",null]"
+     onchange: "[\"Comp\",null]"
     },
    },
    {
-    id: "component",
+    id: "Comp",
+    title: "Component",
     component: "Select",
     props: {
      displayExpr: "properties.id",
-     collection: "->AttributeDataType->DataTypeComponent",
+     collection: "->AttrDataType->DataTypeComp",
     },
    },
    { id: "title", component: "TextInput" },
    { id: "unique", component: "CheckBox" },
    { id: "required", component: "CheckBox" },
    { id: "disabled", component: "CheckBox" },  {
-    id: "Property",
+    id: "Prop",
     component: "Table",
     attributes: [
      {
@@ -104,30 +107,30 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.key",
-       collection: "AttributeProperty<-AttributeComponent->ComponentProperty",
+       collection: "AttrProp<-AttrComp->CompProp",
       },
      },
      {
       id: "value",
-      component: "->AttributePropertyKey->ComponentPropertyComponent:properties.id",
+      component: "->AttrPropKey->CompPropComp:properties.id",
      }
     ]
    }
   ]
  },
- "CollectionCategory": {
+ "CollCategory": {
   title: "Collection Category",
-  id: "CollectionCategory",
+  id: "CollCategory",
   attributes: [
    { id: "id", component: "TextInput" },
    { id: "description", component: "TextArea" }
   ]
  },
 
- // TODO: Collection has only one attribute. Add validation for that.
- "Collection": {
+ // TODO: Coll has only one Attr. Add validation for that.
+ "Coll": {
   title: "Collection",
-  id: "Collection",
+  id: "Coll",
   attributes: [
    { id: "id", component: "TextInput" },
    {
@@ -135,7 +138,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     component: "Select",
     props: {
      displayExpr: "properties.id",
-     collection: "CollectionCategory",
+     collection: "CollCategory",
     },
    },
    { id: "description", component: "TextArea" },
@@ -199,16 +202,17 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       ]
      },
    {
-    id: "Attribute",
+    id: "Attr",
     component: "Table",
     tab: "Attribute",
     attributes: [
      {
-      id: "attribute",
+      id: "Attr",
+      title: "Attribute",
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "Attribute",
+       collection: "Attr",
       },
 
      },
@@ -217,14 +221,14 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "CollectionAttribute<-CollectionTab",
+       collection: "CollAttr<-CollTab",
       },
      },
      {
       id: "group",
       component: "Select",
       props: {
-       collection: "CollectionAttribute<-CollectionGroup",
+       collection: "CollAttr<-CollGroup",
        displayExpr: "properties.id",
       },
      },
@@ -236,47 +240,48 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
        collection: "DataType",
        hidden: true,
        disabled: true,
-       defaultValue: "->CollectionAttributeAttribute->AttributeDataType:properties.id"
+       defaultValue: "->CollAttrAttr->AttrDataType:properties.id"
       },
      },
      {
-      id: "component",
+      id: "Comp",
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
-       defaultValue: "->CollectionAttributeAttribute->AttributeComponent:properties.id"
+       collection: "->CollAttrAttr->AttrDataType->DataTypeComp",
+       defaultValue: "->CollAttrAttr->AttrComp:properties.id"
       },
      },
      {
       id: "title",
       component: "TextInput",
       props: {
-       defaultValue: "->CollectionAttributeAttribute:properties.title"
+       defaultValue: "->CollAttrAttr:properties.title"
       },
      },
      {
       id: "unique",
       component: "CheckBox",
       props: {
-       defaultValue: "->CollectionAttributeAttribute:properties.unique"
+       defaultValue: "->CollAttrAttr:properties.unique"
       },
      },
      {
       id: "required",
       component: "CheckBox",
       props: {
-       defaultValue: "->CollectionAttributeAttribute:properties.required"
+       defaultValue: "->CollAttrAttr:properties.required"
       },
      },
      {
       id: "disabled",
       component: "CheckBox",
       props: {
-       defaultValue: "->CollectionAttributeAttribute:properties.disabled"
+       defaultValue: "->CollAttrAttr:properties.disabled"
       },
      },  {
-      id: "Property",
+      id: "Prop",
+      title: "Property",
       component: "Table",
       attributes: [
        {
@@ -284,12 +289,12 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         component: "Select",
         props: {
          displayExpr: "properties.key",
-         collection: "CollectionAttributeProperty<-CollectionAttributeComponent->ComponentProperty||CollectionAttributeProperty<-CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+         collection: "CollAttrProp<-CollAttrComp->CompProp||CollAttrProp<-CollAttrAttr->AttrComp->CompProp",
         },
        },
        {
         id: "value",
-        component: "->CollectionAttributePropertyKey->ComponentPropertyComponent:properties.id",
+        component: "->CollAttrPropKey->CompPropComp:properties.id",
        }
       ]
     },  {
@@ -333,7 +338,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "Collection",
+       collection: "Coll",
       },
      },
      {
@@ -341,18 +346,19 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "CollectionChild<-CollectionTab",
+       collection: "CollChild<-CollTab",
       },
      },
      {
       id: "group",
       component: "Select",
       props: {
-       collection: "CollectionChild<-CollectionGroup",
+       collection: "CollChild<-CollGroup",
        displayExpr: "properties.id",
       },
      },  {
-      id: "Property",
+      id: "Prop",
+      title: "Property",
       component: "Table",
       attributes: [
        {
@@ -360,12 +366,12 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         component: "Select",
         props: {
          displayExpr: "properties.key",
-         collection: "Component[Table]->ComponentProperty",
+         collection: "Comp[Table]->CompProp",
         },
        },
        {
         id: "value",
-        component: "->CollectionChildPropertyKey->ComponentPropertyComponent:properties.id",
+        component: "->CollChildPropKey->CompPropComp:properties.id",
        }
       ]
      }
@@ -374,8 +380,8 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
   ]
  },
 
- "FormLayout": {
-  title: "FormLayout1", id: "FormLayout", attributes: [
+ "Form": {
+  title: "Form", id: "Form", attributes: [
    { id: "id", component: "TextInput" },
    { id: "title", component: "TextInput" },
    { id: "description", component: "TextArea" },
@@ -385,39 +391,41 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     component: "Select",
     props: {
      displayExpr: "properties.id",
-     collection: "Collection",
+     collection: "Coll",
      inward: true
     },
    },
    {
-    id: "Attribute",
+    id: "Attr",
+    title: "Attribute",
     component: "Table",
     tab: "Attribute",
     attributes: [
      {
-      id: "attribute",
+      id: "Attr",
+      title: "Attribute",
       component: "Select",
       props: {
-       displayExpr: "->CollectionAttributeAttribute:properties.id",
-       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionAttribute"
+       displayExpr: "->CollAttrAttr:properties.id",
+       collection: "CollForm<-FormAttr<-CollAttr"
       },
      },
      {
       id: "tab",
       component: "Select",
       props: {
-       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionTab",
+       collection: "CollForm<-FormAttr<-CollTab",
        displayExpr: "properties.id",
-       defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeTab:properties.id"
+       defaultValue: "FormAttrAttr->CollAttrTab:properties.id"
       },
      },
      {
       id: "group",
       component: "Select",
       props: {
-       collection: "CollectionFormLayout<-FormLayoutAttribute<-CollectionGroup",
+       collection: "CollForm<-FormAttr<-CollGroup",
        displayExpr: "properties.id",
-       defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeGroup:properties.id"
+       defaultValue: "FormAttrAttr->CollAttrGroup:properties.id"
       },
      },
      {
@@ -427,16 +435,17 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
        collection: "DataType",
        displayExpr: "properties.id",
        hidden: true,
-       defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType:properties.id"
+       defaultValue: "FormAttrAttr->CollAttrAttr->AttrDataType:properties.id"
       },
      },
      {
-      id: "component",
+      id: "Comp",
+      title: "Component",
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "->FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
-       defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeComponent:properties.id||FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeComponent:properties.id"
+       collection: "->FormAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
+       defaultValue: "FormAttrAttr->CollAttrComp:properties.id||FormAttrAttr->CollAttrAttr->AttrComp:properties.id"
       },
 
      },
@@ -444,24 +453,25 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       id: "title",
       component: "TextInput",
       props: {
-       defaultValue: "->FormLayoutAttributeAttribute:properties.title||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.title"
+       defaultValue: "->FormAttrAttr:properties.title||FormAttrAttr->CollAttrAttr:properties.title"
       }
      },
      {
       id: "required",
       component: "CheckBox",
       props: {
-       defaultValue: "->FormLayoutAttributeAttribute:properties.required||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.required"
+       defaultValue: "->FormAttrAttr:properties.required||FormAttrAttr->CollAttrAttr:properties.required"
       }
      },
      {
       id: "disabled",
       component: "CheckBox",
       props: {
-       defaultValue: "->FormLayoutAttributeAttribute:properties.disabled||FormLayoutAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
+       defaultValue: "->FormAttrAttr:properties.disabled||FormAttrAttr->CollAttrAttr:properties.disabled"
       }
      },  {
-      id: "Property",
+      id: "Prop",
+      title: "Property",
       component: "Table",
       attributes: [
        {
@@ -469,12 +479,12 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         component: "Select",
         props: {
          displayExpr: "properties.key",
-         collection: "FormLayoutAttributeProperty<-FormLayoutAttributeComponent->ComponentProperty||FormLayoutAttributeProperty<-FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+         collection: "FormAttrProp<-FormAttrComp->CompProp||FormAttrProp<-FormAttrAttr->CollAttrAttr->AttrComp->CompProp",
         },
        },
        {
         id: "value",
-        component: "->FormLayoutAttributePropertyKey->ComponentPropertyComponent:properties.id",
+        component: "->FormAttrPropKey->CompPropComp:properties.id",
        }
       ]
      }
@@ -487,11 +497,12 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
     tab: "Children",
     attributes: [
      {
-      id: "Collection",
+      id: "Coll",
+      title: "Collection",
       component: "Select",
       props: {
-       displayExpr: "->CollectionChildCollection:properties.id",
-       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionChild"
+       displayExpr: "->CollChildColl:properties.id",
+       collection: "CollForm<-FormChild<-CollChild"
       },
 
      },
@@ -499,30 +510,32 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       id: "tab",
       component: "Select",
       props: {
-       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionTab",
+       collection: "CollForm<-FormChild<-CollTab",
        displayExpr: "properties.id",
-       defaultValue: "FormLayoutChildCollection->CollectionChildTab:properties.id"
+       defaultValue: "FormChildColl->CollChildTab:properties.id"
       },
      },
      {
       id: "group",
       component: "Select",
       props: {
-       collection: "CollectionFormLayout<-FormLayoutChild<-CollectionGroup",
+       collection: "CollForm<-FormChild<-CollGroup",
        displayExpr: "properties.id",
-       defaultValue: "FormLayoutChildCollection->CollectionChildGroup:properties.id"
+       defaultValue: "FormChildColl->CollChildGroup:properties.id"
       },
      },
      {
-      id: "attribute",
+      id: "Attr",
+      title: "Attribute",
       component: "Table",
       attributes: [
        {
-        id: "attribute",
+        id: "Attr",
+        title: "Attribute",
         component: "Select",
         props: {
-         displayExpr: "->CollectionAttributeAttribute:properties.id",
-         collection: "FormLayoutChildAttribute<-FormLayoutChildCollection->CollectionChildCollection->CollectionAttribute"
+         displayExpr: "->CollAttrAttr:properties.id",
+         collection: "FormChildAttr<-FormChildColl->CollChildColl->CollAttr"
         },
 
        },
@@ -533,38 +546,39 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
          collection: "DataType",
          displayExpr: "properties.id",
          hidden: true,
-         defaultValue: "FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeDataType:properties.id"
+         defaultValue: "FormChildAttrAttr->CollAttrAttr->AttrDataType:properties.id"
         },
 
        },
        {
-        id: "component",
+        id: "Comp",
+        title: "Component",
         component: "Select",
         props: {
          displayExpr: "properties.id",
-         collection: "->FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
-         defaultValue: "FormLayoutChildAttributeAttribute->CollectionAttributeComponent:properties.id||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeComponent:properties.id"
+         collection: "->FormChildAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
+         defaultValue: "FormChildAttrAttr->CollAttrComp:properties.id||FormChildAttrAttr->CollAttrAttr->AttrComp:properties.id"
         },
        },
        {
         id: "title",
         component: "TextInput",
         props: {
-         defaultValue: "->FormLayoutChildAttributeAttribute:properties.title||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.title"
+         defaultValue: "->FormChildAttrAttr:properties.title||FormChildAttrAttr->CollAttrAttr:properties.title"
         }
        },
        {
         id: "required",
         component: "CheckBox",
         props: {
-         defaultValue: "->FormLayoutChildAttributeAttribute:properties.required||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.required"
+         defaultValue: "->FormChildAttrAttr:properties.required||FormChildAttrAttr->CollAttrAttr:properties.required"
         }
        },
        {
         id: "disabled",
         component: "CheckBox",
         props: {
-         defaultValue: "->FormLayoutChildAttributeAttribute:properties.disabled||FormLayoutChildAttributeAttribute->CollectionAttributeAttribute:properties.disabled"
+         defaultValue: "->FormChildAttrAttr:properties.disabled||FormChildAttrAttr->CollAttrAttr:properties.disabled"
         }
        },
        {
@@ -572,11 +586,11 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
         component: "Select",
         props: {
          displayExpr: "properties.id",
-         collection: "FormLayout"
+         collection: "Form"
         },
        },
        {
-        id: "Property",
+        id: "Prop",
         component: "Table",
         attributes: [
          {
@@ -584,12 +598,12 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
           component: "Select",
           props: {
            displayExpr: "properties.key",
-           collection: "FormLayoutChildAttributeProperty<-FormLayoutChildAttributeComponent->ComponentProperty||FormLayoutChildAttributeProperty<-FormLayoutChildAttributeAttribute->CollectionAttributeAttribute->AttributeComponent->ComponentProperty",
+           collection: "FormChildAttrProp<-FormChildAttrComp->CompProp||FormChildAttrProp<-FormChildAttrAttr->CollAttrAttr->AttrComp->CompProp",
           },
          },
          {
           id: "value",
-          component: "->FormLayoutChildAttributePropertyKey->ComponentPropertyComponent:properties.id",
+          component: "->FormChildAttrPropKey->CompPropComp:properties.id",
          }
         ]
        }
@@ -633,4 +647,4 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
 // TODO: Dynamic Filter on Grid: Role->Filter
 };
 
-// window.a = AttributesTableData;
+// window.a = AttrsTableData;

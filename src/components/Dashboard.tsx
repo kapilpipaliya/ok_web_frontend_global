@@ -11,7 +11,6 @@ import {
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import Page404 from "./page/404";
 import { BackupRestore } from "./core/BackupRestore";
-// import { useDebugger } from "./core/SolidDebug";
 import {
  commitTransaction,
  edgeOldIdToNewIdMap,
@@ -44,12 +43,12 @@ const navigation = [
   name: "Base",
   type: "group",
   children: [
-   { name: "Components", href: "/Component" },
+   { name: "Components", href: "/Comp" },
    { name: "DataTypes", href: "/DataType" },
-   { name: "Attributes", href: "/Attribute" },
-   { name: "Collection Category", href: "/CollectionCategory" },
-   { name: "Collections", href: "/Collection" },
-   { name: "Form Layout", href: "/FormLayout" },
+   { name: "Attributes", href: "/Attr" },
+   { name: "Collection Category", href: "/CollCategory" },
+   { name: "Collections", href: "/Coll" },
+   { name: "Form Layout", href: "/Form" },
    // { name: "Card Layout", href: "/CardLayout" }
   ]
  },
@@ -231,8 +230,6 @@ export const FullDashboard = () => {
   });
  };
  Ws.bind(["get", "sync", 0], setGraphData);
- // const debugGraph = useDebugger("graph");
- // debugGraph(graph);
  return (
   <div>
    <div ref={el => {

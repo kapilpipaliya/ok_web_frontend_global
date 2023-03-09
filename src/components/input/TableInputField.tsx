@@ -9,10 +9,7 @@ import {
   Switch,
   useContext
 } from "solid-js";
-import { BooleanInputField } from "./BooleanInputField";
-import { TextInputField } from "./TextInputField";
 import { Icon } from "@iconify-icon/solid";
-
 
 import {
   closestCenter,
@@ -27,14 +24,10 @@ import {
   getChildVertex,
   getChildVertexes,
   getOptionLabel,
-  getSelectionOptions,
-  SelectInputField
+  getSelectionOptions
 } from "./SelectInputField";
 import { ComponentProps, Vertex } from "./Form";
 import { toTitle } from "case-switcher-js";
-import { JsonInput } from "./JsonInput";
-import { TextAreaField } from "./TextAreaField";
-import { NumberInputField } from "./NumberInputField";
 import {
   addNewVertex,
   deleteVertex,
@@ -45,12 +38,10 @@ import { capitalizeFirstLetter } from "../utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
-import { TagField } from "./TagField";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-import { ModalInput } from "./ModalInput";
-import { CollectionOptionField } from "./CollectionOption";
-import { AbstractSingleForm } from "../Froms";
+import { DynamicComponent } from "../core/dynamicForm";
+
 // import { onChangeHandler } from "../core/dynamicForm";
 
 export function newRow(txnId: number, parentVertex: Vertex, type: string, label?: string) {
@@ -59,7 +50,7 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string, label?
   if (insertVertex.error) {
     alert(insertVertex.error);
     return {
-      error: true,
+      error: true
     };
   }
 
@@ -78,30 +69,7 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string, label?
     edgeId: edgeNew.id
   };
   }
-  const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
-    const { Ws } = useContext(WsContext);
-    const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
 
-    const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
-    const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
-    mergeVertexProperties(getNewTxnId(), newMeta.id,{id: type});
-
-    const vertexes = getSelectionOptions(props.data, `->${type}`, "");
-    let newVertex: any;
-    if (vertexes.length) {
-      newVertex = vertexes[0];
-    } else {
-      const txnId = getNewTxnId();
-      newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
-      commitTxn(txnId, Ws);
-    }
-
-    return <AbstractSingleForm
-     meta={newMeta}
-     formId={props.formId}
-     id={newVertex.id}
-    />;
-  }
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
 
@@ -207,175 +175,29 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
            <Switch>
              <Match when={metaVertex.properties.props?.hidden}>
                <td>
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</div>
-               </td>
-             </Match>
-
-             <Match
-              when={component() === "TextInput"}>
-               <td>
-                 <div
-                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <TextInputField
-                    // name=
-                    meta={metaVertex}
-                    data={p.joinVertex}
-                    setValue={setValue}
-                   />
-
-                 </div>
-               </td>
-             </Match>
-             <Match
-              when={component() === "TextArea"}>
-               <td>
-                 <div
-                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <TextAreaField
-                    meta={metaVertex}
-                    data={p.joinVertex}
-                    setValue={setValue}
-                   />
-
-                 </div>
-               </td>
-             </Match>
-             <Match
-              when={component() === "NumberInput"}>
-               <td>
-                 <div
-                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <NumberInputField
-                    meta={metaVertex}
-                    data={p.joinVertex}
-                    setValue={setValue}
-                   />
-
-                 </div>
-               </td>
-             </Match>
-             <Match when={component() === "Select"}>
-               <td>
-                 <div
-                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <SelectInputField
-
-                    data={p.joinVertex}
-                    meta={metaVertex}
-                    // name={props.form.id + metaVertex.properties.id}
-                    // form={props.form}
-
-                   />
-
-                 </div>
-               </td>
-             </Match>
-             <Match when={component() === "Tag"}>
-               <td>
-                 <div
-                  class="flex align-items:center">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <TagField
-
-                    data={p.joinVertex}
-                    meta={metaVertex}
-                    // name={props.form.id + metaVertex.properties.id}
-                    // form={props.form}
-
-                   />
-
-                 </div>
-               </td>
-             </Match>
-             <Match when={component() === "CheckBox"}>
-               <td>
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <BooleanInputField
-                    meta={metaVertex}
-                    data={p.joinVertex}
-                    setValue={setValue} />
-
-                 </div>
-               </td>
-             </Match>
-             <Match
-              when={component() === "Json"}>
-
-               <td>
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <ModalInput btnContent={<Icon
-                    icon="material-symbols:edit-square-outline-sharp" />}>
-                     <JsonInput
-                      meta={metaVertex}
-                      vertex={p.joinVertex}
-                      setValue={setValue}
-                     />
-                   </ModalInput>
-
-
-                 </div>
-               </td>
-             </Match>
-             <Match
-              when={component() === "CollectionOption"}>
-
-               <td>ff
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <ModalInput btnContent={<Icon
-                    icon="material-symbols:edit-square-outline-sharp" />}>
-                     <CollectionOptionField
-                      meta={metaVertex}
-                      data={p.joinVertex}
-                      setValue={setValue}
-                     />
-                   </ModalInput>
-
-
-                 </div>
-               </td>
-             </Match>
-             <Match when={component() === "JsCode"}>
-               <td>
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <ModalInput btnContent={<Icon
-                    icon="material-symbols:edit-square-outline-sharp" />}>
-                     <TextAreaField
-                      meta={metaVertex}
-                      data={p.joinVertex}
-                      setValue={setValue}
-                     />
-                   </ModalInput>
-
-                 </div>
+                 <div class="flex">
+                   {metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</div>
                </td>
              </Match>
              <Match when={component() === "Table"}>
                <td>
-                 <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <TableInputField
-                    // id={props.form.id + metaVertex.properties.id}
-
-                    meta={graph.vertexes[metaVertex.properties.templateId]}
-                    data={p.joinVertex}
-
-                   />
-
+                 <div class="flex">
+                   {metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                   <DynamicComponent id={""} component={component()} meta={graph.vertexes[metaVertex.properties.templateId]} data={p.joinVertex} setValue={setValue} />
                  </div>
                </td>
              </Match>
-             <Match when={component().startsWith("Form")}>
+             <Match when={true}>
                <td>
                  <div
-                  class="flex">{metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                   <FormComponent meta={metaVertex} data={p.joinVertex} formId={component().slice(4)}/>
+                  class="flex align-items:center">
+                   {metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                   <DynamicComponent id={""} component={component()} meta={metaVertex} data={p.joinVertex} setValue={setValue} />
                  </div>
                </td>
              </Match>
+
+
            </Switch>
           );
         }}

@@ -1,7 +1,8 @@
 import {
  createSignal,
  For,
- Match, onCleanup,
+ Match,
+ onCleanup,
  onMount,
  Show,
  Switch,
@@ -9,12 +10,7 @@ import {
 } from "solid-js";
 import { klona } from "klona/json";
 
-import {
- FieldAttribute,
- FormMetaData,
- Id,
- Vertex
-} from "../input/Form";
+import { FieldAttribute, FormMetaData, Id, Vertex } from "../input/Form";
 import { toTitle } from "case-switcher-js";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import {
@@ -28,8 +24,8 @@ import { TextAreaField } from "../input/TextAreaField";
 import { NumberInputField } from "../input/NumberInputField";
 import { DateInputField } from "../input/DateInputField";
 import { BooleanInputField } from "../input/BooleanInputField";
-import { JsonInput } from "../input/JsonInput";
 import {
+ getOptionLabel,
  getSelectionOptions,
  SelectInputField,
  setSelectionValue
@@ -40,7 +36,9 @@ import { TagField } from "../input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 import { CollectionOptionField } from "../input/CollectionOption";
-import {  useNavigate } from "solid-app-router";
+import { useNavigate } from "solid-app-router";
+import { capitalizeFirstLetter } from "../utils";
+import { AbstractSingleForm } from "../Froms";
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
@@ -54,16 +52,138 @@ export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttri
   }
    let value = args[1];
 
-  if (value === null ) value = undefined;
-  if(attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
-     setSelectionValue(txnId, vertex, attribute,  value)
-   } else {
-    mergeVertexProperties(txnId, vertex.id, { [attribute.properties.id]: value });
-   }
+  if (value === null) value = undefined;
+  if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
+   setSelectionValue(txnId, vertex, attribute, value);
+  } else {
+   mergeVertexProperties(txnId, vertex.id, { [attribute.properties.id]: value });
+  }
  } catch (e) {
 
  }
 }
+const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
+ const { Ws } = useContext(WsContext);
+ const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
+
+ const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
+ const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
+ mergeVertexProperties(getNewTxnId(), newMeta.id,{id: type});
+
+ const vertexes = getSelectionOptions(props.data, `->${type}`, "");
+ let newVertex: any;
+ if (vertexes.length) {
+  newVertex = vertexes[0];
+ } else {
+  const txnId = getNewTxnId();
+  newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
+  commitTxn(txnId, Ws);
+ }
+
+ return <AbstractSingleForm
+  meta={newMeta}
+  formId={props.formId}
+  id={newVertex.id}
+ />;
+}
+export const DynamicComponent = (props: { id: string, component: string, meta: Vertex, data: Vertex, setValue(attribute: Vertex, data: any): void }) => {
+ return <Switch>
+  <Match when={props.component === "TextField"}>
+   <TextInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "TextAreaField"}>
+   <TextAreaField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+
+   />
+  </Match>
+  <Match when={props.component === "IntField"}>
+   <NumberInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "FloatField"}>
+   <NumberInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "DateField"}>
+   <DateInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "DateTimeField"}>
+   <DateInputField
+    aria-labeledby={props.id}
+    // type="datetime"
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "CheckBoxField"}>
+   <BooleanInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component === "SelectBoxJoinField"}>
+   <SelectInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+   />
+  </Match>
+  <Match when={props.component === "TagBoxJoinField"}>
+   <TagField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+   />
+  </Match>
+  <Match when={props.component === "TableField"}>
+   <TableInputField
+    meta={props.meta}
+    data={props.data}
+   />
+  </Match>
+  <Match when={props.component === "CollectionOptionField"}>
+   <CollectionOptionField
+    aria-labeledby={props.id}
+    meta={props.meta}
+    data={props.data}
+    setValue={props.setValue}
+   />
+  </Match>
+  <Match when={props.component.startsWith("Form")}>
+   <td>
+    <div
+     class="flex">{props.meta.properties.props?.defaultValue && getOptionLabel(props.data, props.meta.properties.props.defaultValue)}
+     <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)}/>
+    </div>
+   </td>
+  </Match>
+ </Switch>;
+};
 
 interface DynamicFormProps {
  attributes: Vertex[];
@@ -82,158 +202,24 @@ export function DynamicForm(props: DynamicFormProps) {
    return (
 
     <Switch>
-     <Match
-      when={metaVertex.properties.component === "TextInput"}>
-      <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <TextInputField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "TextArea"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <TextAreaField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "NumberInput"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <NumberInputField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "DateInput"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <DateInputField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "DateTimeInput"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <DateInputField
-         aria-labeledby={id}
-         // type="datetime"
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match when={metaVertex.properties.component === "JsCode"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <TextAreaField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "CheckBox"}>
-      <div class="dx-field">
-       <div class="dx-field-label"
-            id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <BooleanInputField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        /></div>
-      </div>
-     </Match>
-     <Match
-      when={metaVertex.properties.component === "Json"}>
-      <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <JsonInput
-         aria-labeledby={id}
-         vertex={props.vertex}
-         meta={metaVertex}
-         setValue={props.setValue}
-        />
-       </div>
-      </div>
-     </Match>
-     <Match when={metaVertex.properties.component === "Select"}>
-      <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <SelectInputField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-        />
-       </div>
-      </div>
-     </Match>
-     <Match when={metaVertex.properties.component === "Tag"}>
-      <div class="dx-field">
-       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
-       <div class="dx-field-value">
-        <TagField
-         aria-labeledby={id}
-         data={props.vertex}
-         meta={metaVertex}
-        />
-       </div>
-      </div>
-     </Match>
      <Match when={metaVertex.properties.component === "Table"}>
       <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
-      <TableInputField
-       meta={metaVertex}
-       data={props.vertex}
-      />
+      <DynamicComponent id={id} component={metaVertex.properties.component} meta={metaVertex} data={props.vertex} setValue={props.setValue} />
      </Match>
      <Match when={metaVertex.properties.component === "CollectionOption"}>
-      <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
-      <CollectionOptionField
-       aria-labeledby={id}
-       meta={metaVertex}
-       data={props.vertex}
-       setValue={props.setValue}
-      />
+      <DynamicComponent id={id} component={metaVertex.properties.component} meta={metaVertex} data={props.vertex} setValue={props.setValue} />
      </Match>
+     <Match when={true}>
+      <div class="dx-field">
+       <div class="dx-field-label" id={id}>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</div>
+       <div class="dx-field-value">
+        <DynamicComponent id={id} component={metaVertex.properties.component}
+                          meta={metaVertex} data={props.vertex}
+                          setValue={props.setValue} />
+       </div>
+      </div>
+     </Match>
+
     </Switch>
    )
   }}
