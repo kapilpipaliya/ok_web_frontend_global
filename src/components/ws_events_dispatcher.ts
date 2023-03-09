@@ -7,7 +7,7 @@ Simplified WebSocket events dispatcher
 
 import { WSBase } from "./ws_reconnect";
 import { createContext } from "solid-js";
-import { atom } from "solid-use";
+import atom from "../utils/dom_utils";
 import { commitTransaction, graph } from "../lib/graph";
 
 // automatically set NODE_ENV == 'production' when we build the project.

@@ -1,5 +1,6 @@
-import { atom } from "solid-use";
+
 import { IS_PRODUCTION } from "./ws_events_dispatcher";
+import atom from "../utils/dom_utils";
 
 export class WSBase {
  private id_ = 0;
