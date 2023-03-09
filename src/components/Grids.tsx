@@ -90,6 +90,7 @@ interface DataGridProps {
  tableId: string;
 }
 
+// TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
 
  const form = getFormApiFromFormLayout(props.tableId);
