@@ -144,9 +144,9 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
    const formAttributeComponent = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeComponent", "")[0] || collectionAttributeComponent;
 
    if (formAttributeComponent === undefined) {
-    const vertexDefaultAttribute = getSelectionOptions(vertexAttribute, "->AttributeDefault", "")[0];
-    if (!vertexDefaultAttribute) continue;
-    attribute.component = vertexDefaultAttribute.properties.id;
+    const vertexDefaultComponent = getSelectionOptions(vertexAttribute, "->AttributeDefault", "")[0];
+    if (!vertexDefaultComponent) continue;
+    attribute.component = vertexDefaultComponent.properties.id;
    } else {
     attribute.component = formAttributeComponent.properties.id;
    }

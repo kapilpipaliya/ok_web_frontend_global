@@ -60,13 +60,13 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "->ComponentPropertyDataType->DataTypeComponent",
+       collection: "->$0DataType->DataTypeComponent",
       },
      },
      {
       id: "value",
       // component: "MetaAttribute<-MetaAttribute[*properties:id=type]:properties.id",
-      component: "->ComponentPropertyComponent:properties.id",
+      component: "->$0Component:properties.id",
      }
     ]
    }
@@ -435,7 +435,7 @@ export const AttributesTableData: { [key: string]: FormMetaData } = {
       component: "Select",
       props: {
        displayExpr: "properties.id",
-       collection: "FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
+       collection: "->FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeDataType->DataTypeComponent",
        defaultValue: "FormLayoutAttributeAttribute->CollectionAttributeComponent:properties.id||FormLayoutAttributeAttribute->CollectionAttributeAttribute->AttributeComponent:properties.id"
       },
 

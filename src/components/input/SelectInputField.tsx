@@ -41,7 +41,7 @@ export function getParentVertexValue(vertex: Vertex, meta: Vertex){
 // }
 
 export function getParentVertex(path: string[], currentVertex: Vertex): {error:boolean, vertex?: Vertex} {
-  const type = path[path.length -1];
+  const type = path[path.length -1].replace('$0', currentVertex.labels[0]);
   const edges = currentVertex.in_edges[type];
   if(!edges || (edges && edges.length != 1)) {
     return {
@@ -77,8 +77,9 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): {e
   if(path.length == 0) {
     return {error: true}
   }
-  const type = path[path.length -1];
+  let type = path[path.length -1];
   for (const currentVertex of currentVertexes) {
+    type = type.replace('$0', currentVertex.labels[0]);
     const edgeIds = currentVertex.in_edges[type];
     if(!edgeIds) {
       continue;
@@ -124,7 +125,7 @@ export function getChildVertex(path: string[], currentVertex: Vertex): {error:bo
   if(filterIndex > -1) {
     filter = type.slice(filterIndex)
     // modify the variable itself
-    type = type.slice(0, filterIndex);
+    type = type.slice(0, filterIndex).replace('$0', currentVertex.labels[0]);
   }
   let vertexes = (currentVertex.out_edges[type] || []).map(edgeId => graph.vertexes[graph.edges[edgeId].end]);
 
@@ -160,8 +161,9 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
   if(path.length == 0) {
     return {error: true}
   }
-  const type = path[0];
+  let type = path[0];
   for (const currentVertex of currentVertexes) {
+    type = type.replace('$0', currentVertex.labels[0]);
     const edgeIds = currentVertex.out_edges[type];
     if(!edgeIds) {
       continue;
@@ -292,6 +294,7 @@ const getTextValue = (value: any) => {
 
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
   if(!vertex) return '';
+  displayExpr = displayExpr.replaceAll('$0', vertex.labels[0]);
   if(displayExpr.includes('||')) {
     for (const displayExprElement of displayExpr.split('||')) {
       const value = getOptionLabel(vertex, displayExprElement);
