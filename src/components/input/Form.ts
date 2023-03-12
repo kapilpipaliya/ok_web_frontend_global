@@ -15,6 +15,7 @@ export interface FieldAttribute {
  tab?: string;
  group?: string;
  dataType?: string;
+ meta?: string;
  component: string;
  title?: string;
  props?: { [key: string]: any };

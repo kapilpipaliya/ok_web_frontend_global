@@ -6,7 +6,7 @@ import {
   For,
   Match,
   Show,
-  Switch,
+  Switch, untrack,
   useContext
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
@@ -128,7 +128,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     // columns
     const tableColumnsTemplate = getSelectionOptions(props.meta, "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
-
+    // TODO: handle when tableColumnsTemplate Empty
     const rowMetaAttributeInstance = getChildVertex(["AttributeInstance"], p.joinVertex );
 
     if(rowMetaAttributeInstance.error) {
@@ -154,6 +154,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     if(attributesResult.error) alert("Error getting attributes");
     const rowColumnsMetaAttributes = attributesResult.vertexes!;
 
+
     const DisplayProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
         const txnId = getNewTxnId();
@@ -171,6 +172,25 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               return metaVertex.properties.component;
             }
           })
+          // add meta from vertex value:
+           // if mergeProps not keep reactivity use memo
+          createEffect(()=>{
+            if (metaVertex.properties.meta) {
+              const metaRows = getSelectionOptions(p.joinVertex, metaVertex.properties.meta, "");
+              const metaData = metaRows.reduce((acc, curr) => {
+                const key = getOptionLabel(curr, "->$0Key:properties.key");
+                if(key) {
+                  acc[key] = curr.properties.value;
+                }
+                return acc;
+              }, {} as {[key: string]: any});
+              untrack(() =>{
+                const newMetaData = Object.assign({}, graph.vertexes[metaVertex.properties.templateId].properties.props || {}, metaData);
+                mergeVertexProperties(getNewTxnId(), metaVertex.id, {props: newMetaData});
+              })
+            }
+          });
+
           return (
            <Switch>
              <Match when={metaVertex.properties.props?.hidden}>
@@ -179,7 +199,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                    {metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</div>
                </td>
              </Match>
-             <Match when={component() === "Table"}>
+             <Match when={component() === "TableField"}>
                <td>
                  <div class="flex">
                    {metaVertex.properties.props?.defaultValue && getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}

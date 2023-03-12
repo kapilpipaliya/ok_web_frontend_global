@@ -202,7 +202,7 @@ export function DynamicForm(props: DynamicFormProps) {
    return (
 
     <Switch>
-     <Match when={metaVertex.properties.component === "Table"}>
+     <Match when={metaVertex.properties.component === "TableField"}>
       <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
       <DynamicComponent id={id} component={metaVertex.properties.component} meta={metaVertex} data={props.vertex} setValue={props.setValue} />
      </Match>
@@ -296,12 +296,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    const attr = klona(attribute);
    if (!attr.tab) attr.tab = "main";
    if (!attr.group) attr.group = "main";
-   // if(attribute.component === "Table") attribute.group = attribute.id;
+   // if(attribute.component === "TableField") attribute.group = attribute.id;
 
 
    mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
 
-   if (attribute.component === "Table" && attribute.attributes) {
+   if (attribute.component === "TableField" && attribute.attributes) {
     addMetaVertexes(addAttributeResult.vertexId!, attribute.attributes);
    }
    // todo discard transaction
@@ -344,7 +344,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    <For each={Object.keys(groupByTabsAndGroup["main"])}>
     {group => <>
      <div class="dx-fieldset" style={{
-      "max-width": groupByTabsAndGroup["main"][group].filter(attribute => attribute.properties.component === "Table").length ? "100%" : "600px"
+      "max-width": groupByTabsAndGroup["main"][group].filter(attribute => attribute.properties.component === "TableField").length ? "100%" : "600px"
      }}>
       {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
       <DynamicForm attributes={groupByTabsAndGroup["main"][group]}
@@ -373,7 +373,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
    <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>{group => {
     return <div class="dx-fieldset" style={{
-     "max-width": groupByTabsAndGroup[activeTab()][group].filter(attribute => attribute.properties.component === "Table").length ? "100%" : "600px"
+     "max-width": groupByTabsAndGroup[activeTab()][group].filter(attribute => attribute.properties.component === "TableField").length ? "100%" : "600px"
     }}>
      <Show when={group !== "main"}>
       <div class="dx-fieldset-header">{group}</div>

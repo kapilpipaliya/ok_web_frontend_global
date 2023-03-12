@@ -125,8 +125,9 @@ export function getChildVertex(path: string[], currentVertex: Vertex): {error:bo
   if(filterIndex > -1) {
     filter = type.slice(filterIndex)
     // modify the variable itself
-    type = type.slice(0, filterIndex).replace('$0', currentVertex.labels[0]);
+    type = type.slice(0, filterIndex);
   }
+  type = type.replace('$0', currentVertex.labels[0]);
   let vertexes = (currentVertex.out_edges[type] || []).map(edgeId => graph.vertexes[graph.edges[edgeId].end]);
 
   if (filter) {
@@ -242,6 +243,7 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
         }
       }
     } else {
+      // if collection not start with -> we assume first part as main collection
       if (!childrenCollection.startsWith("->")) {
         const rootEdges = collection.split("->");
         childrenCollection = rootEdges.slice(1).join('->');
@@ -294,7 +296,6 @@ const getTextValue = (value: any) => {
 
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
   if(!vertex) return '';
-  displayExpr = displayExpr.replaceAll('$0', vertex.labels[0]);
   if(displayExpr.includes('||')) {
     for (const displayExprElement of displayExpr.split('||')) {
       const value = getOptionLabel(vertex, displayExprElement);
