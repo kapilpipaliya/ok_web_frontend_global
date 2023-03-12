@@ -92,7 +92,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
   createEffect(() => {
     const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
-    const vertexes = getSelectionOptions(props.data, `->${type}`, "").sort((a, b) => a.properties.pos - b.properties.pos);
+    const vertexes = (getChildVertexes([`${type}`], [props.data]).vertexes || []).sort((a, b) => a.properties.pos - b.properties.pos);
     setSortedIds(vertexes);
   })
 
@@ -127,32 +127,34 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     }
 
     // columns
-    const tableColumnsTemplate = getSelectionOptions(props.meta, "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
-    // TODO: handle when tableColumnsTemplate Empty
-    const rowMetaAttributeInstance = getChildVertex(["AttributeInstance"], p.joinVertex );
+    const tableColumnsTemplate = getChildVertexes(["MetaAttr"], [props.meta]); //.sort((a, b) => a.properties.pos - b.properties.pos);
+    if(tableColumnsTemplate.error){
+      return "Cant find table columns";
+    }
+    const rowMetaAttrInst = getChildVertex(["AttrInst"], p.joinVertex );
 
-    if(rowMetaAttributeInstance.error) {
+    if(rowMetaAttrInst.error) {
       batch(() => {
-        const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttributeInstance");
+        const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttrInst");
         if (metaInstanceResult.error) {
           alert("Error creating a row for attribute instance");
         }
         mergeVertexProperties(getNewTxnId(), metaInstanceResult.vertexId!, { templateId: props.meta.id });
 
-        for (const attrColumn of tableColumnsTemplate) {
-          const attrInstanceResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttribute");
-          if (attrInstanceResult.error) {
-            alert(attrInstanceResult.error);
+        for (const attrColumn of tableColumnsTemplate.vertexes!) {
+          const AttrInstResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
+          if (AttrInstResult.error) {
+            alert(AttrInstResult.error);
           }
-          mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, klona(attrColumn.properties));
-          mergeVertexProperties(getNewTxnId(), attrInstanceResult.vertexId!, { templateId: attrColumn.id });
+          mergeVertexProperties(getNewTxnId(), AttrInstResult.vertexId!, klona(attrColumn.properties));
+          mergeVertexProperties(getNewTxnId(), AttrInstResult.vertexId!, { templateId: attrColumn.id });
         }
       });
     }
 
-    const attributesResult = getChildVertexes(["AttributeInstance", "MetaAttribute"], [p.joinVertex]);
+    const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
     if(attributesResult.error) alert("Error getting attributes");
-    const rowColumnsMetaAttributes = attributesResult.vertexes!;
+    const rowColumnsMetaAttrs = attributesResult.vertexes!;
 
 
     const DisplayProperties = () => {
@@ -162,7 +164,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         commitTxn(txnId, Ws);
       };
 
-      return <For each={rowColumnsMetaAttributes}>
+      return <For each={rowColumnsMetaAttrs}>
         {(metaVertex) => {
           const component = createMemo(() => {
             if(metaVertex.properties.component.includes('->') || metaVertex.properties.component.includes('<-')) {
@@ -176,7 +178,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
            // if mergeProps not keep reactivity use memo
           createEffect(()=>{
             if (metaVertex.properties.meta) {
-              const metaRows = getSelectionOptions(p.joinVertex, metaVertex.properties.meta, "");
+              const metaRows = getSelectionOptions(p.joinVertex, metaVertex.properties.meta, "").vertexes || [];
               const metaData = metaRows.reduce((acc, curr) => {
                 const key = getOptionLabel(curr, "->$0Key:properties.key");
                 if(key) {

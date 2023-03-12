@@ -27,7 +27,7 @@ import { G } from "@mobily/ts-belt";
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
-import { getFormApiFromFormLayout } from "./Froms";
+import { getFormApiFromForm } from "./Froms";
 import { AttrsTableData } from "./api";
 
 export const SampleDataGrid = (props: {}) => {
@@ -93,7 +93,7 @@ interface DataGridProps {
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
 
- const form = getFormApiFromFormLayout(props.tableId);
+ const form = getFormApiFromForm(props.tableId);
  let formNew: FormMetaData;
  let collection: string;
 

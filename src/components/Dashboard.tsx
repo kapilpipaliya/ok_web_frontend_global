@@ -31,7 +31,7 @@ import {
 import { addNewEdge, deleteEdge, newEdge, updateEdgeId } from "../lib/Edge";
 import { G } from "@mobily/ts-belt";
 // import { AlertMessageContext } from "../appState";
-import TreeView from "devextreme/ui/tree_view";
+import TreeView, {Properties as TreeViewProperties} from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
 import { Edge, Vertex } from "./input/Form";
@@ -42,14 +42,14 @@ const navigation = [
  {
   name: "Base",
   type: "group",
+  expanded: true,
   children: [
    { name: "Components", href: "/Comp" },
    { name: "DataTypes", href: "/DataType" },
    { name: "Attributes", href: "/Attr" },
    { name: "Collection Category", href: "/CollCategory" },
    { name: "Collections", href: "/Coll" },
-   { name: "Form Layout", href: "/Form" },
-   // { name: "Card Layout", href: "/CardLayout" }
+   { name: "Forms", href: "/Form" },
   ]
  },
  {
@@ -64,7 +64,7 @@ const navigation = [
  { name: "Backup & Restore", href: "/backup_restore" },
  { name: "Forms", href: "/forms" },
  { name: "Grids", href: "/grids" }
-];
+] as TreeViewProperties['dataSource'];
 // window.n = navigation
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 
