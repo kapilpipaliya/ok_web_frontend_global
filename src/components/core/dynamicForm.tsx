@@ -19,11 +19,7 @@ import {
  newVertex
 } from "../../lib/Vertex";
 import { WsContext } from "../ws_events_dispatcher";
-import { TextInputField } from "../input/TextInputField";
-import { TextAreaField } from "../input/TextAreaField";
-import { NumberInputField } from "../input/NumberInputField";
-import { DateInputField } from "../input/DateInputField";
-import { BooleanInputField } from "../input/BooleanInputField";
+
 import {
  getChildVertexes,
  getOptionLabel,
@@ -40,6 +36,7 @@ import { CollectionOptionField } from "../input/CollectionOption";
 import { useNavigate } from "solid-app-router";
 import { capitalizeFirstLetter } from "../utils";
 import { AbstractSingleForm } from "../Froms";
+import { GenericInputField } from "../input/GenaricInputField";
 
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
@@ -88,65 +85,40 @@ const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
  />;
 }
 export const DynamicComponent = (props: { id: string, component: string, meta: Vertex, data: Vertex, setValue(attribute: Vertex, data: any): void }) => {
- return <Switch>
-  <Match when={props.component === "TextField"}>
-   <TextInputField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
-  <Match when={props.component === "TextAreaField"}>
-   <TextAreaField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
+ const genericComponents = [
+  "AutocompleteField",
+  "BarGaugeField",
+  "BulletField",
+  "CalendarField",
+  "CheckBoxField",
+  "CircularGaugeField",
+  "ColorBoxField",
+  "DateBoxField",
+  "DropDownBoxField",
+  "FileUploaderField",
+  "FilterBuilderField",
+  "HtmlEditorField",
+  "LinearGaugeField",
+  "NumberBoxField",
+  "ProgressBarField",
+  "RadioGroupField",
+  "RangeSelectorField",
+  "RangeSliderField",
+  "SelectBoxField",
+  "SliderField",
+  "SwitchField",
+  "TagBoxField",
+  "TextAreaField",
+  "TextBoxField",
 
-   />
-  </Match>
-  <Match when={props.component === "IntField"}>
-   <NumberInputField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
-  <Match when={props.component === "FloatField"}>
-   <NumberInputField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
-  <Match when={props.component === "DateField"}>
-   <DateInputField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
-  <Match when={props.component === "DateTimeField"}>
-   <DateInputField
-    aria-labeledby={props.id}
-    // type="datetime"
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
-  <Match when={props.component === "CheckBoxField"}>
-   <BooleanInputField
-    aria-labeledby={props.id}
-    data={props.data}
-    meta={props.meta}
-    setValue={props.setValue}
-   />
-  </Match>
+  "TextField",
+  "IntField",
+  "FloatField",
+  "DateField",
+  "DateTimeField",
+
+ ];
+ return <Switch>
   <Match when={props.component === "SelectBoxJoinField"}>
    <SelectInputField
     aria-labeledby={props.id}
@@ -182,6 +154,15 @@ export const DynamicComponent = (props: { id: string, component: string, meta: V
      <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)}/>
     </div>
    </td>
+  </Match>
+  <Match when={genericComponents.includes(props.component)}>
+   <GenericInputField
+    aria-labeledby={props.id}
+    data={props.data}
+    meta={props.meta}
+    component={props.component}
+    setValue={props.setValue}
+   />
   </Match>
  </Switch>;
 };
