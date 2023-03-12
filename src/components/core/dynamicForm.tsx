@@ -25,6 +25,7 @@ import { NumberInputField } from "../input/NumberInputField";
 import { DateInputField } from "../input/DateInputField";
 import { BooleanInputField } from "../input/BooleanInputField";
 import {
+ getChildVertexes,
  getOptionLabel,
  getSelectionOptions,
  SelectInputField,
@@ -46,7 +47,7 @@ export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttri
  try{
   const args = JSON.parse(changedFieldAttribute.properties.props.onchange);
   
-  const attribute = getSelectionOptions(changedFieldAttribute, "MetaAttribute<-MetaAttribute", "").find(vertex => vertex.properties.id === args[0]);
+  const attribute = (getSelectionOptions(changedFieldAttribute, "MetaAttr<-MetaAttr", "").vertexes || []).find(vertex => vertex.properties.id === args[0]);
   if(!attribute) {
    return;
   }
@@ -66,18 +67,18 @@ const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
  const { Ws } = useContext(WsContext);
  const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
 
- const attributes = getSelectionOptions(props.meta, "->MetaAttribute", "");
- const newMeta = attributes.length ? attributes[0] : graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttribute").vertexId!];
+ const attributes = getSelectionOptions(props.meta, "->MetaAttr", "");
+ const newMeta = attributes.error ? graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttr").vertexId!] : attributes.vertexes![0];
  mergeVertexProperties(getNewTxnId(), newMeta.id,{id: type});
 
  const vertexes = getSelectionOptions(props.data, `->${type}`, "");
  let newVertex: any;
- if (vertexes.length) {
-  newVertex = vertexes[0];
- } else {
+ if (vertexes.error) {
   const txnId = getNewTxnId();
   newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
   commitTxn(txnId, Ws);
+ } else {
+  newVertex = vertexes.vertexes![0];
  }
 
  return <AbstractSingleForm
@@ -287,7 +288,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
  const addMetaVertexes = (vertexId: Id, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
-   const addAttributeResult = newRow(getNewTxnId(), graph.vertexes[vertexId], "MetaAttribute");
+   const addAttributeResult = newRow(getNewTxnId(), graph.vertexes[vertexId], "MetaAttr");
    if (addAttributeResult.error) {
     alert(addAttributeResult.error);
    }
@@ -315,10 +316,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   }
  })
 
- const mainAttributes = getSelectionOptions(graph.vertexes[metaVertexId], "->MetaAttribute", ""); //.sort((a, b) => a.properties.pos - b.properties.pos);
+ const mainAttributes = getChildVertexes(["MetaAttr"], [graph.vertexes[metaVertexId]]); //.sort((a, b) => a.properties.pos - b.properties.pos);
 
 
- const groupByTabs = A.groupBy(mainAttributes, (item => item.properties.tab!)) as unknown as { [tab: string]: Vertex[] };
+ const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item => item.properties.tab!)) as unknown as { [tab: string]: Vertex[] };
 
  const groupByTabsAndGroup = {} as { [tab: string]: { [group: string]: Vertex[] } };
  for (const tab in groupByTabs) {

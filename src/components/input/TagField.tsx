@@ -21,7 +21,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
   }
 
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.data, props.meta.properties.props.collection, "")
+    return getSelectionOptions(props.data, props.meta.properties.props.collection, "").vertexes || [];
   });
 
   return (

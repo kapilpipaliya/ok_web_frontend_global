@@ -157,7 +157,7 @@ export function getChildVertex(path: string[], currentVertex: Vertex): {error:bo
     }
 
 }
-export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {error:boolean, vertexes?: Vertex[]} {
+export function getChildVertexes(path: string[], currentVertexes: Vertex[], strict?: boolean): {error:boolean, vertexes?: Vertex[]} {
   const stepVertexes = {} as {[id: string]: Vertex};
   if(path.length == 0) {
     return {error: true}
@@ -165,9 +165,16 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
   let type = path[0];
   for (const currentVertex of currentVertexes) {
     type = type.replace('$0', currentVertex.labels[0]);
-    const edgeIds = currentVertex.out_edges[type];
-    if(!edgeIds) {
-      continue;
+    const edgeIds = currentVertex.out_edges[type] || [];
+    if(edgeIds.length == 0) {
+      // we only return error if its in middle of path
+      if(strict && path.length > 1) {
+        return {
+          error: true
+        }
+      } else {
+        continue;
+      }
     }
 
     for (const edgeId of edgeIds) {
@@ -190,7 +197,7 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
   }
 
   if(path.length > 1) {
-   return getChildVertexes(path.slice(1), Object.values(stepVertexes));
+   return getChildVertexes(path.slice(1), Object.values(stepVertexes), strict);
   } else {
     return {
       error: false,
@@ -198,14 +205,14 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[]): {er
     }
   }
 }
-export function getSelectionOptions(vertex: Vertex, collection: string, input: string, meta?: Vertex): Vertex[] {
+export function getSelectionOptions(vertex: Vertex, collection: string, input: string, meta?: Vertex, strict?: boolean): {error:boolean, vertexes?: Vertex[]} {
   const inwardMulti = meta?.properties.props.inward ?? false
-  // TOOD: make input filter working:
+  // TODO: make input filter working:
 
   if (collection.includes("||")) {
     for (const coll of collection.split("||")) {
-      const value = getSelectionOptions(vertex, coll, "");
-      if (value.length != 0) {
+      const value = getSelectionOptions(vertex, coll, "", meta, true);
+      if (!value.error) {
         return value;
       }
     }
@@ -217,7 +224,9 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
       return JSON.parse(collection);
     } catch (e) {
       console.warn(e);
-      return [];
+      return {
+        error: true
+      }
     }
   } else if ((collection).includes("->") || (collection).includes("<-")) {
     let parentVertex: Vertex[] | undefined;
@@ -230,14 +239,14 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
       if(!inwardMulti) {
         const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
         if (parentVertexResult.error) {
-          return [];
+          return parentVertexResult;
         } else {
           parentVertex = [parentVertexResult.vertex!];
         }
       } else {
         const parentVertexResult = getParentVertexes(parentEdges.slice(0, -1), [vertex]);
         if (parentVertexResult.error) {
-          return [];
+          return parentVertexResult;
         } else {
           parentVertex = parentVertexResult.vertexes!;
         }
@@ -262,7 +271,10 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
     }
 
     if (childrenCollection.length === 0 && parentVertex) {
-      return parentVertex;
+      return {
+        error: false,
+        vertexes: parentVertex
+      };
     }
 
     if (!parentVertex) parentVertex = [vertex];
@@ -274,14 +286,12 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
 
     const path_ = childrenCollection.split("->");
 
-      const childrenResult = getChildVertexes(path_, parentVertex);
-      if(childrenResult.error) {
-        return [];
-      } else {
-        return childrenResult.vertexes!;
-      }
+      return getChildVertexes(path_, parentVertex, strict);
     } else {
-      return findVertexIdsByLabel(collection).map((id) => graph.vertexes[id]);
+      return {
+        error: false,
+        vertexes: findVertexIdsByLabel(collection).map((id) => graph.vertexes[id])
+      };
     }
 }
 
@@ -418,7 +428,7 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   }
   
   const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta)
+    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta).vertexes || []
   });
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
