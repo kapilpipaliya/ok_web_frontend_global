@@ -13,10 +13,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    title: "DataType",
    id: "DataType",
    attributes: [
-    { id: "id", component: "TextInput" },
+    { id: "id", component: "TextField" },
     {
      id: "default",
-     component: "Select",
+     component: "SelectBoxJoinField",
      props: {
       displayExpr: "properties.id",
       collection: "Comp"
@@ -25,7 +25,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     {
      id: "Comp",
      title: "Component",
-     component: "Tag",
+     component: "TagBoxJoinField",
      props: {
       displayExpr: "properties.id",
       collection: "Comp"
@@ -37,19 +37,19 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   title: "Component",
   id: "Comp",
   attributes: [
-   { id: "id", component: "TextInput" },
+   { id: "id", component: "TextField" },
    {
     id: "Prop",
-    component: "Table",
+    component: "TableField",
     tab: 'Properties',
     attributes: [
      {
       id: "key",
-      component: "TextInput"
+      component: "TextField"
      },
      {
       id: "dataType",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "DataType",
@@ -59,15 +59,36 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      {
       id: "Comp",
       title: "Component",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "->$0DataType->DataTypeComp",
       },
      },
      {
+      id: "valueProp",
+      title: "Value Property",
+      component: "TableField",
+      tab: 'Properties',
+      attributes: [
+       {
+        id: "key",
+        component: "SelectBoxJoinField",
+        props: {
+         displayExpr: "properties.key",
+         collection: "$0<-$0Comp->$0Prop",
+        },
+       },
+       {
+        id: "value",
+        component: "->$0Key->$0Comp:properties.id",
+       }
+      ]
+     },
+     {
       id: "value",
       // component: "MetaAttr<-MetaAttr[*properties:id=type]:properties.id",
+      meta: "->$0ValueProp",
       component: "->$0Comp:properties.id",
      }
     ]
@@ -76,10 +97,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
  },
  "Attr": {
   title: "Attribute", id: "Attr", attributes: [
-   { id: "id", component: "TextInput" },
+   { id: "id", component: "TextField" },
    {
     id: "dataType",
-    component: "Select",
+    component: "SelectBoxJoinField",
     props: {
      displayExpr: "properties.id",
      collection: "DataType",
@@ -89,22 +110,22 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    {
     id: "Comp",
     title: "Component",
-    component: "Select",
+    component: "SelectBoxJoinField",
     props: {
      displayExpr: "properties.id",
      collection: "->AttrDataType->DataTypeComp",
     },
    },
-   { id: "title", component: "TextInput" },
-   { id: "unique", component: "CheckBox" },
-   { id: "required", component: "CheckBox" },
-   { id: "disabled", component: "CheckBox" },  {
+   { id: "title", component: "TextField" },
+   { id: "unique", component: "CheckBoxField" },
+   { id: "required", component: "CheckBoxField" },
+   { id: "disabled", component: "CheckBoxField" },  {
     id: "Prop",
-    component: "Table",
+    component: "TableField",
     attributes: [
      {
       id: "key",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.key",
        collection: "AttrProp<-AttrComp->CompProp",
@@ -122,7 +143,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   title: "Collection Category",
   id: "CollCategory",
   attributes: [
-   { id: "id", component: "TextInput" },
+   { id: "id", component: "TextField" },
    { id: "description", component: "TextArea" }
   ]
  },
@@ -132,10 +153,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   title: "Collection",
   id: "Coll",
   attributes: [
-   { id: "id", component: "TextInput" },
+   { id: "id", component: "TextField" },
    {
     id: "category",
-    component: "Select",
+    component: "SelectBoxJoinField",
     props: {
      displayExpr: "properties.id",
      collection: "CollCategory",
@@ -144,42 +165,42 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    { id: "description", component: "TextArea" },
    {
     id: "Tab",
-    component: "Table",
+    component: "TableField",
     tab: 'Organize',
     attributes: [
      {
       id: "id",
-      component: "TextInput"
+      component: "TextField"
      },
      {
       id: "name",
-      component: "TextInput"
+      component: "TextField"
      }
     ]
    },
    {
     id: "Group",
-    component: "Table",
+    component: "TableField",
     tab: 'Organize',
     attributes: [
      {
       id: "id",
-      component: "TextInput"
+      component: "TextField"
      },
      {
       id: "name",
-      component: "TextInput"
+      component: "TextField"
      }
     ]
    },
      {
       id: "Role",
-      component: "Table",
+      component: "TableField",
       tab: "Permission",
       attributes: [
        {
         id: "role",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.id",
          collection: "Role"
@@ -187,11 +208,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "Perm",
-        component: "Table",
+        component: "TableField",
         attributes: [
          {
           id: "perm",
-          component: "Select",
+          component: "SelectBoxJoinField",
           props: {
            displayExpr: "properties.id",
            collection: "Perm"
@@ -203,13 +224,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
    {
     id: "Attr",
-    component: "Table",
+    component: "TableField",
     tab: "Attribute",
     attributes: [
      {
       id: "Attr",
       title: "Attribute",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "Attr",
@@ -218,7 +239,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "tab",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "CollAttr<-CollTab",
@@ -226,7 +247,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "group",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollAttr<-CollGroup",
        displayExpr: "properties.id",
@@ -234,7 +255,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "dataType",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "DataType",
@@ -245,7 +266,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "Comp",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "->CollAttrAttr->AttrDataType->DataTypeComp",
@@ -254,39 +275,39 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "title",
-      component: "TextInput",
+      component: "TextField",
       props: {
        defaultValue: "->CollAttrAttr:properties.title"
       },
      },
      {
       id: "unique",
-      component: "CheckBox",
+      component: "CheckBoxField",
       props: {
        defaultValue: "->CollAttrAttr:properties.unique"
       },
      },
      {
       id: "required",
-      component: "CheckBox",
+      component: "CheckBoxField",
       props: {
        defaultValue: "->CollAttrAttr:properties.required"
       },
      },
      {
       id: "disabled",
-      component: "CheckBox",
+      component: "CheckBoxField",
       props: {
        defaultValue: "->CollAttrAttr:properties.disabled"
       },
      },  {
       id: "Prop",
       title: "Property",
-      component: "Table",
+      component: "TableField",
       attributes: [
        {
         id: "key",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.key",
          collection: "CollAttrProp<-CollAttrComp->CompProp||CollAttrProp<-CollAttrAttr->AttrComp->CompProp",
@@ -299,11 +320,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       ]
     },  {
       id: "Role",
-      component: "Table",
+      component: "TableField",
       attributes: [
        {
         id: "role",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.id",
          collection: "Role"
@@ -311,11 +332,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "Perm",
-        component: "Table",
+        component: "TableField",
         attributes: [
          {
           id: "perm",
-          component: "Select",
+          component: "SelectBoxJoinField",
           props: {
            displayExpr: "properties.id",
            collection: "Perm"
@@ -330,12 +351,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    },
    {
     id: "Child",
-    component: "Table",
+    component: "TableField",
     tab: "Child",
     attributes: [
      {
-      id: "collection",
-      component: "Select",
+      id: "coll",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "Coll",
@@ -343,7 +364,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "tab",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "CollChild<-CollTab",
@@ -351,7 +372,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "group",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollChild<-CollGroup",
        displayExpr: "properties.id",
@@ -359,14 +380,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },  {
       id: "Prop",
       title: "Property",
-      component: "Table",
+      component: "TableField",
       attributes: [
        {
         id: "key",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.key",
-         collection: "Comp[Table]->CompProp",
+         collection: "Comp[TableField]->CompProp",
         },
        },
        {
@@ -382,13 +403,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 
  "Form": {
   title: "Form", id: "Form", attributes: [
-   { id: "id", component: "TextInput" },
-   { id: "title", component: "TextInput" },
-   { id: "description", component: "TextArea" },
-   { id: "table", component: "CheckBox" },
+   { id: "id", component: "TextField" },
+   { id: "title", component: "TextField" },
+   { id: "description", component: "TextAreaField" },
+   { id: "table", component: "CheckBoxField" },
    {
-    id: "collection",
-    component: "Select",
+    id: "coll",
+    title: "Collection",
+    component: "SelectBoxJoinField",
     props: {
      displayExpr: "properties.id",
      collection: "Coll",
@@ -398,13 +420,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    {
     id: "Attr",
     title: "Attribute",
-    component: "Table",
+    component: "TableField",
     tab: "Attribute",
     attributes: [
      {
       id: "Attr",
       title: "Attribute",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "->CollAttrAttr:properties.id",
        collection: "CollForm<-FormAttr<-CollAttr"
@@ -412,7 +434,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "tab",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollForm<-FormAttr<-CollTab",
        displayExpr: "properties.id",
@@ -421,7 +443,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "group",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollForm<-FormAttr<-CollGroup",
        displayExpr: "properties.id",
@@ -430,7 +452,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "dataType",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "DataType",
        displayExpr: "properties.id",
@@ -441,7 +463,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      {
       id: "Comp",
       title: "Component",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "properties.id",
        collection: "->FormAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
@@ -451,32 +473,32 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "title",
-      component: "TextInput",
+      component: "TextField",
       props: {
        defaultValue: "->FormAttrAttr:properties.title||FormAttrAttr->CollAttrAttr:properties.title"
       }
      },
      {
       id: "required",
-      component: "CheckBox",
+      component: "CheckBoxField",
       props: {
        defaultValue: "->FormAttrAttr:properties.required||FormAttrAttr->CollAttrAttr:properties.required"
       }
      },
      {
       id: "disabled",
-      component: "CheckBox",
+      component: "CheckBoxField",
       props: {
        defaultValue: "->FormAttrAttr:properties.disabled||FormAttrAttr->CollAttrAttr:properties.disabled"
       }
      },  {
       id: "Prop",
       title: "Property",
-      component: "Table",
+      component: "TableField",
       attributes: [
        {
         id: "key",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.key",
          collection: "FormAttrProp<-FormAttrComp->CompProp||FormAttrProp<-FormAttrAttr->CollAttrAttr->AttrComp->CompProp",
@@ -493,22 +515,24 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    {
     id: "Child",
     title: "Children",
-    component: "Table",
+    component: "TableField",
     tab: "Children",
     attributes: [
      {
       id: "Coll",
       title: "Collection",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        displayExpr: "->CollChildColl:properties.id",
-       collection: "CollForm<-FormChild<-CollChild"
+       collection: "CollForm<-FormChild<-CollChild",
+       // displayExpr: "id",
+       // collection: "CollForm<-FormChild"
       },
 
      },
      {
       id: "tab",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollForm<-FormChild<-CollTab",
        displayExpr: "properties.id",
@@ -517,7 +541,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      },
      {
       id: "group",
-      component: "Select",
+      component: "SelectBoxJoinField",
       props: {
        collection: "CollForm<-FormChild<-CollGroup",
        displayExpr: "properties.id",
@@ -527,12 +551,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
      {
       id: "Attr",
       title: "Attribute",
-      component: "Table",
+      component: "TableField",
       attributes: [
        {
         id: "Attr",
         title: "Attribute",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "->CollAttrAttr:properties.id",
          collection: "FormChildAttr<-FormChildColl->CollChildColl->CollAttr"
@@ -541,7 +565,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "dataType",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          collection: "DataType",
          displayExpr: "properties.id",
@@ -553,7 +577,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        {
         id: "Comp",
         title: "Component",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.id",
          collection: "->FormChildAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
@@ -562,28 +586,28 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "title",
-        component: "TextInput",
+        component: "TextField",
         props: {
          defaultValue: "->FormChildAttrAttr:properties.title||FormChildAttrAttr->CollAttrAttr:properties.title"
         }
        },
        {
         id: "required",
-        component: "CheckBox",
+        component: "CheckBoxField",
         props: {
          defaultValue: "->FormChildAttrAttr:properties.required||FormChildAttrAttr->CollAttrAttr:properties.required"
         }
        },
        {
         id: "disabled",
-        component: "CheckBox",
+        component: "CheckBoxField",
         props: {
          defaultValue: "->FormChildAttrAttr:properties.disabled||FormChildAttrAttr->CollAttrAttr:properties.disabled"
         }
        },
        {
         id: "child",
-        component: "Select",
+        component: "SelectBoxJoinField",
         props: {
          displayExpr: "properties.id",
          collection: "Form"
@@ -591,11 +615,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
        },
        {
         id: "Prop",
-        component: "Table",
+        component: "TableField",
         attributes: [
          {
           id: "key",
-          component: "Select",
+          component: "SelectBoxJoinField",
           props: {
            displayExpr: "properties.key",
            collection: "FormChildAttrProp<-FormChildAttrComp->CompProp||FormChildAttrProp<-FormChildAttrAttr->CollAttrAttr->AttrComp->CompProp",
@@ -617,10 +641,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    title: "User",
    id: "User",
    attributes: [
-    { id: "id", component: "TextInput" },
+    { id: "id", component: "TextField" },
     {
      id: "role",
-     component: "Tag",
+     component: "TagBoxJoinField",
      props: {
       displayExpr: "properties.id",
       collection: "Role"
@@ -633,7 +657,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    title: "Perm",
    id: "Perm",
    attributes: [
-    { id: "id", component: "TextInput" },
+    { id: "id", component: "TextField" },
    ]
   },
  "Role":
@@ -641,7 +665,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    title: "Role",
    id: "Role",
    attributes: [
-    { id: "id", component: "TextInput" },
+    { id: "id", component: "TextField" },
    ]
   },
 // TODO: Dynamic Filter on Grid: Role->Filter

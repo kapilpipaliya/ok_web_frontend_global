@@ -15,7 +15,7 @@ export const getDefaultValue = (dataType?: string, component?: string) => {
    return false;
   case "object":
    return {};
-  case "table":
+  case "TableField":
    return [];
   default:
    return undefined;

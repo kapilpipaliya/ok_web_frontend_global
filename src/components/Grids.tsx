@@ -113,7 +113,7 @@ export const DataGrid = (props: DataGridProps) => {
 
  const tableColumns = [] as Array<Column<any, any>>;
  for (const attribute of formNew!.attributes) {
-  if (attribute.component === "Table") continue;
+  if (attribute.component === "TableField") continue;
   // @ts-ignore
   attribute["dataField"] = `properties.${attribute.id}`;
   // @ts-ignore

@@ -25,6 +25,7 @@ import {
 import { FieldAttribute, FormMetaData } from "./input/Form";
 import { AttrsTableData } from "./api";
 
+// TODO make default component property applied to
 export const AllForms = () => {
  const allFormLayouts = () => graph.vertexLabelIdMap["Form"]?.map(formLayoutVertex => graph.vertexes[formLayoutVertex]) || [];
 
@@ -44,25 +45,25 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
   return { error: "form dont found"};
  }
 
- const formLayoutCollectionResult = getParentVertex(['CollectionFormLayout'], formLayout);
+ const formLayoutCollectionResult = getParentVertex(['CollForm'], formLayout);
  if(formLayoutCollectionResult.error) { return {error: "Please Configure Collection"}; }
  const formLayoutCollection = formLayoutCollectionResult.vertex!
 
- const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormLayoutAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
+ const FormLayoutAttributes = getSelectionOptions(formLayout, "->FormAttr", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
  let attributes: FieldAttribute[] = [];
 
  for(const vertexFormLayoutAttribute of FormLayoutAttributes) {
-  const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeAttribute", "")[0];
+  const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutAttribute, "->FormAttrAttr", "")[0];
   if(!vertexCollectionAttribute) continue;
-  const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+  const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollAttrAttr", "")[0];
   if(!vertexAttribute) continue;
   const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutAttribute.properties, false, 10));
 
   // set component to attribute
-  const attributeComponent = getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
-  const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0] || attributeComponent;
-  const formAttributeComponent = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeComponent", "")[0] || collectionAttributeComponent;
+  const attributeComponent = getSelectionOptions(vertexAttribute, "->AttrComp", "")[0];
+  const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollAttrComp", "")[0] || attributeComponent;
+  const formAttributeComponent = getSelectionOptions(vertexFormLayoutAttribute, "->FormAttrComp", "")[0] || collectionAttributeComponent;
 
   if (formAttributeComponent === undefined) {
    const vertexDefaultAttribute = getSelectionOptions(vertexAttribute, "->AttributeDefault", "")[0];
@@ -73,11 +74,12 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
   }
 
   // set dataType to attribute
-  attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+  // TODO Handle if 0 result found
+  attribute.dataType = getSelectionOptions(vertexAttribute, "->AttrDataType", "")[0].properties.id;
 
   // set props to attribute
-  let formLayoutProps = getSelectionOptions(vertexFormLayoutAttribute, "->FormLayoutAttributeProperty", "").reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->FormLayoutAttributePropertyKey:properties.key");
+  let formLayoutProps = getSelectionOptions(vertexFormLayoutAttribute, "->FormAttrProp", "").reduce((acc, curr) => {
+   const key = getOptionLabel(curr, "->FormAttrPropKey:properties.key");
    if (key) {
     acc[key] = curr.properties.value;
    }
@@ -85,8 +87,8 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
   }, {} as { [key: string]: any });
 
   if (formAttributeComponent === collectionAttributeComponent) {
-   const collectionProps = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeProperty", "").reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->CollectionAttributePropertyKey:properties.key");
+   const collectionProps = getSelectionOptions(vertexCollectionAttribute, "->CollAttrProp", "").reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->CollAttrPropKey:properties.key");
     if (key) {
      acc[key] = curr.properties.value;
     }
@@ -95,8 +97,8 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
    formLayoutProps = Object.assign({}, removeUndefinedProperties(collectionProps, false, 10), removeUndefinedProperties(formLayoutProps, false, 10));
   }
   if (formAttributeComponent === attributeComponent) {
-   const attributeProps = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute->AttributeProperty", "").reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->AttributePropertyKey:properties.key");
+   const attributeProps = getSelectionOptions(vertexCollectionAttribute, "->CollAttrAttr->AttrProp", "").reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->AttrPropKey:properties.key");
     if (key) {
      acc[key] = curr.properties.value;
     }
@@ -123,25 +125,25 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
  // @ts-ignore
  attributes = attributes.sort((a, b) => a.pos - b.pos);
 
- const FormLayoutChilds = getSelectionOptions(formLayout, "->FormLayoutChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
+ const FormLayoutChilds = getSelectionOptions(formLayout, "->FormChild", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
  const childAttributes = [] as FieldAttribute[];
 
  for(const vertexFormLayoutChild of FormLayoutChilds) {
-  const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildAttribute", "").sort((a, b) => a.properties.pos - b.properties.pos);
+  const formLayoutChildAttributes = getSelectionOptions(vertexFormLayoutChild, "->FormChildAttr", "").sort((a, b) => a.properties.pos - b.properties.pos);
 
   let tableAttributes: FieldAttribute[] = [];
   for(const vertexFormLayoutChildAttribute of formLayoutChildAttributes) {
-   const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeAttribute", "")[0];
+   const vertexCollectionAttribute = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormChildAttrAttr", "")[0];
    if(!vertexCollectionAttribute) continue;
-   const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute", "")[0];
+   const vertexAttribute = getSelectionOptions(vertexCollectionAttribute, "->CollAttrAttr", "")[0];
    if(!vertexAttribute) continue;
    const attribute = Object.assign({}, removeUndefinedProperties(vertexAttribute.properties, false, 10), removeUndefinedProperties(vertexCollectionAttribute.properties, false, 10), removeUndefinedProperties(vertexFormLayoutChildAttribute.properties, false, 10));
 
    // set component to attribute
-   const attributeComponent = getSelectionOptions(vertexAttribute, "->AttributeComponent", "")[0];
-   const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeComponent", "")[0] || attributeComponent;
-   const formAttributeComponent = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeComponent", "")[0] || collectionAttributeComponent;
+   const attributeComponent = getSelectionOptions(vertexAttribute, "->AttrComp", "")[0];
+   const collectionAttributeComponent = getSelectionOptions(vertexCollectionAttribute, "->CollAttrComp", "")[0] || attributeComponent;
+   const formAttributeComponent = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormChildAttrComp", "")[0] || collectionAttributeComponent;
 
    if (formAttributeComponent === undefined) {
     const vertexDefaultComponent = getSelectionOptions(vertexAttribute, "->AttributeDefault", "")[0];
@@ -152,11 +154,11 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
    }
 
    // set dataType to attribute
-   attribute.dataType = getSelectionOptions(vertexAttribute, "->AttributeDataType", "")[0].properties.id;
+   attribute.dataType = getSelectionOptions(vertexAttribute, "->AttrDataType", "")[0].properties.id;
 
    // set props to attribute
-   let formLayoutProps = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormLayoutChildAttributeProperty", "").reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->FormLayoutChildAttributePropertyKey:properties.key");
+   let formLayoutProps = getSelectionOptions(vertexFormLayoutChildAttribute, "->FormChildAttrProp", "").reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->FormChildAttrPropKey:properties.key");
     if (key) {
      acc[key] = curr.properties.value;
     }
@@ -164,8 +166,8 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
    }, {} as { [key: string]: any });
 
    if (formAttributeComponent === collectionAttributeComponent) {
-    const collectionProps = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeProperty", "").reduce((acc, curr) => {
-     const key = getOptionLabel(curr, "->CollectionAttributePropertyKey:properties.key");
+    const collectionProps = getSelectionOptions(vertexCollectionAttribute, "->CollAttrProp", "").reduce((acc, curr) => {
+     const key = getOptionLabel(curr, "->CollAttrPropKey:properties.key");
      if (key) {
       acc[key] = curr.properties.value;
      }
@@ -174,8 +176,8 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
     formLayoutProps = Object.assign({}, removeUndefinedProperties(collectionProps, false, 10), removeUndefinedProperties(formLayoutProps, false, 10));
    }
    if (formAttributeComponent === attributeComponent) {
-    const attributeProps = getSelectionOptions(vertexCollectionAttribute, "->CollectionAttributeAttribute->AttributeProperty", "").reduce((acc, curr) => {
-     const key = getOptionLabel(curr, "->AttributePropertyKey:properties.key");
+    const attributeProps = getSelectionOptions(vertexCollectionAttribute, "->CollAttrAttr->AttrProp", "").reduce((acc, curr) => {
+     const key = getOptionLabel(curr, "->AttrPropKey:properties.key");
      if (key) {
       acc[key] = curr.properties.value;
      }
@@ -202,13 +204,13 @@ export const getFormApiFromFormLayout = (formId: string): { error: string, form?
   // @ts-ignore
   tableAttributes = tableAttributes.sort((a, b) => a.pos - b.pos);
 
-  const formLayoutChildCollection = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildCollection", "")[0];
+  const formLayoutChildCollection = getSelectionOptions(vertexFormLayoutChild, "->FormChildColl->CollChildColl", "")[0];
   if(!formLayoutChildCollection) {
    continue;
   }
   // currently we save table property on Collection only, not overwrite by form layout
-  const collectionChildProps = getSelectionOptions(vertexFormLayoutChild, "->FormLayoutChildCollection->CollectionChildProperty", "").reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->CollectionChildPropertyKey:properties.key");
+  const collectionChildProps = getSelectionOptions(vertexFormLayoutChild, "->FormChildColl->CollChildProperty", "").reduce((acc, curr) => {
+   const key = getOptionLabel(curr, "->CollChildPropertyKey:properties.key");
    if (key) {
     acc[key] = curr.properties.value;
    }
