@@ -18,11 +18,12 @@ import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
 import {
- getChildVertex, getChildVertexes,
+ getChildVertex,
+ getChildVertexes,
  getOptionLabel,
  getParentVertex
 } from "./input/SelectInputField";
-import { FieldAttribute, FormMetaData } from "./input/Form";
+import { FieldAttribute, FormMetaData, Vertex } from "./input/Form";
 import { AttrsTableData } from "./api";
 
 // TODO make default component property applied to
@@ -37,15 +38,104 @@ export const AllForms = () => {
  </div>;
 };
 
-export const getFormApiFromForm = (formId: string): { error: string, form?: FormMetaData} => {
+const addProps = (vertexFormAttr: Vertex): { error: boolean, attr?: FieldAttribute } => {
+ const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);
+ if (vertexCollAttrResult.error) return { error: true };
+ const vertexCollAttr = vertexCollAttrResult.vertex!;
+ const vertexAttrResult = getChildVertex(["CollAttrAttr"], vertexCollAttr);
+ if (vertexAttrResult.error) return { error: true };
+ const vertexAttr = vertexAttrResult.vertex!;
+ const attr = Object.assign({}, removeUndefinedProperties(vertexAttr.properties, false, 10), removeUndefinedProperties(vertexCollAttr.properties, false, 10), removeUndefinedProperties(vertexFormAttr.properties, false, 10));
+
+
+ // find components for all levels
+ const vertexDefaultComp = getChildVertex(["AttrDataType", "DataTypeDefault"], vertexAttr);
+ const attrComp = getChildVertex(["AttrComp"], vertexAttr).vertex || vertexDefaultComp.vertex;
+ const collAttrComp = getChildVertex(["CollAttrComp"], vertexCollAttr).vertex || attrComp;
+ const formAttrComp = getChildVertex(["$0Comp"], vertexFormAttr).vertex || collAttrComp;
+
+
+ // set dataType to attr
+ const dataType = getChildVertex(["AttrDataType"], vertexAttr);
+ if (dataType.error) {
+  console.warn("data Type not found");
+  return { error: true };
+ }
+ attr.dataType = dataType.vertex!.properties.id;
+
+ // set props to attr
+ let formProps = (getChildVertexes(["$Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
+  const key = getOptionLabel(curr, "->$Key:properties.key");
+  if (key) {
+   acc[key] = curr.properties.value;
+  }
+  return acc;
+ }, {} as { [key: string]: any });
+
+ if (formAttrComp === collAttrComp) {
+  const collProps = (getChildVertexes(["$Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
+   const key = getOptionLabel(curr, "->$0Key:properties.key");
+   if (key) {
+    acc[key] = curr.properties.value;
+   }
+   return acc;
+  }, {} as { [key: string]: any });
+  formProps = Object.assign({}, removeUndefinedProperties(collProps, false, 10), removeUndefinedProperties(formProps, false, 10));
+ }
+
+ if (formAttrComp === attrComp) {
+  const attrProps = (getChildVertexes(["AttrProp"], [vertexAttr]).vertexes || []).reduce((acc, curr) => {
+   const key = getOptionLabel(curr, "->AttrPropKey:properties.key");
+   if (key) {
+    acc[key] = curr.properties.value;
+   }
+   return acc;
+  }, {} as { [key: string]: any });
+  formProps = Object.assign({}, removeUndefinedProperties(attrProps, false, 10), removeUndefinedProperties(formProps, false, 10));
+ }
+
+ // merge default component props
+ const comp = (formAttrComp === attrComp) ? attrComp : formAttrComp;
+ if (!comp) {
+  console.warn("Component not configured");
+  return { error: true };
+ }
+
+ const compProps = (getChildVertexes(["CompProp"], [comp]).vertexes || []).reduce((acc, curr) => {
+  if (curr.properties.key) {
+   acc[curr.properties.key] = curr.properties.value;
+  }
+  return acc;
+ }, {} as { [key: string]: any });
+ formProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10), formProps);
+
+
+ const parentVertexResult = getParentVertex(["ChildComp"], comp);
+ if (!parentVertexResult.error) {
+  const parentCompProps = (getChildVertexes(["CompProp"], [parentVertexResult.vertex!]).vertexes || []).reduce((acc, curr) => {
+   if (curr.properties.key) {
+    acc[curr.properties.key] = curr.properties.value;
+   }
+   return acc;
+  }, {} as { [key: string]: any });
+  formProps = Object.assign({}, removeUndefinedProperties(parentCompProps, false, 10), formProps);
+  attr.component = parentVertexResult.vertex!.properties.id;
+ } else {
+  attr.component = comp.properties.id;
+ }
+ attr.props = formProps;
+ return { error: false, attr };
+};
+
+export const getFormApiFromForm = (formId: string): { error: string, form?: FormMetaData } => {
  const formID = () => (graph.vertexLabelIdMap["Form"] || []).find(vertexId => graph.vertexes[vertexId].properties["id"] === formId);
  const form = graph.vertexes[formId] || graph.vertexes[`${formID()}`];
  if (!form) {
   console.warn(formId, "form not found");
-  return { error: "form dont found"};
+  return { error: "form dont found" };
  }
 
- const formCollResult = getParentVertex(['CollForm'], form);
+ const formCollResult = getParentVertex(["CollForm"], form);
  if(formCollResult.error) { return {error: "Please Configure Collection in a Form"}; }
  const formColl = formCollResult.vertex!
 
@@ -56,83 +146,9 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
  let attrs: FieldAttribute[] = [];
 
  for(const vertexFormAttr of formAttrs) {
-  const vertexCollAttrResult = getChildVertex(["FormAttrAttr"], vertexFormAttr );
-  if(vertexCollAttrResult.error) continue;
-  const vertexCollAttr = vertexCollAttrResult.vertex!;
-  const vertexAttrResult = getChildVertex(["CollAttrAttr"], vertexCollAttr );
-  if(vertexAttrResult.error) continue;
-  const vertexAttr = vertexAttrResult.vertex!;
-  const attr = Object.assign({}, removeUndefinedProperties(vertexAttr.properties, false, 10), removeUndefinedProperties(vertexCollAttr.properties, false, 10), removeUndefinedProperties(vertexFormAttr.properties, false, 10));
-
-  // set component to attr
-  const attrComp = getChildVertex(["AttrComp"], vertexAttr).vertex;
-  const collAttrComp = getChildVertex(["CollAttrComp"], vertexCollAttr).vertex || attrComp;
-  const formAttrComp = getChildVertex(["FormAttrComp"], vertexFormAttr).vertex || collAttrComp;
-
-  if (formAttrComp === undefined) {
-   const vertexDefaultComp = getChildVertex(["AttrDefault"], vertexAttr);
-   if (vertexDefaultComp.error) continue;
-   attr.component = vertexDefaultComp.vertex!.properties.id;
-  } else {
-   attr.component = formAttrComp.properties.id;
-  }
-
-  // set dataType to attr
-  const dataType = getChildVertex(["AttrDataType"], vertexAttr);
-  if(dataType.error) {
-   console.warn("data Type not found");
-   continue;
-  }
-  attr.dataType = dataType.vertex!.properties.id;
-
-  // set props to attr
-  let formProps = (getChildVertexes(["FormAttrProp"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->FormAttrPropKey:properties.key");
-   if (key) {
-    acc[key] = curr.properties.value;
-   }
-   return acc;
-  }, {} as { [key: string]: any });
-
-  if (formAttrComp === collAttrComp) {
-   const collProps = (getChildVertexes(["CollAttrProp"], [vertexCollAttr] ).vertexes || []).reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->CollAttrPropKey:properties.key");
-    if (key) {
-     acc[key] = curr.properties.value;
-    }
-    return acc;
-   }, {} as { [key: string]: any });
-   formProps = Object.assign({}, removeUndefinedProperties(collProps, false, 10), removeUndefinedProperties(formProps, false, 10));
-  }
-  if (formAttrComp === attrComp) {
-   const attrProps = (getChildVertexes(["CollAttrAttr", "AttrProp"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->AttrPropKey:properties.key");
-    if (key) {
-     acc[key] = curr.properties.value;
-    }
-    return acc;
-   }, {} as { [key: string]: any });
-   formProps = Object.assign({}, removeUndefinedProperties(attrProps, false, 10), removeUndefinedProperties(formProps, false, 10));
-  }
-
-  // merge default component props
-  const comp = (formAttrComp === attrComp) ? attrComp : formAttrComp;
-  if(!comp) {
-   console.warn("Component not configured");
-   continue;
-  }
-
-  const compProps = (getChildVertexes(["CompProp"], [comp]).vertexes || []).reduce((acc, curr) => {
-   if (curr.properties.key) {
-    acc[curr.properties.key] = curr.properties.value;
-   }
-   return acc;
-  }, {} as { [key: string]: any });
-  formProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10),formProps );
-
-  attr.props = formProps;
-
-  attrs.push(attr);
+  const addPropsResult = addProps(vertexFormAttr);
+  if (addPropsResult.error) continue;
+  attrs.push(addPropsResult.attr!);
  }
  // @ts-ignore
  attrs = attrs.sort((a, b) => a.pos - b.pos);
@@ -146,83 +162,9 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
 
   let tableAttrs: FieldAttribute[] = [];
   for(const vertexFormChildAttr of formChildAttrs) {
-   const vertexCollAttrResult = getChildVertex(["FormChildAttrAttr"], vertexFormChildAttr);
-   if(vertexCollAttrResult.error) continue;
-   const vertexCollAttr = vertexCollAttrResult.vertex!;
-   const vertexAttrResult = getChildVertex(["CollAttrAttr"], vertexCollAttr);
-   if(vertexAttrResult.error) continue;
-   const vertexAttr = vertexAttrResult.vertex!;
-   const attr = Object.assign({}, removeUndefinedProperties(vertexAttr.properties, false, 10), removeUndefinedProperties(vertexCollAttr.properties, false, 10), removeUndefinedProperties(vertexFormChildAttr.properties, false, 10));
-
-   // set component to attr
-   const attrComp = getChildVertex(["AttrComp"], vertexAttr).vertex;
-   const collAttrComp = getChildVertex(["CollAttrComp"], vertexCollAttr).vertex || attrComp;
-   const formAttrComp = getChildVertex(["FormChildAttrComp"], vertexFormChildAttr).vertex || collAttrComp;
-
-   if (formAttrComp === undefined) {
-    const vertexDefaultComp = getChildVertex(["AttrDefault"], vertexAttr);
-    if (vertexDefaultComp.error) continue;
-    attr.component = vertexDefaultComp.vertex!.properties.id;
-   } else {
-    attr.component = formAttrComp.properties.id;
-   }
-
-   // set dataType to attr
-   const dataType = getChildVertex(["AttrDataType"], vertexAttr);
-   if(dataType.error) {
-    console.warn("data Type not found");
-    continue;
-   }
-   attr.dataType = dataType.vertex!.properties.id;
-
-   // set props to attr
-   let formProps = (getChildVertexes(["FormChildAttrProp"], [vertexFormChildAttr]).vertexes || []).reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->FormChildAttrPropKey:properties.key");
-    if (key) {
-     acc[key] = curr.properties.value;
-    }
-    return acc;
-   }, {} as { [key: string]: any });
-
-   if (formAttrComp === collAttrComp) {
-    const collectionProps = (getChildVertexes(["CollAttrProp"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
-     const key = getOptionLabel(curr, "->CollAttrPropKey:properties.key");
-     if (key) {
-      acc[key] = curr.properties.value;
-     }
-     return acc;
-    }, {} as { [key: string]: any });
-    formProps = Object.assign({}, removeUndefinedProperties(collectionProps, false, 10), removeUndefinedProperties(formProps, false, 10));
-   }
-   if (formAttrComp === attrComp) {
-    const attrProps = (getChildVertexes(["CollAttrAttr", "AttrProp"], [vertexCollAttr] ).vertexes || []).reduce((acc, curr) => {
-     const key = getOptionLabel(curr, "->AttrPropKey:properties.key");
-     if (key) {
-      acc[key] = curr.properties.value;
-     }
-     return acc;
-    }, {} as { [key: string]: any });
-    formProps = Object.assign({}, removeUndefinedProperties(attrProps, false, 10), removeUndefinedProperties(formProps, false, 10));
-   }
-
-   // merge default component props
-   const comp = (formAttrComp === attrComp) ? attrComp : formAttrComp;
-   if(!comp) {
-    console.warn("Component not configured");
-    continue;
-   }
-
-   const compProps = (getChildVertexes(["CompProp"], [comp] ).vertexes || []).reduce((acc, curr) => {
-    if (curr.properties.key) {
-     acc[curr.properties.key] = curr.properties.value;
-    }
-    return acc;
-   }, {} as { [key: string]: any });
-   formProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10),formProps );
-
-   attr.props = formProps;
-
-   tableAttrs.push(attr);
+   const addPropsResult = addProps(vertexFormChildAttr);
+   if (addPropsResult.error) continue;
+   attrs.push(addPropsResult.attr!);
   }
   // @ts-ignore
   tableAttrs = tableAttrs.sort((a, b) => a.pos - b.pos);
