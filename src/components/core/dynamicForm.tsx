@@ -107,16 +107,9 @@ export const DynamicComponent = (props: { id: string, component: string, meta: V
   "SelectBoxField",
   "SliderField",
   "SwitchField",
-  "TagBoxField",
+  // "TagBoxField",
   "TextAreaField",
   "TextBoxField",
-
-  "TextField",
-  "IntField",
-  "FloatField",
-  "DateField",
-  "DateTimeField",
-
  ];
  return <Switch>
   <Match when={props.component === "SelectBoxJoinField"}>
