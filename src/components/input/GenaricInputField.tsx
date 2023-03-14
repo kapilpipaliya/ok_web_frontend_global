@@ -1,6 +1,6 @@
 import { createEffect } from "solid-js";
 
-import dxAutocomplete , { Properties as dxAutocompleteProperties} from "devextreme/ui/autocomplete";
+import dxAutocomplete , { Properties as dxAutocompleteProperties} from "devextreme/ui/toolbar";
 import dxBarGauge , { Properties as dxBarGaugeProperties} from "devextreme/viz/bar_gauge";
 import dxBullet , { Properties as dxBulletProperties} from "devextreme/viz/bullet";
 import dxCalendar , { Properties as dxCalendarProperties} from "devextreme/ui/calendar";
@@ -65,12 +65,6 @@ export function GenericInputField(props: ComponentProps & { component: string;})
      } else if(props.component === "DateBoxField" ) {
       comp = dxDateBox;
       Object.assign(properties, {} as dxDateBoxProperties);
-     } else if(props.component === "DateField" ) {
-      comp = dxDateBox;
-      Object.assign(properties, {type: "datetime"} as dxDateBoxProperties);
-     } else if(props.component === "DateTimeField" ) {
-      comp = dxDateBox;
-      Object.assign(properties, {} as dxDateBoxProperties);
      } else if(props.component === "DateBoxField" ) {
       comp = dxDateBox;
       Object.assign(properties, {} as dxDateBoxProperties);
@@ -90,12 +84,6 @@ export function GenericInputField(props: ComponentProps & { component: string;})
       comp = dxLinearGauge;
       Object.assign(properties, {} as dxLinearGaugeProperties);
      } else if(props.component === "NumberBoxField" ) {
-      comp = dxNumberBox;
-      Object.assign(properties, {} as dxNumberBoxProperties);
-     } else if(props.component === "IntField" ) {
-      comp = dxNumberBox;
-      Object.assign(properties, {} as dxNumberBoxProperties);
-     } else if(props.component === "FloatField" ) {
       comp = dxNumberBox;
       Object.assign(properties, {} as dxNumberBoxProperties);
      } else if(props.component === "ProgressBarField" ) {
@@ -125,9 +113,6 @@ export function GenericInputField(props: ComponentProps & { component: string;})
      } else if(props.component === "TextAreaField" ) {
       comp = dxTextArea;
       Object.assign(properties, {} as dxTextAreaProperties);
-     } else if(props.component === "TextField" ) {
-      comp = dxTextBox;
-      Object.assign(properties, {} as dxTextBoxProperties);
      } else if(props.component === "TextBoxField" ) {
       comp = dxTextBox;
       Object.assign(properties, {} as dxTextBoxProperties);

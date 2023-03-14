@@ -56,6 +56,7 @@
     "@untemps/solid-readotron": "^1.0.2",
     "case-switcher-js": "^1.1.10",
     "clsx": "^1.2.1",
+    "csvtojson": "^2.0.10",
     "devextreme": "^22.2.4",
     "effector": "^22.5.2",
     "effector-solid": "^0.22.7",
