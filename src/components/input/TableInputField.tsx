@@ -40,7 +40,7 @@ import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent } from "../core/dynamicForm";
+import { DynamicComponent, FormContext } from "../core/dynamicForm";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -72,6 +72,7 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string, label?
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
+  const { local } = useContext(FormContext);
 
   // const owner = getOwner();
 
@@ -84,7 +85,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       const label = props.meta.properties.props?.label;
 
       newRow(txnId, props.data, type, label);
-      commitTxn(txnId, Ws);
+      if(!local) commitTxn(txnId, Ws);
     });
   });
 
@@ -123,7 +124,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       // delete vertex:
       const deleteResult = deleteVertex(txnId, p.joinVertex.id);
       if (deleteResult.error) alert(deleteResult.error)
-      commitTxn(txnId, Ws);
+      if(!local) commitTxn(txnId, Ws);
     }
 
     // columns
@@ -161,7 +162,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       const setValue = (attribute: Vertex, value: any) => {
         const txnId = getNewTxnId();
         mergeVertexProperties(txnId, p.joinVertex.id, { [attribute.properties.id]: value });
-        commitTxn(txnId, Ws);
+        if(!local) commitTxn(txnId, Ws);
       };
 
       return <For each={rowColumnsMetaAttrs}>
@@ -268,7 +269,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           });
         });
       }
-      commitTxn(txnId, Ws);
+      if(!local) commitTxn(txnId, Ws);
     }
     setActiveDragItem(null);
   };

@@ -10,11 +10,11 @@ import {
   setSelectionValue
 } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
-import { onChangeHandler } from "../core/dynamicForm";
+import { FormContext, onChangeHandler } from "../core/dynamicForm";
 
 export function TagField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-
+  const { local } = useContext(FormContext);
 
   if(!props.meta.properties.props?.collection) {
     return "Collection Not Defined."
@@ -38,7 +38,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
             //   if(e.event) isChangedByUser = true;
             setSelectionValue(txnId, props.data, props.meta,  e.value);
               onChangeHandler(txnId, props.data,  props.meta);
-              commitTxn(txnId, Ws);
+              if(!local) commitTxn(txnId, Ws);
             // })
           },
           valueExpr: "id",

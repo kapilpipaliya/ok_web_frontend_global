@@ -8,6 +8,7 @@ import {
  restoreFromJson
 } from "../../lib/graph";
 import { GraphView } from "../GraphView";
+import { Link } from "solid-app-router";
 
 function fileDownloader(opt: {
  data: string | ArrayBuffer | ArrayBufferView | Blob,
@@ -139,7 +140,18 @@ export const BackupRestore = () => {
      </button>
     </div>
    </div>
+
+   <div class="w:24rem">
+    <div slot="header" title-text="Graph Functions"
+                     subtitle-text="Simple Import"></div>
+    <div class="m:1rem flex flex:wrap gap:0.5rem">
+     <Link href="/SimpleImport">Simple Import
+     </Link>
+    </div>
+   </div>
   </div>
+
+
   <Show when={load()}>
    <GraphView
     edges={Object.entries(graph.edges).map(([key, value]) => ({ ...value }))}

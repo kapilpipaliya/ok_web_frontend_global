@@ -1,4 +1,5 @@
 import {
+ createContext,
  createSignal,
  For,
  Match,
@@ -38,6 +39,8 @@ import { capitalizeFirstLetter } from "../utils";
 import { AbstractSingleForm } from "../Froms";
 import { GenericInputField } from "../input/GenaricInputField";
 
+export const FormContext = createContext({} as {[key: string]: any})
+
 //'setValue(component,null)'
 export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
  if(!changedFieldAttribute.properties.props?.onchange) return;
@@ -61,6 +64,7 @@ export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttri
  }
 }
 const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
+ const { local } = useContext(FormContext);
  const { Ws } = useContext(WsContext);
  const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
 
@@ -73,7 +77,7 @@ const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
  if (vertexes.error) {
   const txnId = getNewTxnId();
   newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
-  commitTxn(txnId, Ws);
+  if(!local) commitTxn(txnId, Ws);
  } else {
   newVertex = vertexes.vertexes![0];
  }
@@ -107,7 +111,7 @@ export const DynamicComponent = (props: { id: string, component: string, meta: V
   "SelectBoxField",
   "SliderField",
   "SwitchField",
-  // "TagBoxField",
+  // "TagBoxField", // giving error with undefined values
   "TextAreaField",
   "TextBoxField",
  ];
@@ -206,6 +210,7 @@ export interface DynamicFormSequenceProps {
  meta?: Vertex;
  form: FormMetaData;
  id?: Id;
+ config: {[key: string]: any}
 }
 
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
@@ -227,7 +232,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    alert(error);
    return;
   }
-  commitTxn(txnId, Ws);
+  if(!form.local) commitTxn(txnId, Ws);
   vertex = graph.vertexes[newVertexObj.id];
  } else {
   if (!graph.vertexes[props.id]) {
@@ -236,6 +241,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   }
   vertex = graph.vertexes[props.id];
  }
+
+ props.config['vertex'] = vertex;
 
  // focus first input
  const [divRef, setDivRef] = createSignal<HTMLFormElement>();
@@ -309,10 +316,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const txnId = getNewTxnId();
   mergeVertexProperties(txnId, vertex.id, { [attribute.properties.id]: data });
   onChangeHandler(txnId, vertex, attribute);
-  commitTxn(txnId, Ws);
+  if(!form.local) commitTxn(txnId, Ws);
  };
 
- return <div ref={setDivRef} class="form">
+ return <FormContext.Provider value={{local: form.local}}>
+  <div ref={setDivRef} class="form">
 
   {/* Main Tab is display as top level fields */}
   <Show when={groupByTabsAndGroup["main"]}>
@@ -364,5 +372,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     navigate(-1)
   }}>Back</button>
 
- </div>;
+ </div>
+ </FormContext.Provider>;
 };
