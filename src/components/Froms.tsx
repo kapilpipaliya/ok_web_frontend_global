@@ -7,7 +7,13 @@ import {
  useContext
 } from "solid-js";
 import { Link, useNavigate } from "solid-app-router";
-import { graph, revertTransaction } from "../lib/graph";
+import {
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ graph,
+ revertTransaction
+} from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import {
@@ -25,6 +31,9 @@ import {
 } from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData, Vertex } from "./input/Form";
 import { AttrsTableData } from "./api";
+import csvtojson from "csvtojson";
+import { addNewVertex, newVertex } from "../lib/Vertex";
+import { addNewEdge, newEdge } from "../lib/Edge";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -164,7 +173,7 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
   for(const vertexFormChildAttr of formChildAttrs) {
    const addPropsResult = addProps(vertexFormChildAttr);
    if (addPropsResult.error) continue;
-   attrs.push(addPropsResult.attr!);
+   tableAttrs.push(addPropsResult.attr!);
   }
   // @ts-ignore
   tableAttrs = tableAttrs.sort((a, b) => a.pos - b.pos);
@@ -185,7 +194,7 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
   childAttrs.push({
    attributes: tableAttrs,
    component: "TableField",
-   id: formChildColl.vertex!.properties.id,
+   id: vertexFormChild.properties.id || formChildColl.vertex!.properties.id,
    props: collChildProps
   });
  }
@@ -195,6 +204,7 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
    attributes: [...attrs, ...childAttrs],
    id: formColl.properties.id,
    title: form.properties.title,
+   local: form.properties.local,
    // collection used in Grid, its same like id key
    // @ts-ignore
    collection: formColl.properties.id
@@ -205,6 +215,7 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
 interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, "form" | "id"> {
  formId: string;
  id: string | number;
+ config?: { [key: string]: any };
 }
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
@@ -222,7 +233,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
  const id = createMemo(() => p.id === "new" ? undefined : parseInt(p.id as string));
  return <div class="flex flex:row flex:wrap">
   <DynamicFormSequence
-   form={form!} id={id()} {...customProps} />
+   form={form!} id={id()} {...customProps} config={props.config || {}} />
  </div>;
 };
 
@@ -267,6 +278,7 @@ export const Logout = (props: {}) => {
  onCleanup(() => Ws.unbind(event))
  return <>Logging out...</>
 }
+
 export const SignUp = (props: {}) => {
  const {setAlert} = useContext(AlertMessageContext);
  const {Ws} = useContext(WsContext);
@@ -288,11 +300,109 @@ export const SignUp = (props: {}) => {
  // 5. make password not visible
  return <AbstractSingleForm formId={"signup"} handleSubmit={(txnId, data) => {
   const formData = data.get("0");
-  if(formData) {
+  if (formData) {
    const email = formData.properties.email;
    const password = formData.properties.password;
-   Ws.trigger([[event, { body: { email, password } }]])
-   revertTransaction(txnId)
+   Ws.trigger([[event, { body: { email, password } }]]);
+   revertTransaction(txnId);
   }
- }}/>
+ }} />;
 }
+
+export const SimpleImport = (props: {}) => {
+ const { setAlert } = useContext(AlertMessageContext);
+ const navigate = useNavigate();
+ const { Ws } = useContext(WsContext);
+ const config = {} as { vertex: Vertex };
+
+ const onImportClick = () => {
+  const csvResult = config.vertex.properties.csv;
+  const label = config.vertex.properties.label;
+  const txnId = getNewTxnId();
+
+  const converter = csvtojson({
+   // noheader:true,
+   trim: true
+  });
+  converter.fromString(csvResult as string)
+   .on("data", (data) => {
+    //data is a buffer object
+    const jsonStr = data.toString("utf8");
+
+    addNewVertex(txnId, newVertex(getNewGraphId(), [label], JSON.parse(jsonStr)));
+    console.log(JSON.parse(jsonStr));
+   }).on("end", () => {
+   commitTxn(txnId, Ws);
+  });
+ };
+ const onComponentsImportClick = () => {
+  const csvResult = config.vertex.properties.csv;
+  const label = config.vertex.properties.label;
+  const converter = csvtojson({
+   // noheader:true,
+   trim: true
+  });
+  const txnId = getNewTxnId();
+
+  converter.fromString(csvResult as string)
+   .on("data", (data) => {
+    //data is a buffer object
+    const jsonStr = data.toString("utf8");
+
+    const json = JSON.parse(jsonStr);
+    const id = json.id;
+    const dataType = json.dataType;
+    const vertexCompId = getNewGraphId();
+    addNewVertex(txnId, newVertex(vertexCompId, ["Comp"], { id }));
+
+    const vertexDataType = (graph.vertexLabelIdMap["DataType"] || []).map(vertex => graph.vertexes[vertex]).find(vertex => vertex.properties.id === dataType);
+    if (vertexDataType) {
+     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), "DataTypeComp", {}, vertexDataType.id, vertexCompId));
+     if (insertEdgeResult.error) alert(insertEdgeResult.error);
+    }
+    console.log(JSON.parse(jsonStr));
+   }).on("end", () => {
+   commitTxn(txnId, Ws);
+  });
+ };
+ const onDataDirectoryImportClick = () => {
+  const csvResult = config.vertex.properties.csv;
+  const label = config.vertex.properties.label;
+  const converter = csvtojson({
+   // noheader:true,
+   trim: true
+  });
+  converter.fromString(csvResult as string)
+   .on("data", (data) => {
+    //data is a buffer object
+    const jsonStr = data.toString("utf8");
+    const txnId = getNewTxnId();
+    addNewVertex(txnId, newVertex(getNewGraphId(), [label], JSON.parse(jsonStr)));
+    commitTxn(txnId, Ws);
+    console.log(JSON.parse(jsonStr));
+   });
+ };
+
+ return <>
+  <AbstractSingleForm id={"new"} formId={"SimpleImport"} config={config} />
+  <div>
+   <span>Simple Import will add all properties in a vertex</span>
+   <button type={"button"} onClick={onImportClick}>Simple Import</button>
+  </div>
+  <div>
+   <span>Components Import will add id in the Comp vertex and add Component in a DataType</span>
+   <button type={"button"} onClick={onComponentsImportClick}>Components
+    Import
+   </button>
+  </div>
+  <div>
+   <span>Data Type Import will import all the Data Directory</span>
+   <button type={"button"} onClick={onDataDirectoryImportClick}>Data Directory
+    Import
+   </button>
+
+  </div>
+
+
+ </>;
+};

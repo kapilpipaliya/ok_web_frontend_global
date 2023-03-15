@@ -105,6 +105,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    }
   ]
  },
+ "AttrType": {
+  title: "Attribute", id: "Attr", attributes: [
+   { id: "id", component: "TextBoxField" },
+   { id: "description", component: "TextAreaField" },
+  ]
+ },
  "Attr": {
   title: "Attribute", id: "Attr", attributes: [
    { id: "id", component: "TextBoxField" },
@@ -124,6 +130,15 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     props: {
      displayExpr: "properties.id",
      collection: "->AttrDataType->DataTypeComp",
+    },
+   },
+   {
+    id: "attrType",
+    title: "Component",
+    component: "SelectBoxJoinField",
+    props: {
+     displayExpr: "properties.id",
+     collection: "AttrType",
     },
    },
    { id: "title", component: "TextBoxField" },
@@ -421,6 +436,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    { id: "title", component: "TextBoxField" },
    { id: "description", component: "TextAreaField" },
    { id: "table", component: "CheckBoxField" },
+   { id: "local", component: "CheckBoxField" },
    {
     id: "coll",
     title: "Collection",
@@ -680,6 +696,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    id: "Role",
    attributes: [
     { id: "id", component: "TextBoxField" },
+   ]
+  },
+ "SimpleImport":
+  {
+   title: "Simple Insert",
+   id: "SimpleImport",
+   local: true,
+   attributes: [
+    { id: "csv", component: "TextAreaField", props: {width: 600, height: 500} },
+    { id: "label", component: "TextBoxField" },
    ]
   },
 // TODO: Dynamic Filter on Grid: Role->Filter

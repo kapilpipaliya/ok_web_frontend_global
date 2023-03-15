@@ -6,7 +6,7 @@ import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../utils";
-import { onChangeHandler } from "../core/dynamicForm";
+import { FormContext, onChangeHandler } from "../core/dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 
@@ -422,6 +422,7 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  val
 
 export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
+  const { local } = useContext(FormContext);
 
   if(!props.meta.properties.props?.collection) {
     return "Collection Not Defined."
@@ -447,7 +448,7 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
              setSelectionValue(txnId, props.data, props.meta, e.value);
            }
            onChangeHandler(txnId, props.data, props.meta);
-              commitTxn(txnId, Ws);
+             if(!local) commitTxn(txnId, Ws);
             // })
           },
           valueExpr: "id",

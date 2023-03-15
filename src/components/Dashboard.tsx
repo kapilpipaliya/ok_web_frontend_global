@@ -20,7 +20,14 @@ import {
  transactions,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
-import { AbstractSingleForm, AllForms, Login, Logout, SignUp } from "./Froms";
+import {
+ AbstractSingleForm,
+ AllForms,
+ Login,
+ Logout,
+ SignUp,
+ SimpleImport
+} from "./Froms";
 import { WsContext } from "./ws_events_dispatcher";
 import {
  addNewVertex,
@@ -47,6 +54,7 @@ const navigation = [
   children: [
    { name: "Components", href: "/Comp" },
    { name: "DataTypes", href: "/DataType" },
+   { name: "Attribute Types", href: "/AttrType" },
    { name: "Attributes", href: "/Attr" },
    { name: "Collection Category", href: "/CollCategory" },
    { name: "Collections", href: "/Coll" },
@@ -137,6 +145,7 @@ export const DashboardView = () => {
       <Route path="/login" component={() => <Login />} />
       <Route path="/logout" component={() => <Logout />} />
       <Route path="/signup" component={() => <SignUp />} />
+      <Route path="/SimpleImport" component={() => <SimpleImport />} />
       <Route path="/**" component={() => <Page404 />} />
      </Routes>
     </Show>

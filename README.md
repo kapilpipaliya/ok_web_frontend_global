@@ -58,3 +58,7 @@ https://github.com/ttessarolo/safe-evaluate-expression
 - User don't need to open multiple tabs. he can do whatever he wants in one tab.
 
 https://js.devexpress.com/Documentation/Guide/UI_Components/Common/Advanced/3rd-Party_Frameworks_Integration_API/#Create_and_Configure_a_Widget
+
+### Import:
+- First Import all DataType Manually
+- 
