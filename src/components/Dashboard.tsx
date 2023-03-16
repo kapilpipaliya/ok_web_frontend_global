@@ -243,49 +243,6 @@ export const FullDashboard = () => {
  Ws.bind(["get", "sync", 0], setGraphData);
  return (
   <div>
-   <input type={"file"} accept=".csv" onChange={(e) => {
-    // Read files in JavaScript
-    // https://web.dev/read-files/
-    const filesList = (e.target as HTMLInputElement).files!;
-    const file = filesList[0];
-    if(!file) return;
-    // Not supported in Safari for iOS.
-    const name = file.name ? file.name : 'NOT SUPPORTED';
-    // Not supported in Firefox for Android or Opera for Android.
-    const type = file.type ? file.type : 'NOT SUPPORTED';
-    // Unknown cross-browser support.
-    const size = file.size ? file.size : 'NOT SUPPORTED';
-    console.log({file, name, type, size});
-
-    // Check if the file is a csv.
-    if (file.type && !file.type.startsWith('text/csv')) {
-     console.log('File is not a csv.', file.type);
-     alert('File is not a csv');
-     return;
-    }
-
-    const reader = new FileReader();
-    reader.addEventListener('load', (event) => {
-     const csvResult = event.target!.result;
-     console.log(csvResult);
-     const converter=csvtojson({
-      // noheader:true,
-      // trim:true,
-     })
-     converter.fromString(csvResult as string)
-    .on('data',(data)=>{
-      //data is a buffer object
-      const jsonStr= data.toString('utf8')
-     const txnId = getNewTxnId();
-      addNewVertex(txnId, newVertex(getNewGraphId(), ["DataType"], JSON.parse(jsonStr)));
-      commitTxn(txnId, Ws);
-      console.log(jsonStr)
-     })
-    });
-    reader.readAsText(file);
-
-
-   }}>Import</input>
    <div ref={el => {
     onMount(() => {
      const instance = new Drawer(el, {

@@ -706,6 +706,33 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
    attributes: [
     { id: "csv", component: "TextAreaField", props: {width: 600, height: 500} },
     { id: "label", component: "TextBoxField" },
+    { id: "dry", component: "CheckBoxField" },
+    {
+     id: "Meta",
+     component: "TableField",
+     attributes: [
+      { id: "column", component: "TextBoxField" },
+      { id: "attr", title:"Mapping Attribute", component: "SelectBoxField", props: {
+        displayExpr: "key",
+        collection: "Attr",
+       } },
+      // {
+      //  id: "column",
+      //  component: "SelectBoxField",
+      //  props: {
+      //   displayExpr: "key",
+      //   collection: "Update Dynamically on meta based on first row",
+      //  },
+      // },
+      { id: "attrId", title:"Attribute ID", component: "TextBoxField" },
+      { id: "coll", title:"Lookup Collection", component: "SelectBoxField", props: {
+        displayExpr: "key",
+        collection: "Coll",
+       } },
+      { id: "collLabel",title:"Lookup Label", component: "TextBoxField" },
+      { id: "collId", title:"Lookup Collection ID", component: "TextBoxField" },
+     ]
+    }
    ]
   },
 // TODO: Dynamic Filter on Grid: Role->Filter

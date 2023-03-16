@@ -242,7 +242,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   vertex = graph.vertexes[props.id];
  }
 
- props.config['vertex'] = vertex;
+
 
  // focus first input
  const [divRef, setDivRef] = createSignal<HTMLFormElement>();
@@ -253,9 +253,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
  const {attributes: _, ...custom} = props.form;
 
  // save attributes to vertexes
- let metaVertexId: Id;
+ let metaVertex: Vertex;
  if (props.meta) {
-  metaVertexId = props.meta.id;
+  metaVertex = props.meta;
  } else {
 
   const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
@@ -264,12 +264,15 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    alert(error);
    return;
   }
-  metaVertexId = metaMainVertex.id;
+  metaVertex = graph.vertexes[metaMainVertex.id];
  }
 
- const addMetaVertexes = (vertexId: Id, attributes: FieldAttribute[]) => {
+ props.config['vertex'] = vertex;
+ props.config['meta'] = metaVertex;
+
+ const addMetaVertexes = (vertex: Vertex, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
-   const addAttributeResult = newRow(getNewTxnId(), graph.vertexes[vertexId], "MetaAttr");
+   const addAttributeResult = newRow(getNewTxnId(), vertex, "MetaAttr");
    if (addAttributeResult.error) {
     alert(addAttributeResult.error);
    }
@@ -284,12 +287,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
    mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
 
    if (attribute.component === "TableField" && attribute.attributes) {
-    addMetaVertexes(addAttributeResult.vertexId!, attribute.attributes);
+    addMetaVertexes(graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
    }
    // todo discard transaction
   }
  };
- addMetaVertexes(metaVertexId, form.attributes);
+ addMetaVertexes(metaVertex, form.attributes);
 
  onCleanup(() => {
   if(!props.meta) {
@@ -297,7 +300,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   }
  })
 
- const mainAttributes = getChildVertexes(["MetaAttr"], [graph.vertexes[metaVertexId]]); //.sort((a, b) => a.properties.pos - b.properties.pos);
+ const mainAttributes = getChildVertexes(["MetaAttr"], [metaVertex]); //.sort((a, b) => a.properties.pos - b.properties.pos);
 
 
  const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item => item.properties.tab!)) as unknown as { [tab: string]: Vertex[] };
