@@ -33,7 +33,7 @@ import { FieldAttribute, FormMetaData, Vertex } from "./input/Form";
 import { AttrsTableData } from "./api";
 import csvtojson from "csvtojson";
 import { addNewVertex, newVertex } from "../lib/Vertex";
-import { addNewEdge, newEdge } from "../lib/Edge";
+import { A } from "@mobily/ts-belt";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -336,7 +336,8 @@ export const SimpleImport = (props: {}) => {
   });
  };
  const onComponentsImportClick = () => {
-  const csvResult = config.vertex.properties.csv;
+  // make this generic
+ /* const csvResult = config.vertex.properties.csv;
   const label = config.vertex.properties.label;
   const converter = csvtojson({
    // noheader:true,
@@ -363,24 +364,78 @@ export const SimpleImport = (props: {}) => {
     console.log(JSON.parse(jsonStr));
    }).on("end", () => {
    commitTxn(txnId, Ws);
-  });
+  });*/
  };
  const onDataDirectoryImportClick = () => {
   const csvResult = config.vertex.properties.csv;
   const label = config.vertex.properties.label;
+  const dry = config.vertex.properties.dry;
+  const txnId = getNewTxnId();
+  const firstLine = csvResult.split('\n', 1)[0];
   const converter = csvtojson({
    // noheader:true,
    trim: true
   });
+  const metaData = getChildVertexes(["$0Meta"], [config.vertex]);
+  if(metaData.error){
+   return;
+  }
+  const normalizeMeta = metaData.vertexes!.map(metaVertex => {
+   const column = metaVertex.properties.column;
+   let attrId: string;
+   // attribute may not exist before, in that case write ID
+   const attributeVertex = getChildVertex(['$0Attr'], metaVertex);
+   if(attributeVertex.error) {
+    attrId = metaVertex.properties.attrId
+   } else {
+    attrId = attributeVertex.vertex?.properties.id
+   }
+
+   let collLabel: string;
+   let collId = metaVertex.properties.collId || 'id';
+   // collection may not exist before, in that case write Label
+   const collVertex = getChildVertex(['$0Coll'], metaVertex);
+   if(attributeVertex.error) {
+    collLabel = metaVertex.properties.collLabel
+   } else {
+    collLabel = collVertex.vertex?.properties[collId]
+   }
+   return {
+    column,
+    attrId,
+    collLabel,
+    collId
+   }
+  });
+
+  const rows = [] as {[key: string]: any}[];
   converter.fromString(csvResult as string)
    .on("data", (data) => {
     //data is a buffer object
     const jsonStr = data.toString("utf8");
-    const txnId = getNewTxnId();
-    addNewVertex(txnId, newVertex(getNewGraphId(), [label], JSON.parse(jsonStr)));
-    commitTxn(txnId, Ws);
-    console.log(JSON.parse(jsonStr));
-   });
+    const json = JSON.parse(jsonStr);
+    // addNewVertex(txnId, newVertex(getNewGraphId(), [label], json));
+    rows.push(json);
+    console.log(JSON.parse(json));
+   }).on("end", () => {
+
+
+   const selectMetas = normalizeMeta.filter(meta => meta.collLabel);
+
+   selectMetas.forEach(meta =>  {
+    // get unique ID and insert if not exist.
+    const uniqueGroupBy = A.groupBy(rows, meta.column);
+    Object.keys(uniqueGroupBy).forEach((label) => {
+
+    })
+
+   })
+
+
+
+
+   if(!dry) commitTxn(txnId, Ws);
+  });
  };
 
  return <>
