@@ -1,4 +1,5 @@
 // import { Orb } from '@memgraph/orb';
+// import '@memgraph/orb/dist/browser/orb.min.js'
 
 import { createSignal, onCleanup } from "solid-js";
 
@@ -10,6 +11,9 @@ interface GraphViewProps {
 export const GraphView = (props: GraphViewProps) => {
   const [json, setJson] = createSignal({});
   const mount = (container: HTMLDivElement) => {
+
+    // TODO: Dynamically import library only when required.
+
     // const nodes = [
     //   { id: 1, label: "Orb" },
     //   { id: 2, label: "Graph" },
@@ -22,6 +26,7 @@ export const GraphView = (props: GraphViewProps) => {
 
     // First `Orb` is just a namespace of the JS package
 
+    // @ts-ignore
     const orb = new Orb.Orb(container);
 
     // Initialize nodes and edges
@@ -33,10 +38,12 @@ export const GraphView = (props: GraphViewProps) => {
       orb.view.recenter();
     });
 
+    // @ts-ignore
     orb.events.on(Orb.OrbEventType.NODE_CLICK, (event) => {
       console.log("Event: node-click", event);
       setJson({ ...event.node.data });
     });
+    // @ts-ignore
     orb.events.on(Orb.OrbEventType.EDGE_CLICK, (event) => {
       console.log("Event: edge-click", event);
       setJson({ ...event.edge.data });

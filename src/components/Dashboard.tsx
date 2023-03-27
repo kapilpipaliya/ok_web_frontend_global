@@ -12,8 +12,8 @@ import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import Page404 from "./page/404";
 import { BackupRestore } from "./core/BackupRestore";
 import {
- commitTransaction, commitTxn,
- edgeOldIdToNewIdMap, getNewGraphId, getNewTxnId,
+ commitTransaction,
+ edgeOldIdToNewIdMap,
  graph,
  ProcessStatus,
  setGraph,
@@ -38,11 +38,12 @@ import {
 import { addNewEdge, deleteEdge, newEdge, updateEdgeId } from "../lib/Edge";
 import { G } from "@mobily/ts-belt";
 // import { AlertMessageContext } from "../appState";
-import TreeView, {Properties as TreeViewProperties} from "devextreme/ui/tree_view";
+import TreeView, {
+ Properties as TreeViewProperties
+} from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
 import { Edge, Vertex } from "./input/Form";
-import csvtojson from 'csvtojson'
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -71,6 +72,7 @@ const navigation = [
   ]
  },
  { name: "Backup & Restore", href: "/backup_restore" },
+ { name: "Import", href: "/SimpleImport" },
  { name: "Forms", href: "/forms" },
  { name: "Grids", href: "/grids" }
 ] as TreeViewProperties['dataSource'];
@@ -135,7 +137,7 @@ export const DashboardView = () => {
       }} />
       <Route path="/:entity/:id" component={() => {
        const params = useParams();
-       return <AbstractSingleForm formId={params.entity} id={params.id}/>
+       return <AbstractSingleForm formId={params.entity} id={params.id} config={{}}/>
       }} />
       <Route path="/backup_restore" component={() => <BackupRestore />} />
       {/* Deprecated */}

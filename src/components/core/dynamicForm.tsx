@@ -33,9 +33,8 @@ import { newRow, TableInputField } from "../input/TableInputField";
 import { TagField } from "../input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
-import { CollectionOptionField } from "../input/CollectionOption";
 import { useNavigate } from "solid-app-router";
-import { capitalizeFirstLetter } from "../utils";
+import { capitalizeFirstLetter } from "../../utils/utils";
 import { AbstractSingleForm } from "../Froms";
 import { GenericInputField } from "../input/GenaricInputField";
 
@@ -83,6 +82,7 @@ const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
  }
 
  return <AbstractSingleForm
+  config={{}}
   meta={newMeta}
   formId={props.formId}
   id={newVertex.id}
@@ -91,7 +91,6 @@ const FormComponent = (props: {meta: Vertex, data: Vertex, formId: string}) => {
 export const DynamicComponent = (props: { id: string, component: string, meta: Vertex, data: Vertex, setValue(attribute: Vertex, data: any): void }) => {
  const genericComponents = [
   "AutocompleteField",
-  "BarGaugeField",
   "BulletField",
   "CalendarField",
   "CheckBoxField",
@@ -116,14 +115,15 @@ export const DynamicComponent = (props: { id: string, component: string, meta: V
   "TextBoxField",
  ];
  return <Switch>
-  <Match when={props.component === "SelectBoxJoinField"}>
+  <Match when={props.component === "SelectBoxField"}>
    <SelectInputField
     aria-labeledby={props.id}
     data={props.data}
     meta={props.meta}
+    setValue={props.setValue}
    />
   </Match>
-  <Match when={props.component === "TagBoxJoinField"}>
+  <Match when={props.component === "TagBoxField"}>
    <TagField
     aria-labeledby={props.id}
     data={props.data}
@@ -134,14 +134,6 @@ export const DynamicComponent = (props: { id: string, component: string, meta: V
    <TableInputField
     meta={props.meta}
     data={props.data}
-   />
-  </Match>
-  <Match when={props.component === "CollectionOptionField"}>
-   <CollectionOptionField
-    aria-labeledby={props.id}
-    meta={props.meta}
-    data={props.data}
-    setValue={props.setValue}
    />
   </Match>
   <Match when={props.component.startsWith("Form")}>

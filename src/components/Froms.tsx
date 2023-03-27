@@ -7,13 +7,7 @@ import {
  useContext
 } from "solid-js";
 import { Link, useNavigate } from "solid-app-router";
-import {
- commitTxn,
- getNewGraphId,
- getNewTxnId,
- graph,
- revertTransaction
-} from "../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import {
@@ -27,13 +21,22 @@ import {
  getChildVertex,
  getChildVertexes,
  getOptionLabel,
- getParentVertex
+ getParentVertex,
+ SelectInputField,
+ setParentValue,
+ setSelectionValue
 } from "./input/SelectInputField";
 import { FieldAttribute, FormMetaData, Vertex } from "./input/Form";
 import { AttrsTableData } from "./api";
 import csvtojson from "csvtojson";
-import { addNewVertex, newVertex } from "../lib/Vertex";
-import { A } from "@mobily/ts-belt";
+import {
+ addNewVertex,
+ findVertexByLabelAndUniqueId,
+ newVertex,
+ replaceVertexProperties
+} from "../lib/Vertex";
+import { A, D } from "@mobily/ts-belt";
+import { newRow } from "./input/TableInputField";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -215,11 +218,10 @@ export const getFormApiFromForm = (formId: string): { error: string, form?: Form
 interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, "form" | "id"> {
  formId: string;
  id: string | number;
- config?: { [key: string]: any };
 }
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
-
+ // TODO: add validation on form that AttrsTableData keys should not available.
  let form = AttrsTableData[props.formId];
 
  if (!form) {
@@ -239,26 +241,38 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
 export const Login = (props: {}) => {
  const {setAlert} = useContext(AlertMessageContext);
- const {Ws} = useContext(WsContext);
+ const { Ws } = useContext(WsContext);
  const navigate = useNavigate();
  const event = ["post", "login", 0] as WSEvent;
- Ws.bind(event, (data)=>{
-  if(data.error){
-   setAlert(prev => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}])
+ Ws.bind(event, (data) => {
+  if (data.error) {
+   setAlert(prev => [...prev, {
+    id: createUniqueId(),
+    state: Alert.Error,
+    message: data.error
+   }]);
   } else {
-   navigate('/');
+   navigate("/");
   }
- })
- onCleanup(() => Ws.unbind(event))
- return <AbstractSingleForm formId={"login"} handleSubmit={(txnId, data) => {
-  const formData = data.get("0");
-  if(formData) {
-   const email = formData.properties.email;
-   const password = formData.properties.password;
-   Ws.trigger([[event, {body: { email, password } }]])
-   revertTransaction(txnId)
-  }
- }}/>
+ });
+ onCleanup(() => Ws.unbind(event));
+
+ const config = {} as { vertex: Vertex };
+ const onLoginClick = () => {
+  const email = config.vertex.properties.email as string;
+  const password = config.vertex.properties.password as string;
+  Ws.trigger([[event, { body: { email, password } }]]);
+  // revertTransaction(txnId)
+ };
+
+ return <><AbstractSingleForm
+  formId={"login"}
+  id="new"
+  config={config}
+  // TODO: add dry option
+ />
+  <button type="button" onClick={onLoginClick}>Login</button>
+ </>;
 }
 export const Logout = (props: {}) => {
  const {setAlert} = useContext(AlertMessageContext);
@@ -288,30 +302,40 @@ export const SignUp = (props: {}) => {
   if(data.error){
    setAlert(prev => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}])
   } else {
-   navigate('/');
+   navigate("/");
   }
  })
- onCleanup(() => Ws.unbind(event))
+ onCleanup(() => Ws.unbind(event));
  // TODO:
  // 1. Save button text
  // 2. disable save button when submitting
  // 3. validations
  // 4. clear form on success
  // 5. make password not visible
- return <AbstractSingleForm formId={"signup"} handleSubmit={(txnId, data) => {
-  const formData = data.get("0");
-  if (formData) {
-   const email = formData.properties.email;
-   const password = formData.properties.password;
-   Ws.trigger([[event, { body: { email, password } }]]);
-   revertTransaction(txnId);
-  }
- }} />;
+
+
+ const config = {} as { vertex: Vertex };
+ const onSignupClick = () => {
+  const email = config.vertex.properties.email as string;
+  const password = config.vertex.properties.password as string;
+  Ws.trigger([[event, { body: { email, password } }]]);
+  // revertTransaction(txnId);
+ };
+
+ return <>
+  <AbstractSingleForm
+   formId={"signup"}
+   id="new"
+   config={config}
+   // TODO: add dry option
+  />
+  <button type="button" onClick={onSignupClick}>Login</button>
+ </>;
 }
 
 export const SimpleImport = (props: {}) => {
- const { setAlert } = useContext(AlertMessageContext);
- const navigate = useNavigate();
+ // const { setAlert } = useContext(AlertMessageContext);
+ // const navigate = useNavigate();
  const { Ws } = useContext(WsContext);
  const config = {} as { vertex: Vertex };
 
@@ -335,80 +359,173 @@ export const SimpleImport = (props: {}) => {
    commitTxn(txnId, Ws);
   });
  };
- const onComponentsImportClick = () => {
-  // make this generic
- /* const csvResult = config.vertex.properties.csv;
-  const label = config.vertex.properties.label;
-  const converter = csvtojson({
-   // noheader:true,
-   trim: true
-  });
-  const txnId = getNewTxnId();
 
-  converter.fromString(csvResult as string)
-   .on("data", (data) => {
-    //data is a buffer object
-    const jsonStr = data.toString("utf8");
+ interface Column {
+  column: string;
+  attrId: string;
+  collLabel: string;
+  collId: string;
+  inward: boolean;
+  func: string;
+  edge: string;
+  skip: boolean;
+ }
 
-    const json = JSON.parse(jsonStr);
-    const id = json.id;
-    const dataType = json.dataType;
-    const vertexCompId = getNewGraphId();
-    addNewVertex(txnId, newVertex(vertexCompId, ["Comp"], { id }));
-
-    const vertexDataType = (graph.vertexLabelIdMap["DataType"] || []).map(vertex => graph.vertexes[vertex]).find(vertex => vertex.properties.id === dataType);
-    if (vertexDataType) {
-     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), "DataTypeComp", {}, vertexDataType.id, vertexCompId));
-     if (insertEdgeResult.error) alert(insertEdgeResult.error);
+ const resoDataTypeToComponents = (type: string, row: { [key: string]: any }) => {
+  switch (type) {
+   case "Boolean":
+    return "CheckBoxField";
+   case "Collection":
+    return "";
+   case "Date":
+    return "DateBoxField";
+   case "Number": {
+    if (row.SugMaxPrecision) {
+     return "IntField";
+    } else {
+     return "FloatField";
     }
-    console.log(JSON.parse(jsonStr));
-   }).on("end", () => {
-   commitTxn(txnId, Ws);
-  });*/
+   }
+   case "Resource":
+    return "SelectBoxField";
+   case "String":
+    return "TexBoxField";
+   case "String List, Multi":
+    return "TagBoxField";
+   case "String List, Single":
+    return "SelectBoxField";
+   case "Timestamp":
+    return "DateTimeBoxField";
+   default:
+    return "";
+  }
  };
+
  const onDataDirectoryImportClick = () => {
-  const csvResult = config.vertex.properties.csv;
-  const label = config.vertex.properties.label;
-  const dry = config.vertex.properties.dry;
+  const csvResult = config.vertex.properties.csv as string;
+  const label = config.vertex.properties.label as string;
+  const dry = config.vertex.properties.dry as boolean;
+  const lookup = config.vertex.properties.lookup as string;
+  const lookupId = config.vertex.properties.lookupId as string;
+
   const txnId = getNewTxnId();
-  const firstLine = csvResult.split('\n', 1)[0];
+  // const firstLine = csvResult.split("\n", 1)[0];
+
   const converter = csvtojson({
-   // noheader:true,
    trim: true
   });
+
   const metaData = getChildVertexes(["$0Meta"], [config.vertex]);
-  if(metaData.error){
+  if (metaData.error) {
    return;
   }
   const normalizeMeta = metaData.vertexes!.map(metaVertex => {
-   const column = metaVertex.properties.column;
-   let attrId: string;
+   const column = metaVertex.properties.column as string;
    // attribute may not exist before, in that case write ID
-   const attributeVertex = getChildVertex(['$0Attr'], metaVertex);
-   if(attributeVertex.error) {
-    attrId = metaVertex.properties.attrId
-   } else {
-    attrId = attributeVertex.vertex?.properties.id
+   let attrId = metaVertex.properties.attrId;
+   if (!attrId) {
+    const attributeVertex = getChildVertex(["$0Attr"], metaVertex);
+    if (!attributeVertex.error) {
+     attrId = attributeVertex.vertex?.properties.id;
+    }
    }
 
-   let collLabel: string;
-   let collId = metaVertex.properties.collId || 'id';
+   let collId = metaVertex.properties.collId || "id";
+
    // collection may not exist before, in that case write Label
-   const collVertex = getChildVertex(['$0Coll'], metaVertex);
-   if(attributeVertex.error) {
-    collLabel = metaVertex.properties.collLabel
-   } else {
-    collLabel = collVertex.vertex?.properties[collId]
+   let collLabel = metaVertex.properties.collLabel;
+   const collVertex = getChildVertex(["$0Coll"], metaVertex);
+   if (!collVertex.error) {
+    collLabel = collVertex.vertex?.properties[collId];
    }
    return {
     column,
     attrId,
     collLabel,
-    collId
-   }
+    collId,
+    inward: metaVertex.properties.inward,
+    func: metaVertex.properties.func,
+    edge: metaVertex.properties.edge,
+    skip: metaVertex.properties.skip
+   } as Column;
   });
 
-  const rows = [] as {[key: string]: any}[];
+  const processRows = (rowData: { [key: string]: any }[], labelName: string) => {
+   const selectMetas = normalizeMeta.filter(meta => meta.collLabel);
+   const nonSelectMetas = normalizeMeta.filter(meta => !meta.collLabel);
+   const selectColumnIds = selectMetas.map(meta => meta.column);
+   selectMetas.forEach(meta => {
+    if (meta.skip) return;
+    // get unique ID and insert if not exist.
+    const uniqueValues = A.groupBy(rowData, (row) => row[meta.column]);
+    Object.keys(uniqueValues).forEach((value) => {
+     if (!value) return;
+     // find and if not exist then only add new vertex
+     const existingVertex = (graph.vertexLabelIdMap[meta.collLabel] || []).map(vertexId => graph.vertexes[vertexId]).find(vertex => vertex.properties[meta.collId] === value);
+     if (!existingVertex) {
+      addNewVertex(txnId, newVertex(getNewGraphId(), [meta.collLabel], { [meta.collId]: value }));
+     }
+    });
+   });
+
+
+   rowData.forEach(row => {
+    const selectColumnValues = D.selectKeys(row, selectColumnIds);
+    // remove lookup value
+    const rowObj = D.deleteKeys(row, selectColumnIds);
+    // rename object mapping.
+    for (const meta of nonSelectMetas) {
+     if (meta.skip) {
+      // @ts-ignore
+      rowObj[meta.column] = undefined;
+     }
+     if (!meta.attrId) continue;
+     // @ts-ignore
+     const m = rowObj[meta.column];
+     if (m === undefined) continue;
+     // @ts-ignore
+     delete rowObj[meta.column];
+     // @ts-ignore
+     rowObj[meta.attrId] = m;
+    }
+
+    // insert current row and all lookup as children
+    const vertexId = getNewGraphId();
+    addNewVertex(txnId, newVertex(vertexId, [labelName], rowObj));
+
+    for (const selectMeta of selectMetas) {
+     const value = selectColumnValues[selectMeta.column];
+     if (!value) continue;
+     const vertex = graph.vertexes[vertexId];
+
+     const v = () => findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
+     if (selectMeta.func) {
+      if (selectMeta.func === "dataType") {
+       const component = findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, resoDataTypeToComponents(value, row));
+       if (component) {
+        setSelectionValue(txnId, vertex, { properties: { id: selectMeta.collLabel } } as unknown as Vertex, component.id);
+       }
+      } else if (selectMeta.func === "lookup") {
+       const lookup = findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
+       if (lookup) {
+        // edge and child vertex has same label
+        const lookupChild = newRow(txnId, graph.vertexes[vertexId], selectMeta.collLabel);
+        const rowVertex = graph.vertexes[lookupChild.vertexId!];
+        setSelectionValue(txnId, rowVertex, { properties: { id: selectMeta.collLabel } } as unknown as Vertex, lookup.id);
+       }
+      }
+     } else if (selectMeta.inward) {
+      setParentValue(txnId, vertex, { properties: { id: selectMeta.edge || selectMeta.collLabel } } as unknown as Vertex, v()!.id);
+     } else {
+      setSelectionValue(txnId, vertex, { properties: { id: selectMeta.edge || selectMeta.collLabel } } as unknown as Vertex, v()!.id);
+     }
+
+    }
+   });
+  };
+
+  const rows = [] as { [key: string]: any }[];
+
   converter.fromString(csvResult as string)
    .on("data", (data) => {
     //data is a buffer object
@@ -416,39 +533,139 @@ export const SimpleImport = (props: {}) => {
     const json = JSON.parse(jsonStr);
     // addNewVertex(txnId, newVertex(getNewGraphId(), [label], json));
     rows.push(json);
-    console.log(JSON.parse(json));
    }).on("end", () => {
 
-
-   const selectMetas = normalizeMeta.filter(meta => meta.collLabel);
-
-   selectMetas.forEach(meta =>  {
+   if (lookup && lookupId) {
     // get unique ID and insert if not exist.
-    const uniqueGroupBy = A.groupBy(rows, meta.column);
-    Object.keys(uniqueGroupBy).forEach((label) => {
+    const uniqueValues = A.groupBy(rows, (row) => row[lookup]);
+    Object.keys(uniqueValues).forEach((value) => {
+     if (!value) {
+      console.warn("skipped inserting empty lookups");
+      return;
+     }
+     // find and if not exist then only add new vertex
+     const existingVertex = (graph.vertexLabelIdMap[label] || []).map(vertexId => graph.vertexes[vertexId]).find(vertex => vertex.properties[lookupId] === value);
+     if (!existingVertex) {
+      addNewVertex(txnId, newVertex(getNewGraphId(), [label], { [lookupId]: value }));
+     }
 
-    })
-
-   })
-
-
+     const rows = uniqueValues[value]!;
+     // when lookup we enter one collection and all other data as its child data
+     // @ts-ignore
+     processRows(rows, value);
+    });
+   } else {
+    processRows(rows, label);
+   }
 
 
    if(!dry) commitTxn(txnId, Ws);
+   alert("finished import");
   });
  };
 
  return <>
+  <SelectInputField
+   data={{ properties: {} } as Vertex}
+   meta={{
+    properties: {
+     id: "import",
+     props: {
+      stringValue: true,
+      displayExpr: "id",
+      collection: "[{\"id\": \"dataType\"},{\"id\": \"component\"},{\"id\": \"lookup\"},{\"id\": \"attribute\"}]"
+     }
+    }
+   } as unknown as Vertex}
+   setValue={(attr, data) => {
+    const txnId = getNewTxnId();
+    const dry = true;
+    switch (data) {
+     case "component": {
+      replaceVertexProperties(txnId, config.vertex.id, { label: "Comp", dry });
+      const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      // to store parent components.
+      replaceVertexProperties(txnId, newMeta1.vertexId!, {
+       column: "parent",
+       collLabel: "Comp",
+       collId: "id",
+       edge: "Child",
+       inward: true
+      });
+      const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      // to store parent components.
+      replaceVertexProperties(txnId, newMeta2.vertexId!, {
+       column: "dataType",
+       collLabel: "DataType",
+       collId: "id",
+       inward: true
+      });
+      break;
+     }
+     case "dataType": {
+      replaceVertexProperties(txnId, config.vertex.id, {
+       label: "DataType",
+       dry
+      });
+      break;
+     }
+     case "lookup": {
+      replaceVertexProperties(txnId, config.vertex.id, {
+       label: "Coll",
+       lookup: "LookupName",
+       lookupId: "id",
+       dry
+      });
+      const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta1.vertexId!, {
+       column: "StandardLookupValue",
+       attrId: "id"
+      });
+      const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta2.vertexId!, {
+       column: "Definition",
+       attrId: "description"
+      });
+      break;
+     }
+     case "attribute": {
+      replaceVertexProperties(txnId, config.vertex.id, { label: "Attr", dry });
+      const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta1.vertexId!, {
+       column: "StandardName",
+       attrId: "id"
+      });
+      const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta2.vertexId!, {
+       column: "DisplayName",
+       attrId: "title"
+      });
+      const newMeta3 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta3.vertexId!, {
+       column: "Definition",
+       attrId: "description"
+      });
+      const newMeta4 = newRow(txnId, config.vertex, "SimpleImportMeta");
+      replaceVertexProperties(txnId, newMeta4.vertexId!, {
+       column: "SimpleDataType",
+       collLabel: "DataType",
+       collId: "id",
+       func: "dataType"
+      });
+      break;
+     }
+     default: {
+     }
+    }
+
+   }
+   } />
   <AbstractSingleForm id={"new"} formId={"SimpleImport"} config={config} />
   <div>
    <span>Simple Import will add all properties in a vertex</span>
    <button type={"button"} onClick={onImportClick}>Simple Import</button>
   </div>
   <div>
-   <span>Components Import will add id in the Comp vertex and add Component in a DataType</span>
-   <button type={"button"} onClick={onComponentsImportClick}>Components
-    Import
-   </button>
   </div>
   <div>
    <span>Data Type Import will import all the Data Directory</span>
