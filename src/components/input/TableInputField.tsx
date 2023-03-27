@@ -34,7 +34,7 @@ import {
   mergeVertexProperties,
   newVertex
 } from "../../lib/Vertex";
-import { capitalizeFirstLetter } from "../utils";
+import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
@@ -44,8 +44,8 @@ import { DynamicComponent, FormContext } from "../core/dynamicForm";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
-export function newRow(txnId: number, parentVertex: Vertex, type: string, label?: string) {
-  const vertexNew = newVertex(getNewGraphId(), [label || type], {});
+export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, label?: string) {
+  const vertexNew = newVertex(getNewGraphId(), [label || edgeType], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
     alert(insertVertex.error);
@@ -54,7 +54,7 @@ export function newRow(txnId: number, parentVertex: Vertex, type: string, label?
     };
   }
 
-  const edgeNew = newEdge(getNewGraphId(), type, {}, parentVertex.id, vertexNew.id);
+  const edgeNew = newEdge(getNewGraphId(), edgeType, {}, parentVertex.id, vertexNew.id);
   const insertEdgeResult = addNewEdge(txnId, edgeNew);
   if (insertEdgeResult.error) {
     alert(insertEdgeResult.error);

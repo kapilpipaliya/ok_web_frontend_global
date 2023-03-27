@@ -14,7 +14,9 @@ import { commitTransaction, graph } from "../lib/graph";
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
+// @ts-ignore
 const domain = window.location.hostname;
+// @ts-ignore
 let port = '';
 if(window.location.hostname == 'localhost'){
  port = ':1101';

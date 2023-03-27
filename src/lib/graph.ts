@@ -37,6 +37,7 @@ export enum ProcessStatus {
 }
 export type TransactionValue = InsertFn & Revert;
 export const transactions = new Map<number, {status: ProcessStatus, steps: TransactionValue[]}>();
+// @ts-ignore
 window.t = transactions;
 export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
  if(!txnId) return;
@@ -125,11 +126,11 @@ export function getNewGraphId(): Id {
 
 export function resetDatabase() {
   setGraph(reconcile({
-   _isPartialSynced: false,
+   _isPartialSynced: true,
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    initialSynced: false,
+    initialSynced: true,
    lastSyncedTime: 0
   }));
 }
@@ -137,6 +138,7 @@ export function resetDatabase() {
 export function isValidId(startVertexId: Id) {
   return G.isNumber(startVertexId);
 }
+// @ts-ignore
 window.graph = graph;
 /*
 // ***********

@@ -11,7 +11,7 @@ export class WSBase {
  private isOnline = window.navigator.onLine;
  private onOpen_: (() => void) | undefined;
  private onClose_: (() => void) | undefined;
- private onMessage_: (message: MessageEvent) => void;
+ private onMessage_: ((message: MessageEvent) => void) | undefined;
 
  constructor(path: string) {
   this.path = path;
@@ -49,6 +49,10 @@ export class WSBase {
 
  setupConnection() {
   if (this.socket) {
+   return;
+  }
+  if (!this.onMessage_) {
+   console.warn('please setup onMessage handler');
    return;
   }
   this.socket = new WebSocket(this.path, []);

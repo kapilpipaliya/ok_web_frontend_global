@@ -1,24 +1,24 @@
-import { createEffect, createResource, useContext } from "solid-js";
+import { createEffect, createResource, untrack, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import { ComponentProps, Vertex } from "./Form";
 import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { capitalizeFirstLetter } from "../utils";
+import { capitalizeFirstLetter } from "../../utils/utils";
 import { FormContext, onChangeHandler } from "../core/dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 
 export function getSelectedVertexValue(vertex: Vertex, meta: Vertex){
   const attributeId = meta.properties.id
-  const type = (meta.properties.props.label || vertex.labels[0]) + capitalizeFirstLetter(attributeId);
+  const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(attributeId);
   return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
 }
 
 export function getParentVertexValue(vertex: Vertex, meta: Vertex){
   const attributeId = meta.properties.id
-  const type = capitalizeFirstLetter(attributeId) + (meta.properties.props.label || vertex.labels[0]);
+  const type = capitalizeFirstLetter(attributeId) + (meta.properties.props?.label || vertex.labels[0]);
   return (vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start);
 }
 // "(dataType)->[DataTypeComponent]"
@@ -221,7 +221,10 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
   // JSON.parse options:
   if (collection.startsWith("[")) {
     try {
-      return JSON.parse(collection);
+      return {
+        error: true,
+        vertexes: JSON.parse(collection)
+      }
     } catch (e) {
       console.warn(e);
       return {
@@ -365,7 +368,7 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
   // delete removed edges:
-  const type = (meta.properties.props.label || vertex.labels[0]) + capitalizeFirstLetter(meta.properties.id);
+  const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(meta.properties.id);
   const previousEdges = vertex.out_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -394,7 +397,7 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex,  
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
   // delete removed edges:
-  const type = capitalizeFirstLetter(meta.properties.id) + (meta.properties.props.label || vertex.labels[0]);
+  const type = capitalizeFirstLetter(meta.properties.id) + (meta.properties.props?.label || vertex.labels[0]);
   const previousEdges = vertex.in_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -420,7 +423,7 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  val
   }
 }
 
-export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
+export function SelectInputField(props: ComponentProps) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
 
@@ -434,7 +437,16 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
   return (
    <div aria-labeledby={props["aria-labeledby"]}>
      <div ref={el => {
-       const selectedValue = () => props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta) : getSelectedVertexValue(props.data, props.meta);
+       const selectedValue = () => {
+         if(props.meta.properties.props.stringValue) {
+           // this is causing maximum call stack error when selecting an option
+           return untrack(() => {
+             const value =  props.data.properties[props.meta.properties.id];
+             return Array.isArray(value) ? value : [value];
+           })
+         }
+         return props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta) : getSelectedVertexValue(props.data, props.meta);
+       };
        const instance = new SelectBox(el, {
          searchEnabled: true,
          // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
@@ -442,7 +454,10 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
          onValueChanged: function(e) {
            // batch(() => {
            const txnId = getNewTxnId();
-           if(props.meta.properties.props.inward) {
+           if(props.meta.properties.props.stringValue) {
+
+             props.setValue(props.meta, e.value);
+           } else if(props.meta.properties.props.inward) {
              setParentValue(txnId, props.data, props.meta, e.value);
            } else {
              setSelectionValue(txnId, props.data, props.meta, e.value);
@@ -468,8 +483,9 @@ export function SelectInputField(props: Omit<ComponentProps, "setValue">) {
          instance.option("value", selectedValue()[0]);
        });
         createEffect(() => {
-          if(selectOptions()) {
-            instance.option('dataSource', selectOptions());
+          const options = selectOptions();
+          if(options) {
+            instance.option('dataSource', options);
           }
         })
       }} />

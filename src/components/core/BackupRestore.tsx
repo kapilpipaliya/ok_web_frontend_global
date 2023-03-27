@@ -154,8 +154,8 @@ export const BackupRestore = () => {
 
   <Show when={load()}>
    <GraphView
-    edges={Object.entries(graph.edges).map(([key, value]) => ({ ...value }))}
-    nodes={Object.entries(graph.vertexes).map(([key, value]) => ({
+    edges={Object.entries(graph.edges).filter(([_, edge]) => edge.type !== "MetaAttr").map(([key, value]) => ({ ...value }))}
+    nodes={Object.entries(graph.vertexes).filter(([_, vertex]) => vertex.labels[0] !== "MetaAttr").map(([key, value]) => ({
      ...value,
      label: value.labels[0]
     }))} />

@@ -93,3 +93,6 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
 export function findVertexIdsByLabel(label: string): Id[] {
  return graph.vertexLabelIdMap[label] || [];
 }
+export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: any) {
+ return graph.vertexLabelIdMap[label].map(v => graph.vertexes[v]).find(v => value === v.properties[attribute])
+}
