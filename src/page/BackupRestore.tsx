@@ -6,8 +6,8 @@ import {
  resetDatabase,
  restoreFromIndexDB,
  restoreFromJson
-} from "../../lib/graph";
-import { GraphView } from "../GraphView";
+} from "../lib/graph";
+import { GraphView } from "../components/GraphView";
 import { Link } from "solid-app-router";
 
 function fileDownloader(opt: {
