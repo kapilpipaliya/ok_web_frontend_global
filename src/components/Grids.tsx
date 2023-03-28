@@ -26,7 +26,7 @@ import { G } from "@mobily/ts-belt";
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
-import { FormMetaData, getFormApiFromForm } from "./Froms";
+import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
 
 export const SampleDataGrid = (props: {}) => {
