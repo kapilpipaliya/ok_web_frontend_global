@@ -1,8 +1,14 @@
-import { Id, Vertex } from "../components/input/Form";
+
 import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile } from "solid-js/store";
-import { graph, setGraph, transactionDetailAdd, transactions } from "./graph";
+import {
+ graph, Id,
+ setGraph,
+ transactionDetailAdd,
+ transactions,
+ Vertex
+} from "./graph";
 import { G, pipe } from "@mobily/ts-belt";
 
 // return a new Vertex

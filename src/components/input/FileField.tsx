@@ -1,6 +1,6 @@
 /**
  *
- * \todo Implement drag and drop from: Svelte-File-Upload-Component
+ * \todo Implement drag and drop from: Svelte-FileField-Upload-Component
  * https://github.com/vipero07/svelte-file-upload-component
  */
 import { createSignal, JSX, splitProps } from "solid-js";
@@ -20,7 +20,7 @@ interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "on
   help?: string;
 }
 
-export const File = (props: Properties) => {
+export const FileField = (props: Properties) => {
   const [p, customProps] = splitProps(props, ["label", "prefix", "help", "error", "onchange"]);
 
   // using XMLHttpRequest because fetch can't track upload process yet
@@ -33,7 +33,7 @@ export const File = (props: Properties) => {
   const [percentageText, setPercentageText] = createSignal("");
   const [progressBar, setProgressBar] = createStore({ max: 100, value: 0 });
 
-  // File uploading method
+  // FileField uploading method
   function UploadFile() {
     function uploadFile(evt: ProgressEvent<EventTarget>) {
       if (xhr.responseText) {
@@ -79,13 +79,13 @@ export const File = (props: Properties) => {
       const url = "/api/upload";
 
       const form = new FormData(); // FormData object
-      form.append("file", fileObj); // File object
+      form.append("file", fileObj); // FileField object
 
       xhr = new XMLHttpRequest(); // XMLHttpRequest object
       xhr.open("post", url, true); // post
       xhr.onload = uploadFile;
       xhr.onerror = () => {
-        setState("error", "File Cant Loaded by the browser");
+        setState("error", "FileField Cant Loaded by the browser");
       };
 
       xhr.upload.onprogress = progressFunction;

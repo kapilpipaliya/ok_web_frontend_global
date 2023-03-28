@@ -1,8 +1,14 @@
 import { createEffect, createResource, untrack, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { ComponentProps, Vertex } from "./Form";
-import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
+import { ComponentProps } from "./Type";
+import {
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ graph,
+ Vertex
+} from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../../utils/utils";

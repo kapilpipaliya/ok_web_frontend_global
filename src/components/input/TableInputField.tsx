@@ -26,7 +26,7 @@ import {
   getOptionLabel,
   getSelectionOptions
 } from "./SelectInputField";
-import { ComponentProps, Vertex } from "./Form";
+import { ComponentProps } from "./Type";
 import { toTitle } from "case-switcher-js";
 import {
   addNewVertex,
@@ -36,7 +36,13 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
+import {
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ graph,
+ Vertex
+} from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";

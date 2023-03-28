@@ -1,7 +1,7 @@
 import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "./Type";
 import { commitTxn, getNewTxnId } from "../../lib/graph";
 import {
   getOptionLabel,

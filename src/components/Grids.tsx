@@ -4,12 +4,11 @@ import DataSource from "devextreme/data/data_source";
 import {
  commitTransaction,
  getNewTxnId,
- graph,
+ graph, Id,
  ProcessStatus,
  setGraph,
  transactions
 } from "../lib/graph";
-import { FormMetaData, Id } from "./input/Form";
 import {
  createEffect,
  createSignal,
@@ -27,7 +26,7 @@ import { G } from "@mobily/ts-belt";
 import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
-import { getFormApiFromForm } from "./Froms";
+import { FormMetaData, getFormApiFromForm } from "./Froms";
 import { AttrsTableData } from "./api";
 
 export const SampleDataGrid = (props: {}) => {
