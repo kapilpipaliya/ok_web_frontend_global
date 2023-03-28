@@ -10,7 +10,7 @@ import {
   setSelectionValue
 } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
-import { FormContext, onChangeHandler } from "../core/dynamicForm";
+import { FormContext, onChangeHandler } from "../dynamicForm";
 
 export function TagField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);

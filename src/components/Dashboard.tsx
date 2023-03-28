@@ -9,8 +9,8 @@ import {
  useContext
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
-import Page404 from "./page/404";
-import { BackupRestore } from "./page/BackupRestore";
+import Page404 from "../page/404";
+import { BackupRestore } from "../page/BackupRestore";
 import {
  commitTransaction, Edge,
  edgeOldIdToNewIdMap,

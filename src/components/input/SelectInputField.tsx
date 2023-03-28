@@ -12,7 +12,7 @@ import {
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../../utils/utils";
-import { FormContext, onChangeHandler } from "../core/dynamicForm";
+import { FormContext, onChangeHandler } from "../dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 

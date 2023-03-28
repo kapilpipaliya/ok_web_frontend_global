@@ -19,7 +19,7 @@ import { removeUndefinedProperties } from "../utils/functions";
 import {
  DynamicFormSequence,
  DynamicFormSequenceProps
-} from "./core/dynamicForm";
+} from "./dynamicForm";
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";

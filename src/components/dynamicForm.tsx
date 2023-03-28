@@ -18,13 +18,13 @@ import {
  getNewTxnId,
  graph, Id,
  Vertex
-} from "../../lib/graph";
+} from "../lib/graph";
 import {
  addNewVertex,
  mergeVertexProperties,
  newVertex
-} from "../../lib/Vertex";
-import { WsContext } from "../ws_events_dispatcher";
+} from "../lib/Vertex";
+import { WsContext } from "./ws_events_dispatcher";
 
 import {
  getChildVertexes,
@@ -32,16 +32,16 @@ import {
  getSelectionOptions,
  SelectInputField,
  setSelectionValue
-} from "../input/SelectInputField";
-import { newRow, TableInputField } from "../input/TableInputField";
+} from "./input/SelectInputField";
+import { newRow, TableInputField } from "./input/TableInputField";
 
-import { TagField } from "../input/TagField";
+import { TagField } from "./input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 import { useNavigate } from "solid-app-router";
-import { capitalizeFirstLetter } from "../../utils/utils";
-import { AbstractSingleForm, FieldAttribute, FormMetaData } from "../Form";
-import { GenericInputField } from "../input/GenaricInputField";
+import { capitalizeFirstLetter } from "../utils/utils";
+import { AbstractSingleForm, FieldAttribute, FormMetaData } from "./Form";
+import { GenericInputField } from "./input/GenaricInputField";
 
 export const FormContext = createContext({} as {[key: string]: any})
 

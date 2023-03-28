@@ -46,7 +46,7 @@ import {
 import { bindOwner } from "solid-forms";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent, FormContext } from "../core/dynamicForm";
+import { DynamicComponent, FormContext } from "../dynamicForm";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
