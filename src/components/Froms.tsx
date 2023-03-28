@@ -7,7 +7,13 @@ import {
  useContext
 } from "solid-js";
 import { Link, useNavigate } from "solid-app-router";
-import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../lib/graph";
+import {
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ graph,
+ Vertex
+} from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import {
@@ -26,7 +32,6 @@ import {
  setParentValue,
  setSelectionValue
 } from "./input/SelectInputField";
-import { FieldAttribute, FormMetaData, Vertex } from "./input/Form";
 import { AttrsTableData } from "./api";
 import csvtojson from "csvtojson";
 import {
@@ -49,6 +54,27 @@ export const AllForms = () => {
   </For>
  </div>;
 };
+
+export interface FieldAttribute {
+ id: string;
+ tab?: string;
+ group?: string;
+ dataType?: string;
+ meta?: string;
+ component: string;
+ title?: string;
+ props?: { [key: string]: any };
+ // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
+ attributes?: FieldAttribute[];
+}
+
+export interface FormMetaData {
+ id: string; // required to create new vertex
+ title: string;
+ attributes: FieldAttribute[];
+ local?: boolean;
+ // postSubmit?: (data: any) => any
+}
 
 const addProps = (vertexFormAttr: Vertex): { error: boolean, attr?: FieldAttribute } => {
  const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);

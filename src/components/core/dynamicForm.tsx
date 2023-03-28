@@ -11,9 +11,14 @@ import {
 } from "solid-js";
 import { klona } from "klona/json";
 
-import { FieldAttribute, FormMetaData, Id, Vertex } from "../input/Form";
 import { toTitle } from "case-switcher-js";
-import { commitTxn, getNewGraphId, getNewTxnId, graph } from "../../lib/graph";
+import {
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ graph, Id,
+ Vertex
+} from "../../lib/graph";
 import {
  addNewVertex,
  mergeVertexProperties,
@@ -35,7 +40,7 @@ import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 import { useNavigate } from "solid-app-router";
 import { capitalizeFirstLetter } from "../../utils/utils";
-import { AbstractSingleForm } from "../Froms";
+import { AbstractSingleForm, FieldAttribute, FormMetaData } from "../Froms";
 import { GenericInputField } from "../input/GenaricInputField";
 
 export const FormContext = createContext({} as {[key: string]: any})

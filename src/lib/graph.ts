@@ -2,10 +2,25 @@ import { createStore, reconcile } from "solid-js/store";
 import { G } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { get, set } from "idb-keyval";
-import { Edge, Id, Vertex } from "../components/input/Form";
-import {
-  ServerEventsDispatcher,
-} from "../components/ws_events_dispatcher";
+import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
+
+export type Id = number;
+
+export interface Vertex {
+ id: Id;
+ labels: string[];
+ properties: { [key: string]: any },
+ in_edges: { [key: string]: Id[] },
+ out_edges: { [key: string]: Id[] }
+}
+
+export interface Edge {
+ id: Id;
+ properties: { [key: string]: any },
+ type: string;
+ start: Id;
+ end: Id;
+}
 
 export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };

@@ -3,11 +3,11 @@ import { batch } from "solid-js";
 import { reconcile } from "solid-js/store";
 import { G, pipe } from "@mobily/ts-belt";
 import {
- graph,
+ Edge,
+ graph, Id,
  isValidId,
  setGraph, transactionDetailAdd, transactions
 } from "./graph";
-import { Edge, Id } from "../components/input/Form";
 
 export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId: Id, endVertexId: Id): Edge {
  !isValidId(startVertexId) && console.error(`edge startId should be string, but received ${startVertexId}`);

@@ -10,14 +10,14 @@ import {
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
 import Page404 from "./page/404";
-import { BackupRestore } from "./core/BackupRestore";
+import { BackupRestore } from "./page/BackupRestore";
 import {
- commitTransaction,
+ commitTransaction, Edge,
  edgeOldIdToNewIdMap,
  graph,
  ProcessStatus,
  setGraph,
- transactions,
+ transactions, Vertex,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
 import {
@@ -43,7 +43,6 @@ import TreeView, {
 } from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
-import { Edge, Vertex } from "./input/Form";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [

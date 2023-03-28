@@ -64,7 +64,7 @@ import dxTextBox, {
  Properties as dxTextBoxProperties
 } from "devextreme/ui/text_box";
 
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "./Type";
 
 export function GenericInputField(props: ComponentProps & { component: string;}) {
 
