@@ -27,7 +27,7 @@ import {
  Logout,
  SignUp,
  SimpleImport
-} from "./Froms";
+} from "./Form";
 import { WsContext } from "./ws_events_dispatcher";
 import {
  addNewVertex,

@@ -1,4 +1,4 @@
-import { FormMetaData } from "./Froms";
+import { FormMetaData } from "./Form";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
