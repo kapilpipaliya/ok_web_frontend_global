@@ -292,7 +292,7 @@ export const Login = (props: {}) => {
  };
 
  return <><AbstractSingleForm
-  formId={"login"}
+  formId={"LogIn"}
   id="new"
   config={config}
   // TODO: add dry option
@@ -350,7 +350,7 @@ export const SignUp = (props: {}) => {
 
  return <>
   <AbstractSingleForm
-   formId={"signup"}
+   formId={"SignUp"}
    id="new"
    config={config}
    // TODO: add dry option

@@ -189,6 +189,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     },
    },
    { id: "description", component: "TextAreaField" },
+   { id: "public", component: "CheckBoxField" },
    {
     id: "Tab",
     component: "TableField",
@@ -748,6 +749,24 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     }
    ]
   },
+ "SignUp": {
+  title: "User",
+  id: "User",
+  local: true,
+  attributes: [
+   { id: "email", component: "TextBoxField" },
+   { id: "password", component: "TextBoxField", props: {mode: 'password'} },
+  ]
+ },
+ "LogIn": {
+  title: "User",
+  id: "User",
+  local: true,
+  attributes: [
+   { id: "email", component: "TextBoxField" },
+   { id: "password", component: "TextBoxField", props: {mode: 'password'} },
+  ]
+ },
 // TODO: Dynamic Filter on Grid: Role->Filter
 };
 
