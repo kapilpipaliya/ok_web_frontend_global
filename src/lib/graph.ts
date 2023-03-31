@@ -7,19 +7,19 @@ import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
 export type Id = number;
 
 export interface Vertex {
- id: Id;
- labels: string[];
- properties: { [key: string]: any },
- in_edges: { [key: string]: Id[] },
- out_edges: { [key: string]: Id[] }
+  id: Id;
+  labels: string[];
+  properties: { [key: string]: any };
+  in_edges: { [key: string]: Id[] };
+  out_edges: { [key: string]: Id[] };
 }
 
 export interface Edge {
- id: Id;
- properties: { [key: string]: any },
- type: string;
- start: Id;
- end: Id;
+  id: Id;
+  properties: { [key: string]: any };
+  type: string;
+  start: Id;
+  end: Id;
 }
 
 export type VertexMap = { [key: string]: Vertex };
@@ -32,65 +32,81 @@ let uniqueId = -50000;
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export const [graph, setGraph] = createStore({
- _isPartialSynced: false,
+  _isPartialSynced: false,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },
   initialSynced: false, // TODO: Display initialSynced status to the UI
-  lastSyncedTime: 0
+  lastSyncedTime: 0,
 });
-export type Revert = {revert: () => any}
+export type Revert = { revert: () => any };
 export type InsertFn = {
-  [key in "insert" | "replace" | "merge" | "deleteVertex" | "insertEdge" | 'replaceEdge' | 'replaceEdgeStart' | 'replaceEdgeEnd' | 'deleteEdge']?: () => any;
+  [key in
+    | "insert"
+    | "replace"
+    | "merge"
+    | "deleteVertex"
+    | "insertEdge"
+    | "replaceEdge"
+    | "replaceEdgeStart"
+    | "replaceEdgeEnd"
+    | "deleteEdge"]?: () => any;
 };
 export enum ProcessStatus {
- Unset,
- Ready,
- Sent,
- AckReceived,
- Processed
+  Unset,
+  Ready,
+  Sent,
+  AckReceived,
+  Processed,
 }
 export type TransactionValue = InsertFn & Revert;
-export const transactions = new Map<number, {status: ProcessStatus, steps: TransactionValue[]}>();
+export const transactions = new Map<number, { status: ProcessStatus; steps: TransactionValue[] }>();
 // @ts-ignore
 window.t = transactions;
 export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
- if(!txnId) return;
-  const existingTxnValue = transactions.get(txnId) || {status: ProcessStatus.Unset, steps: []};
+  if (!txnId) return;
+  const existingTxnValue = transactions.get(txnId) || {
+    status: ProcessStatus.Unset,
+    steps: [],
+  };
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
-  transactions.set(txnId, existingTxnValue)
-}
-let txnNo = 1;
-export const getNewTxnId = () => ++txnNo
-
-export const getExistingOrDefaultTxnValue = (txnId: number) => transactions.get(txnId) || {
- status: ProcessStatus.Unset,
- steps: []
+  transactions.set(txnId, existingTxnValue);
 };
+let txnNo = 1;
+export const getNewTxnId = () => ++txnNo;
+
+export const getExistingOrDefaultTxnValue = (txnId: number) =>
+  transactions.get(txnId) || {
+    status: ProcessStatus.Unset,
+    steps: [],
+  };
 
 export const revertOneTransactionUnSafe = (txnId: number, txnIndex: number) => {
- if(!txnId || !transactions.has(txnId)) return;
+  if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
   // todo dont use splice
   const newTxnValue = existingTxnValue.steps.splice(txnIndex, 1);
   newTxnValue[0]?.revert();
-}
+};
 export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
- if(!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = transactions.get(txnId) || {status: ProcessStatus.Unset, steps: []};
+  if (!txnId || !transactions.has(txnId)) return;
+  const existingTxnValue = transactions.get(txnId) || {
+    status: ProcessStatus.Unset,
+    steps: [],
+  };
   const newTxnValue = existingTxnValue.steps.splice(txnIndex);
-  newTxnValue.reverse().forEach(x=>x.revert());
-}
+  newTxnValue.reverse().forEach((x) => x.revert());
+};
 export const revertTransaction = (txnId: number) => {
-  if(!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = [...transactions.get(txnId)!.steps || []];
-  existingTxnValue.reverse().forEach(txn => txn.revert());
+  if (!txnId || !transactions.has(txnId)) return;
+  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])];
+  existingTxnValue.reverse().forEach((txn) => txn.revert());
   transactions.delete(txnId);
-}
+};
 
 export const getTransactionData = (txnId: number) => {
- if(!transactions.has(txnId)) return [];
-  const existingTxnValue = [...transactions.get(txnId)!.steps || []].map(txnDetail => ({
+  if (!transactions.has(txnId)) return [];
+  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])].map((txnDetail) => ({
     insert: txnDetail.insert?.(),
     replace: txnDetail.replace?.(),
     merge: txnDetail.merge?.(),
@@ -99,55 +115,62 @@ export const getTransactionData = (txnId: number) => {
     replaceEdge: txnDetail.replaceEdge?.(),
     replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
     replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
-    deleteEdge: txnDetail.deleteEdge?.()
+    deleteEdge: txnDetail.deleteEdge?.(),
   }));
   return existingTxnValue;
-}
+};
 export let vertexOldIdToNewIdMap = new Map<Id, Id>();
 export let edgeOldIdToNewIdMap = new Map<Id, Id>();
 
 export const commitTransaction = (Ws: ServerEventsDispatcher) => {
- let firstReadyTxn = 0;
- // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
- for(const [txnId, value] of transactions.entries()) {
-  if(value.status === ProcessStatus.Ready) {
-   if(!firstReadyTxn) firstReadyTxn = txnId;
-   break;
-  } else if(value.status === ProcessStatus.AckReceived || value.status === ProcessStatus.Sent){
-   return;
+  let firstReadyTxn = 0;
+  // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
+  for (const [txnId, value] of transactions.entries()) {
+    if (value.status === ProcessStatus.Ready) {
+      if (!firstReadyTxn) firstReadyTxn = txnId;
+      break;
+    } else if (value.status === ProcessStatus.AckReceived || value.status === ProcessStatus.Sent) {
+      return;
+    }
   }
- }
- if(firstReadyTxn){
-  const existingTxnValue = getTransactionData(firstReadyTxn);
-  transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent
-  if(existingTxnValue.length) {
-   Ws.trigger([[['post', 'mutate', 0], [[firstReadyTxn,[...vertexOldIdToNewIdMap], [...edgeOldIdToNewIdMap], existingTxnValue]]]])
+  if (firstReadyTxn) {
+    const existingTxnValue = getTransactionData(firstReadyTxn);
+    transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
+    if (existingTxnValue.length) {
+      Ws.trigger([
+        [
+          ["post", "mutate", 0],
+          [[firstReadyTxn, [...vertexOldIdToNewIdMap], [...edgeOldIdToNewIdMap], existingTxnValue]],
+        ],
+      ]);
+    }
   }
- }
-}
+};
 export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
- if (transactions.has(txnId)) {
-  transactions.get(txnId)!.status = ProcessStatus.Ready;
-  commitTransaction(Ws);
- }
-}
+  if (transactions.has(txnId)) {
+    transactions.get(txnId)!.status = ProcessStatus.Ready;
+    commitTransaction(Ws);
+  }
+};
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 export function getNewGraphId(): Id {
- uniqueId = uniqueId + 1;
+  uniqueId = uniqueId + 1;
   return uniqueId;
- // Muration Actor Exception Error : Integer overflow -
- // return `${new Date().getTime()}`;
+  // Muration Actor Exception Error : Integer overflow -
+  // return `${new Date().getTime()}`;
 }
 
 export function resetDatabase() {
-  setGraph(reconcile({
-   _isPartialSynced: true,
-    vertexes: {} as { [key: string]: Vertex },
-    edges: {} as { [key: string]: Edge },
-    vertexLabelIdMap: {} as { [key: string]: Id[] },
-    initialSynced: true,
-   lastSyncedTime: 0
-  }));
+  setGraph(
+    reconcile({
+      _isPartialSynced: true,
+      vertexes: {} as { [key: string]: Vertex },
+      edges: {} as { [key: string]: Edge },
+      vertexLabelIdMap: {} as { [key: string]: Id[] },
+      initialSynced: true,
+      lastSyncedTime: 0,
+    }),
+  );
 }
 
 export function isValidId(startVertexId: Id) {
@@ -180,7 +203,7 @@ export function backupToIndexDB() {
 }
 
 export function restoreFromIndexDB() {
-  get("graph").then((data)=>setGraph(reconcile(data)));
+  get("graph").then((data) => setGraph(reconcile(data)));
 }
 
 export function backupToJson() {
