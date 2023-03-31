@@ -8,11 +8,7 @@ import "devextreme/dist/css/dx.light.css";
 import "@master/css";
 import "./index.css";
 
-import {
- ServerEventsDispatcher,
- WS_PATH,
- WsContext
-} from "./components/ws_events_dispatcher";
+import { ServerEventsDispatcher, WS_PATH, WsContext } from "./components/ws_events_dispatcher";
 import { AlertMessage } from "./Type";
 import { AlertMessageContext } from "./appState";
 import { createStore } from "solid-js/store";
@@ -21,12 +17,13 @@ render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const [alerts, setAlert] = createStore([] as AlertMessage[]);
 
-  return <WsContext.Provider value={{ Ws }}>
-   <AlertMessageContext.Provider value={{ alerts, setAlert }}>
-     <Router  base={"/admin"}>
-      <FullDashboard />
-     </Router>
-   </AlertMessageContext.Provider>
-  </WsContext.Provider>;
- },
- document.getElementById("root") as HTMLElement);
+  return (
+    <WsContext.Provider value={{ Ws }}>
+      <AlertMessageContext.Provider value={{ alerts, setAlert }}>
+        <Router base={"/admin"}>
+          <FullDashboard />
+        </Router>
+      </AlertMessageContext.Provider>
+    </WsContext.Provider>
+  );
+}, document.getElementById("root") as HTMLElement);

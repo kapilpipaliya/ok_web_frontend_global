@@ -11,7 +11,6 @@ interface GraphViewProps {
 export const GraphView = (props: GraphViewProps) => {
   const [json, setJson] = createSignal({});
   const mount = (container: HTMLDivElement) => {
-
     // TODO: Dynamically import library only when required.
 
     // const nodes = [
@@ -52,12 +51,15 @@ export const GraphView = (props: GraphViewProps) => {
 
   return (
     <>
-      <div style="border: 1px solid #e0e0e0; width: 1200px; height: 600px;" ref={(el) => {
-        setTimeout(() => mount(el), 0);
-        onCleanup(() => {
-          el.replaceChildren();
-        });
-      }}></div>
+      <div
+        style="border: 1px solid #e0e0e0; width: 1200px; height: 600px;"
+        ref={(el) => {
+          setTimeout(() => mount(el), 0);
+          onCleanup(() => {
+            el.replaceChildren();
+          });
+        }}
+      ></div>
       <pre>{JSON.stringify(json())}</pre>
     </>
   );

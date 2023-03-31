@@ -2,13 +2,7 @@ import { createEffect, createResource, untrack, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import { ComponentProps } from "./Type";
-import {
- commitTxn,
- getNewGraphId,
- getNewTxnId,
- graph,
- Vertex
-} from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../../lib/graph";
 import { findVertexIdsByLabel } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../../utils/utils";
@@ -16,16 +10,16 @@ import { FormContext, onChangeHandler } from "../dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import { path } from "rambda";
 
-export function getSelectedVertexValue(vertex: Vertex, meta: Vertex){
-  const attributeId = meta.properties.id
+export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
+  const attributeId = meta.properties.id;
   const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(attributeId);
-  return (vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end);
+  return (vertex.out_edges[type] || []).map((edgeId) => graph.edges[edgeId].end);
 }
 
-export function getParentVertexValue(vertex: Vertex, meta: Vertex){
-  const attributeId = meta.properties.id
+export function getParentVertexValue(vertex: Vertex, meta: Vertex) {
+  const attributeId = meta.properties.id;
   const type = capitalizeFirstLetter(attributeId) + (meta.properties.props?.label || vertex.labels[0]);
-  return (vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start);
+  return (vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start);
 }
 // "(dataType)->[DataTypeComponent]"
 // function getVertexes(vertex: Vertex, attribute: string, projection: string, edgeName: string) {
@@ -46,48 +40,48 @@ export function getParentVertexValue(vertex: Vertex, meta: Vertex){
 //   return result;
 // }
 
-export function getParentVertex(path: string[], currentVertex: Vertex): {error:boolean, vertex?: Vertex} {
-  const type = path[path.length -1].replace('$0', currentVertex.labels[0]);
+export function getParentVertex(path: string[], currentVertex: Vertex): { error: boolean; vertex?: Vertex } {
+  const type = path[path.length - 1].replace("$0", currentVertex.labels[0]);
   const edges = currentVertex.in_edges[type];
-  if(!edges || (edges && edges.length != 1)) {
+  if (!edges || (edges && edges.length != 1)) {
     return {
       error: true,
-    }
+    };
   } else {
     const edge = graph.edges[edges[0]];
     if (edge) {
       const newVertex = graph.vertexes[edge.start];
-      if(newVertex) {
-        if(path.length > 1) {
+      if (newVertex) {
+        if (path.length > 1) {
           return getParentVertex(path.slice(0, -1), newVertex);
         } else {
           return {
             error: false,
             vertex: newVertex,
-          }
+          };
         }
       } else {
         return {
           error: true,
-        }
+        };
       }
     } else {
       return {
         error: true,
-      }
+      };
     }
   }
 }
-export function getParentVertexes(path: string[], currentVertexes: Vertex[]): {error:boolean, vertexes?: Vertex[]} {
-  const stepVertexes = {} as {[id: string]: Vertex};
-  if(path.length == 0) {
-    return {error: true}
+export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { error: boolean; vertexes?: Vertex[] } {
+  const stepVertexes = {} as { [id: string]: Vertex };
+  if (path.length == 0) {
+    return { error: true };
   }
-  let type = path[path.length -1];
+  let type = path[path.length - 1];
   for (const currentVertex of currentVertexes) {
-    type = type.replace('$0', currentVertex.labels[0]);
+    type = type.replace("$0", currentVertex.labels[0]);
     const edgeIds = currentVertex.in_edges[type];
-    if(!edgeIds) {
+    if (!edgeIds) {
       continue;
     }
 
@@ -95,89 +89,93 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): {e
       const edge = graph.edges[edgeId];
       if (edge) {
         const newVertex = graph.vertexes[edge.start];
-        if(newVertex) {
+        if (newVertex) {
           stepVertexes[newVertex.id] = newVertex;
         } else {
           return {
             error: true,
-          }
+          };
         }
       } else {
         return {
           error: true,
-        }
+        };
       }
     }
   }
 
-  if(path.length > 1) {
+  if (path.length > 1) {
     return getParentVertexes(path.slice(0, -1), Object.values(stepVertexes));
   } else {
     return {
       error: false,
       vertexes: Object.values(stepVertexes),
-    }
+    };
   }
 }
-export function getChildVertex(path: string[], currentVertex: Vertex): {error:boolean, vertex?: Vertex} {
-  if(path.length === 0) return {
-    error: true,
-  };
+export function getChildVertex(path: string[], currentVertex: Vertex): { error: boolean; vertex?: Vertex } {
+  if (path.length === 0)
+    return {
+      error: true,
+    };
 
   let type = path[0];
-  let filter = '';
+  let filter = "";
 
-  const filterIndex = type.indexOf('[');
-  if(filterIndex > -1) {
-    filter = type.slice(filterIndex)
+  const filterIndex = type.indexOf("[");
+  if (filterIndex > -1) {
+    filter = type.slice(filterIndex);
     // modify the variable itself
     type = type.slice(0, filterIndex);
   }
-  type = type.replace('$0', currentVertex.labels[0]);
-  let vertexes = (currentVertex.out_edges[type] || []).map(edgeId => graph.vertexes[graph.edges[edgeId].end]);
+  type = type.replace("$0", currentVertex.labels[0]);
+  let vertexes = (currentVertex.out_edges[type] || []).map((edgeId) => graph.vertexes[graph.edges[edgeId].end]);
 
   if (filter) {
     // TODO:
     // vertexes = vertexes.filter(x=>x.properties.id === 'component')
   }
-  if(vertexes.length != 1) {
+  if (vertexes.length != 1) {
     return {
       error: true,
-    }
+    };
   } else {
     const newVertex = vertexes[0];
-      if(newVertex) {
-        if(path.length > 1) {
-          return getChildVertex(path.slice(1), newVertex);
-        } else {
-          return {
-            error: false,
-            vertex: newVertex,
-          }
-        }
+    if (newVertex) {
+      if (path.length > 1) {
+        return getChildVertex(path.slice(1), newVertex);
       } else {
         return {
-          error: true,
-        }
+          error: false,
+          vertex: newVertex,
+        };
       }
+    } else {
+      return {
+        error: true,
+      };
     }
-
+  }
 }
-export function getChildVertexes(path: string[], currentVertexes: Vertex[], strict?: boolean): {error:boolean, vertexes?: Vertex[]} {
-  const stepVertexes = {} as {[id: string]: Vertex};
-  if(path.length == 0) {
-    return {error: true}
+export function getChildVertexes(
+  path: string[],
+  currentVertexes: Vertex[],
+  strict?: boolean,
+): { error: boolean; vertexes?: Vertex[] } {
+  const stepVertexes = {} as { [id: string]: Vertex };
+  if (path.length == 0) {
+    return { error: true };
   }
   let type = path[0];
   for (const currentVertex of currentVertexes) {
-    type = type.replace('$0', currentVertex.labels[0]);
+    type = type.replace("$0", currentVertex.labels[0]);
     const edgeIds = currentVertex.out_edges[type] || [];
-    if(edgeIds.length == 0) {
+    if (edgeIds.length == 0) {
       // we only return error if its in middle of path
-      if(strict && path.length > 1) {
+      if (strict && path.length > 1) {
         return {
-          error: true
-        }
+          error: true,
+        };
       } else {
         continue;
       }
@@ -187,32 +185,38 @@ export function getChildVertexes(path: string[], currentVertexes: Vertex[], stri
       const edge = graph.edges[edgeId];
       if (edge) {
         const newVertex = graph.vertexes[edge.end];
-        if(newVertex) {
+        if (newVertex) {
           stepVertexes[newVertex.id] = newVertex;
         } else {
           return {
             error: true,
-          }
+          };
         }
       } else {
         return {
           error: true,
-        }
+        };
       }
     }
   }
 
-  if(path.length > 1) {
-   return getChildVertexes(path.slice(1), Object.values(stepVertexes), strict);
+  if (path.length > 1) {
+    return getChildVertexes(path.slice(1), Object.values(stepVertexes), strict);
   } else {
     return {
       error: false,
       vertexes: Object.values(stepVertexes),
-    }
+    };
   }
 }
-export function getSelectionOptions(vertex: Vertex, collection: string, input: string, meta?: Vertex, strict?: boolean): {error:boolean, vertexes?: Vertex[]} {
-  const inwardMulti = meta?.properties.props.inward ?? false
+export function getSelectionOptions(
+  vertex: Vertex,
+  collection: string,
+  input: string,
+  meta?: Vertex,
+  strict?: boolean,
+): { error: boolean; vertexes?: Vertex[] } {
+  const inwardMulti = meta?.properties.props.inward ?? false;
   // TODO: make input filter working:
 
   if (collection.includes("||")) {
@@ -229,15 +233,15 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
     try {
       return {
         error: true,
-        vertexes: JSON.parse(collection)
-      }
+        vertexes: JSON.parse(collection),
+      };
     } catch (e) {
       console.warn(e);
       return {
-        error: true
-      }
+        error: true,
+      };
     }
-  } else if ((collection).includes("->") || (collection).includes("<-")) {
+  } else if (collection.includes("->") || collection.includes("<-")) {
     let parentVertex: Vertex[] | undefined;
 
     let childrenCollection = collection;
@@ -245,7 +249,7 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
       const parentEdges = collection.split("<-");
       childrenCollection = parentEdges[parentEdges.length - 1];
 
-      if(!inwardMulti) {
+      if (!inwardMulti) {
         const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
         if (parentVertexResult.error) {
           return parentVertexResult;
@@ -264,17 +268,19 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
       // if collection not start with -> we assume first part as main collection
       if (!childrenCollection.startsWith("->")) {
         const rootEdges = collection.split("->");
-        childrenCollection = rootEdges.slice(1).join('->');
+        childrenCollection = rootEdges.slice(1).join("->");
         let parentEdge = rootEdges[0];
-        const filterIndex = parentEdge.indexOf('[');
-        let filter = '';
-        if(filterIndex > -1) {
-          filter = parentEdge.slice(filterIndex + 1).replace(']', '');
+        const filterIndex = parentEdge.indexOf("[");
+        let filter = "";
+        if (filterIndex > -1) {
+          filter = parentEdge.slice(filterIndex + 1).replace("]", "");
           // modify the variable itself
           parentEdge = parentEdge.slice(0, filterIndex);
-          parentVertex = findVertexIdsByLabel(parentEdge).map((id) => graph.vertexes[id]).filter(vertex => vertex.properties.id === filter);
+          parentVertex = findVertexIdsByLabel(parentEdge)
+            .map((id) => graph.vertexes[id])
+            .filter((vertex) => vertex.properties.id === filter);
         } else {
-          parentVertex = findVertexIdsByLabel(parentEdge).map((id) => graph.vertexes[id])
+          parentVertex = findVertexIdsByLabel(parentEdge).map((id) => graph.vertexes[id]);
         }
       }
     }
@@ -282,12 +288,11 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
     if (childrenCollection.length === 0 && parentVertex) {
       return {
         error: false,
-        vertexes: parentVertex
+        vertexes: parentVertex,
       };
     }
 
     if (!parentVertex) parentVertex = [vertex];
-
 
     if (childrenCollection.startsWith("->")) {
       childrenCollection = childrenCollection.slice(2);
@@ -295,13 +300,13 @@ export function getSelectionOptions(vertex: Vertex, collection: string, input: s
 
     const path_ = childrenCollection.split("->");
 
-      return getChildVertexes(path_, parentVertex, strict);
-    } else {
-      return {
-        error: false,
-        vertexes: findVertexIdsByLabel(collection).map((id) => graph.vertexes[id])
-      };
-    }
+    return getChildVertexes(path_, parentVertex, strict);
+  } else {
+    return {
+      error: false,
+      vertexes: findVertexIdsByLabel(collection).map((id) => graph.vertexes[id]),
+    };
+  }
 }
 
 const getTextValue = (value: any) => {
@@ -311,74 +316,73 @@ const getTextValue = (value: any) => {
     return JSON.stringify(value);
   }
   return value;
-}
+};
 
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
-  if(!vertex) return '';
-  if(displayExpr.includes('||')) {
-    for (const displayExprElement of displayExpr.split('||')) {
+  if (!vertex) return "";
+  if (displayExpr.includes("||")) {
+    for (const displayExprElement of displayExpr.split("||")) {
       const value = getOptionLabel(vertex, displayExprElement);
-      if(value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         return value;
       }
     }
   }
 
-    let pattern = '';
-    let projection = ''
-    if (displayExpr.includes(":")) {
-      const columnIndex = displayExpr.lastIndexOf(":");
-      pattern = displayExpr.slice(0, columnIndex);
-      projection = displayExpr.slice(columnIndex + 1);
-    }
-    if(!pattern) {
-      pattern = displayExpr;
-    }
-    if(!projection) {
-      projection = "id";
-    }
+  let pattern = "";
+  let projection = "";
+  if (displayExpr.includes(":")) {
+    const columnIndex = displayExpr.lastIndexOf(":");
+    pattern = displayExpr.slice(0, columnIndex);
+    projection = displayExpr.slice(columnIndex + 1);
+  }
+  if (!pattern) {
+    pattern = displayExpr;
+  }
+  if (!projection) {
+    projection = "id";
+  }
 
-    if ((pattern).includes("->") || (pattern).includes("<-")) {
-      let parentVertex: Vertex | undefined;
+  if (pattern.includes("->") || pattern.includes("<-")) {
+    let parentVertex: Vertex | undefined;
 
-      let childrenCollection = pattern;
-      if (pattern.includes("<-")) {
-        const parentEdges = pattern.split("<-");
-        childrenCollection = parentEdges[parentEdges.length - 1];
-        const  parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
-        if(parentVertexResult.error) {
-          return '';
-        } else {
-          parentVertex = parentVertexResult.vertex;
-        }
-      }
-
-      if (!parentVertex) parentVertex = vertex;
-
-      if(childrenCollection.startsWith('->')) {
-        childrenCollection = childrenCollection.slice(2);
-      }
-
-      const path_ = childrenCollection.split("->");
-
-      const childrenResult = getChildVertex(path_, parentVertex);
-      if(childrenResult.error) {
-        return '';
+    let childrenCollection = pattern;
+    if (pattern.includes("<-")) {
+      const parentEdges = pattern.split("<-");
+      childrenCollection = parentEdges[parentEdges.length - 1];
+      const parentVertexResult = getParentVertex(parentEdges.slice(0, -1), vertex);
+      if (parentVertexResult.error) {
+        return "";
       } else {
-        return getTextValue(path(projection, childrenResult.vertex)!);
+        parentVertex = parentVertexResult.vertex;
       }
     }
-    return getTextValue(path(displayExpr, vertex)!);
 
+    if (!parentVertex) parentVertex = vertex;
+
+    if (childrenCollection.startsWith("->")) {
+      childrenCollection = childrenCollection.slice(2);
+    }
+
+    const path_ = childrenCollection.split("->");
+
+    const childrenResult = getChildVertex(path_, parentVertex);
+    if (childrenResult.error) {
+      return "";
+    } else {
+      return getTextValue(path(projection, childrenResult.vertex)!);
+    }
+  }
+  return getTextValue(path(displayExpr, vertex)!);
 }
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
+export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
   const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(meta.properties.id);
   const previousEdges = vertex.out_edges[type] || [];
 
   if (!Array.isArray(value)) {
-    if ( value !== null && value !== undefined) {
+    if (value !== null && value !== undefined) {
       value = [value];
     } else {
       value = [];
@@ -388,26 +392,26 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex,  
   for (const edgeId of previousEdges) {
     // we should not delete edge that end to same vertex
     if (value.includes(graph.edges[edgeId].end)) continue;
-    const deleteEdgeResult = deleteEdge(txnId, edgeId)
+    const deleteEdgeResult = deleteEdge(txnId, edgeId);
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
   // add added edges:
   for (const vertexId of value) {
-    if ((vertex.out_edges[type] || []).map(edgeId => graph.edges[edgeId].end).includes(vertexId)) continue
+    if ((vertex.out_edges[type] || []).map((edgeId) => graph.edges[edgeId].end).includes(vertexId)) continue;
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
-    if(insertEdgeResult.error) alert(insertEdgeResult.error);
+    if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  value?: number[] | number) {
+export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
   const type = capitalizeFirstLetter(meta.properties.id) + (meta.properties.props?.label || vertex.labels[0]);
   const previousEdges = vertex.in_edges[type] || [];
 
   if (!Array.isArray(value)) {
-    if ( value !== null && value !== undefined) {
+    if (value !== null && value !== undefined) {
       value = [value];
     } else {
       value = [];
@@ -417,15 +421,15 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex,  val
   for (const edgeId of previousEdges) {
     // we should not delete edge that end to same vertex
     if (value.includes(graph.edges[edgeId].start)) continue;
-    const deleteEdgeResult = deleteEdge(txnId, edgeId)
+    const deleteEdgeResult = deleteEdge(txnId, edgeId);
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
   // add added edges:
   for (const vertexId of value) {
-    if ((vertex.in_edges[type] || []).map(edgeId => graph.edges[edgeId].start).includes(vertexId)) continue
-    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id ));
-    if(insertEdgeResult.error) alert(insertEdgeResult.error);
+    if ((vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start).includes(vertexId)) continue;
+    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id));
+    if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
 
@@ -433,68 +437,71 @@ export function SelectInputField(props: ComponentProps) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
 
-  if(!props.meta.properties.props?.collection) {
-    return "Collection Not Defined."
+  if (!props.meta.properties.props?.collection) {
+    return "Collection Not Defined.";
   }
-  
-  const [selectOptions, {refetch}] = createResource(() => {
-    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta).vertexes || []
+
+  const [selectOptions, { refetch }] = createResource(() => {
+    return getSelectionOptions(props.data, props.meta.properties.props.collection, "", props.meta).vertexes || [];
   });
   return (
-   <div aria-labeledby={props["aria-labeledby"]}>
-     <div ref={el => {
-       const selectedValue = () => {
-         if(props.meta.properties.props.stringValue) {
-           // this is causing maximum call stack error when selecting an option
-           return untrack(() => {
-             const value =  props.data.properties[props.meta.properties.id];
-             return Array.isArray(value) ? value : [value];
-           })
-         }
-         return props.meta.properties.props.inward ? getParentVertexValue(props.data, props.meta) : getSelectedVertexValue(props.data, props.meta);
-       };
-       const instance = new SelectBox(el, {
-         searchEnabled: true,
-         // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-         value: selectedValue()[0],
-         onValueChanged: function(e) {
-           // batch(() => {
-           const txnId = getNewTxnId();
-           if(props.meta.properties.props.stringValue) {
-
-             props.setValue(props.meta, e.value);
-           } else if(props.meta.properties.props.inward) {
-             setParentValue(txnId, props.data, props.meta, e.value);
-           } else {
-             setSelectionValue(txnId, props.data, props.meta, e.value);
-           }
-           onChangeHandler(txnId, props.data, props.meta);
-             if(!local) commitTxn(txnId, Ws);
-            // })
-          },
-          valueExpr: "id",
-          displayExpr: item => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
-          labelMode: 'floating',
-          onFocusIn: function(e) {
-            refetch()
-          }
-        });
-       createEffect(() => {
-         for (const property in props.meta.properties.props as Properties) {
-           if(property === "displayExpr") continue;
-           instance.option(property, props.meta.properties.props[property]);
-         }
-       });
-       createEffect(() => {
-         instance.option("value", selectedValue()[0]);
-       });
-        createEffect(() => {
-          const options = selectOptions();
-          if(options) {
-            instance.option('dataSource', options);
-          }
-        })
-      }} />
+    <div aria-labeledby={props["aria-labeledby"]}>
+      <div
+        ref={(el) => {
+          const selectedValue = () => {
+            if (props.meta.properties.props.stringValue) {
+              // this is causing maximum call stack error when selecting an option
+              return untrack(() => {
+                const value = props.data.properties[props.meta.properties.id];
+                return Array.isArray(value) ? value : [value];
+              });
+            }
+            return props.meta.properties.props.inward
+              ? getParentVertexValue(props.data, props.meta)
+              : getSelectedVertexValue(props.data, props.meta);
+          };
+          const instance = new SelectBox(el, {
+            searchEnabled: true,
+            // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
+            value: selectedValue()[0],
+            onValueChanged: function (e) {
+              // batch(() => {
+              const txnId = getNewTxnId();
+              if (props.meta.properties.props.stringValue) {
+                props.setValue(props.meta, e.value);
+              } else if (props.meta.properties.props.inward) {
+                setParentValue(txnId, props.data, props.meta, e.value);
+              } else {
+                setSelectionValue(txnId, props.data, props.meta, e.value);
+              }
+              onChangeHandler(txnId, props.data, props.meta);
+              if (!local) commitTxn(txnId, Ws);
+              // })
+            },
+            valueExpr: "id",
+            displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
+            labelMode: "floating",
+            onFocusIn: function (e) {
+              refetch();
+            },
+          });
+          createEffect(() => {
+            for (const property in props.meta.properties.props as Properties) {
+              if (property === "displayExpr") continue;
+              instance.option(property, props.meta.properties.props[property]);
+            }
+          });
+          createEffect(() => {
+            instance.option("value", selectedValue()[0]);
+          });
+          createEffect(() => {
+            const options = selectOptions();
+            if (options) {
+              instance.option("dataSource", options);
+            }
+          });
+        }}
+      />
       {/* Todo: think about validations */}
       {/*<Show when={props.page}>*/}
       {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}

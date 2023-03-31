@@ -1,12 +1,11 @@
 import { Vertex } from "../../lib/graph";
 
 export interface ComponentProps {
- meta: Vertex;
- data: Vertex;
+  meta: Vertex;
+  data: Vertex;
 
- errors?: string[];
- "aria-labeledby"?: string;
+  errors?: string[];
+  "aria-labeledby"?: string;
 
- setValue(attribute: Vertex, data: any): void;
+  setValue(attribute: Vertex, data: any): void;
 }
-
