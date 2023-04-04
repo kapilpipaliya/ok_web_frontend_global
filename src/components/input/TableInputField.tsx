@@ -1,4 +1,16 @@
-import { batch, createEffect, createMemo, createSignal, For, Match, Show, Switch, untrack, useContext } from "solid-js";
+import {
+  batch,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  Show,
+  Switch,
+  untrack,
+  useContext
+} from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 
 import {
@@ -13,7 +25,13 @@ import { css } from "solid-styled-components";
 import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions } from "./SelectInputField";
 import { ComponentProps } from "./Type";
 import { toTitle } from "case-switcher-js";
-import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "../../lib/Vertex";
+import {
+  addNewVertex,
+  deleteVertex,
+  findVertexByLabelAndUniqueId,
+  mergeVertexProperties,
+  newVertex, replaceVertexProperties
+} from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../../lib/graph";
@@ -21,6 +39,7 @@ import { bindOwner } from "solid-forms";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent, FormContext } from "../dynamicForm";
+import { addMetaVertexes, getCollAttrs, getProps } from "../Form";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -50,6 +69,36 @@ export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, la
   };
 }
 
+function componentProps(metaVertex: Vertex, data: Vertex) {
+  const metaRows = getSelectionOptions(data, metaVertex.properties.meta, "").vertexes || [];
+  const metaData = metaRows.reduce((acc, curr) => {
+    const key = getOptionLabel(curr, "->$0Key:properties.key");
+    if (key) {
+      acc[key] = curr.properties.value;
+    }
+    return acc;
+  }, {} as { [key: string]: any });
+  return metaData;
+}
+
+// add meta from vertex value:
+function addMeta(metaVertex: Vertex, data: Vertex ) {
+  if (metaVertex.properties.meta) {
+    const metaData = componentProps(metaVertex, data);
+
+    untrack(() => {
+      const newMetaData = Object.assign(
+       {},
+       // when component is rendered dynamically graph.vertexes[metaVertex.properties.templateId] value is undefined
+       graph.vertexes[metaVertex.properties.templateId]?.properties?.props || {},
+       metaData
+      );
+      mergeVertexProperties(getNewTxnId(), metaVertex.id, {
+        props: newMetaData
+      });
+    });
+  }
+}
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
@@ -69,17 +118,47 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     });
   });
 
-  const [sortedVertexes, setSortedIds] = createSignal([] as Vertex[]);
+  const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
+
+
+
+  // If props.meta.properties.attributes are not present and props.meta.props.collection is present then get attributes from the collection
+  if(!props.meta.properties.attributes && props.meta.properties.meta) {
+    const metaData = componentProps(props.meta, props.data);
+    if (metaData.collection) {
+      const collVertex = findVertexByLabelAndUniqueId("Coll", 'id', metaData.collection);
+      if(collVertex) {
+        const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
+        if (!vertexCollAttrResult.error) {
+          const vertexCollAttr = vertexCollAttrResult.vertexes!;
+          const attrs = []
+          for (const attr of vertexCollAttr) {
+            const props = getCollAttrs(attr, {labels: ['Empty'], properties: {}, out_edges: {}} as unknown as Vertex);
+            if(!props.error) attrs.push(props.attr);
+          }
+          const newProperties = klona(props.meta.properties);
+          newProperties.attributes = attrs;
+          replaceVertexProperties(getNewTxnId(), props.meta.id, newProperties);
+
+          addMetaVertexes(props.meta, attrs);
+          onCleanup(() => {
+            // TODO: MUST REMOVE vertexes
+          })
+        }
+      }
+    }
+  }
 
   createEffect(() => {
     const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
     const vertexes = (getChildVertexes([`${type}`], [props.data]).vertexes || []).sort(
       (a, b) => a.properties.pos - b.properties.pos,
     );
-    setSortedIds(vertexes);
+    setSortedVertexes(vertexes);
   });
 
-  // Todo dont allow duplicate value in the select field
+
+// Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex }) => {
     const sortable = createSortable(p.joinVertex.id);
 
@@ -162,29 +241,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 return metaVertex.properties.component;
               }
             });
-            // add meta from vertex value:
             // if mergeProps not keep reactivity use memo
             createEffect(() => {
-              if (metaVertex.properties.meta) {
-                const metaRows = getSelectionOptions(p.joinVertex, metaVertex.properties.meta, "").vertexes || [];
-                const metaData = metaRows.reduce((acc, curr) => {
-                  const key = getOptionLabel(curr, "->$0Key:properties.key");
-                  if (key) {
-                    acc[key] = curr.properties.value;
-                  }
-                  return acc;
-                }, {} as { [key: string]: any });
-                untrack(() => {
-                  const newMetaData = Object.assign(
-                    {},
-                    graph.vertexes[metaVertex.properties.templateId].properties.props || {},
-                    metaData,
-                  );
-                  mergeVertexProperties(getNewTxnId(), metaVertex.id, {
-                    props: newMetaData,
-                  });
-                });
-              }
+              addMeta(metaVertex, p.joinVertex);
             });
 
             return (

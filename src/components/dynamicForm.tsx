@@ -1,8 +1,25 @@
-import { createContext, createSignal, For, Match, onCleanup, onMount, Show, Switch, useContext } from "solid-js";
+import {
+  createContext, createMemo,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  onMount,
+  Show,
+  Switch,
+  useContext
+} from "solid-js";
 import { klona } from "klona/json";
 
 import { toTitle } from "case-switcher-js";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Id, Vertex } from "../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  Id,
+  Vertex
+} from "../lib/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
@@ -11,7 +28,7 @@ import {
   getOptionLabel,
   getSelectionOptions,
   SelectInputField,
-  setSelectionValue,
+  setSelectionValue
 } from "./input/SelectInputField";
 import { newRow, TableInputField } from "./input/TableInputField";
 
@@ -20,8 +37,11 @@ import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
 import { useNavigate } from "solid-app-router";
 import { capitalizeFirstLetter } from "../utils/utils";
-import { AbstractSingleForm, FieldAttribute, FormMetaData } from "./Form";
-import { GenericInputField } from "./input/GenaricInputField";
+import { AbstractSingleForm, addMetaVertexes, FormMetaData } from "./Form";
+import {
+  genericComponents,
+  GenericInputField
+} from "./input/GenaricInputField";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
@@ -76,6 +96,7 @@ const FormComponent = (props: {
 
   return <AbstractSingleForm config={{}} meta={newMeta} formId={props.formId} id={newVertex.id} />;
 };
+
 export const DynamicComponent = (props: {
   id: string;
   component: string;
@@ -83,31 +104,6 @@ export const DynamicComponent = (props: {
   data: Vertex;
   setValue(attribute: Vertex, data: any): void;
 }) => {
-  const genericComponents = [
-    "AutocompleteField",
-    "BulletField",
-    "CalendarField",
-    "CheckBoxField",
-    "CircularGaugeField",
-    "ColorBoxField",
-    "DateBoxField",
-    "DropDownBoxField",
-    "FileUploaderField",
-    "FilterBuilderField",
-    "HtmlEditorField",
-    "LinearGaugeField",
-    "NumberBoxField",
-    "ProgressBarField",
-    "RadioGroupField",
-    "RangeSelectorField",
-    "RangeSliderField",
-    "SelectBoxField",
-    "SliderField",
-    "SwitchField",
-    // "TagBoxField", // giving error with undefined values
-    "TextAreaField",
-    "TextBoxField",
-  ];
   return (
     <Switch>
       <Match when={props.component === "SelectBoxField"}>
@@ -153,22 +149,30 @@ export function DynamicForm(props: DynamicFormProps) {
     <For each={props.attributes}>
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.properties.id + "Label";
+        const component = createMemo(() => {
+          if (metaVertex.properties.component.includes("->") || metaVertex.properties.component.includes("<-")) {
+            // return getOptionLabel(metaVertex, metaVertex.properties.component);
+            return getOptionLabel(props.vertex, metaVertex.properties.component);
+          } else {
+            return metaVertex.properties.component;
+          }
+        });
         return (
           <Switch>
-            <Match when={metaVertex.properties.component === "TableField"}>
+            <Match when={component() === "TableField"}>
               <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
               <DynamicComponent
                 id={id}
-                component={metaVertex.properties.component}
+                component={component()}
                 meta={metaVertex}
                 data={props.vertex}
                 setValue={props.setValue}
               />
             </Match>
-            <Match when={metaVertex.properties.component === "CollectionOption"}>
+            <Match when={component() === "CollectionOption"}>
               <DynamicComponent
                 id={id}
-                component={metaVertex.properties.component}
+                component={component()}
                 meta={metaVertex}
                 data={props.vertex}
                 setValue={props.setValue}
@@ -182,7 +186,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 <div class="dx-field-value">
                   <DynamicComponent
                     id={id}
-                    component={metaVertex.properties.component}
+                    component={component()}
                     meta={metaVertex}
                     data={props.vertex}
                     setValue={props.setValue}
@@ -203,7 +207,6 @@ export interface DynamicFormSequenceProps {
   id?: Id;
   config: { [key: string]: any };
 }
-
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const form = klona(props.form);
   const { Ws } = useContext(WsContext);
@@ -258,27 +261,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   props.config["vertex"] = vertex;
   props.config["meta"] = metaVertex;
 
-  const addMetaVertexes = (vertex: Vertex, attributes: FieldAttribute[]) => {
-    for (const attribute of attributes) {
-      const addAttributeResult = newRow(getNewTxnId(), vertex, "MetaAttr");
-      if (addAttributeResult.error) {
-        alert(addAttributeResult.error);
-      }
-      // todo discard transaction
-
-      const attr = klona(attribute);
-      if (!attr.tab) attr.tab = "main";
-      if (!attr.group) attr.group = "main";
-      // if(attribute.component === "TableField") attribute.group = attribute.id;
-
-      mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
-
-      if (attribute.component === "TableField" && attribute.attributes) {
-        addMetaVertexes(graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
-      }
-      // todo discard transaction
-    }
-  };
   addMetaVertexes(metaVertex, form.attributes);
 
   onCleanup(() => {

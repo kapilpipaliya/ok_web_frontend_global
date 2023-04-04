@@ -163,6 +163,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "value",
+            meta: "->$0Key->$0ValueProp",
             component: "->AttrPropKey->CompPropComp:properties.id",
           },
         ],
@@ -346,6 +347,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               },
               {
                 id: "value",
+                meta: "->$0Key->$0ValueProp",
                 component: "->CollAttrPropKey->CompPropComp:properties.id",
               },
             ],
@@ -428,6 +430,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               },
               {
                 id: "value",
+                meta: "->$0Key->$0ValueProp",
                 component: "->CollChildPropKey->CompPropComp:properties.id",
               },
             ],
@@ -547,6 +550,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               },
               {
                 id: "value",
+                meta: "->$0Key->$0ValueProp",
                 component: "->FormAttrPropKey->CompPropComp:properties.id",
               },
             ],
@@ -670,6 +674,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   },
                   {
                     id: "value",
+                    meta: "->$0Key->$0ValueProp",
                     component: "->FormChildAttrPropKey->CompPropComp:properties.id",
                   },
                 ],

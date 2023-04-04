@@ -1,6 +1,19 @@
-import { createMemo, createUniqueId, For, onCleanup, splitProps, useContext } from "solid-js";
+import {
+  createMemo,
+  createUniqueId,
+  For,
+  onCleanup,
+  splitProps,
+  useContext
+} from "solid-js";
 import { Link, useNavigate } from "solid-app-router";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  Vertex
+} from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import { DynamicFormSequence, DynamicFormSequenceProps } from "./dynamicForm";
@@ -14,13 +27,20 @@ import {
   getParentVertex,
   SelectInputField,
   setParentValue,
-  setSelectionValue,
+  setSelectionValue
 } from "./input/SelectInputField";
 import { AttrsTableData } from "./api";
 import csvtojson from "csvtojson";
-import { addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties } from "../lib/Vertex";
+import {
+  addNewVertex,
+  findVertexByLabelAndUniqueId,
+  mergeVertexProperties,
+  newVertex,
+  replaceVertexProperties
+} from "../lib/Vertex";
 import { A, D } from "@mobily/ts-belt";
 import { newRow } from "./input/TableInputField";
+import { klona } from "klona";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -54,18 +74,15 @@ export interface FormMetaData {
   // postSubmit?: (data: any) => any
 }
 
-const addProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribute } => {
-  const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);
-  if (vertexCollAttrResult.error) return { error: true };
-  const vertexCollAttr = vertexCollAttrResult.vertex!;
+export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr: Vertex) {
   const vertexAttrResult = getChildVertex(["CollAttrAttr"], vertexCollAttr);
   if (vertexAttrResult.error) return { error: true };
   const vertexAttr = vertexAttrResult.vertex!;
   const attr = Object.assign(
-    {},
-    removeUndefinedProperties(vertexAttr.properties, false, 10),
-    removeUndefinedProperties(vertexCollAttr.properties, false, 10),
-    removeUndefinedProperties(vertexFormAttr.properties, false, 10),
+   {},
+   removeUndefinedProperties(vertexAttr.properties, false, 10),
+   removeUndefinedProperties(vertexCollAttr.properties, false, 10),
+   removeUndefinedProperties(vertexFormAttr.properties, false, 10)
   );
 
   // find components for all levels
@@ -100,9 +117,9 @@ const addProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribu
       return acc;
     }, {} as { [key: string]: any });
     formProps = Object.assign(
-      {},
-      removeUndefinedProperties(collProps, false, 10),
-      removeUndefinedProperties(formProps, false, 10),
+     {},
+     removeUndefinedProperties(collProps, false, 10),
+     removeUndefinedProperties(formProps, false, 10)
     );
   }
 
@@ -115,9 +132,9 @@ const addProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribu
       return acc;
     }, {} as { [key: string]: any });
     formProps = Object.assign(
-      {},
-      removeUndefinedProperties(attrProps, false, 10),
-      removeUndefinedProperties(formProps, false, 10),
+     {},
+     removeUndefinedProperties(attrProps, false, 10),
+     removeUndefinedProperties(formProps, false, 10)
     );
   }
 
@@ -139,13 +156,13 @@ const addProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribu
   const parentVertexResult = getParentVertex(["ChildComp"], comp);
   if (!parentVertexResult.error) {
     const parentCompProps = (getChildVertexes(["CompProp"], [parentVertexResult.vertex!]).vertexes || []).reduce(
-      (acc, curr) => {
-        if (curr.properties.key) {
-          acc[curr.properties.key] = curr.properties.value;
-        }
-        return acc;
-      },
-      {} as { [key: string]: any },
+     (acc, curr) => {
+       if (curr.properties.key) {
+         acc[curr.properties.key] = curr.properties.value;
+       }
+       return acc;
+     },
+     {} as { [key: string]: any }
     );
     formProps = Object.assign({}, removeUndefinedProperties(parentCompProps, false, 10), formProps);
     attr.component = parentVertexResult.vertex!.properties.id;
@@ -154,6 +171,13 @@ const addProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribu
   }
   attr.props = formProps;
   return { error: false, attr };
+}
+
+export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribute } => {
+  const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);
+  if (vertexCollAttrResult.error) return { error: true };
+  const vertexCollAttr = vertexCollAttrResult.vertex!;
+  return getCollAttrs(vertexCollAttr, vertexFormAttr);
 };
 
 export const getFormApiFromForm = (formId: string): { error: string; form?: FormMetaData } => {
@@ -180,7 +204,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
   let attrs: FieldAttribute[] = [];
 
   for (const vertexFormAttr of formAttrs) {
-    const addPropsResult = addProps(vertexFormAttr);
+    const addPropsResult = getProps(vertexFormAttr);
     if (addPropsResult.error) continue;
     attrs.push(addPropsResult.attr!);
   }
@@ -200,7 +224,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
     let tableAttrs: FieldAttribute[] = [];
     for (const vertexFormChildAttr of formChildAttrs) {
-      const addPropsResult = addProps(vertexFormChildAttr);
+      const addPropsResult = getProps(vertexFormChildAttr);
       if (addPropsResult.error) continue;
       tableAttrs.push(addPropsResult.attr!);
     }
@@ -766,4 +790,25 @@ export const SimpleImport = (props: {}) => {
       </div>
     </>
   );
+};
+export const addMetaVertexes = (vertex: Vertex, attributes: FieldAttribute[]) => {
+  for (const attribute of attributes) {
+    const addAttributeResult = newRow(getNewTxnId(), vertex, "MetaAttr");
+    if (addAttributeResult.error) {
+      alert(addAttributeResult.error);
+    }
+    // todo discard transaction
+
+    const attr = klona(attribute);
+    if (!attr.tab) attr.tab = "main";
+    if (!attr.group) attr.group = "main";
+    // if(attribute.component === "TableField") attribute.group = attribute.id;
+
+    mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
+
+    if (attribute.component === "TableField" && attribute.attributes) {
+      addMetaVertexes(graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
+    }
+    // todo discard transaction
+  }
 };
