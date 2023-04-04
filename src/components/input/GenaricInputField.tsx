@@ -23,7 +23,31 @@ import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/te
 import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
 
 import { ComponentProps } from "./Type";
-
+export const genericComponents = [
+  "AutocompleteField",
+  "BulletField",
+  "CalendarField",
+  "CheckBoxField",
+  "CircularGaugeField",
+  "ColorBoxField",
+  "DateBoxField",
+  "DropDownBoxField",
+  "FileUploaderField",
+  "FilterBuilderField",
+  "HtmlEditorField",
+  "LinearGaugeField",
+  "NumberBoxField",
+  "ProgressBarField",
+  "RadioGroupField",
+  "RangeSelectorField",
+  "RangeSliderField",
+  "SelectBoxField",
+  "SliderField",
+  "SwitchField",
+  // "TagBoxField", // giving error with undefined values
+  "TextAreaField",
+  "TextBoxField",
+];
 export function GenericInputField(props: ComponentProps & { component: string }) {
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
