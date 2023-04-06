@@ -21,10 +21,6 @@ import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getOptionLabel,
-  getParentVertex,
   SelectInputField,
   setParentValue,
   setSelectionValue
@@ -41,6 +37,11 @@ import {
 import { A, D } from "@mobily/ts-belt";
 import { newRow } from "./input/TableInputField";
 import { klona } from "klona";
+import {
+  getChildVertex,
+  getChildVertexes,
+  getOptionLabel, getParentVertex
+} from "../lib/Traverse";
 
 // TODO make default component property applied to
 export const AllForms = () => {

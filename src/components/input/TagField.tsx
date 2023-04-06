@@ -3,10 +3,17 @@ import { createEffect, createResource, on, useContext } from "solid-js";
 import TagBox, { Properties } from "devextreme/ui/tag_box";
 import { ComponentProps } from "./Type";
 import { commitTxn, getNewTxnId } from "../../lib/graph";
-import { getOptionLabel, getSelectedVertexValue, getSelectionOptions, setSelectionValue } from "./SelectInputField";
+import { setSelectionValue } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
 import { FormContext, onChangeHandler } from "../dynamicForm";
+import {
+ getOptionLabel,
+ getSelectedVertexValue,
+ getSelectionOptions
+} from "../../lib/Traverse";
 
+// TODO: Add support for multiple string values.
+// TODO: Add support for inward values
 export function TagField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
@@ -16,7 +23,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
   }
 
   const [selectOptions, { refetch }] = createResource(() => {
-    return getSelectionOptions(props.data, props.meta.properties.props.collection, "").vertexes || [];
+    return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
   });
 
   return (

@@ -22,7 +22,6 @@ import {
   SortableProvider,
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions } from "./SelectInputField";
 import { ComponentProps } from "./Type";
 import { toTitle } from "case-switcher-js";
 import {
@@ -39,7 +38,13 @@ import { bindOwner } from "solid-forms";
 import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent, FormContext } from "../dynamicForm";
-import { addMetaVertexes, getCollAttrs, getProps } from "../Form";
+import { addMetaVertexes, getCollAttrs } from "../Form";
+import {
+  getChildVertex,
+  getChildVertexes,
+  getOptionLabel,
+  getSelectionOptions
+} from "../../lib/Traverse";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -70,7 +75,7 @@ export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, la
 }
 
 function componentProps(metaVertex: Vertex, data: Vertex) {
-  const metaRows = getSelectionOptions(data, metaVertex.properties.meta, "").vertexes || [];
+  const metaRows = getSelectionOptions(data, metaVertex.properties.meta).vertexes || [];
   const metaData = metaRows.reduce((acc, curr) => {
     const key = getOptionLabel(curr, "->$0Key:properties.key");
     if (key) {
@@ -234,7 +239,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         <For each={rowColumnsMetaAttrs}>
           {(metaVertex) => {
             const component = createMemo(() => {
-              if (metaVertex.properties.component.includes("->") || metaVertex.properties.component.includes("<-")) {
+              if (metaVertex.properties.component.includes("-")) {
                 // return getOptionLabel(metaVertex, metaVertex.properties.component);
                 return getOptionLabel(p.joinVertex, metaVertex.properties.component);
               } else {
