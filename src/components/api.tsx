@@ -85,7 +85,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBoxField",
                 props: {
                   displayExpr: "properties.key",
-                  collection: "$0<-$0Comp->$0Prop",
+                  collection: "-$0->$0Comp->$0Prop",
                 },
               },
               {
@@ -96,7 +96,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "value",
-            // component: "MetaAttr<-MetaAttr[*properties:id=type]:properties.id",
+            // component: "-MetaAttr->MetaAttr[*properties:id=type]:properties.id",
             meta: "->$0ValueProp",
             component: "->$0Comp:properties.id",
           },
@@ -158,7 +158,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBoxField",
             props: {
               displayExpr: "properties.key",
-              collection: "AttrProp<-AttrComp->CompProp",
+              collection: "-AttrProp->AttrComp->CompProp",
             },
           },
           {
@@ -273,14 +273,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBoxField",
             props: {
               displayExpr: "properties.id",
-              collection: "CollAttr<-CollTab",
+              collection: "-CollAttr->CollTab",
             },
           },
           {
             id: "group",
             component: "SelectBoxField",
             props: {
-              collection: "CollAttr<-CollGroup",
+              collection: "-CollAttr->CollGroup",
               displayExpr: "properties.id",
             },
           },
@@ -342,7 +342,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBoxField",
                 props: {
                   displayExpr: "properties.key",
-                  collection: "CollAttrProp<-CollAttrComp->CompProp||CollAttrProp<-CollAttrAttr->AttrComp->CompProp",
+                  collection: "-CollAttrProp->CollAttrComp->CompProp||-CollAttrProp->CollAttrAttr->AttrComp->CompProp",
                 },
               },
               {
@@ -404,14 +404,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBoxField",
             props: {
               displayExpr: "properties.id",
-              collection: "CollChild<-CollTab",
+              collection: "-CollChild->CollTab",
             },
           },
           {
             id: "group",
             component: "SelectBoxField",
             props: {
-              collection: "CollChild<-CollGroup",
+              collection: "-CollChild->CollGroup",
               displayExpr: "properties.id",
             },
           },
@@ -471,14 +471,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBoxField",
             props: {
               displayExpr: "->CollAttrAttr:properties.id",
-              collection: "CollForm<-FormAttr<-CollAttr",
+              collection: "-FormAttr-CollForm->CollAttr",
             },
           },
           {
             id: "tab",
             component: "SelectBoxField",
             props: {
-              collection: "CollForm<-FormAttr<-CollTab",
+              collection: "-FormAttr-CollForm->CollTab",
               displayExpr: "properties.id",
               defaultValue: "FormAttrAttr->CollAttrTab:properties.id",
             },
@@ -487,7 +487,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             id: "group",
             component: "SelectBoxField",
             props: {
-              collection: "CollForm<-FormAttr<-CollGroup",
+              collection: "-FormAttr-CollForm->CollGroup",
               displayExpr: "properties.id",
               defaultValue: "FormAttrAttr->CollAttrGroup:properties.id",
             },
@@ -545,7 +545,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 props: {
                   displayExpr: "properties.key",
                   collection:
-                    "FormAttrProp<-FormAttrComp->CompProp||FormAttrProp<-FormAttrAttr->CollAttrAttr->AttrComp->CompProp",
+                    "-FormAttrProp->FormAttrComp->CompProp||-FormAttrProp->FormAttrAttr->CollAttrAttr->AttrComp->CompProp",
                 },
               },
               {
@@ -569,16 +569,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBoxField",
             props: {
               displayExpr: "->CollChildColl:properties.id",
-              collection: "CollForm<-FormChild<-CollChild",
+              collection: "-FormChild-CollForm->CollChild",
               // displayExpr: "id",
-              // collection: "CollForm<-FormChild"
+              // collection: "-CollForm->FormChild"
             },
           },
           {
             id: "tab",
             component: "SelectBoxField",
             props: {
-              collection: "CollForm<-FormChild<-CollTab",
+              collection: "-FormChild-CollForm->CollTab",
               displayExpr: "properties.id",
               defaultValue: "FormChildColl->CollChildTab:properties.id",
             },
@@ -587,7 +587,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             id: "group",
             component: "SelectBoxField",
             props: {
-              collection: "CollForm<-FormChild<-CollGroup",
+              collection: "-FormChild-CollForm->CollGroup",
               displayExpr: "properties.id",
               defaultValue: "FormChildColl->CollChildGroup:properties.id",
             },
@@ -603,7 +603,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBoxField",
                 props: {
                   displayExpr: "->CollAttrAttr:properties.id",
-                  collection: "FormChildAttr<-FormChildColl->CollChildColl->CollAttr",
+                  collection: "-FormChildAttr->FormChildColl->CollChildColl->CollAttr",
                 },
               },
               {
@@ -669,7 +669,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     props: {
                       displayExpr: "properties.key",
                       collection:
-                        "FormChildAttrProp<-FormChildAttrComp->CompProp||FormChildAttrProp<-FormChildAttrAttr->CollAttrAttr->AttrComp->CompProp",
+                        "-FormChildAttrProp->FormChildAttrComp->CompProp||-FormChildAttrProp->FormChildAttrAttr->CollAttrAttr->AttrComp->CompProp",
                     },
                   },
                   {

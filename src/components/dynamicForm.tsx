@@ -24,9 +24,6 @@ import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
 import {
-  getChildVertexes,
-  getOptionLabel,
-  getSelectionOptions,
   SelectInputField,
   setSelectionValue
 } from "./input/SelectInputField";
@@ -42,6 +39,11 @@ import {
   genericComponents,
   GenericInputField
 } from "./input/GenaricInputField";
+import {
+  getChildVertexes,
+  getOptionLabel,
+  getSelectionOptions
+} from "../lib/Traverse";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
@@ -51,7 +53,7 @@ export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttri
   try {
     const args = JSON.parse(changedFieldAttribute.properties.props.onchange);
 
-    const attribute = (getSelectionOptions(changedFieldAttribute, "MetaAttr<-MetaAttr", "").vertexes || []).find(
+    const attribute = (getSelectionOptions(changedFieldAttribute, "-MetaAttr->MetaAttr").vertexes || []).find(
       (vertex) => vertex.properties.id === args[0],
     );
     if (!attribute) {
@@ -78,13 +80,13 @@ const FormComponent = (props: {
   const { Ws } = useContext(WsContext);
   const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
 
-  const attributes = getSelectionOptions(props.meta, "->MetaAttr", "");
+  const attributes = getSelectionOptions(props.meta, "->MetaAttr");
   const newMeta = attributes.error
     ? graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttr").vertexId!]
     : attributes.vertexes![0];
   mergeVertexProperties(getNewTxnId(), newMeta.id, { id: type });
 
-  const vertexes = getSelectionOptions(props.data, `->${type}`, "");
+  const vertexes = getSelectionOptions(props.data, `->${type}`);
   let newVertex: any;
   if (vertexes.error) {
     const txnId = getNewTxnId();
@@ -106,6 +108,7 @@ export const DynamicComponent = (props: {
 }) => {
   return (
     <Switch>
+      <Match when={!props.component}>NO INPUT</Match>
       <Match when={props.component === "SelectBoxField"}>
         <SelectInputField aria-labeledby={props.id} data={props.data} meta={props.meta} setValue={props.setValue} />
       </Match>
@@ -150,7 +153,7 @@ export function DynamicForm(props: DynamicFormProps) {
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.properties.id + "Label";
         const component = createMemo(() => {
-          if (metaVertex.properties.component.includes("->") || metaVertex.properties.component.includes("<-")) {
+          if (metaVertex.properties.component.includes("-")) {
             // return getOptionLabel(metaVertex, metaVertex.properties.component);
             return getOptionLabel(props.vertex, metaVertex.properties.component);
           } else {
