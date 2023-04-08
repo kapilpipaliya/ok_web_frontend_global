@@ -35,7 +35,7 @@ import {
   replaceVertexProperties
 } from "../lib/Vertex";
 import { A, D } from "@mobily/ts-belt";
-import { newRow } from "./input/TableInputField";
+import { deleteRow, newRow } from "./input/TableInputField";
 import { klona } from "klona";
 import {
   getChildVertex,
@@ -405,31 +405,6 @@ export const SimpleImport = (props: {}) => {
   const { Ws } = useContext(WsContext);
   const config = {} as { vertex: Vertex };
 
-  const onImportClick = () => {
-    const csvResult = config.vertex.properties.csv;
-    const label = config.vertex.properties.label;
-    const txnId = getNewTxnId();
-
-    const converter = csvtojson({
-      // noheader:true,
-      trim: true,
-      // checkColumn: true,
-      delimiter: [",", "\t"]
-    });
-    converter
-      .fromString(csvResult as string)
-      .on("data", (data) => {
-        //data is a buffer object
-        const jsonStr = data.toString("utf8");
-
-        addNewVertex(txnId, newVertex(getNewGraphId(), [label], JSON.parse(jsonStr)));
-        console.log(JSON.parse(jsonStr));
-      })
-      .on("end", () => {
-        commitTxn(txnId, Ws);
-      });
-  };
-
   interface Column {
     column: string;
     attrId: string;
@@ -694,6 +669,10 @@ export const SimpleImport = (props: {}) => {
         setValue={(attr, data) => {
           const txnId = getNewTxnId();
           const dry = true;
+          const vertexes = (getChildVertexes(["SimpleImportMeta"], [config.vertex]).vertexes || []);
+          for (const row of vertexes) {
+            deleteRow(row, false, Ws);
+          }
           switch (data) {
             case "component": {
               replaceVertexProperties(txnId, config.vertex.id, {
@@ -780,25 +759,19 @@ export const SimpleImport = (props: {}) => {
         }}
       />
       <AbstractSingleForm id={"new"} formId={"SimpleImport"} config={config} />
-      <div>
-        <span>Simple Import will add all properties in a vertex</span>
-        <button type={"button"} onClick={onImportClick}>
-          Simple Import
-        </button>
-      </div>
+
       <div></div>
       <div>
-        <span>Data Type Import will import all the Data Directory</span>
         <button type={"button"} onClick={onDataDirectoryImportClick}>
-          Data Directory Import
+          Import
         </button>
       </div>
     </>
   );
 };
-export const addMetaVertexes = (vertex: Vertex, attributes: FieldAttribute[]) => {
+export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
-    const addAttributeResult = newRow(getNewTxnId(), vertex, "MetaAttr");
+    const addAttributeResult = newRow(txnId, vertex, "MetaAttr");
     if (addAttributeResult.error) {
       alert(addAttributeResult.error);
     }
@@ -809,10 +782,10 @@ export const addMetaVertexes = (vertex: Vertex, attributes: FieldAttribute[]) =>
     if (!attr.group) attr.group = "main";
     // if(attribute.component === "TableField") attribute.group = attribute.id;
 
-    mergeVertexProperties(getNewTxnId(), addAttributeResult.vertexId!, attr);
+    mergeVertexProperties(txnId, addAttributeResult.vertexId!, attr);
 
     if (attribute.component === "TableField" && attribute.attributes) {
-      addMetaVertexes(graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
+      addMetaVertexes(txnId, graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
     }
     // todo discard transaction
   }
