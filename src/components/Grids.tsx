@@ -224,6 +224,9 @@ export const DataGrid = (props: DataGridProps) => {
           rowAlternationEnabled: true,
           showRowLines: true,
           showColumnLines: true,
+          paging: {
+            pageSize: 200
+          },
           ...customProps,
         });
         const deleteObject = (id: Id) => {
