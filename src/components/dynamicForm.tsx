@@ -17,7 +17,7 @@ import {
   getNewGraphId,
   getNewTxnId,
   graph,
-  Id,
+  Id, revertTransaction,
   Vertex
 } from "../lib/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
@@ -249,11 +249,12 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   // save attributes to vertexes
   let metaVertex: Vertex;
+  const metaTxnId = getNewTxnId();
   if (props.meta) {
     metaVertex = props.meta;
   } else {
     const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
-    const { error } = addNewVertex(getNewTxnId(), metaMainVertex);
+    const { error } = addNewVertex(metaTxnId, metaMainVertex);
     if (error) {
       alert(error);
       return;
@@ -264,7 +265,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   props.config["vertex"] = vertex;
   props.config["meta"] = metaVertex;
 
-  addMetaVertexes(metaVertex, form.attributes);
+  addMetaVertexes(metaTxnId,metaVertex, form.attributes);
+  onCleanup(() => revertTransaction(metaTxnId));
 
   onCleanup(() => {
     if (!props.meta) {

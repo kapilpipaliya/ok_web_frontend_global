@@ -33,9 +33,16 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  revertTransaction,
+  Vertex
+} from "../../lib/graph";
 import { bindOwner } from "solid-forms";
-import { WsContext } from "../ws_events_dispatcher";
+import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent, FormContext } from "../dynamicForm";
 import { addMetaVertexes, getCollAttrs } from "../Form";
@@ -119,6 +126,34 @@ function addMeta(metaVertex: Vertex, data: Vertex ) {
     });
   }
 }
+
+export function deleteRow(vertex: Vertex, local: boolean, Ws: ServerEventsDispatcher) {
+  batch(() => {
+    const txnId = getNewTxnId();
+    // delete all vertex in edges
+    const inEdges = vertex.in_edges;
+    for (const type in inEdges) {
+      for (const edgeId of inEdges[type]) {
+        const deleteEdgeResult = deleteEdge(txnId, edgeId);
+        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+      }
+    }
+    // delete all outEdges of vertex
+    const outEdge = vertex.out_edges;
+    for (const type in outEdge) {
+      for (const edgeId of outEdge[type]) {
+        const deleteEdgeResult = deleteEdge(txnId, edgeId);
+        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+      }
+    }
+
+    // delete vertex:
+    const deleteResult = deleteVertex(txnId, vertex.id);
+    if (deleteResult.error) alert(deleteResult.error);
+    if (!local) commitTxn(txnId, Ws);
+  });
+}
+
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
@@ -160,9 +195,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           newProperties.attributes = attrs;
           replaceVertexProperties(getNewTxnId(), props.meta.id, newProperties);
 
-          addMetaVertexes(props.meta, attrs);
+          const txnId = getNewTxnId();
+          addMetaVertexes(txnId, props.meta, attrs);
           onCleanup(() => {
-            // TODO: MUST REMOVE vertexes
+            revertTransaction(txnId);
           })
         }
       }
@@ -182,33 +218,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const SortableRow = (p: { joinVertex: Vertex }) => {
     const sortable = createSortable(p.joinVertex.id);
 
-    const deleteRow = () => {
-      batch(() => {
-        const txnId = getNewTxnId();
-        // delete all vertex in edges
-        const inEdges = p.joinVertex.in_edges;
-        for (const type in inEdges) {
-          for (const edgeId of inEdges[type]) {
-            const deleteEdgeResult = deleteEdge(txnId, edgeId);
-            if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-          }
-        }
-        // delete all outEdges of vertex
-        const outEdge = p.joinVertex.out_edges;
-        for (const type in outEdge) {
-          for (const edgeId of outEdge[type]) {
-            const deleteEdgeResult = deleteEdge(txnId, edgeId);
-            if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-          }
-        }
-
-        // delete vertex:
-        const deleteResult = deleteVertex(txnId, p.joinVertex.id);
-        if (deleteResult.error) alert(deleteResult.error);
-        if (!local) commitTxn(txnId, Ws);
-      });
-    };
-
     // columns
     const tableColumnsTemplate = getChildVertexes(["MetaAttr"], [props.meta]); //.sort((a, b) => a.properties.pos - b.properties.pos);
     if (tableColumnsTemplate.error) {
@@ -217,26 +226,32 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const rowMetaAttrInst = getChildVertex(["AttrInst"], p.joinVertex);
 
     if (rowMetaAttrInst.error) {
+      const metaTxnId = getNewTxnId();
       batch(() => {
-        const metaInstanceResult = newRow(getNewTxnId(), p.joinVertex, "AttrInst");
+        const metaInstanceResult = newRow(metaTxnId, p.joinVertex, "AttrInst");
         if (metaInstanceResult.error) {
           alert("Error creating a row for attribute instance");
         }
-        mergeVertexProperties(getNewTxnId(), metaInstanceResult.vertexId!, {
+        mergeVertexProperties(metaTxnId, metaInstanceResult.vertexId!, {
           templateId: props.meta.id,
         });
 
         for (const attrColumn of tableColumnsTemplate.vertexes!) {
-          const AttrInstResult = newRow(getNewTxnId(), graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
+          const AttrInstResult = newRow(metaTxnId, graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
           if (AttrInstResult.error) {
             alert(AttrInstResult.error);
           }
-          mergeVertexProperties(getNewTxnId(), AttrInstResult.vertexId!, klona(attrColumn.properties));
-          mergeVertexProperties(getNewTxnId(), AttrInstResult.vertexId!, {
+          mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.properties));
+          mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, {
             templateId: attrColumn.id,
           });
         }
       });
+      onCleanup(() => {
+        // NOT sure if this works or not, if it causes problems when switching tabs, then comment this line;
+        // remove all AttrInst vertex.
+        revertTransaction(metaTxnId);
+      })
     }
 
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
@@ -324,7 +339,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         <DisplayProperties />
         <td>
           <div class="flex">
-            <button type="button" onclick={deleteRow} title="Delete Row">
+            <button type="button" onclick={() => deleteRow(p.joinVertex, local, Ws)} title="Delete Row">
               <Icon icon="ion:close-circle-outline" />
             </button>
           </div>
