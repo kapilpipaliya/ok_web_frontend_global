@@ -360,15 +360,13 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
   const columnIndex = displayExpr.lastIndexOf(":");
   pattern = displayExpr.slice(0, columnIndex);
   projection = displayExpr.slice(columnIndex + 1);
- }
- if (!pattern) {
+ } else {
   pattern = displayExpr;
- }
- if (!projection) {
   projection = "id";
  }
-
- if (pattern.includes("-") || pattern.includes("->")) {
+ if (!pattern) {
+  return getTextValue(path(projection, vertex)!);
+ } else if (pattern.includes("-") || pattern.includes("->")) {
   const childrenResult = getSelectionOptions(vertex, pattern, );
   if (childrenResult.error) {
    return "";

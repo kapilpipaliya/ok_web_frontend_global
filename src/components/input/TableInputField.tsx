@@ -45,6 +45,7 @@ import {
   getOptionLabel,
   getSelectionOptions
 } from "../../lib/Traverse";
+import { removeUndefinedProperties } from "../../utils/functions";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -74,10 +75,9 @@ export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, la
   };
 }
 
-function componentProps(metaVertex: Vertex, data: Vertex) {
-  const metaRows = getSelectionOptions(data, metaVertex.properties.meta).vertexes || [];
+function getComponentProperties(metaRows: Vertex[]) {
   const metaData = metaRows.reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->$0Key:properties.key");
+    const key = getOptionLabel(curr, "->$0Key:properties.key||:properties.key");
     if (key) {
       acc[key] = curr.properties.value;
     }
@@ -86,17 +86,32 @@ function componentProps(metaVertex: Vertex, data: Vertex) {
   return metaData;
 }
 
+// TODO: when meta changed realtime its not updating.
+function componentProps(metaVertex: Vertex, data: Vertex) {
+  const meta = metaVertex.properties.meta.split('+');
+  const results = [] as {[key: string]: any}[];
+  for (const metaPart of meta) {
+    const metaRows = getSelectionOptions(data, metaPart).vertexes || [];
+    const metaData = getComponentProperties(metaRows);
+    results.push(metaData);
+  }
+  return results.reduce((acc, curr) => {
+    Object.assign(acc, curr);
+    return acc;
+  },{} as {[key: string]: any})
+}
+
 // add meta from vertex value:
 function addMeta(metaVertex: Vertex, data: Vertex ) {
   if (metaVertex.properties.meta) {
     const metaData = componentProps(metaVertex, data);
-
+    const metaDataVal = removeUndefinedProperties(metaData, false, 10)
     untrack(() => {
       const newMetaData = Object.assign(
        {},
        // when component is rendered dynamically graph.vertexes[metaVertex.properties.templateId] value is undefined
        graph.vertexes[metaVertex.properties.templateId]?.properties?.props || {},
-       metaData
+       metaDataVal
       );
       mergeVertexProperties(getNewTxnId(), metaVertex.id, {
         props: newMetaData
@@ -168,28 +183,30 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const sortable = createSortable(p.joinVertex.id);
 
     const deleteRow = () => {
-      const txnId = getNewTxnId();
-      // delete all vertex in edges
-      const inEdges = p.joinVertex.in_edges;
-      for (const type in inEdges) {
-        for (const edgeId of inEdges[type]) {
-          const deleteEdgeResult = deleteEdge(txnId, edgeId);
-          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+      batch(() => {
+        const txnId = getNewTxnId();
+        // delete all vertex in edges
+        const inEdges = p.joinVertex.in_edges;
+        for (const type in inEdges) {
+          for (const edgeId of inEdges[type]) {
+            const deleteEdgeResult = deleteEdge(txnId, edgeId);
+            if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+          }
         }
-      }
-      // delete all outEdges of vertex
-      const outEdge = p.joinVertex.out_edges;
-      for (const type in outEdge) {
-        for (const edgeId of outEdge[type]) {
-          const deleteEdgeResult = deleteEdge(txnId, edgeId);
-          if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        // delete all outEdges of vertex
+        const outEdge = p.joinVertex.out_edges;
+        for (const type in outEdge) {
+          for (const edgeId of outEdge[type]) {
+            const deleteEdgeResult = deleteEdge(txnId, edgeId);
+            if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+          }
         }
-      }
 
-      // delete vertex:
-      const deleteResult = deleteVertex(txnId, p.joinVertex.id);
-      if (deleteResult.error) alert(deleteResult.error);
-      if (!local) commitTxn(txnId, Ws);
+        // delete vertex:
+        const deleteResult = deleteVertex(txnId, p.joinVertex.id);
+        if (deleteResult.error) alert(deleteResult.error);
+        if (!local) commitTxn(txnId, Ws);
+      });
     };
 
     // columns

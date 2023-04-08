@@ -413,6 +413,8 @@ export const SimpleImport = (props: {}) => {
     const converter = csvtojson({
       // noheader:true,
       trim: true,
+      // checkColumn: true,
+      delimiter: [",", "\t"]
     });
     converter
       .fromString(csvResult as string)
@@ -481,6 +483,8 @@ export const SimpleImport = (props: {}) => {
 
     const converter = csvtojson({
       trim: true,
+      // checkColumn: true,
+      delimiter: [",", "\t"]
     });
 
     const metaData = getChildVertexes(["$0Meta"], [config.vertex]);
