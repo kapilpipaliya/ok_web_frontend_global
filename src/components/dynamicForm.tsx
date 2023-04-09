@@ -245,7 +245,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     divRef()?.querySelector("input")?.focus();
   });
 
-  const { attributes: _, ...custom } = props.form;
+  const { attributes, ...custom } = props.form;
 
   // save attributes to vertexes
   let metaVertex: Vertex;
@@ -265,8 +265,10 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   props.config["vertex"] = vertex;
   props.config["meta"] = metaVertex;
 
-  addMetaVertexes(metaTxnId,metaVertex, form.attributes);
-  onCleanup(() => revertTransaction(metaTxnId));
+  addMetaVertexes(metaTxnId,metaVertex, attributes);
+  onCleanup(() => {
+    revertTransaction(metaTxnId)
+  });
 
   onCleanup(() => {
     if (!props.meta) {
@@ -301,9 +303,15 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     onChangeHandler(txnId, vertex, attribute);
     if (!form.local) commitTxn(txnId, Ws);
   };
+  const cleanUpConfig = {} as {[key: string]: any};
+  onCleanup(() => {
+    for (const rowMetaTxnId of (cleanUpConfig.rowMetaTxnIds || [])) {
+      revertTransaction(rowMetaTxnId);
+    }
+  })
 
   return (
-    <FormContext.Provider value={{ local: form.local }}>
+    <FormContext.Provider value={{ local: form.local, cleanUpConfig }}>
       <div ref={setDivRef} class="form">
         {/* Main Tab is display as top level fields */}
         <Show when={groupByTabsAndGroup["main"]}>

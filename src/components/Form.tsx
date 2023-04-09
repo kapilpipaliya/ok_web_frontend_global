@@ -50,7 +50,7 @@ export const AllForms = () => {
   const allForms = () => graph.vertexLabelIdMap["Form"]?.map((formVertex) => graph.vertexes[formVertex]) || [];
 
   return (
-    <div class="flex flex:row flex:wrap">
+    <div class="">
       <For each={allForms()}>{(form) => <Link href={`/${form.properties.id}/new`}>{form.properties.id}</Link>}</For>
     </div>
   );
@@ -290,7 +290,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
   const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
   return (
-    <div class="flex flex:row flex:wrap">
+    <div class="">
       <DynamicFormSequence form={form!} id={id()} {...customProps} config={props.config || {}} />
     </div>
   );
@@ -779,6 +779,7 @@ export const SimpleImport = (props: {}) => {
 };
 export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
+
     const addAttributeResult = newRow(txnId, vertex, "MetaAttr");
     if (addAttributeResult.error) {
       alert(addAttributeResult.error);
