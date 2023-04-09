@@ -1,7 +1,7 @@
 import { createEffect, createSignal, Show } from "solid-js";
 import { backupToIndexDB, backupToJson, graph, resetDatabase, restoreFromIndexDB, restoreFromJson } from "../lib/graph";
 import { GraphView } from "../components/GraphView";
-import { Link } from "solid-app-router";
+import { Link } from "@solidjs/router";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;

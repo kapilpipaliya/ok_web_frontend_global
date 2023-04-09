@@ -31,7 +31,7 @@ import { newRow, TableInputField } from "./input/TableInputField";
 import { TagField } from "./input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A } from "@mobily/ts-belt";
-import { useNavigate } from "solid-app-router";
+import { useNavigate } from "@solidjs/router";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { AbstractSingleForm, addMetaVertexes, FormMetaData } from "./Form";
 import {

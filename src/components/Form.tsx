@@ -6,7 +6,7 @@ import {
   splitProps,
   useContext
 } from "solid-js";
-import { Link, useNavigate } from "solid-app-router";
+import { Link, useNavigate } from "@solidjs/router";
 import {
   commitTxn,
   getNewGraphId,
