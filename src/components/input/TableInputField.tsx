@@ -19,7 +19,7 @@ import {
   DragDropProvider,
   DragDropSensors,
   DragEventHandler,
-  SortableProvider,
+  SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { ComponentProps } from "./Type";
@@ -29,7 +29,8 @@ import {
   deleteVertex,
   findVertexByLabelAndUniqueId,
   mergeVertexProperties,
-  newVertex, replaceVertexProperties
+  newVertex,
+  replaceVertexProperties
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
@@ -53,6 +54,7 @@ import {
   getSelectionOptions
 } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
+import { ButtonGroupField } from "../core/ButtonGroup";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -338,11 +340,25 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         </td>
         <DisplayProperties />
         <td>
-          <div class="flex">
-            <button type="button" onclick={() => deleteRow(p.joinVertex, local, Ws)} title="Delete Row">
-              <Icon icon="ion:close-circle-outline" />
-            </button>
-          </div>
+            <ButtonGroupField
+             meta={{
+               properties: {
+                 id: "meta",
+                 props: {
+                   keyExpr: "id",
+                   items: [
+                     {
+                       icon: "trash",
+                       id: "delete",
+                       hint: "Delete Row"
+                     }
+                   ]
+                 }
+               }
+             } as unknown as Vertex}
+             data={{ properties: { meta: [] } } as unknown as Vertex}
+             onClick={() => deleteRow(p.joinVertex, local, Ws)} />
+
         </td>
       </tr>
     );
@@ -385,30 +401,46 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
         {/*</Show>*/}
 
-        <div>
-          <button type="button" onclick={addNew}>
-            Add New
-          </button>
-        </div>
+
+          <ButtonGroupField
+           meta={{
+             properties: {
+               id: "meta",
+               props: {
+                 keyExpr: "id",
+                 items: [
+                   {
+                     icon: "add",
+                     id: "add",
+                     hint: "Add New"
+                   }
+                 ]
+               }
+             }
+           } as unknown as Vertex}
+           data={{ properties: { meta: [] } } as unknown as Vertex}
+           onClick={addNew} />
+
         <div
-          class={css`
-            table,
-            th,
-            td {
-              border: 1px solid rgba(0, 0, 0, 0.1);
-              border-collapse: collapse;
-            }
-          `}
+         class={css`
+           table,
+           th,
+           td {
+             border: 1px solid rgba(0, 0, 0, 0.1);
+             border-collapse: collapse;
+           }
+         `}
         >
           <table>
             <thead>
-              <tr>
-                <th></th>
-                <For each={props.meta.properties.attributes}>
-                  {(attribute) => (
-                    <Show when={!attribute.hidden || attribute.defaultValue} fallback={<th></th>}>
-                      <th>{toTitle(attribute.title || attribute.id)}</th>
-                    </Show>
+            <tr>
+              <th></th>
+              <For each={props.meta.properties.attributes}>
+                {(attribute) => (
+                 <Show when={!attribute.hidden || attribute.defaultValue}
+                       fallback={<th></th>}>
+                   <th>{toTitle(attribute.title || attribute.id)}</th>
+                 </Show>
                   )}
                 </For>
                 <th></th>

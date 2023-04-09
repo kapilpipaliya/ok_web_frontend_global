@@ -1,5 +1,6 @@
 import {
-  createContext, createMemo,
+  createContext,
+  createMemo,
   createSignal,
   For,
   Match,
@@ -17,16 +18,14 @@ import {
   getNewGraphId,
   getNewTxnId,
   graph,
-  Id, revertTransaction,
+  Id,
+  revertTransaction,
   Vertex
 } from "../lib/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
-import {
-  SelectInputField,
-  setSelectionValue
-} from "./input/SelectInputField";
+import { SelectInputField, setSelectionValue } from "./input/SelectInputField";
 import { newRow, TableInputField } from "./input/TableInputField";
 
 import { TagField } from "./input/TagField";
@@ -44,6 +43,7 @@ import {
   getOptionLabel,
   getSelectionOptions
 } from "../lib/Traverse";
+import { ButtonField } from "./core/Button";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
@@ -363,24 +363,27 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                     <div class="dx-fieldset-header">{group}</div>
                   </Show>
                   <DynamicForm
-                    attributes={groupByTabsAndGroup[activeTab()][group]}
-                    vertex={vertex}
-                    setValue={setValue}
+                   attributes={groupByTabsAndGroup[activeTab()][group]}
+                   vertex={vertex}
+                   setValue={setValue}
                   />
                 </div>
               );
             }}
           </For>
         </Show>
-        <button
-          type="button"
-          class="border:0 cursor:pointer"
-          onClick={() => {
-            navigate(-1);
-          }}
-        >
-          Back
-        </button>
+
+        <ButtonField
+         meta={{
+           properties: {
+             id: "meta",
+             props: { stylingMode: "contained", width: "120", type: "back" }
+           }
+         } as unknown as Vertex}
+         data={{ properties: { meta: "Back" } } as unknown as Vertex}
+         onClick={() => {
+           navigate(-1);
+         }} />
       </div>
     </FormContext.Provider>
   );

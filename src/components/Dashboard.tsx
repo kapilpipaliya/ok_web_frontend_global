@@ -22,6 +22,7 @@ import { G } from "@mobily/ts-belt";
 import TreeView, { Properties as TreeViewProperties } from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
+import { ButtonField } from "./core/Button";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -85,16 +86,18 @@ export const StaticSideBar = () => {
 
 export const MenuButtonToggle = () => {
   return (
-    <button
-      type="button"
-      class="border:0 cursor:pointer"
-      onClick={() => {
-        setSidebarOpen((v) => !v);
-      }}
-    >
-      <span class="sr-only">Open sidebar</span>
-      <span aria-hidden="true">☰</span>
-    </button>
+   <ButtonField
+    meta={{
+      properties: {
+        id: "meta",
+        props: {hint: "Open sidebar", icon: "menu", width: 40}
+      }
+    } as unknown as Vertex}
+    data={{ properties: { meta: "" } } as unknown as Vertex}
+    onClick={() => {
+      setSidebarOpen((v) => !v);
+    }} />
+
   );
 };
 
