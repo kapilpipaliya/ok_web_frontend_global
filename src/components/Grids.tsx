@@ -1,7 +1,16 @@
 import DxDataGrid, { Column, DataType } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
-import { commitTransaction, getNewTxnId, graph, Id, ProcessStatus, setGraph, transactions } from "../lib/graph";
+import {
+  commitTransaction,
+  getNewTxnId,
+  graph,
+  Id,
+  ProcessStatus,
+  setGraph,
+  transactions,
+  Vertex
+} from "../lib/graph";
 import { createEffect, createSignal, For, on, Show, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "solid-app-router";
@@ -13,6 +22,7 @@ import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
 import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
+import { ButtonField } from "./core/Button";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -265,7 +275,17 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   return (
     <div class="">
       <div>
-        <button onClick={() => navigate("./new")}>Add new</button>
+        <ButtonField
+         meta={{
+           properties: {
+             id: "meta",
+             props: {}
+           }
+         } as unknown as Vertex}
+         data={{ properties: { meta: "Add new" } } as unknown as Vertex}
+         onClick={() => {
+           navigate("./new")
+         }} />
       </div>
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />

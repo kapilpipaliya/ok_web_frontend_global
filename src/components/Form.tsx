@@ -40,8 +40,10 @@ import { klona } from "klona";
 import {
   getChildVertex,
   getChildVertexes,
-  getOptionLabel, getParentVertex
+  getOptionLabel,
+  getParentVertex
 } from "../lib/Traverse";
+import { ButtonField } from "./core/Button";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -761,11 +763,17 @@ export const SimpleImport = (props: {}) => {
       <AbstractSingleForm id={"new"} formId={"SimpleImport"} config={config} />
 
       <div></div>
-      <div>
-        <button type={"button"} onClick={onDataDirectoryImportClick}>
-          Import
-        </button>
-      </div>
+
+      <ButtonField
+       meta={{
+         properties: {
+           id: "meta",
+           props: { stylingMode: "contained", width: "120", type: "success" }
+         }
+       } as unknown as Vertex}
+       data={{ properties: { meta: "Import" } } as unknown as Vertex}
+       onClick={onDataDirectoryImportClick} />
+
     </>
   );
 };

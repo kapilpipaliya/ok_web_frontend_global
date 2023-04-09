@@ -259,6 +259,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         id: "Attr",
         component: "TableField",
         tab: "Attribute",
+        props: {
+          unique: 'Attr',
+          kanban: true
+        },
         attributes: [
           {
             id: "Attr",
