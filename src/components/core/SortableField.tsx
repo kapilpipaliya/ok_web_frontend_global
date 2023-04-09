@@ -113,12 +113,6 @@ export default function SortableKanban(props: ComponentProps) {
           }
         }}
       />
-
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
-      </Show>
     </div>
   );
 }

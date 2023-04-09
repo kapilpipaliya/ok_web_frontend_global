@@ -261,7 +261,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         tab: "Attribute",
         props: {
           unique: 'Attr',
-          kanban: true
+          kanban: true,
+          collection: "Attr",
         },
         attributes: [
           {
@@ -485,7 +486,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-FormAttr-CollForm->CollTab",
               displayExpr: "properties.id",
-              defaultValue: "FormAttrAttr->CollAttrTab:properties.id",
+              defaultValue: "->FormAttrAttr->CollAttrTab:properties.id",
             },
           },
           {
@@ -494,7 +495,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-FormAttr-CollForm->CollGroup",
               displayExpr: "properties.id",
-              defaultValue: "FormAttrAttr->CollAttrGroup:properties.id",
+              defaultValue: "->FormAttrAttr->CollAttrGroup:properties.id",
             },
           },
           {
@@ -504,7 +505,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               collection: "DataType",
               displayExpr: "properties.id",
               hidden: true,
-              defaultValue: "FormAttrAttr->CollAttrAttr->AttrDataType:properties.id",
+              defaultValue: "->FormAttrAttr->CollAttrAttr->AttrDataType:properties.id",
             },
           },
           {
@@ -515,28 +516,28 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               displayExpr: "properties.id",
               collection: "->FormAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
               defaultValue:
-                "FormAttrAttr->CollAttrComp:properties.id||FormAttrAttr->CollAttrAttr->AttrComp:properties.id",
+                "->FormAttrAttr->CollAttrComp:properties.id||->FormAttrAttr->CollAttrAttr->AttrComp:properties.id",
             },
           },
           {
             id: "title",
             component: "TextBoxField",
             props: {
-              defaultValue: "->FormAttrAttr:properties.title||FormAttrAttr->CollAttrAttr:properties.title",
+              defaultValue: "->FormAttrAttr:properties.title||->FormAttrAttr->CollAttrAttr:properties.title",
             },
           },
           {
             id: "required",
             component: "CheckBoxField",
             props: {
-              defaultValue: "->FormAttrAttr:properties.required||FormAttrAttr->CollAttrAttr:properties.required",
+              defaultValue: "->FormAttrAttr:properties.required||->FormAttrAttr->CollAttrAttr:properties.required",
             },
           },
           {
             id: "disabled",
             component: "CheckBoxField",
             props: {
-              defaultValue: "->FormAttrAttr:properties.disabled||FormAttrAttr->CollAttrAttr:properties.disabled",
+              defaultValue: "->FormAttrAttr:properties.disabled||->FormAttrAttr->CollAttrAttr:properties.disabled",
             },
           },
           {
@@ -585,7 +586,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-FormChild-CollForm->CollTab",
               displayExpr: "properties.id",
-              defaultValue: "FormChildColl->CollChildTab:properties.id",
+              defaultValue: "->FormChildColl->CollChildTab:properties.id",
             },
           },
           {
@@ -594,7 +595,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-FormChild-CollForm->CollGroup",
               displayExpr: "properties.id",
-              defaultValue: "FormChildColl->CollChildGroup:properties.id",
+              defaultValue: "->FormChildColl->CollChildGroup:properties.id",
             },
           },
           {
@@ -618,7 +619,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   collection: "DataType",
                   displayExpr: "properties.id",
                   hidden: true,
-                  defaultValue: "FormChildAttrAttr->CollAttrAttr->AttrDataType:properties.id",
+                  defaultValue: "->FormChildAttrAttr->CollAttrAttr->AttrDataType:properties.id",
                 },
               },
               {
@@ -629,7 +630,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   displayExpr: "properties.id",
                   collection: "->FormChildAttrAttr->CollAttrAttr->AttrDataType->DataTypeComp",
                   defaultValue:
-                    "FormChildAttrAttr->CollAttrComp:properties.id||FormChildAttrAttr->CollAttrAttr->AttrComp:properties.id",
+                    "->FormChildAttrAttr->CollAttrComp:properties.id||->FormChildAttrAttr->CollAttrAttr->AttrComp:properties.id",
                 },
               },
               {
@@ -637,7 +638,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "TextBoxField",
                 props: {
                   defaultValue:
-                    "->FormChildAttrAttr:properties.title||FormChildAttrAttr->CollAttrAttr:properties.title",
+                    "->FormChildAttrAttr:properties.title||->FormChildAttrAttr->CollAttrAttr:properties.title",
                 },
               },
               {
@@ -645,7 +646,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "CheckBoxField",
                 props: {
                   defaultValue:
-                    "->FormChildAttrAttr:properties.required||FormChildAttrAttr->CollAttrAttr:properties.required",
+                    "->FormChildAttrAttr:properties.required||->FormChildAttrAttr->CollAttrAttr:properties.required",
                 },
               },
               {
@@ -653,7 +654,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "CheckBoxField",
                 props: {
                   defaultValue:
-                    "->FormChildAttrAttr:properties.disabled||FormChildAttrAttr->CollAttrAttr:properties.disabled",
+                    "->FormChildAttrAttr:properties.disabled||->FormChildAttrAttr->CollAttrAttr:properties.disabled",
                 },
               },
               {

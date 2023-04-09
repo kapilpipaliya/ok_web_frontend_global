@@ -11,7 +11,6 @@ import {
   untrack,
   useContext
 } from "solid-js";
-import { Icon } from "@iconify-icon/solid";
 
 import {
   closestCenter,
@@ -55,6 +54,10 @@ import {
 } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
 import { ButtonGroupField } from "../core/ButtonGroup";
+import ScrollView from "devextreme/ui/scroll_view";
+import Sortable from "devextreme/ui/sortable";
+// import SortableKanban from "../core/SortableField";
+// import "../assets/styles/sortable.css";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
@@ -158,7 +161,7 @@ export function deleteRow(vertex: Vertex, local: boolean, Ws: ServerEventsDispat
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-  const { local } = useContext(FormContext);
+  const { local, cleanUpConfig } = useContext(FormContext);
 
   // const owner = getOwner();
 
@@ -176,7 +179,23 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   });
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
+  const [sourceVertexes, setSourceVertexes] = createSignal([] as Vertex[]);
 
+  // columns
+  const tableColumnsTemplate = getChildVertexes(["MetaAttr"], [props.meta]); //.sort((a, b) => a.properties.pos - b.properties.pos);
+  if (tableColumnsTemplate.error) {
+    return "Cant find table columns";
+  }
+
+  const uniqueAttr = () => props.meta.properties.props?.unique;
+  const isKanban = () => (uniqueAttr() && props.meta.properties.props?.kanban && props.meta.properties.props.collection);
+  // add source vertexes data to store
+  if(isKanban()) {
+    createEffect(() => {
+      const vertexes = getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
+      setSourceVertexes(vertexes);
+    });
+  }
 
 
   // If props.meta.properties.attributes are not present and props.meta.props.collection is present then get attributes from the collection
@@ -207,6 +226,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     }
   }
 
+  // add row vertexes data to store
   createEffect(() => {
     const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
     const vertexes = (getChildVertexes([`${type}`], [props.data]).vertexes || []).sort(
@@ -216,26 +236,18 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   });
 
 
-// Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { joinVertex: Vertex }) => {
-    const sortable = createSortable(p.joinVertex.id);
 
-    // columns
-    const tableColumnsTemplate = getChildVertexes(["MetaAttr"], [props.meta]); //.sort((a, b) => a.properties.pos - b.properties.pos);
-    if (tableColumnsTemplate.error) {
-      return "Cant find table columns";
-    }
-    const rowMetaAttrInst = getChildVertex(["AttrInst"], p.joinVertex);
-
+  function rowMetaInitialize(joinVertex: Vertex) {
+    const rowMetaAttrInst = getChildVertex(["AttrInst"], joinVertex);
     if (rowMetaAttrInst.error) {
       const metaTxnId = getNewTxnId();
       batch(() => {
-        const metaInstanceResult = newRow(metaTxnId, p.joinVertex, "AttrInst");
+        const metaInstanceResult = newRow(metaTxnId, joinVertex, "AttrInst");
         if (metaInstanceResult.error) {
           alert("Error creating a row for attribute instance");
         }
         mergeVertexProperties(metaTxnId, metaInstanceResult.vertexId!, {
-          templateId: props.meta.id,
+          templateId: props.meta.id
         });
 
         for (const attrColumn of tableColumnsTemplate.vertexes!) {
@@ -245,15 +257,140 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           }
           mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.properties));
           mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, {
-            templateId: attrColumn.id,
+            templateId: attrColumn.id
           });
         }
       });
       onCleanup(() => {
-        // NOT sure if this works or not, if it causes problems when switching tabs, then comment this line;
         // remove all AttrInst vertex.
-        revertTransaction(metaTxnId);
-      })
+        // TODO: This is breaking when new row is added, its interesting to fix this.
+        // console.log('called', metaTxnId)
+        // revertTransaction(metaTxnId);
+      });
+      return metaTxnId;
+    }
+    return '';
+  }
+  const KanbanCardRow = (p: { joinVertex: Vertex }) => {
+    rowMetaInitialize(p.joinVertex);
+
+    const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
+    if (attributesResult.error) alert("Error getting attributes");
+    const rowColumnsMetaAttrs = attributesResult.vertexes!;
+
+    const DisplayCardProperties = () => {
+      const setValue = (attribute: Vertex, value: any) => {
+        const txnId = getNewTxnId();
+        mergeVertexProperties(txnId, p.joinVertex.id, {
+          [attribute.properties.id]: value,
+        });
+        if (!local) commitTxn(txnId, Ws);
+      };
+
+      return (
+       <For each={rowColumnsMetaAttrs}>
+         {(metaVertex) => {
+           const component = createMemo(() => {
+             if (metaVertex.properties.component.includes("-")) {
+               // return getOptionLabel(metaVertex, metaVertex.properties.component);
+               return getOptionLabel(p.joinVertex, metaVertex.properties.component);
+             } else {
+               return metaVertex.properties.component;
+             }
+           });
+           // if mergeProps not keep reactivity use memo
+           createEffect(() => {
+             addMeta(metaVertex, p.joinVertex);
+           });
+
+           return (
+            <Switch>
+              <Match when={metaVertex.properties.props?.hidden}>
+
+                  <div class="flex">
+                    {metaVertex.properties.props?.defaultValue &&
+                     getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                  </div>
+
+              </Match>
+              <Match when={component() === "TableField"}>
+
+                  <div class="flex">
+                    {metaVertex.properties.props?.defaultValue &&
+                     getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                    <DynamicComponent
+                     id={""}
+                     component={component()}
+                     // When we have a TableField we pass original Table Meta Vertex
+                     meta={graph.vertexes[metaVertex.properties.templateId]}
+                     data={p.joinVertex}
+                     setValue={setValue}
+                    />
+                  </div>
+
+              </Match>
+              <Match when={true}>
+
+                  <div class="flex align-items:center">
+                    {metaVertex.properties.props?.defaultValue &&
+                     getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                    <DynamicComponent
+                     id={""}
+                     component={component()}
+                     meta={metaVertex}
+                     data={p.joinVertex}
+                     setValue={setValue}
+                    />
+                  </div>
+
+              </Match>
+            </Switch>
+           );
+         }}
+       </For>
+      );
+    };
+
+    return (
+      <>
+       <DisplayCardProperties />
+       <div>
+         <ButtonGroupField
+          meta={{
+            properties: {
+              id: "meta",
+              props: {
+                keyExpr: "id",
+                items: [
+                  {
+                    icon: "trash",
+                    id: "delete",
+                    hint: "Delete Row"
+                  }
+                ]
+              }
+            }
+          } as unknown as Vertex}
+          data={{ properties: { meta: [] } } as unknown as Vertex}
+          onClick={() => deleteRow(p.joinVertex, local, Ws)} />
+
+       </div>
+      </>
+    );
+  }
+
+// Todo dont allow duplicate value in the select field
+  const SortableRow = (p: { joinVertex: Vertex }) => {
+    // console.log(p.joinVertex.id)
+    const sortable = createSortable(p.joinVertex.id);
+    const metaTxnId = rowMetaInitialize(p.joinVertex);
+
+    if(metaTxnId){
+      if(!cleanUpConfig.rowMetaTxnIds){
+        cleanUpConfig.rowMetaTxnIds = [];
+      }
+      // currently when we delete row and unmount form it is not giving error, but it should, because revertTransaction is not strict.
+      cleanUpConfig.rowMetaTxnIds.push(metaTxnId)
     }
 
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
@@ -303,6 +440,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                       <DynamicComponent
                         id={""}
                         component={component()}
+                        // When we have a TableField we pass original Table Meta Vertex
                         meta={graph.vertexes[metaVertex.properties.templateId]}
                         data={p.joinVertex}
                         setValue={setValue}
@@ -394,75 +532,164 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     setActiveDragItem(null);
   };
 
-  return (
-    <div>
-      <div>
-        {/*<Show when={props.meta.properties.attributes}>*/}
-        {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
-        {/*</Show>*/}
 
+  // @ts-ignore
+  const Kanban = () => {
 
-          <ButtonGroupField
-           meta={{
-             properties: {
-               id: "meta",
-               props: {
-                 keyExpr: "id",
-                 items: [
-                   {
-                     icon: "add",
-                     id: "add",
-                     hint: "Add New"
-                   }
-                 ]
-               }
-             }
-           } as unknown as Vertex}
-           data={{ properties: { meta: [] } } as unknown as Vertex}
-           onClick={addNew} />
-
+    return <div
+     class="sortable-board sortable-lists"
+     ref={containerEl => {
+       new ScrollView(containerEl, {
+         direction: "horizontal",
+         showScrollbar: "always",
+       });
+     }}
+    >
+      <div class="list">
+        <div class="list-title dx-theme-text-color">
+          Sources
+        </div>
         <div
-         class={css`
-           table,
-           th,
-           td {
-             border: 1px solid rgba(0, 0, 0, 0.1);
-             border-collapse: collapse;
-           }
-         `}
-        >
-          <table>
-            <thead>
-            <tr>
-              <th></th>
-              <For each={props.meta.properties.attributes}>
-                {(attribute) => (
-                 <Show when={!attribute.hidden || attribute.defaultValue}
-                       fallback={<th></th>}>
-                   <th>{toTitle(attribute.title || attribute.id)}</th>
-                 </Show>
-                  )}
-                </For>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
-                <DragDropSensors />
-                <SortableProvider ids={ids()}>
-                  <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
-                    {(vertex) => <SortableRow joinVertex={vertex} />}
-                  </For>
-                </SortableProvider>
-              </DragDropProvider>
-            </tbody>
-          </table>
+         class="scrollable-list"
+         ref={scrollEl => {
+          new ScrollView(scrollEl, {
+            direction: "vertical",
+            showScrollbar: "always",
+          });
+        }}>
+          <div class="sortable-cards" ref={itemsEl => {
+            new Sortable(itemsEl, {
+              group: "tasksGroup",
+              moveItemOnDrop: true,
+            });
+          }}>
+            <For each={sourceVertexes()}>
+              {source => <div class="card dx-card dx-theme-text-color dx-theme-background-color">
+                {/*<div class="card-priority priority-1"/>*/}
+
+                <div class="card-subject">
+                  {source.properties.id}
+                </div>
+                <div class="card-assignee">
+                  String
+                </div>
+              </div>}
+            </For>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="list">
+        <div class="list-title dx-theme-text-color">
+          Target
+        </div>
+        <div
+         // class="scrollable-list"
+         ref={scrollEl => {
+          new ScrollView(scrollEl, {
+            direction: "vertical",
+            showScrollbar: "always",
+          });
+        }}>
+          <div class="sortable-cards" ref={itemsEl => {
+            new Sortable(itemsEl, {
+              group: "tasksGroup",
+              moveItemOnDrop: true,
+            });
+          }}>
+            <For each={sourceVertexes()}>
+              {vertex => <div style="width: auto;" class="card dx-card dx-theme-text-color dx-theme-background-color">
+                {/*<div class="card-priority priority-1"/>*/}
+                <div class="card-subject">
+                  <KanbanCardRow joinVertex={vertex} />
+                </div>
+                <div class="card-assignee">
+
+                </div>
+              </div>}
+            </For>
+          </div>
         </div>
       </div>
 
-      {/*<Show when={props.page}>*/}
-      {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
-      {/*</Show>*/}
     </div>
+  }
+  return (
+    <Switch>
+      {/*<Match when={isKanban()}>*/}
+      {/*  <Kanban/>*/}
+      {/*  <SortableKanban/>*/}
+      {/*</Match>*/}
+      <Match when={true}>
+        <div>
+          {/*<Show when={props.meta.properties.attributes}>*/}
+          {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
+          {/*</Show>*/}
+
+
+            <ButtonGroupField
+             meta={{
+               properties: {
+                 id: "meta",
+                 props: {
+                   keyExpr: "id",
+                   items: [
+                     {
+                       icon: "add",
+                       id: "add",
+                       hint: "Add New"
+                     }
+                   ]
+                 }
+               }
+             } as unknown as Vertex}
+             data={{ properties: { meta: [] } } as unknown as Vertex}
+             onClick={addNew} />
+
+          <div
+           class={css`
+             table,
+             th,
+             td {
+               border: 1px solid rgba(0, 0, 0, 0.1);
+               border-collapse: collapse;
+             }
+           `}
+          >
+            <table>
+              <thead>
+              <tr>
+                <th></th>
+                <For each={props.meta.properties.attributes}>
+                  {(attribute) => (
+                   <Show when={!attribute.hidden || attribute.defaultValue}
+                         fallback={<th></th>}>
+                     <th>{toTitle(attribute.title || attribute.id)}</th>
+                   </Show>
+                    )}
+                  </For>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
+                  <DragDropSensors />
+                  <SortableProvider ids={ids()}>
+                    <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
+                      {(vertex) => <SortableRow joinVertex={vertex} />}
+                    </For>
+                  </SortableProvider>
+                </DragDropProvider>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/*<Show when={props.page}>*/}
+        {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+        {/*</Show>*/}
+      </Match>
+    </Switch>
   );
 }
