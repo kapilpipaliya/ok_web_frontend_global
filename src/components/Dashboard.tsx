@@ -1,5 +1,5 @@
 import { batch, createEffect, createSignal, on, onCleanup, onMount, Show, useContext } from "solid-js";
-import { Link, Route, Routes, useNavigate, useParams } from "solid-app-router";
+import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../page/404";
 import { BackupRestore } from "../page/BackupRestore";
 import {

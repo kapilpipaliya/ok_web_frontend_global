@@ -13,7 +13,7 @@ import {
 } from "../lib/graph";
 import { createEffect, createSignal, For, on, Show, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
-import { Link, useNavigate } from "solid-app-router";
+import { Link, useNavigate } from "@solidjs/router";
 
 import { G } from "@mobily/ts-belt";
 
