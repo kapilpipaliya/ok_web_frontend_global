@@ -1,8 +1,9 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import Gantt, {Properties} from "devextreme/ui/gantt";
-import {newVertex} from "./utils";
 import { tasks, dependencies, resources, resourceAssignments} from '../data/ganttData'
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const ganttData = [
   {

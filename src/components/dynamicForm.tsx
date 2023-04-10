@@ -41,7 +41,7 @@ import {
 import {
   getChildVertexes,
   getOptionLabel,
-  getSelectionOptions
+  getSelectionOptions, getToEdge
 } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
 
@@ -78,7 +78,7 @@ const FormComponent = (props: {
 }) => {
   const { local } = useContext(FormContext);
   const { Ws } = useContext(WsContext);
-  const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id) + props.formId;
+  const type = getToEdge(props.meta, props.data) + props.formId;
 
   const attributes = getSelectionOptions(props.meta, "->MetaAttr");
   const newMeta = attributes.error

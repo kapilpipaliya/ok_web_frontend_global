@@ -1,7 +1,7 @@
 import {createEffect} from "solid-js";
 import { DisplayComponentProps } from "./Form";
 import Button, {Properties} from "devextreme/ui/button";
-import {newVertex} from "./utils";
+import { newVertex } from "../../lib/Vertex";
 
 export function ButtonComponent() {
   const meta = newVertex(0, ["Meta"], {

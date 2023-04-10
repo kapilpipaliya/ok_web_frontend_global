@@ -14,16 +14,17 @@ import { capitalizeFirstLetter } from "../../utils/utils";
 import { FormContext, onChangeHandler } from "../dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import {
+  getInEdge,
   getOptionLabel,
   getParentVertexValue,
   getSelectedVertexValue,
-  getSelectionOptions
+  getSelectionOptions, getToEdge
 } from "../../lib/Traverse";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
-  const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(meta.properties.id);
+  const type = getToEdge(meta, vertex);
   const previousEdges = vertex.out_edges[type] || [];
 
   if (!Array.isArray(value)) {
@@ -52,26 +53,30 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, v
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
-  const type = capitalizeFirstLetter(meta.properties.id) + (meta.properties.props?.label || vertex.labels[0]);
+  const type = getInEdge(meta, vertex);
   const previousEdges = vertex.in_edges[type] || [];
+
+  let valueArray = [] as number[];
 
   if (!Array.isArray(value)) {
     if (value !== null && value !== undefined) {
-      value = [value];
+      valueArray = [value];
     } else {
-      value = [];
+      valueArray = [];
     }
+  } else {
+    valueArray = value;
   }
 
   for (const edgeId of previousEdges) {
-    // we should not delete edge that end to same vertex
-    if (value.includes(graph.edges[edgeId].start)) continue;
+    // we should not delete edge that start with same vertex
+    if (valueArray.includes(graph.edges[edgeId].start)) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId);
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
 
   // add added edges:
-  for (const vertexId of value) {
+  for (const vertexId of valueArray) {
     if ((vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start).includes(vertexId)) continue;
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id));
     if (insertEdgeResult.error) alert(insertEdgeResult.error);

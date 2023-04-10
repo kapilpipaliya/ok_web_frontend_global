@@ -1,4 +1,4 @@
-export type Id = number;
+import { Vertex } from "../../lib/graph";
 
 export interface ComponentProps {
   meta: Vertex;
@@ -14,18 +14,3 @@ export interface DisplayComponentProps {
   data: Vertex;
 }
 
-export interface Vertex {
-  id: Id;
-  labels: string[];
-  properties: { [key: string]: any };
-  in_edges: { [key: string]: Id[] };
-  out_edges: { [key: string]: Id[] };
-}
-
-export interface Edge {
-  id: Id;
-  properties: { [key: string]: any };
-  type: string;
-  start: Id;
-  end: Id;
-}

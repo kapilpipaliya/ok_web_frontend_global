@@ -1,9 +1,10 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import Accordion, {Properties} from "devextreme/ui/accordion";
-import {newVertex} from "./utils";
 // @ts-ignore
 import {accordionItems} from "../data/accordionItems";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function AccordionComponent() {
   const meta = newVertex(0, ["Meta"], {

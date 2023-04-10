@@ -1,8 +1,9 @@
 import {createEffect, For, JSXElement, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import Drawer, {Properties} from "devextreme/ui/drawer";
-import {newVertex} from "./utils";
 import List from "devextreme/ui/list";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const navigation = [
   { id: 1, text: 'Products', icon: 'product' },

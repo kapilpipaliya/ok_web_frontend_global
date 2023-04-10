@@ -1,10 +1,11 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import PivotGrid, {Properties} from "devextreme/ui/pivot_grid";
 import PivotGridFieldChooser, {Properties as PivotGridFieldChooserProperties} from "devextreme/ui/pivot_grid_field_chooser";
-import {newVertex} from "./utils";
 // @ts-ignore
 import {pivotGridSalesData} from '../data/pivotGridSalesData.js'
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 console.log(pivotGridSalesData);
 {/* @todo - currently not working */}

@@ -23,6 +23,7 @@ import "./Grid.css";
 import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
 import { ButtonField } from "./core/Button";
+import { capitalizeFirstLetter } from "../utils/utils";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -144,7 +145,7 @@ export const DataGrid = (props: DataGridProps) => {
     // @ts-ignore
     attribute["dataField"] = `properties.${attribute.id}`;
     // @ts-ignore
-    attribute["caption"] = attribute.title;
+    attribute["caption"] = capitalizeFirstLetter(attribute.title || attribute.id);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
     // @ts-ignore
     tableColumns.push(attribute);

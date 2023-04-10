@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import SpeedDialAction, {Properties} from "devextreme/ui/speed_dial_action";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function SpeedDialActionComponent() {
   const meta = newVertex(0, ["Meta"], {

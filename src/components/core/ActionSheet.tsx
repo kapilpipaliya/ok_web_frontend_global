@@ -1,7 +1,8 @@
 import {createEffect, createSignal, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import ActionSheet, {Properties} from "devextreme/ui/action_sheet";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const actionSheetItems = [
   { text: 'Call' },

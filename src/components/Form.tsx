@@ -156,7 +156,7 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr: Vertex) {
   }, {} as { [key: string]: any });
   formProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10), formProps);
 
-  const parentVertexResult = getParentVertex(["ChildComp"], comp);
+  const parentVertexResult = getParentVertex(["CompChild"], comp);
   if (!parentVertexResult.error) {
     const parentCompProps = (getChildVertexes(["CompProp"], [parentVertexResult.vertex!]).vertexes || []).reduce(
      (acc, curr) => {
@@ -333,9 +333,15 @@ export const Login = (props: {}) => {
         config={config}
         // TODO: add dry option
       />
-      <button type="button" onClick={onLoginClick}>
-        Login
-      </button>
+      <ButtonField
+       meta={{
+         properties: {
+           id: "meta",
+           props: { stylingMode: "contained", width: "120", type: "success" }
+         }
+       } as unknown as Vertex}
+       data={{ properties: { meta: "Login" } } as unknown as Vertex}
+       onClick={onLoginClick} />
     </>
   );
 };
@@ -394,9 +400,15 @@ export const SignUp = (props: {}) => {
         config={config}
         // TODO: add dry option
       />
-      <button type="button" onClick={onSignupClick}>
-        Login
-      </button>
+      <ButtonField
+       meta={{
+         properties: {
+           id: "meta",
+           props: { stylingMode: "contained", width: "120", type: "success" }
+         }
+       } as unknown as Vertex}
+       data={{ properties: { meta: "SignUp" } } as unknown as Vertex}
+       onClick={onSignupClick} />
     </>
   );
 };
