@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import PivotGrid, {Properties} from "devextreme/ui/pivot_grid";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const pivotGridItems = {
     "fields": [

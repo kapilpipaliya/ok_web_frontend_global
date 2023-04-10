@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import TileView, {Properties} from "devextreme/ui/tile_view";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const tileViewData = [
     {

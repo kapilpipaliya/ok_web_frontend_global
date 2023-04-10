@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import List, {Properties} from "devextreme/ui/list";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const listData = [
   "Prepare 2013 Financial",

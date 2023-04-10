@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import ProgressBar, {Properties} from "devextreme/ui/progress_bar";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function ProgressBarComponent() {
   const meta = newVertex(0, ["Meta"], {

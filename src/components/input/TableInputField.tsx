@@ -37,7 +37,7 @@ import {
   commitTxn,
   getNewGraphId,
   getNewTxnId,
-  graph,
+  graph, Id,
   revertTransaction,
   Vertex
 } from "../../lib/graph";
@@ -50,7 +50,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getOptionLabel,
-  getSelectionOptions
+  getSelectionOptions, getToEdge
 } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
 import { ButtonGroupField } from "../core/ButtonGroup";
@@ -61,7 +61,7 @@ import Sortable from "devextreme/ui/sortable";
 
 // import { onChangeHandler } from "../core/dynamicForm";
 
-export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, label?: string) {
+export function newRow(txnId: number, parentVertex: Vertex, edgeType: string, label?: string): {error: boolean, vertexId?: Id, edgeId?: Id} {
   const vertexNew = newVertex(getNewGraphId(), [label || edgeType], {});
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
@@ -169,8 +169,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const addNew = bindOwner(() => {
     batch(function () {
       const txnId = getNewTxnId();
-
-      const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
+      const type = getToEdge(props.meta, props.data);
       const label = props.meta.properties.props?.label;
 
       newRow(txnId, props.data, type, label);
@@ -228,7 +227,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
   // add row vertexes data to store
   createEffect(() => {
-    const type = props.data.labels[0] + capitalizeFirstLetter(props.meta.properties.id);
+    const type = getToEdge(props.meta, props.data);
     const vertexes = (getChildVertexes([`${type}`], [props.data]).vertexes || []).sort(
       (a, b) => a.properties.pos - b.properties.pos,
     );

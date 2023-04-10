@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import CircularGauge, {Properties} from "devextreme/viz/circular_gauge";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function CircularGaugeComponent() {
   const meta = newVertex(0, ["Meta"], {

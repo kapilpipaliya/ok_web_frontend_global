@@ -1,8 +1,9 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import Box, {Properties} from "devextreme/ui/box";
-import {newVertex} from "./utils";
 import '../assets/styles/box.css'
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function BoxComponent() {
   const meta = newVertex(0, ["Meta"], {

@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import HTMLEditor, {Properties} from "devextreme/ui/html_editor";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 export function HTMLEditorComponent() {
   const meta = newVertex(0, ["Meta"], {

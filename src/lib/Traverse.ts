@@ -3,15 +3,28 @@ import { capitalizeFirstLetter } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 
-export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
+export function getToEdge(meta: Vertex, vertex: Vertex) {
  const attributeId = meta.properties.id;
- const type = (meta.properties.props?.label || vertex.labels[0]) + capitalizeFirstLetter(attributeId);
+ return vertex.labels[0] + capitalizeFirstLetter(attributeId);
+}
+
+export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
+ const type = getToEdge(meta, vertex);
  return (vertex.out_edges[type] || []).map((edgeId) => graph.edges[edgeId].end);
 }
 
+export function getInEdge(meta: Vertex, vertex) {
+ const parentLabel = meta.properties.props?.parentLabel;
+ const childLabel = meta.properties.props?.childLabel;
+ if (!parentLabel) return '';
+ return parentLabel + (childLabel || vertex.labels[0]);
+}
+
 export function getParentVertexValue(vertex: Vertex, meta: Vertex) {
- const attributeId = meta.properties.id;
- const type = capitalizeFirstLetter(attributeId) + (meta.properties.props?.label || vertex.labels[0]);
+ const type = getInEdge(meta, vertex);
+ if (!type) {
+  return [];
+ }
  return (vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start);
 }
 

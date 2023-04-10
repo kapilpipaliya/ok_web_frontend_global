@@ -1,7 +1,8 @@
 import {createEffect, For, Show} from "solid-js";
-import {ComponentProps, Vertex} from "./Form";
+import {ComponentProps} from "./Form";
 import Gallery, {Properties} from "devextreme/ui/gallery";
-import {newVertex} from "./utils";
+import { Vertex } from "../../lib/graph";
+import { newVertex } from "../../lib/Vertex";
 
 const galleryData = [
   "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person2.png",
