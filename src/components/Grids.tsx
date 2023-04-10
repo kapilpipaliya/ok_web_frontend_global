@@ -1,6 +1,7 @@
-import DxDataGrid, { Column, DataType } from "devextreme/ui/data_grid";
+import DxDataGrid, { Column } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
+
 import {
   commitTransaction,
   getNewTxnId,
@@ -11,19 +12,27 @@ import {
   transactions,
   Vertex
 } from "../lib/graph";
-import { createEffect, createSignal, For, on, Show, splitProps, useContext } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  For, getOwner,
+  on,
+  runWithOwner,
+  Show,
+  splitProps,
+  useContext
+} from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "@solidjs/router";
 
 import { G } from "@mobily/ts-belt";
-
-import { deleteVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 import "./Grid.css";
 import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
-import { ButtonField } from "./core/Button";
 import { capitalizeFirstLetter } from "../utils/utils";
+import { deleteVertex } from "../lib/Vertex";
+import { ButtonField } from "./core/Button";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -198,6 +207,18 @@ export const DataGrid = (props: DataGridProps) => {
   return (
     <div
       ref={(el) => {
+        const owner = getOwner();
+
+        const template = function(cellElement, cellInfo) {
+          return runWithOwner(owner, () => (
+           <span>
+             <Link
+              href={/*@once*/ `/${props.tableId}/${cellInfo.row.key}`}>Edit</Link>
+             <button
+              onClick={/*@once*/ () => deleteObject(/*@once*/ cellInfo.row.key)}>Delete</button>
+             </span>
+          ));
+        };
         // @ts-ignore
         const instance = new DxDataGrid(el, {
           dataSource: dataDataSource,
@@ -210,17 +231,10 @@ export const DataGrid = (props: DataGridProps) => {
                 "edit",
                 "delete",
                 {
-                  template: function (cellElement, cellInfo) {
-                    return (
-                      <span>
-                        <a href={/*@once*/ `${location.pathname}/${cellInfo.row.key}`}>Edit</a>
-                        <button onClick={/*@once*/ () => deleteObject(/*@once*/ cellInfo.row.key)}>Delete</button>
-                      </span>
-                    );
-                  },
-                },
-              ],
-            },
+                  template
+                }
+              ]
+            }
           ],
           allowColumnReordering: true,
           allowColumnResizing: true,
@@ -238,14 +252,14 @@ export const DataGrid = (props: DataGridProps) => {
           paging: {
             pageSize: 200
           },
-          ...customProps,
+          ...customProps
         });
         const deleteObject = (id: Id) => {
           if (confirm("are you sure")) {
             const txnId = getNewTxnId();
             const deleteResult = deleteVertex(txnId, id);
             // @ts-ignore
-            if (deleteResult?.error) alert(data.message);
+            if (deleteResult?.error) alert(data);
             else {
               dataArrayStore.remove(id);
               dataDataSource.reload();
@@ -258,6 +272,7 @@ export const DataGrid = (props: DataGridProps) => {
     />
   );
 };
+
 interface AbstractSingleGridProps {
   tableId: string;
 }
@@ -274,57 +289,58 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   });
 
   return (
-    <div class="">
-      <div>
-        <ButtonField
-         meta={{
-           properties: {
-             id: "meta",
-             props: {}
-           }
-         } as unknown as Vertex}
-         data={{ properties: { meta: "Add new" } } as unknown as Vertex}
-         onClick={() => {
-           navigate("./new")
-         }} />
-      </div>
-      <Show when={tableId()}>
-        <DataGrid tableId={tableId()} />
-      </Show>
-    </div>
+   <div class="">
+     <div>
+       <ButtonField
+        meta={{
+          properties: {
+            id: "meta",
+            props: {}
+          }
+        } as unknown as Vertex}
+        data={{ properties: { meta: "Add new" } } as unknown as Vertex}
+        onClick={() => {
+          navigate("./new");
+        }} />
+     </div>
+     <Show when={tableId()}>
+       <DataGrid tableId={tableId()} />
+     </Show>
+   </div>
   );
 };
 
 export const TableDashboard = () => {
   const allTableLayouts = () =>
-    graph.vertexLabelIdMap["Form"]
-      ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
-      .filter((v) => v.properties.table) || [];
+   graph.vertexLabelIdMap["Form"]
+    ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
+    .filter((v) => v.properties.table) || [];
 
   return (
-    <div class="index">
-      <div class="title">
-        <div class="block-content main-sections">
-          <For each={allTableLayouts()}>
-            {(tableLayout) => (
-              <div class="content-item">
+   <div class="index">
+     <div class="title">
+       <div class="block-content main-sections">
+         <For each={allTableLayouts()}>
+           {(tableLayout) => (
+            <div class="content-item">
+              {" "}
+              <Link href={`/${tableLayout.properties.id}`}>
                 {" "}
-                <Link href={`/${tableLayout.properties.id}`}>
-                  {" "}
-                  <div></div> <h3 class="multi-line">
-                    {tableLayout.properties.title || tableLayout.properties.id}
-                  </h3>{" "}
-                </Link>
-              </div>
-            )}
-          </For>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-        </div>
-      </div>
-    </div>
+                <div></div>
+                <h3 class="multi-line">
+                  {tableLayout.properties.title || tableLayout.properties.id}
+                </h3>{" "}
+              </Link>
+            </div>
+           )}
+         </For>
+         <div class="content-item"></div>
+         <div class="content-item"></div>
+         <div class="content-item"></div>
+         <div class="content-item"></div>
+       </div>
+     </div>
+   </div>
   );
 };
 const dataTypeToDataGrid = (type: string): DataType => {
