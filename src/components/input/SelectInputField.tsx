@@ -54,6 +54,7 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, v
 export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
   const type = getInEdge(meta, vertex);
+  if(!type) alert('edge type cant be empty');
   const previousEdges = vertex.in_edges[type] || [];
 
   let valueArray = [] as number[];

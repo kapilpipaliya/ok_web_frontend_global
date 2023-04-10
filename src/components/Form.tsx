@@ -604,7 +604,7 @@ export const SimpleImport = (props: {}) => {
               txnId,
               vertex,
               {
-                properties: { id: selectMeta.edge || selectMeta.collLabel },
+                properties: { props: {parentLabel: selectMeta.collLabel, childLabel: selectMeta.edge }},
               } as unknown as Vertex,
               v()!.id,
             );
