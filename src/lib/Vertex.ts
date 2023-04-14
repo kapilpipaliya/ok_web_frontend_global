@@ -146,5 +146,5 @@ export function findVertexIdsByLabel(label: string): Id[] {
   return graph.vertexLabelIdMap[label] || [];
 }
 export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: any) {
-  return graph.vertexLabelIdMap[label].map((v) => graph.vertexes[v]).find((v) => value === v.properties[attribute]);
+  return graph.vertexLabelIdMap[label].find((vertexId) => value === graph.vertexes[vertexId].properties[attribute]);
 }

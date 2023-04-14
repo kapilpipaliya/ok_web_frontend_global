@@ -77,7 +77,7 @@ export interface FormMetaData {
   // postSubmit?: (data: any) => any
 }
 
-export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr: Vertex) {
+export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): { error: boolean; attr?: FieldAttribute } {
   const vertexAttrResult = getChildVertex(["CollAttrAttr"], vertexCollAttr);
   if (vertexAttrResult.error) return { error: true };
   const vertexAttr = vertexAttrResult.vertex!;
@@ -85,14 +85,14 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr: Vertex) {
    {},
    removeUndefinedProperties(vertexAttr.properties, false, 10),
    removeUndefinedProperties(vertexCollAttr.properties, false, 10),
-   removeUndefinedProperties(vertexFormAttr.properties, false, 10)
+   vertexFormAttr ? removeUndefinedProperties(vertexFormAttr.properties, false, 10) : {}
   );
 
   // find components for all levels
   const vertexDefaultComp = getChildVertex(["AttrDataType", "DataTypeDefault"], vertexAttr);
   const attrComp = getChildVertex(["AttrComp"], vertexAttr).vertex || vertexDefaultComp.vertex;
   const collAttrComp = getChildVertex(["CollAttrComp"], vertexCollAttr).vertex || attrComp;
-  const formAttrComp = getChildVertex(["$0Comp"], vertexFormAttr).vertex || collAttrComp;
+  const formAttrComp = vertexFormAttr ? (getChildVertex(["$0Comp"], vertexFormAttr).vertex || collAttrComp) : collAttrComp;
 
   // set dataType to attr
   const dataType = getChildVertex(["AttrDataType"], vertexAttr);
@@ -103,13 +103,13 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr: Vertex) {
   attr.dataType = dataType.vertex!.properties.id;
 
   // set props to attr
-  let formProps = (getChildVertexes(["$Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
+  let formProps = vertexFormAttr ? ((getChildVertexes(["$Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
     const key = getOptionLabel(curr, "->$Key:properties.key");
     if (key) {
       acc[key] = curr.properties.value;
     }
     return acc;
-  }, {} as { [key: string]: any });
+  }, {} as { [key: string]: any })) : {};
 
   if (formAttrComp === collAttrComp) {
     const collProps = (getChildVertexes(["$Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
@@ -183,13 +183,87 @@ export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: Field
   return getCollAttrs(vertexCollAttr, vertexFormAttr);
 };
 
+const getCollectionOneLevelAttrs = (collVertex: Vertex): {error: string, attrs?: FieldAttribute[]} => {
+  const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
+  if (vertexCollAttrResult.error) {
+    return { error: "No Attributes in a Coll" };
+  }
+  const collAttrs = vertexCollAttrResult.vertexes!.sort((a, b) => a.properties.pos - b.properties.pos);
+  let attrs: FieldAttribute[] = [];
+
+  for (const vertexCollAttr of collAttrs) {
+    const addPropsResult = getCollAttrs(vertexCollAttr);
+    if (addPropsResult.error) continue;
+    attrs.push(addPropsResult.attr!);
+  }
+  return { error: '', attrs };
+}
 export const getFormApiFromForm = (formId: string): { error: string; form?: FormMetaData } => {
-  const formID = () =>
-    (graph.vertexLabelIdMap["Form"] || []).find((vertexId) => graph.vertexes[vertexId].properties["id"] === formId);
-  const form = graph.vertexes[formId] || graph.vertexes[`${formID()}`];
+  const form = graph.vertexes[formId] || graph.vertexes[`${findVertexByLabelAndUniqueId("Form", "id", formId)}`];
   if (!form) {
-    console.warn(formId, "form not found");
-    return { error: "form dont found" };
+    const coll = graph.vertexes[`${findVertexByLabelAndUniqueId("Coll", "id", formId)}`];
+    if (!coll) {
+      return {error: "form and coll not found"};
+    }
+    let attrs: FieldAttribute[];
+    const attrsResult = getCollectionOneLevelAttrs(coll);
+    if (attrsResult.error) {
+      return {error: attrsResult.error};
+    }
+    attrs = attrsResult.attrs!;
+
+    // calculate children
+    const collChildren = (getChildVertexes(["$0Child"], [coll]).vertexes || []).sort(
+     (a, b) => a.properties.pos - b.properties.pos,
+    );
+
+    const childAttrs = [] as FieldAttribute[];
+
+    for (const vertexChild of collChildren) {
+      const childCollVertex = getChildVertex(["$0Coll"], vertexChild).vertex;
+      if (!childCollVertex) continue;
+
+      let tableAttrs: FieldAttribute[];
+      const attrsResult= getCollectionOneLevelAttrs(vertexChild);
+      if (attrsResult.error) {
+        return {error: attrsResult.error};
+      }
+      tableAttrs = attrsResult.attrs!;
+      // @ts-ignore
+      tableAttrs = tableAttrs.sort((a, b) => a.pos - b.pos);
+
+
+      // table properties:
+      const collChildProps = (
+       getChildVertexes(["$0Prop"], [vertexChild]).vertexes || []
+      ).reduce((acc, curr) => {
+        const key = getOptionLabel(curr, "->$0Key:properties.key");
+        if (key) {
+          acc[key] = curr.properties.value;
+        }
+        return acc;
+      }, {} as { [key: string]: any });
+
+      childAttrs.push({
+        attributes: tableAttrs,
+        component: "TableField",
+        id: vertexChild.properties.id || childCollVertex.properties.id,
+        props: collChildProps,
+      });
+    }
+
+    return {
+      error: "",
+      form: {
+        attributes: [...attrs, ...childAttrs],
+        id: coll.properties.id,
+        title: coll.properties.title,
+        local: coll.properties.local,
+        // collection used in Grid, its same like id key
+        // @ts-ignore
+        collection: coll.properties.id,
+      },
+    };
   }
 
   const formCollResult = getParentVertex(["CollForm"], form);
@@ -212,7 +286,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
     attrs.push(addPropsResult.attr!);
   }
   // @ts-ignore
-  attrs = attrs.sort((a, b) => a.pos - b.pos);
+  // attrs = attrs.sort((a, b) => a.pos - b.pos); // why this is required?
 
   const formChildren = (getChildVertexes(["FormChild"], [form]).vertexes || []).sort(
     (a, b) => a.properties.pos - b.properties.pos,
@@ -234,15 +308,20 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
     // @ts-ignore
     tableAttrs = tableAttrs.sort((a, b) => a.pos - b.pos);
 
-    const formChildColl = getChildVertex(["FormChildColl", "CollChildColl"], vertexFormChild);
-    if (formChildColl.error) {
+    const collChild = getChildVertex(["$0Coll"], vertexFormChild);
+    if (collChild.error) {
+      continue;
+    }
+
+    const collChildColl = getChildVertex(["CollChildColl"], collChild.vertex!);
+    if (collChildColl.error) {
       continue;
     }
     // currently we save table property on Collection only, not overwrite by form layout
     const collChildProps = (
-      getChildVertexes(["FormChildColl", "CollChildProp"], [vertexFormChild]).vertexes || []
+      getChildVertexes(["$0Prop"], [collChild.vertex!]).vertexes || []
     ).reduce((acc, curr) => {
-      const key = getOptionLabel(curr, "->CollChildPropKey:properties.key");
+      const key = getOptionLabel(curr, "->$0Key:properties.key");
       if (key) {
         acc[key] = curr.properties.value;
       }
@@ -252,7 +331,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
     childAttrs.push({
       attributes: tableAttrs,
       component: "TableField",
-      id: vertexFormChild.properties.id || formChildColl.vertex!.properties.id,
+      id: collChild.vertex!.properties.id || collChildColl.vertex!.properties.id,
       props: collChildProps,
     });
   }
@@ -791,6 +870,9 @@ export const SimpleImport = (props: {}) => {
 };
 export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
+    if (attribute?.props?.skip) {
+      continue;
+    }
 
     const addAttributeResult = newRow(txnId, vertex, "MetaAttr");
     if (addAttributeResult.error) {

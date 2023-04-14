@@ -1,7 +1,17 @@
-import { batch, createEffect, createSignal, on, onCleanup, onMount, Show, useContext } from "solid-js";
+import {
+  batch,
+  Component,
+  createEffect,
+  createSignal,
+  on,
+  onCleanup,
+  onMount,
+  Show,
+  useContext
+} from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
-import Page404 from "../page/404";
-import { BackupRestore } from "../page/BackupRestore";
+import Page404 from "../pages/404";
+import { BackupRestore } from "../pages/BackupRestore";
 import {
   commitTransaction,
   Edge,
@@ -23,6 +33,9 @@ import TreeView, { Properties as TreeViewProperties } from "devextreme/ui/tree_v
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, TableDashboard } from "./Grids";
 import { ButtonField } from "./core/Button";
+import Home from "../pages/home/home";
+import { Page } from "./DynamicPage";
+import { FormDesigner } from "./FormDesigner";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -39,6 +52,7 @@ const navigation = [
       { name: "Collection Category", href: "/CollCategory" },
       { name: "Collections", href: "/Coll" },
       { name: "Forms", href: "/Form" },
+      { name: "Page", href: "/Page" },
     ],
   },
   {
@@ -138,16 +152,19 @@ export const DashboardView = () => {
                 return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />;
               }}
             />
-            <Route path="/backup_restore" component={() => <BackupRestore />} />
+            <Route path="/backup_restore" component={BackupRestore as Component} />
             {/* Deprecated */}
-            <Route path="/forms" component={() => <AllForms />} />
+            <Route path="/forms" component={AllForms as Component} />
             {/* Deprecated */}
-            <Route path="/grids" component={() => <TableDashboard />} />
-            <Route path="/login" component={() => <Login />} />
-            <Route path="/logout" component={() => <Logout />} />
-            <Route path="/signup" component={() => <SignUp />} />
-            <Route path="/SimpleImport" component={() => <SimpleImport />} />
-            <Route path="/**" component={() => <Page404 />} />
+            <Route path="/grids" component={TableDashboard as Component} />
+            <Route path="/login" component={Login as Component} />
+            <Route path="/logout" component={Logout as Component} />
+            <Route path="/signup" component={SignUp as Component} />
+            <Route path="/SimpleImport" component={SimpleImport as Component} />
+            <Route path="/CollDesigner/:id"   component={FormDesigner as Component} />
+            <Route path="/Page/:id" component={Page as Component} />
+            <Route path="/public/avfmobile" component={Home as Component} />
+            <Route path="/**" component={Page404 as Component} />
           </Routes>
         </Show>
       </main>
