@@ -26,7 +26,6 @@ export function GalleryComponent() {
 }
 export function GalleryField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
       <div
         ref={(el) => {
           const instance = new Gallery(el, {
@@ -47,11 +46,5 @@ export function GalleryField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
-      </Show>
-    </div>
   );
 }

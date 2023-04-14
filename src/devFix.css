@@ -1,0 +1,4 @@
+/* make overflow visible in drawer content on dashboard.*/
+.dx-drawer-content {
+    overflow: auto
+}

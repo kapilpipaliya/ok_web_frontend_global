@@ -344,6 +344,9 @@ export function getSelectionOptions(
   }
   return { error: true };
  }
+ if (collection.includes('{') && collection.includes('}')) {
+  collection = collection.replace(/{.*}/, getOptionLabel(vertex,collection.match(/{(.*)}/)![1]!));
+ }
  return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
 }
 
