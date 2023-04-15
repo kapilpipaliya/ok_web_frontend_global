@@ -66,7 +66,7 @@ const navigation = [
   },
   { name: "Backup & Restore", href: "/backup_restore" },
   { name: "Import", href: "/SimpleImport" },
-  { name: "Forms", href: "/forms" },
+  // { name: "Forms", href: "/forms" },
   { name: "Grids", href: "/grids" },
 ] as TreeViewProperties["dataSource"];
 // window.n = navigation
