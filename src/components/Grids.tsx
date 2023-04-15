@@ -33,6 +33,9 @@ import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { deleteVertex } from "../lib/Vertex";
 import { ButtonField } from "./core/Button";
+import { DataType } from "devextreme/common";
+import { selectedValue } from "./input/SelectInputField";
+import { getOptionLabel } from "../lib/Traverse";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -151,11 +154,21 @@ export const DataGrid = (props: DataGridProps) => {
   const tableColumns = [] as Array<Column<any, any>>;
   for (const attribute of formNew!.attributes) {
     if (attribute.component === "TableField") continue;
-    // @ts-ignore
+    if (attribute.props?.skip) continue;
     attribute["dataField"] = `properties.${attribute.id}`;
-    // @ts-ignore
     attribute["caption"] = capitalizeFirstLetter(attribute.title || attribute.id);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
+    if (attribute.component === "SelectBoxField") {
+      attribute['calculateCellValue'] = (columnBase, rowData) => {
+        const vertex = selectedValue(       {
+          properties: attribute
+        } as unknown as Vertex, columnBase);
+        if (vertex[0]) {
+          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || "properties.id")
+        }
+        return ''
+      }
+    }
     // @ts-ignore
     tableColumns.push(attribute);
   }
@@ -311,11 +324,17 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 };
 
 export const TableDashboard = () => {
-  const allTableLayouts = () =>
+  const allFormTableLayouts = ():Vertex[] =>
    graph.vertexLabelIdMap["Form"]
     ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
     .filter((v) => v.properties.table) || [];
 
+  const allCollTableLayouts = ():Vertex[] =>
+   graph.vertexLabelIdMap["Coll"]
+    ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
+    .filter((v) => v.properties.table) || [];
+
+  const allTableLayouts = () => [...new Set([...allCollTableLayouts(), ...allFormTableLayouts()])]
   return (
    <div class="index">
      <div class="title">

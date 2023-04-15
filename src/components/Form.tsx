@@ -97,10 +97,19 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): {
   // set dataType to attr
   const dataType = getChildVertex(["AttrDataType"], vertexAttr);
   if (dataType.error) {
-    console.warn("data Type not found");
-    return { error: true };
+    if (!formAttrComp) {
+      console.warn("data Type not found");
+      return { error: true };
+    }
+    const dataTypeFromComp = getParentVertex(["DataTypeComp"], formAttrComp);
+    if (dataTypeFromComp.error) {
+      console.warn("data Type not found from Component");
+      return { error: true };
+    }
+    attr.dataType = dataTypeFromComp.vertex!.properties.id;
+  } else {
+    attr.dataType = dataType.vertex!.properties.id;
   }
-  attr.dataType = dataType.vertex!.properties.id;
 
   // set props to attr
   let formProps = vertexFormAttr ? ((getChildVertexes(["$Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
@@ -199,9 +208,9 @@ const getCollectionOneLevelAttrs = (collVertex: Vertex): {error: string, attrs?:
   return { error: '', attrs };
 }
 export const getFormApiFromForm = (formId: string): { error: string; form?: FormMetaData } => {
-  const form = graph.vertexes[formId] || graph.vertexes[`${findVertexByLabelAndUniqueId("Form", "id", formId)}`];
+  const form = graph.vertexes[formId] || findVertexByLabelAndUniqueId("Form", "id", formId);
   if (!form) {
-    const coll = graph.vertexes[`${findVertexByLabelAndUniqueId("Coll", "id", formId)}`];
+    const coll = findVertexByLabelAndUniqueId("Coll", "id", formId);
     if (!coll) {
       return {error: "form and coll not found"};
     }

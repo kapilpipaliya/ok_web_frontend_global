@@ -661,12 +661,17 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               <tr>
                 <th></th>
                 <For each={props.meta.properties.attributes}>
-                  {(attribute) => (
-                   <Show when={!attribute.hidden || attribute.defaultValue}
-                         fallback={<th></th>}>
-                     <th>{toTitle(attribute.title || attribute.id)}</th>
-                   </Show>
-                    )}
+                  {(attribute) => {
+                    return (
+                     <Switch>
+                       <Match when={attribute.props?.skip}></Match>
+                       <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
+                         <th>{toTitle(attribute.title || attribute.id)}</th>
+                       </Match>
+                       <Match when={true}><th></th></Match>
+                     </Switch>
+                    );
+                  }}
                   </For>
                   <th></th>
                 </tr>
