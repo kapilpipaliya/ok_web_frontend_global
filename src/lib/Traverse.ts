@@ -20,7 +20,7 @@ export function getInEdge(meta: Vertex, vertex) {
  return parentLabel + (childLabel || vertex.labels[0]);
 }
 
-export function getParentVertexValue(vertex: Vertex, meta: Vertex) {
+export function getParentVertexValue(vertex: Vertex, meta: Vertex): number[] {
  const type = getInEdge(meta, vertex);
  if (!type) {
   return [];

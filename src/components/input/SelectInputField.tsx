@@ -84,6 +84,19 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
   }
 }
 
+export const selectedValue =(meta: Vertex, data: Vertex): number[] => {
+    if (meta.properties.props?.stringValue) {
+      // this is causing maximum call stack error when selecting an option
+      return untrack(() => {
+        const value = data.properties[meta.properties.id];
+        return Array.isArray(value) ? value : [value];
+      });
+    }
+    return meta.properties.props?.inward
+     ? getParentVertexValue(data, meta)
+     : getSelectedVertexValue(data, meta);
+}
+
 export function SelectInputField(props: ComponentProps) {
   const { Ws } = useContext(WsContext);
   const { local } = useContext(FormContext);
@@ -99,22 +112,10 @@ export function SelectInputField(props: ComponentProps) {
     <div aria-labeledby={props["aria-labeledby"]}>
       <div
         ref={(el) => {
-          const selectedValue = () => {
-            if (props.meta.properties.props.stringValue) {
-              // this is causing maximum call stack error when selecting an option
-              return untrack(() => {
-                const value = props.data.properties[props.meta.properties.id];
-                return Array.isArray(value) ? value : [value];
-              });
-            }
-            return props.meta.properties.props.inward
-              ? getParentVertexValue(props.data, props.meta)
-              : getSelectedVertexValue(props.data, props.meta);
-          };
           const instance = new SelectBox(el, {
             searchEnabled: true,
             // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-            value: selectedValue()[0],
+            value: selectedValue(props.meta, props.data)[0],
             onValueChanged: function (e) {
               // batch(() => {
               const txnId = getNewTxnId();
@@ -143,7 +144,7 @@ export function SelectInputField(props: ComponentProps) {
             }
           });
           createEffect(() => {
-            instance.option("value", selectedValue()[0]);
+            instance.option("value", selectedValue(props.meta, props.data)[0]);
           });
           createEffect(() => {
             const options = selectOptions();
