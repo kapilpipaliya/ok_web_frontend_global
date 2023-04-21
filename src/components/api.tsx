@@ -1,5 +1,11 @@
 import { FormMetaData } from "./Form";
 import { klona } from "klona";
+import {
+  findVertexByLabelAndUniqueId,
+  findVertexByLabelAndUniqueIdWithSkip
+} from "../lib/Vertex";
+import { useContext } from "solid-js";
+import { FormContext } from "./dynamicForm";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
@@ -196,7 +202,34 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     title: "Collection",
     id: "Coll",
     attributes: [
-      { id: "id", component: "TextBoxField" },
+      { id: "title", component: "TextBoxField", props:{
+          onchange: '{"new": ["id","label"]}',
+        } },
+      { id: "id", component: "TextBoxField", props: {
+          validationRules: [{
+            type: 'required',
+            message: 'ID is required',
+          },{
+            type: "custom",
+            ignoreEmptyValue: true,
+            message: "This ID is already taken",
+            validationCallback: (options) => {
+              const { local, cleanUpConfig, formVertex } = options.validator.context || {};
+
+              const val = options.value;
+              if (Object.keys(AttrsTableData).includes(val)) {
+                return false;
+              } else {
+                return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, formVertex?.id);
+              }
+            }
+          }
+            // , {
+            //   type: 'email',
+            //   message: 'Email is invalid',
+            // }
+          ],
+        } },
       {
         id: "category",
         component: "SelectBoxField",

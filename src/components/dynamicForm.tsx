@@ -30,7 +30,7 @@ import { newRow, TableInputField } from "./input/TableInputField";
 
 import { TagField } from "./input/TagField";
 import Tabs from "devextreme/ui/tabs";
-import { A } from "@mobily/ts-belt";
+import { A, G } from "@mobily/ts-belt";
 import { useNavigate } from "@solidjs/router";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { AbstractSingleForm, addMetaVertexes, FormMetaData } from "./Form";
@@ -44,14 +44,36 @@ import {
   getSelectionOptions, getToEdge
 } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
+import dxValidationGroup from "devextreme/ui/validation_group";
+import dxValidationSummary from "devextreme/ui/validation_summary";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
 //'setValue(component,null)'
-export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttribute: Vertex) {
+export function getLabel (input: string) {
+  input = input.replaceAll(' ', '');
+  input = capitalizeFirstLetter(input);
+  // TODO: letter make pascalCase letter
+  return input;
+}
+export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Vertex, changedFieldAttribute: Vertex) {
   if (!changedFieldAttribute.properties.props?.onchange) return;
+  const isNew = formVertex.id < 0
   try {
-    const args = JSON.parse(changedFieldAttribute.properties.props.onchange);
+    let args = JSON.parse(changedFieldAttribute.properties.props.onchange);
+
+    if (Array.isArray(args)) {
+      // args in proper format.
+    } else if (G.isObject(args)) {
+      // TODO: Find the form is new or edit.
+      if (args.new && isNew) {
+       args = args.new;
+      } else if (args.edit) {
+       args = args.edit;
+      } else {
+       return;
+      }
+    }
 
     const attribute = (getSelectionOptions(changedFieldAttribute, "-MetaAttr->MetaAttr").vertexes || []).find(
       (vertex) => vertex.properties.id === args[0],
@@ -62,6 +84,7 @@ export function onChangeHandler(txnId: number, vertex: Vertex, changedFieldAttri
     let value = args[1];
 
     if (value === null) value = undefined;
+    if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties.id])
     if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
       setSelectionValue(txnId, vertex, attribute, value);
     } else {
@@ -76,7 +99,7 @@ const FormComponent = (props: {
   data: Vertex;
   formId: string;
 }) => {
-  const { local } = useContext(FormContext);
+  let { local, txnId, isRealTime } = useContext(FormContext);
   const { Ws } = useContext(WsContext);
   const type = getToEdge(props.meta, props.data) + props.formId;
 
@@ -89,9 +112,11 @@ const FormComponent = (props: {
   const vertexes = getSelectionOptions(props.data, `->${type}`);
   let newVertex: any;
   if (vertexes.error) {
-    const txnId = getNewTxnId();
+    if (isRealTime) {
+      txnId = getNewTxnId();
+    }
     newVertex = graph.vertexes[newRow(txnId, props.data, `${type}`).vertexId!];
-    if (!local) commitTxn(txnId, Ws);
+    if (!local && isRealTime) commitTxn(txnId, Ws);
   } else {
     newVertex = vertexes.vertexes![0];
   }
@@ -214,6 +239,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const form = klona(props.form);
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
+  let txnId = getNewTxnId();
+  const isRealTime = false;
 
   // create a new vertex or use existing vertex
   let vertex: Vertex;
@@ -221,7 +248,9 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     if (!form["id"]) {
       return "Id not found";
     }
-    const txnId = getNewTxnId();
+    if (isRealTime) {
+      txnId = getNewTxnId();
+    }
     const newVertexObj = newVertex(getNewGraphId(), [form.id], {});
     // TODO: Do Create Transformation for the vertex
     const { error } = addNewVertex(txnId, newVertexObj);
@@ -229,7 +258,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       alert(error);
       return;
     }
-    if (!form.local) commitTxn(txnId, Ws);
+    if (!form.local && isRealTime) commitTxn(txnId, Ws);
     vertex = graph.vertexes[newVertexObj.id];
   } else {
     if (!graph.vertexes[props.id]) {
@@ -241,6 +270,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   // focus first input
   const [divRef, setDivRef] = createSignal<HTMLFormElement>();
+  let validationGroup;
   onMount(() => {
     divRef()?.querySelector("input")?.focus();
   });
@@ -296,48 +326,57 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
   const setValue = (attribute: Vertex, data: any) => {
-    const txnId = getNewTxnId();
+    // after commit, we can not use same txnId();
+    if (isRealTime) {
+      txnId = getNewTxnId();
+    }
     mergeVertexProperties(txnId, vertex.id, {
       [attribute.properties.id]: data,
     });
-    onChangeHandler(txnId, vertex, attribute);
-    if (!form.local) commitTxn(txnId, Ws);
+    onChangeHandler(txnId, vertex,vertex, attribute);
+    if (!form.local && isRealTime) commitTxn(txnId, Ws);
   };
   const cleanUpConfig = {} as {[key: string]: any};
+
   onCleanup(() => {
     for (const rowMetaTxnId of (cleanUpConfig.rowMetaTxnIds || [])) {
       revertTransaction(rowMetaTxnId);
     }
   })
+  let summery: HTMLDivElement;
 
   return (
-    <FormContext.Provider value={{ local: form.local, cleanUpConfig }}>
-      <div ref={setDivRef} class="form">
-        {/* Main Tab is display as top level fields */}
-        <Show when={groupByTabsAndGroup["main"]}>
-          <For each={Object.keys(groupByTabsAndGroup["main"])}>
-            {(group) => (
+   <div ref={(el) => {
+     setDivRef(el as HTMLFormElement);
+     validationGroup = new dxValidationGroup(divRef()!);
+   }} class="form">
+     <Show when={divRef()}>
+       <FormContext.Provider value={{ local: form.local, cleanUpConfig, validationGroup, formVertex: vertex, isRealTime, txnId }}>
+         {/* Main Tab is display as top level fields */}
+         <Show when={groupByTabsAndGroup["main"]}>
+           <For each={Object.keys(groupByTabsAndGroup["main"])}>
+             {(group) => (
               <>
                 <div
-                  class="dx-fieldset"
-                  style={{
-                    "max-width": groupByTabsAndGroup["main"][group].filter(
-                      (attribute) => attribute.properties.component === "TableField",
-                    ).length
-                      ? "100%"
-                      : "600px",
-                  }}
+                 class="dx-fieldset"
+                 style={{
+                   "max-width": groupByTabsAndGroup["main"][group].filter(
+                    (attribute) => attribute.properties.component === "TableField",
+                   ).length
+                    ? "100%"
+                    : "600px",
+                 }}
                 >
                   {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
                   <DynamicForm attributes={groupByTabsAndGroup["main"][group]} vertex={vertex} setValue={setValue} />
                 </div>
               </>
-            )}
-          </For>
-        </Show>
+             )}
+           </For>
+         </Show>
 
-        <Show when={tabs.length}>
-          <div
+         <Show when={tabs.length}>
+           <div
             ref={(el) => {
               // https://js.devexpress.com/Demos/WidgetsGallery/Demo/Tabs/Overview/jQuery/Light/
               // @ts-ignore
@@ -352,20 +391,20 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                 },
               });
             }}
-          />
+           />
 
-          <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
-            {(group) => {
-              return (
+           <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
+             {(group) => {
+               return (
                 <div
-                  class="dx-fieldset"
-                  style={{
-                    "max-width": groupByTabsAndGroup[activeTab()][group].filter(
-                      (attribute) => attribute.properties.component === "TableField",
-                    ).length
-                      ? "100%"
-                      : "600px",
-                  }}
+                 class="dx-fieldset"
+                 style={{
+                   "max-width": groupByTabsAndGroup[activeTab()][group].filter(
+                    (attribute) => attribute.properties.component === "TableField",
+                   ).length
+                    ? "100%"
+                    : "600px",
+                 }}
                 >
                   <Show when={group !== "main"}>
                     <div class="dx-fieldset-header">{group}</div>
@@ -376,23 +415,56 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                    setValue={setValue}
                   />
                 </div>
-              );
-            }}
-          </For>
-        </Show>
+               );
+             }}
+           </For>
+         </Show>
+         <div ref={el =>
+          new  dxValidationSummary(el, {validationGroup})
+         }/>
+         <ButtonField
+          meta={{
+            properties: {
+              id: "meta",
+              props: { stylingMode: "contained", width: "120", type: "success",
+                // below line is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+                useSubmitBehavior: true,
+              }
+            }
+          } as unknown as Vertex}
+          data={{ properties: { meta: "Submit" } } as unknown as Vertex}
+          onClick={function (e) {
+            const result = validationGroup.validate();
+            if (result.isValid) {
+              console.log('valid');
+              // !!!TODO!!! Handle Error Received From server when commit
+              if (!form.local && !isRealTime) {
+                commitTxn(txnId, Ws);
+              }
+              // currently we are navigating back.
+              navigate(-1);
+            } else {
+              alert('please fix all errors');
+            }
+          }
+          } />
+         <ButtonField
+          meta={{
+            properties: {
+              id: "meta",
+              props: { stylingMode: "contained", width: "120", icon: "back" }
+            }
+          } as unknown as Vertex}
+          data={{ properties: { meta: "Cancel" } } as unknown as Vertex}
+          onClick={() => {
+            revertTransaction(txnId);
+            setTimeout(()=>navigate(-1));
+          }} />
 
-        <ButtonField
-         meta={{
-           properties: {
-             id: "meta",
-             props: { stylingMode: "contained", width: "120", type: "back" }
-           }
-         } as unknown as Vertex}
-         data={{ properties: { meta: "Back" } } as unknown as Vertex}
-         onClick={() => {
-           navigate(-1);
-         }} />
-      </div>
-    </FormContext.Provider>
+       </FormContext.Provider>
+
+     </Show>
+
+   </div>
   );
 };
