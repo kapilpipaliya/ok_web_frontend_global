@@ -1,28 +1,77 @@
-import { createEffect } from "solid-js";
+import { createEffect, useContext } from "solid-js";
 
-import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/toolbar";
-import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
-import dxCalendar, { Properties as dxCalendarProperties } from "devextreme/ui/calendar";
-import dxCheckBox, { Properties as dxCheckBoxProperties } from "devextreme/ui/check_box";
-import dxCircularGauge, { Properties as dxCircularGaugeProperties } from "devextreme/viz/circular_gauge";
-import dxColorBox, { Properties as dxColorBoxProperties } from "devextreme/ui/color_box";
-import dxDateBox, { Properties as dxDateBoxProperties } from "devextreme/ui/date_box";
-import dxDropDownBox, { Properties as dxDropDownBoxProperties } from "devextreme/ui/drop_down_box";
-import dxFileUploader, { Properties as dxFileUploaderProperties } from "devextreme/ui/file_uploader";
-import dxFilterBuilder, { Properties as dxFilterBuilderProperties } from "devextreme/ui/filter_builder";
-import dxHtmlEditor, { Properties as dxHtmlEditorProperties } from "devextreme/ui/html_editor";
-import dxLinearGauge, { Properties as dxLinearGaugeProperties } from "devextreme/viz/linear_gauge";
-import dxNumberBox, { Properties as dxNumberBoxProperties } from "devextreme/ui/number_box";
-import dxProgressBar, { Properties as dxProgressBarProperties } from "devextreme/ui/progress_bar";
-import dxRadioGroup, { Properties as dxRadioGroupProperties } from "devextreme/ui/radio_group";
-import dxRangeSelector, { Properties as dxRangeSelectorProperties } from "devextreme/viz/range_selector";
-import dxRangeSlider, { Properties as dxRangeSliderProperties } from "devextreme/ui/range_slider";
-import dxSlider, { Properties as dxSliderProperties } from "devextreme/ui/slider";
-import dxSwitch, { Properties as dxSwitchProperties } from "devextreme/ui/switch";
-import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/text_area";
-import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
+import dxAutocomplete, {
+ Properties as dxAutocompleteProperties
+} from "devextreme/ui/toolbar";
+import dxBullet, {
+ Properties as dxBulletProperties
+} from "devextreme/viz/bullet";
+import dxCalendar, {
+ Properties as dxCalendarProperties
+} from "devextreme/ui/calendar";
+import dxCheckBox, {
+ Properties as dxCheckBoxProperties
+} from "devextreme/ui/check_box";
+import dxCircularGauge, {
+ Properties as dxCircularGaugeProperties
+} from "devextreme/viz/circular_gauge";
+import dxColorBox, {
+ Properties as dxColorBoxProperties
+} from "devextreme/ui/color_box";
+import dxDateBox, {
+ Properties as dxDateBoxProperties
+} from "devextreme/ui/date_box";
+import dxDropDownBox, {
+ Properties as dxDropDownBoxProperties
+} from "devextreme/ui/drop_down_box";
+import dxFileUploader, {
+ Properties as dxFileUploaderProperties
+} from "devextreme/ui/file_uploader";
+import dxFilterBuilder, {
+ Properties as dxFilterBuilderProperties
+} from "devextreme/ui/filter_builder";
+import dxHtmlEditor, {
+ Properties as dxHtmlEditorProperties
+} from "devextreme/ui/html_editor";
+import dxLinearGauge, {
+ Properties as dxLinearGaugeProperties
+} from "devextreme/viz/linear_gauge";
+import dxNumberBox, {
+ Properties as dxNumberBoxProperties
+} from "devextreme/ui/number_box";
+import dxProgressBar, {
+ Properties as dxProgressBarProperties
+} from "devextreme/ui/progress_bar";
+import dxRadioGroup, {
+ Properties as dxRadioGroupProperties
+} from "devextreme/ui/radio_group";
+import dxRangeSelector, {
+ Properties as dxRangeSelectorProperties
+} from "devextreme/viz/range_selector";
+import dxRangeSlider, {
+ Properties as dxRangeSliderProperties
+} from "devextreme/ui/range_slider";
+import dxSlider, {
+ Properties as dxSliderProperties
+} from "devextreme/ui/slider";
+import dxSwitch, {
+ Properties as dxSwitchProperties
+} from "devextreme/ui/switch";
+import dxTextArea, {
+ Properties as dxTextAreaProperties
+} from "devextreme/ui/text_area";
+import dxTextBox, {
+ Properties as dxTextBoxProperties
+} from "devextreme/ui/text_box";
 
 import { ComponentProps } from "./Type";
+import Validator, {
+ Properties as ValidatorProperties
+} from "devextreme/ui/validator";
+import { FormContext } from "../dynamicForm";
+import dxValidationGroup from "devextreme/ui/validation_group";
+import { ValidationRule } from "devextreme/common";
+
 export const genericComponents = [
   "AutocompleteField",
   "BulletField",
@@ -49,6 +98,7 @@ export const genericComponents = [
   "TextBoxField",
 ];
 export function GenericInputField(props: ComponentProps & { component: string }) {
+ const formContext = useContext(FormContext);
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <div
@@ -60,6 +110,7 @@ export function GenericInputField(props: ComponentProps & { component: string })
             onValueChanged: (e: any) => {
               props.setValue(props.meta, e.value);
             },
+           validationGroup: formContext.validationGroup
           };
           let comp: any;
 
@@ -134,24 +185,41 @@ export function GenericInputField(props: ComponentProps & { component: string })
             //  Object.assign(properties, {} as dxTagBoxProperties);
           } else if (props.component === "TextAreaField") {
             comp = dxTextArea;
-            Object.assign(properties, {} as dxTextAreaProperties);
+           Object.assign(properties, {} as dxTextAreaProperties);
           } else if (props.component === "TextBoxField") {
-            comp = dxTextBox;
-            Object.assign(properties, {} as dxTextBoxProperties);
+           comp = dxTextBox;
+           Object.assign(properties, {} as dxTextBoxProperties);
           } else {
-            console.warn("Component not found", props.component);
-            return "----";
+           console.warn("Component not found", props.component);
+           return "----";
           }
 
-          const instance = new comp(el, properties);
+         const instance = new comp(el, properties);
+         const validatorInstance = new Validator(el, {
+          validationGroup: formContext.validationGroup,
+          // adapter only called when we run validate() manually
+          // adapter: {
+          //  getValue: function(e) {
+          //   return {value: instance.option("value")};
+          //  },
+          //  applyValidationResults: function(e) {
+          //   // $("#contacts").css({ "border": e.isValid ? "none" : "1px solid red" });
+          //  },
+          //  validationRequestsCallbacks: [(e)=> {
+          //   return false;
+          //  }]
+          // }
+         });
+         validatorInstance.context = formContext;
 
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+         createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
 
-          createEffect(() => {
-            for (const property in props.meta.properties.props as dxTextBoxProperties) {
-              instance.option(property, props.meta.properties.props[property]);
-            }
-          });
+         createEffect(() => {
+          for (const property in props.meta.properties.props as dxTextBoxProperties) {
+           instance.option(property, props.meta.properties.props[property]);
+          }
+         });
+         createEffect(() => validatorInstance.option("validationRules", props.meta.properties.props?.validationRules as Array<ValidationRule>));
         }}
       />
     </div>

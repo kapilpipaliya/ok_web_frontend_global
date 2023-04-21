@@ -14,7 +14,7 @@ export function ButtonComponent() {
   return <ButtonField meta={meta} data={data} onClick={()=>0} />
 }
 export function ButtonField(props: DisplayComponentProps & {
- onClick: () => void;
+ onClick: (e: any) => void;
 }) {
   return (
       <div

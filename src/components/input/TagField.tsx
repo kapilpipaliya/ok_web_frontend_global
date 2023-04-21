@@ -16,7 +16,7 @@ import {
 // TODO: Add support for inward values
 export function TagField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-  const { local } = useContext(FormContext);
+  let { local, isRealTime, formVertex, txnId } = useContext(FormContext);
 
   if (!props.meta.properties.props?.collection) {
     return "Collection Not Defined.";
@@ -36,12 +36,14 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
             searchEnabled: true,
             value: selectedValue,
             onValueChanged: function (e) {
-              const txnId = getNewTxnId();
+             if (isRealTime) {
+              txnId = getNewTxnId();
+             }
               // batch(() => {
               //   if(e.event) isChangedByUser = true;
               setSelectionValue(txnId, props.data, props.meta, e.value);
-              onChangeHandler(txnId, props.data, props.meta);
-              if (!local) commitTxn(txnId, Ws);
+              onChangeHandler(txnId, formVertex, props.data, props.meta);
+              if (!local && isRealTime) commitTxn(txnId, Ws);
               // })
             },
             valueExpr: "id",

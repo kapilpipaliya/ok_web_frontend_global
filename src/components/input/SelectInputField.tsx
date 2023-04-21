@@ -99,7 +99,7 @@ export const selectedValue =(meta: Vertex, data: Vertex): number[] => {
 
 export function SelectInputField(props: ComponentProps) {
   const { Ws } = useContext(WsContext);
-  const { local } = useContext(FormContext);
+  let { local, txnId, formVertex, isRealTime } = useContext(FormContext);
 
   if (!props.meta.properties.props?.collection) {
     return "Collection Not Defined.";
@@ -118,7 +118,9 @@ export function SelectInputField(props: ComponentProps) {
             value: selectedValue(props.meta, props.data)[0],
             onValueChanged: function (e) {
               // batch(() => {
-              const txnId = getNewTxnId();
+              if (isRealTime) {
+                txnId = getNewTxnId();
+              }
               if (props.meta.properties.props.stringValue) {
                 props.setValue(props.meta, e.value);
               } else if (props.meta.properties.props.inward) {
@@ -126,8 +128,8 @@ export function SelectInputField(props: ComponentProps) {
               } else {
                 setSelectionValue(txnId, props.data, props.meta, e.value);
               }
-              onChangeHandler(txnId, props.data, props.meta);
-              if (!local) commitTxn(txnId, Ws);
+              onChangeHandler(txnId, formVertex,props.data, props.meta);
+              if (!local && isRealTime) commitTxn(txnId, Ws);
               // })
             },
             valueExpr: "id",

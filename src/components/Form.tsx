@@ -44,6 +44,7 @@ import {
   getParentVertex
 } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
+import { ValidationRule } from "devextreme/common";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -64,7 +65,10 @@ export interface FieldAttribute {
   meta?: string;
   component: string;
   title?: string;
-  props?: { [key: string]: any };
+  props?: {
+    [key: string]: any
+    validationRules?: Array<ValidationRule>
+  };
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
 }
@@ -773,7 +777,7 @@ export const SimpleImport = (props: {}) => {
           const dry = true;
           const vertexes = (getChildVertexes(["SimpleImportMeta"], [config.vertex]).vertexes || []);
           for (const row of vertexes) {
-            deleteRow(row, false, Ws);
+            deleteRow(row, false, true, 0,Ws);
           }
           switch (data) {
             case "component": {

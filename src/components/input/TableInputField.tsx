@@ -132,9 +132,11 @@ function addMeta(metaVertex: Vertex, data: Vertex ) {
   }
 }
 
-export function deleteRow(vertex: Vertex, local: boolean, Ws: ServerEventsDispatcher) {
+export function deleteRow(vertex: Vertex, local: boolean, isRealTime: boolean, txnId: number, Ws: ServerEventsDispatcher) {
   batch(() => {
-    const txnId = getNewTxnId();
+    if (isRealTime) {
+      txnId = getNewTxnId();
+    }
     // delete all vertex in edges
     const inEdges = vertex.in_edges;
     for (const type in inEdges) {
@@ -155,25 +157,27 @@ export function deleteRow(vertex: Vertex, local: boolean, Ws: ServerEventsDispat
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id);
     if (deleteResult.error) alert(deleteResult.error);
-    if (!local) commitTxn(txnId, Ws);
+    if (!local && isRealTime) commitTxn(txnId, Ws);
   });
 }
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-  const { local, cleanUpConfig } = useContext(FormContext);
+  let { local, cleanUpConfig, isRealTime, txnId } = useContext(FormContext);
 
   // const owner = getOwner();
 
   // todo check bindOwner and fix it
   const addNew = bindOwner(() => {
     batch(function () {
-      const txnId = getNewTxnId();
+      if (isRealTime) {
+        txnId = getNewTxnId();
+      }
       const type = getToEdge(props.meta, props.data);
       const label = props.meta.properties.props?.label;
 
       newRow(txnId, props.data, type, label);
-      if (!local) commitTxn(txnId, Ws);
+      if (!local && isRealTime) commitTxn(txnId, Ws);
     });
   });
 
@@ -279,11 +283,13 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     const DisplayCardProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
-        const txnId = getNewTxnId();
+        if (isRealTime) {
+          txnId = getNewTxnId();
+        }
         mergeVertexProperties(txnId, p.joinVertex.id, {
           [attribute.properties.id]: value,
         });
-        if (!local) commitTxn(txnId, Ws);
+        if (!local && isRealTime) commitTxn(txnId, Ws);
       };
 
       return (
@@ -371,7 +377,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             }
           } as unknown as Vertex}
           data={{ properties: { meta: [] } } as unknown as Vertex}
-          onClick={() => deleteRow(p.joinVertex, local, Ws)} />
+          onClick={() => deleteRow(p.joinVertex, local, isRealTime,txnId, Ws)} />
 
        </div>
       </>
@@ -398,11 +404,13 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     const DisplayProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
-        const txnId = getNewTxnId();
+        if (isRealTime) {
+          txnId = getNewTxnId();
+        }
         mergeVertexProperties(txnId, p.joinVertex.id, {
           [attribute.properties.id]: value,
         });
-        if (!local) commitTxn(txnId, Ws);
+        if (!local && isRealTime) commitTxn(txnId, Ws);
       };
 
       return (
@@ -494,7 +502,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                }
              } as unknown as Vertex}
              data={{ properties: { meta: [] } } as unknown as Vertex}
-             onClick={() => deleteRow(p.joinVertex, local, Ws)} />
+             onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId,Ws)} />
 
         </td>
       </tr>
@@ -512,7 +520,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       const currentItems = ids();
       const fromIndex = currentItems.indexOf(draggable.id as number);
       const toIndex = currentItems.indexOf(droppable.id as number);
-      const txnId = getNewTxnId();
+      if (isRealTime) {
+        txnId = getNewTxnId();
+      }
       if (fromIndex !== toIndex) {
         const updatedItems = currentItems.slice();
         updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
@@ -526,7 +536,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           });
         });
       }
-      if (!local) commitTxn(txnId, Ws);
+      if (!local && isRealTime) commitTxn(txnId, Ws);
     }
     setActiveDragItem(null);
   };
