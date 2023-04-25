@@ -1,7 +1,6 @@
 import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
-import { ComponentProps } from "./Type";
 import { commitTxn, getNewTxnId } from "../../lib/graph";
 import { setSelectionValue } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
@@ -11,6 +10,7 @@ import {
  getSelectedVertexValue,
  getSelectionOptions
 } from "../../lib/Traverse";
+import { ComponentProps } from "../core/Form";
 
 // TODO: Add support for multiple string values.
 // TODO: Add support for inward values

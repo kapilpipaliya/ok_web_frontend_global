@@ -1,7 +1,6 @@
 import { createEffect, createResource, untrack, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { ComponentProps } from "./Type";
 import {
   commitTxn,
   getNewGraphId,
@@ -20,6 +19,7 @@ import {
   getSelectedVertexValue,
   getSelectionOptions, getToEdge
 } from "../../lib/Traverse";
+import { ComponentProps } from "../core/Form";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
