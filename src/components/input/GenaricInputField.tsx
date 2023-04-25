@@ -64,13 +64,13 @@ import dxTextBox, {
  Properties as dxTextBoxProperties
 } from "devextreme/ui/text_box";
 
-import { ComponentProps } from "./Type";
 import Validator, {
  Properties as ValidatorProperties
 } from "devextreme/ui/validator";
 import { FormContext } from "../dynamicForm";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
+import { ComponentProps } from "../core/Form";
 
 export const genericComponents = [
   "AutocompleteField",
@@ -211,6 +211,7 @@ export function GenericInputField(props: ComponentProps & { component: string })
           // }
          });
          validatorInstance.context = formContext;
+         validatorInstance.meta = props.meta;
 
          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
 

@@ -21,7 +21,6 @@ import {
   SortableProvider
 } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
-import { ComponentProps } from "./Type";
 import { toTitle } from "case-switcher-js";
 import {
   addNewVertex,
@@ -56,6 +55,8 @@ import { removeUndefinedProperties } from "../../utils/functions";
 import { ButtonGroupField } from "../core/ButtonGroup";
 import ScrollView from "devextreme/ui/scroll_view";
 import Sortable from "devextreme/ui/sortable";
+import { ComponentProps } from "../core/Form";
+import { Icon } from "@iconify-icon/solid";
 // import SortableKanban from "../core/SortableField";
 // import "../assets/styles/sortable.css";
 
@@ -481,7 +482,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       // @ts-ignore
       <tr use:sortable class="" classList={{ "opacity-25": sortable.isActiveDraggable }}>
         <td>
-          <div class="flex">{/* <DynGlyph x="swap_vert" class="hidden group-hover:block" /> */}</div>
+          <div class="flex"> <Icon icon="material-symbols:drag-indicator" width={25} height={25} /></div>
         </td>
         <DisplayProperties />
         <td>
@@ -676,7 +677,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                      <Switch>
                        <Match when={attribute.props?.skip}></Match>
                        <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
-                         <th>{toTitle(attribute.title || attribute.id)}</th>
+                         <th title={attribute.props?.hint}>{toTitle(attribute.title || attribute.id)}</th>
                        </Match>
                        <Match when={true}><th></th></Match>
                      </Switch>

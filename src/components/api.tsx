@@ -130,7 +130,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     title: "Attribute",
     id: "Attr",
     attributes: [
-      { id: "id", component: "TextBoxField" },
+      { id: "id", component: "TextBoxField", },
       {
         id: "dataType",
         component: "SelectBoxField",
@@ -321,6 +321,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               displayExpr: "properties.id",
               collection: "Attr",
+              hint: "select existing attribute"
             },
           },
           {
@@ -790,6 +791,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { id: "dry", component: "CheckBoxField" },
       { id: "lookup", component: "TextBoxField" },
       { id: "lookupId", component: "TextBoxField" },
+      { id: "lookupChild", component: "TextBoxField" },
       {
         id: "Meta",
         component: "TableField",
