@@ -41,7 +41,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getOptionLabel,
-  getParentVertex
+  getParentVertex, getToEdge
 } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
 import { ValidationRule } from "devextreme/common";
@@ -505,6 +505,20 @@ export const SignUp = (props: {}) => {
   );
 };
 
+const isEmpty = (object: {[key: string]: any}) => !Object.values(object).some(x => x !== null && x !== '');
+
+function findOrCreateNewVertex(txnId: number, label: string, lookupId: string, lookUpUniqueValue: string) {
+  let existingVertex = (graph.vertexLabelIdMap[label] || [])
+   .map((vertexId) => graph.vertexes[vertexId])
+   .find((vertex) => vertex.properties[lookupId] === lookUpUniqueValue);
+  if (!existingVertex) {
+    const vertexId = getNewGraphId();
+    addNewVertex(txnId, newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }));
+    existingVertex = graph.vertexes[vertexId];
+  }
+  return existingVertex;
+}
+
 export const SimpleImport = (props: {}) => {
   // const { setAlert } = useContext(AlertMessageContext);
   // const navigate = useNavigate();
@@ -558,9 +572,9 @@ export const SimpleImport = (props: {}) => {
     const dry = config.vertex.properties.dry as boolean;
     const lookup = config.vertex.properties.lookup as string;
     const lookupId = config.vertex.properties.lookupId as string;
+    const lookupChild = config.vertex.properties.lookupChild as string;
 
     const txnId = getNewTxnId();
-    // const firstLine = csvResult.split("\n", 1)[0];
 
     const converter = csvtojson({
       trim: true,
@@ -587,6 +601,10 @@ export const SimpleImport = (props: {}) => {
 
       // collection may not exist before, in that case write Label
       let collLabel = metaVertex.properties.collLabel;
+
+      if (!attrId && !collLabel) {
+        alert('attrId or collLabel is required');
+      }
       const collVertex = getChildVertex(["$0Coll"], metaVertex);
       if (!collVertex.error) {
         collLabel = collVertex.vertex?.properties[collId];
@@ -603,16 +621,19 @@ export const SimpleImport = (props: {}) => {
       } as Column;
     });
 
-    const processRows = (rowData: { [key: string]: any }[], labelName: string) => {
+    // process each row:
+    const processRows = (rowData: { [key: string]: any }[], labelName: string, mainVertex?: Vertex) => {
       const selectMetas = normalizeMeta.filter((meta) => meta.collLabel);
       const nonSelectMetas = normalizeMeta.filter((meta) => !meta.collLabel);
       const selectColumnIds = selectMetas.map((meta) => meta.column);
-      selectMetas.forEach((meta) => {
-        if (meta.skip) return;
+      // Insert all Select Vertexes:
+      for (const meta of selectMetas) {
+        if (meta.skip) continue;
         // get unique ID and insert if not exist.
         const uniqueValues = A.groupBy(rowData, (row) => row[meta.column]);
         Object.keys(uniqueValues).forEach((value) => {
           if (!value) return;
+          if (value === "undefined") return;
           // find and if not exist then only add new vertex
           const existingVertex = (graph.vertexLabelIdMap[meta.collLabel] || [])
             .map((vertexId) => graph.vertexes[vertexId])
@@ -626,9 +647,9 @@ export const SimpleImport = (props: {}) => {
             );
           }
         });
-      });
+      }
 
-      rowData.forEach((row) => {
+      for (const row of rowData) {
         const selectColumnValues = D.selectKeys(row, selectColumnIds);
         // remove lookup value
         const rowObj = D.deleteKeys(row, selectColumnIds);
@@ -648,38 +669,45 @@ export const SimpleImport = (props: {}) => {
           rowObj[meta.attrId] = m;
         }
 
-        // insert current row and all lookup as children
-        const vertexId = getNewGraphId();
-        addNewVertex(txnId, newVertex(vertexId, [labelName], rowObj));
+        // insert current row and all lookup as children or parent
+        let rowVertexId = getNewGraphId();
+        if (mainVertex) {
+          const type = getToEdge({properties: { id: labelName}} as Vertex, mainVertex);
+          const newRow1 = newRow(txnId, mainVertex, type);
+          rowVertexId = newRow1.vertexId!;
+          mergeVertexProperties(txnId, rowVertexId, rowObj);
+        } else {
+          addNewVertex(txnId, newVertex(rowVertexId, [labelName], rowObj));
+        }
 
         for (const selectMeta of selectMetas) {
           const value = selectColumnValues[selectMeta.column];
           if (!value) continue;
-          const vertex = graph.vertexes[vertexId];
+          const vertex = graph.vertexes[rowVertexId];
 
           const v = () => findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
           if (selectMeta.func) {
             if (selectMeta.func === "dataType") {
-              const component = findVertexByLabelAndUniqueId(
+              const dataTypeVertex = findVertexByLabelAndUniqueId(
                 selectMeta.collLabel,
                 selectMeta.collId,
                 resoDataTypeToComponents(value, row),
               );
-              if (component) {
+              if (dataTypeVertex) {
                 setSelectionValue(
                   txnId,
                   vertex,
                   {
                     properties: { id: selectMeta.collLabel },
                   } as unknown as Vertex,
-                  component.id,
+                  dataTypeVertex.id,
                 );
               }
             } else if (selectMeta.func === "lookup") {
               const lookup = findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
               if (lookup) {
                 // edge and child vertex has same label
-                const lookupChild = newRow(txnId, graph.vertexes[vertexId], selectMeta.collLabel);
+                const lookupChild = newRow(txnId, graph.vertexes[rowVertexId], selectMeta.collLabel);
                 const rowVertex = graph.vertexes[lookupChild.vertexId!];
                 setSelectionValue(
                   txnId,
@@ -711,7 +739,7 @@ export const SimpleImport = (props: {}) => {
             );
           }
         }
-      });
+      }
     };
 
     const rows = [] as { [key: string]: any }[];
@@ -723,30 +751,31 @@ export const SimpleImport = (props: {}) => {
         const jsonStr = data.toString("utf8");
         const json = JSON.parse(jsonStr);
         // addNewVertex(txnId, newVertex(getNewGraphId(), [label], json));
-        rows.push(json);
+        if(!isEmpty(json)) {
+          rows.push(json);
+        }
       })
       .on("end", () => {
         if (lookup && lookupId) {
           // get unique ID and insert if not exist.
           const uniqueValues = A.groupBy(rows, (row) => row[lookup]);
-          Object.keys(uniqueValues).forEach((value) => {
-            if (!value) {
-              console.warn("skipped inserting empty lookups");
-              return;
+          for (const lookUpUniqueValue of Object.keys(uniqueValues)) {
+            if (!lookUpUniqueValue || lookUpUniqueValue === "undefined") {
+              console.warn("skipped inserting empty lookups data");
+              continue;
             }
-            // find and if not exist then only add new vertex
-            const existingVertex = (graph.vertexLabelIdMap[label] || [])
-              .map((vertexId) => graph.vertexes[vertexId])
-              .find((vertex) => vertex.properties[lookupId] === value);
-            if (!existingVertex) {
-              addNewVertex(txnId, newVertex(getNewGraphId(), [label], { [lookupId]: value }));
-            }
+            const existingVertex = findOrCreateNewVertex(txnId, label, lookupId, lookUpUniqueValue);
 
-            const rows = uniqueValues[value]!;
+            const rows = uniqueValues[lookUpUniqueValue]!;
             // when lookup we enter one collection and all other data as its child data
-            // @ts-ignore
-            processRows(rows, value);
-          });
+            if (!lookupChild) {
+              // value is Collection Label here.
+              // insert data:
+              processRows(rows, lookUpUniqueValue);
+            } else {
+              processRows(rows, lookupChild, existingVertex);
+            }
+          }
         } else {
           processRows(rows, label);
         }
@@ -832,13 +861,17 @@ export const SimpleImport = (props: {}) => {
             }
             case "attribute": {
               replaceVertexProperties(txnId, config.vertex.id, {
-                label: "Attr",
+                label: "Coll",
+                lookup: "ResourceName",
+                lookupChild: "Attr",
+                lookupId: "id",
                 dry,
               });
               const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta1.vertexId!, {
                 column: "StandardName",
-                attrId: "id",
+                collLabel: "Attr",
+                collId: "id",
               });
               const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
