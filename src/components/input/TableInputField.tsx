@@ -386,9 +386,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   }
 
 // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { joinVertex: Vertex }) => {
-    // console.log(p.joinVertex.id)
-    const sortable = createSortable(p.joinVertex.id);
+  const SortableRow = (p: { joinVertex: Vertex, index: number }) => {
+    // const sortable = createSortable(p.joinVertex.id);
     const metaTxnId = rowMetaInitialize(p.joinVertex);
 
     if(metaTxnId){
@@ -402,6 +401,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
     if (attributesResult.error) alert("Error getting attributes");
     const rowColumnsMetaAttrs = attributesResult.vertexes!;
+    const [disabled, setDisabled] = createSignal(true);
 
     const DisplayProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
@@ -442,18 +442,21 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 </Match>
                 <Match when={component() === "TableField"}>
                   <td>
-                    <div class="flex">
-                      {metaVertex.properties.props?.defaultValue &&
-                        getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                      <DynamicComponent
-                        id={""}
-                        component={component()}
-                        // When we have a TableField we pass original Table Meta Vertex
-                        meta={graph.vertexes[metaVertex.properties.templateId]}
-                        data={p.joinVertex}
-                        setValue={setValue}
-                      />
-                    </div>
+                    <Show when={!props.disabled}>
+                      <div class="flex">
+                        {metaVertex.properties.props?.defaultValue &&
+                         getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                        <DynamicComponent
+                         id={""}
+                         component={component()}
+                         // When we have a TableField we pass original Table Meta Vertex
+                         meta={graph.vertexes[metaVertex.properties.templateId]}
+                         data={p.joinVertex}
+                         setValue={setValue}
+                         disabled={disabled()}
+                        />
+                      </div>
+                    </Show>
                   </td>
                 </Match>
                 <Match when={true}>
@@ -467,6 +470,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                         meta={metaVertex}
                         data={p.joinVertex}
                         setValue={setValue}
+                        disabled={disabled()}
                       />
                     </div>
                   </td>
@@ -479,68 +483,60 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     };
 
     return (
-      // @ts-ignore
-      <tr use:sortable class="" classList={{ "opacity-25": sortable.isActiveDraggable }}>
+      <tr
+       // use:sortable
+       // classList={{ "opacity-25": sortable.isActiveDraggable }}
+       class=""
+      >
         <td>
-          <div class="flex"> <Icon icon="material-symbols:drag-indicator" width={25} height={25} /></div>
+          <div class="flex align-items:center">
+            {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
+            <Icon icon="material-symbols:keyboard-arrow-up" width={25} height={25} />
+            <Icon icon="material-symbols:keyboard-arrow-down" width={25} height={25} />
+            <Icon icon="material-symbols:add-box" width={25} height={25} />
+            <Icon icon="material-symbols:restore-from-trash-outline" width={25} height={25} onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId,Ws)}/>
+            <Show when={!props.disabled}>
+              <Icon icon="material-symbols:edit" width={25} height={25} onClick={() => setDisabled(v => !v)}/>
+            </Show>
+            {p.index + 1}
+          </div>
         </td>
         <DisplayProperties />
-        <td>
-            <ButtonGroupField
-             meta={{
-               properties: {
-                 id: "meta",
-                 props: {
-                   keyExpr: "id",
-                   items: [
-                     {
-                       icon: "trash",
-                       id: "delete",
-                       hint: "Delete Row"
-                     }
-                   ]
-                 }
-               }
-             } as unknown as Vertex}
-             data={{ properties: { meta: [] } } as unknown as Vertex}
-             onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId,Ws)} />
-
-        </td>
       </tr>
     );
   };
 
-  // @ts-ignore
-  const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
-  const ids = () => sortedVertexes().map((vertex) => vertex.id);
-  const onDragStart: DragEventHandler = ({ draggable }) => {
-    setActiveDragItem(draggable.id);
-  };
-  const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
-    if (draggable && droppable) {
-      const currentItems = ids();
-      const fromIndex = currentItems.indexOf(draggable.id as number);
-      const toIndex = currentItems.indexOf(droppable.id as number);
-      if (isRealTime) {
-        txnId = getNewTxnId();
-      }
-      if (fromIndex !== toIndex) {
-        const updatedItems = currentItems.slice();
-        updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
-        // runWithOwner(owner, () => {
-        batch(() => {
-          updatedItems.forEach((vertexId, index) => {
-            const { error } = mergeVertexProperties(txnId, vertexId, {
-              pos: index + 1,
-            });
-            if (error) alert(error);
-          });
-        });
-      }
-      if (!local && isRealTime) commitTxn(txnId, Ws);
-    }
-    setActiveDragItem(null);
-  };
+  // @commented drag and drop related code.
+  // const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
+  // const ids = () => sortedVertexes().map((vertex) => vertex.id);
+  // const onDragStart: DragEventHandler = ({ draggable }) => {
+  //   setActiveDragItem(draggable.id);
+  // };
+  // const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
+  //   if (draggable && droppable) {
+  //     const currentItems = ids();
+  //     const fromIndex = currentItems.indexOf(draggable.id as number);
+  //     const toIndex = currentItems.indexOf(droppable.id as number);
+  //     if (isRealTime) {
+  //       txnId = getNewTxnId();
+  //     }
+  //     if (fromIndex !== toIndex) {
+  //       const updatedItems = currentItems.slice();
+  //       updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
+  //       // runWithOwner(owner, () => {
+  //       batch(() => {
+  //         updatedItems.forEach((vertexId, index) => {
+  //           const { error } = mergeVertexProperties(txnId, vertexId, {
+  //             pos: index + 1,
+  //           });
+  //           if (error) alert(error);
+  //         });
+  //       });
+  //     }
+  //     if (!local && isRealTime) commitTxn(txnId, Ws);
+  //   }
+  //   setActiveDragItem(null);
+  // };
 
 
   // @ts-ignore
@@ -675,7 +671,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   {(attribute) => {
                     return (
                      <Switch>
-                       <Match when={attribute.props?.skip}></Match>
+                       {/*<Match when={attribute.props?.skip}></Match>*/}
                        <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
                          <th title={attribute.props?.hint}>{toTitle(attribute.title || attribute.id)}</th>
                        </Match>
@@ -684,18 +680,17 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     );
                   }}
                   </For>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                <DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>
-                  <DragDropSensors />
-                  <SortableProvider ids={ids()}>
+                {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
+                {/*  <DragDropSensors />*/}
+                {/*  <SortableProvider ids={ids()}>*/}
                     <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
-                      {(vertex) => <SortableRow joinVertex={vertex} />}
+                      {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}
                     </For>
-                  </SortableProvider>
-                </DragDropProvider>
+                {/*  </SortableProvider>*/}
+                {/*</DragDropProvider>*/}
               </tbody>
             </table>
           </div>

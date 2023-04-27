@@ -41,7 +41,8 @@ import {
   getChildVertex,
   getChildVertexes,
   getOptionLabel,
-  getParentVertex, getToEdge
+  getParentVertex,
+  getToEdge
 } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
 import { ValidationRule } from "devextreme/common";
@@ -541,7 +542,7 @@ export const SimpleImport = (props: {}) => {
       case "Boolean":
         return "CheckBoxField";
       case "Collection":
-        return "";
+        return "SelectBoxField";
       case "Date":
         return "DateBoxField";
       case "Number": {
@@ -554,7 +555,7 @@ export const SimpleImport = (props: {}) => {
       case "Resource":
         return "SelectBoxField";
       case "String":
-        return "TexBoxField";
+        return "TextBoxField";
       case "String List, Multi":
         return "TagBoxField";
       case "String List, Single":
@@ -602,7 +603,7 @@ export const SimpleImport = (props: {}) => {
       // collection may not exist before, in that case write Label
       let collLabel = metaVertex.properties.collLabel;
 
-      if (!attrId && !collLabel) {
+      if (!attrId && !collLabel && !metaVertex.properties.skip) {
         alert('attrId or collLabel is required');
       }
       const collVertex = getChildVertex(["$0Coll"], metaVertex);
@@ -687,22 +688,26 @@ export const SimpleImport = (props: {}) => {
 
           const v = () => findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
           if (selectMeta.func) {
-            if (selectMeta.func === "dataType") {
-              const dataTypeVertex = findVertexByLabelAndUniqueId(
-                selectMeta.collLabel,
-                selectMeta.collId,
-                resoDataTypeToComponents(value, row),
+            if (selectMeta.func === "component") {
+              const componentString = resoDataTypeToComponents(value, row);
+              const componentVertex = findVertexByLabelAndUniqueId(
+               selectMeta.collLabel,
+               selectMeta.collId,
+               componentString
               );
-              if (dataTypeVertex) {
-                setSelectionValue(
-                  txnId,
-                  vertex,
-                  {
-                    properties: { id: selectMeta.collLabel },
-                  } as unknown as Vertex,
-                  dataTypeVertex.id,
-                );
+              if (!componentVertex) {
+                console.warn(`component is not found ${componentString}`);
+                continue;
               }
+              // Note: if component does not exist it will not set
+              setSelectionValue(
+               txnId,
+               vertex,
+               {
+                 properties: { id: selectMeta.collLabel }
+               } as unknown as Vertex,
+               componentVertex.id
+              );
             } else if (selectMeta.func === "lookup") {
               const lookup = findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
               if (lookup) {
@@ -796,7 +801,7 @@ export const SimpleImport = (props: {}) => {
               props: {
                 stringValue: true,
                 displayExpr: "id",
-                collection: '[{"id": "dataType"},{"id": "component"},{"id": "lookup"},{"id": "attribute"}]',
+                collection: '[{"id": "component"},{"id": "component"},{"id": "lookup"},{"id": "attribute"}]',
               },
             },
           } as unknown as Vertex
@@ -827,7 +832,7 @@ export const SimpleImport = (props: {}) => {
               // to store parent components.
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
                 column: "dataType",
-                collLabel: "DataType",
+                collLabel: "Comp",
                 collId: "id",
                 inward: true,
               });
@@ -880,16 +885,32 @@ export const SimpleImport = (props: {}) => {
               });
               const newMeta3 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta3.vertexId!, {
-                column: "Definition",
-                attrId: "description",
+                column: "SimpleDataType",
+                collLabel: "Comp",
+                collId: "id",
+                func: "component",
               });
               const newMeta4 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta4.vertexId!, {
-                column: "SimpleDataType",
-                collLabel: "DataType",
-                collId: "id",
-                func: "dataType",
+                column: "Groups",
+                // collLabel: "CollCategory",
+                // collId: "id",
+                // inward: true
+                skip: true
               });
+
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SourceResource', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SugMaxLength', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SugMaxPrecision', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'Synonyms', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'FrenchCanadianDisplayName', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'LookupStatus', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'LookupName', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'RepeatingElement', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'payload', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'TargetResourceKey', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SourceResourceKey', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'BEDES', skip: true });
               break;
             }
             default: {
@@ -916,9 +937,9 @@ export const SimpleImport = (props: {}) => {
 };
 export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: FieldAttribute[]) => {
   for (const attribute of attributes) {
-    if (attribute?.props?.skip) {
-      continue;
-    }
+    // if (attribute?.props?.skip) {
+    //   continue;
+    // }
 
     const addAttributeResult = newRow(txnId, vertex, "MetaAttr");
     if (addAttributeResult.error) {
