@@ -263,7 +263,7 @@ export const DataGrid = (props: DataGridProps) => {
           showRowLines: true,
           showColumnLines: true,
           paging: {
-            pageSize: 200
+            pageSize: 25
           },
           ...customProps
         });

@@ -130,18 +130,21 @@ export const DynamicComponent = (props: {
   meta: Vertex;
   data: Vertex;
   setValue(attribute: Vertex, data: any): void;
+  disabled?: boolean
 }) => {
   return (
     <Switch>
       <Match when={!props.component}>NO INPUT</Match>
       <Match when={props.component === "SelectBoxField"}>
-        <SelectInputField aria-labeledby={props.id} data={props.data} meta={props.meta} setValue={props.setValue} />
+        <SelectInputField aria-labeledby={props.id} data={props.data} meta={props.meta} setValue={props.setValue} disabled={props.disabled!}/>
       </Match>
       <Match when={props.component === "TagBoxField"}>
-        <TagField aria-labeledby={props.id} data={props.data} meta={props.meta} />
+        <TagField aria-labeledby={props.id} data={props.data} meta={props.meta} disabled={props.disabled!}/>
       </Match>
       <Match when={props.component === "TableField"}>
-        <TableInputField meta={props.meta} data={props.data} />
+        <Show when={!props.disabled}>
+        <TableInputField meta={props.meta} data={props.data} disabled={props.disabled!}/>
+        </Show>
       </Match>
       <Match when={props.component.startsWith("Form")}>
         <td>
@@ -159,6 +162,7 @@ export const DynamicComponent = (props: {
           meta={props.meta}
           component={props.component}
           setValue={props.setValue}
+          disabled={props.disabled!}
         />
       </Match>
     </Switch>

@@ -1,8 +1,8 @@
 import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
-import { commitTxn, getNewTxnId } from "../../lib/graph";
-import { setSelectionValue } from "./SelectInputField";
+import { commitTxn, getNewTxnId, graph } from "../../lib/graph";
+import { selectedValue, setSelectionValue } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
 import { FormContext, onChangeHandler } from "../dynamicForm";
 import {
@@ -23,6 +23,9 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
   }
 
   const [selectOptions, { refetch }] = createResource(() => {
+   if (props.disabled) {
+    return selectedValue(props.meta, props.data).map(vertexId => graph.vertexes[vertexId]);
+   }
     return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
   });
 
@@ -34,6 +37,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
 
           const instance = new TagBox(el, {
             searchEnabled: true,
+            disabled: props.disabled!,
             value: selectedValue,
             onValueChanged: function (e) {
              if (isRealTime) {
@@ -68,7 +72,9 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
               { defer: true },
             ),
           );
-          // when the value is changed by other components, we want to refetch the options
+         createEffect(() => instance.option("disabled", props.disabled));
+
+         // when the value is changed by other components, we want to refetch the options
           // createEffect(on(() => props.rawValue, (v) => refetch(v)))
           createEffect(() => {
             if (selectOptions()) {

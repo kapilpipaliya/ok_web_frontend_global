@@ -4,7 +4,7 @@ export interface ComponentProps {
   meta: Vertex;
   data: Vertex;
 
-  errors?: string[];
+  disabled?: boolean;
   "aria-labeledby"?: string;
 
   setValue(attribute: Vertex, data: any): void;
