@@ -48,11 +48,10 @@ const navigation = [
       { name: "DataTypes", href: "/DataType" },
       { name: "Elements", href: "/Comp" },
       { name: "Attribute Types", href: "/AttrType" },
-      { name: "Attributes", href: "/Attr" },
       { name: "Collection Category", href: "/CollCategory" },
       { name: "Collections", href: "/Coll" },
-      // { name: "Forms", href: "/Form" },
-      // { name: "Page", href: "/Page" },
+      { name: "Forms", href: "/Form" },
+      { name: "Page", href: "/Page" },
     ],
   },
   {
