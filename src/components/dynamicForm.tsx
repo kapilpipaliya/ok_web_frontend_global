@@ -192,7 +192,7 @@ export function DynamicForm(props: DynamicFormProps) {
         return (
           <Switch>
             <Match when={component() === "TableField"}>
-              <h3>{toTitle(metaVertex.properties.title || metaVertex.properties.id)}</h3>
+              <h3>{toTitle(metaVertex.properties.displayName || metaVertex.properties.id)}</h3>
               <DynamicComponent
                 id={id}
                 component={component()}
@@ -213,7 +213,7 @@ export function DynamicForm(props: DynamicFormProps) {
             <Match when={true}>
               <div class="dx-field">
                 <div class="dx-field-label" id={id}>
-                  {toTitle(metaVertex.properties.title || metaVertex.properties.id)}
+                  {toTitle(metaVertex.properties.displayName || metaVertex.properties.id)}
                 </div>
                 <div class="dx-field-value">
                   <DynamicComponent
