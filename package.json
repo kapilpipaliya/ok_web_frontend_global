@@ -55,6 +55,7 @@
     "@spicainternational/sds-devextreme": "^5.1.1",
     "@stitches/core": "^1.2.8",
     "@thisbeyond/solid-dnd": "^0.7.4",
+    "@types/uikit": "^3.14.0",
     "@untemps/solid-readotron": "^1.0.2",
     "case-switcher-js": "^1.1.10",
     "clsx": "^1.2.1",
@@ -100,6 +101,7 @@
     "solidjs-hooks": "^1.1.2",
     "solidjs-icons": "^1.0.12",
     "tiny-debounce": "^0.1.1",
+    "uikit": "^3.16.15",
     "ulid": "^2.3.0"
   }
 }

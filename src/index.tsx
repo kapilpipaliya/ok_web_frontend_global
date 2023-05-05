@@ -6,6 +6,8 @@ import "devextreme/dist/css/dx.light.css";
 import "./devFix.css";
 import './master.css'
 
+import 'uikit/dist/js/uikit'
+import 'uikit/dist/css/uikit.css'
 import { render } from "solid-js/web";
 import { FullDashboard } from "./components/Dashboard";
 import { Router } from "@solidjs/router";
