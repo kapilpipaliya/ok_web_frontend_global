@@ -154,9 +154,9 @@ export const DataGrid = (props: DataGridProps) => {
   const tableColumns = [] as Array<Column<any, any>>;
   for (const attribute of formNew!.attributes) {
     if (attribute.component === "TableField") continue;
-    if (attribute.props?.skip) continue;
+    // if (attribute.props?.skip) continue;
     attribute["dataField"] = `properties.${attribute.id}`;
-    attribute["caption"] = capitalizeFirstLetter(attribute.title || attribute.id);
+    attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.id);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
     if (attribute.component === "SelectBoxField") {
       attribute['calculateCellValue'] = (columnBase, rowData) => {
@@ -265,6 +265,11 @@ export const DataGrid = (props: DataGridProps) => {
           paging: {
             pageSize: 25
           },
+          export: {
+            enabled: true
+          },
+          cellHintEnabled: true,
+          showColumnHeaders: true,
           ...customProps
         });
         const deleteObject = (id: Id) => {

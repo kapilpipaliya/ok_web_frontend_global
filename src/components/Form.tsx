@@ -65,7 +65,7 @@ export interface FieldAttribute {
   dataType?: string;
   meta?: string;
   component: string;
-  title?: string;
+  displayName?: string;
   props?: {
     [key: string]: any
     validationRules?: Array<ValidationRule>
@@ -599,6 +599,7 @@ export const SimpleImport = (props: {}) => {
         func: metaVertex.properties.func,
         edge: metaVertex.properties.edge,
         skip: metaVertex.properties.skip,
+        skipRow: metaVertex.properties.skipRow?.split?.('\n') || [],
       } as Column;
     });
 
@@ -634,8 +635,14 @@ export const SimpleImport = (props: {}) => {
         const selectColumnValues = D.selectKeys(row, selectColumnIds);
         // remove lookup value
         const rowObj = D.deleteKeys(row, selectColumnIds);
+        let skipRow = false;
         // rename object mapping.
         for (const meta of nonSelectMetas) {
+          if (meta.skipRow.includes(rowObj[meta.column])) {
+            skipRow = true;
+            console.log(`skipping row with ${meta.column} value ${rowObj[meta.column]}`);
+            break;
+          }
           if (meta.skip) {
             // @ts-ignore
             rowObj[meta.column] = undefined;
@@ -649,6 +656,7 @@ export const SimpleImport = (props: {}) => {
           // @ts-ignore
           rowObj[meta.attrId] = m;
         }
+        if (skipRow) continue;
 
         // insert current row and all lookup as children or parent
         let rowVertexId = getNewGraphId();
@@ -855,29 +863,36 @@ export const SimpleImport = (props: {}) => {
               const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta1.vertexId!, {
                 column: "StandardName",
-                collLabel: "Attr",
-                collId: "id",
+                attrId: "id",
               });
               const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
                 column: "DisplayName",
-                attrId: "title",
+                attrId: "displayName",
               });
               const newMeta3 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta3.vertexId!, {
+                column: "Definition",
+                attrId: "definition",
+              });
+
+              const newMeta4 = newRow(txnId, config.vertex, "SimpleImportMeta");
+              replaceVertexProperties(txnId, newMeta4.vertexId!, {
                 column: "SimpleDataType",
                 collLabel: "Comp",
                 collId: "id",
                 func: "component",
               });
-              const newMeta4 = newRow(txnId, config.vertex, "SimpleImportMeta");
-              replaceVertexProperties(txnId, newMeta4.vertexId!, {
-                column: "Groups",
-                // collLabel: "CollCategory",
-                // collId: "id",
-                // inward: true
-                skip: true
-              });
+              // TODO: Point Groups to Group Tab
+              // const newMeta5 = newRow(txnId, config.vertex, "SimpleImportMeta");
+              // replaceVertexProperties(txnId, newMeta5.vertexId!, {
+              //   column: "Groups",
+              //   // think how to make this work?
+              //   // collLabel: "CollGroup",
+              //   // collId: "id",
+              //   // inward: true
+              //   skip: true
+              // });
 
               replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SourceResource', skip: true });
               replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SugMaxLength', skip: true });

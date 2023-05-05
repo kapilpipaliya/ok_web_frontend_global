@@ -47,11 +47,11 @@ const navigation = [
     children: [
       { name: "DataTypes", href: "/DataType" },
       { name: "Elements", href: "/Comp" },
-      { name: "Attribute Types", href: "/AttrType" },
-      { name: "Collection Category", href: "/CollCategory" },
-      { name: "Collections", href: "/Coll" },
-      { name: "Forms", href: "/Form" },
-      { name: "Page", href: "/Page" },
+      // { name: "Attribute Types", href: "/AttrType" },
+      // { name: "Collection Category", href: "/CollCategory" },
+      { name: "Form", href: "/Coll" },
+      // { name: "Forms", href: "/Form" },
+      // { name: "Page", href: "/Page" },
     ],
   },
   {

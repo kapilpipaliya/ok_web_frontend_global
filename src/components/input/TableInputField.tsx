@@ -673,7 +673,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                      <Switch>
                        {/*<Match when={attribute.props?.skip}></Match>*/}
                        <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
-                         <th title={attribute.props?.hint}>{toTitle(attribute.title || attribute.id)}</th>
+                         <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute.id)}</th>
                        </Match>
                        <Match when={true}><th></th></Match>
                      </Switch>

@@ -22,6 +22,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { id: "id", component: "TextBoxField" },
       {
         id: "default",
+        displayName: "Default Component",
         component: "SelectBoxField",
         props: {
           displayExpr: "properties.id",
@@ -38,7 +39,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { id: "id", component: "TextBoxField" },
       {
         id: "parent",
-        title: "Parent Component",
+        displayName: "Parent Component",
         component: "SelectBoxField",
         props: {
           displayExpr: "properties.id",
@@ -51,7 +52,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         id: "dataType",
-        title: "DataType",
+        displayName: "DataType",
         component: "SelectBoxField",
         props: {
           displayExpr: "properties.id",
@@ -80,7 +81,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Comp",
-            title: "Component",
+            displayName: "Component",
             component: "SelectBoxField",
             props: {
               displayExpr: "properties.id",
@@ -90,7 +91,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             // TODO: Be sure the name is ok, it will not change in production.
             id: "valueProp",
-            title: "Value Property",
+            displayName: "Value Property",
             component: "TableField",
             tab: "Properties",
             attributes: [
@@ -160,17 +161,17 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             // }
           ],
         } },
-      {
-        id: "category",
-        component: "SelectBoxField",
-        props: {
-          displayExpr: "properties.id",
-          collection: "CollCategory",
-          parentLabel: "CollCategory",
-          inward: true,
-          skip: true
-        },
-      },
+      // {
+      //   id: "category",
+      //   component: "SelectBoxField",
+      //   props: {
+      //     displayExpr: "properties.id",
+      //     collection: "CollCategory",
+      //     parentLabel: "CollCategory",
+      //     inward: true,
+      //     skip: true
+      //   },
+      // },
       { id: "description", component: "TextAreaField" },
       { id: "table", component: "CheckBoxField" },
       { id: "public", component: "CheckBoxField", props: {skip: true}, },
@@ -241,25 +242,25 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "TableField",
         tab: "Attribute",
         props: {
-          unique: 'Attr',
-          kanban: true,
-          collection: "Attr",
+          // unique: 'Attr',
+          // kanban: true,
+          // collection: "Attr",
         },
         attributes: [
           {
             id: "id",
-            title: "ID",
+            displayName: "ID",
             component: "TextBoxField",
             props: {
             },
           },
           {
-            id: "title",
+            id: "displayName",
             component: "TextBoxField",
           },
           {
-            id: "Definition",
-            component: "TextBoxField",
+            id: "definition",
+            component: "TextAreaField",
           },
           {
             id: "tab",
@@ -322,7 +323,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Prop",
-            title: "Property",
+            displayName: "Property",
             component: "TableField",
             props: {skip: true},
             attributes: [
@@ -408,7 +409,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Prop",
-            title: "Property",
+            displayName: "Property",
             component: "TableField",
             attributes: [
               {
@@ -442,7 +443,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { id: "local", component: "CheckBoxField" },
       {
         id: "coll",
-        title: "Collection",
+        displayName: "Collection",
         component: "SelectBoxField",
         props: {
           displayExpr: "properties.id",
@@ -453,17 +454,24 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         id: "Attr",
-        title: "Attribute",
+        displayName: "Attribute",
         component: "TableField",
         tab: "Attribute",
         attributes: [
           {
             id: "Attr",
-            title: "Attribute",
+            displayName: "Attribute",
             component: "SelectBoxField",
             props: {
               displayExpr: "->$0Attr:properties.id",
               collection: "-$0-Coll$0->$0Attr",
+            },
+          },
+          {
+            id: "displayName",
+            component: "TextBoxField",
+            props: {
+              defaultValue: "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
             },
           },
           {
@@ -496,20 +504,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Comp",
-            title: "Component",
+            displayName: "Component",
             component: "SelectBoxField",
             props: {
               displayExpr: "properties.id",
               collection: "->$0Attr->$0Attr->$0DataType->$0Comp",
               defaultValue:
                 "->$0Attr->$0Comp:properties.id||->$0Attr->$0Attr->$0Comp:properties.id",
-            },
-          },
-          {
-            id: "title",
-            component: "TextBoxField",
-            props: {
-              defaultValue: "->$0Attr:properties.title||->$0Attr->$0Attr:properties.title",
             },
           },
           {
@@ -528,7 +529,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Prop",
-            title: "Property",
+            displayName: "Property",
             component: "TableField",
             attributes: [
               {
@@ -551,13 +552,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         id: "Child",
-        title: "Children",
+        displayName: "Children",
         component: "TableField",
         tab: "Children",
         attributes: [
           {
             id: "Coll",
-            title: "Collection",
+            displayName: "Collection",
             component: "SelectBoxField",
             props: {
               displayExpr: "->$0Coll:properties.id",
@@ -584,12 +585,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             id: "Attr",
-            title: "Attribute",
+            displayName: "Attribute",
             component: "TableField",
             attributes: [
               {
                 id: "Attr",
-                title: "Attribute",
+                displayName: "Attribute",
                 component: "SelectBoxField",
                 props: {
                   displayExpr: "->$0Attr:properties.id",
@@ -608,7 +609,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               },
               {
                 id: "Comp",
-                title: "Component",
+                displayName: "Component",
                 component: "SelectBoxField",
                 props: {
                   displayExpr: "properties.id",
@@ -618,11 +619,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 },
               },
               {
-                id: "title",
+                id: "displayName",
                 component: "TextBoxField",
                 props: {
                   defaultValue:
-                    "->$0Attr:properties.title||->$0Attr->$0Attr:properties.title",
+                    "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
                 },
               },
               {
@@ -720,15 +721,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "TableField",
         attributes: [
           { id: "column", component: "TextBoxField" },
-          {
-            id: "attr",
-            title: "Mapping Attribute",
-            component: "SelectBoxField",
-            props: {
-              displayExpr: "key",
-              collection: "Attr",
-            },
-          },
           // {
           //  id: "column",
           //  component: "SelectBoxField",
@@ -737,27 +729,27 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //   collection: "Update Dynamically on meta based on first row",
           //  },
           // },
-          { id: "attrId", title: "Attribute ID", component: "TextBoxField" },
+          { id: "attrId", displayName: "Attribute ID", component: "TextBoxField" },
           {
             id: "coll",
-            title: "Lookup Collection",
+            displayName: "Lookup Collection",
             component: "SelectBoxField",
             props: {
               displayExpr: "key",
               collection: "Coll",
             },
           },
-          { id: "collLabel", title: "Lookup Label", component: "TextBoxField" },
+          { id: "collLabel", displayName: "Lookup Label", component: "TextBoxField" },
           { id: "inward", component: "CheckBoxField" },
           {
             id: "collId",
-            title: "Lookup Collection ID",
+            displayName: "Lookup Collection ID",
             component: "TextBoxField",
           },
-          { id: "edge", title: "Edge Type", component: "TextBoxField" },
+          { id: "edge", displayName: "Edge Type", component: "TextBoxField" },
           {
             id: "func",
-            title: "Function",
+            displayName: "Function",
             component: "SelectBoxField",
             props: {
               stringValue: true,
@@ -766,6 +758,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             },
           },
           { id: "skip", component: "CheckBoxField" },
+          { id: "skipRow", component: "TextAreaField" },
         ],
       },
     ],
