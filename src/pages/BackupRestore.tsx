@@ -114,12 +114,10 @@ export const BackupRestore = () => {
       file.text().then((jsonText) => {
         const json = JSON.parse(jsonText);
         // const s = new Set();
-        const keys = {};
         for (const componentId in json) {
           const component = json[componentId];
           const componentConfiguration = component["Configuration"];
           if (!componentConfiguration) continue;
-
 
           for (const property in componentConfiguration) {
             const propertyObj = componentConfiguration[property];
@@ -151,18 +149,17 @@ export const BackupRestore = () => {
               if (dataType) {
                 const vertex = findVertexByLabelAndUniqueId('Comp', 'id', `${componentId}Field`);
                 if (vertex) {
-
-                  // const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'id', dataType);
-                  // if (!dataTypeVertex) {
-                  //   console.log('dataType not found', dataType);
-                  //   continue;
-                  // }
-                  // const txnId = getNewTxnId();
-                  // const rowResult = newRow(txnId, vertex, 'CompProp');
-                  // replaceVertexProperties(txnId, rowResult.vertexId!, {key: name});
-                  // setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
-                  // // It takes too much time to commit the full transaction.
-                  // commitTxn(txnId, Ws);
+                  const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'id', dataType);
+                  if (!dataTypeVertex) {
+                    console.log('dataType not found', dataType);
+                    continue;
+                  }
+                  const txnId = getNewTxnId();
+                  const rowResult = newRow(txnId, vertex, 'CompProp');
+                  replaceVertexProperties(txnId, rowResult.vertexId!, {key: name});
+                  setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
+                  // It takes too much time to commit the full transaction.
+                  commitTxn(txnId, Ws);
                 }
               }
             }
