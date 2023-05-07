@@ -155,15 +155,17 @@ export const DynamicComponent = (props: {
           </div>
         </td>
       </Match>
-      <Match when={genericComponents.includes(props.component)}>
-        <GenericInputField
-          aria-labeledby={props.id}
-          data={props.data}
-          meta={props.meta}
-          component={props.component}
-          setValue={props.setValue}
-          disabled={props.disabled!}
-        />
+      <Match when={props.component} keyed>
+        <Show when={genericComponents.includes(props.component)}>
+          <GenericInputField
+           aria-labeledby={props.id}
+           data={props.data}
+           meta={props.meta}
+           component={props.component}
+           setValue={props.setValue}
+           disabled={props.disabled!}
+          />
+        </Show>
       </Match>
     </Switch>
   );

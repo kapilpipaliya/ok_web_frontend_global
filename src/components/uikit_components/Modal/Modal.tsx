@@ -33,7 +33,7 @@ export function createModal(
 ): UIkit.ModalElement {
   const divElement = document.createElement('div');
   divElement.setAttribute('uk-modal', '');
-  render(() => <div class={options?.className ?? 'uk-modal-dialog'}>{content}</div>, divElement);
+  render(() => <div class={options?.class ?? 'uk-modal-dialog'}>{content}</div>, divElement);
   return UIkit.modal(divElement, options);
 }
 
