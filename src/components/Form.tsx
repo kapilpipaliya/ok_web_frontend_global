@@ -789,7 +789,7 @@ export const SimpleImport = (props: {}) => {
               props: {
                 stringValue: true,
                 displayExpr: "id",
-                collection: '[{"id": "component"},{"id": "component"},{"id": "lookup"},{"id": "attribute"}]',
+                collection: '[{"id": "dataType"},{"id": "component"},{"id": "lookup"},{"id": "attribute"}]',
               },
             },
           } as unknown as Vertex
