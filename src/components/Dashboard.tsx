@@ -46,7 +46,7 @@ const navigation = [
     expanded: true,
     children: [
       { name: "DataTypes", href: "/DataType" },
-      { name: "Elements", href: "/Comp" },
+      { name: "Components", href: "/Comp" },
       // { name: "Attribute Types", href: "/AttrType" },
       // { name: "Collection Category", href: "/CollCategory" },
       { name: "Form", href: "/Coll" },

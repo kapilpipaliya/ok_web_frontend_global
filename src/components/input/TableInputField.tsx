@@ -419,6 +419,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           {(metaVertex) => {
             const component = createMemo(() => {
               if (metaVertex.properties.component.includes("-")) {
+                // Todo Fix: why this prints two times:
+                console.log('refreshing');
                 // return getOptionLabel(metaVertex, metaVertex.properties.component);
                 return getOptionLabel(p.joinVertex, metaVertex.properties.component);
               } else {

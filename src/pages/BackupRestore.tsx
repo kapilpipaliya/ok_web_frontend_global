@@ -1,14 +1,25 @@
-import { createEffect, createSignal, Show } from "solid-js";
+import { createEffect, createSignal, Show, useContext } from "solid-js";
 import {
   backupToIndexDB,
-  backupToJson,
+  backupToJson, commitTxn, getNewTxnId,
   graph,
   resetDatabase,
   restoreFromIndexDB,
-  restoreFromJson
+  restoreFromJson, Vertex
 } from "../lib/graph";
 import { GraphView } from "../components/GraphView";
 import { Link } from "@solidjs/router";
+import { Card } from "../components/uikit_components/Card/Card";
+import { CardHeader } from "../components/uikit_components/Card/CardHeader";
+import { CardTitle } from "../components/uikit_components/Card/CardTitle";
+import { CardBody } from "../components/uikit_components/Card/CardBody";
+import {
+  findVertexByLabelAndUniqueId,
+  findVertexByLabelAndUniqueIdWithSkip, replaceVertexProperties
+} from "../lib/Vertex";
+import { newRow } from "../components/input/TableInputField";
+import { setSelectionValue } from "../components/input/SelectInputField";
+import { WsContext } from "../components/ws_events_dispatcher";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -17,7 +28,7 @@ function fileDownloader(opt: {
   mime?: string;
   bom?: string;
 }) {
-  const throwError = function (name: string) {
+  const throwError = function(name: string) {
     throw new Error("No " + name + " provided to generate-download-link.");
   };
 
@@ -73,6 +84,7 @@ function fileDownloader(opt: {
 }
 
 export const BackupRestore = () => {
+  const { Ws } = useContext(WsContext);
   let fileInputRef: HTMLInputElement;
   let componentPropsInputRef: HTMLInputElement;
   const downloadJson = () => {
@@ -101,7 +113,62 @@ export const BackupRestore = () => {
     if (file) {
       file.text().then((jsonText) => {
         const json = JSON.parse(jsonText);
+        // const s = new Set();
+        const keys = {};
+        for (const componentId in json) {
+          const component = json[componentId];
+          const componentConfiguration = component["Configuration"];
+          if (!componentConfiguration) continue;
 
+
+          for (const property in componentConfiguration) {
+            const propertyObj = componentConfiguration[property];
+            const name = propertyObj["Name"];
+            let type = propertyObj["Type"];
+            const default_ = propertyObj["Default"];
+            const readOnly = propertyObj["ReadOnly"];
+            const acceptedValues = propertyObj["AcceptedValues"];
+            // s.add(type);
+            if (type) {
+              let dataType;
+              type = type.split(" | ").filter(t => !t.includes("function")).filter(t => ["false", "null", "AnimationConfig", "dxCalendar_Options", "UserDefinedElement", "template", "any", "undefined", "Store", "DataSource", "DataSource_Options", "dxFilterBuilder_Options", "Format", "DxPromise",
+                "dxSortable_Options", "dxTextBox_Options", "dxPopup_Options", "dxPopover_Options", "PivotGridDataSource", "getter", 'Filter expression']);
+              if (!type.length) continue;
+              if (type.some(t => t.includes("Array"))) {
+                dataType = "List";
+              } else if (type.some(t => t.includes("PositionConfig"))) {
+                dataType = "Map";
+              } else if (type.length > 1) {
+                console.log('skipped multiple result type', propertyObj);
+              } else {
+                dataType = type[0];
+                if (dataType === 'Number') {
+                  dataType = 'Float';
+                } else if (dataType === 'object' || dataType === 'Object' || dataType === 'Group' || dataType === 'PositionConfig') {
+                  dataType = "Map";
+                }
+              }
+              if (dataType) {
+                const vertex = findVertexByLabelAndUniqueId('Comp', 'id', `${componentId}Field`);
+                if (vertex) {
+
+                  // const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'id', dataType);
+                  // if (!dataTypeVertex) {
+                  //   console.log('dataType not found', dataType);
+                  //   continue;
+                  // }
+                  // const txnId = getNewTxnId();
+                  // const rowResult = newRow(txnId, vertex, 'CompProp');
+                  // replaceVertexProperties(txnId, rowResult.vertexId!, {key: name});
+                  // setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
+                  // // It takes too much time to commit the full transaction.
+                  // commitTxn(txnId, Ws);
+                }
+              }
+            }
+          }
+        }
+        debugger
       });
     }
   };
@@ -114,32 +181,42 @@ export const BackupRestore = () => {
       console.log("reloading");
     }
   });
+  const C = (props: { title: string, subtitle: string, children: JSX.Element }) => {
+    return <Card>
+      <CardHeader class="p:10">
+        <CardTitle class="uk-margin-remove-bottom">
+          {props.title}
+        </CardTitle>
+        <span>{props.subtitle}</span>
+      </CardHeader>
+      <CardBody class="m:0 p:12">
+        {props.children}
+      </CardBody>
+    </Card>;
+  };
 
   // @ts-ignore
   return (
-   <div>
+   <>
      <div class="mb:1.5rem mt:10 m:6">
        <div
         class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
-
-         <div
-          class="bg:#fff box-shadow:1|1|7|#ddd r:5 height:4rem flex flex:column jc:space-evenly ai:center cursor:pointer">
-           <div slot="header" title-text="Backup" subtitle-text="Backup in memory graph to different targets"></div>
-           <div class="m:1rem flex gap:0.5rem">
-             <button type="button" onclick={backupToIndexDB_}>
-               Backup To IndexDB
-             </button>
-             <button type="button" onclick={downloadJson}>
-               Download Json
-             </button>
-           </div>
-
-         </div>
-
-         <div
-          class="bg:#fff box-shadow:1|1|7|#ddd r:5 height:4rem flex flex:column jc:space-evenly ai:center cursor:pointer">
-           <div slot="header" title-text="Restore" subtitle-text="Restore graph from different targets to the memory"></div>
-           <div class="m:1rem flex flex-wrap gap:0.5rem">
+         <C title={"Backup"}
+            subtitle={"Backup in memory graph to different targets"}>
+           <CardBody class="m:0 p:12">
+             <div class="m:1rem flex gap:0.5rem">
+               <button type="button" onclick={backupToIndexDB_}>
+                 Backup To IndexDB
+               </button>
+               <button type="button" onclick={downloadJson}>
+                 Download Json
+               </button>
+             </div>
+           </CardBody>
+         </C>
+         <C title={"Restore"}
+            subtitle={"Restore graph from different targets to the memory"}>
+           <CardBody class="m:0 p:12">
              <button type="button" onclick={restoreFromIndexDB}>
                Restore From IndexDB
              </button>
@@ -148,46 +225,35 @@ export const BackupRestore = () => {
              <button type="button" onClick={restoreFromFile}>
                <span>Restore From JSON</span>
              </button>
-           </div>
-         </div>
-
-
-         <div
-          class="bg:#fff box-shadow:1|1|7|#ddd r:5 height:4rem flex flex:column jc:space-evenly ai:center cursor:pointer">
-           <div slot="header" title-text="Graph Functions" subtitle-text="Other graph functions"></div>
-           <div class="m:1rem flex flex:wrap gap:0.5rem">
-             <button type="button" onclick={resetDatabase}>
-               Clear in memory store
-             </button>
-           </div>
-
-
-         </div>
-
-         <div class="bg:#fff box-shadow:1|1|7|#ddd r:5 height:4rem flex flex:column jc:space-evenly ai:center cursor:pointer">
-           <div class="">
-             <div slot="header" title-text="Graph Functions"
-                  subtitle-text="Simple Import"></div>
-             <div class="m:1rem flex flex:wrap gap:0.5rem">
+           </CardBody>
+         </C>
+         <C title={"Graph Functions"} subtitle={"Other graph functions"}>
+           <CardBody class="m:0 p:12">
+             <div class="m:1rem flex gap:0.5rem">
+               <button type="button" onclick={resetDatabase}>
+                 Clear in memory store
+               </button>
+             </div>
+           </CardBody>
+         </C>
+         <C title={"Graph Functions"} subtitle={"Simple Import"}>
+           <CardBody class="m:0 p:12">
+             <div class="m:1rem flex gap:0.5rem">
                <Link href="/SimpleImport">Simple Import</Link>
              </div>
-           </div>
-         </div>
-
-         <div class="bg:#fff box-shadow:1|1|7|#ddd r:5 height:4rem flex flex:column jc:space-evenly ai:center cursor:pointer">
-           <div class="">
-             <div slot="header" title-text="Graph Functions"
-                  subtitle-text="Simple Import"></div>
-             <div class="m:1rem flex flex:wrap gap:0.5rem">
+           </CardBody>
+         </C>
+         <C title={"Graph Functions"} subtitle={"Simple Import"}>
+           <CardBody class="m:0 p:12">
+             <div class="m:1rem flex gap:0.5rem">
                <input ref={componentPropsInputRef!} type="file" accept="json"
                       style="display: hidden"></input>
-               <button type="button" onClick={restoreFromFile}>
+               <button type="button" onClick={importComponentProps}>
                  <span>Restore From JSON</span>
                </button>
              </div>
-           </div>
-         </div>
-
+           </CardBody>
+         </C>
        </div>
       </div>
 
@@ -204,11 +270,6 @@ export const BackupRestore = () => {
             }))}
         />
       </Show>
-     <div ref={el=> {
-       console.log(OxPropertyEditor)
-       const inst = new OxPropertyEditor(el)
-       debugger
-     }}></div>
-    </div>
+   </>
   );
 };
