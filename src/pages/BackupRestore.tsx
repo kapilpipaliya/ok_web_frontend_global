@@ -1,7 +1,7 @@
 import { createEffect, createSignal, Show, useContext } from "solid-js";
 import {
   backupToIndexDB,
-  backupToJson, commitTxn, getNewTxnId,
+  backupToJson, commitTxn, getNewGraphId, getNewTxnId,
   graph,
   resetDatabase,
   restoreFromIndexDB,
@@ -14,12 +14,14 @@ import { CardHeader } from "../components/uikit_components/Card/CardHeader";
 import { CardTitle } from "../components/uikit_components/Card/CardTitle";
 import { CardBody } from "../components/uikit_components/Card/CardBody";
 import {
+  addNewVertex,
   findVertexByLabelAndUniqueId,
-  findVertexByLabelAndUniqueIdWithSkip, replaceVertexProperties
+  findVertexByLabelAndUniqueIdWithSkip, newVertex, replaceVertexProperties
 } from "../lib/Vertex";
 import { newRow } from "../components/input/TableInputField";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import { WsContext } from "../components/ws_events_dispatcher";
+import { getChildVertex, getParentVertex } from "../lib/Traverse";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -113,7 +115,10 @@ export const BackupRestore = () => {
     if (file) {
       file.text().then((jsonText) => {
         const json = JSON.parse(jsonText);
-        // const s = new Set();
+        // const d = new Set();
+        // const v = new Set();
+        // const da = new Set();
+        // const it = new Set();
         for (const componentId in json) {
           const component = json[componentId];
           const componentConfiguration = component["Configuration"];
@@ -122,7 +127,15 @@ export const BackupRestore = () => {
           for (const property in componentConfiguration) {
             const propertyObj = componentConfiguration[property];
             const name = propertyObj["Name"];
+            const description = propertyObj["description"];
             let type = propertyObj["Type"];
+            // if(name === 'displayExpr') d.add(componentId);
+            // if(name === 'valueExpr') v.add(componentId);
+            // if(name === 'dataSource') da.add(componentId);
+            // if(name === 'items') it.add(componentId);
+            // continue;
+            // Do not specify the items property if you specified the dataSource, and vice versa.
+            if (name === 'dataSource') continue;
             const default_ = propertyObj["Default"];
             const readOnly = propertyObj["ReadOnly"];
             const acceptedValues = propertyObj["AcceptedValues"];
@@ -156,7 +169,7 @@ export const BackupRestore = () => {
                   }
                   const txnId = getNewTxnId();
                   const rowResult = newRow(txnId, vertex, 'CompProp');
-                  replaceVertexProperties(txnId, rowResult.vertexId!, {key: name});
+                  replaceVertexProperties(txnId, rowResult.vertexId!, {key: name, description: description});
                   setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
                   // It takes too much time to commit the full transaction.
                   commitTxn(txnId, Ws);
@@ -166,9 +179,30 @@ export const BackupRestore = () => {
           }
         }
         debugger
+        alert('inserting properties finished.')
       });
     }
   };
+
+  const makeASampleForm = () => {
+    // get all the fields
+    const vertexId = getNewGraphId();
+    const txnId = getNewTxnId();
+    addNewVertex(txnId, newVertex(vertexId, ['Coll'], { id: "TestForm", title: "Test Form", table: true }));
+    const existingVertex = graph.vertexes[vertexId];
+    for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
+      const componentVertex = graph.vertexes[compVertexId];
+      const newRow1 = newRow(txnId, existingVertex, 'CollAttr');
+      replaceVertexProperties(txnId, newRow1.vertexId!, { id: componentVertex.properties.id });
+      const dataType = getParentVertex(['DataType$0'], componentVertex);
+      if (!dataType.error) {
+        // set component dataType and component
+        setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'dataType'}} as Vertex, dataType.vertex!.id);
+        setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'comp'}} as Vertex, compVertexId);
+      }
+      commitTxn(txnId, Ws);
+    }
+  }
   // Hack to remount the component
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
@@ -252,7 +286,17 @@ export const BackupRestore = () => {
            </CardBody>
          </C>
        </div>
-      </div>
+         <C title={"Graph Functions"} subtitle={"Simple Import"}>
+           <CardBody class="m:0 p:12">
+             <div class="m:1rem flex gap:0.5rem">
+               <button type="button" onClick={makeASampleForm}>
+                 <span>Make a sample Form</span>
+               </button>
+             </div>
+           </CardBody>
+         </C>
+       </div>
+
 
       <Show when={load()}>
         <GraphView

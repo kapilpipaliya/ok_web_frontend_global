@@ -666,7 +666,13 @@ export const SimpleImport = (props: {}) => {
           rowVertexId = newRow1.vertexId!;
           mergeVertexProperties(txnId, rowVertexId, rowObj);
         } else {
-          addNewVertex(txnId, newVertex(rowVertexId, [labelName], rowObj));
+          // when importing component it has self join, so it's inserting duplicate rows
+          const existingVertex = findVertexByLabelAndUniqueId(labelName, 'id', rowObj.id);
+          if (existingVertex) {
+            rowVertexId = existingVertex.id;
+          } else {
+            addNewVertex(txnId, newVertex(rowVertexId, [labelName], rowObj));
+          }
         }
 
         for (const selectMeta of selectMetas) {
@@ -789,7 +795,7 @@ export const SimpleImport = (props: {}) => {
               props: {
                 stringValue: true,
                 displayExpr: "id",
-                collection: '[{"id": "dataType"},{"id": "component"},{"id": "lookup"},{"id": "attribute"}]',
+                collection: '[{"id": "dataType"},{"id": "component"},{"id": "dataTypeDefault"},{"id": "lookup"},{"id": "attribute"}]',
               },
             },
           } as unknown as Vertex
@@ -819,17 +825,40 @@ export const SimpleImport = (props: {}) => {
               const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
               // to store parent components.
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
-                column: "dataType",
-                collLabel: "Comp",
+                column: "category",
+                collLabel: "CompCategory",
                 collId: "id",
                 inward: true,
               });
+              const newMeta3 = newRow(txnId, config.vertex, "SimpleImportMeta");
+              // to store parent components.
+              replaceVertexProperties(txnId, newMeta3.vertexId!, {
+                column: "dataType",
+                collLabel: "DataType",
+                collId: "id",
+                inward: true,
+              });
+
               break;
             }
             case "dataType": {
               replaceVertexProperties(txnId, config.vertex.id, {
                 label: "DataType",
                 dry,
+              });
+              break;
+            }
+            case "dataTypeDefault": {
+              replaceVertexProperties(txnId, config.vertex.id, {
+                label: "DataType",
+                dry,
+              });
+              const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
+              replaceVertexProperties(txnId, newMeta1.vertexId!, {
+                column: "default",
+                collLabel: "Comp",
+                edge: "default",
+                collId: "id",
               });
               break;
             }

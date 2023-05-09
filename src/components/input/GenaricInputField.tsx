@@ -97,6 +97,21 @@ export const genericComponents = [
   "TextAreaField",
   "TextBoxField",
 ];
+const displayExpr = ['ContextMenu', 'DropDownBox', 'DropDownButton', 'List', 'Lookup', 'Menu', 'RadioGroup', 'SelectBox', 'TagBox', 'TreeView']
+const valueExpr   = ['Autocomplete', 'DropDownBox', 'Lookup', 'RadioGroup', 'SelectBox', 'TagBox']
+const dataSource  = ['Accordion', 'ActionSheet', 'Autocomplete', 'Box', 'Chart', 'ContextMenu', 'DataGrid', 'DropDownBox', 'DropDownButton', 'Funnel', 'Gallery', 'List', 'Lookup', 'Menu', 'MultiView', 'PieChart', 'PivotGrid', 'PivotGridFieldChooser', 'PolarChart', 'RadioGroup', 'RangeSelector', 'ResponsiveBox', 'Sankey', 'Scheduler', 'SelectBox', 'Sparkline', 'TabPanel', 'Tabs', 'TagBox', 'TileView', 'Toolbar', 'TreeList', 'TreeMap', 'TreeView']
+const items       = ['Accordion', 'ActionSheet', 'Autocomplete', 'Box', 'ButtonGroup', 'ContextMenu', 'DropDownBox', 'DropDownButton', 'Form', 'Gallery', 'List', 'Lookup', 'Menu', 'MultiView', 'RadioGroup', 'ResponsiveBox', 'SelectBox', 'TabPanel', 'Tabs', 'TagBox', 'TileView', 'Toolbar', 'TreeView', 'ValidationSummary']
+// onlyItemsAndNotDataSource = ['ButtonGroup', 'Form', 'ValidationSummary']
+// onlyDataSourceAndNotItems = ['Chart', 'DataGrid', 'Funnel', 'PieChart', 'PivotGrid', 'PivotGridFieldChooser', 'PolarChart', 'RangeSelector', 'Sankey', 'Scheduler', 'Sparkline', 'TreeList', 'TreeMap']
+
+const displayExpr1 = ['DropDownBox', 'RadioGroup', 'SelectBox']
+const valueExpr1 = ['Autocomplete', 'DropDownBox', 'RadioGroup', 'SelectBox']
+// RangeSelector dont have items property, so we will not support it.
+const dataSource1 = ['Autocomplete', 'DropDownBox', 'RadioGroup', 'RangeSelector', 'SelectBox'];
+const items1 = ['Autocomplete', 'DropDownBox', 'RadioGroup', 'SelectBox']
+
+// Do not specify the items property if you specified the dataSource, and vice versa.
+// its best to use dataSource but we are using items for simplicity.
 const getTextColumnValue = (value: any) => {
  if (value === true) {
   return 'True';
@@ -137,6 +152,8 @@ export function GenericInputField(props: ComponentProps & { component: string, d
 
         if (props.component === "AutocompleteField") {
          comp = dxAutocomplete;
+         // autocomplete is just like text box, but it allows user to preselect some values.
+         // AutoComplete accept strings[] in items only
          Object.assign(properties, {} as dxAutocompleteProperties);
         } else if (props.component === "BulletField") {
          comp = dxBullet;
@@ -162,13 +179,17 @@ export function GenericInputField(props: ComponentProps & { component: string, d
          comp = dxDateBox;
          Object.assign(properties, {} as dxDateBoxProperties);
         } else if (props.component === "DropDownBoxField") {
+         // DropDownBox is very advanced we can use custom dropdown in the field. so its not supported yet.
+         return 'not supported yet';
          comp = dxDropDownBox;
          // Specifies the currently selected value. May be an object if dataSource contains objects and valueExpr is not set.
          Object.assign(properties, {} as dxDropDownBoxProperties);
         } else if (props.component === "FileUploaderField") {
+         return 'not supported yet';
          comp = dxFileUploader;
          Object.assign(properties, {} as dxFileUploaderProperties);
         } else if (props.component === "FilterBuilderField") {
+         return 'not supported yet';
          comp = dxFilterBuilder;
          Object.assign(properties, {} as dxFilterBuilderProperties);
         } else if (props.component === "HtmlEditorField") {
@@ -185,6 +206,7 @@ export function GenericInputField(props: ComponentProps & { component: string, d
          Object.assign(properties, {} as dxProgressBarProperties);
         } else if (props.component === "RadioGroupField") {
          comp = dxRadioGroup;
+         // radioBox can support any value in the array, it will return the value on onChange like object.
          Object.assign(properties, {} as dxRadioGroupProperties);
         } else if (props.component === "RangeSelectorField") {
          comp = dxRangeSelector;
@@ -214,35 +236,60 @@ export function GenericInputField(props: ComponentProps & { component: string, d
          console.warn("Component not found", props.component);
          return "----";
         }
+        // if (displayExpr.includes(props.component) && !props.meta.properties.props.displayExpr) {
+        //  Object.assign(properties, {displayExpr: ''});
+        // }
+        // if (valueExpr.includes(props.component) && !props.meta.properties.props.valueExpr) {
+        //  Object.assign(properties, {valueExpr: ''});
+        // }
+        // if (dataSource.includes(props.component) && !props.meta.properties.props.dataSource) {
+        //  Object.assign(properties, {dataSource: ''});
+        // }
+        // if (items.includes(props.component) && !props.meta.properties.props.items) {
+        //  Object.assign(properties, {items: ''});
+        // }
 
         const instance = new comp(el, properties);
-        const validatorInstance = new Validator(el, {
-         validationGroup: formContext.validationGroup,
-         // adapter only called when we run validate() manually
-         // adapter: {
-         //  getValue: function(e) {
-         //   return {value: instance.option("value")};
-         //  },
-         //  applyValidationResults: function(e) {
-         //   // $("#contacts").css({ "border": e.isValid ? "none" : "1px solid red" });
-         //  },
-         //  validationRequestsCallbacks: [(e)=> {
-         //   return false;
-         //  }]
-         // }
-        });
-        validatorInstance.context = formContext;
-        validatorInstance.meta = props.meta;
 
-        createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
-        createEffect(() => instance.option("disabled", props.disabled));
-
-        createEffect(() => {
-         for (const property in props.meta.properties.props as dxTextBoxProperties) {
-          instance.option(property, props.meta.properties.props[property]);
+        // try {
+         if (!["AutocompleteField", "BulletField", 'CircularGaugeField', 'FilterBuilderField', 'LinearGaugeField'].includes(props.component)) {
+          const validatorInstance = new Validator(el, {
+           validationGroup: formContext.validationGroup,
+           // adapter only called when we run validate() manually
+           // adapter: {
+           //  getValue: function(e) {
+           //   return {value: instance.option("value")};
+           //  },
+           //  applyValidationResults: function(e) {
+           //   // $("#contacts").css({ "border": e.isValid ? "none" : "1px solid red" });
+           //  },
+           //  validationRequestsCallbacks: [(e)=> {
+           //   return false;
+           //  }]
+           // }
+          });
+          validatorInstance.context = formContext;
+          validatorInstance.meta = props.meta;
+          createEffect(() => validatorInstance.option("validationRules", props.meta.properties.props?.validationRules as Array<ValidationRule>));
          }
-        });
-        createEffect(() => validatorInstance.option("validationRules", props.meta.properties.props?.validationRules as Array<ValidationRule>));
+        // } catch (e) {
+        //  console.log('cant set validator for', props.component, e);
+        // }
+
+
+         createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+         createEffect(() => instance.option("disabled", props.disabled));
+
+         createEffect(() => {
+          for (const property in props.meta.properties.props as dxTextBoxProperties) {
+           let value = props.meta.properties.props[property];
+           if (property === 'items' && typeof value === 'string') {
+              value = value.split('\n');
+           }
+           instance.option(property, value);
+          }
+         });
+
        }}
       />
      </Show>
