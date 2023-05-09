@@ -119,6 +119,7 @@ export const BackupRestore = () => {
         // const v = new Set();
         // const da = new Set();
         // const it = new Set();
+        const txnId = getNewTxnId();
         for (const componentId in json) {
           const component = json[componentId];
           const componentConfiguration = component["Configuration"];
@@ -167,17 +168,18 @@ export const BackupRestore = () => {
                     console.log('dataType not found', dataType);
                     continue;
                   }
-                  const txnId = getNewTxnId();
+
                   const rowResult = newRow(txnId, vertex, 'CompProp');
                   replaceVertexProperties(txnId, rowResult.vertexId!, {key: name, description: description});
                   setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
                   // It takes too much time to commit the full transaction.
-                  commitTxn(txnId, Ws);
+
                 }
               }
             }
           }
         }
+        commitTxn(txnId, Ws);
         debugger
         alert('inserting properties finished.')
       });
