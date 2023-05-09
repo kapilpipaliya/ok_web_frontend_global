@@ -202,8 +202,9 @@ export const BackupRestore = () => {
         setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'dataType'}} as Vertex, dataType.vertex!.id);
         setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'comp'}} as Vertex, compVertexId);
       }
-      commitTxn(txnId, Ws);
+
     }
+    commitTxn(txnId, Ws);
   }
   // Hack to remount the component
   const [load, setLoad] = createSignal(false);

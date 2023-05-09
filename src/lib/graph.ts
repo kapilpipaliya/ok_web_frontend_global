@@ -146,6 +146,7 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     }
   }
 };
+// Bug: if commitTxn is called many times it is sending event many times.
 export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
   if (transactions.has(txnId)) {
     transactions.get(txnId)!.status = ProcessStatus.Ready;
