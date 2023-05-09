@@ -363,9 +363,33 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
  if (!vertex) return "";
  if (displayExpr.includes("||")) {
   for (const displayExprElement of displayExpr.split("||")) {
-   const value = getOptionLabel(vertex, displayExprElement);
-   if (value !== undefined && value !== null && value !== "") {
-    return value;
+   // get a function and input:
+   const a  = displayExprElement.split('|');
+   if (a.length > 1) {
+    return;
+    // if (a[0] === 'defaultComp') {
+    //  const value = getOptionLabel(vertex, a[1]);
+    //  if (value !== undefined && value !== null && value !== "") {
+    //   switch (value) {
+    //    case "Null": return;
+    //    case "String": return "TextBoxField";
+    //    case "Boolean": return "CheckBoxField";
+    //    case "Integer": return "IntField";
+    //    case "Float": return "FloatField";
+    //    case "List": return "TextAreaField";
+    //    case "Map": return "TextAreaField";
+    //    case "Duration": return "DateBoxField";
+    //    case "Date": return "DateBoxField";
+    //    case "LocalTime": return "DateTimeBoxField";
+    //    case "LocalDateTime": return "DateBoxField";
+    //   }
+    //  }
+    // }
+   } else {
+    const value = getOptionLabel(vertex, displayExprElement);
+    if (value !== undefined && value !== null && value !== "") {
+     return value;
+    }
    }
   }
  }

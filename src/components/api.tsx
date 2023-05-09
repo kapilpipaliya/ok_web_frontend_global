@@ -32,6 +32,15 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
     ],
   },
+  CompCategory: {
+    title: "Component Category",
+    id: "CompCategory",
+    attributes: [
+      { id: "id", component: "TextBoxField" },
+      { id: "description", component: "TextAreaField" },
+    ],
+  },
+
   Comp: {
     title: "Component",
     id: "Comp",
@@ -62,6 +71,17 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
       },
       {
+        id: "category",
+        component: "SelectBoxField",
+        props: {
+          displayExpr: "properties.id",
+          collection: "CompCategory",
+          parentLabel: "CompCategory",
+          inward: true,
+          skip: true
+        },
+      },
+      {
         id: "Prop",
         component: "TableField",
         tab: "Properties",
@@ -69,6 +89,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             id: "key",
             component: "TextBoxField",
+          },
+          {
+            id: "description",
+            component: "TextAreaField",
+            props: {
+              // autoResizeEnabled: true,
+              width: '550px'
+            }
           },
           {
             id: "dataType",
@@ -88,32 +116,33 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               collection: "->$0DataType->$0Comp",
             },
           },
-          {
-            // TODO: Be sure the name is ok, it will not change in production.
-            id: "valueProp",
-            displayName: "Value Property",
-            component: "TableField",
-            tab: "Properties",
-            attributes: [
-              {
-                id: "key",
-                component: "SelectBoxField",
-                props: {
-                  displayExpr: "properties.key",
-                  collection: "-$0->$0Comp->$0Prop",
-                },
-              },
-              {
-                id: "value",
-                meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop",
-                component: "->$0Key->$0Comp-CompChild:properties.id||->$0Key->$0Comp:properties.id",
-              },
-            ],
-          },
+          // {
+          //   // TODO: Be sure the name is ok, it will not change in production.
+          //   id: "valueProp",
+          //   displayName: "Value Property",
+          //   component: "TableField",
+          //   tab: "Properties",
+          //   attributes: [
+          //     {
+          //       id: "key",
+          //       component: "SelectBoxField",
+          //       props: {
+          //         displayExpr: "properties.key",
+          //         collection: "-$0->$0Comp->$0Prop",
+          //       },
+          //     },
+          //     {
+          //       id: "value",
+          //       meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop",
+          //       component: "->$0Key->$0Comp-CompChild:properties.id||->$0Key->$0Comp:properties.id",
+          //     },
+          //   ],
+          // },
           {
             id: "value",
             meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
             component: "->$0Comp-CompChild:properties.id||->$0Comp:properties.id||->$0DataType->$0Default:properties.id",
+            // component: "->$0Comp-CompChild:properties.id||->$0Comp:properties.id||->$0DataType->$0Default:properties.id||defaultComp|->$0DataType:properties.id",
           },
         ],
       },

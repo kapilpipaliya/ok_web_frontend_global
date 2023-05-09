@@ -46,6 +46,7 @@ const navigation = [
     expanded: true,
     children: [
       { name: "DataTypes", href: "/DataType" },
+      { name: "Components Category", href: "/CompCategory" },
       { name: "Components", href: "/Comp" },
       // { name: "Attribute Types", href: "/AttrType" },
       // { name: "Collection Category", href: "/CollCategory" },
@@ -63,10 +64,10 @@ const navigation = [
       { name: "Permissions", href: "/Perm" },
     ],
   },
-  { name: "Backup & Restore", href: "/backup_restore" },
+  { name: "Grids", href: "/grids" },
   { name: "Import", href: "/SimpleImport" },
   // { name: "Forms", href: "/forms" },
-  { name: "Grids", href: "/grids" },
+  { name: "Backup & Restore", href: "/backup_restore" },
 ] as TreeViewProperties["dataSource"];
 // window.n = navigation
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
