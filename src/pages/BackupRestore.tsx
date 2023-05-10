@@ -128,7 +128,10 @@ export const BackupRestore = () => {
           for (const property in componentConfiguration) {
             const propertyObj = componentConfiguration[property];
             const name = propertyObj["Name"];
-            const description = propertyObj["description"];
+            let description = propertyObj["description"] as string;
+            if (description) {
+              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, '$1');
+            }
             let type = propertyObj["Type"];
             // if(name === 'displayExpr') d.add(componentId);
             // if(name === 'valueExpr') v.add(componentId);
