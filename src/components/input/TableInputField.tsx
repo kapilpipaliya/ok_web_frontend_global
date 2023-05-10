@@ -319,7 +319,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   </div>
 
               </Match>
-              <Match when={component() === "TableField"}>
+              <Match when={component() === "Table"}>
 
                   <div class="flex">
                     {metaVertex.properties.props?.defaultValue &&
@@ -327,7 +327,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     <DynamicComponent
                      id={""}
                      component={component()}
-                     // When we have a TableField we pass original Table Meta Vertex
+                     // When we have a Table we pass original Table Meta Vertex
                      meta={graph.vertexes[metaVertex.properties.templateId]}
                      data={p.joinVertex}
                      setValue={setValue}
@@ -442,7 +442,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     </div>
                   </td>
                 </Match>
-                <Match when={component() === "TableField"}>
+                <Match when={component() === "Table"}>
                   <td>
                     <Show when={!props.disabled}>
                       <div class="flex">
@@ -451,7 +451,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                         <DynamicComponent
                          id={""}
                          component={component()}
-                         // When we have a TableField we pass original Table Meta Vertex
+                         // When we have a Table we pass original Table Meta Vertex
                          meta={graph.vertexes[metaVertex.properties.templateId]}
                          data={p.joinVertex}
                          setValue={setValue}

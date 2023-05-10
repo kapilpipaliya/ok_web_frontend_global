@@ -240,7 +240,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
       childAttrs.push({
         attributes: tableAttrs,
-        component: "TableField",
+        component: "Table",
         id: vertexChild.properties.id || childCollVertex.properties.id,
         props: collChildProps,
       });
@@ -324,7 +324,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
     childAttrs.push({
       attributes: tableAttrs,
-      component: "TableField",
+      component: "Table",
       id: collChild.vertex!.properties.id || collChildColl.vertex!.properties.id,
       props: collChildProps,
     });
@@ -520,28 +520,28 @@ export const SimpleImport = (props: {}) => {
   const resoDataTypeToComponents = (type: string, row: { [key: string]: any }) => {
     switch (type) {
       case "Boolean":
-        return "CheckBoxField";
+        return "CheckBox";
       case "Collection":
-        return "SelectBoxField";
+        return "SelectBox";
       case "Date":
-        return "DateBoxField";
+        return "DateBox";
       case "Number": {
         if (row.SugMaxPrecision) {
-          return "IntField";
+          return "Int";
         } else {
-          return "FloatField";
+          return "Float";
         }
       }
       case "Resource":
-        return "SelectBoxField";
+        return "SelectBox";
       case "String":
-        return "TextBoxField";
+        return "TextBox";
       case "String List, Multi":
-        return "TagBoxField";
+        return "TagBox";
       case "String List, Single":
-        return "SelectBoxField";
+        return "SelectBox";
       case "Timestamp":
-        return "DateTimeBoxField";
+        return "DateTimeBox";
       default:
         return "";
     }
@@ -974,11 +974,11 @@ export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: Field
     const attr = klona(attribute);
     if (!attr.tab) attr.tab = "main";
     if (!attr.group) attr.group = "main";
-    // if(attribute.component === "TableField") attribute.group = attribute.id;
+    // if(attribute.component === "Table") attribute.group = attribute.id;
 
     mergeVertexProperties(txnId, addAttributeResult.vertexId!, attr);
 
-    if (attribute.component === "TableField" && attribute.attributes) {
+    if (attribute.component === "Table" && attribute.attributes) {
       addMetaVertexes(txnId, graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
     }
     // todo discard transaction
