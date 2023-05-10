@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import List, { Properties } from "devextreme/ui/list";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const listData = [
@@ -23,7 +23,7 @@ const listData = [
 
 export function ListComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -44,7 +44,7 @@ export function ListField(props: ComponentProps) {
               props.setValue(props.meta, e.itemData);
             },
           });
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -52,9 +52,7 @@ export function ListField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

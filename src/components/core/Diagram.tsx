@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Diagram, { Properties } from "devextreme/ui/diagram";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const diagramData = [
@@ -39,7 +39,7 @@ const diagramData = [
 
 export function DiagramComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -74,9 +74,7 @@ export function DiagramField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

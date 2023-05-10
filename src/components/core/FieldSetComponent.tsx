@@ -3,6 +3,7 @@ import TextBox, { Properties } from "devextreme/ui/text_box";
 import { createEffect } from "solid-js";
 import { NativeEventInfo } from "devextreme/events";
 import TextArea from "devextreme/ui/text_area";
+import { IdAttr } from "../../lib/graph";
 
 export default function FieldSetComponent(props: ComponentProps) {
   return (
@@ -17,8 +18,8 @@ export default function FieldSetComponent(props: ComponentProps) {
           });
           createEffect(
             () =>
-              props.data.properties[props.meta.properties.id] &&
-              instance.option("value", props.data.properties[props.meta.properties.id]),
+              props.data.properties[props.meta.properties[IdAttr]] &&
+              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -41,8 +42,8 @@ export default function FieldSetComponent(props: ComponentProps) {
           });
           createEffect(
             () =>
-              props.data.properties[props.meta.properties.id] &&
-              instance.option("value", props.data.properties[props.meta.properties.id]),
+              props.data.properties[props.meta.properties[IdAttr]] &&
+              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {

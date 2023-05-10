@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import SparkLine, { Properties } from "devextreme/viz/sparkline";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const sparkLineItems = [
@@ -41,7 +41,7 @@ const sparkLineItems = [
 
 export function SparkLineComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -59,7 +59,7 @@ export function SparkLineField(props: ComponentProps) {
         ref={(el) => {
           const instance = new SparkLine(el, {});
 
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -68,9 +68,7 @@ export function SparkLineField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

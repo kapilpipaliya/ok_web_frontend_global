@@ -2,6 +2,7 @@ import { createEffect } from "solid-js";
 
 import CheckBox, { Properties } from "devextreme/ui/check_box";
 import { ComponentProps } from "./Form";
+import { IdAttr } from "../../lib/graph";
 
 export function BooleanInputField(props: ComponentProps) {
   return (
@@ -15,7 +16,7 @@ export function BooleanInputField(props: ComponentProps) {
               // props.setValue((e.event?.currentTarget as HTMLInputElement).checked);
             },
           });
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);

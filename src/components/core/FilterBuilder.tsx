@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import FilterBuilder, { Properties } from "devextreme/ui/filter_builder";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const filter = [
@@ -47,7 +47,7 @@ const filterBuilderData = [
 
 export function FilterBuilderComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -65,7 +65,7 @@ export function FilterBuilderField(props: ComponentProps) {
         ref={(el) => {
           const instance = new FilterBuilder(el, {
             allowHierarchicalFields: true,
-            fields: props.data.properties[props.meta.properties.id],
+            fields: props.data.properties[props.meta.properties[IdAttr]],
             onEditorPreparing: function (e) {
               e.editorOptions.width = 125;
             },
@@ -79,9 +79,7 @@ export function FilterBuilderField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

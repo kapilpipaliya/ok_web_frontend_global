@@ -2,6 +2,7 @@ import { createEffect, For, Show } from "solid-js";
 
 import TextArea, { Properties } from "devextreme/ui/text_area";
 import { ComponentProps } from "./Form";
+import { IdAttr } from "../../lib/graph";
 
 export function TextAreaField(props: ComponentProps) {
   return (
@@ -14,7 +15,7 @@ export function TextAreaField(props: ComponentProps) {
             },
           });
 
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -24,9 +25,7 @@ export function TextAreaField(props: ComponentProps) {
         }}
       />
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import FileManager, { Properties } from "devextreme/ui/file_manager";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const fileManagerData = [
@@ -77,7 +77,7 @@ const fileManagerData = [
 
 export function FileManagerComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    name: "meta",
     props: {},
   });
 
@@ -94,7 +94,7 @@ export function FileManagerField(props: ComponentProps) {
       <div
         ref={(el) => {
           const instance = new FileManager(el, {
-            fileSystemProvider: props.data.properties[props.meta.properties.id],
+            fileSystemProvider: props.data.properties[props.meta.properties[IdAttr]],
             itemView: {
               mode: "thumbnails",
             },
@@ -106,7 +106,7 @@ export function FileManagerField(props: ComponentProps) {
             },
           });
 
-          createEffect(() => instance.option("fileSystemProvider", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("fileSystemProvider", props.data.properties[props.meta.properties[IdAttr]]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -115,9 +115,7 @@ export function FileManagerField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

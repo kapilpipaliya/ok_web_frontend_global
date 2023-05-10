@@ -2,12 +2,12 @@ import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Box, { Properties } from "devextreme/ui/box";
 import "../assets/styles/box.css";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function BoxComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: { width: "100%" },
   });
 
@@ -49,9 +49,7 @@ export function BoxField(props: ComponentProps) {
         </div>
       </div>
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Tooltip, { Properties } from "devextreme/ui/tooltip";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function TooltipComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -30,7 +30,7 @@ export function TooltipField(props: ComponentProps) {
             position: "top",
             contentTemplate: (e: any) => {
               e.component.option("contentTemplate", null);
-              return props.data.properties[props.meta.properties.id];
+              return props.data.properties[props.meta.properties[IdAttr]];
             },
           });
 
@@ -41,12 +41,10 @@ export function TooltipField(props: ComponentProps) {
           });
         }}
       >
-        {props.data.properties[props.meta.properties.id]}
+        {props.data.properties[props.meta.properties[IdAttr]]}
       </div>
       <div id="target-item">This is target item for tooltip</div>
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

@@ -4,6 +4,7 @@ import Validator, { Properties as ValidatorProperties } from "devextreme/ui/vali
 // @ts-ignore
 import { priorities } from "../data/radioData";
 import { createEffect, For, Show } from "solid-js";
+import { IdAttr } from "../../lib/graph";
 
 export function ValidationRadioGroupField(props: ComponentProps) {
   return (
@@ -22,8 +23,8 @@ export function ValidationRadioGroupField(props: ComponentProps) {
 
           createEffect(
             () =>
-              props.data.properties[props.meta.properties.id] &&
-              instance.option("value", props.data.properties[props.meta.properties.id]),
+              props.data.properties[props.meta.properties[IdAttr]] &&
+              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -39,9 +40,7 @@ export function ValidationRadioGroupField(props: ComponentProps) {
         }}
       />
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

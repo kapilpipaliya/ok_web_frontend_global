@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import DataGrid, { Properties } from "devextreme/ui/data_grid";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const dataGridData = [
@@ -39,7 +39,7 @@ const dataGridData = [
 
 export function DataGridComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -57,7 +57,7 @@ export function DataGridField(props: ComponentProps) {
         ref={(el) => {
           const instance = new DataGrid(el, {});
 
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -66,9 +66,7 @@ export function DataGridField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

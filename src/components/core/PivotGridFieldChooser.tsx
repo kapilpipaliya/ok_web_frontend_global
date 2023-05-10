@@ -6,7 +6,7 @@ import PivotGridFieldChooser, {
 } from "devextreme/ui/pivot_grid_field_chooser";
 // @ts-ignore
 import { pivotGridSalesData } from "../data/pivotGridSalesData.js";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 console.log(pivotGridSalesData);
@@ -15,7 +15,7 @@ console.log(pivotGridSalesData);
 }
 export function PivotGridFieldChooserComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -104,9 +104,7 @@ export function PivotGridFieldChooserField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

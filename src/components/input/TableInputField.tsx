@@ -32,7 +32,16 @@ import {
 } from "../../lib/Vertex";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Id, revertTransaction, Vertex } from "../../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  Id,
+  IdAttr,
+  revertTransaction,
+  Vertex
+} from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
@@ -204,7 +213,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   if (!props.meta.properties.attributes && props.meta.properties.meta) {
     const metaData = componentProps(props.meta, props.data);
     if (metaData.collection) {
-      const collVertex = findVertexByLabelAndUniqueId("Coll", "id", metaData.collection);
+      const collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, metaData.collection);
       if (collVertex) {
         const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
         if (!vertexCollAttrResult.error) {
@@ -284,7 +293,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           txnId = getNewTxnId();
         }
         mergeVertexProperties(txnId, p.joinVertex.id, {
-          [attribute.properties.id]: value,
+          [attribute.properties[IdAttr]]: value,
         });
         if (!local && isRealTime) commitTxn(txnId, Ws);
       };
@@ -355,7 +364,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             meta={
               {
                 properties: {
-                  id: "meta",
+                  [IdAttr]: "meta",
                   props: {
                     keyExpr: "id",
                     items: [
@@ -401,7 +410,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           txnId = getNewTxnId();
         }
         mergeVertexProperties(txnId, p.joinVertex.id, {
-          [attribute.properties.id]: value,
+          [attribute.properties[IdAttr]]: value,
         });
         if (!local && isRealTime) commitTxn(txnId, Ws);
       };
@@ -574,7 +583,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                   <div class="card dx-card dx-theme-text-color dx-theme-background-color">
                     {/*<div class="card-priority priority-1"/>*/}
 
-                    <div class="card-subject">{source.properties.id}</div>
+                    <div class="card-subject">{source.properties[IdAttr]}</div>
                     <div class="card-assignee">String</div>
                   </div>
                 )}
@@ -629,14 +638,14 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       <Match when={true}>
         <div>
           {/*<Show when={props.meta.properties.attributes}>*/}
-          {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties.id, attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
+          {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties[IdAttr], attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
 
           <ButtonGroupField
             meta={
               {
                 properties: {
-                  id: "meta",
+                  [IdAttr]: "meta",
                   props: {
                     keyExpr: "id",
                     items: [
@@ -674,7 +683,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
                           <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
-                            <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute.id)}</th>
+                            <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr])}</th>
                           </Match>
                           <Match when={true}>
                             <th></th>

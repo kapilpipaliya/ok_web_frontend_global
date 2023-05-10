@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import ScrollView, { Properties } from "devextreme/ui/scroll_view";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function ScrollViewComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -47,11 +47,9 @@ export function ScrollViewField(props: ComponentProps) {
           });
         }}
       >
-        <div id="scrollview-content">{props.data.properties[props.meta.properties.id]}</div>
+        <div id="scrollview-content">{props.data.properties[props.meta.properties[IdAttr]]}</div>
       </div>
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

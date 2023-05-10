@@ -6,12 +6,12 @@ import {
   commitTransaction,
   Edge,
   edgeOldIdToNewIdMap,
-  graph,
+  graph, IdAttr,
   ProcessStatus,
   setGraph,
   transactions,
   Vertex,
-  vertexOldIdToNewIdMap,
+  vertexOldIdToNewIdMap
 } from "../lib/graph";
 import { AbstractSingleForm, AllForms, Login, Logout, SignUp, SimpleImport } from "./Form";
 import { WsContext } from "./ws_events_dispatcher";
@@ -94,7 +94,7 @@ export const MenuButtonToggle = () => {
       meta={
         {
           properties: {
-            id: "meta",
+            [IdAttr]: "meta",
             props: { hint: "Open sidebar", icon: "menu", width: 40 },
           },
         } as unknown as Vertex

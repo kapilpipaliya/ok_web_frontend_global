@@ -18,7 +18,7 @@ export function ButtonGroupField(
             props.onClick?.(e.itemData);
           },
         });
-        createEffect(() => instance.option("selectedItems", props.data.properties[props.meta.properties.id]));
+        createEffect(() => instance.option("selectedItems", props.data.properties[props.meta.properties[IdAttr]]));
         createEffect(() => {
           for (const property in props.meta.properties.props as Properties) {
             instance.option(property, props.meta.properties.props[property]);

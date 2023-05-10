@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Gallery, { Properties } from "devextreme/ui/gallery";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const galleryData = [
@@ -13,7 +13,7 @@ const galleryData = [
 
 export function GalleryComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -32,7 +32,7 @@ export function GalleryField(props: ComponentProps) {
           height: 400,
         });
 
-        createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+        createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
 
         createEffect(() => {
           for (const property in props.meta.properties.props as Properties) {
