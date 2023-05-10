@@ -1,30 +1,13 @@
-import {
-  createMemo,
-  createUniqueId,
-  For,
-  onCleanup,
-  splitProps,
-  useContext
-} from "solid-js";
+import { createMemo, createUniqueId, For, onCleanup, splitProps, useContext } from "solid-js";
 import { Link, useNavigate } from "@solidjs/router";
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
-  graph,
-  Vertex
-} from "../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import { DynamicFormSequence, DynamicFormSequenceProps } from "./dynamicForm";
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
-import {
-  SelectInputField,
-  setParentValue,
-  setSelectionValue
-} from "./input/SelectInputField";
+import { SelectInputField, setParentValue, setSelectionValue } from "./input/SelectInputField";
 import { AttrsTableData } from "./api";
 import csvtojson from "csvtojson";
 import {
@@ -32,18 +15,12 @@ import {
   findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
-  replaceVertexProperties
+  replaceVertexProperties,
 } from "../lib/Vertex";
 import { A, D } from "@mobily/ts-belt";
 import { deleteRow, newRow } from "./input/TableInputField";
 import { klona } from "klona";
-import {
-  getChildVertex,
-  getChildVertexes,
-  getOptionLabel,
-  getParentVertex,
-  getToEdge
-} from "../lib/Traverse";
+import { getChildVertex, getChildVertexes, getOptionLabel, getParentVertex, getToEdge } from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
 import { ValidationRule } from "devextreme/common";
 
@@ -67,8 +44,8 @@ export interface FieldAttribute {
   component: string;
   displayName?: string;
   props?: {
-    [key: string]: any
-    validationRules?: Array<ValidationRule>
+    [key: string]: any;
+    validationRules?: Array<ValidationRule>;
   };
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
@@ -82,17 +59,21 @@ export interface FormMetaData {
   // postSubmit?: (data: any) => any
 }
 
-export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): { error: boolean; attr?: FieldAttribute } {
-
+export function getCollAttrs(
+  vertexCollAttr: Vertex,
+  vertexFormAttr?: Vertex,
+): { error: boolean; attr?: FieldAttribute } {
   const attr = Object.assign(
-   {},
-   removeUndefinedProperties(vertexCollAttr.properties, false, 10),
-   vertexFormAttr ? removeUndefinedProperties(vertexFormAttr.properties, false, 10) : {}
+    {},
+    removeUndefinedProperties(vertexCollAttr.properties, false, 10),
+    vertexFormAttr ? removeUndefinedProperties(vertexFormAttr.properties, false, 10) : {},
   );
 
   // find components for all levels
   const collAttrComp = getChildVertex(["$0Comp"], vertexCollAttr).vertex;
-  const formAttrComp = vertexFormAttr ? (getChildVertex(["$0Comp"], vertexFormAttr).vertex || collAttrComp) : collAttrComp;
+  const formAttrComp = vertexFormAttr
+    ? getChildVertex(["$0Comp"], vertexFormAttr).vertex || collAttrComp
+    : collAttrComp;
 
   // set dataType to attr
   const dataType = getChildVertex(["$0DataType"], vertexCollAttr);
@@ -112,13 +93,15 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): {
   }
 
   // set props to attr
-  let formProps = vertexFormAttr ? ((getChildVertexes(["$0Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->$0Key:properties.key");
-    if (key) {
-      acc[key] = curr.properties.value;
-    }
-    return acc;
-  }, {} as { [key: string]: any })) : {};
+  let formProps = vertexFormAttr
+    ? (getChildVertexes(["$0Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
+        const key = getOptionLabel(curr, "->$0Key:properties.key");
+        if (key) {
+          acc[key] = curr.properties.value;
+        }
+        return acc;
+      }, {} as { [key: string]: any })
+    : {};
 
   if (formAttrComp === collAttrComp) {
     const collProps = (getChildVertexes(["$0Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
@@ -129,9 +112,9 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): {
       return acc;
     }, {} as { [key: string]: any });
     formProps = Object.assign(
-     {},
-     removeUndefinedProperties(collProps, false, 10),
-     removeUndefinedProperties(formProps, false, 10)
+      {},
+      removeUndefinedProperties(collProps, false, 10),
+      removeUndefinedProperties(formProps, false, 10),
     );
   }
 
@@ -153,13 +136,13 @@ export function getCollAttrs(vertexCollAttr: Vertex, vertexFormAttr?: Vertex): {
   const parentVertexResult = getParentVertex(["CompChild"], comp);
   if (!parentVertexResult.error) {
     const parentCompProps = (getChildVertexes(["CompProp"], [parentVertexResult.vertex!]).vertexes || []).reduce(
-     (acc, curr) => {
-       if (curr.properties.key) {
-         acc[curr.properties.key] = curr.properties.value;
-       }
-       return acc;
-     },
-     {} as { [key: string]: any }
+      (acc, curr) => {
+        if (curr.properties.key) {
+          acc[curr.properties.key] = curr.properties.value;
+        }
+        return acc;
+      },
+      {} as { [key: string]: any },
     );
     formProps = Object.assign({}, removeUndefinedProperties(parentCompProps, false, 10), formProps);
     attr.component = parentVertexResult.vertex!.properties.id;
@@ -177,7 +160,7 @@ export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: Field
   return getCollAttrs(vertexCollAttr, vertexFormAttr);
 };
 
-const getCollectionOneLevelAttrs = (collVertex: Vertex): {error: string, attrs?: FieldAttribute[]} => {
+const getCollectionOneLevelAttrs = (collVertex: Vertex): { error: string; attrs?: FieldAttribute[] } => {
   const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
   if (vertexCollAttrResult.error) {
     return { error: "No Attributes in a Coll" };
@@ -190,25 +173,25 @@ const getCollectionOneLevelAttrs = (collVertex: Vertex): {error: string, attrs?:
     if (addPropsResult.error) continue;
     attrs.push(addPropsResult.attr!);
   }
-  return { error: '', attrs };
-}
+  return { error: "", attrs };
+};
 export const getFormApiFromForm = (formId: string): { error: string; form?: FormMetaData } => {
   const form = graph.vertexes[formId] || findVertexByLabelAndUniqueId("Form", "id", formId);
   if (!form) {
     const coll = findVertexByLabelAndUniqueId("Coll", "id", formId);
     if (!coll) {
-      return {error: "form and coll not found"};
+      return { error: "form and coll not found" };
     }
     let attrs: FieldAttribute[];
     const attrsResult = getCollectionOneLevelAttrs(coll);
     if (attrsResult.error) {
-      return {error: attrsResult.error};
+      return { error: attrsResult.error };
     }
     attrs = attrsResult.attrs!;
 
     // calculate children
     const collChildren = (getChildVertexes(["$0Child"], [coll]).vertexes || []).sort(
-     (a, b) => a.properties.pos - b.properties.pos,
+      (a, b) => a.properties.pos - b.properties.pos,
     );
 
     const childAttrs = [] as FieldAttribute[];
@@ -218,19 +201,16 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
       if (!childCollVertex) continue;
 
       let tableAttrs: FieldAttribute[];
-      const attrsResult= getCollectionOneLevelAttrs(vertexChild);
+      const attrsResult = getCollectionOneLevelAttrs(vertexChild);
       if (attrsResult.error) {
-        return {error: attrsResult.error};
+        return { error: attrsResult.error };
       }
       tableAttrs = attrsResult.attrs!;
       // @ts-ignore
       tableAttrs = tableAttrs.sort((a, b) => a.pos - b.pos);
 
-
       // table properties:
-      const collChildProps = (
-       getChildVertexes(["$0Prop"], [vertexChild]).vertexes || []
-      ).reduce((acc, curr) => {
+      const collChildProps = (getChildVertexes(["$0Prop"], [vertexChild]).vertexes || []).reduce((acc, curr) => {
         const key = getOptionLabel(curr, "->$0Key:properties.key");
         if (key) {
           acc[key] = curr.properties.value;
@@ -312,9 +292,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
       continue;
     }
     // currently we save table property on Collection only, not overwrite by form layout
-    const collChildProps = (
-      getChildVertexes(["$0Prop"], [collChild.vertex!]).vertexes || []
-    ).reduce((acc, curr) => {
+    const collChildProps = (getChildVertexes(["$0Prop"], [collChild.vertex!]).vertexes || []).reduce((acc, curr) => {
       const key = getOptionLabel(curr, "->$0Key:properties.key");
       if (key) {
         acc[key] = curr.properties.value;
@@ -407,14 +385,17 @@ export const Login = (props: {}) => {
         // TODO: add dry option
       />
       <ButtonField
-       meta={{
-         properties: {
-           id: "meta",
-           props: { stylingMode: "contained", width: "120", type: "success" }
-         }
-       } as unknown as Vertex}
-       data={{ properties: { meta: "Login" } } as unknown as Vertex}
-       onClick={onLoginClick} />
+        meta={
+          {
+            properties: {
+              id: "meta",
+              props: { stylingMode: "contained", width: "120", type: "success" },
+            },
+          } as unknown as Vertex
+        }
+        data={{ properties: { meta: "Login" } } as unknown as Vertex}
+        onClick={onLoginClick}
+      />
     </>
   );
 };
@@ -474,24 +455,27 @@ export const SignUp = (props: {}) => {
         // TODO: add dry option
       />
       <ButtonField
-       meta={{
-         properties: {
-           id: "meta",
-           props: { stylingMode: "contained", width: "120", type: "success" }
-         }
-       } as unknown as Vertex}
-       data={{ properties: { meta: "SignUp" } } as unknown as Vertex}
-       onClick={onSignupClick} />
+        meta={
+          {
+            properties: {
+              id: "meta",
+              props: { stylingMode: "contained", width: "120", type: "success" },
+            },
+          } as unknown as Vertex
+        }
+        data={{ properties: { meta: "SignUp" } } as unknown as Vertex}
+        onClick={onSignupClick}
+      />
     </>
   );
 };
 
-const isEmpty = (object: {[key: string]: any}) => !Object.values(object).some(x => x !== null && x !== '');
+const isEmpty = (object: { [key: string]: any }) => !Object.values(object).some((x) => x !== null && x !== "");
 
 function findOrCreateNewVertex(txnId: number, label: string, lookupId: string, lookUpUniqueValue: string) {
   let existingVertex = (graph.vertexLabelIdMap[label] || [])
-   .map((vertexId) => graph.vertexes[vertexId])
-   .find((vertex) => vertex.properties[lookupId] === lookUpUniqueValue);
+    .map((vertexId) => graph.vertexes[vertexId])
+    .find((vertex) => vertex.properties[lookupId] === lookUpUniqueValue);
   if (!existingVertex) {
     const vertexId = getNewGraphId();
     addNewVertex(txnId, newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }));
@@ -560,7 +544,7 @@ export const SimpleImport = (props: {}) => {
     const converter = csvtojson({
       trim: true,
       // checkColumn: true,
-      delimiter: [",", "\t"]
+      delimiter: [",", "\t"],
     });
 
     const metaData = getChildVertexes(["$0Meta"], [config.vertex]);
@@ -584,7 +568,7 @@ export const SimpleImport = (props: {}) => {
       let collLabel = metaVertex.properties.collLabel;
 
       if (!attrId && !collLabel && !metaVertex.properties.skip) {
-        alert('attrId or collLabel is required');
+        alert("attrId or collLabel is required");
       }
       const collVertex = getChildVertex(["$0Coll"], metaVertex);
       if (!collVertex.error) {
@@ -599,7 +583,7 @@ export const SimpleImport = (props: {}) => {
         func: metaVertex.properties.func,
         edge: metaVertex.properties.edge,
         skip: metaVertex.properties.skip,
-        skipRow: metaVertex.properties.skipRow?.split?.('\n') || [],
+        skipRow: metaVertex.properties.skipRow?.split?.("\n") || [],
       } as Column;
     });
 
@@ -661,13 +645,13 @@ export const SimpleImport = (props: {}) => {
         // insert current row and all lookup as children or parent
         let rowVertexId = getNewGraphId();
         if (mainVertex) {
-          const type = getToEdge({properties: { id: labelName}} as Vertex, mainVertex);
+          const type = getToEdge({ properties: { id: labelName } } as Vertex, mainVertex);
           const newRow1 = newRow(txnId, mainVertex, type);
           rowVertexId = newRow1.vertexId!;
           mergeVertexProperties(txnId, rowVertexId, rowObj);
         } else {
           // when importing component it has self join, so it's inserting duplicate rows
-          const existingVertex = findVertexByLabelAndUniqueId(labelName, 'id', rowObj.id);
+          const existingVertex = findVertexByLabelAndUniqueId(labelName, "id", rowObj.id);
           if (existingVertex) {
             rowVertexId = existingVertex.id;
           } else {
@@ -685,9 +669,9 @@ export const SimpleImport = (props: {}) => {
             if (selectMeta.func === "component") {
               const componentString = resoDataTypeToComponents(value, row);
               const componentVertex = findVertexByLabelAndUniqueId(
-               selectMeta.collLabel,
-               selectMeta.collId,
-               componentString
+                selectMeta.collLabel,
+                selectMeta.collId,
+                componentString,
               );
               if (!componentVertex) {
                 console.warn(`component is not found ${componentString}`);
@@ -695,12 +679,12 @@ export const SimpleImport = (props: {}) => {
               }
               // Note: if component does not exist it will not set
               setSelectionValue(
-               txnId,
-               vertex,
-               {
-                 properties: { id: selectMeta.collLabel }
-               } as unknown as Vertex,
-               componentVertex.id
+                txnId,
+                vertex,
+                {
+                  properties: { id: selectMeta.collLabel },
+                } as unknown as Vertex,
+                componentVertex.id,
               );
             } else if (selectMeta.func === "lookup") {
               const lookup = findVertexByLabelAndUniqueId(selectMeta.collLabel, selectMeta.collId, value);
@@ -723,7 +707,7 @@ export const SimpleImport = (props: {}) => {
               txnId,
               vertex,
               {
-                properties: { props: {parentLabel: selectMeta.collLabel, childLabel: selectMeta.edge }},
+                properties: { props: { parentLabel: selectMeta.collLabel, childLabel: selectMeta.edge } },
               } as unknown as Vertex,
               v()!.id,
             );
@@ -750,7 +734,7 @@ export const SimpleImport = (props: {}) => {
         const jsonStr = data.toString("utf8");
         const json = JSON.parse(jsonStr);
         // addNewVertex(txnId, newVertex(getNewGraphId(), [label], json));
-        if(!isEmpty(json)) {
+        if (!isEmpty(json)) {
           rows.push(json);
         }
       })
@@ -795,7 +779,8 @@ export const SimpleImport = (props: {}) => {
               props: {
                 stringValue: true,
                 displayExpr: "id",
-                collection: '[{"id": "dataType"},{"id": "component"},{"id": "dataTypeDefault"},{"id": "lookup"},{"id": "attribute"}]',
+                collection:
+                  '[{"id": "dataType"},{"id": "component"},{"id": "dataTypeDefault"},{"id": "lookup"},{"id": "attribute"}]',
               },
             },
           } as unknown as Vertex
@@ -803,9 +788,9 @@ export const SimpleImport = (props: {}) => {
         setValue={(attr, data) => {
           const txnId = getNewTxnId();
           const dry = true;
-          const vertexes = (getChildVertexes(["SimpleImportMeta"], [config.vertex]).vertexes || []);
+          const vertexes = getChildVertexes(["SimpleImportMeta"], [config.vertex]).vertexes || [];
           for (const row of vertexes) {
-            deleteRow(row, false, true, 0,Ws);
+            deleteRow(row, false, true, 0, Ws);
           }
           switch (data) {
             case "component": {
@@ -923,18 +908,54 @@ export const SimpleImport = (props: {}) => {
               //   skip: true
               // });
 
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SourceResource', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SugMaxLength', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SugMaxPrecision', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'Synonyms', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'FrenchCanadianDisplayName', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'LookupStatus', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'LookupName', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'RepeatingElement', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'payload', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'TargetResourceKey', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'SourceResourceKey', skip: true });
-              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, { column: 'BEDES', skip: true });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "SourceResource",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "SugMaxLength",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "SugMaxPrecision",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "Synonyms",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "FrenchCanadianDisplayName",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "LookupStatus",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "LookupName",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "RepeatingElement",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "payload",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "TargetResourceKey",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "SourceResourceKey",
+                skip: true,
+              });
+              replaceVertexProperties(txnId, newRow(txnId, config.vertex, "SimpleImportMeta").vertexId!, {
+                column: "BEDES",
+                skip: true,
+              });
               break;
             }
             default: {
@@ -947,15 +968,17 @@ export const SimpleImport = (props: {}) => {
       <div></div>
 
       <ButtonField
-       meta={{
-         properties: {
-           id: "meta",
-           props: { stylingMode: "contained", width: "120", type: "success" }
-         }
-       } as unknown as Vertex}
-       data={{ properties: { meta: "Import" } } as unknown as Vertex}
-       onClick={onDataDirectoryImportClick} />
-
+        meta={
+          {
+            properties: {
+              id: "meta",
+              props: { stylingMode: "contained", width: "120", type: "success" },
+            },
+          } as unknown as Vertex
+        }
+        data={{ properties: { meta: "Import" } } as unknown as Vertex}
+        onClick={onDataDirectoryImportClick}
+      />
     </>
   );
 };

@@ -1,13 +1,13 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Scheduler, {Properties} from "devextreme/ui/scheduler";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Scheduler, { Properties } from "devextreme/ui/scheduler";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function SchedulerComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: [] });
@@ -15,22 +15,16 @@ export function SchedulerComponent() {
     console.log(attribute, data);
   };
 
-  return <SchedulerField meta={meta} data={data} setValue={setValue} />
+  return <SchedulerField meta={meta} data={data} setValue={setValue} />;
 }
 export function SchedulerField(props: ComponentProps) {
   return (
     <div aria-labelledby={props["aria-labeledby"]}>
       <div
         ref={(el) => {
-          const instance = new Scheduler(el, {
-          });
+          const instance = new Scheduler(el, {});
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -40,9 +34,7 @@ export function SchedulerField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

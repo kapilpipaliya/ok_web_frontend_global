@@ -1,9 +1,7 @@
 import { createEffect } from "solid-js";
 
 import CheckBox, { Properties } from "devextreme/ui/check_box";
-import Validator, {
-  Properties as ValidatorProperties,
-} from "devextreme/ui/validator";
+import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
 import { ComponentProps } from "./Form";
 
 export function ValidationBooleanInputField(props: ComponentProps) {
@@ -27,22 +25,14 @@ export function ValidationBooleanInputField(props: ComponentProps) {
             // ],
           });
 
-            createEffect(() =>
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
-            );
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
           createEffect(() => {
-            instance.option(
-              "validationStatus",
-              props.errors ? "invalid" : "valid"
-            );
+            instance.option("validationStatus", props.errors ? "invalid" : "valid");
           });
           createEffect(() => {
             if (props.errors) {
@@ -50,7 +40,7 @@ export function ValidationBooleanInputField(props: ComponentProps) {
                 "validationErrors",
                 props.errors.map((error: string) => {
                   error;
-                })
+                }),
               );
             } else {
               instance.option("validationErrors", undefined);
@@ -58,8 +48,7 @@ export function ValidationBooleanInputField(props: ComponentProps) {
           });
 
           createEffect(() => {
-            for (const property in props.meta.properties
-              .props as ValidatorProperties) {
+            for (const property in props.meta.properties.props as ValidatorProperties) {
               if (property === "validationRules") {
                 const validations = props.meta.properties.props.validationRules;
                 const validationRules = [];
@@ -70,10 +59,7 @@ export function ValidationBooleanInputField(props: ComponentProps) {
                 }
                 validatorInstance.option("validationRules", validationRules);
               } else {
-                validatorInstance.option(
-                  property,
-                  props.meta.properties.props[property]
-                );
+                validatorInstance.option(property, props.meta.properties.props[property]);
               }
             }
           });

@@ -1,6 +1,5 @@
-import {setClassNames} from "../set-class-names";
-import {BadgeProps} from "../globals";
-
+import { setClassNames } from "../set-class-names";
+import { BadgeProps } from "../globals";
 
 export function Badge(props: BadgeProps) {
   return (
@@ -8,7 +7,7 @@ export function Badge(props: BadgeProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-badge': true,
+        "uk-badge": true,
         ...setClassNames(props),
       }}
     >

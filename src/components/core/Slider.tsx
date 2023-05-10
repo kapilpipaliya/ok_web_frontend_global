@@ -1,13 +1,13 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Slider, {Properties} from "devextreme/ui/slider";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Slider, { Properties } from "devextreme/ui/slider";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function SliderComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: 50 });
@@ -15,7 +15,7 @@ export function SliderComponent() {
     console.log(attribute, data);
   };
 
-  return <SliderField meta={meta} data={data} setValue={setValue} />
+  return <SliderField meta={meta} data={data} setValue={setValue} />;
 }
 export function SliderField(props: ComponentProps) {
   return (
@@ -27,15 +27,10 @@ export function SliderField(props: ComponentProps) {
             max: 100,
             onValueChanged(e) {
               props.setValue(props.meta, e.value);
-            }
+            },
           });
 
-          createEffect(() =>
-            instance.option(
-              "value",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -45,9 +40,7 @@ export function SliderField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

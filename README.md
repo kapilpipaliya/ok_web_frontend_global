@@ -65,3 +65,5 @@ https://js.devexpress.com/Documentation/Guide/UI_Components/Common/Advanced/3rd-
 
 #TODO: implement modal from this demo:
 https://js.devexpress.com/Demos/WidgetsGallery/Demo/Common/DialogsAndNotificationsOverview/jQuery/Light/
+
+npx rome format <files> --write

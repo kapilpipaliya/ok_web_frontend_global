@@ -1,36 +1,36 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Funnel, {Properties} from "devextreme/viz/funnel";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Funnel, { Properties } from "devextreme/viz/funnel";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const funnelData = [
   {
-    "action": "Visited the Website",
-    "users": 9152
+    action: "Visited the Website",
+    users: 9152,
   },
   {
-    "action": "Downloaded a Trial",
-    "users": 6879
+    action: "Downloaded a Trial",
+    users: 6879,
   },
   {
-    "action": "Contacted Support",
-    "users": 5121
+    action: "Contacted Support",
+    users: 5121,
   },
   {
-    "action": "Subscribed",
-    "users": 2224
+    action: "Subscribed",
+    users: 2224,
   },
   {
-    "action": "Renewed",
-    "users": 1670
-  }
-]
+    action: "Renewed",
+    users: 1670,
+  },
+];
 
 export function FunnelComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: funnelData });
@@ -38,7 +38,7 @@ export function FunnelComponent() {
     console.log(attribute, data);
   };
 
-  return <FunnelField meta={meta} data={data} setValue={setValue} />
+  return <FunnelField meta={meta} data={data} setValue={setValue} />;
 }
 export function FunnelField(props: ComponentProps) {
   return (
@@ -49,21 +49,16 @@ export function FunnelField(props: ComponentProps) {
             argumentField: "action",
             label: {
               backgroundColor: "none",
-              customizeText: function(e) {
+              customizeText: function (e) {
                 // @ts-ignore
-                return e.item.argument + '<br />' + e.item.value;
-                },
-              position: "inside"
+                return e.item.argument + "<br />" + e.item.value;
+              },
+              position: "inside",
             },
-            valueField: "users"
+            valueField: "users",
           });
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -73,9 +68,7 @@ export function FunnelField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

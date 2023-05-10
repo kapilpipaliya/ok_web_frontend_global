@@ -1,5 +1,5 @@
-import {BaseContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
+import { BaseContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function CardBody(props: BaseContainerProps) {
   return (
@@ -7,7 +7,7 @@ export function CardBody(props: BaseContainerProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-card-body': true,
+        "uk-card-body": true,
         ...setClassNames(props),
       }}
     >

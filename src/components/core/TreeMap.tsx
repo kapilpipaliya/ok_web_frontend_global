@@ -1,50 +1,50 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import TreeMap, {Properties} from "devextreme/viz/tree_map";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import TreeMap, { Properties } from "devextreme/viz/tree_map";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const treeMapData = [
   {
-    "name": "Fruits",
-    "items": [
+    name: "Fruits",
+    items: [
       {
-        "name": "Apples",
-        "value": 4
+        name: "Apples",
+        value: 4,
       },
       {
-        "name": "Oranges",
-        "value": 10
+        name: "Oranges",
+        value: 10,
       },
       {
-        "name": "Lemons",
-        "value": 6
-      }
-    ]
+        name: "Lemons",
+        value: 6,
+      },
+    ],
   },
   {
-    "name": "Vegetables",
-    "items": [
+    name: "Vegetables",
+    items: [
       {
-        "name": "Cucumbers",
-        "value": 4
+        name: "Cucumbers",
+        value: 4,
       },
       {
-        "name": "Tomatoes",
-        "value": 8
+        name: "Tomatoes",
+        value: 8,
       },
       {
-        "name": "Turnips",
-        "value": 7
-      }
-    ]
-  }
-]
+        name: "Turnips",
+        value: 7,
+      },
+    ],
+  },
+];
 
 export function TreeMapComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: treeMapData });
@@ -52,7 +52,7 @@ export function TreeMapComponent() {
     console.log(attribute, data);
   };
 
-  return <TreeMapField meta={meta} data={data} setValue={setValue} />
+  return <TreeMapField meta={meta} data={data} setValue={setValue} />;
 }
 export function TreeMapField(props: ComponentProps) {
   return (
@@ -61,12 +61,7 @@ export function TreeMapField(props: ComponentProps) {
         ref={(el) => {
           const instance = new TreeMap(el, {});
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -76,9 +71,7 @@ export function TreeMapField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

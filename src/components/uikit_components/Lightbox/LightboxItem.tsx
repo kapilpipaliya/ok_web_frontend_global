@@ -1,6 +1,5 @@
-import {LightboxItemProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { LightboxItemProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function LightboxItem(props: LightboxItemProps) {
   return (

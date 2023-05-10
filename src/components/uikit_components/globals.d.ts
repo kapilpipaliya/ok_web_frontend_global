@@ -1,10 +1,10 @@
-import {JSX} from "solid-js";
+import { JSX } from "solid-js";
 
 interface BaseProps {
   id?: string;
   class?: string;
   style?: string;
-  children: JSX.Element
+  children: JSX.Element;
 }
 
 interface BaseContainerProps extends BaseProps {
@@ -76,7 +76,7 @@ interface ContainerProps extends BaseContainerProps {
 interface CoverProps extends BaseProps {
   src: string;
   alt?: string;
-  type: 'video' | 'image';
+  type: "video" | "image";
   videoFormat?: string;
   autoPlay?: boolean;
   loop?: boolean;
@@ -103,26 +103,26 @@ interface FormProps extends JSX.HTMLAttributes<HTMLFormElement> {
 }
 
 interface FormInputProps extends JSX.HTMLAttributes<HTMLInputElement> {
-  color?: 'danger' | 'success' | 'blank';
-  layout?: 'small' | 'large';
-  width?: 'large' | 'medium' | 'small' | 'xsmall';
+  color?: "danger" | "success" | "blank";
+  layout?: "small" | "large";
+  width?: "large" | "medium" | "small" | "xsmall";
 }
 
 interface FormSelectProps extends JSX.HTMLAttributes<HTMLSelectElement> {
-  color?: 'danger' | 'success' | 'blank';
-  layout?: 'small' | 'large';
-  width?: 'large' | 'medium' | 'small' | 'xsmall';
+  color?: "danger" | "success" | "blank";
+  layout?: "small" | "large";
+  width?: "large" | "medium" | "small" | "xsmall";
 }
 
 interface FormTextareaProps extends JSX.HTMLAttributes<HTMLTextAreaElement> {
   children?: string;
-  color?: 'danger' | 'success' | 'blank';
-  layout?: 'small' | 'large';
-  width?: 'large' | 'medium' | 'small' | 'xsmall';
+  color?: "danger" | "success" | "blank";
+  layout?: "small" | "large";
+  width?: "large" | "medium" | "small" | "xsmall";
 }
 
 interface GridProps extends BaseContainerProps {
-  gutter?: 'small' | 'medium' | 'large' | 'collapse';
+  gutter?: "small" | "medium" | "large" | "collapse";
   divider?: boolean;
   match?: boolean;
   options?: string;
@@ -156,14 +156,14 @@ interface LightboxItemProps extends BaseProps {
 }
 
 interface LinkProps extends BaseProps {
-  type?: 'muted' | 'text' | 'heading' | 'reset';
+  type?: "muted" | "text" | "heading" | "reset";
   href?: string;
   toggleOptions?: string;
   children: any;
 }
 
 interface ListProps extends BaseContainerProps {
-  type?: 'bullet' | 'divider' | 'striped';
+  type?: "bullet" | "divider" | "striped";
 }
 
 interface MarginProps extends BaseContainerProps {
@@ -172,7 +172,7 @@ interface MarginProps extends BaseContainerProps {
 }
 
 interface NavProps extends BaseProps {
-  preset?: 'default' | 'primary' | 'center';
+  preset?: "default" | "primary" | "center";
   options?: string;
   accordion?: boolean;
   child?: boolean;
@@ -180,7 +180,7 @@ interface NavProps extends BaseProps {
 }
 
 interface NavItemProps extends BaseProps {
-  type?: 'header' | 'divider';
+  type?: "header" | "divider";
   parent?: boolean;
   children: any;
 }
@@ -220,7 +220,7 @@ interface OffcanvasProps extends BaseProps {
 
 interface OverlayProps extends BaseProps {
   position?: string;
-  type?: 'default' | 'primary';
+  type?: "default" | "primary";
   showIcon?: boolean;
 }
 
@@ -262,14 +262,14 @@ interface SidebarProps extends BaseContainerProps {
 interface SlideshowProps extends BaseProps {
   options?: string;
   navigation?: boolean;
-  navigationStyle?: 'dark' | 'light';
+  navigationStyle?: "dark" | "light";
   children: any;
 }
 
 interface SlideshowItemProps extends BaseProps {
   src: string;
   alt?: string;
-  type: 'image' | 'video';
+  type: "image" | "video";
   videoFormat?: string;
   autoPlay?: boolean;
   loop?: boolean;

@@ -1,15 +1,15 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Accordion, {Properties} from "devextreme/ui/accordion";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Accordion, { Properties } from "devextreme/ui/accordion";
 // @ts-ignore
-import {accordionItems} from "../data/accordionItems";
+import { accordionItems } from "../data/accordionItems";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function AccordionComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: {  },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: accordionItems });
@@ -17,7 +17,7 @@ export function AccordionComponent() {
     console.log(attribute, data);
   };
 
-  return <AccordionField meta={meta} data={data} setValue={setValue} />
+  return <AccordionField meta={meta} data={data} setValue={setValue} />;
 }
 export function AccordionField(props: ComponentProps) {
   return (
@@ -51,12 +51,7 @@ export function AccordionField(props: ComponentProps) {
               props.setValue(props.meta, e.addedItems[0]);
             },
           });
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -65,9 +60,7 @@ export function AccordionField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

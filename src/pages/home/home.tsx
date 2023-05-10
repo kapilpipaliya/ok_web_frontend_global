@@ -1,7 +1,6 @@
 import { createSignal } from "solid-js";
 import { Navbar } from "./components/Navbar";
 
-
 import { navItems, homeGalleryData, todayData } from "./data";
 import { GallerySection } from "./components/GallerySection";
 import List from "devextreme/ui/list";
@@ -34,24 +33,18 @@ export default function Home() {
               }
 
               return (
-                <div class={itemIndex==0 ? "flex flex:column jc:center gap:9 px:6" : "flex ai:center gap:10 px:6"}>
+                <div class={itemIndex == 0 ? "flex flex:column jc:center gap:9 px:6" : "flex ai:center gap:10 px:6"}>
                   {itemIndex == 0 ? (
                     <>
-                      <Icon icon={itemData.icon} width={30} style={{color: "#999"}} />
-                      <Link
-                        href={itemData.link}
-                        class="text-decoration:none color:red font-weight:400"
-                      >
+                      <Icon icon={itemData.icon} width={30} style={{ color: "#999" }} />
+                      <Link href={itemData.link} class="text-decoration:none color:red font-weight:400">
                         {itemData.text}
                       </Link>
                     </>
                   ) : (
                     <>
                       <Icon icon={itemData.icon} width={17} />
-                      <Link
-                        href="src/pages/home/home#"
-                        class="text-decoration:none color:#111 font-weight:400"
-                      >
+                      <Link href="src/pages/home/home#" class="text-decoration:none color:#111 font-weight:400">
                         {itemData.text}
                       </Link>
                     </>
@@ -99,11 +92,11 @@ export default function Home() {
 
   const galleryData = newVertex(0, ["Vertex"], { gallery: homeGalleryData });
 
-  const drawerData = newVertex(0, ["Vertex"], {})
+  const drawerData = newVertex(0, ["Vertex"], {});
 
-  const actionCardsData = newVertex(0, ["Vertex"], {})
+  const actionCardsData = newVertex(0, ["Vertex"], {});
 
-  const todaysEnergizerData = newVertex(0, ["Vertex"], { title: "Today's Energizer", todayEnergizer: todayData })
+  const todaysEnergizerData = newVertex(0, ["Vertex"], { title: "Today's Energizer", todayEnergizer: todayData });
 
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);

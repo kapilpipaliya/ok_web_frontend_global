@@ -1,5 +1,5 @@
-import {BaseContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
+import { BaseContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function NavbarDropdown(props: BaseContainerProps) {
   return (
@@ -7,7 +7,7 @@ export function NavbarDropdown(props: BaseContainerProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-navbar-dropdown': true,
+        "uk-navbar-dropdown": true,
         ...setClassNames(props),
       }}
     >

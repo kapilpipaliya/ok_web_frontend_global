@@ -19,10 +19,7 @@ export function RadioGroupField(props: ComponentProps) {
           createEffect(
             () =>
               props.data.properties[props.meta.properties.id] &&
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
+              instance.option("value", props.data.properties[props.meta.properties.id]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -33,9 +30,7 @@ export function RadioGroupField(props: ComponentProps) {
       />
 
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

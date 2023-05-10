@@ -1,21 +1,21 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Toast, {Properties} from "devextreme/ui/toast";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Toast, { Properties } from "devextreme/ui/toast";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function ToastComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: '' });
+  const data = newVertex(0, ["Vertex"], { meta: "" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <ToastField meta={meta} data={data} setValue={setValue} />
+  return <ToastField meta={meta} data={data} setValue={setValue} />;
 }
 export function ToastField(props: ComponentProps) {
   return (
@@ -26,12 +26,10 @@ export function ToastField(props: ComponentProps) {
             displayTime: 20000,
             message: "Toast message",
             type: "info",
-            visible: false
+            visible: false,
           });
 
-          createEffect(() =>
-            instance.show()
-          );
+          createEffect(() => instance.show());
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -41,9 +39,7 @@ export function ToastField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

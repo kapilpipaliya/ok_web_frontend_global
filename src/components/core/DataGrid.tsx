@@ -1,46 +1,46 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import DataGrid, {Properties} from "devextreme/ui/data_grid";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import DataGrid, { Properties } from "devextreme/ui/data_grid";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const dataGridData = [
   {
-    "ID": 1,
-    "CompanyName": "Super Mart of the West",
-    "City": "Bentonville",
-    "State": "Arkansas"
+    ID: 1,
+    CompanyName: "Super Mart of the West",
+    City: "Bentonville",
+    State: "Arkansas",
   },
   {
-    "ID": 2,
-    "CompanyName": "Electronics Depot",
-    "City": "Atlanta",
-    "State": "Georgia"
+    ID: 2,
+    CompanyName: "Electronics Depot",
+    City: "Atlanta",
+    State: "Georgia",
   },
   {
-    "ID": 3,
-    "CompanyName": "K&S Music",
-    "City": "Minneapolis",
-    "State": "Minnesota"
+    ID: 3,
+    CompanyName: "K&S Music",
+    City: "Minneapolis",
+    State: "Minnesota",
   },
   {
-    "ID": 4,
-    "CompanyName": "Tom's Club",
-    "City": "Issaquah",
-    "State": "Washington"
+    ID: 4,
+    CompanyName: "Tom's Club",
+    City: "Issaquah",
+    State: "Washington",
   },
   {
-    "ID": 5,
-    "CompanyName": "E-Mart",
-    "City": "Hoffman Estates",
-    "State": "Illinois"
-  }
-]
+    ID: 5,
+    CompanyName: "E-Mart",
+    City: "Hoffman Estates",
+    State: "Illinois",
+  },
+];
 
 export function DataGridComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: dataGridData });
@@ -48,7 +48,7 @@ export function DataGridComponent() {
     console.log(attribute, data);
   };
 
-  return <DataGridField meta={meta} data={data} setValue={setValue} />
+  return <DataGridField meta={meta} data={data} setValue={setValue} />;
 }
 export function DataGridField(props: ComponentProps) {
   return (
@@ -57,12 +57,7 @@ export function DataGridField(props: ComponentProps) {
         ref={(el) => {
           const instance = new DataGrid(el, {});
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -72,9 +67,7 @@ export function DataGridField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

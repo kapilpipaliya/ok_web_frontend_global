@@ -1,22 +1,19 @@
-import {setClassNames} from "../set-class-names";
-import {IconProps} from "../globals";
-
+import { setClassNames } from "../set-class-names";
+import { IconProps } from "../globals";
 
 export function Icon(props: IconProps) {
-
   const renderIconType = () => {
     if (props.href) {
       return (
         <a
           id={props.id}
           style={props.style}
-
           classList={{
             [`uk-icon`]: true,
             [`uk-icon-button`]: props.button,
             [`uk-icon-link`]: !!props.href,
             [`uk-icon-image`]: !!props.image,
-            ...setClassNames(props)
+            ...setClassNames(props),
           }}
           href={props.href}
           data-uk-icon={props.options}
@@ -25,7 +22,6 @@ export function Icon(props: IconProps) {
     }
 
     if (props.image) {
-
       return (
         <span
           id={props.id}
@@ -34,7 +30,7 @@ export function Icon(props: IconProps) {
             [`uk-icon-button`]: props.button,
             [`uk-icon-link`]: !!props.href,
             [`uk-icon-image`]: !!props.image,
-            ...setClassNames(props)
+            ...setClassNames(props),
           }}
           style={{
             backgroundImage: `url(${props.image})`,
@@ -55,7 +51,7 @@ export function Icon(props: IconProps) {
           [`uk-icon-button`]: props.button,
           [`uk-icon-link`]: !!props.href,
           [`uk-icon-image`]: !!props.image,
-          ...setClassNames(props)
+          ...setClassNames(props),
         }}
         data-uk-icon={props.options}
       />

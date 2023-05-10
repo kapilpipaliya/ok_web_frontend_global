@@ -1,24 +1,24 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Tabs, {Properties} from "devextreme/ui/tabs";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Tabs, { Properties } from "devextreme/ui/tabs";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const tabsData = [
   {
-    "text": "Home",
-    "icon": "home"
+    text: "Home",
+    icon: "home",
   },
   {
-    "text": "About",
-    "icon": "info"
-  }
-]
+    text: "About",
+    icon: "info",
+  },
+];
 
 export function TabsComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: tabsData });
@@ -26,7 +26,7 @@ export function TabsComponent() {
     console.log(attribute, data);
   };
 
-  return <TabsField meta={meta} data={data} setValue={setValue} />
+  return <TabsField meta={meta} data={data} setValue={setValue} />;
 }
 export function TabsField(props: ComponentProps) {
   return (
@@ -39,12 +39,7 @@ export function TabsField(props: ComponentProps) {
             },
           });
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -54,9 +49,7 @@ export function TabsField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

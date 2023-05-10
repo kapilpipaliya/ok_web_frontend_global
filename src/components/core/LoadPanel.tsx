@@ -1,25 +1,25 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import LoadPanel, {Properties} from "devextreme/ui/load_panel";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import LoadPanel, { Properties } from "devextreme/ui/load_panel";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function LoadPanelComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: '' });
+  const data = newVertex(0, ["Vertex"], { meta: "" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <LoadPanelField meta={meta} data={data} setValue={setValue} />
+  return <LoadPanelField meta={meta} data={data} setValue={setValue} />;
 }
 export function LoadPanelField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]} id="load-panel" style={{padding:"10px"}}>
+    <div aria-labelledby={props["aria-labeledby"]} id="load-panel" style={{ padding: "10px" }}>
       <div
         ref={(el) => {
           const instance = new LoadPanel(el, {
@@ -30,19 +30,19 @@ export function LoadPanelField(props: ComponentProps) {
             message: "Loading...",
             position: { of: el },
             onShown: () => {
-              console.log("shown")
+              console.log("shown");
               setTimeout(() => {
                 instance.hide();
               }, 0);
             },
             onHidden: () => {
               console.log("hidden");
-            }
+            },
           });
 
           createEffect(() => {
             instance.show();
-          })
+          });
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -52,9 +52,7 @@ export function LoadPanelField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

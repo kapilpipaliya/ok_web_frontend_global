@@ -5,11 +5,7 @@ import { commitTxn, getNewTxnId, graph } from "../../lib/graph";
 import { selectedValue, setSelectionValue } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
 import { FormContext, onChangeHandler } from "../dynamicForm";
-import {
- getOptionLabel,
- getSelectedVertexValue,
- getSelectionOptions
-} from "../../lib/Traverse";
+import { getOptionLabel, getSelectedVertexValue, getSelectionOptions } from "../../lib/Traverse";
 import { ComponentProps } from "../core/Form";
 
 // TODO: Add support for multiple string values.
@@ -23,9 +19,9 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
   }
 
   const [selectOptions, { refetch }] = createResource(() => {
-   if (props.disabled) {
-    return selectedValue(props.meta, props.data).map(vertexId => graph.vertexes[vertexId]);
-   }
+    if (props.disabled) {
+      return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+    }
     return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
   });
 
@@ -40,9 +36,9 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
             disabled: props.disabled!,
             value: selectedValue,
             onValueChanged: function (e) {
-             if (isRealTime) {
-              txnId = getNewTxnId();
-             }
+              if (isRealTime) {
+                txnId = getNewTxnId();
+              }
               // batch(() => {
               //   if(e.event) isChangedByUser = true;
               setSelectionValue(txnId, props.data, props.meta, e.value);
@@ -72,9 +68,9 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
               { defer: true },
             ),
           );
-         createEffect(() => instance.option("disabled", props.disabled));
+          createEffect(() => instance.option("disabled", props.disabled));
 
-         // when the value is changed by other components, we want to refetch the options
+          // when the value is changed by other components, we want to refetch the options
           // createEffect(on(() => props.rawValue, (v) => refetch(v)))
           createEffect(() => {
             if (selectOptions()) {
