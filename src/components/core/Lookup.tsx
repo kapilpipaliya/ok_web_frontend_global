@@ -1,6 +1,6 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Lookup, {Properties} from "devextreme/ui/lookup";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Lookup, { Properties } from "devextreme/ui/lookup";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
@@ -18,13 +18,13 @@ const lookupData = [
   "Rollout of New Website and Marketing Brochures",
   "Update Sales Strategy Documents",
   "Create 2012 Sales Report",
-  "Direct vs Online Sales Comparison Report"
-]
+  "Direct vs Online Sales Comparison Report",
+];
 
 export function LookupComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: lookupData });
@@ -32,7 +32,7 @@ export function LookupComponent() {
     console.log(attribute, data);
   };
 
-  return <LookupField meta={meta} data={data} setValue={setValue} />
+  return <LookupField meta={meta} data={data} setValue={setValue} />;
 }
 export function LookupField(props: ComponentProps) {
   return (
@@ -40,17 +40,11 @@ export function LookupField(props: ComponentProps) {
       <div
         ref={(el) => {
           const instance = new Lookup(el, {
-
             onItemClick: (e: any) => {
               props.setValue(props.meta, e.itemData);
-            }
+            },
           });
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -59,9 +53,7 @@ export function LookupField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

@@ -1,5 +1,5 @@
-import {setClassNames} from "../set-class-names";
-import {LinkProps} from "../globals";
+import { setClassNames } from "../set-class-names";
+import { LinkProps } from "../globals";
 
 export function Link(props: LinkProps) {
   return (
@@ -10,7 +10,7 @@ export function Link(props: LinkProps) {
       href={props.href}
       classList={{
         [`uk-link-${props.type}`]: !!props.type,
-        ...setClassNames(props)
+        ...setClassNames(props),
       }}
     >
       {props.children}

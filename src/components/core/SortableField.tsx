@@ -6,13 +6,7 @@ import ScrollView from "devextreme/ui/scroll_view";
 import { tasks, employees } from "../data/sortableData";
 import "../assets/styles/sortable.css";
 
-const statuses = [
-  "Not Started",
-  "Need Assistance",
-  "In Progress",
-  "Deferred",
-  "Completed",
-];
+const statuses = ["Not Started", "Need Assistance", "In Progress", "Deferred", "Completed"];
 
 export default function SortableKanban(props: ComponentProps) {
   function renderKanban(container: HTMLElement, statusList: string[]) {
@@ -56,7 +50,6 @@ export default function SortableKanban(props: ComponentProps) {
   }
 
   function renderCards(container: HTMLElement, tasks: any[]) {
-
     const scroll = document.createElement("div");
     const items = document.createElement("div");
 
@@ -64,20 +57,20 @@ export default function SortableKanban(props: ComponentProps) {
     scroll.appendChild(items);
 
     tasks.forEach((task) => {
-        renderCard(items, task);
+      renderCard(items, task);
     });
 
     scroll.classList.add("scrollable-list");
     items.classList.add("sortable-cards");
 
     new ScrollView(scroll, {
-        direction: "vertical",
-        showScrollbar: "always",
+      direction: "vertical",
+      showScrollbar: "always",
     });
 
     new Sortable(items, {
-        group: "tasksGroup",
-        moveItemOnDrop: true,
+      group: "tasksGroup",
+      moveItemOnDrop: true,
     });
   }
 

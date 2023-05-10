@@ -1,4 +1,3 @@
-
 export function setClassNames(props: any) {
   return {
     [`${props.class}`]: props.class,
@@ -7,5 +6,5 @@ export function setClassNames(props: any) {
     [`uk-width-${props.width}`]: props.width,
     [`uk-background-${props.background}`]: props.background,
     [`uk-position-${props.position}`]: props.position,
-  }
+  };
 }

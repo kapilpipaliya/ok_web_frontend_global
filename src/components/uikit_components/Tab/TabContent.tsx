@@ -1,5 +1,5 @@
-import {BaseContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
+import { BaseContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function TabContent(props: BaseContainerProps) {
   return (

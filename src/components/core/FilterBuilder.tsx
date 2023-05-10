@@ -1,53 +1,54 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import FilterBuilder, {Properties} from "devextreme/ui/filter_builder";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import FilterBuilder, { Properties } from "devextreme/ui/filter_builder";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const filter = [
-  ['Product_Current_Inventory', '<>', 0],
-  'or',
-  [
-    ['Product_Name', 'contains', 'HD'],
-    'and',
-    ['Product_Cost', '<', 200],
-  ],
+  ["Product_Current_Inventory", "<>", 0],
+  "or",
+  [["Product_Name", "contains", "HD"], "and", ["Product_Cost", "<", 200]],
 ];
 const filterBuilderData = [
   {
-    caption: 'ID',
+    caption: "ID",
     width: 50,
-    dataField: 'Product_ID',
-    dataType: 'number',
-  }, {
-    dataField: 'Product_Name',
-    dataType: 'string',
-  }, {
-    caption: 'Cost',
-    dataField: 'Product_Cost',
-    dataType: 'number',
-    format: 'currency',
-  }, {
-    dataField: 'Product_Sale_Price',
-    caption: 'Sale Price',
-    dataType: 'number',
-    format: 'currency',
-  }, {
-    dataField: 'Product_Retail_Price',
-    caption: 'Retail Price',
-    dataType: 'number',
-    format: 'currency',
-  }, {
-    dataField: 'Product_Current_Inventory',
-    dataType: 'number',
-    caption: 'Inventory',
+    dataField: "Product_ID",
+    dataType: "number",
+  },
+  {
+    dataField: "Product_Name",
+    dataType: "string",
+  },
+  {
+    caption: "Cost",
+    dataField: "Product_Cost",
+    dataType: "number",
+    format: "currency",
+  },
+  {
+    dataField: "Product_Sale_Price",
+    caption: "Sale Price",
+    dataType: "number",
+    format: "currency",
+  },
+  {
+    dataField: "Product_Retail_Price",
+    caption: "Retail Price",
+    dataType: "number",
+    format: "currency",
+  },
+  {
+    dataField: "Product_Current_Inventory",
+    dataType: "number",
+    caption: "Inventory",
   },
 ];
 
 export function FilterBuilderComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: filterBuilderData });
@@ -55,7 +56,7 @@ export function FilterBuilderComponent() {
     console.log(attribute, data);
   };
 
-  return <FilterBuilderField meta={meta} data={data} setValue={setValue} />
+  return <FilterBuilderField meta={meta} data={data} setValue={setValue} />;
 }
 export function FilterBuilderField(props: ComponentProps) {
   return (
@@ -65,10 +66,10 @@ export function FilterBuilderField(props: ComponentProps) {
           const instance = new FilterBuilder(el, {
             allowHierarchicalFields: true,
             fields: props.data.properties[props.meta.properties.id],
-            onEditorPreparing: function(e) {
+            onEditorPreparing: function (e) {
               e.editorOptions.width = 125;
-              },
-            value: filter
+            },
+            value: filter,
           });
 
           createEffect(() => {
@@ -79,9 +80,7 @@ export function FilterBuilderField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

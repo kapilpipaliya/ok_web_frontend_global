@@ -1,5 +1,4 @@
-import {ImageProps} from "../globals";
-
+import { ImageProps } from "../globals";
 
 export function Image(props: ImageProps) {
   // @ts-ignore
@@ -11,7 +10,7 @@ export function Image(props: ImageProps) {
       height={props.height}
       style={props.style}
       data-src={props.src}
-      data-uk-img={props.options ? props.options : ''}
+      data-uk-img={props.options ? props.options : ""}
     />
   );
 }

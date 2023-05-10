@@ -1,21 +1,21 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Tooltip, {Properties} from "devextreme/ui/tooltip";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Tooltip, { Properties } from "devextreme/ui/tooltip";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function TooltipComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: 'Tooltip content' });
+  const data = newVertex(0, ["Vertex"], { meta: "Tooltip content" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <TooltipField meta={meta} data={data} setValue={setValue} />
+  return <TooltipField meta={meta} data={data} setValue={setValue} />;
 }
 export function TooltipField(props: ComponentProps) {
   return (
@@ -24,14 +24,14 @@ export function TooltipField(props: ComponentProps) {
         ref={(el) => {
           const instance = new Tooltip(el, {
             target: "#target-item",
-            showEvent: 'mouseenter',
-            hideEvent: 'mouseleave',
+            showEvent: "mouseenter",
+            hideEvent: "mouseleave",
             hideOnOutsideClick: false,
             position: "top",
             contentTemplate: (e: any) => {
               e.component.option("contentTemplate", null);
               return props.data.properties[props.meta.properties.id];
-            }
+            },
           });
 
           createEffect(() => {
@@ -45,9 +45,7 @@ export function TooltipField(props: ComponentProps) {
       </div>
       <div id="target-item">This is target item for tooltip</div>
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

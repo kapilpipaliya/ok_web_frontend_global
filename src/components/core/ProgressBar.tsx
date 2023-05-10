@@ -1,13 +1,13 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import ProgressBar, {Properties} from "devextreme/ui/progress_bar";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import ProgressBar, { Properties } from "devextreme/ui/progress_bar";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function ProgressBarComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: 50 });
@@ -15,7 +15,7 @@ export function ProgressBarComponent() {
     console.log(attribute, data);
   };
 
-  return <ProgressBarField meta={meta} data={data} setValue={setValue} />
+  return <ProgressBarField meta={meta} data={data} setValue={setValue} />;
 }
 export function ProgressBarField(props: ComponentProps) {
   return (
@@ -25,21 +25,16 @@ export function ProgressBarField(props: ComponentProps) {
           const instance = new ProgressBar(el, {
             min: 0,
             max: 100,
-            width: '90%',
+            width: "90%",
             statusFormat(ratio) {
               return `Loading: ${ratio * 100}%`;
             },
             onComplete(e) {
-              props.setValue(props.meta, 'completed');
+              props.setValue(props.meta, "completed");
             },
           });
 
-          createEffect(() =>
-            instance.option(
-              "value",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -49,9 +44,7 @@ export function ProgressBarField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

@@ -1,35 +1,35 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import ContextMenu, {Properties} from "devextreme/ui/context_menu";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import ContextMenu, { Properties } from "devextreme/ui/context_menu";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const contextMenuData = [
   {
-    "text": "Hide"
+    text: "Hide",
   },
   {
-    "text": "Delete"
+    text: "Delete",
   },
   {
-    "text": "Clipboard",
-    "items": [
+    text: "Clipboard",
+    items: [
       {
-        "text": "Copy"
+        text: "Copy",
       },
       {
-        "text": "Clear"
+        text: "Clear",
       },
       {
-        "text": "Paste"
-      }
-    ]
-  }
+        text: "Paste",
+      },
+    ],
+  },
 ];
 export function ContextMenuComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: contextMenuData });
@@ -37,7 +37,7 @@ export function ContextMenuComponent() {
     console.log(attribute, data);
   };
 
-  return <ContextMenuField meta={meta} data={data} setValue={setValue} />
+  return <ContextMenuField meta={meta} data={data} setValue={setValue} />;
 }
 export function ContextMenuField(props: ComponentProps) {
   return (
@@ -45,18 +45,12 @@ export function ContextMenuField(props: ComponentProps) {
       <div
         ref={(el) => {
           const instance = new ContextMenu(el, {
-
             visible: true,
             onItemClick: (e: any) => {
               props.setValue(props.meta, e.itemData.text);
-            }
+            },
           });
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -65,9 +59,7 @@ export function ContextMenuField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

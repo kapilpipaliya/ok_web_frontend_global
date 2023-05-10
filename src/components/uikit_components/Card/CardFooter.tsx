@@ -1,6 +1,5 @@
-import {BaseContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { BaseContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function CardFooter(props: BaseContainerProps) {
   return (
@@ -8,7 +7,7 @@ export function CardFooter(props: BaseContainerProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-card-footer': true,
+        "uk-card-footer": true,
         ...setClassNames(props),
       }}
     >

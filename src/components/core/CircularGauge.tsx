@@ -1,13 +1,13 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import CircularGauge, {Properties} from "devextreme/viz/circular_gauge";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import CircularGauge, { Properties } from "devextreme/viz/circular_gauge";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function CircularGaugeComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: 48 });
@@ -15,7 +15,7 @@ export function CircularGaugeComponent() {
     console.log(attribute, data);
   };
 
-  return <CircularGaugeField meta={meta} data={data} setValue={setValue} />
+  return <CircularGaugeField meta={meta} data={data} setValue={setValue} />;
 }
 export function CircularGaugeField(props: ComponentProps) {
   return (
@@ -25,12 +25,7 @@ export function CircularGaugeField(props: ComponentProps) {
           const instance = new CircularGauge(el, {
             value: props.data.properties[props.meta.properties.id],
           });
-          createEffect(() =>
-            instance.option(
-              "value",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -39,9 +34,7 @@ export function CircularGaugeField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

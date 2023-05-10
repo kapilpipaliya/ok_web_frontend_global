@@ -1,21 +1,18 @@
-import {JSX} from "solid-js";
-import {setClassNames} from "../set-class-names";
-
+import { JSX } from "solid-js";
+import { setClassNames } from "../set-class-names";
 
 export function ModalTitle(props: JSX.HTMLAttributes<HTMLHeadingElement>) {
-
-
   // @ts-ignore
   const { children, className, ...rest } = props;
 
   return (
     <h2
-
       classList={{
         [`uk-modal-title`]: true,
-        ...setClassNames(props)
+        ...setClassNames(props),
       }}
-        {...rest}>
+      {...rest}
+    >
       {children}
     </h2>
   );

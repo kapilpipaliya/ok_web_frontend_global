@@ -1,11 +1,15 @@
 import { createEffect, createSignal, Show, useContext } from "solid-js";
 import {
   backupToIndexDB,
-  backupToJson, commitTxn, getNewGraphId, getNewTxnId,
+  backupToJson,
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
   graph,
   resetDatabase,
   restoreFromIndexDB,
-  restoreFromJson, Vertex
+  restoreFromJson,
+  Vertex,
 } from "../lib/graph";
 import { GraphView } from "../components/GraphView";
 import { Link } from "@solidjs/router";
@@ -16,7 +20,9 @@ import { CardBody } from "../components/uikit_components/Card/CardBody";
 import {
   addNewVertex,
   findVertexByLabelAndUniqueId,
-  findVertexByLabelAndUniqueIdWithSkip, newVertex, replaceVertexProperties
+  findVertexByLabelAndUniqueIdWithSkip,
+  newVertex,
+  replaceVertexProperties,
 } from "../lib/Vertex";
 import { newRow } from "../components/input/TableInputField";
 import { setSelectionValue } from "../components/input/SelectInputField";
@@ -30,7 +36,7 @@ function fileDownloader(opt: {
   mime?: string;
   bom?: string;
 }) {
-  const throwError = function(name: string) {
+  const throwError = function (name: string) {
     throw new Error("No " + name + " provided to generate-download-link.");
   };
 
@@ -130,7 +136,7 @@ export const BackupRestore = () => {
             const name = propertyObj["Name"];
             let description = propertyObj["description"] as string;
             if (description) {
-              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, '$1');
+              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
             }
             let type = propertyObj["Type"];
             // if(name === 'displayExpr') d.add(componentId);
@@ -139,52 +145,85 @@ export const BackupRestore = () => {
             // if(name === 'items') it.add(componentId);
             // continue;
             // Do not specify the items property if you specified the dataSource, and vice versa.
-            if (name === 'dataSource') continue;
+            if (name === "dataSource") continue;
             const default_ = propertyObj["Default"];
             const readOnly = propertyObj["ReadOnly"];
             const acceptedValues = propertyObj["AcceptedValues"];
             // s.add(type);
             if (type) {
               let dataType;
-              type = type.split(" | ").filter(t => !t.includes("function")).filter(t => ["false", "null", "AnimationConfig", "dxCalendar_Options", "UserDefinedElement", "template", "any", "undefined", "Store", "DataSource", "DataSource_Options", "dxFilterBuilder_Options", "Format", "DxPromise",
-                "dxSortable_Options", "dxTextBox_Options", "dxPopup_Options", "dxPopover_Options", "PivotGridDataSource", "getter", 'Filter expression']);
+              type = type
+                .split(" | ")
+                .filter((t) => !t.includes("function"))
+                .filter((t) => [
+                  "false",
+                  "null",
+                  "AnimationConfig",
+                  "dxCalendar_Options",
+                  "UserDefinedElement",
+                  "template",
+                  "any",
+                  "undefined",
+                  "Store",
+                  "DataSource",
+                  "DataSource_Options",
+                  "dxFilterBuilder_Options",
+                  "Format",
+                  "DxPromise",
+                  "dxSortable_Options",
+                  "dxTextBox_Options",
+                  "dxPopup_Options",
+                  "dxPopover_Options",
+                  "PivotGridDataSource",
+                  "getter",
+                  "Filter expression",
+                ]);
               if (!type.length) continue;
-              if (type.some(t => t.includes("Array"))) {
+              if (type.some((t) => t.includes("Array"))) {
                 dataType = "List";
-              } else if (type.some(t => t.includes("PositionConfig"))) {
+              } else if (type.some((t) => t.includes("PositionConfig"))) {
                 dataType = "Map";
               } else if (type.length > 1) {
-                console.log('skipped multiple result type', propertyObj);
+                console.log("skipped multiple result type", propertyObj);
               } else {
                 dataType = type[0];
-                if (dataType === 'Number') {
-                  dataType = 'Float';
-                } else if (dataType === 'object' || dataType === 'Object' || dataType === 'Group' || dataType === 'PositionConfig') {
+                if (dataType === "Number") {
+                  dataType = "Float";
+                } else if (
+                  dataType === "object" ||
+                  dataType === "Object" ||
+                  dataType === "Group" ||
+                  dataType === "PositionConfig"
+                ) {
                   dataType = "Map";
                 }
               }
               if (dataType) {
-                const vertex = findVertexByLabelAndUniqueId('Comp', 'id', `${componentId}`);
+                const vertex = findVertexByLabelAndUniqueId("Comp", "id", `${componentId}`);
                 if (vertex) {
-                  const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'id', dataType);
+                  const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", "id", dataType);
                   if (!dataTypeVertex) {
-                    console.log('dataType not found', dataType);
+                    console.log("dataType not found", dataType);
                     continue;
                   }
 
-                  const rowResult = newRow(txnId, vertex, 'CompProp');
-                  replaceVertexProperties(txnId, rowResult.vertexId!, {key: name, description: description});
-                  setSelectionValue(txnId, graph.vertexes[rowResult.vertexId!], {properties: {id: 'DataType'}} as Vertex, dataTypeVertex.id);
+                  const rowResult = newRow(txnId, vertex, "CompProp");
+                  replaceVertexProperties(txnId, rowResult.vertexId!, { key: name, description: description });
+                  setSelectionValue(
+                    txnId,
+                    graph.vertexes[rowResult.vertexId!],
+                    { properties: { id: "DataType" } } as Vertex,
+                    dataTypeVertex.id,
+                  );
                   // It takes too much time to commit the full transaction.
-
                 }
               }
             }
           }
         }
         commitTxn(txnId, Ws);
-        debugger
-        alert('inserting properties finished.')
+        debugger;
+        alert("inserting properties finished.");
       });
     }
   };
@@ -193,22 +232,31 @@ export const BackupRestore = () => {
     // get all the fields
     const vertexId = getNewGraphId();
     const txnId = getNewTxnId();
-    addNewVertex(txnId, newVertex(vertexId, ['Coll'], { id: "TestForm", title: "Test Form", table: true }));
+    addNewVertex(txnId, newVertex(vertexId, ["Coll"], { id: "TestForm", title: "Test Form", table: true }));
     const existingVertex = graph.vertexes[vertexId];
     for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
       const componentVertex = graph.vertexes[compVertexId];
-      const newRow1 = newRow(txnId, existingVertex, 'CollAttr');
+      const newRow1 = newRow(txnId, existingVertex, "CollAttr");
       replaceVertexProperties(txnId, newRow1.vertexId!, { id: componentVertex.properties.id });
-      const dataType = getParentVertex(['DataType$0'], componentVertex);
+      const dataType = getParentVertex(["DataType$0"], componentVertex);
       if (!dataType.error) {
         // set component dataType and component
-        setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'dataType'}} as Vertex, dataType.vertex!.id);
-        setSelectionValue(txnId, graph.vertexes[newRow1.vertexId!], {properties: {id: 'comp'}} as Vertex, compVertexId);
+        setSelectionValue(
+          txnId,
+          graph.vertexes[newRow1.vertexId!],
+          { properties: { id: "dataType" } } as Vertex,
+          dataType.vertex!.id,
+        );
+        setSelectionValue(
+          txnId,
+          graph.vertexes[newRow1.vertexId!],
+          { properties: { id: "comp" } } as Vertex,
+          compVertexId,
+        );
       }
-
     }
     commitTxn(txnId, Ws);
-  }
+  };
   // Hack to remount the component
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
@@ -218,91 +266,83 @@ export const BackupRestore = () => {
       console.log("reloading");
     }
   });
-  const C = (props: { title: string, subtitle: string, children: JSX.Element }) => {
-    return <Card>
-      <CardHeader class="p:10">
-        <CardTitle class="uk-margin-remove-bottom">
-          {props.title}
-        </CardTitle>
-        <span>{props.subtitle}</span>
-      </CardHeader>
-      <CardBody class="m:0 p:12">
-        {props.children}
-      </CardBody>
-    </Card>;
+  const C = (props: { title: string; subtitle: string; children: JSX.Element }) => {
+    return (
+      <Card>
+        <CardHeader class="p:10">
+          <CardTitle class="uk-margin-remove-bottom">{props.title}</CardTitle>
+          <span>{props.subtitle}</span>
+        </CardHeader>
+        <CardBody class="m:0 p:12">{props.children}</CardBody>
+      </Card>
+    );
   };
 
   // @ts-ignore
   return (
-   <>
-     <div class="mb:1.5rem mt:10 m:6">
-       <div
-        class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
-         <C title={"Backup"}
-            subtitle={"Backup in memory graph to different targets"}>
-           <CardBody class="m:0 p:12">
-             <div class="m:1rem flex gap:0.5rem">
-               <button type="button" onclick={backupToIndexDB_}>
-                 Backup To IndexDB
-               </button>
-               <button type="button" onclick={downloadJson}>
-                 Download Json
-               </button>
-             </div>
-           </CardBody>
-         </C>
-         <C title={"Restore"}
-            subtitle={"Restore graph from different targets to the memory"}>
-           <CardBody class="m:0 p:12">
-             <button type="button" onclick={restoreFromIndexDB}>
-               Restore From IndexDB
-             </button>
-             <input ref={fileInputRef!} type="file" accept="image/*" multiple
-                    style="display: hidden"></input>
-             <button type="button" onClick={restoreFromFile}>
-               <span>Restore From JSON</span>
-             </button>
-           </CardBody>
-         </C>
-         <C title={"Graph Functions"} subtitle={"Other graph functions"}>
-           <CardBody class="m:0 p:12">
-             <div class="m:1rem flex gap:0.5rem">
-               <button type="button" onclick={resetDatabase}>
-                 Clear in memory store
-               </button>
-             </div>
-           </CardBody>
-         </C>
-         <C title={"Graph Functions"} subtitle={"Simple Import"}>
-           <CardBody class="m:0 p:12">
-             <div class="m:1rem flex gap:0.5rem">
-               <Link href="/SimpleImport">Simple Import</Link>
-             </div>
-           </CardBody>
-         </C>
-         <C title={"Graph Functions"} subtitle={"Simple Import"}>
-           <CardBody class="m:0 p:12">
-             <div class="m:1rem flex gap:0.5rem">
-               <input ref={componentPropsInputRef!} type="file" accept="json"
-                      style="display: hidden"></input>
-               <button type="button" onClick={importComponentProps}>
-                 <span>Restore From JSON</span>
-               </button>
-             </div>
-           </CardBody>
-         </C>
-       </div>
-         <C title={"Graph Functions"} subtitle={"Simple Import"}>
-           <CardBody class="m:0 p:12">
-             <div class="m:1rem flex gap:0.5rem">
-               <button type="button" onClick={makeASampleForm}>
-                 <span>Make a sample Form</span>
-               </button>
-             </div>
-           </CardBody>
-         </C>
-       </div>
-
+    <>
+      <div class="mb:1.5rem mt:10 m:6">
+        <div class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
+          <C title={"Backup"} subtitle={"Backup in memory graph to different targets"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <button type="button" onclick={backupToIndexDB_}>
+                  Backup To IndexDB
+                </button>
+                <button type="button" onclick={downloadJson}>
+                  Download Json
+                </button>
+              </div>
+            </CardBody>
+          </C>
+          <C title={"Restore"} subtitle={"Restore graph from different targets to the memory"}>
+            <CardBody class="m:0 p:12">
+              <button type="button" onclick={restoreFromIndexDB}>
+                Restore From IndexDB
+              </button>
+              <input ref={fileInputRef!} type="file" accept="image/*" multiple style="display: hidden"></input>
+              <button type="button" onClick={restoreFromFile}>
+                <span>Restore From JSON</span>
+              </button>
+            </CardBody>
+          </C>
+          <C title={"Graph Functions"} subtitle={"Other graph functions"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <button type="button" onclick={resetDatabase}>
+                  Clear in memory store
+                </button>
+              </div>
+            </CardBody>
+          </C>
+          <C title={"Graph Functions"} subtitle={"Simple Import"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <Link href="/SimpleImport">Simple Import</Link>
+              </div>
+            </CardBody>
+          </C>
+          <C title={"Graph Functions"} subtitle={"Simple Import"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <input ref={componentPropsInputRef!} type="file" accept="json" style="display: hidden"></input>
+                <button type="button" onClick={importComponentProps}>
+                  <span>Restore From JSON</span>
+                </button>
+              </div>
+            </CardBody>
+          </C>
+        </div>
+        <C title={"Graph Functions"} subtitle={"Simple Import"}>
+          <CardBody class="m:0 p:12">
+            <div class="m:1rem flex gap:0.5rem">
+              <button type="button" onClick={makeASampleForm}>
+                <span>Make a sample Form</span>
+              </button>
+            </div>
+          </CardBody>
+        </C>
+      </div>
 
       <Show when={load()}>
         <GraphView
@@ -317,6 +357,6 @@ export const BackupRestore = () => {
             }))}
         />
       </Show>
-   </>
+    </>
   );
 };

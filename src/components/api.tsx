@@ -1,9 +1,6 @@
 import { FormMetaData } from "./Form";
 import { klona } from "klona";
-import {
-  findVertexByLabelAndUniqueId,
-  findVertexByLabelAndUniqueIdWithSkip
-} from "../lib/Vertex";
+import { findVertexByLabelAndUniqueId, findVertexByLabelAndUniqueIdWithSkip } from "../lib/Vertex";
 import { useContext } from "solid-js";
 import { FormContext } from "./dynamicForm";
 
@@ -27,7 +24,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         props: {
           displayExpr: "properties.id",
           collection: "Comp",
-          skip: true
+          skip: true,
         },
       },
     ],
@@ -56,7 +53,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           inward: true,
           parentLabel: "Comp",
           childLabel: "Child",
-          skip: true
+          skip: true,
         },
       },
       {
@@ -67,7 +64,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           displayExpr: "properties.id",
           collection: "DataType",
           inward: true,
-          parentLabel: "DataType"
+          parentLabel: "DataType",
         },
       },
       {
@@ -78,7 +75,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           collection: "CompCategory",
           parentLabel: "CompCategory",
           inward: true,
-          skip: true
+          skip: true,
         },
       },
       {
@@ -95,8 +92,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "TextArea",
             props: {
               // autoResizeEnabled: true,
-              width: '550px'
-            }
+              width: "550px",
+            },
           },
           {
             id: "dataType",
@@ -141,17 +138,18 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             id: "value",
             meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
-            component: "->$0Comp-CompChild:properties.id||->$0Comp:properties.id||->$0DataType->$0Default:properties.id",
+            component:
+              "->$0Comp-CompChild:properties.id||->$0Comp:properties.id||->$0DataType->$0Default:properties.id",
             // component: "->$0Comp-CompChild:properties.id||->$0Comp:properties.id||->$0DataType->$0Default:properties.id||defaultComp|->$0DataType:properties.id",
           },
           {
             id: "reset",
             component: "Button",
             props: {
-              function: 'reset',
-              onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}'
-            }
-          }
+              function: "reset",
+              onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
+            },
+          },
         ],
       },
     ],
@@ -170,34 +168,44 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     title: "Collection",
     id: "Coll",
     attributes: [
-      { id: "title", component: "TextBox", props:{
+      {
+        id: "title",
+        component: "TextBox",
+        props: {
           onchange: '{"new": ["id","label"]}',
-        } },
-      { id: "id", component: "TextBox", props: {
-          validationRules: [{
-            type: 'required',
-            message: 'ID is required',
-          },{
-            type: "custom",
-            ignoreEmptyValue: true,
-            message: "This ID is already taken",
-            validationCallback: (options) => {
-              const { local, cleanUpConfig, formVertex } = options.validator.context || {};
+        },
+      },
+      {
+        id: "id",
+        component: "TextBox",
+        props: {
+          validationRules: [
+            {
+              type: "required",
+              message: "ID is required",
+            },
+            {
+              type: "custom",
+              ignoreEmptyValue: true,
+              message: "This ID is already taken",
+              validationCallback: (options) => {
+                const { local, cleanUpConfig, formVertex } = options.validator.context || {};
 
-              const val = options.value;
-              if (Object.keys(AttrsTableData).includes(val)) {
-                return false;
-              } else {
-                return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, formVertex?.id);
-              }
-            }
-          }
+                const val = options.value;
+                if (Object.keys(AttrsTableData).includes(val)) {
+                  return false;
+                } else {
+                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, formVertex?.id);
+                }
+              },
+            },
             // , {
             //   type: 'email',
             //   message: 'Email is invalid',
             // }
           ],
-        } },
+        },
+      },
       // {
       //   id: "category",
       //   component: "SelectBox",
@@ -211,12 +219,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       // },
       { id: "description", component: "TextArea" },
       { id: "table", component: "CheckBox" },
-      { id: "public", component: "CheckBox", props: {skip: true}, },
+      { id: "public", component: "CheckBox", props: { skip: true } },
       {
         id: "Tab",
         component: "Table",
         tab: "Organize",
-        props: {skip: true},
+        props: { skip: true },
         attributes: [
           {
             id: "id",
@@ -232,7 +240,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         id: "Group",
         component: "Table",
         tab: "Organize",
-        props: {skip: true},
+        props: { skip: true },
         attributes: [
           {
             id: "id",
@@ -248,7 +256,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         id: "Role",
         component: "Table",
         tab: "Permission",
-        props: {skip: true},
+        props: { skip: true },
         attributes: [
           {
             id: "role",
@@ -288,8 +296,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             id: "id",
             displayName: "ID",
             component: "TextBox",
-            props: {
-            },
+            props: {},
           },
           {
             id: "displayName",
@@ -305,7 +312,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               displayExpr: "properties.id",
               collection: "-CollAttr->$0Tab",
-              skip: true
+              skip: true,
             },
           },
           {
@@ -314,7 +321,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-CollAttr->$0Group",
               displayExpr: "properties.id",
-              skip: true
+              skip: true,
             },
           },
           {
@@ -323,7 +330,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               displayExpr: "properties.id",
               collection: "DataType",
-              skip: true
+              skip: true,
             },
           },
           {
@@ -341,28 +348,28 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             id: "unique",
             component: "CheckBox",
             props: {
-              skip: true
+              skip: true,
             },
           },
           {
             id: "required",
             component: "CheckBox",
             props: {
-              skip: true
+              skip: true,
             },
           },
           {
             id: "disabled",
             component: "CheckBox",
             props: {
-              skip: true
+              skip: true,
             },
           },
           {
             id: "Prop",
             displayName: "Property",
             component: "Table",
-            props: {skip: true},
+            props: { skip: true },
             attributes: [
               {
                 id: "key",
@@ -375,14 +382,15 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               {
                 id: "value",
                 meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
-                component: "->$0Key->$0Comp-CompChild:properties.id||->$0Key->$0Comp:properties.id||->$0Key->$0DataType->$0Default:properties.id",
+                component:
+                  "->$0Key->$0Comp-CompChild:properties.id||->$0Key->$0Comp:properties.id||->$0Key->$0DataType->$0Default:properties.id",
               },
             ],
           },
           {
             id: "Role",
             component: "Table",
-            props: {skip: true},
+            props: { skip: true },
             attributes: [
               {
                 id: "role",
@@ -414,7 +422,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         id: "Child",
         component: "Table",
         tab: "Child",
-        props: {skip: true},
+        props: { skip: true },
         attributes: [
           {
             id: "coll",
@@ -546,8 +554,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               displayExpr: "properties.id",
               collection: "->$0Attr->$0Attr->$0DataType->$0Comp",
-              defaultValue:
-                "->$0Attr->$0Comp:properties.id||->$0Attr->$0Attr->$0Comp:properties.id",
+              defaultValue: "->$0Attr->$0Comp:properties.id||->$0Attr->$0Attr->$0Comp:properties.id",
             },
           },
           {
@@ -574,8 +581,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: "properties.key",
-                  collection:
-                    "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
+                  collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
                 },
               },
               {
@@ -651,32 +657,28 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 props: {
                   displayExpr: "properties.id",
                   collection: "->$0Attr->$0Attr->$0DataType->$0Comp",
-                  defaultValue:
-                    "->$0Attr->$0Comp:properties.id||->$0Attr->$0Attr->$0Comp:properties.id",
+                  defaultValue: "->$0Attr->$0Comp:properties.id||->$0Attr->$0Attr->$0Comp:properties.id",
                 },
               },
               {
                 id: "displayName",
                 component: "TextBox",
                 props: {
-                  defaultValue:
-                    "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
+                  defaultValue: "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
                 },
               },
               {
                 id: "required",
                 component: "CheckBox",
                 props: {
-                  defaultValue:
-                    "->$0Attr:properties.required||->$0Attr->$0Attr:properties.required",
+                  defaultValue: "->$0Attr:properties.required||->$0Attr->$0Attr:properties.required",
                 },
               },
               {
                 id: "disabled",
                 component: "CheckBox",
                 props: {
-                  defaultValue:
-                    "->$0Attr:properties.disabled||->$0Attr->$0Attr:properties.disabled",
+                  defaultValue: "->$0Attr:properties.disabled||->$0Attr->$0Attr:properties.disabled",
                 },
               },
               {
@@ -696,8 +698,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     component: "SelectBox",
                     props: {
                       displayExpr: "properties.key",
-                      collection:
-                        "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
+                      collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
                     },
                   },
                   {
@@ -848,12 +849,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
       },
     ],
-  }
+  },
   // TODO: Dynamic Filter on Grid: Role->Filter
 };
 const PageMetaData = klona(AttrsTableData.Form);
 PageMetaData.title = "Page";
 PageMetaData.id = "Page";
-PageMetaData.attributes = PageMetaData.attributes.filter(attr => !["table"].includes(attr.id))
+PageMetaData.attributes = PageMetaData.attributes.filter((attr) => !["table"].includes(attr.id));
 AttrsTableData.Page = klona(PageMetaData);
 // window.a = AttrsTableData;

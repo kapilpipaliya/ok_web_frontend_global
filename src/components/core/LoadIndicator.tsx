@@ -1,21 +1,21 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import LoadIndicator, {Properties} from "devextreme/ui/load_indicator";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import LoadIndicator, { Properties } from "devextreme/ui/load_indicator";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function LoadIndicatorComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: '' });
+  const data = newVertex(0, ["Vertex"], { meta: "" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <LoadIndicatorField meta={meta} data={data} setValue={setValue} />
+  return <LoadIndicatorField meta={meta} data={data} setValue={setValue} />;
 }
 export function LoadIndicatorField(props: ComponentProps) {
   return (
@@ -35,9 +35,7 @@ export function LoadIndicatorField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

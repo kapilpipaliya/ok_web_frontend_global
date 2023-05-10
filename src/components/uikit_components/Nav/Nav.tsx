@@ -1,8 +1,7 @@
-import {setClassNames} from "../set-class-names";
-import {NavProps} from "../globals";
+import { setClassNames } from "../set-class-names";
+import { NavProps } from "../globals";
 
 export function Nav(props: NavProps) {
-
   return (
     <ul
       id={props.id}
@@ -12,10 +11,9 @@ export function Nav(props: NavProps) {
         [`uk-nav-${props.preset}`]: !!props.preset,
         [`uk-nav-sub`]: props.child,
         [`uk-nav-parent-icon`]: props.accordion,
-        ...setClassNames(props)
+        ...setClassNames(props),
       }}
-
-      data-uk-nav={props.options ? props.options : ''}
+      data-uk-nav={props.options ? props.options : ""}
     >
       {props.children}
     </ul>

@@ -1,14 +1,4 @@
-import {
-  batch,
-  Component,
-  createEffect,
-  createSignal,
-  on,
-  onCleanup,
-  onMount,
-  Show,
-  useContext
-} from "solid-js";
+import { batch, Component, createEffect, createSignal, on, onCleanup, onMount, Show, useContext } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
 import { BackupRestore } from "../pages/BackupRestore";
@@ -100,18 +90,20 @@ export const StaticSideBar = () => {
 
 export const MenuButtonToggle = () => {
   return (
-   <ButtonField
-    meta={{
-      properties: {
-        id: "meta",
-        props: {hint: "Open sidebar", icon: "menu", width: 40}
+    <ButtonField
+      meta={
+        {
+          properties: {
+            id: "meta",
+            props: { hint: "Open sidebar", icon: "menu", width: 40 },
+          },
+        } as unknown as Vertex
       }
-    } as unknown as Vertex}
-    data={{ properties: { meta: "" } } as unknown as Vertex}
-    onClick={() => {
-      setSidebarOpen((v) => !v);
-    }} />
-
+      data={{ properties: { meta: "" } } as unknown as Vertex}
+      onClick={() => {
+        setSidebarOpen((v) => !v);
+      }}
+    />
   );
 };
 
@@ -161,7 +153,7 @@ export const DashboardView = () => {
             <Route path="/logout" component={Logout as Component} />
             <Route path="/signup" component={SignUp as Component} />
             <Route path="/SimpleImport" component={SimpleImport as Component} />
-            <Route path="/CollDesigner/:id"   component={FormDesigner as Component} />
+            <Route path="/CollDesigner/:id" component={FormDesigner as Component} />
             <Route path="/Page/:id" component={Page as Component} />
             <Route path="/public/avfmobile" component={Home as Component} />
             <Route path="/**" component={Page404 as Component} />

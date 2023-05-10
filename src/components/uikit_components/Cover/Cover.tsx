@@ -1,6 +1,5 @@
-import {setClassNames} from "../set-class-names";
-import {CoverProps} from "../globals";
-
+import { setClassNames } from "../set-class-names";
+import { CoverProps } from "../globals";
 
 export function Cover(props: CoverProps) {
   const renderResponsiveMode = () => {
@@ -10,18 +9,10 @@ export function Cover(props: CoverProps) {
   };
 
   const renderBasedOnType = () => {
-    if (props.type === 'image') {
-      return (
-        <img
-          src={props.src}
-          alt={props.alt}
-          width={props.width}
-          height={props.height}
-          data-uk-cover={''}
-        />
-      );
+    if (props.type === "image") {
+      return <img src={props.src} alt={props.alt} width={props.width} height={props.height} data-uk-cover={""} />;
     }
-    if (props.type === 'video') {
+    if (props.type === "video") {
       return (
         <video
           autoplay={props.autoPlay}
@@ -30,13 +21,13 @@ export function Cover(props: CoverProps) {
           playsinline={props.playsInline}
           width={props.width}
           height={props.height}
-          data-uk-cover={''}
+          data-uk-cover={""}
         >
           <source src={props.src} type={`${props.type}/${props.videoFormat}`} />
         </video>
       );
     }
-    console.error('Type property on cover component must be either video or image');
+    console.error("Type property on cover component must be either video or image");
   };
 
   return (
@@ -44,8 +35,8 @@ export function Cover(props: CoverProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-cover-container': true,
-        ...setClassNames(props)
+        "uk-cover-container": true,
+        ...setClassNames(props),
       }}
     >
       {renderResponsiveMode()}

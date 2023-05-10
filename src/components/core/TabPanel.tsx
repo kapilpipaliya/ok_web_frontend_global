@@ -1,28 +1,28 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import TabPanel, {Properties} from "devextreme/ui/tab_panel";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import TabPanel, { Properties } from "devextreme/ui/tab_panel";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const tabPanelData = [
   {
-    "title": "Info",
-    "text": "John Smith, 1986"
+    title: "Info",
+    text: "John Smith, 1986",
   },
   {
-    "title": "Contacts",
-    "text": "phone: (555)555-5555, email: John.Smith@example.com"
+    title: "Contacts",
+    text: "phone: (555)555-5555, email: John.Smith@example.com",
   },
   {
-    "title": "Address",
-    "text": "CA San Francisco Stanford Ave"
-  }
+    title: "Address",
+    text: "CA San Francisco Stanford Ave",
+  },
 ];
 
 export function TabPanelComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: tabPanelData });
@@ -30,7 +30,7 @@ export function TabPanelComponent() {
     console.log(attribute, data);
   };
 
-  return <TabPanelField meta={meta} data={data} setValue={setValue} />
+  return <TabPanelField meta={meta} data={data} setValue={setValue} />;
 }
 export function TabPanelField(props: ComponentProps) {
   return (
@@ -44,12 +44,7 @@ export function TabPanelField(props: ComponentProps) {
             },
           });
 
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -59,9 +54,7 @@ export function TabPanelField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

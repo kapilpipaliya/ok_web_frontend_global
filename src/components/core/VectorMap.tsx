@@ -1,21 +1,21 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import VectorMap, {Properties} from "devextreme/viz/vector_map";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import VectorMap, { Properties } from "devextreme/viz/vector_map";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function VectorMapComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: '' });
+  const data = newVertex(0, ["Vertex"], { meta: "" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <VectorMapField meta={meta} data={data} setValue={setValue} />
+  return <VectorMapField meta={meta} data={data} setValue={setValue} />;
 }
 export function VectorMapField(props: ComponentProps) {
   return (
@@ -29,7 +29,7 @@ export function VectorMapField(props: ComponentProps) {
               border: {
                 visible: false,
               },
-              font: { color: '#fff' },
+              font: { color: "#fff" },
             },
             layers: {
               type: "area",
@@ -45,9 +45,7 @@ export function VectorMapField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

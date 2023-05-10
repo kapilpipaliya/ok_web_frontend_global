@@ -2,26 +2,8 @@ import DxDataGrid, { Column } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
 
-import {
-  commitTransaction,
-  getNewTxnId,
-  graph,
-  Id,
-  ProcessStatus,
-  setGraph,
-  transactions,
-  Vertex
-} from "../lib/graph";
-import {
-  createEffect,
-  createSignal,
-  For, getOwner,
-  on,
-  runWithOwner,
-  Show,
-  splitProps,
-  useContext
-} from "solid-js";
+import { commitTransaction, getNewTxnId, graph, Id, ProcessStatus, setGraph, transactions, Vertex } from "../lib/graph";
+import { createEffect, createSignal, For, getOwner, on, runWithOwner, Show, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "@solidjs/router";
 
@@ -159,15 +141,18 @@ export const DataGrid = (props: DataGridProps) => {
     attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.id);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
     if (attribute.component === "SelectBox") {
-      attribute['calculateCellValue'] = (columnBase, rowData) => {
-        const vertex = selectedValue(       {
-          properties: attribute
-        } as unknown as Vertex, columnBase);
+      attribute["calculateCellValue"] = (columnBase, rowData) => {
+        const vertex = selectedValue(
+          {
+            properties: attribute,
+          } as unknown as Vertex,
+          columnBase,
+        );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || "properties.id")
+          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || "properties.id");
         }
-        return ''
-      }
+        return "";
+      };
     }
     // @ts-ignore
     tableColumns.push(attribute);
@@ -222,14 +207,12 @@ export const DataGrid = (props: DataGridProps) => {
       ref={(el) => {
         const owner = getOwner();
 
-        const template = function(cellElement, cellInfo) {
+        const template = function (cellElement, cellInfo) {
           return runWithOwner(owner, () => (
-           <span>
-             <Link
-              href={/*@once*/ `/${props.tableId}/${cellInfo.row.key}`}>Edit</Link>
-             <button
-              onClick={/*@once*/ () => deleteObject(/*@once*/ cellInfo.row.key)}>Delete</button>
-             </span>
+            <span>
+              <Link href={/*@once*/ `/${props.tableId}/${cellInfo.row.key}`}>Edit</Link>
+              <button onClick={/*@once*/ () => deleteObject(/*@once*/ cellInfo.row.key)}>Delete</button>
+            </span>
           ));
         };
         // @ts-ignore
@@ -244,10 +227,10 @@ export const DataGrid = (props: DataGridProps) => {
                 "edit",
                 "delete",
                 {
-                  template
-                }
-              ]
-            }
+                  template,
+                },
+              ],
+            },
           ],
           allowColumnReordering: true,
           allowColumnResizing: true,
@@ -263,14 +246,14 @@ export const DataGrid = (props: DataGridProps) => {
           showRowLines: true,
           showColumnLines: true,
           paging: {
-            pageSize: 25
+            pageSize: 25,
           },
           export: {
-            enabled: true
+            enabled: true,
           },
           cellHintEnabled: true,
           showColumnHeaders: true,
-          ...customProps
+          ...customProps,
         });
         const deleteObject = (id: Id) => {
           if (confirm("are you sure")) {
@@ -307,64 +290,65 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   });
 
   return (
-   <div class="">
-     <div>
-       <ButtonField
-        meta={{
-          properties: {
-            id: "meta",
-            props: {}
+    <div class="">
+      <div>
+        <ButtonField
+          meta={
+            {
+              properties: {
+                id: "meta",
+                props: {},
+              },
+            } as unknown as Vertex
           }
-        } as unknown as Vertex}
-        data={{ properties: { meta: "Add new" } } as unknown as Vertex}
-        onClick={() => {
-          navigate("./new");
-        }} />
-     </div>
-     <Show when={tableId()}>
-       <DataGrid tableId={tableId()} />
-     </Show>
-   </div>
+          data={{ properties: { meta: "Add new" } } as unknown as Vertex}
+          onClick={() => {
+            navigate("./new");
+          }}
+        />
+      </div>
+      <Show when={tableId()}>
+        <DataGrid tableId={tableId()} />
+      </Show>
+    </div>
   );
 };
 
 export const TableDashboard = () => {
-  const allFormTableLayouts = ():Vertex[] =>
-   graph.vertexLabelIdMap["Form"]
-    ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
-    .filter((v) => v.properties.table) || [];
+  const allFormTableLayouts = (): Vertex[] =>
+    graph.vertexLabelIdMap["Form"]
+      ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
+      .filter((v) => v.properties.table) || [];
 
-  const allCollTableLayouts = ():Vertex[] =>
-   graph.vertexLabelIdMap["Coll"]
-    ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
-    .filter((v) => v.properties.table) || [];
+  const allCollTableLayouts = (): Vertex[] =>
+    graph.vertexLabelIdMap["Coll"]
+      ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
+      .filter((v) => v.properties.table) || [];
 
-  const allTableLayouts = () => [...new Set([...allCollTableLayouts(), ...allFormTableLayouts()])]
+  const allTableLayouts = () => [...new Set([...allCollTableLayouts(), ...allFormTableLayouts()])];
   return (
-   <div class="index">
-     <div class="title">
-       <div class="block-content main-sections">
-         <For each={allTableLayouts()}>
-           {(tableLayout) => (
-            <div class="content-item">
-              {" "}
-              <Link href={`/${tableLayout.properties.id}`}>
+    <div class="index">
+      <div class="title">
+        <div class="block-content main-sections">
+          <For each={allTableLayouts()}>
+            {(tableLayout) => (
+              <div class="content-item">
                 {" "}
-                <div></div>
-                <h3 class="multi-line">
-                  {tableLayout.properties.title || tableLayout.properties.id}
-                </h3>{" "}
-              </Link>
-            </div>
-           )}
-         </For>
-         <div class="content-item"></div>
-         <div class="content-item"></div>
-         <div class="content-item"></div>
-         <div class="content-item"></div>
-       </div>
-     </div>
-   </div>
+                <Link href={`/${tableLayout.properties.id}`}>
+                  {" "}
+                  <div></div>
+                  <h3 class="multi-line">{tableLayout.properties.title || tableLayout.properties.id}</h3>{" "}
+                </Link>
+              </div>
+            )}
+          </For>
+          <div class="content-item"></div>
+          <div class="content-item"></div>
+          <div class="content-item"></div>
+          <div class="content-item"></div>
+        </div>
+      </div>
+    </div>
   );
 };
 const dataTypeToDataGrid = (type: string): DataType => {

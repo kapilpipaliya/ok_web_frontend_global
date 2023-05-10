@@ -146,15 +146,17 @@ export function findVertexIdsByLabel(label: string): Id[] {
   return graph.vertexLabelIdMap[label] || [];
 }
 export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: any) {
-  const vertexId = (graph.vertexLabelIdMap[label] || []).find((vertexId) => value === graph.vertexes[vertexId].properties[attribute]);
+  const vertexId = (graph.vertexLabelIdMap[label] || []).find(
+    (vertexId) => value === graph.vertexes[vertexId].properties[attribute],
+  );
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
 export function findVertexByLabelAndUniqueIdWithSkip(label: string, attribute: string, value: any, skipId: number) {
-  let vertexIds = (graph.vertexLabelIdMap[label] || [])
-   if (skipId != undefined) {
-     vertexIds = vertexIds.filter(value => value !== skipId);
-   }
-   const vertexId = vertexIds.find((vertexId) => value === graph.vertexes[vertexId].properties[attribute]);
+  let vertexIds = graph.vertexLabelIdMap[label] || [];
+  if (skipId != undefined) {
+    vertexIds = vertexIds.filter((value) => value !== skipId);
+  }
+  const vertexId = vertexIds.find((vertexId) => value === graph.vertexes[vertexId].properties[attribute]);
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }

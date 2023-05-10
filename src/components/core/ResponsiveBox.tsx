@@ -1,7 +1,7 @@
 import { ComponentProps } from "./Form";
 import ResponsiveBox, { Properties } from "devextreme/ui/responsive_box";
 import { createEffect, For, Show } from "solid-js";
-import '../assets/styles/responsive_box.css'
+import "../assets/styles/responsive_box.css";
 
 export function ResponsiveBoxField(props: ComponentProps) {
   return (
@@ -22,10 +22,7 @@ export function ResponsiveBoxField(props: ComponentProps) {
           createEffect(
             () =>
               props.data.properties[props.meta.properties.id] &&
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
+              instance.option("value", props.data.properties[props.meta.properties.id]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -53,8 +50,8 @@ export function ResponsiveBoxField(props: ComponentProps) {
           <p>Header</p>
         </div>
         <div
-            class="content"
-            data-options="dxItem: {
+          class="content"
+          data-options="dxItem: {
                     location: [{
                         row: 1,
                         col: 1,
@@ -66,12 +63,12 @@ export function ResponsiveBoxField(props: ComponentProps) {
                         screen: 'sm'
                     }]
                 }"
-          >
-            <p>Content</p>
-          </div>
-          <div
-            class="left-side-bar"
-            data-options="dxItem: {
+        >
+          <p>Content</p>
+        </div>
+        <div
+          class="left-side-bar"
+          data-options="dxItem: {
                     location: [{
                         row: 1,
                         col: 0,
@@ -82,12 +79,12 @@ export function ResponsiveBoxField(props: ComponentProps) {
                         screen: 'sm'
                     }]
                 }"
-          >
-            <p>Left Bar</p>
-          </div>
-          <div
-            class="right-side-bar"
-            data-options="dxItem: {
+        >
+          <p>Left Bar</p>
+        </div>
+        <div
+          class="right-side-bar"
+          data-options="dxItem: {
                     location: [{
                         row: 1,
                         col: 2,
@@ -97,12 +94,12 @@ export function ResponsiveBoxField(props: ComponentProps) {
                         col: 1,
                         screen: 'sm' }]
                     }"
-          >
-            <p>Right Bar</p>
-          </div>
-          <div
-            class="footer"
-            data-options="dxItem: {
+        >
+          <p>Right Bar</p>
+        </div>
+        <div
+          class="footer"
+          data-options="dxItem: {
                     location: [{
                         row: 2,
                         col: 0,
@@ -114,15 +111,13 @@ export function ResponsiveBoxField(props: ComponentProps) {
                         colspan: 2,
                         screen: 'sm' }]
                     }"
-          >
-            <p>Footer</p>
-          </div>
+        >
+          <p>Footer</p>
+        </div>
       </div>
 
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

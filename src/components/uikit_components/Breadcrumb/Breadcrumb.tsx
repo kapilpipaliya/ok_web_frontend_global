@@ -1,6 +1,5 @@
-import {setClassNames} from "../set-class-names";
-import {BreadcrumbProps} from "../globals";
-
+import { setClassNames } from "../set-class-names";
+import { BreadcrumbProps } from "../globals";
 
 export function Breadcrumb(props: BreadcrumbProps) {
   return (
@@ -8,7 +7,7 @@ export function Breadcrumb(props: BreadcrumbProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-breadcrumb': true,
+        "uk-breadcrumb": true,
         ...setClassNames(props),
       }}
     >

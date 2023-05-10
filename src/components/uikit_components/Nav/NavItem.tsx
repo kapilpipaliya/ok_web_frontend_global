@@ -1,10 +1,7 @@
-import {NavItemProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { NavItemProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function NavItem(props: NavItemProps) {
-
-
   return (
     <li
       id={props.id}
@@ -12,7 +9,7 @@ export function NavItem(props: NavItemProps) {
       classList={{
         [`uk-nav-${props.type}`]: !!props.type,
         [`uk-parent`]: props.parent,
-        ...setClassNames(props)
+        ...setClassNames(props),
       }}
     >
       {props.children}

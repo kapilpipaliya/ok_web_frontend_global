@@ -1,6 +1,5 @@
-import {BaseContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { BaseContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function CardTitle(props: BaseContainerProps) {
   return (
@@ -8,7 +7,7 @@ export function CardTitle(props: BaseContainerProps) {
       id={props.id}
       style={props.style}
       classList={{
-        'uk-card-title': true,
+        "uk-card-title": true,
         ...setClassNames(props),
       }}
     >

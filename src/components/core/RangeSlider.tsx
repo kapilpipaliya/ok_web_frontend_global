@@ -13,10 +13,10 @@ export function RangeSliderField(props: ComponentProps) {
             start: 20,
             end: 80,
             label: {
-                visible: true,
-                format(value: number) {
-                    return `${value}%`
-                },
+              visible: true,
+              format(value: number) {
+                return `${value}%`;
+              },
             },
             onValueChanged: (e) => {
               props.setValue(props.meta, e.value);
@@ -25,10 +25,7 @@ export function RangeSliderField(props: ComponentProps) {
           createEffect(
             () =>
               props.data.properties[props.meta.properties.id] &&
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
+              instance.option("value", props.data.properties[props.meta.properties.id]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -39,9 +36,7 @@ export function RangeSliderField(props: ComponentProps) {
       />
 
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

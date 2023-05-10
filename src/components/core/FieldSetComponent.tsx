@@ -18,10 +18,7 @@ export default function FieldSetComponent(props: ComponentProps) {
           createEffect(
             () =>
               props.data.properties[props.meta.properties.id] &&
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
+              instance.option("value", props.data.properties[props.meta.properties.id]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -45,10 +42,7 @@ export default function FieldSetComponent(props: ComponentProps) {
           createEffect(
             () =>
               props.data.properties[props.meta.properties.id] &&
-              instance.option(
-                "value",
-                props.data.properties[props.meta.properties.id]
-              )
+              instance.option("value", props.data.properties[props.meta.properties.id]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {

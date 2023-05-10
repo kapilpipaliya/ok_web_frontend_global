@@ -1,44 +1,44 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import PivotGrid, {Properties} from "devextreme/ui/pivot_grid";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import PivotGrid, { Properties } from "devextreme/ui/pivot_grid";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const pivotGridItems = {
-    "fields": [
-      {
-        "dataField": "[Product].[Category]",
-        "area": "row"
-      },
-      {
-        "dataField": "[Product].[Subcategory]",
-        "area": "row"
-      },
-      {
-        "dataField": "[Ship Date].[Calendar Year]",
-        "area": "column"
-      },
-      {
-        "dataField": "[Ship Date].[Month of Year]",
-        "area": "column"
-      },
-      {
-        "dataField": "[Measures].[Customer Count]",
-        "area": "data"
-      }
-    ],
-    "store": {
-      "type": "xmla",
-      "url": "https://demos.devexpress.com/Services/OLAP/msmdpump.dll",
-      "catalog": "Adventure Works DW Standard Edition",
-      "cube": "Adventure Works"
-    }
-  }
+  fields: [
+    {
+      dataField: "[Product].[Category]",
+      area: "row",
+    },
+    {
+      dataField: "[Product].[Subcategory]",
+      area: "row",
+    },
+    {
+      dataField: "[Ship Date].[Calendar Year]",
+      area: "column",
+    },
+    {
+      dataField: "[Ship Date].[Month of Year]",
+      area: "column",
+    },
+    {
+      dataField: "[Measures].[Customer Count]",
+      area: "data",
+    },
+  ],
+  store: {
+    type: "xmla",
+    url: "https://demos.devexpress.com/Services/OLAP/msmdpump.dll",
+    catalog: "Adventure Works DW Standard Edition",
+    cube: "Adventure Works",
+  },
+};
 
 export function PivotGridComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: pivotGridItems });
@@ -46,7 +46,7 @@ export function PivotGridComponent() {
     console.log(attribute, data);
   };
 
-  return <PivotGridField meta={meta} data={data} setValue={setValue} />
+  return <PivotGridField meta={meta} data={data} setValue={setValue} />;
 }
 export function PivotGridField(props: ComponentProps) {
   return (
@@ -54,18 +54,12 @@ export function PivotGridField(props: ComponentProps) {
       <div
         ref={(el) => {
           const instance = new PivotGrid(el, {
-
             fieldChooser: {
-              width: 400
+              width: 400,
             },
-            showBorders: true
+            showBorders: true,
           });
-          createEffect(() =>
-            instance.option(
-              "dataSource",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -74,9 +68,7 @@ export function PivotGridField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

@@ -1,13 +1,13 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import HTMLEditor, {Properties} from "devextreme/ui/html_editor";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import HTMLEditor, { Properties } from "devextreme/ui/html_editor";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function HTMLEditorComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: "HTml editor value" });
@@ -15,7 +15,7 @@ export function HTMLEditorComponent() {
     console.log(attribute, data);
   };
 
-  return <HTMLEditorField meta={meta} data={data} setValue={setValue} />
+  return <HTMLEditorField meta={meta} data={data} setValue={setValue} />;
 }
 export function HTMLEditorField(props: ComponentProps) {
   return (
@@ -32,35 +32,18 @@ export function HTMLEditorField(props: ComponentProps) {
                 "link",
                 {
                   name: "header",
-                  acceptedValues: [
-                    1,
-                    2,
-                    3,
-                    false
-                  ]
+                  acceptedValues: [1, 2, 3, false],
                 },
-                "variable"
-              ]
+                "variable",
+              ],
             },
             value: props.data.properties[props.meta.properties.id],
             variables: {
-              dataSource: [
-                "FirstName",
-                "LastName",
-                "Company"
-              ],
-              escapeChar: [
-                "{",
-                "}"
-              ]
-            }
+              dataSource: ["FirstName", "LastName", "Company"],
+              escapeChar: ["{", "}"],
+            },
           });
-          createEffect(() =>
-            instance.option(
-              "value",
-              props.data.properties[props.meta.properties.id]
-            )
-          );
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -69,9 +52,7 @@ export function HTMLEditorField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

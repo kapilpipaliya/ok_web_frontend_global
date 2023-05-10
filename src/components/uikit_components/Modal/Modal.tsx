@@ -1,9 +1,7 @@
-
-import {JSXElement} from "solid-js";
-import {render} from "solid-js/web";
+import { JSXElement } from "solid-js";
+import { render } from "solid-js/web";
 // @ts-ignore
-import UIkit from 'uikit'
-
+import UIkit from "uikit";
 
 /**
  * creates a simple modal elements that can contain any content you want
@@ -27,13 +25,10 @@ import UIkit from 'uikit'
  * @param content The content to display
  * @param options Modal options
  */
-export function createModal(
-  content: JSXElement,
-  options?: UIkit.ModalOptions,
-): UIkit.ModalElement {
-  const divElement = document.createElement('div');
-  divElement.setAttribute('uk-modal', '');
-  render(() => <div class={options?.class ?? 'uk-modal-dialog'}>{content}</div>, divElement);
+export function createModal(content: JSXElement, options?: UIkit.ModalOptions): UIkit.ModalElement {
+  const divElement = document.createElement("div");
+  divElement.setAttribute("uk-modal", "");
+  render(() => <div class={options?.class ?? "uk-modal-dialog"}>{content}</div>, divElement);
   return UIkit.modal(divElement, options);
 }
 

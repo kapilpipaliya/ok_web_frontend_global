@@ -1,12 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  For,
-  JSXElement,
-  on,
-  onMount,
-  Show,
-} from "solid-js";
+import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js";
 import { ComponentProps } from "../../utils/Form";
 import Drawer, { Properties } from "devextreme/ui/drawer";
 
@@ -14,8 +6,8 @@ export function DrawerComponent(
   props: ComponentProps & { children: JSXElement } & {
     isSideBarOpen: any;
     setSideBarOpen: any;
-    template: any
-  }
+    template: any;
+  },
 ) {
   const { isSideBarOpen, setSideBarOpen } = props;
 
@@ -32,19 +24,11 @@ export function DrawerComponent(
               },
               template: props.template,
             });
-            createEffect(
-              on(isSideBarOpen, (_) =>
-                isSideBarOpen() ? instance.show() : instance.hide()
-              )
-            );
+            createEffect(on(isSideBarOpen, (_) => (isSideBarOpen() ? instance.show() : instance.hide())));
 
             createEffect(() => {
-              for (const property in props.meta.properties
-                .props as Properties) {
-                instance.option(
-                  property,
-                  props.meta.properties.props[property]
-                );
+              for (const property in props.meta.properties.props as Properties) {
+                instance.option(property, props.meta.properties.props[property]);
               }
             });
           });
@@ -55,9 +39,7 @@ export function DrawerComponent(
         </div>
       </div>
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

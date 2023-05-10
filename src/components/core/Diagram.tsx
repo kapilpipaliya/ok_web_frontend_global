@@ -1,46 +1,46 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import Diagram, {Properties} from "devextreme/ui/diagram";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import Diagram, { Properties } from "devextreme/ui/diagram";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const diagramData = [
   {
-    "id": "125",
-    "from": "101",
-    "to": "102"
+    id: "125",
+    from: "101",
+    to: "102",
   },
   {
-    "id": "127",
-    "from": "101",
-    "to": "103"
+    id: "127",
+    from: "101",
+    to: "103",
   },
   {
-    "id": "129",
-    "from": "103",
-    "to": "104"
+    id: "129",
+    from: "103",
+    to: "104",
   },
   {
-    "id": "130",
-    "from": "103",
-    "to": "105"
+    id: "130",
+    from: "103",
+    to: "105",
   },
   {
-    "id": "139",
-    "from": "102",
-    "to": "106"
+    id: "139",
+    from: "102",
+    to: "106",
   },
   {
-    "id": "140",
-    "from": "102",
-    "to": "107"
-  }
-]
+    id: "140",
+    from: "102",
+    to: "107",
+  },
+];
 
 export function DiagramComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
   const data = newVertex(0, ["Vertex"], { meta: diagramData });
@@ -48,7 +48,7 @@ export function DiagramComponent() {
     console.log(attribute, data);
   };
 
-  return <DiagramField meta={meta} data={data} setValue={setValue} />
+  return <DiagramField meta={meta} data={data} setValue={setValue} />;
 }
 export function DiagramField(props: ComponentProps) {
   return (
@@ -67,8 +67,6 @@ export function DiagramField(props: ComponentProps) {
             // width: 500
           });
 
-
-
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -77,9 +75,7 @@ export function DiagramField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

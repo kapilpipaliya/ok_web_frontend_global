@@ -1,6 +1,5 @@
-import {ContainerProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { ContainerProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function Container(props: ContainerProps) {
   return (

@@ -1,5 +1,5 @@
-import {setClassNames} from "../set-class-names";
-import {ScrollspyProps} from "../globals";
+import { setClassNames } from "../set-class-names";
+import { ScrollspyProps } from "../globals";
 
 export function Scrollspy(props: ScrollspyProps) {
   return (
@@ -7,7 +7,7 @@ export function Scrollspy(props: ScrollspyProps) {
       id={props.id}
       style={props.style}
       classList={setClassNames(props)}
-      data-uk-scrollspy={props.options ? props.options : ''}
+      data-uk-scrollspy={props.options ? props.options : ""}
     >
       {props.children}
     </div>

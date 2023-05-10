@@ -1,21 +1,21 @@
-import {createEffect, For, Show} from "solid-js";
-import {ComponentProps} from "./Form";
-import FileUploader, {Properties} from "devextreme/ui/file_uploader";
+import { createEffect, For, Show } from "solid-js";
+import { ComponentProps } from "./Form";
+import FileUploader, { Properties } from "devextreme/ui/file_uploader";
 import { Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function FileUploaderComponent() {
   const meta = newVertex(0, ["Meta"], {
     id: "meta",
-    props: { },
+    props: {},
   });
 
-  const data = newVertex(0, ["Vertex"], { meta: '' });
+  const data = newVertex(0, ["Vertex"], { meta: "" });
   const setValue = (attribute: Vertex, data: any) => {
     console.log(attribute, data);
   };
 
-  return <FileUploaderField meta={meta} data={data} setValue={setValue} />
+  return <FileUploaderField meta={meta} data={data} setValue={setValue} />;
 }
 export function FileUploaderField(props: ComponentProps) {
   return (
@@ -24,9 +24,9 @@ export function FileUploaderField(props: ComponentProps) {
         ref={(el) => {
           const instance = new FileUploader(el, {
             selectButtonText: "Select file",
-            labelText: '',
-            accept: 'image/*',
-            uploadMode: 'instantly',
+            labelText: "",
+            accept: "image/*",
+            uploadMode: "instantly",
             onValueChanged: (e) => {
               props.setValue(props.meta, e.component._files[0].value);
             },
@@ -40,9 +40,7 @@ export function FileUploaderField(props: ComponentProps) {
         }}
       />
       <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>
-          {(errorMsg: string) => <small>{errorMsg}</small>}
-        </For>
+        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
       </Show>
     </div>
   );

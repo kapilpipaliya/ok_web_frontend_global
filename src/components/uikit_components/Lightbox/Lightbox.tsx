@@ -1,6 +1,5 @@
-import {LightboxProps} from "../globals";
-import {setClassNames} from "../set-class-names";
-
+import { LightboxProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function Lightbox(props: LightboxProps) {
   return (
@@ -8,7 +7,7 @@ export function Lightbox(props: LightboxProps) {
       id={props.id}
       style={props.style}
       classList={setClassNames(props)}
-      data-uk-lightbox={props.options ? props.options : ''}
+      data-uk-lightbox={props.options ? props.options : ""}
     >
       {props.children}
     </div>

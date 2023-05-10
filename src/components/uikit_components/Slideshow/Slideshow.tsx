@@ -1,5 +1,5 @@
-import {SlideshowProps} from "../globals";
-import {setClassNames} from "../set-class-names";
+import { SlideshowProps } from "../globals";
+import { setClassNames } from "../set-class-names";
 
 export function Slideshow(props: SlideshowProps) {
   const setNavigation = () => {
@@ -38,7 +38,7 @@ export function Slideshow(props: SlideshowProps) {
       id={props.id}
       style={props.style}
       classList={setClassNames(props)}
-      data-uk-slideshow={props.options ? props.options : ''}
+      data-uk-slideshow={props.options ? props.options : ""}
     >
       {setNavigation()}
     </div>
