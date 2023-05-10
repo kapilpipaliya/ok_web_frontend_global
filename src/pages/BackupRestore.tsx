@@ -161,7 +161,7 @@ export const BackupRestore = () => {
                 }
               }
               if (dataType) {
-                const vertex = findVertexByLabelAndUniqueId('Comp', 'id', `${componentId}Field`);
+                const vertex = findVertexByLabelAndUniqueId('Comp', 'id', `${componentId}`);
                 if (vertex) {
                   const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'id', dataType);
                   if (!dataTypeVertex) {

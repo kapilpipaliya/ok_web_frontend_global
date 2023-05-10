@@ -153,12 +153,12 @@ export const DataGrid = (props: DataGridProps) => {
 
   const tableColumns = [] as Array<Column<any, any>>;
   for (const attribute of formNew!.attributes) {
-    if (attribute.component === "TableField") continue;
+    if (attribute.component === "Table") continue;
     // if (attribute.props?.skip) continue;
     attribute["dataField"] = `properties.${attribute.id}`;
     attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.id);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
-    if (attribute.component === "SelectBoxField") {
+    if (attribute.component === "SelectBox") {
       attribute['calculateCellValue'] = (columnBase, rowData) => {
         const vertex = selectedValue(       {
           properties: attribute

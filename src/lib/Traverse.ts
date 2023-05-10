@@ -372,16 +372,16 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
     //  if (value !== undefined && value !== null && value !== "") {
     //   switch (value) {
     //    case "Null": return;
-    //    case "String": return "TextBoxField";
-    //    case "Boolean": return "CheckBoxField";
-    //    case "Integer": return "IntField";
-    //    case "Float": return "FloatField";
-    //    case "List": return "TextAreaField";
-    //    case "Map": return "TextAreaField";
-    //    case "Duration": return "DateBoxField";
-    //    case "Date": return "DateBoxField";
-    //    case "LocalTime": return "DateTimeBoxField";
-    //    case "LocalDateTime": return "DateBoxField";
+    //    case "String": return "TextBox";
+    //    case "Boolean": return "CheckBox";
+    //    case "Integer": return "Int";
+    //    case "Float": return "Float";
+    //    case "List": return "TextArea";
+    //    case "Map": return "TextArea";
+    //    case "Duration": return "DateBox";
+    //    case "Date": return "DateBox";
+    //    case "LocalTime": return "DateTimeBox";
+    //    case "LocalDateTime": return "DateBox";
     //   }
     //  }
     // }

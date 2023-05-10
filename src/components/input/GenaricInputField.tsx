@@ -73,29 +73,29 @@ import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
 
 export const genericComponents = [
-  "AutocompleteField",
-  "BulletField",
-  "CalendarField",
-  "CheckBoxField",
-  "CircularGaugeField",
-  "ColorBoxField",
-  "DateBoxField",
-  "DropDownBoxField",
-  "FileUploaderField",
-  "FilterBuilderField",
-  "HtmlEditorField",
-  "LinearGaugeField",
-  "NumberBoxField",
-  "ProgressBarField",
-  "RadioGroupField",
-  "RangeSelectorField",
-  "RangeSliderField",
-  "SelectBoxField",
-  "SliderField",
-  "SwitchField",
-  // "TagBoxField", // giving error with undefined values
-  "TextAreaField",
-  "TextBoxField",
+  "Autocomplete",
+  "Bullet",
+  "Calendar",
+  "CheckBox",
+  "CircularGauge",
+  "ColorBox",
+  "DateBox",
+  "DropDownBox",
+  "FileUploader",
+  "FilterBuilder",
+  "HtmlEditor",
+  "LinearGauge",
+  "NumberBox",
+  "ProgressBar",
+  "RadioGroup",
+  "RangeSelector",
+  "RangeSlider",
+  "SelectBox",
+  "Slider",
+  "Switch",
+  // "TagBox", // giving error with undefined values
+  "TextArea",
+  "TextBox",
 ];
 const displayExpr = ['ContextMenu', 'DropDownBox', 'DropDownButton', 'List', 'Lookup', 'Menu', 'RadioGroup', 'SelectBox', 'TagBox', 'TreeView']
 const valueExpr   = ['Autocomplete', 'DropDownBox', 'Lookup', 'RadioGroup', 'SelectBox', 'TagBox']
@@ -150,86 +150,86 @@ export function GenericInputField(props: ComponentProps & { component: string, d
         };
         let comp: any;
 
-        if (props.component === "AutocompleteField") {
+        if (props.component === "Autocomplete") {
          comp = dxAutocomplete;
          // autocomplete is just like text box, but it allows user to preselect some values.
          // AutoComplete accept strings[] in items only
          Object.assign(properties, {} as dxAutocompleteProperties);
-        } else if (props.component === "BulletField") {
+        } else if (props.component === "Bullet") {
          comp = dxBullet;
          Object.assign(properties, {} as dxBulletProperties);
-        } else if (props.component === "CalendarField") {
+        } else if (props.component === "Calendar") {
          comp = dxCalendar;
          Object.assign(properties, {} as dxCalendarProperties);
-        } else if (props.component === "CheckBoxField") {
+        } else if (props.component === "CheckBox") {
          comp = dxCheckBox;
          Object.assign(properties, {
           enableThreeStateBehavior: true,
          } as dxCheckBoxProperties);
-        } else if (props.component === "CircularGaugeField") {
+        } else if (props.component === "CircularGauge") {
          comp = dxCircularGauge;
          Object.assign(properties, {} as dxCircularGaugeProperties);
-        } else if (props.component === "ColorBoxField") {
+        } else if (props.component === "ColorBox") {
          comp = dxColorBox;
          Object.assign(properties, {} as dxColorBoxProperties);
-        } else if (props.component === "DateBoxField") {
+        } else if (props.component === "DateBox") {
          comp = dxDateBox;
          Object.assign(properties, {} as dxDateBoxProperties);
-        } else if (props.component === "DateBoxField") {
+        } else if (props.component === "DateBox") {
          comp = dxDateBox;
          Object.assign(properties, {} as dxDateBoxProperties);
-        } else if (props.component === "DropDownBoxField") {
+        } else if (props.component === "DropDownBox") {
          // DropDownBox is very advanced we can use custom dropdown in the field. so its not supported yet.
          return 'not supported yet';
          comp = dxDropDownBox;
          // Specifies the currently selected value. May be an object if dataSource contains objects and valueExpr is not set.
          Object.assign(properties, {} as dxDropDownBoxProperties);
-        } else if (props.component === "FileUploaderField") {
+        } else if (props.component === "FileUploader") {
          return 'not supported yet';
          comp = dxFileUploader;
          Object.assign(properties, {} as dxFileUploaderProperties);
-        } else if (props.component === "FilterBuilderField") {
+        } else if (props.component === "FilterBuilder") {
          return 'not supported yet';
          comp = dxFilterBuilder;
          Object.assign(properties, {} as dxFilterBuilderProperties);
-        } else if (props.component === "HtmlEditorField") {
+        } else if (props.component === "HtmlEditor") {
          comp = dxHtmlEditor;
          Object.assign(properties, {} as dxHtmlEditorProperties);
-        } else if (props.component === "LinearGaugeField") {
+        } else if (props.component === "LinearGauge") {
          comp = dxLinearGauge;
          Object.assign(properties, {} as dxLinearGaugeProperties);
-        } else if (props.component === "NumberBoxField") {
+        } else if (props.component === "NumberBox") {
          comp = dxNumberBox;
          Object.assign(properties, {} as dxNumberBoxProperties);
-        } else if (props.component === "ProgressBarField") {
+        } else if (props.component === "ProgressBar") {
          comp = dxProgressBar;
          Object.assign(properties, {} as dxProgressBarProperties);
-        } else if (props.component === "RadioGroupField") {
+        } else if (props.component === "RadioGroup") {
          comp = dxRadioGroup;
          // radioBox can support any value in the array, it will return the value on onChange like object.
          Object.assign(properties, {} as dxRadioGroupProperties);
-        } else if (props.component === "RangeSelectorField") {
+        } else if (props.component === "RangeSelector") {
          comp = dxRangeSelector;
          Object.assign(properties, {} as dxRangeSelectorProperties);
-        } else if (props.component === "RangeSliderField") {
+        } else if (props.component === "RangeSlider") {
          comp = dxRangeSlider;
          Object.assign(properties, {} as dxRangeSliderProperties);
-         // } else if(props.component === "SelectBoxField" ) {
+         // } else if(props.component === "SelectBox" ) {
          //  comp = dxSelectBox;
          //  Object.assign(properties, {} as dxSelectBoxProperties);
-        } else if (props.component === "SliderField") {
+        } else if (props.component === "Slider") {
          comp = dxSlider;
          Object.assign(properties, {} as dxSliderProperties);
-        } else if (props.component === "SwitchField") {
+        } else if (props.component === "Switch") {
          comp = dxSwitch;
          Object.assign(properties, {} as dxSwitchProperties);
-         // } else if(props.component === "TagBoxField" ) {
+         // } else if(props.component === "TagBox" ) {
          //  comp = dxTagBox;
          //  Object.assign(properties, {} as dxTagBoxProperties);
-        } else if (props.component === "TextAreaField") {
+        } else if (props.component === "TextArea") {
          comp = dxTextArea;
          Object.assign(properties, {} as dxTextAreaProperties);
-        } else if (props.component === "TextBoxField") {
+        } else if (props.component === "TextBox") {
          comp = dxTextBox;
          Object.assign(properties, {} as dxTextBoxProperties);
         } else {
@@ -252,7 +252,7 @@ export function GenericInputField(props: ComponentProps & { component: string, d
         const instance = new comp(el, properties);
 
         // try {
-         if (!["AutocompleteField", "BulletField", 'CircularGaugeField', 'FilterBuilderField', 'LinearGaugeField'].includes(props.component)) {
+         if (!["Autocomplete", "Bullet", 'CircularGauge', 'FilterBuilder', 'LinearGauge'].includes(props.component)) {
           const validatorInstance = new Validator(el, {
            validationGroup: formContext.validationGroup,
            // adapter only called when we run validate() manually

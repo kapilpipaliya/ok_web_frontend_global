@@ -85,6 +85,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
 
     if (value === null) value = undefined;
     if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties.id])
+    if (value === "clear") value = null;
     if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
       setSelectionValue(txnId, vertex, attribute, value);
     } else {
@@ -135,13 +136,13 @@ export const DynamicComponent = (props: {
   return (
     <Switch>
       <Match when={!props.component}>NO INPUT</Match>
-      <Match when={props.component === "SelectBoxField"}>
+      <Match when={props.component === "SelectBox"}>
         <SelectInputField aria-labeledby={props.id} data={props.data} meta={props.meta} setValue={props.setValue} disabled={props.disabled!}/>
       </Match>
-      <Match when={props.component === "TagBoxField"}>
+      <Match when={props.component === "TagBox"}>
         <TagField aria-labeledby={props.id} data={props.data} meta={props.meta} disabled={props.disabled!}/>
       </Match>
-      <Match when={props.component === "TableField"}>
+      <Match when={props.component === "Table"}>
         <Show when={!props.disabled}>
         <TableInputField meta={props.meta} data={props.data} disabled={props.disabled!}/>
         </Show>
@@ -193,7 +194,7 @@ export function DynamicForm(props: DynamicFormProps) {
         });
         return (
           <Switch>
-            <Match when={component() === "TableField"}>
+            <Match when={component() === "Table"}>
               <h3>{toTitle(metaVertex.properties.displayName || metaVertex.properties.id)}</h3>
               <DynamicComponent
                 id={id}
@@ -367,7 +368,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                  class="dx-fieldset"
                  style={{
                    "max-width": groupByTabsAndGroup["main"][group].filter(
-                    (attribute) => attribute.properties.component === "TableField",
+                    (attribute) => attribute.properties.component === "Table",
                    ).length
                     ? "100%"
                     : "600px",
@@ -406,7 +407,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                  class="dx-fieldset"
                  style={{
                    "max-width": groupByTabsAndGroup[activeTab()][group].filter(
-                    (attribute) => attribute.properties.component === "TableField",
+                    (attribute) => attribute.properties.component === "Table",
                    ).length
                     ? "100%"
                     : "600px",
