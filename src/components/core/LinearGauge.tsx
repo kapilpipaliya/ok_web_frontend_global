@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import LinearGauge, { Properties } from "devextreme/viz/linear_gauge";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function LinearGaugeComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -23,9 +23,9 @@ export function LinearGaugeField(props: ComponentProps) {
       <div
         ref={(el) => {
           const instance = new LinearGauge(el, {
-            value: props.data.properties[props.meta.properties.id],
+            value: props.data.properties[props.meta.properties[IdAttr]],
           });
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -33,9 +33,7 @@ export function LinearGaugeField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

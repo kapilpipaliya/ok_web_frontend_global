@@ -1,10 +1,10 @@
-import { graph, Vertex } from "./graph";
+import { graph, IdAttr, Vertex } from "./graph";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 
 export function getToEdge(meta: Vertex, vertex: Vertex) {
-  const attributeId = meta.properties.id;
+  const attributeId = meta.properties[IdAttr];
   return vertex.labels[0] + capitalizeFirstLetter(attributeId);
 }
 
@@ -123,7 +123,7 @@ export function getChildVertex(path: string[], currentVertex: Vertex): { error: 
 
   if (filter) {
     // TODO:
-    // vertexes = vertexes.filter(x=>x.properties.id === 'component')
+    // vertexes = vertexes.filter(x=>x.properties[IdAttr] === 'component')
   }
   if (vertexes.length != 1) {
     return {
@@ -304,7 +304,7 @@ export const getSelectOptionsInternal = (
         filter = edgeType.slice(filterIndex + 1).replace("]", "");
         vertexes = findVertexIdsByLabel(edgeType.slice(0, filterIndex))
           .map((id) => graph.vertexes[id])
-          .filter((vertex) => vertex.properties.id === filter);
+          .filter((vertex) => vertex.properties[IdAttr] === filter);
       } else if (filterIndex === 0) {
         // JSON.parse options:
         try {
@@ -400,7 +400,7 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
     projection = displayExpr.slice(columnIndex + 1);
   } else {
     pattern = displayExpr;
-    projection = "id";
+    projection = IdAttr;
   }
   if (!pattern) {
     return getTextValue(path(projection, vertex)!);

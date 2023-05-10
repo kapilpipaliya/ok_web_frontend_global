@@ -5,11 +5,11 @@ import {
   commitTxn,
   getNewGraphId,
   getNewTxnId,
-  graph,
+  graph, IdAttr,
   resetDatabase,
   restoreFromIndexDB,
   restoreFromJson,
-  Vertex,
+  Vertex
 } from "../lib/graph";
 import { GraphView } from "../components/GraphView";
 import { Link } from "@solidjs/router";
@@ -199,9 +199,9 @@ export const BackupRestore = () => {
                 }
               }
               if (dataType) {
-                const vertex = findVertexByLabelAndUniqueId("Comp", "id", `${componentId}`);
+                const vertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
                 if (vertex) {
-                  const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", "id", dataType);
+                  const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
                   if (!dataTypeVertex) {
                     console.log("dataType not found", dataType);
                     continue;
@@ -212,7 +212,7 @@ export const BackupRestore = () => {
                   setSelectionValue(
                     txnId,
                     graph.vertexes[rowResult.vertexId!],
-                    { properties: { id: "DataType" } } as Vertex,
+                    { properties: { [IdAttr]: "DataType" } } as Vertex,
                     dataTypeVertex.id,
                   );
                   // It takes too much time to commit the full transaction.
@@ -232,25 +232,25 @@ export const BackupRestore = () => {
     // get all the fields
     const vertexId = getNewGraphId();
     const txnId = getNewTxnId();
-    addNewVertex(txnId, newVertex(vertexId, ["Coll"], { id: "TestForm", title: "Test Form", table: true }));
+    addNewVertex(txnId, newVertex(vertexId, ["Coll"], { [IdAttr]: "TestForm", title: "Test Form", table: true }));
     const existingVertex = graph.vertexes[vertexId];
     for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
       const componentVertex = graph.vertexes[compVertexId];
       const newRow1 = newRow(txnId, existingVertex, "CollAttr");
-      replaceVertexProperties(txnId, newRow1.vertexId!, { id: componentVertex.properties.id });
+      replaceVertexProperties(txnId, newRow1.vertexId!, { [IdAttr]: componentVertex.properties[IdAttr] });
       const dataType = getParentVertex(["DataType$0"], componentVertex);
       if (!dataType.error) {
         // set component dataType and component
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
-          { properties: { id: "dataType" } } as Vertex,
+          { properties: { [IdAttr]: "dataType" } } as Vertex,
           dataType.vertex!.id,
         );
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
-          { properties: { id: "comp" } } as Vertex,
+          { properties: { [IdAttr]: "comp" } } as Vertex,
           compVertexId,
         );
       }

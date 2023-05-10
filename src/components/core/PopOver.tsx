@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import PopOver, { Properties } from "devextreme/ui/popover";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function PopOverComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -42,9 +42,7 @@ export function PopOverField(props: ComponentProps) {
       >
         Some popover message
       </div>
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

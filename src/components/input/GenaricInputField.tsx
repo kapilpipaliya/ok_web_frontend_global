@@ -27,6 +27,7 @@ import { FormContext } from "../dynamicForm";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
+import { IdAttr } from "../../lib/graph";
 
 export const genericComponents = [
   "Autocomplete",
@@ -159,13 +160,13 @@ export function GenericInputField(props: ComponentProps & { component: string; d
   const formContext = useContext(FormContext);
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties.id])}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {
             let properties: any = {
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: props.data.properties[props.meta.properties.id],
+              value: props.data.properties[props.meta.properties[IdAttr]],
               onValueChanged: (e: any) => {
                 props.setValue(props.meta, e.value);
               },
@@ -307,7 +308,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             //  console.log('cant set validator for', props.component, e);
             // }
 
-            createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+            createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
             createEffect(() => instance.option("disabled", props.disabled));
 
             createEffect(() => {

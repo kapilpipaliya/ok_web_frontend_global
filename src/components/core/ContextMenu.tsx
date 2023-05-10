@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import ContextMenu, { Properties } from "devextreme/ui/context_menu";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const contextMenuData = [
@@ -28,7 +28,7 @@ const contextMenuData = [
 ];
 export function ContextMenuComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -50,7 +50,7 @@ export function ContextMenuField(props: ComponentProps) {
               props.setValue(props.meta, e.itemData.text);
             },
           });
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -58,9 +58,7 @@ export function ContextMenuField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

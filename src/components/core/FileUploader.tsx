@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import FileUploader, { Properties } from "devextreme/ui/file_uploader";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function FileUploaderComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -39,9 +39,7 @@ export function FileUploaderField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

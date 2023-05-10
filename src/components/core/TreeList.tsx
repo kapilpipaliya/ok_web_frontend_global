@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import TreeList, { Properties } from "devextreme/ui/tree_list";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const treeListData = [
@@ -44,7 +44,7 @@ const treeListData = [
 
 export function TreeListComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -73,7 +73,7 @@ export function TreeListField(props: ComponentProps) {
             },
           });
 
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
 
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -82,9 +82,7 @@ export function TreeListField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

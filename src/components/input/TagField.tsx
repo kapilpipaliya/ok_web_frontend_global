@@ -1,7 +1,7 @@
 import { createEffect, createResource, on, useContext } from "solid-js";
 
 import TagBox, { Properties } from "devextreme/ui/tag_box";
-import { commitTxn, getNewTxnId, graph } from "../../lib/graph";
+import { commitTxn, getNewTxnId, graph, IdAttr } from "../../lib/graph";
 import { selectedValue, setSelectionValue } from "./SelectInputField";
 import { WsContext } from "../ws_events_dispatcher";
 import { FormContext, onChangeHandler } from "../dynamicForm";
@@ -46,8 +46,8 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
               if (!local && isRealTime) commitTxn(txnId, Ws);
               // })
             },
-            valueExpr: "id",
-            displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
+            valueExpr: IdAttr,
+            displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties${[IdAttr]}`),
             labelMode: "floating",
             onFocusIn: function (e) {
               refetch();

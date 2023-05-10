@@ -1,7 +1,14 @@
 import { createEffect, createResource, untrack, useContext } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  IdAttr,
+  Vertex
+} from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { capitalizeFirstLetter } from "../../utils/utils";
 import { FormContext, onChangeHandler } from "../dynamicForm";
@@ -83,7 +90,7 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
   if (meta.properties.props?.stringValue) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
-      const value = data.properties[meta.properties.id];
+      const value = data.properties[meta.properties[IdAttr]];
       if (Array.isArray(value)) {
         return value;
       } else {
@@ -115,7 +122,7 @@ export function SelectInputField(props: ComponentProps) {
         when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId])}>
-            {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id")}</>}
+            {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || `properties${[IdAttr]}`)}</>}
           </For>
         }
       >
@@ -143,6 +150,7 @@ export function SelectInputField(props: ComponentProps) {
                 if (!local && isRealTime) commitTxn(txnId, Ws);
                 // })
               },
+              // if valueExpr value is undefined onValueChange will not fire.
               valueExpr: "id",
               displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
               labelMode: "floating",

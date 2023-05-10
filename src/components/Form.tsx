@@ -1,6 +1,13 @@
-import { createMemo, createUniqueId, For, onCleanup, splitProps, useContext } from "solid-js";
+import { JSX, createMemo, createUniqueId, For, onCleanup, splitProps, useContext } from "solid-js";
 import { Link, useNavigate } from "@solidjs/router";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Vertex } from "../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  Id, IdAttr,
+  Vertex
+} from "../lib/graph";
 import { removeUndefinedProperties } from "../utils/functions";
 
 import { DynamicFormSequence, DynamicFormSequenceProps } from "./dynamicForm";
@@ -30,13 +37,13 @@ export const AllForms = () => {
 
   return (
     <div class="">
-      <For each={allForms()}>{(form) => <Link href={`/${form.properties.id}/new`}>{form.properties.id}</Link>}</For>
+      <For<Vertex[]> each={allForms()}>{(form) => <Link href={`/${form.properties[IdAttr]}/new`}>{form.properties[IdAttr]}</Link>}</For>
     </div>
   );
 };
 
 export interface FieldAttribute {
-  id: string;
+  name: string;
   tab?: string;
   group?: string;
   dataType?: string;
@@ -52,7 +59,7 @@ export interface FieldAttribute {
 }
 
 export interface FormMetaData {
-  id: string; // required to create new vertex
+  name: string; // required to create new vertex
   title: string;
   attributes: FieldAttribute[];
   local?: boolean;
@@ -87,9 +94,9 @@ export function getCollAttrs(
       console.warn("data Type not found from Component");
       return { error: true };
     }
-    attr.dataType = dataTypeFromComp.vertex!.properties.id;
+    attr.dataType = dataTypeFromComp.vertex!.properties[IdAttr];
   } else {
-    attr.dataType = dataType.vertex!.properties.id;
+    attr.dataType = dataType.vertex!.properties[IdAttr];
   }
 
   // set props to attr
@@ -145,9 +152,9 @@ export function getCollAttrs(
       {} as { [key: string]: any },
     );
     formProps = Object.assign({}, removeUndefinedProperties(parentCompProps, false, 10), formProps);
-    attr.component = parentVertexResult.vertex!.properties.id;
+    attr.component = parentVertexResult.vertex!.properties[IdAttr];
   } else {
-    attr.component = comp.properties.id;
+    attr.component = comp.properties[IdAttr];
   }
   attr.props = formProps;
   return { error: false, attr };
@@ -176,9 +183,9 @@ const getCollectionOneLevelAttrs = (collVertex: Vertex): { error: string; attrs?
   return { error: "", attrs };
 };
 export const getFormApiFromForm = (formId: string): { error: string; form?: FormMetaData } => {
-  const form = graph.vertexes[formId] || findVertexByLabelAndUniqueId("Form", "id", formId);
+  const form = graph.vertexes[formId] || findVertexByLabelAndUniqueId("Form", IdAttr, formId);
   if (!form) {
-    const coll = findVertexByLabelAndUniqueId("Coll", "id", formId);
+    const coll = findVertexByLabelAndUniqueId("Coll", IdAttr, formId);
     if (!coll) {
       return { error: "form and coll not found" };
     }
@@ -221,7 +228,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
       childAttrs.push({
         attributes: tableAttrs,
         component: "Table",
-        id: vertexChild.properties.id || childCollVertex.properties.id,
+        [IdAttr]: vertexChild.properties[IdAttr] || childCollVertex.properties[IdAttr],
         props: collChildProps,
       });
     }
@@ -230,12 +237,12 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
       error: "",
       form: {
         attributes: [...attrs, ...childAttrs],
-        id: coll.properties.id,
+        [IdAttr]: coll.properties[IdAttr],
         title: coll.properties.title,
         local: coll.properties.local,
         // collection used in Grid, its same like id key
         // @ts-ignore
-        collection: coll.properties.id,
+        collection: coll.properties[IdAttr],
       },
     };
   }
@@ -303,7 +310,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
     childAttrs.push({
       attributes: tableAttrs,
       component: "Table",
-      id: collChild.vertex!.properties.id || collChildColl.vertex!.properties.id,
+      [IdAttr]: collChild.vertex!.properties[IdAttr] || collChildColl.vertex!.properties[IdAttr],
       props: collChildProps,
     });
   }
@@ -312,12 +319,12 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
     error: "",
     form: {
       attributes: [...attrs, ...childAttrs],
-      id: formColl.properties.id,
+      [IdAttr]: formColl.properties[IdAttr],
       title: form.properties.title,
       local: form.properties.local,
       // collection used in Grid, its same like id key
       // @ts-ignore
-      collection: formColl.properties.id,
+      collection: formColl.properties[IdAttr],
     },
   };
 };
@@ -342,7 +349,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
   return (
     <div class="">
-      <DynamicFormSequence form={form!} id={id()} {...customProps} config={props.config || {}} />
+      <DynamicFormSequence form={form!} id={id() as Id} {...customProps} config={props.config || {}} />
     </div>
   );
 };
@@ -388,7 +395,7 @@ export const Login = (props: {}) => {
         meta={
           {
             properties: {
-              id: "meta",
+              [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex
@@ -458,7 +465,7 @@ export const SignUp = (props: {}) => {
         meta={
           {
             properties: {
-              id: "meta",
+              [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex
@@ -538,6 +545,10 @@ export const SimpleImport = (props: {}) => {
     const lookup = config.vertex.properties.lookup as string;
     const lookupId = config.vertex.properties.lookupId as string;
     const lookupChild = config.vertex.properties.lookupChild as string;
+    if (!label) {
+      alert('label cant be blank');
+      return;
+    }
 
     const txnId = getNewTxnId();
 
@@ -558,11 +569,11 @@ export const SimpleImport = (props: {}) => {
       if (!attrId) {
         const attributeVertex = getChildVertex(["$0Attr"], metaVertex);
         if (!attributeVertex.error) {
-          attrId = attributeVertex.vertex?.properties.id;
+          attrId = attributeVertex.vertex?.properties[IdAttr];
         }
       }
 
-      let collId = metaVertex.properties.collId || "id";
+      let collId = metaVertex.properties.collId || IdAttr;
 
       // collection may not exist before, in that case write Label
       let collLabel = metaVertex.properties.collLabel;
@@ -645,13 +656,13 @@ export const SimpleImport = (props: {}) => {
         // insert current row and all lookup as children or parent
         let rowVertexId = getNewGraphId();
         if (mainVertex) {
-          const type = getToEdge({ properties: { id: labelName } } as Vertex, mainVertex);
+          const type = getToEdge({ properties: { [IdAttr]: labelName } } as Vertex, mainVertex);
           const newRow1 = newRow(txnId, mainVertex, type);
           rowVertexId = newRow1.vertexId!;
           mergeVertexProperties(txnId, rowVertexId, rowObj);
         } else {
           // when importing component it has self join, so it's inserting duplicate rows
-          const existingVertex = findVertexByLabelAndUniqueId(labelName, "id", rowObj.id);
+          const existingVertex = findVertexByLabelAndUniqueId(labelName, IdAttr, rowObj[IdAttr]);
           if (existingVertex) {
             rowVertexId = existingVertex.id;
           } else {
@@ -682,7 +693,7 @@ export const SimpleImport = (props: {}) => {
                 txnId,
                 vertex,
                 {
-                  properties: { id: selectMeta.collLabel },
+                  properties: { [IdAttr]: selectMeta.collLabel },
                 } as unknown as Vertex,
                 componentVertex.id,
               );
@@ -696,7 +707,7 @@ export const SimpleImport = (props: {}) => {
                   txnId,
                   rowVertex,
                   {
-                    properties: { id: selectMeta.collLabel },
+                    properties: { [IdAttr]: selectMeta.collLabel },
                   } as unknown as Vertex,
                   lookup.id,
                 );
@@ -716,7 +727,7 @@ export const SimpleImport = (props: {}) => {
               txnId,
               vertex,
               {
-                properties: { id: selectMeta.edge || selectMeta.collLabel },
+                properties: { [IdAttr]: selectMeta.edge || selectMeta.collLabel },
               } as unknown as Vertex,
               v()!.id,
             );
@@ -775,12 +786,12 @@ export const SimpleImport = (props: {}) => {
         meta={
           {
             properties: {
-              id: "import",
+              [IdAttr]: "import",
               props: {
                 stringValue: true,
-                displayExpr: "id",
+                displayExpr: "name",
                 collection:
-                  '[{"id": "dataType"},{"id": "component"},{"id": "dataTypeDefault"},{"id": "lookup"},{"id": "attribute"}]',
+                  '[{"name": "dataType"},{"name": "component"},{"name": "dataTypeDefault"},{"name": "lookup"},{"name": "attribute"}]',
               },
             },
           } as unknown as Vertex
@@ -803,7 +814,7 @@ export const SimpleImport = (props: {}) => {
               replaceVertexProperties(txnId, newMeta1.vertexId!, {
                 column: "parent",
                 collLabel: "Comp",
-                collId: "id",
+                collId: IdAttr,
                 edge: "Child",
                 inward: true,
               });
@@ -812,7 +823,7 @@ export const SimpleImport = (props: {}) => {
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
                 column: "category",
                 collLabel: "CompCategory",
-                collId: "id",
+                collId: IdAttr,
                 inward: true,
               });
               const newMeta3 = newRow(txnId, config.vertex, "SimpleImportMeta");
@@ -820,7 +831,7 @@ export const SimpleImport = (props: {}) => {
               replaceVertexProperties(txnId, newMeta3.vertexId!, {
                 column: "dataType",
                 collLabel: "DataType",
-                collId: "id",
+                collId: IdAttr,
                 inward: true,
               });
 
@@ -843,7 +854,7 @@ export const SimpleImport = (props: {}) => {
                 column: "default",
                 collLabel: "Comp",
                 edge: "default",
-                collId: "id",
+                collId: IdAttr,
               });
               break;
             }
@@ -851,13 +862,13 @@ export const SimpleImport = (props: {}) => {
               replaceVertexProperties(txnId, config.vertex.id, {
                 label: "Coll",
                 lookup: "LookupName",
-                lookupId: "id",
+                lookupId: IdAttr,
                 dry,
               });
               const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta1.vertexId!, {
                 column: "StandardLookupValue",
-                attrId: "id",
+                attrId: IdAttr,
               });
               const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
@@ -871,13 +882,13 @@ export const SimpleImport = (props: {}) => {
                 label: "Coll",
                 lookup: "ResourceName",
                 lookupChild: "Attr",
-                lookupId: "id",
+                lookupId: IdAttr,
                 dry,
               });
               const newMeta1 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta1.vertexId!, {
                 column: "StandardName",
-                attrId: "id",
+                attrId: IdAttr,
               });
               const newMeta2 = newRow(txnId, config.vertex, "SimpleImportMeta");
               replaceVertexProperties(txnId, newMeta2.vertexId!, {
@@ -894,7 +905,7 @@ export const SimpleImport = (props: {}) => {
               replaceVertexProperties(txnId, newMeta4.vertexId!, {
                 column: "SimpleDataType",
                 collLabel: "Comp",
-                collId: "id",
+                collId: IdAttr,
                 func: "component",
               });
               // TODO: Point Groups to Group Tab
@@ -903,7 +914,7 @@ export const SimpleImport = (props: {}) => {
               //   column: "Groups",
               //   // think how to make this work?
               //   // collLabel: "CollGroup",
-              //   // collId: "id",
+              //   // collId: IdAttr,
               //   // inward: true
               //   skip: true
               // });
@@ -971,7 +982,7 @@ export const SimpleImport = (props: {}) => {
         meta={
           {
             properties: {
-              id: "meta",
+              [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex

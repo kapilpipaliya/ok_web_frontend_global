@@ -2,6 +2,7 @@ import { ComponentProps } from "./Form";
 import ResponsiveBox, { Properties } from "devextreme/ui/responsive_box";
 import { createEffect, For, Show } from "solid-js";
 import "../assets/styles/responsive_box.css";
+import { IdAttr } from "../../lib/graph";
 
 export function ResponsiveBoxField(props: ComponentProps) {
   return (
@@ -21,8 +22,8 @@ export function ResponsiveBoxField(props: ComponentProps) {
           });
           createEffect(
             () =>
-              props.data.properties[props.meta.properties.id] &&
-              instance.option("value", props.data.properties[props.meta.properties.id]),
+              props.data.properties[props.meta.properties[IdAttr]] &&
+              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -116,9 +117,7 @@ export function ResponsiveBoxField(props: ComponentProps) {
         </div>
       </div>
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

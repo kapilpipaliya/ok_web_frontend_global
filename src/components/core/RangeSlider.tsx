@@ -1,6 +1,7 @@
 import { ComponentProps } from "./Form";
 import RangeSlider, { Properties } from "devextreme/ui/range_slider";
 import { createEffect, For, Show } from "solid-js";
+import { IdAttr } from "../../lib/graph";
 
 export function RangeSliderField(props: ComponentProps) {
   return (
@@ -24,8 +25,8 @@ export function RangeSliderField(props: ComponentProps) {
           });
           createEffect(
             () =>
-              props.data.properties[props.meta.properties.id] &&
-              instance.option("value", props.data.properties[props.meta.properties.id]),
+              props.data.properties[props.meta.properties[IdAttr]] &&
+              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
           );
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
@@ -35,9 +36,7 @@ export function RangeSliderField(props: ComponentProps) {
         }}
       />
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

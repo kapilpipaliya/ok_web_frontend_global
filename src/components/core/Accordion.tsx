@@ -3,12 +3,12 @@ import { ComponentProps } from "./Form";
 import Accordion, { Properties } from "devextreme/ui/accordion";
 // @ts-ignore
 import { accordionItems } from "../data/accordionItems";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function AccordionComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -28,7 +28,7 @@ export function AccordionField(props: ComponentProps) {
             animationDuration: 300,
             collapsible: true,
             multiple: false,
-            selectedItems: [props.data.properties[props.meta.properties.id][0]],
+            selectedItems: [props.data.properties[props.meta.properties[IdAttr]][0]],
 
             itemTitleTemplate: (itemData: any, itemIndex: number, itemElement: any) => {
               itemElement.innerHTML = `
@@ -51,7 +51,7 @@ export function AccordionField(props: ComponentProps) {
               props.setValue(props.meta, e.addedItems[0]);
             },
           });
-          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("dataSource", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -59,9 +59,7 @@ export function AccordionField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

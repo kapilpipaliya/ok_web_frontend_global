@@ -2,8 +2,18 @@ import DxDataGrid, { Column } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
 
-import { commitTransaction, getNewTxnId, graph, Id, ProcessStatus, setGraph, transactions, Vertex } from "../lib/graph";
-import { createEffect, createSignal, For, getOwner, on, runWithOwner, Show, splitProps, useContext } from "solid-js";
+import {
+  commitTransaction,
+  getNewTxnId,
+  graph,
+  Id,
+  IdAttr,
+  ProcessStatus,
+  setGraph,
+  transactions,
+  Vertex
+} from "../lib/graph";
+import { JSX, createEffect, createSignal, For, getOwner, on, runWithOwner, Show, splitProps, useContext } from "solid-js";
 import { klona } from "klona";
 import { Link, useNavigate } from "@solidjs/router";
 
@@ -72,8 +82,8 @@ export const SampleDataGrid = (props: {}) => {
               width: 70,
             },
             {
-              caption: "ID",
-              dataField: "properties.id",
+              caption: "Name",
+              dataField: `properties${[IdAttr]}`,
               dataType: "string",
               fixed: true,
             },
@@ -137,8 +147,8 @@ export const DataGrid = (props: DataGridProps) => {
   for (const attribute of formNew!.attributes) {
     if (attribute.component === "Table") continue;
     // if (attribute.props?.skip) continue;
-    attribute["dataField"] = `properties.${attribute.id}`;
-    attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.id);
+    attribute["dataField"] = `properties.${attribute.name}`;
+    attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.name);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
     if (attribute.component === "SelectBox") {
       attribute["calculateCellValue"] = (columnBase, rowData) => {
@@ -149,7 +159,7 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || "properties.id");
+          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || `properties${[IdAttr]}`);
         }
         return "";
       };
@@ -166,6 +176,7 @@ export const DataGrid = (props: DataGridProps) => {
   const data = [] as { [key: string]: any }[];
   const dataArrayStore = new ArrayStore({
     data: data,
+    // if key is not found Grid will use unique UUID as key:
     key: "id",
     onLoaded: function () {
       // ...
@@ -176,7 +187,7 @@ export const DataGrid = (props: DataGridProps) => {
     store: dataArrayStore,
     // sort: "LastName"
   });
-  const coll = G.isNumber(collection) ? graph.vertexes[collection].properties.id : collection;
+  const coll = G.isNumber(collection) ? graph.vertexes[collection].properties[IdAttr] : collection;
   // if(!graph.vertexLabelIdMap[coll]) {
   //  alert(`collection not found ${coll}`)
   //  return;
@@ -296,7 +307,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
           meta={
             {
               properties: {
-                id: "meta",
+                [IdAttr]: "meta",
                 props: {},
               },
             } as unknown as Vertex
@@ -307,7 +318,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
           }}
         />
       </div>
-      <Show when={tableId()}>
+      <Show<string> when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>
     </div>
@@ -330,14 +341,14 @@ export const TableDashboard = () => {
     <div class="index">
       <div class="title">
         <div class="block-content main-sections">
-          <For each={allTableLayouts()}>
+          <For<Vertex[]> each={allTableLayouts()}>
             {(tableLayout) => (
               <div class="content-item">
                 {" "}
-                <Link href={`/${tableLayout.properties.id}`}>
+                <Link href={`/${tableLayout.properties[IdAttr]}`}>
                   {" "}
                   <div></div>
-                  <h3 class="multi-line">{tableLayout.properties.title || tableLayout.properties.id}</h3>{" "}
+                  <h3 class="multi-line">{tableLayout.properties.title || tableLayout.properties[IdAttr]}</h3>{" "}
                 </Link>
               </div>
             )}

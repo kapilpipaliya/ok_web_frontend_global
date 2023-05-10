@@ -1,4 +1,5 @@
 import {
+  JSX,
   createContext,
   createMemo,
   createSignal,
@@ -13,7 +14,16 @@ import {
 import { klona } from "klona/json";
 
 import { toTitle } from "case-switcher-js";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Id, revertTransaction, Vertex } from "../lib/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  Id,
+  IdAttr,
+  revertTransaction,
+  Vertex
+} from "../lib/graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
@@ -61,7 +71,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
     }
 
     const attribute = (getSelectionOptions(changedFieldAttribute, "-MetaAttr->MetaAttr").vertexes || []).find(
-      (vertex) => vertex.properties.id === args[0],
+      (vertex) => vertex.properties[IdAttr] === args[0],
     );
     if (!attribute) {
       return;
@@ -69,13 +79,13 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
     let value = args[1];
 
     if (value === null) value = undefined;
-    if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties.id]);
+    if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties[IdAttr]]);
     if (value === "clear") value = null;
     if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
       setSelectionValue(txnId, vertex, attribute, value);
     } else {
       mergeVertexProperties(txnId, vertex.id, {
-        [attribute.properties.id]: value,
+        [attribute.properties[IdAttr]]: value,
       });
     }
   } catch (e) {}
@@ -93,7 +103,7 @@ const FormComponent = (props: {
   const newMeta = attributes.error
     ? graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttr").vertexId!]
     : attributes.vertexes![0];
-  mergeVertexProperties(getNewTxnId(), newMeta.id, { id: type });
+  mergeVertexProperties(getNewTxnId(), newMeta.id, { [IdAttr]: type });
 
   const vertexes = getSelectionOptions(props.data, `->${type}`);
   let newVertex: any;
@@ -174,7 +184,7 @@ export function DynamicForm(props: DynamicFormProps) {
   return (
     <For each={props.attributes}>
       {(metaVertex) => {
-        const id = props.vertex.id + metaVertex.properties.id + "Label";
+        const id = props.vertex.id + metaVertex.properties[IdAttr] + "Label";
         const component = createMemo(() => {
           if (metaVertex.properties.component.includes("-")) {
             // return getOptionLabel(metaVertex, metaVertex.properties.component);
@@ -186,7 +196,7 @@ export function DynamicForm(props: DynamicFormProps) {
         return (
           <Switch>
             <Match when={component() === "Table"}>
-              <h3>{toTitle(metaVertex.properties.displayName || metaVertex.properties.id)}</h3>
+              <h3>{toTitle(metaVertex.properties.displayName || metaVertex.properties[IdAttr])}</h3>
               <DynamicComponent
                 id={id}
                 component={component()}
@@ -207,7 +217,7 @@ export function DynamicForm(props: DynamicFormProps) {
             <Match when={true}>
               <div class="dx-field">
                 <div class="dx-field-label" id={id}>
-                  {toTitle(metaVertex.properties.displayName || metaVertex.properties.id)}
+                  {toTitle(metaVertex.properties.displayName || metaVertex.properties[IdAttr])}
                 </div>
                 <div class="dx-field-value">
                   <DynamicComponent
@@ -243,13 +253,13 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   // create a new vertex or use existing vertex
   let vertex: Vertex;
   if (!props.id) {
-    if (!form["id"]) {
+    if (!form[IdAttr]) {
       return "Id not found";
     }
     if (isRealTime) {
       txnId = getNewTxnId();
     }
-    const newVertexObj = newVertex(getNewGraphId(), [form.id], {});
+    const newVertexObj = newVertex(getNewGraphId(), [form.name], {});
     // TODO: Do Create Transformation for the vertex
     const { error } = addNewVertex(txnId, newVertexObj);
     if (error) {
@@ -329,7 +339,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       txnId = getNewTxnId();
     }
     mergeVertexProperties(txnId, vertex.id, {
-      [attribute.properties.id]: data,
+      [attribute.properties[IdAttr]]: data,
     });
     onChangeHandler(txnId, vertex, vertex, attribute);
     if (!form.local && isRealTime) commitTxn(txnId, Ws);
@@ -351,13 +361,13 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
       }}
       class="form"
     >
-      <Show when={divRef()}>
+      <Show<HTMLFormElement> when={divRef()}>
         <FormContext.Provider
           value={{ local: form.local, cleanUpConfig, validationGroup, formVertex: vertex, isRealTime, txnId }}
         >
           {/* Main Tab is display as top level fields */}
-          <Show when={groupByTabsAndGroup["main"]}>
-            <For each={Object.keys(groupByTabsAndGroup["main"])}>
+          <Show<{[p: string]: Vertex[]}> when={groupByTabsAndGroup["main"]}>
+            <For<string[]> each={Object.keys(groupByTabsAndGroup["main"])}>
               {(group) => (
                 <>
                   <div
@@ -378,7 +388,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
             </For>
           </Show>
 
-          <Show when={tabs.length}>
+          <Show<boolean> when={tabs.length > 0}>
             <div
               ref={(el) => {
                 // https://js.devexpress.com/Demos/WidgetsGallery/Demo/Tabs/Overview/jQuery/Light/
@@ -427,7 +437,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
             meta={
               {
                 properties: {
-                  id: "meta",
+                  name: "meta",
                   props: {
                     stylingMode: "contained",
                     width: "120",
@@ -458,7 +468,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
             meta={
               {
                 properties: {
-                  id: "meta",
+                  [IdAttr]: "meta",
                   props: { stylingMode: "contained", width: "120", icon: "back" },
                 },
               } as unknown as Vertex

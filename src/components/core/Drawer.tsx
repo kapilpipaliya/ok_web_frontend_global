@@ -1,6 +1,6 @@
 import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js";
-import { ComponentProps } from "../../utils/Form";
 import Drawer, { Properties } from "devextreme/ui/drawer";
+import { ComponentProps } from "./Form";
 
 export function DrawerComponent(
   props: ComponentProps & { children: JSXElement } & {
@@ -38,9 +38,7 @@ export function DrawerComponent(
           {props.children}
         </div>
       </div>
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

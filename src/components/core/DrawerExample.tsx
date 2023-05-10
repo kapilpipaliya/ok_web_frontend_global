@@ -2,7 +2,7 @@ import { createEffect, For, JSXElement, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Drawer, { Properties } from "devextreme/ui/drawer";
 import List from "devextreme/ui/list";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const navigation = [
@@ -17,7 +17,7 @@ const text = `Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do ei
 
 export function DrawerComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -45,7 +45,7 @@ export function DrawerField(props: ComponentProps & { children: JSXElement }) {
             // maxSize: 200,
             template: function (e) {
               const listInstance = new List(e, {
-                dataSource: props.data.properties[props.meta.properties.id],
+                dataSource: props.data.properties[props.meta.properties[IdAttr]],
                 hoverStateEnabled: false,
                 activeStateEnabled: false,
                 focusStateEnabled: false,
@@ -74,9 +74,7 @@ export function DrawerField(props: ComponentProps & { children: JSXElement }) {
           {props.children}
         </div>
       </div>
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

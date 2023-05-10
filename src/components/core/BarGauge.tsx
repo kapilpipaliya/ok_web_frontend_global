@@ -1,12 +1,12 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import BarGauge, { Properties } from "devextreme/viz/bar_gauge";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 export function BarGaugeComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -25,7 +25,7 @@ export function BarGaugeField(props: ComponentProps) {
           const instance = new BarGauge(el, {
             startValue: 0,
             endValue: 100,
-            values: props.data.properties[props.meta.properties.id],
+            values: props.data.properties[props.meta.properties[IdAttr]],
             label: {
               indent: 30,
               format: {
@@ -46,7 +46,7 @@ export function BarGaugeField(props: ComponentProps) {
               },
             },
           });
-          createEffect(() => instance.option("values", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("values", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -54,9 +54,7 @@ export function BarGaugeField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

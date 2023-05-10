@@ -12,7 +12,7 @@ export function CalendarField(props: ComponentProps) {
               props.setValue(props.meta, e.value);
             },
           });
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -21,9 +21,7 @@ export function CalendarField(props: ComponentProps) {
         }}
       />
 
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import Gantt, { Properties } from "devextreme/ui/gantt";
 import { tasks, dependencies, resources, resourceAssignments } from "../data/ganttData";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const ganttData = [
@@ -65,7 +65,7 @@ const ganttData = [
 
 export function GanttComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -141,9 +141,7 @@ export function GanttField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

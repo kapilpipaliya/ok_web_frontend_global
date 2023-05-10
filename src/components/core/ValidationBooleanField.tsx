@@ -3,6 +3,7 @@ import { createEffect } from "solid-js";
 import CheckBox, { Properties } from "devextreme/ui/check_box";
 import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
 import { ComponentProps } from "./Form";
+import { IdAttr } from "../../lib/graph";
 
 export function ValidationBooleanInputField(props: ComponentProps) {
   return (
@@ -25,7 +26,7 @@ export function ValidationBooleanInputField(props: ComponentProps) {
             // ],
           });
 
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);

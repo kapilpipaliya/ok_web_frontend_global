@@ -1,7 +1,7 @@
 import { createEffect, For, Show } from "solid-js";
 import { ComponentProps } from "./Form";
 import DropDownButton, { Properties } from "devextreme/ui/drop_down_button";
-import { Vertex } from "../../lib/graph";
+import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
 const dropdownButtonData = [
@@ -28,7 +28,7 @@ const dropdownButtonData = [
 ];
 export function DropDownButtonComponent() {
   const meta = newVertex(0, ["Meta"], {
-    id: "meta",
+    [IdAttr]: "meta",
     props: {},
   });
 
@@ -46,7 +46,7 @@ export function DropDownButtonField(props: ComponentProps) {
         ref={(el) => {
           const instance = new DropDownButton(el, {
             displayExpr: "name",
-            items: props.data.properties[props.meta.properties.id],
+            items: props.data.properties[props.meta.properties[IdAttr]],
             keyExpr: "id",
             selectedItemKey: 1,
             stylingMode: "text",
@@ -56,7 +56,7 @@ export function DropDownButtonField(props: ComponentProps) {
               props.setValue(props.meta, e.item);
             },
           });
-          createEffect(() => instance.option("items", props.data.properties[props.meta.properties.id]));
+          createEffect(() => instance.option("items", props.data.properties[props.meta.properties[IdAttr]]));
           createEffect(() => {
             for (const property in props.meta.properties.props as Properties) {
               instance.option(property, props.meta.properties.props[property]);
@@ -64,9 +64,7 @@ export function DropDownButtonField(props: ComponentProps) {
           });
         }}
       />
-      <Show when={props.errors}>
-        <For each={Object.values(props.errors!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>
-      </Show>
+
     </div>
   );
 }

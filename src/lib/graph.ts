@@ -6,6 +6,8 @@ import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
 
 export type Id = number;
 
+export const IdAttr = "name";
+
 export interface Vertex {
   id: Id;
   labels: string[];

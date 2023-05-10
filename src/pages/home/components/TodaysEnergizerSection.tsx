@@ -1,5 +1,6 @@
 import { A } from "@solidjs/router";
 import { ComponentProps } from "../../../utils/Form";
+import { IdAttr } from "../../../lib/graph";
 
 export function TodaysEnergizerSection(props: ComponentProps) {
   return (
@@ -15,7 +16,7 @@ export function TodaysEnergizerSection(props: ComponentProps) {
       </header>
 
       <div>
-        {props.data.properties[props.meta.properties.id].map((item: any) => {
+        {props.data.properties[props.meta.properties[IdAttr]].map((item: any) => {
           return (
             <div>
               <img src={item.image} alt="" />
