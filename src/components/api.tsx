@@ -55,6 +55,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
       },
       { name: "name", component: "TextBox" },
+      { name: "description", component: "TextArea" },
       {
         name: "parent",
         displayName: "Parent Component",
