@@ -122,7 +122,7 @@ export function SelectInputField(props: ComponentProps) {
         when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId])}>
-            {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || `properties${[IdAttr]}`)}</>}
+            {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`)}</>}
           </For>
         }
       >

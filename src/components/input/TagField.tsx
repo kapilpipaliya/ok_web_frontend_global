@@ -47,7 +47,7 @@ export function TagField(props: Omit<ComponentProps, "setValue">) {
               // })
             },
             valueExpr: IdAttr,
-            displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties${[IdAttr]}`),
+            displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`),
             labelMode: "floating",
             onFocusIn: function (e) {
               refetch();

@@ -1,5 +1,4 @@
 import {
-  JSX,
   createContext,
   createMemo,
   createSignal,
@@ -9,7 +8,7 @@ import {
   onMount,
   Show,
   Switch,
-  useContext,
+  useContext
 } from "solid-js";
 import { klona } from "klona/json";
 
@@ -36,8 +35,16 @@ import { A, G } from "@mobily/ts-belt";
 import { useNavigate } from "@solidjs/router";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { AbstractSingleForm, addMetaVertexes, FormMetaData } from "./Form";
-import { genericComponents, GenericInputField } from "./input/GenaricInputField";
-import { getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../lib/Traverse";
+import {
+  genericComponents,
+  GenericInputField
+} from "./input/GenaricInputField";
+import {
+  getChildVertexes,
+  getOptionLabel,
+  getSelectionOptions,
+  getToEdge
+} from "../lib/Traverse";
 import { ButtonField } from "./core/Button";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
@@ -51,12 +58,18 @@ export function getLabel(input: string) {
   // TODO: letter make pascalCase letter
   return input;
 }
+export function getId(input: string) {
+  input = input.replaceAll(" ", "");
+  input = (input).toLowerCase();
+  // TODO: letter make pascalCase letter
+  return input;
+}
 export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Vertex, changedFieldAttribute: Vertex) {
   if (!changedFieldAttribute.properties.props?.onchange) return;
   const isNew = formVertex.id < 0;
   try {
     let args = JSON.parse(changedFieldAttribute.properties.props.onchange);
-
+    debugger
     if (Array.isArray(args)) {
       // args in proper format.
     } else if (G.isObject(args)) {
@@ -80,6 +93,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
 
     if (value === null) value = undefined;
     if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties[IdAttr]]);
+    if (value === "id") value = getId(vertex.properties[changedFieldAttribute.properties[IdAttr]]);
     if (value === "clear") value = null;
     if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
       setSelectionValue(txnId, vertex, attribute, value);
@@ -133,19 +147,24 @@ export const DynamicComponent = (props: {
       <Match when={!props.component}>NO INPUT</Match>
       <Match when={props.component === "SelectBox"}>
         <SelectInputField
-          aria-labeledby={props.id}
-          data={props.data}
-          meta={props.meta}
-          setValue={props.setValue}
-          disabled={props.disabled!}
+         aria-labeledby={props.id}
+         data={props.data}
+         meta={props.meta}
+         // passed setValue when we have a string value in select field
+         setValue={props.setValue}
+         disabled={props.disabled!}
         />
       </Match>
       <Match when={props.component === "TagBox"}>
-        <TagField aria-labeledby={props.id} data={props.data} meta={props.meta} disabled={props.disabled!} />
+        <TagField aria-labeledby={props.id} data={props.data} meta={props.meta}
+                  // TODO: passed setValue when we have a string value in select field
+                  setValue={props.setValue}
+                  disabled={props.disabled!} />
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!props.disabled}>
-          <TableInputField meta={props.meta} data={props.data} disabled={props.disabled!} />
+          <TableInputField meta={props.meta} data={props.data}
+                           disabled={props.disabled!} />
         </Show>
       </Match>
       <Match when={props.component.startsWith("Form")}>
