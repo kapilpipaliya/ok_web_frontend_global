@@ -155,7 +155,7 @@ export const BackupRestore = () => {
               type = type
                 .split(" | ")
                 .filter((t) => !t.includes("function"))
-                .filter((t) => [
+                .filter((t) => ![
                   "false",
                   "null",
                   "AnimationConfig",
@@ -177,14 +177,24 @@ export const BackupRestore = () => {
                   "PivotGridDataSource",
                   "getter",
                   "Filter expression",
-                ]);
+                ].includes(t));
               if (!type.length) continue;
-              if (type.some((t) => t.includes("Array"))) {
+              if (type.join(',') === "Number,String") {
+                dataType = 'String';
+              } else if (type.join(',') === "String,Number") {
+                dataType = 'Float';
+              } else if (type.join(',') === "Date,Number,String") {
+                dataType = 'String';
+              } else if (type.join(',') === "String,UserDefinedElement") {
+                dataType = 'String';
+              } else if (type.some((t) => t.includes("Array"))) {
                 dataType = "List";
               } else if (type.some((t) => t.includes("DataSource"))) {
                 dataType = "List";
               } else if (type.some((t) => t.includes("PositionConfig"))) {
                 dataType = "Map";
+              } else if (type.join(',') === "Boolean,String") {
+                dataType = "Boolean";
               } else if (type.length > 1) {
                 console.log("skipped multiple result type", propertyObj);
               } else {
@@ -219,12 +229,13 @@ export const BackupRestore = () => {
                   );
                   // It takes too much time to commit the full transaction.
                 }
+              } else {
+                console.log('dataType Not Found:', name, type);
               }
             }
           }
         }
         commitTxn(txnId, Ws);
-        debugger;
         alert("inserting properties finished.");
       });
     }

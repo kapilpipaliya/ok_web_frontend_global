@@ -150,7 +150,7 @@ export const DataGrid = (props: DataGridProps) => {
     attribute["dataField"] = `properties.${attribute.name}`;
     attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.name);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
-    if (attribute.component === "SelectBox") {
+    if (attribute.component === "SelectBox" && !attribute.props.items) {
       attribute["calculateCellValue"] = (columnBase, rowData) => {
         const vertex = selectedValue(
           {

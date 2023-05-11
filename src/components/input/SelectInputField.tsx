@@ -10,7 +10,6 @@ import {
   Vertex
 } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { capitalizeFirstLetter } from "../../utils/utils";
 import { FormContext, onChangeHandler } from "../dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import {
@@ -105,15 +104,25 @@ export function SelectInputField(props: ComponentProps) {
   const { Ws } = useContext(WsContext);
   let { local, txnId, formVertex, isRealTime } = useContext(FormContext);
 
-  if (!props.meta.properties.props?.collection) {
-    return "Collection Not Defined.";
-  }
-
   const [selectOptions, { refetch }] = createResource(() => {
-    if (props.disabled) {
-      return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+    let value = props.meta.properties.props.items;
+    if (value) {
+      if (typeof value === "string") {
+        return value.split("\n");
+      } else if (Array.isArray(value)) {
+        return value;
+      } else {
+        return value ? [value] : [];
+      }
+    } else {
+      if (props.disabled) {
+        return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+      }
+      if (!props.meta.properties.props?.collection) {
+        return [];
+      }
+      return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
     }
-    return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
   });
 
   return (
@@ -128,7 +137,7 @@ export function SelectInputField(props: ComponentProps) {
       >
         <div
           ref={(el) => {
-            const instance = new SelectBox(el, {
+            let selectOp = {
               searchEnabled: true,
               disabled: props.disabled!,
 
@@ -141,6 +150,8 @@ export function SelectInputField(props: ComponentProps) {
                 }
                 if (props.meta.properties.props.stringValue) {
                   props.setValue(props.meta, e.value);
+                } else if (props.meta.properties.props.items) {
+                  props.setValue(props.meta, e.value);
                 } else if (props.meta.properties.props.inward) {
                   setParentValue(txnId, props.data, props.meta, e.value);
                 } else {
@@ -150,17 +161,22 @@ export function SelectInputField(props: ComponentProps) {
                 if (!local && isRealTime) commitTxn(txnId, Ws);
                 // })
               },
-              // if valueExpr value is undefined onValueChange will not fire.
-              valueExpr: "id",
-              displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
               labelMode: "floating",
               onFocusIn: function (e) {
                 refetch();
               },
-            });
+            } as Properties;
+            if (!props.meta.properties.props.items) {
+              Object.assign(selectOp, {
+                // if valueExpr value is undefined onValueChange will not fire.
+                valueExpr: "id",
+                displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
+              } as Properties)
+            }
+            const instance = new SelectBox(el, selectOp);
             createEffect(() => {
               for (const property in props.meta.properties.props as Properties) {
-                if (property === "displayExpr") continue;
+                if (property === "displayExpr" || property === 'items') continue;
                 instance.option(property, props.meta.properties.props[property]);
               }
             });
