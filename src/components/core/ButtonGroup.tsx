@@ -1,6 +1,7 @@
 import { DisplayComponentProps } from "./Form";
 import ButtonGroup, { Properties } from "devextreme/ui/button_group";
 import { createEffect } from "solid-js";
+import { IdAttr } from "../../lib/graph";
 
 export function ButtonGroupField(
   props: DisplayComponentProps & {

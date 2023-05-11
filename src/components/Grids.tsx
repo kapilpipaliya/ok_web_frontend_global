@@ -83,7 +83,7 @@ export const SampleDataGrid = (props: {}) => {
             },
             {
               caption: "Name",
-              dataField: `properties${[IdAttr]}`,
+              dataField: `properties.${IdAttr}`,
               dataType: "string",
               fixed: true,
             },
@@ -159,7 +159,7 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || `properties${[IdAttr]}`);
+          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || `properties.${IdAttr}`);
         }
         return "";
       };

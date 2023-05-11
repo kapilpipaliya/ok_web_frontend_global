@@ -790,6 +790,7 @@ export const SimpleImport = (props: {}) => {
               props: {
                 stringValue: true,
                 displayExpr: "name",
+                valueExpr: "name",
                 collection:
                   '[{"name": "dataType"},{"name": "component"},{"name": "dataTypeDefault"},{"name": "lookup"},{"name": "attribute"}]',
               },

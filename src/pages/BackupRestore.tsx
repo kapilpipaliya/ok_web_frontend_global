@@ -145,7 +145,7 @@ export const BackupRestore = () => {
             // if(name === 'items') it.add(componentId);
             // continue;
             // Do not specify the items property if you specified the dataSource, and vice versa.
-            if (name === "dataSource") continue;
+            // if (name === "dataSource") continue;
             const default_ = propertyObj["Default"];
             const readOnly = propertyObj["ReadOnly"];
             const acceptedValues = propertyObj["AcceptedValues"];
@@ -165,7 +165,7 @@ export const BackupRestore = () => {
                   "any",
                   "undefined",
                   "Store",
-                  "DataSource",
+                  // "DataSource",
                   "DataSource_Options",
                   "dxFilterBuilder_Options",
                   "Format",
@@ -180,6 +180,8 @@ export const BackupRestore = () => {
                 ]);
               if (!type.length) continue;
               if (type.some((t) => t.includes("Array"))) {
+                dataType = "List";
+              } else if (type.some((t) => t.includes("DataSource"))) {
                 dataType = "List";
               } else if (type.some((t) => t.includes("PositionConfig"))) {
                 dataType = "Map";

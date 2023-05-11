@@ -45,7 +45,7 @@ import {
 import { bindOwner } from "solid-forms";
 import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent, FormContext } from "../dynamicForm";
+import { DynamicComponent, FormContext, onChangeHandler } from "../dynamicForm";
 import { addMetaVertexes, getCollAttrs } from "../Form";
 import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
@@ -57,7 +57,6 @@ import { Icon } from "@iconify-icon/solid";
 // import SortableKanban from "../core/SortableField";
 // import "../assets/styles/sortable.css";
 
-// import { onChangeHandler } from "../core/dynamicForm";
 
 export function newRow(
   txnId: number,
@@ -172,7 +171,7 @@ export function deleteRow(
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-  let { local, cleanUpConfig, isRealTime, txnId } = useContext(FormContext);
+  let { local, cleanUpConfig, isRealTime, formVertex, txnId } = useContext(FormContext);
 
   // const owner = getOwner();
 
@@ -295,6 +294,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         mergeVertexProperties(txnId, p.joinVertex.id, {
           [attribute.properties[IdAttr]]: value,
         });
+        onChangeHandler(txnId, formVertex, p.joinVertex, attribute);
         if (!local && isRealTime) commitTxn(txnId, Ws);
       };
 
@@ -412,6 +412,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         mergeVertexProperties(txnId, p.joinVertex.id, {
           [attribute.properties[IdAttr]]: value,
         });
+        onChangeHandler(txnId, formVertex, p.joinVertex, attribute);
         if (!local && isRealTime) commitTxn(txnId, Ws);
       };
 
