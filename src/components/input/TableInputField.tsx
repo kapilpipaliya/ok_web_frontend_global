@@ -1,52 +1,15 @@
-import {
-  batch,
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  Show,
-  Switch,
-  untrack,
-  useContext,
-} from "solid-js";
-
-import {
-  closestCenter,
-  createSortable,
-  DragDropProvider,
-  DragDropSensors,
-  DragEventHandler,
-  SortableProvider,
-} from "@thisbeyond/solid-dnd";
+import { JSX, batch, createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack, useContext, } from "solid-js";
+// import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { toTitle } from "case-switcher-js";
-import {
-  addNewVertex,
-  deleteVertex,
-  findVertexByLabelAndUniqueId,
-  mergeVertexProperties,
-  newVertex,
-  replaceVertexProperties,
-} from "../../lib/Vertex";
-import { capitalizeFirstLetter } from "../../utils/utils";
+import { addNewVertex, deleteVertex, findVertexByLabelAndUniqueId, mergeVertexProperties, newVertex, replaceVertexProperties, } from "../../lib/Vertex";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
-  graph,
-  Id,
-  IdAttr,
-  revertTransaction,
-  Vertex
-} from "../../lib/graph";
+import { commitTxn, getNewGraphId, getNewTxnId, graph, Id, IdAttr, revertTransaction, Vertex } from "../../lib/graph";
 import { bindOwner } from "solid-forms";
 import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent, FormContext, onChangeHandler } from "../dynamicForm";
-import { addMetaVertexes, getCollAttrs } from "../Form";
+import { addMetaVertexes, FieldAttribute, getCollAttrs } from "../Form";
 import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
 import { ButtonGroupField } from "../core/ButtonGroup";
@@ -217,10 +180,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
         if (!vertexCollAttrResult.error) {
           const vertexCollAttr = vertexCollAttrResult.vertexes!;
-          const attrs = [];
+          const attrs = [] as FieldAttribute[];
           for (const attr of vertexCollAttr) {
             const props = getCollAttrs(attr, { labels: ["Empty"], properties: {}, out_edges: {} } as unknown as Vertex);
-            if (!props.error) attrs.push(props.attr);
+            if (!props.error) attrs.push(props.attr!);
           }
           const newProperties = klona(props.meta.properties);
           newProperties.attributes = attrs;
@@ -299,7 +262,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       };
 
       return (
-        <For each={rowColumnsMetaAttrs}>
+        <For<Vertex[]> each={rowColumnsMetaAttrs}>
           {(metaVertex) => {
             const component = createMemo(() => {
               if (metaVertex.properties.component.includes("-")) {
@@ -316,13 +279,13 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
             return (
               <Switch>
-                <Match when={metaVertex.properties.props?.hidden}>
+                <Match<boolean> when={metaVertex.properties.props?.hidden}>
                   <div class="flex">
                     {metaVertex.properties.props?.defaultValue &&
                       getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
                   </div>
                 </Match>
-                <Match when={component() === "Table"}>
+                <Match<boolean> when={component() === "Table"}>
                   <div class="flex">
                     {metaVertex.properties.props?.defaultValue &&
                       getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
@@ -336,7 +299,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     />
                   </div>
                 </Match>
-                <Match when={true}>
+                <Match<boolean> when={true}>
                   <div class="flex align-items:center">
                     {metaVertex.properties.props?.defaultValue &&
                       getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
@@ -406,6 +369,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     const DisplayProperties = () => {
       const setValue = (attribute: Vertex, value: any) => {
+        debugger
         if (isRealTime) {
           txnId = getNewTxnId();
         }
@@ -417,7 +381,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       };
 
       return (
-        <For each={rowColumnsMetaAttrs}>
+        <For<Vertex[]> each={rowColumnsMetaAttrs}>
           {(metaVertex) => {
             const component = createMemo(() => {
               if (metaVertex.properties.component.includes("-")) {
@@ -436,7 +400,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
             return (
               <Switch>
-                <Match when={metaVertex.properties.props?.hidden}>
+                <Match<boolean> when={metaVertex.properties.props?.hidden}>
                   <td>
                     <div class="flex">
                       {metaVertex.properties.props?.defaultValue &&
@@ -444,9 +408,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     </div>
                   </td>
                 </Match>
-                <Match when={component() === "Table"}>
+                <Match<boolean> when={component() === "Table"}>
                   <td>
-                    <Show when={!props.disabled}>
+                    <Show<boolean> when={!props.disabled}>
                       <div class="flex">
                         {metaVertex.properties.props?.defaultValue &&
                           getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
@@ -463,7 +427,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     </Show>
                   </td>
                 </Match>
-                <Match when={true}>
+                <Match<boolean> when={true}>
                   <td>
                     <div class="flex align-items:center">
                       {metaVertex.properties.props?.defaultValue &&
@@ -504,7 +468,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               height={25}
               onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId, Ws)}
             />
-            <Show when={!props.disabled}>
+            <Show<boolean> when={!props.disabled}>
               <Icon icon="material-symbols:edit" width={25} height={25} onClick={() => setDisabled((v) => !v)} />
             </Show>
             {p.index + 1}
@@ -579,7 +543,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 });
               }}
             >
-              <For each={sourceVertexes()}>
+              <For<Vertex[]> each={sourceVertexes()}>
                 {(source) => (
                   <div class="card dx-card dx-theme-text-color dx-theme-background-color">
                     {/*<div class="card-priority priority-1"/>*/}
@@ -613,7 +577,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 });
               }}
             >
-              <For each={sourceVertexes()}>
+              <For<Vertex[]> each={sourceVertexes()}>
                 {(vertex) => (
                   <div style="width: auto;" class="card dx-card dx-theme-text-color dx-theme-background-color">
                     {/*<div class="card-priority priority-1"/>*/}
@@ -632,13 +596,13 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   };
   return (
     <Switch>
-      {/*<Match when={isKanban()}>*/}
+      {/*<Match<boolean> when={isKanban()}>*/}
       {/*  <Kanban/>*/}
       {/*  <SortableKanban/>*/}
       {/*</Match>*/}
-      <Match when={true}>
+      <Match<boolean> when={true}>
         <div>
-          {/*<Show when={props.meta.properties.attributes}>*/}
+          {/*<Show<boolean> when={props.meta.properties.attributes}>*/}
           {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties[IdAttr], attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
 
@@ -682,11 +646,11 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                     {(attribute) => {
                       return (
                         <Switch>
-                          {/*<Match when={attribute.props?.skip}></Match>*/}
-                          <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
+                          {/*<Match<boolean> when={attribute.props?.skip}></Match>*/}
+                          <Match<boolean> when={!attribute.props?.hidden || attribute.props?.defaultValue}>
                             <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr])}</th>
                           </Match>
-                          <Match when={true}>
+                          <Match<boolean> when={true}>
                             <th></th>
                           </Match>
                         </Switch>
@@ -699,7 +663,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
-                <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
+                <For<Vertex[]> each={sortedVertexes()} fallback={<div>No Columns</div>}>
                   {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}
                 </For>
                 {/*  </SortableProvider>*/}
@@ -709,7 +673,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           </div>
         </div>
 
-        {/*<Show when={props.page}>*/}
+        {/*<Show<boolean> when={props.page}>*/}
         {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
         {/*</Show>*/}
       </Match>

@@ -3,6 +3,7 @@ import { G } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { get, set } from "idb-keyval";
 import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
+import { batch } from "solid-js";
 
 export type Id = number;
 
@@ -102,7 +103,9 @@ export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
 export const revertTransaction = (txnId: number) => {
   if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = [...(transactions.get(txnId)!.steps || [])];
-  existingTxnValue.reverse().forEach((txn) => txn.revert());
+  batch(() => {
+    existingTxnValue.reverse().forEach((txn) => txn.revert());
+  });
   transactions.delete(txnId);
 };
 
@@ -181,6 +184,8 @@ export function isValidId(startVertexId: Id) {
 }
 // @ts-ignore
 window.graph = graph;
+// @ts-ignore
+window.setGraph = setGraph;
 /*
 // ***********
 // Development
