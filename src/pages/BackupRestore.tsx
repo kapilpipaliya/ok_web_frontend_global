@@ -28,6 +28,7 @@ import { newRow } from "../components/input/TableInputField";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import { WsContext } from "../components/ws_events_dispatcher";
 import { getChildVertex, getParentVertex } from "../lib/Traverse";
+import { getId } from "../components/dynamicForm";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -249,8 +250,10 @@ export const BackupRestore = () => {
     const existingVertex = graph.vertexes[vertexId];
     for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
       const componentVertex = graph.vertexes[compVertexId];
+      const componentName = componentVertex.properties[IdAttr];
+      if (["DropDownBox", "Bullet", "CircularGauge", "LinearGauge", "ProgressBar"].includes(componentName)) continue;
       const newRow1 = newRow(txnId, existingVertex, "CollAttr");
-      replaceVertexProperties(txnId, newRow1.vertexId!, { [IdAttr]: componentVertex.properties[IdAttr] });
+      replaceVertexProperties(txnId, newRow1.vertexId!, { [IdAttr]: getId(componentName), displayName: componentName});
       const dataType = getParentVertex(["DataType$0"], componentVertex);
       if (!dataType.error) {
         // set component dataType and component

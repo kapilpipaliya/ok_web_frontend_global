@@ -1,6 +1,6 @@
 import { createEffect, Show, useContext } from "solid-js";
 import { G } from "@mobily/ts-belt";
-import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/toolbar";
+import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
 import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
 import dxCalendar, { Properties as dxCalendarProperties } from "devextreme/ui/calendar";
 import dxCheckBox, { Properties as dxCheckBoxProperties } from "devextreme/ui/check_box";
@@ -167,12 +167,12 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             let properties: any = {
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
               value: props.data.properties[props.meta.properties[IdAttr]],
-              onValueChanged: (e: any) => {
+              onValueChanged: (data: any) => {
                 // note: valueChanged is fired even when the value is changed programmatically,
                 // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
-                // used e.event check to prevent this.
-                if (e.event) {
-                  props.setValue(props.meta, e.value);
+                // used data.event check to prevent this.
+                if (data.event || props.component === "FilterBuilder") {
+                  props.setValue(props.meta, data.value);
                 }
               },
               // onChange: (e: any) => {
@@ -185,8 +185,8 @@ export function GenericInputField(props: ComponentProps & { component: string; d
 
             if (props.component === "Autocomplete") {
               comp = dxAutocomplete;
+              debugger
               // autocomplete is just like text box, but it allows user to preselect some values.
-              // AutoComplete accept strings[] in items only
               Object.assign(properties, {} as dxAutocompleteProperties);
             } else if (props.component === "Bullet") {
               comp = dxBullet;
@@ -218,13 +218,17 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               // Specifies the currently selected value. May be an object if dataSource contains objects and valueExpr is not set.
               Object.assign(properties, {} as dxDropDownBoxProperties);
             } else if (props.component === "FileUploader") {
-              return "not supported yet";
               comp = dxFileUploader;
-              Object.assign(properties, {} as dxFileUploaderProperties);
+              Object.assign(properties, {value: []} as dxFileUploaderProperties);
             } else if (props.component === "FilterBuilder") {
-              return "not supported yet";
               comp = dxFilterBuilder;
-              Object.assign(properties, {} as dxFilterBuilderProperties);
+              Object.assign(properties, {value: [],
+                // at least one field is required, else component is giving error.
+                fields: props.meta.properties.props.fields || [{
+                  dataField: 'name',
+                  dataType: 'string',
+                }]
+              } as dxFilterBuilderProperties);
             } else if (props.component === "HtmlEditor") {
               comp = dxHtmlEditor;
               Object.assign(properties, {} as dxHtmlEditorProperties);
@@ -304,7 +308,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 // }
               });
               validatorInstance.context = formContext;
-              validatorInstance.meta = props.meta;
+              validatorInstance.zmeta = props.meta;
               createEffect(() =>
                 validatorInstance.option(
                   "validationRules",
@@ -316,7 +320,16 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             //  console.log('cant set validator for', props.component, e);
             // }
 
-            createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
+            createEffect(() => {
+              let value = props.data.properties[props.meta.properties[IdAttr]];
+              if (props.component === "FilterBuilder" || props.component === "FileUploader") {
+                if (!value) value = [];
+                else if(!Array.isArray(value)) {
+                  value = [value];
+                }
+              }
+              return instance.option("value", value);
+            });
             createEffect(() => instance.option("disabled", props.disabled));
 
             createEffect(() => {
