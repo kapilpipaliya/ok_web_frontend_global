@@ -1,4 +1,5 @@
 import {
+  JSX,
   createContext,
   createMemo,
   createSignal,
@@ -69,7 +70,6 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
   const isNew = formVertex.id < 0;
   try {
     let args = JSON.parse(changedFieldAttribute.properties.props.onchange);
-    debugger
     if (Array.isArray(args)) {
       // args in proper format.
     } else if (G.isObject(args)) {
@@ -144,8 +144,8 @@ export const DynamicComponent = (props: {
 }) => {
   return (
     <Switch>
-      <Match when={!props.component}>NO INPUT</Match>
-      <Match when={props.component === "SelectBox"}>
+      <Match<boolean> when={!props.component}>NO INPUT</Match>
+      <Match<boolean> when={props.component === "SelectBox"}>
         <SelectInputField
          aria-labeledby={props.id}
          data={props.data}
@@ -155,19 +155,19 @@ export const DynamicComponent = (props: {
          disabled={props.disabled!}
         />
       </Match>
-      <Match when={props.component === "TagBox"}>
+      <Match<boolean> when={props.component === "TagBox"}>
         <TagField aria-labeledby={props.id} data={props.data} meta={props.meta}
                   // TODO: passed setValue when we have a string value in select field
                   setValue={props.setValue}
                   disabled={props.disabled!} />
       </Match>
-      <Match when={props.component === "Table"}>
-        <Show when={!props.disabled}>
+      <Match<boolean> when={props.component === "Table"}>
+        <Show<boolean> when={!props.disabled}>
           <TableInputField meta={props.meta} data={props.data}
                            disabled={props.disabled!} />
         </Show>
       </Match>
-      <Match when={props.component.startsWith("Form")}>
+      <Match<boolean> when={props.component.startsWith("Form")}>
         <td>
           <div class="flex">
             {props.meta.properties.props?.defaultValue &&
@@ -176,8 +176,8 @@ export const DynamicComponent = (props: {
           </div>
         </td>
       </Match>
-      <Match when={props.component} keyed>
-        <Show when={genericComponents.includes(props.component)}>
+      <Match<string> when={props.component} keyed>
+        <Show<boolean> when={genericComponents.includes(props.component)}>
           <GenericInputField
             aria-labeledby={props.id}
             data={props.data}
@@ -201,7 +201,7 @@ interface DynamicFormProps {
 
 export function DynamicForm(props: DynamicFormProps) {
   return (
-    <For each={props.attributes}>
+    <For<Vertex[]> each={props.attributes}>
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.properties[IdAttr] + "Label";
         const component = createMemo(() => {
@@ -214,7 +214,7 @@ export function DynamicForm(props: DynamicFormProps) {
         });
         return (
           <Switch>
-            <Match when={component() === "Table"}>
+            <Match<boolean> when={component() === "Table"}>
               <h3>{toTitle(metaVertex.properties.displayName || metaVertex.properties[IdAttr])}</h3>
               <DynamicComponent
                 id={id}
@@ -224,7 +224,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 setValue={props.setValue}
               />
             </Match>
-            <Match when={component() === "CollectionOption"}>
+            <Match<boolean> when={component() === "CollectionOption"}>
               <DynamicComponent
                 id={id}
                 component={component()}
@@ -233,7 +233,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 setValue={props.setValue}
               />
             </Match>
-            <Match when={true}>
+            <Match<boolean> when={true}>
               <div class="dx-field">
                 <div class="dx-field-label" id={id}>
                   {toTitle(metaVertex.properties.displayName || metaVertex.properties[IdAttr])}
@@ -299,7 +299,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
   const [divRef, setDivRef] = createSignal<HTMLFormElement>();
   let validationGroup;
   onMount(() => {
-    divRef()?.querySelector("input")?.focus();
+    // @ts-ignore
+    divRef()?.querySelector?.("input")?.focus();
   });
 
   const { attributes, ...custom } = props.form;
@@ -419,13 +420,13 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                   showNavButtons: true,
                   selectedIndex: 0,
                   onItemClick(e) {
-                    setActiveTab(e.itemData);
+                    setActiveTab(e.itemData as string);
                   },
                 });
               }}
             />
 
-            <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
+            <For<string[]> each={Object.keys(groupByTabsAndGroup[activeTab()])}>
               {(group) => {
                 return (
                   <div
@@ -438,7 +439,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                         : "600px",
                     }}
                   >
-                    <Show when={group !== "main"}>
+                    <Show<boolean> when={group !== "main"}>
                       <div class="dx-fieldset-header">{group}</div>
                     </Show>
                     <DynamicForm

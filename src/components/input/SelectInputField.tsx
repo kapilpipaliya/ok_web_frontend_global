@@ -1,4 +1,11 @@
-import { createEffect, createResource, untrack, useContext } from "solid-js";
+import {
+  JSX,
+  createEffect,
+  createResource,
+  Show,
+  untrack,
+  useContext
+} from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import {
@@ -96,6 +103,8 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
         return value ? [value] : [];
       }
     });
+  } else if (meta.properties.props.items) {
+    return data.properties[meta.properties[IdAttr]];
   }
   return meta.properties.props?.inward ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
 };
@@ -127,10 +136,10 @@ export function SelectInputField(props: ComponentProps) {
 
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
-      <Show
+      <Show<boolean>
         when={!props.disabled}
         fallback={
-          <For each={selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId])}>
+          <For<Vertex[]> each={selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId])}>
             {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`)}</>}
           </For>
         }
@@ -145,6 +154,12 @@ export function SelectInputField(props: ComponentProps) {
               value: selectedValue(props.meta, props.data)[0],
               onValueChanged: function (e) {
                 // batch(() => {
+                // note: valueChanged is fired even when the value is changed programmatically,
+                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
+                // used e.event check to prevent this.
+                if (!e.event) {
+                  return;
+                }
                 if (isRealTime) {
                   txnId = getNewTxnId();
                 }
@@ -170,7 +185,7 @@ export function SelectInputField(props: ComponentProps) {
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || "properties.id"),
+                displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`),
               } as Properties)
             }
             const instance = new SelectBox(el, selectOp);

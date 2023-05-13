@@ -357,7 +357,7 @@ export const BackupRestore = () => {
         </C>
       </div>
 
-      <Show when={load()}>
+      <Show<boolean> when={load()}>
         <GraphView
           edges={Object.entries(graph.edges)
             .filter(([_, edge]) => edge.type !== "MetaAttr")

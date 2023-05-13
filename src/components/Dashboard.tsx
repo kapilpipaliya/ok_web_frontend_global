@@ -1,4 +1,4 @@
-import { batch, Component, createEffect, createSignal, on, onCleanup, onMount, Show, useContext } from "solid-js";
+import { JSX, batch, Component, createEffect, createSignal, on, onCleanup, onMount, Show, useContext } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
 import { BackupRestore } from "../pages/BackupRestore";
@@ -114,7 +114,7 @@ export const DashboardView = () => {
     <div class="flex flex:col flex:1">
       {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
       <MenuButtonToggle />
-      <Show
+      <Show<boolean>
         when={Ws.isLoggedIn()}
         fallback={
           <>

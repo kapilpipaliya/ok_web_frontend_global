@@ -1,4 +1,4 @@
-import { createEffect, useContext } from "solid-js";
+import { createEffect, Show, useContext } from "solid-js";
 import { G } from "@mobily/ts-belt";
 import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/toolbar";
 import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
@@ -160,7 +160,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
   const formContext = useContext(FormContext);
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
+      <Show<boolean> when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {
@@ -168,8 +168,16 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
               value: props.data.properties[props.meta.properties[IdAttr]],
               onValueChanged: (e: any) => {
-                props.setValue(props.meta, e.value);
+                // note: valueChanged is fired even when the value is changed programmatically,
+                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
+                // used e.event check to prevent this.
+                if (e.event) {
+                  props.setValue(props.meta, e.value);
+                }
               },
+              // onChange: (e: any) => {
+              //   props.setValue(props.meta, e.value);
+              // },
               validationGroup: formContext.validationGroup,
               disabled: props.disabled,
             };
