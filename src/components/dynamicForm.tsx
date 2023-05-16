@@ -30,7 +30,6 @@ import { WsContext } from "./ws_events_dispatcher";
 import { SelectInputField, setSelectionValue } from "./input/SelectInputField";
 import { newRow, TableInputField } from "./input/TableInputField";
 
-import { TagField } from "./input/TagField";
 import Tabs from "devextreme/ui/tabs";
 import { A, G } from "@mobily/ts-belt";
 import { useNavigate } from "@solidjs/router";
@@ -153,13 +152,16 @@ export const DynamicComponent = (props: {
          // passed setValue when we have a string value in select field
          setValue={props.setValue}
          disabled={props.disabled!}
+         component={'SelectBox'}
         />
       </Match>
       <Match<boolean> when={props.component === "TagBox"}>
-        <TagField aria-labeledby={props.id} data={props.data} meta={props.meta}
-                  // TODO: passed setValue when we have a string value in select field
+        <SelectInputField aria-labeledby={props.id} data={props.data} meta={props.meta}
+                  // passed setValue when we have a string value in select field
                   setValue={props.setValue}
-                  disabled={props.disabled!} />
+                  disabled={props.disabled!}
+                  component={'TagBox'}
+        />
       </Match>
       <Match<boolean> when={props.component === "Table"}>
         <Show<boolean> when={!props.disabled}>

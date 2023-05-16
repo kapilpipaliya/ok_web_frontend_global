@@ -54,6 +54,7 @@ const navigation = [
       { name: "Permissions", href: "/Perm" },
     ],
   },
+  { name: "Dashboard", href: "/Dashboard" },
   { name: "Grids", href: "/grids" },
   { name: "Import", href: "/SimpleImport" },
   // { name: "Forms", href: "/forms" },
