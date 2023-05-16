@@ -30,6 +30,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
     ],
   },
+  Dashboard: {
+    title: "Dashboards",
+    name: "Dashboard",
+    attributes: [
+      { name: "name", component: "TextBox" },
+      { name: "description", component: "TextArea" },
+    ],
+  },
   CompCategory: {
     title: "Component Category",
     name: "CompCategory",
@@ -220,8 +228,17 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       //     skip: true
       //   },
       // },
+      {
+        name: "dashboard",
+        component: "TagBox",
+        props: {
+          displayExpr: `properties.${IdAttr}`,
+          collection: "Dashboard",
+          parentLabel: "Dashboard",
+          inward: true,
+        },
+      },
       { name: "description", component: "TextArea" },
-      { name: "table", component: "CheckBox" },
       { name: "public", component: "CheckBox", props: { skip: true } },
       {
         name: "Tab",
@@ -861,6 +878,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 const PageMetaData = klona(AttrsTableData.Form);
 PageMetaData.title = "Page";
 PageMetaData.name = "Page";
-PageMetaData.attributes = PageMetaData.attributes.filter((attr) => !["table"].includes(attr.id));
+PageMetaData.attributes = PageMetaData.attributes.filter((attr) => !["table"].includes(attr.name));
 AttrsTableData.Page = klona(PageMetaData);
 // window.a = AttrsTableData;

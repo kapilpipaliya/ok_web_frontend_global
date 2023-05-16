@@ -1,5 +1,6 @@
 import {
   JSX,
+  on,
   createEffect,
   createResource,
   Show,
@@ -8,6 +9,7 @@ import {
 } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
+import TagBox, { Properties as TagBoxProperties} from "devextreme/ui/tag_box";
 import {
   commitTxn,
   getNewGraphId,
@@ -109,7 +111,7 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
   return meta.properties.props?.inward ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
 };
 
-export function SelectInputField(props: ComponentProps) {
+export function SelectInputField(props: ComponentProps & {component: string}) {
   const { Ws } = useContext(WsContext);
   let { local, txnId, formVertex, isRealTime } = useContext(FormContext);
 
@@ -151,7 +153,7 @@ export function SelectInputField(props: ComponentProps) {
               disabled: props.disabled!,
 
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: selectedValue(props.meta, props.data)[0],
+              value: props.component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
               onValueChanged: function (e) {
                 // batch(() => {
                 // note: valueChanged is fired even when the value is changed programmatically,
@@ -188,16 +190,30 @@ export function SelectInputField(props: ComponentProps) {
                 displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`),
               } as Properties)
             }
-            const instance = new SelectBox(el, selectOp);
+            const instance = props.component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
             createEffect(() => {
               for (const property in props.meta.properties.props as Properties) {
                 if (property === "displayExpr" || property === 'items') continue;
                 instance.option(property, props.meta.properties.props[property]);
               }
             });
-            createEffect(() => {
-              instance.option("value", selectedValue(props.meta, props.data)[0]);
-            });
+            // when the value is changed by other components, we want to refetch the options
+            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+            createEffect(
+             on(
+              () => selectedValue(props.meta, props.data),
+              (selectedValue) => {
+                instance.option("value", props.component === 'SelectBox' ? selectedValue[0] : selectedValue);
+              },
+              { defer: true },
+             ),
+            );
+
+            // when the value is changed by other components, we want to refetch the options
+            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+
+
+
             createEffect(() => instance.option("disabled", props.disabled));
 
             createEffect(() => {
