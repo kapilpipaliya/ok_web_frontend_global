@@ -62,11 +62,7 @@ export function DrawerField(props: ComponentProps & { children: JSXElement }) {
             instance.show();
           });
 
-          createEffect(() => {
-            for (const property in props.meta.properties.props as Properties) {
-              instance.option(property, props.meta.properties.props[property]);
-            }
-          });
+
         }}
       >
         <div id="content" class="dx-theme-background-color">

@@ -28,8 +28,9 @@ import { A, D } from "@mobily/ts-belt";
 import { deleteRow, newRow } from "./input/TableInputField";
 import { klona } from "klona";
 import { getChildVertex, getChildVertexes, getOptionLabel, getParentVertex, getToEdge } from "../lib/Traverse";
-import { ButtonField } from "./core/Button";
+
 import { ValidationRule } from "devextreme/common";
+import { GenericField } from "./input/GenaricField";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -391,7 +392,8 @@ export const Login = (props: {}) => {
         config={config}
         // TODO: add dry option
       />
-      <ButtonField
+      <GenericField
+       component={"Button"}
         meta={
           {
             properties: {
@@ -461,7 +463,8 @@ export const SignUp = (props: {}) => {
         config={config}
         // TODO: add dry option
       />
-      <ButtonField
+      <GenericField
+       component={"Button"}
         meta={
           {
             properties: {
@@ -979,7 +982,8 @@ export const SimpleImport = (props: {}) => {
 
       <div></div>
 
-      <ButtonField
+      <GenericField
+       component={"Button"}
         meta={
           {
             properties: {

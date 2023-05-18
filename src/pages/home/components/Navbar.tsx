@@ -17,7 +17,7 @@ export function Navbar(props: ComponentProps & { isSideBarOpen: any; setSideBarO
           class="cursor:pointer"
           onclick={() => {
             console.log("clicked");
-            setSideBarOpen(!isSideBarOpen());
+            props.setSideBarOpen((v) => !v);
           }}
         >
           <Icon icon="mdi:hamburger-menu" width={25} height={25} />
