@@ -1,8 +1,9 @@
-import { createSignal } from "solid-js";
+import { createEffect, createSignal, on } from "solid-js";
 import { Navbar } from "./components/Navbar";
+import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
 import { navItems, homeGalleryData, todayData } from "./data";
-import { GallerySection } from "./components/GallerySection";
+
 import List from "devextreme/ui/list";
 import { Link } from "@solidjs/router";
 import { Icon } from "@iconify-icon/solid";
@@ -10,8 +11,9 @@ import { Icon } from "@iconify-icon/solid";
 import { ActionCards } from "./components/ActionCards";
 import { TodaysEnergizerSection } from "./components/TodaysEnergizerSection";
 import { newVertex } from "../../lib/Vertex";
-import { DrawerComponent } from "../../components/core/Drawer";
+
 import { Vertex } from "../../lib/graph";
+import { GenericField } from "../../components/input/GenaricField";
 
 export default function Home() {
   const navTemplate = function (e: Element) {
@@ -69,12 +71,14 @@ export default function Home() {
   const navbarMeta = newVertex(0, ["Meta"], {
     id: "navbar",
     props: {
+      opened: isSideBarOpen(),
       position: "right",
       openedStateMode: "overlap",
       closeOnOutsideClick: true,
       revealMode: "expand",
       maxSize: 250,
-    },
+      template: navTemplate
+    } as dxDrawerProperties,
   });
 
   const galleryMeta = newVertex(0, ["Meta"], {
@@ -102,16 +106,19 @@ export default function Home() {
     console.log(attribute, data);
   };
 
+  // drawer has problem when it rendered, it dont know the proper height of the content so sidebar height is not proper.
   return (
-    <div class="">
-      <DrawerComponent
-        isSideBarOpen={isSideBarOpen}
-        setSideBarOpen={setSideBarOpen}
-        template={navTemplate}
+      <GenericField
+       component={"Drawer"}
         meta={navbarMeta}
         data={drawerData}
         setValue={setValue}
+        ref={instance=> {
+          createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));
+        }}
       >
+        {/* Min Height is set because drawer cant see height initially*/}
+        <div style={"min-height: 506px"}>
         <Navbar
           isSideBarOpen={isSideBarOpen}
           setSideBarOpen={setSideBarOpen}
@@ -123,11 +130,11 @@ export default function Home() {
         <div class="p:15 bg:#f7f7f7">
           <ActionCards meta={galleryMeta} data={actionCardsData} setValue={setValue} />
 
-          <GallerySection meta={galleryMeta} data={galleryData} setValue={setValue} />
+          <GenericField component={"Gallery"} meta={galleryMeta} data={galleryData} setValue={setValue} />
 
           {/* <TodaysEnergizerSection meta={todayEnergizerMeta} data={todaysEnergizerData} setValue={setValue} /> */}
         </div>
-      </DrawerComponent>
-    </div>
+        </div>
+      </GenericField>
   );
 }

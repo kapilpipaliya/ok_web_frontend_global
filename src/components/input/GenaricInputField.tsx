@@ -192,7 +192,9 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               Object.assign(properties, {} as dxAutocompleteProperties);
             } else if (props.component === "Bullet") {
               comp = dxBullet;
-              Object.assign(properties, {} as dxBulletProperties);
+              Object.assign(properties, {
+                // target: 30,
+              } as dxBulletProperties);
             } else if (props.component === "Calendar") {
               comp = dxCalendar;
               Object.assign(properties, {} as dxCalendarProperties);
@@ -271,23 +273,68 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               Object.assign(properties, {} as dxNumberBoxProperties);
             } else if (props.component === "ProgressBar") {
               comp = dxProgressBar;
-              Object.assign(properties, {} as dxProgressBarProperties);
+              Object.assign(properties, {
+                min: 0,
+                max: 100,
+                width: "90%",
+                statusFormat(ratio) {
+                  return `Loading: ${ratio * 100}%`;
+                },
+                onComplete(e) {
+                  props.setValue(props.meta, "completed");
+                },
+              } as dxProgressBarProperties);
             } else if (props.component === "RadioGroup") {
               comp = dxRadioGroup;
               // radioBox can support any value in the array, it will return the value on onChange like object.
               Object.assign(properties, {} as dxRadioGroupProperties);
             } else if (props.component === "RangeSelector") {
               comp = dxRangeSelector;
-              Object.assign(properties, {} as dxRangeSelectorProperties);
+              Object.assign(properties, {
+                // scale: {
+                //   startValue: 0,
+                //   endValue: 100,
+                //   tickInterval: 10,
+                //   minorTickInterval: 2,
+                //   minorTick: {
+                //     visible: true,
+                //   },
+                //   label: {
+                //     format: {
+                //       type: "decimal",
+                //     },
+                //   },
+                // },
+                // sliderMarker: {
+                //   format: {
+                //     type: "decimal",
+                //   },
+                // },
+                // value: [20, 80],
+              } as dxRangeSelectorProperties);
             } else if (props.component === "RangeSlider") {
               comp = dxRangeSlider;
-              Object.assign(properties, {} as dxRangeSliderProperties);
+              Object.assign(properties, {
+                // min: 0,
+                // max: 100,
+                // start: 20,
+                // end: 80,
+                // label: {
+                //   visible: true,
+                //   format(value: number) {
+                //     return `${value}%`;
+                //   },
+                // },
+              } as dxRangeSliderProperties);
               // } else if(props.component === "SelectBox" ) {
               //  comp = dxSelectBox;
               //  Object.assign(properties, {} as dxSelectBoxProperties);
             } else if (props.component === "Slider") {
               comp = dxSlider;
-              Object.assign(properties, {} as dxSliderProperties);
+              Object.assign(properties, {
+                // min: 0,
+                // max: 100,
+              } as dxSliderProperties);
             } else if (props.component === "Switch") {
               comp = dxSwitch;
               Object.assign(properties, {} as dxSwitchProperties);

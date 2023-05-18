@@ -45,9 +45,9 @@ import {
   getSelectionOptions,
   getToEdge
 } from "../lib/Traverse";
-import { ButtonField } from "./core/Button";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
+import { GenericField } from "./input/GenaricField";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
@@ -456,7 +456,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
             </For>
           </Show>
           <div ref={(el) => new dxValidationSummary(el, { validationGroup })} />
-          <ButtonField
+          <GenericField
+           component={"Button"}
             meta={
               {
                 properties: {
@@ -487,7 +488,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
               }
             }}
           />
-          <ButtonField
+          <GenericField
+           component={"Button"}
             meta={
               {
                 properties: {

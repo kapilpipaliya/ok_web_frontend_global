@@ -29,11 +29,11 @@ import TreeView, {
 } from "devextreme/ui/tree_view";
 import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
-import { ButtonField } from "./core/Button";
 import Home from "../pages/home/home";
 import { Page } from "./DynamicPage";
 import { FormDesigner } from "./FormDesigner";
 import { syncEvent } from "./ws_events";
+import { GenericField } from "./input/GenaricField";
 
 // TODO: Make a Menu Collection and save it in database.
 const navigation = [
@@ -99,7 +99,8 @@ export const StaticSideBar = () => {
 
 export const MenuButtonToggle = () => {
   return (
-    <ButtonField
+    <GenericField
+     component={"Button"}
       meta={meta({ hint: "Open sidebar", icon: "menu", width: 40 })}
       onClick={() => {
         setSidebarOpen((v) => !v);
@@ -181,15 +182,18 @@ export const FullDashboard = () => {
     <div>
       <div
         ref={(el) => {
+          // if we don't use onMount, the content rendered below the sidebar.
           onMount(() => {
             const instance = new Drawer(el, {
               // @ts-ignore
               template: StaticSideBar,
+              // this will set the container div size to 100vh.
               height: "100vh",
+              opened: true,
               maxSize: 200,
               revealMode: "expand",
             });
-            createEffect(on(isSideBarOpen, (_) => instance.toggle()));
+            createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));
           });
         }}
       >

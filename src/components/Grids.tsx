@@ -35,10 +35,11 @@ import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
-import { ButtonField } from "./core/Button";
+
 import { DataType } from "devextreme/common";
 import { selectedValue } from "./input/SelectInputField";
 import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
+import { GenericField } from "./input/GenaricField";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -316,7 +317,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   return (
     <div class="">
       <div>
-        <ButtonField
+        <GenericField
+         component={"Button"}
           meta={
             {
               properties: {

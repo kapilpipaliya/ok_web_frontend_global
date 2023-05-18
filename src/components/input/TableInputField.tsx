@@ -12,11 +12,11 @@ import { DynamicComponent, FormContext, onChangeHandler } from "../dynamicForm";
 import { addMetaVertexes, FieldAttribute, getCollAttrs } from "../Form";
 import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
-import { ButtonGroupField } from "../core/ButtonGroup";
 import ScrollView from "devextreme/ui/scroll_view";
 import Sortable from "devextreme/ui/sortable";
 import { ComponentProps } from "../core/Form";
 import { Icon } from "@iconify-icon/solid";
+import { GenericField } from "./GenaricField";
 // import SortableKanban from "../core/SortableField";
 // import "../assets/styles/sortable.css";
 
@@ -323,7 +323,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       <>
         <DisplayCardProperties />
         <div>
-          <ButtonGroupField
+          <GenericField
+           component={"ButtonGroup"}
             meta={
               {
                 properties: {
@@ -606,7 +607,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties[IdAttr], attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
 
-          <ButtonGroupField
+          <GenericField
+           component={"ButtonGroup"}
             meta={
               {
                 properties: {
