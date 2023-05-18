@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
@@ -6,6 +6,7 @@ import dxDataGrid from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
 import CustomStore from "devextreme/data/custom_store";
+import { IdAttr } from "../../lib/graph";
 
 export function DropDownGrid(props: ComponentProps) {
   const [treeView, setTreeView] = createSignal(null);
@@ -42,8 +43,7 @@ export function DropDownGrid(props: ComponentProps) {
   });
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new DropDownBox(el, {
             value: 3,
@@ -100,10 +100,11 @@ export function DropDownGrid(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
 
-    </div>
+
   );
 }

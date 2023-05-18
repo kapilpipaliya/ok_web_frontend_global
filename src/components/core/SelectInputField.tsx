@@ -1,12 +1,11 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import { IdAttr } from "../../lib/graph";
 
 export function SelectInputField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new SelectBox(el, {
             items: props.items,
@@ -24,9 +23,9 @@ export function SelectInputField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

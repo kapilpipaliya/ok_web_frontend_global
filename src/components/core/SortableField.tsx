@@ -1,5 +1,5 @@
 import { ComponentProps } from "./Form";
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import Sortable, { Properties } from "devextreme/ui/sortable";
 import ScrollView from "devextreme/ui/scroll_view";
 // @ts-ignore
@@ -97,8 +97,7 @@ export default function SortableKanban(props: ComponentProps) {
   }
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         id="sortable1"
         ref={(el) => {
           {
@@ -106,6 +105,5 @@ export default function SortableKanban(props: ComponentProps) {
           }
         }}
       />
-    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import TreeList, { Properties } from "devextreme/ui/tree_list";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -57,8 +57,7 @@ export function TreeListComponent() {
 }
 export function TreeListField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new TreeList(el, {
             showRowLines: true,
@@ -80,9 +79,9 @@ export function TreeListField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

@@ -1,14 +1,13 @@
 import { ComponentProps } from "./Form";
 import TextBox, { Properties } from "devextreme/ui/text_box";
-import { createEffect } from "solid-js";
+import { createEffect, onCleanup } from "solid-js";
 import { NativeEventInfo } from "devextreme/events";
 import TextArea from "devextreme/ui/text_area";
 import { IdAttr } from "../../lib/graph";
 
 export default function FieldSetComponent(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <><div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new TextBox(el, {
             value: "Some text box value",
@@ -26,6 +25,7 @@ export default function FieldSetComponent(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
       <br />
@@ -50,8 +50,9 @@ export default function FieldSetComponent(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
-    </div>
+     </>
   );
 }

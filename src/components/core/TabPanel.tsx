@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import TabPanel, { Properties } from "devextreme/ui/tab_panel";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -34,8 +34,7 @@ export function TabPanelComponent() {
 }
 export function TabPanelField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new TabPanel(el, {
             height: 260,
@@ -51,9 +50,9 @@ export function TabPanelField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

@@ -1,12 +1,11 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 
 import DateBox, { Properties } from "devextreme/ui/date_box";
 import { ComponentProps } from "./Form";
 
 export function DateInputField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new DateBox(el, {
             onValueChanged: (e) => {
@@ -19,10 +18,11 @@ export function DateInputField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
 
-    </div>
+
   );
 }

@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import TileView, { Properties } from "devextreme/ui/tile_view";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -156,8 +156,7 @@ export function TileViewComponent() {
 }
 export function TileViewField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new TileView(el, {
             height: 350,
@@ -181,9 +180,9 @@ export function TileViewField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

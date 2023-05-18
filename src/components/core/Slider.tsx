@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Slider, { Properties } from "devextreme/ui/slider";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -19,8 +19,7 @@ export function SliderComponent() {
 }
 export function SliderField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Slider(el, {
             min: 0,
@@ -37,9 +36,9 @@ export function SliderField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

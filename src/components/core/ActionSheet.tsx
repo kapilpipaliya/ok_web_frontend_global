@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import ActionSheet, { Properties } from "devextreme/ui/action_sheet";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -33,8 +33,7 @@ export function ActionSheetComponent() {
 }
 export function ActionSheetField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new ActionSheet(el, {
             title: "Choose action",
@@ -51,9 +50,10 @@ export function ActionSheetField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
+
   );
 }

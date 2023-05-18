@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import SparkLine, { Properties } from "devextreme/viz/sparkline";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -54,8 +54,7 @@ export function SparkLineComponent() {
 }
 export function SparkLineField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new SparkLine(el, {});
 
@@ -66,9 +65,9 @@ export function SparkLineField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

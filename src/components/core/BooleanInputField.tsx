@@ -1,4 +1,4 @@
-import { createEffect } from "solid-js";
+import { createEffect, onCleanup } from "solid-js";
 
 import CheckBox, { Properties } from "devextreme/ui/check_box";
 import { ComponentProps } from "./Form";
@@ -6,8 +6,7 @@ import { IdAttr } from "../../lib/graph";
 
 export function BooleanInputField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new CheckBox(el, {
             enableThreeStateBehavior: true,
@@ -37,8 +36,9 @@ export function BooleanInputField(props: ComponentProps) {
               instance.option("validationErrors", undefined);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
-    </div>
+
   );
 }

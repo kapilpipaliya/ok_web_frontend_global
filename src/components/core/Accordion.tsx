@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Accordion, { Properties } from "devextreme/ui/accordion";
 // @ts-ignore
@@ -21,8 +21,7 @@ export function AccordionComponent() {
 }
 export function AccordionField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Accordion(el, {
             animationDuration: 300,
@@ -57,9 +56,10 @@ export function AccordionField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
+
   );
 }

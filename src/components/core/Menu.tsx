@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Menu, { Properties } from "devextreme/ui/menu";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -42,8 +42,7 @@ export function MenuComponent() {
 }
 export function MenuField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Menu(el, {
             onItemClick: (e: any) => {
@@ -56,9 +55,9 @@ export function MenuField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

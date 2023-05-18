@@ -1,13 +1,12 @@
 import { ComponentProps } from "./Form";
 import ResponsiveBox, { Properties } from "devextreme/ui/responsive_box";
-import { createEffect, For, Show } from "solid-js";
-import "../assets/styles/responsive_box.css";
+import { createEffect, For, Show, onCleanup } from "solid-js";
+
 import { IdAttr } from "../../lib/graph";
 
 export function ResponsiveBoxField(props: ComponentProps) {
   return (
-    <div id="page" aria-labeledby={props["aria-labeledby"]}>
-      <div
+      <div aria-labeledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new ResponsiveBox(el, {
             rows: [{ ratio: 1 }, { ratio: 2 }, { ratio: 1 }],
@@ -116,8 +115,5 @@ export function ResponsiveBoxField(props: ComponentProps) {
           <p>Footer</p>
         </div>
       </div>
-
-
-    </div>
   );
 }

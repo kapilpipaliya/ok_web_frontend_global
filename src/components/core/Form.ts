@@ -11,5 +11,5 @@ export interface ComponentProps {
 }
 export interface DisplayComponentProps {
   meta: Vertex;
-  data: Vertex;
+  data?: Vertex;
 }

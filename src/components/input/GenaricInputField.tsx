@@ -1,4 +1,4 @@
-import { createEffect, Show, useContext } from "solid-js";
+import { createEffect, onCleanup, Show, useContext } from "solid-js";
 import { G } from "@mobily/ts-belt";
 import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
 import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
@@ -171,7 +171,9 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 // note: valueChanged is fired even when the value is changed programmatically,
                 // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
                 // used data.event check to prevent this.
-                if (data.event || props.component === "FilterBuilder") {
+                if (props.component === "FileUploader") {
+                  props.setValue(props.meta, data.component._files[0].value);
+                } else if (data.event || props.component === "FilterBuilder") {
                   props.setValue(props.meta, data.value);
                 }
               },
@@ -219,19 +221,48 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               Object.assign(properties, {} as dxDropDownBoxProperties);
             } else if (props.component === "FileUploader") {
               comp = dxFileUploader;
-              Object.assign(properties, {value: []} as dxFileUploaderProperties);
+              Object.assign(properties, {
+                // selectButtonText: "Select file",
+                // labelText: "",
+                // accept: "image/*",
+                // uploadMode: "instantly",
+                value: []
+              } as dxFileUploaderProperties);
             } else if (props.component === "FilterBuilder") {
               comp = dxFilterBuilder;
               Object.assign(properties, {value: [],
+                // allowHierarchicalFields: true,
+                // onEditorPreparing: function (e) {
+                //   e.editorOptions.width = 125;
+                // },
                 // at least one field is required, else component is giving error.
                 fields: props.meta.properties.props.fields || [{
                   dataField: 'name',
                   dataType: 'string',
-                }]
+                }],
               } as dxFilterBuilderProperties);
             } else if (props.component === "HtmlEditor") {
               comp = dxHtmlEditor;
-              Object.assign(properties, {} as dxHtmlEditorProperties);
+              Object.assign(properties, {
+                toolbar: {
+                  items: [
+                    "bold",
+                    "italic",
+                    "color",
+                    "background",
+                    "link",
+                    {
+                      name: "header",
+                      acceptedValues: [1, 2, 3, false],
+                    },
+                    "variable",
+                  ],
+                },
+                variables: {
+                  dataSource: ["FirstName", "LastName", "Company"],
+                  escapeChar: ["{", "}"],
+                },
+              } as dxHtmlEditorProperties);
             } else if (props.component === "LinearGauge") {
               comp = dxLinearGauge;
               Object.assign(properties, {} as dxLinearGaugeProperties);
@@ -309,6 +340,22 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               });
               validatorInstance.context = formContext;
               validatorInstance.zmeta = props.meta;
+              // validationRules: [{
+              //     type: 'required',
+              //     message: 'Email is required',
+              //   }
+              //   , {
+              //     type: 'email',
+              //     message: 'Email is invalid',
+              //   },
+              //   {
+              //     type: 'async',
+              //     message: 'Email is already registered',
+              //     validationCallback(params) {
+              //       return sendRequest(params.value);
+              //     },
+              //   }
+              // ],
               createEffect(() =>
                 validatorInstance.option(
                   "validationRules",
@@ -341,6 +388,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 instance.option(property, value);
               }
             });
+            onCleanup(() => instance.dispose());
           }}
         />
       </Show>

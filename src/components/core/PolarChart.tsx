@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import PolarChart, { Properties } from "devextreme/viz/polar_chart";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -50,8 +50,7 @@ export function PolarChartComponent() {
 }
 export function PolarChartField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new PolarChart(el, {
             series: [
@@ -68,9 +67,9 @@ export function PolarChartField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }
