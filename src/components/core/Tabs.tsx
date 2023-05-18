@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Tabs, { Properties } from "devextreme/ui/tabs";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -30,8 +30,7 @@ export function TabsComponent() {
 }
 export function TabsField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Tabs(el, {
             onSelectionChanged(e) {
@@ -46,9 +45,9 @@ export function TabsField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

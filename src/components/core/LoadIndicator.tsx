@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import LoadIndicator, { Properties } from "devextreme/ui/load_indicator";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -19,8 +19,7 @@ export function LoadIndicatorComponent() {
 }
 export function LoadIndicatorField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new LoadIndicator(el, {
             width: 100,
@@ -32,9 +31,9 @@ export function LoadIndicatorField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

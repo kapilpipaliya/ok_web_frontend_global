@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import LoadPanel, { Properties } from "devextreme/ui/load_panel";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -49,6 +49,7 @@ export function LoadPanelField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 

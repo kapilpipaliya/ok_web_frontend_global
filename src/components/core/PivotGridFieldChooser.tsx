@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import PivotGrid, { Properties } from "devextreme/ui/pivot_grid";
 import PivotGridFieldChooser, {
@@ -30,8 +30,7 @@ export function PivotGridFieldChooserField(props: ComponentProps) {
   let pivotGridInstance: PivotGrid;
   let pivotGridFieldChooserInstance: PivotGridFieldChooser;
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <><div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           pivotGridInstance = new PivotGrid(el, {
             allowSortingBySummary: true,
@@ -85,6 +84,7 @@ export function PivotGridFieldChooserField(props: ComponentProps) {
               pivotGridInstance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
@@ -102,9 +102,10 @@ export function PivotGridFieldChooserField(props: ComponentProps) {
             width: 400,
             height: 400,
           });
+          onCleanup(() => pivotGridFieldChooserInstance.dispose());
         }}
       />
 
-    </div>
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import TreeView, { Properties } from "devextreme/ui/tree_view";
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import { IdAttr } from "../../lib/graph";
 
@@ -15,8 +15,6 @@ export function TreeViewField(props: ComponentProps) {
   };
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <h4>Employees</h4>
       <div
         ref={(el) => {
           const instance = new TreeView(el, {
@@ -40,10 +38,8 @@ export function TreeViewField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
-
-
-    </div>
   );
 }

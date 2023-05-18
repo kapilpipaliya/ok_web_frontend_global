@@ -2,13 +2,12 @@ import { ComponentProps } from "./Form";
 import RadioGroup, { Properties } from "devextreme/ui/radio_group";
 // @ts-ignore
 import { priorities } from "../data/radioData";
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { IdAttr } from "../../lib/graph";
 
 export function RadioGroupField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new RadioGroup(el, {
             items: priorities,
@@ -27,10 +26,10 @@ export function RadioGroupField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
 
-    </div>
   );
 }

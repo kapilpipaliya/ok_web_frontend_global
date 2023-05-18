@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Scheduler, { Properties } from "devextreme/ui/scheduler";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -19,8 +19,7 @@ export function SchedulerComponent() {
 }
 export function SchedulerField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Scheduler(el, {});
 
@@ -31,9 +30,9 @@ export function SchedulerField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

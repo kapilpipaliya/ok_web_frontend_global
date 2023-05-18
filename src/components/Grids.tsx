@@ -13,21 +13,32 @@ import {
   transactions,
   Vertex
 } from "../lib/graph";
-import { JSX, createEffect, createSignal, For, getOwner, on, runWithOwner, Show, splitProps, useContext } from "solid-js";
+import {
+  JSX,
+  createEffect,
+  createSignal,
+  For,
+  getOwner,
+  on,
+  runWithOwner,
+  Show,
+  splitProps,
+  useContext,
+  onCleanup
+} from "solid-js";
 import { klona } from "klona";
-import { Link, useNavigate } from "@solidjs/router";
+import { Link, useNavigate, useParams } from "@solidjs/router";
 
 import { G } from "@mobily/ts-belt";
 import { WsContext } from "./ws_events_dispatcher";
-import "./Grid.css";
 import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
-import { deleteVertex } from "../lib/Vertex";
+import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
 import { ButtonField } from "./core/Button";
 import { DataType } from "devextreme/common";
 import { selectedValue } from "./input/SelectInputField";
-import { getOptionLabel } from "../lib/Traverse";
+import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -115,6 +126,7 @@ export const SampleDataGrid = (props: {}) => {
           showColumnLines: true,
           width: "800",
         });
+        onCleanup(() => instance.dispose());
       }}
     />
   );
@@ -280,6 +292,7 @@ export const DataGrid = (props: DataGridProps) => {
             commitTransaction(Ws);
           }
         };
+        onCleanup(() => instance.dispose());
       }}
     />
   );
@@ -326,42 +339,40 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 };
 
 export const TableDashboard = () => {
-  const allFormTableLayouts = (): Vertex[] =>
-    graph.vertexLabelIdMap["Form"]
-      ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
-      .filter((v) => v.properties.table) || [];
+  const params = useParams();
+  const dashboard = findVertexByLabelAndUniqueId('Dashboard',IdAttr, params.name);
+  if (!dashboard) {
+    return "No Dashboard Found";
+  }
+  const allFormTableLayouts = getChildVertexes(['$0Form'], [dashboard]).vertexes || [];
+  const allCollTableLayouts = getChildVertexes(['$0Coll'], [dashboard]).vertexes || [];
 
-  const allCollTableLayouts = (): Vertex[] =>
-    graph.vertexLabelIdMap["Coll"]
-      ?.map((formLayoutVertex) => graph.vertexes[formLayoutVertex])
-      .filter((v) => v.properties.table) || [];
-
-  const allTableLayouts = () => [...new Set([...allCollTableLayouts(), ...allFormTableLayouts()])];
+  const allTableLayouts = () => [...new Set([...allCollTableLayouts, ...allFormTableLayouts])];
   return (
-    <div class="index">
-      <div class="title">
-        <div class="block-content main-sections">
+    <div class="">
+      <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
           <For<Vertex[]> each={allTableLayouts()}>
             {(tableLayout) => (
-              <div class="content-item">
-                {" "}
-                <Link href={`/${tableLayout.properties[IdAttr]}`}>
-                  {" "}
-                  <div></div>
-                  <h3 class="multi-line">{tableLayout.properties.title || tableLayout.properties[IdAttr]}</h3>{" "}
-                </Link>
-              </div>
+             <div class="bg:gray-22 p:10 r:10 max-w:350 bg:gray-28:hover flex ji:center ai:center h:5rem">
+               <h3 class="f:18@md font:semibold"></h3>
+               <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><Link href={`/${tableLayout.properties[IdAttr]}`}>{tableLayout.properties.title || tableLayout.properties[IdAttr]}</Link></p>
+             </div>
             )}
           </For>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-          <div class="content-item"></div>
-        </div>
       </div>
     </div>
   );
 };
+
+export const AllDashboards = () => {
+  const vertexes = () => graph.vertexLabelIdMap["Dashboard"]?.map((formVertex) => graph.vertexes[formVertex]) || [];
+
+  return (
+   <div class="">
+     <For<Vertex[]> each={vertexes()}>{(form) => <Link href={`/grid/${form.properties[IdAttr]}`}>{form.properties[IdAttr]}</Link>}</For>
+   </div>
+  );
+}
 const dataTypeToDataGrid = (type: string): DataType => {
   switch (type) {
     case "String":

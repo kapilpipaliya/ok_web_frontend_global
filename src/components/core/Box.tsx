@@ -1,7 +1,7 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Box, { Properties } from "devextreme/ui/box";
-import "../assets/styles/box.css";
+
 import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
@@ -20,8 +20,7 @@ export function BoxComponent() {
 }
 export function BoxField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+      <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Box(el, {
             direction: "row",
@@ -35,21 +34,18 @@ export function BoxField(props: ComponentProps) {
           });
         }}
       >
-        <div class="rect demo-dark" data-options="dxItem: {ratio: 1}" style={{ background: "#f39e6c" }}>
+        <div class="text-align:center font-size:30px padding-top:10px; height:100% demo-dark" data-options="dxItem: {ratio: 1}" style={{ background: "#f39e6c" }}>
           {" "}
           ratio = 1{" "}
         </div>
-        <div class="rect demo-light" data-options="dxItem: {ratio: 2}" style={{ background: "#f5e5a6" }}>
+        <div class="text-align:center font-size:30px padding-top:10px; height:100% demo-light" data-options="dxItem: {ratio: 2}" style={{ background: "#f5e5a6" }}>
           {" "}
           ratio = 2{" "}
         </div>
-        <div class="rect demo-dark" data-options="dxItem: {ratio: 1}" style={{ background: "#94d7c7" }}>
+        <div class="text-align:center font-size:30px padding-top:10px; height:100% demo-dark" data-options="dxItem: {ratio: 1}" style={{ background: "#94d7c7" }}>
           {" "}
           ratio = 1{" "}
         </div>
       </div>
-
-
-    </div>
   );
 }

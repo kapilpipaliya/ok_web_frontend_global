@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import VectorMap, { Properties } from "devextreme/viz/vector_map";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -19,8 +19,7 @@ export function VectorMapComponent() {
 }
 export function VectorMapField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new VectorMap(el, {
             bounds: [-180, 85, 180, -60],
@@ -42,9 +41,9 @@ export function VectorMapField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

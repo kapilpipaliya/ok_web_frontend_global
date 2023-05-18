@@ -1,4 +1,4 @@
-import { createEffect, For, JSXElement, Show } from "solid-js";
+import { createEffect, For, JSXElement, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Drawer, { Properties } from "devextreme/ui/drawer";
 import List from "devextreme/ui/list";
@@ -34,8 +34,7 @@ export function DrawerComponent() {
 }
 export function DrawerField(props: ComponentProps & { children: JSXElement }) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Drawer(el, {
             opened: false,
@@ -75,6 +74,6 @@ export function DrawerField(props: ComponentProps & { children: JSXElement }) {
         </div>
       </div>
 
-    </div>
+
   );
 }

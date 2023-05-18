@@ -5,7 +5,7 @@ import {
   createResource,
   Show,
   untrack,
-  useContext
+  useContext, onCleanup
 } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
@@ -222,6 +222,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 instance.option("dataSource", options);
               }
             });
+            onCleanup(() => instance.dispose());
           }}
         />
       </Show>

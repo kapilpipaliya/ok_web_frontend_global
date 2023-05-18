@@ -1,12 +1,11 @@
 import { ComponentProps } from "./Form";
 import RangeSlider, { Properties } from "devextreme/viz/range_selector";
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { IdAttr } from "../../lib/graph";
 
 export function RangeSelector(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new RangeSlider(el, {
             scale: {
@@ -43,10 +42,10 @@ export function RangeSelector(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
 
-    </div>
   );
 }

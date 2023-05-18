@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Funnel, { Properties } from "devextreme/viz/funnel";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -42,8 +42,7 @@ export function FunnelComponent() {
 }
 export function FunnelField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Funnel(el, {
             argumentField: "action",
@@ -65,9 +64,9 @@ export function FunnelField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Tooltip, { Properties } from "devextreme/ui/tooltip";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -19,8 +19,7 @@ export function TooltipComponent() {
 }
 export function TooltipField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <><div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Tooltip(el, {
             target: "#target-item",
@@ -44,7 +43,6 @@ export function TooltipField(props: ComponentProps) {
         {props.data.properties[props.meta.properties[IdAttr]]}
       </div>
       <div id="target-item">This is target item for tooltip</div>
-
-    </div>
+</>
   );
 }

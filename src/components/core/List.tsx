@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import List, { Properties } from "devextreme/ui/list";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -36,8 +36,7 @@ export function ListComponent() {
 }
 export function ListField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new List(el, {
             onItemClick: (e: any) => {
@@ -50,9 +49,9 @@ export function ListField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

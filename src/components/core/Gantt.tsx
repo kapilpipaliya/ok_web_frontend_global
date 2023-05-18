@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Gantt, { Properties } from "devextreme/ui/gantt";
 import { tasks, dependencies, resources, resourceAssignments } from "../data/ganttData";
@@ -78,8 +78,7 @@ export function GanttComponent() {
 }
 export function GanttField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Gantt(el, {
             tasks: {
@@ -139,9 +138,9 @@ export function GanttField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

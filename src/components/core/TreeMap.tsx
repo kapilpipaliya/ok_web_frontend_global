@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import TreeMap, { Properties } from "devextreme/viz/tree_map";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -56,8 +56,7 @@ export function TreeMapComponent() {
 }
 export function TreeMapField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new TreeMap(el, {});
 
@@ -68,9 +67,9 @@ export function TreeMapField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

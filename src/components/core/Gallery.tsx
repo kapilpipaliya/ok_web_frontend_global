@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Gallery, { Properties } from "devextreme/ui/gallery";
 import { IdAttr, Vertex } from "../../lib/graph";

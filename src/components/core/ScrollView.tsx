@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import ScrollView, { Properties } from "devextreme/ui/scroll_view";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -28,8 +28,7 @@ export function ScrollViewField(props: ComponentProps) {
   }
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new ScrollView(el, {
             height: 100,
@@ -50,6 +49,5 @@ export function ScrollViewField(props: ComponentProps) {
         <div id="scrollview-content">{props.data.properties[props.meta.properties[IdAttr]]}</div>
       </div>
 
-    </div>
   );
 }

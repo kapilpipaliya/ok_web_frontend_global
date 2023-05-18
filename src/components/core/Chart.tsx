@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import Chart, { Properties } from "devextreme/viz/chart";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -49,8 +49,7 @@ export function ChartComponent() {
 }
 export function ChartField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new Chart(el, {
             series: {
@@ -67,9 +66,10 @@ export function ChartField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
+
   );
 }

@@ -1,4 +1,4 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, onCleanup } from "solid-js";
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
 import { ComponentProps } from "./Form";
 
@@ -11,8 +11,7 @@ export function DropDownTry2(props: ComponentProps) {
   ];
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new DropDownBox(el, {
             dataSource: options,
@@ -30,8 +29,8 @@ export function DropDownTry2(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
-    </div>
   );
 }

@@ -160,3 +160,9 @@ export function findVertexByLabelAndUniqueIdWithSkip(label: string, attribute: s
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
+
+export const meta = (props: { [key: string]: any }) => ({
+ properties: {
+  props
+ }
+} as unknown as Vertex);

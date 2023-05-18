@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, JSXElement, on, onMount, Show } from "solid-js";
+import { createEffect, createSignal, For, JSXElement, on, onMount, Show, onCleanup } from "solid-js";
 import Drawer, { Properties } from "devextreme/ui/drawer";
 import { ComponentProps } from "./Form";
 
@@ -12,8 +12,7 @@ export function DrawerComponent(
   const { isSideBarOpen, setSideBarOpen } = props;
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           onMount(() => {
             const instance = new Drawer(el, {
@@ -39,6 +38,6 @@ export function DrawerComponent(
         </div>
       </div>
 
-    </div>
+
   );
 }

@@ -1,4 +1,4 @@
-import { createEffect, For, Show } from "solid-js";
+import { createEffect, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 import FileManager, { Properties } from "devextreme/ui/file_manager";
 import { IdAttr, Vertex } from "../../lib/graph";
@@ -90,8 +90,7 @@ export function FileManagerComponent() {
 }
 export function FileManagerField(props: ComponentProps) {
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new FileManager(el, {
             fileSystemProvider: props.data.properties[props.meta.properties[IdAttr]],
@@ -113,9 +112,9 @@ export function FileManagerField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
-    </div>
   );
 }

@@ -1,7 +1,7 @@
 import CustomStore from "devextreme/data/custom_store";
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
 import dxTreeView from "devextreme/ui/tree_view";
-import { createEffect, createSignal, For, Show } from "solid-js";
+import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
 import { ComponentProps } from "./Form";
 
 export function DropDownBoxField(props: ComponentProps) {
@@ -29,8 +29,7 @@ export function DropDownBoxField(props: ComponentProps) {
   };
 
   return (
-    <div aria-labelledby={props["aria-labeledby"]}>
-      <div
+    <div aria-labelledby={props["aria-labeledby"]}
         ref={(el) => {
           const instance = new DropDownBox(el, {
             value: "1_1",
@@ -88,10 +87,10 @@ export function DropDownBoxField(props: ComponentProps) {
               instance.option(property, props.meta.properties.props[property]);
             }
           });
+          onCleanup(() => instance.dispose());
         }}
       />
 
 
-    </div>
   );
 }

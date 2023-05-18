@@ -425,6 +425,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                     setActiveTab(e.itemData as string);
                   },
                 });
+                onCleanup(() => tabsInstance.dispose());
               }}
             />
 
