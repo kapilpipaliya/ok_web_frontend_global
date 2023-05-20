@@ -31,7 +31,6 @@ import { Link, useNavigate, useParams } from "@solidjs/router";
 
 import { G } from "@mobily/ts-belt";
 import { WsContext } from "./ws_events_dispatcher";
-import { FormMetaData, getFormApiFromForm } from "./Form";
 import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
@@ -40,6 +39,7 @@ import { DataType } from "devextreme/common";
 import { selectedValue } from "./input/SelectInputField";
 import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
 import { GenericField } from "./input/GenaricField";
+import { FormMetaData, getFormApiFromForm } from "../lib/Record";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];

@@ -9,7 +9,7 @@ import { bindOwner } from "solid-forms";
 import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent, FormContext, onChangeHandler } from "../dynamicForm";
-import { addMetaVertexes, FieldAttribute, getCollAttrs } from "../Form";
+import { addMetaVertexes, FieldAttribute, getCollAttrs } from "../../lib/Record";
 import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../../lib/Traverse";
 import { removeUndefinedProperties } from "../../utils/functions";
 import ScrollView from "devextreme/ui/scroll_view";
@@ -99,7 +99,6 @@ function addMeta(metaVertex: Vertex, data: Vertex) {
 
 export function deleteRow(
   vertex: Vertex,
-  local: boolean,
   isRealTime: boolean,
   txnId: number,
   Ws: ServerEventsDispatcher,
@@ -128,7 +127,7 @@ export function deleteRow(
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id);
     if (deleteResult.error) alert(deleteResult.error);
-    if (!local && isRealTime) commitTxn(txnId, Ws);
+    if (isRealTime) commitTxn(txnId, Ws);
   });
 }
 
@@ -343,7 +342,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               } as unknown as Vertex
             }
             data={{ properties: { meta: [] } } as unknown as Vertex}
-            onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId, Ws)}
+            onClick={() => deleteRow(p.joinVertex, isRealTime, txnId, Ws)}
           />
         </div>
       </>
@@ -467,7 +466,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               icon="material-symbols:restore-from-trash-outline"
               width={25}
               height={25}
-              onClick={() => deleteRow(p.joinVertex, local, isRealTime, txnId, Ws)}
+              onClick={() => deleteRow(p.joinVertex, isRealTime, txnId, Ws)}
             />
             <Show<boolean> when={!props.disabled}>
               <Icon icon="material-symbols:edit" width={25} height={25} onClick={() => setDisabled((v) => !v)} />

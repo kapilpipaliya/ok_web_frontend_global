@@ -1,4 +1,4 @@
-import { FormMetaData } from "./Form";
+import { FormMetaData } from "../lib/Record";
 import { klona } from "klona";
 import { findVertexByLabelAndUniqueId, findVertexByLabelAndUniqueIdWithSkip } from "../lib/Vertex";
 import { useContext } from "solid-js";

@@ -11,12 +11,10 @@ import {
   Switch,
   useContext
 } from "solid-js";
-import { klona } from "klona/json";
 
 import { toTitle } from "case-switcher-js";
 import {
   commitTxn,
-  getNewGraphId,
   getNewTxnId,
   graph,
   Id,
@@ -24,7 +22,7 @@ import {
   revertTransaction,
   Vertex
 } from "../lib/graph";
-import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
+import { mergeVertexProperties } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
 import { SelectInputField, setSelectionValue } from "./input/SelectInputField";
@@ -34,7 +32,7 @@ import Tabs from "devextreme/ui/tabs";
 import { A, G } from "@mobily/ts-belt";
 import { useNavigate } from "@solidjs/router";
 import { capitalizeFirstLetter } from "../utils/utils";
-import { AbstractSingleForm, addMetaVertexes, FormMetaData } from "./Form";
+import { AbstractSingleForm } from "./Form";
 import {
   genericComponents,
   GenericInputField
@@ -48,6 +46,7 @@ import {
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 import { GenericField } from "./input/GenaricField";
+import { FormMetaData, Record } from "../lib/Record";
 
 export const FormContext = createContext({} as { [key: string]: any });
 
@@ -265,36 +264,20 @@ export interface DynamicFormSequenceProps {
   config: { [key: string]: any };
 }
 export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
-  const form = klona(props.form);
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
-  let txnId = getNewTxnId();
-  const isRealTime = false;
 
-  // create a new vertex or use existing vertex
-  let vertex: Vertex;
+  const record = new Record({ form: props.form, ws: Ws });
   if (!props.id) {
-    if (!form[IdAttr]) {
-      return "Id not found";
+    const createResult = record.create();
+    if (createResult.error) {
+      return createResult.error;
     }
-    if (isRealTime) {
-      txnId = getNewTxnId();
-    }
-    const newVertexObj = newVertex(getNewGraphId(), [form.name], {});
-    // TODO: Do Create Transformation for the vertex
-    const { error } = addNewVertex(txnId, newVertexObj);
-    if (error) {
-      alert(error);
-      return;
-    }
-    if (!form.local && isRealTime) commitTxn(txnId, Ws);
-    vertex = graph.vertexes[newVertexObj.id];
   } else {
-    if (!graph.vertexes[props.id]) {
-      alert("vertex not found");
-      return;
+    const loadResult = record.load(props.id);
+    if (loadResult.error) {
+      return loadResult.error;
     }
-    vertex = graph.vertexes[props.id];
   }
 
   // focus first input
@@ -305,38 +288,11 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     divRef()?.querySelector?.("input")?.focus();
   });
 
-  const { attributes, ...custom } = props.form;
+  props.config["record"] = record;
+  props.config["vertex"] = record.vertex;
+  props.config["meta"] = record.metaVertex;
 
-  // save attributes to vertexes
-  let metaVertex: Vertex;
-  const metaTxnId = getNewTxnId();
-  if (props.meta) {
-    metaVertex = props.meta;
-  } else {
-    const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
-    const { error } = addNewVertex(metaTxnId, metaMainVertex);
-    if (error) {
-      alert(error);
-      return;
-    }
-    metaVertex = graph.vertexes[metaMainVertex.id];
-  }
-
-  props.config["vertex"] = vertex;
-  props.config["meta"] = metaVertex;
-
-  addMetaVertexes(metaTxnId, metaVertex, attributes);
-  onCleanup(() => {
-    revertTransaction(metaTxnId);
-  });
-
-  onCleanup(() => {
-    if (!props.meta) {
-      // TODO: Remove all the meta
-    }
-  });
-
-  const mainAttributes = getChildVertexes(["MetaAttr"], [metaVertex]); //.sort((a, b) => a.properties.pos - b.properties.pos);
+  const mainAttributes = getChildVertexes(["MetaAttr"], [record.metaVertex]); //.sort((a, b) => a.properties.pos - b.properties.pos);
 
   const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item) => item.properties.tab!) as unknown as {
     [tab: string]: Vertex[];
@@ -355,17 +311,6 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
 
   const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
-  const setValue = (attribute: Vertex, data: any) => {
-    // after commit, we can not use same txnId();
-    if (isRealTime) {
-      txnId = getNewTxnId();
-    }
-    mergeVertexProperties(txnId, vertex.id, {
-      [attribute.properties[IdAttr]]: data,
-    });
-    onChangeHandler(txnId, vertex, vertex, attribute);
-    if (!form.local && isRealTime) commitTxn(txnId, Ws);
-  };
   const cleanUpConfig = {} as { [key: string]: any };
 
   onCleanup(() => {
@@ -385,7 +330,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
     >
       <Show<HTMLFormElement> when={divRef()}>
         <FormContext.Provider
-          value={{ local: form.local, cleanUpConfig, validationGroup, formVertex: vertex, isRealTime, txnId }}
+          value={{ local: record.form.local, cleanUpConfig, validationGroup, formVertex: record.vertex, isRealTime: record.isRealTime, txnId: record.txnId }}
         >
           {/* Main Tab is display as top level fields */}
           <Show<{[p: string]: Vertex[]}> when={groupByTabsAndGroup["main"]}>
@@ -403,7 +348,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                     }}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <DynamicForm attributes={groupByTabsAndGroup["main"][group]} vertex={vertex} setValue={setValue} />
+                    <DynamicForm attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />
                   </div>
                 </>
               )}
@@ -447,8 +392,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
                     </Show>
                     <DynamicForm
                       attributes={groupByTabsAndGroup[activeTab()][group]}
-                      vertex={vertex}
-                      setValue={setValue}
+                      vertex={record.vertex}
+                      setValue={record.setValue}
                     />
                   </div>
                 );
@@ -478,8 +423,8 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
               if (result.isValid) {
                 console.log("valid");
                 // !!!TODO!!! Handle Error Received From server when commit
-                if (!form.local && !isRealTime) {
-                  commitTxn(txnId, Ws);
+                if (!record.form.local && !record.isRealTime) {
+                  commitTxn(record.txnId, Ws);
                 }
                 // currently we are navigating back.
                 navigate(-1);
@@ -500,7 +445,7 @@ export const DynamicFormSequence = (props: DynamicFormSequenceProps) => {
             }
             data={{ properties: { meta: "Cancel" } } as unknown as Vertex}
             onClick={() => {
-              revertTransaction(txnId);
+              revertTransaction(record.txnId);
               setTimeout(() => navigate(-1));
             }}
           />

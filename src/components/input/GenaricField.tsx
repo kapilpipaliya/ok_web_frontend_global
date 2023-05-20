@@ -1470,7 +1470,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   props.onClick?.(e.itemData);
                 },
               } as dxButtonGroupProperties);
-              createEffect(() => instance.option("selectedItems", props.data.properties[props.meta.properties[IdAttr]]));
+
 
             } else if (props.component === "Tooltip") {
               comp = dxTooltip;
@@ -1601,6 +1601,8 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 instance.option("text", props.data.properties[props.meta.properties[IdAttr]])
               });
               }
+            } else if (props.component === "ButtonGroup") {
+              createEffect(() => instance.option("selectedItems", props.data.properties[props.meta.properties[IdAttr]]));
             }
 
             createEffect(() => {
