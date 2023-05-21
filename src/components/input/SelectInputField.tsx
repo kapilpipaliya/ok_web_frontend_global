@@ -19,7 +19,6 @@ import {
   Vertex
 } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { FormContext, onChangeHandler } from "../dynamicForm";
 import { WsContext } from "../ws_events_dispatcher";
 import {
   getInEdge,
@@ -30,6 +29,7 @@ import {
   getToEdge,
 } from "../../lib/Traverse";
 import { ComponentProps } from "../core/Form";
+import { FormContext, onChangeHandler, Record } from "../../lib/Record";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
@@ -113,7 +113,8 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
 
 export function SelectInputField(props: ComponentProps & {component: string}) {
   const { Ws } = useContext(WsContext);
-  let { local, txnId, formVertex, isRealTime } = useContext(FormContext);
+  let { record } = useContext(FormContext);
+  if (!record) record = {} as Record;
 
   const [selectOptions, { refetch }] = createResource(() => {
     let value = props.meta.properties.props.items;
@@ -162,20 +163,20 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 if (!e.event) {
                   return;
                 }
-                if (isRealTime) {
-                  txnId = getNewTxnId();
+                if (record.isRealTime) {
+                  record.txnId = getNewTxnId();
                 }
                 if (props.meta.properties.props.stringValue) {
-                  props.setValue(props.meta, e.value);
+                  props.setValue(props.meta,props.data, e.value);
                 } else if (props.meta.properties.props.items) {
-                  props.setValue(props.meta, e.value);
+                  props.setValue(props.meta,props.data, e.value);
                 } else if (props.meta.properties.props.inward) {
-                  setParentValue(txnId, props.data, props.meta, e.value);
+                  setParentValue(record.txnId, props.data, props.meta, e.value);
                 } else {
-                  setSelectionValue(txnId, props.data, props.meta, e.value);
+                  setSelectionValue(record.txnId, props.data, props.meta, e.value);
                 }
-                onChangeHandler(txnId, formVertex, props.data, props.meta);
-                if (!local && isRealTime) commitTxn(txnId, Ws);
+                onChangeHandler(record.txnId, record.vertex, props.data, props.meta);
+                if (record.isRealTime) commitTxn(record.txnId, Ws);
                 // })
               },
               labelMode: "floating",

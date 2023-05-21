@@ -102,7 +102,7 @@ export default function Home() {
 
   const todaysEnergizerData = newVertex(0, ["Vertex"], { title: "Today's Energizer", todayEnergizer: todayData });
 
-  const setValue = (attribute: Vertex, data: any) => {
+  const setValue = (attribute: Vertex,vertex: Vertex, data: any) => {
     console.log(attribute, data);
   };
 

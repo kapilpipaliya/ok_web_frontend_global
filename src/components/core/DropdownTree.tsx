@@ -78,7 +78,7 @@ export function DropDownBoxTreeField(props: ComponentProps) {
               setTreeView(treeView);
             },
             onValueChanged: (e) => {
-              props.setValue(props.meta, e.value);
+              props.setValue(props.meta, props.data,e.value);
               treeView().instance.selectItem(e.value);
             },
           });

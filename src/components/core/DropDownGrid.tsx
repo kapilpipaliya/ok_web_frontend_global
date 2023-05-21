@@ -80,14 +80,14 @@ export function DropDownGrid(props: ComponentProps) {
 
                   e.component.option("selectedRowKeys", hasSelection ? keys[0] : null);
                   // set value of keys[0] to props.setvalue
-                  props.setValue(props.meta, keys[0]);
+                  props.setValue(props.meta, props.data,keys[0]);
                 },
               });
 
               setDataGrid($dataGrid.instance);
 
               e.component.on("valueChanged", (args: any) => {
-                props.setValue(props.meta, e.value);
+                props.setValue(props.meta, props.data,e.value);
                 console.log("onValueChanged", e.value);
                 // dataGrid().selectRows(args.value, false);
                 e.component.close();

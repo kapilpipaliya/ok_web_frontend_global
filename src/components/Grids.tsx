@@ -172,7 +172,21 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex], attribute.props?.displayExpr || `properties.${IdAttr}`);
+          return getOptionLabel(graph.vertexes[vertex[0]], attribute.props?.displayExpr || `properties.${IdAttr}`);
+        }
+        return "";
+      };
+    }
+    if (attribute.component === "TagBox" && !attribute.props.items) {
+      attribute["calculateCellValue"] = (columnBase, rowData) => {
+        const vertex = selectedValue(
+          {
+            properties: attribute,
+          } as unknown as Vertex,
+          columnBase,
+        );
+        if (vertex) {
+          return vertex.map(v => getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `properties.${IdAttr}`)).join(', ');
         }
         return "";
       };
@@ -367,7 +381,7 @@ export const TableDashboard = () => {
 };
 
 export const AllDashboards = () => {
-  const vertexes = () => graph.vertexLabelIdMap["Dashboard"]?.map((formVertex) => graph.vertexes[formVertex]) || [];
+  const vertexes = () => graph.vertexLabelIdMap["Dashboard"]?.map((vertex) => graph.vertexes[vertex]) || [];
 
   return (
    <div class="">

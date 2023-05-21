@@ -23,11 +23,11 @@ import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/te
 import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
 
 import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
-import { FormContext } from "../dynamicForm";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
 import { IdAttr } from "../../lib/graph";
+import { FormContext } from "../../lib/Record";
 
 export const genericComponents = [
   "Autocomplete",
@@ -172,13 +172,13 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
                 // used data.event check to prevent this.
                 if (props.component === "FileUploader") {
-                  props.setValue(props.meta, data.component._files[0].value);
+                  props.setValue(props.meta, props.data,data.component._files[0]?.value);
                 } else if (data.event || props.component === "FilterBuilder") {
-                  props.setValue(props.meta, data.value);
+                  props.setValue(props.meta, props.data,data.value);
                 }
               },
               // onChange: (e: any) => {
-              //   props.setValue(props.meta, e.value);
+              //   props.setValue(props.meta, props.data, e.value);
               // },
               validationGroup: formContext.validationGroup,
               disabled: props.disabled,
@@ -281,7 +281,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                   return `Loading: ${ratio * 100}%`;
                 },
                 onComplete(e) {
-                  props.setValue(props.meta, "completed");
+                  props.setValue(props.meta, props.data,"completed");
                 },
               } as dxProgressBarProperties);
             } else if (props.component === "RadioGroup") {

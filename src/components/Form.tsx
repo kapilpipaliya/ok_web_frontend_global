@@ -10,19 +10,18 @@ import {
 import { Link, useNavigate } from "@solidjs/router";
 import { graph, Id, IdAttr, Vertex } from "../lib/graph";
 
-import { DynamicFormSequence, DynamicFormSequenceProps } from "./dynamicForm";
+import { DynamicForm, DynamicFormProps } from "./dynamicForm";
 import { AlertMessageContext } from "../appState";
 import { Alert } from "../Type";
 import { WsContext, WSEvent } from "./ws_events_dispatcher";
 import { SelectInputField } from "./input/SelectInputField";
-import { AttrsTableData } from "./api";
 import { GenericField } from "./input/GenaricField";
-import { getFormApiFromForm, Record } from "../lib/Record";
+import { getFormMetaData, Record } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 
 // TODO make default component property applied to
 export const AllForms = () => {
-  const allForms = () => graph.vertexLabelIdMap["Form"]?.map((formVertex) => graph.vertexes[formVertex]) || [];
+  const allForms = () => graph.vertexLabelIdMap["Form"]?.map((vertex) => graph.vertexes[vertex]) || [];
 
   return (
     <div class="">
@@ -31,27 +30,23 @@ export const AllForms = () => {
   );
 };
 
-interface AbstractSingleFormProps extends Omit<DynamicFormSequenceProps, "form" | "id"> {
+interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
   formId: string;
   id: string | number;
 }
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   // TODO: add validation on form that AttrsTableData keys should not available.
-  let form = AttrsTableData[props.formId];
 
-  if (!form) {
-    const formResult = getFormApiFromForm(props.formId);
-    if (formResult.error) return formResult.error;
-    form = formResult.form!;
-  }
-  console.log(form);
+  const form = getFormMetaData(props.formId);
+  if (form.error) return form.error;
+
   const [p, customProps] = splitProps(props, ["formId", "id"]);
 
   const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
   return (
     <div class="">
-      <DynamicFormSequence form={form!} id={id() as Id} {...customProps} config={props.config || {}} />
+      <DynamicForm form={form.form!} id={id() as Id} {...customProps} config={props.config || {}} />
     </div>
   );
 };
@@ -77,10 +72,10 @@ export const Login = (props: {}) => {
   });
   onCleanup(() => Ws.unbind(event));
 
-  const config = {} as { vertex: Vertex };
+  const config = {} as { record: Record };
   const onLoginClick = () => {
-    const email = config.vertex.properties.email as string;
-    const password = config.vertex.properties.password as string;
+    const email = config.record.vertex.properties.email as string;
+    const password = config.record.vertex.properties.password as string;
     Ws.trigger([[event, { body: { email, password } }]]);
     // revertTransaction(txnId)
   };
@@ -148,10 +143,10 @@ export const SignUp = (props: {}) => {
   // 4. clear form on success
   // 5. make password not visible
 
-  const config = {} as { vertex: Vertex };
+  const config = {} as { record: Record };
   const onSignupClick = () => {
-    const email = config.vertex.properties.email as string;
-    const password = config.vertex.properties.password as string;
+    const email = config.record.vertex.properties.email as string;
+    const password = config.record.vertex.properties.password as string;
     Ws.trigger([[event, { body: { email, password } }]]);
     // revertTransaction(txnId);
   };
@@ -188,6 +183,7 @@ export const SimpleImport = (props: {}) => {
    return (
     <>
       <SelectInputField
+        component={"SelectBox"}
         data={{ properties: {} } as Vertex}
         meta={
           {
@@ -203,9 +199,9 @@ export const SimpleImport = (props: {}) => {
             },
           } as unknown as Vertex
         }
-        setValue={(attr, data) => updateImportRecord(data, config.record)}
+        setValue={(attr,vertex, data) => updateImportRecord(data, config.record)}
       />
-      <AbstractSingleForm id={"new"} formId={"SimpleImport"} config={config} />
+      <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
 
       <GenericField
        component={"Button"}

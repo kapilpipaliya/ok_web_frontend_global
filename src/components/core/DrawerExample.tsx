@@ -22,7 +22,7 @@ export function DrawerComponent() {
   });
 
   const data = newVertex(0, ["Vertex"], { meta: navigation });
-  const setValue = (attribute: Vertex, data: any) => {
+  const setValue = (attribute: Vertex,vertex:Vertex, data: any) => {
     console.log(attribute, data);
   };
 

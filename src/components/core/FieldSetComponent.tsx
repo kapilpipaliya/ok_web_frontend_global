@@ -12,7 +12,7 @@ export default function FieldSetComponent(props: ComponentProps) {
           const instance = new TextBox(el, {
             value: "Some text box value",
             onChange: (e: NativeEventInfo<TextBox, KeyboardEvent>) => {
-              props.setValue(props.meta, e.component.option("value"));
+              props.setValue(props.meta, props.data,e.component.option("value"));
             },
           });
           createEffect(
@@ -33,7 +33,7 @@ export default function FieldSetComponent(props: ComponentProps) {
             height: 100,
             onChange: (e: NativeEventInfo<TextArea, KeyboardEvent>) => {
               console.log(e.component.option("value"));
-              props.setValue(props.meta, e.component.option("value"));
+              props.setValue(props.meta, props.data,e.component.option("value"));
             },
           });
           createEffect(

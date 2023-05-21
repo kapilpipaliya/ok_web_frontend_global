@@ -65,7 +65,7 @@ export function DropDownBoxField(props: ComponentProps) {
                     // e.component.unselectAll();
                     // e.component.selectItem(selectedItems[0]);
                     e.component.option("value", selectedItems[0]);
-                    props.setValue(props.meta, selectedItems[0]);
+                    props.setValue(props.meta, props.data,selectedItems[0]);
                     syncTreeViewSelection(e.component, selectedItems[0]);
                   } else {
                     e.component.option("value", null);
@@ -75,7 +75,7 @@ export function DropDownBoxField(props: ComponentProps) {
               setTreeView(treeViewInstance);
             },
             onValueChanged: (e) => {
-              props.setValue(props.meta, e.value);
+              props.setValue(props.meta, props.data,e.value);
               console.log("onValueChanged", e.value);
               syncTreeViewSelection(treeView(), e.value);
               e.component.close();

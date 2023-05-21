@@ -24,11 +24,11 @@ import {
   newVertex,
   replaceVertexProperties,
 } from "../lib/Vertex";
-import { newRow } from "../components/input/TableInputField";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import { WsContext } from "../components/ws_events_dispatcher";
 import { getChildVertex, getParentVertex } from "../lib/Traverse";
-import { getId } from "../components/dynamicForm";
+import { getFormMetaData, getId, newRow, Record } from "../lib/Record";
+import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -273,6 +273,83 @@ export const BackupRestore = () => {
     }
     commitTxn(txnId, Ws);
   };
+  const importAllCSV = () => {
+    const form = getFormMetaData('Import');
+    if(form.error) return form.error;
+    const record = new Record({ form: form.form!, ws: Ws });
+    const createResult = record.create();
+    if (createResult.error) return createResult.error;
+
+
+    // 1. import dataTypes
+    updateImportRecord('dataType', record, false);
+    record.mergeFieldValues({
+      csv: `name
+Null
+String
+Boolean
+Integer
+Float
+List
+Map
+Duration
+Date
+LocalTime
+LocalDateTime`,
+    });
+    onDataDirectoryImportClick(record, Ws);
+    // 2. Import components
+    updateImportRecord('component', record, false);
+    record.mergeFieldValues({
+      csv: `name\tdataType\tparent\tcategory
+Autocomplete\tString\t\tForm
+Calendar\tInteger\t\tForm
+CheckBox\tBoolean\t\tForm
+ColorBox\tString\t\tForm
+DateBox\tDate\t\tForm
+DropDownBox\tList\t\tForm
+FileUploader\tList\t\tForm
+FilterBuilder\tList\t\tForm
+HtmlEditor\tString\t\tForm
+NumberBox\tFloat\t\tForm
+RadioGroup\tList\t\tForm
+RangeSelector\t\t\tForm
+RangeSlider\t\t\tForm
+SelectBox\tList\t\tForm
+Slider\tFloat\t\tForm
+Switch\tBoolean\t\tForm
+TagBox\tList\t\tForm
+TextArea\tString\t\tForm
+TextBox\tString\t\tForm
+Table\t\t\tForm
+Bullet\tInteger\t\tView
+CircularGauge\tInteger\t\tView
+LinearGauge\tFloat\t\tView
+ProgressBar\tFloat\t\tView
+Int\tInteger\tNumberBox\tCustom
+Float\tFloat\tNumberBox\tCustom
+DateTimeBox\tLocalDateTime\tDateBox\tCustom`,
+    });
+    onDataDirectoryImportClick(record, Ws);
+    // 3. Import dataTypeDefault
+    updateImportRecord('dataTypeDefault', record, false);
+    record.mergeFieldValues({
+      csv: `name\tdefault
+String\tTextBox
+Boolean\tCheckBox
+Integer\tInt
+Float\tFloat
+List\tTextArea
+Map\tTextArea
+Duration\tDateBox
+Date\tDateBox
+LocalTime\tDateTimeBox
+LocalDateTime\tDateBox`,
+    });
+    onDataDirectoryImportClick(record, Ws);
+
+
+  };
   // Hack to remount the component
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
@@ -348,16 +425,26 @@ export const BackupRestore = () => {
               </div>
             </CardBody>
           </C>
+          <C title={"Graph Functions"} subtitle={"Simple Import"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <button type="button" onClick={makeASampleForm}>
+                  <span>Make a sample Form</span>
+                </button>
+              </div>
+            </CardBody>
+          </C>
+          <C title={"Graph Functions"} subtitle={"Import All CSV"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <button type="button" onClick={importAllCSV}>
+                  <span>Import all csv</span>
+                </button>
+              </div>
+            </CardBody>
+          </C>
         </div>
-        <C title={"Graph Functions"} subtitle={"Simple Import"}>
-          <CardBody class="m:0 p:12">
-            <div class="m:1rem flex gap:0.5rem">
-              <button type="button" onClick={makeASampleForm}>
-                <span>Make a sample Form</span>
-              </button>
-            </div>
-          </CardBody>
-        </C>
+
       </div>
 
       <Show<boolean> when={load()}>
