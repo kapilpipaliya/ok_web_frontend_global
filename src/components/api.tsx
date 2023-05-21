@@ -1,8 +1,7 @@
-import { FormMetaData } from "../lib/Record";
+import { FormMetaData, IFormContext } from "../lib/Record";
 import { klona } from "klona";
 import { findVertexByLabelAndUniqueId, findVertexByLabelAndUniqueIdWithSkip } from "../lib/Vertex";
 import { useContext } from "solid-js";
-import { FormContext } from "./dynamicForm";
 import { IdAttr } from "../lib/graph";
 
 /* use in c++
@@ -200,13 +199,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options) => {
-                const { local, cleanUpConfig, formVertex } = options.validator.context || {};
+                const { cleanUpConfig, record } = options.validator.context || {} as IFormContext;
 
                 const val = options.value;
                 if (Object.keys(AttrsTableData).includes(val)) {
                   return false;
                 } else {
-                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, formVertex?.id);
+                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id);
                 }
               },
             },
@@ -508,7 +507,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { name: "title", component: "TextBox" },
       { name: "description", component: "TextArea" },
       { name: "table", component: "CheckBox" },
-      { name: "local", component: "CheckBox" },
+      { name: "isRealTime", component: "CheckBox" },
       {
         name: "coll",
         displayName: "Collection",
@@ -762,10 +761,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     name: "Role",
     attributes: [{ name: "name", component: "TextBox" }],
   },
-  SimpleImport: {
+  Import: {
     title: "Simple Insert",
-    name: "SimpleImport",
-    local: true,
+    name: "Import",
+    isRealTime: true,
     attributes: [
       {
         name: "csv",
@@ -827,7 +826,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   SignUp: {
     title: "User",
     name: "User",
-    local: true,
+    isRealTime: true,
     attributes: [
       { name: "email", component: "TextBox" },
       {
@@ -840,7 +839,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   LogIn: {
     title: "User",
     name: "User",
-    local: true,
+    isRealTime: true,
     attributes: [
       { name: "email", component: "TextBox" },
       {
@@ -853,7 +852,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   _PageData: {
     title: "User",
     name: "User",
-    local: true,
+    isRealTime: true,
     attributes: [
       {
         name: "coll",

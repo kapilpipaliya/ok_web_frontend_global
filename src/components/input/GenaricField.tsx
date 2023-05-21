@@ -53,11 +53,11 @@ import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer
 
 
 import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
-import { FormContext } from "../dynamicForm";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
 import { IdAttr } from "../../lib/graph";
+import { FormContext } from "../../lib/Record";
 
 export const genericComponents = [
   "Autocomplete",
@@ -274,7 +274,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 // const selectedKeys = selectedItems.map((item: any) => item.key);
                 // treeViewInstance.selectItem(selectedKeys);
                 console.log(selectedItems);
-                props.setValue(props.meta, selectedItems);
+                props.setValue(props.meta,props.data, selectedItems);
               };
               comp = dxTreeView;
               Object.assign(properties, {
@@ -519,7 +519,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               ];
               Object.assign(properties, {
                 onSelectionChanged(e) {
-                  props.setValue(props.meta, e.addedItems[0].text);
+                  props.setValue(props.meta, props.data,e.addedItems[0].text);
                 },
               } as dxTabsProperties);
             } else if (props.component === "TabPanel") {
@@ -541,7 +541,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               Object.assign(properties, {
                 height: 260,
                 onSelectionChanged(e) {
-                  props.setValue(props.meta, e.addedItems[0].text);
+                  props.setValue(props.meta, props.data,e.addedItems[0].text);
                 },
               } as dxTabPanelProperties);
             } else if (props.component === "SpeedDialAction") {
@@ -883,7 +883,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
               Object.assign(properties, {
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData);
+                  props.setValue(props.meta, props.data,e.itemData);
                 },
                 height: 300,
                 selectedIndex: 0,
@@ -901,7 +901,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               `;
                 },
                 onSelectionChanged(e) {
-                  props.setValue(props.meta, e.addedItems[0]);
+                  props.setValue(props.meta,props.data, e.addedItems[0]);
                 },
               } as dxMultiViewProperties);
               // } else if(props.component === "SelectBox" ) {
@@ -935,7 +935,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
               Object.assign(properties, {
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData);
+                  props.setValue(props.meta, props.data,e.itemData);
                 },
               } as dxMenuProperties);
             } else if (props.component === "Map") {
@@ -969,7 +969,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
               Object.assign(properties, {
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData);
+                  props.setValue(props.meta, props.data,e.itemData);
                 },
               } as dxLookupProperties);
             } else if (props.component === "LoadPanel") {
@@ -1020,7 +1020,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
               Object.assign(properties, {
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData);
+                  props.setValue(props.meta, props.data,e.itemData);
                 },
               } as dxListProperties);
             } else if (props.component === "Gantt") {
@@ -1341,7 +1341,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               Object.assign(properties, {
                 visible: true,
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData.text);
+                  props.setValue(props.meta, props.data,e.itemData.text);
                 },
               } as dxContextMenuProperties);
             } else if (props.component === "Chart") {
@@ -1423,10 +1423,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               Object.assign(properties, {
                 title: "Choose action",
                 onCancelClick: () => {
-                  props.setValue(props.meta, "Cancel");
+                  props.setValue(props.meta, props.data,"Cancel");
                 },
                 onItemClick: (e: any) => {
-                  props.setValue(props.meta, e.itemData.text);
+                  props.setValue(props.meta,props.data, e.itemData.text);
                 },
               } as dxActionSheetProperties);
             } else if (props.component === "Accordion") {
@@ -1455,7 +1455,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               `;
                 },
                 onSelectionChanged: (e: any) => {
-                  props.setValue(props.meta, e.addedItems[0]);
+                  props.setValue(props.meta, props.data,e.addedItems[0]);
                 },
               } as dxAccordionProperties);
 
@@ -1558,7 +1558,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 useSelectMode: true,
                 width: 100,
                 onSelectionChanged: (e: any) => {
-                  props.setValue(props.meta, e.item);
+                  props.setValue(props.meta, props.data,e.item);
                 },
               } as dxDropDownButtonProperties);
             } else if (props.component === "Drawer") {
@@ -1628,7 +1628,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 instance.option(property, value);
               }
             });
-            onCleanup(() => instance.dispose());
+            onCleanup(() => instance?.dispose());
           }}
         >{props.children}</div>
       </Show>

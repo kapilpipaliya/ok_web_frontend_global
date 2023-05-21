@@ -1,3 +1,4 @@
+import { JSX } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { G } from "@mobily/ts-belt";
 import { klona } from "klona";

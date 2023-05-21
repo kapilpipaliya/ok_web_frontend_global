@@ -1,17 +1,48 @@
-import { JSX, batch, createEffect, createMemo, createSignal, For, Match, onCleanup, Show, Switch, untrack, useContext, } from "solid-js";
+import {
+  JSX,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  Show,
+  Switch,
+  useContext
+} from "solid-js";
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { toTitle } from "case-switcher-js";
-import { addNewVertex, deleteVertex, findVertexByLabelAndUniqueId, mergeVertexProperties, newVertex, replaceVertexProperties, } from "../../lib/Vertex";
-import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { commitTxn, getNewGraphId, getNewTxnId, graph, Id, IdAttr, revertTransaction, Vertex } from "../../lib/graph";
-import { bindOwner } from "solid-forms";
-import { ServerEventsDispatcher, WsContext } from "../ws_events_dispatcher";
+import {
+  findVertexByLabelAndUniqueId,
+  replaceVertexProperties
+} from "../../lib/Vertex";
+import {
+  getNewTxnId,
+  graph,
+  IdAttr,
+  revertTransaction,
+  Vertex
+} from "../../lib/graph";
+import { WsContext } from "../ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent, FormContext, onChangeHandler } from "../dynamicForm";
-import { addMetaVertexes, FieldAttribute, getCollAttrs } from "../../lib/Record";
-import { getChildVertex, getChildVertexes, getOptionLabel, getSelectionOptions, getToEdge } from "../../lib/Traverse";
-import { removeUndefinedProperties } from "../../utils/functions";
+import { DynamicComponent } from "../dynamicForm";
+import {
+  addMeta,
+  addMetaVertexes,
+  addNewRow,
+  componentProps,
+  deleteRow,
+  FieldAttribute,
+  FormContext,
+  getCollAttrs,
+  rowMetaInitialize
+} from "../../lib/Record";
+import {
+  getChildVertexes,
+  getOptionLabel,
+  getSelectionOptions
+} from "../../lib/Traverse";
 import ScrollView from "devextreme/ui/scroll_view";
 import Sortable from "devextreme/ui/sortable";
 import { ComponentProps } from "../core/Form";
@@ -21,142 +52,16 @@ import { GenericField } from "./GenaricField";
 // import "../assets/styles/sortable.css";
 
 
-export function newRow(
-  txnId: number,
-  parentVertex: Vertex,
-  edgeType: string,
-  label?: string,
-): { error: boolean; vertexId?: Id; edgeId?: Id } {
-  const vertexNew = newVertex(getNewGraphId(), [label || edgeType], {});
-  const insertVertex = addNewVertex(txnId, vertexNew);
-  if (insertVertex.error) {
-    alert(insertVertex.error);
-    return {
-      error: true,
-    };
-  }
-
-  const edgeNew = newEdge(getNewGraphId(), edgeType, {}, parentVertex.id, vertexNew.id);
-  const insertEdgeResult = addNewEdge(txnId, edgeNew);
-  if (insertEdgeResult.error) {
-    alert(insertEdgeResult.error);
-    return {
-      error: true,
-      vertexId: vertexNew.id,
-    };
-  }
-  return {
-    error: false,
-    vertexId: vertexNew.id,
-    edgeId: edgeNew.id,
-  };
-}
-
-function getComponentProperties(metaRows: Vertex[]) {
-  const metaData = metaRows.reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->$0Key:properties.key||:properties.key");
-    if (key) {
-      acc[key] = curr.properties.value;
-    }
-    return acc;
-  }, {} as { [key: string]: any });
-  return metaData;
-}
-
-// TODO: when meta changed realtime its not updating.
-function componentProps(metaVertex: Vertex, data: Vertex) {
-  const meta = metaVertex.properties.meta.split("+");
-  const results = [] as { [key: string]: any }[];
-  for (const metaPart of meta) {
-    const metaRows = getSelectionOptions(data, metaPart).vertexes || [];
-    const metaData = getComponentProperties(metaRows);
-    results.push(metaData);
-  }
-  return results.reduce((acc, curr) => {
-    Object.assign(acc, curr);
-    return acc;
-  }, {} as { [key: string]: any });
-}
-
-// add meta from vertex value:
-function addMeta(metaVertex: Vertex, data: Vertex) {
-  if (metaVertex.properties.meta) {
-    const metaData = componentProps(metaVertex, data);
-    const metaDataVal = removeUndefinedProperties(metaData, false, 10);
-    untrack(() => {
-      const newMetaData = Object.assign(
-        {},
-        // when component is rendered dynamically graph.vertexes[metaVertex.properties.templateId] value is undefined
-        graph.vertexes[metaVertex.properties.templateId]?.properties?.props || {},
-        metaDataVal,
-      );
-      mergeVertexProperties(getNewTxnId(), metaVertex.id, {
-        props: newMetaData,
-      });
-    });
-  }
-}
-
-export function deleteRow(
-  vertex: Vertex,
-  isRealTime: boolean,
-  txnId: number,
-  Ws: ServerEventsDispatcher,
-) {
-  batch(() => {
-    if (isRealTime) {
-      txnId = getNewTxnId();
-    }
-    // delete all vertex in edges
-    const inEdges = vertex.in_edges;
-    for (const type in inEdges) {
-      for (const edgeId of inEdges[type]) {
-        const deleteEdgeResult = deleteEdge(txnId, edgeId);
-        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-      }
-    }
-    // delete all outEdges of vertex
-    const outEdge = vertex.out_edges;
-    for (const type in outEdge) {
-      for (const edgeId of outEdge[type]) {
-        const deleteEdgeResult = deleteEdge(txnId, edgeId);
-        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-      }
-    }
-
-    // delete vertex:
-    const deleteResult = deleteVertex(txnId, vertex.id);
-    if (deleteResult.error) alert(deleteResult.error);
-    if (isRealTime) commitTxn(txnId, Ws);
-  });
-}
-
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
-  let { local, cleanUpConfig, isRealTime, formVertex, txnId } = useContext(FormContext);
-
-  // const owner = getOwner();
-
-  // todo check bindOwner and fix it
-  const addNew = bindOwner(() => {
-    batch(function () {
-      if (isRealTime) {
-        txnId = getNewTxnId();
-      }
-      const type = getToEdge(props.meta, props.data);
-      const label = props.meta.properties.props?.label;
-
-      newRow(txnId, props.data, type, label);
-      if (!local && isRealTime) commitTxn(txnId, Ws);
-    });
-  });
+  let { record, cleanUpConfig } = useContext(FormContext);
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
   const [sourceVertexes, setSourceVertexes] = createSignal([] as Vertex[]);
 
   // columns
-  const tableColumnsTemplate = getChildVertexes(["MetaAttr"], [props.meta]); //.sort((a, b) => a.properties.pos - b.properties.pos);
-  if (tableColumnsTemplate.error) {
+  const tableColumnsTemplate = record.getMetaAttributes(props.meta);
+  if (tableColumnsTemplate.length === 0) {
     return "Cant find table columns";
   }
 
@@ -170,6 +75,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     });
   }
 
+  // add dynamic meta from separate collection.
   // If props.meta.properties.attributes are not present and props.meta.props.collection is present then get attributes from the collection
   if (!props.meta.properties.attributes && props.meta.properties.meta) {
     const metaData = componentProps(props.meta, props.data);
@@ -200,66 +106,19 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
   // add row vertexes data to store
   createEffect(() => {
-    const type = getToEdge(props.meta, props.data);
-    const vertexes = (getChildVertexes([`${type}`], [props.data]).vertexes || []).sort(
-      (a, b) => a.properties.pos - b.properties.pos,
-    );
+    const vertexes = record.getSublistRows(props.meta, props.data);
     setSortedVertexes(vertexes);
   });
 
-  function rowMetaInitialize(joinVertex: Vertex) {
-    const rowMetaAttrInst = getChildVertex(["AttrInst"], joinVertex);
-    if (rowMetaAttrInst.error) {
-      const metaTxnId = getNewTxnId();
-      batch(() => {
-        const metaInstanceResult = newRow(metaTxnId, joinVertex, "AttrInst");
-        if (metaInstanceResult.error) {
-          alert("Error creating a row for attribute instance");
-        }
-        mergeVertexProperties(metaTxnId, metaInstanceResult.vertexId!, {
-          templateId: props.meta.id,
-        });
 
-        for (const attrColumn of tableColumnsTemplate.vertexes!) {
-          const AttrInstResult = newRow(metaTxnId, graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
-          if (AttrInstResult.error) {
-            alert(AttrInstResult.error);
-          }
-          mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.properties));
-          mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, {
-            templateId: attrColumn.id,
-          });
-        }
-      });
-      onCleanup(() => {
-        // remove all AttrInst vertex.
-        // TODO: This is breaking when new row is added, its interesting to fix this.
-        // console.log('called', metaTxnId)
-        // revertTransaction(metaTxnId);
-      });
-      return metaTxnId;
-    }
-    return "";
-  }
   const KanbanCardRow = (p: { joinVertex: Vertex }) => {
-    rowMetaInitialize(p.joinVertex);
+    rowMetaInitialize(p.joinVertex, props.meta, tableColumnsTemplate);
 
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
     if (attributesResult.error) alert("Error getting attributes");
     const rowColumnsMetaAttrs = attributesResult.vertexes!;
 
     const DisplayCardProperties = () => {
-      const setValue = (attribute: Vertex, value: any) => {
-        if (isRealTime) {
-          txnId = getNewTxnId();
-        }
-        mergeVertexProperties(txnId, p.joinVertex.id, {
-          [attribute.properties[IdAttr]]: value,
-        });
-        onChangeHandler(txnId, formVertex, p.joinVertex, attribute);
-        if (!local && isRealTime) commitTxn(txnId, Ws);
-      };
-
       return (
         <For<Vertex[]> each={rowColumnsMetaAttrs}>
           {(metaVertex) => {
@@ -276,41 +135,38 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               addMeta(metaVertex, p.joinVertex);
             });
 
+            const DefaultValue = () => <>{metaVertex.properties.props?.defaultValue &&
+             getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</>;
+            const Content = () => <>
+              <DynamicComponent
+               id={""}
+               component={component()}
+               // When we have a Table we pass original Table Meta Vertex
+               meta={component() === "Table" ? graph.vertexes[metaVertex.properties.templateId] : metaVertex}
+               data={p.joinVertex}
+               setValue={record.setValue}
+              />
+            </>;
+
             return (
-              <Switch>
-                <Match<boolean> when={metaVertex.properties.props?.hidden}>
-                  <div class="flex">
-                    {metaVertex.properties.props?.defaultValue &&
-                      getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                  </div>
-                </Match>
-                <Match<boolean> when={component() === "Table"}>
-                  <div class="flex">
-                    {metaVertex.properties.props?.defaultValue &&
-                      getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                    <DynamicComponent
-                      id={""}
-                      component={component()}
-                      // When we have a Table we pass original Table Meta Vertex
-                      meta={graph.vertexes[metaVertex.properties.templateId]}
-                      data={p.joinVertex}
-                      setValue={setValue}
-                    />
-                  </div>
-                </Match>
-                <Match<boolean> when={true}>
-                  <div class="flex align-items:center">
-                    {metaVertex.properties.props?.defaultValue &&
-                      getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                    <DynamicComponent
-                      id={""}
-                      component={component()}
-                      meta={metaVertex}
-                      data={p.joinVertex}
-                      setValue={setValue}
-                    />
-                  </div>
-                </Match>
+             <Switch>
+               <Match<boolean> when={metaVertex.properties.props?.hidden}>
+                 <div class="">
+                   <DefaultValue />
+                 </div>
+               </Match>
+               <Match<boolean> when={component() === "Table"}>
+                 <div class="">
+                   <DefaultValue />
+                   <Content />
+                 </div>
+               </Match>
+               <Match<boolean> when={true}>
+                 <div class="flex align-items:center">
+                   <DefaultValue />
+                   <Content />
+                 </div>
+               </Match>
               </Switch>
             );
           }}
@@ -342,7 +198,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               } as unknown as Vertex
             }
             data={{ properties: { meta: [] } } as unknown as Vertex}
-            onClick={() => deleteRow(p.joinVertex, isRealTime, txnId, Ws)}
+            onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
           />
         </div>
       </>
@@ -352,7 +208,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
     // const sortable = createSortable(p.joinVertex.id);
-    const metaTxnId = rowMetaInitialize(p.joinVertex);
+    const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, tableColumnsTemplate);
 
     if (metaTxnId) {
       if (!cleanUpConfig.rowMetaTxnIds) {
@@ -368,18 +224,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const [disabled, setDisabled] = createSignal(true);
 
     const DisplayProperties = () => {
-      const setValue = (attribute: Vertex, value: any) => {
-        debugger
-        if (isRealTime) {
-          txnId = getNewTxnId();
-        }
-        mergeVertexProperties(txnId, p.joinVertex.id, {
-          [attribute.properties[IdAttr]]: value,
-        });
-        onChangeHandler(txnId, formVertex, p.joinVertex, attribute);
-        if (!local && isRealTime) commitTxn(txnId, Ws);
-      };
-
       return (
         <For<Vertex[]> each={rowColumnsMetaAttrs}>
           {(metaVertex) => {
@@ -387,7 +231,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               if (metaVertex.properties.component.includes("-")) {
                 // Todo Fix: why this prints two times:
                 console.log("refreshing");
-                // return getOptionLabel(metaVertex, metaVertex.properties.component);
                 return getOptionLabel(p.joinVertex, metaVertex.properties.component);
               } else {
                 return metaVertex.properties.component;
@@ -397,32 +240,34 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             createEffect(() => {
               addMeta(metaVertex, p.joinVertex);
             });
+            const DefaultValue = () => <>{metaVertex.properties.props?.defaultValue &&
+             getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}</>;
+            const Content = () => <>
+              <DynamicComponent
+               id={""}
+               component={component()}
+               // When we have a Table we pass original Table Meta Vertex
+               meta={component() === "Table" ? graph.vertexes[metaVertex.properties.templateId] : metaVertex}
+               data={p.joinVertex}
+               setValue={record.setValue}
+              />
+            </>;
 
             return (
               <Switch>
                 <Match<boolean> when={metaVertex.properties.props?.hidden}>
                   <td>
-                    <div class="flex">
-                      {metaVertex.properties.props?.defaultValue &&
-                        getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
+                    <div class="">
+                      <DefaultValue/>
                     </div>
                   </td>
                 </Match>
                 <Match<boolean> when={component() === "Table"}>
                   <td>
                     <Show<boolean> when={!props.disabled}>
-                      <div class="flex">
-                        {metaVertex.properties.props?.defaultValue &&
-                          getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                        <DynamicComponent
-                          id={""}
-                          component={component()}
-                          // When we have a Table we pass original Table Meta Vertex
-                          meta={graph.vertexes[metaVertex.properties.templateId]}
-                          data={p.joinVertex}
-                          setValue={setValue}
-                          disabled={disabled()}
-                        />
+                      <div class="">
+                        <DefaultValue/>
+                        <Content/>
                       </div>
                     </Show>
                   </td>
@@ -430,16 +275,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 <Match<boolean> when={true}>
                   <td>
                     <div class="flex align-items:center">
-                      {metaVertex.properties.props?.defaultValue &&
-                        getOptionLabel(p.joinVertex, metaVertex.properties.props.defaultValue)}
-                      <DynamicComponent
-                        id={""}
-                        component={component()}
-                        meta={metaVertex}
-                        data={p.joinVertex}
-                        setValue={setValue}
-                        disabled={disabled()}
-                      />
+                      <DefaultValue/>
+                      <Content/>
                     </div>
                   </td>
                 </Match>
@@ -466,7 +303,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               icon="material-symbols:restore-from-trash-outline"
               width={25}
               height={25}
-              onClick={() => deleteRow(p.joinVertex, isRealTime, txnId, Ws)}
+              onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
             />
             <Show<boolean> when={!props.disabled}>
               <Icon icon="material-symbols:edit" width={25} height={25} onClick={() => setDisabled((v) => !v)} />
@@ -506,7 +343,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   //         });
   //       });
   //     }
-  //     if (!local && isRealTime) commitTxn(txnId, Ws);
+  //     if (isRealTime) commitTxn(txnId, Ws);
   //   }
   //   setActiveDragItem(null);
   // };
@@ -603,12 +440,12 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       <Match<boolean> when={true}>
         <div>
           {/*<Show<boolean> when={props.meta.properties.attributes}>*/}
-          {/*  <DynamicForm form={{title: '', label: props.meta.properties.props.title || props.meta.properties[IdAttr], attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
+          {/*  <FormGroup form={{title: '', label: props.meta.properties.props.title || props.meta.properties[IdAttr], attributes: props.meta.properties.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
 
           <GenericField
            component={"ButtonGroup"}
-            meta={
+           meta={
               {
                 properties: {
                   [IdAttr]: "meta",
@@ -625,8 +462,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 },
               } as unknown as Vertex
             }
-            data={{ properties: { meta: [] } } as unknown as Vertex}
-            onClick={addNew}
+           data={{ properties: { meta: [] } } as unknown as Vertex}
+           onClick={() => addNewRow(record.txnId, props.meta, props.data, record.isRealTime, Ws)}
           />
 
           <div

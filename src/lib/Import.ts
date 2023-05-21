@@ -1,4 +1,4 @@
-import { Record } from "./Record";
+import { newRow, Record } from "./Record";
 import {
  commitTxn,
  getNewGraphId,
@@ -17,16 +17,14 @@ import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
 import csvtojson from "csvtojson";
 import { getChildVertex, getChildVertexes, getToEdge } from "./Traverse";
 import { A, D } from "@mobily/ts-belt";
-import { newRow } from "../components/input/TableInputField";
 import {
  setParentValue,
  setSelectionValue
 } from "../components/input/SelectInputField";
 
-export const updateImportRecord = (type: string, record: Record) => {
- const dry = true;
+export const updateImportRecord = (type: string, record: Record, dry= true) => {
 
- record.deleteAllRows("SimpleImportMeta");
+ record.deleteAllRows("ImportMeta");
 
  switch (type) {
   case "component": {
@@ -34,31 +32,26 @@ export const updateImportRecord = (type: string, record: Record) => {
     label: "Comp",
     dry
    });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "parent",
-     collLabel: "Comp",
-     collId: IdAttr,
-     edge: "Child",
-     inward: true
-    }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "category",
-     collLabel: "CompCategory",
-     collId: IdAttr,
-     inward: true
-    }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "dataType",
-     collLabel: "DataType",
-     collId: IdAttr,
-     inward: true
-    }
-   });
+   const rows = [{
+    column: "parent",
+    collLabel: "Comp",
+    collId: IdAttr,
+    edge: "Child",
+    inward: true
+   }, {
+    column: "category",
+    collLabel: "CompCategory",
+    collId: IdAttr,
+    inward: true
+   }, {
+    column: "dataType",
+    collLabel: "DataType",
+    collId: IdAttr,
+    inward: true
+   }];
+   for (const row of rows) {
+    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+   }
 
    break;
   }
@@ -74,14 +67,15 @@ export const updateImportRecord = (type: string, record: Record) => {
     label: "DataType",
     dry
    });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "default",
-     collLabel: "Comp",
-     edge: "default",
-     collId: IdAttr
-    }
-   });
+   const rows = [{
+    column: "default",
+    collLabel: "Comp",
+    edge: "default",
+    collId: IdAttr
+   }];
+   for (const row of rows) {
+    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+   }
    break;
   }
   case "lookup": {
@@ -91,18 +85,16 @@ export const updateImportRecord = (type: string, record: Record) => {
     lookupId: IdAttr,
     dry
    });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "StandardLookupValue",
-     attrId: IdAttr
-    }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "Definition",
-     attrId: "description"
-    }
-   });
+   const rows = [{
+    column: "StandardLookupValue",
+    attrId: IdAttr
+   }, {
+    column: "Definition",
+    attrId: "description"
+   }];
+   for (const row of rows) {
+    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+   }
    break;
   }
   case "attribute": {
@@ -113,92 +105,41 @@ export const updateImportRecord = (type: string, record: Record) => {
     lookupId: IdAttr,
     dry
    });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "StandardName",
-     attrId: IdAttr
-    }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "DisplayName",
-     attrId: "displayName"
-    }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
-     column: "Definition",
-     attrId: "definition"
-    }
-   });
-
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta", properties: {
+   const rows = [
+    { column: "StandardName", attrId: IdAttr },
+    { column: "DisplayName", attrId: "displayName" },
+    { column: "Definition", attrId: "definition" },
+    {
      column: "SimpleDataType",
      collLabel: "Comp",
      collId: IdAttr,
      func: "component"
-    }
-   });
-   // TODO: Point Groups to Group Tab
-   // const newMeta5 = newRow(txnId, record.vertex, "SimpleImportMeta");
-   // replaceVertexProperties(txnId, newMeta5.vertexId!, {
-   //   column: "Groups",
-   //   // think how to make this work?
-   //   // collLabel: "CollGroup",
-   //   // collId: IdAttr,
-   //   // inward: true
-   //   skip: true
-   // });
-
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "SourceResource", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "SugMaxLength", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "SugMaxPrecision", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "Synonyms", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "FrenchCanadianDisplayName", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "LookupStatus", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "LookupName", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "RepeatingElement", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "payload", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "TargetResourceKey", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "SourceResourceKey", skip: true }
-   });
-   record.selectNewLine({
-    sublistId: "SimpleImportMeta",
-    properties: { column: "BEDES", skip: true }
-   });
+    },
+    { column: "SourceResource", skip: true },
+    { column: "SugMaxLength", skip: true },
+    { column: "SugMaxPrecision", skip: true },
+    { column: "Synonyms", skip: true },
+    { column: "FrenchCanadianDisplayName", skip: true },
+    { column: "LookupStatus", skip: true },
+    { column: "LookupName", skip: true },
+    { column: "RepeatingElement", skip: true },
+    { column: "payload", skip: true },
+    { column: "TargetResourceKey", skip: true },
+    { column: "SourceResourceKey", skip: true },
+    { column: "BEDES", skip: true }
+    // TODO: Point Groups to Group Tab
+    // {
+    //  column: "Groups",
+    //  // think how to make this work?
+    //  // collLabel: "CollGroup",
+    //  // collId: IdAttr,
+    //  // inward: true
+    //  skip: true
+    // }
+   ];
+   for (const row of rows) {
+    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+   }
    break;
   }
   default: {
