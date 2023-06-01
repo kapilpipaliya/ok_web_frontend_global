@@ -128,20 +128,20 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
 }
 
 export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
-  if (meta.properties.props?.stringValue) {
+  if (meta.P.props?.stringValue) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
-      const value = data.properties[meta.properties[IdAttr]];
+      const value = data.P[meta.P[IdAttr]];
       if (Array.isArray(value)) {
         return value;
       } else {
         return value ? [value] : [];
       }
     });
-  } else if (meta.properties.props.items) {
-    return data.properties[meta.properties[IdAttr]];
+  } else if (meta.P.props.items) {
+    return data.P[meta.P[IdAttr]];
   }
-  return meta.properties.props?.inward ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
+  return meta.P.props?.inward ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
 };
 
 export function SelectInputField(props: ComponentProps & {component: string}) {
@@ -150,7 +150,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
   if (!record) record = {} as Record;
 
   const [selectOptions, { refetch }] = createResource(() => {
-    let value = props.meta.properties.props.items;
+    let value = props.meta.P.props.items;
     if (value) {
       if (typeof value === "string") {
         return value.split("\n");
@@ -163,10 +163,10 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
       if (props.disabled) {
         return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
       }
-      if (!props.meta.properties.props?.collection) {
+      if (!props.meta.P.props?.collection) {
         return [];
       }
-      return getSelectionOptions(props.data, props.meta.properties.props.collection).vertexes || [];
+      return getSelectionOptions(props.data, props.meta.P.props.collection).vertexes || [];
     }
   });
 
@@ -176,7 +176,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
         when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data)}>
-            {(vertexId) => <>{getOptionLabel(graph.vertexes[vertexId], props.meta.properties.props.displayExpr || `properties.${IdAttr}`)}</>}
+            {(vertexId) => <>{getOptionLabel(graph.vertexes[vertexId], props.meta.P.props.displayExpr || `P.${IdAttr}`)}</>}
           </For>
         }
       >
@@ -204,11 +204,11 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 if (record.isRealTime) {
                   record.txnId = getNewTxnId();
                 }
-                if (props.meta.properties.props.stringValue) {
+                if (props.meta.P.props.stringValue) {
                   props.setValue?.(props.meta,props.data, e.value);
-                } else if (props.meta.properties.props.items) {
+                } else if (props.meta.P.props.items) {
                   props.setValue?.(props.meta,props.data, e.value);
-                } else if (props.meta.properties.props.inward) {
+                } else if (props.meta.P.props.inward) {
                   setParentValue(record.txnId, props.data, props.meta, e.value);
                 } else {
                   setSelectionValue(record.txnId, props.data, props.meta, e.value);
@@ -223,18 +223,18 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
               //   refetch();
               // },
             } as Properties;
-            if (!props.meta.properties.props.items) {
+            if (!props.meta.P.props.items) {
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`),
+                displayExpr: (item) => getOptionLabel(item, props.meta.P.props.displayExpr || `P.${IdAttr}`),
               } as Properties)
             }
             const instance = props.component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
             createEffect(() => {
-              for (const property in props.meta.properties.props as Properties) {
+              for (const property in props.meta.P.props as Properties) {
                 if (property === "displayExpr" || property === 'items') continue;
-                instance.option(property, props.meta.properties.props[property]);
+                instance.option(property, props.meta.P.props[property]);
               }
             });
             // when the value is changed by other components, we want to refetch the options

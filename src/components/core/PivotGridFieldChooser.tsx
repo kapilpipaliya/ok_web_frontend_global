@@ -80,8 +80,8 @@ export function PivotGridFieldChooserField(props: ComponentProps) {
           });
 
           createEffect(() => {
-            for (const property in props.meta.properties.props as Properties) {
-              pivotGridInstance.option(property, props.meta.properties.props[property]);
+            for (const property in props.meta.P.props as Properties) {
+              pivotGridInstance.option(property, props.meta.P.props[property]);
             }
           });
           onCleanup(() => instance.dispose());

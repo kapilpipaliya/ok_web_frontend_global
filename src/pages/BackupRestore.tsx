@@ -234,7 +234,7 @@ export const BackupRestore = () => {
                   setSelectionValue(
                     txnId,
                     graph.vertexes[rowResult.vertexId!],
-                    { properties: { [IdAttr]: "DataType" } } as Vertex,
+                    { P: { [IdAttr]: "DataType" } } as Vertex,
                     dataTypeVertex.id,
                   );
                   // It takes too much time to commit the full transaction.
@@ -259,7 +259,7 @@ export const BackupRestore = () => {
     const existingVertex = graph.vertexes[vertexId];
     for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
       const componentVertex = graph.vertexes[compVertexId];
-      const componentName = componentVertex.properties[IdAttr];
+      const componentName = componentVertex.P[IdAttr];
       if (["DropDownBox", "Bullet", "CircularGauge", "LinearGauge", "ProgressBar"].includes(componentName)) continue;
       const newRow1 = newRow(txnId, existingVertex, "CollAttr");
       replaceVertexProperties(txnId, newRow1.vertexId!, { [IdAttr]: getId(componentName), displayName: componentName});
@@ -269,13 +269,13 @@ export const BackupRestore = () => {
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
-          { properties: { [IdAttr]: "dataType" } } as Vertex,
+          { P: { [IdAttr]: "dataType" } } as Vertex,
           dataType.vertex!.id,
         );
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
-          { properties: { [IdAttr]: "comp" } } as Vertex,
+          { P: { [IdAttr]: "comp" } } as Vertex,
           compVertexId,
         );
       }
@@ -594,7 +594,7 @@ LocalDateTime\tDateBox`,
                 setSelectionValue(
                  txnId,
                  graph.vertexes[rowResult.vertexId!],
-                 { properties: { [IdAttr]: "DataType" } } as Vertex,
+                 { P: { [IdAttr]: "DataType" } } as Vertex,
                  dataTypeVertex.id
                 );
               }
@@ -671,7 +671,7 @@ LocalDateTime\tDateBox`,
           setSelectionValue(
            txnId,
            graph.vertexes[rowResult.vertexId!],
-           { properties: { [IdAttr]: "coll" } } as Vertex,
+           { P: { [IdAttr]: "coll" } } as Vertex,
            collVertex.id
           );
 
@@ -719,7 +719,7 @@ LocalDateTime\tDateBox`,
           setSelectionValue(
            txnId,
            graph.vertexes[rowResult.vertexId!],
-           { properties: { [IdAttr]: "coll" } } as Vertex,
+           { P: { [IdAttr]: "coll" } } as Vertex,
            collVertex.id
           );
         }

@@ -189,12 +189,12 @@ const resoDataTypeToComponents = (type: string, row: { [key: string]: any }) => 
  }
 };
 export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispatcher) => {
- const csvResult = record.vertex.properties.csv as string;
- const label = record.vertex.properties.label as string;
- const dry = record.vertex.properties.dry as boolean;
- const lookup = record.vertex.properties.lookup as string;
- const lookupId = record.vertex.properties.lookupId as string;
- const lookupChild = record.vertex.properties.lookupChild as string;
+ const csvResult = record.vertex.P.csv as string;
+ const label = record.vertex.P.label as string;
+ const dry = record.vertex.P.dry as boolean;
+ const lookup = record.vertex.P.lookup as string;
+ const lookupId = record.vertex.P.lookupId as string;
+ const lookupChild = record.vertex.P.lookupChild as string;
  if (!label) {
   alert("label cant be blank");
   return;
@@ -225,38 +225,38 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
  }
 
  const normalizeMeta = metaData.vertexes!.map((metaVertex) => {
-  const column = metaVertex.properties.column as string;
+  const column = metaVertex.P.column as string;
   // attribute may not exist before, in that case write ID
-  let attrId = metaVertex.properties.attrId;
+  let attrId = metaVertex.P.attrId;
   if (!attrId) {
    const attributeVertex = getChildVertex(["$0Attr"], metaVertex);
    if (!attributeVertex.error) {
-    attrId = attributeVertex.vertex?.properties[IdAttr];
+    attrId = attributeVertex.vertex?.P[IdAttr];
    }
   }
 
-  let collId = metaVertex.properties.collId || IdAttr;
+  let collId = metaVertex.P.collId || IdAttr;
 
   // collection may not exist before, in that case write Label
-  let collLabel = metaVertex.properties.collLabel;
+  let collLabel = metaVertex.P.collLabel;
 
-  if (!attrId && !collLabel && !metaVertex.properties.skip) {
+  if (!attrId && !collLabel && !metaVertex.P.skip) {
    alert("attrId or collLabel is required");
   }
   const collVertex = getChildVertex(["$0Coll"], metaVertex);
   if (!collVertex.error) {
-   collLabel = collVertex.vertex?.properties[collId];
+   collLabel = collVertex.vertex?.P[collId];
   }
   return {
    column,
    attrId,
    collLabel,
    collId,
-   inward: metaVertex.properties.inward,
-   func: metaVertex.properties.func,
-   edge: metaVertex.properties.edge,
-   skip: metaVertex.properties.skip,
-   skipRow: metaVertex.properties.skipRow?.split?.("\n") || []
+   inward: metaVertex.P.inward,
+   func: metaVertex.P.func,
+   edge: metaVertex.P.edge,
+   skip: metaVertex.P.skip,
+   skipRow: metaVertex.P.skipRow?.split?.("\n") || []
   } as Column;
  });
 
@@ -317,7 +317,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
    // insert current row and all lookup as children or parent
    let rowVertexId = getNewGraphId();
    if (mainVertex) {
-    const type = getToEdge({ properties: { [IdAttr]: labelName } } as Vertex, mainVertex);
+    const type = getToEdge({ P: { [IdAttr]: labelName } } as Vertex, mainVertex);
     const newRow1 = newRow(txnId, mainVertex, type);
     rowVertexId = newRow1.vertexId!;
     mergeVertexProperties(txnId, rowVertexId, rowObj);
@@ -354,7 +354,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
        txnId,
        vertex,
        {
-        properties: { [IdAttr]: selectMeta.collLabel }
+        P: { [IdAttr]: selectMeta.collLabel }
        } as unknown as Vertex,
        componentVertex.id
       );
@@ -368,7 +368,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
         txnId,
         rowVertex,
         {
-         properties: { [IdAttr]: selectMeta.collLabel }
+         P: { [IdAttr]: selectMeta.collLabel }
         } as unknown as Vertex,
         lookup.id
        );
@@ -379,7 +379,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
       txnId,
       vertex,
       {
-       properties: {
+       P: {
         props: {
          parentLabel: selectMeta.collLabel,
          childLabel: selectMeta.edge
@@ -393,7 +393,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
       txnId,
       vertex,
       {
-       properties: { [IdAttr]: selectMeta.edge || selectMeta.collLabel }
+       P: { [IdAttr]: selectMeta.edge || selectMeta.collLabel }
       } as unknown as Vertex,
       v()!.id
      );

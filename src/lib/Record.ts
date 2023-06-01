@@ -66,8 +66,8 @@ export function getCollAttrs(
 ): { error: boolean; attr?: FieldAttribute } {
  const attr = Object.assign(
   {},
-  removeUndefinedProperties(vertexCollAttr.properties, false, 10),
-  vertexFormAttr ? removeUndefinedProperties(vertexFormAttr.properties, false, 10) : {}
+  removeUndefinedProperties(vertexCollAttr.P, false, 10),
+  vertexFormAttr ? removeUndefinedProperties(vertexFormAttr.P, false, 10) : {}
  );
 
  // find components for all levels
@@ -80,7 +80,7 @@ export function getCollAttrs(
  const dataType = getChildVertex(["$0DataType"], vertexCollAttr);
  if (dataType.error) {
   if (!formAttrComp) {
-   console.warn("data Type not found", vertexCollAttr.properties.name);
+   console.warn("data Type not found", vertexCollAttr.P.name);
    return { error: true };
   }
   const dataTypeFromComp = getParentVertex(["DataTypeComp"], formAttrComp);
@@ -88,17 +88,17 @@ export function getCollAttrs(
    console.warn("data Type not found from Component");
    return { error: true };
   }
-  attr.dataType = dataTypeFromComp.vertex!.properties[IdAttr];
+  attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
  } else {
-  attr.dataType = dataType.vertex!.properties[IdAttr];
+  attr.dataType = dataType.vertex!.P[IdAttr];
  }
 
  // set props to attr
  let formProps = vertexFormAttr
   ? (getChildVertexes(["$0Prop"], [vertexFormAttr]).vertexes || []).reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->$0Key:properties.key");
+   const key = getOptionLabel(curr, "->$0Key:P.key");
    if (key) {
-    acc[key] = curr.properties.value;
+    acc[key] = curr.P.value;
    }
    return acc;
   }, {} as { [key: string]: any })
@@ -106,9 +106,9 @@ export function getCollAttrs(
 
  if (formAttrComp === collAttrComp) {
   const collProps = (getChildVertexes(["$0Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->$0Key:properties.key");
+   const key = getOptionLabel(curr, "->$0Key:P.key");
    if (key) {
-    acc[key] = curr.properties.value;
+    acc[key] = curr.P.value;
    }
    return acc;
   }, {} as { [key: string]: any });
@@ -131,8 +131,8 @@ export function getCollAttrs(
  }
 
  const compProps = (getChildVertexes(["CompProp"], [comp]).vertexes || []).reduce((acc, curr) => {
-  if (curr.properties.key) {
-   acc[curr.properties.key] = curr.properties.value;
+  if (curr.P.key) {
+   acc[curr.P.key] = curr.P.value;
   }
   return acc;
  }, {} as { [key: string]: any });
@@ -142,17 +142,17 @@ export function getCollAttrs(
  if (!parentVertexResult.error) {
   const parentCompProps = (getChildVertexes(["CompProp"], [parentVertexResult.vertex!]).vertexes || []).reduce(
    (acc, curr) => {
-    if (curr.properties.key) {
-     acc[curr.properties.key] = curr.properties.value;
+    if (curr.P.key) {
+     acc[curr.P.key] = curr.P.value;
     }
     return acc;
    },
    {} as { [key: string]: any }
   );
   formProps = Object.assign({}, removeUndefinedProperties(parentCompProps, false, 10), formProps);
-  attr.component = parentVertexResult.vertex!.properties[IdAttr];
+  attr.component = parentVertexResult.vertex!.P[IdAttr];
  } else {
-  attr.component = comp.properties[IdAttr];
+  attr.component = comp.P[IdAttr];
  }
  attr.props = formProps;
  return { error: false, attr };
@@ -169,7 +169,7 @@ const getCollectionOneLevelAttrs = (collVertex: Vertex): { error: string; attrs?
  if (vertexCollAttrResult.error) {
   return { error: "No Attributes in a Coll" };
  }
- const collAttrs = vertexCollAttrResult.vertexes!.sort((a, b) => a.properties.pos - b.properties.pos);
+ const collAttrs = vertexCollAttrResult.vertexes!.sort((a, b) => a.P.pos - b.P.pos);
  let attrs: FieldAttribute[] = [];
 
  for (const vertexCollAttr of collAttrs) {
@@ -195,7 +195,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
   // calculate children
   const collChildren = (getChildVertexes(["$0Child"], [coll]).vertexes || []).sort(
-   (a, b) => a.properties.pos - b.properties.pos
+   (a, b) => a.P.pos - b.P.pos
   );
 
   const childAttrs = [] as FieldAttribute[];
@@ -215,9 +215,9 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
    // table properties:
    const collChildProps = (getChildVertexes(["$0Prop"], [vertexChild]).vertexes || []).reduce((acc, curr) => {
-    const key = getOptionLabel(curr, "->$0Key:properties.key");
+    const key = getOptionLabel(curr, "->$0Key:P.key");
     if (key) {
-     acc[key] = curr.properties.value;
+     acc[key] = curr.P.value;
     }
     return acc;
    }, {} as { [key: string]: any });
@@ -225,7 +225,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
    childAttrs.push({
     attributes: tableAttrs,
     component: "Table",
-    [IdAttr]: vertexChild.properties[IdAttr] || childCollVertex.properties[IdAttr],
+    [IdAttr]: vertexChild.P[IdAttr] || childCollVertex.P[IdAttr],
     props: collChildProps
    });
   }
@@ -234,12 +234,12 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
    error: "",
    form: {
     attributes: [...attrs, ...childAttrs],
-    [IdAttr]: coll.properties[IdAttr],
-    title: coll.properties.title,
-    isRealTime: coll.properties.isRealTime,
+    [IdAttr]: coll.P[IdAttr],
+    title: coll.P.title,
+    isRealTime: coll.P.isRealTime,
     // collection used in Grid, its same like id key
     // @ts-ignore
-    collection: coll.properties[IdAttr]
+    collection: coll.P[IdAttr]
    }
   };
  }
@@ -254,7 +254,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
  if (formAttrsResult.error) {
   return { error: "No Attributes in a Form" };
  }
- const formAttrs = formAttrsResult.vertexes!.sort((a, b) => a.properties.pos - b.properties.pos);
+ const formAttrs = formAttrsResult.vertexes!.sort((a, b) => a.P.pos - b.P.pos);
 
  let attrs: FieldAttribute[] = [];
 
@@ -267,14 +267,14 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
  // attrs = attrs.sort((a, b) => a.pos - b.pos); // why this is required?
 
  const formChildren = (getChildVertexes(["FormChild"], [form]).vertexes || []).sort(
-  (a, b) => a.properties.pos - b.properties.pos
+  (a, b) => a.P.pos - b.P.pos
  );
 
  const childAttrs = [] as FieldAttribute[];
 
  for (const vertexFormChild of formChildren) {
   const formChildAttrs = (getChildVertexes(["FormChildAttr"], [vertexFormChild]).vertexes || []).sort(
-   (a, b) => a.properties.pos - b.properties.pos
+   (a, b) => a.P.pos - b.P.pos
   );
 
   let tableAttrs: FieldAttribute[] = [];
@@ -297,9 +297,9 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
   }
   // currently we save table property on Collection only, not overwrite by form layout
   const collChildProps = (getChildVertexes(["$0Prop"], [collChild.vertex!]).vertexes || []).reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->$0Key:properties.key");
+   const key = getOptionLabel(curr, "->$0Key:P.key");
    if (key) {
-    acc[key] = curr.properties.value;
+    acc[key] = curr.P.value;
    }
    return acc;
   }, {} as { [key: string]: any });
@@ -307,7 +307,7 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
   childAttrs.push({
    attributes: tableAttrs,
    component: "Table",
-   [IdAttr]: collChild.vertex!.properties[IdAttr] || collChildColl.vertex!.properties[IdAttr],
+   [IdAttr]: collChild.vertex!.P[IdAttr] || collChildColl.vertex!.P[IdAttr],
    props: collChildProps
   });
  }
@@ -316,12 +316,12 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
   error: "",
   form: {
    attributes: [...attrs, ...childAttrs],
-   [IdAttr]: formColl.properties[IdAttr],
-   title: form.properties.title,
-   isRealTime: form.properties.isRealTime,
+   [IdAttr]: formColl.P[IdAttr],
+   title: form.P.title,
+   isRealTime: form.P.isRealTime,
    // collection used in Grid, its same like id key
    // @ts-ignore
-   collection: formColl.properties[IdAttr]
+   collection: formColl.P[IdAttr]
   }
  };
 };
@@ -361,9 +361,9 @@ export function newRow(
 
 function getComponentProperties(metaRows: Vertex[]) {
  const metaData = metaRows.reduce((acc, curr) => {
-  const key = getOptionLabel(curr, "->$0Key:properties.key||:properties.key");
+  const key = getOptionLabel(curr, "->$0Key:P.key||:P.key");
   if (key) {
-   acc[key] = curr.properties.value;
+   acc[key] = curr.P.value;
   }
   return acc;
  }, {} as { [key: string]: any });
@@ -372,7 +372,7 @@ function getComponentProperties(metaRows: Vertex[]) {
 
 // TODO: when meta changed realtime its not updating.
 export function componentProps(metaVertex: Vertex, data: Vertex) {
- const meta = metaVertex.properties.meta.split("+");
+ const meta = metaVertex.P.meta.split("+");
  const results = [] as { [key: string]: any }[];
  for (const metaPart of meta) {
   const metaRows = getSelectionOptions(data, metaPart).vertexes || [];
@@ -387,14 +387,14 @@ export function componentProps(metaVertex: Vertex, data: Vertex) {
 
 // add meta from vertex value:
 export function addMeta(metaVertex: Vertex, data: Vertex) {
- if (metaVertex.properties.meta) {
+ if (metaVertex.P.meta) {
   const metaData = componentProps(metaVertex, data);
   const metaDataVal = removeUndefinedProperties(metaData, false, 10);
   untrack(() => {
    const newMetaData = Object.assign(
     {},
-    // when component is rendered dynamically graph.vertexes[metaVertex.properties.templateId] value is undefined
-    graph.vertexes[metaVertex.properties.templateId]?.properties?.props || {},
+    // when component is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
+    graph.vertexes[metaVertex.P.templateId]?.P?.props || {},
     metaDataVal
    );
    mergeVertexProperties(getNewTxnId(), metaVertex.id, {
@@ -480,10 +480,10 @@ export function getId(input: string) {
 }
 
 export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Vertex, changedFieldAttribute: Vertex) {
- if (!changedFieldAttribute.properties.props?.onchange) return;
+ if (!changedFieldAttribute.P.props?.onchange) return;
  const isNew = formVertex.id < 0;
  try {
-  let args = JSON.parse(changedFieldAttribute.properties.props.onchange);
+  let args = JSON.parse(changedFieldAttribute.P.props.onchange);
   if (Array.isArray(args)) {
    // args in proper format.
   } else if (G.isObject(args)) {
@@ -498,7 +498,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
   }
 
   const attribute = (getSelectionOptions(changedFieldAttribute, "-MetaAttr->MetaAttr").vertexes || []).find(
-   (vertex) => vertex.properties[IdAttr] === args[0]
+   (vertex) => vertex.P[IdAttr] === args[0]
   );
   if (!attribute) {
    return;
@@ -506,14 +506,14 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
   let value = args[1];
 
   if (value === null) value = undefined;
-  if (value === "label") value = getLabel(vertex.properties[changedFieldAttribute.properties[IdAttr]]);
-  if (value === "id") value = getId(vertex.properties[changedFieldAttribute.properties[IdAttr]]);
+  if (value === "label") value = getLabel(vertex.P[changedFieldAttribute.P[IdAttr]]);
+  if (value === "id") value = getId(vertex.P[changedFieldAttribute.P[IdAttr]]);
   if (value === "clear") value = null;
-  if (attribute.properties.component == "Select" || attribute.properties.component === "Tag") {
+  if (attribute.P.component == "Select" || attribute.P.component === "Tag") {
    setSelectionValue(txnId, vertex, attribute, value);
   } else {
    mergeVertexProperties(txnId, vertex.id, {
-    [attribute.properties[IdAttr]]: value
+    [attribute.P[IdAttr]]: value
    });
   }
  } catch (e) {
@@ -609,7 +609,7 @@ export class Record {
    this.txnId = getNewTxnId();
   }
   mergeVertexProperties(this.txnId, vertex.id, {
-   [attribute.properties[IdAttr]]: data
+   [attribute.P[IdAttr]]: data
   });
   onChangeHandler(this.txnId, this.vertex, vertex, attribute);
   if (this.isRealTime) commitTxn(this.txnId, this.ws);
@@ -690,14 +690,14 @@ export class Record {
  getSublistRows = (meta: Vertex, vertex: Vertex) => {
   const type = getToEdge(meta, vertex);
   return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
-   (a, b) => a.properties.pos - b.properties.pos,
+   (a, b) => a.P.pos - b.P.pos,
   );
  };
 
  groupByTabsAndGroup = () => {
-  const mainAttributes = getChildVertexes(["MetaAttr"], [this.metaVertex]); //.sort((a, b) => a.properties.pos - b.properties.pos);
+  const mainAttributes = getChildVertexes(["MetaAttr"], [this.metaVertex]); //.sort((a, b) => a.P.pos - b.P.pos);
 
-  const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item) => item.properties.tab!) as unknown as {
+  const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item) => item.P.tab!) as unknown as {
    [tab: string]: Vertex[];
   };
 
@@ -705,7 +705,7 @@ export class Record {
    [tab: string]: { [group: string]: Vertex[] };
   };
   for (const tab in groupByTabs) {
-   groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, (item) => item.properties.group!) as unknown as {
+   groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, (item) => item.P.group!) as unknown as {
     [group: string]: Vertex[];
    };
   }
@@ -739,7 +739,7 @@ export const addNewRow = (txnId: number, meta: Vertex, data: Vertex, isRealTime:
    txnId = getNewTxnId();
   }
   const type = getToEdge(meta, data);
-  const label = meta.properties.props?.label;
+  const label = meta.P.props?.label;
 
   newRow(txnId, data, type, label);
   if (isRealTime) commitTxn(txnId, Ws);
@@ -772,7 +772,7 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
     if (AttrInstResult.error) {
      alert(AttrInstResult.error);
     }
-    mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.properties));
+    mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.P));
     mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, {
      templateId: attrColumn.id
     });

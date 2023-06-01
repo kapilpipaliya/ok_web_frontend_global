@@ -4,7 +4,7 @@ import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 
 export function getToEdge(meta: Vertex, vertex: Vertex) {
-  const attributeId = meta.properties[IdAttr];
+  const attributeId = meta.P[IdAttr];
   return vertex.labels[0] + capitalizeFirstLetter(attributeId);
 }
 
@@ -14,8 +14,8 @@ export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
 }
 
 export function getInEdge(meta: Vertex, vertex) {
-  const parentLabel = meta.properties.props?.parentLabel;
-  const childLabel = meta.properties.props?.childLabel;
+  const parentLabel = meta.P.props?.parentLabel;
+  const childLabel = meta.P.props?.childLabel;
   if (!parentLabel) return "";
   return parentLabel + (childLabel || vertex.labels[0]);
 }
@@ -123,7 +123,7 @@ export function getChildVertex(path: string[], currentVertex: Vertex): { error: 
 
   if (filter) {
     // TODO:
-    // vertexes = vertexes.filter(x=>x.properties[IdAttr] === 'component')
+    // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'component')
   }
   if (vertexes.length != 1) {
     return {
@@ -305,7 +305,7 @@ export const getSelectOptionsInternal = (
         const vertexIds = findVertexIdsByLabel(edgeType.slice(0, filterIndex));
         const filteredVertexes = [];
         for (const vertexId of vertexIds) {
-          if (graph.vertexes[vertexId].properties[IdAttr] === filter) {
+          if (graph.vertexes[vertexId].P[IdAttr] === filter) {
             filteredVertexes.push(graph.vertexes[vertexId]);
           }
         }

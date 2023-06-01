@@ -21,8 +21,8 @@ export function ResponsiveBoxField(props: ComponentProps) {
           });
           createEffect(
             () =>
-              props.data.properties[props.meta.properties[IdAttr]] &&
-              instance.option("value", props.data.properties[props.meta.properties[IdAttr]]),
+              props.data.P[props.meta.P[IdAttr]] &&
+              instance.option("value", props.data.P[props.meta.P[IdAttr]]),
           );
 
         }}

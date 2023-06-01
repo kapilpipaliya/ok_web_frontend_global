@@ -81,7 +81,7 @@ export function DropDownBoxField(props: ComponentProps) {
               e.component.close();
             },
           });
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
+          createEffect(() => instance.option("value", props.data.P[props.meta.P[IdAttr]]));
 
           onCleanup(() => instance.dispose());
         }}

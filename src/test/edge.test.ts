@@ -29,8 +29,8 @@ describe("addNewEdge", () => {
     expect(txnDetailIndex1).toBe(1);
     const Edge1 = newEdge(getNewGraphId(), "hello", { a: 11, b: 12, c: [13, 14, 15] }, vertex1.id, vertex2.id);
     addNewEdge(1, Edge1);
-    Edge1.properties.a = 3;
-    expect(graph.edges[Edge1.id].properties.a).to.eq(11);
+    Edge1.P.a = 3;
+    expect(graph.edges[Edge1.id].P.a).to.eq(11);
   });
   test("Edge revert transaction", async () => {
     const vertex1 = newVertex(getNewGraphId(), ["hello"], {
@@ -86,9 +86,9 @@ describe("replaceEdgeProperties", () => {
     const newProperties = { a: 13, d: 14 };
     //@ts-ignore
     const { error: error3, txnDetailIndex: txnDetailIndex3 } = replaceEdgeProperties(1, Edge1.id, newProperties);
-    expect(graph.edges[Edge1.id].properties.a).to.eq(13);
+    expect(graph.edges[Edge1.id].P.a).to.eq(13);
     newProperties.a = 1;
-    expect(graph.edges[Edge1.id].properties.a).to.eq(13);
+    expect(graph.edges[Edge1.id].P.a).to.eq(13);
   });
 
   test("Edge revert replace Properties", async () => {

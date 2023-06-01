@@ -111,8 +111,8 @@ export const DynamicComponent = (props: {
       <Match when={props.component.startsWith("Form")}>
         <td>
           <div class="flex">
-            {props.meta.properties.props?.defaultValue &&
-              getOptionLabel(props.data, props.meta.properties.props.defaultValue)}
+            {props.meta.P.props?.defaultValue &&
+              getOptionLabel(props.data, props.meta.P.props.defaultValue)}
             <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)} />
           </div>
         </td>
@@ -144,15 +144,15 @@ export function FormGroup(props: FormGroupProps) {
   return (
     <For each={props.attributes}>
       {(metaVertex) => {
-        const id = props.vertex.id + metaVertex.properties[IdAttr] + "Label";
+        const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
         const component = createMemo(() => {
-          if (metaVertex.properties.component.includes("-")) {
-            return getOptionLabel(props.vertex, metaVertex.properties.component);
+          if (metaVertex.P.component.includes("-")) {
+            return getOptionLabel(props.vertex, metaVertex.P.component);
           } else {
-            return metaVertex.properties.component;
+            return metaVertex.P.component;
           }
         });
-        const Label = () => <>{toTitle(metaVertex.properties.displayName || metaVertex.properties[IdAttr])}</>
+        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr])}</>
         const Content = () => <DynamicComponent
          id={id}
          component={component()}
@@ -195,7 +195,7 @@ export interface DynamicFormProps {
 
 function getTabsWidth(group: Vertex[]) {
   return group.filter(
-     (attribute) => attribute.properties.component === "Table"
+     (attribute) => attribute.P.component === "Table"
     ).length
      ? "100%"
      : "600px"

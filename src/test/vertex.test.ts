@@ -16,8 +16,8 @@ describe("addNewVertex", () => {
       c: [3, 4, 5],
     });
     addNewVertex(1, vertex1);
-    vertex1.properties.a = 3;
-    expect(graph.vertexes[vertex1.id].properties.a).to.eq(1);
+    vertex1.P.a = 3;
+    expect(graph.vertexes[vertex1.id].P.a).to.eq(1);
   });
 
   test("vertex revert transaction", async () => {
@@ -59,9 +59,9 @@ describe("replaceVertexProperties", () => {
     expect(txnDetailIndex).toBe(0);
     const newProperties = { a: 6, d: 7 };
     replaceVertexProperties(1, vertex1.id, newProperties);
-    expect(graph.vertexes[vertex1.id].properties.a).to.eq(6);
+    expect(graph.vertexes[vertex1.id].P.a).to.eq(6);
     newProperties.a = 1;
-    expect(graph.vertexes[vertex1.id].properties.a).to.eq(6);
+    expect(graph.vertexes[vertex1.id].P.a).to.eq(6);
   });
 
   test("vertex revert replace Properties", async () => {

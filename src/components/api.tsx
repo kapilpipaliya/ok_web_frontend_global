@@ -22,7 +22,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Default Component",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Comp",
           skip: true,
         },
@@ -54,7 +54,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "CompCategory",
           parentLabel: "CompCategory",
           inward: true,
@@ -68,7 +68,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Parent Component",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Comp",
           inward: true,
           parentLabel: "Comp",
@@ -81,7 +81,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "DataType",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "DataType",
           inward: true,
           parentLabel: "DataType",
@@ -101,7 +101,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "DataType",
               onchange: '["Comp",null]',
             },
@@ -111,7 +111,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "->$0DataType->$0Comp",
             },
           },
@@ -126,14 +126,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //       name: "key",
           //       component: "SelectBox",
           //       props: {
-          //         displayExpr: "properties.key",
+          //         displayExpr: "P.key",
           //         collection: "-$0->$0Comp->$0Prop",
           //       },
           //     },
           //     {
           //       name: "value",
           //       meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop",
-          //       component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties[IdAttr]",
+          //       component: "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P[IdAttr]",
           //     },
           //   ],
           // },
@@ -141,8 +141,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "value",
             meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
             component:
-              "->$0Comp-CompChild:properties.name||->$0Comp:properties.name||->$0DataType->$0Default:properties.name",
-            // component: "->$0Comp-CompChild:properties.name||->$0Comp:properties.name||->$0DataType->$0Default:properties.name||defaultComp|->$0DataType:properties.name",
+              "->$0Comp-CompChild:P.name||->$0Comp:P.name||->$0DataType->$0Default:P.name",
+            // component: "->$0Comp-CompChild:P.name||->$0Comp:P.name||->$0DataType->$0Default:P.name||defaultComp|->$0DataType:P.name",
           },
           {
             name: "reset",
@@ -220,7 +220,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       //   name: "category",
       //   component: "SelectBox",
       //   props: {
-      //     displayExpr: `properties.${IdAttr}`,
+      //     displayExpr: `P.${IdAttr}`,
       //     collection: "CollCategory",
       //     parentLabel: "CollCategory",
       //     inward: true,
@@ -231,7 +231,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Dashboard",
           parentLabel: "Dashboard",
           inward: true,
@@ -308,7 +308,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "tab",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "-CollAttr->$0Tab",
               skip: true,
             },
@@ -318,7 +318,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-CollAttr->$0Group",
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               skip: true,
             },
           },
@@ -326,7 +326,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "DataType",
               skip: true,
             },
@@ -335,7 +335,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "Comp",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "->$0DataType->$0Comp",
               // smaller version:
               // collection: "Comp",
@@ -373,7 +373,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "key",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "properties.key",
+                  displayExpr: "P.key",
                   collection: "-CollAttrProp->CollAttrComp->$0Prop||-CollAttrProp->$0Attr->$0Comp->$0Prop",
                 },
               },
@@ -381,7 +381,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "value",
                 meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
                 component:
-                  "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name||->$0Key->$0DataType->$0Default:properties.name",
+                  "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
               },
             ],
           },
@@ -394,7 +394,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "role",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `properties.${IdAttr}`,
+                  displayExpr: `P.${IdAttr}`,
                   collection: "Role",
                 },
               },
@@ -406,7 +406,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "perm",
                     component: "SelectBox",
                     props: {
-                      displayExpr: `properties.${IdAttr}`,
+                      displayExpr: `P.${IdAttr}`,
                       collection: "Perm",
                     },
                   },
@@ -426,7 +426,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "Coll",
             },
           },
@@ -445,7 +445,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "tab",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "-CollChild->$0Tab",
             },
           },
@@ -454,7 +454,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-CollChild->$0Group",
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
             },
           },
           {
@@ -466,14 +466,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "key",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "properties.key",
+                  displayExpr: "P.key",
                   collection: "Comp[Table]->$0Prop",
                 },
               },
               {
                 name: "value",
                 meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
-                component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name",
+                component: "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name",
               },
             ],
           },
@@ -488,7 +488,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "Coll",
             },
           },
@@ -509,14 +509,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "key",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "properties.key",
+                  displayExpr: "P.key",
                   collection: "Comp[Table]->$0Prop",
                 },
               },
               {
                 name: "value",
                 meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
-                component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name",
+                component: "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name",
               },
             ],
           },
@@ -532,7 +532,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               collection: "Role",
             },
           },
@@ -544,7 +544,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "perm",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `properties.${IdAttr}`,
+                  displayExpr: `P.${IdAttr}`,
                   collection: "Perm",
                 },
               },
@@ -566,7 +566,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Dashboard",
           parentLabel: "Dashboard",
           inward: true,
@@ -578,7 +578,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Collection",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Coll",
           inward: true,
           parentLabel: "Coll",
@@ -595,8 +595,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Attribute",
             component: "SelectBox",
             props: {
-              // displayExpr: "properties.displayName||properties.name",
-              displayExpr: "$properties.displayName ($properties.name)",
+              // displayExpr: "P.displayName||P.name",
+              displayExpr: "$P.displayName ($P.name)",
               collection: "-$0-Coll$0->$0Attr",
             },
           },
@@ -604,7 +604,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "displayName",
             component: "TextBox",
             props: {
-              // defaultValue: "->$0Attr:properties.displayName",
+              // defaultValue: "->$0Attr:P.displayName",
             },
           },
           {
@@ -612,8 +612,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Tab",
-              displayExpr: `properties.${IdAttr}`,
-              defaultValue: "->$0Attr->$0Tab:properties.name",
+              displayExpr: `P.${IdAttr}`,
+              defaultValue: "->$0Attr->$0Tab:P.name",
             },
           },
           {
@@ -621,8 +621,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Group",
-              displayExpr: `properties.${IdAttr}`,
-              defaultValue: "->$0Attr->$0Group:properties.name",
+              displayExpr: `P.${IdAttr}`,
+              defaultValue: "->$0Attr->$0Group:P.name",
             },
           },
           {
@@ -630,10 +630,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "DataType",
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               hidden: true,
-              // defaultValue: "->$0Attr->$0DataType:properties.name",
-              defaultValue: "->$0Attr->$0DataType:properties.name",
+              // defaultValue: "->$0Attr->$0DataType:P.name",
+              defaultValue: "->$0Attr->$0DataType:P.name",
             },
           },
           {
@@ -641,24 +641,24 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              displayExpr: `properties.${IdAttr}`,
+              displayExpr: `P.${IdAttr}`,
               // collection: "->$0Attr->$0DataType->$0Comp",
               collection: "->$0Attr->$0DataType->$0Comp",
-              defaultValue: "->$0Attr->$0Comp:properties.name",
+              defaultValue: "->$0Attr->$0Comp:P.name",
             },
           },
           {
             name: "required",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:properties.required",
+              defaultValue: "->$0Attr:P.required",
             },
           },
           {
             name: "disabled",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:properties.disabled",
+              defaultValue: "->$0Attr:P.disabled",
             },
           },
           {
@@ -670,14 +670,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "key",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "properties.key",
+                  displayExpr: "P.key",
                   collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
                 },
               },
               {
                 name: "value",
                 meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
-                component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name",
+                component: "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name",
               },
             ],
           },
@@ -694,7 +694,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Collection",
             component: "SelectBox",
             props: {
-              displayExpr: "->$0Coll:properties.name",
+              displayExpr: "->$0Coll:P.name",
               collection: "-$0-Coll$0->$0Child",
             },
           },
@@ -703,8 +703,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Tab",
-              displayExpr: `properties.${IdAttr}`,
-              defaultValue: "->$0Coll->$0Tab:properties.name",
+              displayExpr: `P.${IdAttr}`,
+              defaultValue: "->$0Coll->$0Tab:P.name",
             },
           },
           {
@@ -712,8 +712,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Group",
-              displayExpr: `properties.${IdAttr}`,
-              defaultValue: "->$0Coll->$0Group:properties.name",
+              displayExpr: `P.${IdAttr}`,
+              defaultValue: "->$0Coll->$0Group:P.name",
             },
           },
           {
@@ -726,7 +726,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 displayName: "Attribute",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "properties.name",
+                  displayExpr: "P.name",
                   collection: "-$0->$0Coll->$0Coll->$0Attr",
                 },
               },
@@ -735,9 +735,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   collection: "DataType",
-                  displayExpr: `properties.${IdAttr}`,
+                  displayExpr: `P.${IdAttr}`,
                   hidden: true,
-                  defaultValue: "->$0Attr->$0DataType:properties.name",
+                  defaultValue: "->$0Attr->$0DataType:P.name",
                 },
               },
               {
@@ -745,37 +745,37 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 displayName: "Component",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `properties.${IdAttr}`,
+                  displayExpr: `P.${IdAttr}`,
                   collection: "->$0Attr->$0DataType->$0Comp",
-                  defaultValue: "->$0Attr->$0Comp:properties.name",
+                  defaultValue: "->$0Attr->$0Comp:P.name",
                 },
               },
               {
                 name: "displayName",
                 component: "TextBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.displayName",
+                  defaultValue: "->$0Attr:P.displayName",
                 },
               },
               {
                 name: "required",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.required",
+                  defaultValue: "->$0Attr:P.required",
                 },
               },
               {
                 name: "disabled",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.disabled",
+                  defaultValue: "->$0Attr:P.disabled",
                 },
               },
               {
                 name: "child",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `properties.${IdAttr}`,
+                  displayExpr: `P.${IdAttr}`,
                   collection: "Form",
                 },
               },
@@ -787,14 +787,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "key",
                     component: "SelectBox",
                     props: {
-                      displayExpr: "properties.key",
+                      displayExpr: "P.key",
                       collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
                     },
                   },
                   {
                     name: "value",
                     meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
-                    component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name",
+                    component: "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name",
                   },
                 ],
               },
@@ -813,7 +813,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "role",
         component: "TagBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Role",
         },
       },
@@ -926,7 +926,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "coll",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
+          displayExpr: `P.${IdAttr}`,
           collection: "Coll",
         },
       },
@@ -934,8 +934,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "data",
         component: "SelectBox",
         props: {
-          displayExpr: `properties.${IdAttr}`,
-          collection: "{->$0Coll:properties[IdAttr]}",
+          displayExpr: `P.${IdAttr}`,
+          collection: "{->$0Coll:P[IdAttr]}",
         },
       },
     ],

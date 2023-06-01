@@ -24,7 +24,7 @@ export const AllForms = () => {
 
   return (
     <div class="">
-      <For each={allForms()}>{(vertexId) => <Link href={`/${graph.vertexes[vertexId].properties[IdAttr]}/new`}>{graph.vertexes[vertexId].properties[IdAttr]}</Link>}</For>
+      <For each={allForms()}>{(vertexId) => <Link href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
     </div>
   );
 };
@@ -73,8 +73,8 @@ export const Login = (props: {}) => {
 
   const config = {} as { record: Record };
   const onLoginClick = () => {
-    const email = config.record.vertex.properties.email as string;
-    const password = config.record.vertex.properties.password as string;
+    const email = config.record.vertex.P.email as string;
+    const password = config.record.vertex.P.password as string;
     Ws.trigger([[event, { body: { email, password } }]]);
     // revertTransaction(txnId)
   };
@@ -91,13 +91,13 @@ export const Login = (props: {}) => {
        component={"Button"}
         meta={
           {
-            properties: {
+            P: {
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex
         }
-        data={{ properties: { meta: "Login" } } as unknown as Vertex}
+        data={{ P: { meta: "Login" } } as unknown as Vertex}
         onClick={onLoginClick}
       />
     </>
@@ -144,8 +144,8 @@ export const SignUp = (props: {}) => {
 
   const config = {} as { record: Record };
   const onSignupClick = () => {
-    const email = config.record.vertex.properties.email as string;
-    const password = config.record.vertex.properties.password as string;
+    const email = config.record.vertex.P.email as string;
+    const password = config.record.vertex.P.password as string;
     Ws.trigger([[event, { body: { email, password } }]]);
     // revertTransaction(txnId);
   };
@@ -162,13 +162,13 @@ export const SignUp = (props: {}) => {
        component={"Button"}
         meta={
           {
-            properties: {
+            P: {
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex
         }
-        data={{ properties: { meta: "SignUp" } } as unknown as Vertex}
+        data={{ P: { meta: "SignUp" } } as unknown as Vertex}
         onClick={onSignupClick}
       />
     </>
@@ -183,10 +183,10 @@ export const SimpleImport = (props: {}) => {
     <>
       <SelectInputField
         component={"SelectBox"}
-        data={{ properties: {} } as Vertex}
+        data={{ P: {} } as Vertex}
         meta={
           {
-            properties: {
+            P: {
               [IdAttr]: "import",
               props: {
                 stringValue: true,
@@ -206,13 +206,13 @@ export const SimpleImport = (props: {}) => {
        component={"Button"}
         meta={
           {
-            properties: {
+            P: {
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
           } as unknown as Vertex
         }
-        data={{ properties: { meta: "Import" } } as unknown as Vertex}
+        data={{ P: { meta: "Import" } } as unknown as Vertex}
         onClick={() => onDataDirectoryImportClick(config.record, Ws)}
       />
     </>
