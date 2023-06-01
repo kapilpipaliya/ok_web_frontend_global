@@ -160,7 +160,9 @@ export class ServerEventsDispatcher {
   }
 
   unbindEvent(eventNames: Array<WSEvent> = []) {
-    eventNames.map((event) => this.unbind(event));
+    for (const event of eventNames) {
+      this.unbind(event);
+    }
     return this;
   }
 

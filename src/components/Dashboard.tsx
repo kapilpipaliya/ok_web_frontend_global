@@ -48,8 +48,9 @@ const navigation = [
       { name: "Components", href: "/Comp" },
       // { name: "Attribute Types", href: "/AttrType" },
       // { name: "Collection Category", href: "/CollCategory" },
-      { name: "Form", href: "/Coll" },
-      // { name: "Forms", href: "/Form" },
+      // { name: "Form", href: "/Coll" },
+      { name: "Collections", href: "/Coll" },
+      { name: "Forms", href: "/Form" },
       // { name: "Page", href: "/Page" },
     ],
   },
@@ -116,7 +117,7 @@ export const DashboardView = () => {
     <div class="flex flex:col flex:1">
       {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
       <MenuButtonToggle />
-      <Show<boolean>
+      <Show
         when={Ws.isLoggedIn()}
         fallback={
           <>

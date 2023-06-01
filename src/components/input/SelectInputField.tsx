@@ -5,7 +5,7 @@ import {
   createResource,
   Show,
   untrack,
-  useContext, onCleanup
+  useContext, onCleanup, For
 } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
@@ -31,6 +31,32 @@ import {
 import { ComponentProps } from "../core/Form";
 import { FormContext, onChangeHandler, Record } from "../../lib/Record";
 
+function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: number) {
+  const outEdges = vertex.out_edges[type] || [];
+  let containsVertexId = false;
+
+  for (const edgeId of outEdges) {
+    const endVertex = graph.edges[edgeId].end;
+    if (endVertex === vertexId) {
+      containsVertexId = true;
+      break;
+    }
+  }
+  return containsVertexId;
+}
+function vertexInEdgeContainVertex(vertex: Vertex, type: any, vertexId: number) {
+  const inEdges = vertex.in_edges[type] || [];
+  let includesVertexId = false;
+  for (const edgeId of inEdges) {
+    const startVertex = graph.edges[edgeId].start;
+    if (startVertex === vertexId) {
+      includesVertexId = true;
+      break;
+    }
+  }
+  return includesVertexId;
+}
+
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
@@ -54,11 +80,15 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, v
 
   // add added edges:
   for (const vertexId of value) {
-    if ((vertex.out_edges[type] || []).map((edgeId) => graph.edges[edgeId].end).includes(vertexId)) continue;
+    if (vertexOutEdgeContainVertex(vertex, type, vertexId)) {
+      continue;
+    }
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
     if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
+
+
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
@@ -88,7 +118,10 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
 
   // add added edges:
   for (const vertexId of valueArray) {
-    if ((vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start).includes(vertexId)) continue;
+    if (vertexInEdgeContainVertex(vertex, type, vertexId)) {
+      continue;
+    }
+
     const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id));
     if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
@@ -139,19 +172,21 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
 
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
-      <Show<boolean>
+      <Show
         when={!props.disabled}
         fallback={
-          <For<Vertex[]> each={selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId])}>
-            {(item) => <>{getOptionLabel(item, props.meta.properties.props.displayExpr || `properties.${IdAttr}`)}</>}
+          <For each={selectedValue(props.meta, props.data)}>
+            {(vertexId) => <>{getOptionLabel(graph.vertexes[vertexId], props.meta.properties.props.displayExpr || `properties.${IdAttr}`)}</>}
           </For>
         }
       >
         <div
+         class="min-w:140"
           ref={(el) => {
             let selectOp = {
               searchEnabled: true,
               disabled: props.disabled!,
+
 
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
               value: props.component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
@@ -163,13 +198,16 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 if (!e.event) {
                   return;
                 }
+                if (!props.data) {
+                  return;
+                }
                 if (record.isRealTime) {
                   record.txnId = getNewTxnId();
                 }
                 if (props.meta.properties.props.stringValue) {
-                  props.setValue(props.meta,props.data, e.value);
+                  props.setValue?.(props.meta,props.data, e.value);
                 } else if (props.meta.properties.props.items) {
-                  props.setValue(props.meta,props.data, e.value);
+                  props.setValue?.(props.meta,props.data, e.value);
                 } else if (props.meta.properties.props.inward) {
                   setParentValue(record.txnId, props.data, props.meta, e.value);
                 } else {
@@ -180,9 +218,10 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 // })
               },
               labelMode: "floating",
-              onFocusIn: function (e) {
-                refetch();
-              },
+              // slow down performance.
+              // onFocusIn: function (e) {
+              //   refetch();
+              // },
             } as Properties;
             if (!props.meta.properties.props.items) {
               Object.assign(selectOp, {

@@ -12,12 +12,18 @@ import {
  vertexOldIdToNewIdMap
 } from "../lib/graph";
 import {
- addNewVertex,
+ addNewVertex, addNewVertexUnSafe,
  deleteVertex,
  newVertex,
  updateVertexId
 } from "../lib/Vertex";
-import { addNewEdge, deleteEdge, newEdge, updateEdgeId } from "../lib/Edge";
+import {
+ addNewEdge,
+ addNewEdgeUnSafe,
+ deleteEdge,
+ newEdge,
+ updateEdgeId
+} from "../lib/Edge";
 
 export const syncEvent = () => {
  const { Ws } = useContext(WsContext);
@@ -109,10 +115,18 @@ export const syncEvent = () => {
  }) => {
   batch(() => {
    if (args.timestamp) setGraph("lastSyncedTime", args.timestamp);
-   args.vertexes?.map((v) => addNewVertex(0, newVertex(v.id, v.labels, v.properties)));
-   args.edges?.map((e) => addNewEdge(0, newEdge(e.id, e.type, e.properties, e.start, e.end)));
-   args.deleted_edges?.map((edgeId) => deleteEdge(0, parseInt(edgeId)));
-   args.deleted_vertexes?.map((vertexId) => deleteVertex(0, parseInt(vertexId)));
+   for (const v of args.vertexes || []) {
+    addNewVertexUnSafe(v);
+   }
+   for (const e of args.edges || []) {
+    addNewEdgeUnSafe(e);
+   }
+   for (const edgeId of args.deleted_edges || []) {
+    deleteEdge(0, parseInt(edgeId));
+   }
+   for (const vertexId of args.deleted_vertexes || []) {
+    deleteVertex(0, parseInt(vertexId));
+   }
    setGraph("initialSynced", true);
   });
  };

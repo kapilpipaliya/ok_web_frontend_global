@@ -302,9 +302,13 @@ export const getSelectOptionsInternal = (
       let filter = "";
       if (filterIndex > 0) {
         filter = edgeType.slice(filterIndex + 1).replace("]", "");
-        vertexes = findVertexIdsByLabel(edgeType.slice(0, filterIndex))
-          .map((id) => graph.vertexes[id])
-          .filter((vertex) => vertex.properties[IdAttr] === filter);
+        const vertexIds = findVertexIdsByLabel(edgeType.slice(0, filterIndex));
+        const filteredVertexes = [];
+        for (const vertexId of vertexIds) {
+          if (graph.vertexes[vertexId].properties[IdAttr] === filter) {
+            filteredVertexes.push(graph.vertexes[vertexId]);
+          }
+        }
       } else if (filterIndex === 0) {
         // JSON.parse options:
         try {
@@ -359,12 +363,18 @@ const getTextValue = (value: any) => {
 
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
   if (!vertex) return "";
+  if (displayExpr.match(/\$([A-Za-z]\w+[:\w.]*)/g)) {
+    return displayExpr.replace(/\$([A-Za-z]\w+[:\w.]*)/g, function(match, p1, offset, string) {
+      return getOptionLabel(vertex, p1);
+    });
+
+  }
   if (displayExpr.includes("||")) {
     for (const displayExprElement of displayExpr.split("||")) {
       // get a function and input:
       const a = displayExprElement.split("|");
       if (a.length > 1) {
-        return;
+        return '';
         // if (a[0] === 'defaultComp') {
         //  const value = getOptionLabel(vertex, a[1]);
         //  if (value !== undefined && value !== null && value !== "") {
@@ -390,6 +400,7 @@ export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
         }
       }
     }
+    return '';
   }
 
   let pattern = "";

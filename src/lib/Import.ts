@@ -149,9 +149,8 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
 const isEmpty = (object: { [key: string]: any }) => !Object.values(object).some((x) => x !== null && x !== "");
 
 function findOrCreateNewVertex(txnId: number, label: string, lookupId: string, lookUpUniqueValue: string) {
- let existingVertex = (graph.vertexLabelIdMap[label] || [])
-  .map((vertexId) => graph.vertexes[vertexId])
-  .find((vertex) => vertex.properties[lookupId] === lookUpUniqueValue);
+ let existingVertex = findVertexByLabelAndUniqueId(label, lookupId, lookUpUniqueValue);
+
  if (!existingVertex) {
   const vertexId = getNewGraphId();
   addNewVertex(txnId, newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }));
@@ -275,9 +274,8 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
     if (!value) return;
     if (value === "undefined") return;
     // find and if not exist then only add new vertex
-    const existingVertex = (graph.vertexLabelIdMap[meta.collLabel] || [])
-     .map((vertexId) => graph.vertexes[vertexId])
-     .find((vertex) => vertex.properties[meta.collId] === value);
+    let existingVertex = findVertexByLabelAndUniqueId(meta.collLabel, meta.collId, value);
+
     if (!existingVertex) {
      addNewVertex(
       txnId,
