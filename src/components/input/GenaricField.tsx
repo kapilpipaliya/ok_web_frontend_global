@@ -176,27 +176,27 @@ export function GenericField(props: ComponentProps & { component: string; disabl
   const formContext = useContext(FormContext);
   return (
 
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {
-            let properties: any = {
+            let attributes: any = {
 
             };
             let comp: any;
 
             if (props.component === "Box") {
               comp = dxBox;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 direction: "row",
                 height: 100,
               } as dxBoxProperties);
             } else if (props.component === "1") {
               comp = dxLoadPanel;
-              Object.assign(properties, {} as dxLoadPanelProperties);
+              Object.assign(attributes, {} as dxLoadPanelProperties);
             } else if (props.component === "1") {
               comp = dxLoadPanel;
-              Object.assign(properties, {} as dxLoadPanelProperties);
+              Object.assign(attributes, {} as dxLoadPanelProperties);
             } else if (props.component === "TreeMap") {
               comp = dxTreeMap;
               // const treeMapData = [
@@ -235,10 +235,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               //     ],
               //   },
               // ];
-              Object.assign(properties, {} as dxTreeMapProperties);
+              Object.assign(attributes, {} as dxTreeMapProperties);
             } else if (props.component === "VectorMap") {
               comp = dxVectorMap;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 // bounds: [-180, 85, 180, -60],
                 // tooltip: {
                 //   enabled: true,
@@ -263,7 +263,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 props.setValue(props.meta,props.data, selectedItems);
               };
               comp = dxTreeView;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 width: 340,
                 height: 320,
                 showCheckBoxesMode: "normal",
@@ -317,7 +317,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               //     email: "gretas@dx-email.com",
               //   },
               // ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 showRowLines: true,
                 autoExpandAll: true,
                 columns: ["position", "fullName", "email"],
@@ -331,7 +331,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxTreeListProperties);
             } else if (props.component === "Toast") {
               comp = dxToast;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 displayTime: 20000,
                 message: "Toast message",
                 type: "info",
@@ -477,7 +477,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 height: 350,
                 itemTemplate: (itemData, itemIndex, itemElement) => {
                   console.log("itemData", itemData, itemElement);
@@ -503,7 +503,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   icon: "info",
                 },
               ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onSelectionChanged(e) {
                   props.setValue(props.meta, props.data,e.addedItems[0].text);
                 },
@@ -524,7 +524,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   text: "CA San Francisco Stanford Ave",
                 },
               ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 height: 260,
                 onSelectionChanged(e) {
                   props.setValue(props.meta, props.data,e.addedItems[0].text);
@@ -532,7 +532,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxTabPanelProperties);
             } else if (props.component === "SpeedDialAction") {
               comp = dxSpeedDialAction;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 icon: "tel",
                 onClick(e) {
                   console.log("Click");
@@ -575,10 +575,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   val: 3,
                 },
               ];
-              Object.assign(properties, {} as dxSparkLineProperties);
+              Object.assign(attributes, {} as dxSparkLineProperties);
             } else if (props.component === "ScrollView") {
               comp = dxScrollView;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 height: 100,
                 scrollByContent: true,
                 scrollByThumb: true,
@@ -593,7 +593,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxScrollViewProperties);
             } else if (props.component === "Scheduler") {
               comp = dxScheduler;
-              Object.assign(properties, {} as dxSchedulerProperties);
+              Object.assign(attributes, {} as dxSchedulerProperties);
             } else if (props.component === "Sankey") {
               comp = dxSankey;
               const sankeyData = [
@@ -654,14 +654,14 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 link: {
                   colorMode: "gradient",
                 },
               } as dxSankeyProperties);
             } else if (props.component === "Popup") {
               comp = dxPopup;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 visible: false,
                 contentTemplate: () => {
                   return "<div>Some popup message</div>";
@@ -719,7 +719,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
             } else if (props.component === "PopOver") {
               comp = dxPopOver;
               // <p><span id="subject1">Google AdWords Strategy</span> (<a id="link1">details</a>)</p>
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 target: "#link1",
                 showEvent: "mouseenter",
                 hideEvent: "mouseleave",
@@ -761,7 +761,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 series: [
                   {
                     argumentField: "arg",
@@ -808,7 +808,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 legend: {
                   horizontalAlignment: "center",
                   verticalAlignment: "bottom",
@@ -867,7 +867,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onItemClick: (e: any) => {
                   props.setValue(props.meta, props.data,e.itemData);
                 },
@@ -892,7 +892,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxMultiViewProperties);
               // } else if(props.component === "SelectBox" ) {
               //  comp = dxSelectBox;
-              //  Object.assign(properties, {} as dxSelectBoxProperties);
+              //  Object.assign(attributes, {} as dxSelectBoxProperties);
             } else if (props.component === "Menu") {
               comp = dxMenu;
 
@@ -919,20 +919,20 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onItemClick: (e: any) => {
                   props.setValue(props.meta, props.data,e.itemData);
                 },
               } as dxMenuProperties);
             } else if (props.component === "Map") {
               comp = dxMap;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 provider: "bing",
                 type: "satellite",
               } as dxMapProperties);
               // } else if(props.component === "TagBox" ) {
               //  comp = dxTagBox;
-              //  Object.assign(properties, {} as dxTagBoxProperties);
+              //  Object.assign(attributes, {} as dxTagBoxProperties);
             } else if (props.component === "Lookup") {
               comp = dxLookup;
 
@@ -953,7 +953,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 "Direct vs Online Sales Comparison Report",
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onItemClick: (e: any) => {
                   props.setValue(props.meta, props.data,e.itemData);
                 },
@@ -961,7 +961,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
             } else if (props.component === "LoadPanel") {
               comp = dxLoadPanel;
               // set on container: style={{ padding: "10px" }}
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 showIndicator: true,
                 showPane: true,
                 shading: true,
@@ -980,7 +980,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxLoadPanelProperties);
             } else if (props.component === "LoadIndicator") {
               comp = dxLoadIndicator;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 width: 100,
                 visible: true,
               } as dxLoadIndicatorProperties);
@@ -1004,7 +1004,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 "Direct vs Online Sales Comparison Report",
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onItemClick: (e: any) => {
                   props.setValue(props.meta, props.data,e.itemData);
                 },
@@ -1070,7 +1070,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
 
                 tasks: {
                   dataSource: tasks,
@@ -1132,7 +1132,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person4.png",
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 height: 400,
               } as dxGalleryProperties);
             } else if (props.component === "Funnel") {
@@ -1160,7 +1160,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 argumentField: "action",
                 label: {
                   backgroundColor: "none",
@@ -1246,8 +1246,8 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {
-                fileSystemProvider: props.data.properties[props.meta.properties[IdAttr]],
+              Object.assign(attributes, {
+                fileSystemProvider: props.data.P[props.meta.P[IdAttr]],
                 itemView: {
                   mode: "thumbnails",
                 },
@@ -1258,7 +1258,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   rename: true,
                 },
               } as dxFileManagerProperties);
-              // createEffect(() => instance.option("fileSystemProvider", props.data.properties[props.meta.properties[IdAttr]]));
+              // createEffect(() => instance.option("fileSystemProvider", props.data.P[props.meta.P[IdAttr]]));
             } else if (props.component === "Diagram") {
               comp = dxDiagram;
 
@@ -1295,10 +1295,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               ];
 
-              Object.assign(properties, {} as dxDiagramProperties);
+              Object.assign(attributes, {} as dxDiagramProperties);
             } else if (props.component === "DataGrid") {
               comp = dxDataGrid;
-              Object.assign(properties, {} as dxDataGridProperties);
+              Object.assign(attributes, {} as dxDataGridProperties);
             } else if (props.component === "ContextMenu") {
               comp = dxContextMenu;
 
@@ -1324,7 +1324,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   ],
                 },
               ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 visible: true,
                 onItemClick: (e: any) => {
                   props.setValue(props.meta, props.data,e.itemData.text);
@@ -1363,27 +1363,27 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   oranges: 4,
                 },
               ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 series: {
                   argumentField: "day",
                   valueField: "oranges",
                   name: "My oranges",
-                  type: props.meta.properties.props["type"] || "bar",
+                  type: props.meta.P.props["type"] || "bar",
                   color: "#ffaa66",
                 },
               } as dxChartProperties);
             } else if (props.component === "Button") {
               comp = dxButton;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 onClick: props.onClick,
               } as dxButtonProperties);
             } else if (props.component === "BarGauge") {
               comp = dxBarGauge;
               // [47.27, 65.32, 84.59, 71.86]
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 startValue: 0,
                 endValue: 100,
-                values: props.data.properties[props.meta.properties[IdAttr]],
+                values: props.data.P[props.meta.P[IdAttr]],
                 label: {
                   indent: 30,
                   format: {
@@ -1406,7 +1406,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxBarGaugeProperties);
             } else if (props.component === "ActionSheet") {
               comp = dxActionSheet;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 title: "Choose action",
                 onCancelClick: () => {
                   props.setValue(props.meta, props.data,"Cancel");
@@ -1417,11 +1417,11 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxActionSheetProperties);
             } else if (props.component === "Accordion") {
               comp = dxAccordion;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 animationDuration: 300,
                 collapsible: true,
                 multiple: false,
-                selectedItems: [props.data.properties[props.meta.properties[IdAttr]][0]],
+                selectedItems: [props.data.P[props.meta.P[IdAttr]][0]],
 
                 itemTitleTemplate: (itemData: any, itemIndex: number, itemElement: any) => {
                   itemElement.innerHTML = `
@@ -1447,7 +1447,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
             } else if (props.component === "ButtonGroup") {
               comp = dxButtonGroup;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 items: [],
                 selectionMode: "none",
 
@@ -1460,7 +1460,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
 
             } else if (props.component === "Tooltip") {
               comp = dxTooltip;
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 target: "#target-item",
                 showEvent: "mouseenter",
                 hideEvent: "mouseleave",
@@ -1468,7 +1468,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 position: "top",
                 contentTemplate: (e: any) => {
                   e.component.option("contentTemplate", null);
-                  return props.data.properties[props.meta.properties[IdAttr]];
+                  return props.data.P[props.meta.P[IdAttr]];
                 },
               } as dxTooltipProperties);
             } else if (props.component === "PivotGrid") {
@@ -1505,7 +1505,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                 },
               };
 
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 fieldChooser: {
                   width: 400,
                 },
@@ -1535,9 +1535,9 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                   icon: "alignjustify",
                 },
               ];
-              Object.assign(properties, {
+              Object.assign(attributes, {
                 displayExpr: "name",
-                items: props.data.properties[props.meta.properties[IdAttr]],
+                items: props.data.P[props.meta.P[IdAttr]],
                 keyExpr: "id",
                 selectedItemKey: 1,
                 stylingMode: "text",
@@ -1549,33 +1549,33 @@ export function GenericField(props: ComponentProps & { component: string; disabl
               } as dxDropDownButtonProperties);
             } else if (props.component === "Drawer") {
               comp = dxDrawer;
-              Object.assign(properties, {} as dxDrawerProperties);
+              Object.assign(attributes, {} as dxDrawerProperties);
             } else if (props.component === "1") {
               comp = dxLoadPanel;
-              Object.assign(properties, {} as dxLoadPanelProperties);
+              Object.assign(attributes, {} as dxLoadPanelProperties);
             } else if (props.component === "1") {
               comp = dxLoadPanel;
-              Object.assign(properties, {} as dxLoadPanelProperties);
+              Object.assign(attributes, {} as dxLoadPanelProperties);
             } else {
               console.warn("Component not found", props.component);
               return "----";
             }
-            // if (displayExpr.includes(props.component) && !props.meta.properties.props.displayExpr) {
-            //  Object.assign(properties, {displayExpr: ''});
+            // if (displayExpr.includes(props.component) && !props.meta.P.props.displayExpr) {
+            //  Object.assign(attributes, {displayExpr: ''});
             // }
-            // if (valueExpr.includes(props.component) && !props.meta.properties.props.valueExpr) {
-            //  Object.assign(properties, {valueExpr: ''});
+            // if (valueExpr.includes(props.component) && !props.meta.P.props.valueExpr) {
+            //  Object.assign(attributes, {valueExpr: ''});
             // }
-            // if (dataSource.includes(props.component) && !props.meta.properties.props.dataSource) {
-            //  Object.assign(properties, {dataSource: ''});
+            // if (dataSource.includes(props.component) && !props.meta.P.props.dataSource) {
+            //  Object.assign(attributes, {dataSource: ''});
             // }
-            // if (items.includes(props.component) && !props.meta.properties.props.items) {
-            //  Object.assign(properties, {items: ''});
+            // if (items.includes(props.component) && !props.meta.P.props.items) {
+            //  Object.assign(attributes, {items: ''});
             // }
             let instance;
             // createEffect needed for the drawer.else drawer is not working.
             createEffect(()=> {
-              instance = new comp(el, properties);
+              instance = new comp(el, attributes);
               if (props.ref) {
                 props.ref(instance);
               }
@@ -1584,16 +1584,16 @@ export function GenericField(props: ComponentProps & { component: string; disabl
             if (props.component === "Button") {
               if (props.data) {
               createEffect(() => {
-                instance.option("text", props.data.properties[props.meta.properties[IdAttr]])
+                instance.option("text", props.data.P[props.meta.P[IdAttr]])
               });
               }
             } else if (props.component === "ButtonGroup") {
-              createEffect(() => instance.option("selectedItems", props.data.properties[props.meta.properties[IdAttr]]));
+              createEffect(() => instance.option("selectedItems", props.data.P[props.meta.P[IdAttr]]));
             }
 
             createEffect(() => {
               if(props.data) {
-                let value = props.data.properties[props.meta.properties[IdAttr]];
+                let value = props.data.P[props.meta.P[IdAttr]];
                 if (props.component === "FilterBuilder" || props.component === "FileUploader") {
                   if (!value) value = [];
                   else if(!Array.isArray(value)) {
@@ -1606,8 +1606,8 @@ export function GenericField(props: ComponentProps & { component: string; disabl
             createEffect(() => instance.option("disabled", props.disabled));
 
             createEffect(() => {
-              for (const property in props.meta.properties.props as dxTreeMapProperties) {
-                let value = props.meta.properties.props[property];
+              for (const property in props.meta.P.props as dxTreeMapProperties) {
+                let value = props.meta.P.props[property];
                 if (property === "items" && typeof value === "string") {
                   value = value.split("\n");
                 }

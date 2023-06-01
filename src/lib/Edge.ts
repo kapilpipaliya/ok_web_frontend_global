@@ -10,7 +10,7 @@ export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId:
   return {
     id: edgeId,
     type,
-    properties,
+    P: properties,
     start: startVertexId,
     end: endVertexId,
   };
@@ -85,8 +85,8 @@ export function replaceEdgeProperties(
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
-  const originalProperties = klona(graph.edges[edgeId].properties);
-  setGraph("edges", edgeId, "properties", reconcile(klona(properties)));
+  const originalProperties = klona(graph.edges[edgeId].P);
+  setGraph("edges", edgeId, "P", reconcile(klona(properties)));
   transactionDetailAdd(txnId, {
     replaceEdge: () => klona(graph.edges[edgeId]),
     revert: () => replaceEdgeProperties(0, edgeId, originalProperties),

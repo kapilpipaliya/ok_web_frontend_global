@@ -46,7 +46,7 @@ export function Alert(props: AlertProps) {
   return (
     // <div class="uk-alert-primary" uk-alert>
     //   <a class="uk-alert-close" uk-close></a>
-    //   <p>{props.data.properties[props.meta.properties[IdAttr]]}</p>
+    //   <p>{props.data.P[props.meta.P[IdAttr]]}</p>
     // </div>
     <div
       classList={{

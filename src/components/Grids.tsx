@@ -73,7 +73,7 @@ export const SampleDataGrid = (props: {}) => {
     );
   }
   setTimeout(() => {
-    setGraph("vertexes", graph.vertexLabelIdMap["Attr"][0], "properties", {
+    setGraph("vertexes", graph.vertexLabelIdMap["Attr"][0], "P", {
       id: "Kapil",
     });
   }, 3000);
@@ -95,19 +95,19 @@ export const SampleDataGrid = (props: {}) => {
             },
             {
               caption: "Name",
-              dataField: `properties.${IdAttr}`,
+              dataField: `P.${IdAttr}`,
               dataType: "string",
               fixed: true,
             },
             {
               caption: "Label",
-              dataField: "properties.label",
+              dataField: "P.label",
               dataType: "string",
               fixed: true,
             },
             {
               caption: "Unique",
-              dataField: "properties.unique",
+              dataField: "P.unique",
               dataType: "boolean",
               fixed: true,
             },
@@ -160,19 +160,19 @@ export const DataGrid = (props: DataGridProps) => {
   for (const attribute of formNew!.attributes) {
     if (attribute.component === "Table") continue;
     // if (attribute.props?.skip) continue;
-    attribute["dataField"] = `properties.${attribute.name}`;
+    attribute["dataField"] = `P.${attribute.name}`;
     attribute["caption"] = capitalizeFirstLetter(attribute.displayName || attribute.name);
     attribute["dataType"] = dataTypeToDataGrid(attribute.dataType!);
     if (attribute.component === "SelectBox" && !attribute.props.items) {
       attribute["calculateCellValue"] = (columnBase, rowData) => {
         const vertex = selectedValue(
           {
-            properties: attribute,
+            P: attribute,
           } as unknown as Vertex,
           columnBase,
         );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex[0]], attribute.props?.displayExpr || `properties.${IdAttr}`);
+          return getOptionLabel(graph.vertexes[vertex[0]], attribute.props?.displayExpr || `P.${IdAttr}`);
         }
         return "";
       };
@@ -181,14 +181,14 @@ export const DataGrid = (props: DataGridProps) => {
       attribute["calculateCellValue"] = (columnBase, rowData) => {
         const vertex = selectedValue(
           {
-            properties: attribute,
+            P: attribute,
           } as unknown as Vertex,
           columnBase,
         );
         if (vertex) {
           const labels = [];
           for (const v of vertex) {
-            const label = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `properties.${IdAttr}`);
+            const label = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `P.${IdAttr}`);
             labels.push(label);
           }
           return labels.join(', ');
@@ -219,7 +219,7 @@ export const DataGrid = (props: DataGridProps) => {
     store: dataArrayStore,
     // sort: "LastName"
   });
-  const coll = G.isNumber(collection) ? graph.vertexes[collection].properties[IdAttr] : collection;
+  const coll = G.isNumber(collection) ? graph.vertexes[collection].P[IdAttr] : collection;
   // if(!graph.vertexLabelIdMap[coll]) {
   //  alert(`collection not found ${coll}`)
   //  return;
@@ -340,13 +340,13 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
          component={"Button"}
           meta={
             {
-              properties: {
+              P: {
                 [IdAttr]: "meta",
                 props: {},
               },
             } as unknown as Vertex
           }
-          data={{ properties: { meta: "Add new" } } as unknown as Vertex}
+          data={{ P: { meta: "Add new" } } as unknown as Vertex}
           onClick={() => {
             navigate("./new");
           }}
@@ -376,7 +376,7 @@ export const TableDashboard = () => {
             {(tableLayout) => (
              <div class="bg:gray-22 p:10 r:10 max-w:350 bg:gray-28:hover flex ji:center ai:center h:5rem">
                <h3 class="f:18@md font:semibold"></h3>
-               <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><Link href={`/${tableLayout.properties[IdAttr]}`}>{tableLayout.properties.title || tableLayout.properties[IdAttr]}</Link></p>
+               <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><Link href={`/${tableLayout.P[IdAttr]}`}>{tableLayout.P.title || tableLayout.P[IdAttr]}</Link></p>
              </div>
             )}
           </For>
@@ -390,7 +390,7 @@ export const AllDashboards = () => {
 
   return (
    <div class="">
-     <For each={vertexes()}>{(vertexId) => <Link href={`/grid/${graph.vertexes[vertexId].properties[IdAttr]}`}>{graph.vertexes[vertexId].properties[IdAttr]}</Link>}</For>
+     <For each={vertexes()}>{(vertexId) => <Link href={`/grid/${graph.vertexes[vertexId].P[IdAttr]}`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
    </div>
   );
 }

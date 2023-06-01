@@ -44,7 +44,7 @@ export function DrawerField(props: ComponentProps & { children: JSXElement }) {
             // maxSize: 200,
             template: function (e) {
               const listInstance = new List(e, {
-                dataSource: props.data.properties[props.meta.properties[IdAttr]],
+                dataSource: props.data.P[props.meta.P[IdAttr]],
                 hoverStateEnabled: false,
                 activeStateEnabled: false,
                 focusStateEnabled: false,

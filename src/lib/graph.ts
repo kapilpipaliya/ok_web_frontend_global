@@ -13,14 +13,14 @@ export const IdAttr = "name";
 export interface Vertex {
   id: Id;
   labels: string[];
-  properties: { [key: string]: any };
+  P: { [key: string]: any };
   in_edges: { [key: string]: Id[] };
   out_edges: { [key: string]: Id[] };
 }
 
 export interface Edge {
   id: Id;
-  properties: { [key: string]: any };
+  P: { [key: string]: any };
   type: string;
   start: Id;
   end: Id;

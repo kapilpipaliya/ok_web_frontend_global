@@ -3,7 +3,7 @@ import { splitProps } from "solid-js";
 import { IdAttr } from "../../../lib/graph";
 
 export function Label(props: LabelProps) {
-  const [selectedProps, customProps] = splitProps(props.meta.properties.props as LabelProps, ["color"]);
+  const [selectedProps, customProps] = splitProps(props.meta.P.props as LabelProps, ["color"]);
 
   return (
     <div
@@ -13,7 +13,7 @@ export function Label(props: LabelProps) {
         [`uk-label-${selectedProps.color}`]: !!selectedProps.color,
       }}
     >
-      {props.data.properties[props.meta.properties[IdAttr]]}
+      {props.data.P[props.meta.P[IdAttr]]}
     </div>
   );
 }

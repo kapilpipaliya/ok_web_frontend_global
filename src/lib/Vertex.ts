@@ -6,7 +6,7 @@ import { G, pipe } from "@mobily/ts-belt";
 
 // return a new Vertex
 export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
-  return { id, labels, properties, in_edges: {}, out_edges: {} };
+  return { id, labels, P: properties, in_edges: {}, out_edges: {} };
 }
 
 export function addNewVertexUnSafe(vertex: Vertex) {
@@ -53,8 +53,8 @@ export function replaceVertexProperties(
   if (!graph.vertexes[vertexId]) {
     return { error: "Vertex ID is not valid" };
   }
-  const originalProperties = klona(graph.vertexes[vertexId].properties);
-  setGraph("vertexes", vertexId, "properties", reconcile(klona(properties)));
+  const originalProperties = klona(graph.vertexes[vertexId].P);
+  setGraph("vertexes", vertexId, "P", reconcile(klona(properties)));
   transactionDetailAdd(txnId, {
     replace: () => klona(graph.vertexes[vertexId]),
     revert: () => replaceVertexProperties(0, vertexId, originalProperties),
@@ -77,9 +77,9 @@ export function mergeVertexProperties(
   }
   const originalProperties = {} as { [key: string]: any };
   for (const property in properties) {
-    originalProperties[property] = vertex.properties[property];
+    originalProperties[property] = vertex.P[property];
   }
-  setGraph("vertexes", vertexId, "properties", properties);
+  setGraph("vertexes", vertexId, "P", properties);
   transactionDetailAdd(txnId, {
     merge: () => Object.assign({}, vertex, { properties }),
     revert: () => mergeVertexProperties(0, vertexId, originalProperties),
@@ -156,7 +156,7 @@ export function findVertexIdsByLabel(label: string): Id[] {
 }
 export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: any) {
   const vertexId = (graph.vertexLabelIdMap[label] || []).find(
-    (vertexId) => value === graph.vertexes[vertexId].properties[attribute],
+    (vertexId) => value === graph.vertexes[vertexId].P[attribute],
   );
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
@@ -165,13 +165,13 @@ export function findVertexByLabelAndUniqueIdWithSkip(label: string, attribute: s
   if (skipId != undefined) {
     vertexIds = vertexIds.filter((value) => value !== skipId);
   }
-  const vertexId = vertexIds.find((vertexId) => value === graph.vertexes[vertexId].properties[attribute]);
+  const vertexId = vertexIds.find((vertexId) => value === graph.vertexes[vertexId].P[attribute]);
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
 
 export const meta = (props: { [key: string]: any }) => ({
- properties: {
+ P: {
   props
  }
 } as unknown as Vertex);

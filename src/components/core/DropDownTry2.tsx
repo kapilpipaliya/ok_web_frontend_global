@@ -23,7 +23,7 @@ export function DropDownTry2(props: ComponentProps) {
               console.log("onValueChanged", e.value);
             },
           });
-          createEffect(() => instance.option("value", props.data.properties[props.meta.properties[IdAttr]]));
+          createEffect(() => instance.option("value", props.data.P[props.meta.P[IdAttr]]));
 
           onCleanup(() => instance.dispose());
         }}
