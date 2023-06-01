@@ -1,11 +1,19 @@
-import { createEffect, createSignal, Show, useContext } from "solid-js";
+import {
+  batch,
+  createEffect,
+  createSignal,
+  JSX,
+  Show,
+  useContext
+} from "solid-js";
 import {
   backupToIndexDB,
   backupToJson,
   commitTxn,
   getNewGraphId,
   getNewTxnId,
-  graph, IdAttr,
+  graph,
+  IdAttr,
   resetDatabase,
   restoreFromIndexDB,
   restoreFromJson,
@@ -20,15 +28,15 @@ import { CardBody } from "../components/uikit_components/Card/CardBody";
 import {
   addNewVertex,
   findVertexByLabelAndUniqueId,
-  findVertexByLabelAndUniqueIdWithSkip,
   newVertex,
-  replaceVertexProperties,
+  replaceVertexProperties
 } from "../lib/Vertex";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import { WsContext } from "../components/ws_events_dispatcher";
-import { getChildVertex, getParentVertex } from "../lib/Traverse";
+import { getParentVertex } from "../lib/Traverse";
 import { getFormMetaData, getId, newRow, Record } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
+import { Field, NsMetaJson, Type } from "../NSMetaData";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -96,12 +104,13 @@ export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
   let fileInputRef: HTMLInputElement;
   let componentPropsInputRef: HTMLInputElement;
+  let importNSDataInputRef: HTMLInputElement;
   const downloadJson = () => {
     const json = backupToJson();
     fileDownloader({
       data: JSON.stringify(json),
       title: "Download Json",
-      filename: "graph.json",
+      filename: "graph.json"
     });
   };
   const backupToIndexDB_ = () => {
@@ -350,6 +359,399 @@ LocalDateTime\tDateBox`,
 
 
   };
+  const importNSData = () => {
+    const file = importNSDataInputRef!.files![0];
+
+    function nsTypeToGraphType(type: Type) {
+      let dataType;
+      switch (type) {
+        case "address": {
+          dataType = "Map";
+          break;
+        }
+        case "bigdecimal": {
+          dataType = "Float";
+          break;
+        }
+        case "ccexpdate": {
+          dataType = "Date";
+          break;
+        }
+        case "ccnumber": {
+          dataType = "Float";
+          break;
+        }
+        case "ccvalidfrom": {
+          dataType = "Date";
+          break;
+        }
+        case "checkbox": {
+          dataType = "Boolean";
+          break;
+        }
+        case "clobtext": {
+          dataType = "String";
+          break;
+        }
+        case "currency": {
+          dataType = "Float";
+          break;
+        }
+        case "currency2": {
+          dataType = "Float";
+          break;
+        }
+        case "date": {
+          dataType = "Date";
+          break;
+        }
+        case "datetime": {
+          dataType = "LocalDateTime";
+          break;
+        }
+        case "datetimetz": {
+          dataType = "LocalDateTime";
+          break;
+        }
+        case "double": {
+          dataType = "Float";
+          break;
+        }
+        case "email": {
+          dataType = "String";
+          break;
+        }
+        case "emails": {
+          dataType = "String";
+          break;
+        }
+        case "file": {
+          dataType = "Integer";
+          break;
+        }
+        case "float": {
+          dataType = "Float";
+          break;
+        }
+        case "identifier": {
+          dataType = "String";
+          break;
+        }
+        case "identifieranycase": {
+          dataType = "String";
+          break;
+        }
+        case "image": {
+          dataType = "Integer";
+          break;
+        }
+        case "integer": {
+          dataType = "Integer";
+          break;
+        }
+        case "label": {
+          dataType = "String";
+          break;
+        }
+        case "mmyydate": {
+          dataType = "Date";
+          break;
+        }
+        case "multiselect": {
+          dataType = "List";
+          break;
+        }
+        case "namevaluelist": {
+          dataType = "List";
+          break;
+        }
+        case "nonnegfloat": {
+          dataType = "Float";
+          break;
+        }
+        case "password": {
+          dataType = "String";
+          break;
+        }
+        case "percent": {
+          dataType = "Float";
+          break;
+        }
+        case "period": {
+          dataType = "Float";
+          break;
+        }
+        case "phone": {
+          dataType = "String";
+          break;
+        }
+        case "poscurrency": {
+          dataType = "Float";
+          break;
+        }
+        case "posfloat": {
+          dataType = "Float";
+          break;
+        }
+        case "posinteger": {
+          dataType = "Integer";
+          break;
+        }
+        case "radio": {
+          dataType = "String";
+          break;
+        }
+        case "rate": {
+          dataType = "Float";
+          break;
+        }
+        case "ratehighprecision": {
+          dataType = "Float";
+          break;
+        }
+        case "richtext": {
+          dataType = "String";
+          break;
+        }
+        case "rtext": {
+          dataType = "String";
+          break;
+        }
+        case "select": {
+          dataType = "Integer";
+          break;
+        }
+        case "ssnumber": {
+          dataType = "Float";
+          break;
+        }
+        case "summary": {
+          dataType = "String";
+          break;
+        }
+        case "text": {
+          dataType = "String";
+          break;
+        }
+        case "textarea": {
+          dataType = "String";
+          break;
+        }
+        case "time": {
+          dataType = "LocalTime";
+          break;
+        }
+        case "timeofday": {
+          dataType = "LocalTime";
+          break;
+        }
+        case "timetrack": {
+          dataType = "Duration";
+          break;
+        }
+        case "url": {
+          dataType = "String";
+          break;
+        }
+        case "year": {
+          dataType = "Integer";
+          break;
+        }
+      }
+      return dataType;
+    }
+
+    function importNsData_(json: { [p: string]: NsMetaJson }) {
+      let txnId = getNewTxnId();
+      const splitTransaction = false;
+
+      function fieldsInsert(fields: Field[], collectionVertex: Vertex) {
+        for (const field of fields) {
+          let description = field.help;
+          if (description) {
+            description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
+          }
+          let type = field.type;
+          // s.add(type);
+          if (type) {
+            let dataType = nsTypeToGraphType(type);
+
+            if (dataType) {
+              if (collectionVertex) {
+                const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
+                if (!dataTypeVertex) {
+                  console.log("dataType not found", dataType);
+                  continue;
+                }
+
+                const rowResult = newRow(txnId, collectionVertex, "CollAttr");
+                replaceVertexProperties(txnId, rowResult.vertexId!, {
+                  name: field.id,
+                  displayName: field.label,
+                  definition: field.help,
+                  required: field.required
+                });
+                setSelectionValue(
+                 txnId,
+                 graph.vertexes[rowResult.vertexId!],
+                 { properties: { [IdAttr]: "DataType" } } as Vertex,
+                 dataTypeVertex.id
+                );
+              }
+            } else {
+              console.log("dataType Not Found:", name, type);
+            }
+          }
+        }
+      }
+
+      for (const collectionId_ in json) {
+        const collection = json[collectionId_];
+        const fields = collection["fields"];
+        if (!fields) continue;
+        const label = collection.label;
+        const collectionId = collection.id;
+        let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`);
+        if (!collectionVertex) {
+          const id = getNewGraphId();
+          const newCollVertex = addNewVertex(txnId, newVertex(id, ["Coll"], {
+            name: collectionId,
+            title: label,
+            supportCustomFields: collection.supportCustomFields,
+            searchOnly: collection.searchOnly,
+            supportDeletedRecordSearch: collection.supportDeletedRecordSearch
+          }));
+          if (newCollVertex.error) {
+            continue;
+          } else {
+            collectionVertex = graph.vertexes[id];
+          }
+        } else {
+          // not updating vertex properties.
+        }
+        fieldsInsert(fields, collectionVertex);
+      }
+      if (splitTransaction) commitTxn(txnId, Ws);
+
+      if (splitTransaction) txnId = getNewTxnId();
+      for (const collectionId_ in json) {
+        const collection = json[collectionId_];
+        const collectionId = collection.id;
+        const sublists = collection["sublists"];
+        if (!sublists) continue;
+        let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+
+        for (const sublist of sublists) {
+          const sublistCollName = `${collectionId}${sublist.id}`;
+          let collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, sublistCollName);
+          if (!collVertex) {
+            const id = getNewGraphId();
+            const newCollVertex = addNewVertex(txnId, newVertex(id, ["Coll"], {
+              name: sublistCollName,
+              title: sublist.label
+            }));
+            if (newCollVertex.error) {
+              continue;
+            } else {
+              collVertex = graph.vertexes[id];
+            }
+          } else {
+            // not updating vertex properties.
+          }
+          const fields = sublist["fields"];
+          if (fields) {
+            fieldsInsert(fields, collVertex);
+          }
+
+          const rowResult = newRow(txnId, collectionVertex, "CollChild");
+          replaceVertexProperties(txnId, rowResult.vertexId!, {
+            displayName: sublist.label,
+            name: sublist.id
+          });
+          setSelectionValue(
+           txnId,
+           graph.vertexes[rowResult.vertexId!],
+           { properties: { [IdAttr]: "coll" } } as Vertex,
+           collVertex.id
+          );
+
+
+        }
+      }
+      if (splitTransaction) commitTxn(txnId, Ws);
+
+      if (splitTransaction) txnId = getNewTxnId();
+      for (const collectionId_ in json) {
+        const collection = json[collectionId_];
+        const collectionId = collection.id;
+        const tabs = collection["tabs"];
+        if (!tabs) continue;
+        let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+
+        for (const tab of tabs) {
+          const rowResult = newRow(txnId, collectionVertex, "CollTab");
+          replaceVertexProperties(txnId, rowResult.vertexId!, {
+            displayName: tab.label,
+            name: tab.name
+          });
+        }
+      }
+      if (splitTransaction) commitTxn(txnId, Ws);
+
+      if (splitTransaction) txnId = getNewTxnId();
+      for (const collectionId_ in json) {
+        const collection = json[collectionId_];
+        const collectionId = collection.id;
+        const transformTypes = collection["transformTypes"];
+        if (!transformTypes) continue;
+        let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+
+        for (const transformType of transformTypes) {
+          const rowResult = newRow(txnId, collectionVertex, "CollTransform");
+          replaceVertexProperties(txnId, rowResult.vertexId!, {
+            fieldDefaults: transformType.fieldDefaults
+          });
+          let collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, transformType.targetRecordType);
+          if (!collVertex) {
+            console.log("transform collection not found", transformType.targetRecordType);
+            continue;
+          }
+          setSelectionValue(
+           txnId,
+           graph.vertexes[rowResult.vertexId!],
+           { properties: { [IdAttr]: "coll" } } as Vertex,
+           collVertex.id
+          );
+        }
+      }
+      commitTxn(txnId, Ws);
+
+
+      /*
+       transform collection not found vendorBill
+       transform collection not found vendorCredit
+       transform collection not found vendorPayment
+       transform collection not found cashRefund
+       transform collection not found cashSale
+       transform collection not found creditMemo
+       transform collection not found customSale
+       2 transform collection not found customPurchase
+      */
+
+      // because multiple transactions not working splitting it
+      // commitTxn(txnId, Ws);
+    }
+
+    if (file) {
+      file.text().then((jsonText) => {
+        const json = JSON.parse(jsonText) as { [key: string]: NsMetaJson };
+        batch(() => {
+          importNsData_(json);
+        })
+        alert("inserting ns data finished.");
+      });
+    }
+  };
   // Hack to remount the component
   const [load, setLoad] = createSignal(false);
   createEffect(() => {
@@ -443,11 +845,22 @@ LocalDateTime\tDateBox`,
               </div>
             </CardBody>
           </C>
+          <C title={"Graph Functions"} subtitle={"Import Netsuite Data"}>
+            <CardBody class="m:0 p:12">
+              <div class="m:1rem flex gap:0.5rem">
+                <input ref={importNSDataInputRef!} type="file" accept="json"
+                       style="display: hidden"></input>
+                <button type="button" onClick={importNSData}>
+                  <span>Import NS Data</span>
+                </button>
+              </div>
+            </CardBody>
+          </C>
         </div>
 
       </div>
 
-      <Show<boolean> when={load()}>
+      <Show when={load()}>
         <GraphView
           edges={Object.entries(graph.edges)
             .filter(([_, edge]) => edge.type !== "MetaAttr")
