@@ -9,6 +9,14 @@ export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
   return { id, labels, properties, in_edges: {}, out_edges: {} };
 }
 
+export function addNewVertexUnSafe(vertex: Vertex) {
+  setGraph("vertexes", vertex.id, vertex);
+  vertex.labels.forEach((label) =>
+   setGraph("vertexLabelIdMap", label, (vertexIds) =>
+    G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
+   ),
+  );
+}
 // add a new vertex to the graph
 export function addNewVertex(txnId: number, vertex: Vertex): { error: string | boolean; txnDetailIndex?: number } {
   if (graph.vertexes[vertex.id]) {
@@ -60,7 +68,8 @@ export function replaceVertexProperties(
 export function mergeVertexProperties(
   txnId: number,
   vertexId: Id,
-  properties: {},
+  properties: {[key: string]: any},
+  types?: {[key: string]: any}
 ): { error: string | boolean; txnDetailIndex?: number } {
   const vertex = graph.vertexes[vertexId];
   if (!vertex) {

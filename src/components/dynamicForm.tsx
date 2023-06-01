@@ -1,5 +1,4 @@
 import {
-  JSX,
   createMemo,
   createSignal,
   For,
@@ -28,7 +27,6 @@ import { SelectInputField } from "./input/SelectInputField";
 import { TableInputField } from "./input/TableInputField";
 
 import Tabs from "devextreme/ui/tabs";
-import { A } from "@mobily/ts-belt";
 import { useNavigate } from "@solidjs/router";
 import { AbstractSingleForm } from "./Form";
 import {
@@ -36,7 +34,6 @@ import {
   GenericInputField
 } from "./input/GenaricInputField";
 import {
-  getChildVertexes,
   getOptionLabel,
   getSelectionOptions,
   getToEdge
@@ -93,8 +90,8 @@ export const DynamicComponent = (props: {
 }) => {
   return (
     <Switch>
-      <Match<boolean> when={!props.component}>NO INPUT</Match>
-      <Match<boolean> when={props.component === "SelectBox" || props.component === "TagBox"}>
+      <Match when={!props.component}>NO INPUT</Match>
+      <Match when={props.component === "SelectBox" || props.component === "TagBox"}>
         <SelectInputField
          aria-labeledby={props.id}
          data={props.data}
@@ -105,13 +102,13 @@ export const DynamicComponent = (props: {
          component={props.component}
         />
       </Match>
-      <Match<boolean> when={props.component === "Table"}>
-        <Show<boolean> when={!props.disabled} fallback={<>...</>}>
+      <Match when={props.component === "Table"}>
+        <Show when={!props.disabled} fallback={<>...</>}>
           <TableInputField meta={props.meta} data={props.data}
                            disabled={props.disabled!} />
         </Show>
       </Match>
-      <Match<boolean> when={props.component.startsWith("Form")}>
+      <Match when={props.component.startsWith("Form")}>
         <td>
           <div class="flex">
             {props.meta.properties.props?.defaultValue &&
@@ -120,8 +117,8 @@ export const DynamicComponent = (props: {
           </div>
         </td>
       </Match>
-      <Match<string> when={props.component} keyed>
-        <Show<boolean> when={genericComponents.includes(props.component)}>
+      <Match when={props.component} keyed>
+        <Show when={genericComponents.includes(props.component)}>
           <GenericInputField
             aria-labeledby={props.id}
             data={props.data}
@@ -145,7 +142,7 @@ interface FormGroupProps {
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
   return (
-    <For<Vertex[]> each={props.attributes}>
+    <For each={props.attributes}>
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.properties[IdAttr] + "Label";
         const component = createMemo(() => {
@@ -165,14 +162,14 @@ export function FormGroup(props: FormGroupProps) {
         />
         return (
           <Switch>
-            <Match<boolean> when={component() === "Table"}>
+            <Match when={component() === "Table"}>
               <h3><Label/></h3>
               <Content/>
             </Match>
-            <Match<boolean> when={component() === "CollectionOption"}>
+            <Match when={component() === "CollectionOption"}>
               <Content/>
             </Match>
-            <Match<boolean> when={true}>
+            <Match when={true}>
               <div class="dx-field">
                 <div class="dx-field-label" id={id}>
                   <Label/>
@@ -218,7 +215,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
   }
 
   // focus first input
-  const [divRef, setDivRef] = createSignal<HTMLFormElement>();
+  const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   onMount(() => {
     // @ts-ignore
     divRef()?.querySelector?.("input")?.focus();
@@ -261,15 +258,15 @@ export const DynamicForm = (props: DynamicFormProps) => {
   return (
     <div
       ref={(el) => {
-        setDivRef(el as HTMLFormElement);
+        setDivRef(el);
         validationGroup = new dxValidationGroup(divRef()!);
       }}
     >
-      <Show<HTMLFormElement> when={divRef()}>
-        <FormContext.Provider value={{ record, cleanUpConfig, validationGroup }}>
+      <Show when={divRef()}>
+        <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
           {/* Main Tab is display as top level fields */}
-          <Show<{[p: string]: Vertex[]}> when={groupByTabsAndGroup["main"]}>
-            <For<string[]> each={Object.keys(groupByTabsAndGroup["main"])}>
+          <Show when={groupByTabsAndGroup["main"]}>
+            <For each={Object.keys(groupByTabsAndGroup["main"])}>
               {(group) => (
                 <>
                   <div
@@ -284,7 +281,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             </For>
           </Show>
 
-          <Show<boolean> when={tabs.length > 0}>
+          <Show when={tabs.length > 0}>
             <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
@@ -301,14 +298,14 @@ export const DynamicForm = (props: DynamicFormProps) => {
               }}
             />
 
-            <For<string[]> each={Object.keys(groupByTabsAndGroup[activeTab()])}>
+            <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
               {(group) => {
                 return (
                   <div
                     class="dx-fieldset"
                     style={{"max-width": getTabsWidth(groupByTabsAndGroup[activeTab()][group])}}
                   >
-                    <Show<boolean> when={group !== "main"}>
+                    <Show when={group !== "main"}>
                       <div class="dx-fieldset-header">{group}</div>
                     </Show>
                     <FormGroup
@@ -321,7 +318,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               }}
             </For>
           </Show>
-          <div ref={(el) => new dxValidationSummary(el, { validationGroup })} />
+          <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
           <GenericField
            component={"Button"}
            // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/

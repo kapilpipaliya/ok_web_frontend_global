@@ -16,7 +16,7 @@ export const ModalInput = (props: {
       <button type="button" ref={setTarget} onClick={() => setIsVisible(true)}>
         {props.btnContent}
       </button>
-      <Show<boolean> when={isVisible()}>
+      <Show when={isVisible()}>
         <div ref={setPopper}>
           {props.children}
           <button type="button" onClick={() => setIsVisible(false)}>

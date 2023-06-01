@@ -26,8 +26,9 @@ import Validator, { Properties as ValidatorProperties } from "devextreme/ui/vali
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
-import { IdAttr } from "../../lib/graph";
+import { graph, IdAttr } from "../../lib/graph";
 import { FormContext } from "../../lib/Record";
+import { getOptionLabel } from "../../lib/Traverse";
 
 export const genericComponents = [
   "Autocomplete",
@@ -140,7 +141,7 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // its best to use dataSource but we are using items for simplicity.
-const getTextColumnValue = (value: any) => {
+export const getTextColumnValue = (value: any) => {
   if (value === true) {
     return "True";
   } else if (value === false) {
@@ -151,7 +152,11 @@ const getTextColumnValue = (value: any) => {
   }
 
   if (Array.isArray(value)) {
-    value = value.map((v) => getTextColumnValue(v)).join(", ");
+    const values = [];
+    for (const v of value) {
+      values.push(getTextColumnValue(v));
+    }
+    value = values.join(', ');
   }
 
   return G.isObject(value) ? JSON.stringify(value) : value;
@@ -159,8 +164,10 @@ const getTextColumnValue = (value: any) => {
 export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean }) {
   const formContext = useContext(FormContext);
   return (
-    <div aria-labeledby={props["aria-labeledby"]}>
-      <Show<boolean> when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
+    <div aria-labeledby={props["aria-labeledby"]} classList={{
+      'width:100%': props.component === 'TextArea'
+    }}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {
@@ -343,7 +350,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               //  Object.assign(properties, {} as dxTagBoxProperties);
             } else if (props.component === "TextArea") {
               comp = dxTextArea;
-              Object.assign(properties, {} as dxTextAreaProperties);
+              Object.assign(properties, {minHeight: '140px'} as dxTextAreaProperties);
             } else if (props.component === "TextBox") {
               comp = dxTextBox;
               Object.assign(properties, {} as dxTextBoxProperties);

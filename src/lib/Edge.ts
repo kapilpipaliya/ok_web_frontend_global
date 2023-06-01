@@ -15,7 +15,17 @@ export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId:
     end: endVertexId,
   };
 }
-
+export function addNewEdgeUnSafe(edge: Edge) {
+  batch(() => {
+    setGraph("edges", edge.id, edge);
+    setGraph("vertexes", edge.start, "out_edges", edge.type, (out_edges) =>
+     G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
+    );
+    setGraph("vertexes", edge.end, "in_edges", edge.type, (in_edges) =>
+     G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
+    );
+  });
+}
 export function addNewEdge(txnId: number, edge: Edge): { error: string | boolean; txnDetailIndex?: number } {
   if (!edge.id) {
     return { error: "Edge ID is not valid" };

@@ -58,6 +58,7 @@ import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
 import { IdAttr } from "../../lib/graph";
 import { FormContext } from "../../lib/Record";
+import { getTextColumnValue } from "./GenaricInputField";
 
 export const genericComponents = [
   "Autocomplete",
@@ -170,27 +171,12 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // its best to use dataSource but we are using items for simplicity.
-const getTextColumnValue = (value: any) => {
-  if (value === true) {
-    return "True";
-  } else if (value === false) {
-    return "False";
-  }
-  if (!value) {
-    return "";
-  }
 
-  if (Array.isArray(value)) {
-    value = value.map((v) => getTextColumnValue(v)).join(", ");
-  }
-
-  return G.isObject(value) ? JSON.stringify(value) : value;
-};
-export function GenericField(props: ComponentProps & { component: string; disabled?: boolean; children?: JSXElement }) {
+export function GenericField(props: ComponentProps & { component: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
   const formContext = useContext(FormContext);
   return (
 
-      <Show<boolean> when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.properties[props.meta.properties[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {

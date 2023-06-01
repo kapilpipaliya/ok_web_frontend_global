@@ -1,5 +1,4 @@
 import {
-  JSX,
   createMemo,
   createUniqueId,
   For,
@@ -21,11 +20,11 @@ import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 
 // TODO make default component property applied to
 export const AllForms = () => {
-  const allForms = () => graph.vertexLabelIdMap["Form"]?.map((vertex) => graph.vertexes[vertex]) || [];
+  const allForms = () => graph.vertexLabelIdMap["Form"] || [];
 
   return (
     <div class="">
-      <For<Vertex[]> each={allForms()}>{(form) => <Link href={`/${form.properties[IdAttr]}/new`}>{form.properties[IdAttr]}</Link>}</For>
+      <For each={allForms()}>{(vertexId) => <Link href={`/${graph.vertexes[vertexId].properties[IdAttr]}/new`}>{graph.vertexes[vertexId].properties[IdAttr]}</Link>}</For>
     </div>
   );
 };
@@ -214,7 +213,7 @@ export const SimpleImport = (props: {}) => {
           } as unknown as Vertex
         }
         data={{ properties: { meta: "Import" } } as unknown as Vertex}
-        onClick={_ => onDataDirectoryImportClick(config.record, Ws)}
+        onClick={() => onDataDirectoryImportClick(config.record, Ws)}
       />
     </>
   );

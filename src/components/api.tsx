@@ -199,7 +199,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options) => {
-                const { cleanUpConfig, record } = options.validator.context || {} as IFormContext;
+                const { record } = options.validator.context || {} as IFormContext;
 
                 const val = options.value;
                 if (Object.keys(AttrsTableData).includes(val)) {
@@ -239,6 +239,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       { name: "description", component: "TextArea" },
       { name: "public", component: "CheckBox", props: { skip: true } },
+      { name: "supportCustomFields", component: "CheckBox" },
+      { name: "searchOnly", component: "CheckBox" },
+      { name: "supportDeletedRecordSearch", component: "CheckBox" },
       {
         name: "Tab",
         component: "Table",
@@ -246,8 +249,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         props: { skip: true },
         attributes: [
           {
-            name: "name",
+            name: "displayName",
             component: "TextBox",
+            props: {
+              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+            }
           },
           {
             name: "name",
@@ -425,6 +431,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             },
           },
           {
+            name: "displayName",
+            component: "TextBox",
+            props: {
+              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+            }
+          },
+          {
             name: "name",
             component: "TextBox",
           },
@@ -443,6 +456,49 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               collection: "-CollChild->$0Group",
               displayExpr: `properties.${IdAttr}`,
             },
+          },
+          {
+            name: "Prop",
+            displayName: "Property",
+            component: "Table",
+            attributes: [
+              {
+                name: "key",
+                component: "SelectBox",
+                props: {
+                  displayExpr: "properties.key",
+                  collection: "Comp[Table]->$0Prop",
+                },
+              },
+              {
+                name: "value",
+                meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                component: "->$0Key->$0Comp-CompChild:properties.name||->$0Key->$0Comp:properties.name",
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Transform",
+        component: "Table",
+        tab: "Transform",
+        attributes: [
+          {
+            name: "coll",
+            component: "SelectBox",
+            props: {
+              displayExpr: `properties.${IdAttr}`,
+              collection: "Coll",
+            },
+          },
+          {
+            name: "displayName",
+            component: "TextBox",
+          },
+          {
+            name: "fieldDefaults",
+            component: "TextBox",
           },
           {
             name: "Prop",
@@ -506,7 +562,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { name: "name", component: "TextBox" },
       { name: "title", component: "TextBox" },
       { name: "description", component: "TextArea" },
-      { name: "table", component: "CheckBox" },
+      {
+        name: "dashboard",
+        component: "TagBox",
+        props: {
+          displayExpr: `properties.${IdAttr}`,
+          collection: "Dashboard",
+          parentLabel: "Dashboard",
+          inward: true,
+        },
+      },
       { name: "isRealTime", component: "CheckBox" },
       {
         name: "coll",
@@ -530,7 +595,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Attribute",
             component: "SelectBox",
             props: {
-              displayExpr: "->$0Attr:properties.name",
+              // displayExpr: "properties.displayName||properties.name",
+              displayExpr: "$properties.displayName ($properties.name)",
               collection: "-$0-Coll$0->$0Attr",
             },
           },
@@ -538,7 +604,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "displayName",
             component: "TextBox",
             props: {
-              defaultValue: "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
+              // defaultValue: "->$0Attr:properties.displayName",
             },
           },
           {
@@ -566,7 +632,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               collection: "DataType",
               displayExpr: `properties.${IdAttr}`,
               hidden: true,
-              defaultValue: "->$0Attr->$0Attr->$0DataType:properties.name",
+              // defaultValue: "->$0Attr->$0DataType:properties.name",
+              defaultValue: "->$0Attr->$0DataType:properties.name",
             },
           },
           {
@@ -575,22 +642,23 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               displayExpr: `properties.${IdAttr}`,
-              collection: "->$0Attr->$0Attr->$0DataType->$0Comp",
-              defaultValue: "->$0Attr->$0Comp:properties.name||->$0Attr->$0Attr->$0Comp:properties.name",
+              // collection: "->$0Attr->$0DataType->$0Comp",
+              collection: "->$0Attr->$0DataType->$0Comp",
+              defaultValue: "->$0Attr->$0Comp:properties.name",
             },
           },
           {
             name: "required",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:properties.required||->$0Attr->$0Attr:properties.required",
+              defaultValue: "->$0Attr:properties.required",
             },
           },
           {
             name: "disabled",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:properties.disabled||->$0Attr->$0Attr:properties.disabled",
+              defaultValue: "->$0Attr:properties.disabled",
             },
           },
           {
@@ -603,7 +671,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: "properties.key",
-                  collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
+                  collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
                 },
               },
               {
@@ -658,7 +726,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 displayName: "Attribute",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "->$0Attr:properties.name",
+                  displayExpr: "properties.name",
                   collection: "-$0->$0Coll->$0Coll->$0Attr",
                 },
               },
@@ -669,7 +737,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   collection: "DataType",
                   displayExpr: `properties.${IdAttr}`,
                   hidden: true,
-                  defaultValue: "->$0Attr->$0Attr->$0DataType:properties.name",
+                  defaultValue: "->$0Attr->$0DataType:properties.name",
                 },
               },
               {
@@ -678,29 +746,29 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: `properties.${IdAttr}`,
-                  collection: "->$0Attr->$0Attr->$0DataType->$0Comp",
-                  defaultValue: "->$0Attr->$0Comp:properties.name||->$0Attr->$0Attr->$0Comp:properties.name",
+                  collection: "->$0Attr->$0DataType->$0Comp",
+                  defaultValue: "->$0Attr->$0Comp:properties.name",
                 },
               },
               {
                 name: "displayName",
                 component: "TextBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.displayName||->$0Attr->$0Attr:properties.displayName",
+                  defaultValue: "->$0Attr:properties.displayName",
                 },
               },
               {
                 name: "required",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.required||->$0Attr->$0Attr:properties.required",
+                  defaultValue: "->$0Attr:properties.required",
                 },
               },
               {
                 name: "disabled",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:properties.disabled||->$0Attr->$0Attr:properties.disabled",
+                  defaultValue: "->$0Attr:properties.disabled",
                 },
               },
               {
@@ -720,7 +788,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     component: "SelectBox",
                     props: {
                       displayExpr: "properties.key",
-                      collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Attr->$0Comp->$0Prop",
+                      collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
                     },
                   },
                   {

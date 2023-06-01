@@ -186,7 +186,12 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex) {
-          return vertex.map(v => getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `properties.${IdAttr}`)).join(', ');
+          const labels = [];
+          for (const v of vertex) {
+            const label = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `properties.${IdAttr}`);
+            labels.push(label);
+          }
+          return labels.join(', ');
         }
         return "";
       };
@@ -367,7 +372,7 @@ export const TableDashboard = () => {
   return (
     <div class="">
       <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
-          <For<Vertex[]> each={allTableLayouts()}>
+          <For each={allTableLayouts()}>
             {(tableLayout) => (
              <div class="bg:gray-22 p:10 r:10 max-w:350 bg:gray-28:hover flex ji:center ai:center h:5rem">
                <h3 class="f:18@md font:semibold"></h3>
@@ -381,11 +386,11 @@ export const TableDashboard = () => {
 };
 
 export const AllDashboards = () => {
-  const vertexes = () => graph.vertexLabelIdMap["Dashboard"]?.map((vertex) => graph.vertexes[vertex]) || [];
+  const vertexes = () => graph.vertexLabelIdMap["Dashboard"]|| [];
 
   return (
    <div class="">
-     <For<Vertex[]> each={vertexes()}>{(form) => <Link href={`/grid/${form.properties[IdAttr]}`}>{form.properties[IdAttr]}</Link>}</For>
+     <For each={vertexes()}>{(vertexId) => <Link href={`/grid/${graph.vertexes[vertexId].properties[IdAttr]}`}>{graph.vertexes[vertexId].properties[IdAttr]}</Link>}</For>
    </div>
   );
 }

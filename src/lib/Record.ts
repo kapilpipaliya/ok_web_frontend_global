@@ -120,10 +120,14 @@ export function getCollAttrs(
  }
 
  // merge default component props
- const comp = formAttrComp;
+ let comp = formAttrComp;
  if (!comp) {
-  console.warn("Component not configured");
-  return { error: true };
+  const dataTypeDefault = getChildVertex(["$0Default"], dataType.vertex!);
+  if (dataTypeDefault.error) {
+   console.warn("Component not configured");
+   return { error: true };
+  }
+  comp = dataTypeDefault.vertex!;
  }
 
  const compProps = (getChildVertexes(["CompProp"], [comp]).vertexes || []).reduce((acc, curr) => {
@@ -738,7 +742,7 @@ export const addNewRow = (txnId: number, meta: Vertex, data: Vertex, isRealTime:
   const label = meta.properties.props?.label;
 
   newRow(txnId, data, type, label);
-  if (!isRealTime) commitTxn(txnId, Ws);
+  if (isRealTime) commitTxn(txnId, Ws);
 
 }
 
