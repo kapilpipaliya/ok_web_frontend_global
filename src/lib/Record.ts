@@ -330,10 +330,11 @@ export function newRow(
  txnId: number,
  parentVertex: Vertex,
  edgeType: string,
+ properties?: {[key: string]: any},
  label?: string
 ): { error: boolean; vertexId?: Id; edgeId?: Id } {
  return batch(() => {
-  const vertexNew = newVertex(getNewGraphId(), [label || edgeType], {});
+  const vertexNew = newVertex(getNewGraphId(), [label || edgeType], properties);
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
    alert(insertVertex.error);
@@ -415,7 +416,7 @@ export function deleteRow(
    txnId = getNewTxnId();
   }
   // delete all vertex in edges
-  const inEdges = vertex.in_edges;
+  const inEdges = vertex.IN;
   for (const type in inEdges) {
    for (const edgeId of inEdges[type]) {
     const deleteEdgeResult = deleteEdge(txnId, edgeId);
@@ -423,7 +424,7 @@ export function deleteRow(
    }
   }
   // delete all outEdges of vertex
-  const outEdge = vertex.out_edges;
+  const outEdge = vertex.OUT;
   for (const type in outEdge) {
    for (const edgeId of outEdge[type]) {
     const deleteEdgeResult = deleteEdge(txnId, edgeId);
@@ -523,32 +524,32 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
 export class Record {
  txnId: number;
  readonly isRealTime: boolean;
- readonly form: FormMetaData;
  vertex: Vertex;
  ws: ServerEventsDispatcher;
  meta?: Vertex;
  metaVertex: Vertex;
 
  constructor({
-              form,
               ws,
               meta
-             }: { form: FormMetaData, ws: ServerEventsDispatcher, meta?: Vertex }) {
-  this.form = klona(form);
+             }: { ws: ServerEventsDispatcher, meta?: Vertex }) {
+
   this.txnId = getNewTxnId();
   this.isRealTime = false;
   this.ws = ws;
   this.meta = meta;
  }
 
- create = (): { error: string | boolean; vertex?: Vertex } => {
-  if (!this.form[IdAttr]) {
-   return { error: "Name Key not found" };
+ // create
+ create = (label: string, properties?: {[key: string]: any}): { error: string | boolean; vertex?: Vertex } => {
+  if (!label) {
+  // if (!form[IdAttr]) {
+   return { error: "Label not found" };
   }
   if (this.isRealTime) {
    this.txnId = getNewTxnId();
   }
-  const newVertexObj = newVertex(getNewGraphId(), [this.form.name], {});
+  const newVertexObj = newVertex(getNewGraphId(), [label], properties || {});
   // TODO: Do Create Transformation for the vertex
   const addNewVertexResult = addNewVertex(this.txnId, newVertexObj);
   if (addNewVertexResult.error) {
@@ -556,26 +557,24 @@ export class Record {
   }
   if (this.isRealTime) commitTxn(this.txnId, this.ws);
   this.vertex = graph.vertexes[newVertexObj.id];
-  this.createMeta();
   return {
    error: false, vertex: this.vertex
   };
  };
 
  load = (id: number): { error: string | boolean; vertex?: Vertex } => {
-
   if (!graph.vertexes[id]) {
    return { error: "vertex not found" };
   }
   this.vertex = graph.vertexes[id];
-  this.createMeta();
+
   return {
    error: false, vertex: this.vertex
   };
  };
 
- createMeta = () => {
-  const { attributes, ...custom } = this.form;
+ createMeta = (form: FormMetaData) => {
+  const { attributes, ...custom } = form;
 
   // save attributes to vertexes
   const metaTxnId = getNewTxnId();
@@ -680,11 +679,10 @@ export class Record {
   }
  };
 
-
  // variables: oldValue, newValue
 
- addNewRowUI = (meta: Vertex) => {
-  addNewRow(this.txnId, meta, this.vertex, this.isRealTime, this.ws);
+ addNewRowUI = (meta: Vertex, parentVertex: Vertex, properties: { [key: string]: any }) => {
+  return addNewRow(this.txnId, meta, parentVertex, properties, this.isRealTime, this.ws);
  };
 
  getSublistRows = (meta: Vertex, vertex: Vertex) => {
@@ -734,16 +732,16 @@ class Emitter {
  }
 }
 
-export const addNewRow = (txnId: number, meta: Vertex, data: Vertex, isRealTime: boolean, Ws: ServerEventsDispatcher) => {
+export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, properties: {[key: string]: any}, isRealTime: boolean, Ws: ServerEventsDispatcher) => {
   if (isRealTime) {
    txnId = getNewTxnId();
   }
-  const type = getToEdge(meta, data);
+  const type = getToEdge(meta, parentVertex);
   const label = meta.P.props?.label;
 
-  newRow(txnId, data, type, label);
+  const newRowResult = newRow(txnId, parentVertex, type,properties, label);
   if (isRealTime) commitTxn(txnId, Ws);
-
+  return newRowResult;
 }
 
 export interface IFormContext {
@@ -753,6 +751,7 @@ export interface IFormContext {
 }
 
 export const FormContext = createContext({} as IFormContext);
+export const PageContext = createContext({} as {[key: string]: any});
 
 export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumnsTemplate: Vertex[]) {
  const rowMetaAttrInst = getChildVertex(["AttrInst"], joinVertex);

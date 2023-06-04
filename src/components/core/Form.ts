@@ -1,4 +1,4 @@
-import { Vertex } from "../../lib/graph";
+import { Vertex, VertexUnsafe } from "../../lib/graph";
 
 export interface ComponentProps {
   meta: Vertex;
@@ -10,6 +10,8 @@ export interface ComponentProps {
   setValue?(attribute: Vertex, vertex: Vertex, data: any): void;
 }
 export interface DisplayComponentProps {
-  meta: Vertex;
-  data?: Vertex;
+  // meta?: Vertex;
+  meta?: VertexUnsafe;
+  // data?: Vertex;
+  data?: VertexUnsafe;
 }

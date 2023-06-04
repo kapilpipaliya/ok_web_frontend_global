@@ -5,19 +5,19 @@ import { findVertexIdsByLabel } from "./Vertex";
 
 export function getToEdge(meta: Vertex, vertex: Vertex) {
   const attributeId = meta.P[IdAttr];
-  return vertex.labels[0] + capitalizeFirstLetter(attributeId);
+  return vertex.L[0] + capitalizeFirstLetter(attributeId);
 }
 
 export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
   const type = getToEdge(meta, vertex);
-  return (vertex.out_edges[type] || []).map((edgeId) => graph.edges[edgeId].end);
+  return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
 
 export function getInEdge(meta: Vertex, vertex) {
   const parentLabel = meta.P.props?.parentLabel;
   const childLabel = meta.P.props?.childLabel;
   if (!parentLabel) return "";
-  return parentLabel + (childLabel || vertex.labels[0]);
+  return parentLabel + (childLabel || vertex.L[0]);
 }
 
 export function getParentVertexValue(vertex: Vertex, meta: Vertex): number[] {
@@ -25,12 +25,12 @@ export function getParentVertexValue(vertex: Vertex, meta: Vertex): number[] {
   if (!type) {
     return [];
   }
-  return (vertex.in_edges[type] || []).map((edgeId) => graph.edges[edgeId].start);
+  return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
 
 export function getParentVertex(path: string[], currentVertex: Vertex): { error: boolean; vertex?: Vertex } {
-  const type = path[path.length - 1].replace("$0", currentVertex.labels[0]);
-  const edges = currentVertex.in_edges[type];
+  const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
+  const edges = currentVertex.IN[type];
   if (!edges || (edges && edges.length != 1)) {
     return {
       error: true,
@@ -38,7 +38,7 @@ export function getParentVertex(path: string[], currentVertex: Vertex): { error:
   } else {
     const edge = graph.edges[edges[0]];
     if (edge) {
-      const newVertex = graph.vertexes[edge.start];
+      const newVertex = graph.vertexes[edge.S];
       if (newVertex) {
         if (path.length > 1) {
           return getParentVertex(path.slice(0, -1), newVertex);
@@ -68,8 +68,8 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { 
   }
   let type = path[path.length - 1];
   for (const currentVertex of currentVertexes) {
-    type = type.replace("$0", currentVertex.labels[0]);
-    const edgeIds = currentVertex.in_edges[type];
+    type = type.replace("$0", currentVertex.L[0]);
+    const edgeIds = currentVertex.IN[type];
     if (!edgeIds) {
       continue;
     }
@@ -77,7 +77,7 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { 
     for (const edgeId of edgeIds) {
       const edge = graph.edges[edgeId];
       if (edge) {
-        const newVertex = graph.vertexes[edge.start];
+        const newVertex = graph.vertexes[edge.S];
         if (newVertex) {
           stepVertexes[newVertex.id] = newVertex;
         } else {
@@ -118,8 +118,8 @@ export function getChildVertex(path: string[], currentVertex: Vertex): { error: 
     // modify the variable itself
     type = type.slice(0, filterIndex);
   }
-  type = type.replace("$0", currentVertex.labels[0]);
-  let vertexes = (currentVertex.out_edges[type] || []).map((edgeId) => graph.vertexes[graph.edges[edgeId].end]);
+  type = type.replace("$0", currentVertex.L[0]);
+  let vertexes = (currentVertex.OUT[type] || []).map((edgeId) => graph.vertexes[graph.edges[edgeId].E]);
 
   if (filter) {
     // TODO:
@@ -159,8 +159,8 @@ export function getChildVertexes(
   }
   let type = path[0];
   for (const currentVertex of currentVertexes) {
-    type = type.replace("$0", currentVertex.labels[0]);
-    const edgeIds = currentVertex.out_edges[type] || [];
+    type = type.replace("$0", currentVertex.L[0]);
+    const edgeIds = currentVertex.OUT[type] || [];
     if (edgeIds.length == 0) {
       // we only return error if its in middle of path
       if (strict && path.length > 1) {
@@ -175,7 +175,7 @@ export function getChildVertexes(
     for (const edgeId of edgeIds) {
       const edge = graph.edges[edgeId];
       if (edge) {
-        const newVertex = graph.vertexes[edge.end];
+        const newVertex = graph.vertexes[edge.E];
         if (newVertex) {
           stepVertexes[newVertex.id] = newVertex;
         } else {
@@ -236,8 +236,8 @@ export const getSelectOptionsInternal = (
       const stepVertexes = {} as { [id: string]: Vertex };
 
       for (const currentVertex of vertexes) {
-        const type = edgeType.replace("$0", currentVertex.labels[0]);
-        const edgeIds = currentVertex.in_edges[type];
+        const type = edgeType.replace("$0", currentVertex.L[0]);
+        const edgeIds = currentVertex.IN[type];
         if (!edgeIds) {
           continue;
         }
@@ -245,7 +245,7 @@ export const getSelectOptionsInternal = (
         for (const edgeId of edgeIds) {
           const edge = graph.edges[edgeId];
           if (edge) {
-            const newVertex = graph.vertexes[edge.start];
+            const newVertex = graph.vertexes[edge.S];
             if (newVertex) {
               stepVertexes[newVertex.id] = newVertex;
             } else {
@@ -265,8 +265,8 @@ export const getSelectOptionsInternal = (
       const stepVertexes = {} as { [id: string]: Vertex };
 
       for (const currentVertex of vertexes) {
-        const type = edgeType.replace("$0", currentVertex.labels[0]);
-        const edgeIds = currentVertex.out_edges[type] || [];
+        const type = edgeType.replace("$0", currentVertex.L[0]);
+        const edgeIds = currentVertex.OUT[type] || [];
         if (edgeIds.length == 0) {
           // we only return error if its in middle of path
           if (strict && path.length > 1) {
@@ -281,7 +281,7 @@ export const getSelectOptionsInternal = (
         for (const edgeId of edgeIds) {
           const edge = graph.edges[edgeId];
           if (edge) {
-            const newVertex = graph.vertexes[edge.end];
+            const newVertex = graph.vertexes[edge.E];
             if (newVertex) {
               stepVertexes[newVertex.id] = newVertex;
             } else {

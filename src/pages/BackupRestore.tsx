@@ -863,13 +863,13 @@ LocalDateTime\tDateBox`,
       <Show when={load()}>
         <GraphView
           edges={Object.entries(graph.edges)
-            .filter(([_, edge]) => edge.type !== "MetaAttr")
+            .filter(([_, edge]) => edge.T !== "MetaAttr")
             .map(([key, value]) => ({ ...value }))}
           nodes={Object.entries(graph.vertexes)
-            .filter(([_, vertex]) => vertex.labels[0] !== "MetaAttr")
+            .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")
             .map(([key, value]) => ({
               ...value,
-              label: value.labels[0],
+              label: value.L[0],
             }))}
         />
       </Show>

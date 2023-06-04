@@ -3,12 +3,12 @@ import { WsContext } from "./ws_events_dispatcher";
 import { G } from "@mobily/ts-belt";
 import {
  commitTransaction,
- Edge,
- edgeOldIdToNewIdMap,
+ EdgeMap,
+ edgeOldIdToNewIdMap, Id,
  ProcessStatus,
  setGraph,
  transactions,
- Vertex,
+ VertexMap,
  vertexOldIdToNewIdMap
 } from "../lib/graph";
 import {
@@ -24,6 +24,7 @@ import {
  newEdge,
  updateEdgeId
 } from "../lib/Edge";
+
 
 export const syncEvent = () => {
  const { Ws } = useContext(WsContext);
@@ -108,19 +109,70 @@ export const syncEvent = () => {
 
  const setGraphData = (args: {
   timestamp: number;
-  vertexes: Vertex[];
-  edges: Edge[];
+  vertexes: VertexMap;
+  vertexLabelIdMap: { [key: string]: Id[] },
+  edges: EdgeMap,
   deleted_vertexes: string[];
   deleted_edges: string[];
  }) => {
   batch(() => {
    if (args.timestamp) setGraph("lastSyncedTime", args.timestamp);
-   for (const v of args.vertexes || []) {
-    addNewVertexUnSafe(v);
+   // let start = Date.now();
+   // for (const v of args.vertexes || []) {
+   //  addNewVertexUnSafe(v);
+   // }
+   // faster:
+   // calculating shapes takes two seconds, this should be done on server if possible.
+   // const vertexes = {} as VertexMap;
+   // const vertexLabelIdMap = {} as { [key: string]: Id[] };
+   //  for (const v of args.vertexes || []) {
+   //   vertexes[v.id] = v;
+   //   for (const label of v.L) {
+   //    if (!vertexLabelIdMap[label]) vertexLabelIdMap[label] = [v.id];
+   //    else
+   //     vertexLabelIdMap[label] = [...vertexLabelIdMap[label], v.id];
+   //    }
+   //  }
+   // fastest:
+
+
+   // let timeTaken = Date.now() - start;
+   // console.log("Total time taken : " + timeTaken + " milliseconds");
+
+   // for (const e of args.edges || []) {
+   //  addNewEdgeUnSafe(e);
+   // }
+
+
+   // timeTaken = Date.now() - start;
+   // console.log("Total time taken : " + timeTaken + " milliseconds");
+
+   for (const vertexId in args.vertexes) {
+    setGraph("vertexes", vertexId, args.vertexes[vertexId]);
    }
-   for (const e of args.edges || []) {
-    addNewEdgeUnSafe(e);
+
+   for (const label in args.vertexLabelIdMap) {
+    setGraph("vertexLabelIdMap", label, (vertexIds) => {
+     return G.isArray(vertexIds) ? [...new Set([...vertexIds, ...args.vertexLabelIdMap[label]])] : args.vertexLabelIdMap[label];
+    });
    }
+
+   for (const edgeId in args.edges) {
+    setGraph("edges", edgeId, args.edges[edgeId]);
+   }
+
+   for (const edgeId in args.edges) {
+    const edge = args.edges[edgeId];
+    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
+     G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
+    );
+    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
+     G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
+    );
+   }
+   // timeTaken = Date.now() - start;
+   // console.log("Total time taken : " + timeTaken + " milliseconds");
+
    for (const edgeId of args.deleted_edges || []) {
     deleteEdge(0, parseInt(edgeId));
    }

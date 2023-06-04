@@ -5,13 +5,13 @@ import { graph, Id, setGraph, transactionDetailAdd, transactions, Vertex } from 
 import { G, pipe } from "@mobily/ts-belt";
 
 // return a new Vertex
-export function newVertex(id: Id, labels: string[], properties: {}): Vertex {
-  return { id, labels, P: properties, in_edges: {}, out_edges: {} };
+export function newVertex(id: Id, labels: string[], properties: {[key: string]: any} ): Vertex {
+  return { id, L: labels, P: properties, IN: {}, OUT: {} };
 }
 
 export function addNewVertexUnSafe(vertex: Vertex) {
   setGraph("vertexes", vertex.id, vertex);
-  vertex.labels.forEach((label) =>
+  vertex.L.forEach((label) =>
    setGraph("vertexLabelIdMap", label, (vertexIds) =>
     G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
    ),
@@ -22,14 +22,14 @@ export function addNewVertex(txnId: number, vertex: Vertex): { error: string | b
   if (graph.vertexes[vertex.id]) {
     return { error: "Vertex ID Already exist" };
   }
-  const existedVertexes = vertex.labels.filter(
+  const existedVertexes = vertex.L.filter(
     (label) => G.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id),
   );
   if (existedVertexes.length) {
     return { error: "vertex ID already exist while adding new vertex" };
   }
   setGraph("vertexes", vertex.id, klona(vertex));
-  vertex.labels.forEach((label) =>
+  vertex.L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (vertexIds) =>
       G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
     ),
@@ -98,7 +98,7 @@ export function deleteVertex(txnId: number, vertexId: Id): { error: string | boo
   const vertex = klona(graph.vertexes[vertexId]);
   batch(() => {
     // @ts-ignore
-    graph.vertexes[vertexId].labels.forEach((label) =>
+    graph.vertexes[vertexId].L.forEach((label) =>
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
         G.isArray(vertexIds) && vertexIds.includes(vertexId)
           ? pipe(
@@ -133,20 +133,20 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
   // @ts-ignore
   setGraph("vertexes", oldVertexId, undefined);
   // TODO: replace id exactly at same position
-  graph.vertexes[newVertexId].labels.forEach((label) =>
+  graph.vertexes[newVertexId].L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (ids) => ids.filter((id) => id !== oldVertexId)),
   );
-  graph.vertexes[newVertexId].labels.forEach((label) =>
+  graph.vertexes[newVertexId].L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (vertexIds) =>
       G.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
     ),
   );
   // v->E--in->V-out-->E->v
-  Object.entries(graph.vertexes[newVertexId].out_edges).forEach(([edgeType, edgeIds]) => {
-    setGraph("edges", edgeIds, "start", newVertexId);
+  Object.entries(graph.vertexes[newVertexId].OUT).forEach(([edgeType, edgeIds]) => {
+    setGraph("edges", edgeIds, "S", newVertexId);
   });
-  Object.entries(graph.vertexes[newVertexId].in_edges).forEach(([edgeType, edgeIds]) => {
-    setGraph("edges", edgeIds, "end", newVertexId);
+  Object.entries(graph.vertexes[newVertexId].IN).forEach(([edgeType, edgeIds]) => {
+    setGraph("edges", edgeIds, "E", newVertexId);
   });
   return { error: "" };
 }
