@@ -12,7 +12,7 @@ import {
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
 import { BackupRestore } from "../pages/BackupRestore";
-import { graph } from "../lib/graph";
+import { graph, Vertex } from "../lib/graph";
 import {
   AbstractSingleForm,
   AllForms,
@@ -27,7 +27,6 @@ import { meta } from "../lib/Vertex";
 import TreeView, {
   Properties as TreeViewProperties
 } from "devextreme/ui/tree_view";
-import Drawer from "devextreme/ui/drawer";
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import { Page } from "./DynamicPage";
@@ -102,7 +101,7 @@ export const MenuButtonToggle = () => {
   return (
     <GenericField
      component={"Button"}
-      meta={meta({ hint: "Open sidebar", icon: "menu", width: 40 })}
+      meta={meta({ hint: "Open sidebar", icon: "menu", width: 40,stylingMode: 'text', })}
       onClick={() => {
         setSidebarOpen((v) => !v);
       }}
@@ -181,25 +180,26 @@ export const FullDashboard = () => {
   syncEvent();
   return (
     <div>
-      <div
-        ref={(el) => {
-          // if we don't use onMount, the content rendered below the sidebar.
-          onMount(() => {
-            const instance = new Drawer(el, {
-              // @ts-ignore
-              template: StaticSideBar,
-              // this will set the container div size to 100vh.
-              height: "100vh",
-              opened: true,
-              maxSize: 200,
-              revealMode: "expand",
-            });
-            createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));
-          });
-        }}
+      <GenericField
+       component={"Drawer"}
+       meta={{
+         P: {
+           props: {
+             // @ts-ignore
+             template: StaticSideBar,
+             // this will set the container div size to 100vh.
+             height: "100vh",
+             opened: true,
+             maxSize: 200,
+             revealMode: "expand",
+           }
+         }} as unknown as Vertex}
+       ref={(instance: any)=> {
+         createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));
+       }}
       >
         <DashboardView />
-      </div>
+      </GenericField>
     </div>
   );
 };

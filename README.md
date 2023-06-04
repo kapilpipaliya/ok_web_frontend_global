@@ -43,7 +43,7 @@ ESLint is configured as following
   -- is constant
 
 ### Graph Logic Rules:
-- always handle node object like: {id: 0, labels: [], P: {}}
+- always handle node object like: {id: 0, L: [], P: {}}
 
 ### css rules
 - don't use css child selectors.

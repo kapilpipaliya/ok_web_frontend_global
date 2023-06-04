@@ -32,11 +32,11 @@ import { ComponentProps } from "../core/Form";
 import { FormContext, onChangeHandler, Record } from "../../lib/Record";
 
 function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: number) {
-  const outEdges = vertex.out_edges[type] || [];
+  const outEdges = vertex.OUT[type] || [];
   let containsVertexId = false;
 
   for (const edgeId of outEdges) {
-    const endVertex = graph.edges[edgeId].end;
+    const endVertex = graph.edges[edgeId].E;
     if (endVertex === vertexId) {
       containsVertexId = true;
       break;
@@ -45,10 +45,10 @@ function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: numb
   return containsVertexId;
 }
 function vertexInEdgeContainVertex(vertex: Vertex, type: any, vertexId: number) {
-  const inEdges = vertex.in_edges[type] || [];
+  const inEdges = vertex.IN[type] || [];
   let includesVertexId = false;
   for (const edgeId of inEdges) {
-    const startVertex = graph.edges[edgeId].start;
+    const startVertex = graph.edges[edgeId].S;
     if (startVertex === vertexId) {
       includesVertexId = true;
       break;
@@ -61,7 +61,7 @@ function vertexInEdgeContainVertex(vertex: Vertex, type: any, vertexId: number) 
 export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
   // delete removed edges:
   const type = getToEdge(meta, vertex);
-  const previousEdges = vertex.out_edges[type] || [];
+  const previousEdges = vertex.OUT[type] || [];
 
   if (!Array.isArray(value)) {
     if (value !== null && value !== undefined) {
@@ -73,7 +73,7 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, v
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that end to same vertex
-    if (value.includes(graph.edges[edgeId].end)) continue;
+    if (value.includes(graph.edges[edgeId].E)) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId);
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }
@@ -95,7 +95,7 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
   // delete removed edges:
   const type = getInEdge(meta, vertex);
   if (!type) alert("edge type cant be empty");
-  const previousEdges = vertex.in_edges[type] || [];
+  const previousEdges = vertex.IN[type] || [];
 
   let valueArray = [] as number[];
 
@@ -111,7 +111,7 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
 
   for (const edgeId of previousEdges) {
     // we should not delete edge that start with same vertex
-    if (valueArray.includes(graph.edges[edgeId].start)) continue;
+    if (valueArray.includes(graph.edges[edgeId].S)) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId);
     if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
   }

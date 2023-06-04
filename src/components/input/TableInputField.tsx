@@ -91,7 +91,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           const vertexCollAttr = vertexCollAttrResult.vertexes!;
           const attrs = [] as FieldAttribute[];
           for (const attr of vertexCollAttr) {
-            const props = getCollAttrs(attr, { labels: ["Empty"], P: {}, out_edges: {} } as unknown as Vertex);
+            const props = getCollAttrs(attr, { L: ["Empty"], P: {}, OUT: {} } as unknown as Vertex);
             if (!props.error) attrs.push(props.attr!);
           }
           const newProperties = klona(props.meta.P);
@@ -301,17 +301,15 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         <td>
           <div class="flex align-items:center">
             {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
-            <Icon icon="material-symbols:keyboard-arrow-up" width={25} height={25} />
-            <Icon icon="material-symbols:keyboard-arrow-down" width={25} height={25} />
-            <Icon icon="material-symbols:add-box" width={25} height={25} />
+            <Icon icon="mingcute:up-fill"  />
+            <Icon icon="mingcute:down-fill"  />
+            <Icon icon="material-symbols:add-box"  />
             <Icon
               icon="material-symbols:restore-from-trash-outline"
-              width={25}
-              height={25}
               onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
             />
             <Show when={!props.disabled}>
-              <Icon icon="material-symbols:edit" width={25} height={25} onClick={() => setDisabled((v) => !v)} />
+              <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />
             </Show>
             {p.index + 1}
           </div>
@@ -468,7 +466,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               } as unknown as Vertex
             }
            data={{ P: { meta: [] } } as unknown as Vertex}
-           onClick={() => addNewRow(record.txnId, props.meta, props.data!, record.isRealTime, Ws)}
+           onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}
           />
 
           <div

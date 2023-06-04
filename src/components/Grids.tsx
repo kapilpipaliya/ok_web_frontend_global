@@ -186,12 +186,12 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex) {
-          const labels = [];
+          const textArray = [];
           for (const v of vertex) {
-            const label = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `P.${IdAttr}`);
-            labels.push(label);
+            const text = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `P.${IdAttr}`);
+            textArray.push(text);
           }
-          return labels.join(', ');
+          return textArray.join(', ');
         }
         return "";
       };

@@ -9,19 +9,19 @@ export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId:
   !isValidId(endVertexId) && console.error(`edge endId and endId should be string, but received ${endVertexId}`);
   return {
     id: edgeId,
-    type,
+    T: type,
     P: properties,
-    start: startVertexId,
-    end: endVertexId,
+    S: startVertexId,
+    E: endVertexId,
   };
 }
 export function addNewEdgeUnSafe(edge: Edge) {
   batch(() => {
     setGraph("edges", edge.id, edge);
-    setGraph("vertexes", edge.start, "out_edges", edge.type, (out_edges) =>
+    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
      G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
     );
-    setGraph("vertexes", edge.end, "in_edges", edge.type, (in_edges) =>
+    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
      G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
     );
   });
@@ -33,36 +33,36 @@ export function addNewEdge(txnId: number, edge: Edge): { error: string | boolean
   if (graph.edges[edge.id]) {
     return { error: "Edge ID already exist while adding new edge" };
   }
-  if (!graph.vertexes[edge.start]) {
+  if (!graph.vertexes[edge.S]) {
     return {
-      error: `Edge Start Vertex ${edge.start} not exist while adding new edge`,
+      error: `Edge Start Vertex ${edge.S} not exist while adding new edge`,
     };
   }
-  if (!graph.vertexes[edge.end]) {
+  if (!graph.vertexes[edge.E]) {
     return { error: "Edge End Vertex not exist while adding new edge" };
   }
   if (
-    G.isArray(graph.vertexes[edge.start].out_edges[edge.type]) &&
-    graph.vertexes[edge.start].out_edges[edge.type].includes(edge.id)
+    G.isArray(graph.vertexes[edge.S].OUT[edge.T]) &&
+    graph.vertexes[edge.S].OUT[edge.T].includes(edge.id)
   ) {
     return {
-      error: `Edge ID ${edge.id} already exist in out_edges of the Start vertex ${edge.start}`,
+      error: `Edge ID ${edge.id} already exist in out_edges of the Start vertex ${edge.S}`,
     };
   }
   if (
-    G.isArray(graph.vertexes[edge.end].in_edges[edge.type]) &&
-    graph.vertexes[edge.end].in_edges[edge.type].includes(edge.id)
+    G.isArray(graph.vertexes[edge.E].IN[edge.T]) &&
+    graph.vertexes[edge.E].IN[edge.T].includes(edge.id)
   ) {
     return {
-      error: `Edge ID ${edge.id} already exist in in_edges of the End vertex ${edge.end}`,
+      error: `Edge ID ${edge.id} already exist in in_edges of the End vertex ${edge.E}`,
     };
   }
   batch(() => {
     setGraph("edges", edge.id, klona(edge));
-    setGraph("vertexes", edge.start, "out_edges", edge.type, (out_edges) =>
+    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
       G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
     );
-    setGraph("vertexes", edge.end, "in_edges", edge.type, (in_edges) =>
+    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
       G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
     );
   });
@@ -106,14 +106,14 @@ export const replaceEdgeStart = (
     return { error: "Edge ID is not valid" };
   }
   const edge = graph.edges[edgeId];
-  const oldStartVertexId = edge.start;
+  const oldStartVertexId = edge.S;
   if (oldStartVertexId === newStartVertexId) {
     return { error: "" };
   }
   batch(() => {
     setGraph("edges", edgeId, "start", newStartVertexId);
     // @ts-ignore
-    setGraph("vertexes", oldStartVertexId, "out_edges", edge.type, (v) =>
+    setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) =>
       G.isArray(v)
         ? pipe(
             v.filter((e) => e !== edgeId),
@@ -121,7 +121,7 @@ export const replaceEdgeStart = (
           )
         : v,
     );
-    setGraph("vertexes", newStartVertexId, "out_edges", edge.type, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
+    setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
   });
   transactionDetailAdd(txnId, {
     replaceEdgeStart: () => klona(graph.edges[edgeId]),
@@ -142,14 +142,14 @@ export const replaceEdgeEnd = (
     return { error: "Edge ID is not valid" };
   }
   const edge = graph.edges[edgeId];
-  const oldEndVertexId = edge.end;
+  const oldEndVertexId = edge.E;
   if (oldEndVertexId === newEndVertexId) {
     return { error: "" };
   }
   batch(() => {
     setGraph("edges", edgeId, "end", newEndVertexId);
     // @ts-ignore
-    setGraph("vertexes", oldEndVertexId, "in_edges", edge.type, (v) =>
+    setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) =>
       G.isArray(v)
         ? pipe(
             v.filter((e) => e !== edgeId),
@@ -157,7 +157,7 @@ export const replaceEdgeEnd = (
           )
         : v,
     );
-    setGraph("vertexes", newEndVertexId, "in_edges", edge.type, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
+    setGraph("vertexes", newEndVertexId, "IN", edge.T, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
   });
   transactionDetailAdd(txnId, {
     replaceEdgeEnd: () => klona(graph.edges[edgeId]),
@@ -175,9 +175,9 @@ export function deleteEdge(txnId: number, edgeId: Id): { error: string | boolean
   }
   const edge = klona(graph.edges[edgeId]);
   batch(() => {
-    const type = edge.type;
+    const type = edge.T;
     // @ts-ignore
-    setGraph("vertexes", graph.edges[edgeId].start, "out_edges", type, (ids) =>
+    setGraph("vertexes", graph.edges[edgeId].S, "OUT", type, (ids) =>
       G.isArray(ids) && ids.includes(edgeId)
         ? pipe(
             ids.filter((id_) => id_ !== edgeId),
@@ -186,7 +186,7 @@ export function deleteEdge(txnId: number, edgeId: Id): { error: string | boolean
         : ids,
     );
     // @ts-ignore
-    setGraph("vertexes", graph.edges[edgeId].end, "in_edges", type, (ids) =>
+    setGraph("vertexes", graph.edges[edgeId].E, "IN", type, (ids) =>
       G.isArray(ids) && ids.includes(edgeId)
         ? pipe(
             ids.filter((id_) => id_ !== edgeId),
@@ -217,11 +217,11 @@ export function updateEdgeId(oldEdgeId: Id, newEdgeId: Id) {
     ...klona(graph.edges[oldEdgeId]),
     id: newEdgeId,
   });
-  setGraph("vertexes", graph.edges[oldEdgeId].start, "out_edges", graph.edges[oldEdgeId].type, (ids) => [
+  setGraph("vertexes", graph.edges[oldEdgeId].S, "OUT", graph.edges[oldEdgeId].T, (ids) => [
     ...ids.filter((id) => id !== oldEdgeId),
     newEdgeId,
   ]);
-  setGraph("vertexes", graph.edges[oldEdgeId].end, "in_edges", graph.edges[oldEdgeId].type, (ids) => [
+  setGraph("vertexes", graph.edges[oldEdgeId].E, "IN", graph.edges[oldEdgeId].T, (ids) => [
     ...ids.filter((id) => id !== oldEdgeId),
     newEdgeId,
   ]);
@@ -231,5 +231,5 @@ export function updateEdgeId(oldEdgeId: Id, newEdgeId: Id) {
 }
 
 export function getOutEdgeIdsOfType(id: Id | string, edgeLabel: string): Id[] {
-  return graph.vertexes[id].out_edges[edgeLabel] || [];
+  return graph.vertexes[id].OUT[edgeLabel] || [];
 }

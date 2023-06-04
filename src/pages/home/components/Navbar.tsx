@@ -1,28 +1,35 @@
 import { Icon } from "@iconify-icon/solid";
-import { ComponentProps } from "../../../utils/Form";
+import { DisplayComponentProps } from "../../../components/core/Form";
+import { Show, useContext } from "solid-js";
+import { PageContext } from "../../../lib/Record";
+import { MenuIcon } from "../../../components/MenuIcon";
 
-export function Navbar(props: ComponentProps & { isSideBarOpen: any; setSideBarOpen: any }) {
-  const { isSideBarOpen, setSideBarOpen } = props;
+export function Navbar(props: DisplayComponentProps) {
+ let { events } = useContext(PageContext);
 
-  return (
-    <nav class="bg:white box-shadow:1|1|10|#ddd p:10 flex jc:space-between ai:center">
-      <div>AVF App</div>
+ return (
+  <nav
+   class="bg:white box-shadow:1|1|10|#ddd p:10 flex jc:space-between ai:center">
 
-      {/* Actions */}
-      <div class="flex ai:center jc:center gap:8">
-        <div class="cursor:pointer">
-          <Icon icon="material-symbols:search" width={20} />
-        </div>
-        <div
-          class="cursor:pointer"
-          onclick={() => {
-            console.log("clicked");
-            props.setSideBarOpen((v) => !v);
-          }}
-        >
-          <Icon icon="mdi:hamburger-menu" width={25} height={25} />
-        </div>
-      </div>
-    </nav>
-  );
+   <Show when={props.meta?.P.props?.menuPosition === "left" || !props.meta?.P.props?.menuPosition}>
+    <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
+   </Show>
+
+   <div>{props.meta?.P?.props.title}</div>
+
+   {/* Actions */}
+   <div class="flex ai:center jc:center gap:8">
+
+    <div class="cursor:pointer">
+     <Icon icon="material-symbols:search" width={20} />
+    </div>
+
+    <Show when={props.meta?.P.props?.menuPosition === "right"}>
+     <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
+    </Show>
+
+   </div>
+
+  </nav>
+ );
 }

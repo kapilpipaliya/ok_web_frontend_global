@@ -5,6 +5,7 @@ import { klona } from "klona";
 import { get, set } from "idb-keyval";
 import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
 import { batch } from "solid-js";
+window.s = createStore;
 
 export type Id = number;
 
@@ -12,18 +13,25 @@ export const IdAttr = "name";
 
 export interface Vertex {
   id: Id;
-  labels: string[];
+  L: string[];
   P: { [key: string]: any };
-  in_edges: { [key: string]: Id[] };
-  out_edges: { [key: string]: Id[] };
+  IN: { [key: string]: Id[] };
+  OUT: { [key: string]: Id[] };
+}
+export interface VertexUnsafe {
+  id?: Id;
+  L?: string[];
+  P: { [key: string]: any };
+  IN?: { [key: string]: Id[] };
+  OUT?: { [key: string]: Id[] };
 }
 
 export interface Edge {
   id: Id;
   P: { [key: string]: any };
-  type: string;
-  start: Id;
-  end: Id;
+  T: string;
+  S: Id;
+  E: Id;
 }
 
 export type VertexMap = { [key: string]: Vertex };

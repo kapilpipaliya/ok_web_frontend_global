@@ -194,7 +194,6 @@ export function GenericInputField(props: ComponentProps & { component: string; d
 
             if (props.component === "Autocomplete") {
               comp = dxAutocomplete;
-              debugger
               // autocomplete is just like text box, but it allows user to preselect some values.
               Object.assign(attributes, {} as dxAutocompleteProperties);
             } else if (props.component === "Bullet") {
