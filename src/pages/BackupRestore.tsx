@@ -286,7 +286,8 @@ export const BackupRestore = () => {
     const form = getFormMetaData('Import');
     if(form.error) return form.error;
     const record = new Record({ form: form.form!, ws: Ws });
-    const createResult = record.create();
+    const createResult = record.create(form.form![IdAttr]);
+    record.createMeta(form.form!);
     if (createResult.error) return createResult.error;
 
 
@@ -337,7 +338,49 @@ LinearGauge\tFloat\t\tView
 ProgressBar\tFloat\t\tView
 Int\tInteger\tNumberBox\tCustom
 Float\tFloat\tNumberBox\tCustom
-DateTimeBox\tLocalDateTime\tDateBox\tCustom`,
+DateTimeBox\tLocalDateTime\tDateBox\tCustom
+Box\t\t\tView
+TreeMap\t\t\tView
+VectorMap\t\t\tView
+TreeView\t\t\tView
+TreeList\t\t\tView
+Toast\t\t\tView
+TileView\t\t\tView
+Tabs\t\t\tView
+TabPanel\t\t\tView
+SpeedDialAction\t\t\tView
+SparkLine\t\t\tView
+ScrollView\t\t\tView
+Scheduler\t\t\tView
+Sankey\t\t\tView
+Popup\t\t\tView
+PopOver\t\t\tView
+PolarChart\t\t\tView
+PieChart\t\t\tView
+MultiView\t\t\tView
+Menu\t\t\tView
+Map\t\t\tView
+Lookup\t\t\tView
+LoadPanel\t\t\tView
+LoadIndicator\t\t\tView
+List\t\t\tView
+Gantt\t\t\tView
+Gallery\t\t\tView
+Funnel\t\t\tView
+FileManager\t\t\tView
+Diagram\t\t\tView
+DataGrid\t\t\tView
+ContextMenu\t\t\tView
+Chart\t\t\tView
+Button\t\t\tView
+BarGauge\t\t\tView
+ActionSheet\t\t\tView
+Accordion\t\t\tView
+ButtonGroup\t\t\tView
+Tooltip\t\t\tView
+PivotGrid\t\t\tView
+DropDownButton\t\t\tView
+Drawer\t\t\tView`,
     });
     onDataDirectoryImportClick(record, Ws);
     // 3. Import dataTypeDefault

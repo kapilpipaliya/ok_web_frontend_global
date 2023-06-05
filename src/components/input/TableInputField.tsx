@@ -143,7 +143,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
              getOptionLabel(p.joinVertex, metaVertex.P.props.defaultValue)}</>;
             const Content = () => <>
               <DynamicComponent
-               id={""}
                component={component()}
                // When we have a Table we pass original Table Meta Vertex
                meta={component() === "Table" ? graph.vertexes[metaVertex.P.templateId] : metaVertex}
@@ -183,10 +182,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
         <DisplayCardProperties />
         <div>
           <GenericField
-           component={"ButtonGroup"}
             meta={
               {
                 P: {
+                  component: "ButtonGroup",
                   [IdAttr]: "meta",
                   props: {
                     keyExpr: "id",
@@ -225,7 +224,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
     if (attributesResult.error) alert("Error getting attributes");
     const rowColumnsMetaAttrs = attributesResult.vertexes!;
-    const [disabled, setDisabled] = createSignal(true);
+    const [disabled, setDisabled] = createSignal(false);
 
     const DisplayProperties = () => {
       return (
@@ -447,10 +446,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           {/*</Show>*/}
 
           <GenericField
-           component={"ButtonGroup"}
            meta={
               {
                 P: {
+                  component: "ButtonGroup",
                   [IdAttr]: "meta",
                   props: {
                     keyExpr: "id",

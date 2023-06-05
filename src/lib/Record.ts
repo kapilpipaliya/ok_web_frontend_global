@@ -5,7 +5,7 @@ import {
  graph,
  Id,
  IdAttr,
- revertTransaction,
+ revertTransaction, setGraph,
  Vertex
 } from "./graph";
 import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
@@ -610,6 +610,9 @@ export class Record {
   mergeVertexProperties(this.txnId, vertex.id, {
    [attribute.P[IdAttr]]: data
   });
+  // we directly save the dataType on vertex:
+  setGraph("vertexes", vertex.id, "D", {[attribute.P[IdAttr]]: attribute.P["dataType"]});
+
   onChangeHandler(this.txnId, this.vertex, vertex, attribute);
   if (this.isRealTime) commitTxn(this.txnId, this.ws);
  };

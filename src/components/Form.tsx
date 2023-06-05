@@ -88,10 +88,10 @@ export const Login = (props: {}) => {
         // TODO: add dry option
       />
       <GenericField
-       component={"Button"}
         meta={
           {
             P: {
+              component: "Button",
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
@@ -159,10 +159,10 @@ export const SignUp = (props: {}) => {
         // TODO: add dry option
       />
       <GenericField
-       component={"Button"}
         meta={
           {
             P: {
+              component: "Button",
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },
@@ -203,10 +203,10 @@ export const SimpleImport = (props: {}) => {
       <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
 
       <GenericField
-       component={"Button"}
         meta={
           {
             P: {
+              component: "Button",
               [IdAttr]: "meta",
               props: { stylingMode: "contained", width: "120", type: "success" },
             },

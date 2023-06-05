@@ -108,7 +108,9 @@ export default function Home() {
      "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person4.png",
     ]} as  dxGalleryProperties
   })
-
+ const todaysenergizer = record.addNewRowUI({P: {name: "Child"}} as unknown as Vertex, graph.vertexes[drawer.vertexId!], {
+  component: "TodaysEnergizer",
+ })
  return (
   <PageContext.Provider value={{ events: { isSideBarOpen, setSideBarOpen } }}>
    <PageItemRender metaVertex={record.vertex}/>
