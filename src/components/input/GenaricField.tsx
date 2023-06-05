@@ -1,5 +1,5 @@
 import {
-  createEffect, For,
+  createEffect, createMemo, For,
   JSXElement, Match, on,
   onCleanup,
   Show, Switch,
@@ -51,43 +51,70 @@ import dxPivotGrid, { Properties as dxPivotGridProperties } from "devextreme/ui/
 import dxDropDownButton, { Properties as dxDropDownButtonProperties } from "devextreme/ui/drop_down_button";
 import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
-
-import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
-import dxValidationGroup from "devextreme/ui/validation_group";
-import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../core/Form";
-import { IdAttr, Vertex, VertexUnsafe } from "../../lib/graph";
+import { getNewTxnId, IdAttr, Vertex } from "../../lib/graph";
 import { FormContext, PageContext } from "../../lib/Record";
 import { getTextColumnValue } from "./GenaricInputField";
 import { ActionCards } from "../../pages/home/components/ActionCards";
 import { Navbar } from "../../pages/home/components/Navbar";
-import { getChildVertexes } from "../../lib/Traverse";
-
-export const genericComponents = [
-  "Autocomplete",
-  "Bullet",
-  "Calendar",
-  "CheckBox",
-  "CircularGauge",
-  "ColorBox",
-  "DateBox",
-  "DropDownBox",
-  "FileUploader",
-  "FilterBuilder",
-  "HtmlEditor",
-  "LinearGauge",
-  "NumberBox",
-  "ProgressBar",
-  "RadioGroup",
-  "RangeSelector",
-  "RangeSlider",
-  "SelectBox",
-  "Slider",
-  "Switch",
-  // "TagBox", // giving error with undefined values
-  "TextArea",
-  "TextBox",
-];
+import {
+  getChildVertex,
+  getChildVertexes,
+  getOptionLabel
+} from "../../lib/Traverse";
+import {
+  TodaysEnergizer
+} from "../../pages/home/components/TodaysEnergizerSection";
+import { DynamicComponent } from "../dynamicForm";
+import { replaceVertexProperties } from "../../lib/Vertex";
+export const genericComponents2 = [
+  "Box",
+  "TreeMap",
+  "VectorMap",
+  "TreeView",
+  "TreeList",
+  "Toast",
+  "TileView",
+  "Tabs",
+  "TabPanel",
+  "SpeedDialAction",
+  "SparkLine",
+  "ScrollView",
+  "Scheduler",
+  "Sankey",
+  "Popup",
+  "PopOver",
+  "PolarChart",
+  "PieChart",
+  "MultiView",
+  // "SelectBox",
+  "Menu",
+  "Map",
+  // "TagBox",
+  "Lookup",
+  "LoadPanel",
+  "LoadIndicator",
+  "List",
+  "Gantt",
+  "Gallery",
+  "Funnel",
+  "FileManager",
+  "Diagram",
+  "DataGrid",
+  "ContextMenu",
+  "Chart",
+  "Button",
+  "BarGauge",
+  "ActionSheet",
+  "Accordion",
+  "ButtonGroup",
+  "Tooltip",
+  "PivotGrid",
+  "DropDownButton",
+  "Drawer",
+  // "FilterBuilder",
+  // "FileUploader",
+]
 const displayExpr = [
   "ContextMenu",
   "DropDownBox",
@@ -178,31 +205,47 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 export const PageItemRender = (props: {metaVertex: Vertex}) => {
   if (!props.metaVertex.L) return;
 
-  const attributesResult = getChildVertexes(["$0Child"], [props.metaVertex]);
+  // children:
+  const attributesResult = getChildVertexes(["$0Attr"], [props.metaVertex]);
 
   return <><For each={attributesResult.vertexes}>
     {item => {
-      return <><GenericField
-       component={item.P.component}
+      const compProps = (getChildVertexes(["$0Prop"], [item]).vertexes || []).reduce((acc, curr) => {
+        const key = getOptionLabel(curr, "->$0Key:P.key");
+        if (key) {
+          acc[key] = curr.P.value;
+        }
+        return acc;
+      }, {} as { [key: string]: any });
+      replaceVertexProperties(getNewTxnId(), item.id, { props: compProps });
+
+      return <><DynamicComponent
        meta={item}
+       data={{P:{}}}
+       setValue={_=>0}
+       disabled={false}
+       component={item.P.component || getChildVertex(['$0Comp'], item).vertex?.P[IdAttr]}
       /></>
   }}
   </For></>
 }
 
-export function GenericField(props: ComponentProps & { component: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
+export function GenericField(props: ComponentProps & { component?: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
   const formContext = useContext(FormContext);
   let { events } = useContext(PageContext);
-
+  const component = createMemo(() => props.component || props.meta.P.component)
   return (
 
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
-          <Match when={props.component==="NavBar"}>
+          <Match when={component()==="NavBar"}>
             <Navbar meta={props.meta} data={props.data}/>
           </Match>
-          <Match when={props.component==="ActionCard"}>
+          <Match when={component()==="ActionCard"}>
             <ActionCards meta={props.meta} data={props.data} />
+          </Match>
+          <Match when={component()==="TodaysEnergizer"}>
+            <TodaysEnergizer meta={props.meta} data={props.data} />
           </Match>
           <Match when={true}>
             <div
@@ -214,7 +257,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                };
                let comp: any;
 
-               if (props.component === "Box") {
+               if (component() === "Box") {
                  // https://github.com/DevExpress/DevExtreme/blob/23_1/js/ui/box.js#L273
                  // Box only support items properly, if we use children it use it as template and all the events are removed.
                  // so don't use the box component.
@@ -224,13 +267,13 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    // direction: "row",
                    // height: 100,
                  } as dxBoxProperties);
-               } else if (props.component === "1") {
+               } else if (component() === "1") {
                  comp = dxLoadPanel;
                  Object.assign(attributes, {} as dxLoadPanelProperties);
-               } else if (props.component === "1") {
+               } else if (component() === "1") {
                  comp = dxLoadPanel;
                  Object.assign(attributes, {} as dxLoadPanelProperties);
-               } else if (props.component === "TreeMap") {
+               } else if (component() === "TreeMap") {
                  comp = dxTreeMap;
                  // const treeMapData = [
                  //   {
@@ -269,7 +312,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  //   },
                  // ];
                  Object.assign(attributes, {} as dxTreeMapProperties);
-               } else if (props.component === "VectorMap") {
+               } else if (component() === "VectorMap") {
                  comp = dxVectorMap;
                  Object.assign(attributes, {
                    // bounds: [-180, 85, 180, -60],
@@ -285,7 +328,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    //   dataSource: "https://js.devexpress.com/Content/data/vectorMap-sources/world.txt",
                    // },
                  } as dxVectorMapProperties);
-               } else if (props.component === "TreeView") {
+               } else if (component() === "TreeView") {
                  const syncSelection = (treeViewInstance: dxTreeView) => {
                    // console.log(treeViewInstance);
                    const selectedItems = treeViewInstance.getSelectedNodes().map((node) => node.itemData);
@@ -311,7 +354,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
 
                  } as dxTreeViewProperties);
-               } else if (props.component === "TreeList") {
+               } else if (component() === "TreeList") {
                  comp = dxTreeList;
                  // const treeListData = [
                  //   {
@@ -362,7 +405,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      visible: true,
                    },
                  } as dxTreeListProperties);
-               } else if (props.component === "Toast") {
+               } else if (component() === "Toast") {
                  comp = dxToast;
                  Object.assign(attributes, {
                    displayTime: 20000,
@@ -371,7 +414,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    visible: false,
                  } as dxToastProperties);
                  // use instance.show() method to display toast
-               } else if (props.component === "TileView") {
+               } else if (component() === "TileView") {
                  comp = dxTileView;
                  const tileViewData = [
                    {
@@ -524,7 +567,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      itemElement.append(imageDiv);
                    },
                  } as dxTileViewProperties);
-               } else if (props.component === "Tabs") {
+               } else if (component() === "Tabs") {
                  comp = dxTabs;
                  const tabsData = [
                    {
@@ -541,7 +584,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.addedItems[0].text);
                    },
                  } as dxTabsProperties);
-               } else if (props.component === "TabPanel") {
+               } else if (component() === "TabPanel") {
                  comp = dxTabPanel;
                  const tabPanelData = [
                    {
@@ -563,7 +606,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.addedItems[0].text);
                    },
                  } as dxTabPanelProperties);
-               } else if (props.component === "SpeedDialAction") {
+               } else if (component() === "SpeedDialAction") {
                  comp = dxSpeedDialAction;
                  Object.assign(attributes, {
                    icon: "tel",
@@ -571,7 +614,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      console.log("Click");
                    },
                  } as dxSpeedDialActionProperties);
-               } else if (props.component === "SparkLine") {
+               } else if (component() === "SparkLine") {
                  comp = dxSparkLine;
 
                  const sparkLineItems = [
@@ -609,7 +652,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                  ];
                  Object.assign(attributes, {} as dxSparkLineProperties);
-               } else if (props.component === "ScrollView") {
+               } else if (component() === "ScrollView") {
                  comp = dxScrollView;
                  Object.assign(attributes, {
                    height: 100,
@@ -624,10 +667,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                    reachBottomText: "Updating...",
                  } as dxScrollViewProperties);
-               } else if (props.component === "Scheduler") {
+               } else if (component() === "Scheduler") {
                  comp = dxScheduler;
                  Object.assign(attributes, {} as dxSchedulerProperties);
-               } else if (props.component === "Sankey") {
+               } else if (component() === "Sankey") {
                  comp = dxSankey;
                  const sankeyData = [
                    {
@@ -692,7 +735,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      colorMode: "gradient",
                    },
                  } as dxSankeyProperties);
-               } else if (props.component === "Popup") {
+               } else if (component() === "Popup") {
                  comp = dxPopup;
                  Object.assign(attributes, {
                    visible: false,
@@ -749,7 +792,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    ],
                  } as dxPopupProperties);
                  // use instance.show() to display popup.
-               } else if (props.component === "PopOver") {
+               } else if (component() === "PopOver") {
                  comp = dxPopOver;
                  // <p><span id="subject1">Google AdWords Strategy</span> (<a id="link1">details</a>)</p>
                  Object.assign(attributes, {
@@ -760,7 +803,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    width: 300,
                  } as dxPopOverProperties);
                  // add some children and it will display when we click on the link
-               } else if (props.component === "PolarChart") {
+               } else if (component() === "PolarChart") {
                  comp = dxPolarChart;
 
                  const pivotGridItems = [
@@ -803,7 +846,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      },
                    ],
                  } as dxPolarChartProperties);
-               } else if (props.component === "PieChart") {
+               } else if (component() === "PieChart") {
                  comp = dxPieChart;
 
                  const pieChartData = [
@@ -851,7 +894,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      valueField: "val",
                    },
                  } as dxPieChartProperties);
-               } else if (props.component === "MultiView") {
+               } else if (component() === "MultiView") {
                  comp = dxMultiView;
                  const multiViewItems = [
                    {
@@ -923,10 +966,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta,props.data, e.addedItems[0]);
                    },
                  } as dxMultiViewProperties);
-                 // } else if(props.component === "SelectBox" ) {
+                 // } else if(component() === "SelectBox" ) {
                  //  comp = dxSelectBox;
                  //  Object.assign(attributes, {} as dxSelectBoxProperties);
-               } else if (props.component === "Menu") {
+               } else if (component() === "Menu") {
                  comp = dxMenu;
 
                  const menuData = [
@@ -957,16 +1000,16 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.itemData);
                    },
                  } as dxMenuProperties);
-               } else if (props.component === "Map") {
+               } else if (component() === "Map") {
                  comp = dxMap;
                  Object.assign(attributes, {
                    provider: "bing",
                    type: "satellite",
                  } as dxMapProperties);
-                 // } else if(props.component === "TagBox" ) {
+                 // } else if(component() === "TagBox" ) {
                  //  comp = dxTagBox;
                  //  Object.assign(attributes, {} as dxTagBoxProperties);
-               } else if (props.component === "Lookup") {
+               } else if (component() === "Lookup") {
                  comp = dxLookup;
 
                  const lookupData = [
@@ -991,7 +1034,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.itemData);
                    },
                  } as dxLookupProperties);
-               } else if (props.component === "LoadPanel") {
+               } else if (component() === "LoadPanel") {
                  comp = dxLoadPanel;
                  // set on container: style={{ padding: "10px" }}
                  Object.assign(attributes, {
@@ -1011,13 +1054,13 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      console.log("hidden");
                    },
                  } as dxLoadPanelProperties);
-               } else if (props.component === "LoadIndicator") {
+               } else if (component() === "LoadIndicator") {
                  comp = dxLoadIndicator;
                  Object.assign(attributes, {
                    width: 100,
                    visible: true,
                  } as dxLoadIndicatorProperties);
-               } else if (props.component === "List") {
+               } else if (component() === "List") {
                  comp = dxList;
 
                  const listData = [
@@ -1042,7 +1085,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.itemData);
                    },
                  } as dxListProperties);
-               } else if (props.component === "Gantt") {
+               } else if (component() === "Gantt") {
                  comp = dxGantt;
 
                  const ganttData = [
@@ -1156,7 +1199,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    scaleType: "weeks",
                    taskListWidth: 500,
                  } as dxGanttProperties);
-               } else if (props.component === "Gallery") {
+               } else if (component() === "Gallery") {
                  comp = dxGallery;
                  const galleryData = [
                    "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person2.png",
@@ -1169,7 +1212,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    height: 400,
                    dataSource: galleryData
                  } as dxGalleryProperties);
-               } else if (props.component === "Funnel") {
+               } else if (component() === "Funnel") {
                  comp = dxFunnel;
                  const funnelData = [
                    {
@@ -1206,7 +1249,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                    valueField: "users",
                  } as dxFunnelProperties);
-               } else if (props.component === "FileManager") {
+               } else if (component() === "FileManager") {
                  comp = dxFileManager;
 
                  const fileManagerData = [
@@ -1293,7 +1336,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                  } as dxFileManagerProperties);
                  // createEffect(() => instance.option("fileSystemProvider", props.data.P[props.meta.P[IdAttr]]));
-               } else if (props.component === "Diagram") {
+               } else if (component() === "Diagram") {
                  comp = dxDiagram;
 
                  const diagramData = [
@@ -1330,10 +1373,10 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  ];
 
                  Object.assign(attributes, {} as dxDiagramProperties);
-               } else if (props.component === "DataGrid") {
+               } else if (component() === "DataGrid") {
                  comp = dxDataGrid;
                  Object.assign(attributes, {} as dxDataGridProperties);
-               } else if (props.component === "ContextMenu") {
+               } else if (component() === "ContextMenu") {
                  comp = dxContextMenu;
 
                  const contextMenuData = [
@@ -1364,7 +1407,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta, props.data,e.itemData.text);
                    },
                  } as dxContextMenuProperties);
-               } else if (props.component === "Chart") {
+               } else if (component() === "Chart") {
                  comp = dxChart;
 
                  const chartDataSource = [
@@ -1406,12 +1449,12 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      color: "#ffaa66",
                    },
                  } as dxChartProperties);
-               } else if (props.component === "Button") {
+               } else if (component() === "Button") {
                  comp = dxButton;
                  Object.assign(attributes, {
                    onClick: props.onClick,
                  } as dxButtonProperties);
-               } else if (props.component === "BarGauge") {
+               } else if (component() === "BarGauge") {
                  comp = dxBarGauge;
                  // [47.27, 65.32, 84.59, 71.86]
                  Object.assign(attributes, {
@@ -1438,7 +1481,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      },
                    },
                  } as dxBarGaugeProperties);
-               } else if (props.component === "ActionSheet") {
+               } else if (component() === "ActionSheet") {
                  comp = dxActionSheet;
                  Object.assign(attributes, {
                    title: "Choose action",
@@ -1449,7 +1492,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      props.setValue(props.meta,props.data, e.itemData.text);
                    },
                  } as dxActionSheetProperties);
-               } else if (props.component === "Accordion") {
+               } else if (component() === "Accordion") {
                  comp = dxAccordion;
                  Object.assign(attributes, {
                    animationDuration: 300,
@@ -1479,7 +1522,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                  } as dxAccordionProperties);
 
-               } else if (props.component === "ButtonGroup") {
+               } else if (component() === "ButtonGroup") {
                  comp = dxButtonGroup;
                  Object.assign(attributes, {
                    items: [],
@@ -1492,7 +1535,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  } as dxButtonGroupProperties);
 
 
-               } else if (props.component === "Tooltip") {
+               } else if (component() === "Tooltip") {
                  comp = dxTooltip;
                  Object.assign(attributes, {
                    target: "#target-item",
@@ -1505,7 +1548,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                      return props.data.P[props.meta.P[IdAttr]];
                    },
                  } as dxTooltipProperties);
-               } else if (props.component === "PivotGrid") {
+               } else if (component() === "PivotGrid") {
                  comp = dxPivotGrid;
 
                  const pivotGridItems = {
@@ -1545,7 +1588,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                    },
                    showBorders: true,
                  } as dxPivotGridProperties);
-               } else if (props.component === "DropDownButton") {
+               } else if (component() === "DropDownButton") {
                  comp = dxDropDownButton;
                  const dropdownButtonData = [
                    {
@@ -1583,27 +1626,27 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  } as dxDropDownButtonProperties);
                } else if (
                 // drawer has problem when it rendered, it dont know the proper height of the content so sidebar height is not proper.
-                props.component === "Drawer"
+                component() === "Drawer"
                ) {
                  comp = dxDrawer;
                  Object.assign(attributes, {} as dxDrawerProperties);
-               } else if (props.component === "1") {
+               } else if (component() === "1") {
                  comp = dxLoadPanel;
                  Object.assign(attributes, {} as dxLoadPanelProperties);
                } else {
-                 console.warn("Component not found", props.component);
+                 console.warn("Component not found", component());
                  return "----";
                }
-               // if (displayExpr.includes(props.component) && !props.meta.P.props.displayExpr) {
+               // if (displayExpr.includes(component()) && !props.meta.P.props.displayExpr) {
                //  Object.assign(attributes, {displayExpr: ''});
                // }
-               // if (valueExpr.includes(props.component) && !props.meta.P.props.valueExpr) {
+               // if (valueExpr.includes(component()) && !props.meta.P.props.valueExpr) {
                //  Object.assign(attributes, {valueExpr: ''});
                // }
-               // if (dataSource.includes(props.component) && !props.meta.P.props.dataSource) {
+               // if (dataSource.includes(component()) && !props.meta.P.props.dataSource) {
                //  Object.assign(attributes, {dataSource: ''});
                // }
-               // if (items.includes(props.component) && !props.meta.P.props.items) {
+               // if (items.includes(component()) && !props.meta.P.props.items) {
                //  Object.assign(attributes, {items: ''});
                // }
                let instance: any;
@@ -1615,20 +1658,20 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  }
                  window.www = instance
                })
-               if (props.component === "Button") {
-                 if (props.data) {
+               if (component() === "Button") {
+                 if (props.data?.P) {
                    createEffect(() => {
                      instance.option("text", props.data.P[props.meta.P[IdAttr]])
                    });
                  }
-               } else if (props.component === "ButtonGroup") {
+               } else if (component() === "ButtonGroup") {
                  createEffect(() => instance.option("selectedItems", props.data.P[props.meta.P[IdAttr]]));
                }
 
                createEffect(() => {
-                 if(props.data) {
+                 if(props.data?.P) {
                    let value = props.data.P[props.meta.P[IdAttr]];
-                   if (props.component === "FilterBuilder" || props.component === "FileUploader") {
+                   if (component() === "FilterBuilder" || component() === "FileUploader") {
                      if (!value) value = [];
                      else if(!Array.isArray(value)) {
                        value = [value];
@@ -1649,7 +1692,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
                  }
                });
 
-               if (props.component === "Drawer") {
+               if (component() === "Drawer") {
                  if (events?.isSideBarOpen) {
                    createEffect(on(events.isSideBarOpen, (_) => instance.toggle(), { defer: true }));
                  }
@@ -1658,7 +1701,7 @@ export function GenericField(props: ComponentProps & { component: string; disabl
              }}
             >
               <Switch>
-                <Match when={props.component === "Drawer"}>
+                <Match when={component() === "Drawer"}>
                   {/* Min Height is set because drawer cant see height initially*/}
                   <div style={"min-height: 506px"}>
                     {props.children}

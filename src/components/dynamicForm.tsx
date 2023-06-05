@@ -20,7 +20,7 @@ import {
   revertTransaction,
   Vertex
 } from "../lib/graph";
-import { mergeVertexProperties, meta } from "../lib/Vertex";
+import { mergeVertexProperties } from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
 import { SelectInputField } from "./input/SelectInputField";
@@ -40,7 +40,7 @@ import {
 } from "../lib/Traverse";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
-import { GenericField } from "./input/GenaricField";
+import { genericComponents2, GenericField } from "./input/GenaricField";
 import {
   FormContext,
   FormMetaData,
@@ -81,7 +81,7 @@ const FormComponent = (props: {
 
 // Dynamic Component used in the form
 export const DynamicComponent = (props: {
-  id: string;
+  // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
   data: Vertex;
@@ -93,7 +93,6 @@ export const DynamicComponent = (props: {
       <Match when={!props.component}>NO INPUT</Match>
       <Match when={props.component === "SelectBox" || props.component === "TagBox"}>
         <SelectInputField
-         aria-labeledby={props.id}
          data={props.data}
          meta={props.meta}
          // passed setValue when we have a string value in select field
@@ -117,17 +116,23 @@ export const DynamicComponent = (props: {
           </div>
         </td>
       </Match>
-      <Match when={props.component} keyed>
-        <Show when={genericComponents.includes(props.component)}>
-          <GenericInputField
-            aria-labeledby={props.id}
-            data={props.data}
-            meta={props.meta}
-            component={props.component}
-            setValue={props.setValue}
-            disabled={props.disabled!}
-          />
-        </Show>
+      <Match when={genericComponents.includes(props.component) && props.component} keyed>
+        <GenericInputField
+          data={props.data}
+          meta={props.meta}
+          component={props.component}
+          setValue={props.setValue}
+          disabled={props.disabled!}
+        />
+      </Match>
+      <Match when={genericComponents2.includes(props.component) && props.component} keyed>
+        <GenericField
+          data={props.data}
+          meta={props.meta}
+          component={props.component}
+          setValue={props.setValue}
+          disabled={props.disabled!}
+        />
       </Match>
     </Switch>
   );
@@ -154,7 +159,7 @@ export function FormGroup(props: FormGroupProps) {
         });
         const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr])}</>
         const Content = () => <DynamicComponent
-         id={id}
+
          component={component()}
          meta={metaVertex}
          data={props.vertex}
@@ -205,14 +210,15 @@ export const DynamicForm = (props: DynamicFormProps) => {
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
 
-  const record = new Record({ form: props.form, ws: Ws });
+  const record = new Record({ ws: Ws });
   if (!props.id) {
-    const createResult = record.create();
+    const createResult = record.create(props.form[IdAttr]);
     if (createResult.error) return createResult.error;
   } else {
     const loadResult = record.load(props.id);
     if (loadResult.error) return loadResult.error;
   }
+  record.createMeta(props.form);
 
   // focus first input
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -320,14 +326,12 @@ export const DynamicForm = (props: DynamicFormProps) => {
           </Show>
           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
           <GenericField
-           component={"Button"}
            // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-           meta={meta({ stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" })}
+           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
            onClick={onSubmit}
           />
           <GenericField
-           component={"Button"}
-           meta={meta({ stylingMode: "contained", width: "120", icon: "back", text: "Cancel" })}
+           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", icon: "back", text: "Cancel" }}} as any}
            onClick={onCancel}
           />
         </FormContext.Provider>

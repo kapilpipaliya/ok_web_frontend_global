@@ -337,10 +337,10 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     <div class="">
       <div>
         <GenericField
-         component={"Button"}
           meta={
             {
               P: {
+                component: "Button",
                 [IdAttr]: "meta",
                 props: {},
               },

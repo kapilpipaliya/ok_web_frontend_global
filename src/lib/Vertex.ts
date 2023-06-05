@@ -6,7 +6,7 @@ import { G, pipe } from "@mobily/ts-belt";
 
 // return a new Vertex
 export function newVertex(id: Id, labels: string[], properties: {[key: string]: any} ): Vertex {
-  return { id, L: labels, P: properties, IN: {}, OUT: {} };
+  return { id, L: labels, P: properties || {}, IN: {}, OUT: {} };
 }
 
 export function addNewVertexUnSafe(vertex: Vertex) {
@@ -169,9 +169,3 @@ export function findVertexByLabelAndUniqueIdWithSkip(label: string, attribute: s
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
-
-export const meta = (props: { [key: string]: any }) => ({
- P: {
-  props
- }
-} as unknown as Vertex);

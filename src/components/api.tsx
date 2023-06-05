@@ -328,7 +328,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               displayExpr: `P.${IdAttr}`,
               collection: "DataType",
-              skip: true,
+              // skip: true,
             },
           },
           {
@@ -374,7 +374,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: "P.key",
-                  collection: "-CollAttrProp->CollAttrComp->$0Prop||-CollAttrProp->$0Attr->$0Comp->$0Prop",
+                  collection: "-$0->$0Comp->$0Prop",
                 },
               },
               {
@@ -937,6 +937,174 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           displayExpr: `P.${IdAttr}`,
           collection: "{->$0Coll:P[IdAttr]}",
         },
+      },
+    ],
+  },
+  Page2: {
+    title: "Page2",
+    name: "Page2",
+    attributes: [
+      {
+        name: "title",
+        component: "TextBox",
+        props: {
+          onchange: '{"new": ["name","id"]}',
+        },
+      },
+      {
+        name: "name",
+        component: "TextBox",
+        props: {
+          validationRules: [
+            {
+              type: "required",
+              message: "ID is required",
+            },
+            {
+              type: "custom",
+              ignoreEmptyValue: true,
+              message: "This ID is already taken",
+              validationCallback: (options) => {
+                const { record } = options.validator.context || {} as IFormContext;
+
+                const val = options.value;
+                if (Object.keys(AttrsTableData).includes(val)) {
+                  return false;
+                } else {
+                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id);
+                }
+              },
+            },
+            // , {
+            //   type: 'email',
+            //   message: 'Email is invalid',
+            // }
+          ],
+        },
+      },
+      { name: "description", component: "TextArea" },
+      { name: "public", component: "CheckBox", props: { skip: true } },
+      {
+        name: "Attr",
+        component: "Table",
+        tab: "Attribute",
+        props: {
+          // unique: 'Attr',
+          // kanban: true,
+          // collection: "Attr",
+        },
+        attributes: [
+          {
+            name: "name",
+            displayName: "ID",
+            component: "TextBox",
+            props: {},
+          },
+          {
+            name: "definition",
+            component: "TextArea",
+          },
+          // {
+          //   name: "parent",
+          //   component: "SelectBox",
+          //   props: {
+          //     displayExpr: `P.${IdAttr}`,
+          //     collection: "-$0->$0Attr",
+          //     focusRefresh: true
+          //   },
+          // },
+          {
+            name: "Comp",
+            component: "SelectBox",
+            props: {
+              displayExpr: `P.${IdAttr}`,
+              collection: "Comp",
+              // smaller version:
+              // collection: "Comp",
+            },
+          },
+          {
+            name: "Prop",
+            displayName: "Property",
+            component: "Table",
+            props: { skip: true },
+            attributes: [
+              {
+                name: "key",
+                component: "SelectBox",
+                props: {
+                  displayExpr: "P.key",
+                  collection: "-$0->$0Comp->$0Prop",
+                },
+              },
+              {
+                name: "value",
+                meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                component:
+                 "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+              },
+            ],
+          },
+          {
+            name: "Role",
+            component: "Table",
+            props: { skip: true },
+            attributes: [
+              {
+                name: "role",
+                component: "SelectBox",
+                props: {
+                  displayExpr: `P.${IdAttr}`,
+                  collection: "Role",
+                },
+              },
+              {
+                name: "Perm",
+                component: "Table",
+                attributes: [
+                  {
+                    name: "perm",
+                    component: "SelectBox",
+                    props: {
+                      displayExpr: `P.${IdAttr}`,
+                      collection: "Perm",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: "Role",
+        component: "Table",
+        tab: "Permission",
+        props: { skip: true },
+        attributes: [
+          {
+            name: "role",
+            component: "SelectBox",
+            props: {
+              displayExpr: `P.${IdAttr}`,
+              collection: "Role",
+            },
+          },
+          {
+            name: "Perm",
+            component: "Table",
+            attributes: [
+              {
+                name: "perm",
+                component: "SelectBox",
+                props: {
+                  displayExpr: `P.${IdAttr}`,
+                  collection: "Perm",
+                },
+              },
+            ],
+          },
+        ],
       },
     ],
   },

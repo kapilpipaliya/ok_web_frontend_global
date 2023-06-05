@@ -149,6 +149,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
   let { record } = useContext(FormContext);
   if (!record) record = {} as Record;
 
+  // @ts-ignore
   const [selectOptions, { refetch }] = createResource(() => {
     let value = props.meta.P.props.items;
     if (value) {
@@ -160,15 +161,16 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
         return value ? [value] : [];
       }
     } else {
-      if (props.disabled) {
-        return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
-      }
+      // this is not working when row is enabled, select field options is not updated
+      // if (props.disabled) {
+      //   return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+      // }
       if (!props.meta.P.props?.collection) {
         return [];
       }
       return getSelectionOptions(props.data, props.meta.P.props.collection).vertexes || [];
     }
-  });
+  }, (data) => data);
 
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
@@ -223,11 +225,20 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
               //   refetch();
               // },
             } as Properties;
+
+            if (props.meta.P.props.focusRefresh) {
+              Object.assign(selectOp, {
+                onFocusIn: function (e) {
+                  refetch();
+                },
+              } as Properties)
+            }
             if (!props.meta.P.props.items) {
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
                 displayExpr: (item) => getOptionLabel(item, props.meta.P.props.displayExpr || `P.${IdAttr}`),
+
               } as Properties)
             }
             const instance = props.component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);

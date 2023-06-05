@@ -22,7 +22,6 @@ import {
   SimpleImport
 } from "./Form";
 import { WsContext } from "./ws_events_dispatcher";
-import { meta } from "../lib/Vertex";
 // import { AlertMessageContext } from "../appState";
 import TreeView, {
   Properties as TreeViewProperties
@@ -30,7 +29,7 @@ import TreeView, {
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import { Page } from "./DynamicPage";
-import { FormDesigner } from "./FormDesigner";
+import { FormDesigner, PageDesigner } from "./FormDesigner";
 import { syncEvent } from "./ws_events";
 import { GenericField } from "./input/GenaricField";
 
@@ -51,6 +50,7 @@ const navigation = [
       { name: "Collections", href: "/Coll" },
       { name: "Forms", href: "/Form" },
       // { name: "Page", href: "/Page" },
+      { name: "Page2", href: "/Page2/new" },
     ],
   },
   {
@@ -100,8 +100,7 @@ export const StaticSideBar = () => {
 export const MenuButtonToggle = () => {
   return (
     <GenericField
-     component={"Button"}
-      meta={meta({ hint: "Open sidebar", icon: "menu", width: 40,stylingMode: 'text', })}
+      meta={{ P: {component: "Button", props: {hint: "Open sidebar", icon: "menu", width: 40,stylingMode: 'text', }}} as any}
       onClick={() => {
         setSidebarOpen((v) => !v);
       }}
@@ -157,6 +156,7 @@ export const DashboardView = () => {
             <Route path="/signup" component={SignUp as Component} />
             <Route path="/SimpleImport" component={SimpleImport as Component} />
             <Route path="/CollDesigner/:id" component={FormDesigner as Component} />
+            <Route path="/Page2/:id" component={PageDesigner as Component} />
             <Route path="/Page/:id" component={Page as Component} />
             <Route path="/public/avfmobile" component={Home as Component} />
             <Route path="/**" component={Page404 as Component} />
@@ -181,9 +181,9 @@ export const FullDashboard = () => {
   return (
     <div>
       <GenericField
-       component={"Drawer"}
        meta={{
          P: {
+           component: "Drawer",
            props: {
              // @ts-ignore
              template: StaticSideBar,
