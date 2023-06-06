@@ -349,7 +349,9 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               //  Object.assign(attributes, {} as dxTagBoxProperties);
             } else if (props.component === "TextArea") {
               comp = dxTextArea;
-              Object.assign(attributes, {minHeight: '140px'} as dxTextAreaProperties);
+              Object.assign(attributes, {
+                autoResizeEnabled: true
+              } as dxTextAreaProperties);
             } else if (props.component === "TextBox") {
               comp = dxTextBox;
               Object.assign(attributes, {} as dxTextBoxProperties);

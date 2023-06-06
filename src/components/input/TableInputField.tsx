@@ -223,7 +223,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
     if (attributesResult.error) alert("Error getting attributes");
-    const rowColumnsMetaAttrs = attributesResult.vertexes!;
+    const rowColumnsMetaAttrs = attributesResult.vertexes!.filter(vertex => vertex.P.tab !== "expand");
+    const expandVertex = attributesResult.vertexes!.find(vertex => vertex.P.tab === "expand");
+
     const [disabled, setDisabled] = createSignal(false);
 
     const DisplayProperties = () => {
@@ -247,7 +249,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
              getOptionLabel(p.joinVertex, metaVertex.P.props.defaultValue)}</>;
             const Content = () => <>
               <DynamicComponent
-               id={""}
                component={component()}
                // When we have a Table we pass original Table Meta Vertex
                meta={component() === "Table" ? graph.vertexes[metaVertex.P.templateId] : metaVertex}
@@ -292,7 +293,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     };
 
     return (
-      <tr
+      <><tr
         // use:sortable
         // classList={{ "opacity-25": sortable.isActiveDraggable }}
         class=""
@@ -310,11 +311,30 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             <Show when={!props.disabled}>
               <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />
             </Show>
+            <Show when={expandVertex}>
+              <Icon icon="carbon:row-expand"  onClick={() => {
+                record.addNewRowUI({P: {name: "Attr"}} as unknown as Vertex, p.joinVertex, {})
+              }} />
+            </Show>
+
             {p.index + 1}
           </div>
         </td>
         <DisplayProperties />
       </tr>
+        <Show when={expandVertex}>
+          <tr><td class="pl:24" colspan={rowColumnsMetaAttrs.length + 1}>
+            <DynamicComponent
+             component={"Table"}
+             // When we have a Table we pass original Table Meta Vertex
+             meta={graph.vertexes[expandVertex!.P.templateId]}
+             data={p.joinVertex}
+             setValue={record.setValue}
+             disabled={disabled()}
+            />
+          </td></tr>
+        </Show>
+      </>
     );
   };
 
@@ -487,6 +507,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                       return (
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
+                          <Match when={attribute.tab === "expand"}>{}</Match>
                           <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
                             <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr])}</th>
                           </Match>
