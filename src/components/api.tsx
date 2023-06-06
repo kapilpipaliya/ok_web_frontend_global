@@ -1074,6 +1074,153 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               },
             ],
           },
+          {
+            name: "Attr",
+            component: "Table",
+            tab: "expand",
+            props: {
+              // unique: 'Attr',
+              // kanban: true,
+              // collection: "Attr",
+            },
+            attributes: [
+              {
+                name: "name",
+                displayName: "ID",
+                component: "TextBox",
+                props: {},
+              },
+              {
+                name: "Comp",
+                component: "SelectBox",
+                props: {
+                  displayExpr: `P.${IdAttr}`,
+                  collection: "Comp",
+                  // smaller version:
+                  // collection: "Comp",
+                },
+              },
+              {
+                name: "Prop",
+                displayName: "Property",
+                component: "Table",
+                attributes: [
+                  {
+                    name: "key",
+                    component: "SelectBox",
+                    props: {
+                      displayExpr: "P.key",
+                      collection: "-$0->$0Comp->$0Prop",
+                    },
+                  },
+                  {
+                    name: "value",
+                    meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                    component:
+                     "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                  },
+                ],
+              },
+              {
+                name: "Attr",
+                component: "Table",
+                tab: "expand",
+                props: {
+                  // unique: 'Attr',
+                  // kanban: true,
+                  // collection: "Attr",
+                },
+                attributes: [
+                  {
+                    name: "name",
+                    displayName: "ID",
+                    component: "TextBox",
+                    props: {},
+                  },
+                  {
+                    name: "Comp",
+                    component: "SelectBox",
+                    props: {
+                      displayExpr: `P.${IdAttr}`,
+                      collection: "Comp",
+                      // smaller version:
+                      // collection: "Comp",
+                    },
+                  },
+                  {
+                    name: "Prop",
+                    displayName: "Property",
+                    component: "Table",
+                    attributes: [
+                      {
+                        name: "key",
+                        component: "SelectBox",
+                        props: {
+                          displayExpr: "P.key",
+                          collection: "-$0->$0Comp->$0Prop",
+                        },
+                      },
+                      {
+                        name: "value",
+                        meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                        component:
+                         "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                      },
+                    ],
+                  },
+                  {
+                    name: "Attr",
+                    component: "Table",
+                    tab: "expand",
+                    props: {
+                      // unique: 'Attr',
+                      // kanban: true,
+                      // collection: "Attr",
+                    },
+                    attributes: [
+                      {
+                        name: "name",
+                        displayName: "ID",
+                        component: "TextBox",
+                        props: {},
+                      },
+                      {
+                        name: "Comp",
+                        component: "SelectBox",
+                        props: {
+                          displayExpr: `P.${IdAttr}`,
+                          collection: "Comp",
+                          // smaller version:
+                          // collection: "Comp",
+                        },
+                      },
+                      {
+                        name: "Prop",
+                        displayName: "Property",
+                        component: "Table",
+                        attributes: [
+                          {
+                            name: "key",
+                            component: "SelectBox",
+                            props: {
+                              displayExpr: "P.key",
+                              collection: "-$0->$0Comp->$0Prop",
+                            },
+                          },
+                          {
+                            name: "value",
+                            meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                            component:
+                             "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
         ],
       },
       {
