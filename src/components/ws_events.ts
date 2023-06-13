@@ -183,4 +183,7 @@ export const syncEvent = () => {
   });
  };
  Ws.bind(["get", "sync", 0], setGraphData);
+ Ws.bind(["get", "member", 0], d => {
+  setGraph('member', d);
+ });
 };

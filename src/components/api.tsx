@@ -22,7 +22,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Default Component",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Comp",
           skip: true,
         },
@@ -54,7 +54,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "CompCategory",
           parentLabel: "CompCategory",
           inward: true,
@@ -68,7 +68,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Parent Component",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Comp",
           inward: true,
           parentLabel: "Comp",
@@ -81,7 +81,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "DataType",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "DataType",
           inward: true,
           parentLabel: "DataType",
@@ -101,7 +101,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "DataType",
               onchange: '["Comp",null]',
             },
@@ -111,7 +111,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "->$0DataType->$0Comp",
             },
           },
@@ -220,7 +220,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       //   name: "category",
       //   component: "SelectBox",
       //   props: {
-      //     displayExpr: `P.${IdAttr}`,
+      //     
       //     collection: "CollCategory",
       //     parentLabel: "CollCategory",
       //     inward: true,
@@ -231,7 +231,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Dashboard",
           parentLabel: "Dashboard",
           inward: true,
@@ -242,6 +242,29 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       { name: "supportCustomFields", component: "CheckBox" },
       { name: "searchOnly", component: "CheckBox" },
       { name: "supportDeletedRecordSearch", component: "CheckBox" },
+      {
+        name: "pk",
+        displayName: "Primary Key",
+        component: "TagBox",
+        props: {
+          
+          collection: "->$0Attr",
+          // TODO: add validation
+          // If there is not name attribute,
+          // then this field is required.
+        },
+      },
+      {
+        name: "nameKey",
+        component: "TagBox",
+        props: {
+          
+          collection: "->$0Attr",
+          // TODO: add validation
+          // If there is not name attribute,
+          // then this field is required.
+        },
+      },
       {
         name: "Tab",
         component: "Table",
@@ -308,7 +331,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "tab",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "-CollAttr->$0Tab",
               skip: true,
             },
@@ -318,7 +341,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-CollAttr->$0Group",
-              displayExpr: `P.${IdAttr}`,
+              
               skip: true,
             },
           },
@@ -326,7 +349,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "DataType",
               // skip: true,
             },
@@ -335,7 +358,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "Comp",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "->$0DataType->$0Comp",
               // smaller version:
               // collection: "Comp",
@@ -394,7 +417,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "role",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "Role",
                 },
               },
@@ -406,7 +429,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "perm",
                     component: "SelectBox",
                     props: {
-                      displayExpr: `P.${IdAttr}`,
+                      
                       collection: "Perm",
                     },
                   },
@@ -426,7 +449,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "Coll",
             },
           },
@@ -445,7 +468,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "tab",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "-CollChild->$0Tab",
             },
           },
@@ -454,7 +477,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-CollChild->$0Group",
-              displayExpr: `P.${IdAttr}`,
+              
             },
           },
           {
@@ -488,7 +511,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "Coll",
             },
           },
@@ -532,23 +555,17 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "Role",
             },
           },
           {
-            name: "Perm",
-            component: "Table",
-            attributes: [
-              {
-                name: "perm",
-                component: "SelectBox",
-                props: {
-                  displayExpr: `P.${IdAttr}`,
-                  collection: "Perm",
-                },
-              },
-            ],
+            name: "perm",
+            component: "TagBox",
+            props: {
+              
+              collection: "Perm",
+            },
           },
         ],
       },
@@ -566,7 +583,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Dashboard",
           parentLabel: "Dashboard",
           inward: true,
@@ -578,7 +595,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Collection",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Coll",
           inward: true,
           parentLabel: "Coll",
@@ -612,7 +629,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Tab",
-              displayExpr: `P.${IdAttr}`,
+              
               defaultValue: "->$0Attr->$0Tab:P.name",
             },
           },
@@ -621,7 +638,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Group",
-              displayExpr: `P.${IdAttr}`,
+              
               defaultValue: "->$0Attr->$0Group:P.name",
             },
           },
@@ -630,7 +647,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "DataType",
-              displayExpr: `P.${IdAttr}`,
+              
               hidden: true,
               // defaultValue: "->$0Attr->$0DataType:P.name",
               defaultValue: "->$0Attr->$0DataType:P.name",
@@ -641,7 +658,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               // collection: "->$0Attr->$0DataType->$0Comp",
               collection: "->$0Attr->$0DataType->$0Comp",
               defaultValue: "->$0Attr->$0Comp:P.name",
@@ -703,7 +720,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Tab",
-              displayExpr: `P.${IdAttr}`,
+              
               defaultValue: "->$0Coll->$0Tab:P.name",
             },
           },
@@ -712,7 +729,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-$0-Coll$0->$0Group",
-              displayExpr: `P.${IdAttr}`,
+              
               defaultValue: "->$0Coll->$0Group:P.name",
             },
           },
@@ -735,7 +752,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   collection: "DataType",
-                  displayExpr: `P.${IdAttr}`,
+                  
                   hidden: true,
                   defaultValue: "->$0Attr->$0DataType:P.name",
                 },
@@ -745,7 +762,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 displayName: "Component",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "->$0Attr->$0DataType->$0Comp",
                   defaultValue: "->$0Attr->$0Comp:P.name",
                 },
@@ -775,7 +792,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "child",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "Form",
                 },
               },
@@ -809,11 +826,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     name: "User",
     attributes: [
       { name: "name", component: "TextBox" },
+      { name: "email", component: "TextBox" },
+      { name: "pass", component: "TextBox" },
       {
         name: "role",
         component: "TagBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Role",
         },
       },
@@ -898,7 +917,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "email", component: "TextBox" },
       {
-        name: "password",
+        name: "pass",
         component: "TextBox",
         props: { mode: "password" },
       },
@@ -911,7 +930,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "email", component: "TextBox" },
       {
-        name: "password",
+        name: "pass",
         component: "TextBox",
         props: { mode: "password" },
       },
@@ -926,7 +945,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "coll",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
+          
           collection: "Coll",
         },
       },
@@ -934,8 +953,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "data",
         component: "SelectBox",
         props: {
-          displayExpr: `P.${IdAttr}`,
-          collection: "{->$0Coll:P[IdAttr]}",
+          
+          collection: `{->$0Coll:P.${IdAttr}}`,
         },
       },
     ],
@@ -968,17 +987,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 const { record } = options.validator.context || {} as IFormContext;
 
                 const val = options.value;
-                if (Object.keys(AttrsTableData).includes(val)) {
-                  return false;
-                } else {
-                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id);
-                }
+                return !findVertexByLabelAndUniqueIdWithSkip("Page2", "id", val, record.vertex.id);
               },
             },
-            // , {
-            //   type: 'email',
-            //   message: 'Email is invalid',
-            // }
           ],
         },
       },
@@ -1008,7 +1019,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //   name: "parent",
           //   component: "SelectBox",
           //   props: {
-          //     displayExpr: `P.${IdAttr}`,
+          //     
           //     collection: "-$0->$0Attr",
           //     focusRefresh: true
           //   },
@@ -1017,7 +1028,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "Comp",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "Comp",
               // smaller version:
               // collection: "Comp",
@@ -1054,7 +1065,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "role",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "Role",
                 },
               },
@@ -1066,7 +1077,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "perm",
                     component: "SelectBox",
                     props: {
-                      displayExpr: `P.${IdAttr}`,
+                      
                       collection: "Perm",
                     },
                   },
@@ -1094,7 +1105,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "Comp",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "Comp",
                   // smaller version:
                   // collection: "Comp",
@@ -1141,7 +1152,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "Comp",
                     component: "SelectBox",
                     props: {
-                      displayExpr: `P.${IdAttr}`,
+                      
                       collection: "Comp",
                       // smaller version:
                       // collection: "Comp",
@@ -1188,7 +1199,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         name: "Comp",
                         component: "SelectBox",
                         props: {
-                          displayExpr: `P.${IdAttr}`,
+                          
                           collection: "Comp",
                           // smaller version:
                           // collection: "Comp",
@@ -1233,7 +1244,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-              displayExpr: `P.${IdAttr}`,
+              
               collection: "Role",
             },
           },
@@ -1245,9 +1256,370 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "perm",
                 component: "SelectBox",
                 props: {
-                  displayExpr: `P.${IdAttr}`,
+                  
                   collection: "Perm",
                 },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Nav: {
+    title: "Navigation",
+    name: "Nav",
+    attributes: [
+      {
+        name: "title",
+        component: "TextBox",
+        props: {
+          onchange: '{"new": ["name","id"]}',
+        },
+      },
+      {
+        name: "name",
+        component: "TextBox",
+        props: {
+          validationRules: [
+            {
+              type: "required",
+              message: "ID is required",
+            },
+            {
+              type: "custom",
+              ignoreEmptyValue: true,
+              message: "This ID is already taken",
+              validationCallback: (options) => {
+                const { record } = options.validator.context || {} as IFormContext;
+
+                const val = options.value;
+                return !findVertexByLabelAndUniqueIdWithSkip("Navigation", "id", val, record.vertex.id);
+              },
+            },
+          ],
+        },
+      },
+      { name: "description", component: "TextArea" },
+      {
+        name: "Attr",
+        component: "Table",
+        tab: "Attributes",
+        props: {
+          type: "NavAttr"
+        },
+        attributes: [
+          {
+            name: "name",
+            displayName: "ID",
+            component: "TextBox",
+            props: {},
+          },
+          {
+            name: "definition",
+            component: "TextArea",
+          },
+          {
+            name: "expanded",
+            component: "CheckBox",
+          },
+          {
+            name: "func",
+            component: "SelectBox",
+            props: {
+              
+              items: `Table
+Form
+Url`,
+            },
+          },
+          {
+            name: "Coll",
+            component: "SelectBox",
+            props: {
+              
+              collection: "Coll",
+            },
+          },
+          {
+            name: "Form",
+            component: "SelectBox",
+            props: {
+              
+              collection: "Form",
+            },
+          },
+          {
+            name: "url",
+            component: "TextBox",
+          },
+          {
+            name: "Role",
+            component: "Table",
+            tab: "Permission",
+            attributes: [
+              {
+                name: "role",
+                component: "SelectBox",
+                props: {
+                  collection: "Role",
+                },
+              },
+              {
+                name: "Perm",
+                component: "Table",
+                attributes: [
+                  {
+                    name: "perm",
+                    component: "SelectBox",
+                    props: {
+                      collection: "Perm",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            name: "Attr",
+            component: "Table",
+            tab: "expand",
+            props: {
+              type: "NavAttr"
+            },
+            attributes: [
+              {
+                name: "name",
+                displayName: "ID",
+                component: "TextBox",
+                props: {},
+              },
+              {
+                name: "definition",
+                component: "TextArea",
+              },
+              {
+                name: "expanded",
+                component: "CheckBox",
+              },
+              {
+                name: "func",
+                component: "SelectBox",
+                props: {
+                  
+                  items: `Table
+Form
+Url`,
+                },
+              },
+              {
+                name: "Coll",
+                component: "SelectBox",
+                props: {
+                  
+                  collection: "Coll",
+                },
+              },
+              {
+                name: "Form",
+                component: "SelectBox",
+                props: {
+                  
+                  collection: "Form",
+                },
+              },
+              {
+                name: "url",
+                component: "TextBox",
+              },
+              {
+                name: "Role",
+                component: "Table",
+                tab: "Permission",
+                attributes: [
+                  {
+                    name: "role",
+                    component: "SelectBox",
+                    props: {
+                      collection: "Role",
+                    },
+                  },
+                  {
+                    name: "Perm",
+                    component: "Table",
+                    attributes: [
+                      {
+                        name: "perm",
+                        component: "SelectBox",
+                        props: {
+                          collection: "Perm",
+                        },
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                name: "Attr",
+                component: "Table",
+                tab: "expand",
+                props: {
+                  type: "NavAttr"
+                },
+                attributes: [
+                  {
+                    name: "name",
+                    displayName: "ID",
+                    component: "TextBox",
+                    props: {},
+                  },
+                  {
+                    name: "definition",
+                    component: "TextArea",
+                  },
+                  {
+                    name: "expanded",
+                    component: "CheckBox",
+                  },
+                  {
+                    name: "func",
+                    component: "SelectBox",
+                    props: {
+                      
+                      items: `Table
+Form
+Url`,
+                    },
+                  },
+                  {
+                    name: "Coll",
+                    component: "SelectBox",
+                    props: {
+                      
+                      collection: "Coll",
+                    },
+                  },
+                  {
+                    name: "Form",
+                    component: "SelectBox",
+                    props: {
+                      
+                      collection: "Form",
+                    },
+                  },
+                  {
+                    name: "url",
+                    component: "TextBox",
+                  },
+                  {
+                    name: "Role",
+                    component: "Table",
+                    tab: "Permission",
+                    attributes: [
+                      {
+                        name: "role",
+                        component: "SelectBox",
+                        props: {
+                          collection: "Role",
+                        },
+                      },
+                      {
+                        name: "Perm",
+                        component: "Table",
+                        attributes: [
+                          {
+                            name: "perm",
+                            component: "SelectBox",
+                            props: {
+                              collection: "Perm",
+                            },
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                  {
+                    name: "Attr",
+                    component: "Table",
+                    tab: "expand",
+                    props: {
+                      type: "NavAttr"
+                    },
+                    attributes: [
+                      {
+                        name: "name",
+                        displayName: "ID",
+                        component: "TextBox",
+                        props: {},
+                      },
+                      {
+                        name: "definition",
+                        component: "TextArea",
+                      },
+                      {
+                        name: "expanded",
+                        component: "CheckBox",
+                      },
+                      {
+                        name: "func",
+                        component: "SelectBox",
+                        props: {
+                          
+                          items: `Table
+Form
+Url`,
+                        },
+                      },
+                      {
+                        name: "Coll",
+                        component: "SelectBox",
+                        props: {
+                          
+                          collection: "Coll",
+                        },
+                      },
+                      {
+                        name: "Form",
+                        component: "SelectBox",
+                        props: {
+                          
+                          collection: "Form",
+                        },
+                      },
+                      {
+                        name: "url",
+                        component: "TextBox",
+                      },
+                      {
+                        name: "Role",
+                        component: "Table",
+                        tab: "Permission",
+                        attributes: [
+                          {
+                            name: "role",
+                            component: "SelectBox",
+                            props: {
+                              collection: "Role",
+                            },
+                          },
+                          {
+                            name: "Perm",
+                            component: "Table",
+                            attributes: [
+                              {
+                                name: "perm",
+                                component: "SelectBox",
+                                props: {
+                                  collection: "Perm",
+                                },
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
               },
             ],
           },

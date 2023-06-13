@@ -7,7 +7,14 @@ import {
   useContext
 } from "solid-js";
 import { Link, useNavigate } from "@solidjs/router";
-import { graph, Id, IdAttr, Vertex } from "../lib/graph";
+import {
+  graph,
+  Id,
+  IdAttr,
+  resetDatabaseLogin,
+  revertTransaction, setGraph,
+  Vertex
+} from "../lib/graph";
 
 import { DynamicForm, DynamicFormProps } from "./dynamicForm";
 import { AlertMessageContext } from "../appState";
@@ -62,10 +69,23 @@ export const Login = (props: {}) => {
         {
           id: createUniqueId(),
           state: Alert.Error,
-          message: data.error,
+          message: data.description,
         },
       ]);
     } else {
+      revertTransaction(config.record.txnId);
+      // because we are doing sync processing in websocket class,
+      // this will not be a problem
+      resetDatabaseLogin();
+      Ws.trigger([
+        [
+          ["get", "sync", 0],
+          {
+            from: 0,
+            subscriptions: Ws.subscriptions,
+          },
+        ],
+      ])
       navigate("/");
     }
   });
@@ -74,9 +94,8 @@ export const Login = (props: {}) => {
   const config = {} as { record: Record };
   const onLoginClick = () => {
     const email = config.record.vertex.P.email as string;
-    const password = config.record.vertex.P.password as string;
-    Ws.trigger([[event, { body: { email, password } }]]);
-    // revertTransaction(txnId)
+    const pass = config.record.vertex.P.pass as string;
+    Ws.trigger([[event, { body: { email, pass } }]]);
   };
 
   return (
@@ -113,7 +132,19 @@ export const Logout = (props: {}) => {
     if (data.error) {
       setAlert((prev) => [...prev, { id: createUniqueId(), state: Alert.Error, message: data.error }]);
     } else {
-      Ws.isLoggedIn(false);
+      setGraph('member', null);
+      // because we are doing sync processing in websocket class,
+      // this will not be a problem
+      resetDatabaseLogin();
+      Ws.trigger([
+        [
+          ["get", "sync", 0],
+          {
+            from: 0,
+            subscriptions: Ws.subscriptions,
+          },
+        ],
+      ])
       navigate("/");
     }
   });
@@ -131,6 +162,7 @@ export const SignUp = (props: {}) => {
     if (data.error) {
       setAlert((prev) => [...prev, { id: createUniqueId(), state: Alert.Error, message: data.error }]);
     } else {
+      revertTransaction(config.record.txnId)
       navigate("/");
     }
   });
@@ -140,14 +172,12 @@ export const SignUp = (props: {}) => {
   // 2. disable save button when submitting
   // 3. validations
   // 4. clear form on success
-  // 5. make password not visible
 
   const config = {} as { record: Record };
   const onSignupClick = () => {
     const email = config.record.vertex.P.email as string;
-    const password = config.record.vertex.P.password as string;
-    Ws.trigger([[event, { body: { email, password } }]]);
-    // revertTransaction(txnId);
+    const pass = config.record.vertex.P.pass as string;
+    Ws.trigger([[event, { body: { email, pass } }]]);
   };
 
   return (
@@ -190,10 +220,14 @@ export const SimpleImport = (props: {}) => {
               [IdAttr]: "import",
               props: {
                 stringValue: true,
-                displayExpr: "name",
-                valueExpr: "name",
-                collection:
-                  '[{"name": "dataType"},{"name": "component"},{"name": "dataTypeDefault"},{"name": "lookup"},{"name": "attribute"}]',
+                items: `dataType
+component
+dataTypeDefault
+lookup
+attribute
+user
+role
+perm`
               },
             },
           } as unknown as Vertex

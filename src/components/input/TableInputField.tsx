@@ -313,7 +313,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             </Show>
             <Show when={expandVertex}>
               <Icon icon="carbon:row-expand"  onClick={() => {
-                record.addNewRowUI({P: {name: "Attr"}} as unknown as Vertex, p.joinVertex, {})
+                record.addNewRowUI(expandVertex!, p.joinVertex, {})
               }} />
             </Show>
 

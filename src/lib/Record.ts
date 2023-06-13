@@ -80,15 +80,22 @@ export function getCollAttrs(
  const dataType = getChildVertex(["$0DataType"], vertexCollAttr);
  if (dataType.error) {
   if (!formAttrComp) {
-   console.warn("data Type not found", vertexCollAttr.P.name);
-   return { error: true };
+   console.warn("data Type not found for attr", vertexCollAttr.P.name, "taking string dataType");
+   const dataTypeVertex = findVertexByLabelAndUniqueId('DataType', 'name', 'String');
+   if (!dataTypeVertex) {
+    console.warn("String data Type not found");
+    return { error: true };
+   }
+   dataType.vertex = dataTypeVertex;
+   attr.dataType = dataTypeVertex.P[IdAttr];
+  } else {
+   const dataTypeFromComp = getParentVertex(["DataTypeComp"], formAttrComp);
+   if (dataTypeFromComp.error) {
+    console.warn("data Type not found from Component for attr", vertexCollAttr.P.name);
+    return { error: true };
+   }
+   attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
   }
-  const dataTypeFromComp = getParentVertex(["DataTypeComp"], formAttrComp);
-  if (dataTypeFromComp.error) {
-   console.warn("data Type not found from Component");
-   return { error: true };
-  }
-  attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
  } else {
   attr.dataType = dataType.vertex!.P[IdAttr];
  }
@@ -405,6 +412,15 @@ export function addMeta(metaVertex: Vertex, data: Vertex) {
  }
 }
 
+export function getPkForCollection(collVerex: Vertex) {
+ const pks = getChildVertexes(['$0Pk'], [collVerex]).vertexes || [];
+ return pks.map(pk => pk.P.name);
+}
+export function getNameKeyForCollection(collVertex: Vertex) {
+ const pks = getChildVertexes(['$0NameKey'], [collVertex]).vertexes || [];
+ return pks.map(pk => pk.P.name);
+}
+
 export function deleteRow(
  vertex: Vertex,
  isRealTime: boolean,
@@ -445,18 +461,16 @@ export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: Field
   //   continue;
   // }
 
-  const addAttributeResult = newRow(txnId, vertex, "MetaAttr");
-  if (addAttributeResult.error) {
-   alert(addAttributeResult.error);
-  }
-  // todo discard transaction
-
   const attr = klona(attribute);
   if (!attr.tab) attr.tab = "main";
   if (!attr.group) attr.group = "main";
   // if(attribute.component === "Table") attribute.group = attribute.id;
 
-  mergeVertexProperties(txnId, addAttributeResult.vertexId!, attr);
+  const addAttributeResult = newRow(txnId, vertex, "MetaAttr", attr);
+  if (addAttributeResult.error) {
+   alert(addAttributeResult.error);
+  }
+  // todo discard transaction
 
   if (attribute.component === "Table" && attribute.attributes) {
    addMetaVertexes(txnId, graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
@@ -602,6 +616,29 @@ export class Record {
   });
  };
 
+ commitTxn = () => {
+  // TODO: currently we can only run this function once.
+  // we need to set seperate txnId once commited. Fix this.
+  commitTxn(this.txnId, this.ws);
+ };
+
+ submitForm = () => {
+  // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
+  // @ts-ignore
+  const result = validationGroup.validate();
+  if (result.isValid) {
+   // !!!TODO!!! Handle Error Received From server when commit
+   if (!this.isRealTime) {
+    commitTxn(this.txnId, this.ws);
+   }
+  } else {
+   alert("please fix all errors");
+  }
+  return result.isValid;
+ }
+ cancelForm = () => {
+  revertTransaction(this.txnId);
+ }
  setValue = (attribute: Vertex, vertex: Vertex, data: any) => {
   // after commit, we can not use same txnId();
   if (this.isRealTime) {
@@ -617,6 +654,7 @@ export class Record {
   if (this.isRealTime) commitTxn(this.txnId, this.ws);
  };
 
+ // TODO: Is this method valid? does it delete nested Rows set by this form?, check code written in NavDesigner component to clear the form.
  deleteAllRows = (edgeType: string) => {
   const vertexes = getChildVertexes([edgeType], [this.vertex]).vertexes || [];
   for (const row of vertexes) {
@@ -688,7 +726,13 @@ export class Record {
   return addNewRow(this.txnId, meta, parentVertex, properties, this.isRealTime, this.ws);
  };
 
+ getSublistRowsForType = (type: string, vertex: Vertex) => {
+  return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
+   (a, b) => a.P.pos - b.P.pos,
+  );
+ };
  getSublistRows = (meta: Vertex, vertex: Vertex) => {
+  // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
    (a, b) => a.P.pos - b.P.pos,

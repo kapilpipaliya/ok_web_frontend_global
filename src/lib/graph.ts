@@ -43,13 +43,21 @@ let uniqueId = -50000;
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
-export const [graph, setGraph] = createStore({
+export const [graph, setGraph] = createStore<{
+  _isPartialSynced: boolean,
+  vertexes: VertexMap,
+  edges: EdgeMap,
+  vertexLabelIdMap: { [key: string]: Id[] },
+initialSynced: boolean,
+ lastSyncedTime: 0,
+ member?: { [key: string]: any } | null}>({
   _isPartialSynced: false,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },
   initialSynced: false, // TODO: Display initialSynced status to the UI
   lastSyncedTime: 0,
+  member: {}
 });
 export type Revert = { revert: () => any };
 export type InsertFn = {
@@ -187,6 +195,18 @@ export function resetDatabase() {
     }),
   );
 }
+export function resetDatabaseLogin() {
+  setGraph(
+    reconcile({
+      _isPartialSynced: false,
+      vertexes: {} as { [key: string]: Vertex },
+      edges: {} as { [key: string]: Edge },
+      vertexLabelIdMap: {} as { [key: string]: Id[] },
+      initialSynced: false,
+      lastSyncedTime: 0,
+    }),
+  );
+}
 
 export function isValidId(startVertexId: Id) {
   return G.isNumber(startVertexId);
@@ -231,3 +251,4 @@ export function restoreFromJson(json: { [key: string]: any }) {
   resetDatabase();
   setGraph(json);
 }
+
