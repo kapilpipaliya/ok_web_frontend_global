@@ -9,6 +9,7 @@ import {
 } from "./graph";
 import {
  addNewVertex,
+ findOrCreateNewVertex,
  findVertexByLabelAndUniqueId,
  mergeVertexProperties,
  newVertex
@@ -142,22 +143,51 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
    }
    break;
   }
+  case "user": {
+   record.replaceFieldValues({
+    label: "User",
+    lookup: "",
+    lookupChild: "",
+    lookupId: IdAttr,
+    dry
+   });
+   const rows = [
+    {
+     column: "role",
+     collLabel: "Role",
+     collId: IdAttr,
+    },
+   ];
+   for (const row of rows) {
+    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+   }
+   break;
+  }
+  case "role": {
+   record.replaceFieldValues({
+    label: "Role",
+    lookup: "",
+    lookupChild: "",
+    lookupId: IdAttr,
+    dry
+   });
+   break;
+  }
+  case "perm": {
+   record.replaceFieldValues({
+    label: "Perm",
+    lookup: "",
+    lookupChild: "",
+    lookupId: IdAttr,
+    dry
+   });
+   break;
+  }
   default: {
   }
  }
 };
 const isEmpty = (object: { [key: string]: any }) => !Object.values(object).some((x) => x !== null && x !== "");
-
-function findOrCreateNewVertex(txnId: number, label: string, lookupId: string, lookUpUniqueValue: string) {
- let existingVertex = findVertexByLabelAndUniqueId(label, lookupId, lookUpUniqueValue);
-
- if (!existingVertex) {
-  const vertexId = getNewGraphId();
-  addNewVertex(txnId, newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }));
-  existingVertex = graph.vertexes[vertexId];
- }
- return existingVertex;
-}
 
 const resoDataTypeToComponents = (type: string, row: { [key: string]: any }) => {
  switch (type) {
@@ -317,12 +347,13 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
    // insert current row and all lookup as children or parent
    let rowVertexId = getNewGraphId();
    if (mainVertex) {
-    const type = getToEdge({ P: { [IdAttr]: labelName } } as Vertex, mainVertex);
+    const type = getToEdge({ P: { [IdAttr]: labelName } } as any, mainVertex);
     const newRow1 = newRow(txnId, mainVertex, type);
     rowVertexId = newRow1.vertexId!;
     mergeVertexProperties(txnId, rowVertexId, rowObj);
    } else {
     // when importing component it has self join, so it's inserting duplicate rows
+    // TODO: allow customizing primary key for the collection when doing import instead of rowObj[IdAttr]
     const existingVertex = findVertexByLabelAndUniqueId(labelName, IdAttr, rowObj[IdAttr]);
     if (existingVertex) {
      rowVertexId = existingVertex.id;

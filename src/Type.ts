@@ -1,8 +1,8 @@
 export enum Alert {
-  Error = "Negative",
+  Error = "danger",
   Warning = "Warning",
-  Success = "Positive",
-  Information = "Information",
+  Success = "success",
+  Information = "primary",
 }
 
 export interface AlertMessage {

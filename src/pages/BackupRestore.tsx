@@ -27,16 +27,32 @@ import { CardTitle } from "../components/uikit_components/Card/CardTitle";
 import { CardBody } from "../components/uikit_components/Card/CardBody";
 import {
   addNewVertex,
+  deleteVertex,
+  findOrCreateNewVertex,
+  findVertexByLabelAndPks,
   findVertexByLabelAndUniqueId,
   newVertex,
   replaceVertexProperties
 } from "../lib/Vertex";
-import { setSelectionValue } from "../components/input/SelectInputField";
+import {
+  isSimpleCollection,
+  setSelectionValue
+} from "../components/input/SelectInputField";
 import { WsContext } from "../components/ws_events_dispatcher";
-import { getParentVertex } from "../lib/Traverse";
-import { getFormMetaData, getId, newRow, Record } from "../lib/Record";
+import { getParentVertex, getToEdge } from "../lib/Traverse";
+import {
+  getFormMetaData,
+  getId,
+  getPkForCollection,
+  newRow,
+  Record
+} from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 import { Field, NsMetaJson, Type } from "../NSMetaData";
+import { parse } from "yaml";
+import { G } from "@mobily/ts-belt";
+import { deleteEdge } from "../lib/Edge";
+import { AttrsTableData } from "../components/api";
 
 function fileDownloader(opt: {
   data: string | ArrayBuffer | ArrayBufferView | Blob;
@@ -285,7 +301,7 @@ export const BackupRestore = () => {
   const importAllCSV = () => {
     const form = getFormMetaData('Import');
     if(form.error) return form.error;
-    const record = new Record({ form: form.form!, ws: Ws });
+    const record = new Record({ ws: Ws });
     const createResult = record.create(form.form![IdAttr]);
     record.createMeta(form.form!);
     if (createResult.error) return createResult.error;
@@ -400,8 +416,120 @@ LocalDateTime\tDateBox`,
     });
     onDataDirectoryImportClick(record, Ws);
 
+    updateImportRecord('user', record, false);
+    record.mergeFieldValues({
+      csv: `name\temail\tpass\trole
+Test1\ttest1@test.com\ttest1\tAdmin
+Test2\ttest2@test.com\ttest2\tUser`,
+    });
+    onDataDirectoryImportClick(record, Ws);
+
+    updateImportRecord('role', record, false);
+    record.mergeFieldValues({
+      csv: `name
+Admin
+User`,
+    });
+    onDataDirectoryImportClick(record, Ws);
+
+    updateImportRecord('perm', record, false);
+    record.mergeFieldValues({
+      csv: `name
+insert
+edit
+view
+delete`,
+    });
+    onDataDirectoryImportClick(record, Ws);
 
   };
+  const importMainNavigation = () => {
+    const record = new Record({ws: Ws});
+    record.create("Nav", {});
+    record.createMeta(AttrsTableData["Nav"])
+    importNavigation(`L: Nav
+P:
+  title: Main
+  name: main
+OUT:
+  NavAttr:
+    - L: NavAttr
+      P:
+        name: Home
+        url: /admin/
+    - L: NavAttr
+      P:
+        name: Base
+        expanded: true
+      OUT:
+        NavAttr:
+          - L: NavAttr
+            P:
+              name: DataTypes
+              url: /admin/DataType
+          - L: NavAttr
+            P:
+              name: Components Category
+              url: /admin/CompCategory
+          - L: NavAttr
+            P:
+              name: Components
+              url: /admin/Comp
+          - L: NavAttr
+            P:
+              name: Collection Category
+              url: /admin/CollCategory
+          - L: NavAttr
+            P:
+              name: Collections
+              url: /admin/Coll
+          - L: NavAttr
+            P:
+              name: Forms
+              url: /admin/Form
+          - L: NavAttr
+            P:
+              name: Page2
+              url: /admin/Page2/new
+    - L: NavAttr
+      P:
+        name: Auth
+        expanded: true
+      OUT:
+        NavAttr:
+          - L: NavAttr
+            P:
+              name: Users
+              url: /admin/User
+          - L: NavAttr
+            P:
+              name: Roles
+              url: /admin/Role
+          - L: NavAttr
+            P:
+              name: Permissions
+              url: /admin/Perm
+    - L: NavAttr
+      P:
+        name: Dashboard
+        url: /admin/Dashboard
+    - L: NavAttr
+      P:
+        name: Grids
+        url: /admin/grids
+    - L: NavAttr
+      P:
+        name: Import
+        url: /admin/SimpleImport
+    - L: NavAttr
+      P:
+        name: Backup & Restore
+        url: /admin/backup_restore
+`, record);
+    record.commitTxn();
+    alert("Imported Navigation")
+  }
+
   const importNSData = () => {
     const file = importNSDataInputRef!.files![0];
 
@@ -796,14 +924,7 @@ LocalDateTime\tDateBox`,
     }
   };
   // Hack to remount the component
-  const [load, setLoad] = createSignal(false);
-  createEffect(() => {
-    if (graph.vertexes && graph.edges) {
-      setLoad(false);
-      setTimeout(() => setLoad(true), 0);
-      console.log("reloading");
-    }
-  });
+
   const C = (props: { title: string; subtitle: string; children: JSX.Element }) => {
     return (
       <Card>
@@ -853,19 +974,21 @@ LocalDateTime\tDateBox`,
               </div>
             </CardBody>
           </C>
-          <C title={"Graph Functions"} subtitle={"Simple Import"}>
+          <C title={"Links"} subtitle={"Simple Import"}>
             <CardBody class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
-                <Link href="/SimpleImport">Simple Import</Link>
+                <Link class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</Link>
+                <Link class="b:2|solid|blue-40" href="/Graph">Go to Graph</Link>
+                <Link class="b:2|solid|blue-40" href="/Nav">Configure Navigation</Link>
               </div>
             </CardBody>
           </C>
-          <C title={"Graph Functions"} subtitle={"Simple Import"}>
+          <C title={"Dev Component Properties"} subtitle={"Import all DevExpress Components properties"}>
             <CardBody class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <input ref={componentPropsInputRef!} type="file" accept="json" style="display: hidden"></input>
                 <button type="button" onClick={importComponentProps}>
-                  <span>Restore From JSON</span>
+                  <span>Import DevExpress.json</span>
                 </button>
               </div>
             </CardBody>
@@ -885,10 +1008,13 @@ LocalDateTime\tDateBox`,
                 <button type="button" onClick={importAllCSV}>
                   <span>Import all csv</span>
                 </button>
+                <button type="button" onClick={importMainNavigation}>
+                  <span>Import Main Navigation</span>
+                </button>
               </div>
             </CardBody>
           </C>
-          <C title={"Graph Functions"} subtitle={"Import Netsuite Data"}>
+          <C title={"Import NS Data"} subtitle={"Import Netsuite Data"}>
             <CardBody class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <input ref={importNSDataInputRef!} type="file" accept="json"
@@ -903,19 +1029,179 @@ LocalDateTime\tDateBox`,
 
       </div>
 
-      <Show when={load()}>
-        <GraphView
-          edges={Object.entries(graph.edges)
-            .filter(([_, edge]) => edge.T !== "MetaAttr")
-            .map(([key, value]) => ({ ...value }))}
-          nodes={Object.entries(graph.vertexes)
-            .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")
-            .map(([key, value]) => ({
-              ...value,
-              label: value.L[0],
-            }))}
-        />
-      </Show>
+
     </>
   );
 };
+
+export const GraphViewPage = () => {
+  const [load, setLoad] = createSignal(false);
+  createEffect(() => {
+    if (graph.vertexes && graph.edges) {
+      setLoad(false);
+      setTimeout(() => setLoad(true), 0);
+      console.log("reloading");
+    }
+  });
+  return <Show when={load()}>
+    <GraphView
+     edges={Object.entries(graph.edges)
+      .filter(([_, edge]) => edge.T !== "MetaAttr")
+      .map(([key, value]) => ({ ...value, type: value.T, start: value.S, end: value.E }))}
+     nodes={Object.entries(graph.vertexes)
+      .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")
+      .map(([key, value]) => ({
+        ...value,
+        label: value.L[0],
+      }))}
+    />
+  </Show>
+}
+
+export function importNavigation(yamlInput: any, record: Record) {
+  const input = parse(yamlInput);
+  console.log(input);
+  if (!G.isObject(input)) {
+    return;
+  }
+
+  record.replaceFieldValues({});
+
+  const clearChildren = (meta: Vertex, vertex: Vertex) => {
+    // 2. loop through meta and set all the data.
+    const metaVertexes = record.getSublistRowsForType("MetaAttr", record.metaVertex);
+
+    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
+    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
+
+    for (const metaVertex of selectMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // Todo
+      } else {
+        setSelectionValue(record.txnId, vertex, metaVertex, undefined);
+      }
+    }
+
+    for (const metaVertex of tableMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // not possible now
+      } else {
+        const childVertexes = record.getSublistRows(metaVertex, vertex);
+        const edge = getToEdge(metaVertex, vertex);
+        const outEdges = vertex.OUT[edge] || [];
+
+        for (const v of childVertexes) {
+          clearChildren(metaVertex, v);
+          // this deletes all vertexes in edges,
+          // out edges and the vertex itself.
+          // without confirmation, this is not good.
+          // some form may depend on it.
+          // unsafely delete:
+          // deleteRow(v, record.isRealTime, record.txnId, record.ws);
+
+          // safe delete:
+          const edgeToDelete = outEdges.find(edgeId => graph.edges[edgeId].E === v.id);
+          if (edgeToDelete) {
+            deleteEdge(record.txnId, edgeToDelete);
+          }
+
+          deleteVertex(record.txnId, v.id);
+        }
+      }
+    }
+  };
+
+  // after finalizing move this code to record.
+  clearChildren(record.metaVertex, record.vertex);
+
+  const insertChildren = (meta: Vertex, vertex: Vertex, input: {
+    [key: string]: any
+  }) => {
+    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+    // const props = meta.P.props || {};
+
+    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
+    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
+
+
+    for (const metaVertex of selectMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // input['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
+
+      } else {
+        const type = getToEdge(metaVertex, vertex);
+        const childVertexes = input?.["OUT"]?.[type] || [];
+        if (metaVertex.P.props?.items) {
+          continue;
+        }
+        if (!metaVertex.P.props?.collection) {
+          alert("collection is not defined in the meta");
+          continue;
+        }
+
+        // when a collection is not simple, label is required to import data
+        const label = isSimpleCollection(metaVertex.P.props.collection) ? metaVertex.P.props.collection : metaVertex.P.props.label;
+        if (!metaVertex.P.props?.collection) {
+          alert("collection label is not defined in the meta");
+          continue;
+        }
+
+        for (const v of childVertexes) {
+          if (AttrsTableData[label]) {
+            if (v["name"]) {
+              const selectedVertex = findOrCreateNewVertex(record.txnId, label, "name", v["name"]);
+              setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
+            }
+          } else {
+            const collVertex = findVertexByLabelAndUniqueId("Coll", "name", vertex.L[0]);
+            if (!collVertex) {
+              alert(`Collection not defined: ${label[0]}`);
+              continue;
+            }
+            const pks = getPkForCollection(collVertex);
+
+            const pksResult = {} as { [primaryKey: string]: any };
+            for (const pk of pks) {
+              pksResult[pk] = v[pk];
+            }
+            if (pks.length === 0) {
+              pksResult["name"] = v["name"];
+            }
+            const selectedVertex = findVertexByLabelAndPks(label, pksResult);
+            setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
+
+          }
+
+        }
+      }
+    }
+    for (const metaVertex of tableMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // not possible now
+      } else {
+        const type = getToEdge(metaVertex, vertex);
+        const childVertexes = input?.["OUT"]?.[type] || [];
+
+        for (const v of childVertexes) {
+          const newRowResult = record.addNewRowUI(metaVertex, vertex, v.P || {});
+          if (!newRowResult.error) {
+            insertChildren(metaVertex, graph.vertexes[newRowResult.vertexId!], v);
+          }
+        }
+      }
+    }
+
+    return input;
+  };
+
+  record.replaceFieldValues(input.P || {});
+  insertChildren(record.metaVertex, record.vertex, input);
+}

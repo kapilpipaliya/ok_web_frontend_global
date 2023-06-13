@@ -1,5 +1,5 @@
 import { setClassNames } from "../set-class-names";
-import { createEffect, createSignal, splitProps } from "solid-js";
+import { createEffect, createSignal, Show, splitProps } from "solid-js";
 import { AlertProps } from "../globals";
 
 export function Alert(props: AlertProps) {
@@ -40,15 +40,14 @@ export function Alert(props: AlertProps) {
     };
   });
 
-  if (state().isClosed) return null;
-
   // @ts-ignore
   return (
     // <div class="uk-alert-primary" uk-alert>
     //   <a class="uk-alert-close" uk-close></a>
     //   <p>{props.data.P[props.meta.P[IdAttr]]}</p>
     // </div>
-    <div
+   <Show when={state().isOpen}>
+     <div
       classList={{
         "uk-alert": true,
         [`uk-alert-${selectedProps.color}`]: !!selectedProps.color,
@@ -62,9 +61,10 @@ export function Alert(props: AlertProps) {
         // @ts-ignore
         ...props.style,
       }}
-    >
-      {selectedProps.isClosable && <a class="uk-alert-close" uk-close onclick={handleClose}></a>}
-      <span>{props.content}</span>
-    </div>
+     >
+       {selectedProps.isClosable && <a class="uk-alert-close" uk-close onclick={handleClose}></a>}
+       <span>{props.content}</span>
+     </div>
+   </Show>
   );
 }

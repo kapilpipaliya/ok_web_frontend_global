@@ -7,7 +7,6 @@ Simplified WebSocket events dispatcher
 
 import { WSBase } from "./ws_reconnect";
 import { createContext } from "solid-js";
-import atom from "../utils/dom_utils";
 import { commitTransaction, graph } from "../lib/graph";
 
 // automatically set NODE_ENV == 'production' when we build the project.
@@ -78,7 +77,6 @@ export class ServerEventsDispatcher extends WSBase {
   firstCancelTimeout: number;
   // TODO: implement this:
   subscriptions: string[] = [];
-  isLoggedIn = atom<boolean>(false);
 
   constructor(path: string) {
     super(path);
@@ -100,10 +98,6 @@ export class ServerEventsDispatcher extends WSBase {
     this.heartbeat = this.heartbeat.bind(this);
     this.subscribe = this.subscribe.bind(this);
     this.bind(["get", "cookie_event", 0], saveCookies);
-    this.bind(["get", "is_logged_in", 0], (data: any) => {
-      if (data.error) this.isLoggedIn(false);
-      else this.isLoggedIn(true);
-    });
     this.start();
   }
 

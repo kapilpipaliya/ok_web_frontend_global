@@ -1,15 +1,16 @@
 import {
-  JSX,
-  on,
   createEffect,
   createResource,
+  For,
+  on,
+  onCleanup,
   Show,
   untrack,
-  useContext, onCleanup, For
+  useContext
 } from "solid-js";
 
 import SelectBox, { Properties } from "devextreme/ui/select_box";
-import TagBox, { Properties as TagBoxProperties} from "devextreme/ui/tag_box";
+import TagBox, { Properties as TagBoxProperties } from "devextreme/ui/tag_box";
 import {
   commitTxn,
   getNewGraphId,
@@ -26,10 +27,16 @@ import {
   getParentVertexValue,
   getSelectedVertexValue,
   getSelectionOptions,
-  getToEdge,
+  getToEdge
 } from "../../lib/Traverse";
 import { ComponentProps } from "../core/Form";
-import { FormContext, onChangeHandler, Record } from "../../lib/Record";
+import {
+  FormContext,
+  getNameKeyForCollection,
+  onChangeHandler,
+  Record
+} from "../../lib/Record";
+import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
 
 function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: number) {
   const outEdges = vertex.OUT[type] || [];
@@ -127,27 +134,55 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
   }
 }
 
+export const ensureArray = (value: any) => {
+  if (Array.isArray(value)) {
+    return value;
+  } else {
+    return value ? [value] : [];
+  }
+}
 export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
-  if (meta.P.props?.stringValue) {
+  if (meta.P.props?.stringValue || meta.P.props?.items) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
-      const value = data.P[meta.P[IdAttr]];
-      if (Array.isArray(value)) {
-        return value;
-      } else {
-        return value ? [value] : [];
-      }
+      return(ensureArray(data.P[meta.P[IdAttr]]));
     });
-  } else if (meta.P.props.items) {
-    return data.P[meta.P[IdAttr]];
   }
   return meta.P.props?.inward ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
 };
 
+// if props.meta.P.props?.collection is simple string
+// no need to pass displayExpr,
+// it will be calculated automatically
+// * - { } $ [ | is special characters,
+// but checked more
+export function isSimpleCollection(collection: string) {
+  return !/[`!@$%^&*()+=\[\]{};':"\\|,.<>?~]/.test(collection);
+}
+
+// so in future can use more operators.
+export function collectionNameDisplayExpr(collection?: string) {
+  if (!collection) {
+    return;
+  }
+    const collectionVertex = findVertexByLabelAndUniqueId("Coll", "name", collection);
+    if (collectionVertex) {
+      const nameKeys = getNameKeyForCollection(collectionVertex);
+      if (nameKeys.length === 1) {
+        return `P.${nameKeys[0]}`;
+      } else {
+        return nameKeys.map(name => `$P.${name}`).join(" ");
+      }
+    }
+    return;
+}
+
+// displayExpr is required when props.meta.P.props.collection is complex
 export function SelectInputField(props: ComponentProps & {component: string}) {
   const { Ws } = useContext(WsContext);
   let { record } = useContext(FormContext);
   if (!record) record = {} as Record;
+
 
   // @ts-ignore
   const [selectOptions, { refetch }] = createResource(() => {
@@ -188,7 +223,8 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
             let selectOp = {
               searchEnabled: true,
               disabled: props.disabled!,
-
+              showSelectionControls: true,
+              showClearButton: true,
 
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
               value: props.component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
@@ -197,7 +233,12 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                 // note: valueChanged is fired even when the value is changed programmatically,
                 // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
                 // used e.event check to prevent this.
-                if (!e.event) {
+                // on simple import screen when value is selected first time event is not there
+                if (e.previousValue && !e.event) {
+                  // TODO: TO Prevent Onchange event firing on select set a flag
+                  // when it should not fire the event In the form
+                  // and remove it
+                  // when calculations are done.
                   return;
                 }
                 if (!props.data) {
@@ -234,10 +275,26 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
               } as Properties)
             }
             if (!props.meta.P.props.items) {
+              let displayExpr: undefined | string;
+              // Bug: When In a Coll, In Attr Row,
+              // If DataType Selected, Submit
+              // Open Coll again, Change DataType,
+              // Component is not updated the First time.
+              // To Simplify development, Temporary enables refresh on click
+              if (!isSimpleCollection(props.meta.P.props?.collection)) {
+                Object.assign(selectOp, {
+                  onFocusIn: function (e) {
+                    refetch();
+                  },
+                } as Properties)
+              } else {
+                displayExpr = collectionNameDisplayExpr(props.meta.P.props?.collection);
+              }
+
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, props.meta.P.props.displayExpr || `P.${IdAttr}`),
+                displayExpr: (item) => getOptionLabel(item, props.meta.P.props.displayExpr || displayExpr || `P.${IdAttr}`),
 
               } as Properties)
             }

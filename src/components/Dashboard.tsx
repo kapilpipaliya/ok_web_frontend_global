@@ -4,14 +4,13 @@ import {
   createEffect,
   createSignal,
   on,
-  onCleanup,
   onMount,
   Show,
-  useContext
+  useContext, For
 } from "solid-js";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
-import { BackupRestore } from "../pages/BackupRestore";
+import { BackupRestore, GraphViewPage } from "../pages/BackupRestore";
 import { graph, Vertex } from "../lib/graph";
 import {
   AbstractSingleForm,
@@ -23,51 +22,24 @@ import {
 } from "./Form";
 import { WsContext } from "./ws_events_dispatcher";
 // import { AlertMessageContext } from "../appState";
-import TreeView, {
-  Properties as TreeViewProperties
-} from "devextreme/ui/tree_view";
+
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import { Page } from "./DynamicPage";
-import { FormDesigner, PageDesigner } from "./FormDesigner";
+import {
+  FormDesigner,
+  NavDesigner,
+  PageDesigner,
+  renderTreeFromGraph
+} from "./FormDesigner";
 import { syncEvent } from "./ws_events";
 import { GenericField } from "./input/GenaricField";
+import { AlertMessageContext } from "../appState";
+import { Alert } from "./uikit_components/Alert/Alert";
+import { Record } from "../lib/Record";
+import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
+import { AttrsTableData } from "./api";
 
-// TODO: Make a Menu Collection and save it in database.
-const navigation = [
-  { name: "Home", href: "/" },
-  {
-    name: "Base",
-    type: "group",
-    expanded: true,
-    children: [
-      { name: "DataTypes", href: "/DataType" },
-      { name: "Components Category", href: "/CompCategory" },
-      { name: "Components", href: "/Comp" },
-      // { name: "Attribute Types", href: "/AttrType" },
-      // { name: "Collection Category", href: "/CollCategory" },
-      // { name: "Form", href: "/Coll" },
-      { name: "Collections", href: "/Coll" },
-      { name: "Forms", href: "/Form" },
-      // { name: "Page", href: "/Page" },
-      { name: "Page2", href: "/Page2/new" },
-    ],
-  },
-  {
-    name: "Auth",
-    type: "group",
-    children: [
-      { name: "Users", href: "/User" },
-      { name: "Roles", href: "/Role" },
-      { name: "Permissions", href: "/Perm" },
-    ],
-  },
-  { name: "Dashboard", href: "/Dashboard" },
-  { name: "Grids", href: "/grids" },
-  { name: "Import", href: "/SimpleImport" },
-  // { name: "Forms", href: "/forms" },
-  { name: "Backup & Restore", href: "/backup_restore" },
-] as TreeViewProperties["dataSource"];
 // window.n = navigation
 const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 
@@ -75,25 +47,25 @@ const [isSideBarOpen, setSidebarOpen] = createSignal(true);
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
   const navigate = useNavigate();
+
+  const { Ws } = useContext(WsContext);
+
+  // parent div is required else component is not rendered.
   return (
-    <>
-      <div
-        ref={(el) => {
-          const instance = new TreeView(el, {
-            dataSource: navigation,
-            dataStructure: "tree",
-            keyExpr: "href",
-            displayExpr: "name",
-            itemsExpr: "children",
-            width: 200,
-            onItemClick(e) {
-              if (e.itemData?.href) navigate(e.itemData.href);
-            },
-          });
-          onCleanup(() => instance.dispose());
-        }}
+   <div><Show when={graph.initialSynced}><div
+       ref={el => {
+         const nav = findVertexByLabelAndUniqueId('Nav', 'name', "main");
+         if (!nav) {
+           console.log('no Nav Found')
+           return;
+         }
+         const record = new Record({ws: Ws});
+         record.load(nav.id);
+         record.createMeta(AttrsTableData["Nav"])
+         renderTreeFromGraph(el, record, navigate);
+       }}
       ></div>
-    </>
+   </Show></div>
   );
 };
 
@@ -108,15 +80,19 @@ export const MenuButtonToggle = () => {
   );
 };
 
+const AlertDisplay = () => {
+  const { alerts, setAlert } = useContext(AlertMessageContext);
+  return   <For each={alerts}>
+    {(alert, index) => <Alert color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={()=>setAlert(prev=> prev.filter((_, i) => i !== index()))}/>}
+  </For>
+}
 export const DashboardView = () => {
-  const { Ws } = useContext(WsContext);
-  // const { alerts } = useContext(AlertMessageContext);
   return (
     <div class="flex flex:col flex:1">
-      {/*<For each={alerts}>{alert => <ui5-message-strip design={alert.state} hideIcon={alert.hideIcon} hideCloseButton={alert.hideCloseButton} >{alert.message}</ui5-message-strip>}</For>*/}
+      <AlertDisplay/>
       <MenuButtonToggle />
       <Show
-        when={Ws.isLoggedIn()}
+        when={graph.member?.id}
         fallback={
           <>
             <Link href={`/signup`}>Signup</Link>
@@ -159,6 +135,8 @@ export const DashboardView = () => {
             <Route path="/Page2/:id" component={PageDesigner as Component} />
             <Route path="/Page/:id" component={Page as Component} />
             <Route path="/public/avfmobile" component={Home as Component} />
+            <Route path="/Graph" component={GraphViewPage as Component} />
+            <Route path="/Nav/new" component={NavDesigner as Component} />
             <Route path="/**" component={Page404 as Component} />
           </Routes>
         </Show>

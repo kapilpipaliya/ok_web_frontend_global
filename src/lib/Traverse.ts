@@ -4,8 +4,10 @@ import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 
 export function getToEdge(meta: Vertex, vertex: Vertex) {
+  if (meta.P.props?.type) return meta.P.props.type;
+
   const attributeId = meta.P[IdAttr];
-  return vertex.L[0] + capitalizeFirstLetter(attributeId);
+  return capitalizeFirstLetter(vertex.L[0]) + capitalizeFirstLetter(attributeId);
 }
 
 export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
@@ -17,7 +19,7 @@ export function getInEdge(meta: Vertex, vertex) {
   const parentLabel = meta.P.props?.parentLabel;
   const childLabel = meta.P.props?.childLabel;
   if (!parentLabel) return "";
-  return parentLabel + (childLabel || vertex.L[0]);
+  return capitalizeFirstLetter(parentLabel) + capitalizeFirstLetter((childLabel || vertex.L[0]));
 }
 
 export function getParentVertexValue(vertex: Vertex, meta: Vertex): number[] {
@@ -346,6 +348,7 @@ export function getSelectionOptions(
     }
     return { error: true };
   }
+  // example: `{->$0Coll:P.${IdAttr}}` will get a collection from expression
   if (collection.includes("{{") && collection.includes("}}")) {
     collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || ""));
   }
@@ -361,38 +364,24 @@ const getTextValue = (value: any) => {
   return value;
 };
 
+// TODO:
+//  if possible use Name Keys, if not found use "name"
+//  key else Primary Keys will be used.
 export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
   if (!vertex) return "";
-  if (displayExpr.match(/\$([A-Za-z]\w+[:\w.]*)/g)) {
-    return displayExpr.replace(/\$([A-Za-z]\w+[:\w.]*)/g, function(match, p1, offset, string) {
+
+  if (displayExpr.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
+    return displayExpr.replace(/\$([A-Za-z][\w+]?[:\w.]*)/g, function(match, p1, offset, string) {
       return getOptionLabel(vertex, p1);
     });
-
   }
-  if (displayExpr.includes("||")) {
-    for (const displayExprElement of displayExpr.split("||")) {
+  const displayExpressions = displayExpr.split("||");
+  if (displayExpressions.length > 1) {
+    for (const displayExprElement of displayExpressions) {
       // get a function and input:
       const a = displayExprElement.split("|");
       if (a.length > 1) {
         return '';
-        // if (a[0] === 'defaultComp') {
-        //  const value = getOptionLabel(vertex, a[1]);
-        //  if (value !== undefined && value !== null && value !== "") {
-        //   switch (value) {
-        //    case "Null": return;
-        //    case "String": return "TextBox";
-        //    case "Boolean": return "CheckBox";
-        //    case "Integer": return "Int";
-        //    case "Float": return "Float";
-        //    case "List": return "TextArea";
-        //    case "Map": return "TextArea";
-        //    case "Duration": return "DateBox";
-        //    case "Date": return "DateBox";
-        //    case "LocalTime": return "DateTimeBox";
-        //    case "LocalDateTime": return "DateBox";
-        //   }
-        //  }
-        // }
       } else {
         const value = getOptionLabel(vertex, displayExprElement);
         if (value !== undefined && value !== null && value !== "") {

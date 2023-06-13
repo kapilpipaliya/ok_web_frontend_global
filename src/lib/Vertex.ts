@@ -1,11 +1,20 @@
 import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile } from "solid-js/store";
-import { graph, Id, setGraph, transactionDetailAdd, transactions, Vertex } from "./graph";
+import {
+  getNewGraphId,
+  graph,
+  Id,
+  setGraph,
+  transactionDetailAdd,
+  transactions,
+  Vertex
+} from "./graph";
 import { G, pipe } from "@mobily/ts-belt";
+import { deleteEdge } from "./Edge";
 
 // return a new Vertex
-export function newVertex(id: Id, labels: string[], properties: {[key: string]: any} ): Vertex {
+export function newVertex(id: Id, labels: string[], properties?: {[key: string]: any} ): Vertex {
   return { id, L: labels, P: properties || {}, IN: {}, OUT: {} };
 }
 
@@ -95,7 +104,43 @@ export function deleteVertex(txnId: number, vertexId: Id): { error: string | boo
   if (!graph.vertexes[vertexId]) {
     return { error: "Vertex ID is not valid" };
   }
+  // TODO:
+  //  this must check
+  //  if the in and out edges are empty else not allow to delete.
+
   const vertex = klona(graph.vertexes[vertexId]);
+
+  if (Object.keys(vertex.OUT).filter(label => label !== "AttrInst").length > 0) {
+    alert(`there are multiple children exist when deleting ${vertex.L[0]} (${vertex.id})`);
+    return { error: "Vertex Children Exist When deleting vertex" };
+  }
+  for (const attrInstEdgeId of vertex.OUT["AttrInst"] || []) {
+    const attrInstEdge = graph.edges[attrInstEdgeId];
+    if (attrInstEdge) {
+      const endVertex = graph.vertexes[attrInstEdge.E];
+      deleteEdge(txnId, attrInstEdgeId);
+      if (endVertex) {
+        for (const metaAttrEdgeId of endVertex.OUT["MetaAttr"] || []) {
+          const metaAttrEdge = graph.edges[metaAttrEdgeId];
+          if (metaAttrEdge) {
+            const endVertex = graph.vertexes[metaAttrEdge.E];
+            deleteEdge(txnId, metaAttrEdgeId);
+            if (endVertex) {
+              deleteVertex(txnId, metaAttrEdge.E);
+            }
+          }
+        }
+
+        deleteVertex(txnId, attrInstEdge.E);
+      }
+    }
+  }
+
+  if (Object.keys(vertex.IN).length > 0) {
+    alert(`there are multiple Parent exist when deleting ${vertex.L[0]} (${vertex.id})`);
+    return { error: "Vertex Children Exist When deleting vertex" };
+  }
+
   batch(() => {
     // @ts-ignore
     graph.vertexes[vertexId].L.forEach((label) =>
@@ -154,9 +199,24 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
 export function findVertexIdsByLabel(label: string): Id[] {
   return graph.vertexLabelIdMap[label] || [];
 }
-export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: any) {
+export function findVertexByLabelAndUniqueId(label: string, attribute: string, value: number | string) {
+  if (!value) return undefined;
   const vertexId = (graph.vertexLabelIdMap[label] || []).find(
     (vertexId) => value === graph.vertexes[vertexId].P[attribute],
+  );
+  return vertexId ? graph.vertexes[vertexId] : undefined;
+}
+export function findVertexByLabelAndPks(label: string, value: {[key: string]: number | string | boolean}) {
+  if (!value) return undefined;
+  const vertexId = (graph.vertexLabelIdMap[label] || []).find(
+    (vertexId) => {
+      for (const valueKey in value) {
+        if (value[valueKey] !== graph.vertexes[vertexId].P[valueKey]) {
+          return false;
+        }
+      }
+      return true;
+    },
   );
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
@@ -168,4 +228,19 @@ export function findVertexByLabelAndUniqueIdWithSkip(label: string, attribute: s
   const vertexId = vertexIds.find((vertexId) => value === graph.vertexes[vertexId].P[attribute]);
 
   return vertexId ? graph.vertexes[vertexId] : undefined;
+}
+
+export function findOrCreateNewVertex(txnId: number, label: string, lookupId: string, lookUpUniqueValue: string) {
+  if (!lookUpUniqueValue) {
+    alert("lookup Unique Value must not be empty");
+    return;
+  }
+  let existingVertex = findVertexByLabelAndUniqueId(label, lookupId, lookUpUniqueValue);
+
+  if (!existingVertex) {
+    const vertexId = getNewGraphId();
+    addNewVertex(txnId, newVertex(vertexId, [label], { [lookupId]: lookUpUniqueValue }));
+    existingVertex = graph.vertexes[vertexId];
+  }
+  return existingVertex;
 }
