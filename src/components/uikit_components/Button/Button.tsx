@@ -5,14 +5,6 @@ export function Button(props: ButtonProps) {
   const isLink = () => {
     return !!props.href;
   };
-  const _setClassNames = (): string => {
-    return classNames("uk-button", {
-      [`uk-button-default`]: !props.color,
-      [`uk-button-${props.color}`]: !!props.color,
-      [`uk-button-${props.size}`]: !!props.size,
-      ...setClassNames(props),
-    });
-  };
   return isLink() ? (
     <a
       id={props.id}
@@ -20,7 +12,13 @@ export function Button(props: ButtonProps) {
       data-uk-toggle={props.toggleOptions}
       href={props.href}
       onClick={props.onClick}
-      class={_setClassNames()}
+      classList={{
+        "uk-button": true,
+        [`uk-button-default`]: !props.color,
+        [`uk-button-${props.color}`]: !!props.color,
+        [`uk-button-${props.size}`]: !!props.size,
+        ...setClassNames(props),
+      }}
     >
       {props.children}
     </a>
@@ -30,7 +28,13 @@ export function Button(props: ButtonProps) {
       style={props.style}
       data-uk-toggle={props.toggleOptions}
       onClick={props.onClick}
-      class={_setClassNames()}
+      classList={{
+        "uk-button": true,
+        [`uk-button-default`]: !props.color,
+        [`uk-button-${props.color}`]: !!props.color,
+        [`uk-button-${props.size}`]: !!props.size,
+        ...setClassNames(props),
+      }}
     >
       {props.children}
     </button>

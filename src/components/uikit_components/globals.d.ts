@@ -58,7 +58,7 @@ interface ButtonProps extends BaseProps {
   children: any;
   toggleOptions?: string;
   color?: string;
-  size?: string;
+  size?: 'small' | 'large';
   href?: string;
   onClick?: any;
 }

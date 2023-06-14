@@ -265,41 +265,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           // then this field is required.
         },
       },
-      {
-        name: "Tab",
-        component: "Table",
-        tab: "Organize",
-        props: { skip: true },
-        attributes: [
-          {
-            name: "displayName",
-            component: "TextBox",
-            props: {
-              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-            }
-          },
-          {
-            name: "name",
-            component: "TextBox",
-          },
-        ],
-      },
-      {
-        name: "Group",
-        component: "Table",
-        tab: "Organize",
-        props: { skip: true },
-        attributes: [
-          {
-            name: "name",
-            component: "TextBox",
-          },
-          {
-            name: "name",
-            component: "TextBox",
-          },
-        ],
-      },
+
       {
         name: "Attr",
         component: "Table",
@@ -365,13 +331,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             },
           },
 
-          {
-            name: "unique",
-            component: "CheckBox",
-            props: {
-              skip: true,
-            },
-          },
+          // {
+          //   name: "unique",
+          //   component: "CheckBox",
+          //   props: {
+          //     skip: true,
+          //   },
+          // },
           {
             name: "required",
             component: "CheckBox",
@@ -388,7 +354,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             name: "Prop",
-            displayName: "Property",
+            displayName: "Properties",
             component: "Table",
             props: { skip: true },
             attributes: [
@@ -410,6 +376,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             name: "Role",
+            displayName: "Permissions",
             component: "Table",
             props: { skip: true },
             attributes: [
@@ -436,6 +403,41 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 ],
               },
             ],
+          },
+        ],
+      },
+      {
+        name: "Tab",
+        component: "Table",
+        tab: "Organize",
+        props: { skip: true },
+        attributes: [
+          {
+            name: "displayName",
+            component: "TextBox",
+            props: {
+              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+            }
+          },
+          {
+            name: "name",
+            component: "TextBox",
+          },
+        ],
+      },
+      {
+        name: "Group",
+        component: "Table",
+        tab: "Organize",
+        props: { skip: true },
+        attributes: [
+          {
+            name: "name",
+            component: "TextBox",
+          },
+          {
+            name: "name",
+            component: "TextBox",
           },
         ],
       },
@@ -565,6 +567,21 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               
               collection: "Perm",
+            },
+          },
+        ],
+      },
+      {
+        name: "uniqueConstrain",
+        component: "Table",
+        tab: "Unique Constrain",
+        attributes: [
+          {
+            name: "pk",
+            displayName: "Unique Constrain Keys",
+            component: "TagBox",
+            props: {
+              collection: "-$0->$0Attr",
             },
           },
         ],
