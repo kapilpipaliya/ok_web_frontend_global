@@ -1658,14 +1658,15 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                  }
                  window.www = instance
                })
-               if (component() === "Button") {
-                 if (props.data?.P) {
+
+               if (props.data?.P) {
+                 if (component() === "Button") {
                    createEffect(() => {
-                     instance.option("text", props.data.P[props.meta.P[IdAttr]])
+                     instance.option("text", props.data!.P[props.meta.P[IdAttr]])
                    });
+                 } else if (component() === "ButtonGroup") {
+                   createEffect(() => instance.option("selectedItems", props.data!.P[props.meta.P[IdAttr]]));
                  }
-               } else if (component() === "ButtonGroup") {
-                 createEffect(() => instance.option("selectedItems", props.data.P[props.meta.P[IdAttr]]));
                }
 
                createEffect(() => {

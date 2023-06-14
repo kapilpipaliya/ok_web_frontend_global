@@ -300,28 +300,34 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       >
         <td>
           <div class="flex align-items:center">
+            {p.index + 1}
             {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
-            <Icon icon="mingcute:up-fill"  />
-            <Icon icon="mingcute:down-fill"  />
-            <Icon icon="material-symbols:add-box"  />
+
+
+            {/*<Icon icon="mingcute:up-fill"  />*/}
+            {/*<Icon icon="mingcute:down-fill"  />*/}
+            {/*<Icon icon="material-symbols:add-box"  />*/}
             <Icon
               icon="material-symbols:restore-from-trash-outline"
               onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
             />
-            <Show when={!props.disabled}>
-              <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />
-            </Show>
+            {/*<Show when={!props.disabled}>*/}
+            {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
+            {/*</Show>*/}
+
             <Show when={expandVertex}>
               <Icon icon="carbon:row-expand"  onClick={() => {
                 record.addNewRowUI(expandVertex!, p.joinVertex, {})
               }} />
             </Show>
 
-            {p.index + 1}
+
           </div>
         </td>
         <DisplayProperties />
       </tr>
+        {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
+        {/*{getSelectionOptions(p.joinVertex, expandVertex.P.props.collection).vertexes?.length}*/}
         <Show when={expandVertex}>
           <tr><td class="pl:24" colspan={rowColumnsMetaAttrs.length + 1}>
             <DynamicComponent
@@ -453,6 +459,31 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       </div>
     );
   };
+  const AddNewButton = () => {
+    // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
+    return <GenericField
+     meta={
+       {
+         P: {
+           component: "ButtonGroup",
+           props: {
+             class:"h:25",
+             keyExpr: "id",
+             items: [
+               {
+                 icon: "add",
+                 id: "add",
+                 hint: "Add New",
+
+               },
+             ],
+           },
+         },
+       } as unknown as Vertex
+     }
+     onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}
+    />
+  }
   return (
     <Switch>
       {/*<Match when={isKanban()}>*/}
@@ -464,29 +495,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
           {/*<Show when={props.meta.P.attributes}>*/}
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
-
-          <GenericField
-           meta={
-              {
-                P: {
-                  component: "ButtonGroup",
-                  [IdAttr]: "meta",
-                  props: {
-                    keyExpr: "id",
-                    items: [
-                      {
-                        icon: "add",
-                        id: "add",
-                        hint: "Add New",
-                      },
-                    ],
-                  },
-                },
-              } as unknown as Vertex
-            }
-           data={{ P: { meta: [] } } as unknown as Vertex}
-           onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}
-          />
+          <Show when={sortedVertexes().length}>
+            <AddNewButton/>
+          </Show>
 
           <div
             class={css`
@@ -498,7 +509,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
              }
            `}
           >
-            <table>
+            <table classList={{
+              "f:10": sortedVertexes().length === 0
+            }}>
               <thead>
                 <tr>
                   <th></th>
@@ -524,7 +537,11 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
-                <For each={sortedVertexes()} fallback={<div>No Columns</div>}>
+                <For each={sortedVertexes()} fallback={<tr>
+                  <td class="text:center white-space:nowrap" colspan={props.meta.P.attributes.length + 1}>
+                    No Data <Icon icon="material-symbols:add-box"  onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
+                  </td>
+                </tr>}>
                   {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}
                 </For>
                 {/*  </SortableProvider>*/}
