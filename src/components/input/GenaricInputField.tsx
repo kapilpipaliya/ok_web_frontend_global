@@ -430,7 +430,10 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                   value = [value];
                 }
               }
-              return instance.option("value", value);
+              instance.option("value", value);
+              if (props.component === "TextArea") {
+                instance.option("hint", value)
+              };
             });
             createEffect(() => instance.option("disabled", props.disabled));
 
