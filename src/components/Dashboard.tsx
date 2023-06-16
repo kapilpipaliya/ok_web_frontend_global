@@ -11,7 +11,7 @@ import {
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
 import { BackupRestore, GraphViewPage } from "../pages/BackupRestore";
-import { graph, Vertex } from "../lib/graph";
+import { getNewGraphId, graph, Vertex } from "../lib/graph";
 import {
   AbstractSingleForm,
   AllForms,
@@ -37,7 +37,11 @@ import { GenericField } from "./input/GenaricField";
 import { AlertMessageContext } from "../appState";
 import { Alert } from "./uikit_components/Alert/Alert";
 import { PageContext, Record } from "../lib/Record";
-import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
+import {
+ addNewVertex,
+ findVertexByLabelAndUniqueId, mergeVertexProperties,
+ newVertex
+} from "../lib/Vertex";
 import { AttrsTableData } from "./api";
 import { Navbar } from "../pages/home/components/Navbar";
 
@@ -79,9 +83,12 @@ const AlertDisplay = () => {
   </For>
 }
 export const DashboardView = () => {
+ const vertexId = getNewGraphId();
+ addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {props: {}}))
+
   return (
     <div class="flex flex:col flex:1">
-     <PageContext.Provider value={{ events: { setSideBarOpen } }}>
+     <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, {props: { title }}) } }}>
       <Navbar
        right={<Show
         when={graph.member?.id}
@@ -93,10 +100,12 @@ export const DashboardView = () => {
         }
        >
         <Link href={`/logout`}>Logout</Link>
-       </Show>}/>
+       </Show>}
+       meta={graph.vertexes[vertexId]}
+      />
 
       <AlertDisplay/>
-     </PageContext.Provider>
+
 
 
       <main class="">
@@ -138,6 +147,7 @@ export const DashboardView = () => {
           </Routes>
         </Show>
       </main>
+     </PageContext.Provider>
     </div>
   );
 };

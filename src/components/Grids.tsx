@@ -42,7 +42,7 @@ import {
 } from "./input/SelectInputField";
 import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
 import { GenericField } from "./input/GenaricField";
-import { FormMetaData, getFormApiFromForm } from "../lib/Record";
+import { FormMetaData, getFormApiFromForm, PageContext } from "../lib/Record";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -208,6 +208,8 @@ export const DataGrid = (props: DataGridProps) => {
   }
   // console.log(1, JSON.stringify(props))
   const { Ws } = useContext(WsContext);
+  let { events } = useContext(PageContext);
+  events?.setTitle(formNew.title);
   const data = [] as { [key: string]: any }[];
   const dataArrayStore = new ArrayStore({
     data: data,
