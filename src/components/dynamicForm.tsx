@@ -1,7 +1,7 @@
 import {
   createMemo,
   createSignal,
-  For,
+  For, JSXElement,
   Match,
   onCleanup,
   onMount,
@@ -196,6 +196,7 @@ export interface DynamicFormProps {
   form: FormMetaData;
   id?: Id;
   config: { [key: string]: any };
+  submitButton?: JSXElement
 }
 
 function getTabsWidth(group: Vertex[]) {
@@ -325,15 +326,21 @@ export const DynamicForm = (props: DynamicFormProps) => {
             </For>
           </Show>
           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
-          <GenericField
-           // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
-           onClick={onSubmit}
-          />
-          <GenericField
-           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", icon: "back", text: "Cancel" }}} as any}
-           onClick={onCancel}
-          />
+
+          <div class="flex gap:10">
+            <Show when={props.submitButton} fallback={<GenericField
+             // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
+             onClick={onSubmit}
+            />}>
+              {props.submitButton}
+            </Show>
+
+            <GenericField
+             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", icon: "back", text: "Cancel" }}} as any}
+             onClick={onCancel}
+            />
+          </div>
         </FormContext.Provider>
       </Show>
     </div>

@@ -249,7 +249,7 @@ export const DataGrid = (props: DataGridProps) => {
   const [_, customProps] = splitProps(props, ["tableId"]);
 
   return (
-    <div
+    <div class="py:5"
       ref={(el) => {
         const owner = getOwner();
 
@@ -337,7 +337,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   });
 
   return (
-    <div class="">
+    <div class="p:5">
       <div>
         <GenericField
           meta={
@@ -355,7 +355,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
           }}
         />
       </div>
-      <Show<string> when={tableId()}>
+      <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>
     </div>
