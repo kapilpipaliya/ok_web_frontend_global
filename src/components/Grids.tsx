@@ -210,6 +210,7 @@ export const DataGrid = (props: DataGridProps) => {
   const { Ws } = useContext(WsContext);
   let { events } = useContext(PageContext);
   events?.setTitle(formNew.title);
+  onCleanup(() => events?.setTitle(''));
   const data = [] as { [key: string]: any }[];
   const dataArrayStore = new ArrayStore({
     data: data,
