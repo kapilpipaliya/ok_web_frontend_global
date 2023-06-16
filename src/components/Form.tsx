@@ -99,27 +99,23 @@ export const Login = (props: {}) => {
   };
 
   return (
-    <>
-      <AbstractSingleForm
-        formId={"LogIn"}
-        id="new"
-        config={config}
-        // TODO: add dry option
-      />
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              [IdAttr]: "meta",
-              props: { stylingMode: "contained", width: "120", type: "success" },
-            },
-          } as unknown as Vertex
-        }
-        data={{ P: { meta: "Login" } } as unknown as Vertex}
-        onClick={onLoginClick}
-      />
-    </>
+   <AbstractSingleForm
+    formId={"LogIn"}
+    id="new"
+    config={config}
+    submitButton={<GenericField
+     meta={
+       {
+         P: {
+           component: "Button",
+           props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
+         },
+       } as unknown as Vertex
+     }
+     onClick={onLoginClick}
+    />}
+    // TODO: add dry option
+   />
   );
 };
 export const Logout = (props: {}) => {
@@ -181,27 +177,24 @@ export const SignUp = (props: {}) => {
   };
 
   return (
-    <>
-      <AbstractSingleForm
-        formId={"SignUp"}
-        id="new"
-        config={config}
-        // TODO: add dry option
-      />
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              [IdAttr]: "meta",
-              props: { stylingMode: "contained", width: "120", type: "success" },
-            },
-          } as unknown as Vertex
-        }
-        data={{ P: { meta: "SignUp" } } as unknown as Vertex}
-        onClick={onSignupClick}
-      />
-    </>
+   <AbstractSingleForm
+    formId={"SignUp"}
+    id="new"
+    config={config}
+    submitButton={<GenericField
+     meta={
+       {
+         P: {
+           component: "Button",
+
+           props: { stylingMode: "contained", width: "120", type: "success", text: "Register", },
+         },
+       } as unknown as Vertex
+     }
+     onClick={onSignupClick}
+    />}
+    // TODO: add dry option
+   />
   );
 };
 

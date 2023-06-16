@@ -36,12 +36,13 @@ import { syncEvent } from "./ws_events";
 import { GenericField } from "./input/GenaricField";
 import { AlertMessageContext } from "../appState";
 import { Alert } from "./uikit_components/Alert/Alert";
-import { Record } from "../lib/Record";
+import { PageContext, Record } from "../lib/Record";
 import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
 import { AttrsTableData } from "./api";
+import { Navbar } from "../pages/home/components/Navbar";
 
 // window.n = navigation
-const [isSideBarOpen, setSidebarOpen] = createSignal(true);
+const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
@@ -69,16 +70,7 @@ export const StaticSideBar = () => {
   );
 };
 
-export const MenuButtonToggle = () => {
-  return (
-    <GenericField
-      meta={{ P: {component: "Button", props: {hint: "Open sidebar", icon: "menu", width: 40,stylingMode: 'text', }}} as any}
-      onClick={() => {
-        setSidebarOpen((v) => !v);
-      }}
-    />
-  );
-};
+
 
 const AlertDisplay = () => {
   const { alerts, setAlert } = useContext(AlertMessageContext);
@@ -89,19 +81,24 @@ const AlertDisplay = () => {
 export const DashboardView = () => {
   return (
     <div class="flex flex:col flex:1">
-      <AlertDisplay/>
-      <MenuButtonToggle />
-      <Show
+     <PageContext.Provider value={{ events: { setSideBarOpen } }}>
+      <Navbar
+       right={<Show
         when={graph.member?.id}
         fallback={
-          <>
-            <Link href={`/signup`}>Signup</Link>
-            <Link href={`/login`}>Login</Link>
-          </>
+         <>
+          <Link href={`/signup`}>Register</Link>
+          <Link href={`/login`}>Login</Link>
+         </>
         }
-      >
+       >
         <Link href={`/logout`}>Logout</Link>
-      </Show>
+       </Show>}/>
+
+      <AlertDisplay/>
+     </PageContext.Provider>
+
+
       <main class="">
         <Show when={graph.initialSynced}>
           <Routes>

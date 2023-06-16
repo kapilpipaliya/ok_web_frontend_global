@@ -1,5 +1,5 @@
 const navItems = [
-  { id: 0, text: "Login / Signup", icon: "mdi:user-circle", link: "#" },
+  { id: 0, text: "Login / Sign up", icon: "mdi:user-circle", link: "#" },
   { id: 1, text: "Playlist", icon: "material-symbols:format-list-bulleted", link: "#" },
   { id: 2, text: "Watchlist", icon: "ic:round-access-time", link: "#" },
   { id: 3, text: "Favorites", icon: "material-symbols:favorite-outline", link: "#" },

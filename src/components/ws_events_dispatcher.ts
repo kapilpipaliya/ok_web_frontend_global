@@ -27,7 +27,7 @@ if (window.location.hostname == "localhost") {
 const ws_proto = http_proto == "http:" ? "ws" : "wss";
 
 // const BACKEND = process.env.b ? process.env.b : `${domain}${port}`;
-const BACKEND = `localhost:1101`;
+const BACKEND = `${domain}${port}`;
 export const WS_PATH = `${ws_proto}://${BACKEND}/ws`;
 export const SERVER_PATH = `${http_proto}://${BACKEND}`;
 
