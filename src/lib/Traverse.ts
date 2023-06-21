@@ -3,7 +3,8 @@ import { capitalizeFirstLetter } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 
-export function getToEdge(meta: Vertex, vertex: Vertex) {
+export function getToEdge(meta: Vertex, vertex: Vertex): string {
+  // TODO: on new vertex it will be meta.P.props.type.P.value
   if (meta.P.props?.type) return meta.P.props.type;
 
   const attributeId = meta.P[IdAttr];
@@ -11,6 +12,7 @@ export function getToEdge(meta: Vertex, vertex: Vertex) {
 }
 
 export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
+  if (!vertex.L) return [];
   const type = getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
@@ -70,7 +72,10 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { 
   }
   let type = path[path.length - 1];
   for (const currentVertex of currentVertexes) {
-    type = type.replace("$0", currentVertex.L[0]);
+    if (type.includes("$0")) {
+      if (!currentVertex.L) continue;
+      type = type.replace("$0", currentVertex.L[0]);
+    }
     const edgeIds = currentVertex.IN[type];
     if (!edgeIds) {
       continue;
@@ -120,7 +125,12 @@ export function getChildVertex(path: string[], currentVertex: Vertex): { error: 
     // modify the variable itself
     type = type.slice(0, filterIndex);
   }
-  type = type.replace("$0", currentVertex.L[0]);
+  if (type.includes("$0")) {
+    if (!currentVertex.L) return {
+      error: true,
+    };
+    type = type.replace("$0", currentVertex.L[0]);
+  }
   let vertexes = (currentVertex.OUT[type] || []).map((edgeId) => graph.vertexes[graph.edges[edgeId].E]);
 
   if (filter) {
@@ -161,7 +171,10 @@ export function getChildVertexes(
   }
   let type = path[0];
   for (const currentVertex of currentVertexes) {
-    type = type.replace("$0", currentVertex.L[0]);
+    if (type.includes("$0")) {
+      if (!currentVertex.L) continue;
+      type = type.replace("$0", currentVertex.L[0]);
+    }
     const edgeIds = currentVertex.OUT[type] || [];
     if (edgeIds.length == 0) {
       // we only return error if its in middle of path

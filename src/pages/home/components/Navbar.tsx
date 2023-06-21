@@ -6,19 +6,17 @@ import { MenuIcon } from "../../../components/MenuIcon";
 
 export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?: JSXElement}) {
  let { events } = useContext(PageContext);
-
  // bg:white box-shadow:1|1|10|#ddd
  return (
-  <nav
-   class="p:10 flex jc:space-between ai:center">
+  <nav class={`p:10 flex jc:space-between ai:center ${props.meta?.P.class || ''}`}>
 
-   <Show when={props.meta?.P.props?.menuPosition === "left" || !props.meta?.P.props?.menuPosition}>
+   <Show when={props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition}>
     <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
    </Show>
 
    {props.left}
 
-   <div>{props.meta?.P?.props.title}</div>
+   <div>{props.meta?.P?.title}</div>
 
    {/* Actions */}
    <div class="flex ai:center jc:center gap:8">
@@ -27,7 +25,7 @@ export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?
 
     {props.right}
 
-    <Show when={props.meta?.P.props?.menuPosition === "right"}>
+    <Show when={props.meta?.P.menuPosition === "right"}>
      <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
     </Show>
 

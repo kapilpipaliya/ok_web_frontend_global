@@ -22,6 +22,7 @@ import {
 } from "./Form";
 import { WsContext } from "./ws_events_dispatcher";
 // import { AlertMessageContext } from "../appState";
+import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
@@ -50,6 +51,7 @@ const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
+const border = "|solid|slate-80"
 export const StaticSideBar = () => {
   const navigate = useNavigate();
 
@@ -84,11 +86,13 @@ const AlertDisplay = () => {
 }
 export const DashboardView = () => {
  const vertexId = getNewGraphId();
- addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {props: {}}))
+ addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {
+  class: "bb:1" + border
+ }));
 
   return (
     <div class="flex flex:col flex:1">
-     <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, {props: { title }}) } }}>
+     <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, { title }) } }}>
       <Navbar
        right={<Show
         when={graph.member?.id}
@@ -108,7 +112,7 @@ export const DashboardView = () => {
 
 
 
-      <main class="">
+      <main class="p:20">
         <Show when={graph.initialSynced}>
           <Routes>
             <Route path="/" component={() => <>Home Page</>} />
@@ -177,7 +181,8 @@ export const FullDashboard = () => {
              opened: true,
              maxSize: 200,
              revealMode: "expand",
-           }
+             elementAttr: {class: `br:1${border}_.dx-drawer-panel-content`}
+           } as dxDrawerProperties
          }} as unknown as Vertex}
        ref={(instance: any)=> {
          createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));

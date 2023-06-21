@@ -340,7 +340,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   });
 
   return (
-    <div class="p:5">
+    <>
       <div>
         <GenericField
           meta={
@@ -361,7 +361,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>
-    </div>
+    </>
   );
 };
 

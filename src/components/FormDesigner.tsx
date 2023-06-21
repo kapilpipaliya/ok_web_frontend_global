@@ -1,10 +1,21 @@
 import { AbstractSingleForm } from "./Form";
 import { useNavigate, useParams } from "@solidjs/router";
-import { createSignal, createUniqueId, onCleanup, Show } from "solid-js";
-import { getPkForCollection, PageContext, Record } from "../lib/Record";
+import {
+ createEffect,
+ createSignal,
+ createUniqueId,
+ onCleanup,
+ Show
+} from "solid-js";
+import {
+ getExportCode,
+ getPkForCollection,
+ PageContext,
+ Record
+} from "../lib/Record";
 import { PageItemRender } from "./input/GenaricField";
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
-import { Vertex } from "../lib/graph";
+import { graph, Vertex } from "../lib/graph";
 import { getChildVertex, getToEdge } from "../lib/Traverse";
 import { stringify } from "yaml";
 import { klona } from "klona";
@@ -45,8 +56,7 @@ export const PageDesigner = () => {
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:300">
-
-   <button type={"button"} onClick={rerender}>Run</button>
+    <button type={"button"} onClick={rerender}>Run</button>
     <PageContext.Provider value={{ events: {  } }}>
      <Show when={count() && config.record.vertex && count()} keyed>
       <Preview/>
@@ -73,120 +83,7 @@ export const NavDesigner = () => {
   setCount(prev => prev + 1);
  };
  const PreviewCode = () => {
-  const getChildren = (meta: Vertex, vertex: Vertex, result: {
-   [key: string]: any
-  }) => {
-   const metaVertexes = config.record.getSublistRowsForType("MetaAttr", meta);
-   // const props = meta.P.props || {};
-
-   const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
-   const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
-
-
-   for (const metaVertex of selectMetaVertexes) {
-    const metaProps = metaVertex.P.props || {};
-
-    if (metaProps.inward) {
-     // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
-
-    } else {
-     const type = getToEdge(metaVertex, vertex);
-     // also can use selectedValue function;
-     const childVertexes = config.record.getSublistRows(metaVertex, vertex);
-
-     for (const v of childVertexes) {
-      // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
-      // so get Primary Key from Vertex itself.
-      const label = v.L[0];
-      if (AttrsTableData[label]) {
-       const pksResult = {} as { [primaryKey: string]: any };
-       pksResult["name"] = v.P["name"];
-       if (!result["OUT"]) {
-        result["OUT"] = {} as {
-         [EdgeType: string]: { [primaryKey: string]: any }[]
-        };
-       }
-       result["OUT"][type] = [pksResult];
-       // getChildren(metaVertex, v, pksResult);
-      } else {
-       const collVertex = findVertexByLabelAndUniqueId("Coll", "name", label);
-       if (!collVertex) {
-        alert(`Collection not defined: ${label}`);
-        continue;
-       }
-       const pks = getPkForCollection(collVertex);
-
-       const pksResult = {} as { [primaryKey: string]: any };
-       for (const pk of pks) {
-        pksResult[pk] = v.P[pk];
-       }
-       if (pks.length === 0) {
-        pksResult["name"] = v.P["name"];
-       }
-
-       if (!result["OUT"]) {
-        result["OUT"] = {} as {
-         [EdgeType: string]: { [primaryKey: string]: any }[]
-        };
-       }
-
-       if (!result["OUT"][type]) {
-        result["OUT"][type] = [pksResult];
-       } else {
-        result["OUT"][type].push(pksResult);
-       }
-       // getChildren(metaVertex, v, pksResult);
-      }
-
-     }
-    }
-   }
-   for (const metaVertex of tableMetaVertexes) {
-    const metaProps = metaVertex.P.props || {};
-
-    if (metaProps.inward) {
-     // not possible now
-    } else {
-     const type = getToEdge(metaVertex, vertex);
-     const childVertexes = config.record.getSublistRows(metaVertex, vertex);
-
-
-     const out = childVertexes.map(v => getChildren(metaVertex, v, {
-      ...klona(v),
-      L: v.L[0],
-      IN: undefined,
-      OUT: undefined,
-      id: undefined,
-      D: undefined
-     }));
-     if (out.length > 0) {
-      if (!result["OUT"]) {
-       result["OUT"] = { [type]: out } as {
-        [EdgeType: string]: { [primaryKey: string]: any }[]
-       };
-      } else
-       result["OUT"][type] = out;
-     }
-    }
-   }
-
-   return result;
-  };
-
-  const result = getChildren(config.record.metaVertex, config.record.vertex, {
-   ...klona(config.record.vertex),
-   L: config.record.vertex.L[0],
-   IN: undefined,
-   OUT: undefined,
-   id: undefined,
-   D: undefined
-  });
-
-  console.log(stringify(result));
-
-
-  // export:
-  return <pre>{stringify(result)}</pre>;
+  return <pre>{stringify(getExportCode(config.record))}</pre>;
  };
 
  const [importCode, setImportCode] = createSignal("");

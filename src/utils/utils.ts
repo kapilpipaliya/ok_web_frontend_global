@@ -1,3 +1,14 @@
+import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
+import { Vertex } from "../lib/graph";
+
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+export const getProps = (meta: Vertex) => (getChildVertexes(["$0Prop"], [meta]).vertexes || []).reduce((acc, curr) => {
+  const key = getOptionLabel(curr, "->$0Key:P.key");
+  if (key) {
+    acc[key] = curr.P.value;
+  }
+  return acc;
+}, {} as { [key: string]: any });
