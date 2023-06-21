@@ -20,18 +20,27 @@ import {
   revertTransaction,
   Vertex
 } from "../lib/graph";
-import { mergeVertexProperties } from "../lib/Vertex";
+import {
+  findVertexByLabelAndUniqueId,
+  mergeVertexProperties
+} from "../lib/Vertex";
 import { WsContext } from "./ws_events_dispatcher";
 
-import { SelectInputField } from "./input/SelectInputField";
-import { TableInputField } from "./input/TableInputField";
+import {
+  SelectInputField,
+  SelectInputFieldWithAutoProps
+} from "./input/SelectInputField";
+import {
+  TableInputField,
+  TableInputFieldWithAutoProps
+} from "./input/TableInputField";
 
 import Tabs from "devextreme/ui/tabs";
 import { useNavigate } from "@solidjs/router";
 import { AbstractSingleForm } from "./Form";
 import {
   genericComponents,
-  GenericInputField
+  GenericInputField, GenericInputFieldWithAutoProps
 } from "./input/GenaricInputField";
 import {
   getOptionLabel,
@@ -40,13 +49,22 @@ import {
 } from "../lib/Traverse";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
-import { genericComponents2, GenericField } from "./input/GenaricField";
+import {
+  genericComponents2,
+  GenericField,
+  GenericFieldWithAutoProps
+} from "./input/GenaricField";
 import {
   FormContext,
-  FormMetaData,
+  FormMetaData, getExportCode, getPkForCollection,
   newRow,
   Record
 } from "../lib/Record";
+import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
+import { importNavigation } from "../pages/BackupRestore";
+import { AttrsTableData } from "./api";
+import { klona } from "klona";
+import { stringify } from "yaml";
 
 // Dynamic Form Component
 const FormComponent = (props: {
@@ -127,6 +145,64 @@ export const DynamicComponent = (props: {
       </Match>
       <Match when={genericComponents2.includes(props.component) && props.component} keyed>
         <GenericField
+          data={props.data}
+          meta={props.meta}
+          component={props.component}
+          setValue={props.setValue}
+          disabled={props.disabled!}
+        />
+      </Match>
+    </Switch>
+  );
+};
+// Dynamic Component used in the form
+export const DynamicComponentWithAutoPropsSupport = (props: {
+  // component is required, cant refactor it to remove it, because parent component needs it too.
+  component: string;
+  meta: Vertex;
+  data: Vertex;
+  setValue(attribute: Vertex, vertex: Vertex, data: any): void;
+  disabled?: boolean;
+}) => {
+  return (
+    <Switch>
+      <Match when={!props.component}>NO INPUT</Match>
+      <Match when={props.component === "SelectBox" || props.component === "TagBox"} keyed>
+        <SelectInputFieldWithAutoProps
+         data={props.data}
+         meta={props.meta}
+         // passed setValue when we have a string value in select field
+         setValue={props.setValue}
+         disabled={props.disabled!}
+         component={props.component}
+        />
+      </Match>
+      <Match when={props.component === "Table"}>
+        <Show when={!props.disabled} fallback={<>...</>}>
+          <TableInputFieldWithAutoProps meta={props.meta} data={props.data}
+                           disabled={props.disabled!} />
+        </Show>
+      </Match>
+      <Match when={props.component.startsWith("Form")}>
+        <td>
+          <div class="flex">
+            {props.meta.P.props?.defaultValue &&
+              getOptionLabel(props.data, props.meta.P.props.defaultValue)}
+            <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)} />
+          </div>
+        </td>
+      </Match>
+      <Match when={genericComponents.includes(props.component) && props.component} keyed>
+        <GenericInputFieldWithAutoProps
+          data={props.data}
+          meta={props.meta}
+          component={props.component}
+          setValue={props.setValue}
+          disabled={props.disabled!}
+        />
+      </Match>
+      <Match when={genericComponents2.includes(props.component) && props.component} keyed>
+        <GenericFieldWithAutoProps
           data={props.data}
           meta={props.meta}
           component={props.component}
@@ -262,6 +338,99 @@ export const DynamicForm = (props: DynamicFormProps) => {
     setTimeout(() => navigate(-1));
   }
 
+  const [popup, setPopup] = createSignal(false);
+  const [importCode, setImportCode] = createSignal("");
+  const importCodeFn = () => {
+    // importNavigation(importCode(), record);
+  };
+  let popupConfig: any;
+
+  const ImportComponent = () => {
+    return <textarea class="h:95% w:100%" value={importCode()}
+                     onChange={e => setImportCode(e.target.value)} />
+  }
+  const PreviewCode = () => {
+    return <pre>{stringify(getExportCode(record))}</pre>;
+  };
+  const onImportClick = (data: any) => {
+    popupConfig = (instance: () => dxPopup) => ({
+      contentTemplate: ImportComponent,
+      width: 500,
+      height: 500,
+      title: 'Import',
+      'position.of': data.element,
+      toolbarItems: [{
+        widget: 'dxButton',
+        toolbar: 'bottom',
+        location: 'before',
+        options: {
+          icon: 'import',
+          text: 'Import',
+          onClick: importCodeFn,
+        },
+      }, {
+        widget: 'dxButton',
+        toolbar: 'bottom',
+        location: 'after',
+        options: {
+          text: 'Close',
+          onClick() {
+            instance().hide();
+            setPopup(false);
+          },
+        },
+      }],
+    })
+    setPopup(true);
+  }
+
+  const onExportClick =  (data: any) => {
+    popupConfig = (instance: () => dxPopup) => ({
+      contentTemplate: PreviewCode,
+      width: 500,
+      height: 500,
+      title: 'Export',
+      'position.of': data.element,
+      toolbarItems: [{
+        widget: 'dxButton',
+        toolbar: 'bottom',
+        location: 'after',
+        options: {
+          text: 'Close',
+          onClick() {
+            instance().hide();
+            setPopup(false);
+          },
+        },
+      }],
+    })
+    setPopup(true);
+  }
+  const PopOver = () => {
+    return <div ref={el => {
+      let instance: dxPopup;
+      onMount(() => {
+        instance = new dxPopup(el, {
+          container: '.dx-viewport',
+          showTitle: true,
+          visible: false,
+          dragEnabled: false,
+          hideOnOutsideClick: true,
+          showCloseButton: false,
+          onHidden:() => setPopup(false),
+          position: {
+            at: 'bottom',
+            my: 'center',
+            collision: 'fit',
+          },
+          ...popupConfig(() => instance)
+        }  as dxPopupProperties);
+        instance.show();
+      })
+      onCleanup(() => instance.dispose());
+    }}/>
+  }
+
   return (
     <div
       ref={(el) => {
@@ -269,6 +438,16 @@ export const DynamicForm = (props: DynamicFormProps) => {
         validationGroup = new dxValidationGroup(divRef()!);
       }}
     >
+      <div class="flex gap:10 jc:end">
+        <GenericField
+         meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
+         onClick={onImportClick}
+        />
+        <GenericField
+         meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Export" }}} as any}
+         onClick={onExportClick}
+        />
+      </div>
       <Show when={divRef()}>
         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
           {/* Main Tab is display as top level fields */}
@@ -337,12 +516,13 @@ export const DynamicForm = (props: DynamicFormProps) => {
             </Show>
 
             <GenericField
-             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", icon: "back", text: "Cancel" }}} as any}
+             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel" }}} as any}
              onClick={onCancel}
             />
           </div>
         </FormContext.Provider>
       </Show>
+      <Show when={popup()}><PopOver/></Show>
     </div>
   );
 };

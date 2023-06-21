@@ -14,7 +14,7 @@ export const IdAttr = "name";
 export interface Vertex {
   id: Id;
   L: string[];
-  P: { [key: string]: any };
+  P: { [key: string]: any, props?: {[key: string]: Vertex} };
   IN: { [key: string]: Id[] };
   OUT: { [key: string]: Id[] };
 }

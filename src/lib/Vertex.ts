@@ -74,6 +74,7 @@ export function replaceVertexProperties(
   };
 }
 
+// mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
 export function mergeVertexProperties(
   txnId: number,
   vertexId: Id,

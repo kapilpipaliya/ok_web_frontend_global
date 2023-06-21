@@ -338,3 +338,164 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
     </div>
   );
 }
+
+export function SelectInputFieldWithAutoProps(props: ComponentProps & {component: string}) {
+  const { Ws } = useContext(WsContext);
+  let { record } = useContext(FormContext);
+  if (!record) record = {} as Record;
+
+
+  // @ts-ignore
+  const [selectOptions, { refetch }] = createResource(() => {
+    let value = props.meta.P.props?.items?.P.value;
+    if (value) {
+      if (typeof value === "string") {
+        return value.split("\n");
+      } else if (Array.isArray(value)) {
+        return value;
+      } else {
+        return value ? [value] : [];
+      }
+    } else {
+      // this is not working when row is enabled, select field options is not updated
+      // if (props.disabled) {
+      //   return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+      // }
+      if (!props.meta.P.props?.collection?.P.value) {
+        return [];
+      }
+      return getSelectionOptions(props.data, props.meta.P.props.collection?.P.value).vertexes || [];
+    }
+  }, (data) => data);
+
+  return (
+    <div aria-labeledby={props["aria-labeledby"]}>
+      <Show
+        when={!props.disabled}
+        fallback={
+          <For each={selectedValue(props.meta, props.data)}>
+            {(vertexId) => <>{getOptionLabel(graph.vertexes[vertexId], props.meta.P.props?.displayExpr?.P.value || `P.${IdAttr}`)}</>}
+          </For>
+        }
+      >
+        <div
+         class="min-w:140"
+          ref={(el) => {
+            let selectOp = {
+              searchEnabled: true,
+              disabled: props.disabled!,
+              showSelectionControls: true,
+              showClearButton: true,
+
+              // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
+              value: props.component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
+              onValueChanged: function (e) {
+                // batch(() => {
+                // note: valueChanged is fired even when the value is changed programmatically,
+                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
+                // used e.event check to prevent this.
+                // on simple import screen when value is selected first time event is not there
+                if (e.previousValue && !e.event) {
+                  // TODO: TO Prevent Onchange event firing on select set a flag
+                  // when it should not fire the event In the form
+                  // and remove it
+                  // when calculations are done.
+                  return;
+                }
+                if (!props.data) {
+                  return;
+                }
+                if (record.isRealTime) {
+                  record.txnId = getNewTxnId();
+                }
+                if (props.meta.P.props?.stringValue?.P.value) {
+                  props.setValue?.(props.meta,props.data, e.value);
+                } else if (props.meta.P.props?.items?.P.value) {
+                  props.setValue?.(props.meta,props.data, e.value);
+                } else if (props.meta.P.props?.inward?.P.value) {
+                  setParentValue(record.txnId, props.data, props.meta, e.value);
+                } else {
+                  setSelectionValue(record.txnId, props.data, props.meta, e.value);
+                }
+                onChangeHandler(record.txnId, record.vertex, props.data, props.meta);
+                if (record.isRealTime) commitTxn(record.txnId, Ws);
+                // })
+              },
+              labelMode: "floating",
+              // slow down performance.
+              // onFocusIn: function (e) {
+              //   refetch();
+              // },
+            } as Properties;
+
+            if (props.meta.P.props?.focusRefresh?.P.value) {
+              Object.assign(selectOp, {
+                onFocusIn: function (e) {
+                  refetch();
+                },
+              } as Properties)
+            }
+            if (!props.meta.P.props?.items?.P.value) {
+              let displayExpr: undefined | string;
+              // Bug: When In a Coll, In Attr Row,
+              // If DataType Selected, Submit
+              // Open Coll again, Change DataType,
+              // Component is not updated the First time.
+              // To Simplify development, Temporary enables refresh on click
+              if (!isSimpleCollection(props.meta.P.props?.collection?.P.value)) {
+                Object.assign(selectOp, {
+                  onFocusIn: function (e) {
+                    refetch();
+                  },
+                } as Properties)
+              } else {
+                displayExpr = collectionNameDisplayExpr(props.meta.P.props?.collection?.P.value);
+              }
+
+              Object.assign(selectOp, {
+                // if valueExpr value is undefined onValueChange will not fire.
+                valueExpr: "id",
+                displayExpr: (item) => getOptionLabel(item, props.meta.P.props?.displayExpr?.P.value || displayExpr || `P.${IdAttr}`),
+
+              } as Properties)
+            }
+            const instance = props.component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
+            createEffect(() => {
+              for (const property in props.meta.P.props) {// as Properties
+                if (property === "displayExpr" || property === 'items') continue;
+                instance.option(property, props.meta.P.props?.[property]?.P.value);
+              }
+            });
+            // when the value is changed by other components, we want to refetch the options
+            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+            createEffect(
+             on(
+              () => selectedValue(props.meta, props.data),
+              (selectedValue) => {
+                instance.option("value", props.component === 'SelectBox' ? selectedValue[0] : selectedValue);
+              },
+              { defer: true },
+             ),
+            );
+
+            // when the value is changed by other components, we want to refetch the options
+            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+
+
+
+            createEffect(() => instance.option("disabled", props.disabled));
+
+            createEffect(() => {
+              const options = selectOptions();
+              if (options) {
+                instance.option("dataSource", options);
+              }
+            });
+            onCleanup(() => instance.dispose());
+          }}
+        />
+      </Show>
+      {/* Todo: think about validations */}
+    </div>
+  );
+}

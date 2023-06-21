@@ -151,13 +151,18 @@ export const BackupRestore = () => {
         // const v = new Set();
         // const da = new Set();
         // const it = new Set();
-        const txnId = getNewTxnId();
+        let txnId = getNewTxnId(); // Note txnId 0 not working
+        // Issue with big websocket messages, its not received at all when debugging, It cant received at websocket message handler,
+        // so spliting it.
+        const splitTransaction = false;
         for (const componentId in json) {
+
           const component = json[componentId];
           const componentConfiguration = component["Configuration"];
           if (!componentConfiguration) continue;
 
           for (const property in componentConfiguration) {
+            if (splitTransaction) txnId = getNewTxnId();
             const propertyObj = componentConfiguration[property];
             const name = propertyObj["Name"];
             let description = propertyObj["description"] as string;
@@ -259,9 +264,13 @@ export const BackupRestore = () => {
                 console.log('dataType Not Found:', name, type);
               }
             }
+            if (splitTransaction) {
+              commitTxn(txnId, Ws);
+            }
           }
+
         }
-        commitTxn(txnId, Ws);
+        if(!splitTransaction) commitTxn(txnId, Ws);
         alert("inserting properties finished.");
       });
     }
@@ -733,8 +742,19 @@ OUT:
     }
 
     function importNsData_(json: { [p: string]: NsMetaJson }) {
+      alert('importing');
+      // TODO: make import with txnId 0 working.
       let txnId = getNewTxnId();
-      const splitTransaction = false;
+      const splitTransaction = true;
+      // statistics:
+      // 1. after 1.30-minutes payload
+      // 2. after 20 sec ack
+      // 3. after 1 min final
+
+      // we need to increase bolt connection timeout second because from 18 seconds to 180 seconds,?
+      // if it closes in 18 seconds backend is not replying, maybe we should give proper error for it.?
+
+
 
       function fieldsInsert(fields: Field[], collectionVertex: Vertex) {
         for (const field of fields) {
@@ -919,7 +939,8 @@ OUT:
         batch(() => {
           importNsData_(json);
         })
-        alert("inserting ns data finished.");
+        // alert("inserting ns data finished.");
+        console.log("inserting ns data finished.", new Date());
       });
     }
   };

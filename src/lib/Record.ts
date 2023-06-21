@@ -164,7 +164,7 @@ export function getCollAttrs(
  attr.props = formProps;
  return { error: false, attr };
 }
-
+export let isUpdatingInput = false;
 export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribute } => {
  const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);
  if (vertexCollAttrResult.error) return { error: true };
@@ -644,9 +644,11 @@ export class Record {
   if (this.isRealTime) {
    this.txnId = getNewTxnId();
   }
+  isUpdatingInput = true;
   mergeVertexProperties(this.txnId, vertex.id, {
    [attribute.P[IdAttr]]: data
   });
+  isUpdatingInput = false;
   // we directly save the dataType on vertex:
   setGraph("vertexes", vertex.id, "D", {[attribute.P[IdAttr]]: attribute.P["dataType"]});
 
@@ -845,3 +847,114 @@ export const getFormMetaData = (formId: string) => {
  }
  return { error: false, form };
 };
+
+export const getExportCode = (record: Record) => {
+ const getChildren = (meta: Vertex, vertex: Vertex, result: {
+  [key: string]: any
+ }) => {
+  const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+  // const props = meta.P.props || {};
+
+  const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
+  const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
+
+
+  for (const metaVertex of selectMetaVertexes) {
+   const metaProps = metaVertex.P.props || {};
+
+   if (metaProps.inward) {
+    // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
+
+   } else {
+    const type = getToEdge(metaVertex, vertex);
+    // also can use selectedValue function;
+    const childVertexes = record.getSublistRows(metaVertex, vertex);
+
+    for (const v of childVertexes) {
+     // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
+     // so get Primary Key from Vertex itself.
+     const label = v.L[0];
+     if (AttrsTableData[label]) {
+      const pksResult = {} as { [primaryKey: string]: any };
+      pksResult["name"] = v.P["name"];
+      if (!result["OUT"]) {
+       result["OUT"] = {} as {
+        [EdgeType: string]: { [primaryKey: string]: any }[]
+       };
+      }
+      result["OUT"][type] = [pksResult];
+      // getChildren(metaVertex, v, pksResult);
+     } else {
+      const collVertex = findVertexByLabelAndUniqueId("Coll", "name", label);
+      if (!collVertex) {
+       alert(`Collection not defined: ${label}`);
+       continue;
+      }
+      const pks = getPkForCollection(collVertex);
+
+      const pksResult = {} as { [primaryKey: string]: any };
+      for (const pk of pks) {
+       pksResult[pk] = v.P[pk];
+      }
+      if (pks.length === 0) {
+       pksResult["name"] = v.P["name"];
+      }
+
+      if (!result["OUT"]) {
+       result["OUT"] = {} as {
+        [EdgeType: string]: { [primaryKey: string]: any }[]
+       };
+      }
+
+      if (!result["OUT"][type]) {
+       result["OUT"][type] = [pksResult];
+      } else {
+       result["OUT"][type].push(pksResult);
+      }
+      // getChildren(metaVertex, v, pksResult);
+     }
+
+    }
+   }
+  }
+  for (const metaVertex of tableMetaVertexes) {
+   const metaProps = metaVertex.P.props || {};
+
+   if (metaProps.inward) {
+    // not possible now
+   } else {
+    const type = getToEdge(metaVertex, vertex);
+    const childVertexes = record.getSublistRows(metaVertex, vertex);
+
+
+    const out = childVertexes.map(v => getChildren(metaVertex, v, {
+     ...klona(v),
+     L: v.L[0],
+     IN: undefined,
+     OUT: undefined,
+     id: undefined,
+     D: undefined
+    }));
+    if (out.length > 0) {
+     if (!result["OUT"]) {
+      result["OUT"] = { [type]: out } as {
+       [EdgeType: string]: { [primaryKey: string]: any }[]
+      };
+     } else
+      result["OUT"][type] = out;
+    }
+   }
+  }
+
+  return result;
+ };
+
+ return getChildren(record.metaVertex, record.vertex, {
+  ...klona(record.vertex),
+  L: record.vertex.L[0],
+  IN: undefined,
+  OUT: undefined,
+  id: undefined,
+  D: undefined
+ });
+}
