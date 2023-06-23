@@ -14,11 +14,12 @@ export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
 const http_proto = location.protocol;
 // @ts-ignore
-const domain = window.location.hostname;
+let domain = window.location.hostname;
 // @ts-ignore
 let port = "";
 if (window.location.hostname == "localhost") {
-  port = ":1101";
+  domain = "49.12.190.36"
+  port = ":1201";
 } else if (IS_PRODUCTION) {
   port = `:${window.location.port}`;
 }
@@ -58,6 +59,13 @@ export function saveCookie(name: string, value: string, max_age: number) {
 
 export function clearCookie(d: any) {
   document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+}
+
+// https://stackoverflow.com/questions/10730362/get-cookie-by-name
+export function getCookie(name: string) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
 }
 
 function saveCookies(data: {
@@ -109,18 +117,6 @@ export class ServerEventsDispatcher extends WSBase {
     // if (token) {
     //   this.sendMessage('authentication_challenge', {token});
     // }
-    this.dispatch(["open", "", 0], []);
-    // TODO: We dont need fresh sync but from last timestamp sync
-
-    this.trigger([
-      [
-        ["get", "sync", 0],
-        {
-          from: graph.lastSyncedTime && graph.lastSyncedTime - 4000,
-          subscriptions: this.subscriptions,
-        },
-      ],
-    ]); // TODO fix time
     // Todo: Think about what will happen if ack is not received(but server actually sends it) and internet is disconnected.
     commitTransaction(this);
   }
