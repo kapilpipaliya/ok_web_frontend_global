@@ -1,5 +1,5 @@
 import { batch, useContext } from "solid-js";
-import { WsContext } from "./ws_events_dispatcher";
+import { WsContext } from "../utils/ws_events_dispatcher";
 import { G } from "@mobily/ts-belt";
 import {
  commitTransaction,
@@ -10,20 +10,20 @@ import {
  transactions,
  VertexMap,
  vertexOldIdToNewIdMap
-} from "../lib/graph";
+} from "./graph";
 import {
  addNewVertex, addNewVertexUnSafe,
  deleteVertex,
  newVertex,
  updateVertexId
-} from "../lib/Vertex";
+} from "./Vertex";
 import {
  addNewEdge,
  addNewEdgeUnSafe,
  deleteEdge,
  newEdge,
  updateEdgeId
-} from "../lib/Edge";
+} from "./Edge";
 
 
 export const syncEvent = () => {
@@ -45,6 +45,7 @@ export const syncEvent = () => {
     }[],
    ][]
   ) => {
+
    if (G.isObject(d) && d.ack) {
     if (Array.isArray(d.txnIds)) {
      for (const txnId of d.txnIds as number[]) {
@@ -53,57 +54,64 @@ export const syncEvent = () => {
      }
     }
    }
-   if (Array.isArray(d)) {
-    for (const [txnId, txnResult] of d) {
-     if (transactions.has(txnId)) transactions.get(txnId)!.status = ProcessStatus.Processed;
-     for (const txnObject of txnResult) {
-      if (txnObject.insert) {
-       vertexOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
-       updateVertexId(txnObject.insert[0], txnObject.insert[1]);
-      }
-      if (txnObject.insertEdge) {
-       edgeOldIdToNewIdMap.set(txnObject.insertEdge[0], txnObject.insertEdge[1]);
-       updateEdgeId(txnObject.insertEdge[0], txnObject.insertEdge[1]);
-      }
-      if (txnObject.replace) {
-       // TODO: handle on backend
-       // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
-      }
-      if (txnObject.deleteVertex) {
-       if (txnObject.deleteVertex.error) {
-        alert(txnObject.deleteVertex.message);
+   batch(() => {
+    if (Array.isArray(d)) {
+     for (const [txnId, txnResult] of d) {
+      if (transactions.has(txnId)) transactions.get(txnId)!.status = ProcessStatus.Processed;
+      for (const txnObject of txnResult) {
+       // Vertexes and edges are interlinked.
+       // It's complicated to insert replace without error.
+       // When saving Form with Select field, table is giving error.
+       if (txnObject.insert) {
+        vertexOldIdToNewIdMap.set(txnObject.insert[0], txnObject.insert[1]);
+        updateVertexId(txnObject.insert[0], txnObject.insert[1]);
        }
-       // TODO: handle on backend
-       // deleteVertex(0, txnObject.insert[0]);
-      }
-      if (txnObject.replaceEdge) {
-       // TODO: handle on backend
-       // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
-      }
-      // if(txnObject.replaceEdgeStart){
-      //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
-      // }
-      // if(txnObject.replaceEdgeEnd){
-      //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
-      // }
-      if (txnObject.deleteEdge) {
-       // TODO: handle on backend
-       // deleteEdge(0, txnObject.insert[0]);
+       if (txnObject.insertEdge) {
+        edgeOldIdToNewIdMap.set(txnObject.insertEdge[0], txnObject.insertEdge[1]);
+        updateEdgeId(txnObject.insertEdge[0], txnObject.insertEdge[1]);
+       }
+       if (txnObject.replace) {
+        // TODO: handle on backend
+        // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
+       }
+       if (txnObject.deleteVertex) {
+        if (txnObject.deleteVertex.error) {
+         alert(txnObject.deleteVertex.message);
+        }
+        // TODO: handle on backend
+        // deleteVertex(0, txnObject.insert[0]);
+       }
+       if (txnObject.replaceEdge) {
+        // TODO: handle on backend
+        // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
+       }
+       // if(txnObject.replaceEdgeStart){
+       //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
+       // }
+       // if(txnObject.replaceEdgeEnd){
+       //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
+       // }
+       if (txnObject.deleteEdge) {
+        // TODO: handle on backend
+        // deleteEdge(0, txnObject.insert[0]);
+       }
       }
      }
     }
-   }
-   let allTxnProcessed = true;
-   for (const [_txnId, value] of transactions.entries()) {
-    if (value.status !== ProcessStatus.Processed) {
-     allTxnProcessed = false;
-     break;
+    let allTxnProcessed = true;
+    for (const [_txnId, value] of transactions.entries()) {
+     if (value.status !== ProcessStatus.Processed) {
+      allTxnProcessed = false;
+      break;
+     }
     }
-   }
-   if (allTxnProcessed) {
-    vertexOldIdToNewIdMap.clear();
-    edgeOldIdToNewIdMap.clear();
-   } else commitTransaction(Ws);
+    if (allTxnProcessed) {
+     vertexOldIdToNewIdMap.clear();
+     edgeOldIdToNewIdMap.clear();
+    } else commitTransaction(Ws);
+   })
+
+
   }
  );
 

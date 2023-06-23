@@ -1,11 +1,11 @@
 import { createEffect, For, Show, onCleanup } from "solid-js";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 import PivotGrid, { Properties } from "devextreme/ui/pivot_grid";
 import PivotGridFieldChooser, {
   Properties as PivotGridFieldChooserProperties,
 } from "devextreme/ui/pivot_grid_field_chooser";
 // @ts-ignore
-import { pivotGridSalesData } from "../data/pivotGridSalesData.js";
+import { pivotGridSalesData } from "./data/pivotGridSalesData.js";
 import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 

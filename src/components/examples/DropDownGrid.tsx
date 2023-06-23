@@ -1,5 +1,5 @@
 import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
 import dxDataGrid from "devextreme/ui/data_grid";

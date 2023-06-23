@@ -1,4 +1,4 @@
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 import ResponsiveBox, { Properties } from "devextreme/ui/responsive_box";
 import { createEffect, For, Show, onCleanup } from "solid-js";
 

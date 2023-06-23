@@ -363,7 +363,8 @@ export function getSelectionOptions(
   }
   // example: `{->$0Coll:P.${IdAttr}}` will get a collection from expression
   if (collection.includes("{{") && collection.includes("}}")) {
-    collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || ""));
+    debugger
+    collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || "") || "");
   }
   return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
 }

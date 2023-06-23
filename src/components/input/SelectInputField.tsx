@@ -20,7 +20,7 @@ import {
   Vertex
 } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { WsContext } from "../ws_events_dispatcher";
+import { WsContext } from "../../utils/ws_events_dispatcher";
 import {
   getInEdge,
   getOptionLabel,
@@ -29,7 +29,7 @@ import {
   getSelectionOptions,
   getToEdge
 } from "../../lib/Traverse";
-import { ComponentProps } from "../core/Form";
+import { ComponentProps } from "../../types/Component";
 import {
   FormContext,
   getNameKeyForCollection,

@@ -14,7 +14,6 @@ import {
   Vertex
 } from "../lib/graph";
 import {
-  JSX,
   createEffect,
   createSignal,
   For,
@@ -30,7 +29,7 @@ import { klona } from "klona";
 import { Link, useNavigate, useParams } from "@solidjs/router";
 
 import { G } from "@mobily/ts-belt";
-import { WsContext } from "./ws_events_dispatcher";
+import { WsContext } from "../utils/ws_events_dispatcher";
 import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";

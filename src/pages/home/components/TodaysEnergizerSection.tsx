@@ -1,6 +1,6 @@
 import { A } from "@solidjs/router";
 import { IdAttr } from "../../../lib/graph";
-import { DisplayComponentProps } from "../../../components/core/Form";
+import { DisplayComponentProps } from "../../../types/Component";
 
 export function TodaysEnergizer(props: DisplayComponentProps) {
   return (

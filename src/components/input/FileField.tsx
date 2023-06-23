@@ -8,7 +8,6 @@ import { createStore } from "solid-js/store";
 
 interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
   name?: string;
-
   disabled?: boolean;
   value?: string;
   props: {};
@@ -20,6 +19,7 @@ interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "on
   help?: string;
 }
 
+/* Work In Progress */
 export const FileField = (props: Properties) => {
   const [p, customProps] = splitProps(props, ["label", "prefix", "help", "error", "onchange"]);
 

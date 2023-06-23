@@ -1,11 +1,13 @@
 import {
   createMemo,
   createSignal,
-  For, JSXElement,
+  For,
+  JSXElement,
   Match,
   onCleanup,
   onMount,
   Show,
+  splitProps,
   Switch,
   useContext
 } from "solid-js";
@@ -20,11 +22,8 @@ import {
   revertTransaction,
   Vertex
 } from "../lib/graph";
-import {
-  findVertexByLabelAndUniqueId,
-  mergeVertexProperties
-} from "../lib/Vertex";
-import { WsContext } from "./ws_events_dispatcher";
+import { mergeVertexProperties } from "../lib/Vertex";
+import { WsContext } from "../utils/ws_events_dispatcher";
 
 import {
   SelectInputField,
@@ -37,10 +36,10 @@ import {
 
 import Tabs from "devextreme/ui/tabs";
 import { useNavigate } from "@solidjs/router";
-import { AbstractSingleForm } from "./Form";
 import {
   genericComponents,
-  GenericInputField, GenericInputFieldWithAutoProps
+  GenericInputField,
+  GenericInputFieldWithAutoProps
 } from "./input/GenaricInputField";
 import {
   getOptionLabel,
@@ -56,16 +55,36 @@ import {
 } from "./input/GenaricField";
 import {
   FormContext,
-  FormMetaData, getExportCode, getPkForCollection,
+  FormMetaData,
+  getExportCode,
+  getFormMetaData,
   newRow,
   Record
 } from "../lib/Record";
 import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
-import { importNavigation } from "../pages/BackupRestore";
-import { AttrsTableData } from "./api";
-import { klona } from "klona";
 import { stringify } from "yaml";
 
+interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
+  formId: string;
+  id: string | number;
+}
+
+export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
+  // TODO: add validation on form that AttrsTableData keys should not available.
+
+  const form = getFormMetaData(props.formId);
+  if (form.error) return form.error;
+
+  const [p, customProps] = splitProps(props, ["formId", "id"]);
+
+  const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
+  return (
+   <div class="">
+     <DynamicForm form={form.form!} id={id() as Id} {...customProps}
+                  config={props.config || {}} />
+   </div>
+  );
+};
 // Dynamic Form Component
 const FormComponent = (props: {
   meta: Vertex;
@@ -504,6 +523,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               }}
             </For>
           </Show>
+          {/* @ts-ignore */}
           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
 
           <div class="flex gap:10">

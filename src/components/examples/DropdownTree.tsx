@@ -2,7 +2,7 @@ import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
 import TreeView from "devextreme/ui/tree_view";
 import CustomStore from "devextreme/data/custom_store";
 import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 
 const makeAsyncDataSource = (jsonFile: any) => {
   return new CustomStore({

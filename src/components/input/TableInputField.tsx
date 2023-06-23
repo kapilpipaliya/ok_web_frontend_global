@@ -1,5 +1,4 @@
 import {
-  JSX,
   createEffect,
   createMemo,
   createSignal,
@@ -24,9 +23,9 @@ import {
   revertTransaction,
   Vertex
 } from "../../lib/graph";
-import { WsContext } from "../ws_events_dispatcher";
+import { WsContext } from "../../utils/ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent } from "../dynamicForm";
+import { DynamicComponent } from "../DynamicForm";
 import {
   addMeta,
   addMetaVertexes,
@@ -45,12 +44,9 @@ import {
 } from "../../lib/Traverse";
 import ScrollView from "devextreme/ui/scroll_view";
 import Sortable from "devextreme/ui/sortable";
-import { ComponentProps } from "../core/Form";
+import { ComponentProps } from "../../types/Component";
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "./GenaricField";
-// import SortableKanban from "../core/SortableField";
-// import "../assets/styles/sortable.css";
-
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
@@ -61,22 +57,11 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   }
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
-  const [sourceVertexes, setSourceVertexes] = createSignal([] as Vertex[]);
 
   // columns
   const tableColumnsTemplate = record.getMetaAttributes(props.meta);
   if (tableColumnsTemplate.length === 0) {
     return "Cant find table columns";
-  }
-
-  const uniqueAttr = () => props.meta.P.props?.unique;
-  const isKanban = () => uniqueAttr() && props.meta.P.props?.kanban && props.meta.P.props.collection;
-  // add source vertexes data to store
-  if (isKanban()) {
-    createEffect(() => {
-      const vertexes = getSelectionOptions(props.data, props.meta.P.props.collection).vertexes || [];
-      setSourceVertexes(vertexes);
-    });
   }
 
   // add dynamic meta from separate collection.
@@ -113,100 +98,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const vertexes = record.getSublistRows(props.meta, props.data);
     setSortedVertexes(vertexes);
   });
-
-
-  const KanbanCardRow = (p: { joinVertex: Vertex }) => {
-    rowMetaInitialize(p.joinVertex, props.meta, tableColumnsTemplate);
-
-    const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
-    if (attributesResult.error) alert("Error getting attributes");
-    const rowColumnsMetaAttrs = attributesResult.vertexes!;
-
-    const DisplayCardProperties = () => {
-      return (
-        <For each={rowColumnsMetaAttrs}>
-          {(metaVertex) => {
-            const component = createMemo(() => {
-              if (metaVertex.P.component.includes("-")) {
-                // return getOptionLabel(metaVertex, metaVertex.P.component);
-                return getOptionLabel(p.joinVertex, metaVertex.P.component);
-              } else {
-                return metaVertex.P.component;
-              }
-            });
-            // if mergeProps not keep reactivity use memo
-            createEffect(() => {
-              addMeta(metaVertex, p.joinVertex);
-            });
-
-            const DefaultValue = () => <>{metaVertex.P.props?.defaultValue &&
-             getOptionLabel(p.joinVertex, metaVertex.P.props.defaultValue)}</>;
-            const Content = () => <>
-              <DynamicComponent
-               component={component()}
-               // When we have a Table we pass original Table Meta Vertex
-               meta={component() === "Table" ? graph.vertexes[metaVertex.P.templateId] : metaVertex}
-               data={p.joinVertex}
-               setValue={record.setValue}
-              />
-            </>;
-
-            return (
-             <Switch>
-               <Match when={metaVertex.P.props?.hidden}>
-                 <div class="">
-                   <DefaultValue />
-                 </div>
-               </Match>
-               <Match when={component() === "Table"}>
-                 <div class="">
-                   <DefaultValue />
-                   <Content />
-                 </div>
-               </Match>
-               <Match when={true}>
-                 <div class="flex align-items:center">
-                   <DefaultValue />
-                   <Content />
-                 </div>
-               </Match>
-              </Switch>
-            );
-          }}
-        </For>
-      );
-    };
-
-    return (
-      <>
-        <DisplayCardProperties />
-        <div>
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "ButtonGroup",
-                  [IdAttr]: "meta",
-                  props: {
-                    keyExpr: "id",
-                    items: [
-                      {
-                        icon: "trash",
-                        id: "delete",
-                        hint: "Delete Row",
-                      },
-                    ],
-                  },
-                },
-              } as unknown as Vertex
-            }
-            data={{ P: { meta: [] } } as unknown as Vertex}
-            onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
-          />
-        </div>
-      </>
-    );
-  };
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
@@ -376,89 +267,6 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   //   setActiveDragItem(null);
   // };
 
-  // @ts-ignore
-  const Kanban = () => {
-    return (
-      <div
-        class="sortable-board sortable-lists"
-        ref={(containerEl) => {
-          new ScrollView(containerEl, {
-            direction: "horizontal",
-            showScrollbar: "always",
-          });
-        }}
-      >
-        <div class="list">
-          <div class="list-title dx-theme-text-color">Sources</div>
-          <div
-            class="scrollable-list"
-            ref={(scrollEl) => {
-              new ScrollView(scrollEl, {
-                direction: "vertical",
-                showScrollbar: "always",
-              });
-            }}
-          >
-            <div
-              class="sortable-cards"
-              ref={(itemsEl) => {
-                new Sortable(itemsEl, {
-                  group: "tasksGroup",
-                  moveItemOnDrop: true,
-                });
-              }}
-            >
-              <For each={sourceVertexes()}>
-                {(source) => (
-                  <div class="card dx-card dx-theme-text-color dx-theme-background-color">
-                    {/*<div class="card-priority priority-1"/>*/}
-
-                    <div class="card-subject">{source.P[IdAttr]}</div>
-                    <div class="card-assignee">String</div>
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-        </div>
-
-        <div class="list">
-          <div class="list-title dx-theme-text-color">Target</div>
-          <div
-            // class="scrollable-list"
-            ref={(scrollEl) => {
-              new ScrollView(scrollEl, {
-                direction: "vertical",
-                showScrollbar: "always",
-              });
-            }}
-          >
-            <div
-              class="sortable-cards"
-              ref={(itemsEl) => {
-                new Sortable(itemsEl, {
-                  group: "tasksGroup",
-                  moveItemOnDrop: true,
-                });
-              }}
-            >
-              <For each={sourceVertexes()}>
-                {(vertex) => (
-                  <div style="width: auto;" class="card dx-card dx-theme-text-color dx-theme-background-color">
-                    {/*<div class="card-priority priority-1"/>*/}
-                    <div class="card-subject">
-                      <KanbanCardRow joinVertex={vertex} />
-                    </div>
-                    <div class="card-assignee"></div>
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
     return <GenericField
@@ -570,7 +378,6 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
   }
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
-  const [sourceVertexes, setSourceVertexes] = createSignal([] as Vertex[]);
 
   // columns
   const tableColumnsTemplate = record.getMetaAttributes(props.meta);
@@ -578,15 +385,6 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
     return "Cant find table columns";
   }
 
-  const uniqueAttr = () => props.meta.P.props?.unique;
-  const isKanban = () => uniqueAttr() && props.meta.P.props?.kanban && props.meta.P.props.collection;
-  // add source vertexes data to store
-  if (isKanban()) {
-    createEffect(() => {
-      const vertexes = getSelectionOptions(props.data, props.meta.P.props.collection).vertexes || [];
-      setSourceVertexes(vertexes);
-    });
-  }
 
   // add dynamic meta from separate collection.
   // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
@@ -622,100 +420,6 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
     const vertexes = record.getSublistRows(props.meta, props.data);
     setSortedVertexes(vertexes);
   });
-
-
-  const KanbanCardRow = (p: { joinVertex: Vertex }) => {
-    rowMetaInitialize(p.joinVertex, props.meta, tableColumnsTemplate);
-
-    const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
-    if (attributesResult.error) alert("Error getting attributes");
-    const rowColumnsMetaAttrs = attributesResult.vertexes!;
-
-    const DisplayCardProperties = () => {
-      return (
-        <For each={rowColumnsMetaAttrs}>
-          {(metaVertex) => {
-            const component = createMemo(() => {
-              if (metaVertex.P.component.includes("-")) {
-                // return getOptionLabel(metaVertex, metaVertex.P.component);
-                return getOptionLabel(p.joinVertex, metaVertex.P.component);
-              } else {
-                return metaVertex.P.component;
-              }
-            });
-            // if mergeProps not keep reactivity use memo
-            createEffect(() => {
-              addMeta(metaVertex, p.joinVertex);
-            });
-
-            const DefaultValue = () => <>{metaVertex.P.props?.defaultValue &&
-             getOptionLabel(p.joinVertex, metaVertex.P.props.defaultValue)}</>;
-            const Content = () => <>
-              <DynamicComponent
-               component={component()}
-               // When we have a Table we pass original Table Meta Vertex
-               meta={component() === "Table" ? graph.vertexes[metaVertex.P.templateId] : metaVertex}
-               data={p.joinVertex}
-               setValue={record.setValue}
-              />
-            </>;
-
-            return (
-             <Switch>
-               <Match when={metaVertex.P.props?.hidden}>
-                 <div class="">
-                   <DefaultValue />
-                 </div>
-               </Match>
-               <Match when={component() === "Table"}>
-                 <div class="">
-                   <DefaultValue />
-                   <Content />
-                 </div>
-               </Match>
-               <Match when={true}>
-                 <div class="flex align-items:center">
-                   <DefaultValue />
-                   <Content />
-                 </div>
-               </Match>
-              </Switch>
-            );
-          }}
-        </For>
-      );
-    };
-
-    return (
-      <>
-        <DisplayCardProperties />
-        <div>
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "ButtonGroup",
-                  [IdAttr]: "meta",
-                  props: {
-                    keyExpr: "id",
-                    items: [
-                      {
-                        icon: "trash",
-                        id: "delete",
-                        hint: "Delete Row",
-                      },
-                    ],
-                  },
-                },
-              } as unknown as Vertex
-            }
-            data={{ P: { meta: [] } } as unknown as Vertex}
-            onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
-          />
-        </div>
-      </>
-    );
-  };
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
@@ -885,89 +589,6 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
   //   setActiveDragItem(null);
   // };
 
-  // @ts-ignore
-  const Kanban = () => {
-    return (
-      <div
-        class="sortable-board sortable-lists"
-        ref={(containerEl) => {
-          new ScrollView(containerEl, {
-            direction: "horizontal",
-            showScrollbar: "always",
-          });
-        }}
-      >
-        <div class="list">
-          <div class="list-title dx-theme-text-color">Sources</div>
-          <div
-            class="scrollable-list"
-            ref={(scrollEl) => {
-              new ScrollView(scrollEl, {
-                direction: "vertical",
-                showScrollbar: "always",
-              });
-            }}
-          >
-            <div
-              class="sortable-cards"
-              ref={(itemsEl) => {
-                new Sortable(itemsEl, {
-                  group: "tasksGroup",
-                  moveItemOnDrop: true,
-                });
-              }}
-            >
-              <For each={sourceVertexes()}>
-                {(source) => (
-                  <div class="card dx-card dx-theme-text-color dx-theme-background-color">
-                    {/*<div class="card-priority priority-1"/>*/}
-
-                    <div class="card-subject">{source.P[IdAttr]}</div>
-                    <div class="card-assignee">String</div>
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-        </div>
-
-        <div class="list">
-          <div class="list-title dx-theme-text-color">Target</div>
-          <div
-            // class="scrollable-list"
-            ref={(scrollEl) => {
-              new ScrollView(scrollEl, {
-                direction: "vertical",
-                showScrollbar: "always",
-              });
-            }}
-          >
-            <div
-              class="sortable-cards"
-              ref={(itemsEl) => {
-                new Sortable(itemsEl, {
-                  group: "tasksGroup",
-                  moveItemOnDrop: true,
-                });
-              }}
-            >
-              <For each={sourceVertexes()}>
-                {(vertex) => (
-                  <div style="width: auto;" class="card dx-card dx-theme-text-color dx-theme-background-color">
-                    {/*<div class="card-priority priority-1"/>*/}
-                    <div class="card-subject">
-                      <KanbanCardRow joinVertex={vertex} />
-                    </div>
-                    <div class="card-assignee"></div>
-                  </div>
-                )}
-              </For>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
     return <GenericField

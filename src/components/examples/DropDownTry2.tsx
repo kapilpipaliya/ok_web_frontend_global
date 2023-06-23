@@ -1,6 +1,6 @@
 import { createEffect, createSignal, onCleanup } from "solid-js";
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 
 export function DropDownTry2(props: ComponentProps) {
   const [selectedValue, setSelectedValue] = createSignal(null);

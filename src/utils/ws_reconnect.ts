@@ -1,11 +1,11 @@
 import { IS_PRODUCTION } from "./ws_events_dispatcher";
-import atom from "../utils/dom_utils";
+import atom from "./dom_utils";
 
 export class WSBase {
   private id_ = 0;
   private readonly path: string;
   socket?: WebSocket | null;
-  state = atom(WebSocket.CLOSED);
+  state = atom<number>(WebSocket.CLOSED);
   // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
   private isOnline = window.navigator.onLine;
   private onOpen_: (() => void) | undefined;

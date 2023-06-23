@@ -25,7 +25,7 @@ import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text
 import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { ValidationRule } from "devextreme/common";
-import { ComponentProps } from "../core/Form";
+import { ComponentProps } from "../../types/Component";
 import { graph, IdAttr } from "../../lib/graph";
 import { FormContext, isUpdatingInput } from "../../lib/Record";
 import { getOptionLabel } from "../../lib/Traverse";
