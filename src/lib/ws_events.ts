@@ -1,29 +1,20 @@
 import { batch, useContext } from "solid-js";
-import { WsContext } from "../utils/ws_events_dispatcher";
+import { getCookie, WsContext } from "../utils/ws_events_dispatcher";
 import { G } from "@mobily/ts-belt";
 import {
  commitTransaction,
  EdgeMap,
- edgeOldIdToNewIdMap, Id,
+ edgeOldIdToNewIdMap,
+ graph,
+ Id,
  ProcessStatus,
  setGraph,
  transactions,
  VertexMap,
  vertexOldIdToNewIdMap
 } from "./graph";
-import {
- addNewVertex, addNewVertexUnSafe,
- deleteVertex,
- newVertex,
- updateVertexId
-} from "./Vertex";
-import {
- addNewEdge,
- addNewEdgeUnSafe,
- deleteEdge,
- newEdge,
- updateEdgeId
-} from "./Edge";
+import { deleteVertex, updateVertexId } from "./Vertex";
+import { deleteEdge, updateEdgeId } from "./Edge";
 
 
 export const syncEvent = () => {
@@ -191,7 +182,46 @@ export const syncEvent = () => {
   });
  };
  Ws.bind(["get", "sync", 0], setGraphData);
+ Ws.bind(["post", "loginJwt", 0], d => {
+  if(!d?.error) {
+   setGraph('member', d);
+  }
+  Ws.trigger([
+   [
+    ["get", "sync", 0],
+    {
+     from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
+     // subscriptions: this.subscriptions,
+     subscriptions: [],
+    },
+   ],
+  ])
+ });
+
  Ws.bind(["get", "member", 0], d => {
   setGraph('member', d);
+  // we sync after member is received.
+  // TODO: We dont need fresh sync but from last timestamp sync
+  if (!d) {
+   Ws.trigger([
+    [
+     ["post", "loginJwt", 0],
+     {
+      jwt: getCookie("jwt")
+     },
+    ],
+   ])
+  } else {
+   Ws.trigger([
+    [
+     ["get", "sync", 0],
+     {
+      from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
+      // subscriptions: this.subscriptions,
+      subscriptions: [],
+     },
+    ],
+   ])
+  }
  });
 };
