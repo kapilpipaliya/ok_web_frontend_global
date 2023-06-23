@@ -1,7 +1,5 @@
-import { AbstractSingleForm } from "./Form";
 import { useNavigate, useParams } from "@solidjs/router";
 import {
- createEffect,
  createSignal,
  createUniqueId,
  onCleanup,
@@ -9,31 +7,24 @@ import {
 } from "solid-js";
 import {
  getExportCode,
- getPkForCollection,
  PageContext,
  Record
 } from "../lib/Record";
 import { PageItemRender } from "./input/GenaricField";
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
-import { graph, Vertex } from "../lib/graph";
-import { getChildVertex, getToEdge } from "../lib/Traverse";
+import { Vertex } from "../lib/graph";
+import { getChildVertex } from "../lib/Traverse";
 import { stringify } from "yaml";
-import { klona } from "klona";
-import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
-import { AttrsTableData } from "./api";
 import { Navigator } from "@solidjs/router/dist/types";
 import { importNavigation } from "../pages/BackupRestore";
+import { AbstractSingleForm } from "./DynamicForm";
 
-export const FormDesigner = () => {
- const params = useParams();
- return (
-  <div>
-   hello
-   <AbstractSingleForm formId={"Coll"} id={params.id} config={{}} />
-  </div>
- );
-};
-
+/*
+  Tasks:
+  Check if this component support custom components.
+  Check if we can directly use the the vertexes, or can use some proxies so we not need intermediate transformations
+  https://js.devexpress.com/Demos/WidgetsGallery/Demo/TreeView/DragAndDropHierarchicalDataStructure/jQuery/Light/
+*/
 export const PageDesigner = () => {
  const params = useParams();
  const config = {} as { record: Record };
@@ -189,6 +180,7 @@ export const renderTreeFromGraph = (el: HTMLDivElement, record: Record, navigate
   displayExpr: "name",
   itemsExpr: "children",
   width: 200,
+  searchEnabled: true,
   onItemClick(e) {
    if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
   }

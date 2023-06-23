@@ -8,7 +8,7 @@ import {
  revertTransaction, setGraph,
  Vertex
 } from "./graph";
-import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
+import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
 import { klona } from "klona/json";
 import {
  addNewVertex,

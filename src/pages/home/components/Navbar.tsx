@@ -1,8 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { DisplayComponentProps } from "../../../components/core/Form";
+import { DisplayComponentProps } from "../../../types/Component";
 import { JSXElement, Show, useContext } from "solid-js";
 import { PageContext } from "../../../lib/Record";
-import { MenuIcon } from "../../../components/MenuIcon";
 
 export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?: JSXElement}) {
  let { events } = useContext(PageContext);
@@ -11,7 +10,7 @@ export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?
   <nav class={`p:10 flex jc:space-between ai:center ${props.meta?.P.class || ''}`}>
 
    <Show when={props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition}>
-    <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
+    <Icon icon="mdi:hamburger-menu" width={20} onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
    </Show>
 
    {props.left}
@@ -26,7 +25,7 @@ export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?
     {props.right}
 
     <Show when={props.meta?.P.menuPosition === "right"}>
-     <MenuIcon icon="mdi:hamburger-menu" onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
+     <Icon icon="mdi:hamburger-menu" width={20} onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>
     </Show>
 
    </div>

@@ -1,10 +1,9 @@
-import { ComponentProps } from "./Form";
-import { createEffect, For, Show, onCleanup } from "solid-js";
+import { ComponentProps } from "../../types/Component";
 import Sortable, { Properties } from "devextreme/ui/sortable";
 import ScrollView from "devextreme/ui/scroll_view";
 // @ts-ignore
-import { tasks, employees } from "../data/sortableData";
-import "../assets/styles/sortable.css";
+import { tasks, employees } from "./data/sortableData";
+import "./styles/sortable.css";
 
 const statuses = ["Not Started", "Need Assistance", "In Progress", "Deferred", "Completed"];
 
@@ -22,6 +21,7 @@ export default function SortableKanban(props: ComponentProps) {
 
     container.classList.add("sortable-lists");
 
+    // @ts-ignore
     const sortable = new Sortable(container, {
       filter: ".list",
       itemOrientation: "horizontal",

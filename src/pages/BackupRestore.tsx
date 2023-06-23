@@ -38,7 +38,7 @@ import {
   isSimpleCollection,
   setSelectionValue
 } from "../components/input/SelectInputField";
-import { WsContext } from "../components/ws_events_dispatcher";
+import { WsContext } from "../utils/ws_events_dispatcher";
 import { getParentVertex, getToEdge } from "../lib/Traverse";
 import {
   getFormMetaData,
@@ -48,7 +48,7 @@ import {
   Record
 } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
-import { Field, NsMetaJson, Type } from "../NSMetaData";
+import { Field, NsMetaJson, Type } from "../types/NSMetaData";
 import { parse } from "yaml";
 import { G } from "@mobily/ts-belt";
 import { deleteEdge } from "../lib/Edge";

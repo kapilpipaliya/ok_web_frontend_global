@@ -32,7 +32,7 @@ import dxLoadPanel, { Properties as dxLoadPanelProperties } from "devextreme/ui/
 import dxLoadIndicator, { Properties as dxLoadIndicatorProperties } from "devextreme/ui/load_indicator";
 import dxList, { Properties as dxListProperties } from "devextreme/ui/list";
 import dxGantt, { Properties as dxGanttProperties } from "devextreme/ui/gantt";
-import { tasks, dependencies, resources, resourceAssignments } from "../data/ganttData";
+import { tasks, dependencies, resources, resourceAssignments } from "../examples/data/ganttData";
 import dxGallery, { Properties as dxGalleryProperties } from "devextreme/ui/gallery";
 import dxFunnel, { Properties as dxFunnelProperties } from "devextreme/viz/funnel";
 import dxFileManager, { Properties as dxFileManagerProperties } from "devextreme/ui/file_manager";
@@ -50,7 +50,7 @@ import dxPivotGrid, { Properties as dxPivotGridProperties } from "devextreme/ui/
 import dxDropDownButton, { Properties as dxDropDownButtonProperties } from "devextreme/ui/drop_down_button";
 import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
-import { ComponentProps } from "../core/Form";
+import { ComponentProps } from "../../types/Component";
 import { IdAttr, setGraph, Vertex } from "../../lib/graph";
 import { FormContext, PageContext } from "../../lib/Record";
 import { getTextColumnValue } from "./GenaricInputField";
@@ -66,7 +66,7 @@ import {
 } from "../../pages/home/components/TodaysEnergizerSection";
 import {
   DynamicComponentWithAutoPropsSupport
-} from "../dynamicForm";
+} from "../DynamicForm";
 
 export const genericComponents2 = [
   "Box",

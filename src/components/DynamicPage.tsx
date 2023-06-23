@@ -1,6 +1,6 @@
-import { AbstractSingleForm } from "./Form";
 import { Vertex } from "../lib/graph";
 import { useParams } from "@solidjs/router";
+import { AbstractSingleForm } from "./DynamicForm";
 
 export const Page = () => {
   const params = useParams();

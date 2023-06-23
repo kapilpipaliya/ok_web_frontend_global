@@ -2,7 +2,7 @@ import CustomStore from "devextreme/data/custom_store";
 import DropDownBox, { Properties } from "devextreme/ui/drop_down_box";
 import dxTreeView from "devextreme/ui/tree_view";
 import { createEffect, createSignal, For, Show, onCleanup } from "solid-js";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 
 export function DropDownBoxField(props: ComponentProps) {
   const [treeView, setTreeView] = createSignal(null);

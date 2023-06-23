@@ -14,7 +14,7 @@ import {
  mergeVertexProperties,
  newVertex
 } from "./Vertex";
-import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
+import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
 import csvtojson from "csvtojson";
 import { getChildVertex, getChildVertexes, getToEdge } from "./Traverse";
 import { A, D } from "@mobily/ts-belt";

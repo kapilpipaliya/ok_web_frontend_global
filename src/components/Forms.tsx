@@ -1,29 +1,21 @@
-import {
-  createMemo,
-  createUniqueId,
-  For,
-  onCleanup,
-  splitProps,
-  useContext
-} from "solid-js";
+import { createUniqueId, For, onCleanup, useContext } from "solid-js";
 import { Link, useNavigate } from "@solidjs/router";
 import {
   graph,
-  Id,
   IdAttr,
   resetDatabaseLogin,
-  revertTransaction, setGraph,
+  revertTransaction,
+  setGraph,
   Vertex
 } from "../lib/graph";
-
-import { DynamicForm, DynamicFormProps } from "./dynamicForm";
-import { AlertMessageContext } from "../appState";
-import { Alert } from "../Type";
-import { WsContext, WSEvent } from "./ws_events_dispatcher";
+import { AbstractSingleForm } from "./DynamicForm";
+import { Alert } from "../types/Type";
+import { WsContext, WSEvent } from "../utils/ws_events_dispatcher";
 import { SelectInputField } from "./input/SelectInputField";
 import { GenericField } from "./input/GenaricField";
-import { getFormMetaData, Record } from "../lib/Record";
+import { Record } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
+import { AlertMessageContext } from "../contexts/AlertMessageContext";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -32,27 +24,6 @@ export const AllForms = () => {
   return (
     <div class="">
       <For each={allForms()}>{(vertexId) => <Link href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
-    </div>
-  );
-};
-
-interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
-  formId: string;
-  id: string | number;
-}
-
-export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
-  // TODO: add validation on form that AttrsTableData keys should not available.
-
-  const form = getFormMetaData(props.formId);
-  if (form.error) return form.error;
-
-  const [p, customProps] = splitProps(props, ["formId", "id"]);
-
-  const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
-  return (
-    <div class="">
-      <DynamicForm form={form.form!} id={id() as Id} {...customProps} config={props.config || {}} />
     </div>
   );
 };

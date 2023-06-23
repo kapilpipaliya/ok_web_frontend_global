@@ -10,7 +10,7 @@ import { Icon } from "@iconify-icon/solid";
 import { graph, Vertex } from "../../lib/graph";
 import { PageItemRender } from "../../components/input/GenaricField";
 import { PageContext, Record } from "../../lib/Record";
-import { WsContext } from "../../components/ws_events_dispatcher";
+import { WsContext } from "../../utils/ws_events_dispatcher";
 import { Properties as dxGalleryProperties } from "devextreme/ui/gallery";
 
 export default function Home() {

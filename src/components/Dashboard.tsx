@@ -1,10 +1,8 @@
 import {
-  JSX,
   Component,
   createEffect,
   createSignal,
   on,
-  onMount,
   Show,
   useContext, For
 } from "solid-js";
@@ -13,29 +11,26 @@ import Page404 from "../pages/404";
 import { BackupRestore, GraphViewPage } from "../pages/BackupRestore";
 import { getNewGraphId, graph, Vertex } from "../lib/graph";
 import {
-  AbstractSingleForm,
   AllForms,
   Login,
   Logout,
   SignUp,
   SimpleImport
-} from "./Form";
-import { WsContext } from "./ws_events_dispatcher";
-// import { AlertMessageContext } from "../appState";
-import dxDrawer, { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
+} from "./Forms";
+import { WsContext } from "../utils/ws_events_dispatcher";
+import { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import { Page } from "./DynamicPage";
 import {
-  FormDesigner,
   NavDesigner,
   PageDesigner,
   renderTreeFromGraph
 } from "./FormDesigner";
-import { syncEvent } from "./ws_events";
+import { syncEvent } from "../lib/ws_events";
 import { GenericField } from "./input/GenaricField";
-import { AlertMessageContext } from "../appState";
+
 import { Alert } from "./uikit_components/Alert/Alert";
 import { PageContext, Record } from "../lib/Record";
 import {
@@ -45,13 +40,14 @@ import {
 } from "../lib/Vertex";
 import { AttrsTableData } from "./api";
 import { Navbar } from "../pages/home/components/Navbar";
+import { AlertMessageContext } from "../contexts/AlertMessageContext";
+import { AbstractSingleForm } from "./DynamicForm";
 
-// window.n = navigation
+const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
-// Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
-const border = "|solid|slate-80"
+// Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
   const navigate = useNavigate();
 
@@ -77,18 +73,16 @@ export const StaticSideBar = () => {
 };
 
 
-
 const AlertDisplay = () => {
   const { alerts, setAlert } = useContext(AlertMessageContext);
   return   <For each={alerts}>
     {(alert, index) => <Alert color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={()=>setAlert(prev=> prev.filter((_, i) => i !== index()))}/>}
   </For>
 }
+
 export const DashboardView = () => {
  const vertexId = getNewGraphId();
- addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {
-  class: "bb:1" + border
- }));
+ addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {class: "bb:1" + border}));
 
   return (
     <div class="flex flex:col flex:1">
@@ -99,7 +93,8 @@ export const DashboardView = () => {
         fallback={
          <>
           <Link href={`/signup`}>Register</Link>
-          <Link href={`/login`}>Login</Link>
+          {/* @ts-ignore */}
+          <Link href={`/login`} title={__APP_VERSION__}>Login</Link>
          </>
         }
        >
@@ -109,8 +104,6 @@ export const DashboardView = () => {
       />
 
       <AlertDisplay/>
-
-
 
       <main class="p:20">
         <Show when={graph.initialSynced}>
@@ -141,7 +134,6 @@ export const DashboardView = () => {
             <Route path="/logout" component={Logout as Component} />
             <Route path="/signup" component={SignUp as Component} />
             <Route path="/SimpleImport" component={SimpleImport as Component} />
-            <Route path="/CollDesigner/:id" component={FormDesigner as Component} />
             <Route path="/Page2/:id" component={PageDesigner as Component} />
             <Route path="/Page/:id" component={Page as Component} />
             <Route path="/public/avfmobile" component={Home as Component} />
@@ -158,15 +150,8 @@ export const DashboardView = () => {
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
-  onMount(() => {
-    const meta = document.createElement("meta");
-    meta.name = "version";
-    // @ts-ignore
-    meta.content = __APP_VERSION__;
-    document.getElementsByTagName("head")[0].appendChild(meta);
-  });
-
   syncEvent();
+
   return (
     <div>
       <GenericField

@@ -3,7 +3,7 @@ import { createStore, reconcile } from "solid-js/store";
 import { G } from "@mobily/ts-belt";
 import { klona } from "klona";
 import { get, set } from "idb-keyval";
-import { ServerEventsDispatcher } from "../components/ws_events_dispatcher";
+import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
 import { batch } from "solid-js";
 window.s = createStore;
 

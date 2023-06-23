@@ -3,18 +3,41 @@ Simplified WebSocket events dispatcher
 */
 // import IsomorphicWs from 'isomorphic-ws'
 
-// import { decode } from '@msgpack/msgpack';
+// import { decode } from '@msgpack/msgpack'; import {WSBase} from "./ws_reconnect";
 
-/*
-usage:
-for $ prefix use always check if(mounted) first.
-*/
+import { WSBase } from "./ws_reconnect";
+import { createContext } from "solid-js";
+import { commitTransaction, graph } from "../lib/graph";
+
+// automatically set NODE_ENV == 'production' when we build the project.
+export const IS_PRODUCTION = process.env.NODE_ENV == "production";
+
+const http_proto = location.protocol;
+// @ts-ignore
+const domain = window.location.hostname;
+// @ts-ignore
+let port = "";
+if (window.location.hostname == "localhost") {
+  port = ":1101";
+} else if (IS_PRODUCTION) {
+  port = `:${window.location.port}`;
+}
+// const port = location.protocol == "http:" ? (IS_PRODUCTION ? "" : ":8500") : IS_PRODUCTION ? "" : ":8504";
+// const port = ''; // ':8500';
+const ws_proto = http_proto == "http:" ? "ws" : "wss";
+
+// const BACKEND = process.env.b ? process.env.b : `${domain}${port}`;
+const BACKEND = `${domain}${port}`;
+export const WS_PATH = `${ws_proto}://${BACKEND}/ws`;
+export const SERVER_PATH = `${http_proto}://${BACKEND}`;
+
+export enum BindType {
+  Once = 0,
+  Permanent = 1,
+}
+
 /**
  *
- * Ws Event Dispatcher class:
- * 1. keep constant open connection to the backend server.
- * component can bind and unbind function for the events
- * keep event identifier different to not call same event's different binded functions.
  * \todo show internet is connected or not on one place, not at every place.
  * \todo(optional) First ws retry = 0s, second = 2s then 4s..
  */
@@ -23,231 +46,153 @@ for $ prefix use always check if(mounted) first.
 // A WebSocket JavaScript library https://sarus.anephenix.com
 // https://github.com/anephenix/sarus
 // API: https://www.w3.org/TR/websockets/
-type CallBack = (d: unknown) => void;
-export type WSEvent = Array<number | string>;
-export type WsSingleEvent = [WSEvent, unknown];
+// see: https://github.com/discord/sample-game-integration/blob/master/client/src/App.js
+// see https://github.com/titoBouzout/angelia.io
+type callBack = (d: any) => void;
+export type WSEvent = [string, string, number];
 
-export class ServerEventsDispatcher {
-  path: string;
-  req: {};
-  res: {};
-  callbacks: Map<string, Array<CallBack>>;
-  isFirst: boolean;
+// read more: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
+export function saveCookie(name: string, value: string, max_age: number) {
+  document.cookie = `${name}=${value}; path=/; max-age=${max_age}`;
+}
+
+export function clearCookie(d: any) {
+  document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+}
+
+function saveCookies(data: {
+  max_age: number;
+  cookie: { [key: string]: string; jwt: string };
+}) {
+  Object.keys(data.cookie).forEach((key) => {
+    saveCookie(key, data.cookie[key] as string, data.max_age);
+  });
+}
+
+export class ServerEventsDispatcher extends WSBase {
+  callbacks: Record<string, any> = { open: [], close: [], error: [] };
+  lm_handle: ReturnType<typeof window.setTimeout>;
+  isFirstTriggers: boolean;
+  firstPayload: Array<[WSEvent, any]>;
   firstCancelTimeout: number;
-  firstPayload: WsSingleEvent[];
-  conn?: WebSocket;
-  lmHandle: number;
-  statusChangeCallback: (status: boolean) => void;
-  private id = 0;
-  // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
-  private isOnline = window.navigator.onLine;
+  // TODO: implement this:
+  subscriptions: string[] = [];
 
-  constructor(path: string, statusChangeCallback: (status: boolean) => void, isProd = false) {
-    this.path = path;
-
-    this.callbacks = new Map<string, Array<CallBack>>();
-    this.isFirst = false;
+  constructor(path: string) {
+    super(path);
+    this.callbacks = {};
     this.firstCancelTimeout = 0;
+    this.onmessage = this.onmessage.bind(this);
+    this.setOnMessage(this.onmessage);
+    this.isFirstTriggers = false;
     this.firstPayload = [];
-    this.lmHandle = 0;
-    this.statusChangeCallback = statusChangeCallback;
+    this.lm_handle = setTimeout((_) => 0, 0);
+    this.setOnOpen(this.onOpen.bind(this));
+    this.setOnClose(this.onClose.bind(this));
 
     this.bind = this.bind.bind(this);
-    this.bind$ = this.bind$.bind(this);
-    this.bindT = this.bindT.bind(this);
-    // this.bind_F = this.bind_F.bind(this)
     this.unbind = this.unbind.bind(this);
-    this.unbindEvent = this.unbindEvent.bind(this);
     this.trigger = this.trigger.bind(this);
-    // this.triggerFile = this.triggerFile.bind(this)
-    this.onmessage = this.onmessage.bind(this);
-    this.onclose = this.onclose.bind(this);
-    this.onopen = this.onopen.bind(this);
-    this.onerror = this.onerror.bind(this);
     this.dispatch = this.dispatch.bind(this);
-    this.batchBind = this.batchBind.bind(this);
-    this.batchBindT = this.batchBindT.bind(this);
-    this.delaySend = this.delaySend.bind(this);
+    this.delay_send = this.delay_send.bind(this);
     this.heartbeat = this.heartbeat.bind(this);
-
-    if (isProd) {
-      if (window.navigator.onLine) {
-        this.conn = this.setupConnection();
-      }
-      window.addEventListener("online", () => {
-        this.isOnline = true;
-        this.setupConnection();
-      });
-      window.addEventListener("offline", () => {
-        this.isOnline = false;
-      });
-    } else {
-      this.setupConnection();
-    }
+    this.subscribe = this.subscribe.bind(this);
+    this.bind(["get", "cookie_event", 0], saveCookies);
+    this.start();
   }
 
-  get uid() {
-    return ++this.id;
-  }
-
-  setupConnection() {
-    // if (this.conn) {
-    //   return;
+  onOpen() {
+    clearTimeout(this.lm_handle);
+    this.isFirstTriggers = true;
+    this.heartbeat();
+    this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
+    // if (token) {
+    //   this.sendMessage('authentication_challenge', {token});
     // }
-    this.conn = new WebSocket(this.path, []);
-    // dispatch to the right handlers
-    this.conn.onmessage = this.onmessage;
-    this.conn.onclose = this.onclose;
-    // this.conn.onopen = this.onopen;
-    this.conn.addEventListener("open", this.onopen);
-    this.conn.onerror = (e) => {
-      // console.log(e);
-    };
-    return this.conn;
+    this.dispatch(["open", "", 0], []);
+    // TODO: We dont need fresh sync but from last timestamp sync
+
+    this.trigger([
+      [
+        ["get", "sync", 0],
+        {
+          from: graph.lastSyncedTime && graph.lastSyncedTime - 4000,
+          subscriptions: this.subscriptions,
+        },
+      ],
+    ]); // TODO fix time
+    // Todo: Think about what will happen if ack is not received(but server actually sends it) and internet is disconnected.
+    commitTransaction(this);
+  }
+
+  onClose() {
+    clearTimeout(this.lm_handle);
+    // this.dispatch(['close', '', 0], []);
   }
 
   heartbeat() {
-    // console.log("heartbeat send");
     // this.trigger(['heartbeat', Date.now()]);
-    this.lmHandle = window.setTimeout(this.heartbeat, 30 * 1000);
+    this.lm_handle = setTimeout(this.heartbeat, 30 * 1000);
   }
 
-  destroy() {
-    if (this.conn) {
-      this.conn.onmessage = null;
-      this.conn.onclose = null;
-      this.conn.removeEventListener("open", this.onopen);
-      this.conn.close();
-    }
-  }
-
-  bind(event: WSEvent, callback: CallBack, handleMultiple = 0, data = []) {
+  bind(event: WSEvent, callback: callBack, handleMultiple = BindType.Permanent) {
     this.callbacks[JSON.stringify(event)] = this.callbacks[JSON.stringify(event)] ?? [];
-    this.callbacks[JSON.stringify(event)].push([handleMultiple, callback, data]); // 0 means unsubscribe using first time
+    this.callbacks[JSON.stringify(event)].push([handleMultiple, callback]);
     return this;
-  }
-
-  batchBind(events: Array<[WSEvent, CallBack, any]> = []) {
-    const payload = [];
-    for (let i = 0; i < events.length; i++) {
-      const e = events[i];
-      this.bind(e[0], e[1]);
-      payload.push([e[0], e[2]]);
-    }
-    return payload;
-  }
-
-  batchBindT(events: Array<[WSEvent, CallBack, any]> = []) {
-    const payload = this.batchBind(events);
-    this.trigger(payload);
-    return this;
-  }
-
-  bind$(event: WSEvent, callback: CallBack, handleMultiple = 0, data = []) {
-    this.unbind(event);
-    this.bind(event, callback, handleMultiple, data);
-    return () => this.unbind(event);
-  }
-
-  bindT(event: WSEvent, callback: CallBack, data, handleMultiple = 0) {
-    this.bind$(event, callback, handleMultiple, data);
-    this.trigger([[event, data]]);
-    return () => this.unbind(event);
   }
 
   unbind(event: WSEvent) {
-    this.callbacks[JSON.stringify(event)] = [];
-  }
-
-  unbindEvent(eventNames: Array<WSEvent> = []) {
-    for (const event of eventNames) {
-      this.unbind(event);
-    }
+    this.callbacks[JSON.stringify(event)] = undefined;
     return this;
   }
 
-  trigger(payload: WsSingleEvent[]) {
-    const f = this.trigger;
-    if (!this.conn) {
+  subscribe(args: any) {
+    this.trigger([["get", "sync", 0], args]);
+  }
+
+  private delay_send() {
+    if (this.firstPayload.length) {
+      if (this.socket) {
+        this.socket.send(JSON.stringify(this.firstPayload));
+        this.firstPayload = [];
+      } else {
+        return;
+      }
+    }
+    this.isFirstTriggers = false;
+  }
+
+  // to handle trigger response, needs to bind first
+  trigger(payload: Array<[WSEvent, any]>) {
+    if (!this.socket) {
       this.firstPayload.push(...payload);
     } else {
-      switch (this.conn.readyState) {
+      switch (this.socket.readyState) {
         case WebSocket.CONNECTING:
-          // code block
-          // This will added to onopen list, take care
-          // this.conn.addEventListener('open', () => {
-          // f(payload)
           this.firstPayload.push(...payload);
-          // })
-          return this;
+          return;
         case WebSocket.OPEN:
-          if (this.isFirst) {
+          if (this.isFirstTriggers) {
             for (let i = 0; i < payload.length; i++) {
               this.firstPayload.push(payload[i]);
             }
             clearTimeout(this.firstCancelTimeout);
-            this.firstCancelTimeout = window.setTimeout(this.delaySend, 50);
+            this.firstCancelTimeout = window.setTimeout(this.delay_send, 50);
           } else {
-            this.conn.send(JSON.stringify(payload)); // <= send JSON data to socket server
+            this.socket.send(JSON.stringify(payload)); // <= send JSON data to socket server
           }
-          return this;
+          return;
         case WebSocket.CLOSING:
         case WebSocket.CLOSED:
-          // try to reconnect/logout
-          this.setupConnection();
-          // this.conn.addEventListener('open', () => {
           this.firstPayload.push(...payload);
-          // f(payload)
-          // })
-          return this;
+          return;
         default:
-          return this;
-        // code block
+          return;
       }
     }
   }
 
-  private delaySend() {
-    if (this.firstPayload.length) {
-      // VM421 main.aaf1bd3bb…936a.bundle.js:5658 Uncaught DOMException: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.
-      this.conn && this.conn.send(JSON.stringify(this.firstPayload));
-      this.firstPayload = [];
-    }
-    this.isFirst = false;
-  }
-
-  private onopen(evt: Event) {
-    clearTimeout(this.lmHandle);
-    this.statusChangeCallback(true);
-    this.isFirst = true;
-    this.firstCancelTimeout = window.setTimeout(this.delaySend, 50);
-    this.dispatch(["open", "", 0], []);
-    this.heartbeat();
-  }
-
-  private onclose(ev: CloseEvent) {
-    clearTimeout(this.lmHandle);
-    this.statusChangeCallback(false); // this.dispatch(['close', '', 0], []);
-    const waitMs = 2000;
-    // console.log(`close ${ev.code}, trying to reconnect ${new Date().toISOString()}... (waiting ${waitMs}ms)`);
-    if (ev.code !== 1006 && ev.code !== 1001) {
-      console.log(ev);
-    }
-    setTimeout(() => {
-      if (this.isOnline) {
-        this.setupConnection();
-      }
-    }, waitMs);
-    // on reconnection all subscribtion needs to resubscribe.
-  }
-
-  private onerror(event: Event) {
-    console.warn("WebSocket error:", event);
-    // todo depend on error try to reconnect
-    this.dispatch(["error", "", 0], []);
-  }
-
-  private stringHandle(data: [[[number, number, string], Array<{}>]]) {
+  private stringHandle(data: [[WSEvent, Array<any>]]) {
     if (!Array.isArray(data)) {
       console.warn("return data must be an array.", data);
     } else {
@@ -275,8 +220,8 @@ export class ServerEventsDispatcher {
     }
     // if(evt.data instanceof ArrayBuffer ){
     else {
-      const blob = evt.data;
-      const buffer = await blob.arrayBuffer();
+      // const blob = evt.data;
+      // const buffer = await blob.arrayBuffer();
       /// /const data = decode(buffer);
       /// /this.stringHandle(data);
       // console.log('Received arraybuffer')
@@ -298,9 +243,13 @@ export class ServerEventsDispatcher {
       for (let i = 0; i < length; i++) {
         chain[i][1](...message);
         if (chain[i][0] == 0) {
-          this.callbacks[JSON.stringify(event)] = [];
+          this.callbacks[JSON.stringify(event)] = undefined;
         }
       }
     }
   }
 }
+//
+// export const Ws = new ServerEventsDispatcher(WS_PATH);
+
+export const WsContext = createContext({} as { Ws: ServerEventsDispatcher });

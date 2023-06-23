@@ -1,4 +1,4 @@
-import { Vertex, VertexUnsafe } from "../../lib/graph";
+import { Vertex, VertexUnsafe } from "../lib/graph";
 
 export interface ComponentProps {
   meta: Vertex;

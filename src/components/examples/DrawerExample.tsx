@@ -1,5 +1,5 @@
 import { createEffect, For, JSXElement, Show, onCleanup } from "solid-js";
-import { ComponentProps } from "./Form";
+import { ComponentProps } from "../../types/Component";
 import Drawer, { Properties } from "devextreme/ui/drawer";
 import List from "devextreme/ui/list";
 import { IdAttr, Vertex } from "../../lib/graph";

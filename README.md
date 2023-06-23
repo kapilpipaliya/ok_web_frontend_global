@@ -1,6 +1,5 @@
 ## Usage
 
-
 ```bash
 npm install
 ```
@@ -21,14 +20,10 @@ npm install
 
 ## Deployment
 
-You can deploy the `dist` folder to any static host provider
+- You can deploy the `dist` folder to any static host provider
 
 ## Linting
 
-ESLint is configured as following
-
-- Warning on prettier warnings.
-<!-- - `id-length`: avoid single letter name -->
 - `camelcase`: Use `camelCase` for naming objects, functions, and instances
 - `new-cap`: Use `PascalCase` for naming constructor and classes,
 - `no-underscore-dangle`: Do not use leading or trailing underscore
@@ -42,11 +37,19 @@ ESLint is configured as following
   -- Exported
   -- is constant
 
-### Graph Logic Rules:
-- always handle node object like: {id: 0, L: [], P: {}}
+## Formatting
+- npx rome format <files> --write
 
 ### css rules
 - don't use css child selectors.
+
+### Rules:
+- User doesn't need to open multiple tabs. he can do whatever he wants in one tab.
+
+### 3rdParty Libraries
+
+- devExpress: https://js.devexpress.com/Documentation/Guide/UI_Components/Common/Advanced/3rd-Party_Frameworks_Integration_API/#Create_and_Configure_a_Widget
+
 
 ### Eval Libs
 https://www.npmjs.com/package/@nx-js/compiler-util
@@ -54,19 +57,3 @@ evalute in a window:
 https://github.com/amasad/context-eval/blob/master/lib/context-browser.js
 https://github.com/ttessarolo/safe-evaluate-expression
 
-### Rules:
-- User don't need to open multiple tabs. he can do whatever he wants in one tab.
-
-https://js.devexpress.com/Documentation/Guide/UI_Components/Common/Advanced/3rd-Party_Frameworks_Integration_API/#Create_and_Configure_a_Widget
-
-### Import:
-- First Import all DataType Manually
-
-
-#TODO: implement modal from this demo:
-https://js.devexpress.com/Demos/WidgetsGallery/Demo/Common/DialogsAndNotificationsOverview/jQuery/Light/
-
-npx rome format <files> --write
-
-###TODO:
-1. 
