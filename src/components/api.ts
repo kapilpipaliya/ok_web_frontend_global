@@ -210,6 +210,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "key",
             component: "TextBox",
           },
+          {
+            name: "required",
+            component: "CheckBox",
+          },
 
           {
             name: "dataType",
@@ -1003,7 +1007,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             },
           },
           {
-            name: "Attr",
+            name: "Att",
             displayName: "Attribute",
             component: "SelectBox",
             props: {
@@ -1091,13 +1095,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             ],
           },
           {
-            name: "coll",
-            component: "SelectBox",
-            props: {
-              collection: "Coll",
-            },
-          },
-          {
             name: "data",
             component: "SelectBox",
             props: {
@@ -1125,7 +1122,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 },
               },
               {
-                name: "Attr",
+                name: "Att",
                 displayName: "Attribute",
                 component: "SelectBox",
                 props: {
@@ -1172,13 +1169,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 ],
               },
               {
-                name: "coll",
-                component: "SelectBox",
-                props: {
-                  collection: "Coll",
-                },
-              },
-              {
                 name: "data",
                 component: "SelectBox",
                 props: {
@@ -1205,7 +1195,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     },
                   },
                   {
-                    name: "Attr",
+                    name: "Att",
                     displayName: "Attribute",
                     component: "SelectBox",
                     props: {
@@ -1252,13 +1242,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     ],
                   },
                   {
-                    name: "coll",
-                    component: "SelectBox",
-                    props: {
-                      collection: "Coll",
-                    },
-                  },
-                  {
                     name: "data",
                     component: "SelectBox",
                     props: {
@@ -1285,7 +1268,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         },
                       },
                       {
-                        name: "Attr",
+                        name: "Att",
                         displayName: "Attribute",
                         component: "SelectBox",
                         props: {
@@ -1330,13 +1313,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                              "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
                           },
                         ],
-                      },
-                      {
-                        name: "coll",
-                        component: "SelectBox",
-                        props: {
-                          collection: "Coll",
-                        },
                       },
                       {
                         name: "data",

@@ -27,7 +27,7 @@ import {
   getParentVertexValue,
   getSelectedVertexValue,
   getSelectionOptions,
-  getToEdge
+  getToEdge, replaceExpressionToLabel
 } from "../../lib/Traverse";
 import { ComponentProps } from "../../types/Component";
 import {
@@ -287,14 +287,12 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
                     refetch();
                   },
                 } as Properties)
-              } else {
-                displayExpr = collectionNameDisplayExpr(props.meta.P.props?.collection);
               }
 
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, props.meta.P.props.displayExpr || displayExpr || `P.${IdAttr}`),
+                displayExpr: (item) => getOptionLabel(item, props.meta.P.props?.displayExpr || collectionNameDisplayExpr(replaceExpressionToLabel(props.meta.P.props?.collection, props.data)) || `P.${IdAttr}`),
 
               } as Properties)
             }
@@ -449,13 +447,12 @@ export function SelectInputFieldWithAutoProps(props: ComponentProps & {component
                   },
                 } as Properties)
               } else {
-                displayExpr = collectionNameDisplayExpr(props.meta.P.props?.collection?.P.value);
               }
 
               Object.assign(selectOp, {
                 // if valueExpr value is undefined onValueChange will not fire.
                 valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, props.meta.P.props?.displayExpr?.P.value || displayExpr || `P.${IdAttr}`),
+                displayExpr: (item) => getOptionLabel(item, props.meta.P.props?.displayExpr?.P.value || collectionNameDisplayExpr(replaceExpressionToLabel(props.meta.P.props?.collection?.P.value, props.data)) || `P.${IdAttr}`),
 
               } as Properties)
             }

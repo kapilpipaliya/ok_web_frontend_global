@@ -347,6 +347,15 @@ export const getSelectOptionsInternal = (
   return { error: false, vertexes };
 };
 
+export function replaceExpressionToLabel(collection: string, vertex: Vertex) {
+  if (!collection) return "";
+  // example: `{->$0Coll:P.${IdAttr}}` will get a collection from expression
+  if (collection.includes("{{") && collection.includes("}}")) {
+    collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || "") || "");
+  }
+  return collection;
+}
+
 export function getSelectionOptions(
   vertex: Vertex,
   collection: string,
@@ -361,11 +370,7 @@ export function getSelectionOptions(
     }
     return { error: true };
   }
-  // example: `{->$0Coll:P.${IdAttr}}` will get a collection from expression
-  if (collection.includes("{{") && collection.includes("}}")) {
-    debugger
-    collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || "") || "");
-  }
+  collection = replaceExpressionToLabel(collection, vertex);
   return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
 }
 

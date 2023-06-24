@@ -1,5 +1,5 @@
 import {
-  createComputed,
+  createComputed, createContext,
   createEffect, createMemo, For,
   JSXElement, Match, on,
   onCleanup,
@@ -64,9 +64,8 @@ import {
 import {
   TodaysEnergizer
 } from "../../pages/home/components/TodaysEnergizerSection";
-import {
-  DynamicComponentWithAutoPropsSupport
-} from "../DynamicForm";
+import { DynamicComponentWithAutoPropsSupport } from "../DynamicForm";
+import { toTitle } from "case-switcher-js";
 
 export const genericComponents2 = [
   "Box",
@@ -115,6 +114,7 @@ export const genericComponents2 = [
   "Drawer",
   // "FilterBuilder",
   // "FileUploader",
+  "FieldSetLabelLeft"
 ]
 const displayExpr = [
   "ContextMenu",
@@ -203,7 +203,21 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
+
+export const PageRenderContext = createContext([] as Vertex[]);
+
+const PageRenderUtils = {
+  getCollection: (item?: Vertex) => item && getChildVertex(['$0Coll'], item).vertex?.P[IdAttr],
+  getAttr: (item?: Vertex) => item && getChildVertex(['$0Att'], item).vertex?.P[IdAttr],
+  getID: (item?: Vertex) => item && item.P["name"],
+  getComponent: (item?: Vertex) => item && getChildVertex(['$0Comp'], item).vertex?.P[IdAttr],
+  getDataVertex: (item?: Vertex) => item && getChildVertex(['$0Comp'], item).vertex,
+}
+
 export const PageItemRender = (props: {metaVertex: Vertex}) => {
+
+  const parentItems = useContext(PageRenderContext);
+
   // children:
   return <For each={getChildVertexes(["$0Attr"], [props.metaVertex]).vertexes}>
     {item => {
@@ -225,17 +239,57 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
         // untrack(() => { mergeVertexProperties(getNewTxnId(), item.id, { props: compProps }); })
       })
 
-      return <DynamicComponentWithAutoPropsSupport
-       meta={item}
-       data={{P:{}}}
-       setValue={_=>0}
-       disabled={false}
-       component={item.P.component || getChildVertex(['$0Comp'], item).vertex?.P[IdAttr]}
-      />
-  }}
+      const component = createMemo(() => item.P.component || getChildVertex(['$0Comp'], item).vertex?.P[IdAttr]);
+      const parentComponent = createMemo(() => {
+        return PageRenderUtils.getComponent(getLastItem(parentItems, 1));
+      });
+      const PageComponent = () => <PageRenderContext.Provider value={[...useContext(PageRenderContext), item]}>
+        <DynamicComponentWithAutoPropsSupport
+         meta={item}
+         data={{P:{}}}
+         setValue={_=>0}
+         disabled={false}
+         component={component()}
+        />
+      </PageRenderContext.Provider>
+      // currently context is not reactive, but we are assuming it will work.
+
+      const Label = () => {
+        return <>{toTitle(PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "")}</>;
+      }
+
+      return <Switch>
+        <Match when={parentComponent()==="FieldSetLabelLeft"}>
+          <Switch>
+            <Match when={component() === "Table"}>
+              <h3><Label/></h3>
+              <PageComponent/>
+            </Match>
+            <Match when={component() === "CollectionOption"}>
+              <PageComponent/>
+            </Match>
+            <Match when={true}>
+              <div class="dx-field">
+                <div class="dx-field-label">
+                  <Label/>
+                </div>
+                <div class="dx-field-value">
+                  <PageComponent/>
+                </div>
+              </div>
+            </Match>
+          </Switch>
+        </Match>
+        <Match when={true}>
+          <PageComponent/>
+        </Match>
+      </Switch>
+    }}
   </For>
 }
-
+function getLastItem<T>(arr: T[], index = 1): T | undefined {
+  return  arr[arr.length - index];
+}
 // This component support rendering Child Themselves by calling PageRender.
 export function GenericField(props: ComponentProps & { component?: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
   const formContext = useContext(FormContext);
@@ -1732,12 +1786,25 @@ export function GenericField(props: ComponentProps & { component?: string; disab
 export function GenericFieldWithAutoProps(props: ComponentProps & { component?: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
   const formContext = useContext(FormContext);
   let { events } = useContext(PageContext);
+  const parentItems = useContext(PageRenderContext);
   const component = createMemo(() => props.component || props.meta.P.component);
+  const parentComponent = createMemo(() => {
+    return PageRenderUtils.getComponent(getLastItem(parentItems, 2));
+  });
+
 
   return (
-
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
+          <Match when={component()  === "FieldSetLabelLeft"}>
+            <div class="dx-fieldset"
+             // style={{"max-width": getTabsWidth(groupByTabsAndGroup["main"][group])}}
+            >
+              {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+              <PageItemRender metaVertex={props.meta}/>
+              {/*<FormGroup attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />*/}
+            </div>
+          </Match>
           <Match when={component()==="NavBar"}>
             <Navbar meta={props.meta} data={props.data}/>
           </Match>
