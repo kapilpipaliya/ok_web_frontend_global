@@ -462,14 +462,15 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
     <div aria-labeledby={props["aria-labeledby"]} classList={{
       'width:100%': props.component === 'TextArea'
     }}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
         <div
           // @ts-ignore
           ref={(el) => {
             let attributes: any = {
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: props.data.P[props.meta.P[IdAttr]],
+              value: props.data?.P[props.meta.P[IdAttr]],
               onValueChanged: (data: any) => {
+                if (!props.data || !props.setValue) return;
                 // note: valueChanged is fired even when the value is changed programmatically,
                 // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
                 // used data.event check to prevent this.
@@ -582,6 +583,7 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
                   return `Loading: ${ratio * 100}%`;
                 },
                 onComplete(e) {
+                  if (!props.data || !props.setValue) return;
                   props.setValue(props.meta, props.data,"completed");
                 },
               } as dxProgressBarProperties);
@@ -717,8 +719,10 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
             //  console.log('cant set validator for', props.component, e);
             // }
 
+            // set value:
             createEffect(() => {
               if (isUpdatingInput) return;
+              if (!props.data) return;
               let value = props.data.P[props.meta.P[IdAttr]];
               if (props.component === "FilterBuilder" || props.component === "FileUploader") {
                 if (!value) value = [];

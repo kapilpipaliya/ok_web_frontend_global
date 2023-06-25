@@ -117,6 +117,7 @@ List`,
     component: "Table",
     tab: "expand",
     props: {
+      // this makes edge type fixed.
       type: "CollAttr"
     },
   }
@@ -392,7 +393,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         attributes: collectionAttr,
       },
 
-      {
+/*      {
         name: "Child",
         component: "Table",
         tab: "Child",
@@ -453,7 +454,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             ],
           },
         ],
-      },
+      },*/
       {
         name: "Transform",
         component: "Table",
@@ -902,30 +903,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
     ],
   },
-  _PageData: {
-    title: "User",
-    name: "User",
-    isRealTime: true,
-    attributes: [
-      {
-        name: "coll",
-        component: "SelectBox",
-        props: {
-          collection: "Coll",
-        },
-      },
-      {
-        name: "data",
-        component: "SelectBox",
-        props: {
-          collection: `{{->$0Coll:P.${IdAttr}}}`,
-        },
-      },
-    ],
-  },
-  Page2: {
-    title: "Page2",
-    name: "Page2",
+  Page: {
+    title: "Page",
+    name: "Page",
     attributes: [
       {
         name: "title",
@@ -951,7 +931,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 const { record } = options.validator.context || {} as IFormContext;
 
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Page2", "id", val, record.vertex.id);
+                return !findVertexByLabelAndUniqueIdWithSkip("Page", "id", val, record.vertex.id);
               },
             },
           ],
@@ -1128,7 +1108,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 props: {
                   // displayExpr: "P.displayName||P.name",
                   displayExpr: "$P.displayName ($P.name)",
-                  collection: "->$0Coll->$0Attr||-$0->$0Coll->$0Attr",
+                  collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr",
                 },
               },
               {
@@ -1201,7 +1181,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     props: {
                       // displayExpr: "P.displayName||P.name",
                       displayExpr: "$P.displayName ($P.name)",
-                      collection: "->$0Coll->$0Attr||-$0->$0Coll->$0Attr",
+                      collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr",
                     },
                   },
                   {
@@ -1274,7 +1254,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         props: {
                           // displayExpr: "P.displayName||P.name",
                           displayExpr: "$P.displayName ($P.name)",
-                          collection: "->$0Coll->$0Attr||-$0->$0Coll->$0Attr",
+                          collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr",
                         },
                       },
                       {
@@ -1723,9 +1703,7 @@ Url`,
   },
   // TODO: Dynamic Filter on Grid: Role->Filter
 };
-const PageMetaData = klona(AttrsTableData.Form);
-PageMetaData.title = "Page";
-PageMetaData.name = "Page";
-PageMetaData.attributes = PageMetaData.attributes.filter((attr) => !["table"].includes(attr.name));
-AttrsTableData.Page = klona(PageMetaData);
+
+
+
 // window.a = AttrsTableData;

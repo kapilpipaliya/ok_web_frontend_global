@@ -88,7 +88,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 // Dynamic Form Component
 const FormComponent = (props: {
   meta: Vertex;
-  data: Vertex;
+  data?: Vertex;
   formId: string;
 }) => {
   let { record } = useContext(FormContext);
@@ -122,7 +122,7 @@ export const DynamicComponent = (props: {
   component: string;
   meta: Vertex;
   data: Vertex;
-  setValue(attribute: Vertex, vertex: Vertex, data: any): void;
+  setValue?(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
 }) => {
   return (
@@ -179,7 +179,7 @@ export const DynamicComponentWithAutoPropsSupport = (props: {
   // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
-  data: Vertex;
+  data?: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
 }) => {
@@ -252,7 +252,7 @@ export function FormGroup(props: FormGroupProps) {
             return metaVertex.P.component;
           }
         });
-        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr])}</>
+        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || '')}</>
         const Content = () => <DynamicComponent
 
          component={component()}

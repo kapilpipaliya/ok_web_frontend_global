@@ -1,4 +1,5 @@
 import {
+  createComputed,
   createEffect,
   createMemo,
   createSignal,
@@ -7,7 +8,8 @@ import {
   onCleanup,
   Show,
   Switch,
-  useContext
+  useContext,
+ on
 } from "solid-js";
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
@@ -20,12 +22,15 @@ import {
   getNewTxnId,
   graph,
   IdAttr,
-  revertTransaction,
+  revertTransaction, setGraph,
   Vertex
 } from "../../lib/graph";
 import { WsContext } from "../../utils/ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent } from "../DynamicForm";
+import {
+  DynamicComponent,
+  DynamicComponentWithAutoPropsSupport
+} from "../DynamicForm";
 import {
   addMeta,
   addMetaVertexes,
@@ -34,10 +39,11 @@ import {
   deleteRow,
   FieldAttribute,
   FormContext,
-  getCollAttrs,
+  getCollAttrs, getSublistRows,
   rowMetaInitialize
 } from "../../lib/Record";
 import {
+  getChildVertex,
   getChildVertexes,
   getOptionLabel,
   getSelectionOptions
@@ -46,7 +52,12 @@ import ScrollView from "devextreme/ui/scroll_view";
 import Sortable from "devextreme/ui/sortable";
 import { ComponentProps } from "../../types/Component";
 import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "./GenaricField";
+import {
+  GenericField,
+  PageRenderContext,
+  PageRenderUtils
+} from "./GenaricField";
+import { getLastItem } from "../../utils/functions";
 
 export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
@@ -332,7 +343,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                           {/*<Match when={attribute.props?.skip}></Match>*/}
                           <Match when={attribute.tab === "expand"}>{}</Match>
                           <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
-                            <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr])}</th>
+                            <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr] || '')}</th>
                           </Match>
                           <Match when={true}>
                             <th></th>
@@ -371,26 +382,35 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
 export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
+  // if there is no parent FormContext, it should still work.
   let { record, cleanUpConfig } = useContext(FormContext);
-  if (!record) {
-    // on hot reload record is not available.
-    return;
-  }
 
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   // columns
-  const tableColumnsTemplate = record.getMetaAttributes(props.meta);
-  if (tableColumnsTemplate.length === 0) {
-    return "Cant find table columns";
-  }
+  // finally remove record?.getMetaAttributes(props.meta)
 
+  const getAttributes = () => {
+    // If child vertexes, use it
+    const childAttrVertex = getChildVertexes(["$0Attr", "$0Att"], [props.meta]).vertexes;
+    if(childAttrVertex?.length) {
+      return childAttrVertex;
+    }
+
+    // else get attributes from a collection.
+    const attrVertex = getChildVertex(["$0Att"], props.meta).vertex;
+    if (!attrVertex) return;
+
+    return getChildVertexes(["CollAttr"], [attrVertex]).vertexes;
+  }
+  const tableColumnsTemplate = createMemo(() => record?.getMetaAttributes(props.meta) || getAttributes() || []);
 
   // add dynamic meta from separate collection.
   // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
   if (!props.meta.P.attributes && props.meta.P.meta) {
     const metaData = componentProps(props.meta, props.data);
     if (metaData.collection) {
+      // add metadata from separate collection.
       const collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, metaData.collection);
       if (collVertex) {
         const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
@@ -414,66 +434,79 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
       }
     }
   }
+  const parentItems = useContext(PageRenderContext);
 
+  const parentData = createMemo(() => {
+    return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
+  });
+  // load data:
   // add row vertexes data to store
   createEffect(() => {
-    const vertexes = record.getSublistRows(props.meta, props.data);
+    // if a parent has data vertex use it,
+    // TODO: else if it has a parent Form Container(Record) use it.
+    const vertexes = getSublistRows(props.meta, props.data || parentData());
     setSortedVertexes(vertexes);
   });
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
     // const sortable = createSortable(p.joinVertex.id);
-    const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, tableColumnsTemplate);
 
-    if (metaTxnId) {
-      if (!cleanUpConfig.rowMetaTxnIds) {
-        cleanUpConfig.rowMetaTxnIds = [];
+    createComputed(on(tableColumnsTemplate, columns => {
+      const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, columns);
+
+      if (metaTxnId) {
+        if (cleanUpConfig) {
+          if (!cleanUpConfig.rowMetaTxnIds) {
+            cleanUpConfig.rowMetaTxnIds = [];
+          }
+          // currently, when we delete row and unmount form it is not giving error, but it should, because revertTransaction is not strict.
+          if(cleanUpConfig.rowMetaTxnIds.includes(metaTxnId)) cleanUpConfig.rowMetaTxnIds.push(metaTxnId);
+        }
       }
-      // currently when we delete row and unmount form it is not giving error, but it should, because revertTransaction is not strict.
-      cleanUpConfig.rowMetaTxnIds.push(metaTxnId);
-    }
+    }))
 
-    const attributesResult = getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]);
-    if (attributesResult.error) alert("Error getting attributes");
-    const rowColumnsMetaAttrs = attributesResult.vertexes!.filter(vertex => vertex.P.tab !== "expand");
-    const expandVertex = attributesResult.vertexes!.find(vertex => vertex.P.tab === "expand");
+    const instResult = createMemo(() => getChildVertex(["AttrInst"], p.joinVertex).vertex);
+    const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
+    const rowColumnsMetaAttrs = createMemo(() => attributesResult().vertexes?.filter(vertex => vertex.P.tab !== "expand"));
+    const expandVertex = createMemo(() => attributesResult().vertexes?.find(vertex => vertex.P.tab === "expand"));
 
     const [disabled, setDisabled] = createSignal(false);
 
     const DisplayProperties = () => {
       return (
-        <For each={rowColumnsMetaAttrs}>
-          {(metaVertex) => {
+        <For each={tableColumnsTemplate()}>
+          {(column) => {
+            const metaVertex = createMemo(() => instResult() ? graph.vertexes[instResult()!.P.rows[column.id]] : {P: {component: "String"}} as unknown as Vertex)
             const component = createMemo(() => {
-              if (metaVertex.P.component.includes("-")) {
+              if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
                 console.log("refreshing");
-                return getOptionLabel(p.joinVertex, metaVertex.P.component);
+                return getOptionLabel(p.joinVertex, metaVertex().P.component);
               } else {
-                return metaVertex.P.component;
+                return metaVertex().P.component;
               }
             });
             // if mergeProps not keep reactivity use memo
             createEffect(() => {
-              addMeta(metaVertex, p.joinVertex);
+              addMeta(metaVertex(), p.joinVertex);
             });
-            const DefaultValue = () => <>{metaVertex.P.props?.defaultValue &&
-             getOptionLabel(p.joinVertex, metaVertex.P.props.defaultValue)}</>;
+            const DefaultValue = () => <>{metaVertex().P.props?.defaultValue &&
+             getOptionLabel(p.joinVertex, metaVertex().P.props.defaultValue)}</>;
             const Content = () => <>
-              <DynamicComponent
+              <DynamicComponentWithAutoPropsSupport
                component={component()}
                // When we have a Table we pass original Table Meta Vertex
-               meta={component() === "Table" ? graph.vertexes[metaVertex.P.templateId] : metaVertex}
+               meta={component() === "Table" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
                data={p.joinVertex}
-               setValue={record.setValue}
+               setValue={record?.setValue}
                disabled={disabled()}
               />
             </>;
 
             return (
               <Switch>
-                <Match when={metaVertex.P.props?.hidden}>
+                <Match when={metaVertex().P.props?.hidden}>
                   <td>
                     <div class="">
                       <DefaultValue/>
@@ -528,9 +561,9 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
             {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
             {/*</Show>*/}
 
-            <Show when={expandVertex}>
+            <Show when={expandVertex()}>
               <Icon icon="carbon:row-expand"  onClick={() => {
-                record.addNewRowUI(expandVertex!, p.joinVertex, {})
+                return addNewRow(record?.txnId || 0, expandVertex()!, p.joinVertex, {}, record?.isRealTime ?? false, Ws);
               }} />
             </Show>
 
@@ -541,14 +574,14 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
       </tr>
         {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
         {/*{getSelectionOptions(p.joinVertex, expandVertex.P.props.collection).vertexes?.length}*/}
-        <Show when={expandVertex}>
+        <Show when={expandVertex()}>
           <tr><td class="pl:24" colspan={rowColumnsMetaAttrs.length + 1}>
-            <DynamicComponent
+            <DynamicComponentWithAutoPropsSupport
              component={"Table"}
              // When we have a Table we pass original Table Meta Vertex
-             meta={graph.vertexes[expandVertex!.P.templateId]}
+             meta={graph.vertexes[expandVertex()!.P.templateId]}
              data={p.joinVertex}
-             setValue={record.setValue}
+             setValue={record?.setValue}
              disabled={disabled()}
             />
           </td></tr>
@@ -589,6 +622,13 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
   //   setActiveDragItem(null);
   // };
 
+  const insertNewRow = () => {
+    if (!props.data) {
+      alert("Table data is not set");
+      return;
+    }
+    return addNewRow(record?.txnId || 0, props.meta, props.data!, {}, record?.isRealTime ?? false, Ws);
+  }
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
     return <GenericField
@@ -611,17 +651,20 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
          },
        } as unknown as Vertex
      }
-     onClick={() => {
-       record.addNewRowUI(props.meta!, props.data!, {});
-     }}
+     onClick={insertNewRow}
     />
   }
+
+
   return (
     <Switch>
       {/*<Match when={isKanban()}>*/}
       {/*  <Kanban/>*/}
       {/*  <SortableKanban/>*/}
       {/*</Match>*/}
+      <Match when={tableColumnsTemplate().length === 0}>
+        Please Define table columns
+      </Match>
       <Match when={true}>
         <div>
           {/*<Show when={props.meta.P.attributes}>*/}
@@ -647,14 +690,14 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
               <thead>
                 <tr>
                   <th></th>
-                  <For each={props.meta.P.attributes}>
+                  <For each={tableColumnsTemplate()}>
                     {(attribute) => {
                       return (
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
-                          <Match when={attribute.tab === "expand"}>{}</Match>
-                          <Match when={!attribute.props?.hidden || attribute.props?.defaultValue}>
-                            <th title={attribute.props?.hint}>{toTitle(attribute.displayName || attribute[IdAttr])}</th>
+                          <Match when={attribute.P.tab === "expand"}>{}</Match>
+                          <Match when={!attribute.P.hidden || attribute.P.defaultValue}>
+                            <th title={attribute.P.hint}>{toTitle(attribute.P.displayName || attribute.P[IdAttr] || '')}</th>
                           </Match>
                           <Match when={true}>
                             <th></th>
@@ -670,8 +713,8 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
                 <For each={sortedVertexes()} fallback={<tr>
-                  <td class="text:center white-space:nowrap" colspan={props.meta.P.attributes.length + 1}>
-                    No Data <Icon icon="material-symbols:add-box"  onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
+                  <td class="text:center white-space:nowrap" colspan={tableColumnsTemplate().length + 1}>
+                    No Data <Icon icon="material-symbols:add-box"  onClick={insertNewRow}/>
                   </td>
                 </tr>}>
                   {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}

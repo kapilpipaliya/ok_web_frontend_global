@@ -5,7 +5,8 @@ import {
  graph,
  Id,
  IdAttr,
- revertTransaction, setGraph,
+ revertTransaction,
+ setGraph,
  Vertex
 } from "./graph";
 import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
@@ -535,6 +536,15 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
  }
 }
 
+export function getSublistRows(meta: Vertex, vertex?: Vertex) {
+ if (!vertex) return [];
+ // This should check for inward edges too
+ const type = getToEdge(meta, vertex);
+ return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
+  (a, b) => a.P.pos - b.P.pos
+ );
+}
+
 export class Record {
  txnId: number;
  readonly isRealTime: boolean;
@@ -734,11 +744,7 @@ export class Record {
   );
  };
  getSublistRows = (meta: Vertex, vertex: Vertex) => {
-  // This should check for inward edges too
-  const type = getToEdge(meta, vertex);
-  return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
-   (a, b) => a.P.pos - b.P.pos,
-  );
+  return getSublistRows(meta, vertex);
  };
 
  groupByTabsAndGroup = () => {
@@ -805,6 +811,7 @@ export const PageContext = createContext({} as {[key: string]: any});
 export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumnsTemplate: Vertex[]) {
  const rowMetaAttrInst = getChildVertex(["AttrInst"], joinVertex);
  if (rowMetaAttrInst.error) {
+  const rows = {} as {[key: Id]: Id};
   const metaTxnId = getNewTxnId();
   batch(() => {
    const metaInstanceResult = newRow(metaTxnId, joinVertex, "AttrInst");
@@ -816,15 +823,21 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
    });
 
    for (const attrColumn of tableColumnsTemplate) {
-    const AttrInstResult = newRow(metaTxnId, graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
-    if (AttrInstResult.error) {
-     alert(AttrInstResult.error);
+    const AttrRowResult = newRow(metaTxnId, graph.vertexes[metaInstanceResult.vertexId!], "MetaAttr");
+    if (AttrRowResult.error) {
+     alert(AttrRowResult.error);
     }
-    mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, klona(attrColumn.P));
-    mergeVertexProperties(metaTxnId, AttrInstResult.vertexId!, {
-     templateId: attrColumn.id
-    });
+    const P = klona(attrColumn.P);
+    P.templateId = attrColumn.id;
+
+    if (!P.component) {
+     const component = getCollAttrComp(attrColumn);
+     if(component) P.component = component;
+    }
+    mergeVertexProperties(metaTxnId, AttrRowResult.vertexId!, P);
+    rows[attrColumn.id] = AttrRowResult.vertexId!;
    }
+   mergeVertexProperties(metaTxnId, metaInstanceResult.vertexId!, {rows, metaTxnId});
   });
   onCleanup(() => {
    // remove all AttrInst vertex.
@@ -833,8 +846,38 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
    // revertTransaction(metaTxnId);
   });
   return metaTxnId;
+ } else {
+  const rows = klona(rowMetaAttrInst.vertex!.P.rows);
+  const metaTxnId = rowMetaAttrInst.vertex!.P.metaTxnId;
+  batch(() => {
+   for (const attrColumn of tableColumnsTemplate) {
+    if (rows[attrColumn.id]) {
+     continue;
+    }
+    const AttrRowResult = newRow(metaTxnId, graph.vertexes[rowMetaAttrInst.vertex!.id], "MetaAttr");
+    if (AttrRowResult.error) {
+     alert(AttrRowResult.error);
+    }
+    const P = klona(attrColumn.P);
+    P.templateId = attrColumn.id;
+
+    if (!P.component) {
+     const component = getCollAttrComp(attrColumn);
+     if(component) P.component = component;
+    }
+    mergeVertexProperties(metaTxnId, AttrRowResult.vertexId!, P);
+    rows[attrColumn.id] = AttrRowResult.vertexId!;
+   }
+   mergeVertexProperties(metaTxnId, rowMetaAttrInst.vertex!.id, {rows});
+  });
+  onCleanup(() => {
+   // remove all AttrInst vertex.
+   // TODO: This is breaking when new row is added, its interesting to fix this.
+   // console.log('called', metaTxnId)
+   // revertTransaction(metaTxnId);
+  });
+  return metaTxnId
  }
- return "";
 }
 
 export const getFormMetaData = (formId: string) => {
@@ -957,4 +1000,18 @@ export const getExportCode = (record: Record) => {
   id: undefined,
   D: undefined
  });
+}
+
+export function getCollAttrComp(attrVertex: Vertex) {
+ const attrComp = getChildVertex(["$0Comp"], attrVertex).vertex?.P[IdAttr];
+ if (attrComp) return attrComp;
+
+ let attrDataTypeVertex = getChildVertex(["$0DataType"], attrVertex).vertex;
+ if (!attrDataTypeVertex) {
+  attrDataTypeVertex = findVertexByLabelAndUniqueId("DataType", "name", "String");
+  if (!attrDataTypeVertex) {
+   return;
+  }
+ }
+ return getChildVertex(["$0Default"], attrDataTypeVertex).vertex?.P[IdAttr];
 }
