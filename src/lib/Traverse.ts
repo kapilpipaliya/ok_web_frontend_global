@@ -66,7 +66,7 @@ export function getParentVertex(path: string[], currentVertex: Vertex): { error:
 }
 
 export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = {} as { [id: string]: Vertex };
+  const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -86,7 +86,7 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { 
       if (edge) {
         const newVertex = graph.vertexes[edge.S];
         if (newVertex) {
-          stepVertexes[newVertex.id] = newVertex;
+          stepVertexes.set(newVertex.id, newVertex);
         } else {
           return {
             error: true,
@@ -101,11 +101,11 @@ export function getParentVertexes(path: string[], currentVertexes: Vertex[]): { 
   }
 
   if (path.length > 1) {
-    return getParentVertexes(path.slice(0, -1), Object.values(stepVertexes));
+    return getParentVertexes(path.slice(0, -1), Array.from(stepVertexes.values()));
   } else {
     return {
       error: false,
-      vertexes: Object.values(stepVertexes),
+      vertexes: Array.from(stepVertexes.values()),
     };
   }
 }
@@ -165,7 +165,7 @@ export function getChildVertexes(
   currentVertexes: Vertex[],
   strict?: boolean,
 ): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = {} as { [id: string]: Vertex };
+  const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -192,7 +192,7 @@ export function getChildVertexes(
       if (edge) {
         const newVertex = graph.vertexes[edge.E];
         if (newVertex) {
-          stepVertexes[newVertex.id] = newVertex;
+          stepVertexes.set(newVertex.id, newVertex);
         } else {
           return {
             error: true,
@@ -207,11 +207,11 @@ export function getChildVertexes(
   }
 
   if (path.length > 1) {
-    return getChildVertexes(path.slice(1), Object.values(stepVertexes), strict);
+    return getChildVertexes(path.slice(1), Array.from(stepVertexes.values()), strict);
   } else {
     return {
       error: false,
-      vertexes: Object.values(stepVertexes),
+      vertexes: Array.from(stepVertexes.values()),
     };
   }
 }
@@ -248,7 +248,7 @@ export const getSelectOptionsInternal = (
 
   for (const [direction, edgeType] of collection) {
     if (direction === "-") {
-      const stepVertexes = {} as { [id: string]: Vertex };
+      const stepVertexes = new Map<number, Vertex>();
 
       for (const currentVertex of vertexes) {
         const type = edgeType.replace("$0", currentVertex.L[0]);
@@ -262,7 +262,7 @@ export const getSelectOptionsInternal = (
           if (edge) {
             const newVertex = graph.vertexes[edge.S];
             if (newVertex) {
-              stepVertexes[newVertex.id] = newVertex;
+              stepVertexes.set(newVertex.id, newVertex);
             } else {
               return {
                 error: true,
@@ -275,9 +275,9 @@ export const getSelectOptionsInternal = (
           }
         }
       }
-      vertexes = Object.values(stepVertexes);
+      vertexes = Array.from(stepVertexes.values());
     } else if (direction === "->") {
-      const stepVertexes = {} as { [id: string]: Vertex };
+      const stepVertexes = new Map<number, Vertex>();
 
       for (const currentVertex of vertexes) {
         const type = edgeType.replace("$0", currentVertex.L[0]);
@@ -298,7 +298,7 @@ export const getSelectOptionsInternal = (
           if (edge) {
             const newVertex = graph.vertexes[edge.E];
             if (newVertex) {
-              stepVertexes[newVertex.id] = newVertex;
+              stepVertexes.set(newVertex.id, newVertex);
             } else {
               return {
                 error: true,
@@ -311,7 +311,7 @@ export const getSelectOptionsInternal = (
           }
         }
       }
-      vertexes = Object.values(stepVertexes);
+      vertexes = Array.from(stepVertexes.values());
     } else if (direction === "*") {
       const filterIndex = edgeType.indexOf("[");
       let filter = "";
@@ -386,7 +386,7 @@ const getTextValue = (value: any) => {
 // TODO:
 //  if possible use Name Keys, if not found use "name"
 //  key else Primary Keys will be used.
-export function getOptionLabel(vertex: Vertex, displayExpr: string): string {
+export function getOptionLabel(vertex: Vertex | undefined, displayExpr: string): string {
   if (!vertex) return "";
 
   if (displayExpr.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {

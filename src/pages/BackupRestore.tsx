@@ -469,7 +469,7 @@ OUT:
     - L: NavAttr
       P:
         name: Base
-        expanded: true
+        expanded: false
       OUT:
         NavAttr:
           - L: NavAttr
@@ -486,24 +486,16 @@ OUT:
               url: /admin/Comp
           - L: NavAttr
             P:
-              name: Collection Category
-              url: /admin/CollCategory
+              name: Import
+              url: /admin/SimpleImport
           - L: NavAttr
             P:
-              name: Collections
-              url: /admin/Coll
-          - L: NavAttr
-            P:
-              name: Forms
-              url: /admin/Form
-          - L: NavAttr
-            P:
-              name: Page2
-              url: /admin/Page2/new
+              name: Backup & Restore
+              url: /admin/backup_restore
     - L: NavAttr
       P:
         name: Auth
-        expanded: true
+        expanded: false
       OUT:
         NavAttr:
           - L: NavAttr
@@ -520,20 +512,34 @@ OUT:
               url: /admin/Perm
     - L: NavAttr
       P:
-        name: Dashboard
-        url: /admin/Dashboard
+        name: Customization
+        expanded: true
+      OUT:
+        NavAttr:
+          - L: NavAttr
+            P:
+              name: Collection Category
+              url: /admin/CollCategory
+          - L: NavAttr
+            P:
+              name: Collections
+              url: /admin/Coll
+#          - L: NavAttr
+#            P:
+#              name: Forms
+#              url: /admin/Form
+          - L: NavAttr
+            P:
+              name: Pages
+              url: /admin/Page
+          - L: NavAttr
+            P:
+              name: Dashboards
+              url: /admin/Dashboard
     - L: NavAttr
       P:
-        name: Grids
-        url: /admin/grids
-    - L: NavAttr
-      P:
-        name: Import
-        url: /admin/SimpleImport
-    - L: NavAttr
-      P:
-        name: Backup & Restore
-        url: /admin/backup_restore
+        name: Dashboards
+        url: /admin/dashboards
 `, record);
     record.commitTxn();
     alert("Imported Navigation")
