@@ -46,8 +46,8 @@ export const PageDesigner = () => {
     />
    </div>
 
-   <div class="border:1|solid|blue-60 p:10 m:5 min-w:300">
-    <button type={"button"} onClick={rerender}>Run</button>
+   <div class="border:1|solid|blue-60 p:10 m:5 min-w:400">
+    <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
     <PageContext.Provider value={{ events: {  } }}>
      <Show when={count() && config.record.vertex && count()} keyed>
       <Preview/>

@@ -5,7 +5,7 @@ import PivotGridFieldChooser, {
   Properties as PivotGridFieldChooserProperties,
 } from "devextreme/ui/pivot_grid_field_chooser";
 // @ts-ignore
-import { pivotGridSalesData } from "./data/pivotGridSalesData.js";
+import { pivotGridSalesData } from "./data/pivotGridSalesData";
 import { IdAttr, Vertex } from "../../lib/graph";
 import { newVertex } from "../../lib/Vertex";
 
