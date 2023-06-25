@@ -211,6 +211,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             {/*<Icon icon="material-symbols:add-box"  />*/}
             <Icon
               icon="material-symbols:restore-from-trash-outline"
+              class="cursor:pointer"
               onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
             />
             {/*<Show when={!props.disabled}>*/}
@@ -218,7 +219,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             {/*</Show>*/}
 
             <Show when={expandVertex}>
-              <Icon icon="carbon:row-expand"  onClick={() => {
+              <Icon icon="carbon:row-expand" class="cursor:pointer" onClick={() => {
                 record.addNewRowUI(expandVertex!, p.joinVertex, {})
               }} />
             </Show>
@@ -331,7 +332,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
            `}
           >
             <table classList={{
-              "f:10": sortedVertexes().length === 0
+              "f:11": sortedVertexes().length === 0
             }}>
               <thead>
                 <tr>
@@ -358,9 +359,9 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
-                <For each={sortedVertexes()} fallback={<tr>
+                <For each={sortedVertexes()} fallback={<tr  class="cursor:pointer" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}>
                   <td class="text:center white-space:nowrap" colspan={props.meta.P.attributes.length + 1}>
-                    No Data <Icon icon="material-symbols:add-box"  onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
+                    No Data
                   </td>
                 </tr>}>
                   {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}
@@ -403,7 +404,7 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
 
     return getChildVertexes(["CollAttr"], [attrVertex]).vertexes;
   }
-  const tableColumnsTemplate = createMemo(() => record?.getMetaAttributes(props.meta) || getAttributes() || []);
+  const tableColumnsTemplate = createMemo(() => getAttributes() || record?.getMetaAttributes(props.meta) || []);
 
   // add dynamic meta from separate collection.
   // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
@@ -555,6 +556,7 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
             {/*<Icon icon="material-symbols:add-box"  />*/}
             <Icon
               icon="material-symbols:restore-from-trash-outline"
+              class="cursor:pointer"
               onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
             />
             {/*<Show when={!props.disabled}>*/}
@@ -562,7 +564,7 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
             {/*</Show>*/}
 
             <Show when={expandVertex()}>
-              <Icon icon="carbon:row-expand"  onClick={() => {
+              <Icon icon="carbon:row-expand" class="cursor:pointer" onClick={() => {
                 return addNewRow(record?.txnId || 0, expandVertex()!, p.joinVertex, {}, record?.isRealTime ?? false, Ws);
               }} />
             </Show>
@@ -685,7 +687,7 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
            `}
           >
             <table classList={{
-              "f:10": sortedVertexes().length === 0
+              "f:11": sortedVertexes().length === 0
             }}>
               <thead>
                 <tr>
@@ -712,9 +714,9 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
-                <For each={sortedVertexes()} fallback={<tr>
+                <For each={sortedVertexes()} fallback={<tr class="cursor:pointer" onClick={insertNewRow}>
                   <td class="text:center white-space:nowrap" colspan={tableColumnsTemplate().length + 1}>
-                    No Data <Icon icon="material-symbols:add-box"  onClick={insertNewRow}/>
+                    No Data
                   </td>
                 </tr>}>
                   {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}

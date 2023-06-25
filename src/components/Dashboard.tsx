@@ -108,7 +108,7 @@ export const DashboardView = () => {
         <Show when={graph.initialSynced}>
           <Routes>
             <Route path="/" component={() => <>Home Page</>} />
-            {/* TODO: when incorrect entity is rended*/}
+            {/* TODO: fix when incorrect entity is rendered */}
             <Route
               path="/:entity"
               component={() => {
@@ -123,21 +123,23 @@ export const DashboardView = () => {
                 return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />;
               }}
             />
-            <Route path="/backup_restore" component={BackupRestore as Component} />
-            {/* Deprecated */}
-            <Route path="/forms" component={AllForms as Component} />
-            {/* Deprecated */}
-            <Route path="/dashboards" component={AllDashboards as Component} />
-            <Route path="/grid/:name" component={TableDashboard as Component} />
-            <Route path="/login" component={Login as Component} />
-            <Route path="/logout" component={Logout as Component} />
-            <Route path="/signup" component={SignUp as Component} />
-            <Route path="/SimpleImport" component={SimpleImport as Component} />
-            <Route path="/Page/:id" component={PageDesigner as Component} />
-            <Route path="/public/avfmobile" component={Home as Component} />
-            <Route path="/Graph" component={GraphViewPage as Component} />
-            <Route path="/Nav/new" component={NavDesigner as Component} />
-            <Route path="/**" component={Page404 as Component} />
+           <Route path="/Page/:id" component={PageDesigner as Component} />
+           <Route path="/Nav/new" component={NavDesigner as Component} />
+           <Route path="/dashboards" component={AllDashboards as Component} />
+           <Route path="/forms" component={AllForms as Component} />
+           <Route path="/grid/:name" component={TableDashboard as Component} />
+           {/* Auth: */}
+           <Route path="/login" component={Login as Component} />
+           <Route path="/logout" component={Logout as Component} />
+           <Route path="/signup" component={SignUp as Component} />
+           {/* Utils */}
+           <Route path="/backup_restore" component={BackupRestore as Component} />
+           <Route path="/SimpleImport" component={SimpleImport as Component} />
+           <Route path="/Graph" component={GraphViewPage as Component} />
+           {/* Test */}
+           <Route path="/public/avfmobile" component={Home as Component} />
+           {/* Error */}
+           <Route path="/**" component={Page404 as Component} />
           </Routes>
         </Show>
       </main>

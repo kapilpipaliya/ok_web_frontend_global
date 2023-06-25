@@ -1,4 +1,18 @@
-import { createComputed, createContext, createEffect, createMemo, For, JSXElement, Match, on, onCleanup, Show, Switch, useContext } from "solid-js";
+import {
+  createComputed,
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  JSXElement,
+  Match,
+  on,
+  onCleanup,
+  Show,
+  Switch,
+  useContext
+} from "solid-js";
 
 import dxBox, { Properties as dxBoxProperties } from "devextreme/ui/box";
 import dxTreeMap, {
@@ -117,8 +131,19 @@ import dxDrawer, {
 } from "devextreme/ui/drawer";
 
 import { ComponentProps } from "../../types/Component";
-import { IdAttr, setGraph, Vertex } from "../../lib/graph";
-import { FormContext, getCollAttrComp, PageContext } from "../../lib/Record";
+import {
+  commitTxn,
+  IdAttr,
+  revertTransaction,
+  setGraph,
+  Vertex
+} from "../../lib/graph";
+import {
+  FormContext,
+  getCollAttrComp,
+  PageContext,
+  Record
+} from "../../lib/Record";
 import { getTextColumnValue } from "./GenaricInputField";
 import { ActionCards } from "../../pages/home/components/ActionCards";
 import { Navbar } from "../../pages/home/components/Navbar";
@@ -130,9 +155,17 @@ import {
 import {
   TodaysEnergizer
 } from "../../pages/home/components/TodaysEnergizerSection";
-import { DynamicComponentWithAutoPropsSupport } from "../DynamicForm";
+import {
+  DynamicComponentWithAutoPropsSupport,
+  FormGroup
+} from "../DynamicForm";
 import { toTitle } from "case-switcher-js";
 import { getLastItem } from "../../utils/functions";
+import { WsContext } from "../../utils/ws_events_dispatcher";
+import { useNavigate } from "@solidjs/router";
+import dxValidationGroup from "devextreme/ui/validation_group";
+import Tabs from "devextreme/ui/tabs";
+import dxValidationSummary from "devextreme/ui/validation_summary";
 
 export const genericComponents2 = [
   "Box",
@@ -181,7 +214,8 @@ export const genericComponents2 = [
   "Drawer",
   // "FilterBuilder",
   // "FileUploader",
-  "FieldSetLabelLeft"
+  "FieldSetLabelLeft",
+ "Form"
 ]
 const displayExpr = [
   "ContextMenu",
@@ -274,13 +308,13 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 export const PageRenderContext = createContext([] as Vertex[]);
 
 export const PageRenderUtils = {
-  getCollection: (item?: Vertex) => item && getChildVertex(['$0Coll'], item).vertex?.P[IdAttr],
-  getAttrVertex: (item?: Vertex) => item && getChildVertex(['$0Att'], item).vertex,
-  getAttr: (item?: Vertex) => item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
-  getID: (item?: Vertex) => item && item.P["name"],
-  getId: (item?: Vertex) => PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
+  getCollection: (item?: Vertex): string | undefined => item && getChildVertex(['$0Coll'], item).vertex?.P[IdAttr],
+  getAttrVertex: (item?: Vertex): Vertex | undefined => item && getChildVertex(['$0Att'], item).vertex,
+  getAttr: (item?: Vertex): string | undefined => item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
+  getID: (item?: Vertex): string | undefined => item && item.P["name"],
+  getId: (item?: Vertex): string | undefined => PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
-  getComponent: (item?: Vertex) => {
+  getComponent: (item?: Vertex): string | undefined => {
     if (!item) return;
 
     const currentComp = getChildVertex(["$0Comp"], item).vertex?.P[IdAttr];
@@ -296,6 +330,7 @@ export const PageRenderUtils = {
 export const PageItemRender = (props: {metaVertex: Vertex}) => {
 
   const parentItems = useContext(PageRenderContext);
+  let { record, cleanUpConfig } = useContext(FormContext);
 
   // children:
   return <For each={getChildVertexes(["$0Attr"], [props.metaVertex]).vertexes}>
@@ -330,7 +365,7 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
         <DynamicComponentWithAutoPropsSupport
          meta={item}
          data={PageRenderUtils.getDataVertex(item) || parentData()}
-         setValue={_=>0}
+         setValue={record?.setValue || (() => {})}
          disabled={false}
          component={component()}
         />
@@ -1874,10 +1909,101 @@ export function GenericFieldWithAutoProps(props: ComponentProps & { component?: 
     return PageRenderUtils.getComponent(getLastItem(parentItems, 2));
   });
 
+  const Form = () => {
+    const { Ws } = useContext(WsContext);
+    const navigate = useNavigate();
+
+    const record = new Record({ ws: Ws });
+    const collectionVertex = createMemo(() => {
+      return PageRenderUtils.getCollection(getLastItem(parentItems, 1));
+    });
+    if (!collectionVertex()) return 'No Collection Found'
+    // const dataVertex =
+    if (!props.data?.id) {
+      // create new vertex from Collection vertex
+      const createResult = record.create(collectionVertex()!);
+      if (createResult.error) return createResult.error;
+    } else {
+      // load data vertex
+      const loadResult = record.load(props.data.id);
+      if (loadResult.error) return loadResult.error;
+    }
+
+    const [divRef, setDivRef] = createSignal<HTMLDivElement>();
+
+    let validationGroup: dxValidationGroup;
+    // letter if we need a record, write a solution.
+    // but we should not need to access record,
+    // everything will be configured from json.
+    // props.config["record"] = record;
+
+    const cleanUpConfig = {} as { [key: string]: any };
+
+    onCleanup(() => {
+      for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+        revertTransaction(rowMetaTxnId);
+    });
+
+    const onSubmit = () => {
+      const result = validationGroup.validate();
+      if (result.isValid) {
+        console.log("valid");
+        // !!!TODO!!! Handle Error Received From server when commit
+        if (!record.isRealTime) {
+          commitTxn(record.txnId, Ws);
+        }
+        // currently we are navigating back.
+        navigate(-1);
+      } else {
+        alert("please fix all errors");
+      }
+    }
+
+    const onCancel = () => {
+      revertTransaction(record.txnId);
+      setTimeout(() => navigate(-1));
+    }
+
+    return (
+     <div
+      ref={(el) => {
+        setDivRef(el);
+        validationGroup = new dxValidationGroup(divRef()!);
+      }}
+     >
+       <Show when={divRef()}>
+         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
+           <PageItemRender metaVertex={props.meta}/>
+           {/* @ts-ignore */}
+           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
+
+           <div class="flex gap:10">
+             <Show when={props.submitButton} fallback={<GenericField
+              // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+              meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
+              onClick={onSubmit}
+             />}>
+               {props.submitButton}
+             </Show>
+
+             <GenericField
+              meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel" }}} as any}
+              onClick={onCancel}
+             />
+           </div>
+         </FormContext.Provider>
+       </Show>
+     </div>
+    );
+  }
+
 
   return (
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
+          <Match when={component()  === "Form"}>
+            <Form/>
+          </Match>
           <Match when={component()  === "FieldSetLabelLeft"}>
             <div class="dx-fieldset"
              // style={{"max-width": getTabsWidth(groupByTabsAndGroup["main"][group])}}

@@ -202,15 +202,6 @@ export const DynamicComponentWithAutoPropsSupport = (props: {
                            disabled={props.disabled!} />
         </Show>
       </Match>
-      <Match when={props.component.startsWith("Form")}>
-        <td>
-          <div class="flex">
-            {props.meta.P.props?.defaultValue &&
-              getOptionLabel(props.data, props.meta.P.props.defaultValue)}
-            <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)} />
-          </div>
-        </td>
-      </Match>
       <Match when={genericComponents.includes(props.component) && props.component} keyed>
         <GenericInputFieldWithAutoProps
           data={props.data}
