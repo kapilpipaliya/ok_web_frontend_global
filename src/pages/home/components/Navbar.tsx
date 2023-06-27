@@ -7,7 +7,7 @@ export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?
  let { events } = useContext(PageContext);
  // bg:white box-shadow:1|1|10|#ddd
  return (
-  <nav class={`p:10 flex jc:space-between ai:center ${props.meta?.P.class || ''}`}>
+  <nav class={`p:7.5 flex jc:space-between ai:center ${props.meta?.P.class || ''}`}>
 
    <Show when={props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition}>
     <Icon icon="mdi:hamburger-menu" width={20} onclick={() => {events?.setSideBarOpen((v: any) => !v);}}/>

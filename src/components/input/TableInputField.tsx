@@ -461,7 +461,7 @@ export function TableInputFieldWithAutoProps(props: Omit<ComponentProps, "setVal
           if (!cleanUpConfig.rowMetaTxnIds) {
             cleanUpConfig.rowMetaTxnIds = [];
           }
-          // currently, when we delete row and unmount form it is not giving error, but it should, because revertTransaction is not strict.
+          // currently, when we delete row and unmount form, it is not giving error, but it should, because revertTransaction is not strict.
           if(cleanUpConfig.rowMetaTxnIds.includes(metaTxnId)) cleanUpConfig.rowMetaTxnIds.push(metaTxnId);
         }
       }
