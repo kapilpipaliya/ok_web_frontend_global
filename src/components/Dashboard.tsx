@@ -6,6 +6,7 @@ import {
   Show,
   useContext, For
 } from "solid-js";
+import { get, set } from "idb-keyval";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
 import { BackupRestore, GraphViewPage } from "../pages/BackupRestore";
@@ -44,6 +45,7 @@ import { AbstractSingleForm } from "./DynamicForm";
 
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
+get("isSideBarOpen").then((data) => setSideBarOpen(data));
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
@@ -151,6 +153,9 @@ export const DashboardView = () => {
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
   syncEvent();
+  createEffect(() => {
+   set("isSideBarOpen", isSideBarOpen());
+  })
 
   return (
     <div>

@@ -333,16 +333,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           ],
         },
       },
-      // {
-      //   name: "category",
-      //   component: "SelectBox",
-      //   props: {
-      //     
-      //     collection: "CollCategory",
-      //     parentLabel: "CollCategory",
-      //     inward: true,
-      //   },
-      // },
+      {
+        name: "category",
+        component: "SelectBox",
+        props: {
+
+          collection: "CollCategory",
+          parentLabel: "CollCategory",
+          inward: true,
+        },
+      },
       {
         name: "dashboard",
         component: "TagBox",
@@ -355,9 +355,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       { name: "description", component: "TextArea" },
       { name: "public", component: "CheckBox" },
-      { name: "supportCustomFields", component: "CheckBox" },
-      { name: "searchOnly", component: "CheckBox" },
-      { name: "supportDeletedRecordSearch", component: "CheckBox" },
+      // { name: "supportCustomFields", component: "CheckBox" },
+      // { name: "searchOnly", component: "CheckBox" },
+      // { name: "supportDeletedRecordSearch", component: "CheckBox" },
       {
         name: "pk",
         displayName: "Primary Key",

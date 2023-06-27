@@ -518,7 +518,7 @@ OUT:
         NavAttr:
           - L: NavAttr
             P:
-              name: Collection Category
+              name: Collections Category
               url: /admin/CollCategory
           - L: NavAttr
             P:
