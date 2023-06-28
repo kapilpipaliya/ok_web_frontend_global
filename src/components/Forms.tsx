@@ -16,6 +16,7 @@ import { GenericField } from "./input/GenaricField";
 import { Record } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
+import { createStore } from "solid-js/store";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -44,7 +45,7 @@ export const Login = (props: {}) => {
         },
       ]);
     } else {
-      revertTransaction(config.record.txnId);
+      revertTransaction(config[0].record.txnId);
       // because we are doing sync processing in websocket class,
       // this will not be a problem
       resetDatabaseLogin();
@@ -62,10 +63,11 @@ export const Login = (props: {}) => {
   });
   onCleanup(() => Ws.unbind(event));
 
-  const config = {} as { record: Record };
+  const config = createStore({} as { record: Record });
+
   const onLoginClick = () => {
-    const email = config.record.vertex.P.email as string;
-    const pass = config.record.vertex.P.pass as string;
+    const email = config[0].record.vertex.P.email as string;
+    const pass = config[0].record.vertex.P.pass as string;
     Ws.trigger([[event, { body: { email, pass } }]]);
   };
 
@@ -129,7 +131,7 @@ export const SignUp = (props: {}) => {
     if (data.error) {
       setAlert((prev) => [...prev, { id: createUniqueId(), state: Alert.Error, message: data.error }]);
     } else {
-      revertTransaction(config.record.txnId)
+      revertTransaction(config[0].record.txnId)
       navigate("/");
     }
   });
@@ -140,10 +142,10 @@ export const SignUp = (props: {}) => {
   // 3. validations
   // 4. clear form on success
 
-  const config = {} as { record: Record };
+  const config = createStore({} as { record: Record });
   const onSignupClick = () => {
-    const email = config.record.vertex.P.email as string;
-    const pass = config.record.vertex.P.pass as string;
+    const email = config[0].record.vertex.P.email as string;
+    const pass = config[0].record.vertex.P.pass as string;
     Ws.trigger([[event, { body: { email, pass } }]]);
   };
 
@@ -171,7 +173,7 @@ export const SignUp = (props: {}) => {
 
 export const SimpleImport = (props: {}) => {
   const { Ws } = useContext(WsContext);
-  const config = {} as { record: Record };
+  const config = createStore({} as { record: Record });
 
    return (
     <>
@@ -196,7 +198,7 @@ perm`
             },
           } as unknown as Vertex
         }
-        setValue={(attr,vertex, data) => updateImportRecord(data, config.record)}
+        setValue={(attr,vertex, data) => updateImportRecord(data, config[0].record)}
       />
       <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
 
@@ -211,7 +213,7 @@ perm`
           } as unknown as Vertex
         }
         data={{ P: { meta: "Import" } } as unknown as Vertex}
-        onClick={() => onDataDirectoryImportClick(config.record, Ws)}
+        onClick={() => onDataDirectoryImportClick(config[0].record, Ws)}
       />
     </>
   );

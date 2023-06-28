@@ -24,9 +24,9 @@ import { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import {
-  NavDesigner,
-  PageDesigner,
-  renderTreeFromGraph
+ NavDesigner,
+ PageDesignerDragAndDrop,
+ renderNavTreeFromGraph
 } from "./FormDesigner";
 import { syncEvent } from "../lib/ws_events";
 import { GenericField } from "./input/GenaricField";
@@ -66,7 +66,7 @@ export const StaticSideBar = () => {
          const record = new Record({ws: Ws});
          record.load(nav.id);
          record.createMeta(AttrsTableData["Nav"])
-         renderTreeFromGraph(el, record, navigate);
+         renderNavTreeFromGraph(el, record, navigate);
        }}
       ></div>
    </Show></div>
@@ -125,7 +125,7 @@ export const DashboardView = () => {
                 return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />;
               }}
             />
-           <Route path="/Page/:id" component={PageDesigner as Component} />
+           <Route path="/Page/:id" component={PageDesignerDragAndDrop as Component} />
            <Route path="/Nav/new" component={NavDesigner as Component} />
            <Route path="/dashboards" component={AllDashboards as Component} />
            <Route path="/forms" component={AllForms as Component} />
