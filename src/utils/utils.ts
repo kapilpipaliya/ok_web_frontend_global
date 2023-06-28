@@ -12,3 +12,7 @@ export const getProps = (meta: Vertex) => (getChildVertexes(["$0Prop"], [meta]).
   }
   return acc;
 }, {} as { [key: string]: any });
+
+export function getValueFromVertexOrKey(obj: {[key: string]: Vertex} | any, key: string) {
+  return obj[key]?.id ? obj[key].P.value : obj[key];
+}

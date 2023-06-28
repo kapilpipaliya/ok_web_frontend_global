@@ -168,300 +168,6 @@ export function GenericInputField(props: ComponentProps & { component: string; d
     <div aria-labeledby={props["aria-labeledby"]} classList={{
       'width:100%': props.component === 'TextArea'
     }}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
-        <div
-          // @ts-ignore
-          ref={(el) => {
-            let attributes: any = {
-              // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: props.data.P[props.meta.P[IdAttr]],
-              onValueChanged: (data: any) => {
-                // note: valueChanged is fired even when the value is changed programmatically,
-                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
-                // used data.event check to prevent this.
-                if (props.component === "FileUploader") {
-                  props.setValue(props.meta, props.data,data.component._files[0]?.value);
-                } else if (data.event || props.component === "FilterBuilder") {
-                  props.setValue(props.meta, props.data,data.value);
-                }
-              },
-              // onChange: (e: any) => {
-              //   props.setValue(props.meta, props.data, e.value);
-              // },
-              validationGroup: formContext.validationGroup,
-              disabled: props.disabled,
-            };
-            let comp: any;
-
-            if (props.component === "Autocomplete") {
-              comp = dxAutocomplete;
-              // autocomplete is just like text box, but it allows user to preselect some values.
-              Object.assign(attributes, {} as dxAutocompleteProperties);
-            } else if (props.component === "Bullet") {
-              comp = dxBullet;
-              Object.assign(attributes, {
-                // target: 30,
-              } as dxBulletProperties);
-            } else if (props.component === "Calendar") {
-              comp = dxCalendar;
-              Object.assign(attributes, {} as dxCalendarProperties);
-            } else if (props.component === "CheckBox") {
-              comp = dxCheckBox;
-              Object.assign(attributes, {
-                enableThreeStateBehavior: true,
-              } as dxCheckBoxProperties);
-            } else if (props.component === "CircularGauge") {
-              comp = dxCircularGauge;
-              Object.assign(attributes, {} as dxCircularGaugeProperties);
-            } else if (props.component === "ColorBox") {
-              comp = dxColorBox;
-              Object.assign(attributes, {} as dxColorBoxProperties);
-            } else if (props.component === "DateBox") {
-              comp = dxDateBox;
-              Object.assign(attributes, {} as dxDateBoxProperties);
-            } else if (props.component === "DateBox") {
-              comp = dxDateBox;
-              Object.assign(attributes, {} as dxDateBoxProperties);
-            } else if (props.component === "DropDownBox") {
-              // DropDownBox is very advanced we can use custom dropdown in the field. so its not supported yet.
-              return "not supported yet";
-              comp = dxDropDownBox;
-              // Specifies the currently selected value. May be an object if dataSource contains objects and valueExpr is not set.
-              Object.assign(attributes, {} as dxDropDownBoxProperties);
-            } else if (props.component === "FileUploader") {
-              comp = dxFileUploader;
-              Object.assign(attributes, {
-                // selectButtonText: "Select file",
-                // labelText: "",
-                // accept: "image/*",
-                // uploadMode: "instantly",
-                value: []
-              } as dxFileUploaderProperties);
-            } else if (props.component === "FilterBuilder") {
-              comp = dxFilterBuilder;
-              Object.assign(attributes, {value: [],
-                // allowHierarchicalFields: true,
-                // onEditorPreparing: function (e) {
-                //   e.editorOptions.width = 125;
-                // },
-                // at least one field is required, else component is giving error.
-                fields: props.meta.P.props.fields || [{
-                  dataField: 'name',
-                  dataType: 'string',
-                }],
-              } as dxFilterBuilderProperties);
-            } else if (props.component === "HtmlEditor") {
-              comp = dxHtmlEditor;
-              Object.assign(attributes, {
-                toolbar: {
-                  items: [
-                    "bold",
-                    "italic",
-                    "color",
-                    "background",
-                    "link",
-                    {
-                      name: "header",
-                      acceptedValues: [1, 2, 3, false],
-                    },
-                    "variable",
-                  ],
-                },
-                variables: {
-                  dataSource: ["FirstName", "LastName", "Company"],
-                  escapeChar: ["{", "}"],
-                },
-              } as dxHtmlEditorProperties);
-            } else if (props.component === "LinearGauge") {
-              comp = dxLinearGauge;
-              Object.assign(attributes, {} as dxLinearGaugeProperties);
-            } else if (props.component === "NumberBox") {
-              comp = dxNumberBox;
-              Object.assign(attributes, {} as dxNumberBoxProperties);
-            } else if (props.component === "ProgressBar") {
-              comp = dxProgressBar;
-              Object.assign(attributes, {
-                min: 0,
-                max: 100,
-                width: "90%",
-                statusFormat(ratio) {
-                  return `Loading: ${ratio * 100}%`;
-                },
-                onComplete(e) {
-                  props.setValue(props.meta, props.data,"completed");
-                },
-              } as dxProgressBarProperties);
-            } else if (props.component === "RadioGroup") {
-              comp = dxRadioGroup;
-              // radioBox can support any value in the array, it will return the value on onChange like object.
-              Object.assign(attributes, {} as dxRadioGroupProperties);
-            } else if (props.component === "RangeSelector") {
-              comp = dxRangeSelector;
-              Object.assign(attributes, {
-                // scale: {
-                //   startValue: 0,
-                //   endValue: 100,
-                //   tickInterval: 10,
-                //   minorTickInterval: 2,
-                //   minorTick: {
-                //     visible: true,
-                //   },
-                //   label: {
-                //     format: {
-                //       type: "decimal",
-                //     },
-                //   },
-                // },
-                // sliderMarker: {
-                //   format: {
-                //     type: "decimal",
-                //   },
-                // },
-                // value: [20, 80],
-              } as dxRangeSelectorProperties);
-            } else if (props.component === "RangeSlider") {
-              comp = dxRangeSlider;
-              Object.assign(attributes, {
-                // min: 0,
-                // max: 100,
-                // start: 20,
-                // end: 80,
-                // label: {
-                //   visible: true,
-                //   format(value: number) {
-                //     return `${value}%`;
-                //   },
-                // },
-              } as dxRangeSliderProperties);
-              // } else if(props.component === "SelectBox" ) {
-              //  comp = dxSelectBox;
-              //  Object.assign(attributes, {} as dxSelectBoxProperties);
-            } else if (props.component === "Slider") {
-              comp = dxSlider;
-              Object.assign(attributes, {
-                // min: 0,
-                // max: 100,
-              } as dxSliderProperties);
-            } else if (props.component === "Switch") {
-              comp = dxSwitch;
-              Object.assign(attributes, {} as dxSwitchProperties);
-              // } else if(props.component === "TagBox" ) {
-              //  comp = dxTagBox;
-              //  Object.assign(attributes, {} as dxTagBoxProperties);
-            } else if (props.component === "TextArea") {
-              comp = dxTextArea;
-              Object.assign(attributes, {
-                autoResizeEnabled: true
-              } as dxTextAreaProperties);
-            } else if (props.component === "TextBox") {
-              comp = dxTextBox;
-              Object.assign(attributes, {} as dxTextBoxProperties);
-            } else {
-              console.warn("Component not found", props.component);
-              return "----";
-            }
-            // if (displayExpr.includes(props.component) && !props.meta.P.props.displayExpr) {
-            //  Object.assign(attributes, {displayExpr: ''});
-            // }
-            // if (valueExpr.includes(props.component) && !props.meta.P.props.valueExpr) {
-            //  Object.assign(attributes, {valueExpr: ''});
-            // }
-            // if (dataSource.includes(props.component) && !props.meta.P.props.dataSource) {
-            //  Object.assign(attributes, {dataSource: ''});
-            // }
-            // if (items.includes(props.component) && !props.meta.P.props.items) {
-            //  Object.assign(attributes, {items: ''});
-            // }
-
-            const instance = new comp(el, attributes);
-
-            // try {
-            if (
-              !["Autocomplete", "Bullet", "CircularGauge", "FilterBuilder", "LinearGauge"].includes(props.component)
-            ) {
-              const validatorInstance = new Validator(el, {
-                validationGroup: formContext.validationGroup,
-                // adapter only called when we run validate() manually
-                // adapter: {
-                //  getValue: function(e) {
-                //   return {value: instance.option("value")};
-                //  },
-                //  applyValidationResults: function(e) {
-                //   // $("#contacts").css({ "border": e.isValid ? "none" : "1px solid red" });
-                //  },
-                //  validationRequestsCallbacks: [(e)=> {
-                //   return false;
-                //  }]
-                // }
-              });
-              validatorInstance.context = formContext;
-              validatorInstance.zmeta = props.meta;
-              // validationRules: [{
-              //     type: 'required',
-              //     message: 'Email is required',
-              //   }
-              //   , {
-              //     type: 'email',
-              //     message: 'Email is invalid',
-              //   },
-              //   {
-              //     type: 'async',
-              //     message: 'Email is already registered',
-              //     validationCallback(params) {
-              //       return sendRequest(params.value);
-              //     },
-              //   }
-              // ],
-              createEffect(() =>
-                validatorInstance.option(
-                  "validationRules",
-                  props.meta.P.props?.validationRules as Array<ValidationRule>,
-                ),
-              );
-            }
-            // } catch (e) {
-            //  console.log('cant set validator for', props.component, e);
-            // }
-
-            createEffect(() => {
-              if (isUpdatingInput) return;
-              let value = props.data.P[props.meta.P[IdAttr]];
-              if (props.component === "FilterBuilder" || props.component === "FileUploader") {
-                if (!value) value = [];
-                else if(!Array.isArray(value)) {
-                  value = [value];
-                }
-              }
-              instance.option("value", value);
-              if (props.component === "TextArea") {
-                instance.option("hint", value)
-              };
-            });
-            createEffect(() => instance.option("disabled", props.disabled));
-
-            createEffect(() => {
-              for (const property in props.meta.P.props as dxTextBoxProperties) {
-                let value = props.meta.P.props[property];
-                if (property === "items" && typeof value === "string") {
-                  value = value.split("\n");
-                }
-                instance.option(property, value);
-              }
-            });
-            onCleanup(() => instance.dispose());
-          }}
-        />
-      </Show>
-    </div>
-  );
-}
-
-export function GenericInputFieldWithAutoProps(props: ComponentProps & { component: string; disabled: boolean }) {
-  const formContext = useContext(FormContext);
-  return (
-    <div aria-labeledby={props["aria-labeledby"]} classList={{
-      'width:100%': props.component === 'TextArea'
-    }}>
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
         <div
           // @ts-ignore
@@ -534,16 +240,17 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
               } as dxFileUploaderProperties);
             } else if (props.component === "FilterBuilder") {
               comp = dxFilterBuilder;
+              const fields = (props.meta.P.props?.fields?.id ? props.meta.P.props?.fields?.P.value : props.meta.P.props?.fields) || [{
+                dataField: 'name',
+                dataType: 'string',
+              }];
               Object.assign(attributes, {value: [],
                 // allowHierarchicalFields: true,
                 // onEditorPreparing: function (e) {
                 //   e.editorOptions.width = 125;
                 // },
                 // at least one field is required, else component is giving error.
-                fields: props.meta.P.props?.fields?.P.value || [{
-                  dataField: 'name',
-                  dataType: 'string',
-                }],
+                fields,
               } as dxFilterBuilderProperties);
             } else if (props.component === "HtmlEditor") {
               comp = dxHtmlEditor;
@@ -711,7 +418,7 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
               createEffect(() =>
                 validatorInstance.option(
                   "validationRules",
-                  props.meta.P.props?.validationRules?.P.value as Array<ValidationRule>,
+                 props.meta.P.props?.validationRules?.id ? props.meta.P.props?.validationRules?.P.value as Array<ValidationRule> : props.meta.P.props?.validationRules as unknown as Array<ValidationRule>,
                 ),
               );
             }
@@ -739,7 +446,7 @@ export function GenericInputFieldWithAutoProps(props: ComponentProps & { compone
 
             createEffect(() => {
               for (const property in props.meta.P.props) {// as dxTextBoxProperties
-                let value = props.meta.P.props[property]?.P.value;
+                let value = props.meta.P.props[property]?.id ? props.meta.P.props[property]?.P.value : props.meta.P.props[property];
                 if (property === "items" && typeof value === "string") {
                   value = value.split("\n");
                 }

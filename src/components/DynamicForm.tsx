@@ -27,11 +27,9 @@ import { WsContext } from "../utils/ws_events_dispatcher";
 
 import {
   SelectInputField,
-  SelectInputFieldWithAutoProps
 } from "./input/SelectInputField";
 import {
   TableInputField,
-  TableInputFieldWithAutoProps
 } from "./input/TableInputField";
 
 import Tabs from "devextreme/ui/tabs";
@@ -39,7 +37,6 @@ import { useNavigate } from "@solidjs/router";
 import {
   genericComponents,
   GenericInputField,
-  GenericInputFieldWithAutoProps
 } from "./input/GenaricInputField";
 import {
   getOptionLabel,
@@ -50,8 +47,7 @@ import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 import {
   genericComponents2,
-  GenericField,
-  GenericFieldWithAutoProps
+  GenericField
 } from "./input/GenaricField";
 import {
   FormContext,
@@ -81,39 +77,9 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   return (
    <div class="">
      <DynamicForm form={form.form!} id={id() as Id} {...customProps}
-                  config={props.config || {}} />
+                  config={props.config || []} />
    </div>
   );
-};
-// Dynamic Form Component
-const FormComponent = (props: {
-  meta: Vertex;
-  data?: Vertex;
-  formId: string;
-}) => {
-  let { record } = useContext(FormContext);
-  const { Ws } = useContext(WsContext);
-  const type = getToEdge(props.meta, props.data) + props.formId;
-
-  const attributes = getSelectionOptions(props.meta, "->MetaAttr");
-  const newMeta = attributes.error
-    ? graph.vertexes[newRow(getNewTxnId(), props.meta, "MetaAttr").vertexId!]
-    : attributes.vertexes![0];
-  mergeVertexProperties(getNewTxnId(), newMeta.id, { [IdAttr]: type });
-
-  const vertexes = getSelectionOptions(props.data, `->${type}`);
-  let newVertex: any;
-  if (vertexes.error) {
-    if (record.isRealTime) {
-      record.txnId = getNewTxnId();
-    }
-    newVertex = graph.vertexes[newRow(record.txnId, props.data, `${type}`).vertexId!];
-    if (record.isRealTime) commitTxn(record.txnId, Ws);
-  } else {
-    newVertex = vertexes.vertexes![0];
-  }
-
-  return <AbstractSingleForm config={{}} meta={newMeta} formId={props.formId} id={newVertex.id} />;
 };
 
 // Dynamic Component used in the form
@@ -121,14 +87,14 @@ export const DynamicComponent = (props: {
   // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
-  data: Vertex;
-  setValue?(attribute: Vertex, vertex: Vertex, data: any): void;
+  data?: Vertex;
+  setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
 }) => {
   return (
     <Switch>
       <Match when={!props.component}>NO INPUT</Match>
-      <Match when={props.component === "SelectBox" || props.component === "TagBox"}>
+      <Match when={props.component === "SelectBox" || props.component === "TagBox"} keyed>
         <SelectInputField
          data={props.data}
          meta={props.meta}
@@ -144,15 +110,6 @@ export const DynamicComponent = (props: {
                            disabled={props.disabled!} />
         </Show>
       </Match>
-      <Match when={props.component.startsWith("Form")}>
-        <td>
-          <div class="flex">
-            {props.meta.P.props?.defaultValue &&
-              getOptionLabel(props.data, props.meta.P.props.defaultValue)}
-            <FormComponent meta={props.meta} data={props.data} formId={props.component.slice(4)} />
-          </div>
-        </td>
-      </Match>
       <Match when={genericComponents.includes(props.component) && props.component} keyed>
         <GenericInputField
           data={props.data}
@@ -164,55 +121,6 @@ export const DynamicComponent = (props: {
       </Match>
       <Match when={genericComponents2.includes(props.component) && props.component} keyed>
         <GenericField
-          data={props.data}
-          meta={props.meta}
-          component={props.component}
-          setValue={props.setValue}
-          disabled={props.disabled!}
-        />
-      </Match>
-    </Switch>
-  );
-};
-// Dynamic Component used in the form
-export const DynamicComponentWithAutoPropsSupport = (props: {
-  // component is required, cant refactor it to remove it, because parent component needs it too.
-  component: string;
-  meta: Vertex;
-  data?: Vertex;
-  setValue(attribute: Vertex, vertex: Vertex, data: any): void;
-  disabled?: boolean;
-}) => {
-  return (
-    <Switch>
-      <Match when={!props.component}>NO INPUT</Match>
-      <Match when={props.component === "SelectBox" || props.component === "TagBox"} keyed>
-        <SelectInputFieldWithAutoProps
-         data={props.data}
-         meta={props.meta}
-         // passed setValue when we have a string value in select field
-         setValue={props.setValue}
-         disabled={props.disabled!}
-         component={props.component}
-        />
-      </Match>
-      <Match when={props.component === "Table"}>
-        <Show when={!props.disabled} fallback={<>...</>}>
-          <TableInputFieldWithAutoProps meta={props.meta} data={props.data}
-                           disabled={props.disabled!} />
-        </Show>
-      </Match>
-      <Match when={genericComponents.includes(props.component) && props.component} keyed>
-        <GenericInputFieldWithAutoProps
-          data={props.data}
-          meta={props.meta}
-          component={props.component}
-          setValue={props.setValue}
-          disabled={props.disabled!}
-        />
-      </Match>
-      <Match when={genericComponents2.includes(props.component) && props.component} keyed>
-        <GenericFieldWithAutoProps
           data={props.data}
           meta={props.meta}
           component={props.component}
@@ -315,9 +223,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
   });
 
   let validationGroup: dxValidationGroup;
-  props.config[1]("record", record);
+  props.config[1]?.("record", record);
   onCleanup(() => {
-    props.config[1]("record", undefined);
+    props.config[1]?.("record", undefined);
   })
 
   const groupByTabsAndGroup  = record.groupByTabsAndGroup();
