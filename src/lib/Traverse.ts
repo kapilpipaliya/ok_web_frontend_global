@@ -2,6 +2,8 @@ import { graph, IdAttr, Vertex } from "./graph";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
+import { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
+import { createUniqueId } from "solid-js";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
   // TODO: on new vertex it will be meta.P.props.type.P.value
@@ -372,6 +374,31 @@ export function getSelectionOptions(
   }
   collection = replaceExpressionToLabel(collection, vertex);
   return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
+}
+
+export const getTreeData = (treeLevels: {[key: string]: any}) => {
+  const getChildren = (levels: {[key: string]: any}, vertexes: Vertex[]) => {
+    const result = [] as dxTreeViewItem[];
+    if (!levels.collection) return result;
+
+    const children = getSelectOptionsInternal(vertexes, convertToTraverseArray(levels.collection), true);
+    for (const child of children.vertexes || []) {
+      const name = child.P.name;
+      const navItem = {} as dxTreeViewItem;
+      navItem.name = name;
+      navItem.expanded = true;
+      navItem.id = createUniqueId();
+      if (levels.child) {
+        navItem.children = getChildren(levels.child, [child]);
+      }
+
+      result.push(navItem);
+    }
+    return result;
+  };
+
+  return getChildren(treeLevels, []);
+
 }
 
 const getTextValue = (value: any) => {

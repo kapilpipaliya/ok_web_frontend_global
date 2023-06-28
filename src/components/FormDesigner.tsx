@@ -13,12 +13,11 @@ import {
 import { PageItemRender } from "./input/GenaricField";
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
 import { graph, Vertex } from "../lib/graph";
-import { getChildVertex, getChildVertexes } from "../lib/Traverse";
+import { getChildVertex, getChildVertexes, getTreeData } from "../lib/Traverse";
 import { stringify } from "yaml";
 import { Navigator } from "@solidjs/router/dist/types";
 import { importNavigation } from "../pages/BackupRestore";
 import { AbstractSingleForm } from "./DynamicForm";
-import dxList from "devextreme/ui/list";
 import { createStore } from "solid-js/store";
 import { setSelectionValue } from "./input/SelectInputField";
 
@@ -79,8 +78,7 @@ export const PageDesignerDragAndDrop = () => {
      class="max-h:30rem"
      ref={el => {
      onMount(() => {
-      // @ts-ignore
-      const instance = new dxList(el, {
+      /*const instance = new dxList(el, {
        dataSource: graph.vertexLabelIdMap["Comp"].map(id => graph.vertexes[id]),
        keyExpr: 'id',
        // if searchExpr is not specified, search will not work
@@ -110,7 +108,20 @@ export const PageDesignerDragAndDrop = () => {
        onItemClick: (e) => {
         console.log(e.itemData);
        },
-      })
+      })*/
+      // @ts-ignore
+      const instance = new TreeView(el, {
+       dataSource: getTreeData({collection: "*CompCategory", child: {collection: "->CompCategoryComp"}}),
+       dataStructure: "tree",
+       keyExpr: "id",
+       displayExpr: "name",
+       itemsExpr: "children",
+       width: 200,
+       searchEnabled: true,
+       onItemClick(e) {
+
+       }
+      });
      })
     }}
     />

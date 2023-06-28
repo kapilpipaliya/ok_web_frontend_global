@@ -545,6 +545,12 @@ export function getSublistRows(meta: Vertex, vertex?: Vertex) {
  );
 }
 
+export function getSublistRowsForType(type: string, vertex: Vertex) {
+ return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
+  (a, b) => a.P.pos - b.P.pos
+ );
+}
+
 export class Record {
  txnId: number;
  readonly isRealTime: boolean;
@@ -739,9 +745,7 @@ export class Record {
  };
 
  getSublistRowsForType = (type: string, vertex: Vertex) => {
-  return (getChildVertexes([`${type}`], [vertex]).vertexes || []).sort(
-   (a, b) => a.P.pos - b.P.pos,
-  );
+  return getSublistRowsForType(type, vertex);
  };
  getSublistRows = (meta: Vertex, vertex: Vertex) => {
   return getSublistRows(meta, vertex);
