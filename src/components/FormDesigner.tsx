@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import {
  createSignal,
  createUniqueId,
- onCleanup,
+ onCleanup, onMount,
  Show
 } from "solid-js";
 import {
@@ -12,12 +12,15 @@ import {
 } from "../lib/Record";
 import { PageItemRender } from "./input/GenaricField";
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
-import { Vertex } from "../lib/graph";
-import { getChildVertex } from "../lib/Traverse";
+import { graph, Vertex } from "../lib/graph";
+import { getChildVertex, getChildVertexes } from "../lib/Traverse";
 import { stringify } from "yaml";
 import { Navigator } from "@solidjs/router/dist/types";
 import { importNavigation } from "../pages/BackupRestore";
 import { AbstractSingleForm } from "./DynamicForm";
+import dxList from "devextreme/ui/list";
+import { createStore } from "solid-js/store";
+import { setSelectionValue } from "./input/SelectInputField";
 
 /*
   Tasks:
@@ -27,13 +30,13 @@ import { AbstractSingleForm } from "./DynamicForm";
 */
 export const PageDesigner = () => {
  const params = useParams();
- const config = {} as { record: Record };
+ const config = createStore({} as { record: Record });
  const [count, setCount] = createSignal(1);
  const rerender = () => {
   setCount(prev=>prev+1);
  }
  const Preview = () => {
-  return <PageItemRender metaVertex={config.record.vertex}/>
+  return <PageItemRender metaVertex={config[0].record.vertex}/>
  }
  return (
   <div class="flex">
@@ -49,7 +52,7 @@ export const PageDesigner = () => {
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:400">
     <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
     <PageContext.Provider value={{ events: {  } }}>
-     <Show when={count() && config.record.vertex && count()} keyed>
+     <Show when={count() && config[0].record?.vertex && count()} keyed>
       <Preview/>
      </Show>
     </PageContext.Provider>
@@ -59,6 +62,104 @@ export const PageDesigner = () => {
  );
 };
 
+export const PageDesignerDragAndDrop = () => {
+ const params = useParams();
+ const pageConfig = createStore({} as { record: Record });
+ const [count, setCount] = createSignal(1);
+ const rerender = () => {
+  setCount(prev=>prev+1);
+ }
+ const Preview = () => {
+  return <PageItemRender metaVertex={pageConfig[0].record.vertex}/>
+ }
+ return (
+  <div class="flex">
+   <div class="border:1|solid|blue-60 p:10 m:5 flex:col">
+    <div
+     class="max-h:30rem"
+     ref={el => {
+     onMount(() => {
+      // @ts-ignore
+      const instance = new dxList(el, {
+       dataSource: graph.vertexLabelIdMap["Comp"].map(id => graph.vertexes[id]),
+       keyExpr: 'id',
+       // if searchExpr is not specified, search will not work
+       searchExpr: 'P.name',
+       displayExpr: 'P.name',
+       // scrollBottom don't work if we not use onMount
+       pageLoadMode: 'scrollBottom',
+       searchEnabled: true,
+       width: '20rem',
+       searchMode: 'contains',
+       // hoverStateEnabled: false,
+       activeStateEnabled: false,
+       focusStateEnabled: false,
+       // https://supportcenter.devexpress.com/ticket/details/t622207/scheduler-how-to-drag-and-drop-an-item-from-list-and-vice-versa
+       onItemRendered: (el) => {
+        el.itemElement.draggable = true;
+        el.itemElement.addEventListener("dragstart", (event) =>
+         event.dataTransfer!.setData("text/plain", `${el.itemData?.id || ''}`)
+        );
+       },
+       // Note:
+       // cant enable dragging with itemTemplate
+       // because parent cancels drag event.
+       // And error received when searching with itemTemplate:
+       // computations created outside a `createRoot`
+       // or `render` will never be disposed
+       onItemClick: (e) => {
+        console.log(e.itemData);
+       },
+      })
+     })
+    }}
+    />
+    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1" >
+
+    </div>
+   </div>
+
+   <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1" ondragover={e => e.preventDefault()}
+        onDrop={e => {
+         e.preventDefault();
+         const vertexId = e.dataTransfer?.getData('text/plain');
+         if (vertexId) {
+          const attrMeta = getChildVertexes(['MetaAttr'], [pageConfig[0].record.metaVertex]).vertexes;
+          if (!attrMeta) return;
+          const attrMetaVertex = attrMeta.find(vertex => vertex.P.name === "Attr")!;
+          const rowResult = pageConfig[0].record.addNewRowUI(attrMetaVertex, pageConfig[0].record.vertex, {});
+          const rowVertex = graph.vertexes[rowResult.vertexId!];
+          const attrAttrMeta = getChildVertexes(['MetaAttr'], [attrMetaVertex]).vertexes;
+          if (!attrAttrMeta) return;
+          const attrAttrMetaVertex = attrAttrMeta.find(vertex => vertex.P.name === "Comp")!;
+          setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrAttrMetaVertex, parseInt(vertexId));
+         }
+        }}>
+    <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
+    <PageContext.Provider value={{ events: {  } }}>
+     <Show when={count() && pageConfig[0].record?.vertex && count()} keyed>
+      <Preview/>
+     </Show>
+    </PageContext.Provider>
+   </div>
+
+   <div class="border:1|solid|blue-60 p:10 m:5 flex flex:col">
+    <AbstractSingleForm
+     formId={"Page"}
+     id={params.id}
+     config={pageConfig}
+     // TODO: add dry option
+    />
+    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1" >
+     <div class={"mb:12"}>Properties</div>
+   </div>
+   </div>
+
+  </div>
+ );
+};
+
+
 /*
 TODO:
 1. make inward selectbox and tagbox working
@@ -66,7 +167,7 @@ TODO:
  */
 export const NavDesigner = () => {
  const params = useParams();
- const config = {} as { record: Record };
+ const config = createStore({} as { record: Record });
  const [count, setCount] = createSignal(1);
  const [previewCode, setPreviewCode] = createSignal(false);
  const navigate = useNavigate();
@@ -74,14 +175,14 @@ export const NavDesigner = () => {
   setCount(prev => prev + 1);
  };
  const PreviewCode = () => {
-  return <pre>{stringify(getExportCode(config.record))}</pre>;
+  return <pre>{stringify(getExportCode(config[0].record))}</pre>;
  };
 
  const [importCode, setImportCode] = createSignal("");
 
  const importCodeFn = () => {
 
-  importNavigation(importCode(), config.record);
+  importNavigation(importCode(), config[0].record);
 
 
  };
@@ -109,9 +210,9 @@ export const NavDesigner = () => {
     <Show when={previewCode()}>
      <PreviewCode />
     </Show>
-    <Show when={count() && config.record.vertex && count()} keyed>
+    <Show when={count() && config[0].record?.vertex && count()} keyed>
      <div
-      ref={el => renderTreeFromGraph(el, config.record, navigate)}
+      ref={el => renderNavTreeFromGraph(el, config[0].record, navigate)}
      ></div>
     </Show>
    </div>
@@ -119,7 +220,7 @@ export const NavDesigner = () => {
  );
 };
 
-export const renderTreeFromGraph = (el: HTMLDivElement, record: Record, navigate: Navigator) => {
+export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navigate: Navigator) => {
  // !!!TODO!!!: This code can we written in the code itself
  const getChildren = (meta: Vertex, vertex: Vertex) => {
   const result = [] as dxTreeViewItem[];

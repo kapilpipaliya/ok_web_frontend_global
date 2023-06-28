@@ -11,7 +11,7 @@ import {
   Switch,
   useContext
 } from "solid-js";
-
+import { SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
 import {
   commitTxn,
@@ -281,7 +281,7 @@ export interface DynamicFormProps {
   meta?: Vertex;
   form: FormMetaData;
   id?: Id;
-  config: { [key: string]: any };
+  config: [Store<{ [key: string]: any }>, SetStoreFunction<{ [key: string]: any }>];
   submitButton?: JSXElement
 }
 
@@ -315,7 +315,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
   });
 
   let validationGroup: dxValidationGroup;
-  props.config["record"] = record;
+  props.config[1]("record", record);
+  onCleanup(() => {
+    props.config[1]("record", undefined);
+  })
 
   const groupByTabsAndGroup  = record.groupByTabsAndGroup();
   const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
