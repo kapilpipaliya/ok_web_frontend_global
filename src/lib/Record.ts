@@ -33,7 +33,7 @@ import { ValidationRule } from "devextreme/common";
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
 import { A, G } from "@mobily/ts-belt";
 import { setSelectionValue } from "../components/input/SelectInputField";
-import { capitalizeFirstLetter } from "../utils/utils";
+import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { AttrsTableData } from "../components/api";
 
@@ -167,13 +167,13 @@ export function getCollAttrs(
 }
 export let isUpdatingInput = false;
 export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribute } => {
- const vertexCollAttrResult = getChildVertex(["$0Attr"], vertexFormAttr);
+ const vertexCollAttrResult = getChildVertex(["Attr"], vertexFormAttr);
  if (vertexCollAttrResult.error) return { error: true };
  const vertexCollAttr = vertexCollAttrResult.vertex!;
  return getCollAttrs(vertexCollAttr, vertexFormAttr);
 };
 const getCollectionOneLevelAttrs = (collVertex: Vertex): { error: string; attrs?: FieldAttribute[] } => {
- const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
+ const vertexCollAttrResult = getChildVertexes(["Attr"], [collVertex]);
  if (vertexCollAttrResult.error) {
   return { error: "No Attributes in a Coll" };
  }
@@ -336,13 +336,12 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
 export function newRow(
  txnId: number,
- parentVertex: Vertex,
- edgeType: string,
- properties?: {[key: string]: any},
- label?: string
+ parentVertex: Vertex,label: string,
+ edgeType?: string,
+ properties?: {[key: string]: any}
 ): { error: boolean; vertexId?: Id; edgeId?: Id } {
  return batch(() => {
-  const vertexNew = newVertex(getNewGraphId(), [label || edgeType], properties);
+  const vertexNew = newVertex(getNewGraphId(), [label || edgeType!], properties);
   const insertVertex = addNewVertex(txnId, vertexNew);
   if (insertVertex.error) {
    alert(insertVertex.error);
@@ -351,7 +350,7 @@ export function newRow(
    };
   }
 
-  const edgeNew = newEdge(getNewGraphId(), edgeType, {}, parentVertex.id, vertexNew.id);
+  const edgeNew = newEdge(getNewGraphId(), edgeType || label!, {}, parentVertex.id, vertexNew.id);
   const insertEdgeResult = addNewEdge(txnId, edgeNew);
   if (insertEdgeResult.error) {
    alert(insertEdgeResult.error);
@@ -467,13 +466,14 @@ export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: Field
   if (!attr.group) attr.group = "main";
   // if(attribute.component === "Table") attribute.group = attribute.id;
 
-  const addAttributeResult = newRow(txnId, vertex, "MetaAttr", attr);
+  const addAttributeResult = newRow(txnId, vertex, "MetaAttr","MetaAttr", attr);
   if (addAttributeResult.error) {
    alert(addAttributeResult.error);
   }
   // todo discard transaction
 
-  if (attribute.component === "Table" && attribute.attributes) {
+  // if (attribute.component === "Table" && attribute.attributes) {
+  if (attribute.attributes) {
    addMetaVertexes(txnId, graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
   }
   // todo discard transaction
@@ -732,10 +732,7 @@ export class Record {
  // selectNewLine = addNewLine + selectLine
  // Selects a new line at the end of a sublist.
  selectNewLine = (options: { sublistId: string, properties: { [key: string]: any } }) => {
-  const newMeta = newRow(this.txnId, this.vertex, options.sublistId);
-  if (options.properties) {
-   replaceVertexProperties(this.txnId, newMeta.vertexId!, options.properties);
-  }
+  const newMeta = newRow(this.txnId, this.vertex, options.sublistId, options.sublistId, options.properties);
  };
 
  // variables: oldValue, newValue
@@ -796,9 +793,9 @@ export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, pro
    txnId = getNewTxnId();
   }
   const type = getToEdge(meta, parentVertex);
-  const label = meta.P.props?.label;
+  const label = getValueFromVertexOrKey(meta.P.props, 'label');
 
-  const newRowResult = newRow(txnId, parentVertex, type,properties, label);
+  const newRowResult = newRow(txnId, parentVertex, label, type,properties);
   if (isRealTime) commitTxn(txnId, Ws);
   return newRowResult;
 }

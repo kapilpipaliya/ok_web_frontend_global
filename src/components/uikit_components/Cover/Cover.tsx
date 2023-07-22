@@ -4,13 +4,13 @@ import { CoverProps } from "../globals";
 export function Cover(props: CoverProps) {
   const renderResponsiveMode = () => {
     if (props.responsive) {
-      return <canvas width={props.width} height={props.height} />;
+      return <canvas width={props.width} height={props.height} />
     }
   };
 
   const renderBasedOnType = () => {
     if (props.type === "image") {
-      return <img src={props.src} alt={props.alt} width={props.width} height={props.height} data-uk-cover={""} />;
+      return <img src={props.src} alt={props.alt} width={props.width} height={props.height} data-uk-cover={""} />
     }
     if (props.type === "video") {
       return (

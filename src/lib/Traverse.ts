@@ -1,13 +1,12 @@
 import { graph, IdAttr, Vertex } from "./graph";
-import { capitalizeFirstLetter } from "../utils/utils";
+import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 import { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
 import { createUniqueId } from "solid-js";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
-  // TODO: on new vertex it will be meta.P.props.type.P.value
-  if (meta.P.props?.type) return meta.P.props.type;
+  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
   const attributeId = meta.P[IdAttr];
   return capitalizeFirstLetter(vertex.L[0]) + capitalizeFirstLetter(attributeId);
@@ -19,9 +18,11 @@ export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
 
-export function getInEdge(meta: Vertex, vertex) {
-  const parentLabel = meta.P.props?.parentLabel;
-  const childLabel = meta.P.props?.childLabel;
+export function getInEdge(meta: Vertex, vertex: Vertex) {
+  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
+
+  const parentLabel = getValueFromVertexOrKey(meta.P.props, "parentLabel");
+  const childLabel = getValueFromVertexOrKey(meta.P.props, "childLabel");
   if (!parentLabel) return "";
   return capitalizeFirstLetter(parentLabel) + capitalizeFirstLetter((childLabel || vertex.L[0]));
 }
@@ -177,7 +178,7 @@ export function getChildVertexes(
       if (!currentVertex.L) continue;
       type = type.replace("$0", currentVertex.L[0]);
     }
-    const edgeIds = currentVertex.OUT[type] || [];
+    const edgeIds = currentVertex.OUT?.[type] || [];
     if (edgeIds.length == 0) {
       // we only return error if its in middle of path
       if (strict && path.length > 1) {
@@ -222,13 +223,15 @@ export const convertToTraverseArray = (input: string): Array<[string, string]> =
   const pathOperators = ["*", "-", "->"];
 
   const isStartWithOp = pathOperators.some((operator) => input.startsWith(operator));
-  if (!isStartWithOp) {
+  if (!isStartWithOp && !input.startsWith('!')) {
     input = `*${input}`;
   }
 
   const result = [] as Array<[string, string]>;
   for (let i = 0; i < input.length; i++) {
-    if (i + 1 < input.length && pathOperators.includes(input[i] + input[i + 1])) {
+    if (input[i] === "!") {
+      result.push(["->", ""]);
+    } else if (i + 1 < input.length && pathOperators.includes(input[i] + input[i + 1])) {
       result.push([input[i] + input[i + 1], ""]);
       i++;
     } else if (pathOperators.includes(input[i])) {
@@ -376,18 +379,19 @@ export function getSelectionOptions(
   return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
 }
 
-export const getTreeData = (treeLevels: {[key: string]: any}) => {
+export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string}) => {
   const getChildren = (levels: {[key: string]: any}, vertexes: Vertex[]) => {
     const result = [] as dxTreeViewItem[];
     if (!levels.collection) return result;
 
     const children = getSelectOptionsInternal(vertexes, convertToTraverseArray(levels.collection), true);
     for (const child of children.vertexes || []) {
-      const name = child.P.name;
+      const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as dxTreeViewItem;
       navItem.name = name;
       navItem.expanded = true;
-      navItem.id = createUniqueId();
+      navItem.id = child.id;
+      navItem.P = child.P;
       if (levels.child) {
         navItem.children = getChildren(levels.child, [child]);
       }
@@ -397,7 +401,7 @@ export const getTreeData = (treeLevels: {[key: string]: any}) => {
     return result;
   };
 
-  return getChildren(treeLevels, []);
+  return getChildren(treeLevels, vertexes);
 
 }
 
@@ -411,7 +415,7 @@ const getTextValue = (value: any) => {
 };
 
 // TODO:
-//  if possible use Name Keys, if not found use "name"
+//  if possible, use Name Keys, if not found use "name"
 //  key else Primary Keys will be used.
 export function getOptionLabel(vertex: Vertex | undefined, displayExpr: string): string {
   if (!vertex) return "";

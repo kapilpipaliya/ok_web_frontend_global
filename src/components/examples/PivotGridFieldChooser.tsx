@@ -24,7 +24,7 @@ export function PivotGridFieldChooserComponent() {
     console.log(attribute, data);
   };
 
-  return <PivotGridFieldChooserField meta={meta} data={data} setValue={setValue} />;
+  return <PivotGridFieldChooserField meta={meta} data={data} setValue={setValue} />
 }
 export function PivotGridFieldChooserField(props: ComponentProps) {
   let pivotGridInstance: PivotGrid;

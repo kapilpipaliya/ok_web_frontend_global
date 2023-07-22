@@ -20,6 +20,8 @@ let port = "";
 if (window.location.hostname == "localhost") {
   domain = "49.12.190.36"
   port = ":1201";
+
+  // port = ":1101";
 } else if (IS_PRODUCTION) {
   port = `:${window.location.port}`;
 }

@@ -235,6 +235,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
  const converter = csvtojson({
   trim: true,
   // checkColumn: true,
+  checkType: true, // this converts "true" to boolean
   delimiter: [",", "\t"]
  });
 
@@ -259,7 +260,7 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
   // attribute may not exist before, in that case write ID
   let attrId = metaVertex.P.attrId;
   if (!attrId) {
-   const attributeVertex = getChildVertex(["$0Attr"], metaVertex);
+   const attributeVertex = getChildVertex(["Attr"], metaVertex);
    if (!attributeVertex.error) {
     attrId = attributeVertex.vertex?.P[IdAttr];
    }

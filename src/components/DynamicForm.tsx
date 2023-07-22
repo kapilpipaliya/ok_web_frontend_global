@@ -19,7 +19,7 @@ import {
   graph,
   Id,
   IdAttr,
-  revertTransaction,
+  revertTransaction, txnHasSteps,
   Vertex
 } from "../lib/graph";
 import { mergeVertexProperties } from "../lib/Vertex";
@@ -33,7 +33,11 @@ import {
 } from "./input/TableInputField";
 
 import Tabs from "devextreme/ui/tabs";
-import { useNavigate } from "@solidjs/router";
+import {
+  BeforeLeaveEventArgs,
+  useBeforeLeave,
+  useNavigate
+} from "@solidjs/router";
 import {
   genericComponents,
   GenericInputField,
@@ -133,7 +137,7 @@ export const DynamicComponent = (props: {
 };
 
 interface FormGroupProps {
-  attributes: Vertex[];
+  metaAttributes: Vertex[];
   vertex: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
 }
@@ -141,7 +145,7 @@ interface FormGroupProps {
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
   return (
-    <For each={props.attributes}>
+    <For each={props.metaAttributes}>
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
         const component = createMemo(() => {
@@ -228,7 +232,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
     props.config[1]?.("record", undefined);
   })
 
+  // For new Form component, user will define layout, not a fixed layout;
+  // We may use this component for render from the json.
   const groupByTabsAndGroup  = record.groupByTabsAndGroup();
+  // TODO: Fix Tabs are not reactive
   const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
   const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
@@ -351,7 +358,23 @@ export const DynamicForm = (props: DynamicFormProps) => {
       onCleanup(() => instance.dispose());
     }}/>
   }
-
+  // https://github.com/solidjs/solid-router
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    // if (form.isDirty && !e.defaultPrevented) {
+    // preventDefault to block immediately and prompt user async
+    e.preventDefault();
+    if (!txnHasSteps(record.txnId)) {
+      e.retry(true);
+      return;
+    }
+    setTimeout(() => {
+      if (window.confirm("Discard unsaved changes - are you sure?")) {
+        revertTransaction(record.txnId);
+        // user wants to proceed anyway so retry with force=true
+        e.retry(true);
+      }
+    }, 100);
+  });
   return (
     <div
       ref={(el) => {
@@ -371,7 +394,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
       </div>
       <Show when={divRef()}>
         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
-          {/* Main Tab is display as top level fields */}
+          {/* Main Tab is displayed as top level fields */}
           <Show when={groupByTabsAndGroup["main"]}>
             <For each={Object.keys(groupByTabsAndGroup["main"])}>
               {(group) => (
@@ -381,7 +404,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": getTabsWidth(groupByTabsAndGroup["main"][group])}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <FormGroup attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />
+                    <FormGroup metaAttributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />
                   </div>
                 </>
               )}
@@ -416,7 +439,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                       <div class="dx-fieldset-header">{group}</div>
                     </Show>
                     <FormGroup
-                      attributes={groupByTabsAndGroup[activeTab()][group]}
+                      metaAttributes={groupByTabsAndGroup[activeTab()][group]}
                       vertex={record.vertex}
                       setValue={record.setValue}
                     />

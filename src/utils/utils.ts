@@ -4,7 +4,7 @@ import { Vertex } from "../lib/graph";
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
+// This method read all property vertexes and make an object.
 export const getProps = (meta: Vertex) => (getChildVertexes(["$0Prop"], [meta]).vertexes || []).reduce((acc, curr) => {
   const key = getOptionLabel(curr, "->$0Key:P.key");
   if (key) {
