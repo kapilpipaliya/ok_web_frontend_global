@@ -119,7 +119,7 @@ export const Logout = (props: {}) => {
   });
   Ws.trigger([[event, {}]]);
   onCleanup(() => Ws.unbind(event));
-  return <>Logging out...</>;
+  return <>Logging out...</>
 };
 
 export const SignUp = (props: {}) => {

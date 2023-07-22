@@ -70,7 +70,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
   const getAttributes = () => {
     // If child vertexes, use it
-    const childAttrVertex = getChildVertexes(["$0Attr", "$0Att"], [props.meta]).vertexes;
+    const childAttrVertex = getChildVertexes(["Attr", "$0Att"], [props.meta]).vertexes;
     if(childAttrVertex?.length) {
       return childAttrVertex;
     }
@@ -79,7 +79,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
     const attrVertex = getChildVertex(["$0Att"], props.meta).vertex;
     if (!attrVertex) return;
 
-    return getChildVertexes(["CollAttr"], [attrVertex]).vertexes;
+    return getChildVertexes(["Attr"], [attrVertex]).vertexes;
   }
   const tableColumnsTemplate = createMemo(() => getAttributes() || record?.getMetaAttributes(props.meta) || []);
 
@@ -91,7 +91,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       // add metadata from separate collection.
       const collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, metaData.collection);
       if (collVertex) {
-        const vertexCollAttrResult = getChildVertexes(["$0Attr"], [collVertex]);
+        const vertexCollAttrResult = getChildVertexes(["Attr"], [collVertex]);
         if (!vertexCollAttrResult.error) {
           const vertexCollAttr = vertexCollAttrResult.vertexes!;
           const attrs = [] as FieldAttribute[];
@@ -170,7 +170,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
               addMeta(metaVertex(), p.joinVertex);
             });
             const DefaultValue = () => <>{metaVertex().P.props?.defaultValue &&
-             getOptionLabel(p.joinVertex, metaVertex().P.props.defaultValue)}</>;
+             getOptionLabel(p.joinVertex, metaVertex().P.props.defaultValue)}</>
             const Content = () => <>
               <DynamicComponent
                component={component()}
@@ -180,7 +180,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                setValue={record?.setValue}
                disabled={disabled()}
               />
-            </>;
+            </>
 
             return (
               <Switch>
@@ -225,7 +225,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
        >
          <td>
            <div class="flex align-items:center">
-             {p.index + 1}
+             {p.joinVertex.P.pos}
              {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
 
 

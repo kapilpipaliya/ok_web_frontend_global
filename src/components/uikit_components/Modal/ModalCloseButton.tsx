@@ -6,5 +6,5 @@
 export function ModalCloseButton({ mode }: { mode?: "default" | "outside" }) {
   const className = `uk-modal-close-${mode ?? "default"}`;
 
-  return <button class={className} type="button" data-uk-close />;
+  return <button class={className} type="button" data-uk-close />
 }

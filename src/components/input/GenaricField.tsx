@@ -333,10 +333,14 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
   let { record, cleanUpConfig } = useContext(FormContext);
 
   // children:
-  return <For each={getChildVertexes(["$0Attr"], [props.metaVertex]).vertexes}>
+  return <For each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort((a, b) => a.P.pos - b.P.pos)}>
     {item => {
       // createComputed is hard to debug
       createComputed(() => {
+        // @Note:(Question)
+        // We may need to link vertex with meta,
+        // so each vertex can identify its meta.
+
         // 1. this will re-render when Props length changes.
         // 2. when Prop Key changes.
         const compProps = (getChildVertexes(["$0Prop"], [item]).vertexes || []).reduce((acc, curr) => {
@@ -373,7 +377,7 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
       // currently context is not reactive, but we are assuming it will work.
 
       const Label = () => {
-        return <>{toTitle(PageRenderUtils.getId(item) || '')}</>;
+        return <>{toTitle(PageRenderUtils.getId(item) || '')}</>
       }
 
       return <Switch>

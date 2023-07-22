@@ -203,7 +203,7 @@ export const DataGrid = (props: DataGridProps) => {
   }
 
   if (!collection) {
-    return <>Incorrect Configuration</>;
+    return <>Incorrect Configuration</>
   }
   // console.log(1, JSON.stringify(props))
   const { Ws } = useContext(WsContext);

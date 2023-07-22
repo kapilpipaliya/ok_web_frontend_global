@@ -9,7 +9,7 @@ import {
 import { get, set } from "idb-keyval";
 import { Link, Route, Routes, useNavigate, useParams } from "@solidjs/router";
 import Page404 from "../pages/404";
-import { BackupRestore, GraphViewPage } from "../pages/BackupRestore";
+import { BackupRestore } from "../pages/BackupRestore";
 import { getNewGraphId, graph, Vertex } from "../lib/graph";
 import {
   AllForms,
@@ -25,7 +25,6 @@ import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 import Home from "../pages/home/home";
 import {
  NavDesigner,
- PageDesignerDragAndDrop,
  renderNavTreeFromGraph
 } from "./FormDesigner";
 import { syncEvent } from "../lib/ws_events";
@@ -42,6 +41,10 @@ import { AttrsTableData } from "./api";
 import { Navbar } from "../pages/home/components/Navbar";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { AbstractSingleForm } from "./DynamicForm";
+import { FileField } from "./input/FileField";
+import { PageDesignerDragAndDrop } from "./PageDesignerDragAndDrop";
+import { GraphViewPage } from "../pages/GraphViewPage";
+
 
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
@@ -56,7 +59,9 @@ export const StaticSideBar = () => {
 
   // parent div is required else component is not rendered.
   return (
-   <div><Show when={graph.initialSynced}><div
+   <div><Show when={graph.initialSynced}>
+    <div
+       class="height:calc(100vh-1rem)"
        ref={el => {
          const nav = findVertexByLabelAndUniqueId('Nav', 'name', "main");
          if (!nav) {
@@ -115,14 +120,14 @@ export const DashboardView = () => {
               path="/:entity"
               component={() => {
                 const params = useParams();
-                return <AbstractSingleGrid tableId={params.entity} />;
+                return <AbstractSingleGrid tableId={params.entity} />
               }}
             />
             <Route
               path="/:entity/:id"
               component={() => {
                 const params = useParams();
-                return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />;
+                return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />
               }}
             />
            <Route path="/Page/:id" component={PageDesignerDragAndDrop as Component} />

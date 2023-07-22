@@ -125,6 +125,11 @@ export const revertTransaction = (txnId: number) => {
   });
   transactions.delete(txnId);
 };
+export const txnHasSteps = (txnId: number) => {
+  if (!txnId || !transactions.has(txnId)) return false;
+  const existingTxnValue = transactions.get(txnId)!.steps || [];
+  return existingTxnValue.length > 0;
+};
 
 export const getTransactionData = (txnId: number) => {
   if (!transactions.has(txnId)) return [];

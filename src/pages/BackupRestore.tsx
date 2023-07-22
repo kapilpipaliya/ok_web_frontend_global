@@ -1,11 +1,4 @@
-import {
-  batch,
-  createEffect,
-  createSignal,
-  JSX,
-  Show,
-  useContext
-} from "solid-js";
+import { batch, JSX, useContext } from "solid-js";
 import {
   backupToIndexDB,
   backupToJson,
@@ -19,7 +12,6 @@ import {
   restoreFromJson,
   Vertex
 } from "../lib/graph";
-import { GraphView } from "../components/GraphView";
 import { Link } from "@solidjs/router";
 import { Card } from "../components/uikit_components/Card/Card";
 import { CardHeader } from "../components/uikit_components/Card/CardHeader";
@@ -53,68 +45,7 @@ import { parse } from "yaml";
 import { G } from "@mobily/ts-belt";
 import { deleteEdge } from "../lib/Edge";
 import { AttrsTableData } from "../components/api";
-
-function fileDownloader(opt: {
-  data: string | ArrayBuffer | ArrayBufferView | Blob;
-  filename: string;
-  title: string;
-  mime?: string;
-  bom?: string;
-}) {
-  const throwError = function (name: string) {
-    throw new Error("No " + name + " provided to generate-download-link.");
-  };
-
-  const data = opt.data || throwError("data");
-  const title = opt.title || throwError("title");
-  const filename = opt.filename || throwError("filename");
-
-  const anchor = document.createElement("a");
-  anchor.style.display = "none";
-  const blobData = typeof opt.bom !== "undefined" ? [opt.bom, data] : [data];
-  const blob = new Blob(blobData, {
-    type: opt.mime || "application/octet-stream",
-  });
-  const blobURL =
-    window.URL && window.URL.createObjectURL
-      ? window.URL.createObjectURL(blob)
-      : window.webkitURL.createObjectURL(blob);
-
-  const attachDataAsOctetStream = function (data: any) {
-    // const link = 'data:application/octet-stream,' + encodeURIComponent(data);
-    // anchor.setAttribute('href', link);
-    anchor.href = blobURL;
-  };
-
-  const setFilename = function (filename: string) {
-    anchor.setAttribute("download", filename);
-  };
-
-  const setTitle = function (title: string) {
-    anchor.appendChild(document.createTextNode(title));
-  };
-
-  // Safari thinks _blank anchor are pop ups. We only want to set _blank
-  // target if the browser does not support the HTML5 download attribute.
-  // This allows you to download files in desktop safari if pop up blocking
-  // is enabled.
-  if (typeof anchor.download === "undefined") {
-    anchor.setAttribute("target", "_blank");
-  }
-
-  attachDataAsOctetStream(data);
-  setFilename(filename);
-  setTitle(title);
-
-  document.body.appendChild(anchor);
-  anchor.click();
-
-  // Fixes "webkit blob resource error 1"
-  setTimeout(function () {
-    document.body.removeChild(anchor);
-    window.URL.revokeObjectURL(blobURL);
-  }, 200);
-}
+import { fileDownloader } from "../utils/dom_utils";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
@@ -154,6 +85,7 @@ export const BackupRestore = () => {
         let txnId = getNewTxnId(); // Note txnId 0 not working
         // Issue with big websocket messages, its not received at all when debugging, It cant received at websocket message handler,
         // so spliting it.
+        // If we splitTransaction, it's very slow
         const splitTransaction = false;
         for (const componentId in json) {
 
@@ -286,7 +218,7 @@ export const BackupRestore = () => {
       const componentVertex = graph.vertexes[compVertexId];
       const componentName = componentVertex.P[IdAttr];
       if (["DropDownBox", "Bullet", "CircularGauge", "LinearGauge", "ProgressBar"].includes(componentName)) continue;
-      const newRow1 = newRow(txnId, existingVertex, "CollAttr");
+      const newRow1 = newRow(txnId, existingVertex, "Attr");
       replaceVertexProperties(txnId, newRow1.vertexId!, { [IdAttr]: getId(componentName), displayName: componentName});
       const dataType = getParentVertex(["DataType$0"], componentVertex);
       if (!dataType.error) {
@@ -330,82 +262,85 @@ Map
 Duration
 Date
 LocalTime
-LocalDateTime`,
+LocalDateTime
+->
+=>`,
     });
     onDataDirectoryImportClick(record, Ws);
     // 2. Import components
     updateImportRecord('component', record, false);
     record.mergeFieldValues({
-      csv: `name\tdataType\tparent\tcategory
-Autocomplete\tString\t\tForm
-Calendar\tInteger\t\tForm
-CheckBox\tBoolean\t\tForm
-ColorBox\tString\t\tForm
-DateBox\tDate\t\tForm
-DropDownBox\tList\t\tForm
-FileUploader\tList\t\tForm
-FilterBuilder\tList\t\tForm
-HtmlEditor\tString\t\tForm
-NumberBox\tFloat\t\tForm
-RadioGroup\tList\t\tForm
-RangeSelector\t\t\tForm
-RangeSlider\t\t\tForm
-SelectBox\tList\t\tForm
-Slider\tFloat\t\tForm
-Switch\tBoolean\t\tForm
-TagBox\tList\t\tForm
-TextArea\tString\t\tForm
-TextBox\tString\t\tForm
-Table\t\t\tForm
-Bullet\tInteger\t\tView
-CircularGauge\tInteger\t\tView
-LinearGauge\tFloat\t\tView
-ProgressBar\tFloat\t\tView
-Int\tInteger\tNumberBox\tCustom
-Float\tFloat\tNumberBox\tCustom
-DateTimeBox\tLocalDateTime\tDateBox\tCustom
-Box\t\t\tView
-TreeMap\t\t\tView
-VectorMap\t\t\tView
-TreeView\t\t\tView
-TreeList\t\t\tView
-Toast\t\t\tView
-TileView\t\t\tView
-Tabs\t\t\tView
-TabPanel\t\t\tView
-SpeedDialAction\t\t\tView
-SparkLine\t\t\tView
-ScrollView\t\t\tView
-Scheduler\t\t\tView
-Sankey\t\t\tView
-Popup\t\t\tView
-PopOver\t\t\tView
-PolarChart\t\t\tView
-PieChart\t\t\tView
-MultiView\t\t\tView
-Menu\t\t\tView
-Map\t\t\tView
-Lookup\t\t\tView
-LoadPanel\t\t\tView
-LoadIndicator\t\t\tView
-List\t\t\tView
-Gantt\t\t\tView
-Gallery\t\t\tView
-Funnel\t\t\tView
-FileManager\t\t\tView
-Diagram\t\t\tView
-DataGrid\t\t\tView
-ContextMenu\t\t\tView
-Chart\t\t\tView
-Button\t\t\tView
-BarGauge\t\t\tView
-ActionSheet\t\t\tView
-Accordion\t\t\tView
-ButtonGroup\t\t\tView
-Tooltip\t\t\tView
-PivotGrid\t\t\tView
-DropDownButton\t\t\tView
-Drawer\t\t\tView`,
+      csv: `name\tdataType\tparent\tcategory\tchild
+Autocomplete\tString\t\tForm\t
+Calendar\tInteger\t\tForm\t
+CheckBox\tBoolean\t\tForm\t
+ColorBox\tString\t\tForm\t
+DateBox\tDate\t\tForm\t
+DropDownBox\tList\t\tForm\t
+FileUploader\tList\t\tForm\t
+FilterBuilder\tList\t\tForm\t
+HtmlEditor\tString\t\tForm\t
+NumberBox\tFloat\t\tForm\t
+RadioGroup\tList\t\tForm\t
+RangeSelector\t\t\tForm\t
+RangeSlider\t\t\tForm\t
+SelectBox\t->\t\tJoin\t
+Slider\tFloat\t\tForm\t
+Switch\tBoolean\t\tForm\t
+TagBox\t=>\t\tJoin\t
+TextArea\tString\t\tForm\t
+TextBox\tString\t\tForm\t
+Table\t\t\tForm\t
+Bullet\tInteger\t\tView\t
+CircularGauge\tInteger\t\tView\t
+LinearGauge\tFloat\t\tView\t
+ProgressBar\tFloat\t\tView\t
+Int\tInteger\tNumberBox\tCustom\t
+Float\tFloat\tNumberBox\tCustom\t
+DateTimeBox\tLocalDateTime\tDateBox\tCustom\t
+Box\t\t\tView\tTRUE
+TreeMap\t\t\tView\tTRUE
+VectorMap\t\t\tView\tTRUE
+TreeView\t\t\tView\tTRUE
+TreeList\t\t\tView\tTRUE
+Toast\t\t\tView\t
+TileView\t\t\tView\tTRUE
+Tabs\t\t\tView\tTRUE
+TabPanel\t\t\tView\tTRUE
+SpeedDialAction\t\t\tView\t
+SparkLine\t\t\tView\t
+ScrollView\t\t\tView\t
+Scheduler\t\t\tView\tTRUE
+Sankey\t\t\tView\t
+Popup\t\t\tView\t
+PopOver\t\t\tView\t
+PolarChart\t\t\tView\t
+PieChart\t\t\tView\t
+MultiView\t\t\tView\t
+Menu\t\t\tView\tTRUE
+Map\t\t\tView\t
+Lookup\t\t\tView\t
+LoadPanel\t\t\tView\t
+LoadIndicator\t\t\tView\t
+List\t\t\tView\tTRUE
+Gantt\t\t\tView\t
+Gallery\t\t\tView\tTRUE
+Funnel\t\t\tView\t
+FileManager\t\t\tView\t
+Diagram\t\t\tView\t
+DataGrid\t\t\tView\tTRUE
+ContextMenu\t\t\tView\tTRUE
+Chart\t\t\tView\t
+Button\t\t\tView\t
+BarGauge\t\t\tView\t
+ActionSheet\t\t\tView\tTRUE
+Accordion\t\t\tView\tTRUE
+ButtonGroup\t\t\tView\tTRUE
+Tooltip\t\t\tView\t
+PivotGrid\t\t\tView\t
+DropDownButton\t\t\tView\t
+Drawer\t\t\tView\tTRUE
+FieldSetLabelLeft\t\t\tForm\tTRUE`,
     });
     onDataDirectoryImportClick(record, Ws);
     // 3. Import dataTypeDefault
@@ -421,7 +356,9 @@ Map\tTextArea
 Duration\tDateBox
 Date\tDateBox
 LocalTime\tDateTimeBox
-LocalDateTime\tDateBox`,
+LocalDateTime\tDateBox
+->\tSelectBox
+=>\tTagBox`,
     });
     onDataDirectoryImportClick(record, Ws);
 
@@ -781,7 +718,7 @@ OUT:
                   continue;
                 }
 
-                const rowResult = newRow(txnId, collectionVertex, "CollAttr");
+                const rowResult = newRow(txnId, collectionVertex, "Attr");
                 replaceVertexProperties(txnId, rowResult.vertexId!, {
                   name: field.id,
                   displayName: field.label,
@@ -1060,30 +997,6 @@ OUT:
     </>
   );
 };
-
-export const GraphViewPage = () => {
-  const [load, setLoad] = createSignal(false);
-  createEffect(() => {
-    if (graph.vertexes && graph.edges) {
-      setLoad(false);
-      setTimeout(() => setLoad(true), 0);
-      console.log("reloading");
-    }
-  });
-  return <Show when={load()}>
-    <GraphView
-     edges={Object.entries(graph.edges)
-      .filter(([_, edge]) => edge.T !== "MetaAttr")
-      .map(([key, value]) => ({ ...value, type: value.T, start: value.S, end: value.E }))}
-     nodes={Object.entries(graph.vertexes)
-      .filter(([_, vertex]) => vertex.L[0] !== "MetaAttr")
-      .map(([key, value]) => ({
-        ...value,
-        label: value.L[0],
-      }))}
-    />
-  </Show>
-}
 
 export function importNavigation(yamlInput: any, record: Record) {
   const input = parse(yamlInput);

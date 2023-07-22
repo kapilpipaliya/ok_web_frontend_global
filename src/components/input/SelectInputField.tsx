@@ -22,6 +22,7 @@ import {
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { WsContext } from "../../utils/ws_events_dispatcher";
 import {
+  getChildVertex,
   getInEdge,
   getOptionLabel,
   getParentVertexValue,
@@ -201,13 +202,27 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
       // if (props.disabled) {
       //   return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
       // }
-      const collection = getValueFromVertexOrKey(props.meta.P.props, "collection");
+
+      const collection = getChildVertex(["$0Coll"], props.meta).vertex?.['P']?.['name'] || getValueFromVertexOrKey(props.meta.P.props, "collection");
       if (!collection) {
         return [];
       }
       return getSelectionOptions(props.data, collection).vertexes || [];
     }
   }, (data) => data);
+
+  function getComponent() {
+    let component = props.component;
+    let direction = props.meta.P.dir;
+    if (!component && direction) {
+      if (direction === "->") {
+        component = "SelectBox";
+      } else {
+        component = "TagBox";
+      }
+    }
+    return component;
+  }
 
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
@@ -222,6 +237,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
         <div
          class="min-w:140"
           ref={(el) => {
+            let component = getComponent();
             let selectOp = {
               searchEnabled: true,
               disabled: props.disabled!,
@@ -229,7 +245,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
               showClearButton: true,
 
               // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: props.component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
+              value: component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
               onValueChanged: function (e) {
                 // batch(() => {
                 // note: valueChanged is fired even when the value is changed programmatically,
@@ -299,7 +315,8 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
 
               } as Properties)
             }
-            const instance = props.component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
+            // TODO: make this reactive when component change it should re-render component.
+            const instance = component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
             createEffect(() => {
               for (const property in props.meta.P.props) {// as Properties
                 if (property === "displayExpr" || property === 'items') continue;
@@ -312,7 +329,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
              on(
               () => selectedValue(props.meta, props.data),
               (selectedValue) => {
-                instance.option("value", props.component === 'SelectBox' ? selectedValue[0] : selectedValue);
+                instance.option("value", getComponent() === 'SelectBox' ? selectedValue[0] : selectedValue);
               },
               { defer: true },
              ),

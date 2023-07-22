@@ -1,5 +1,4 @@
 import { FieldAttribute, FormMetaData, IFormContext } from "../lib/Record";
-import { klona } from "klona";
 import { findVertexByLabelAndUniqueIdWithSkip } from "../lib/Vertex";
 import { IdAttr } from "../lib/graph";
 
@@ -29,14 +28,6 @@ const collectionAttr = [
     component: "TextArea",
   },
   {
-    name: "type",
-    component: "SelectBox",
-    props: {
-      items: `Group
-List`,
-    },
-  },
-  {
     name: "dataType",
     component: "SelectBox",
     props: {
@@ -52,6 +43,13 @@ List`,
       collection: "->$0DataType->$0Comp",
       // smaller version:
       // collection: "Comp",
+    },
+  },
+  {
+    name: "coll",
+    component: "SelectBox",
+    props: {
+      collection: "Coll",
     },
   },
   {
@@ -117,8 +115,8 @@ List`,
     component: "Table",
     tab: "expand",
     props: {
-      // this makes edge type fixed.
-      type: "CollAttr"
+      type: 'Attr',
+      label: "Attr",
     },
   }
 ] as FieldAttribute[];
@@ -177,13 +175,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
       },
       { name: "name", component: "TextBox" },
-      { name: "description", component: "TextArea" },
       {
         name: "parent",
         displayName: "Parent Component",
         component: "SelectBox",
         props: {
-          
+
           collection: "Comp",
           inward: true,
           parentLabel: "Comp",
@@ -201,6 +198,12 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           parentLabel: "DataType",
         },
       },
+      {
+        name: "child",
+        displayName: "Children",
+        component: "CheckBox",
+      },
+      { name: "description", component: "TextArea" },
       {
         name: "Prop",
         component: "Table",
@@ -364,7 +367,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "TagBox",
         props: {
           
-          collection: "->$0Attr",
+          collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
           // then this field is required.
@@ -375,7 +378,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "TagBox",
         props: {
           
-          collection: "->$0Attr",
+          collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
           // then this field is required.
@@ -387,6 +390,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "Table",
         tab: "Attribute",
         props: {
+          type: 'Attr',
+          label: "Attr",
         },
         attributes: collectionAttr,
       },
@@ -529,7 +534,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Unique Constrain Keys",
             component: "TagBox",
             props: {
-              collection: "-$0->$0Attr",
+              collection: "-$0->Attr",
             },
           },
         ],
@@ -578,14 +583,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               // displayExpr: "P.displayName||P.name",
               displayExpr: "$P.displayName ($P.name)",
-              collection: "-$0-Coll$0->$0Attr",
+              collection: "-$0-Coll$0->Attr",
             },
           },
           {
             name: "displayName",
             component: "TextBox",
             props: {
-              // defaultValue: "->$0Attr:P.displayName",
+              // defaultValue: "->Attr:P.displayName",
             },
           },
           {
@@ -594,7 +599,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-$0-Coll$0->$0Tab",
               
-              defaultValue: "->$0Attr->$0Tab:P.name",
+              defaultValue: "->Attr->$0Tab:P.name",
             },
           },
           {
@@ -603,7 +608,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               collection: "-$0-Coll$0->$0Group",
               
-              defaultValue: "->$0Attr->$0Group:P.name",
+              defaultValue: "->Attr->$0Group:P.name",
             },
           },
           {
@@ -613,8 +618,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               collection: "DataType",
               
               hidden: true,
-              // defaultValue: "->$0Attr->$0DataType:P.name",
-              defaultValue: "->$0Attr->$0DataType:P.name",
+              // defaultValue: "->Attr->$0DataType:P.name",
+              defaultValue: "->Attr->$0DataType:P.name",
             },
           },
           {
@@ -623,23 +628,23 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               
-              // collection: "->$0Attr->$0DataType->$0Comp",
-              collection: "->$0Attr->$0DataType->$0Comp",
-              defaultValue: "->$0Attr->$0Comp:P.name",
+              // collection: "->Attr->$0DataType->$0Comp",
+              collection: "->Attr->$0DataType->$0Comp",
+              defaultValue: "->Attr->$0Comp:P.name",
             },
           },
           {
             name: "required",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:P.required",
+              defaultValue: "->Attr:P.required",
             },
           },
           {
             name: "disabled",
             component: "CheckBox",
             props: {
-              defaultValue: "->$0Attr:P.disabled",
+              defaultValue: "->Attr:P.disabled",
             },
           },
           {
@@ -652,7 +657,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: "P.key",
-                  collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
+                  collection: "-$0->$0Comp->$0Prop||-$0->Attr->$0Comp->$0Prop",
                 },
               },
               {
@@ -708,7 +713,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   displayExpr: "P.name",
-                  collection: "-$0->$0Coll->$0Coll->$0Attr",
+                  collection: "-$0->$0Coll->$0Coll->Attr",
                 },
               },
               {
@@ -718,7 +723,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   collection: "DataType",
                   
                   hidden: true,
-                  defaultValue: "->$0Attr->$0DataType:P.name",
+                  defaultValue: "->Attr->$0DataType:P.name",
                 },
               },
               {
@@ -727,29 +732,29 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "SelectBox",
                 props: {
                   
-                  collection: "->$0Attr->$0DataType->$0Comp",
-                  defaultValue: "->$0Attr->$0Comp:P.name",
+                  collection: "->Attr->$0DataType->$0Comp",
+                  defaultValue: "->Attr->$0Comp:P.name",
                 },
               },
               {
                 name: "displayName",
                 component: "TextBox",
                 props: {
-                  defaultValue: "->$0Attr:P.displayName",
+                  defaultValue: "->Attr:P.displayName",
                 },
               },
               {
                 name: "required",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:P.required",
+                  defaultValue: "->Attr:P.required",
                 },
               },
               {
                 name: "disabled",
                 component: "CheckBox",
                 props: {
-                  defaultValue: "->$0Attr:P.disabled",
+                  defaultValue: "->Attr:P.disabled",
                 },
               },
               {
@@ -769,7 +774,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     component: "SelectBox",
                     props: {
                       displayExpr: "P.key",
-                      collection: "-$0->$0Comp->$0Prop||-$0->$0Attr->$0Comp->$0Prop",
+                      collection: "-$0->$0Comp->$0Prop||-$0->Attr->$0Comp->$0Prop",
                     },
                   },
                   {
@@ -969,9 +974,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "Table",
         tab: "Attribute",
         props: {
-          // unique: 'Attr',
-          // kanban: true,
-          // collection: "Attr",
+          type: 'Attr',
+          label: "Attr",
         },
         attributes: [
           {
@@ -990,7 +994,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               // displayExpr: "P.displayName||P.name",
               displayExpr: "$P.displayName ($P.name)",
-              collection: "->$0Coll->$0Attr||-$0->$0Coll->CollAttr",
+              collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
             },
           },
           {
@@ -1008,7 +1012,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //   component: "SelectBox",
           //   props: {
           //     
-          //     collection: "-$0->$0Attr",
+          //     collection: "-$0->Attr",
           //     focusRefresh: true
           //   },
           // },
@@ -1085,9 +1089,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "Table",
             tab: "expand",
             props: {
-              // unique: 'Attr',
-              // kanban: true,
-              // collection: "Attr",
+              type: 'Attr',
+              label: "Attr",
             },
             attributes: [
               {
@@ -1106,7 +1109,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 props: {
                   // displayExpr: "P.displayName||P.name",
                   displayExpr: "$P.displayName ($P.name)",
-                  collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr", //||-$0->$0Coll->CollAttr
+                  collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
                 },
               },
               {
@@ -1159,9 +1162,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 component: "Table",
                 tab: "expand",
                 props: {
-                  // unique: 'Attr',
-                  // kanban: true,
-                  // collection: "Attr",
+                  type: 'Attr',
+                  label: "Attr",
                 },
                 attributes: [
                   {
@@ -1180,7 +1182,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     props: {
                       // displayExpr: "P.displayName||P.name",
                       displayExpr: "$P.displayName ($P.name)",
-                      collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr", //||-$0->$0Coll->CollAttr
+                      collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
                     },
                   },
                   {
@@ -1233,9 +1235,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     component: "Table",
                     tab: "expand",
                     props: {
-                      // unique: 'Attr',
-                      // kanban: true,
-                      // collection: "Attr",
+                      type: 'Attr',
+                      label: "Attr",
                     },
                     attributes: [
                       {
@@ -1254,7 +1255,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         props: {
                           // displayExpr: "P.displayName||P.name",
                           displayExpr: "$P.displayName ($P.name)",
-                          collection: "->$0Coll->$0Attr||-$0->$0Att->CollAttr", //||-$0->$0Coll->CollAttr
+                          collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
                         },
                       },
                       {
@@ -1302,6 +1303,531 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         ],
                       },
 
+                      {
+                        name: "Attr",
+                        component: "Table",
+                        tab: "expand",
+                        props: {
+                          type: 'Attr',
+                          label: "Attr",
+                        },
+                        attributes: [
+                          {
+                            name: "coll",
+                            displayName: "Collection",
+                            component: "SelectBox",
+                            props: {
+                              collection: "Coll",
+                              parentLabel: "Coll",
+                            },
+                          },
+                          {
+                            name: "Att",
+                            displayName: "Attribute",
+                            component: "SelectBox",
+                            props: {
+                              // displayExpr: "P.displayName||P.name",
+                              displayExpr: "$P.displayName ($P.name)",
+                              collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                            },
+                          },
+                          {
+                            name: "name",
+                            displayName: "ID",
+                            component: "TextBox",
+                            props: {},
+                          },
+                          {
+                            name: "Comp",
+                            component: "SelectBox",
+                            props: {
+
+                              collection: "Comp",
+                              // smaller version:
+                              // collection: "Comp",
+                            },
+                          },
+                          {
+                            name: "data",
+                            component: "SelectBox",
+                            props: {
+                              collection: `{{->$0Coll:P.${IdAttr}}}`,
+                            },
+                          },
+                          {
+                            name: "Prop",
+                            displayName: "Property",
+                            component: "Table",
+                            attributes: [
+                              {
+                                name: "key",
+                                component: "SelectBox",
+                                props: {
+                                  displayExpr: "P.key",
+                                  collection: "-$0->$0Comp->$0Prop",
+                                },
+                              },
+                              {
+                                name: "value",
+                                meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                component:
+                                 "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                              },
+                            ],
+                          },
+
+                          {
+                            name: "Attr",
+                            component: "Table",
+                            tab: "expand",
+                            props: {
+                              type: 'Attr',
+                              label: "Attr",
+                            },
+                            attributes: [
+                              {
+                                name: "coll",
+                                displayName: "Collection",
+                                component: "SelectBox",
+                                props: {
+                                  collection: "Coll",
+                                  parentLabel: "Coll",
+                                },
+                              },
+                              {
+                                name: "Att",
+                                displayName: "Attribute",
+                                component: "SelectBox",
+                                props: {
+                                  // displayExpr: "P.displayName||P.name",
+                                  displayExpr: "$P.displayName ($P.name)",
+                                  collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                },
+                              },
+                              {
+                                name: "name",
+                                displayName: "ID",
+                                component: "TextBox",
+                                props: {},
+                              },
+                              {
+                                name: "Comp",
+                                component: "SelectBox",
+                                props: {
+
+                                  collection: "Comp",
+                                  // smaller version:
+                                  // collection: "Comp",
+                                },
+                              },
+                              {
+                                name: "data",
+                                component: "SelectBox",
+                                props: {
+                                  collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                },
+                              },
+                              {
+                                name: "Prop",
+                                displayName: "Property",
+                                component: "Table",
+                                attributes: [
+                                  {
+                                    name: "key",
+                                    component: "SelectBox",
+                                    props: {
+                                      displayExpr: "P.key",
+                                      collection: "-$0->$0Comp->$0Prop",
+                                    },
+                                  },
+                                  {
+                                    name: "value",
+                                    meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                    component:
+                                     "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                  },
+                                ],
+                              },
+
+                              {
+                                name: "Attr",
+                                component: "Table",
+                                tab: "expand",
+                                props: {
+                                  type: 'Attr',
+                                  label: "Attr",
+                                },
+                                attributes: [
+                                  {
+                                    name: "coll",
+                                    displayName: "Collection",
+                                    component: "SelectBox",
+                                    props: {
+                                      collection: "Coll",
+                                      parentLabel: "Coll",
+                                    },
+                                  },
+                                  {
+                                    name: "Att",
+                                    displayName: "Attribute",
+                                    component: "SelectBox",
+                                    props: {
+                                      // displayExpr: "P.displayName||P.name",
+                                      displayExpr: "$P.displayName ($P.name)",
+                                      collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                    },
+                                  },
+                                  {
+                                    name: "name",
+                                    displayName: "ID",
+                                    component: "TextBox",
+                                    props: {},
+                                  },
+                                  {
+                                    name: "Comp",
+                                    component: "SelectBox",
+                                    props: {
+
+                                      collection: "Comp",
+                                      // smaller version:
+                                      // collection: "Comp",
+                                    },
+                                  },
+                                  {
+                                    name: "data",
+                                    component: "SelectBox",
+                                    props: {
+                                      collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                    },
+                                  },
+                                  {
+                                    name: "Prop",
+                                    displayName: "Property",
+                                    component: "Table",
+                                    attributes: [
+                                      {
+                                        name: "key",
+                                        component: "SelectBox",
+                                        props: {
+                                          displayExpr: "P.key",
+                                          collection: "-$0->$0Comp->$0Prop",
+                                        },
+                                      },
+                                      {
+                                        name: "value",
+                                        meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                        component:
+                                         "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                      },
+                                    ],
+                                  },
+
+                                  {
+                                    name: "Attr",
+                                    component: "Table",
+                                    tab: "expand",
+                                    props: {
+                                      type: 'Attr',
+                                      label: "Attr",
+                                    },
+                                    attributes: [
+                                      {
+                                        name: "coll",
+                                        displayName: "Collection",
+                                        component: "SelectBox",
+                                        props: {
+                                          collection: "Coll",
+                                          parentLabel: "Coll",
+                                        },
+                                      },
+                                      {
+                                        name: "Att",
+                                        displayName: "Attribute",
+                                        component: "SelectBox",
+                                        props: {
+                                          // displayExpr: "P.displayName||P.name",
+                                          displayExpr: "$P.displayName ($P.name)",
+                                          collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                        },
+                                      },
+                                      {
+                                        name: "name",
+                                        displayName: "ID",
+                                        component: "TextBox",
+                                        props: {},
+                                      },
+                                      {
+                                        name: "Comp",
+                                        component: "SelectBox",
+                                        props: {
+
+                                          collection: "Comp",
+                                          // smaller version:
+                                          // collection: "Comp",
+                                        },
+                                      },
+                                      {
+                                        name: "data",
+                                        component: "SelectBox",
+                                        props: {
+                                          collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                        },
+                                      },
+                                      {
+                                        name: "Prop",
+                                        displayName: "Property",
+                                        component: "Table",
+                                        attributes: [
+                                          {
+                                            name: "key",
+                                            component: "SelectBox",
+                                            props: {
+                                              displayExpr: "P.key",
+                                              collection: "-$0->$0Comp->$0Prop",
+                                            },
+                                          },
+                                          {
+                                            name: "value",
+                                            meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                            component:
+                                             "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                          },
+                                        ],
+                                      },
+
+                                      {
+                                        name: "Attr",
+                                        component: "Table",
+                                        tab: "expand",
+                                        props: {
+                                          type: 'Attr',
+                                          label: "Attr",
+                                        },
+                                        attributes: [
+                                          {
+                                            name: "coll",
+                                            displayName: "Collection",
+                                            component: "SelectBox",
+                                            props: {
+                                              collection: "Coll",
+                                              parentLabel: "Coll",
+                                            },
+                                          },
+                                          {
+                                            name: "Att",
+                                            displayName: "Attribute",
+                                            component: "SelectBox",
+                                            props: {
+                                              // displayExpr: "P.displayName||P.name",
+                                              displayExpr: "$P.displayName ($P.name)",
+                                              collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                            },
+                                          },
+                                          {
+                                            name: "name",
+                                            displayName: "ID",
+                                            component: "TextBox",
+                                            props: {},
+                                          },
+                                          {
+                                            name: "Comp",
+                                            component: "SelectBox",
+                                            props: {
+
+                                              collection: "Comp",
+                                              // smaller version:
+                                              // collection: "Comp",
+                                            },
+                                          },
+                                          {
+                                            name: "data",
+                                            component: "SelectBox",
+                                            props: {
+                                              collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                            },
+                                          },
+                                          {
+                                            name: "Prop",
+                                            displayName: "Property",
+                                            component: "Table",
+                                            attributes: [
+                                              {
+                                                name: "key",
+                                                component: "SelectBox",
+                                                props: {
+                                                  displayExpr: "P.key",
+                                                  collection: "-$0->$0Comp->$0Prop",
+                                                },
+                                              },
+                                              {
+                                                name: "value",
+                                                meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                                component:
+                                                 "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                              },
+                                            ],
+                                          },
+
+                                          {
+                                            name: "Attr",
+                                            component: "Table",
+                                            tab: "expand",
+                                            props: {
+                                              type: 'Attr',
+                                              label: "Attr",
+                                            },
+                                            attributes: [
+                                              {
+                                                name: "coll",
+                                                displayName: "Collection",
+                                                component: "SelectBox",
+                                                props: {
+                                                  collection: "Coll",
+                                                  parentLabel: "Coll",
+                                                },
+                                              },
+                                              {
+                                                name: "Att",
+                                                displayName: "Attribute",
+                                                component: "SelectBox",
+                                                props: {
+                                                  // displayExpr: "P.displayName||P.name",
+                                                  displayExpr: "$P.displayName ($P.name)",
+                                                  collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                                },
+                                              },
+                                              {
+                                                name: "name",
+                                                displayName: "ID",
+                                                component: "TextBox",
+                                                props: {},
+                                              },
+                                              {
+                                                name: "Comp",
+                                                component: "SelectBox",
+                                                props: {
+
+                                                  collection: "Comp",
+                                                  // smaller version:
+                                                  // collection: "Comp",
+                                                },
+                                              },
+                                              {
+                                                name: "data",
+                                                component: "SelectBox",
+                                                props: {
+                                                  collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                                },
+                                              },
+                                              {
+                                                name: "Prop",
+                                                displayName: "Property",
+                                                component: "Table",
+                                                attributes: [
+                                                  {
+                                                    name: "key",
+                                                    component: "SelectBox",
+                                                    props: {
+                                                      displayExpr: "P.key",
+                                                      collection: "-$0->$0Comp->$0Prop",
+                                                    },
+                                                  },
+                                                  {
+                                                    name: "value",
+                                                    meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                                    component:
+                                                     "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                                  },
+                                                ],
+                                              },
+
+                                              {
+                                                name: "Attr",
+                                                component: "Table",
+                                                tab: "expand",
+                                                props: {
+                                                  type: 'Attr',
+                                                  label: "Attr",
+                                                },
+                                                attributes: [
+                                                  {
+                                                    name: "coll",
+                                                    displayName: "Collection",
+                                                    component: "SelectBox",
+                                                    props: {
+                                                      collection: "Coll",
+                                                      parentLabel: "Coll",
+                                                    },
+                                                  },
+                                                  {
+                                                    name: "Att",
+                                                    displayName: "Attribute",
+                                                    component: "SelectBox",
+                                                    props: {
+                                                      // displayExpr: "P.displayName||P.name",
+                                                      displayExpr: "$P.displayName ($P.name)",
+                                                      collection: "->$0Coll->Attr||-$0->$0Att->Attr", //||-$0->$0Coll->Attr
+                                                    },
+                                                  },
+                                                  {
+                                                    name: "name",
+                                                    displayName: "ID",
+                                                    component: "TextBox",
+                                                    props: {},
+                                                  },
+                                                  {
+                                                    name: "Comp",
+                                                    component: "SelectBox",
+                                                    props: {
+
+                                                      collection: "Comp",
+                                                      // smaller version:
+                                                      // collection: "Comp",
+                                                    },
+                                                  },
+                                                  {
+                                                    name: "data",
+                                                    component: "SelectBox",
+                                                    props: {
+                                                      collection: `{{->$0Coll:P.${IdAttr}}}`,
+                                                    },
+                                                  },
+                                                  {
+                                                    name: "Prop",
+                                                    displayName: "Property",
+                                                    component: "Table",
+                                                    attributes: [
+                                                      {
+                                                        name: "key",
+                                                        component: "SelectBox",
+                                                        props: {
+                                                          displayExpr: "P.key",
+                                                          collection: "-$0->$0Comp->$0Prop",
+                                                        },
+                                                      },
+                                                      {
+                                                        name: "value",
+                                                        meta: "->$0Key->$0Comp-CompChild->$0Prop+->$0Key->$0Comp->$0Prop+->$0Key->$0ValueProp",
+                                                        component:
+                                                         "->$0Key->$0Comp-CompChild:P.name||->$0Key->$0Comp:P.name||->$0Key->$0DataType->$0Default:P.name",
+                                                      },
+                                                    ],
+                                                  },
+
+                                                ],
+                                              },
+                                            ],
+                                          },
+                                        ],
+                                      },
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                        ],
+                      },
                     ],
                   },
                 ],

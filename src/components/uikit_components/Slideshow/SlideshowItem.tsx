@@ -4,7 +4,7 @@ import { setClassNames } from "../set-class-names";
 export function SlideshowItem(props: SlideshowItemProps) {
   const renderBasedOnType = () => {
     if (props.type === "image") {
-      return <img src={props.src} alt={props.alt} uk-cover="" />;
+      return <img src={props.src} alt={props.alt} uk-cover="" />
     }
     if (props.type === "video") {
       return (
