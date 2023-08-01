@@ -9,7 +9,7 @@ import {
   Show,
   Switch,
   useContext,
- on
+  on, getOwner, runWithOwner
 } from "solid-js";
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
@@ -62,7 +62,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
   const { Ws } = useContext(WsContext);
   // if there is no parent FormContext, it should still work.
   let { record, cleanUpConfig } = useContext(FormContext);
-
+  const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   // columns
@@ -309,7 +309,8 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       alert("Table data is not set");
       return;
     }
-    return addNewRow(record?.txnId || 0, props.meta, props.data!, {}, record?.isRealTime ?? false, Ws);
+
+    return runWithOwner(outerOwner, () => addNewRow(record?.txnId || 0, props.meta, props.data!, {}, record?.isRealTime ?? false, Ws));
   }
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>

@@ -1,9 +1,9 @@
 import {
   createEffect,
   createResource,
-  For,
+  For, getOwner,
   on,
-  onCleanup,
+  onCleanup, runWithOwner,
   Show,
   untrack,
   useContext
@@ -223,7 +223,7 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
     }
     return component;
   }
-
+  const outerOwner = getOwner();
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <Show
@@ -237,118 +237,119 @@ export function SelectInputField(props: ComponentProps & {component: string}) {
         <div
          class="min-w:140"
           ref={(el) => {
-            let component = getComponent();
-            let selectOp = {
-              searchEnabled: true,
-              disabled: props.disabled!,
-              showSelectionControls: true,
-              showClearButton: true,
+            runWithOwner(outerOwner, () => {
+              let component = getComponent();
+              let selectOp = {
+                searchEnabled: true,
+                disabled: props.disabled!,
+                showSelectionControls: true,
+                showClearButton: true,
 
-              // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-              value: component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
-              onValueChanged: function (e) {
-                // batch(() => {
-                // note: valueChanged is fired even when the value is changed programmatically,
-                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
-                // used e.event check to prevent this.
-                // on simple import screen when value is selected first time event is not there
-                if (e.previousValue && !e.event) {
-                  // TODO: TO Prevent Onchange event firing on select set a flag
-                  // when it should not fire the event In the form
-                  // and remove it
-                  // when calculations are done.
-                  return;
-                }
-                if (!props.data) {
-                  return;
-                }
-                if (record.isRealTime) {
-                  record.txnId = getNewTxnId();
-                }
-                if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
-                  props.setValue?.(props.meta,props.data, e.value);
-                } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
-                  props.setValue?.(props.meta,props.data, e.value);
-                } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
-                  setParentValue(record.txnId, props.data, props.meta, e.value);
-                } else {
-                  setSelectionValue(record.txnId, props.data, props.meta, e.value);
-                }
-                onChangeHandler(record.txnId, record.vertex, props.data, props.meta);
-                if (record.isRealTime) commitTxn(record.txnId, Ws);
-                // })
-              },
-              labelMode: "floating",
-              // slow down performance.
-              // onFocusIn: function (e) {
-              //   refetch();
-              // },
-            } as Properties;
-
-            if (getValueFromVertexOrKey(props.meta.P.props, "focusRefresh")) {
-              Object.assign(selectOp, {
-                onFocusIn: function (e) {
-                  refetch();
+                // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
+                value: component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
+                onValueChanged: function(e) {
+                  runWithOwner(outerOwner, () => {
+                    // note: valueChanged is fired even when the value is changed programmatically,
+                    // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
+                    // used e.event check to prevent this.
+                    // on simple import screen when value is selected first time event is not there
+                    if (e.previousValue && !e.event) {
+                      // TODO: TO Prevent Onchange event firing on select set a flag
+                      // when it should not fire the event In the form
+                      // and remove it
+                      // when calculations are done.
+                      return;
+                    }
+                    if (!props.data) {
+                      return;
+                    }
+                    if (record.isRealTime) {
+                      record.txnId = getNewTxnId();
+                    }
+                    if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
+                      props.setValue?.(props.meta, props.data, e.value);
+                    } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
+                      props.setValue?.(props.meta, props.data, e.value);
+                    } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
+                      setParentValue(record.txnId, props.data, props.meta, e.value);
+                    } else {
+                      setSelectionValue(record.txnId, props.data, props.meta, e.value);
+                    }
+                    onChangeHandler(record.txnId, record.vertex, props.data, props.meta);
+                    if (record.isRealTime) commitTxn(record.txnId, Ws);
+                  })
                 },
-              } as Properties)
-            }
-            if (!getValueFromVertexOrKey(props.meta.P.props, "items")) {
-              let displayExpr: undefined | string;
-              // Bug: When In a Coll, In Attr Row,
-              // If DataType Selected, Submit
-              // Open Coll again, Change DataType,
-              // Component is not updated the First time.
-              // To Simplify development, Temporary enables refresh on click
-              if (!isSimpleCollection(getValueFromVertexOrKey(props.meta.P.props, "collection"))) {
+                labelMode: "floating",
+                // slow down performance.
+                // onFocusIn: function (e) {
+                //   refetch();
+                // },
+              } as Properties;
+
+              if (getValueFromVertexOrKey(props.meta.P.props, "focusRefresh")) {
                 Object.assign(selectOp, {
-                  onFocusIn: function (e) {
+                  onFocusIn: function(e) {
                     refetch();
                   },
                 } as Properties)
-              } else {
               }
+              if (!getValueFromVertexOrKey(props.meta.P.props, "items")) {
+                let displayExpr: undefined | string;
+                // Bug: When In a Coll, In Attr Row,
+                // If DataType Selected, Submit
+                // Open Coll again, Change DataType,
+                // Component is not updated the First time.
+                // To Simplify development, Temporary enables refresh on click
+                if (!isSimpleCollection(getValueFromVertexOrKey(props.meta.P.props, "collection"))) {
+                  Object.assign(selectOp, {
+                    onFocusIn: function(e) {
+                      refetch();
+                    },
+                  } as Properties)
+                } else {
+                }
 
-              Object.assign(selectOp, {
-                // if valueExpr value is undefined onValueChange will not fire.
-                valueExpr: "id",
-                displayExpr: (item) => getOptionLabel(item, getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || collectionNameDisplayExpr(replaceExpressionToLabel(getValueFromVertexOrKey(props.meta.P.props, "collection"), props.data)) || `P.${IdAttr}`),
+                Object.assign(selectOp, {
+                  // if valueExpr value is undefined onValueChange will not fire.
+                  valueExpr: "id",
+                  displayExpr: (item) => runWithOwner(outerOwner, () => getOptionLabel(item, getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || collectionNameDisplayExpr(replaceExpressionToLabel(getValueFromVertexOrKey(props.meta.P.props, "collection"), props.data)) || `P.${IdAttr}`)),
 
-              } as Properties)
-            }
-            // TODO: make this reactive when component change it should re-render component.
-            const instance = component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
-            createEffect(() => {
-              for (const property in props.meta.P.props) {// as Properties
-                if (property === "displayExpr" || property === 'items') continue;
-                instance.option(property, getValueFromVertexOrKey(props.meta.P.props, property));
+                } as Properties)
               }
+              // TODO: make this reactive when component change it should re-render component.
+              const instance = component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
+              createEffect(() => {
+                for (const property in props.meta.P.props) {// as Properties
+                  if (property === "displayExpr" || property === 'items') continue;
+                  instance.option(property, getValueFromVertexOrKey(props.meta.P.props, property));
+                }
+              });
+              // when the value is changed by other components, we want to refetch the options
+              // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+              createEffect(
+               on(
+                () => selectedValue(props.meta, props.data),
+                (selectedValue) => {
+                  instance.option("value", getComponent() === 'SelectBox' ? selectedValue[0] : selectedValue);
+                },
+                { defer: true },
+               ),
+              );
+
+              // when the value is changed by other components, we want to refetch the options
+              // createEffect(on(() => props.rawValue, (v) => refetch(v)))
+
+
+              createEffect(() => instance.option("disabled", props.disabled));
+
+              createEffect(() => {
+                const options = selectOptions();
+                if (options) {
+                  instance.option("dataSource", options);
+                }
+              });
+              onCleanup(() => instance.dispose());
             });
-            // when the value is changed by other components, we want to refetch the options
-            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
-            createEffect(
-             on(
-              () => selectedValue(props.meta, props.data),
-              (selectedValue) => {
-                instance.option("value", getComponent() === 'SelectBox' ? selectedValue[0] : selectedValue);
-              },
-              { defer: true },
-             ),
-            );
-
-            // when the value is changed by other components, we want to refetch the options
-            // createEffect(on(() => props.rawValue, (v) => refetch(v)))
-
-
-
-            createEffect(() => instance.option("disabled", props.disabled));
-
-            createEffect(() => {
-              const options = selectOptions();
-              if (options) {
-                instance.option("dataSource", options);
-              }
-            });
-            onCleanup(() => instance.dispose());
           }}
         />
       </Show>

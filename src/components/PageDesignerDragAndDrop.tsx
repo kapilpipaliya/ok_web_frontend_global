@@ -1,9 +1,23 @@
 // TODO: make multiple Fields Drag and Drop once.
 import { useParams } from "@solidjs/router";
-import { createStore } from "solid-js/store";
-import { PageContext, Record } from "../lib/Record";
-import { createSignal, createUniqueId, onMount, Show } from "solid-js";
-import { PageItemRender } from "./input/GenaricField";
+import { createStore, reconcile } from "solid-js/store";
+import {
+ deleteRow,
+ getCompProps,
+ getRowProps,
+ PageContext,
+ Record
+} from "../lib/Record";
+import {
+ batch,
+ createEffect,
+ createSignal,
+ on,
+ onMount,
+ Show,
+ useContext
+} from "solid-js";
+import { GenericField, PageItemRender } from "./input/GenaricField";
 import TreeView, {
  Item as dxTreeViewItem,
  Node
@@ -12,16 +26,30 @@ import dxSortable, { DragEndEvent } from "devextreme/ui/sortable";
 import {
  getChildVertex,
  getChildVertexes,
- getParentVertex,
+ getParentVertex, getSelectionOptions,
  getTreeData
 } from "../lib/Traverse";
-import { graph, Id, Vertex } from "../lib/graph";
+import {
+ getNewGraphId,
+ getNewTxnId,
+ graph, Id,
+ IdAttr,
+ setGraph,
+ Vertex
+} from "../lib/graph";
 import dxDraggable from "devextreme/ui/draggable";
-import { AbstractSingleForm } from "./DynamicForm";
+import { AbstractSingleForm, FormGroup } from "./DynamicForm";
 import { setParentValue, setSelectionValue } from "./input/SelectInputField";
-import { mergeVertexProperties, replaceVertexProperties } from "../lib/Vertex";
+import {
+ addNewVertex,
+ findVertexByLabelAndUniqueId,
+ mergeVertexProperties,
+ newVertex, replaceVertexProperties
+} from "../lib/Vertex";
+import { WsContext } from "../utils/ws_events_dispatcher";
 
 function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
+ if (!childrenItems) return;
  for (let i = 0; i < childrenItems.length; i++) {
   const child = childrenItems[i];
   mergeVertexProperties(txnId, child.id! as number, { pos: i + 1 });
@@ -33,38 +61,97 @@ export const PageDesignerDragAndDrop = () => {
  const params = useParams();
  const pageConfig = createStore({} as { record: Record });
  const [count, setCount] = createSignal(1);
+ const { Ws } = useContext(WsContext);
+ const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
+ const [selectedComponent, setSelectedComponent] = createSignal({vertexId: -1});
+ const [selectedColl, setSelectedColl] = createSignal({vertexId: -1});
  const rerender = () => {
   setCount(prev => prev + 1);
  };
 
+ const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
+  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
+  if (propVertexes.vertexes) {
+   const initialValues = propVertexes.vertexes.reduce((acc, curr) => {
+    if (typeof curr.P.value === "boolean") {
+     acc[curr.P.key] = curr.P.value;
+    } else if (curr.P.value) {
+     acc[curr.P.key] = curr.P.value;
+    }
+    return acc;
+   }, {} as {[key: string]: any});
+   replaceVertexProperties(txnId, layoutRowId, initialValues);
+  }
+ }
  // @Note:
  // From Component To Layout drag:
  // 1. Create a Row to proper parent.
  // 2. Sort properly
- const componentDrag = (componentVertexId: Id, index: number, parentVertex?: Vertex, childrenItems: dxTreeViewItem[]) => {
+ const componentDrag = (fromVertex: Vertex, index: number, parentVertex?: Vertex, childrenItems: dxTreeViewItem[]) => {
   // handle (toNode === null) case.
-  if (componentVertexId) {
+  if (fromVertex) {
    parentVertex = parentVertex || pageConfig[0].record.vertex;
-   // Add new Row
-   const rowMetaAttrInst = getChildVertex(["AttrInst"], parentVertex);
-   const attrMeta = getChildVertexes(['MetaAttr'], [rowMetaAttrInst.vertex || pageConfig[0].record.metaVertex]).vertexes;
-   if (!attrMeta) return -1;
-   const attrMetaVertex = attrMeta.find(vertex => vertex.P.name === "Attr");
-   // if it's too many nested levels, it's not supported.
-   if (!attrMetaVertex) {
-    alert('too much nested layout not supported.');
-    return -1;
-   }
+   const attrMetaVertex =      newVertex(getNewTxnId(), [],{
+    name: "Attr",
+    component: "Table",
+    tab: "Attribute",
+    props: {
+     type: 'Attr',
+     label: "Attr",
+    },
+   });
    const rowResult = pageConfig[0].record.addNewRowUI(attrMetaVertex, parentVertex, {pos: index});
    const rowVertex = graph.vertexes[rowResult.vertexId!];
-   // set Component to the row
-   const attrAttrMeta = getChildVertexes(['MetaAttr'], [rowMetaAttrInst.vertex || attrMetaVertex]).vertexes;
-   if (!attrAttrMeta) return -1;
-   const attrCompMetaVertex = attrAttrMeta.find(vertex => vertex.P.name === "Comp");
-   if (!attrCompMetaVertex) {
-    return -1;
+
+   if(fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
+    const attrCompMetaVertex = newVertex(getNewTxnId(), [],{
+     name: "Comp",
+     component: "SelectBox",
+     props: {
+      collection: "Comp",
+     },
+    });
+
+    if (fromVertex.L[0] === "Comp") {
+     // set Component to the row
+     setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCompMetaVertex, fromVertex.id);
+     addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, fromVertex);
+    } else if (fromVertex.L[0] === "Coll") {
+     // set Collection to the row
+     const attrCollMetaVertex = newVertex(getNewTxnId(), [], {
+      name: "coll",
+      displayName: "Collection",
+      component: "SelectBox",
+      props: {
+       collection: "Coll",
+       parentLabel: "Coll",
+      },
+     });
+     setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCollMetaVertex, fromVertex.id);
+     const formVertex = findVertexByLabelAndUniqueId('Comp', IdAttr, "Form");
+     if (!formVertex) {
+      alert('cant find form');
+     } else {
+      setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCompMetaVertex, formVertex.id);
+      addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
+     }
+    }
+   } else if (fromVertex.L[0] === "Attr") {
+    // set Collection Attribute to the row
+    const attMetaVertex = newVertex(getNewTxnId(), [], {
+     name: "Att",
+     displayName: "Attribute",
+     component: "SelectBox",
+     props: {
+      displayExpr: "$P.displayName ($P.name)",
+      collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
+     }
+    });
+    setSelectionValue(pageConfig[0].record.txnId, rowVertex, attMetaVertex, fromVertex.id);
+    // TODO add comp prop default values
+    // addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
    }
-   setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCompMetaVertex, componentVertexId);
+
    return rowResult.vertexId!
   }
   return -1;
@@ -89,6 +176,7 @@ export const PageDesignerDragAndDrop = () => {
  }
 
  function calculateToIndex(e: DragEndEvent) {
+  // great
   if (e.fromComponent !== e.toComponent || e.dropInsideItem) {
    return e.toIndex;
   }
@@ -176,7 +264,7 @@ export const PageDesignerDragAndDrop = () => {
   return null;
  }
 
- const One = () => {
+ const OneComponents = () => {
   return     <div ref={el => {
    // TODO: How to drag and drop several/multiple items using dxSortable
    // https://supportcenter.devexpress.com/ticket/details/t874232/how-to-drag-and-drop-several-multiple-items-using-dxsortable
@@ -234,11 +322,15 @@ export const PageDesignerDragAndDrop = () => {
       let toIndex = 0;
 
 
-      let parentVertex: Vertex | undefined;
+      let parentAttrVertex: Vertex | undefined;
       let childrenItems: dxTreeViewItem[];
       if (e.dropInsideItem) {
-       parentVertex = graph.vertexes[toNode?.itemData!.id!];
+       parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
        childrenItems = toNode!.itemData![itemsExpr];
+       const compVertex = getComponentFromLayoutRow(toNode?.itemData!.id!);
+       if (!compVertex?.P.child) {
+        return;
+       }
       } else {
        const toNodeContainingArray = getNodeContainingArray(toNode, toItems);
        if (!toNodeContainingArray) return;
@@ -251,13 +343,13 @@ export const PageDesignerDragAndDrop = () => {
        }
 
        if (toNode?.parent?.itemData?.id) {
-        parentVertex = graph.vertexes[toNode!.parent.itemData.id]
+        parentAttrVertex = graph.vertexes[toNode!.parent.itemData.id]
        } else if (toNode === null) {
-        parentVertex = pageConfig[0].record?.vertex;
+        parentAttrVertex = pageConfig[0].record?.vertex;
        }
       }
 
-      const rowId = componentDrag(fromNode!.itemData!.id as number,  toIndex, parentVertex, childrenItems);
+      const rowId = componentDrag(fromVertex,  toIndex, parentAttrVertex, childrenItems);
       if (rowId === -1) return;
       // key value should be unique in the array.
       const originalId = fromNode!.itemData!.id;
@@ -270,11 +362,7 @@ export const PageDesignerDragAndDrop = () => {
       fromTreeView.option("items", fromItems);
       toTreeView.option("items", toItems);
 
-      // sort
-      for (let i = 0; i < childrenItems.length; i++){
-       const child = childrenItems[i];
-       mergeVertexProperties(pageConfig[0].record.txnId, child.id! as number, {pos: i +1});
-      }
+      sortChildren(childrenItems, pageConfig[0].record.txnId);
 
       fromTreeView.scrollToItem(fromTopVisibleNode);
       toTreeView.scrollToItem(toTopVisibleNode);
@@ -319,6 +407,7 @@ export const PageDesignerDragAndDrop = () => {
       })*/
       const data = getTreeData({
        collection: "*CompCategory",
+       // TODO: Dont display "Form" Component
        child: { collection: "->CompCategoryComp" }
       });
       componentsTreeViewInstance = new TreeView(el, {
@@ -340,26 +429,20 @@ export const PageDesignerDragAndDrop = () => {
    />
   </div>
  }
- const Two = () => {
+ const TwoCollections = () => {
   return      <div ref={el => {
    onMount(() => {
     new dxSortable(el, {
      data: "collectionFields", // identifier
      group: "componentDrag",
+     allowReordering: false,
+     // If we set allowDropInsideItem false, it re-position instantly when dragging.
      allowDropInsideItem: true,
-     allowReordering: true,
+     moveItemOnDrop: false,
      filter: ".dx-treeview-item",
      onDragChange(e) {
-      if (e.fromComponent === e.toComponent) {
-       const nodes = e.element.querySelectorAll(".dx-treeview-node");
-       if (!e.fromIndex || !e.toIndex) return;
-       const parent = nodes[e.fromIndex];
-       const child = nodes[e.toIndex];
-       const isDescendant = parent.contains(child);
-       if (isDescendant) {
-        e.cancel = true;
-       }
-      }
+      // doesn't support re-order and a drop from other components.
+      e.cancel = true;
      },
      onDragStart: (e) => {
       console.log("start");
@@ -375,21 +458,75 @@ export const PageDesignerDragAndDrop = () => {
       const fromTreeView = getTreeView(e.fromData);
       const toTreeView = getTreeView(e.toData);
       if (!fromTreeView || !toTreeView) return;
+      if (e.toData !== 'layout') return;
 
+      // Cant Use JSON.parse(JSON.stringify()), circular reference.
       const fromNode = findNode(fromTreeView, e.fromIndex);
       const toNode = findNode(toTreeView, calculateToIndex(e));
 
+      // If we JSON.parse(JSON.stringify()), drop inside tree is not working.
       const fromItems = fromTreeView.option("items");
       const toItems = toTreeView.option("items");
 
-      // TODO: disable dropping Component Category Node
+      // TODO: disable dropping1 Component Category Node
       // toNode === null means end of the list
 
       const fromTopVisibleNode = getTopVisibleNode(e.fromComponent as dxSortable);
       const toTopVisibleNode = getTopVisibleNode(e.toComponent as dxSortable);
-      moveNode(fromNode, toNode, fromItems, toItems, e.dropInsideItem);
+
+      // disable dropping some vertex
+      const fromVertex = graph.vertexes[fromNode!.itemData!.id!];
+      // if (!['Coll', 'Attr'].includes(fromVertex.L[0])) return;
+
+      let toIndex = 0;
+
+
+      let parentAttrVertex: Vertex | undefined;
+      let childrenItems: dxTreeViewItem[];
+      if (e.dropInsideItem) {
+       parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
+       childrenItems = toNode!.itemData![itemsExpr];
+       const compVertex = getComponentFromLayoutRow(toNode?.itemData!.id!);
+       if (!compVertex?.P.child) {
+        return;
+       }
+      } else {
+       const toNodeContainingArray = getNodeContainingArray(toNode, toItems);
+       if (!toNodeContainingArray) return;
+       if (toNode === null) {
+        toIndex = toNodeContainingArray.length;
+        childrenItems = toNodeContainingArray;
+       } else {
+        toIndex = findIndex(toNodeContainingArray, toNode.itemData!.id as string);
+        childrenItems = toNodeContainingArray;
+       }
+
+       if (toNode?.parent?.itemData?.id) {
+        parentAttrVertex = graph.vertexes[toNode!.parent.itemData.id]
+       } else if (toNode === null) {
+        parentAttrVertex = pageConfig[0].record?.vertex;
+       }
+      }
+
+      const rowId = componentDrag(fromVertex,  toIndex, parentAttrVertex, childrenItems);
+      if (rowId === -1) return;
+      // key value should be unique in the array.
+      const originalId = fromNode!.itemData!.id;
+      fromNode!.itemData!.id = rowId;
+
+      moveNode(fromNode, toNode, fromItems, toItems, e.dropInsideItem, false);
+      fromNode!.itemData!.id = originalId;
+
+      // we need to reset fromItems because, there is a bug it removes the dragged item from the tree.
       fromTreeView.option("items", fromItems);
       toTreeView.option("items", toItems);
+
+      // sort
+      for (let i = 0; i < childrenItems.length; i++){
+       const child = childrenItems[i];
+       mergeVertexProperties(pageConfig[0].record.txnId, child.id! as number, {pos: i +1});
+      }
+
       fromTreeView.scrollToItem(fromTopVisibleNode);
       toTreeView.scrollToItem(toTopVisibleNode);
 
@@ -398,20 +535,20 @@ export const PageDesignerDragAndDrop = () => {
    });
   }}>
    <div
-    //class="max-h:30rem"
+    class="h:30rem"
     ref={el => {
      onMount(() => {
       // This is very slow, because we have very big data.
-      return;
+
       const data = getTreeData({
        collection: "Coll",
        // TODO: First level add Incoming Fields.
-       child: { collection: "->Attr",
-        child: {
-         collection: "->Attr",
-         child: { collection: "->Attr", child: { collection: "->Attr" } }
-        }
-       }
+       // child: { collection: "->Attr",
+       //  child: {
+       //   collection: "->Attr",
+       //   child: { collection: "->Attr", child: { collection: "->Attr" } }
+       //  }
+       // }
       }, [], {
        nameExpr: (v: Vertex) => {
         const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
@@ -424,8 +561,8 @@ export const PageDesignerDragAndDrop = () => {
        keyExpr: "id",
        displayExpr: "name",
        itemsExpr: "children",
-       // width: 200,
-       // searchEnabled: true,
+       width: 200,
+       searchEnabled: true,
        activeStateEnabled: false,
        // focusStateEnabled: false,
        expandNodesRecursive: false,
@@ -439,7 +576,22 @@ export const PageDesignerDragAndDrop = () => {
   </div>
  }
 
- const Four = () => {
+ const getComponentFromLayoutRow = (layoutRowId: string | number) => {
+  // There must be a component found.
+  const currentVertex = graph.vertexes[layoutRowId];
+  const compVertex = (getSelectionOptions(currentVertex, "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default").vertexes || []);
+  if (compVertex[0]) {
+   return compVertex[0];
+  }
+  const collVertex = getChildVertex(['$0Coll'], currentVertex);
+  if (collVertex.vertex?.P.name === "Form") {
+    return findVertexByLabelAndUniqueId('Comp', IdAttr, "Form");
+  }
+
+  return findVertexByLabelAndUniqueId("DataType", "name", "String");
+ }
+
+ const FourLayout = () => {
   return     <div ref={el => {
    onMount(() => {
     new dxSortable(el, {
@@ -457,6 +609,18 @@ export const PageDesignerDragAndDrop = () => {
        const isDescendant = parent.contains(child);
        if (isDescendant) {
         e.cancel = true;
+       }
+      }
+      if (e.dropInsideItem) {
+       const toTreeView = getTreeView(e.toData);
+       if (!toTreeView) return;
+       const toNode = findNode(toTreeView, calculateToIndex(e as any));
+       const parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
+       if (!parentAttrVertex) return;
+       const compVertex = getComponentFromLayoutRow(toNode?.itemData!.id!);
+       if (!compVertex?.P.child) {
+        e.cancel = true;
+        return;
        }
       }
      },
@@ -513,7 +677,7 @@ export const PageDesignerDragAndDrop = () => {
         setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}})
        }
        const toId = toNode?.itemData!.id;
-       // add new adge.
+       // add new edge.
        if (e.dropInsideItem) {
         setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}}, toId)
        } else {
@@ -539,8 +703,10 @@ export const PageDesignerDragAndDrop = () => {
   }}>
    <div
     //class="max-h:30rem"
+
     ref={el => {
      onMount(() => {
+      let selectedElement: HTMLDivElement;
       const data = getTreeData({
        collection: "!Attr",
        child: { collection: "!Attr",
@@ -555,6 +721,7 @@ export const PageDesignerDragAndDrop = () => {
         return `${v.P.name}${component ? ` (${component})` : ""}`;
        }
       });
+
       layoutTreeViewInstance = new TreeView(el, {
        items: data,
        dataStructure: "tree",
@@ -566,83 +733,137 @@ export const PageDesignerDragAndDrop = () => {
        activeStateEnabled: false,
        // focusStateEnabled: false,
        expandNodesRecursive: false,
-       onItemClick(e) {
+       // selectByClick: true,
+       // @ts-ignore
+       onFocusOut() {
+        setTimeout(() => selectedElement?.classList.add("dx-state-focused"));
+       },
+       onItemClick: function(args) {
+        // @ts-ignore
+        selectedElement = args.itemElement!.parentElement!
+        if (!args.itemData?.id) {
+         alert('Layout Id not Found');
+         return;
+        }
+        batch(() => {
+         setSelectedLayout({vertexId: -1});
+         setSelectedComponent({vertexId: -1});
+         setSelectedColl({vertexId: -1});
 
-       }
+         setSelectedLayout({vertexId: args.itemData!.id! as number, itemIndex: args.itemIndex});
+         const collVertex = getChildVertex(['$0Coll'], graph.vertexes[args.itemData!.id!]);
+         setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
+         const componentVertex = getComponentFromLayoutRow(args.itemData!.id!);
+         setSelectedComponent({vertexId: componentVertex?.id || -1});
+        })
+       },
       });
      });
     }}
    />
   </div>
  }
+
+
+
+ const FiveProperties = () => {
+  const vertexId = getNewGraphId();
+  const addNewVertexResult = addNewVertex(0, newVertex(vertexId, ['PropsJson'], {sample: true}));
+  if (addNewVertexResult.error) {
+   console.warn('error while inserting');
+  }
+
+  createEffect(on(selectedComponent, v => {
+   if (selectedLayout().vertexId && selectedLayout().vertexId !== -1) {
+    const componentProps = getCompProps(graph.vertexes[selectedComponent().vertexId]);
+    const rowProps = getRowProps(graph.vertexes[selectedLayout().vertexId]);
+    const props = Object.assign(componentProps, rowProps);
+    // set existing layout props
+    setGraph('vertexes', vertexId, 'P', reconcile(props));
+   } else {
+    setGraph('vertexes', vertexId, 'P', reconcile( {}));
+   }
+
+  }));
+
+  const setPropertyValue = (meta: Vertex, data: Vertex, value: any) => {
+   setGraph('vertexes', data.id, 'P', meta.P.name, value)
+   if (selectedLayout().vertexId) {
+
+    // find existing row;
+    const layoutVertex = graph.vertexes[selectedLayout().vertexId];
+    const componentVertex = graph.vertexes[selectedComponent().vertexId];
+    const rowProps = getChildVertexes(["$0Prop"], [layoutVertex]).vertexes || [];
+    const row = rowProps.find(vertex => {
+     const component = getChildVertex(['$0Name'], vertex).vertex;
+     return component?.P.name === meta.P.name
+    });
+    if (row) {
+     mergeVertexProperties(pageConfig[0].record.txnId, row.id, {value});
+    } else {
+     const propMetaVertex = newVertex(0, ['Meta'], {
+      name: "Prop",
+      displayName: "Property",
+     });
+     const addRowResult = pageConfig[0].record.addNewRowUI(propMetaVertex, layoutVertex, {value});
+     if (addRowResult.vertexId) {
+      const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
+      const componentProp = componentProps.find(vertex => {
+       return vertex.P.name === meta.P.name
+      });
+      if (componentProp) {
+       setSelectionValue(pageConfig[0].record.txnId, graph.vertexes[addRowResult.vertexId], {P: {name: 'Name'}} as unknown as Vertex, componentProp.id);
+      }
+     }
+    }
+    // TODO: if reset, delete the row.
+   }
+  }
+  const selectedComponentProperties = () => {
+   const selectedComp = graph.vertexes[selectedComponent().vertexId];
+
+   if (!selectedComp) {
+    return { error: true }
+   }
+
+   return getChildVertexes(['$0Prop'], [selectedComp]);
+  }
+
+  return <>
+   <FormGroup
+    metaAttributes={selectedComponentProperties().vertexes || []}
+    vertex={graph.vertexes[vertexId]}
+    setValue={setPropertyValue}
+   />
+  </>
+ }
+ const deleteLayout = () => {
+  if(selectedLayout().vertexId !== -1) {
+   // TODO: delete layout and all its properties and all the childrens.
+   deleteRow(graph.vertexes[selectedLayout().vertexId], pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
+
+   const fromNode = findNode(layoutTreeViewInstance, selectedLayout().itemIndex!);
+   const fromItems = layoutTreeViewInstance.option("items");
+   if (!fromItems) return;
+   const fromIndex = findIndex(fromItems, fromNode!.itemData!.id as string);
+   fromItems?.splice(fromIndex, 1);
+
+   layoutTreeViewInstance.option("items", fromItems);
+  }
+ }
  return (
   <div class="flex">
    <div class="border:1|solid|blue-60 p:10 m:5 flex:col">
     <div class="mb:10">Components:</div>
-    <One/>
+    <OneComponents/>
 
-    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
-     Collection Fields
-     <Two/>
+    <div class="bt:1|solid|gray py:10 mt:5 flex-grow:1">
+     <div class="mb:10">Collection Fields:</div>
+     <TwoCollections/>
     </div>
    </div>
 
-   <div
-    class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1"
-    // Native Drop
-    // ondragover={e => e.preventDefault()}
-    // onDrop={e => {
-    //  e.preventDefault();
-    //  const vertexId = e.dataTransfer?.getData("text/plain");
-    //  if (vertexId) {
-    //   const attrMeta = getChildVertexes(["MetaAttr"], [pageConfig[0].record.metaVertex]).vertexes;
-    //   if (!attrMeta) return;
-    //   const attrMetaVertex = attrMeta.find(vertex => vertex.P.name === "Attr")!;
-    //   const rowResult = pageConfig[0].record.addNewRowUI(attrMetaVertex, pageConfig[0].record.vertex, {});
-    //   const rowVertex = graph.vertexes[rowResult.vertexId!];
-    //   const attrAttrMeta = getChildVertexes(["MetaAttr"], [attrMetaVertex]).vertexes;
-    //   if (!attrAttrMeta) return;
-    //   const attrAttrMetaVertex = attrAttrMeta.find(vertex => vertex.P.name === "Comp")!;
-    //   setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrAttrMetaVertex, parseInt(vertexId));
-    //  }
-    // }}
-    ref={el => {
-     // https://js.devexpress.com/Demos/WidgetsGallery/Demo/TreeView/DragAndDropHierarchicalDataStructure/jQuery/Light/
-     new dxDraggable(el, {
-      data: "preview", // identifier
-      group: "componentDrag",
-      allowDropInsideItem: true,
-      allowReordering: true,
-      // filter: ".dx-treeview-item",
-      // itemOrientation: "vertical",
-      onDragChange(e) {
-       if (e.fromComponent === e.toComponent) {
-        const nodes = e.element.querySelectorAll(".dx-treeview-node");
-        if (!e.fromIndex || !e.toIndex) return;
-        const parent = nodes[e.fromIndex];
-        const child = nodes[e.toIndex];
-        const isDescendant = parent.contains(child);
-        if (isDescendant) {
-         e.cancel = true;
-        }
-       }
-      },
-      onDragStart: (e) => {
-       console.log("start");
-       // e.itemData = e.fromData[e.fromIndex];
-       // if(e.itemData.Task_Status === "Not Started") {
-       //  e.cancel = true;
-       // }
-      },
-      onDragMove: (e) => {
-       console.log("move");
-      },
-      onDragEnd: (e) => {
-       console.log("end");
-      }
-     });
-    }}
-   >
+   <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
     <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
     <PageContext.Provider value={{ events: {} }}>
      <Show when={count() && pageConfig[0].record?.vertex && count()} keyed>
@@ -652,17 +873,36 @@ export const PageDesignerDragAndDrop = () => {
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5 flex flex:col">
-    <Four/>
 
-    <AbstractSingleForm
-     formId={"Page"}
-     id={params.id}
-     config={pageConfig}
-     // TODO: add dry option
-    />
-    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
-     <div class={"mb:12"}>Properties</div>
+
+    <div class="flex-grow:1">
+     <div class={"mb:12"}>Layout</div>
+     <FourLayout/>
     </div>
+    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
+     <div class={"mb:12 flex ai:center justify-content:space-between"}>
+      <span>Properties</span>
+      <Show when={selectedLayout().vertexId !== -1}>
+       <GenericField
+        meta={{ P: {component: "Button", props: { stylingMode: 'text', type: "danger", icon: "trash" }}} as any}
+        onClick={deleteLayout}
+       />
+      </Show>
+     </div>
+     <FiveProperties/>
+    </div>
+
+    <div class="bt:1|solid|gray p:10 mt:5 ">
+     <AbstractSingleForm
+      formId={"Page"}
+      id={params.id}
+      config={pageConfig}
+      showMainFieldsOnly={true}
+      importExportButtons={false}
+      // TODO: add dry option
+     />
+    </div>
+
    </div>
 
   </div>

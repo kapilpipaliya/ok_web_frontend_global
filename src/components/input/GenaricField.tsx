@@ -4,11 +4,11 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  For,
+  For, getOwner,
   JSXElement,
   Match,
   on,
-  onCleanup, onMount,
+  onCleanup, onMount, runWithOwner,
   Show,
   Switch,
   useContext
@@ -132,7 +132,7 @@ import dxDrawer, {
 
 import { ComponentProps } from "../../types/Component";
 import {
-  commitTxn,
+  commitTxn, graph,
   IdAttr,
   revertTransaction,
   setGraph,
@@ -140,7 +140,7 @@ import {
 } from "../../lib/graph";
 import {
   FormContext,
-  getCollAttrComp,
+  getCollAttrComp, getCompProps, getRowProps,
   PageContext,
   Record
 } from "../../lib/Record";
@@ -157,7 +157,6 @@ import {
 } from "../../pages/home/components/TodaysEnergizerSection";
 import {
   DynamicComponent,
-  FormGroup
 } from "../DynamicForm";
 import { toTitle } from "case-switcher-js";
 import { getLastItem } from "../../utils/functions";
@@ -166,6 +165,7 @@ import { useNavigate } from "@solidjs/router";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import Tabs from "devextreme/ui/tabs";
 import dxValidationSummary from "devextreme/ui/validation_summary";
+import { getValueFromVertexOrKey } from "../../utils/utils";
 
 export const genericComponents2 = [
   "Box",
@@ -314,10 +314,10 @@ export const PageRenderUtils = {
   getID: (item?: Vertex): string | undefined => item && item.P["name"],
   getId: (item?: Vertex): string | undefined => PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
-  getComponent: (item?: Vertex): string | undefined => {
+  getComponent: (item?: Vertex): Vertex | undefined => {
     if (!item) return;
 
-    const currentComp = getChildVertex(["$0Comp"], item).vertex?.P[IdAttr];
+    const currentComp = getChildVertex(["$0Comp"], item).vertex;
     if (currentComp) return currentComp;
 
     const attrVertex = PageRenderUtils.getAttrVertex(item);
@@ -343,13 +343,10 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
 
         // 1. this will re-render when Props length changes.
         // 2. when Prop Key changes.
-        const compProps = (getChildVertexes(["$0Prop"], [item]).vertexes || []).reduce((acc, curr) => {
-          const key = getOptionLabel(curr, "->$0Key:P.key");
-          if (key) {
-            acc[key] = curr;
-          }
-          return acc;
-        }, {} as { [key: string]: any });
+        const componentVertex = PageRenderUtils.getComponent(item);
+        const componentProps = componentVertex ? getCompProps(componentVertex) : {};
+        const rowProps = getRowProps(item);
+        const compProps = Object.assign(componentProps, rowProps);
 
         // supported deleted properties.
         // mergeProperties only merge top level properties. so props will be replaced.
@@ -357,9 +354,9 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
         // untrack(() => { mergeVertexProperties(getNewTxnId(), item.id, { props: compProps }); })
       })
 
-      const component = createMemo(() => item.P.component || PageRenderUtils.getComponent(item));
+      const component = createMemo(() => item.P.component || PageRenderUtils.getComponent(item)?.P[IdAttr]);
       const parentComponent = createMemo(() => {
-        return PageRenderUtils.getComponent(getLastItem(parentItems, 1));
+        return PageRenderUtils.getComponent(getLastItem(parentItems, 1))?.P[IdAttr];
       });
       const parentData = () => {
         return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
@@ -418,8 +415,10 @@ export function GenericField(props: ComponentProps & { component?: string; disab
   const parentItems = useContext(PageRenderContext);
   const component = createMemo(() => props.component || props.meta.P.component);
   const parentComponent = createMemo(() => {
-    return PageRenderUtils.getComponent(getLastItem(parentItems, 2));
+    return PageRenderUtils.getComponent(getLastItem(parentItems, 2))?.P[IdAttr];
   });
+
+  const outerOwner = getOwner();
 
   const Form = () => {
     const { Ws } = useContext(WsContext);
@@ -536,9 +535,10 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           </Match>
           <Match when={true}>
             <div
-             class={props.meta?.P.props?.class?.id ? (props.meta?.P.props?.class?.P.value || '') : props.meta?.P.props?.class}
+             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
              // @ts-ignore
              ref={(el) => {
+               runWithOwner(outerOwner, () => {
                let attributes: any = {
 
                };
@@ -631,7 +631,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                    height: 320,
                    showCheckBoxesMode: "normal",
                    onSelectionChanged: (e) => {
-                     syncSelection(e.component);
+                     runWithOwner(outerOwner, () => syncSelection(e.component));
                    },
                    onContentReady: (e) => {
                      syncSelection(e.component);
@@ -868,7 +868,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                  ];
                  Object.assign(attributes, {
                    onSelectionChanged(e) {
-                     props.setValue(props.meta, props.data,e.addedItems[0].text);
+                     runWithOwner(outerOwner, () => props.setValue(props.meta, props.data,e.addedItems[0].text));
                    },
                  } as dxTabsProperties);
                } else if (component() === "TabPanel") {
@@ -890,7 +890,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                  Object.assign(attributes, {
                    height: 260,
                    onSelectionChanged(e) {
-                     props.setValue(props.meta, props.data,e.addedItems[0].text);
+                     runWithOwner(outerOwner, () => props.setValue(props.meta, props.data,e.addedItems[0].text));
                    },
                  } as dxTabPanelProperties);
                } else if (component() === "SpeedDialAction") {
@@ -1250,7 +1250,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
               `;
                    },
                    onSelectionChanged(e) {
-                     props.setValue(props.meta,props.data, e.addedItems[0]);
+                     runWithOwner(outerOwner, () => props.setValue(props.meta,props.data, e.addedItems[0]));
                    },
                  } as dxMultiViewProperties);
                  // } else if(component() === "SelectBox" ) {
@@ -1732,7 +1732,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                      argumentField: "day",
                      valueField: "oranges",
                      name: "My oranges",
-                     type: props.meta.P.props?.type?.id ? (props.meta.P.props?.type?.P.value || "bar") : (props.meta.P.props?.type || "bar"),
+                     type: getValueFromVertexOrKey(props.meta.P.props, "type") || "bar",
                      color: "#ffaa66",
                    },
                  } as dxChartProperties);
@@ -1805,7 +1805,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
               `;
                    },
                    onSelectionChanged: (e: any) => {
-                     props.setValue(props.meta, props.data,e.addedItems[0]);
+                     runWithOwner(outerOwner, () => props.setValue(props.meta, props.data,e.addedItems[0]));
                    },
                  } as dxAccordionProperties);
 
@@ -1908,7 +1908,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                    useSelectMode: true,
                    width: 100,
                    onSelectionChanged: (e: any) => {
-                     props.setValue(props.meta, props.data,e.item);
+                     runWithOwner(outerOwner, () => props.setValue(props.meta, props.data,e.item));
                    },
                  } as dxDropDownButtonProperties);
                } else if (
@@ -1971,8 +1971,11 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                createEffect(() => instance()?.option("disabled", props.disabled));
 
                createEffect(() => {
+                 // Todo: Bug:
+                 //  when property is removed,
+                 //  it will not removed from the component.
                  for (const property in props.meta.P.props) { // as dxTreeMapProperties
-                   let value = props.meta.P.props[property]?.id ? props.meta.P.props[property]?.P.value : props.meta.P.props[property];
+                   let value = getValueFromVertexOrKey(props.meta.P.props, property);
                    if (property === "items" && typeof value === "string") {
                      value = value.split("\n");
                    }
@@ -1986,6 +1989,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                  }
                }
                onCleanup(() => instance()?.dispose());
+               })
              }}
             >
               <Switch>

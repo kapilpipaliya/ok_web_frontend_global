@@ -61,6 +61,25 @@ export interface FormMetaData {
  // postSubmit?: (data: any) => any
 }
 
+export function getCompProps(comp: Vertex) {
+ return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
+  if (curr.P.name && curr.P.value !== undefined) {
+   acc[curr.P.name] = curr.P.value;
+  }
+  return acc;
+ }, {} as { [key: string]: any });
+}
+
+export function getRowProps(comp: Vertex) {
+ return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
+  const compProp = getChildVertex(['$0Name'], curr);
+  if (compProp.vertex && compProp.vertex.P.name && curr.P.value !== undefined) {
+   acc[compProp.vertex.P.name] = curr.P.value;
+  }
+  return acc;
+ }, {} as { [key: string]: any });
+}
+
 export function getCollAttrs(
  vertexCollAttr: Vertex,
  vertexFormAttr?: Vertex
@@ -138,12 +157,7 @@ export function getCollAttrs(
   comp = dataTypeDefault.vertex!;
  }
 
- const compProps = (getChildVertexes(["CompProp"], [comp]).vertexes || []).reduce((acc, curr) => {
-  if (curr.P.key) {
-   acc[curr.P.key] = curr.P.value;
-  }
-  return acc;
- }, {} as { [key: string]: any });
+ const compProps = getCompProps(comp);
  formProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10), formProps);
 
  const parentVertexResult = getParentVertex(["CompChild"], comp);
@@ -336,7 +350,8 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
 
 export function newRow(
  txnId: number,
- parentVertex: Vertex,label: string,
+ parentVertex: Vertex,
+ label: string,
  edgeType?: string,
  properties?: {[key: string]: any}
 ): { error: boolean; vertexId?: Id; edgeId?: Id } {
@@ -793,7 +808,7 @@ export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, pro
    txnId = getNewTxnId();
   }
   const type = getToEdge(meta, parentVertex);
-  const label = getValueFromVertexOrKey(meta.P.props, 'label');
+  const label = getValueFromVertexOrKey(meta.P.props || {}, 'label');
 
   const newRowResult = newRow(txnId, parentVertex, label, type,properties);
   if (isRealTime) commitTxn(txnId, Ws);
@@ -832,7 +847,7 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
     P.templateId = attrColumn.id;
 
     if (!P.component) {
-     const component = getCollAttrComp(attrColumn);
+     const component = getCollAttrComp(attrColumn)?.P[IdAttr];
      if(component) P.component = component;
     }
     mergeVertexProperties(metaTxnId, AttrRowResult.vertexId!, P);
@@ -863,7 +878,7 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
     P.templateId = attrColumn.id;
 
     if (!P.component) {
-     const component = getCollAttrComp(attrColumn);
+     const component = getCollAttrComp(attrColumn)?.P[IdAttr];
      if(component) P.component = component;
     }
     mergeVertexProperties(metaTxnId, AttrRowResult.vertexId!, P);
@@ -1003,8 +1018,8 @@ export const getExportCode = (record: Record) => {
  });
 }
 
-export function getCollAttrComp(attrVertex: Vertex) {
- const attrComp = getChildVertex(["$0Comp"], attrVertex).vertex?.P[IdAttr];
+export function getCollAttrComp(attrVertex: Vertex): Vertex | undefined {
+ const attrComp = getChildVertex(["$0Comp"], attrVertex).vertex;
  if (attrComp) return attrComp;
 
  let attrDataTypeVertex = getChildVertex(["$0DataType"], attrVertex).vertex;
@@ -1014,5 +1029,5 @@ export function getCollAttrComp(attrVertex: Vertex) {
    return;
   }
  }
- return getChildVertex(["$0Default"], attrDataTypeVertex).vertex?.P[IdAttr];
+ return getChildVertex(["$0Default"], attrDataTypeVertex).vertex;
 }
