@@ -204,20 +204,20 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "CheckBox",
       },
       { name: "description", component: "TextArea" },
+     // TODO: add validation, duplicate row with same name is not allowed.
       {
         name: "Prop",
         component: "Table",
         tab: "Properties",
         attributes: [
           {
-            name: "key",
+            name: "name",
             component: "TextBox",
           },
           {
             name: "required",
             component: "CheckBox",
           },
-
           {
             name: "dataType",
             component: "SelectBox",

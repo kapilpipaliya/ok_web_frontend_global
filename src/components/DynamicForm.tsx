@@ -55,7 +55,7 @@ import {
 } from "./input/GenaricField";
 import {
   FormContext,
-  FormMetaData,
+  FormMetaData, getCollAttrComp,
   getExportCode,
   getFormMetaData,
   newRow,
@@ -142,20 +142,24 @@ interface FormGroupProps {
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
 }
 
+export function getComponentForCollRow(metaVertex: Vertex, data: Vertex) {
+    if (!metaVertex.P.component) {
+      return getCollAttrComp(metaVertex)?.P[IdAttr];
+    } else if (metaVertex.P.component.includes("-")) {
+      return getOptionLabel(data, metaVertex.P.component);
+    } else {
+      return metaVertex.P.component as string;
+    }
+}
+
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
   return (
     <For each={props.metaAttributes}>
       {(metaVertex) => {
         const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-        const component = createMemo(() => {
-          if (metaVertex.P.component.includes("-")) {
-            return getOptionLabel(props.vertex, metaVertex.P.component);
-          } else {
-            return metaVertex.P.component;
-          }
-        });
-        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || '')}</>
+        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
+        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
         const Content = () => <DynamicComponent
 
          component={component()}
@@ -195,6 +199,9 @@ export interface DynamicFormProps {
   id?: Id;
   config: [Store<{ [key: string]: any }>, SetStoreFunction<{ [key: string]: any }>];
   submitButton?: JSXElement
+  importExportButtons?: boolean;
+  showMainFieldsOnly?: boolean;
+  showSubmitButtonOnTop?: boolean;
 }
 
 function getTabsWidth(group: Vertex[]) {
@@ -245,7 +252,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
       revertTransaction(rowMetaTxnId);
   });
-
+  let submit: boolean;
   const onSubmit = () => {
     const result = validationGroup.validate();
     if (result.isValid) {
@@ -254,6 +261,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
       if (!record.isRealTime) {
         commitTxn(record.txnId, Ws);
       }
+      submit = true;
       // currently we are navigating back.
       navigate(-1);
     } else {
@@ -363,7 +371,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     // if (form.isDirty && !e.defaultPrevented) {
     // preventDefault to block immediately and prompt user async
     e.preventDefault();
-    if (!txnHasSteps(record.txnId)) {
+    if (submit || !txnHasSteps(record.txnId)) {
       e.retry(true);
       return;
     }
@@ -375,6 +383,22 @@ export const DynamicForm = (props: DynamicFormProps) => {
       }
     }, 100);
   });
+
+  const SubmitButton = () =>           <div class="flex gap:10">
+    <Show when={props.submitButton} fallback={<GenericField
+     // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+     meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
+     onClick={onSubmit}
+    />}>
+      {props.submitButton}
+    </Show>
+
+    <GenericField
+     meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel" }}} as any}
+     onClick={onCancel}
+    />
+  </div>
+
   return (
     <div
       ref={(el) => {
@@ -382,16 +406,21 @@ export const DynamicForm = (props: DynamicFormProps) => {
         validationGroup = new dxValidationGroup(divRef()!);
       }}
     >
-      <div class="flex gap:10 jc:end">
-        <GenericField
-         meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
-         onClick={onImportClick}
-        />
-        <GenericField
-         meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Export" }}} as any}
-         onClick={onExportClick}
-        />
-      </div>
+      <Show when={props.showSubmitButtonOnTop ?? false}>
+        <SubmitButton/>
+      </Show>
+      <Show when={props.importExportButtons ?? true}>
+        <div class="flex gap:10 jc:end">
+          <GenericField
+           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
+           onClick={onImportClick}
+          />
+          <GenericField
+           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Export" }}} as any}
+           onClick={onExportClick}
+          />
+        </div>
+      </Show>
       <Show when={divRef()}>
         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
           {/* Main Tab is displayed as top level fields */}
@@ -411,7 +440,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             </For>
           </Show>
 
-          <Show when={tabs.length > 0}>
+          <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
             <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
@@ -451,20 +480,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
           {/* @ts-ignore */}
           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
 
-          <div class="flex gap:10">
-            <Show when={props.submitButton} fallback={<GenericField
-             // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "success", useSubmitBehavior: true, text: "Submit" }}} as any}
-             onClick={onSubmit}
-            />}>
-              {props.submitButton}
-            </Show>
-
-            <GenericField
-             meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel" }}} as any}
-             onClick={onCancel}
-            />
-          </div>
+        <Show when={!(props.showSubmitButtonOnTop ?? false)}>
+          <SubmitButton/>
+        </Show>
         </FormContext.Provider>
       </Show>
       <Show when={popup()}><PopOver/></Show>

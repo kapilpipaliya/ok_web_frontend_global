@@ -183,7 +183,7 @@ export const BackupRestore = () => {
                   }
 
                   const rowResult = newRow(txnId, vertex, "CompProp");
-                  replaceVertexProperties(txnId, rowResult.vertexId!, { key: name, description: description });
+                  replaceVertexProperties(txnId, rowResult.vertexId!, { name, description: description });
                   setSelectionValue(
                     txnId,
                     graph.vertexes[rowResult.vertexId!],
@@ -340,7 +340,8 @@ Tooltip\t\t\tView\t
 PivotGrid\t\t\tView\t
 DropDownButton\t\t\tView\t
 Drawer\t\t\tView\tTRUE
-FieldSetLabelLeft\t\t\tForm\tTRUE`,
+FieldSetLabelLeft\t\t\tForm\tTRUE
+Form\t\t\tForm\tTRUE`,
     });
     onDataDirectoryImportClick(record, Ws);
     // 3. Import dataTypeDefault
