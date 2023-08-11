@@ -22,7 +22,7 @@ import {
   getNewTxnId,
   graph,
   IdAttr,
-  revertTransaction, setGraph,
+  revertTransaction,
   Vertex
 } from "../../lib/graph";
 import { WsContext } from "../../utils/ws_events_dispatcher";
@@ -45,10 +45,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getOptionLabel,
-  getSelectionOptions
 } from "../../lib/Traverse";
-import ScrollView from "devextreme/ui/scroll_view";
-import Sortable from "devextreme/ui/sortable";
 import { ComponentProps } from "../../types/Component";
 import { Icon } from "@iconify-icon/solid";
 import {
@@ -58,17 +55,18 @@ import {
 } from "./GenaricField";
 import { getLastItem } from "../../utils/functions";
 
-export function TableInputField(props: Omit<ComponentProps, "setValue">) {
+export function TableInputField(props: ComponentProps & {txnId?: number; isRealTime?: boolean; }) {
   const { Ws } = useContext(WsContext);
   // if there is no parent FormContext, it should still work.
-  let { record, cleanUpConfig } = useContext(FormContext);
+  let {  cleanUpConfig } = useContext(FormContext);
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
   // columns
-  // finally remove record?.getMetaAttributes(props.meta)
+  // finally remove props.getMetaAttributes(props.meta)
 
   const getAttributes = () => {
+    console.log('1')
     // If child vertexes, use it
     const childAttrVertex = getChildVertexes(["Attr", "$0Att"], [props.meta]).vertexes;
     if(childAttrVertex?.length) {
@@ -81,12 +79,12 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
     return getChildVertexes(["Attr"], [attrVertex]).vertexes;
   }
-  const tableColumnsTemplate = createMemo(() => getAttributes() || record?.getMetaAttributes(props.meta) || []);
+  const tableColumnsTemplate = createMemo(() => getAttributes() || getChildVertexes(["MetaAttr"], [props.meta]).vertexes || []);
 
   // add dynamic meta from separate collection.
   // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
   if (!props.meta.P.attributes && props.meta.P.meta) {
-    const metaData = componentProps(props.meta, props.data);
+    const metaData = componentProps(props.meta, props.data!);
     if (metaData.collection) {
       // add metadata from separate collection.
       const collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, metaData.collection);
@@ -177,8 +175,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
                // When we have a Table we pass original Table Meta Vertex
                meta={component() === "Table" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
                data={p.joinVertex}
-               setValue={record?.setValue}
+               setValue={props.setValue!}
                disabled={disabled()}
+               txnId={props.txnId}
+               isRealTime={props.isRealTime}
               />
             </>
 
@@ -235,7 +235,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
              <Icon
               icon="material-symbols:restore-from-trash-outline"
               class="cursor:pointer"
-              onClick={() => deleteRow(p.joinVertex, record.isRealTime, record.txnId, Ws)}
+              onClick={() => deleteRow(p.joinVertex, props.isRealTime, props.txnId, Ws)}
              />
              {/*<Show when={!props.disabled}>*/}
              {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
@@ -243,7 +243,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
 
              <Show when={expandVertex()}>
                <Icon icon="carbon:row-expand" class="cursor:pointer" onClick={() => {
-                 return addNewRow(record?.txnId || 0, expandVertex()!, p.joinVertex, {}, record?.isRealTime ?? false, Ws);
+                 return addNewRow(props.txnId || 0, expandVertex()!, p.joinVertex, {}, props.isRealTime ?? false, Ws);
                }} />
              </Show>
 
@@ -262,8 +262,10 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
             // When we have a Table we pass original Table Meta Vertex
             meta={expandVertex()!}
             data={p.joinVertex}
-            setValue={record?.setValue}
+            setValue={props.setValue!}
             disabled={disabled()}
+            txnId={props.txnId}
+            isRealTime={props.isRealTime}
            />
          </td>
          </tr>
@@ -310,7 +312,7 @@ export function TableInputField(props: Omit<ComponentProps, "setValue">) {
       return;
     }
 
-    return runWithOwner(outerOwner, () => addNewRow(record?.txnId || 0, props.meta, props.data!, {}, record?.isRealTime ?? false, Ws));
+    return runWithOwner(outerOwner, () => addNewRow(props.txnId || 0, props.meta, props.data!, {}, props.isRealTime ?? false, Ws));
   }
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>

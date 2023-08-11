@@ -43,8 +43,10 @@ export function addNewVertex(txnId: number, vertex: Vertex): { error: string | b
       G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
     ),
   );
+  const data = klona(vertex);
   transactionDetailAdd(txnId, {
-    insert: () => klona(vertex),
+    data,
+    insert: () => data,
     revert: () => deleteVertex(0, vertex.id),
   });
   return {
@@ -90,7 +92,9 @@ export function mergeVertexProperties(
     originalProperties[property] = vertex.P[property];
   }
   setGraph("vertexes", vertexId, "P", properties);
+
   transactionDetailAdd(txnId, {
+    data: properties,
     merge: () => Object.assign({}, vertex, { properties }),
     revert: () => mergeVertexProperties(0, vertexId, originalProperties),
   });
@@ -157,8 +161,10 @@ export function deleteVertex(txnId: number, vertexId: Id): { error: string | boo
     // @ts-ignore
     setGraph("vertexes", vertexId, undefined);
   });
+  const data = klona(vertex);
   transactionDetailAdd(txnId, {
-    deleteVertex: () => klona(vertex),
+    data,
+    deleteVertex: () => data,
     revert: () => addNewVertex(0, vertex),
   });
   return {

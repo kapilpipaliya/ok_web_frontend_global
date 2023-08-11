@@ -428,6 +428,9 @@ export function getOptionLabel(vertex: Vertex | undefined, displayExpr: string):
   const displayExpressions = displayExpr.split("||");
   if (displayExpressions.length > 1) {
     for (const displayExprElement of displayExpressions) {
+      if (displayExprElement.startsWith('=')) {
+        return displayExprElement.slice(1);
+      }
       // get a function and input:
       const a = displayExprElement.split("|");
       if (a.length > 1) {

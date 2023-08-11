@@ -2,17 +2,18 @@
 import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import {
- deleteRow,
+ addMetaVertexes,
+ deleteRow, FieldAttribute,
  getCompProps,
  getRowProps,
  PageContext,
- Record
+ Record, setValueGlobal
 } from "../lib/Record";
 import {
  batch,
  createEffect,
  createSignal,
- on,
+ on, onCleanup,
  onMount,
  Show,
  useContext
@@ -33,12 +34,16 @@ import {
  getNewGraphId,
  getNewTxnId,
  graph, Id,
- IdAttr,
- setGraph,
+ IdAttr, revertTransaction, revertTransactionUpTo,
+ setGraph, transactions,
  Vertex
 } from "../lib/graph";
 import dxDraggable from "devextreme/ui/draggable";
-import { AbstractSingleForm, FormGroup } from "./DynamicForm";
+import {
+ AbstractSingleForm,
+ FormGroup,
+ FormGroupProperties
+} from "./DynamicForm";
 import { setParentValue, setSelectionValue } from "./input/SelectInputField";
 import {
  addNewVertex,
@@ -47,6 +52,16 @@ import {
  newVertex, replaceVertexProperties
 } from "../lib/Vertex";
 import { WsContext } from "../utils/ws_events_dispatcher";
+import { Portal } from "solid-js/web";
+import {
+ Button,
+ ModalBody,
+ ModalContent,
+ ModalFooter,
+ ModalHeader
+} from "solid-blocks";
+import { TableInputField } from "./input/TableInputField";
+import { AttrsTableData } from "./api";
 
 function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
  if (!childrenItems) return;
@@ -767,6 +782,7 @@ export const PageDesignerDragAndDrop = () => {
 
 
  const FiveProperties = () => {
+  const [isRulesOpen, setIsRulesOpen] = createSignal(false);
   const vertexId = getNewGraphId();
   const addNewVertexResult = addNewVertex(0, newVertex(vertexId, ['PropsJson'], {sample: true}));
   if (addNewVertexResult.error) {
@@ -786,27 +802,30 @@ export const PageDesignerDragAndDrop = () => {
 
   }));
 
-  const setPropertyValue = (meta: Vertex, data: Vertex, value: any) => {
-   setGraph('vertexes', data.id, 'P', meta.P.name, value)
+  // @ts-ignore
+  const setPropertyValue = (meta: Vertex, data: Vertex, value: any, valueSet?: boolean) => {
+   if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
    if (selectedLayout().vertexId) {
 
     // find existing row;
     const layoutVertex = graph.vertexes[selectedLayout().vertexId];
     const componentVertex = graph.vertexes[selectedComponent().vertexId];
     const rowProps = getChildVertexes(["$0Prop"], [layoutVertex]).vertexes || [];
-    const row = rowProps.find(vertex => {
-     const component = getChildVertex(['$0Name'], vertex).vertex;
-     return component?.P.name === meta.P.name
+    let row = rowProps.find(vertex => {
+     const name = getChildVertex(['$0Name'], vertex).vertex;
+     return name?.P.name === meta.P.name
     });
     if (row) {
-     mergeVertexProperties(pageConfig[0].record.txnId, row.id, {value});
+     if (valueSet ?? true) mergeVertexProperties(pageConfig[0].record.txnId, row.id, {value});
     } else {
      const propMetaVertex = newVertex(0, ['Meta'], {
       name: "Prop",
       displayName: "Property",
      });
-     const addRowResult = pageConfig[0].record.addNewRowUI(propMetaVertex, layoutVertex, {value});
+     const v = (valueSet ?? true) ? {value} : {};
+     const addRowResult = pageConfig[0].record.addNewRowUI(propMetaVertex, layoutVertex, v);
      if (addRowResult.vertexId) {
+      row = graph.vertexes[addRowResult.vertexId];
       const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
       const componentProp = componentProps.find(vertex => {
        return vertex.P.name === meta.P.name
@@ -817,6 +836,8 @@ export const PageDesignerDragAndDrop = () => {
      }
     }
     // TODO: if reset, delete the row.
+
+    return row;
    }
   }
   const selectedComponentProperties = () => {
@@ -829,12 +850,104 @@ export const PageDesignerDragAndDrop = () => {
    return getChildVertexes(['$0Prop'], [selectedComp]);
   }
 
+  const toggle = () => setIsRulesOpen(prev => !prev);
+  let prevTxnIndex = -1;
+  const onCancel = () => {
+   if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
+   toggle();
+  }
+
+  const Body = () => {
+   prevTxnIndex = transactions.get(pageConfig[0].record.txnId)?.steps?.length || 0
+
+
+   const metaVertexId = getNewGraphId();
+   const txnId = getNewTxnId();
+   const metaAttributes = AttrsTableData.Coll.attributes.find(x => x.name === "Rules");
+
+   addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: metaAttributes?.name, props: metaAttributes?.props}));
+   addMetaVertexes(txnId, graph.vertexes[metaVertexId], metaAttributes!.attributes!);
+   onCleanup(() => {
+    revertTransaction(txnId);
+   })
+
+   return <TableInputField meta={graph.vertexes[metaVertexId]}
+                           data={graph.vertexes[selectedLayout().vertexId!]}
+                           txnId={pageConfig[0].record.txnId}
+                           setValue={pageConfig[0].record.setValue}
+                           isRealTime={false}  />
+  }
+
+
+
   return <>
-   <FormGroup
+   <Show when={selectedLayout().vertexId !== -1}>
+    <GenericField
+     meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Rules" }}} as any}
+     onClick={toggle}
+    />
+   </Show>
+   <FormGroupProperties
+    txnId={pageConfig[0].record.txnId}
     metaAttributes={selectedComponentProperties().vertexes || []}
     vertex={graph.vertexes[vertexId]}
     setValue={setPropertyValue}
+    setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) => setValueGlobal(pageConfig[0].record.txnId, attribute, vertex, data, Ws, pageConfig[0].record.isRealTime)}
    />
+   <Show when={isRulesOpen()}>
+    <Portal>
+     <div role="dialog" tabIndex={-1} class="sb-modal">
+      <ModalContent>
+       <ModalHeader>
+        Header
+        <Button
+         variant="icon"
+         onclick={toggle}
+         style={{ float: "right" }}
+        >
+         ✕
+        </Button>
+       </ModalHeader>
+       <ModalBody>
+        <Body/>
+       </ModalBody>
+       <ModalFooter>
+        {/*<Button onclick={toggle}>OK</Button>*/}
+        <div class="flex gap:4">
+         <GenericField
+          meta={{
+           P: {
+            component: "Button",
+            props: {
+             stylingMode: "contained",
+             type: "success",
+             text: "Submit"
+            }
+           }
+          } as any}
+          onClick={toggle}
+         />
+
+         <GenericField
+          meta={{
+           P: {
+            component: "Button",
+            props: {
+             stylingMode: "contained",
+             type: "danger",
+             text: "Cancel"
+            }
+           }
+          } as any}
+          onClick={onCancel}
+         />
+        </div>
+
+       </ModalFooter>
+      </ModalContent>
+     </div>
+    </Portal>
+   </Show>
   </>
  }
  const deleteLayout = () => {

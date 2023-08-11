@@ -180,6 +180,9 @@ export function getCollAttrs(
  return { error: false, attr };
 }
 export let isUpdatingInput = false;
+export function setUpdateStatus(value: boolean) {
+ isUpdatingInput = value;
+}
 export const getProps = (vertexFormAttr: Vertex): { error: boolean; attr?: FieldAttribute } => {
  const vertexCollAttrResult = getChildVertex(["Attr"], vertexFormAttr);
  if (vertexCollAttrResult.error) return { error: true };
@@ -566,6 +569,23 @@ export function getSublistRowsForType(type: string, vertex: Vertex) {
  );
 }
 
+export function setValueGlobal(txnId: number, attribute: Vertex, vertex: Vertex, data: any, ws: ServerEventsDispatcher, isRealTime: boolean) {
+ // after commit, we can not use same txnId();
+ if (isRealTime) {
+  txnId = getNewTxnId();
+ }
+ isUpdatingInput = true;
+ mergeVertexProperties(txnId, vertex.id, {
+  [attribute.P[IdAttr]]: data
+ });
+ isUpdatingInput = false;
+ // we directly save the dataType on vertex:
+ setGraph("vertexes", vertex.id, "D", { [attribute.P[IdAttr]]: attribute.P["dataType"] });
+
+ onChangeHandler(txnId, vertex, vertex, attribute);
+ if (isRealTime) commitTxn(txnId, ws);
+}
+
 export class Record {
  txnId: number;
  readonly isRealTime: boolean;
@@ -671,20 +691,7 @@ export class Record {
   revertTransaction(this.txnId);
  }
  setValue = (attribute: Vertex, vertex: Vertex, data: any) => {
-  // after commit, we can not use same txnId();
-  if (this.isRealTime) {
-   this.txnId = getNewTxnId();
-  }
-  isUpdatingInput = true;
-  mergeVertexProperties(this.txnId, vertex.id, {
-   [attribute.P[IdAttr]]: data
-  });
-  isUpdatingInput = false;
-  // we directly save the dataType on vertex:
-  setGraph("vertexes", vertex.id, "D", {[attribute.P[IdAttr]]: attribute.P["dataType"]});
-
-  onChangeHandler(this.txnId, this.vertex, vertex, attribute);
-  if (this.isRealTime) commitTxn(this.txnId, this.ws);
+  setValueGlobal(this.txnId, attribute, vertex, data, this.ws, this.isRealTime);
  };
 
  // TODO: Is this method valid? does it delete nested Rows set by this form?, check code written in NavDesigner component to clear the form.
@@ -803,6 +810,7 @@ class Emitter {
  }
 }
 
+// 'type' or 'label' can be overwritten in the meta.
 export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, properties: {[key: string]: any}, isRealTime: boolean, Ws: ServerEventsDispatcher) => {
   if (isRealTime) {
    txnId = getNewTxnId();

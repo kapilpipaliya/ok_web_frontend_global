@@ -16,6 +16,8 @@ import { ServerEventsDispatcher, WS_PATH, WsContext } from "./utils/ws_events_di
 import { AlertMessage } from "./types/Type";
 import { AlertMessageContext } from "./contexts/AlertMessageContext";
 
+import './solid_blocks_index.css'
+
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const [alerts, setAlert] = createStore([] as AlertMessage[]);
