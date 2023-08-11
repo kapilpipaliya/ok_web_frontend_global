@@ -395,6 +395,99 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
         attributes: collectionAttr,
       },
+      {
+        name: "Rules",
+        component: "Table",
+        tab: "Rules",
+        props: {
+          type: 'Rules',
+          label: "Rules",
+        },
+        attributes: [
+          {
+            name: "name",
+            component: "TextBox",
+            props: {},
+          },
+          {
+            name: "Rule",
+            component: "Table",
+            tab: "Rule",
+            props: {
+              type: 'Rule',
+              label: "Rule",
+            },
+            attributes: [
+              {
+                name: "cond",
+                displayName: "Conditions",
+                component: "Table",
+                attributes: [
+                  {
+                    name: "left",
+                    displayName: "Paren",
+                    component: "SelectBox",
+                    props: {
+                      items: `(
+((
+(((`,
+                    },
+                  },{
+                    name: "field",
+                    displayName: "Field",
+                    component: "SelectBox",
+                    props: {
+                      // collection: "DataType",
+                    },
+                  },{
+                    name: "operator",
+                    displayName: "Operator",
+                    component: "SelectBox",
+                    props: {
+                      items: `<
+<=
+>=`,
+                    },
+                  },
+                  {
+                    name: "right",
+                    displayName: "Paren",
+                    component: "SelectBox",
+                    props: {
+                      items: `)
+))
+)))`,
+                    },
+                  }
+                ]
+              },
+              {
+                name: "dataType",
+                displayName: "DataType",
+                component: "SelectBox",
+                props: {
+                  collection: "DataType",
+                },
+              },
+              {
+                name: "comp",
+                displayName: "Component",
+                component: "SelectBox",
+                props: {
+                  collection: "->$0DataType->$0Comp||*Comp",
+                },
+              },
+              {
+                name: "value",
+                displayName: "Value",
+                meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
+                component:
+                 `->$0Comp-CompChild:P.name||->$0Comp:P.name||->$0DataType->$0Default:P.name`,
+              }
+            ]
+          }
+        ],
+      },
 
 /*      {
         name: "Child",

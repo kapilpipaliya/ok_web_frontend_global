@@ -81,7 +81,7 @@ export enum ProcessStatus {
   AckReceived,
   Processed,
 }
-export type TransactionValue = InsertFn & Revert;
+export type TransactionValue = InsertFn & Revert & {data: any};
 export const transactions = new Map<number, { status: ProcessStatus; steps: TransactionValue[] }>();
 // @ts-ignore
 window.t = transactions;

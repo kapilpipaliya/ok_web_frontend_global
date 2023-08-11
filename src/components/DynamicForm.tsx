@@ -14,15 +14,15 @@ import {
 import { SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
 import {
-  commitTxn,
+  commitTxn, getNewGraphId,
   getNewTxnId,
   graph,
   Id,
   IdAttr,
-  revertTransaction, txnHasSteps,
+  revertTransaction, revertTransactionUpTo, transactions, txnHasSteps,
   Vertex
 } from "../lib/graph";
-import { mergeVertexProperties } from "../lib/Vertex";
+import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { WsContext } from "../utils/ws_events_dispatcher";
 
 import {
@@ -54,6 +54,8 @@ import {
   GenericField
 } from "./input/GenaricField";
 import {
+  addMetaVertexes,
+  addNewRow, FieldAttribute,
   FormContext,
   FormMetaData, getCollAttrComp,
   getExportCode,
@@ -63,6 +65,8 @@ import {
 } from "../lib/Record";
 import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
 import { stringify } from "yaml";
+import { Modal, ModalBody, ModalHeader, ModalContent, ModalFooter, Button } from "solid-blocks";
+import { Portal } from "solid-js/web";
 
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
   formId: string;
@@ -94,6 +98,8 @@ export const DynamicComponent = (props: {
   data?: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
+  isRealTime?: boolean;
+  txnId?: number;
 }) => {
   return (
     <Switch>
@@ -106,12 +112,18 @@ export const DynamicComponent = (props: {
          setValue={props.setValue}
          disabled={props.disabled!}
          component={props.component}
+         txnId={props.txnId}
+         isRealTime={props.isRealTime}
         />
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!props.disabled} fallback={<>...</>}>
           <TableInputField meta={props.meta} data={props.data}
-                           disabled={props.disabled!} />
+                           disabled={props.disabled!}
+                           txnId={props.txnId}
+                           setValue={props.setValue}
+                           isRealTime={props.isRealTime}
+          />
         </Show>
       </Match>
       <Match when={genericComponents.includes(props.component) && props.component} keyed>
@@ -183,6 +195,229 @@ export function FormGroup(props: FormGroupProps) {
                 </div>
                 <div class="dx-field-value">
                   <Content/>
+                </div>
+              </div>
+            </Match>
+          </Switch>
+        );
+      }}
+    </For>
+  );
+}
+interface FormGroupPropertiesProps {
+  metaAttributes: Vertex[];
+  vertex: Vertex;
+  setValue(attribute: Vertex, vertex: Vertex, data: any, valueSet?: boolean): Vertex | undefined;
+  setValueGeneric(attribute: Vertex, vertex: Vertex, data: any): void;
+  txnId: number;
+}
+// group of the fields
+export function FormGroupProperties(props: FormGroupPropertiesProps) {
+  const { Ws } = useContext(WsContext);
+  return (
+    <For each={props.metaAttributes}>
+      {(metaVertex) => {
+        const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
+        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
+        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
+        const Content = () => <DynamicComponent
+
+         component={component()}
+         meta={metaVertex}
+         data={props.vertex}
+         setValue={props.setValue}
+        />
+        const Modal3 = () => {
+          const [isModalOpen, setModalOpen] = createSignal(false);
+          const toggle = () => setModalOpen(prev => !prev);
+          let prevTxnIndex = 0;
+          const onCancel = () => {
+            prevTxnIndex && revertTransactionUpTo(props.txnId, prevTxnIndex);
+            toggle();
+          }
+
+          const Body = (bodyProps: {meta: Vertex}) => {
+            prevTxnIndex = transactions.get(props.txnId)?.steps?.length || 0
+
+            const propVertex = props.setValue(bodyProps.meta, props.vertex, 0, false)
+            if (!propVertex) {
+              console.warn('can not create row');
+              return;
+            }
+
+
+const meta = [
+      {
+        name: "condition",
+        displayName: "Conditions",
+        component: "Table",
+        attributes: [
+          {
+            name: "leftParen",
+            displayName: "Paren",
+            component: "SelectBox",
+            props: {
+              items: `(
+((
+(((`,
+            },
+          },{
+            name: "field",
+            displayName: "Paren",
+            component: "SelectBox",
+            props: {
+              // collection: "DataType",
+            },
+          },{
+            name: "operator",
+            displayName: "Paren",
+            component: "SelectBox",
+            props: {
+              items: `<
+<=
+>=`,
+            },
+          },
+          {
+            name: "rightParen",
+            displayName: "Paren",
+            component: "SelectBox",
+            props: {
+              items: `)
+))
+)))`,
+            },
+          }
+
+        ]
+      },
+      {
+        name: "dataType",
+        displayName: "DataType",
+        component: "SelectBox",
+        props: {
+          collection: "DataType",
+        },
+      },
+      {
+        name: "comp",
+        displayName: "Component",
+        component: "SelectBox",
+        props: {
+          collection: "Comp",
+        },
+      },
+      {
+        name: "value",
+        displayName: "Value",
+        meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
+        component:
+         `->$0Comp-CompChild:P.name||->$0Comp:P.name||->$0DataType->$0Default:P.name||=${component()}`,
+      }
+    ] as FieldAttribute[];
+
+            const metaVertexId = getNewGraphId();
+            const txnId = getNewTxnId();
+            addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: "Rule"}));
+            addMetaVertexes(txnId, graph.vertexes[metaVertexId], meta);
+            onCleanup(() => {
+              revertTransaction(txnId);
+            })
+
+            return <TableInputField meta={graph.vertexes[metaVertexId]}
+                                    data={propVertex}
+                                    txnId={props.txnId}
+                                    setValue={props.setValueGeneric}
+                                    isRealTime={false}  />
+          }
+
+          return <><GenericField
+           meta={{
+             P: {
+               component: "Button",
+               props: { icon: "formula" }
+             }
+           } as any}
+           onClick={toggle}
+          />
+            <Show when={isModalOpen()}>
+              <Portal>
+                <div role="dialog" tabIndex={-1} class="sb-modal">
+                  <ModalContent>
+                    <ModalHeader>
+                      Header
+                      <Button
+                       variant="icon"
+                       onclick={toggle}
+                       style={{ float: "right" }}
+                      >
+                        ✕
+                      </Button>
+                    </ModalHeader>
+                    <ModalBody>
+                      <Body meta={metaVertex}/>
+                    </ModalBody>
+                    <ModalFooter>
+                      {/*<Button onclick={toggle}>OK</Button>*/}
+                      <div class="flex gap:4">
+                        <GenericField
+                         meta={{
+                           P: {
+                             component: "Button",
+                             props: {
+                               stylingMode: "contained",
+                               type: "success",
+                               text: "Submit"
+                             }
+                           }
+                         } as any}
+                         onClick={toggle}
+                        />
+
+                        <GenericField
+                         meta={{
+                           P: {
+                             component: "Button",
+                             props: {
+                               stylingMode: "contained",
+                               type: "danger",
+                               text: "Cancel"
+                             }
+                           }
+                         } as any}
+                         onClick={onCancel}
+                        />
+                      </div>
+
+                    </ModalFooter>
+                  </ModalContent>
+                </div>
+              </Portal>
+            </Show>
+
+          </>;
+        }
+        return (
+          <Switch>
+            <Match when={component() === "Table"}>
+              <h3><Label/></h3>
+              <Content/>
+            </Match>
+            <Match when={component() === "CollectionOption"}>
+              <Content/>
+            </Match>
+            <Match when={true}>
+              <div class="dx-field">
+                <div class="dx-field-label" id={id}>
+                  <Label/>
+                </div>
+                <div class="dx-field-value flex gap:2 justify-content:space-between">
+                  <Content/>
+
+                  <Modal3/>
+
+
+
                 </div>
               </div>
             </Match>

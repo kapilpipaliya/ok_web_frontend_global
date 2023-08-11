@@ -66,9 +66,10 @@ export function addNewEdge(txnId: number, edge: Edge): { error: string | boolean
       G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
     );
   });
-
+  const data = klona(edge);
   transactionDetailAdd(txnId, {
-    insertEdge: () => klona(edge),
+    data,
+    insertEdge: () => data,
     revert: () => deleteEdge(0, edge.id),
   });
   return {
@@ -87,8 +88,10 @@ export function replaceEdgeProperties(
   }
   const originalProperties = klona(graph.edges[edgeId].P);
   setGraph("edges", edgeId, "P", reconcile(klona(properties)));
+  const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
-    replaceEdge: () => klona(graph.edges[edgeId]),
+    data,
+    replaceEdge: () => data,
     revert: () => replaceEdgeProperties(0, edgeId, originalProperties),
   });
   return {
@@ -123,8 +126,10 @@ export const replaceEdgeStart = (
     );
     setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
   });
+  const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
-    replaceEdgeStart: () => klona(graph.edges[edgeId]),
+    data,
+    replaceEdgeStart: () => data,
     revert: () => replaceEdgeStart(0, edgeId, oldStartVertexId),
   });
   return {
@@ -159,8 +164,10 @@ export const replaceEdgeEnd = (
     );
     setGraph("vertexes", newEndVertexId, "IN", edge.T, (v) => (G.isArray(v) ? [...v, edgeId] : [edgeId]));
   });
+  const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
-    replaceEdgeEnd: () => klona(graph.edges[edgeId]),
+    data,
+    replaceEdgeEnd: () => data,
     revert: () => replaceEdgeEnd(0, edgeId, oldEndVertexId),
   });
   return {
@@ -197,7 +204,9 @@ export function deleteEdge(txnId: number, edgeId: Id): { error: string | boolean
     // @ts-ignore
     setGraph("edges", edgeId, undefined);
   });
+
   transactionDetailAdd(txnId, {
+    data: edge,
     deleteEdge: () => edge,
     revert: () => addNewEdge(0, edge),
   });
