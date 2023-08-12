@@ -852,6 +852,11 @@ export const PageDesignerDragAndDrop = () => {
 
   const toggle = () => setIsRulesOpen(prev => !prev);
   let prevTxnIndex = -1;
+  const onSubmit = () => {
+   // hack to refresh the select fields. no option is refereshing the label.
+   setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
+   toggle();
+  }
   const onCancel = () => {
    if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
    toggle();
@@ -893,6 +898,7 @@ export const PageDesignerDragAndDrop = () => {
     vertex={graph.vertexes[vertexId]}
     setValue={setPropertyValue}
     setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) => setValueGlobal(pageConfig[0].record.txnId, attribute, vertex, data, Ws, pageConfig[0].record.isRealTime)}
+    selectedLayout={graph.vertexes[selectedLayout().vertexId]}
    />
    <Show when={isRulesOpen()}>
     <Portal>
@@ -925,7 +931,7 @@ export const PageDesignerDragAndDrop = () => {
             }
            }
           } as any}
-          onClick={toggle}
+          onClick={onSubmit}
          />
 
          <GenericField

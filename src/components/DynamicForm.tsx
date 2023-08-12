@@ -67,6 +67,7 @@ import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
 import { stringify } from "yaml";
 import { Modal, ModalBody, ModalHeader, ModalContent, ModalFooter, Button } from "solid-blocks";
 import { Portal } from "solid-js/web";
+import { updateImportRecord } from "../lib/Import";
 
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
   formId: string;
@@ -210,6 +211,7 @@ interface FormGroupPropertiesProps {
   setValue(attribute: Vertex, vertex: Vertex, data: any, valueSet?: boolean): Vertex | undefined;
   setValueGeneric(attribute: Vertex, vertex: Vertex, data: any): void;
   txnId: number;
+  selectedLayout: Vertex;
 }
 // group of the fields
 export function FormGroupProperties(props: FormGroupPropertiesProps) {
@@ -227,176 +229,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
          data={props.vertex}
          setValue={props.setValue}
         />
-        const Modal3 = () => {
-          const [isModalOpen, setModalOpen] = createSignal(false);
-          const toggle = () => setModalOpen(prev => !prev);
-          let prevTxnIndex = 0;
-          const onCancel = () => {
-            prevTxnIndex && revertTransactionUpTo(props.txnId, prevTxnIndex);
-            toggle();
-          }
 
-          const Body = (bodyProps: {meta: Vertex}) => {
-            prevTxnIndex = transactions.get(props.txnId)?.steps?.length || 0
-
-            const propVertex = props.setValue(bodyProps.meta, props.vertex, 0, false)
-            if (!propVertex) {
-              console.warn('can not create row');
-              return;
-            }
-
-
-const meta = [
-      {
-        name: "condition",
-        displayName: "Conditions",
-        component: "Table",
-        attributes: [
-          {
-            name: "leftParen",
-            displayName: "Paren",
-            component: "SelectBox",
-            props: {
-              items: `(
-((
-(((`,
-            },
-          },{
-            name: "field",
-            displayName: "Paren",
-            component: "SelectBox",
-            props: {
-              // collection: "DataType",
-            },
-          },{
-            name: "operator",
-            displayName: "Paren",
-            component: "SelectBox",
-            props: {
-              items: `<
-<=
->=`,
-            },
-          },
-          {
-            name: "rightParen",
-            displayName: "Paren",
-            component: "SelectBox",
-            props: {
-              items: `)
-))
-)))`,
-            },
-          }
-
-        ]
-      },
-      {
-        name: "dataType",
-        displayName: "DataType",
-        component: "SelectBox",
-        props: {
-          collection: "DataType",
-        },
-      },
-      {
-        name: "comp",
-        displayName: "Component",
-        component: "SelectBox",
-        props: {
-          collection: "Comp",
-        },
-      },
-      {
-        name: "value",
-        displayName: "Value",
-        meta: "->$0Comp-CompChild->$0Prop+->$0Comp->$0Prop+->$0ValueProp",
-        component:
-         `->$0Comp-CompChild:P.name||->$0Comp:P.name||->$0DataType->$0Default:P.name||=${component()}`,
-      }
-    ] as FieldAttribute[];
-
-            const metaVertexId = getNewGraphId();
-            const txnId = getNewTxnId();
-            addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: "Rule"}));
-            addMetaVertexes(txnId, graph.vertexes[metaVertexId], meta);
-            onCleanup(() => {
-              revertTransaction(txnId);
-            })
-
-            return <TableInputField meta={graph.vertexes[metaVertexId]}
-                                    data={propVertex}
-                                    txnId={props.txnId}
-                                    setValue={props.setValueGeneric}
-                                    isRealTime={false}  />
-          }
-
-          return <><GenericField
-           meta={{
-             P: {
-               component: "Button",
-               props: { icon: "formula" }
-             }
-           } as any}
-           onClick={toggle}
-          />
-            <Show when={isModalOpen()}>
-              <Portal>
-                <div role="dialog" tabIndex={-1} class="sb-modal">
-                  <ModalContent>
-                    <ModalHeader>
-                      Header
-                      <Button
-                       variant="icon"
-                       onclick={toggle}
-                       style={{ float: "right" }}
-                      >
-                        ✕
-                      </Button>
-                    </ModalHeader>
-                    <ModalBody>
-                      <Body meta={metaVertex}/>
-                    </ModalBody>
-                    <ModalFooter>
-                      {/*<Button onclick={toggle}>OK</Button>*/}
-                      <div class="flex gap:4">
-                        <GenericField
-                         meta={{
-                           P: {
-                             component: "Button",
-                             props: {
-                               stylingMode: "contained",
-                               type: "success",
-                               text: "Submit"
-                             }
-                           }
-                         } as any}
-                         onClick={toggle}
-                        />
-
-                        <GenericField
-                         meta={{
-                           P: {
-                             component: "Button",
-                             props: {
-                               stylingMode: "contained",
-                               type: "danger",
-                               text: "Cancel"
-                             }
-                           }
-                         } as any}
-                         onClick={onCancel}
-                        />
-                      </div>
-
-                    </ModalFooter>
-                  </ModalContent>
-                </div>
-              </Portal>
-            </Show>
-
-          </>;
-        }
         return (
           <Switch>
             <Match when={component() === "Table"}>
@@ -414,7 +247,22 @@ const meta = [
                 <div class="dx-field-value flex gap:2 justify-content:space-between">
                   <Content/>
 
-                  <Modal3/>
+                  <SelectInputField
+                   component={"SelectBox"}
+                   data={{ P: {} } as Vertex}
+                   meta={
+                     {
+                       P: {
+                         [IdAttr]: "import",
+                         props: {
+                           displayExpr: "$P.name",
+                           collection: `=${props.selectedLayout.id}->Rules`
+                         },
+                       },
+                     } as unknown as Vertex
+                   }
+                   setValue={(attr,vertex, data) => 0}
+                  />
 
 
 

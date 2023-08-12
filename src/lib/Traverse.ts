@@ -220,7 +220,7 @@ export function getChildVertexes(
 }
 
 export const convertToTraverseArray = (input: string): Array<[string, string]> => {
-  const pathOperators = ["*", "-", "->"];
+  const pathOperators = ["*", "-", "->", "="];
 
   const isStartWithOp = pathOperators.some((operator) => input.startsWith(operator));
   if (!isStartWithOp && !input.startsWith('!')) {
@@ -345,6 +345,8 @@ export const getSelectOptionsInternal = (
       } else {
         vertexes = findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
       }
+    } else if (direction === "=") {
+      vertexes = edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);
     } else {
       return { error: true };
     }
