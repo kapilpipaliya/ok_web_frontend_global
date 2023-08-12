@@ -66,7 +66,6 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
   // finally remove props.getMetaAttributes(props.meta)
 
   const getAttributes = () => {
-    console.log('1')
     // If child vertexes, use it
     const childAttrVertex = getChildVertexes(["Attr", "$0Att"], [props.meta]).vertexes;
     if(childAttrVertex?.length) {
