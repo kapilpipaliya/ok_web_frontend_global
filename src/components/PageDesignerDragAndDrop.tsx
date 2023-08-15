@@ -792,10 +792,10 @@ export const PageDesignerDragAndDrop = () => {
   createEffect(on(selectedComponent, v => {
    if (selectedLayout().vertexId && selectedLayout().vertexId !== -1) {
     const componentProps = getCompProps(graph.vertexes[selectedComponent().vertexId]);
-    const rowProps = getRowProps(graph.vertexes[selectedLayout().vertexId]);
-    const props = Object.assign(componentProps, rowProps);
+    const layoutPropRows = getRowProps(graph.vertexes[selectedLayout().vertexId]);
+    const layoutPropRow = Object.assign(componentProps, layoutPropRows);
     // set existing layout props
-    setGraph('vertexes', vertexId, 'P', reconcile(props));
+    setGraph('vertexes', vertexId, 'P', reconcile(layoutPropRow));
    } else {
     setGraph('vertexes', vertexId, 'P', reconcile( {}));
    }
@@ -805,7 +805,7 @@ export const PageDesignerDragAndDrop = () => {
   // @ts-ignore
   const setPropertyValue = (meta: Vertex, data: Vertex, value: any, valueSet?: boolean) => {
    if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
-   if (selectedLayout().vertexId) {
+   if (selectedLayout().vertexId !== -1) {
 
     // find existing row;
     const layoutVertex = graph.vertexes[selectedLayout().vertexId];
@@ -852,17 +852,17 @@ export const PageDesignerDragAndDrop = () => {
 
   const toggle = () => setIsRulesOpen(prev => !prev);
   let prevTxnIndex = -1;
-  const onSubmit = () => {
+  const onRulesSubmit = () => {
    // hack to refresh the select fields. no option is refereshing the label.
    setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
    toggle();
   }
-  const onCancel = () => {
+  const onRulesCancel = () => {
    if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
    toggle();
   }
 
-  const Body = () => {
+  const RulesModalBody = () => {
    prevTxnIndex = transactions.get(pageConfig[0].record.txnId)?.steps?.length || 0
 
 
@@ -871,7 +871,60 @@ export const PageDesignerDragAndDrop = () => {
    const metaAttributes = AttrsTableData.Coll.attributes.find(x => x.name === "Rules");
 
    addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: metaAttributes?.name, props: metaAttributes?.props}));
-   addMetaVertexes(txnId, graph.vertexes[metaVertexId], metaAttributes!.attributes!);
+   const attributes: FieldAttribute[] = JSON.parse(JSON.stringify(metaAttributes!.attributes!));
+
+   for (const attribute of attributes) {
+    if (attribute.name === "Rule") {
+     for (const ruleattribute of attribute.attributes!) {
+      if (ruleattribute.name === "cond") {
+       for (const condAttribute of ruleattribute.attributes!) {
+        if (condAttribute.name === "layout") {
+         const data = getTreeData({
+          collection: "!Attr",
+          child: { collection: "!Attr",
+           child: {
+            collection: "!Attr",
+            child: { collection: "!Attr", child: { collection: "!Attr" } }
+           }
+          }
+         }, pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
+          nameExpr: (v: Vertex) => {
+           const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
+           return `${v.P.name}${component ? ` (${component})` : ""}`;
+          }
+         });
+
+
+         condAttribute!.props = {
+          dataSource: data,
+          valueExpr: "id",
+          displayExpr: "name",
+          itemsExpr: "children",
+          showClearButton: true,
+          treeProps: {
+           dataStructure: "tree",
+           keyExpr: "id",
+           displayExpr: "name",
+           itemsExpr: "children",
+           selectionMode: 'single',
+           // width: 200,
+           // searchEnabled: true,
+           // activeStateEnabled: false,
+           // focusStateEnabled: false,
+           expandNodesRecursive: false,
+          },
+
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+
+
+
+   addMetaVertexes(txnId, graph.vertexes[metaVertexId], attributes);
    onCleanup(() => {
     revertTransaction(txnId);
    })
@@ -915,7 +968,7 @@ export const PageDesignerDragAndDrop = () => {
         </Button>
        </ModalHeader>
        <ModalBody>
-        <Body/>
+        <RulesModalBody/>
        </ModalBody>
        <ModalFooter>
         {/*<Button onclick={toggle}>OK</Button>*/}
@@ -931,7 +984,7 @@ export const PageDesignerDragAndDrop = () => {
             }
            }
           } as any}
-          onClick={onSubmit}
+          onClick={onRulesSubmit}
          />
 
          <GenericField
@@ -945,7 +998,7 @@ export const PageDesignerDragAndDrop = () => {
             }
            }
           } as any}
-          onClick={onCancel}
+          onClick={onRulesCancel}
          />
         </div>
 
