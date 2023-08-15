@@ -381,20 +381,20 @@ export function getSelectionOptions(
   return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
 }
 
-export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string}) => {
+export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
   const getChildren = (levels: {[key: string]: any}, vertexes: Vertex[]) => {
     const result = [] as dxTreeViewItem[];
     if (!levels.collection) return result;
 
     const children = getSelectOptionsInternal(vertexes, convertToTraverseArray(levels.collection), true);
-    for (const child of children.vertexes || []) {
+    for (const child of (children.vertexes || []).sort((a, b) => a.P.pos - b.P.pos)) {
       const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as dxTreeViewItem;
       navItem.name = name;
       navItem.expanded = true;
       navItem.id = child.id;
       navItem.P = child.P;
-      if (levels.child) {
+      if (levels.child && ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)) {
         navItem.children = getChildren(levels.child, [child]);
       }
 

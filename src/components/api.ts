@@ -433,13 +433,21 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 (((`,
                     },
                   },{
+                    name: "layout",
+                    displayName: "Layout",
+                    component: "DropDownBoxTreeView",
+                    props: {
+                      // collection: "DataType",
+                    },
+                  },{
                     name: "field",
                     displayName: "Field",
                     component: "SelectBox",
                     props: {
                       // collection: "DataType",
                     },
-                  },{
+                  },
+                  {
                     name: "operator",
                     displayName: "Operator",
                     component: "SelectBox",

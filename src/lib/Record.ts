@@ -794,22 +794,6 @@ export class Record {
 
 }
 
-class SublistLine {
-
-}
-
-class Emitter {
- emit(event: any) {
-
- }
-
- on(options: {}) {
- }
-
- off(options: {}) {
- }
-}
-
 // 'type' or 'label' can be overwritten in the meta.
 export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, properties: {[key: string]: any}, isRealTime: boolean, Ws: ServerEventsDispatcher) => {
   if (isRealTime) {
