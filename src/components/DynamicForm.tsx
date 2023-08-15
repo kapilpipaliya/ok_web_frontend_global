@@ -337,6 +337,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
   });
   let submit: boolean;
   const onSubmit = () => {
+    // const valid = record.submitForm();
     const result = validationGroup.validate();
     if (result.isValid) {
       console.log("valid");
