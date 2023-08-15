@@ -93,7 +93,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
           const vertexCollAttr = vertexCollAttrResult.vertexes!;
           const attrs = [] as FieldAttribute[];
           for (const attr of vertexCollAttr) {
-            const props = getCollAttrs(attr, { L: ["Empty"], P: {}, OUT: {} } as unknown as Vertex);
+            const props = getCollAttrs(attr);
             if (!props.error) attrs.push(props.attr!);
           }
           const newProperties = klona(props.meta.P);
