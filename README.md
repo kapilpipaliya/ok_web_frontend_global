@@ -4,11 +4,6 @@
 npm install
 ```
 
-## testing
-
-- install cypress using `npm install -g cypress`
-- start cypress using `yarn cypress open`
-
 ## Available Scripts
 
 - `npm run dev`: Runs the app in the development mode
