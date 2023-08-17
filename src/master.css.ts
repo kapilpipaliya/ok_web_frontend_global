@@ -1,14 +1,17 @@
 import MasterCSS, { Config } from "@master/css";
 
 export const config: Config = {
-  themes: {},
-  colors: {},
   classes: {},
+  colors: {},
+  themes: {},
+  rules: {},
   values: {},
   semantics: {},
-  breakpoints: {},
-  selectors: {},
+  viewports: {},
   mediaQueries: {},
+  animations: {},
+  selectors: {},
+  functions: {}
 };
 
-export const css = new MasterCSS(config);
+
