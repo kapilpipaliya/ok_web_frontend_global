@@ -1,10 +1,10 @@
-import { JSX } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
-import { G } from "@mobily/ts-belt";
-import { klona } from "klona";
-import { get, set } from "idb-keyval";
-import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
-import { batch } from "solid-js";
+import {batch} from "solid-js";
+import {createStore, reconcile} from "solid-js/store";
+import {G} from "@mobily/ts-belt";
+import {klona} from "klona";
+import {get, set} from "idb-keyval";
+import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
+
 window.s = createStore;
 
 export type Id = number;
@@ -259,3 +259,32 @@ export function restoreFromJson(json: { [key: string]: any }) {
   setGraph(json);
 }
 
+export async function waitTillAllEventsAreProcessed() {
+  if (isAllTxnProcessed()) return true;
+  return await new Promise((resolve, reject) => {
+    const checkAllTxnCompleted = () => {
+      const checkTxnCompletedTimeout = setTimeout(() => {
+        if (isAllTxnProcessed()) {
+          vertexOldIdToNewIdMap.clear();
+          edgeOldIdToNewIdMap.clear();
+          resolve(true);
+        } else {
+          checkAllTxnCompleted()
+        }
+        clearTimeout(checkTxnCompletedTimeout);
+      }, 120)
+    }
+    checkAllTxnCompleted();
+  })
+}
+
+export function isAllTxnProcessed() {
+  let allTxnProcessed = true;
+  for (const [_txnId, value] of transactions.entries()) {
+    if (value.status !== ProcessStatus.Processed && value.status !== ProcessStatus.Unset) {
+      allTxnProcessed = false;
+      break;
+    }
+  }
+  return allTxnProcessed;
+}

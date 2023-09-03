@@ -122,6 +122,8 @@ export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: F
   attr.dataType = dataType.vertex!.P[IdAttr];
  }
 
+ const collAttrColl = getChildVertex(["$0Coll"], vertexCollAttr).vertex;
+
  // set props to attr
   let collProps = (getChildVertexes(["$0Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
    const key = getOptionLabel(curr, "->$0Name:P.name");
@@ -130,6 +132,9 @@ export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: F
    }
    return acc;
   }, {} as { [key: string]: any });
+  if (collAttrColl) {
+   collProps.collection = collAttrColl['P']?.['name'];
+  }
 
  // merge default component props
  if (!collAttrComp) {
@@ -143,6 +148,7 @@ export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: F
 
  const compProps = getCompProps(collAttrComp);
  collProps = Object.assign({}, removeUndefinedProperties(compProps, false, 10), collProps);
+
 
  const parentVertexResult = getParentVertex(["CompChild"], collAttrComp);
  if (!parentVertexResult.error) {
