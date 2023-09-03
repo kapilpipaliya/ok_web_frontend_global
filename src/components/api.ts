@@ -190,7 +190,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       {
         name: "dataType",
         displayName: "DataType",
-        component: "SelectBox",
+        component: "TagBox",
         props: {
           
           collection: "DataType",
@@ -272,6 +272,25 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               function: "reset",
               onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
             },
+          },
+          {
+            name: "description",
+            component: "TextArea",
+            props: {
+              // autoResizeEnabled: true,
+              width: "550px",
+            },
+          },
+        ],
+      },
+      {
+        name: "Event",
+        component: "Table",
+        tab: "Events",
+        attributes: [
+          {
+            name: "name",
+            component: "TextBox",
           },
           {
             name: "description",

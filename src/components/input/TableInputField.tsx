@@ -201,7 +201,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                   </td>
                 </Match>
                 <Match when={true}>
-                  <td>
+                  <td class="max-w:600px">
                     <div class="flex align-items:center">
                       <DefaultValue/>
                       <Content/>
