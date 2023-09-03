@@ -151,7 +151,12 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
       return(ensureArray(data.P[meta.P[IdAttr]]));
     });
   }
-  return getValueFromVertexOrKey(meta.P.props, "inward") ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
+  try {
+    // when new row added or modified this gives error.
+    return getValueFromVertexOrKey(meta.P.props, "inward") ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
+  } catch (e) {
+    return [];
+  }
 };
 
 // if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
