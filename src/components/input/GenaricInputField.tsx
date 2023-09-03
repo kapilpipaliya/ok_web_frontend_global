@@ -193,7 +193,35 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                     // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
                     // used data.event check to prevent this.
                     if (props.component === "FileUploader") {
-                      props.setValue(props.meta, props.data, data.component._files[0]?.value);
+                      // data.event is always undefined
+                      const file = data.component._files[0]?.value;
+                      if (!file) return;
+                      props.setValue(props.meta, props.data, file);
+                      let formData = new FormData();
+                      formData.append(
+                          "",
+                          file,
+                          file.name
+                      );
+                      const setResult = (media: number[]) => {
+                        runWithOwner(outerOwner, () => {
+                          props.setValue!(props.meta, props.data!, media[0]);
+                        })
+                      }
+
+                      fetch("http://49.12.190.36:1401/api/upload", {
+                        method: "POST",
+                        body: formData,
+                        // redirect: "follow",
+                        // mode: "no-cors",
+                      })
+                          .then((response) => response.json())
+                          .then((result) => {
+                            if (result.media) {
+                              setResult(result.media);
+                            }
+                          })
+                          .catch((error) => console.log("error", error));
                     } else if (data.event || props.component === "FilterBuilder") {
                       props.setValue(props.meta, props.data, data.value);
                     }
@@ -249,6 +277,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                   // labelText: "",
                   // accept: "image/*",
                   // uploadMode: "instantly",
+                  uploadMode: "useForm",
                   value: []
                 } as dxFileUploaderProperties);
               } else if (props.component === "FilterBuilder") {
@@ -446,7 +475,12 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 if (!props.data) return;
                 let value = props.data.P[props.meta.P[IdAttr]];
                 if (props.component === "FilterBuilder" || props.component === "FileUploader") {
-                  if (!value) value = [];
+                  if (!value) {
+                    value = [];
+                  } else if (Object.keys(value).length === 0) {
+                    value = [];
+                  }
+
                   else if (!Array.isArray(value)) {
                     value = [value];
                   }
@@ -455,7 +489,6 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 if (props.component === "TextArea") {
                   instance.option("hint", value)
                 }
-                ;
               });
               createEffect(() => instance.option("disabled", props.disabled));
 
