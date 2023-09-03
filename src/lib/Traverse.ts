@@ -13,7 +13,7 @@ export function getToEdge(meta: Vertex, vertex: Vertex): string {
 }
 
 export function getSelectedVertexValue(vertex: Vertex, meta: Vertex) {
-  if (!vertex.L) return [];
+  if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
@@ -218,7 +218,27 @@ export function getChildVertexes(
     };
   }
 }
-
+export const calculateFilter = (input: string) => {
+  let isMultiple = true;
+  let filterIndex = input.indexOf("[");
+  let filter = "";
+  let type = "";
+  if (filterIndex > 0) {
+    isMultiple = true;
+    filter = input.slice(filterIndex + 1).replace("]", "");
+    type = input.slice(0, filterIndex);
+  } else {
+    filterIndex = input.indexOf("(");
+    if (filterIndex > 0) {
+      isMultiple = false
+      filter = input.slice(filterIndex + 1).replace(")", "");
+      type = input.slice(0, filterIndex);
+    } else {
+      type = input;
+    }
+  }
+  return [type, filter, isMultiple] as const
+}
 export const convertToTraverseArray = (input: string): Array<[string, string]> => {
   const pathOperators = ["*", "-", "->", "="];
 
@@ -256,7 +276,8 @@ export const getSelectOptionsInternal = (
       const stepVertexes = new Map<number, Vertex>();
 
       for (const currentVertex of vertexes) {
-        const type = edgeType.replace("$0", currentVertex.L[0]);
+        const [type, filter, isMultiple] = calculateFilter(edgeType.replace("$0", currentVertex.L[0]))
+
         const edgeIds = currentVertex.IN[type];
         if (!edgeIds) {
           continue;
@@ -285,7 +306,8 @@ export const getSelectOptionsInternal = (
       const stepVertexes = new Map<number, Vertex>();
 
       for (const currentVertex of vertexes) {
-        const type = edgeType.replace("$0", currentVertex.L[0]);
+        const [type, filter, isMultiple] = calculateFilter(edgeType.replace("$0", currentVertex.L[0]))
+
         const edgeIds = currentVertex.OUT[type] || [];
         if (edgeIds.length == 0) {
           // we only return error if its in middle of path
@@ -318,18 +340,7 @@ export const getSelectOptionsInternal = (
       }
       vertexes = Array.from(stepVertexes.values());
     } else if (direction === "*") {
-      const filterIndex = edgeType.indexOf("[");
-      let filter = "";
-      if (filterIndex > 0) {
-        filter = edgeType.slice(filterIndex + 1).replace("]", "");
-        const vertexIds = findVertexIdsByLabel(edgeType.slice(0, filterIndex));
-        const filteredVertexes = [];
-        for (const vertexId of vertexIds) {
-          if (graph.vertexes[vertexId].P[IdAttr] === filter) {
-            filteredVertexes.push(graph.vertexes[vertexId]);
-          }
-        }
-      } else if (filterIndex === 0) {
+      if (edgeType.startsWith("[")) {
         // JSON.parse options:
         try {
           return {
@@ -343,7 +354,18 @@ export const getSelectOptionsInternal = (
           };
         }
       } else {
-        vertexes = findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
+        const [type, filter, isMultiple] = calculateFilter(edgeType)
+        if (filter) {
+          const vertexIds = findVertexIdsByLabel(type);
+          const filteredVertexes = [];
+          for (const vertexId of vertexIds) {
+            if (graph.vertexes[vertexId].P[IdAttr] === filter) {
+              filteredVertexes.push(graph.vertexes[vertexId]);
+            }
+          }
+        } else {
+          vertexes = findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
+        }
       }
     } else if (direction === "=") {
       vertexes = edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);

@@ -10,7 +10,7 @@ import {
   resetDatabase,
   restoreFromIndexDB,
   restoreFromJson,
-  Vertex
+  Vertex, waitTillAllEventsAreProcessed
 } from "../lib/graph";
 import { Link } from "@solidjs/router";
 import { Card } from "../components/uikit_components/Card/Card";
@@ -76,7 +76,7 @@ export const BackupRestore = () => {
     const file = componentPropsInputRef!.files![0];
 
     if (file) {
-      file.text().then((jsonText) => {
+      file.text().then(async (jsonText) => {
         const json = JSON.parse(jsonText);
         // const d = new Set();
         // const v = new Set();
@@ -86,7 +86,7 @@ export const BackupRestore = () => {
         // Issue with big websocket messages, its not received at all when debugging, It cant received at websocket message handler,
         // so spliting it.
         // If we splitTransaction, it's very slow
-        const splitTransaction = false;
+        const splitTransaction = true;
         for (const componentId in json) {
 
           const component = json[componentId];
@@ -142,13 +142,14 @@ export const BackupRestore = () => {
                   "Filter expression",
                 ].includes(t));
               if (!type.length) continue;
-              if (type.join(',') === "Number,String") {
+              let typeJoined = type.join(',');
+              if (typeJoined === "Number,String") {
                 dataType = 'String';
-              } else if (type.join(',') === "String,Number") {
+              } else if (typeJoined === "String,Number") {
                 dataType = 'Float';
-              } else if (type.join(',') === "Date,Number,String") {
+              } else if (typeJoined === "Date,Number,String") {
                 dataType = 'String';
-              } else if (type.join(',') === "String,UserDefinedElement") {
+              } else if (typeJoined === "String,UserDefinedElement") {
                 dataType = 'String';
               } else if (type.some((t) => t.includes("Array"))) {
                 dataType = "List";
@@ -156,7 +157,7 @@ export const BackupRestore = () => {
                 dataType = "List";
               } else if (type.some((t) => t.includes("PositionConfig"))) {
                 dataType = "Map";
-              } else if (type.join(',') === "Boolean,String") {
+              } else if (typeJoined === "Boolean,String") {
                 dataType = "Boolean";
               } else if (type.length > 1) {
                 console.log("skipped multiple result type", propertyObj);
@@ -174,35 +175,61 @@ export const BackupRestore = () => {
                 }
               }
               if (dataType) {
-                const vertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
-                if (vertex) {
+                const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
+                if (compVertex) {
+                  const rowResult = newRow(txnId, compVertex, "CompProp");
+                  replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
+
                   const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
                   if (!dataTypeVertex) {
                     console.log("dataType not found", dataType);
-                    continue;
+                  } else {
+                    setSelectionValue(
+                      txnId,
+                      graph.vertexes[rowResult.vertexId!],
+                      {P: {[IdAttr]: "DataType"}} as unknown as Vertex,
+                      dataTypeVertex.id,
+                    );
                   }
-
-                  const rowResult = newRow(txnId, vertex, "CompProp");
-                  replaceVertexProperties(txnId, rowResult.vertexId!, { name, description: description });
-                  setSelectionValue(
-                    txnId,
-                    graph.vertexes[rowResult.vertexId!],
-                    { P: { [IdAttr]: "DataType" } } as Vertex,
-                    dataTypeVertex.id,
-                  );
                   // It takes too much time to commit the full transaction.
+                } else {
+                  console.log('Component Not Found:', name);
                 }
               } else {
-                console.log('dataType Not Found:', name, type);
+                console.log('DataType Not Found:', name, type);
               }
             }
             if (splitTransaction) {
               commitTxn(txnId, Ws);
+              await waitTillAllEventsAreProcessed();
             }
           }
 
+          const componentEvents = component["Events"];
+          if (!componentEvents) continue;
+          for (const property in componentEvents) {
+            if (splitTransaction) txnId = getNewTxnId();
+            const propertyObj = componentEvents[property];
+            const name = propertyObj["Name"];
+            let description = propertyObj["description"] as string;
+            if (description) {
+              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
+            }
+            const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
+            if (compVertex) {
+              const rowResult = newRow(txnId, compVertex, "CompEvent");
+              replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
+            }else {
+                console.log('Component Not Found:', name);
+              }
+
+            if (splitTransaction) {
+              commitTxn(txnId, Ws);
+              await waitTillAllEventsAreProcessed();
+            }
+          }
         }
-        if(!splitTransaction) commitTxn(txnId, Ws);
+        if (!splitTransaction) commitTxn(txnId, Ws);
         alert("inserting properties finished.");
       });
     }
@@ -271,77 +298,81 @@ LocalDateTime
     updateImportRecord('component', record, false);
     record.mergeFieldValues({
       csv: `name\tdataType\tparent\tcategory\tchild
+ActionSheet\t\t\tAction\tTRUE
+Button\t\t\tAction\t
+ContextMenu\t\t\tAction\tTRUE
+DropDownButton\t\t\tAction\t
+Resizable\t\t\tAction\tTRUE
+SpeedDialAction\t\t\tAction\t
+Bullet\tInteger\t\tChart\t
+Chart\t\t\tChart\t
+Funnel\t\t\tChart\t
+PieChart\t\t\tChart\t
+PolarChart\t\t\tChart\t
+Sankey\t\t\tChart\t
+SparkLine\t\t\tChart\t
+TreeMap\t\t\tChart\tTRUE
+PopOver\t\t\tDialog\t
+Popup\t\t\tDialog\t
+Toast\t\t\tDialog\t
+Tooltip\t\t\tDialog\t
 Autocomplete\tString\t\tForm\t
+ButtonGroup\t\t\tForm\tTRUE
 Calendar\tInteger\t\tForm\t
 CheckBox\tBoolean\t\tForm\t
 ColorBox\tString\t\tForm\t
 DateBox\tDate\t\tForm\t
+DateRangeBox\t\t\tForm\t
+DateTimeBox\tLocalDateTime\tDateBox\tForm\t
+Diagram\t\t\tForm\t
 DropDownBox\tList\t\tForm\t
+FieldSetLabelLeft\t\t\tForm\tTRUE
+FileManager\t\t\tForm\t
 FileUploader\tList\t\tForm\t
 FilterBuilder\tList\t\tForm\t
+Float\tFloat\tNumberBox\tForm\t
+Form\t\t\tForm\tTRUE
+Gantt\t\t\tForm\t
 HtmlEditor\tString\t\tForm\t
+Int\tInteger\tNumberBox\tForm\t
+Lookup\t\t\tForm\t
 NumberBox\tFloat\t\tForm\t
 RadioGroup\tList\t\tForm\t
 RangeSelector\t\t\tForm\t
 RangeSlider\t\t\tForm\t
-SelectBox\t->\t\tJoin\t
+Scheduler\t\t\tForm\tTRUE
 Slider\tFloat\t\tForm\t
+Sortable\t\t\tForm\tTRUE
 Switch\tBoolean\t\tForm\t
-TagBox\t=>\t\tJoin\t
+Table\tList\t\tForm\t
 TextArea\tString\t\tForm\t
 TextBox\tString\t\tForm\t
-Table\t\t\tForm\t
-Bullet\tInteger\t\tView\t
-CircularGauge\tInteger\t\tView\t
-LinearGauge\tFloat\t\tView\t
-ProgressBar\tFloat\t\tView\t
-Int\tInteger\tNumberBox\tCustom\t
-Float\tFloat\tNumberBox\tCustom\t
-DateTimeBox\tLocalDateTime\tDateBox\tCustom\t
+BarGauge\t\t\tGauge\t
+CircularGauge\tInteger\t\tGauge\t
+LinearGauge\tFloat\t\tGauge\t
+DataGrid\t\t\tGrid\tTRUE
+PivotGrid\t\t\tGrid\t
+TreeList\t\t\tGrid\tTRUE
+SelectBox\t->\t\tJoin\t
+TagBox\t=>\t\tJoin\t
+Gallery\t\t\tList\tTRUE
+List\t\t\tList\tTRUE
+TileView\t\t\tList\tTRUE
+Map\t\t\tMap\t
+VectorMap\t\t\tMap\tTRUE
+Accordion\t\t\tNavigation\tTRUE
+Drawer\t\t\tNavigation\tTRUE
+Menu\t\t\tNavigation\tTRUE
+MultiView\t\t\tNavigation\t
+TabPanel\t\t\tNavigation\tTRUE
+Tabs\t\t\tNavigation\tTRUE
+Toolbar\t\t\tNavigation\tTRUE
+TreeView\t\t\tNavigation\tTRUE
+LoadIndicator\t\t\tNotification\t
+LoadPanel\t\t\tNotification\t
+ProgressBar\tFloat\t\tNotification\t
 Box\t\t\tView\tTRUE
-TreeMap\t\t\tView\tTRUE
-VectorMap\t\t\tView\tTRUE
-TreeView\t\t\tView\tTRUE
-TreeList\t\t\tView\tTRUE
-Toast\t\t\tView\t
-TileView\t\t\tView\tTRUE
-Tabs\t\t\tView\tTRUE
-TabPanel\t\t\tView\tTRUE
-SpeedDialAction\t\t\tView\t
-SparkLine\t\t\tView\t
-ScrollView\t\t\tView\t
-Scheduler\t\t\tView\tTRUE
-Sankey\t\t\tView\t
-Popup\t\t\tView\t
-PopOver\t\t\tView\t
-PolarChart\t\t\tView\t
-PieChart\t\t\tView\t
-MultiView\t\t\tView\t
-Menu\t\t\tView\tTRUE
-Map\t\t\tView\t
-Lookup\t\t\tView\t
-LoadPanel\t\t\tView\t
-LoadIndicator\t\t\tView\t
-List\t\t\tView\tTRUE
-Gantt\t\t\tView\t
-Gallery\t\t\tView\tTRUE
-Funnel\t\t\tView\t
-FileManager\t\t\tView\t
-Diagram\t\t\tView\t
-DataGrid\t\t\tView\tTRUE
-ContextMenu\t\t\tView\tTRUE
-Chart\t\t\tView\t
-Button\t\t\tView\t
-BarGauge\t\t\tView\t
-ActionSheet\t\t\tView\tTRUE
-Accordion\t\t\tView\tTRUE
-ButtonGroup\t\t\tView\tTRUE
-Tooltip\t\t\tView\t
-PivotGrid\t\t\tView\t
-DropDownButton\t\t\tView\t
-Drawer\t\t\tView\tTRUE
-FieldSetLabelLeft\t\t\tForm\tTRUE
-Form\t\t\tForm\tTRUE`,
+ScrollView\t\t\tView\t`,
     });
     onDataDirectoryImportClick(record, Ws);
     // 3. Import dataTypeDefault

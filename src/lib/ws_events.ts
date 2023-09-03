@@ -1,20 +1,21 @@
-import { batch, useContext } from "solid-js";
-import { getCookie, WsContext } from "../utils/ws_events_dispatcher";
-import { G } from "@mobily/ts-belt";
+import {batch, useContext} from "solid-js";
+import {getCookie, WsContext} from "../utils/ws_events_dispatcher";
+import {G} from "@mobily/ts-belt";
 import {
  commitTransaction,
  EdgeMap,
  edgeOldIdToNewIdMap,
  graph,
  Id,
+ isAllTxnProcessed,
  ProcessStatus,
  setGraph,
  transactions,
  VertexMap,
  vertexOldIdToNewIdMap
 } from "./graph";
-import { deleteVertex, updateVertexId } from "./Vertex";
-import { deleteEdge, updateEdgeId } from "./Edge";
+import {deleteVertex, updateVertexId} from "./Vertex";
+import {deleteEdge, updateEdgeId} from "./Edge";
 
 
 export const syncEvent = () => {
@@ -89,14 +90,8 @@ export const syncEvent = () => {
       }
      }
     }
-    let allTxnProcessed = true;
-    for (const [_txnId, value] of transactions.entries()) {
-     if (value.status !== ProcessStatus.Processed) {
-      allTxnProcessed = false;
-      break;
-     }
-    }
-    if (allTxnProcessed) {
+
+    if (isAllTxnProcessed()) {
      vertexOldIdToNewIdMap.clear();
      edgeOldIdToNewIdMap.clear();
     } else commitTransaction(Ws);
