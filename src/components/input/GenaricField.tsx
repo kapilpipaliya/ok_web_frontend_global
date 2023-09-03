@@ -153,7 +153,7 @@ import { Navbar } from "../../pages/home/components/Navbar";
 import {
   getChildVertex,
   getChildVertexes,
-  getOptionLabel
+  getSelectionOptions
 } from "../../lib/Traverse";
 import {
   TodaysEnergizer
@@ -164,11 +164,13 @@ import {
 import { toTitle } from "case-switcher-js";
 import { getLastItem } from "../../utils/functions";
 import { WsContext } from "../../utils/ws_events_dispatcher";
-import { useNavigate } from "@solidjs/router";
+import {Link, useNavigate} from "@solidjs/router";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import Tabs from "devextreme/ui/tabs";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 import { getValueFromVertexOrKey } from "../../utils/utils";
+import {Dynamic} from "solid-js/web";
+import {path} from "rambda";
 
 export const genericComponents2 = [
   "Box",
@@ -218,8 +220,15 @@ export const genericComponents2 = [
   // "FilterBuilder",
   // "FileUploader",
   "FieldSetLabelLeft",
- "Form",
- "DropDownBoxTreeView"
+  "Form",
+  "DropDownBoxTreeView",
+  "NavBar",
+  "ActionCard",
+  "TodaysEnergizer",
+  "Text",
+  "Repeater",
+  "A",
+  "Image"
 ]
 const displayExpr = [
   "ContextMenu",
@@ -310,6 +319,7 @@ const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
 
 
 export const PageRenderContext = createContext([] as Vertex[]);
+export const RepeaterContext = createContext([] as Vertex[]); // DataVertex[]
 
 export const PageRenderUtils = {
   getCollection: (item?: Vertex): string | undefined => item && getChildVertex(['$0Coll'], item).vertex?.P[IdAttr],
@@ -331,7 +341,7 @@ export const PageRenderUtils = {
   getDataVertex: (item?: Vertex) => item && getChildVertex(['$0Data'], item).vertex,
 }
 
-export const PageItemRender = (props: {metaVertex: Vertex}) => {
+export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
 
   const parentItems = useContext(PageRenderContext);
   let { record, cleanUpConfig } = useContext(FormContext);
@@ -369,7 +379,7 @@ export const PageItemRender = (props: {metaVertex: Vertex}) => {
       const PageComponent = () => <PageRenderContext.Provider value={[...useContext(PageRenderContext), item]}>
         <DynamicComponent
          meta={item}
-         data={PageRenderUtils.getDataVertex(item) || parentData()}
+         data={props.data || PageRenderUtils.getDataVertex(item) || parentData()}
          setValue={record?.setValue || (() => {})}
          disabled={false}
          component={component()}
@@ -2002,9 +2012,39 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       onCleanup(() => instance()?.dispose());
     })
   }
+  const repeaterContext = useContext(RepeaterContext);
   return (
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
+          <Match when={component()==="Repeater"}>
+            <For each={getSelectionOptions(props.meta, PageRenderUtils.getCollection(props.meta)!).vertexes}>
+              {vertex => <RepeaterContext.Provider value={[...useContext(RepeaterContext), vertex]}>
+                <PageRenderContext.Provider value={[...useContext(PageRenderContext), props.meta]}>
+                  <PageItemRender metaVertex={props.meta} data={vertex}/>
+                </PageRenderContext.Provider>
+              </RepeaterContext.Provider>}
+            </For>
+          </Match>
+          <Match when={component()  === "Text"}>
+            <Show when={props.meta.P.props?.as} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+              <Dynamic component={props.meta.P.props?.as}
+                       class={getValueFromVertexOrKey(props.meta.P.props, "class")}
+              >
+                {getText(props.meta.P.props?.text, repeaterContext)}
+              </Dynamic>
+            </Show>
+          </Match>
+          <Match when={component()  === "A"}>
+            <Link {...props.meta.P.props} href={getText(props.meta.P.props?.href, repeaterContext)}>
+              <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+                {props.children}
+                <PageItemRender metaVertex={props.meta}/>
+              </Show>
+            </Link>
+          </Match>
+          <Match when={component()  === "Image"}>
+            <img {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)}/>
+          </Match>
           <Match when={component()  === "Form"}>
             <Form/>
           </Match>
@@ -2027,7 +2067,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             <TodaysEnergizer meta={props.meta} data={props.data} />
           </Match>
           <Match when={true}>
-            <div
+            <Dynamic component={props.meta.P.props?.as || "div"}
              class={getValueFromVertexOrKey(props.meta.P.props, "class")}
              ref={mountComponent}
             >
@@ -2045,9 +2085,18 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                 </Match>
               </Switch>
 
-            </div>
+            </Dynamic>
           </Match>
         </Switch>
       </Show>
   );
+}
+
+function getText(text: string, repeaterContext: Vertex[]) {
+  if (!text) return "";
+  return text.replace(/\$(\d+)([:.\w]+)/g, (match: string, numericPart: string, projection: string) => {
+    const numericValue = parseInt(numericPart);
+    const vertex = repeaterContext[numericValue - 1];
+    return path(projection, vertex) as string
+  });
 }

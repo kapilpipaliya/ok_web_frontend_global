@@ -153,6 +153,7 @@ interface FormGroupProps {
   metaAttributes: Vertex[];
   vertex: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
+  txnId: number;
 }
 
 export function getComponentForCollRow(metaVertex: Vertex, data: Vertex) {
@@ -174,11 +175,13 @@ export function FormGroup(props: FormGroupProps) {
         const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
         const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
         const Content = () => <DynamicComponent
-
          component={component()}
          meta={metaVertex}
          data={props.vertex}
          setValue={props.setValue}
+          // disabled={props.d}
+         txnId={props.txnId}
+         isRealTime={false}
         />
         return (
           <Switch>
@@ -223,11 +226,13 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
         const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
         const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
         const Content = () => <DynamicComponent
-
          component={component()}
          meta={metaVertex}
          data={props.vertex}
          setValue={props.setValue}
+         // disabled={props.d}
+         txnId={props.txnId}
+         isRealTime={false}
         />
 
         return (
@@ -239,7 +244,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
             <Match when={component() === "CollectionOption"}>
               <Content/>
             </Match>
-            <Match when={true}>
+            <Match when={props.selectedLayout}>
               <div class="dx-field">
                 <div class="dx-field-label" id={id}>
                   <Label/>
@@ -517,7 +522,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": getTabsWidth(groupByTabsAndGroup["main"][group])}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <FormGroup metaAttributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />
+                    <FormGroup metaAttributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} txnId={record.txnId}/>
                   </div>
                 </>
               )}
@@ -555,6 +560,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                       metaAttributes={groupByTabsAndGroup[activeTab()][group]}
                       vertex={record.vertex}
                       setValue={record.setValue}
+                      txnId={record.txnId}
                     />
                   </div>
                 );

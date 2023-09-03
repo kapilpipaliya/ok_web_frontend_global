@@ -4,21 +4,21 @@ import { createStore, reconcile } from "solid-js/store";
 import {
  addMetaVertexes,
  deleteRow, FieldAttribute,
- getCompProps,
+ getCompProps, getFormMetaData,
  getRowProps,
  PageContext,
  Record, setValueGlobal
 } from "../lib/Record";
 import {
  batch,
- createEffect,
- createSignal,
+ createEffect, createMemo,
+ createSignal, For, Match,
  on, onCleanup,
  onMount,
- Show,
+ Show, Switch,
  useContext
 } from "solid-js";
-import { GenericField, PageItemRender } from "./input/GenaricField";
+import {GenericField, PageItemRender, PageRenderContext, PageRenderUtils} from "./input/GenaricField";
 import TreeView, {
  Item as dxTreeViewItem,
  Node
@@ -44,9 +44,9 @@ import {
  FormGroup,
  FormGroupProperties
 } from "./DynamicForm";
-import { setParentValue, setSelectionValue } from "./input/SelectInputField";
+import {SelectInputField, setParentValue, setSelectionValue} from "./input/SelectInputField";
 import {
- addNewVertex,
+ addNewVertex, deleteVertex, findOrCreateNewVertex,
  findVertexByLabelAndUniqueId,
  mergeVertexProperties,
  newVertex, replaceVertexProperties
@@ -69,6 +69,34 @@ function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
   const child = childrenItems[i];
   mergeVertexProperties(txnId, child.id! as number, { pos: i + 1 });
  }
+}
+
+function PageView(props: {
+ number: number,
+ record: Record
+}) {
+ const collection = createMemo(() => PageRenderUtils.getCollection(props.record?.vertex));
+ const dataVertex = createMemo(() => PageRenderUtils.getDataVertex(props.record?.vertex));
+
+ return <PageContext.Provider value={{events: {}}}>
+  <Show when={props.number && props.record?.vertex && props.number} keyed>
+   <Switch>
+    <Match when={collection() && !dataVertex()}>
+     <For each={getSelectionOptions(props.record?.vertex, collection()!).vertexes}>
+      {vertex => <PageRenderContext.Provider value={[props.record.vertex]}>
+       <PageItemRender metaVertex={props.record.vertex} data={vertex}/>
+      </PageRenderContext.Provider>}
+     </For>
+    </Match>
+    <Match when={collection() && dataVertex()}>
+      <PageItemRender metaVertex={props.record.vertex} />
+    </Match>
+    <Match when={true}>
+     <PageItemRender metaVertex={props.record.vertex} />
+    </Match>
+   </Switch>
+  </Show>
+ </PageContext.Provider>;
 }
 
 export const PageDesignerDragAndDrop = () => {
@@ -606,6 +634,105 @@ export const PageDesignerDragAndDrop = () => {
   return findVertexByLabelAndUniqueId("DataType", "name", "String");
  }
 
+ function getLayoutTreeData() {
+  return getTreeData({
+   collection: "!Attr",
+   child: {
+    collection: "!Attr",
+    child: {
+     collection: "!Attr",
+     child: {
+      collection: "!Attr",
+      child: {
+       collection: "!Attr",
+       child: {
+        collection: "!Attr",
+        child: {
+         collection: "!Attr",
+         child: {
+          collection: "!Attr",
+          child: {
+           collection: "!Attr",
+           child: {
+            collection: "!Attr",
+            child: {
+             collection: "!Attr",
+             child: {
+              collection: "!Attr",
+              child: {
+               collection: "!Attr",
+               child: {
+                collection: "!Attr",
+                child: {
+                 collection: "!Attr",
+                 child: {
+                  collection: "!Attr",
+                  child: {
+                   collection: "!Attr",
+                   child: {
+                    collection: "!Attr",
+                    child: {
+                     collection: "!Attr",
+                     child: {
+                      collection: "!Attr",
+                      child: {
+                       collection: "!Attr",
+                       child: {
+                        collection: "!Attr",
+                        child: {
+                         collection: "!Attr",
+                         child: {
+                          collection: "!Attr",
+                          child: {
+                           collection: "!Attr",
+                           child: {
+                            collection: "!Attr",
+                            child: {
+                             collection: "!Attr",
+                             child: {
+                              collection: "!Attr",
+                              child: {
+                               collection: "!Attr",
+                               child: {
+                                collection: "!Attr",
+                                child: {collection: "!Attr", child: {collection: "!Attr", child: {collection: "!Attr"}}}
+                               }
+                              }
+                             }
+                            }
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    }
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }, pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
+   nameExpr: (v: Vertex) => {
+    const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
+    return `${v.P.name}${component ? ` (${component})` : ""}`;
+   }
+  });
+ }
+
  const FourLayout = () => {
   return     <div ref={el => {
    onMount(() => {
@@ -722,20 +849,8 @@ export const PageDesignerDragAndDrop = () => {
     ref={el => {
      onMount(() => {
       let selectedElement: HTMLDivElement;
-      const data = getTreeData({
-       collection: "!Attr",
-       child: { collection: "!Attr",
-        child: {
-         collection: "!Attr",
-         child: { collection: "!Attr", child: { collection: "!Attr" } }
-        }
-       }
-      }, pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
-       nameExpr: (v: Vertex) => {
-        const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
-        return `${v.P.name}${component ? ` (${component})` : ""}`;
-       }
-      });
+      // TODO: This should be infinite
+      const data = getLayoutTreeData();
 
       layoutTreeViewInstance = new TreeView(el, {
        items: data,
@@ -937,6 +1052,67 @@ export const PageDesignerDragAndDrop = () => {
   }
 
 
+  const CollAndData = () => {
+
+   const metaVertexId = getNewGraphId();
+   const txnId = getNewTxnId();
+   const metaAttributes = AttrsTableData.Page;
+
+   addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: "Attr", props: {
+     type: 'Attr',
+     label: "Attr",
+    }}));
+   const attributes: FieldAttribute[] = [
+    {
+     name: "coll",
+     displayName: "Collection",
+     component: "SelectBox",
+     props: {
+      collection: "Coll",
+      parentLabel: "Coll",
+     },
+    },
+    {
+     name: "data",
+     component: "SelectBox",
+     props: {
+      collection: `{{->$0Coll:P.${IdAttr}}}`,
+     },
+    },
+   ];
+   addMetaVertexes(txnId, graph.vertexes[metaVertexId], attributes);
+   onCleanup(() => {
+    revertTransaction(txnId);
+   });
+   const metaVertex = graph.vertexes[metaVertexId];
+   const collMetaVertex = getChildVertexes(["MetaAttr"], [metaVertex]);
+
+
+   return <>
+    <span>Collection:</span>
+    <SelectInputField
+      data={graph.vertexes[selectedLayout().vertexId!]}
+      meta={collMetaVertex.vertexes![0]!}
+      disabled={false}
+      component={"SelectBox"}
+      txnId={pageConfig[0].record.txnId}
+      // passed setValue when we have a string value in select field
+      setValue={pageConfig[0].record.setValue}
+      isRealTime={false}
+    />
+    <span>Data:</span>
+    <SelectInputField
+      data={graph.vertexes[selectedLayout().vertexId!]}
+      meta={collMetaVertex.vertexes![1]!}
+      disabled={false}
+      component={"SelectBox"}
+      txnId={pageConfig[0].record.txnId}
+      // passed setValue when we have a string value in select field
+      setValue={pageConfig[0].record.setValue}
+      isRealTime={false}
+    />
+   </>
+  }
 
   return <>
    <Show when={selectedLayout().vertexId !== -1}>
@@ -944,15 +1120,17 @@ export const PageDesignerDragAndDrop = () => {
      meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Rules" }}} as any}
      onClick={toggle}
     />
+    <CollAndData/>
+
+    <FormGroupProperties
+      txnId={pageConfig[0].record.txnId}
+      metaAttributes={selectedComponentProperties().vertexes || []}
+      vertex={graph.vertexes[vertexId]}
+      setValue={setPropertyValue}
+      setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) => setValueGlobal(pageConfig[0].record.txnId, attribute, vertex, data, Ws, pageConfig[0].record.isRealTime)}
+      selectedLayout={graph.vertexes[selectedLayout().vertexId]}
+    />
    </Show>
-   <FormGroupProperties
-    txnId={pageConfig[0].record.txnId}
-    metaAttributes={selectedComponentProperties().vertexes || []}
-    vertex={graph.vertexes[vertexId]}
-    setValue={setPropertyValue}
-    setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) => setValueGlobal(pageConfig[0].record.txnId, attribute, vertex, data, Ws, pageConfig[0].record.isRealTime)}
-    selectedLayout={graph.vertexes[selectedLayout().vertexId]}
-   />
    <Show when={isRulesOpen()}>
     <Portal>
      <div role="dialog" tabIndex={-1} class="sb-modal">
@@ -1012,15 +1190,36 @@ export const PageDesignerDragAndDrop = () => {
  const deleteLayout = () => {
   if(selectedLayout().vertexId !== -1) {
    // TODO: delete layout and all its properties and all the childrens.
-   deleteRow(graph.vertexes[selectedLayout().vertexId], pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
 
-   const fromNode = findNode(layoutTreeViewInstance, selectedLayout().itemIndex!);
+   const layoutVertexId = selectedLayout().vertexId;
+   const layoutItemIndex = selectedLayout().itemIndex;
+   batch(() => {
+    setSelectedLayout({vertexId: -1});
+    setSelectedComponent({vertexId: -1});
+    setSelectedColl({vertexId: -1});
+   })
+
+   // delete properties:
+   const AttrProps = getChildVertexes(["AttrProp"], [graph.vertexes[layoutVertexId]]);
+   if (!AttrProps.error) {
+    for (const vertex of AttrProps.vertexes!) {
+     // delete in edges and out edges of properties
+     deleteRow(vertex, pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
+     // no commitTxn because, it's not realtime
+    }
+   }
+
+   // delete in edges and out edges and attr
+   deleteRow(graph.vertexes[layoutVertexId], pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
+
+/*   const fromNode = findNode(layoutTreeViewInstance, layoutItemIndex!);
    const fromItems = layoutTreeViewInstance.option("items");
    if (!fromItems) return;
    const fromIndex = findIndex(fromItems, fromNode!.itemData!.id as string);
-   fromItems?.splice(fromIndex, 1);
+   fromItems?.splice(fromIndex, 1);*/
 
-   layoutTreeViewInstance.option("items", fromItems);
+
+   layoutTreeViewInstance.option("items", getLayoutTreeData());
   }
  }
  return (
@@ -1037,11 +1236,7 @@ export const PageDesignerDragAndDrop = () => {
 
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
     <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
-    <PageContext.Provider value={{ events: {} }}>
-     <Show when={count() && pageConfig[0].record?.vertex && count()} keyed>
-      <PageItemRender metaVertex={pageConfig[0].record.vertex} />
-     </Show>
-    </PageContext.Provider>
+    <PageView number={count()} record={pageConfig[0].record}/>
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5 flex flex:col">
@@ -1056,8 +1251,8 @@ export const PageDesignerDragAndDrop = () => {
       <span>Properties</span>
       <Show when={selectedLayout().vertexId !== -1}>
        <GenericField
-        meta={{ P: {component: "Button", props: { stylingMode: 'text', type: "danger", icon: "trash" }}} as any}
-        onClick={deleteLayout}
+         meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
+         onClick={deleteLayout}
        />
       </Show>
      </div>
@@ -1066,12 +1261,12 @@ export const PageDesignerDragAndDrop = () => {
 
     <div class="bt:1|solid|gray p:10 mt:5 ">
      <AbstractSingleForm
-      formId={"Page"}
-      id={params.id}
-      config={pageConfig}
-      showMainFieldsOnly={true}
-      importExportButtons={false}
-      // TODO: add dry option
+       formId={"Page"}
+       id={params.id}
+       config={pageConfig}
+       showMainFieldsOnly={true}
+       importExportButtons={false}
+       // TODO: add dry option
      />
     </div>
 
@@ -1080,3 +1275,21 @@ export const PageDesignerDragAndDrop = () => {
   </div>
  );
 };
+
+export const PagePreview = (props: {}) => {
+ const params = useParams();
+ const { Ws } = useContext(WsContext);
+
+ if (!params.id) return "Page ID not specified.";
+ const record = new Record({ ws: Ws });
+ const result = findVertexByLabelAndUniqueId("Page", "name", params.id);
+ if (!result) return "No Page Found";
+ const loadResult = record.load(result.id);
+ if (loadResult.error) return loadResult.error;
+
+ const form = getFormMetaData("Page");
+ if (form.error) return form.error;
+
+ record.createMeta(form.form!);
+ return <PageView number={1} record={record}/>
+}
