@@ -25,7 +25,6 @@ import { WsContext } from "../../utils/ws_events_dispatcher";
 import {
   getChildVertex,
   getInEdge,
-  getOptionLabel,
   getParentVertexValue,
   getSelectedVertexValue,
   getSelectionOptions,
@@ -212,7 +211,7 @@ export function SelectInputField(props: ComponentProps & {component: string; txn
       if (!collection) {
         return [];
       }
-      return getSelectionOptions(props.data, collection).vertexes || [];
+      return getSelectionOptions([props.data], collection).vertexes || [];
     }
   }, (data) => data);
 
@@ -235,7 +234,7 @@ export function SelectInputField(props: ComponentProps & {component: string; txn
         when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data)}>
-            {(vertexId) => <>{getOptionLabel(graph.vertexes[vertexId], getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || `P.${IdAttr}`)}</>}
+            {(vertexId) => <>{getSelectionOptions([graph.vertexes[vertexId]], getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || `::'P.${IdAttr}'`).vertexes}</>}
           </For>
         }
       >
@@ -327,7 +326,7 @@ export function SelectInputField(props: ComponentProps & {component: string; txn
                   Object.assign(selectOp, {
                     // if valueExpr value is undefined onValueChange will not fire.
                     valueExpr: "id",
-                    displayExpr: (item) => runWithOwner(outerOwner, () => getOptionLabel(item, getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || collectionNameDisplayExpr(replaceExpressionToLabel(getValueFromVertexOrKey(props.meta.P.props, "collection"), props.data)) || `P.${IdAttr}`)),
+                    displayExpr: (item) => runWithOwner(outerOwner, () => getSelectionOptions([item], getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || collectionNameDisplayExpr(replaceExpressionToLabel(getValueFromVertexOrKey(props.meta.P.props, "collection"), props.data)) || `::'P.${IdAttr}'`).vertexes),
 
                   } as Properties)
                 }

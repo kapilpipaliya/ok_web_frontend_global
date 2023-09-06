@@ -1,4 +1,4 @@
-import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
+import {getChildVertexes, getSelectionOptions} from "../lib/Traverse";
 import { Vertex } from "../lib/graph";
 
 export function capitalizeFirstLetter(string: string) {
@@ -6,7 +6,7 @@ export function capitalizeFirstLetter(string: string) {
 }
 // This method read all property vertexes and make an object.
 export const getProps = (meta: Vertex) => (getChildVertexes(["$0Prop"], [meta]).vertexes || []).reduce((acc, curr) => {
-  const key = getOptionLabel(curr, "->$0Key:P.key");
+  const key = getSelectionOptions([curr], "T:(->$0Key::'P.key')").vertexes;
   if (key) {
     acc[key] = curr.P.value;
   }

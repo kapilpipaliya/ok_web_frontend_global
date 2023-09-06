@@ -3,7 +3,9 @@ import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
 import { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
-import { createUniqueId } from "solid-js";
+import {evaluate} from "./jsep";
+import jsep from "jsep";
+
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
@@ -239,152 +241,17 @@ export const calculateFilter = (input: string) => {
   }
   return [type, filter, isMultiple] as const
 }
-export const convertToTraverseArray = (input: string): Array<[string, string]> => {
-  const pathOperators = ["*", "-", "->", "="];
-
-  const isStartWithOp = pathOperators.some((operator) => input.startsWith(operator));
-  if (!isStartWithOp && !input.startsWith('!')) {
-    input = `*${input}`;
-  }
-
-  const result = [] as Array<[string, string]>;
-  for (let i = 0; i < input.length; i++) {
-    if (input[i] === "!") {
-      result.push(["->", ""]);
-    } else if (i + 1 < input.length && pathOperators.includes(input[i] + input[i + 1])) {
-      result.push([input[i] + input[i + 1], ""]);
-      i++;
-    } else if (pathOperators.includes(input[i])) {
-      result.push([input[i], ""]);
-    } else {
-      result[result.length - 1][1] += input[i];
-    }
-  }
-  return result;
-};
-export const getSelectOptionsInternal = (
-  vertexes: Vertex[],
-  collection: Array<[string, string]>,
-  strict?: boolean,
-): { error: boolean; vertexes?: Vertex[] } => {
-  if (collection.length == 0) {
-    return { error: true };
-  }
-
-  for (const [direction, edgeType] of collection) {
-    if (direction === "-") {
-      const stepVertexes = new Map<number, Vertex>();
-
-      for (const currentVertex of vertexes) {
-        const [type, filter, isMultiple] = calculateFilter(edgeType.replace("$0", currentVertex.L[0]))
-
-        const edgeIds = currentVertex.IN[type];
-        if (!edgeIds) {
-          continue;
-        }
-
-        for (const edgeId of edgeIds) {
-          const edge = graph.edges[edgeId];
-          if (edge) {
-            const newVertex = graph.vertexes[edge.S];
-            if (newVertex) {
-              stepVertexes.set(newVertex.id, newVertex);
-            } else {
-              return {
-                error: true,
-              };
-            }
-          } else {
-            return {
-              error: true,
-            };
-          }
-        }
-      }
-      vertexes = Array.from(stepVertexes.values());
-    } else if (direction === "->") {
-      const stepVertexes = new Map<number, Vertex>();
-
-      for (const currentVertex of vertexes) {
-        const [type, filter, isMultiple] = calculateFilter(edgeType.replace("$0", currentVertex.L[0]))
-
-        const edgeIds = currentVertex.OUT[type] || [];
-        if (edgeIds.length == 0) {
-          // we only return error if its in middle of path
-          if (strict && path.length > 1) {
-            return {
-              error: true,
-            };
-          } else {
-            continue;
-          }
-        }
-
-        for (const edgeId of edgeIds) {
-          const edge = graph.edges[edgeId];
-          if (edge) {
-            const newVertex = graph.vertexes[edge.E];
-            if (newVertex) {
-              stepVertexes.set(newVertex.id, newVertex);
-            } else {
-              return {
-                error: true,
-              };
-            }
-          } else {
-            return {
-              error: true,
-            };
-          }
-        }
-      }
-      vertexes = Array.from(stepVertexes.values());
-    } else if (direction === "*") {
-      if (edgeType.startsWith("[")) {
-        // JSON.parse options:
-        try {
-          return {
-            error: true,
-            vertexes: JSON.parse(edgeType),
-          };
-        } catch (e) {
-          console.warn(e);
-          return {
-            error: true,
-          };
-        }
-      } else {
-        const [type, filter, isMultiple] = calculateFilter(edgeType)
-        if (filter) {
-          const vertexIds = findVertexIdsByLabel(type);
-          const filteredVertexes = [];
-          for (const vertexId of vertexIds) {
-            if (graph.vertexes[vertexId].P[IdAttr] === filter) {
-              filteredVertexes.push(graph.vertexes[vertexId]);
-            }
-          }
-        } else {
-          vertexes = findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
-        }
-      }
-    } else if (direction === "=") {
-      vertexes = edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);
-    } else {
-      return { error: true };
-    }
-  }
-  return { error: false, vertexes };
-};
 
 export function replaceExpressionToLabel(collection: string, vertex: Vertex) {
   if (!collection) return "";
-  // example: `{->$0Coll:P.${IdAttr}}` will get a collection from expression
+  // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression
   if (collection.includes("{{") && collection.includes("}}")) {
-    collection = collection.replace(/{{.*}}/, getOptionLabel(vertex, collection.match(/{{(.*)}}/)![1]! || "") || "");
+    collection = collection.replace(/{{.*}}/, getSelectionOptions([vertex], collection.match(/{{(.*)}}/)![1]! || "").vertexes || "");
   }
   return collection;
 }
 
+/*
 export function getSelectionOptions(
   vertex: Vertex,
   collection: string,
@@ -393,14 +260,40 @@ export function getSelectionOptions(
   if (collection.includes("||")) {
     for (const coll of collection.split("||")) {
       const value = getSelectOptionsInternal([vertex], convertToTraverseArray(coll), true);
-      if (!value.error) {
-        return value;
+      if (value) {
+        return {error: false, vertexes: value};
       }
     }
     return { error: true };
   }
   collection = replaceExpressionToLabel(collection, vertex);
-  return getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
+  const value = getSelectOptionsInternal([vertex], convertToTraverseArray(collection), strict);
+  if (value) {
+    return {error: false, vertexes: value};
+  } else {
+    return {error: true};
+  }
+}*/
+// TODO:
+//  if possible, use Name Keys, if not found use "name"
+//  key else Primary Keys will be used.
+export function getSelectionOptions(
+  vertex: Vertex[],
+  collection: string,
+  strict?: boolean,
+): { error: boolean; vertexes?: any } {
+  collection = replaceExpressionToLabel(collection, vertex[0]);
+  try{
+    const value = evaluate(jsep(collection), {vertexes: vertex});
+    if (value) {
+      return {error: false, vertexes: value};
+    } else {
+      return {error: true};
+    }
+  } catch (e) {
+    console.error(e)
+    return {error: true};
+  }
 }
 
 export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
@@ -408,8 +301,8 @@ export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[]
     const result = [] as dxTreeViewItem[];
     if (!levels.collection) return result;
 
-    const children = getSelectOptionsInternal(vertexes, convertToTraverseArray(levels.collection), true);
-    for (const child of (children.vertexes || []).sort((a, b) => a.P.pos - b.P.pos)) {
+    const children = evaluate(jsep(levels.collection), {vertexes: vertexes});
+    for (const child of (children || []).sort((a, b) => a.P.pos - b.P.pos)) {
       const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as dxTreeViewItem;
       navItem.name = name;
@@ -429,7 +322,7 @@ export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[]
 
 }
 
-const getTextValue = (value: any) => {
+export const getTextValue = (value: any) => {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
   } else if (typeof value === "object") {
@@ -437,57 +330,3 @@ const getTextValue = (value: any) => {
   }
   return value;
 };
-
-// TODO:
-//  if possible, use Name Keys, if not found use "name"
-//  key else Primary Keys will be used.
-export function getOptionLabel(vertex: Vertex | undefined, displayExpr: string): string {
-  if (!vertex) return "";
-
-  if (displayExpr.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
-    return displayExpr.replace(/\$([A-Za-z][\w+]?[:\w.]*)/g, function(match, p1, offset, string) {
-      return getOptionLabel(vertex, p1);
-    });
-  }
-  const displayExpressions = displayExpr.split("||");
-  if (displayExpressions.length > 1) {
-    for (const displayExprElement of displayExpressions) {
-      if (displayExprElement.startsWith('=')) {
-        return displayExprElement.slice(1);
-      }
-      // get a function and input:
-      const a = displayExprElement.split("|");
-      if (a.length > 1) {
-        return '';
-      } else {
-        const value = getOptionLabel(vertex, displayExprElement);
-        if (value !== undefined && value !== null && value !== "") {
-          return value;
-        }
-      }
-    }
-    return '';
-  }
-
-  let pattern = "";
-  let projection = "";
-  if (displayExpr.includes(":")) {
-    const columnIndex = displayExpr.lastIndexOf(":");
-    pattern = displayExpr.slice(0, columnIndex);
-    projection = displayExpr.slice(columnIndex + 1);
-  } else {
-    pattern = displayExpr;
-    projection = IdAttr;
-  }
-  if (!pattern) {
-    return getTextValue(path(projection, vertex)!);
-  } else if (pattern.includes("-") || pattern.includes("->")) {
-    const childrenResult = getSelectionOptions(vertex, pattern);
-    if (childrenResult.error) {
-      return "";
-    } else {
-      return getTextValue(path(projection, childrenResult.vertexes![0])!);
-    }
-  }
-  return getTextValue(path(displayExpr, vertex)!);
-}

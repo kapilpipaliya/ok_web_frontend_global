@@ -44,7 +44,7 @@ import {
 import {
   getChildVertex,
   getChildVertexes,
-  getOptionLabel,
+  getSelectionOptions,
 } from "../../lib/Traverse";
 import { ComponentProps } from "../../types/Component";
 import { Icon } from "@iconify-icon/solid";
@@ -157,7 +157,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
               if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
                 console.log("refreshing");
-                return getOptionLabel(p.joinVertex, metaVertex().P.component);
+                return getSelectionOptions([p.joinVertex], metaVertex().P.component).vertexes;
               } else {
                 return metaVertex().P.component;
               }
@@ -167,7 +167,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
               addMeta(metaVertex(), p.joinVertex);
             });
             const DefaultValue = () => <>{metaVertex().P.props?.defaultValue &&
-             getOptionLabel(p.joinVertex, metaVertex().P.props.defaultValue)}</>
+                getSelectionOptions([p.joinVertex], metaVertex().P.props.defaultValue).vertexes}</>
             const Content = () => <>
               <DynamicComponent
                component={component()}
@@ -252,7 +252,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
          <DisplayProperties />
        </tr>
        {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
-       {/*{getSelectionOptions(p.joinVertex, expandVertex.P.props.collection).vertexes?.length}*/}
+       {/*{getSelectionOptions([p.joinVertex], expandVertex.P.props.collection).vertexes?.length}*/}
        <Show when={expandVertex()}>
          <tr>
            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
