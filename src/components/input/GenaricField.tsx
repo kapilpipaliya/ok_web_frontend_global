@@ -2017,7 +2017,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
           <Match when={component()==="Repeater"}>
-            <For each={getSelectionOptions(props.meta, PageRenderUtils.getCollection(props.meta)!).vertexes}>
+            <For each={getSelectionOptions([props.meta], `g:'${PageRenderUtils.getCollection(props.meta)!}'`).vertexes}>
               {vertex => <RepeaterContext.Provider value={[...useContext(RepeaterContext), vertex]}>
                 <PageRenderContext.Provider value={[...useContext(PageRenderContext), props.meta]}>
                   <PageItemRender metaVertex={props.meta} data={vertex}/>
@@ -2092,11 +2092,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
   );
 }
 
-function getText(text: string, repeaterContext: Vertex[]) {
-  if (!text) return "";
-  return text.replace(/\$(\d+)([:.\w]+)/g, (match: string, numericPart: string, projection: string) => {
-    const numericValue = parseInt(numericPart);
-    const vertex = repeaterContext[numericValue - 1];
-    return path(projection, vertex) as string
-  });
+function getText(projection: string, repeaterContext: Vertex[]) {
+    return getSelectionOptions(repeaterContext, projection).vertexes as string
 }

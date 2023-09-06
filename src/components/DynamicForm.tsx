@@ -43,9 +43,7 @@ import {
   GenericInputField,
 } from "./input/GenaricInputField";
 import {
-  getOptionLabel,
   getSelectionOptions,
-  getToEdge
 } from "../lib/Traverse";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
@@ -160,7 +158,7 @@ export function getComponentForCollRow(metaVertex: Vertex, data: Vertex) {
     if (!metaVertex.P.component) {
       return getCollAttrComp(metaVertex)?.P[IdAttr];
     } else if (metaVertex.P.component.includes("-")) {
-      return getOptionLabel(data, metaVertex.P.component);
+      return getSelectionOptions([data], metaVertex.P.component).vertexes;
     } else {
       return metaVertex.P.component as string;
     }
@@ -261,7 +259,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                          [IdAttr]: "import",
                          props: {
                            displayExpr: "$P.name",
-                           collection: `=${props.selectedLayout.id}->Rules`
+                           collection: `ids:'${props.selectedLayout.id}'->Rules`
                          },
                        },
                      } as unknown as Vertex

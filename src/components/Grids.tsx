@@ -39,7 +39,7 @@ import {
   collectionNameDisplayExpr,
   selectedValue
 } from "./input/SelectInputField";
-import { getChildVertexes, getOptionLabel } from "../lib/Traverse";
+import {getChildVertexes, getSelectionOptions} from "../lib/Traverse";
 import { GenericField } from "./input/GenaricField";
 import { FormMetaData, getFormApiFromForm, PageContext } from "../lib/Record";
 
@@ -174,7 +174,7 @@ export const DataGrid = (props: DataGridProps) => {
           columnBase,
         );
         if (vertex[0]) {
-          return getOptionLabel(graph.vertexes[vertex[0]], attribute.props?.displayExpr || collectionNameDisplayExpr(attribute.props?.collection) || `P.${IdAttr}`);
+          return getSelectionOptions([graph.vertexes[vertex[0]]], attribute.props?.displayExpr || collectionNameDisplayExpr(attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
         }
         return "";
       };
@@ -190,7 +190,7 @@ export const DataGrid = (props: DataGridProps) => {
         if (vertex) {
           const textArray = [];
           for (const v of vertex) {
-            const text = getOptionLabel(graph.vertexes[v], attribute.props?.displayExpr || `P.${IdAttr}`);
+            const text = getSelectionOptions([graph.vertexes[v]], attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
             textArray.push(text);
           }
           return textArray.join(', ');

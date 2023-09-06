@@ -82,7 +82,7 @@ function PageView(props: {
   <Show when={props.number && props.record?.vertex && props.number} keyed>
    <Switch>
     <Match when={collection() && !dataVertex()}>
-     <For each={getSelectionOptions(props.record?.vertex, collection()!).vertexes}>
+     <For each={getSelectionOptions([props.record?.vertex], `'g:${collection()!}'`).vertexes}>
       {vertex => <PageRenderContext.Provider value={[props.record.vertex]}>
        <PageItemRender metaVertex={props.record.vertex} data={vertex}/>
       </PageRenderContext.Provider>}
@@ -151,7 +151,7 @@ export const PageDesignerDragAndDrop = () => {
      name: "Comp",
      component: "SelectBox",
      props: {
-      collection: "Comp",
+      collection: "g:'Comp'",
      },
     });
 
@@ -166,7 +166,7 @@ export const PageDesignerDragAndDrop = () => {
       displayName: "Collection",
       component: "SelectBox",
       props: {
-       collection: "Coll",
+       collection: "g:'Coll'",
        parentLabel: "Coll",
       },
      });
@@ -449,7 +449,7 @@ export const PageDesignerDragAndDrop = () => {
        },
       })*/
       const data = getTreeData({
-       collection: "*CompCategory",
+       collection: "g:'CompCategory'",
        // TODO: Dont display "Form" Component
        child: { collection: "->CompCategoryComp" }
       });
@@ -584,7 +584,7 @@ export const PageDesignerDragAndDrop = () => {
       // This is very slow, because we have very big data.
 
       const data = getTreeData({
-       collection: "Coll",
+       collection: "g:'Coll'",
        // TODO: First level add Incoming Fields.
        // child: { collection: "->Attr",
        //  child: {
@@ -622,7 +622,7 @@ export const PageDesignerDragAndDrop = () => {
  const getComponentFromLayoutRow = (layoutRowId: string | number) => {
   // There must be a component found.
   const currentVertex = graph.vertexes[layoutRowId];
-  const compVertex = (getSelectionOptions(currentVertex, "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default").vertexes || []);
+  const compVertex = (getSelectionOptions([currentVertex], "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default").vertexes || []);
   if (compVertex[0]) {
    return compVertex[0];
   }
@@ -636,66 +636,66 @@ export const PageDesignerDragAndDrop = () => {
 
  function getLayoutTreeData() {
   return getTreeData({
-   collection: "!Attr",
+   collection: "->Attr",
    child: {
-    collection: "!Attr",
+    collection: "->Attr",
     child: {
-     collection: "!Attr",
+     collection: "->Attr",
      child: {
-      collection: "!Attr",
+      collection: "->Attr",
       child: {
-       collection: "!Attr",
+       collection: "->Attr",
        child: {
-        collection: "!Attr",
+        collection: "->Attr",
         child: {
-         collection: "!Attr",
+         collection: "->Attr",
          child: {
-          collection: "!Attr",
+          collection: "->Attr",
           child: {
-           collection: "!Attr",
+           collection: "->Attr",
            child: {
-            collection: "!Attr",
+            collection: "->Attr",
             child: {
-             collection: "!Attr",
+             collection: "->Attr",
              child: {
-              collection: "!Attr",
+              collection: "->Attr",
               child: {
-               collection: "!Attr",
+               collection: "->Attr",
                child: {
-                collection: "!Attr",
+                collection: "->Attr",
                 child: {
-                 collection: "!Attr",
+                 collection: "->Attr",
                  child: {
-                  collection: "!Attr",
+                  collection: "->Attr",
                   child: {
-                   collection: "!Attr",
+                   collection: "->Attr",
                    child: {
-                    collection: "!Attr",
+                    collection: "->Attr",
                     child: {
-                     collection: "!Attr",
+                     collection: "->Attr",
                      child: {
-                      collection: "!Attr",
+                      collection: "->Attr",
                       child: {
-                       collection: "!Attr",
+                       collection: "->Attr",
                        child: {
-                        collection: "!Attr",
+                        collection: "->Attr",
                         child: {
-                         collection: "!Attr",
+                         collection: "->Attr",
                          child: {
-                          collection: "!Attr",
+                          collection: "->Attr",
                           child: {
-                           collection: "!Attr",
+                           collection: "->Attr",
                            child: {
-                            collection: "!Attr",
+                            collection: "->Attr",
                             child: {
-                             collection: "!Attr",
+                             collection: "->Attr",
                              child: {
-                              collection: "!Attr",
+                              collection: "->Attr",
                               child: {
-                               collection: "!Attr",
+                               collection: "->Attr",
                                child: {
-                                collection: "!Attr",
-                                child: {collection: "!Attr", child: {collection: "!Attr", child: {collection: "!Attr"}}}
+                                collection: "->Attr",
+                                child: {collection: "->Attr", child: {collection: "->Attr", child: {collection: "->Attr"}}}
                                }
                               }
                              }
@@ -995,11 +995,11 @@ export const PageDesignerDragAndDrop = () => {
        for (const condAttribute of ruleattribute.attributes!) {
         if (condAttribute.name === "layout") {
          const data = getTreeData({
-          collection: "!Attr",
-          child: { collection: "!Attr",
+          collection: "->Attr",
+          child: { collection: "->Attr",
            child: {
-            collection: "!Attr",
-            child: { collection: "!Attr", child: { collection: "!Attr" } }
+            collection: "->Attr",
+            child: { collection: "->Attr", child: { collection: "->Attr" } }
            }
           }
          }, pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
@@ -1068,7 +1068,7 @@ export const PageDesignerDragAndDrop = () => {
      displayName: "Collection",
      component: "SelectBox",
      props: {
-      collection: "Coll",
+      collection: "g:'Coll'",
       parentLabel: "Coll",
      },
     },
@@ -1076,7 +1076,7 @@ export const PageDesignerDragAndDrop = () => {
      name: "data",
      component: "SelectBox",
      props: {
-      collection: `{{->$0Coll:P.${IdAttr}}}`,
+      collection: `{{->$0Coll::'P.${IdAttr}'}}`,
      },
     },
    ];

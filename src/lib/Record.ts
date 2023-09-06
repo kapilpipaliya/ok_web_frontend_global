@@ -23,7 +23,6 @@ import { batch, createContext, onCleanup, untrack } from "solid-js";
 import {
  getChildVertex,
  getChildVertexes,
- getOptionLabel,
  getParentVertex,
  getSelectionOptions,
  getToEdge
@@ -73,7 +72,7 @@ export function getCompProps(comp: Vertex) {
 export function getRowProps(comp: Vertex) {
  return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
 
-  const key = getOptionLabel(curr, "->$0Name:P.name");
+  const key = getSelectionOptions([curr], "->$0Name::'P.name'").vertexes;
   if (key && curr.P.value !== undefined) {
    acc[key] = curr.P.value;
   }
@@ -84,7 +83,7 @@ export function getRowProps(comp: Vertex) {
 
 function getComponentProperties(metaRows: Vertex[]) {
  const metaData = metaRows.reduce((acc, curr) => {
-  const key = getOptionLabel(curr, "P.name"); // ->$0Name:P.name||:P.name
+  const key = getSelectionOptions([curr], "::'P.name'").vertexes; // ->$0Name:P.name||:P.name
   if (key && curr.P.value !== undefined) {
    acc[key] = curr.P.value;
   }
@@ -126,7 +125,7 @@ export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: F
 
  // set props to attr
   let collProps = (getChildVertexes(["$0Prop"], [vertexCollAttr]).vertexes || []).reduce((acc, curr) => {
-   const key = getOptionLabel(curr, "->$0Name:P.name");
+   const key = getSelectionOptions([curr], "->$0Name::'P.name'").vertexes;
    if (key && curr.P.value !== undefined) {
     acc[key] = curr.P.value;
    }
@@ -257,7 +256,7 @@ export function componentProps(metaVertex: Vertex, data: Vertex) {
  const meta = metaVertex.P.meta.split("+");
  const results = [] as { [key: string]: any }[];
  for (const metaPart of meta) {
-  const metaRows = getSelectionOptions(data, metaPart).vertexes || [];
+  const metaRows = getSelectionOptions([data], metaPart).vertexes || [];
   const metaData = getComponentProperties(metaRows);
   results.push(metaData);
  }
@@ -387,7 +386,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
    }
   }
 
-  const attribute = (getSelectionOptions(changedFieldAttribute, "-MetaAttr->MetaAttr").vertexes || []).find(
+  const attribute = (getSelectionOptions([changedFieldAttribute], "-MetaAttr->MetaAttr").vertexes || []).find(
    (vertex) => vertex.P[IdAttr] === args[0]
   );
   if (!attribute) {

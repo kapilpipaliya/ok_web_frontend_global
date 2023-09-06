@@ -35,7 +35,6 @@ import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../../types/Component";
 import { graph, IdAttr } from "../../lib/graph";
 import { FormContext, getCompProps, isUpdatingInput } from "../../lib/Record";
-import { getOptionLabel } from "../../lib/Traverse";
 import { getValueFromVertexOrKey } from "../../utils/utils";
 import { getComponentForCollRow } from "../DynamicForm";
 
