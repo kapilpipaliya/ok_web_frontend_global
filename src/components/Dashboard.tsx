@@ -49,8 +49,9 @@ import { GraphViewPage } from "../pages/GraphViewPage";
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 get("isSideBarOpen").then((data) => setSideBarOpen(data));
-const queryParam = new URLSearchParams(window.location.search);
-const showNav = queryParam.has("nav");
+
+export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
+
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
@@ -100,9 +101,9 @@ export const DashboardView = () => {
               when={graph.member?.id}
               fallback={
                 <>
-                  <Link href={`/signup`}>Register</Link>
+                  <Link href={`/signup`} replace={true}>Register</Link>
                   {/* @ts-ignore */}
-                  <Link href={`/login`} title={__APP_VERSION__}>Login</Link>
+                  <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
                 </>
               }
             >

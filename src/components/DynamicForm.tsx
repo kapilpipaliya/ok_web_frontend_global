@@ -218,64 +218,87 @@ interface FormGroupPropertiesProps {
 export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   return (
-    <For each={props.metaAttributes}>
-      {(metaVertex) => {
-        const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
-        const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
-        const Content = () => <DynamicComponent
-         component={component()}
-         meta={metaVertex}
-         data={props.vertex}
-         setValue={props.setValue}
-         // disabled={props.d}
-         txnId={props.txnId}
-         isRealTime={false}
-        />
+    <>
+      {/*<div class="dx-field">*/}
+      {/*  <div class="dx-field-label">*/}
+      {/*    Data*/}
+      {/*  </div>*/}
+      {/*  <div class="dx-field-value flex gap:2 justify-content:space-between">*/}
+      {/*    <GenericInputField*/}
+      {/*        data={props.vertex}*/}
+      {/*        meta={*/}
+      {/*          {*/}
+      {/*            P: {*/}
+      {/*              [IdAttr]: "data",*/}
+      {/*            },*/}
+      {/*          } as unknown as Vertex*/}
+      {/*        }*/}
+      {/*        disabled={false}*/}
+      {/*        component={"TextBox"}*/}
+      {/*        setValue={props.setValue}*/}
+      {/*    />*/}
+      {/*  </div>*/}
+      {/*</div>*/}
+      <table class="min-w:100%">
+        <tbody>
+        <For each={props.metaAttributes}>
+          {(metaVertex) => {
+            const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
+            const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
+            const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
+            const Content = () => <DynamicComponent
+              component={component()}
+              meta={metaVertex}
+              data={props.vertex}
+              setValue={props.setValue}
+              // disabled={props.d}
+              txnId={props.txnId}
+              isRealTime={false}
+            />
 
-        return (
-          <Switch>
-            <Match when={component() === "Table"}>
-              <h3><Label/></h3>
-              <Content/>
-            </Match>
-            <Match when={component() === "CollectionOption"}>
-              <Content/>
-            </Match>
-            <Match when={props.selectedLayout}>
-              <div class="dx-field">
-                <div class="dx-field-label" id={id}>
-                  <Label/>
-                </div>
-                <div class="dx-field-value flex gap:2 justify-content:space-between">
+            return (
+              <Switch>
+                <Match when={component() === "Table"}>
+                  <h3><Label/></h3>
                   <Content/>
-
-                  <SelectInputField
-                   component={"SelectBox"}
-                   data={{ P: {} } as Vertex}
-                   meta={
-                     {
-                       P: {
-                         [IdAttr]: "import",
-                         props: {
-                           displayExpr: "$P.name",
-                           collection: `ids:'${props.selectedLayout.id}'->Rules`
-                         },
-                       },
-                     } as unknown as Vertex
-                   }
-                   setValue={(attr,vertex, data) => 0}
-                  />
-
-
-
-                </div>
-              </div>
-            </Match>
-          </Switch>
-        );
-      }}
-    </For>
+                </Match>
+                <Match when={component() === "CollectionOption"}>
+                  <Content/>
+                </Match>
+                <Match when={props.selectedLayout}>
+                  <tr>
+                    <td class="pr:2" id={id}>
+                      <Label/>
+                    </td>
+                    <td class="flex gap:2 justify-content:space-between">
+                      <Content/>
+                      {/* Select Rules: */}
+                      {/*<SelectInputField*/}
+                      {/* component={"SelectBox"}*/}
+                      {/* data={{ P: {} } as Vertex}*/}
+                      {/* meta={*/}
+                      {/*   {*/}
+                      {/*     P: {*/}
+                      {/*       [IdAttr]: "import",*/}
+                      {/*       props: {*/}
+                      {/*         displayExpr: "$P.name",*/}
+                      {/*         collection: `ids:'${props.selectedLayout.id}'->Rules`*/}
+                      {/*       },*/}
+                      {/*     },*/}
+                      {/*   } as unknown as Vertex*/}
+                      {/* }*/}
+                      {/* setValue={(attr,vertex, data) => 0}*/}
+                      {/*/>*/}
+                    </td>
+                  </tr>
+                </Match>
+              </Switch>
+            );
+          }}
+        </For>
+        </tbody>
+      </table>
+    </>
   );
 }
 
