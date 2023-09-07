@@ -62,6 +62,7 @@ import {
 } from "solid-blocks";
 import { TableInputField } from "./input/TableInputField";
 import { AttrsTableData } from "./api";
+import {GenericInputField} from "./input/GenaricInputField";
 
 function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
  if (!childrenItems) return;
@@ -98,14 +99,14 @@ function PageView(props: {
   </Show>
  </PageContext.Provider>;
 }
-
+export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
 export const PageDesignerDragAndDrop = () => {
  const itemsExpr = "children";
  const params = useParams();
  const pageConfig = createStore({} as { record: Record });
  const [count, setCount] = createSignal(1);
  const { Ws } = useContext(WsContext);
- const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
+
  const [selectedComponent, setSelectedComponent] = createSignal({vertexId: -1});
  const [selectedColl, setSelectedColl] = createSignal({vertexId: -1});
  const rerender = () => {
@@ -1076,8 +1077,12 @@ export const PageDesignerDragAndDrop = () => {
      name: "data",
      component: "SelectBox",
      props: {
-      collection: `{{->$0Coll::'P.${IdAttr}'}}`,
+      collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
      },
+    },
+    {
+     name: "data",
+     component: "TextBox",
     },
    ];
    addMetaVertexes(txnId, graph.vertexes[metaVertexId], attributes);
@@ -1110,6 +1115,13 @@ export const PageDesignerDragAndDrop = () => {
       // passed setValue when we have a string value in select field
       setValue={pageConfig[0].record.setValue}
       isRealTime={false}
+    />
+    <GenericInputField
+      data={graph.vertexes[selectedLayout().vertexId!]}
+      meta={collMetaVertex.vertexes![2]!}
+      disabled={false}
+      component={"TextBox"}
+      setValue={pageConfig[0].record.setValue}
     />
    </>
   }

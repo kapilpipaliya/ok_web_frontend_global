@@ -171,6 +171,7 @@ import dxValidationSummary from "devextreme/ui/validation_summary";
 import { getValueFromVertexOrKey } from "../../utils/utils";
 import {Dynamic} from "solid-js/web";
 import {path} from "rambda";
+import {selectedLayout} from "../PageDesignerDragAndDrop";
 
 export const genericComponents2 = [
   "Box",
@@ -361,6 +362,13 @@ export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
         const componentProps = componentVertex ? getCompProps(componentVertex) : {};
         const rowProps = getRowProps(item);
         const compProps = Object.assign(componentProps, rowProps);
+        if (selectedLayout().vertexId === item.id) {
+          if (compProps.class) {
+            compProps.class += ` b:red|1px|dashed`
+          } else {
+            compProps.class = `b:red|1px|dashed`
+          }
+        }
 
         // supported deleted properties.
         // mergeProperties only merge top level properties. so props will be replaced.
@@ -372,6 +380,8 @@ export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
       const parentComponent = createMemo(() => {
         return PageRenderUtils.getComponent(getLastItem(parentItems, 1))?.P[IdAttr];
       });
+      // TODO: Is This Parent Vertex is ok?
+      // Need Repetitive parent checks?
       const parentData = () => {
         return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
       }
@@ -379,7 +389,9 @@ export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
       const PageComponent = () => <PageRenderContext.Provider value={[...useContext(PageRenderContext), item]}>
         <DynamicComponent
          meta={item}
-         data={props.data || PageRenderUtils.getDataVertex(item) || parentData()}
+         // NOTE: For repeater we cant use parentData
+         // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+         data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item)}
          setValue={record?.setValue || (() => {})}
          disabled={false}
          component={component()}
@@ -2017,8 +2029,8 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
         <Switch>
           <Match when={component()==="Repeater"}>
-            <For each={getSelectionOptions([props.meta], `g:'${PageRenderUtils.getCollection(props.meta)!}'`).vertexes}>
-              {vertex => <RepeaterContext.Provider value={[...useContext(RepeaterContext), vertex]}>
+            <For each={props.data || getSelectionOptions([props.meta], `g:'${PageRenderUtils.getCollection(props.meta)!}'`).vertexes}>
+              {vertex => <RepeaterContext.Provider value={[vertex, ...useContext(RepeaterContext)]}>
                 <PageRenderContext.Provider value={[...useContext(PageRenderContext), props.meta]}>
                   <PageItemRender metaVertex={props.meta} data={vertex}/>
                 </PageRenderContext.Provider>
@@ -2035,12 +2047,17 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             </Show>
           </Match>
           <Match when={component()  === "A"}>
-            <Link {...props.meta.P.props} href={getText(props.meta.P.props?.href, repeaterContext)}>
-              <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
-                {props.children}
-                <PageItemRender metaVertex={props.meta}/>
-              </Show>
-            </Link>
+            <Show when={props.meta.P.props?.href} fallback={<a>
+              {props.children}
+              <PageItemRender metaVertex={props.meta}/>
+            </a>}>
+              <Link {...props.meta.P.props} href={getText(props.meta.P.props.href, repeaterContext)}>
+                <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+                  {props.children}
+                  <PageItemRender metaVertex={props.meta}/>
+                </Show>
+              </Link>
+            </Show>
           </Match>
           <Match when={component()  === "Image"}>
             <img {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)}/>
