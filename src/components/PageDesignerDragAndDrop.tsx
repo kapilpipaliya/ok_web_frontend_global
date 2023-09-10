@@ -2,7 +2,7 @@
 import { useParams } from "@solidjs/router";
 import { createStore, reconcile } from "solid-js/store";
 import {
- addMetaVertexes,
+ addMetaVertexes, addNewRow,
  deleteRow, FieldAttribute,
  getCompProps, getFormMetaData,
  getRowProps,
@@ -63,13 +63,137 @@ import {
 import { TableInputField } from "./input/TableInputField";
 import { AttrsTableData } from "./api";
 import {GenericInputField} from "./input/GenaricInputField";
+import JsxParser from "./jsx_parser/source/components/JsxParser";
+import {klona} from "klona";
 
-function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
+const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
+ const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
+ if (propVertexes.vertexes) {
+  const initialValues = propVertexes.vertexes.reduce((acc, curr) => {
+   if (typeof curr.P.value === "boolean") {
+    acc[curr.P.key] = curr.P.value;
+   } else if (curr.P.value) {
+    acc[curr.P.key] = curr.P.value;
+   }
+   return acc;
+  }, {} as {[key: string]: any});
+  replaceVertexProperties(txnId, layoutRowId, initialValues);
+ }
+}
+
+// @Note:
+// From Component To Layout drag:
+// 1. Create a Row to proper parent.
+// 2. Sort properly
+export const componentDrag = (txnId: number, fromVertex: Vertex, index: number, parentVertex: Vertex) => {
+ // handle (toNode === null) case.
+ if (fromVertex) {
+  const attrMetaVertex =      newVertex(getNewTxnId(), [],{
+   name: "Attr",
+   component: "Table",
+   tab: "Attribute",
+   props: {
+    type: 'Attr',
+    label: "Attr",
+   },
+  });
+  const rowResult = addNewRow(txnId, attrMetaVertex, parentVertex, {pos: index}, false, {} as any);
+  const rowVertex = graph.vertexes[rowResult.vertexId!];
+
+  if(fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
+   const attrCompMetaVertex = newVertex(getNewTxnId(), [],{
+    name: "Comp",
+    component: "SelectBox",
+    props: {
+     collection: "g:'Comp'",
+    },
+   });
+
+   if (fromVertex.L[0] === "Comp") {
+    // set Component to the row
+    setSelectionValue(txnId, rowVertex, attrCompMetaVertex, fromVertex.id);
+    addPropsToLayoutRow(txnId, rowVertex.id, fromVertex);
+   } else if (fromVertex.L[0] === "Coll") {
+    // set Collection to the row
+    const attrCollMetaVertex = newVertex(getNewTxnId(), [], {
+     name: "coll",
+     displayName: "Collection",
+     component: "SelectBox",
+     props: {
+      collection: "g:'Coll'",
+      parentLabel: "Coll",
+     },
+    });
+    setSelectionValue(txnId, rowVertex, attrCollMetaVertex, fromVertex.id);
+    const formVertex = findVertexByLabelAndUniqueId('Comp', IdAttr, "Form");
+    if (!formVertex) {
+     alert('cant find form');
+    } else {
+     setSelectionValue(txnId, rowVertex, attrCompMetaVertex, formVertex.id);
+     addPropsToLayoutRow(txnId, rowVertex.id, formVertex);
+    }
+   }
+  } else if (fromVertex.L[0] === "Attr") {
+   // set Collection Attribute to the row
+   const attMetaVertex = newVertex(getNewTxnId(), [], {
+    name: "Att",
+    displayName: "Attribute",
+    component: "SelectBox",
+    props: {
+     displayExpr: "$P.displayName ($P.name)",
+     collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
+    }
+   });
+   setSelectionValue(txnId, rowVertex, attMetaVertex, fromVertex.id);
+   // TODO add comp prop default values
+   // addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
+  }
+
+  return rowResult.vertexId!
+ }
+ return -1;
+}
+export function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
  if (!childrenItems) return;
  for (let i = 0; i < childrenItems.length; i++) {
   const child = childrenItems[i];
   mergeVertexProperties(txnId, child.id! as number, { pos: i + 1 });
  }
+}
+
+// @ts-ignore
+
+export const setPropertyValueGlobal = (txnId: number, meta: Vertex, layoutVertex: Vertex, componentVertex: Vertex, value: any, valueSet?: boolean) => {
+ // find existing row;
+ const rowProps = getChildVertexes(["$0Prop"], [layoutVertex]).vertexes || [];
+ let row = rowProps.find(vertex => {
+  const name = getChildVertex(['$0Name'], vertex).vertex;
+  return name?.P.name === meta.P.name
+ });
+ if (row) {
+  if (valueSet ?? true) mergeVertexProperties(txnId, row.id, {value});
+ } else {
+  const propMetaVertex = newVertex(0, ['Meta'], {
+   name: "Prop",
+   displayName: "Property",
+  });
+  const properties = (valueSet ?? true) ? {value} : {};
+  const addRowResult = addNewRow(txnId, propMetaVertex, layoutVertex, properties, false, {} as any);
+  if (addRowResult.vertexId) {
+   row = graph.vertexes[addRowResult.vertexId];
+   const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
+   const componentProp = componentProps.find(vertex => {
+    return vertex.P.name === meta.P.name
+   });
+   if (componentProp) {
+    setSelectionValue(txnId, graph.vertexes[addRowResult.vertexId], {P: {name: 'Name'}} as unknown as Vertex, componentProp.id);
+   }
+  }
+ }
+ // TODO: if reset, delete the row.
+
+ return row;
+
 }
 
 function PageView(props: {
@@ -113,93 +237,8 @@ export const PageDesignerDragAndDrop = () => {
   setCount(prev => prev + 1);
  };
 
- const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
-  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
-  if (propVertexes.vertexes) {
-   const initialValues = propVertexes.vertexes.reduce((acc, curr) => {
-    if (typeof curr.P.value === "boolean") {
-     acc[curr.P.key] = curr.P.value;
-    } else if (curr.P.value) {
-     acc[curr.P.key] = curr.P.value;
-    }
-    return acc;
-   }, {} as {[key: string]: any});
-   replaceVertexProperties(txnId, layoutRowId, initialValues);
-  }
- }
- // @Note:
- // From Component To Layout drag:
- // 1. Create a Row to proper parent.
- // 2. Sort properly
- const componentDrag = (fromVertex: Vertex, index: number, parentVertex?: Vertex, childrenItems: dxTreeViewItem[]) => {
-  // handle (toNode === null) case.
-  if (fromVertex) {
-   parentVertex = parentVertex || pageConfig[0].record.vertex;
-   const attrMetaVertex =      newVertex(getNewTxnId(), [],{
-    name: "Attr",
-    component: "Table",
-    tab: "Attribute",
-    props: {
-     type: 'Attr',
-     label: "Attr",
-    },
-   });
-   const rowResult = pageConfig[0].record.addNewRowUI(attrMetaVertex, parentVertex, {pos: index});
-   const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-   if(fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
-    const attrCompMetaVertex = newVertex(getNewTxnId(), [],{
-     name: "Comp",
-     component: "SelectBox",
-     props: {
-      collection: "g:'Comp'",
-     },
-    });
 
-    if (fromVertex.L[0] === "Comp") {
-     // set Component to the row
-     setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCompMetaVertex, fromVertex.id);
-     addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, fromVertex);
-    } else if (fromVertex.L[0] === "Coll") {
-     // set Collection to the row
-     const attrCollMetaVertex = newVertex(getNewTxnId(), [], {
-      name: "coll",
-      displayName: "Collection",
-      component: "SelectBox",
-      props: {
-       collection: "g:'Coll'",
-       parentLabel: "Coll",
-      },
-     });
-     setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCollMetaVertex, fromVertex.id);
-     const formVertex = findVertexByLabelAndUniqueId('Comp', IdAttr, "Form");
-     if (!formVertex) {
-      alert('cant find form');
-     } else {
-      setSelectionValue(pageConfig[0].record.txnId, rowVertex, attrCompMetaVertex, formVertex.id);
-      addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
-     }
-    }
-   } else if (fromVertex.L[0] === "Attr") {
-    // set Collection Attribute to the row
-    const attMetaVertex = newVertex(getNewTxnId(), [], {
-     name: "Att",
-     displayName: "Attribute",
-     component: "SelectBox",
-     props: {
-      displayExpr: "$P.displayName ($P.name)",
-      collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
-     }
-    });
-    setSelectionValue(pageConfig[0].record.txnId, rowVertex, attMetaVertex, fromVertex.id);
-    // TODO add comp prop default values
-    // addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
-   }
-
-   return rowResult.vertexId!
-  }
-  return -1;
- }
 
  let componentsTreeViewInstance: TreeView;
  let collectionFieldsTreeViewInstance: TreeView;
@@ -393,7 +432,7 @@ export const PageDesignerDragAndDrop = () => {
        }
       }
 
-      const rowId = componentDrag(fromVertex,  toIndex, parentAttrVertex, childrenItems);
+      const rowId = componentDrag(pageConfig[0].record.txnId, fromVertex,  toIndex, parentAttrVertex || pageConfig[0].record.vertex, childrenItems);
       if (rowId === -1) return;
       // key value should be unique in the array.
       const originalId = fromNode!.itemData!.id;
@@ -898,7 +937,8 @@ export const PageDesignerDragAndDrop = () => {
 
 
  const FiveProperties = () => {
-  const [isRulesOpen, setIsRulesOpen] = createSignal(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
+  const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
   const vertexId = getNewGraphId();
   const addNewVertexResult = addNewVertex(0, newVertex(vertexId, ['PropsJson'], {sample: true}));
   if (addNewVertexResult.error) {
@@ -906,55 +946,24 @@ export const PageDesignerDragAndDrop = () => {
   }
 
   createEffect(on(selectedComponent, v => {
-   if (selectedLayout().vertexId && selectedLayout().vertexId !== -1) {
+   if (selectedLayout().vertexId && selectedLayout().vertexId !== -1 && selectedComponent() && selectedComponent().vertexId !== -1) {
     const componentProps = getCompProps(graph.vertexes[selectedComponent().vertexId]);
     const layoutPropRows = getRowProps(graph.vertexes[selectedLayout().vertexId]);
     const layoutPropRow = Object.assign(componentProps, layoutPropRows);
     // set existing layout props
     setGraph('vertexes', vertexId, 'P', reconcile(layoutPropRow));
    } else {
-    setGraph('vertexes', vertexId, 'P', reconcile( {}));
+    setGraph('vertexes', vertexId, 'P', reconcile({}));
    }
 
   }));
 
-  // @ts-ignore
   const setPropertyValue = (meta: Vertex, data: Vertex, value: any, valueSet?: boolean) => {
-   if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
-   if (selectedLayout().vertexId !== -1) {
-
-    // find existing row;
-    const layoutVertex = graph.vertexes[selectedLayout().vertexId];
-    const componentVertex = graph.vertexes[selectedComponent().vertexId];
-    const rowProps = getChildVertexes(["$0Prop"], [layoutVertex]).vertexes || [];
-    let row = rowProps.find(vertex => {
-     const name = getChildVertex(['$0Name'], vertex).vertex;
-     return name?.P.name === meta.P.name
-    });
-    if (row) {
-     if (valueSet ?? true) mergeVertexProperties(pageConfig[0].record.txnId, row.id, {value});
-    } else {
-     const propMetaVertex = newVertex(0, ['Meta'], {
-      name: "Prop",
-      displayName: "Property",
-     });
-     const v = (valueSet ?? true) ? {value} : {};
-     const addRowResult = pageConfig[0].record.addNewRowUI(propMetaVertex, layoutVertex, v);
-     if (addRowResult.vertexId) {
-      row = graph.vertexes[addRowResult.vertexId];
-      const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
-      const componentProp = componentProps.find(vertex => {
-       return vertex.P.name === meta.P.name
-      });
-      if (componentProp) {
-       setSelectionValue(pageConfig[0].record.txnId, graph.vertexes[addRowResult.vertexId], {P: {name: 'Name'}} as unknown as Vertex, componentProp.id);
-      }
-     }
-    }
-    // TODO: if reset, delete the row.
-
-    return row;
+   if (selectedLayout().vertexId !== -1 && selectedComponent().vertexId !== -1) {
+    if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
+    return setPropertyValueGlobal(pageConfig[0].record.txnId, meta, graph.vertexes[selectedLayout().vertexId], graph.vertexes[selectedComponent().vertexId], value, valueSet);
    }
+   return -1
   }
   const selectedComponentProperties = () => {
    const selectedComp = graph.vertexes[selectedComponent().vertexId];
@@ -966,16 +975,28 @@ export const PageDesignerDragAndDrop = () => {
    return getChildVertexes(['$0Prop'], [selectedComp]);
   }
 
-  const toggle = () => setIsRulesOpen(prev => !prev);
+  const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);
+  const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
   let prevTxnIndex = -1;
   const onRulesSubmit = () => {
    // hack to refresh the select fields. no option is refereshing the label.
    setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
-   toggle();
+   toggleRulesModal();
   }
   const onRulesCancel = () => {
    if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
-   toggle();
+   toggleRulesModal();
+  }
+  const onImportsSubmit = () => {
+   layoutTreeViewInstance.option("items", getLayoutTreeData());
+   // hack to refresh the select fields. no option is refereshing the label.
+   setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
+   toggleImportsModal();
+  }
+  const onImportsCancel = () => {
+   if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
+   layoutTreeViewInstance.option("items", getLayoutTreeData());
+   toggleImportsModal();
   }
 
   const RulesModalBody = () => {
@@ -1050,6 +1071,37 @@ export const PageDesignerDragAndDrop = () => {
                            txnId={pageConfig[0].record.txnId}
                            setValue={pageConfig[0].record.setValue}
                            isRealTime={false}  />
+  }
+  const ImportModalBody = () => {
+   prevTxnIndex = transactions.get(pageConfig[0].record.txnId)?.steps?.length || 0
+
+   const metaVertexId = getNewGraphId();
+   const dataVertexId = getNewGraphId();
+
+   setGraph("vertexes", metaVertexId, {P: {name: "jsx"}});
+   setGraph("vertexes", dataVertexId, {id: dataVertexId, P: {}});
+
+   onCleanup(() => {
+    // @ts-ignore
+    setGraph("vertexes", metaVertexId, undefined);
+    // @ts-ignore
+    setGraph("vertexes", dataVertexId, undefined);
+   })
+   return <>
+    <GenericInputField component="TextArea" meta={graph.vertexes[metaVertexId]}
+                           data={graph.vertexes[dataVertexId]}
+                           setValue={(attribute: Vertex, vertex: Vertex, data: any) => setGraph('vertexes', vertex.id, 'P', {jsx: data})} disabled={false}/>
+
+    <GenericField
+        meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
+        onClick={() => {
+         const jsxParser = new JsxParser({txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
+         jsxParser.render();
+         layoutTreeViewInstance.option("items", getLayoutTreeData());
+        }}
+    />
+
+   </>
   }
 
 
@@ -1130,7 +1182,11 @@ export const PageDesignerDragAndDrop = () => {
    <Show when={selectedLayout().vertexId !== -1}>
     <GenericField
      meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Rules" }}} as any}
-     onClick={toggle}
+     onClick={toggleRulesModal}
+    />
+    <GenericField
+     meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
+     onClick={toggleImportsModal}
     />
     <CollAndData/>
 
@@ -1143,7 +1199,7 @@ export const PageDesignerDragAndDrop = () => {
       selectedLayout={graph.vertexes[selectedLayout().vertexId]}
     />
    </Show>
-   <Show when={isRulesOpen()}>
+   <Show when={isRulesModalOpen()}>
     <Portal>
      <div role="dialog" tabIndex={-1} class="sb-modal">
       <ModalContent>
@@ -1151,7 +1207,7 @@ export const PageDesignerDragAndDrop = () => {
         Header
         <Button
          variant="icon"
-         onclick={toggle}
+         onclick={toggleRulesModal}
          style={{ float: "right" }}
         >
          ✕
@@ -1161,7 +1217,7 @@ export const PageDesignerDragAndDrop = () => {
         <RulesModalBody/>
        </ModalBody>
        <ModalFooter>
-        {/*<Button onclick={toggle}>OK</Button>*/}
+        {/*<Button onclick={toggleRulesModal}>OK</Button>*/}
         <div class="flex gap:4">
          <GenericField
           meta={{
@@ -1189,6 +1245,60 @@ export const PageDesignerDragAndDrop = () => {
            }
           } as any}
           onClick={onRulesCancel}
+         />
+        </div>
+
+       </ModalFooter>
+      </ModalContent>
+     </div>
+    </Portal>
+   </Show>
+   <Show when={isImportModalOpen()}>
+    <Portal>
+     <div role="dialog" tabIndex={-1} class="sb-modal">
+      <ModalContent>
+       <ModalHeader>
+        Header
+        <Button
+         variant="icon"
+         onclick={toggleImportsModal}
+         style={{ float: "right" }}
+        >
+         ✕
+        </Button>
+       </ModalHeader>
+       <ModalBody>
+        <ImportModalBody/>
+       </ModalBody>
+       <ModalFooter>
+        {/*<Button onclick={toggleRulesModal}>OK</Button>*/}
+        <div class="flex gap:4">
+         <GenericField
+          meta={{
+           P: {
+            component: "Button",
+            props: {
+             stylingMode: "contained",
+             type: "success",
+             text: "Submit"
+            }
+           }
+          } as any}
+          onClick={onImportsSubmit}
+         />
+
+         <GenericField
+          meta={{
+           P: {
+            component: "Button",
+            props: {
+             stylingMode: "contained",
+             type: "danger",
+             text: "Cancel"
+            }
+           }
+          } as any}
+          onClick={onImportsCancel}
          />
         </div>
 

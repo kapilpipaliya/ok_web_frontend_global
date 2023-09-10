@@ -2083,6 +2083,13 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           <Match when={component()==="TodaysEnergizer"}>
             <TodaysEnergizer meta={props.meta} data={props.data} />
           </Match>
+          <Match when={component()==="Box" && props.meta.P.props?.text}>
+            <Dynamic component={props.meta.P.props?.as || "div"}
+                     class={getValueFromVertexOrKey(props.meta.P.props, "class")}
+            >
+              {getText(props.meta.P.props?.text, repeaterContext)}
+            </Dynamic>
+          </Match>
           <Match when={true}>
             <Dynamic component={props.meta.P.props?.as || "div"}
              class={getValueFromVertexOrKey(props.meta.P.props, "class")}
