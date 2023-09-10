@@ -25,6 +25,7 @@ import TreeView, {
 } from "devextreme/ui/tree_view";
 import dxSortable, { DragEndEvent } from "devextreme/ui/sortable";
 import {
+ deleteNestedLayout,
  getChildVertex,
  getChildVertexes,
  getParentVertex, getSelectionOptions,
@@ -226,6 +227,104 @@ function PageView(props: {
  </PageContext.Provider>;
 }
 export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
+
+function getLayoutTreeJson() {
+ return {
+  collection: "->Attr",
+  child: {
+   collection: "->Attr",
+   child: {
+    collection: "->Attr",
+    child: {
+     collection: "->Attr",
+     child: {
+      collection: "->Attr",
+      child: {
+       collection: "->Attr",
+       child: {
+        collection: "->Attr",
+        child: {
+         collection: "->Attr",
+         child: {
+          collection: "->Attr",
+          child: {
+           collection: "->Attr",
+           child: {
+            collection: "->Attr",
+            child: {
+             collection: "->Attr",
+             child: {
+              collection: "->Attr",
+              child: {
+               collection: "->Attr",
+               child: {
+                collection: "->Attr",
+                child: {
+                 collection: "->Attr",
+                 child: {
+                  collection: "->Attr",
+                  child: {
+                   collection: "->Attr",
+                   child: {
+                    collection: "->Attr",
+                    child: {
+                     collection: "->Attr",
+                     child: {
+                      collection: "->Attr",
+                      child: {
+                       collection: "->Attr",
+                       child: {
+                        collection: "->Attr",
+                        child: {
+                         collection: "->Attr",
+                         child: {
+                          collection: "->Attr",
+                          child: {
+                           collection: "->Attr",
+                           child: {
+                            collection: "->Attr",
+                            child: {
+                             collection: "->Attr",
+                             child: {
+                              collection: "->Attr",
+                              child: {
+                               collection: "->Attr",
+                               child: {
+                                collection: "->Attr",
+                                child: {collection: "->Attr", child: {collection: "->Attr"}}
+                               }
+                              }
+                             }
+                            }
+                           }
+                          }
+                         }
+                        }
+                       }
+                      }
+                     }
+                    }
+                   }
+                  }
+                 }
+                }
+               }
+              }
+             }
+            }
+           }
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ };
+}
+
 export const PageDesignerDragAndDrop = () => {
  const itemsExpr = "children";
  const params = useParams();
@@ -677,97 +776,7 @@ export const PageDesignerDragAndDrop = () => {
  }
 
  function getLayoutTreeData() {
-  return getTreeData({
-   collection: "->Attr",
-   child: {
-    collection: "->Attr",
-    child: {
-     collection: "->Attr",
-     child: {
-      collection: "->Attr",
-      child: {
-       collection: "->Attr",
-       child: {
-        collection: "->Attr",
-        child: {
-         collection: "->Attr",
-         child: {
-          collection: "->Attr",
-          child: {
-           collection: "->Attr",
-           child: {
-            collection: "->Attr",
-            child: {
-             collection: "->Attr",
-             child: {
-              collection: "->Attr",
-              child: {
-               collection: "->Attr",
-               child: {
-                collection: "->Attr",
-                child: {
-                 collection: "->Attr",
-                 child: {
-                  collection: "->Attr",
-                  child: {
-                   collection: "->Attr",
-                   child: {
-                    collection: "->Attr",
-                    child: {
-                     collection: "->Attr",
-                     child: {
-                      collection: "->Attr",
-                      child: {
-                       collection: "->Attr",
-                       child: {
-                        collection: "->Attr",
-                        child: {
-                         collection: "->Attr",
-                         child: {
-                          collection: "->Attr",
-                          child: {
-                           collection: "->Attr",
-                           child: {
-                            collection: "->Attr",
-                            child: {
-                             collection: "->Attr",
-                             child: {
-                              collection: "->Attr",
-                              child: {
-                               collection: "->Attr",
-                               child: {
-                                collection: "->Attr",
-                                child: {collection: "->Attr", child: {collection: "->Attr", child: {collection: "->Attr"}}}
-                               }
-                              }
-                             }
-                            }
-                           }
-                          }
-                         }
-                        }
-                       }
-                      }
-                     }
-                    }
-                   }
-                  }
-                 }
-                }
-               }
-              }
-             }
-            }
-           }
-          }
-         }
-        }
-       }
-      }
-     }
-    }
-   }
-  }, pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
+  return getTreeData(getLayoutTreeJson(), pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [], {
    nameExpr: (v: Vertex) => {
     const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
     return `${v.P.name}${component ? ` (${component})` : ""}`;
@@ -1313,30 +1322,17 @@ export const PageDesignerDragAndDrop = () => {
  }
  const deleteLayout = () => {
   if(selectedLayout().vertexId !== -1) {
-   // TODO: delete layout and all its properties and all the childrens.
-
    const layoutVertexId = selectedLayout().vertexId;
-   const layoutItemIndex = selectedLayout().itemIndex;
    batch(() => {
     setSelectedLayout({vertexId: -1});
     setSelectedComponent({vertexId: -1});
     setSelectedColl({vertexId: -1});
    })
 
-   // delete properties:
-   const AttrProps = getChildVertexes(["AttrProp"], [graph.vertexes[layoutVertexId]]);
-   if (!AttrProps.error) {
-    for (const vertex of AttrProps.vertexes!) {
-     // delete in edges and out edges of properties
-     deleteRow(vertex, pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
-     // no commitTxn because, it's not realtime
-    }
-   }
-
-   // delete in edges and out edges and attr
-   deleteRow(graph.vertexes[layoutVertexId], pageConfig[0].record.isRealTime, pageConfig[0].record.txnId, Ws);
-
-/*   const fromNode = findNode(layoutTreeViewInstance, layoutItemIndex!);
+   deleteNestedLayout(pageConfig[0].record.txnId, [graph.vertexes[layoutVertexId]]);
+/*
+   const layoutItemIndex = selectedLayout().itemIndex;
+   const fromNode = findNode(layoutTreeViewInstance, layoutItemIndex!);
    const fromItems = layoutTreeViewInstance.option("items");
    if (!fromItems) return;
    const fromIndex = findIndex(fromItems, fromNode!.itemData!.id as string);

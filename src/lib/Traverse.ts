@@ -5,6 +5,7 @@ import { findVertexIdsByLabel } from "./Vertex";
 import { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
 import {evaluate} from "./jsep";
 import jsep from "jsep";
+import {deleteRow} from "./Record";
 
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
@@ -319,6 +320,32 @@ export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[]
   };
 
   return getChildren(treeLevels, vertexes);
+
+}
+export const deleteNestedLayout = (txnId: number, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
+  const deleteChildren = (vertexes: Vertex[]) => {
+
+    const children = getChildVertexes(["Attr"], vertexes);
+    for (const child of (children.vertexes || [])) {
+      // delete children
+      deleteChildren([child]);
+
+      // delete properties:
+      const AttrProps = getChildVertexes(["AttrProp"], vertexes);
+      if (!AttrProps.error) {
+        for (const vertex of AttrProps.vertexes!) {
+          // delete in edges and out edges of properties
+          deleteRow(vertex, false, txnId, {} as any);
+          // no commitTxn because, it's not realtime
+        }
+      }
+
+      // delete in edges and out edges and attr
+      deleteRow(child, false, txnId, {} as any);
+    }
+  };
+
+  return deleteChildren(vertexes);
 
 }
 
