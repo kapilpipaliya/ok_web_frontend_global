@@ -95,19 +95,19 @@ export const DashboardView = () => {
   return (
     <div class="flex flex:col flex:1">
       <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, { title }) } }}>
-        <Show when={showNav}>
+        <Show when={showNav()}>
           <Navbar
             right={<Show
               when={graph.member?.id}
               fallback={
                 <>
-                  <Link href={`/signup`} replace={true}>Register</Link>
+                  <Link href={(showNav() ? '/nav' : '') + `/signup`} replace={true}>Register</Link>
                   {/* @ts-ignore */}
-                  <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
+                  <Link href={(showNav() ? '/nav' : '') + `/login`} replace={true} title={__APP_VERSION__}>Login</Link>
                 </>
               }
             >
-              <Link href={`/logout`}>Logout</Link>
+              <Link href={(showNav() ? '/nav' : '') + `/logout`}>Logout</Link>
             </Show>}
             meta={graph.vertexes[vertexId]}
           />

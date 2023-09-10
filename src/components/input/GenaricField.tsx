@@ -4,174 +4,83 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  For, getOwner,
+  For,
+  getOwner,
   JSXElement,
   Match,
   on,
-  onCleanup, onMount, runWithOwner,
+  onCleanup,
+  onMount,
+  runWithOwner,
   Show,
   Switch,
   useContext
 } from "solid-js";
 
-import dxBox, { Properties as dxBoxProperties } from "devextreme/ui/box";
-import dxTreeMap, {
-  Properties as dxTreeMapProperties
-} from "devextreme/viz/tree_map";
-import dxVectorMap, {
-  Properties as dxVectorMapProperties
-} from "devextreme/viz/vector_map";
-import dxTreeView, {
-  Properties as dxTreeViewProperties
-} from "devextreme/ui/tree_view";
-import dxTreeList, {
-  Properties as dxTreeListProperties
-} from "devextreme/ui/tree_list";
-import dxToast, { Properties as dxToastProperties } from "devextreme/ui/toast";
+import dxBox, {Properties as dxBoxProperties} from "devextreme/ui/box";
+import dxTreeMap, {Properties as dxTreeMapProperties} from "devextreme/viz/tree_map";
+import dxVectorMap, {Properties as dxVectorMapProperties} from "devextreme/viz/vector_map";
+import dxTreeView, {Properties as dxTreeViewProperties} from "devextreme/ui/tree_view";
+import dxTreeList, {Properties as dxTreeListProperties} from "devextreme/ui/tree_list";
+import dxToast, {Properties as dxToastProperties} from "devextreme/ui/toast";
 import dxTileView from "devextreme/ui/tile_view";
-import dxTabs, {
-  Properties as dxTileViewProperties,
-  Properties as dxTabsProperties
-} from "devextreme/ui/tile_view";
-import dxTabPanel, {
-  Properties as dxTabPanelProperties
-} from "devextreme/ui/tab_panel";
-import dxSpeedDialAction, {
-  Properties as dxSpeedDialActionProperties
-} from "devextreme/ui/speed_dial_action";
-import dxSparkLine, {
-  Properties as dxSparkLineProperties
-} from "devextreme/viz/sparkline";
-import dxScrollView, {
-  Properties as dxScrollViewProperties
-} from "devextreme/ui/scroll_view";
-import dxScheduler, {
-  Properties as dxSchedulerProperties
-} from "devextreme/ui/scheduler";
-import dxSankey, {
-  Properties as dxSankeyProperties
-} from "devextreme/viz/sankey";
-import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
-import dxPopOver, {
-  Properties as dxPopOverProperties
-} from "devextreme/ui/popover";
-import dxPolarChart, {
-  Properties as dxPolarChartProperties
-} from "devextreme/viz/polar_chart";
-import dxPieChart, {
-  Properties as dxPieChartProperties
-} from "devextreme/viz/pie_chart";
-import dxMultiView, {
-  Properties as dxMultiViewProperties
-} from "devextreme/ui/multi_view";
-import dxMenu, { Properties as dxMenuProperties } from "devextreme/ui/menu";
-import dxMap, { Properties as dxMapProperties } from "devextreme/ui/map";
-import dxLookup, {
-  Properties as dxLookupProperties
-} from "devextreme/ui/lookup";
-import dxLoadPanel, {
-  Properties as dxLoadPanelProperties
-} from "devextreme/ui/load_panel";
-import dxLoadIndicator, {
-  Properties as dxLoadIndicatorProperties
-} from "devextreme/ui/load_indicator";
-import dxList, { Properties as dxListProperties } from "devextreme/ui/list";
-import dxGantt, { Properties as dxGanttProperties } from "devextreme/ui/gantt";
-import {
-  dependencies,
-  resourceAssignments,
-  resources,
-  tasks
-} from "../examples/data/ganttData";
-import dxGallery, {
-  Properties as dxGalleryProperties
-} from "devextreme/ui/gallery";
-import dxFunnel, {
-  Properties as dxFunnelProperties
-} from "devextreme/viz/funnel";
-import dxFileManager, {
-  Properties as dxFileManagerProperties
-} from "devextreme/ui/file_manager";
-import dxDiagram, {
-  Properties as dxDiagramProperties
-} from "devextreme/ui/diagram";
-import dxDataGrid, {
-  Properties as dxDataGridProperties
-} from "devextreme/ui/data_grid";
-import dxContextMenu, {
-  Properties as dxContextMenuProperties
-} from "devextreme/ui/context_menu";
-import dxChart, { Properties as dxChartProperties } from "devextreme/viz/chart";
-import dxButton, {
-  Properties as dxButtonProperties
-} from "devextreme/ui/button";
-import dxBarGauge, {
-  Properties as dxBarGaugeProperties
-} from "devextreme/viz/bar_gauge";
-import dxActionSheet, {
-  Properties as dxActionSheetProperties
-} from "devextreme/ui/action_sheet";
-import dxAccordion, {
-  Properties as dxAccordionProperties
-} from "devextreme/ui/accordion";
-import dxButtonGroup, {
-  Properties as dxButtonGroupProperties
-} from "devextreme/ui/button_group";
-import dxTooltip, {
-  Properties as dxTooltipProperties
-} from "devextreme/ui/tooltip";
-import dxPivotGrid, {
-  Properties as dxPivotGridProperties
-} from "devextreme/ui/pivot_grid";
-import dxDropDownButton, {
-  Properties as dxDropDownButtonProperties
-} from "devextreme/ui/drop_down_button";
-import dxDrawer, {
-  Properties as dxDrawerProperties
-} from "devextreme/ui/drawer";
-import dxDropDownBox, {
-  Properties as dxDropDownBoxProperties
-} from "devextreme/ui/drop_down_box";
+import dxTabs, {Properties as dxTileViewProperties, Properties as dxTabsProperties} from "devextreme/ui/tile_view";
+import dxTabPanel, {Properties as dxTabPanelProperties} from "devextreme/ui/tab_panel";
+import dxSpeedDialAction, {Properties as dxSpeedDialActionProperties} from "devextreme/ui/speed_dial_action";
+import dxSparkLine, {Properties as dxSparkLineProperties} from "devextreme/viz/sparkline";
+import dxScrollView, {Properties as dxScrollViewProperties} from "devextreme/ui/scroll_view";
+import dxScheduler, {Properties as dxSchedulerProperties} from "devextreme/ui/scheduler";
+import dxSankey, {Properties as dxSankeyProperties} from "devextreme/viz/sankey";
+import dxPopup, {Properties as dxPopupProperties} from "devextreme/ui/popup";
+import dxPopOver, {Properties as dxPopOverProperties} from "devextreme/ui/popover";
+import dxPolarChart, {Properties as dxPolarChartProperties} from "devextreme/viz/polar_chart";
+import dxPieChart, {Properties as dxPieChartProperties} from "devextreme/viz/pie_chart";
+import dxMultiView, {Properties as dxMultiViewProperties} from "devextreme/ui/multi_view";
+import dxMenu, {Properties as dxMenuProperties} from "devextreme/ui/menu";
+import dxMap, {Properties as dxMapProperties} from "devextreme/ui/map";
+import dxLookup, {Properties as dxLookupProperties} from "devextreme/ui/lookup";
+import dxLoadPanel, {Properties as dxLoadPanelProperties} from "devextreme/ui/load_panel";
+import dxLoadIndicator, {Properties as dxLoadIndicatorProperties} from "devextreme/ui/load_indicator";
+import dxList, {Properties as dxListProperties} from "devextreme/ui/list";
+import dxGantt, {Properties as dxGanttProperties} from "devextreme/ui/gantt";
+import {dependencies, resourceAssignments, resources, tasks} from "../examples/data/ganttData";
+import dxGallery, {Properties as dxGalleryProperties} from "devextreme/ui/gallery";
+import dxFunnel, {Properties as dxFunnelProperties} from "devextreme/viz/funnel";
+import dxFileManager, {Properties as dxFileManagerProperties} from "devextreme/ui/file_manager";
+import dxDiagram, {Properties as dxDiagramProperties} from "devextreme/ui/diagram";
+import dxDataGrid, {Properties as dxDataGridProperties} from "devextreme/ui/data_grid";
+import dxContextMenu, {Properties as dxContextMenuProperties} from "devextreme/ui/context_menu";
+import dxChart, {Properties as dxChartProperties} from "devextreme/viz/chart";
+import dxButton, {Properties as dxButtonProperties} from "devextreme/ui/button";
+import dxBarGauge, {Properties as dxBarGaugeProperties} from "devextreme/viz/bar_gauge";
+import dxActionSheet, {Properties as dxActionSheetProperties} from "devextreme/ui/action_sheet";
+import dxAccordion, {Properties as dxAccordionProperties} from "devextreme/ui/accordion";
+import dxButtonGroup, {Properties as dxButtonGroupProperties} from "devextreme/ui/button_group";
+import dxTooltip, {Properties as dxTooltipProperties} from "devextreme/ui/tooltip";
+import dxPivotGrid, {Properties as dxPivotGridProperties} from "devextreme/ui/pivot_grid";
+import dxDropDownButton, {Properties as dxDropDownButtonProperties} from "devextreme/ui/drop_down_button";
+import dxDrawer, {Properties as dxDrawerProperties} from "devextreme/ui/drawer";
+import dxDropDownBox, {Properties as dxDropDownBoxProperties} from "devextreme/ui/drop_down_box";
 
-import { ComponentProps } from "../../types/Component";
-import {
-  commitTxn, graph,
-  IdAttr,
-  revertTransaction,
-  setGraph,
-  Vertex
-} from "../../lib/graph";
-import {
-  FormContext,
-  getCollAttrComp, getCompProps, getRowProps,
-  PageContext,
-  Record
-} from "../../lib/Record";
-import { getTextColumnValue } from "./GenaricInputField";
-import { ActionCards } from "../../pages/home/components/ActionCards";
-import { Navbar } from "../../pages/home/components/Navbar";
-import {
-  getChildVertex,
-  getChildVertexes,
-  getSelectionOptions
-} from "../../lib/Traverse";
-import {
-  TodaysEnergizer
-} from "../../pages/home/components/TodaysEnergizerSection";
-import {
-  DynamicComponent,
-} from "../DynamicForm";
-import { toTitle } from "case-switcher-js";
-import { getLastItem } from "../../utils/functions";
-import { WsContext } from "../../utils/ws_events_dispatcher";
+import {ComponentProps} from "../../types/Component";
+import {commitTxn, IdAttr, revertTransaction, setGraph, Vertex} from "../../lib/graph";
+import {FormContext, getCollAttrComp, getCompProps, getRowProps, PageContext, Record} from "../../lib/Record";
+import {getTextColumnValue} from "./GenaricInputField";
+import {ActionCards} from "../../pages/home/components/ActionCards";
+import {Navbar} from "../../pages/home/components/Navbar";
+import {getChildVertex, getChildVertexes, getSelectionOptions} from "../../lib/Traverse";
+import {TodaysEnergizer} from "../../pages/home/components/TodaysEnergizerSection";
+import {DynamicComponent,} from "../DynamicForm";
+import {toTitle} from "case-switcher-js";
+import {getLastItem} from "../../utils/functions";
+import {WsContext} from "../../utils/ws_events_dispatcher";
 import {Link, useNavigate} from "@solidjs/router";
 import dxValidationGroup from "devextreme/ui/validation_group";
-import Tabs from "devextreme/ui/tabs";
 import dxValidationSummary from "devextreme/ui/validation_summary";
-import { getValueFromVertexOrKey } from "../../utils/utils";
+import {getValueFromVertexOrKey} from "../../utils/utils";
 import {Dynamic} from "solid-js/web";
-import {path} from "rambda";
 import {selectedLayout} from "../PageDesignerDragAndDrop";
+import {showNav} from "../Dashboard";
 
 export const genericComponents2 = [
   "Box",
@@ -229,7 +138,8 @@ export const genericComponents2 = [
   "Text",
   "Repeater",
   "A",
-  "Image"
+  "Image",
+  "Page"
 ]
 const displayExpr = [
   "ContextMenu",
@@ -2047,17 +1957,34 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             </Show>
           </Match>
           <Match when={component()  === "A"}>
-            <Show when={props.meta.P.props?.href} fallback={<a>
-              {props.children}
-              <PageItemRender metaVertex={props.meta}/>
-            </a>}>
-              <Link {...props.meta.P.props} href={getText(props.meta.P.props.href, repeaterContext)}>
-                <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+            <Switch>
+              <Match when={PageRenderUtils.getDataVertex(props.meta)}>
+                {vertex => <Link {...props.meta.P.props} href={(showNav() ? '/nav/' : '/') + vertex().P.name}>
+                  <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+                    {props.children}
+                    <PageItemRender metaVertex={props.meta}/>
+                  </Show>
+                </Link>}
+              </Match>
+              <Match when={props.meta.P.props?.href}>
+                <Link {...props.meta.P.props} href={getUrl(props.meta.P.props.href, repeaterContext)}>
+                  <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+                    {props.children}
+                    <PageItemRender metaVertex={props.meta}/>
+                  </Show>
+                </Link>
+              </Match>
+              <Match when={true}>
+                <a>
                   {props.children}
                   <PageItemRender metaVertex={props.meta}/>
-                </Show>
-              </Link>
-            </Show>
+                </a>
+              </Match>
+            </Switch>
+          </Match>
+          <Match when={component()  === "Page"}>
+            {/* g:'Page':-'*[P.name="book"]' */}
+            <PageView number={1} vertex={props.data}/>
           </Match>
           <Match when={component()  === "Image"}>
             <img {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)}/>
@@ -2118,4 +2045,40 @@ export function GenericField(props: ComponentProps & { component?: string; disab
 
 function getText(projection: string, repeaterContext: Vertex[]) {
     return getSelectionOptions(repeaterContext, projection).vertexes as string
+}
+
+function getUrl(projection: string, repeaterContext: Vertex[]) {
+    let url = getSelectionOptions(repeaterContext, projection).vertexes as string | undefined
+    if (typeof url === "string" && url.startsWith('/')) {
+      url = (showNav() ? '/nav' : '') + url;
+    }
+    return url;
+}
+
+export function PageView(props: {
+  number: number,
+  vertex?: Vertex
+}) {
+  const collection = createMemo(() => PageRenderUtils.getCollection(props.vertex));
+  const dataVertex = createMemo(() => PageRenderUtils.getDataVertex(props.vertex));
+
+  return <PageContext.Provider value={{events: {}}}>
+    <Show when={props.number && props.vertex && props.number} keyed>
+      <Switch>
+        <Match when={collection() && !dataVertex()}>
+          <For each={getSelectionOptions([props.vertex!], `'g:${collection()!}'`).vertexes}>
+            {vertex => <PageRenderContext.Provider value={[props.vertex!]}>
+              <PageItemRender metaVertex={props.vertex!} data={vertex}/>
+            </PageRenderContext.Provider>}
+          </For>
+        </Match>
+        <Match when={collection() && dataVertex()}>
+          <PageItemRender metaVertex={props.vertex!}/>
+        </Match>
+        <Match when={true}>
+          <PageItemRender metaVertex={props.vertex!}/>
+        </Match>
+      </Switch>
+    </Show>
+  </PageContext.Provider>;
 }
