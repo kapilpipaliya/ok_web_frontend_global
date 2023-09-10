@@ -1,71 +1,56 @@
 // TODO: make multiple Fields Drag and Drop once.
-import { useParams } from "@solidjs/router";
-import { createStore, reconcile } from "solid-js/store";
+import {useParams} from "@solidjs/router";
+import {createStore, reconcile} from "solid-js/store";
 import {
- addMetaVertexes, addNewRow,
- deleteRow, FieldAttribute,
- getCompProps, getFormMetaData,
+ addMetaVertexes,
+ addNewRow,
+ FieldAttribute,
+ getCompProps,
+ getFormMetaData,
  getRowProps,
- PageContext,
- Record, setValueGlobal
+ Record,
+ setValueGlobal
 } from "../lib/Record";
-import {
- batch,
- createEffect, createMemo,
- createSignal, For, Match,
- on, onCleanup,
- onMount,
- Show, Switch,
- useContext
-} from "solid-js";
-import {GenericField, PageItemRender, PageRenderContext, PageRenderUtils} from "./input/GenaricField";
-import TreeView, {
- Item as dxTreeViewItem,
- Node
-} from "devextreme/ui/tree_view";
-import dxSortable, { DragEndEvent } from "devextreme/ui/sortable";
+import {batch, createEffect, createSignal, on, onCleanup, onMount, Show, useContext} from "solid-js";
+import {GenericField, PageView} from "./input/GenaricField";
+import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
+import dxSortable, {DragEndEvent} from "devextreme/ui/sortable";
 import {
  deleteNestedLayout,
  getChildVertex,
  getChildVertexes,
- getParentVertex, getSelectionOptions,
+ getParentVertex,
+ getSelectionOptions,
  getTreeData
 } from "../lib/Traverse";
 import {
  getNewGraphId,
  getNewTxnId,
- graph, Id,
- IdAttr, revertTransaction, revertTransactionUpTo,
- setGraph, transactions,
+ graph,
+ Id,
+ IdAttr,
+ revertTransaction,
+ revertTransactionUpTo,
+ setGraph,
+ transactions,
  Vertex
 } from "../lib/graph";
-import dxDraggable from "devextreme/ui/draggable";
-import {
- AbstractSingleForm,
- FormGroup,
- FormGroupProperties
-} from "./DynamicForm";
+import {AbstractSingleForm, FormGroupProperties} from "./DynamicForm";
 import {SelectInputField, setParentValue, setSelectionValue} from "./input/SelectInputField";
 import {
- addNewVertex, deleteVertex, findOrCreateNewVertex,
+ addNewVertex,
  findVertexByLabelAndUniqueId,
  mergeVertexProperties,
- newVertex, replaceVertexProperties
+ newVertex,
+ replaceVertexProperties
 } from "../lib/Vertex";
-import { WsContext } from "../utils/ws_events_dispatcher";
-import { Portal } from "solid-js/web";
-import {
- Button,
- ModalBody,
- ModalContent,
- ModalFooter,
- ModalHeader
-} from "solid-blocks";
-import { TableInputField } from "./input/TableInputField";
-import { AttrsTableData } from "./api";
+import {WsContext} from "../utils/ws_events_dispatcher";
+import {Portal} from "solid-js/web";
+import {Button, ModalBody, ModalContent, ModalFooter, ModalHeader} from "solid-blocks";
+import {TableInputField} from "./input/TableInputField";
+import {AttrsTableData} from "./api";
 import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "./jsx_parser/source/components/JsxParser";
-import {klona} from "klona";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -199,33 +184,6 @@ export const setPropertyValueGlobal = (txnId: number, meta: Vertex, layoutVertex
 
 }
 
-function PageView(props: {
- number: number,
- record: Record
-}) {
- const collection = createMemo(() => PageRenderUtils.getCollection(props.record?.vertex));
- const dataVertex = createMemo(() => PageRenderUtils.getDataVertex(props.record?.vertex));
-
- return <PageContext.Provider value={{events: {}}}>
-  <Show when={props.number && props.record?.vertex && props.number} keyed>
-   <Switch>
-    <Match when={collection() && !dataVertex()}>
-     <For each={getSelectionOptions([props.record?.vertex], `'g:${collection()!}'`).vertexes}>
-      {vertex => <PageRenderContext.Provider value={[props.record.vertex]}>
-       <PageItemRender metaVertex={props.record.vertex} data={vertex}/>
-      </PageRenderContext.Provider>}
-     </For>
-    </Match>
-    <Match when={collection() && dataVertex()}>
-      <PageItemRender metaVertex={props.record.vertex} />
-    </Match>
-    <Match when={true}>
-     <PageItemRender metaVertex={props.record.vertex} />
-    </Match>
-   </Switch>
-  </Show>
- </PageContext.Provider>;
-}
 export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
 
 function getLayoutTreeJson() {
@@ -1120,7 +1078,6 @@ export const PageDesignerDragAndDrop = () => {
 
    const metaVertexId = getNewGraphId();
    const txnId = getNewTxnId();
-   const metaAttributes = AttrsTableData.Page;
 
    addNewVertex(txnId, newVertex(metaVertexId, ["MetaAttr"], {name: "Attr", props: {
      type: 'Attr',
@@ -1179,6 +1136,7 @@ export const PageDesignerDragAndDrop = () => {
       setValue={pageConfig[0].record.setValue}
       isRealTime={false}
     />
+    <span>Expression:</span>
     <GenericInputField
       data={graph.vertexes[selectedLayout().vertexId!]}
       meta={collMetaVertex.vertexes![2]!}
@@ -1356,7 +1314,7 @@ export const PageDesignerDragAndDrop = () => {
 
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
     <div class={"text:center mb:12"} onClick={rerender}>Preview</div>
-    <PageView number={count()} record={pageConfig[0].record}/>
+    <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5 flex flex:col">
@@ -1411,5 +1369,5 @@ export const PagePreview = (props: {}) => {
  if (form.error) return form.error;
 
  record.createMeta(form.form!);
- return <PageView number={1} record={record}/>
+ return <PageView number={1} vertex={record?.vertex}/>
 }
