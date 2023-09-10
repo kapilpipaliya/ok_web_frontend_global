@@ -177,17 +177,19 @@ export const setPropertyValueGlobal = (txnId: number, meta: Vertex, layoutVertex
    name: "Prop",
    displayName: "Property",
   });
-  const properties = (valueSet ?? true) ? {value} : {};
-  const addRowResult = addNewRow(txnId, propMetaVertex, layoutVertex, properties, false, {} as any);
-  if (addRowResult.vertexId) {
-   row = graph.vertexes[addRowResult.vertexId];
-   const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
-   const componentProp = componentProps.find(vertex => {
-    return vertex.P.name === meta.P.name
-   });
-   if (componentProp) {
+  const componentProps = getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
+  const componentProp = componentProps.find(vertex => {
+   return vertex.P.name === meta.P.name
+  });
+  if (componentProp) {
+   const properties = (valueSet ?? true) ? {value} : {};
+   const addRowResult = addNewRow(txnId, propMetaVertex, layoutVertex, properties, false, {} as any);
+   if (addRowResult.vertexId) {
+    row = graph.vertexes[addRowResult.vertexId];
     setSelectionValue(txnId, graph.vertexes[addRowResult.vertexId], {P: {name: 'Name'}} as unknown as Vertex, componentProp.id);
    }
+  } else {
+   console.error(`component prop ${meta.P.name} is not found. so skipped inserting property.`);
   }
  }
  // TODO: if reset, delete the row.
