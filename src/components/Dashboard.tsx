@@ -170,7 +170,7 @@ export const FullDashboard = () => {
 
   return (
     <div>
-      <Show when={showNav} fallback={<DashboardView />}>
+      <Show when={showNav()} fallback={<DashboardView />}>
         <GenericField
           meta={{
             P: {

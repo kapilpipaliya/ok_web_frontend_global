@@ -1,5 +1,6 @@
 /* @refresh reload */
 import "./base.css";
+// Comment This Lines in web build
 // import 'devextreme/scss/bundles/dx.light.scss'
 import "devextreme/dist/css/dx.light.css";
 // import '@spicainternational/sds-devextreme/css/dx.generic.sds-theme.css'

@@ -3,6 +3,7 @@ import { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
 import { navItems } from "./data";
 
+// Comment This Lines in web build
 import List from "devextreme/ui/list";
 import { Link } from "@solidjs/router";
 import { Icon } from "@iconify-icon/solid";

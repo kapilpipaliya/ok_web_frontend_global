@@ -28,12 +28,13 @@ import {
  getToEdge
 } from "./Traverse";
 import { removeUndefinedProperties } from "../utils/functions";
+// Comment This Lines in web build
 import { ValidationRule } from "devextreme/common";
+import dxValidationGroup from "devextreme/ui/validation_group";
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
 import { A, G } from "@mobily/ts-belt";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
-import dxValidationGroup from "devextreme/ui/validation_group";
 import { AttrsTableData } from "../components/api";
 
 export interface FieldAttribute {

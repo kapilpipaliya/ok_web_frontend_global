@@ -2,6 +2,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import { createSignal, createUniqueId, onCleanup, Show } from "solid-js";
 import { getExportCode, PageContext, Record } from "../lib/Record";
 import { PageItemRender } from "./input/GenaricField";
+// Comment This Lines in web build
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
 import { Vertex } from "../lib/graph";
 import { getChildVertex } from "../lib/Traverse";
@@ -55,8 +56,7 @@ export const PageDesigner = () => {
 
 /*
 TODO:
-1. make inward selectbox and tagbox working
-2. make import working too.
+Instead of this use Page Builder
  */
 export const NavDesigner = () => {
  const params = useParams();

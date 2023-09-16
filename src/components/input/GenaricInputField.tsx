@@ -7,31 +7,33 @@ import {
   useContext
 } from "solid-js";
 import { G } from "@mobily/ts-belt";
-import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
-import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
-import dxCalendar, { Properties as dxCalendarProperties } from "devextreme/ui/calendar";
-import dxCheckBox, { Properties as dxCheckBoxProperties } from "devextreme/ui/check_box";
-import dxCircularGauge, { Properties as dxCircularGaugeProperties } from "devextreme/viz/circular_gauge";
-import dxColorBox, { Properties as dxColorBoxProperties } from "devextreme/ui/color_box";
-import dxDateBox, { Properties as dxDateBoxProperties } from "devextreme/ui/date_box";
-import dxDropDownBox, { Properties as dxDropDownBoxProperties } from "devextreme/ui/drop_down_box";
-import dxFileUploader, { Properties as dxFileUploaderProperties } from "devextreme/ui/file_uploader";
-import dxFilterBuilder, { Properties as dxFilterBuilderProperties } from "devextreme/ui/filter_builder";
-import dxHtmlEditor, { Properties as dxHtmlEditorProperties } from "devextreme/ui/html_editor";
-import dxLinearGauge, { Properties as dxLinearGaugeProperties } from "devextreme/viz/linear_gauge";
-import dxNumberBox, { Properties as dxNumberBoxProperties } from "devextreme/ui/number_box";
-import dxProgressBar, { Properties as dxProgressBarProperties } from "devextreme/ui/progress_bar";
-import dxRadioGroup, { Properties as dxRadioGroupProperties } from "devextreme/ui/radio_group";
-import dxRangeSelector, { Properties as dxRangeSelectorProperties } from "devextreme/viz/range_selector";
-import dxRangeSlider, { Properties as dxRangeSliderProperties } from "devextreme/ui/range_slider";
-import dxSlider, { Properties as dxSliderProperties } from "devextreme/ui/slider";
-import dxSwitch, { Properties as dxSwitchProperties } from "devextreme/ui/switch";
-import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/text_area";
-import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
+// Comment This Lines in web build
+// import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
+// import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
+// import dxCalendar, { Properties as dxCalendarProperties } from "devextreme/ui/calendar";
+// import dxCheckBox, { Properties as dxCheckBoxProperties } from "devextreme/ui/check_box";
+// import dxCircularGauge, { Properties as dxCircularGaugeProperties } from "devextreme/viz/circular_gauge";
+// import dxColorBox, { Properties as dxColorBoxProperties } from "devextreme/ui/color_box";
+// import dxDateBox, { Properties as dxDateBoxProperties } from "devextreme/ui/date_box";
+// import dxDropDownBox, { Properties as dxDropDownBoxProperties } from "devextreme/ui/drop_down_box";
+// import dxFileUploader, { Properties as dxFileUploaderProperties } from "devextreme/ui/file_uploader";
+// import dxFilterBuilder, { Properties as dxFilterBuilderProperties } from "devextreme/ui/filter_builder";
+// import dxHtmlEditor, { Properties as dxHtmlEditorProperties } from "devextreme/ui/html_editor";
+// import dxLinearGauge, { Properties as dxLinearGaugeProperties } from "devextreme/viz/linear_gauge";
+// import dxNumberBox, { Properties as dxNumberBoxProperties } from "devextreme/ui/number_box";
+// import dxProgressBar, { Properties as dxProgressBarProperties } from "devextreme/ui/progress_bar";
+// import dxRadioGroup, { Properties as dxRadioGroupProperties } from "devextreme/ui/radio_group";
+// import dxRangeSelector, { Properties as dxRangeSelectorProperties } from "devextreme/viz/range_selector";
+// import dxRangeSlider, { Properties as dxRangeSliderProperties } from "devextreme/ui/range_slider";
+// import dxSlider, { Properties as dxSliderProperties } from "devextreme/ui/slider";
+// import dxSwitch, { Properties as dxSwitchProperties } from "devextreme/ui/switch";
+// import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/text_area";
+// import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
 
-import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
-import dxValidationGroup from "devextreme/ui/validation_group";
-import { ValidationRule } from "devextreme/common";
+// import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
+// import dxValidationGroup from "devextreme/ui/validation_group";
+// import { ValidationRule } from "devextreme/common";
+
 import { ComponentProps } from "../../types/Component";
 import { graph, IdAttr } from "../../lib/graph";
 import { FormContext, getCompProps, isUpdatingInput } from "../../lib/Record";
