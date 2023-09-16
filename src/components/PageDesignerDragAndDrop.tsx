@@ -11,7 +11,7 @@ import {
  Record,
  setValueGlobal
 } from "../lib/Record";
-import {batch, createEffect, createSignal, on, onCleanup, onMount, Show, useContext} from "solid-js";
+import {batch, createEffect, createSignal, For, on, onCleanup, onMount, Show, useContext} from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
 // Comment This Lines in web build
 import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
@@ -1048,7 +1048,7 @@ export const PageDesignerDragAndDrop = () => {
    const metaVertexId = getNewGraphId();
    const dataVertexId = getNewGraphId();
 
-   setGraph("vertexes", metaVertexId, {P: {name: "jsx"}});
+   setGraph("vertexes", metaVertexId, {P: {name: "jsx", props: {width: 700, height: 700}}});
    setGraph("vertexes", dataVertexId, {id: dataVertexId, P: {}});
 
    onCleanup(() => {
@@ -1057,23 +1057,56 @@ export const PageDesignerDragAndDrop = () => {
     // @ts-ignore
     setGraph("vertexes", dataVertexId, undefined);
    })
+   const footerButtons = [
+    {
+     meta: { P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import", type: "success", }}} as any,
+     onClick: () => {
+      const jsxParser = new JsxParser({txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
+      jsxParser.render();
+      layoutTreeViewInstance.option("items", getLayoutTreeData());
+     }
+    },
+    {
+     meta: {P: {component: "Button", props: {stylingMode: "contained", type: "success", text: "Submit"}}} as any,
+     onClick: onImportsSubmit
+    },
+    {
+     meta: {P: {component: "Button", props: {stylingMode: "contained", type: "danger", text: "Cancel"}}} as any,
+     onClick: onImportsCancel
+    }
+   ]
    return <>
-    <GenericInputField component="TextArea" meta={graph.vertexes[metaVertexId]}
+    <Portal>
+     <div role="dialog" tabIndex={-1} class="sb-modal">
+      <ModalContent>
+       <ModalHeader>
+        Import HTML
+        <Button
+            variant="icon"
+            onclick={toggleImportsModal}
+            style={{ float: "right" }}
+        >
+         ✕
+        </Button>
+       </ModalHeader>
+       <ModalBody>
+        <GenericInputField component="TextArea" meta={graph.vertexes[metaVertexId]}
                            data={graph.vertexes[dataVertexId]}
                            setValue={(attribute: Vertex, vertex: Vertex, data: any) => setGraph('vertexes', vertex.id, 'P', {jsx: data})} disabled={false}/>
+       </ModalBody>
+       <ModalFooter>
+        <div class="flex gap:4">
+         <For each={footerButtons}>
+          {item => <GenericField meta={item.meta} onClick={item.onClick}/>}
+         </For>
+        </div>
 
-    <GenericField
-        meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
-        onClick={() => {
-         const jsxParser = new JsxParser({txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
-         jsxParser.render();
-         layoutTreeViewInstance.option("items", getLayoutTreeData());
-        }}
-    />
-
+       </ModalFooter>
+      </ModalContent>
+     </div>
+    </Portal>
    </>
   }
-
 
   const CollAndData = () => {
 
@@ -1224,58 +1257,7 @@ export const PageDesignerDragAndDrop = () => {
     </Portal>
    </Show>
    <Show when={isImportModalOpen()}>
-    <Portal>
-     <div role="dialog" tabIndex={-1} class="sb-modal">
-      <ModalContent>
-       <ModalHeader>
-        Header
-        <Button
-         variant="icon"
-         onclick={toggleImportsModal}
-         style={{ float: "right" }}
-        >
-         ✕
-        </Button>
-       </ModalHeader>
-       <ModalBody>
-        <ImportModalBody/>
-       </ModalBody>
-       <ModalFooter>
-        {/*<Button onclick={toggleRulesModal}>OK</Button>*/}
-        <div class="flex gap:4">
-         <GenericField
-          meta={{
-           P: {
-            component: "Button",
-            props: {
-             stylingMode: "contained",
-             type: "success",
-             text: "Submit"
-            }
-           }
-          } as any}
-          onClick={onImportsSubmit}
-         />
-
-         <GenericField
-          meta={{
-           P: {
-            component: "Button",
-            props: {
-             stylingMode: "contained",
-             type: "danger",
-             text: "Cancel"
-            }
-           }
-          } as any}
-          onClick={onImportsCancel}
-         />
-        </div>
-
-       </ModalFooter>
-      </ModalContent>
-     </div>
-    </Portal>
+     <ImportModalBody/>
    </Show>
   </>
  }
