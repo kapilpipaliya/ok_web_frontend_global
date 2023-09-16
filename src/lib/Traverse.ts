@@ -292,7 +292,7 @@ export function getSelectionOptions(
       return {error: true};
     }
   } catch (e) {
-    console.error(e)
+    console.error(e, vertex, collection)
     return {error: true};
   }
 }

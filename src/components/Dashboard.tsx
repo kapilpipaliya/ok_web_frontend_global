@@ -102,9 +102,9 @@ export const DashboardView = () => {
               when={graph.member?.id}
               fallback={
                 <>
-                  <Link href={(showNav() ? '/nav' : '') + `/signup`} replace={true}>Register</Link>
+                  <Link href={`/signup`} replace={true}>Register</Link>
                   {/* @ts-ignore */}
-                  <Link href={(showNav() ? '/nav' : '') + `/login`} replace={true} title={__APP_VERSION__}>Login</Link>
+                  <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
                 </>
               }
             >

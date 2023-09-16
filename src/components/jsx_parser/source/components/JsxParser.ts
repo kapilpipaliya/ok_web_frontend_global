@@ -289,18 +289,25 @@ export default class JsxParser {
 			return;
 		}
 		let componentVertex: Vertex;
+		let isText = false;
 		if (containerTags.includes(comp)) {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Box")!;
 		} else if (comp === "img") {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Img")!;
 		} else if (comp === "a") {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "A")!;
+		} else if (comp === "Repeater") {
+			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Repeater")!;
 		} else {
+			isText = true;
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
 		}
 		const rowId = componentDrag(this.props.txnId, componentVertex!,  1000, scope.parent);
 		if (rowId === -1) return;
 		const parentVertex = graph.vertexes[rowId];
+		if (isText) {
+			setPropertyValueGlobal(this.props.txnId, {P: {name: "as"}} as any, graph.vertexes[rowId], componentVertex, comp );
+		}
 
 		// sort to parent's children
 		// sortChildren(childrenItems, pageConfig[0].record.txnId);
@@ -372,7 +379,9 @@ export default class JsxParser {
 		// return console.log(component || lowerName, props, children)
 
 		if (typeof children === "string") {
-			setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, children );
+			if (children) {
+				setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, `'${children}'` );
+			}
 		} else {
 			console.log('not handled', children)
 		}
