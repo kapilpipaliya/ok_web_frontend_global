@@ -52,3 +52,8 @@ evalute in a window:
 https://github.com/amasad/context-eval/blob/master/lib/context-browser.js
 https://github.com/ttessarolo/safe-evaluate-expression
 
+
+### Web Build
+- Do not compile dev extreme
+- only send Web Components data.
+- 

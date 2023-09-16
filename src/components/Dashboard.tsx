@@ -51,6 +51,7 @@ const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 get("isSideBarOpen").then((data) => setSideBarOpen(data));
 
 export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
+export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
 
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
@@ -147,7 +148,6 @@ export const DashboardView = () => {
               <Route path="/backup_restore" component={BackupRestore as Component} />
               <Route path="/SimpleImport" component={SimpleImport as Component} />
               <Route path="/Graph" component={GraphViewPage as Component} />
-              <Route path="/p/:id" component={PagePreview as Component} />
               {/* Test */}
               <Route path="/public/avfmobile" component={Home as Component} />
               {/* Error */}
@@ -162,7 +162,6 @@ export const DashboardView = () => {
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
-  syncEvent();
   createEffect(() => {
    set("isSideBarOpen", isSideBarOpen());
   })
