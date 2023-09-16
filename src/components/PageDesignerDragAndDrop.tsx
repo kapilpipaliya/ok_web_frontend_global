@@ -13,6 +13,7 @@ import {
 } from "../lib/Record";
 import {batch, createEffect, createSignal, on, onCleanup, onMount, Show, useContext} from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
+// Comment This Lines in web build
 import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
 import dxSortable, {DragEndEvent} from "devextreme/ui/sortable";
 import {

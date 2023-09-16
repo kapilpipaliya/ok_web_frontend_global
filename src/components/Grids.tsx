@@ -1,6 +1,8 @@
+// Comment This Lines in web build
 import DxDataGrid, { Column } from "devextreme/ui/data_grid";
 import ArrayStore from "devextreme/data/array_store";
 import DataSource from "devextreme/data/data_source";
+import { DataType } from "devextreme/common";
 
 import {
   commitTransaction,
@@ -34,7 +36,6 @@ import { AttrsTableData } from "./api";
 import { capitalizeFirstLetter } from "../utils/utils";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
 
-import { DataType } from "devextreme/common";
 import {
   collectionNameDisplayExpr,
   selectedValue

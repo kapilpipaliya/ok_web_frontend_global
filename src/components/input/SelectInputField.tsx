@@ -10,6 +10,7 @@ import {
   useContext
 } from "solid-js";
 
+// Comment This Lines in web build
 import SelectBox, { Properties } from "devextreme/ui/select_box";
 import TagBox, { Properties as TagBoxProperties } from "devextreme/ui/tag_box";
 import {
