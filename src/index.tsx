@@ -11,26 +11,42 @@ import "uikit/dist/js/uikit";
 import "uikit/dist/css/uikit.css";
 import {render} from "solid-js/web";
 import {createStore} from "solid-js/store";
-import {Router} from "@solidjs/router";
-import {FullDashboard, showNav} from "./components/Dashboard";
+import {Route, Router, Routes} from "@solidjs/router";
+import {FullDashboard, isAdmin, showNav} from "./components/Dashboard";
 import {ServerEventsDispatcher, WS_PATH, WsContext} from "./utils/ws_events_dispatcher";
 import {AlertMessage} from "./types/Type";
 import {AlertMessageContext} from "./contexts/AlertMessageContext";
 
 import './solid_blocks_index.css'
 import {CSSProvider} from "./css/CSSProvider";
+import {PagePreview} from "./components/PageDesignerDragAndDrop";
+import {Component, Show} from "solid-js";
+import {graph} from "./lib/graph";
+import {syncEvent} from "./lib/ws_events";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const [alerts, setAlert] = createStore([] as AlertMessage[]);
+  const Sync = () => {
+    syncEvent();
+    return <></>
+  }
 
   return (
     <CSSProvider config={config}>
       <WsContext.Provider value={{Ws}}>
+        <Sync/>
         <AlertMessageContext.Provider value={{alerts, setAlert}}>
         <Router base={showNav() ? "/nav/admin" : "/admin"}>
           <FullDashboard/>
         </Router>
+        <Show when={!isAdmin() && graph.initialSynced}>
+          <Router>
+            <Routes>
+              <Route path=":id" component={PagePreview as Component} />
+            </Routes>
+          </Router>
+        </Show>
         </AlertMessageContext.Provider>
       </WsContext.Provider>
     </CSSProvider>
