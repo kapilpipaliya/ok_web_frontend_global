@@ -1061,7 +1061,7 @@ export const PageDesignerDragAndDrop = () => {
     {
      meta: { P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import", type: "success", }}} as any,
      onClick: () => {
-      const jsxParser = new JsxParser({txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
+      const jsxParser = new JsxParser({showWarnings: true, txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
       jsxParser.render();
       layoutTreeViewInstance.option("items", getLayoutTreeData());
      }
