@@ -38,7 +38,7 @@ import {
   deleteRow,
   FieldAttribute,
   FormContext,
-  getCollAttrs, getSublistRows,
+  getCollAttrs, getStringComponent, getSublistRows,
   rowMetaInitialize
 } from "../../lib/Record";
 import {
@@ -51,7 +51,7 @@ import { Icon } from "@iconify-icon/solid";
 import {
   GenericField,
   PageRenderContext,
-  PageRenderUtils
+  PageRenderUtils, RepeaterContext
 } from "./GenaricField";
 import { getLastItem } from "../../utils/functions";
 
@@ -157,7 +157,12 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
               if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
                 console.log("refreshing");
-                return getSelectionOptions([p.joinVertex], metaVertex().P.component).vertexes;
+                const component = getSelectionOptions([p.joinVertex], metaVertex().P.component).vertexes;
+                if (component) {
+                  return component;
+                } else {
+                  return getStringComponent()?.P.name;
+                }
               } else {
                 return metaVertex().P.component;
               }
@@ -401,7 +406,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                     No Data
                   </td>
                 </tr>}>
-                  {(vertex, index) => <SortableRow joinVertex={vertex} index={index()} />}
+                  {(vertex, index) => <RepeaterContext.Provider value={[vertex, ...useContext(RepeaterContext)]}><SortableRow joinVertex={vertex} index={index()} /></RepeaterContext.Provider>}
                 </For>
                 {/*  </SortableProvider>*/}
                 {/*</DragDropProvider>*/}

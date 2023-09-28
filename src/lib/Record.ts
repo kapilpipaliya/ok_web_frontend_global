@@ -865,11 +865,7 @@ export const getExportCode = (record: Record) => {
  });
 }
 
-export function getCollAttrComp(attrVertex: Vertex): Vertex | undefined {
- const attrComp = getChildVertex(["$0Comp"], attrVertex).vertex;
- if (attrComp) return attrComp;
-
- let attrDataTypeVertex = getChildVertex(["$0DataType"], attrVertex).vertex;
+export function getStringComponent(attrDataTypeVertex?: Vertex) {
  if (!attrDataTypeVertex) {
   attrDataTypeVertex = findVertexByLabelAndUniqueId("DataType", "name", "String");
   if (!attrDataTypeVertex) {
@@ -877,4 +873,12 @@ export function getCollAttrComp(attrVertex: Vertex): Vertex | undefined {
   }
  }
  return getChildVertex(["$0Default"], attrDataTypeVertex).vertex;
+}
+
+export function getCollAttrComp(attrVertex: Vertex): Vertex | undefined {
+ const attrComp = getChildVertex(["$0Comp"], attrVertex).vertex;
+ if (attrComp) return attrComp;
+
+ let attrDataTypeVertex = getChildVertex(["$0DataType"], attrVertex).vertex;
+ return getStringComponent(attrDataTypeVertex);
 }
