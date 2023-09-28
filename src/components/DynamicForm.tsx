@@ -50,7 +50,7 @@ import {
 } from "../lib/Traverse";
 import {
   genericComponents2,
-  GenericField
+  GenericField, RepeaterContext
 } from "./input/GenaricField";
 import {
   addMetaVertexes,
@@ -510,7 +510,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
   </div>
 
   return (
-    <div
+      <RepeaterContext.Provider value={[record.vertex, ...useContext(RepeaterContext)]}><div
       ref={(el) => {
         setDivRef(el);
         validationGroup = new dxValidationGroup(divRef()!);
@@ -597,6 +597,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
         </FormContext.Provider>
       </Show>
       <Show when={popup()}><PopOver/></Show>
-    </div>
+      </div></RepeaterContext.Provider>
   );
 };

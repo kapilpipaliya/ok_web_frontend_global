@@ -69,7 +69,7 @@ const collectionAttr = [
         name: "name",
         component: "SelectBox",
         props: {
-          displayExpr: "P.name",
+          displayExpr: "::'P.name'",
           collection: "<-$0->$0Comp->$0Prop",
         },
       },
@@ -247,7 +247,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //       name: "name",
           //       component: "SelectBox",
           //       props: {
-          //         displayExpr: "P.name",
+          //         displayExpr: "::'P.name'",
           //         collection: "<-$0->$0Comp->$0Prop",
           //       },
           //     },
@@ -565,7 +565,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "name",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "P.name",
+                  displayExpr: "::'P.name'",
                   collection: "g:'Comp[Table]'->$0Prop",
                 },
               },
@@ -608,7 +608,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "name",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "P.name",
+                  displayExpr: "::'P.name'",
                   collection: "g:'Comp[Table]'->$0Prop",
                 },
               },
@@ -913,7 +913,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "name",
                 component: "SelectBox",
                 props: {
-                  displayExpr: "P.name",
+                  displayExpr: "::'P.name'",
                   collection: "<-$0->$0Comp->$0Prop",
                 },
               },
@@ -1015,7 +1015,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     name: "name",
                     component: "SelectBox",
                     props: {
-                      displayExpr: "P.name",
+                      displayExpr: "::'P.name'",
                       collection: "<-$0->$0Comp->$0Prop",
                     },
                   },
@@ -1088,7 +1088,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                         name: "name",
                         component: "SelectBox",
                         props: {
-                          displayExpr: "P.name",
+                          displayExpr: "::'P.name'",
                           collection: "<-$0->$0Comp->$0Prop",
                         },
                       },
@@ -1161,7 +1161,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                             name: "name",
                             component: "SelectBox",
                             props: {
-                              displayExpr: "P.name",
+                              displayExpr: "::'P.name'",
                               collection: "<-$0->$0Comp->$0Prop",
                             },
                           },
@@ -1234,7 +1234,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                 name: "name",
                                 component: "SelectBox",
                                 props: {
-                                  displayExpr: "P.name",
+                                  displayExpr: "::'P.name'",
                                   collection: "<-$0->$0Comp->$0Prop",
                                 },
                               },
@@ -1307,7 +1307,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                     name: "name",
                                     component: "SelectBox",
                                     props: {
-                                      displayExpr: "P.name",
+                                      displayExpr: "::'P.name'",
                                       collection: "<-$0->$0Comp->$0Prop",
                                     },
                                   },
@@ -1380,7 +1380,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                         name: "name",
                                         component: "SelectBox",
                                         props: {
-                                          displayExpr: "P.name",
+                                          displayExpr: "::'P.name'",
                                           collection: "<-$0->$0Comp->$0Prop",
                                         },
                                       },
@@ -1453,7 +1453,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                             name: "name",
                                             component: "SelectBox",
                                             props: {
-                                              displayExpr: "P.name",
+                                              displayExpr: "::'P.name'",
                                               collection: "<-$0->$0Comp->$0Prop",
                                             },
                                           },
@@ -1526,7 +1526,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                                 name: "name",
                                                 component: "SelectBox",
                                                 props: {
-                                                  displayExpr: "P.name",
+                                                  displayExpr: "::'P.name'",
                                                   collection: "<-$0->$0Comp->$0Prop",
                                                 },
                                               },
@@ -1599,7 +1599,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                                     name: "name",
                                                     component: "SelectBox",
                                                     props: {
-                                                      displayExpr: "P.name",
+                                                      displayExpr: "::'P.name'",
                                                       collection: "<-$0->$0Comp->$0Prop",
                                                     },
                                                   },
@@ -1672,7 +1672,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                                                         name: "name",
                                                         component: "SelectBox",
                                                         props: {
-                                                          displayExpr: "P.name",
+                                                          displayExpr: "::'P.name'",
                                                           collection: "<-$0->$0Comp->$0Prop",
                                                         },
                                                       },
