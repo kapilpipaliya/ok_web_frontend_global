@@ -56,4 +56,8 @@ https://github.com/ttessarolo/safe-evaluate-expression
 ### Web Build
 - Do not compile dev extreme
 - only send Web Components data.
-- 
+
+### How to import HTML in Page Builder:
+- Wrap For Loop With <Repeater> component.
+- replace expression with formula string.
+Q
