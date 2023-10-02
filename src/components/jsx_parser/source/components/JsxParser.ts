@@ -293,7 +293,7 @@ export default class JsxParser {
 		if (containerTags.includes(comp)) {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Box")!;
 		} else if (comp === "img") {
-			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Img")!;
+			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Image")!;
 		} else if (comp === "a") {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "A")!;
 		} else if (comp === "Repeater") {
@@ -343,7 +343,10 @@ export default class JsxParser {
 					const rawName = expr.name.name
 					const attributeName = ATTRIBUTES[rawName] || rawName
 					// if the value is null, this is an implicitly "true" prop, such as readOnly
-					const value = this.#parseExpression(expr,{...scope, parent: parentVertex})
+					let value = this.#parseExpression(expr,{...scope, parent: parentVertex})
+					if(attributeName === "href" || attributeName === "src") {
+						value = `'${value}'`;
+					}
 
 					const matches = blacklistedAttrs.filter(re => re.test(attributeName))
 					if (matches.length === 0) {

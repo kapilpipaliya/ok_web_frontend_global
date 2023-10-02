@@ -16,6 +16,7 @@ import {
 } from "./graph";
 import {deleteVertex, updateVertexId} from "./Vertex";
 import {deleteEdge, updateEdgeId} from "./Edge";
+import {isAdmin} from "../components/Dashboard";
 
 
 export const syncEvent = () => {
@@ -185,6 +186,7 @@ export const syncEvent = () => {
    [
     ["get", "sync", 0],
     {
+     admin: isAdmin() ? true : undefined,
      from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
      // subscriptions: this.subscriptions,
      subscriptions: [],
@@ -211,6 +213,7 @@ export const syncEvent = () => {
     [
      ["get", "sync", 0],
      {
+      admin: isAdmin() ? true : undefined,
       from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
       // subscriptions: this.subscriptions,
       subscriptions: [],

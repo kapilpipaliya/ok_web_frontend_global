@@ -346,7 +346,7 @@ export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
   </For>
 }
 // This component support rendering Child Themselves by calling PageRender.
-export function GenericField(props: ComponentProps & { component?: string; disabled?: boolean; children?: JSXElement, [key: string]: any }) {
+export function GenericField(props: ComponentProps & { component?: string; disabled?: boolean; txnId?: number; children?: JSXElement, [key: string]: any }) {
   const formContext = useContext(FormContext);
   let { events } = useContext(PageContext);
   const parentItems = useContext(PageRenderContext);
@@ -2051,7 +2051,7 @@ function getText(projection: string, repeaterContext: Vertex[]) {
 function getUrl(projection: string, repeaterContext: Vertex[]) {
     let url = getSelectionOptions(repeaterContext, projection).vertexes as string | undefined
     if (typeof url === "string" && url.startsWith('/')) {
-      url = (showNav() ? '/nav' : '') + url;
+      // url = (showNav() ? '/nav' : '') + url;
     }
     return url;
 }

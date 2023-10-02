@@ -381,7 +381,13 @@ binops [':-'] = (vertexes1, projection) => {
         return;
     }
 }
-binops ['::'] = (vertexes1, projection) => {
+function projectedValueBinOps (vertexes1: any, projection: string): any {
+    if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
+        return projection.replace(/\$([A-Za-z][\w+]?[:\w.]*)/g, function(match, p1, offset, string) {
+            return projectedValueBinOps(vertexes1, p1);
+        });
+    }
+
     let vertex;
     if (Array.isArray(vertexes1)) {
         vertex = vertexes1[0] || {};
@@ -392,6 +398,7 @@ binops ['::'] = (vertexes1, projection) => {
     }
     return getTextValue(path(projection, vertex));
 }
+binops ['::'] = projectedValueBinOps
 unops['->'] = (collection, context) => {
     if (/^\$[1-9]+[0-9]*$/.test(collection)) {
         const numericValue = parseInt(collection.slice(1));
@@ -418,6 +425,20 @@ unops['json:'] = (string) => {
         return;
     }
 }
+//
+// unops['id:'] = (id, context) => {
+//
+//     let idValue;
+//     if (Array.isArray(id)) {
+//         idValue = id[0] || {};
+//     } else if (G.isObject(id)) {
+//         idValue = id.id;
+//     } else {
+//         idValue = id;
+//     }
+//
+//     return idValue;
+// }
 
 unops['g:'] = (edgeType) => {
     const [type, filter, isMultiple] = calculateFilter(edgeType)
@@ -434,15 +455,39 @@ unops['g:'] = (edgeType) => {
         return findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
     }
 }
-unops['ids:'] = (edgeType: string) => {
-    return edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);
+unops['ids:'] = (edgeType: string | number | string[] | Vertex[]) => {
+    if ( typeof edgeType === "number") {
+        return graph.vertexes[edgeType]
+    } else if (typeof edgeType === "string") {
+        return edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);
+    } else if (Array.isArray(edgeType)) {
+        if (edgeType.length === 0) {
+            return [];
+        } else if (typeof edgeType[0] === "string" || typeof edgeType[0] === "number") {
+            return edgeType.map(id => graph.vertexes[id]).filter(x => x);
+        }
+    }
 }
 unops['T:'] = (value: any) => {
     return getTextValue(value);
 }
-unops['::'] = (projection: any, context) => {
-    return getTextValue(path(projection, context.vertexes[0]));
+function projectedValueUnOps(projection: any, context: any) {
+    if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
+        return projection.replace(/\$([A-Za-z][\w+]?[:\w.]*)/g, function(match, p1, offset, string) {
+            return projectedValueUnOps(p1, context);
+        });
+    }
+    let vertex;
+    if (Array.isArray(context.vertexes)) {
+        vertex = context.vertexes[0] || {};
+    } else if (G.isObject(context.vertexes)) {
+        vertex = context.vertexes;
+    } else {
+        vertex = {};
+    }
+    return getTextValue(path(projection, vertex));
 }
+unops['::'] = projectedValueUnOps
 
 // const parse_tree = jsep('(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)');
 

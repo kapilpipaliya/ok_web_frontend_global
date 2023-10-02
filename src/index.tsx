@@ -19,7 +19,7 @@ import {AlertMessageContext} from "./contexts/AlertMessageContext";
 
 import './solid_blocks_index.css'
 import {CSSProvider} from "./css/CSSProvider";
-import {PagePreview} from "./components/PageDesignerDragAndDrop";
+import {PagePreview, RobotsTxt, SiteMap} from "./components/PageDesignerDragAndDrop";
 import {Component, Show} from "solid-js";
 import {graph} from "./lib/graph";
 import {syncEvent} from "./lib/ws_events";
@@ -44,6 +44,8 @@ render(() => {
           <Router>
             <Routes>
               <Route path=":id" component={PagePreview as Component} />
+              <Route path="robots.txt" component={RobotsTxt as Component} />
+              <Route path="sitemap.txt" component={SiteMap as Component} />
             </Routes>
           </Router>
         </Show>
