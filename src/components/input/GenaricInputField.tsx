@@ -39,6 +39,7 @@ import { graph, IdAttr } from "../../lib/graph";
 import { FormContext, getCompProps, isUpdatingInput } from "../../lib/Record";
 import { getValueFromVertexOrKey } from "../../utils/utils";
 import { getComponentForCollRow } from "../DynamicForm";
+import {mergeVertexProperties} from "../../lib/Vertex";
 
 export const genericComponents = [
   "Autocomplete",
@@ -172,7 +173,7 @@ export const getTextColumnValue = (value: any) => {
 
   return G.isObject(value) ? JSON.stringify(value) : value;
 };
-export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean }) {
+export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
   const formContext = useContext(FormContext);
   const outerOwner = getOwner();
   return (
@@ -204,9 +205,12 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                           file,
                           file.name
                       );
-                      const setResult = (media: number[]) => {
+                      const setResult = (media: {}[]) => {
                         runWithOwner(outerOwner, () => {
-                          props.setValue!(props.meta, props.data!, media[0]);
+                          // props.setValue!(props.meta, props.data!, media[0]);
+                          for (const m of media) {
+                            mergeVertexProperties(props.txnId, props.data.id, {...m.P, id: m.id});
+                          }
                         })
                       }
 

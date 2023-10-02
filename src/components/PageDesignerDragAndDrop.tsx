@@ -176,7 +176,7 @@ export const setPropertyValueGlobal = (txnId: number, meta: Vertex, layoutVertex
     setSelectionValue(txnId, graph.vertexes[addRowResult.vertexId], {P: {name: 'Name'}} as unknown as Vertex, componentProp.id);
    }
   } else {
-   console.error(`component prop ${meta.P.name} is not found. so skipped inserting property.`);
+   console.error(`component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`);
   }
  }
  // TODO: if reset, delete the row.
@@ -1283,6 +1283,13 @@ export const PageDesignerDragAndDrop = () => {
    layoutTreeViewInstance.option("items", getLayoutTreeData());
   }
  }
+ onCleanup(() => {
+  batch(() => {
+   setSelectedLayout({vertexId: -1});
+   setSelectedComponent({vertexId: -1});
+   setSelectedColl({vertexId: -1});
+  })
+ })
  return (
   <div class="flex">
    <div class="border:1|solid|blue-60 p:10 m:5 flex:col">
@@ -1340,17 +1347,36 @@ export const PageDesignerDragAndDrop = () => {
 export const PagePreview = (props: {}) => {
  const params = useParams();
  const { Ws } = useContext(WsContext);
+ const [count, setCount] = createSignal(1);
 
- if (!params.id) return "Page ID not specified.";
- const record = new Record({ ws: Ws });
- const result = findVertexByLabelAndUniqueId("Page", "name", params.id);
- if (!result) return "No Page Found";
- const loadResult = record.load(result.id);
- if (loadResult.error) return loadResult.error;
+ createEffect(on(() => params.id, v=> setCount(v => v + 1), {defer: true}));
 
- const form = getFormMetaData("Page");
- if (form.error) return form.error;
+ const PageView_ = () => {
+  if (!params.id) return "Page ID not specified.";
+  const record = new Record({ ws: Ws });
+  const result = findVertexByLabelAndUniqueId("Page", "name", params.id);
+  if (!result) return "No Page Found";
+  const loadResult = record.load(result.id);
+  if (loadResult.error) return loadResult.error;
 
- record.createMeta(form.form!);
- return <PageView number={1} vertex={record?.vertex}/>
+  const form = getFormMetaData("Page");
+  if (form.error) return form.error;
+  record.createMeta(form.form!);
+
+  return <PageView number={count()} vertex={record?.vertex}/>
+ }
+ return <Show when={count()} keyed><PageView_/></Show>
+}
+export const RobotsTxt = (props: {}) => {
+  return <>
+  User-agent: *
+  Allow: /
+
+  Sitemap: {window.location.origin + '/sitemap.txt'}
+</>
+}
+export const SiteMap = (props: {}) => {
+  return <For each={graph.vertexLabelIdMap["Page"]?.filter(vertex => graph.vertexes[vertex].P.public)}>
+   {vertex => <>{window.location.origin + graph.vertexes[vertex].P.name}</>}
+</For>
 }

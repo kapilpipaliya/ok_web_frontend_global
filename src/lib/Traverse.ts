@@ -345,8 +345,10 @@ export const deleteNestedLayout = (txnId: number, vertexes: Vertex[] = [], optio
     }
   };
 
-  return deleteChildren(vertexes);
-
+  deleteChildren(vertexes);
+  for(const child of vertexes) {
+    deleteRow(child, false, txnId, {} as any);
+  }
 }
 
 export const getTextValue = (value: any) => {

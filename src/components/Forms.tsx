@@ -17,6 +17,7 @@ import { Record } from "../lib/Record";
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { createStore } from "solid-js/store";
+import {isAdmin} from "./Dashboard";
 
 // TODO make default component property applied to
 export const AllForms = () => {
@@ -53,6 +54,7 @@ export const Login = (props: {}) => {
         [
           ["get", "sync", 0],
           {
+            admin: isAdmin() ? true : undefined,
             from: 0,
             subscriptions: Ws.subscriptions,
           },
@@ -109,6 +111,7 @@ export const Logout = (props: {}) => {
         [
           ["get", "sync", 0],
           {
+            admin: isAdmin() ? true : undefined,
             from: 0,
             subscriptions: Ws.subscriptions,
           },
