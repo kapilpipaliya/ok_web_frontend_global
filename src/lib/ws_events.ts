@@ -158,12 +158,21 @@ export const syncEvent = () => {
 
    for (const edgeId in args.edges) {
     const edge = args.edges[edgeId];
-    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
-     G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
-    );
-    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
-     G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
-    );
+    try {
+     setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
+         G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
+     );
+    } catch (e) {
+     debugger
+    }
+
+    try {
+     setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
+         G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
+     );
+    } catch (e) {
+     debugger
+    }
    }
    // timeTaken = Date.now() - start;
    // console.log("Total time taken : " + timeTaken + " milliseconds");

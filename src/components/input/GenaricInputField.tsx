@@ -209,14 +209,18 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                         runWithOwner(outerOwner, () => {
                           // props.setValue!(props.meta, props.data!, media[0]);
                           for (const m of media) {
-                            mergeVertexProperties(props.txnId, props.data.id, {...m.P, id: m.id});
+                            if (m) {
+                              mergeVertexProperties(props.txnId, props.data.id, {...m.P, id: m.id});
+                            }
                           }
                         })
                       }
 
+                      // TODO: Delete Temp file vertex after form is saved.
                       fetch("http://49.12.190.36:1401/api/upload", {
                         method: "POST",
                         body: formData,
+                        headers: {temp: "true"},
                         // redirect: "follow",
                         // mode: "no-cors",
                       })

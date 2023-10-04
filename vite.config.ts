@@ -1,10 +1,73 @@
 /// <reference types="vitest" />
 
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import solidPlugin from "vite-plugin-solid";
 import devtools from 'solid-devtools/vite'
+import type { ImportSpecifier } from 'es-module-lexer'
+import { init, parse } from 'es-module-lexer'
+import MagicString from 'magic-string'
 
+let needSourcemap = false
 
+const isBuildForWeb = !process.env.admin
+
+// write a plugin to comment devExpress import using this plugin:
+// https://github.com/vbenjs/vite-plugin-style-import/blob/main/packages/core/src/index.ts
+// Other Similar Plugin reference:  https://github.com/vite-plugin/vite-plugin-dynamic-import/blob/main/src/index.ts
+function removeDevExpressImport(options = {}): Plugin {
+ return {
+  name: 'output-plugin-stats',
+  configResolved(config)
+  {
+   needSourcemap = !!config.build.sourcemap
+  },
+  async transform(code, id) {
+   if (!code || !needTransform(code)) {
+    return null
+   }
+
+   let imports: readonly ImportSpecifier[] = []
+   try {
+    imports = parse(code)[0]
+   } catch (e) {
+    console.error(e)
+   }
+   if (!imports.length) {
+    return null
+   }
+
+   let s: MagicString | undefined
+   const str = () => s || (s = new MagicString(code))
+
+   for (let index = 0; index < imports.length; index++) {
+    const { n, se, ss } = imports[index]
+    if (!n) continue
+
+    const importStr = code.slice(ss, se)
+
+    if (needTransform(importStr)) {
+     str().appendLeft(ss, '//')
+    }
+   }
+   return {
+    map: needSourcemap ? str().generateMap({ hires: true }) : null,
+    code: str().toString(),
+   }
+  }
+ }
+}
+
+// Do you need to process code
+function needTransform(code: string) {
+ return code.includes("devextreme/");
+}
+
+const alias = {} as {[key: string]: string};
+if (!isBuildForWeb) {
+ Object.assign(alias, {
+  "devextreme/ui": 'devextreme/esm/ui'
+ })
+}
 export default defineConfig({
  plugins: [
   devtools({
@@ -23,13 +86,22 @@ export default defineConfig({
      // ],
     ]
    }
-  })
+  }),
+  isBuildForWeb && removeDevExpressImport()
  ],
  define: {
   '__APP_VERSION__': JSON.stringify(process.env.npm_package_version),
  },
  build: {
-  target: "esnext"
+  outDir: isBuildForWeb ? 'distweb' : `distadmin`,
+  target: "esnext",
+  rollupOptions: {
+   output: {
+    entryFileNames: `${isBuildForWeb ? "assets_web" : "assets"}/[name]-[hash].js`,
+    chunkFileNames: `${isBuildForWeb ? "assets_web" : "assets"}/[name]-[hash].js`,
+    assetFileNames: `${isBuildForWeb ? "assets_web" : "assets"}/[name]-[hash].[ext]`,
+   },
+  },
  },
  server: {
   host: "0.0.0.0"
@@ -75,8 +147,6 @@ export default defineConfig({
   // devexpress tree shaking issue:
   // https://supportcenter.devexpress.com/ticket/details/t1055230/the-cannot-read-properties-of-undefined-reading-render-error-occurs-in-vite-2-7-6-in
   // devexpress not working in production issue: https://supportcenter.devexpress.com/ticket/details/t1054272/vue3-react-vite-rollup-devextreme-fails-in-production-because-some-modules-do-not-pass
-  alias: {
-   "devextreme/ui": 'devextreme/esm/ui'
-  }
+  alias
  },
 });
