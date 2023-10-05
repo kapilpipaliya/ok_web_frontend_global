@@ -80,7 +80,7 @@ import {WsContext} from "../../utils/ws_events_dispatcher";
 import {Link, useNavigate} from "@solidjs/router";
 import {getValueFromVertexOrKey} from "../../utils/utils";
 import {Dynamic} from "solid-js/web";
-import {selectedLayout} from "../PageDesignerDragAndDrop";
+import {selectedLayout} from "../PageView";
 import {showNav} from "../Dashboard";
 
 export const genericComponents2 = [
