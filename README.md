@@ -56,6 +56,7 @@ https://github.com/ttessarolo/safe-evaluate-expression
 ### Web Build
 - Do not compile dev extreme
 - only send Web Components data.
+- Analyze Web build size: https://www.npmjs.com/package/vite-bundle-visualizer
 
 ### How to import HTML in Page Builder:
 - Wrap For Loop With <Repeater> component.
