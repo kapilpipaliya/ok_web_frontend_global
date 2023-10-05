@@ -6,7 +6,6 @@ import {
  addNewRow,
  FieldAttribute,
  getCompProps,
- getFormMetaData,
  getRowProps,
  Record,
  setValueGlobal
@@ -52,6 +51,7 @@ import {TableInputField} from "./input/TableInputField";
 import {AttrsTableData} from "./api";
 import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "./jsx_parser/source/components/JsxParser";
+import {selectedLayout, setSelectedLayout} from "./PageView"
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -185,7 +185,6 @@ export const setPropertyValueGlobal = (txnId: number, meta: Vertex, layoutVertex
 
 }
 
-export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
 
 function getLayoutTreeJson() {
  return {
@@ -1344,39 +1343,3 @@ export const PageDesignerDragAndDrop = () => {
  );
 };
 
-export const PagePreview = (props: {}) => {
- const params = useParams();
- const { Ws } = useContext(WsContext);
- const [count, setCount] = createSignal(1);
-
- createEffect(on(() => params.id, v=> setCount(v => v + 1), {defer: true}));
-
- const PageView_ = () => {
-  if (!params.id) return "Page ID not specified.";
-  const record = new Record({ ws: Ws });
-  const result = findVertexByLabelAndUniqueId("Page", "name", params.id);
-  if (!result) return "No Page Found";
-  const loadResult = record.load(result.id);
-  if (loadResult.error) return loadResult.error;
-
-  const form = getFormMetaData("Page");
-  if (form.error) return form.error;
-  record.createMeta(form.form!);
-
-  return <PageView number={count()} vertex={record?.vertex}/>
- }
- return <Show when={count()} keyed><PageView_/></Show>
-}
-export const RobotsTxt = (props: {}) => {
-  return <>
-  User-agent: *
-  Allow: /
-
-  Sitemap: {window.location.origin + '/sitemap.txt'}
-</>
-}
-export const SiteMap = (props: {}) => {
-  return <For each={graph.vertexLabelIdMap["Page"]?.filter(vertex => graph.vertexes[vertex].P.public)}>
-   {vertex => <>{window.location.origin + graph.vertexes[vertex].P.name}</>}
-</For>
-}

@@ -42,9 +42,8 @@ import { Navbar } from "../pages/home/components/Navbar";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { AbstractSingleForm } from "./DynamicForm";
 import { FileField } from "./input/FileField";
-import {PageDesignerDragAndDrop, PagePreview} from "./PageDesignerDragAndDrop";
+import {PageDesignerDragAndDrop} from "./PageDesignerDragAndDrop";
 import { GraphViewPage } from "../pages/GraphViewPage";
-
 
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
@@ -135,7 +134,7 @@ export const DashboardView = () => {
                   return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />
                 }}
               />
-              <Route path="/Page/:id" component={PageDesignerDragAndDrop as Component} />
+              <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props}/>} />
               <Route path="/Nav/new" component={NavDesigner as Component} />
               <Route path="/dashboards" component={AllDashboards as Component} />
               <Route path="/forms" component={AllForms as Component} />
@@ -145,7 +144,7 @@ export const DashboardView = () => {
               <Route path="/logout" component={Logout as Component} />
               <Route path="/signup" component={SignUp as Component} />
               {/* Utils */}
-              <Route path="/backup_restore" component={BackupRestore as Component} />
+              <Route path="/backup_restore" component={(props) => <BackupRestore {...props}/>} />
               <Route path="/SimpleImport" component={SimpleImport as Component} />
               <Route path="/Graph" component={GraphViewPage as Component} />
               {/* Test */}

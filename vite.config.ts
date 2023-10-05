@@ -59,7 +59,7 @@ function removeDevExpressImport(options = {}): Plugin {
 
 // Do you need to process code
 function needTransform(code: string) {
- return code.includes("devextreme/");
+ return code.includes("devextreme/") || code.includes("jsx_parser/source/components/JsxParser") || code.includes(`import csvtojson from "csvtojson"`) || code.includes(`from "yaml"`) || code.includes(`from "../examples/data`) || code.includes(`from "../pages/BackupRestore"`) || code.includes("/PageDesignerDragAndDrop");
 }
 
 const alias = {} as {[key: string]: string};

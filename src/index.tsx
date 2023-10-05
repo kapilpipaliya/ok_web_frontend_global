@@ -19,10 +19,10 @@ import {AlertMessageContext} from "./contexts/AlertMessageContext";
 
 import './solid_blocks_index.css'
 import {CSSProvider} from "./css/CSSProvider";
-import {PagePreview, RobotsTxt, SiteMap} from "./components/PageDesignerDragAndDrop";
 import {Component, Show} from "solid-js";
 import {graph} from "./lib/graph";
 import {syncEvent} from "./lib/ws_events";
+import {PagePreview, RobotsTxt, SiteMap} from "./components/PageView";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
