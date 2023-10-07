@@ -8,28 +8,30 @@ import {graph} from "../lib/graph";
 
 export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
 
+
+export const PageView_ = (props: {id: string, count: number}) => {
+    const {Ws} = useContext(WsContext);
+    if (!props.id) return "Page ID not specified.";
+    const record = new Record({ws: Ws});
+    const result = findVertexByLabelAndUniqueId("Page", "name", props.id);
+    if (!result) return "No Page Found";
+    const loadResult = record.load(result.id);
+    if (loadResult.error) return loadResult.error;
+
+    const form = getFormMetaData("Page");
+    if (form.error) return form.error;
+    record.createMeta(form.form!);
+
+    return <PageView number={props.count} vertex={record?.vertex}/>
+}
+
 export const PagePreview = (props: {}) => {
     const params = useParams();
-    const {Ws} = useContext(WsContext);
     const [count, setCount] = createSignal(1);
 
     createEffect(on(() => params.id, v => setCount(v => v + 1), {defer: true}));
 
-    const PageView_ = () => {
-        if (!params.id) return "Page ID not specified.";
-        const record = new Record({ws: Ws});
-        const result = findVertexByLabelAndUniqueId("Page", "name", params.id);
-        if (!result) return "No Page Found";
-        const loadResult = record.load(result.id);
-        if (loadResult.error) return loadResult.error;
-
-        const form = getFormMetaData("Page");
-        if (form.error) return form.error;
-        record.createMeta(form.form!);
-
-        return <PageView number={count()} vertex={record?.vertex}/>
-    }
-    return <Show when={count()} keyed><PageView_/></Show>
+    return <Show when={count()} keyed><PageView_ id={params.id} count={count()}/></Show>
 }
 export const RobotsTxt = (props: {}) => {
     return <>

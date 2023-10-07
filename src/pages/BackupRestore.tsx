@@ -42,10 +42,11 @@ import {
 import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
 import { Field, NsMetaJson, Type } from "../types/NSMetaData";
 import { parse } from "yaml";
-import { G } from "@mobily/ts-belt";
+
 import { deleteEdge } from "../lib/Edge";
 import { AttrsTableData } from "../components/api";
 import { fileDownloader } from "../utils/dom_utils";
+import {isObject} from "../utils/utils";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
@@ -1033,7 +1034,7 @@ OUT:
 export function importNavigation(yamlInput: any, record: Record) {
   const input = parse(yamlInput);
   console.log(input);
-  if (!G.isObject(input)) {
+  if (!isObject(input)) {
     return;
   }
 

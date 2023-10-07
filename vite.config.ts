@@ -59,7 +59,12 @@ function removeDevExpressImport(options = {}): Plugin {
 
 // Do you need to process code
 function needTransform(code: string) {
- return code.includes("devextreme/") || code.includes("jsx_parser/source/components/JsxParser") || code.includes(`import csvtojson from "csvtojson"`) || code.includes(`from "yaml"`) || code.includes(`from "../examples/data`) || code.includes(`from "../pages/BackupRestore"`) || code.includes("/PageDesignerDragAndDrop");
+ return code.includes("devextreme/") || code.includes("jsx_parser/source/components/JsxParser") || code.includes(`import csvtojson from "csvtojson"`) || code.includes(`from "yaml"`) || code.includes(`from "../examples/data`)
+     || code.includes(`from "../pages/BackupRestore"`) || code.includes("/PageDesignerDragAndDrop") || code.includes("lib/Import")
+     // || code.includes("/api")
+     || code.includes("css/dx.light.css")  || code.includes("solid-blocks")  || code.includes("./solid_blocks_index.css")
+     || code.includes(`from "../pages/GraphViewPage"`) || code.includes(`from "./FormDesigner"`) || code.includes(`from "./Grids"`)
+     || code.includes(`/GenericInputField"`) || code.includes(`/TableInputField"`) || code.includes(`/SelectInputField"`);
 }
 
 const alias = {} as {[key: string]: string};

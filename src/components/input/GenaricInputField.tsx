@@ -6,7 +6,6 @@ import {
   Show,
   useContext
 } from "solid-js";
-import { G } from "@mobily/ts-belt";
 // Comment This Lines in web build
 import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
 import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
@@ -37,7 +36,7 @@ import { ValidationRule } from "devextreme/common";
 import { ComponentProps } from "../../types/Component";
 import { graph, IdAttr } from "../../lib/graph";
 import { FormContext, getCompProps, isUpdatingInput } from "../../lib/Record";
-import { getValueFromVertexOrKey } from "../../utils/utils";
+import {getValueFromVertexOrKey, isObject} from "../../utils/utils";
 import { getComponentForCollRow } from "../DynamicForm";
 import {mergeVertexProperties} from "../../lib/Vertex";
 
@@ -171,7 +170,7 @@ export const getTextColumnValue = (value: any) => {
     value = values.join(', ');
   }
 
-  return G.isObject(value) ? JSON.stringify(value) : value;
+  return isObject(value) ? JSON.stringify(value) : value;
 };
 export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
   const formContext = useContext(FormContext);

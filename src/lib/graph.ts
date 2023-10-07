@@ -1,9 +1,9 @@
 import {batch} from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
-import {G} from "@mobily/ts-belt";
 import {klona} from "klona";
 import {get, set} from "idb-keyval";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
+import {isNumber} from "../utils/utils";
 
 window.s = createStore;
 
@@ -216,7 +216,7 @@ export function resetDatabaseLogin() {
 }
 
 export function isValidId(startVertexId: Id) {
-  return G.isNumber(startVertexId);
+  return isNumber(startVertexId);
 }
 // @ts-ignore
 window.graph = graph;

@@ -4,8 +4,8 @@ import {graph, IdAttr, Vertex} from "./graph";
 import {path} from "rambda";
 import {calculateFilter, getTextValue} from "./Traverse";
 import {findVertexIdsByLabel} from "./Vertex";
-import {G} from "@mobily/ts-belt";
 import {jsonata} from "./jsonata/jsonata";
+import {isObject} from "../utils/utils";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -391,7 +391,7 @@ function projectedValueBinOps (vertexes1: any, projection: string): any {
     let vertex;
     if (Array.isArray(vertexes1)) {
         vertex = vertexes1[0] || {};
-    } else if (G.isObject(vertexes1)) {
+    } else if (isObject(vertexes1)) {
         vertex = vertexes1;
     } else {
         vertex = {};
@@ -480,7 +480,7 @@ function projectedValueUnOps(projection: any, context: any) {
     let vertex;
     if (Array.isArray(context.vertexes)) {
         vertex = context.vertexes[0] || {};
-    } else if (G.isObject(context.vertexes)) {
+    } else if (isObject(context.vertexes)) {
         vertex = context.vertexes;
     } else {
         vertex = {};

@@ -69,10 +69,7 @@ import {ComponentProps} from "../../types/Component";
 import {commitTxn, IdAttr, revertTransaction, setGraph, Vertex} from "../../lib/graph";
 import {FormContext, getCollAttrComp, getCompProps, getRowProps, PageContext, Record} from "../../lib/Record";
 import {getTextColumnValue} from "./GenaricInputField";
-import {ActionCards} from "../../pages/home/components/ActionCards";
-import {Navbar} from "../../pages/home/components/Navbar";
 import {getChildVertex, getChildVertexes, getSelectionOptions} from "../../lib/Traverse";
-import {TodaysEnergizer} from "../../pages/home/components/TodaysEnergizerSection";
 import {DynamicComponent,} from "../DynamicForm";
 import {toTitle} from "case-switcher-js";
 import {getLastItem} from "../../utils/functions";
@@ -133,9 +130,6 @@ export const genericComponents2 = [
   "FieldSetLabelLeft",
   "Form",
   "DropDownBoxTreeView",
-  "NavBar",
-  "ActionCard",
-  "TodaysEnergizer",
   "Text",
   "Repeater",
   "A",
@@ -2002,17 +1996,9 @@ export function GenericField(props: ComponentProps & { component?: string; disab
               {/*<FormGroup attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />*/}
             </div>
           </Match>
-          <Match when={component()==="NavBar"}>
-            <Navbar meta={props.meta} data={props.data}/>
-          </Match>
-          <Match when={component()==="ActionCard"}>
-            <ActionCards meta={props.meta} data={props.data} />
-          </Match>
-          <Match when={component()==="TodaysEnergizer"}>
-            <TodaysEnergizer meta={props.meta} data={props.data} />
-          </Match>
           <Match when={component()==="Box" && props.meta.P.props?.text}>
             <Dynamic component={props.meta.P.props?.as || "div"}
+                     {...getAttrs(props.meta)}
                      class={getValueFromVertexOrKey(props.meta.P.props, "class")}
             >
               {getText(props.meta.P.props?.text, repeaterContext)}
@@ -2082,4 +2068,14 @@ export function PageView(props: {
       </Switch>
     </Show>
   </PageContext.Provider>;
+}
+
+
+
+export function getAttrs(meta: Vertex) {
+  if (meta.P.props?.attr) {
+    return JSON.parse(meta.P.props?.attr)
+  } else {
+    return {}
+  }
 }
