@@ -22,15 +22,11 @@ import { WsContext } from "../utils/ws_events_dispatcher";
 import { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
 
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
-import Home from "../pages/home/home";
 import {
  NavDesigner,
  renderNavTreeFromGraph
 } from "./FormDesigner";
-import { syncEvent } from "../lib/ws_events";
 import { GenericField } from "./input/GenaricField";
-
-import { Alert } from "./uikit_components/Alert/Alert";
 import { PageContext, Record } from "../lib/Record";
 import {
  addNewVertex,
@@ -38,10 +34,9 @@ import {
  newVertex
 } from "../lib/Vertex";
 import { AttrsTableData } from "./api";
-import { Navbar } from "../pages/home/components/Navbar";
+import { Navbar } from "./Navbar";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { AbstractSingleForm } from "./DynamicForm";
-import { FileField } from "./input/FileField";
 import {PageDesignerDragAndDrop} from "./PageDesignerDragAndDrop";
 import { GraphViewPage } from "../pages/GraphViewPage";
 
@@ -81,10 +76,11 @@ export const StaticSideBar = () => {
 };
 
 
+// Todo use mastercss
 const AlertDisplay = () => {
   const { alerts, setAlert } = useContext(AlertMessageContext);
   return   <For each={alerts}>
-    {(alert, index) => <Alert color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={()=>setAlert(prev=> prev.filter((_, i) => i !== index()))}/>}
+    {(alert, index) => <div color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={()=>setAlert(prev=> prev.filter((_, i) => i !== index()))}/>}
   </For>
 }
 
@@ -135,10 +131,10 @@ export const DashboardView = () => {
                 }}
               />
               <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props}/>} />
-              <Route path="/Nav/new" component={NavDesigner as Component} />
-              <Route path="/dashboards" component={AllDashboards as Component} />
+              <Route path="/Nav/new" component={(props) => <NavDesigner {...props}/>} />
+              <Route path="/dashboards" component={(props) => <AllDashboards {...props}/>} />
               <Route path="/forms" component={AllForms as Component} />
-              <Route path="/grid/:name" component={TableDashboard as Component} />
+              <Route path="/grid/:name" component={(props) => <TableDashboard  {...props}/>} />
               {/* Auth: */}
               <Route path="/login" component={Login as Component} />
               <Route path="/logout" component={Logout as Component} />
@@ -146,9 +142,7 @@ export const DashboardView = () => {
               {/* Utils */}
               <Route path="/backup_restore" component={(props) => <BackupRestore {...props}/>} />
               <Route path="/SimpleImport" component={SimpleImport as Component} />
-              <Route path="/Graph" component={GraphViewPage as Component} />
-              {/* Test */}
-              <Route path="/public/avfmobile" component={Home as Component} />
+              <Route path="/Graph" component={(props) => <GraphViewPage/>} />
               {/* Error */}
               <Route path="/**" component={Page404 as Component} />
             </Routes>

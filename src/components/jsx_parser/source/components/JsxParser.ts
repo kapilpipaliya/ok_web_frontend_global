@@ -292,6 +292,9 @@ export default class JsxParser {
 		let isText = false;
 		if (containerTags.includes(comp)) {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Box")!;
+			if (comp !== "div") {
+				isText = true;
+			}
 		} else if (comp === "img") {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Image")!;
 		} else if (comp === "a") {
@@ -388,12 +391,27 @@ export default class JsxParser {
 		} else {
 			console.log('not handled', children)
 		}
+
+		// ui-kit keys
+		const uiKitProps = {} as {[key: string]: any};
+		const nonUiKitProps = {} as {[key: string]: any};
 		for (let key in props) {
+			if (key.startsWith('uk-')) {
+				uiKitProps[key] = props[key];
+			} else {
+				nonUiKitProps[key] = props[key];
+			}
+		}
+		if (Object.keys(uiKitProps).length) {
+			setPropertyValueGlobal(this.props.txnId, {P: {name: "attr"}} as any, graph.vertexes[rowId], componentVertex, JSON.stringify(uiKitProps) );
+		}
+
+		for (let key in nonUiKitProps) {
 			if (key === "key") {
 				continue;
 			}
 
-			setPropertyValueGlobal(this.props.txnId, {P: {name: (key === "className" || key === "class") ? "class" : key}} as any, graph.vertexes[rowId], componentVertex, props[key] );
+			setPropertyValueGlobal(this.props.txnId, {P: {name: (key === "className" || key === "class") ? "class" : key}} as any, graph.vertexes[rowId], componentVertex, nonUiKitProps[key] );
 		}
 	}
 

@@ -30,10 +30,9 @@ import {
 import { klona } from "klona";
 import { Link, useNavigate, useParams } from "@solidjs/router";
 
-import { G } from "@mobily/ts-belt";
 import { WsContext } from "../utils/ws_events_dispatcher";
 import { AttrsTableData } from "./api";
-import { capitalizeFirstLetter } from "../utils/utils";
+import {capitalizeFirstLetter, isNumber} from "../utils/utils";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
 
 import {
@@ -225,7 +224,7 @@ export const DataGrid = (props: DataGridProps) => {
     store: dataArrayStore,
     // sort: "LastName"
   });
-  const coll = G.isNumber(collection) ? graph.vertexes[collection].P[IdAttr] : collection;
+  const coll = isNumber(collection) ? graph.vertexes[collection].P[IdAttr] : collection;
   // if(!graph.vertexLabelIdMap[coll]) {
   //  alert(`collection not found ${coll}`)
   //  return;

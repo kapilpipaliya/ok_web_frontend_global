@@ -10,7 +10,7 @@ import {
   transactions,
   Vertex
 } from "./graph";
-import { G, pipe } from "@mobily/ts-belt";
+import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "./Edge";
 
 // return a new Vertex
@@ -22,7 +22,7 @@ export function addNewVertexUnSafe(vertex: Vertex) {
   setGraph("vertexes", vertex.id, vertex);
   vertex.L.forEach((label) =>
    setGraph("vertexLabelIdMap", label, (vertexIds) =>
-    G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
+    Array.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
    ),
   );
 }
@@ -32,7 +32,7 @@ export function addNewVertex(txnId: number, vertex: Vertex): { error: string | b
     return { error: "Vertex ID Already exist" };
   }
   const existedVertexes = vertex.L.filter(
-    (label) => G.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id),
+    (label) => Array.isArray(graph.vertexLabelIdMap[label]) && graph.vertexLabelIdMap[label].includes(vertex.id),
   );
   if (existedVertexes.length) {
     return { error: "vertex ID already exist while adding new vertex" };
@@ -40,7 +40,7 @@ export function addNewVertex(txnId: number, vertex: Vertex): { error: string | b
   setGraph("vertexes", vertex.id, klona(vertex));
   vertex.L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (vertexIds) =>
-      G.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
+      Array.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
     ),
   );
   const data = klona(vertex);
@@ -150,7 +150,7 @@ export function deleteVertex(txnId: number, vertexId: Id): { error: string | boo
     // @ts-ignore
     graph.vertexes[vertexId].L.forEach((label) =>
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
-        G.isArray(vertexIds) && vertexIds.includes(vertexId)
+        Array.isArray(vertexIds) && vertexIds.includes(vertexId)
           ? pipe(
               vertexIds.filter((vId) => vId !== vertexId),
               (fIds) => (fIds.length ? fIds : undefined),
@@ -190,7 +190,7 @@ export function updateVertexId(oldVertexId: Id, newVertexId: Id) {
   );
   graph.vertexes[newVertexId].L.forEach((label) =>
     setGraph("vertexLabelIdMap", label, (vertexIds) =>
-      G.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
+      Array.isArray(vertexIds) ? [...vertexIds, newVertexId] : [newVertexId],
     ),
   );
   // v->E--in->V-out-->E->v

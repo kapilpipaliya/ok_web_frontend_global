@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { DisplayComponentProps } from "../../../types/Component";
+import { DisplayComponentProps } from "../types/Component";
 import { JSXElement, Show, useContext } from "solid-js";
-import { PageContext } from "../../../lib/Record";
+import { PageContext } from "../lib/Record";
 
 export function Navbar(props: DisplayComponentProps & {left?: JSXElement, right?: JSXElement}) {
  let { events } = useContext(PageContext);

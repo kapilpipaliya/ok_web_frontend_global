@@ -32,9 +32,8 @@ import { removeUndefinedProperties } from "../utils/functions";
 import { ValidationRule } from "devextreme/common";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
-import { A, G } from "@mobily/ts-belt";
 import { setSelectionValue } from "../components/input/SelectInputField";
-import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
+import {capitalizeFirstLetter, getValueFromVertexOrKey, groupBy, isObject} from "../utils/utils";
 import { AttrsTableData } from "../components/api";
 
 export interface FieldAttribute {
@@ -376,7 +375,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
   let args = JSON.parse(changedFieldAttribute.P.props.onchange);
   if (Array.isArray(args)) {
    // args in proper format.
-  } else if (G.isObject(args)) {
+  } else if (isObject(args)) {
    // TODO: Find the form is new or edit.
    if (args.new && isNew) {
     args = args.new;
@@ -628,7 +627,7 @@ export class Record {
  groupByTabsAndGroup = () => {
   const mainAttributes = getChildVertexes(["MetaAttr"], [this.metaVertex]); //.sort((a, b) => a.P.pos - b.P.pos);
 
-  const groupByTabs = A.groupBy(mainAttributes.vertexes!, (item) => item.P.tab!) as unknown as {
+  const groupByTabs = groupBy(mainAttributes.vertexes!, (item) => item.P.tab!) as unknown as {
    [tab: string]: Vertex[];
   };
 
@@ -636,7 +635,7 @@ export class Record {
    [tab: string]: { [group: string]: Vertex[] };
   };
   for (const tab in groupByTabs) {
-   groupByTabsAndGroup[tab] = A.groupBy(groupByTabs[tab]!, (item) => item.P.group!) as unknown as {
+   groupByTabsAndGroup[tab] = groupBy(groupByTabs[tab]!, (item) => item.P.group!) as unknown as {
     [group: string]: Vertex[];
    };
   }

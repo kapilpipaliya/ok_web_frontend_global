@@ -1,6 +1,6 @@
 import {batch, useContext} from "solid-js";
 import {getCookie, WsContext} from "../utils/ws_events_dispatcher";
-import {G} from "@mobily/ts-belt";
+
 import {
  commitTransaction,
  EdgeMap,
@@ -17,6 +17,7 @@ import {
 import {deleteVertex, updateVertexId} from "./Vertex";
 import {deleteEdge, updateEdgeId} from "./Edge";
 import {isAdmin} from "../components/Dashboard";
+import {isObject} from "../utils/utils";
 
 
 export const syncEvent = () => {
@@ -39,7 +40,7 @@ export const syncEvent = () => {
    ][]
   ) => {
 
-   if (G.isObject(d) && d.ack) {
+   if (isObject(d) && d.ack) {
     if (Array.isArray(d.txnIds)) {
      for (const txnId of d.txnIds as number[]) {
       // what if ack is not received?
@@ -148,7 +149,7 @@ export const syncEvent = () => {
 
    for (const label in args.vertexLabelIdMap) {
     setGraph("vertexLabelIdMap", label, (vertexIds) => {
-     return G.isArray(vertexIds) ? [...new Set([...vertexIds, ...args.vertexLabelIdMap[label]])] : args.vertexLabelIdMap[label];
+     return Array.isArray(vertexIds) ? [...new Set([...vertexIds, ...args.vertexLabelIdMap[label]])] : args.vertexLabelIdMap[label];
     });
    }
 
@@ -160,7 +161,7 @@ export const syncEvent = () => {
     const edge = args.edges[edgeId];
     try {
      setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
-         G.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
+         Array.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
      );
     } catch (e) {
      debugger
@@ -168,7 +169,7 @@ export const syncEvent = () => {
 
     try {
      setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
-         G.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
+         Array.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
      );
     } catch (e) {
      debugger
