@@ -34,7 +34,8 @@ import dxValidationGroup from "devextreme/ui/validation_group";
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import {capitalizeFirstLetter, getValueFromVertexOrKey, groupBy, isObject} from "../utils/utils";
-import { AttrsTableData } from "../components/api";
+import {AdminAttrKeys, AttrsTableData} from "../components/api";
+import {AttrsAdminTableData} from "../components/apiAdmin";
 
 export interface FieldAttribute {
  name: string;
@@ -743,7 +744,7 @@ export function rowMetaInitialize(joinVertex: Vertex, meta: Vertex, tableColumns
 }
 
 export const getFormMetaData = (formId: string) => {
- let form = AttrsTableData[formId];
+ let form = AttrsTableData[formId] || (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
  if (!form) {
   const formResult = getFormApiFromForm(formId);
@@ -779,7 +780,7 @@ export const getExportCode = (record: Record) => {
      // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
      // so get Primary Key from Vertex itself.
      const label = v.L[0];
-     if (AttrsTableData[label]) {
+     if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
       const pksResult = {} as { [primaryKey: string]: any };
       pksResult["name"] = v.P["name"];
       if (!result["OUT"]) {

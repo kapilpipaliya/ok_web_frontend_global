@@ -65,7 +65,7 @@ function needTransform(code: string) {
      || code.includes("css/dx.light.css")  || code.includes("solid-blocks")  || code.includes("./solid_blocks_index.css")
      || code.includes(`from "../pages/GraphViewPage"`) || code.includes(`from "./FormDesigner"`) || code.includes(`from "./Grids"`)
      || code.includes(`/GenericInputField"`) || code.includes(`/TableInputField"`) || code.includes(`/SelectInputField"`)
-     || code.includes(`./dev_fix.css`);
+     || code.includes(`./dev_fix.css`) || code.includes(`/apiAdmin`) || code.includes(`/FormsAdmin`) || code.includes(`/Navbar`) || code.includes(`/MountDevExtremeComp`) || code.includes(`/GenaricInputField`);
 }
 
 const alias = {} as {[key: string]: string};

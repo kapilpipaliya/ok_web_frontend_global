@@ -35,7 +35,7 @@ import {
  transactions,
  Vertex
 } from "../lib/graph";
-import {AbstractSingleForm, FormGroupProperties} from "./DynamicForm";
+import {AbstractSingleForm} from "./DynamicForm";
 import {SelectInputField, setParentValue, setSelectionValue} from "./input/SelectInputField";
 import {
  addNewVertex,
@@ -52,6 +52,7 @@ import {AttrsTableData} from "./api";
 import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "./jsx_parser/source/components/JsxParser";
 import {selectedLayout, setSelectedLayout} from "./PageView"
+import {FormGroupProperties} from "./FormsAdmin";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);

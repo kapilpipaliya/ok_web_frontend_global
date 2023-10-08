@@ -1,177 +1,37 @@
-import {
-  createEffect, createMemo,
-  getOwner,
-  onCleanup,
-  runWithOwner,
-  Show,
-  useContext
-} from "solid-js";
+import {createEffect, getOwner, onCleanup, runWithOwner, Show, useContext} from "solid-js";
 // Comment This Lines in web build
-import dxAutocomplete, { Properties as dxAutocompleteProperties } from "devextreme/ui/autocomplete";
-import dxBullet, { Properties as dxBulletProperties } from "devextreme/viz/bullet";
-import dxCalendar, { Properties as dxCalendarProperties } from "devextreme/ui/calendar";
-import dxCheckBox, { Properties as dxCheckBoxProperties } from "devextreme/ui/check_box";
-import dxCircularGauge, { Properties as dxCircularGaugeProperties } from "devextreme/viz/circular_gauge";
-import dxColorBox, { Properties as dxColorBoxProperties } from "devextreme/ui/color_box";
-import dxDateBox, { Properties as dxDateBoxProperties } from "devextreme/ui/date_box";
-import dxDropDownBox, { Properties as dxDropDownBoxProperties } from "devextreme/ui/drop_down_box";
-import dxFileUploader, { Properties as dxFileUploaderProperties } from "devextreme/ui/file_uploader";
-import dxFilterBuilder, { Properties as dxFilterBuilderProperties } from "devextreme/ui/filter_builder";
-import dxHtmlEditor, { Properties as dxHtmlEditorProperties } from "devextreme/ui/html_editor";
-import dxLinearGauge, { Properties as dxLinearGaugeProperties } from "devextreme/viz/linear_gauge";
-import dxNumberBox, { Properties as dxNumberBoxProperties } from "devextreme/ui/number_box";
-import dxProgressBar, { Properties as dxProgressBarProperties } from "devextreme/ui/progress_bar";
-import dxRadioGroup, { Properties as dxRadioGroupProperties } from "devextreme/ui/radio_group";
-import dxRangeSelector, { Properties as dxRangeSelectorProperties } from "devextreme/viz/range_selector";
-import dxRangeSlider, { Properties as dxRangeSliderProperties } from "devextreme/ui/range_slider";
-import dxSlider, { Properties as dxSliderProperties } from "devextreme/ui/slider";
-import dxSwitch, { Properties as dxSwitchProperties } from "devextreme/ui/switch";
-import dxTextArea, { Properties as dxTextAreaProperties } from "devextreme/ui/text_area";
-import dxTextBox, { Properties as dxTextBoxProperties } from "devextreme/ui/text_box";
+import dxAutocomplete, {Properties as dxAutocompleteProperties} from "devextreme/ui/autocomplete";
+import dxBullet, {Properties as dxBulletProperties} from "devextreme/viz/bullet";
+import dxCalendar, {Properties as dxCalendarProperties} from "devextreme/ui/calendar";
+import dxCheckBox, {Properties as dxCheckBoxProperties} from "devextreme/ui/check_box";
+import dxCircularGauge, {Properties as dxCircularGaugeProperties} from "devextreme/viz/circular_gauge";
+import dxColorBox, {Properties as dxColorBoxProperties} from "devextreme/ui/color_box";
+import dxDateBox, {Properties as dxDateBoxProperties} from "devextreme/ui/date_box";
+import dxDropDownBox, {Properties as dxDropDownBoxProperties} from "devextreme/ui/drop_down_box";
+import dxFileUploader, {Properties as dxFileUploaderProperties} from "devextreme/ui/file_uploader";
+import dxFilterBuilder, {Properties as dxFilterBuilderProperties} from "devextreme/ui/filter_builder";
+import dxHtmlEditor, {Properties as dxHtmlEditorProperties} from "devextreme/ui/html_editor";
+import dxLinearGauge, {Properties as dxLinearGaugeProperties} from "devextreme/viz/linear_gauge";
+import dxNumberBox, {Properties as dxNumberBoxProperties} from "devextreme/ui/number_box";
+import dxProgressBar, {Properties as dxProgressBarProperties} from "devextreme/ui/progress_bar";
+import dxRadioGroup, {Properties as dxRadioGroupProperties} from "devextreme/ui/radio_group";
+import dxRangeSelector, {Properties as dxRangeSelectorProperties} from "devextreme/viz/range_selector";
+import dxRangeSlider, {Properties as dxRangeSliderProperties} from "devextreme/ui/range_slider";
+import dxSlider, {Properties as dxSliderProperties} from "devextreme/ui/slider";
+import dxSwitch, {Properties as dxSwitchProperties} from "devextreme/ui/switch";
+import dxTextArea, {Properties as dxTextAreaProperties} from "devextreme/ui/text_area";
+import dxTextBox, {Properties as dxTextBoxProperties} from "devextreme/ui/text_box";
 
-import Validator, { Properties as ValidatorProperties } from "devextreme/ui/validator";
-import dxValidationGroup from "devextreme/ui/validation_group";
-import { ValidationRule } from "devextreme/common";
+import Validator from "devextreme/ui/validator";
+import {ValidationRule} from "devextreme/common";
 
-import { ComponentProps } from "../../types/Component";
-import { graph, IdAttr } from "../../lib/graph";
-import { FormContext, getCompProps, isUpdatingInput } from "../../lib/Record";
-import {getValueFromVertexOrKey, isObject} from "../../utils/utils";
-import { getComponentForCollRow } from "../DynamicForm";
+import {ComponentProps} from "../../types/Component";
+import {IdAttr} from "../../lib/graph";
+import {FormContext, isUpdatingInput} from "../../lib/Record";
+import {getValueFromVertexOrKey} from "../../utils/utils";
 import {mergeVertexProperties} from "../../lib/Vertex";
+import {getTextColumnValue} from "./GenaricField";
 
-export const genericComponents = [
-  "Autocomplete",
-  "Bullet",
-  "Calendar",
-  "CheckBox",
-  "CircularGauge",
-  "ColorBox",
-  "DateBox",
-  "DropDownBox",
-  "FileUploader",
-  "FilterBuilder",
-  "HtmlEditor",
-  "LinearGauge",
-  "NumberBox",
-  "ProgressBar",
-  "RadioGroup",
-  "RangeSelector",
-  "RangeSlider",
-  "SelectBox",
-  "Slider",
-  "Switch",
-  // "TagBox", // giving error with undefined values
-  "TextArea",
-  "TextBox",
-];
-const displayExpr = [
-  "ContextMenu",
-  "DropDownBox",
-  "DropDownButton",
-  "List",
-  "Lookup",
-  "Menu",
-  "RadioGroup",
-  "SelectBox",
-  "TagBox",
-  "TreeView",
-];
-const valueExpr = ["Autocomplete", "DropDownBox", "Lookup", "RadioGroup", "SelectBox", "TagBox"];
-const dataSource = [
-  "Accordion",
-  "ActionSheet",
-  "Autocomplete",
-  "Box",
-  "Chart",
-  "ContextMenu",
-  "DataGrid",
-  "DropDownBox",
-  "DropDownButton",
-  "Funnel",
-  "Gallery",
-  "List",
-  "Lookup",
-  "Menu",
-  "MultiView",
-  "PieChart",
-  "PivotGrid",
-  "PivotGridFieldChooser",
-  "PolarChart",
-  "RadioGroup",
-  "RangeSelector",
-  "ResponsiveBox",
-  "Sankey",
-  "Scheduler",
-  "SelectBox",
-  "Sparkline",
-  "TabPanel",
-  "Tabs",
-  "TagBox",
-  "TileView",
-  "Toolbar",
-  "TreeList",
-  "TreeMap",
-  "TreeView",
-];
-const items = [
-  "Accordion",
-  "ActionSheet",
-  "Autocomplete",
-  "Box",
-  "ButtonGroup",
-  "ContextMenu",
-  "DropDownBox",
-  "DropDownButton",
-  "Form",
-  "Gallery",
-  "List",
-  "Lookup",
-  "Menu",
-  "MultiView",
-  "RadioGroup",
-  "ResponsiveBox",
-  "SelectBox",
-  "TabPanel",
-  "Tabs",
-  "TagBox",
-  "TileView",
-  "Toolbar",
-  "TreeView",
-  "ValidationSummary",
-];
-// onlyItemsAndNotDataSource = ['ButtonGroup', 'Form', 'ValidationSummary']
-// onlyDataSourceAndNotItems = ['Chart', 'DataGrid', 'Funnel', 'PieChart', 'PivotGrid', 'PivotGridFieldChooser', 'PolarChart', 'RangeSelector', 'Sankey', 'Scheduler', 'Sparkline', 'TreeList', 'TreeMap']
-
-const displayExpr1 = ["DropDownBox", "RadioGroup", "SelectBox"];
-const valueExpr1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
-// RangeSelector dont have items property, so we will not support it.
-const dataSource1 = ["Autocomplete", "DropDownBox", "RadioGroup", "RangeSelector", "SelectBox"];
-const items1 = ["Autocomplete", "DropDownBox", "RadioGroup", "SelectBox"];
-
-// Do not specify the items property if you specified the dataSource, and vice versa.
-// It's best to use dataSource, but we are using items for simplicity.
-// Components that don't have children.
-export const getTextColumnValue = (value: any) => {
-  if (value === true) {
-    return "True";
-  } else if (value === false) {
-    return "False";
-  }
-  if (!value) {
-    return "";
-  }
-
-  if (Array.isArray(value)) {
-    const values = [];
-    for (const v of value) {
-      values.push(getTextColumnValue(v));
-    }
-    value = values.join(', ');
-  }
-
-  return isObject(value) ? JSON.stringify(value) : value;
-};
 export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
   const formContext = useContext(FormContext);
   const outerOwner = getOwner();

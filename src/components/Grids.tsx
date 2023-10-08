@@ -42,6 +42,7 @@ import {
 import {getChildVertexes, getSelectionOptions} from "../lib/Traverse";
 import { GenericField } from "./input/GenaricField";
 import { FormMetaData, getFormApiFromForm, PageContext } from "../lib/Record";
+import {AttrsAdminTableData} from "./apiAdmin";
 
 export const SampleDataGrid = (props: {}) => {
   const data = [] as { [key: string]: any }[];
@@ -145,8 +146,8 @@ export const DataGrid = (props: DataGridProps) => {
   let collection: string;
 
   if (form.error) {
-    if (AttrsTableData[props.tableId]) {
-      formNew = AttrsTableData[props.tableId];
+    if (AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId]) {
+      formNew = AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId];
       collection = props.tableId;
     } else {
       return form.error;
