@@ -1064,15 +1064,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       } else if (component() === "Chart") {
         comp = dxChart;
 
-        const chartDataSource = [
-          {
-            day: "Monday",
-            oranges: 3,
-          },
-          {
-            day: "Tuesday",
-            oranges: 2,
-          },
         Object.assign(attributes, {
           series: {
             argumentField: "day",

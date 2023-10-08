@@ -1303,7 +1303,7 @@ export const PageDesignerDragAndDrop = () => {
 
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
     <div class={"text:center mb:12"} onClick={rerender}>Mobile Preview</div>
-    <div class="mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem">
+    <div class="overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem">
      <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
     </div>
     <div class={"text:center mb:12"} onClick={rerender}>Web Preview</div>

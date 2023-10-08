@@ -153,6 +153,7 @@ export default defineConfig({
   // devexpress tree shaking issue:
   // https://supportcenter.devexpress.com/ticket/details/t1055230/the-cannot-read-properties-of-undefined-reading-render-error-occurs-in-vite-2-7-6-in
   // devexpress not working in production issue: https://supportcenter.devexpress.com/ticket/details/t1054272/vue3-react-vite-rollup-devextreme-fails-in-production-because-some-modules-do-not-pass
-  alias
+  // It is resolved in 23.2
+  // alias
  },
 });
