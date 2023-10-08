@@ -50,16 +50,17 @@ export const [graph, setGraph] = createStore<{
   vertexes: VertexMap,
   edges: EdgeMap,
   vertexLabelIdMap: { [key: string]: Id[] },
-initialSynced: boolean,
- lastSyncedTime: 0,
- member?: { [key: string]: any } | null}>({
+  initialSynced: boolean,
+  lastSyncedTime: 0,
+  member?: { [key: string]: any } | null,
+}>({
   _isPartialSynced: false,
   vertexes: {} as VertexMap,
   edges: {} as EdgeMap,
   vertexLabelIdMap: {} as { [key: string]: Id[] },
   initialSynced: false, // TODO: Display initialSynced status to the UI
   lastSyncedTime: 0,
-  member: {}
+  member: {},
 });
 export type Revert = { revert: () => any };
 export type InsertFn = {
