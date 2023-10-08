@@ -11,62 +11,107 @@ import {
   Switch,
   useContext
 } from "solid-js";
-import { SetStoreFunction, Store } from "solid-js/store";
-import { toTitle } from "case-switcher-js";
-import {
-  commitTxn, getNewGraphId,
-  getNewTxnId,
-  graph,
-  Id,
-  IdAttr,
-  revertTransaction, revertTransactionUpTo, transactions, txnHasSteps,
-  Vertex
-} from "../lib/graph";
-import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
-import { WsContext } from "../utils/ws_events_dispatcher";
+import {SetStoreFunction, Store} from "solid-js/store";
+import {toTitle} from "case-switcher-js";
+import {commitTxn, Id, IdAttr, revertTransaction, txnHasSteps, Vertex} from "../lib/graph";
+import {WsContext} from "../utils/ws_events_dispatcher";
 
-import {
-  SelectInputField,
-} from "./input/SelectInputField";
-import {
-  TableInputField,
-} from "./input/TableInputField";
+import {SelectInputField,} from "./input/SelectInputField";
+import {TableInputField,} from "./input/TableInputField";
 // Comment This Lines in web build
 import Tabs from "devextreme/ui/tabs";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
-import dxPopup, { Properties as dxPopupProperties } from "devextreme/ui/popup";
-import {
-  BeforeLeaveEventArgs,
-  useBeforeLeave,
-  useNavigate
-} from "@solidjs/router";
-import {
-  genericComponents,
-  GenericInputField,
-} from "./input/GenaricInputField";
-import {
-  getSelectionOptions,
-} from "../lib/Traverse";
-import {
-  genericComponents2,
-  GenericField, RepeaterContext
-} from "./input/GenaricField";
-import {
-  addMetaVertexes,
-  addNewRow, FieldAttribute,
-  FormContext,
-  FormMetaData, getCollAttrComp,
-  getExportCode,
-  getFormMetaData,
-  newRow,
-  Record
-} from "../lib/Record";
-import { stringify } from "yaml";
-import { Modal, ModalBody, ModalHeader, ModalContent, ModalFooter, Button } from "solid-blocks";
-import { Portal } from "solid-js/web";
-import { updateImportRecord } from "../lib/Import";
+import dxPopup, {Properties as dxPopupProperties} from "devextreme/ui/popup";
+import {BeforeLeaveEventArgs, useBeforeLeave, useNavigate} from "@solidjs/router";
+import {GenericInputField,} from "./input/GenaricInputField";
+import {getSelectionOptions,} from "../lib/Traverse";
+import {GenericField, RepeaterContext} from "./input/GenaricField";
+import {FormContext, FormMetaData, getCollAttrComp, getExportCode, getFormMetaData, Record} from "../lib/Record";
+import {stringify} from "yaml";
 
+const genericComponents = [
+  "Autocomplete",
+  "Bullet",
+  "Calendar",
+  "CheckBox",
+  "CircularGauge",
+  "ColorBox",
+  "DateBox",
+  "DropDownBox",
+  "FileUploader",
+  "FilterBuilder",
+  "HtmlEditor",
+  "LinearGauge",
+  "NumberBox",
+  "ProgressBar",
+  "RadioGroup",
+  "RangeSelector",
+  "RangeSlider",
+  "SelectBox",
+  "Slider",
+  "Switch",
+  // "TagBox", // giving error with undefined values
+  "TextArea",
+  "TextBox",
+];
+
+const genericComponents2 = [
+  "Box",
+  "TreeMap",
+  "VectorMap",
+  "TreeView",
+  "TreeList",
+  "Toast",
+  "TileView",
+  "Tabs",
+  "TabPanel",
+  "SpeedDialAction",
+  "SparkLine",
+  "ScrollView",
+  "Scheduler",
+  "Sankey",
+  "Popup",
+  "PopOver",
+  "PolarChart",
+  "PieChart",
+  "MultiView",
+  // "SelectBox",
+  "Menu",
+  "Map",
+  // "TagBox",
+  "Lookup",
+  "LoadPanel",
+  "LoadIndicator",
+  "List",
+  "Gantt",
+  "Gallery",
+  "Funnel",
+  "FileManager",
+  "Diagram",
+  "DataGrid",
+  "ContextMenu",
+  "Chart",
+  "Button",
+  "BarGauge",
+  "ActionSheet",
+  "Accordion",
+  "ButtonGroup",
+  "Tooltip",
+  "PivotGrid",
+  "DropDownButton",
+  "Drawer",
+  // "FilterBuilder",
+  // "FileUploader",
+  "FieldSetLabelLeft",
+  "Form",
+  "DropDownBoxTreeView",
+  "Text",
+  "Repeater",
+  "A",
+  "Image",
+  "Page"
+]
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
   formId: string;
   id: string | number;
@@ -206,101 +251,6 @@ export function FormGroup(props: FormGroupProps) {
         );
       }}
     </For>
-  );
-}
-interface FormGroupPropertiesProps {
-  metaAttributes: Vertex[];
-  vertex: Vertex;
-  setValue(attribute: Vertex, vertex: Vertex, data: any, valueSet?: boolean): Vertex | undefined;
-  setValueGeneric(attribute: Vertex, vertex: Vertex, data: any): void;
-  txnId: number;
-  selectedLayout: Vertex;
-}
-// group of the fields
-export function FormGroupProperties(props: FormGroupPropertiesProps) {
-  const { Ws } = useContext(WsContext);
-  return (
-    <>
-      {/*<div class="dx-field">*/}
-      {/*  <div class="dx-field-label">*/}
-      {/*    Data*/}
-      {/*  </div>*/}
-      {/*  <div class="dx-field-value flex gap:2 justify-content:space-between">*/}
-      {/*    <GenericInputField*/}
-      {/*        data={props.vertex}*/}
-      {/*        meta={*/}
-      {/*          {*/}
-      {/*            P: {*/}
-      {/*              [IdAttr]: "data",*/}
-      {/*            },*/}
-      {/*          } as unknown as Vertex*/}
-      {/*        }*/}
-      {/*        disabled={false}*/}
-      {/*        component={"TextBox"}*/}
-      {/*        setValue={props.setValue}*/}
-      {/*    />*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-      <table class="min-w:100%">
-        <tbody>
-        <For each={props.metaAttributes}>
-          {(metaVertex) => {
-            const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-            const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
-            const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
-            const Content = () => <DynamicComponent
-              component={component()}
-              meta={metaVertex}
-              data={props.vertex}
-              setValue={props.setValue}
-              // disabled={props.d}
-              txnId={props.txnId}
-              isRealTime={false}
-            />
-
-            return (
-              <Switch>
-                <Match when={component() === "Table"}>
-                  <h3><Label/></h3>
-                  <Content/>
-                </Match>
-                <Match when={component() === "CollectionOption"}>
-                  <Content/>
-                </Match>
-                <Match when={props.selectedLayout}>
-                  <tr>
-                    <td class="pr:2" id={id}>
-                      <Label/>
-                    </td>
-                    <td class="flex gap:2 justify-content:space-between">
-                      <Content/>
-                      {/* Select Rules: */}
-                      {/*<SelectInputField*/}
-                      {/* component={"SelectBox"}*/}
-                      {/* data={{ P: {} } as Vertex}*/}
-                      {/* meta={*/}
-                      {/*   {*/}
-                      {/*     P: {*/}
-                      {/*       [IdAttr]: "import",*/}
-                      {/*       props: {*/}
-                      {/*         displayExpr: "$P.name",*/}
-                      {/*         collection: `ids:'${props.selectedLayout.id}'->Rules`*/}
-                      {/*       },*/}
-                      {/*     },*/}
-                      {/*   } as unknown as Vertex*/}
-                      {/* }*/}
-                      {/* setValue={(attr,vertex, data) => 0}*/}
-                      {/*/>*/}
-                    </td>
-                  </tr>
-                </Match>
-              </Switch>
-            );
-          }}
-        </For>
-        </tbody>
-      </table>
-    </>
   );
 }
 

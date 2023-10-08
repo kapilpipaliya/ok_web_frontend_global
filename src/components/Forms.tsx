@@ -1,34 +1,14 @@
-import { createUniqueId, For, onCleanup, useContext } from "solid-js";
-import { Link, useNavigate } from "@solidjs/router";
-import {
-  graph,
-  IdAttr,
-  resetDatabaseLogin,
-  revertTransaction,
-  setGraph,
-  Vertex
-} from "../lib/graph";
-import { AbstractSingleForm } from "./DynamicForm";
-import { Alert } from "../types/Type";
-import { WsContext, WSEvent } from "../utils/ws_events_dispatcher";
-import { SelectInputField } from "./input/SelectInputField";
-import { GenericField } from "./input/GenaricField";
-import { Record } from "../lib/Record";
-import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
-import { AlertMessageContext } from "../contexts/AlertMessageContext";
-import { createStore } from "solid-js/store";
+import {createUniqueId, onCleanup, useContext} from "solid-js";
+import {useNavigate} from "@solidjs/router";
+import {resetDatabaseLogin, revertTransaction, setGraph, Vertex} from "../lib/graph";
+import {AbstractSingleForm} from "./DynamicForm";
+import {Alert} from "../types/Type";
+import {WsContext, WSEvent} from "../utils/ws_events_dispatcher";
+import {GenericField} from "./input/GenaricField";
+import {Record} from "../lib/Record";
+import {AlertMessageContext} from "../contexts/AlertMessageContext";
+import {createStore} from "solid-js/store";
 import {isAdmin} from "./Dashboard";
-
-// TODO make default component property applied to
-export const AllForms = () => {
-  const allForms = () => graph.vertexLabelIdMap["Form"] || [];
-
-  return (
-    <div class="">
-      <For each={allForms()}>{(vertexId) => <Link href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
-    </div>
-  );
-};
 
 export const Login = (props: {}) => {
   const { setAlert } = useContext(AlertMessageContext);
@@ -174,50 +154,3 @@ export const SignUp = (props: {}) => {
   );
 };
 
-export const SimpleImport = (props: {}) => {
-  const { Ws } = useContext(WsContext);
-  const config = createStore({} as { record: Record });
-
-   return (
-    <>
-      <SelectInputField
-        component={"SelectBox"}
-        data={{ P: {} } as Vertex}
-        meta={
-          {
-            P: {
-              [IdAttr]: "import",
-              props: {
-                stringValue: true,
-                items: `dataType
-component
-dataTypeDefault
-lookup
-attribute
-user
-role
-perm`
-              },
-            },
-          } as unknown as Vertex
-        }
-        setValue={(attr,vertex, data) => updateImportRecord(data, config[0].record)}
-      />
-      <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
-
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              [IdAttr]: "meta",
-              props: { stylingMode: "contained", width: "120", type: "success" },
-            },
-          } as unknown as Vertex
-        }
-        data={{ P: { meta: "Import" } } as unknown as Vertex}
-        onClick={() => onDataDirectoryImportClick(config[0].record, Ws)}
-      />
-    </>
-  );
-};

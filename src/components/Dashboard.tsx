@@ -12,11 +12,9 @@ import Page404 from "../pages/404";
 import { BackupRestore } from "../pages/BackupRestore";
 import { getNewGraphId, graph, Vertex } from "../lib/graph";
 import {
-  AllForms,
   Login,
   Logout,
-  SignUp,
-  SimpleImport
+  SignUp
 } from "./Forms";
 import { WsContext } from "../utils/ws_events_dispatcher";
 import { Properties as dxDrawerProperties } from "devextreme/ui/drawer";
@@ -39,6 +37,8 @@ import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { AbstractSingleForm } from "./DynamicForm";
 import {PageDesignerDragAndDrop} from "./PageDesignerDragAndDrop";
 import { GraphViewPage } from "../pages/GraphViewPage";
+import {AttrsAdminTableData} from "./apiAdmin";
+import {AllForms, SimpleImport} from "./FormsAdmin";
 
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
@@ -67,7 +67,7 @@ export const StaticSideBar = () => {
          }
          const record = new Record({ws: Ws});
          record.load(nav.id);
-         record.createMeta(AttrsTableData["Nav"])
+         record.createMeta(AttrsAdminTableData["Nav"])
          renderNavTreeFromGraph(el, record, navigate);
        }}
       ></div>
@@ -133,7 +133,7 @@ export const DashboardView = () => {
               <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props}/>} />
               <Route path="/Nav/new" component={(props) => <NavDesigner {...props}/>} />
               <Route path="/dashboards" component={(props) => <AllDashboards {...props}/>} />
-              <Route path="/forms" component={AllForms as Component} />
+              <Route path="/forms" component={(props) => <AllForms {...props}/>} />
               <Route path="/grid/:name" component={(props) => <TableDashboard  {...props}/>} />
               {/* Auth: */}
               <Route path="/login" component={Login as Component} />
@@ -141,7 +141,7 @@ export const DashboardView = () => {
               <Route path="/signup" component={SignUp as Component} />
               {/* Utils */}
               <Route path="/backup_restore" component={(props) => <BackupRestore {...props}/>} />
-              <Route path="/SimpleImport" component={SimpleImport as Component} />
+              <Route path="/SimpleImport" component={(props) => <SimpleImport {...props}/>} />
               <Route path="/Graph" component={(props) => <GraphViewPage/>} />
               {/* Error */}
               <Route path="/**" component={Page404 as Component} />

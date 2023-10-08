@@ -47,6 +47,7 @@ import { deleteEdge } from "../lib/Edge";
 import { AttrsTableData } from "../components/api";
 import { fileDownloader } from "../utils/dom_utils";
 import {isObject} from "../utils/utils";
+import {AttrsAdminTableData} from "../components/apiAdmin";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
@@ -425,7 +426,7 @@ delete`,
   const importMainNavigation = () => {
     const record = new Record({ws: Ws});
     record.create("Nav", {});
-    record.createMeta(AttrsTableData["Nav"])
+    record.createMeta(AttrsAdminTableData["Nav"])
     importNavigation(`L: Nav
 P:
   title: Main
@@ -1126,7 +1127,7 @@ export function importNavigation(yamlInput: any, record: Record) {
         }
 
         for (const v of childVertexes) {
-          if (AttrsTableData[label]) {
+          if (AttrsTableData[label] || AttrsAdminTableData[label]) {
             if (v["name"]) {
               const selectedVertex = findOrCreateNewVertex(record.txnId, label, "name", v["name"]);
               setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
