@@ -482,23 +482,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
         //       },
         //     ],
         //   },
-        //   {
-        //     name: "Vegetables",
-        //     items: [
-        //       {
-        //         name: "Cucumbers",
-        //         value: 4,
-        //       },
-        //       {
-        //         name: "Tomatoes",
-        //         value: 8,
-        //       },
-        //       {
-        //         name: "Turnips",
-        //         value: 7,
-        //       },
-        //     ],
-        //   },
         // ];
         Object.assign(attributes, {} as dxTreeMapProperties);
       } else if (component() === "VectorMap") {
@@ -553,34 +536,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
         //     position: "CEO",
         //     email: "jheart@dx-email.com",
         //   },
-        //   {
-        //     id: 2,
-        //     parentId: 1,
-        //     fullName: "Samantha Bright",
-        //     position: "COO",
-        //     email: "samanthab@dx-email.com",
-        //   },
-        //   {
-        //     id: 3,
-        //     parentId: 1,
-        //     fullName: "Arthur Miller",
-        //     position: "CTO",
-        //     email: "arthurm@dx-email.com",
-        //   },
-        //   {
-        //     id: 4,
-        //     parentId: 1,
-        //     fullName: "Robert Reagan",
-        //     position: "CMO",
-        //     email: "robertr@dx-email.com",
-        //   },
-        //   {
-        //     id: 5,
-        //     parentId: 2,
-        //     fullName: "Greta Sims",
-        //     position: "HR Manager",
-        //     email: "gretas@dx-email.com",
-        //   },
         // ];
         Object.assign(attributes, {
           showRowLines: true,
@@ -613,132 +568,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             State: "ON",
             Price: 780000,
             ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/1.jpg",
-          },
-          {
-            ID: "2",
-            Address: "328 S Kerema Ave",
-            City: "Milford",
-            State: "CT",
-            Price: 350000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/3.jpg",
-          },
-          {
-            ID: "3",
-            Address: "8512 Tanglewood Cir",
-            City: "Reform",
-            State: "AL",
-            Price: 250000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/6.jpg",
-            widthRatio: 2,
-          },
-          {
-            ID: "4",
-            Address: "6351 Forrest St",
-            City: "Jersey City",
-            State: "NJ",
-            Price: 320000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/14.jpg",
-          },
-          {
-            ID: "5",
-            Address: "61207 16th St N",
-            City: "Moorhead",
-            State: "MN",
-            Price: 1700000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/5.jpg",
-            heightRatio: 2,
-            widthRatio: 2,
-          },
-          {
-            ID: "6",
-            Address: "5119 Beryl Dr",
-            City: "San Antonio",
-            State: "TX",
-            Price: 455000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/4.jpg",
-          },
-          {
-            ID: "7",
-            Address: "7121 Bailey St",
-            City: "Worcester",
-            State: "MA",
-            Price: 555000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/7.jpg",
-          },
-          {
-            ID: "8",
-            Address: "82649 Topeka St",
-            City: "Riverbank",
-            State: "CA",
-            Price: 1750000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/2.jpg",
-            heightRatio: 2,
-          },
-          {
-            ID: "9",
-            Address: "7700 Elmwood Dr",
-            City: "Cleveland",
-            State: "OK",
-            Price: 470000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/17.jpg",
-            heightRatio: 2,
-            widthRatio: 2,
-          },
-          {
-            ID: "10",
-            Address: "620201 Plymouth Rd",
-            City: "Detroit",
-            State: "MI",
-            Price: 610000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/8.jpg",
-          },
-          {
-            ID: "11",
-            Address: "1198 Theresa Cir",
-            City: "Whitinsville",
-            State: "MA",
-            Price: 320000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/9.jpg",
-          },
-          {
-            ID: "12",
-            Address: "4815 Warbler Ln",
-            City: "Rockport",
-            State: "TX",
-            Price: 700000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/12.jpg",
-          },
-          {
-            ID: "13",
-            Address: "420234 Rogge St",
-            City: "Detroit",
-            State: "MI",
-            Price: 320000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/23.jpg",
-          },
-          {
-            ID: "14",
-            Address: "114840 Interlake Ave N",
-            City: "Seattle",
-            State: "WA",
-            Price: 400000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/22.jpg",
-          },
-          {
-            ID: "15",
-            Address: "13673 Pearl Dr #7",
-            City: "Monroe",
-            State: "MI",
-            Price: 399000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/20.jpg",
-          },
-          {
-            ID: "16",
-            Address: "15447 Via Viento",
-            City: "Atascadero",
-            State: "CA",
-            Price: 1100000,
-            ImageSrc: "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/images/gallery/21.jpg",
           },
         ];
 
@@ -784,10 +613,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             title: "Contacts",
             text: "phone: (555)555-5555, email: John.Smith@example.com",
           },
-          {
-            title: "Address",
-            text: "CA San Francisco Stanford Ave",
-          },
         ];
         Object.assign(attributes, {
           height: 260,
@@ -814,30 +639,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           {
             arg: "2",
             val: 2,
-          },
-          {
-            arg: "3",
-            val: 8,
-          },
-          {
-            arg: "4",
-            val: 4,
-          },
-          {
-            arg: "5",
-            val: 5,
-          },
-          {
-            arg: "6",
-            val: 2,
-          },
-          {
-            arg: "7",
-            val: 7,
-          },
-          {
-            arg: "8",
-            val: 3,
           },
         ];
         Object.assign(attributes, {} as dxSparkLineProperties);
@@ -870,51 +671,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           {
             source: "Brazil",
             target: "France",
-            weight: 1,
-          },
-          {
-            source: "Brazil",
-            target: "Spain",
-            weight: 1,
-          },
-          {
-            source: "Brazil",
-            target: "England",
-            weight: 1,
-          },
-          {
-            source: "Canada",
-            target: "Portugal",
-            weight: 1,
-          },
-          {
-            source: "Canada",
-            target: "France",
-            weight: 5,
-          },
-          {
-            source: "Canada",
-            target: "England",
-            weight: 1,
-          },
-          {
-            source: "Mexico",
-            target: "Portugal",
-            weight: 1,
-          },
-          {
-            source: "Mexico",
-            target: "France",
-            weight: 1,
-          },
-          {
-            source: "Mexico",
-            target: "Spain",
-            weight: 5,
-          },
-          {
-            source: "Mexico",
-            target: "England",
             weight: 1,
           },
         ];
@@ -1004,26 +760,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             arg: "Tuesday",
             val: 2,
           },
-          {
-            arg: "Wednesday",
-            val: 3,
-          },
-          {
-            arg: "Thursday",
-            val: 4,
-          },
-          {
-            arg: "Friday",
-            val: 6,
-          },
-          {
-            arg: "Saturday",
-            val: 11,
-          },
-          {
-            arg: "Sunday",
-            val: 4,
-          },
         ];
 
         Object.assign(attributes, {
@@ -1046,30 +782,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           {
             arg: "Canada",
             val: 7,
-          },
-          {
-            arg: "USA",
-            val: 7,
-          },
-          {
-            arg: "China",
-            val: 7,
-          },
-          {
-            arg: "Brazil",
-            val: 6,
-          },
-          {
-            arg: "Australia",
-            val: 5,
-          },
-          {
-            arg: "India",
-            val: 2,
-          },
-          {
-            arg: "Others",
-            val: 55,
           },
         ];
 
@@ -1096,39 +808,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             Phone: "(800) 555-2797",
             Fax: "(800) 555-2171",
             Website: "http://www.nowebsitesupermart.com",
-          },
-          {
-            ID: 2,
-            CompanyName: "El'Depot",
-            Address: "2455 Paces Ferry Road NW",
-            City: "Atlanta",
-            State: "Georgia",
-            Zipcode: 30339,
-            Phone: "(800) 595-3232",
-            Fax: "(800) 595-3231",
-            Website: "http://www.nowebsitedepot.com",
-          },
-          {
-            ID: 3,
-            CompanyName: "K&S Music",
-            Address: "1000 Nicllet Mall",
-            City: "Minneapolis",
-            State: "Minnesota",
-            Zipcode: 55403,
-            Phone: "(612) 304-6073",
-            Fax: "(612) 304-6074",
-            Website: "http://www.nowebsitemusic.com",
-          },
-          {
-            ID: 4,
-            CompanyName: "Tom Club",
-            Address: "999 Lake Drive",
-            City: "Issaquah",
-            State: "Washington",
-            Zipcode: 98027,
-            Phone: "(800) 955-2292",
-            Fax: "(800) 955-2293",
-            Website: "http://www.nowebsitetomsclub.com",
           },
         ];
 
@@ -1161,29 +840,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       } else if (component() === "Menu") {
         comp = dxMenu;
 
-        const menuData = [
-          {
-            text: "Video Players",
-          },
-          {
-            text: "Televisions",
-          },
-          {
-            text: "Monitors",
-            items: [
-              {
-                text: "DesktopLCD 19",
-              },
-              {
-                text: "DesktopLCD 21",
-              },
-              {
-                text: "DesktopLED 21",
-              },
-            ],
-          },
-        ];
-
         Object.assign(attributes, {
           onItemClick: (e: any) => {
             props.setValue(props.meta, props.data,e.itemData);
@@ -1205,17 +861,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           "Prepare 2013 Financial",
           "Prepare 3013 Marketing Plan",
           "Update Personnel Files",
-          "Review Health Insurance Options Under the Affordable Care Act",
-          "Choose between PPO and HMO Health Plan",
-          "Google AdWords Strategy",
-          "New Brochures",
-          "2013 Brochure Designs",
-          "Brochure Design Review",
-          "Website Re-Design Plan",
-          "Rollout of New Website and Marketing Brochures",
-          "Update Sales Strategy Documents",
-          "Create 2012 Sales Report",
-          "Direct vs Online Sales Comparison Report",
         ];
 
         Object.assign(attributes, {
@@ -1256,17 +901,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           "Prepare 2013 Financial",
           "Prepare 3013 Marketing Plan",
           "Update Personnel Files",
-          "Review Health Insurance Options Under the Affordable Care Act",
-          "Choose between PPO and HMO Health Plan",
-          "Google AdWords Strategy",
-          "New Brochures",
-          "2013 Brochure Designs",
-          "Brochure Design Review",
-          "Website Re-Design Plan",
-          "Rollout of New Website and Marketing Brochures",
-          "Update Sales Strategy Documents",
-          "Create 2012 Sales Report",
-          "Direct vs Online Sales Comparison Report",
         ];
 
         Object.assign(attributes, {
@@ -1291,47 +925,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             start: "2019-01-13",
             end: "2019-02-02",
             progress: 100,
-          },
-          {
-            id: 3,
-            title: "Implementation",
-            start: "2019-02-02",
-            end: "2019-03-21",
-            progress: 35,
-          },
-          {
-            id: 4,
-            title: "Demos",
-            start: "2019-02-28",
-            end: "2019-03-21",
-            progress: 0,
-          },
-          {
-            id: 5,
-            title: "Docs",
-            start: "2019-02-28",
-            end: "2019-03-21",
-            progress: 0,
-          },
-          {
-            id: 6,
-            title: "Testing",
-            start: "2019-03-21",
-            end: "2019-04-05",
-            progress: 0,
-          },
-          {
-            id: 7,
-            title: "Bug Fixing",
-            start: "2019-03-21",
-            end: "2019-04-15",
-            progress: 0,
-          },
-          {
-            id: 8,
-            title: "Feature Release",
-            start: "2019-04-15",
-            end: "2019-04-15",
           },
         ];
 
@@ -1393,8 +986,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
         const galleryData = [
           "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person2.png",
           "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person1.png",
-          "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person3.png",
-          "https://js.devexpress.com/Content/images/doc/22_2/PhoneJS/person4.png",
         ];
 
         Object.assign(attributes, {
@@ -1412,18 +1003,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             action: "Downloaded a Trial",
             users: 6879,
           },
-          {
-            action: "Contacted Support",
-            users: 5121,
-          },
-          {
-            action: "Subscribed",
-            users: 2224,
-          },
-          {
-            action: "Renewed",
-            users: 1670,
-          },
         ];
 
         Object.assign(attributes, {
@@ -1440,78 +1019,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
         } as dxFunnelProperties);
       } else if (component() === "FileManager") {
         comp = dxFileManager;
-
-        const fileManagerData = [
-          {
-            name: "Documents",
-            isDirectory: true,
-            items: [
-              {
-                name: "Projects",
-                isDirectory: true,
-                items: [
-                  {
-                    name: "About.rtf",
-                    isDirectory: false,
-                  },
-                  {
-                    name: "Passwords.rtf",
-                    isDirectory: false,
-                  },
-                ],
-              },
-              {
-                name: "About.xml",
-                isDirectory: false,
-              },
-              {
-                name: "Managers.rtf",
-                isDirectory: false,
-              },
-              {
-                name: "ToDo.txt",
-                isDirectory: false,
-              },
-            ],
-          },
-          {
-            name: "Images",
-            isDirectory: true,
-            items: [
-              {
-                name: "logo.png",
-                isDirectory: false,
-              },
-              {
-                name: "banner.gif",
-                isDirectory: false,
-              },
-            ],
-          },
-          {
-            name: "System",
-            isDirectory: true,
-            items: [
-              {
-                name: "Employees.txt",
-                isDirectory: false,
-              },
-              {
-                name: "PasswordList.txt",
-                isDirectory: false,
-              },
-            ],
-          },
-          {
-            name: "Description.rtf",
-            isDirectory: false,
-          },
-          {
-            name: "Description.txt",
-            isDirectory: false,
-          },
-        ];
-
         Object.assign(attributes, {
           fileSystemProvider: props.data.P[props.meta.P[IdAttr]],
           itemView: {
@@ -1539,26 +1046,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             from: "101",
             to: "103",
           },
-          {
-            id: "129",
-            from: "103",
-            to: "104",
-          },
-          {
-            id: "130",
-            from: "103",
-            to: "105",
-          },
-          {
-            id: "139",
-            from: "102",
-            to: "106",
-          },
-          {
-            id: "140",
-            from: "102",
-            to: "107",
-          },
         ];
 
         Object.assign(attributes, {} as dxDiagramProperties);
@@ -1568,28 +1055,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
       } else if (component() === "ContextMenu") {
         comp = dxContextMenu;
 
-        const contextMenuData = [
-          {
-            text: "Hide",
-          },
-          {
-            text: "Delete",
-          },
-          {
-            text: "Clipboard",
-            items: [
-              {
-                text: "Copy",
-              },
-              {
-                text: "Clear",
-              },
-              {
-                text: "Paste",
-              },
-            ],
-          },
-        ];
         Object.assign(attributes, {
           visible: true,
           onItemClick: (e: any) => {
@@ -1608,27 +1073,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             day: "Tuesday",
             oranges: 2,
           },
-          {
-            day: "Wednesday",
-            oranges: 3,
-          },
-          {
-            day: "Thursday",
-            oranges: 4,
-          },
-          {
-            day: "Friday",
-            oranges: 6,
-          },
-          {
-            day: "Saturday",
-            oranges: 11,
-          },
-          {
-            day: "Sunday",
-            oranges: 4,
-          },
-        ];
         Object.assign(attributes, {
           series: {
             argumentField: "day",
@@ -1750,18 +1194,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
               dataField: "[Product].[Subcategory]",
               area: "row",
             },
-            {
-              dataField: "[Ship Date].[Calendar Year]",
-              area: "column",
-            },
-            {
-              dataField: "[Ship Date].[Month of Year]",
-              area: "column",
-            },
-            {
-              dataField: "[Measures].[Customer Count]",
-              area: "data",
-            },
           ],
           store: {
             type: "xmla",
@@ -1784,21 +1216,6 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             id: 1,
             name: "Left",
             icon: "alignleft",
-          },
-          {
-            id: 4,
-            name: "Right",
-            icon: "alignright",
-          },
-          {
-            id: 2,
-            name: "Center",
-            icon: "aligncenter",
-          },
-          {
-            id: 3,
-            name: "Justify",
-            icon: "alignjustify",
           },
         ];
         Object.assign(attributes, {

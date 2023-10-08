@@ -1,6 +1,5 @@
 import { FieldAttribute, FormMetaData, IFormContext } from "../lib/Record";
 import { findVertexByLabelAndUniqueIdWithSkip } from "../lib/Vertex";
-import { IdAttr } from "../lib/graph";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
@@ -100,7 +99,7 @@ const collectionAttr = [
         attributes: [
           {
             name: "perm",
-            component: "SelectBox",
+            component: "TagBox",
             props: {
 
               collection: "g:'Perm'",
@@ -248,7 +247,7 @@ const pageAttr = [
   },
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];
-for (let i = 0; i <5; i++) {
+for (let i = 0; i <25; i++) {
   const attributes =  JSON.parse(JSON.stringify(pageAttr));
   pageChildAttrs.attributes =  attributes;
   pageChildAttrs = attributes[attributes.length - 1];

@@ -382,8 +382,3 @@ Make elements with the HTML hidden attribute stay hidden by default.
 [hidden] {
     display: none;
 }
-
-/* make overflow visible in drawer content on dashboard.*/
-.dx-drawer-content {
-    overflow: auto
-}
