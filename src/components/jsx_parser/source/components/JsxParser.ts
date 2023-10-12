@@ -283,14 +283,15 @@ export default class JsxParser {
 			: undefined
 
 		const comp = component || name;
-		// if comp is undefiend it means a framgment and handle it properly.
+
 		if(!scope?.parent) {
 			alert ("parent scope is not defined.")
 			return;
 		}
 		let componentVertex: Vertex;
 		let isText = false;
-		if (containerTags.includes(comp)) {
+		// if comp is undefined it means a framgment and handle it properly by rendering a div
+		if (containerTags.includes(comp) || !comp) {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Box")!;
 			if (comp !== "div") {
 				isText = true;
@@ -301,6 +302,8 @@ export default class JsxParser {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "A")!;
 		} else if (comp === "Repeater") {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Repeater")!;
+		} else if (comp === "svg") {
+			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Icon")!;
 		} else {
 			isText = true;
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
@@ -314,28 +317,6 @@ export default class JsxParser {
 
 		// sort to parent's children
 		// sortChildren(childrenItems, pageConfig[0].record.txnId);
-
-
-		if (component || canHaveChildren(name)) {
-			children = childNodes.map(node => this.#parseExpression(node, {...scope, parent: parentVertex}))
-			if (!component && !canHaveWhitespace(name)) {
-				children = children.filter(child => (
-					typeof child !== 'string' || !/^\s*$/.test(child)
-				))
-			}
-
-			if (children.length === 0) {
-				children = undefined
-			} else if (children.length === 1) {
-				[children] = children;
-			} else if (children.length > 1 && !this.props.disableKeyGeneration) {
-				// Add `key` to any child that is a react element (by checking if it has `.type`) if one
-				// does not already exist.
-				children = children.map((child, key) => (
-					(child?.type && !child?.key) ? { ...child, key: child.key || key } : child
-				))
-			}
-		}
 
 		const props: { [key: string]: any } = {
 			key: this.props.disableKeyGeneration ? undefined : randomHash(),
@@ -376,21 +357,6 @@ export default class JsxParser {
 		if (typeof props.style === 'string') {
 			props.style = parseStyle(props.style)
 		}
-		const lowerName = name.toLowerCase()
-		if (lowerName === 'option') {
-			children = children.props.children
-		}
-
-		// return React.createElement(component || lowerName, props, children)
-		// return console.log(component || lowerName, props, children)
-
-		if (typeof children === "string") {
-			if (children) {
-				setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, `'${children}'` );
-			}
-		} else {
-			console.log('not handled', children)
-		}
 
 		// ui-kit keys
 		const uiKitProps = {} as {[key: string]: any};
@@ -412,6 +378,60 @@ export default class JsxParser {
 			}
 
 			setPropertyValueGlobal(this.props.txnId, {P: {name: (key === "className" || key === "class") ? "class" : key}} as any, graph.vertexes[rowId], componentVertex, nonUiKitProps[key] );
+		}
+
+		if (comp === "svg") {
+			setPropertyValueGlobal(this.props.txnId, {P: {name: "icon"}} as any, graph.vertexes[rowId], componentVertex, `'${'mdi:hamburger-menu'.replaceAll("'", "\\'")}'` );
+			return;
+		}
+
+		// handle children last
+		if (component || canHaveChildren(name)) {
+			children = childNodes.map(node => {
+				const value =  this.#parseExpression(node, {...scope, parent: parentVertex});
+				if (typeof (value) === "string" && childNodes.length > 1) {
+					const componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
+					const rowId = componentDrag(this.props.txnId, componentVertex!,  1000, parentVertex);
+					if (rowId === -1) return;
+					setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, `'${value.replaceAll("'", "\\'")}'` );
+				}
+				return value;
+			})
+			// Don't process if children length > 1
+			if (childNodes.length > 1) return;
+			if (!component && !canHaveWhitespace(name)) {
+				children = children.filter(child => (
+					typeof child !== 'string' || !/^\s*$/.test(child)
+				))
+			}
+
+			if (children.length === 0) {
+				children = undefined
+			} else if (children.length === 1) {
+				[children] = children;
+			} else if (children.length > 1 && !this.props.disableKeyGeneration) {
+				// Add `key` to any child that is a react element (by checking if it has `.type`) if one
+				// does not already exist.N
+				children = children.map((child, key) => (
+					(child?.type && !child?.key) ? { ...child, key: child.key || key } : child
+				))
+			}
+		}
+
+		const lowerName = name.toLowerCase()
+		if (lowerName === 'option') {
+			children = children.props.children
+		}
+
+		// return React.createElement(component || lowerName, props, children)
+		// return console.log(component || lowerName, props, children)
+
+		if (typeof children === "string") {
+			if (children) {
+				setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, `'${children.replaceAll("'", "\\'")}'` );
+			}
+		} else {
+			console.log('not handled', children)
 		}
 	}
 

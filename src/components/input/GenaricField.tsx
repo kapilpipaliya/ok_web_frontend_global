@@ -32,6 +32,7 @@ import {Dynamic} from "solid-js/web";
 import {selectedLayout} from "../PageView";
 import {showNav} from "../Dashboard";
 import {mountComponent} from "./MountDevExtremeComp";
+import {Icon} from "@iconify-icon/solid";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -294,6 +295,8 @@ export function GenericField(props: ComponentProps & { component?: string; disab
                        class={getValueFromVertexOrKey(props.meta.P.props, "class")}
               >
                 {getText(props.meta.P.props?.text, repeaterContext)}
+                {props.children}
+                <PageItemRender metaVertex={props.meta}/>
               </Dynamic>
             </Show>
           </Match>
@@ -332,6 +335,13 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           </Match>
           <Match when={component()  === "Form"}>
             <Form/>
+          </Match>
+          <Match when={component()  === "Icon"}>
+            <Icon icon={getText(props.meta.P.props?.icon, repeaterContext)}
+                  class={getValueFromVertexOrKey(props.meta.P.props, "class")}
+                  width={props.meta.P.props?.width || "24"}
+                  height={props.meta.P.props?.height || "24"}
+            />
           </Match>
           <Match when={component()  === "FieldSetLabelLeft"}>
             <div class="dx-fieldset"
