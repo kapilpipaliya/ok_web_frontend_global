@@ -750,6 +750,7 @@ export const PageDesignerDragAndDrop = () => {
      data: "layout", // identifier
      group: "componentDrag",
      allowDropInsideItem: true,
+     height: '40vh',
      allowReordering: true,
      filter: ".dx-treeview-item",
      onDragChange(e) {
@@ -1313,7 +1314,7 @@ export const PageDesignerDragAndDrop = () => {
     </div>
    </div>
 
-   <div class="border:1|solid|blue-60 p:10 m:5 flex flex:col">
+   <div class="border:1|solid|blue-60 p:10 m:5">
 
 
     <div class="flex-grow:1">

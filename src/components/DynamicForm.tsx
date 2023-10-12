@@ -110,7 +110,8 @@ const genericComponents2 = [
   "Repeater",
   "A",
   "Image",
-  "Page"
+  "Page",
+  "Icon"
 ]
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
   formId: string;
