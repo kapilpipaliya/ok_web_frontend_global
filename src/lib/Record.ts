@@ -95,6 +95,7 @@ function getComponentProperties(metaRows: Vertex[]) {
 
 export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: FieldAttribute } {
  const attr = Object.assign({}, removeUndefinedProperties(vertexCollAttr.P, false, 10));
+ attr.metaId = vertexCollAttr.id;
 
  let collAttrComp = getChildVertex(["$0Comp"], vertexCollAttr).vertex;
 

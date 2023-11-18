@@ -331,7 +331,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
             <PageView number={1} vertex={props.data}/>
           </Match>
           <Match when={component()  === "Image"}>
-            <img {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)}/>
+            <img loading="lazy" {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)}/>
           </Match>
           <Match when={component()  === "Form"}>
             <Form/>
