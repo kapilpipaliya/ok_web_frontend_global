@@ -248,7 +248,8 @@ const pageAttr = [
   },
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];
-for (let i = 0; i <25; i++) {
+// Keep max level 10, else the page navigation is very slow. because revert transaction on record takes so much time.
+for (let i = 0; i <10; i++) {
   const attributes =  JSON.parse(JSON.stringify(pageAttr));
   pageChildAttrs.attributes =  attributes;
   pageChildAttrs = attributes[attributes.length - 1];

@@ -18,7 +18,7 @@ let domain = window.location.hostname;
 // @ts-ignore
 let port = "";
 if (window.location.hostname == "localhost") {
-  domain = "49.12.190.36"
+  domain = "65.21.181.71"
   port = ":1401";
 
   // port = ":1101";

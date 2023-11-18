@@ -13,7 +13,7 @@ import {
 } from "solid-js";
 import {SetStoreFunction, Store} from "solid-js/store";
 import {toTitle} from "case-switcher-js";
-import {commitTxn, Id, IdAttr, revertTransaction, txnHasSteps, Vertex} from "../lib/graph";
+import {commitTxn, graph, Id, IdAttr, revertTransaction, txnHasSteps, Vertex} from "../lib/graph";
 import {WsContext} from "../utils/ws_events_dispatcher";
 
 import {SelectInputField,} from "./input/SelectInputField";
@@ -29,6 +29,7 @@ import {getSelectionOptions,} from "../lib/Traverse";
 import {GenericField, RepeaterContext} from "./input/GenaricField";
 import {FormContext, FormMetaData, getCollAttrComp, getExportCode, getFormMetaData, Record} from "../lib/Record";
 import {stringify} from "yaml";
+import {getPermissions} from "../lib/auth";
 
 const genericComponents = [
   "Autocomplete",
@@ -229,6 +230,8 @@ export function FormGroup(props: FormGroupProps) {
          txnId={props.txnId}
          isRealTime={false}
         />
+        const permissions = metaVertex.P.metaId ? getPermissions(graph.vertexes[metaVertex.P.metaId]) : getPermissions(metaVertex);
+        console.log(permissions)
         return (
           <Switch>
             <Match when={component() === "Table"}>

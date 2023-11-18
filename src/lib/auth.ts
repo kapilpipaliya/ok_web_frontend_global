@@ -28,4 +28,5 @@ export function getPermissions(meta: Vertex) {
             }
         }
     }
+    return permissionResult;
 }
