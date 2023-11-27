@@ -29,8 +29,7 @@
   },
   "dependencies": {
     "@bedrock-layout/solid": "^1.1.4",
-    "@devexpress/analytics-core": "^23.1.5",
-    "@iconify-icon/solid": "^1.0.8",
+      "@iconify-icon/solid": "^1.0.8",
     "@master/css": "^2.0.0-beta.171",
     "@memgraph/orb": "^0.4.1",
     "@mobily/ts-belt": "^4.0.0-rc.5",

@@ -39,8 +39,8 @@ import {AttrsAdminTableData} from "../components/apiAdmin";
 
 export interface FieldAttribute {
  name: string;
- tab?: string;
- group?: string;
+ // tab?: string;
+ // group?: string;
  dataType?: string;
  meta?: string;
  component: string;
@@ -59,6 +59,13 @@ export interface FormMetaData {
  attributes: FieldAttribute[];
  isRealTime?: boolean;
  // postSubmit?: (data: any) => any
+}
+
+export function getCompPropsMap(comp: Vertex) {
+ return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
+   acc[curr.P.name] = curr;
+  return acc;
+ }, {} as { [key: string]: Veretex });
 }
 
 export function getCompProps(comp: Vertex) {

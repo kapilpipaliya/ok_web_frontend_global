@@ -5,7 +5,7 @@ import {
   commitTxn,
   getNewGraphId,
   getNewTxnId,
-  graph,
+  graph, Id,
   IdAttr,
   resetDatabase,
   restoreFromIndexDB,
@@ -31,8 +31,9 @@ import {
   setSelectionValue
 } from "../components/input/SelectInputField";
 import { WsContext } from "../utils/ws_events_dispatcher";
-import { getParentVertex, getToEdge } from "../lib/Traverse";
+import {getChildVertex, getParentVertex, getToEdge} from "../lib/Traverse";
 import {
+  FieldAttribute, FormMetaData, getCompPropsMap,
   getFormMetaData,
   getId,
   getPkForCollection,
@@ -53,6 +54,7 @@ export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
   let fileInputRef: HTMLInputElement;
   let componentPropsInputRef: HTMLInputElement;
+  let collectionImportInputRef: HTMLInputElement;
   let importNSDataInputRef: HTMLInputElement;
   const downloadJson = () => {
     const json = backupToJson();
@@ -232,6 +234,112 @@ export const BackupRestore = () => {
           }
         }
         if (!splitTransaction) commitTxn(txnId, Ws);
+        alert("inserting properties finished.");
+      });
+    }
+  };
+
+  const insertAttributes = (txnId: Id, parentVertex: Vertex, collectionMetaData: FormMetaData) => {
+
+    const collectionAttributes = collectionMetaData["attributes"];
+    if (!collectionAttributes) return;
+
+    for (const attribute of collectionAttributes) {
+
+      const name = attribute.name;
+      const displayName = attribute.displayName;
+      let component = attribute.component;
+      if (attribute.props && !component) {
+        component = "TextBox";
+      }
+      // const description = attribute.description;
+      const rowResult = newRow(txnId, parentVertex, "Attr", "Attr",{name, displayName});
+
+      const setDataType = (rowVertex: Vertex, dataType: string) => {
+        const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
+        if (!dataTypeVertex) {
+          console.log("dataType not found", dataType);
+        } else {
+          setSelectionValue(
+            txnId,
+            rowVertex,
+            {P: {[IdAttr]: "DataType"}} as unknown as Vertex,
+            dataTypeVertex.id,
+          );
+          return dataTypeVertex;
+        }
+        return;
+      }
+
+      const setComponent = (rowVertex: Vertex, component: string) => {
+        const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, component);
+        if (!compVertex) {
+          console.log("component not found", component);
+        } else {
+          setSelectionValue(
+            txnId,
+            rowVertex,
+            {P: {[IdAttr]: "Comp"}} as unknown as Vertex,
+            compVertex.id,
+          );
+          return compVertex;
+        }
+        return;
+      }
+
+      let dataTypeVertex: Vertex | undefined;
+      if (attribute.dataType) {
+        dataTypeVertex = setDataType(graph.vertexes[rowResult.vertexId!], attribute.dataType);
+      }
+
+      if (component && (component !==  "TextBox" || attribute.props)) {
+        const compVertex  = setComponent(graph.vertexes[rowResult.vertexId!], component);
+        if (compVertex && !dataTypeVertex) {
+          const dataTypeDefault = getChildVertex(["$0Default"], compVertex);
+          if (dataTypeDefault.error) {
+            console.warn(`Component dataType not configured ${component}`);
+          } else {
+            dataTypeVertex = setDataType(graph.vertexes[rowResult.vertexId!], dataTypeDefault.vertex!.P[IdAttr]);
+          }
+        }
+
+        if (compVertex && attribute.props) {
+          for (const property in attribute.props) {
+            const props = getCompPropsMap(compVertex);
+            if(props[property]) {
+              const rowResult = newRow(txnId, parentVertex, "AttrProp", "AttrProp",{value: attribute.props[property]});
+              if (!rowResult.error) {
+                setSelectionValue(
+                  txnId,
+                  graph.vertexes[rowResult.vertexId!],
+                  {P: {[IdAttr]: "Name"}} as unknown as Vertex,
+                  props[property].id,
+                );
+              }
+            }
+          }
+        }
+      }
+
+    }
+  }
+  const importCollections = () => {
+    const file = componentPropsInputRef!.files![0];
+
+    if (file) {
+      file.text().then(async (jsonText) => {
+        const json = JSON.parse(jsonText);
+        let txnId = getNewTxnId(); // Note txnId 0 not working
+        for (const collectionId in json) {
+          const collection = json[collectionId];
+          const name = collection["name"] as string;
+          const title = collection["title"] as string;
+
+          const parentVertexId = getNewGraphId();
+          addNewVertex(txnId, newVertex(parentVertexId,['Coll'], {name, title}));
+          insertAttributes(txnId, graph.vertexes[parentVertexId], collection);
+        }
+        commitTxn(txnId, Ws);
         alert("inserting properties finished.");
       });
     }

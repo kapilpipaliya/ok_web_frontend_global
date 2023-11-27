@@ -13,7 +13,6 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
         name: "role",
         component: "TagBox",
         props: {
-          
           collection: "g:'Role'",
         },
       },
