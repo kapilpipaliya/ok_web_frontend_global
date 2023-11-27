@@ -38,19 +38,24 @@ render(() => {
       <WsContext.Provider value={{Ws}}>
         <Sync/>
         <AlertMessageContext.Provider value={{alerts, setAlert}}>
-        <Router base={showNav() ? "/nav/admin" : "/admin"}>
-          <FullDashboard/>
-        </Router>
-        <Show when={!isAdmin() && graph.initialSynced}>
-          <Router>
-            <Routes>
-              <Route path="/" component={() => <PageView_ count={1} id={"home"}/>} />
-              <Route path=":id" component={PagePreview as Component} />
-              <Route path="robots.txt" component={RobotsTxt as Component} />
-              <Route path="sitemap.txt" component={SiteMap as Component} />
-            </Routes>
-          </Router>
-        </Show>
+
+          <Show when={isAdmin()}>
+            <Router base={showNav() ? "/nav/admin" : "/admin"}>
+              <FullDashboard/>
+            </Router>
+          </Show>
+
+          <Show when={!isAdmin() && graph.initialSynced}>
+            <Router>
+              <Routes>
+                <Route path="/" component={() => <PageView_ count={1} id={"home"}/>} />
+                <Route path=":id" component={PagePreview as Component} />
+                <Route path="robots.txt" component={RobotsTxt as Component} />
+                <Route path="sitemap.txt" component={SiteMap as Component} />
+              </Routes>
+            </Router>
+          </Show>
+
         </AlertMessageContext.Provider>
       </WsContext.Provider>
     </CSSProvider>
