@@ -1,8 +1,8 @@
-import { MasterCSS, initRuntime, type Config } from "@master/css";
+import { RuntimeCSS, type Config } from "@master/css";
 import {createContext, createEffect, JSX, useContext} from "solid-js";
 import { createStore } from "solid-js/store";
 
-export const CSSContext = createContext<{m:  MasterCSS | undefined }>({m: undefined});
+export const CSSContext = createContext<{m?:  RuntimeCSS }>({m: undefined});
 export function useCSS() {
   return useContext(CSSContext)
 }
@@ -14,38 +14,36 @@ export function CSSProvider(props: {
   root?: Document | ShadowRoot | null
 }) {
   const root = typeof document !== 'undefined' ? document : null
-  const [css, setCSS] = createStore<{m: MasterCSS | undefined}>({m: MasterCSS.instances.find((eachCSS) => eachCSS.root === root)});
+  const [runtimeCSS, setRuntimeCSS] = createStore({} as {m?: RuntimeCSS});
 
   createEffect(() => {
-    let newCSS: MasterCSS;
-
-    if (!css.m) {
+    let newRuntimeCSS: RuntimeCSS | undefined = globalThis.runtimeCSSs?.find((eachCSS) => eachCSS.root === root)
+    if (newRuntimeCSS) {
+      setRuntimeCSS({m: newRuntimeCSS})
+    } else if (!runtimeCSS.m) {
       const init = (resolvedConfig?: Config) => {
-        const existingCSS = MasterCSS.instances.find((eachCSS) => eachCSS.root === root)
+        const existingCSS = globalThis.runtimeCSSs.find((eachCSS) => eachCSS.root === root)
         if (existingCSS) {
-          setCSS({m: existingCSS})
+          setRuntimeCSS({m: existingCSS})
         } else {
-          newCSS = initRuntime(resolvedConfig)
-          setCSS({m: newCSS})
+          newRuntimeCSS = new RuntimeCSS(root, resolvedConfig).observe()
+          setRuntimeCSS({m: newRuntimeCSS})
         }
       }
-
       if (props.config instanceof Promise) {
         (async () => {
-          const configModule = await props.config;
+          const configModule = await props.config
           init(configModule?.config || configModule?.default || configModule)
         })()
       } else {
-        init(props.config);
+        init(props.config)
       }
-    } else if (!css.m.observing) {
-
-      css.m.observe(root)
+    } else if (!runtimeCSS.m!.observing) {
+      runtimeCSS.m!.observe()
     }
-
     return () => {
-      newCSS?.destroy()
+      newRuntimeCSS?.destroy()
     }
   })
-  return <CSSContext.Provider value={css}>{props.children}</CSSContext.Provider>
+  return <CSSContext.Provider value={runtimeCSS}>{props.children}</CSSContext.Provider>
 }

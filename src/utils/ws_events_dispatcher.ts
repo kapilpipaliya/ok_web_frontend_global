@@ -18,8 +18,9 @@ let domain = window.location.hostname;
 // @ts-ignore
 let port = "";
 if (window.location.hostname == "localhost") {
-  domain = "65.21.181.71"
-  port = ":1401";
+  // domain = "65.21.181.71"
+  domain = "easyformforge.com"
+  port = ":1101";
 
   // port = ":1101";
 } else if (IS_PRODUCTION) {
