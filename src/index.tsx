@@ -9,21 +9,21 @@ import "./dev_fix.css";
 import {config} from "./master.css";
 // import "uikit/dist/js/uikit";
 // import "uikit/dist/css/uikit.css";
-import './solid_blocks_index.css'
-import {CSSProvider} from "./css/CSSProvider";
+// import './solid_blocks_index.css'
+import {CSSProvider} from "./components/css/CSSProvider";
 
 import {render} from "solid-js/web";
 import {createStore} from "solid-js/store";
 import {Route, Router, Routes} from "@solidjs/router";
-import {FullDashboard, isAdmin, showNav} from "./components/Dashboard";
+import {FullDashboard, isAdmin, showNav} from "./pages/Dashboard";
 import {ServerEventsDispatcher, WS_PATH, WsContext} from "./utils/ws_events_dispatcher";
 
-import {AlertMessage} from "./types/Type";
 import {AlertMessageContext} from "./contexts/AlertMessageContext";
 import {Component, Show} from "solid-js";
 import {graph} from "./lib/graph";
 import {syncEvent} from "./lib/ws_events";
-import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./components/PageView";
+import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
+import {AlertMessage} from "./components/ComponentType";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);

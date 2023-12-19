@@ -1,27 +1,24 @@
-import { newRow, Record } from "./Record";
+import {getPkForCollection, newRow, Record} from "./Record";
+import {commitTxn, getNewGraphId, getNewTxnId, graph, IdAttr, Vertex} from "./graph";
 import {
- commitTxn,
- getNewGraphId,
- getNewTxnId,
- graph,
- IdAttr,
- Vertex
-} from "./graph";
-import {
- addNewVertex,
- findOrCreateNewVertex,
- findVertexByLabelAndUniqueId,
- mergeVertexProperties,
- newVertex
+  addNewVertex,
+  deleteVertex,
+  findOrCreateNewVertex,
+  findVertexByLabelAndPks,
+  findVertexByLabelAndUniqueId,
+  mergeVertexProperties,
+  newVertex
 } from "./Vertex";
-import { ServerEventsDispatcher } from "../utils/ws_events_dispatcher";
+import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
 import csvtojson from "csvtojson";
-import { getChildVertex, getChildVertexes, getToEdge } from "./Traverse";
-import { A, D } from "@mobily/ts-belt";
-import {
- setParentValue,
- setSelectionValue
-} from "../components/input/SelectInputField";
+import {getChildVertex, getChildVertexes, getToEdge} from "./Traverse";
+import {A, D} from "@mobily/ts-belt";
+import {isSimpleCollection, setParentValue, setSelectionValue} from "../components/input/SelectInputField";
+import {parse} from "yaml";
+import {isObject} from "../utils/utils";
+import {deleteEdge} from "./Edge";
+import {AttrsTableData} from "./api";
+import {AttrsAdminTableData} from "./apiAdmin";
 
 export const updateImportRecord = (type: string, record: Record, dry= true) => {
 
@@ -476,3 +473,150 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
    alert("finished import");
   });
 };
+
+export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
+  const input = parse(yamlInput);
+  console.log(input);
+  if (!isObject(input)) {
+    return;
+  }
+
+  record.replaceFieldValues({});
+
+  const clearChildren = (meta: Vertex, vertex: Vertex) => {
+    // 2. loop through meta and set all the data.
+    const metaVertexes = record.getSublistRowsForType("MetaAttr", record.metaVertex);
+
+    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
+    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
+
+    for (const metaVertex of selectMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // Todo
+      } else {
+        setSelectionValue(record.txnId, vertex, metaVertex, undefined);
+      }
+    }
+
+    for (const metaVertex of tableMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // not possible now
+      } else {
+        const childVertexes = record.getSublistRows(metaVertex, vertex);
+        const edge = getToEdge(metaVertex, vertex);
+        const outEdges = vertex.OUT[edge] || [];
+
+        for (const v of childVertexes) {
+          clearChildren(metaVertex, v);
+          // this deletes all vertexes in edges,
+          // out edges and the vertex itself.
+          // without confirmation, this is not good.
+          // some form may depend on it.
+          // unsafely delete:
+          // deleteRow(v, record.isRealTime, record.txnId, record.ws);
+
+          // safe delete:
+          const edgeToDelete = outEdges.find(edgeId => graph.edges[edgeId].E === v.id);
+          if (edgeToDelete) {
+            deleteEdge(record.txnId, edgeToDelete);
+          }
+
+          deleteVertex(record.txnId, v.id);
+        }
+      }
+    }
+  };
+
+  // after finalizing move this code to record.
+  clearChildren(record.metaVertex, record.vertex);
+
+  const insertChildren = (meta: Vertex, vertex: Vertex, input: {
+    [key: string]: any
+  }) => {
+    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+    // const props = meta.P.props || {};
+
+    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
+    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
+
+    for (const metaVertex of selectMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // input['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
+
+      } else {
+        const type = getToEdge(metaVertex, vertex);
+        const childVertexes = input?.["OUT"]?.[type] || [];
+        if (metaVertex.P.props?.items) {
+          continue;
+        }
+        if (!metaVertex.P.props?.collection) {
+          alert("collection is not defined in the meta");
+          continue;
+        }
+
+        // when a collection is not simple, label is required to import data
+        const label = isSimpleCollection(metaVertex.P.props.collection) ? metaVertex.P.props.collection : metaVertex.P.props.label;
+        if (!metaVertex.P.props?.collection) {
+          alert("collection label is not defined in the meta");
+          continue;
+        }
+
+        for (const v of childVertexes) {
+          if (AttrsTableData[label] || AttrsAdminTableData[label]) {
+            if (v["name"]) {
+              const selectedVertex = findOrCreateNewVertex(record.txnId, label, "name", v["name"]);
+              setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
+            }
+          } else {
+            const collVertex = findVertexByLabelAndUniqueId("Coll", "name", vertex.L[0]);
+            if (!collVertex) {
+              alert(`Collection not defined: ${label[0]}`);
+              continue;
+            }
+            const pks = getPkForCollection(collVertex);
+
+            const pksResult = {} as { [primaryKey: string]: any };
+            for (const pk of pks) {
+              pksResult[pk] = v[pk];
+            }
+            if (pks.length === 0) {
+              pksResult["name"] = v["name"];
+            }
+            const selectedVertex = findVertexByLabelAndPks(label, pksResult);
+            setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
+
+          }
+
+        }
+      }
+    }
+    for (const metaVertex of tableMetaVertexes) {
+      const metaProps = metaVertex.P.props || {};
+
+      if (metaProps.inward) {
+        // not possible now
+      } else {
+        const type = getToEdge(metaVertex, vertex);
+        const childVertexes = input?.["OUT"]?.[type] || [];
+
+        for (const v of childVertexes) {
+          const newRowResult = record.addNewRowUI(metaVertex, vertex, v.P || {});
+          if (!newRowResult.error) {
+            insertChildren(metaVertex, graph.vertexes[newRowResult.vertexId!], v);
+          }
+        }
+      }
+    }
+
+    return input;
+  };
+
+  record.replaceFieldValues(input.P || {});
+  insertChildren(record.metaVertex, record.vertex, input);
+}

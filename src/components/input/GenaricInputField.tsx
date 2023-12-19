@@ -7,7 +7,7 @@ import dxCheckBox, {Properties as dxCheckBoxProperties} from "devextreme/ui/chec
 import dxCircularGauge, {Properties as dxCircularGaugeProperties} from "devextreme/viz/circular_gauge";
 import dxColorBox, {Properties as dxColorBoxProperties} from "devextreme/ui/color_box";
 import dxDateBox, {Properties as dxDateBoxProperties} from "devextreme/ui/date_box";
-import dxDropDownBox, {Properties as dxDropDownBoxProperties} from "devextreme/ui/drop_down_box";
+// import dxDropDownBox, {Properties as dxDropDownBoxProperties} from "devextreme/ui/drop_down_box";
 import dxFileUploader, {Properties as dxFileUploaderProperties} from "devextreme/ui/file_uploader";
 import dxFilterBuilder, {Properties as dxFilterBuilderProperties} from "devextreme/ui/filter_builder";
 import dxHtmlEditor, {Properties as dxHtmlEditorProperties} from "devextreme/ui/html_editor";

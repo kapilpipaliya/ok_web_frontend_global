@@ -25,7 +25,6 @@ import dxLookup, {Properties as dxLookupProperties} from "devextreme/ui/lookup";
 import dxLoadIndicator, {Properties as dxLoadIndicatorProperties} from "devextreme/ui/load_indicator";
 import dxList, {Properties as dxListProperties} from "devextreme/ui/list";
 import dxGantt, {Properties as dxGanttProperties} from "devextreme/ui/gantt";
-import {dependencies, resourceAssignments, resources, tasks} from "../examples/data/ganttData";
 import dxGallery, {Properties as dxGalleryProperties} from "devextreme/ui/gallery";
 import dxFunnel, {Properties as dxFunnelProperties} from "devextreme/viz/funnel";
 import dxFileManager, {Properties as dxFileManagerProperties} from "devextreme/ui/file_manager";
@@ -536,16 +535,16 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
             Object.assign(attributes, {
 
                 tasks: {
-                    dataSource: tasks,
+                    //dataSource: dddddddd,
                 },
                 dependencies: {
-                    dataSource: dependencies,
+                    //dataSource: aaaaaaaa,
                 },
                 resources: {
-                    dataSource: resources,
+                    //dataSource: cccccccc,
                 },
                 resourceAssignments: {
-                    dataSource: resourceAssignments,
+                    //dataSource: bbbbbbbb,
                 },
                 editing: {
                     enabled: true,

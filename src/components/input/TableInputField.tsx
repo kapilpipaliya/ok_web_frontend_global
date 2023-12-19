@@ -46,7 +46,7 @@ import {
   getChildVertexes,
   getSelectionOptions,
 } from "../../lib/Traverse";
-import { ComponentProps } from "../../types/Component";
+import { ComponentProps } from "../ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {
   GenericField,
@@ -146,7 +146,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
     const rowColumnsMetaAttrs = createMemo(() => tableColumnsTemplate().filter(vertex => vertex.P.tab !== "expand"));
     const expandVertex = createMemo(() => tableColumnsTemplate()?.find(vertex => vertex.P.tab === "expand"));
 
-    const [disabled, setDisabled] = createSignal(false);
+    const [disabled, _] = createSignal(false);
 
     const DisplayProperties = () => {
       return (
@@ -239,7 +239,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
              <Icon
               icon="material-symbols:restore-from-trash-outline"
               class="cursor:pointer"
-              onClick={() => deleteRow(p.joinVertex, props.isRealTime, props.txnId, Ws)}
+              onClick={() => deleteRow(p.joinVertex, props.isRealTime!, props.txnId!, Ws)}
              />
              {/*<Show when={!props.disabled}>*/}
              {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
@@ -384,7 +384,7 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                       return (
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
-                          <Match when={attribute.P.tab === "expand"}>{}</Match>
+                          <Match when={attribute.P.tab === "expand"}><span></span></Match>
                           <Match when={!attribute.P.hidden || attribute.P.defaultValue}>
                             <th title={attribute.P.hint}>{toTitle(attribute.P.displayName || attribute.P[IdAttr] || '')}</th>
                           </Match>

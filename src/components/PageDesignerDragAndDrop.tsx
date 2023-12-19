@@ -33,7 +33,7 @@ import {
  revertTransactionUpTo,
  setGraph,
  transactions,
- Vertex
+ Vertex,
 } from "../lib/graph";
 import {AbstractSingleForm} from "./DynamicForm";
 import {SelectInputField, setParentValue, setSelectionValue} from "./input/SelectInputField";
@@ -46,13 +46,14 @@ import {
 } from "../lib/Vertex";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {Portal} from "solid-js/web";
+// @ts-ignore
 import {Button, ModalBody, ModalContent, ModalFooter, ModalHeader} from "solid-blocks";
 import {TableInputField} from "./input/TableInputField";
-import {AttrsTableData} from "./api";
+import {AttrsTableData} from "../lib/api";
 import {GenericInputField} from "./input/GenaricInputField";
-import JsxParser from "./jsx_parser/source/components/JsxParser";
-import {selectedLayout, setSelectedLayout} from "./PageView"
-import {FormGroupProperties} from "./FormsAdmin";
+import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
+import {selectedLayout, setSelectedLayout} from "../pages/PageView"
+import {FormGroupProperties} from "../pages/FormsAdmin";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -292,6 +293,7 @@ export const PageDesignerDragAndDrop = () => {
  const { Ws } = useContext(WsContext);
 
  const [selectedComponent, setSelectedComponent] = createSignal({vertexId: -1});
+ // @ts-ignore
  const [selectedColl, setSelectedColl] = createSignal({vertexId: -1});
  const rerender = () => {
   setCount(prev => prev + 1);
@@ -492,7 +494,7 @@ export const PageDesignerDragAndDrop = () => {
        }
       }
 
-      const rowId = componentDrag(pageConfig[0].record.txnId, fromVertex,  toIndex, parentAttrVertex || pageConfig[0].record.vertex, childrenItems);
+      const rowId = componentDrag(pageConfig[0].record.txnId, fromVertex,  toIndex, parentAttrVertex || pageConfig[0].record.vertex);
       if (rowId === -1) return;
       // key value should be unique in the array.
       const originalId = fromNode!.itemData!.id;
@@ -651,7 +653,7 @@ export const PageDesignerDragAndDrop = () => {
        }
       }
 
-      const rowId = componentDrag(fromVertex,  toIndex, parentAttrVertex, childrenItems);
+      const rowId = componentDrag(pageConfig[0].record.txnId, fromVertex,  toIndex, parentAttrVertex!);
       if (rowId === -1) return;
       // key value should be unique in the array.
       const originalId = fromNode!.itemData!.id;
@@ -827,15 +829,15 @@ export const PageDesignerDragAndDrop = () => {
        const fromParentVertex = getParentVertex(['Attr'], fromVertex);
        if (fromParentVertex.vertex) {
         // remove previous incoming edge if present.
-        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}})
+        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex)
        }
        const toId = toNode?.itemData!.id;
        // add new edge.
        if (e.dropInsideItem) {
-        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}}, toId)
+        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toId as number)
        } else {
         const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
-        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}}, toParentVertex?.id)
+        setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
        }
 
        // sort from parent's children
@@ -934,7 +936,7 @@ export const PageDesignerDragAndDrop = () => {
     if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
     return setPropertyValueGlobal(pageConfig[0].record.txnId, meta, graph.vertexes[selectedLayout().vertexId], graph.vertexes[selectedComponent().vertexId], value, valueSet);
    }
-   return -1
+   return;
   }
   const selectedComponentProperties = () => {
    const selectedComp = graph.vertexes[selectedComponent().vertexId];

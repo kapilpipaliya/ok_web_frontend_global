@@ -1,60 +1,34 @@
-import { batch, JSX, useContext } from "solid-js";
+import {batch, JSX, useContext} from "solid-js";
 import {
   backupToIndexDB,
   backupToJson,
   commitTxn,
   getNewGraphId,
   getNewTxnId,
-  graph, Id,
+  graph,
+  Id,
   IdAttr,
   resetDatabase,
   restoreFromIndexDB,
   restoreFromJson,
-  Vertex, waitTillAllEventsAreProcessed
+  Vertex,
+  waitTillAllEventsAreProcessed
 } from "../lib/graph";
-import { Link } from "@solidjs/router";
-import { Card } from "../components/uikit_components/Card/Card";
-import { CardHeader } from "../components/uikit_components/Card/CardHeader";
-import { CardTitle } from "../components/uikit_components/Card/CardTitle";
-import { CardBody } from "../components/uikit_components/Card/CardBody";
-import {
-  addNewVertex,
-  deleteVertex,
-  findOrCreateNewVertex,
-  findVertexByLabelAndPks,
-  findVertexByLabelAndUniqueId,
-  newVertex,
-  replaceVertexProperties
-} from "../lib/Vertex";
-import {
-  isSimpleCollection,
-  setSelectionValue
-} from "../components/input/SelectInputField";
-import { WsContext } from "../utils/ws_events_dispatcher";
-import {getChildVertex, getParentVertex, getToEdge} from "../lib/Traverse";
-import {
-  FieldAttribute, FormMetaData, getCompPropsMap,
-  getFormMetaData,
-  getId,
-  getPkForCollection,
-  newRow,
-  Record
-} from "../lib/Record";
-import { onDataDirectoryImportClick, updateImportRecord } from "../lib/Import";
-import { Field, NsMetaJson, Type } from "../types/NSMetaData";
-import { parse } from "yaml";
-
-import { deleteEdge } from "../lib/Edge";
-import { AttrsTableData } from "../components/api";
-import { fileDownloader } from "../utils/dom_utils";
-import {isObject} from "../utils/utils";
-import {AttrsAdminTableData} from "../components/apiAdmin";
+import {Link} from "@solidjs/router";
+import {addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties} from "../lib/Vertex";
+import {setSelectionValue} from "../components/input/SelectInputField";
+import {WsContext} from "../utils/ws_events_dispatcher";
+import {getChildVertex, getParentVertex} from "../lib/Traverse";
+import {FormMetaData, getCompPropsMap, getFormMetaData, getId, newRow, Record} from "../lib/Record";
+import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
+import {fileDownloader} from "../utils/dom_utils";
+import {AttrsAdminTableData} from "../lib/apiAdmin";
+import {NsMetaJson} from "./NSMetaDataType";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
   let fileInputRef: HTMLInputElement;
   let componentPropsInputRef: HTMLInputElement;
-  let collectionImportInputRef: HTMLInputElement;
   let importNSDataInputRef: HTMLInputElement;
   const downloadJson = () => {
     const json = backupToJson();
@@ -113,15 +87,20 @@ export const BackupRestore = () => {
             // continue;
             // Do not specify the items property if you specified the dataSource, and vice versa.
             // if (name === "dataSource") continue;
+            // @ts-ignore
             const default_ = propertyObj["Default"];
+            // @ts-ignore
             const readOnly = propertyObj["ReadOnly"];
+            // @ts-ignore
             const acceptedValues = propertyObj["AcceptedValues"];
             // s.add(type);
             if (type) {
               let dataType;
               type = type
                 .split(" | ")
+                // @ts-ignore
                 .filter((t) => !t.includes("function"))
+                // @ts-ignore
                 .filter((t) => ![
                   "false",
                   "null",
@@ -155,10 +134,13 @@ export const BackupRestore = () => {
                 dataType = 'String';
               } else if (typeJoined === "String,UserDefinedElement") {
                 dataType = 'String';
+                // @ts-ignore
               } else if (type.some((t) => t.includes("Array"))) {
                 dataType = "List";
+                // @ts-ignore
               } else if (type.some((t) => t.includes("DataSource"))) {
                 dataType = "List";
+                // @ts-ignore
               } else if (type.some((t) => t.includes("PositionConfig"))) {
                 dataType = "Map";
               } else if (typeJoined === "Boolean,String") {
@@ -323,6 +305,7 @@ export const BackupRestore = () => {
 
     }
   }
+  // @ts-ignore
   const importCollections = () => {
     const file = componentPropsInputRef!.files![0];
 
@@ -363,12 +346,14 @@ export const BackupRestore = () => {
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
+          // @ts-ignore
           { P: { [IdAttr]: "dataType" } } as Vertex,
           dataType.vertex!.id,
         );
         setSelectionValue(
           txnId,
           graph.vertexes[newRow1.vertexId!],
+          // @ts-ignore
           { P: { [IdAttr]: "comp" } } as Vertex,
           compVertexId,
         );
@@ -376,6 +361,8 @@ export const BackupRestore = () => {
     }
     commitTxn(txnId, Ws);
   };
+
+  // @ts-ignore
   const importAllCSV = () => {
     const form = getFormMetaData('Import');
     if(form.error) return form.error;
@@ -535,7 +522,7 @@ delete`,
     const record = new Record({ws: Ws});
     record.create("Nav", {});
     record.createMeta(AttrsAdminTableData["Nav"])
-    importNavigation(`L: Nav
+    importRecordWithYAMLSchema(`L: Nav
 P:
   title: Main
   name: main
@@ -1033,13 +1020,13 @@ OUT:
 
   const C = (props: { title: string; subtitle: string; children: JSX.Element }) => {
     return (
-      <Card>
-        <CardHeader class="p:10">
-          <CardTitle class="uk-margin-remove-bottom">{props.title}</CardTitle>
+      <div class="b:2">
+        <div class="p:10 bb:1">
+          <h2 class="uk-margin-remove-bottom">{props.title}</h2>
           <span>{props.subtitle}</span>
-        </CardHeader>
-        <CardBody class="m:0 p:12">{props.children}</CardBody>
-      </Card>
+        </div>
+        <div class="m:0 p:12">{props.children}</div>
+      </div>
     );
   };
 
@@ -1049,7 +1036,7 @@ OUT:
       <div class="mb:1.5rem mt:10 m:6">
         <div class="grid-cols:2 grid-cols:3@xs grid-cols:3@sm grid-cols:3@md grid-cols:3@lg grid-cols:3@xl gap:10 w:full text:center">
           <C title={"Backup"} subtitle={"Backup in memory graph to different targets"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <button type="button" onclick={backupToIndexDB_}>
                   Backup To IndexDB
@@ -1058,10 +1045,10 @@ OUT:
                   Download Json
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Restore"} subtitle={"Restore graph from different targets to the memory"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <button type="button" onclick={restoreFromIndexDB}>
                 Restore From IndexDB
               </button>
@@ -1069,47 +1056,47 @@ OUT:
               <button type="button" onClick={restoreFromFile}>
                 <span>Restore From JSON</span>
               </button>
-            </CardBody>
+            </div>
           </C>
           <C title={"Graph Functions"} subtitle={"Other graph functions"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <button type="button" onclick={resetDatabase}>
                   Clear in memory store
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Links"} subtitle={"Simple Import"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <Link class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</Link>
                 <Link class="b:2|solid|blue-40" href="/Graph">Go to Graph</Link>
                 <Link class="b:2|solid|blue-40" href="/Nav">Configure Navigation</Link>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Dev Component Properties"} subtitle={"Import all DevExpress Components properties"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <input ref={componentPropsInputRef!} type="file" accept="json" style="display: hidden"></input>
                 <button type="button" onClick={importComponentProps}>
                   <span>Import DevExpress.json</span>
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Graph Functions"} subtitle={"Simple Import"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <button type="button" onClick={makeASampleForm}>
                   <span>Make a sample Form</span>
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Graph Functions"} subtitle={"Import All CSV"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <button type="button" onClick={importAllCSV}>
                   <span>Import all csv</span>
@@ -1118,10 +1105,10 @@ OUT:
                   <span>Import Main Navigation</span>
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
           <C title={"Import NS Data"} subtitle={"Import Netsuite Data"}>
-            <CardBody class="m:0 p:12">
+            <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
                 <input ref={importNSDataInputRef!} type="file" accept="json"
                        style="display: hidden"></input>
@@ -1129,7 +1116,7 @@ OUT:
                   <span>Import NS Data</span>
                 </button>
               </div>
-            </CardBody>
+            </div>
           </C>
         </div>
 
@@ -1140,150 +1127,5 @@ OUT:
   );
 };
 
-export function importNavigation(yamlInput: any, record: Record) {
-  const input = parse(yamlInput);
-  console.log(input);
-  if (!isObject(input)) {
-    return;
-  }
+export default BackupRestore;
 
-  record.replaceFieldValues({});
-
-  const clearChildren = (meta: Vertex, vertex: Vertex) => {
-    // 2. loop through meta and set all the data.
-    const metaVertexes = record.getSublistRowsForType("MetaAttr", record.metaVertex);
-
-    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
-    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
-
-    for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // Todo
-      } else {
-        setSelectionValue(record.txnId, vertex, metaVertex, undefined);
-      }
-    }
-
-    for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // not possible now
-      } else {
-        const childVertexes = record.getSublistRows(metaVertex, vertex);
-        const edge = getToEdge(metaVertex, vertex);
-        const outEdges = vertex.OUT[edge] || [];
-
-        for (const v of childVertexes) {
-          clearChildren(metaVertex, v);
-          // this deletes all vertexes in edges,
-          // out edges and the vertex itself.
-          // without confirmation, this is not good.
-          // some form may depend on it.
-          // unsafely delete:
-          // deleteRow(v, record.isRealTime, record.txnId, record.ws);
-
-          // safe delete:
-          const edgeToDelete = outEdges.find(edgeId => graph.edges[edgeId].E === v.id);
-          if (edgeToDelete) {
-            deleteEdge(record.txnId, edgeToDelete);
-          }
-
-          deleteVertex(record.txnId, v.id);
-        }
-      }
-    }
-  };
-
-  // after finalizing move this code to record.
-  clearChildren(record.metaVertex, record.vertex);
-
-  const insertChildren = (meta: Vertex, vertex: Vertex, input: {
-    [key: string]: any
-  }) => {
-    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
-    // const props = meta.P.props || {};
-
-    const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
-    const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
-
-
-    for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // input['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
-
-      } else {
-        const type = getToEdge(metaVertex, vertex);
-        const childVertexes = input?.["OUT"]?.[type] || [];
-        if (metaVertex.P.props?.items) {
-          continue;
-        }
-        if (!metaVertex.P.props?.collection) {
-          alert("collection is not defined in the meta");
-          continue;
-        }
-
-        // when a collection is not simple, label is required to import data
-        const label = isSimpleCollection(metaVertex.P.props.collection) ? metaVertex.P.props.collection : metaVertex.P.props.label;
-        if (!metaVertex.P.props?.collection) {
-          alert("collection label is not defined in the meta");
-          continue;
-        }
-
-        for (const v of childVertexes) {
-          if (AttrsTableData[label] || AttrsAdminTableData[label]) {
-            if (v["name"]) {
-              const selectedVertex = findOrCreateNewVertex(record.txnId, label, "name", v["name"]);
-              setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
-            }
-          } else {
-            const collVertex = findVertexByLabelAndUniqueId("Coll", "name", vertex.L[0]);
-            if (!collVertex) {
-              alert(`Collection not defined: ${label[0]}`);
-              continue;
-            }
-            const pks = getPkForCollection(collVertex);
-
-            const pksResult = {} as { [primaryKey: string]: any };
-            for (const pk of pks) {
-              pksResult[pk] = v[pk];
-            }
-            if (pks.length === 0) {
-              pksResult["name"] = v["name"];
-            }
-            const selectedVertex = findVertexByLabelAndPks(label, pksResult);
-            setSelectionValue(record.txnId, vertex, metaVertex, selectedVertex!.id);
-
-          }
-
-        }
-      }
-    }
-    for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // not possible now
-      } else {
-        const type = getToEdge(metaVertex, vertex);
-        const childVertexes = input?.["OUT"]?.[type] || [];
-
-        for (const v of childVertexes) {
-          const newRowResult = record.addNewRowUI(metaVertex, vertex, v.P || {});
-          if (!newRowResult.error) {
-            insertChildren(metaVertex, graph.vertexes[newRowResult.vertexId!], v);
-          }
-        }
-      }
-    }
-
-    return input;
-  };
-
-  record.replaceFieldValues(input.P || {});
-  insertChildren(record.metaVertex, record.vertex, input);
-}

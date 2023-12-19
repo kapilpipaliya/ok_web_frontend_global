@@ -1,6 +1,6 @@
 import { createContext } from "solid-js";
-import { AlertMessage } from "../types/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
+import {AlertMessage} from "../components/ComponentType";
 
 export const AlertMessageContext = createContext(
   {} as {

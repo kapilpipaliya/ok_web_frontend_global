@@ -16,7 +16,7 @@ import {
 } from "./graph";
 import {deleteVertex, updateVertexId} from "./Vertex";
 import {deleteEdge, updateEdgeId} from "./Edge";
-import {isAdmin} from "../components/Dashboard";
+import {isAdmin} from "../pages/Dashboard";
 import {isObject} from "../utils/utils";
 
 

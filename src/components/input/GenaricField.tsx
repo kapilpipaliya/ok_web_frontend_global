@@ -18,7 +18,7 @@ import {
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 
-import {ComponentProps} from "../../types/Component";
+import {ComponentProps} from "../ComponentType";
 import {commitTxn, IdAttr, revertTransaction, setGraph, Vertex} from "../../lib/graph";
 import {FormContext, getCollAttrComp, getCompProps, getRowProps, PageContext, Record} from "../../lib/Record";
 import {getChildVertex, getChildVertexes, getSelectionOptions} from "../../lib/Traverse";
@@ -29,8 +29,8 @@ import {WsContext} from "../../utils/ws_events_dispatcher";
 import {Link, useNavigate} from "@solidjs/router";
 import {getValueFromVertexOrKey, isObject} from "../../utils/utils";
 import {Dynamic} from "solid-js/web";
-import {selectedLayout} from "../PageView";
-import {showNav} from "../Dashboard";
+import {selectedLayout} from "../../pages/PageView";
+import {showNav} from "../../pages/Dashboard";
 import {mountComponent} from "./MountDevExtremeComp";
 import {Icon} from "@iconify-icon/solid";
 
@@ -63,6 +63,7 @@ export const PageRenderUtils = {
 export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
 
   const parentItems = useContext(PageRenderContext);
+  // @ts-ignore
   let { record, cleanUpConfig } = useContext(FormContext);
 
   // children:
@@ -100,6 +101,7 @@ export const PageItemRender = (props: {metaVertex: Vertex, data?: Vertex}) => {
       });
       // TODO: Is This Parent Vertex is ok?
       // Need Repetitive parent checks?
+      // @ts-ignore
       const parentData = () => {
         return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
       }
@@ -178,10 +180,12 @@ export const getTextColumnValue = (value: any) => {
 
 // This component support rendering Child Themselves by calling PageRender.
 export function GenericField(props: ComponentProps & { component?: string; disabled?: boolean; txnId?: number; children?: JSXElement, [key: string]: any }) {
+  // @ts-ignore
   const formContext = useContext(FormContext);
   let { events } = useContext(PageContext);
   const parentItems = useContext(PageRenderContext);
   const component = createMemo(() => props.component || props.meta.P.component);
+  // @ts-ignore
   const parentComponent = createMemo(() => {
     return PageRenderUtils.getComponent(getLastItem(parentItems, 2))?.P[IdAttr];
   });
@@ -278,7 +282,7 @@ export function GenericField(props: ComponentProps & { component?: string; disab
 
   const repeaterContext = useContext(RepeaterContext);
   return (
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data.P[props.meta.P[IdAttr]])}>
+      <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
         <Switch>
           <Match when={component()==="Repeater"}>
             <For each={props.data || getSelectionOptions([props.meta], `g:'${PageRenderUtils.getCollection(props.meta)!}'`).vertexes}>
@@ -363,10 +367,10 @@ export function GenericField(props: ComponentProps & { component?: string; disab
           <Match when={true}>
             <Dynamic component={props.meta.P.props?.as || "div"}
              class={getValueFromVertexOrKey(props.meta.P.props, "class")}
-             ref={(el) => {
+             ref={(el: any) => {
                if (["Box"].includes(component())) return;
                runWithOwner(outerOwner, () => {
-                 mountComponent(el, component(), props.meta, props.data, props.setValue, outerOwner, props.disabled, props.ref, props.onClick, events)
+                 mountComponent(el, component(), props.meta, props.data, props.setValue!, outerOwner!, props.disabled!, props.ref, props.onClick, events)
                })
              }}
             >

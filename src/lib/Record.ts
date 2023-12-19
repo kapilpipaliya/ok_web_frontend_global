@@ -34,8 +34,8 @@ import dxValidationGroup from "devextreme/ui/validation_group";
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import {capitalizeFirstLetter, getValueFromVertexOrKey, groupBy, isObject} from "../utils/utils";
-import {AdminAttrKeys, AttrsTableData} from "../components/api";
-import {AttrsAdminTableData} from "../components/apiAdmin";
+import {AdminAttrKeys, AttrsTableData} from "./api";
+import {AttrsAdminTableData} from "./apiAdmin";
 
 export interface FieldAttribute {
  name: string;

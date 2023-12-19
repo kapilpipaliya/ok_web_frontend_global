@@ -1,4 +1,6 @@
+// @ts-ignore
 import { createRoot } from 'react-dom/client'
+// @ts-ignore
 import {createElement} from 'react';
 import ReactPlayer, { ReactPlayerProps } from "react-player";
 import { BaseReactPlayerProps } from "react-player/base";
