@@ -106,14 +106,14 @@ export const DataGrid = (props: DataGridProps) => {
     header: '',
     footer: '',
     cell: info => {
-      return <Link href={`/${props.tableId}/${info.row.original.id}`}>Edit</Link>;
+      return <Link href={`/${props.tableId}/${info.row.original.id}`}><i class="fas fa-edit"></i>Edit</Link>;
     }
   });
   tableColumns.push({
     accessorKey: 'Delete',
     header: '',
     footer: '',
-    cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}>Delete</button>
+    cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}><i class="fas fa-trash-alt"></i>Delete</button>
   });
 
   console.log(tableColumns)
@@ -143,7 +143,7 @@ export const DataGrid = (props: DataGridProps) => {
   return (
     <div class="py:5">
       <div class="p-2">
-        <table>
+        <table class="w-100">
           <thead>
             <For each={table.getHeaderGroups()}>
               {headerGroup => (

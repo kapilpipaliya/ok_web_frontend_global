@@ -1,22 +1,20 @@
 
-import "./base.css";
 import "devextreme/dist/css/dx.light.css";
+import "./base.css";
+import { CSSProvider } from "./components/css/CSSProvider";
 import "./dev_fix.css";
 import { config } from "./master.css";
-import { CSSProvider } from "./components/css/CSSProvider";
 
-import { render } from "solid-js/web";
+import { Router } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import { Route, Router, Routes } from "@solidjs/router";
+import { render } from "solid-js/web";
 import { FullDashboard, isAdmin, showNav } from "./pages/Dashboard";
 import { ServerEventsDispatcher, WS_PATH, WsContext } from "./utils/ws_events_dispatcher";
 
-import { AlertMessageContext } from "./contexts/AlertMessageContext";
-import { Component, Show } from "solid-js";
-import { graph } from "./lib/graph";
-import { syncEvent } from "./lib/ws_events";
-import { PagePreview, PageView_, RobotsTxt, SiteMap } from "./pages/PageView";
+import { Show } from "solid-js";
 import { AlertMessage } from "./components/ComponentType";
+import { AlertMessageContext } from "./contexts/AlertMessageContext";
+import { syncEvent } from "./lib/ws_events";
 
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
