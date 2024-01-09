@@ -26,10 +26,6 @@ import {
   transactions
 } from "../lib/graph";
 
-import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
-import { AttrsTableData } from "../lib/api";
-import { capitalizeFirstLetter, isNumber } from "../utils/utils";
-import { WsContext } from "../utils/ws_events_dispatcher";
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "../components/input/GenaricField";
 import {
@@ -38,7 +34,11 @@ import {
 } from "../components/input/SelectInputField";
 import { FormMetaData, PageContext, getFormApiFromForm } from "../lib/Record";
 import { getChildVertexes, getSelectionOptions } from "../lib/Traverse";
+import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
+import { AttrsTableData } from "../lib/api";
 import { AttrsAdminTableData } from "../lib/apiAdmin";
+import { capitalizeFirstLetter, isNumber } from "../utils/utils";
+import { WsContext } from "../utils/ws_events_dispatcher";
 
 
 interface DataGridProps {
@@ -48,6 +48,7 @@ interface DataGridProps {
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
   const form = getFormApiFromForm(props.tableId);
+
   let formNew: FormMetaData;
   let collection: string;
 
@@ -145,7 +146,6 @@ export const DataGrid = (props: DataGridProps) => {
     footer: '',
     cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}><Icon icon="fluent:delete-12-regular" />Delete</button>
   });
-
   console.log(tableColumns)
 
   if (!collection) {
@@ -164,9 +164,9 @@ export const DataGrid = (props: DataGridProps) => {
   //  alert(`collection not found ${coll}`)
   //  return;
   // }
-  const [_, customProps] = splitProps(props, ["tableId"]);
+  const [_] = splitProps(props, ["tableId"]);
 
-  const [data, setData] = createSignal((graph.vertexLabelIdMap[coll] || []).map(vertexId => graph.vertexes[vertexId]))
+  const [data] = createSignal((graph.vertexLabelIdMap[coll] || []).map(vertexId => graph.vertexes[vertexId]))
 
   const table = createSolidTable({
     get data() {
@@ -176,7 +176,11 @@ export const DataGrid = (props: DataGridProps) => {
     getCoreRowModel: getCoreRowModel(),
   })
 
-
+  const calculateRowStyle = (index: any) => {
+    return {
+      background: index.index % 2 === 0 ? "white" : "#e1dfdf",
+    };
+  };
   return (
     <div class="py:5">
       <div class="p-2">
@@ -203,8 +207,11 @@ export const DataGrid = (props: DataGridProps) => {
           </thead>
           <tbody>
             <For each={table.getRowModel().rows}>
-              {row => (
-                <tr class="p:10 text:center">
+              {(row) => (
+                <tr
+                  style={calculateRowStyle(row)}
+                  class="p-10 text-center"
+                >
                   <For each={row.getVisibleCells()}>
                     {cell => (
                       <td>
