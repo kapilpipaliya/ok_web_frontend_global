@@ -10,7 +10,7 @@ import {config} from "./master.css";
 // import "uikit/dist/js/uikit";
 // import "uikit/dist/css/uikit.css";
 // import './solid_blocks_index.css'
-import {CSSProvider} from "./components/css/CSSProvider";
+import {CSSRuntimeProvider} from "./components/css/CSSRuntimeProvider";
 
 import {render} from "solid-js/web";
 import {createStore} from "solid-js/store";
@@ -34,7 +34,7 @@ render(() => {
   }
 
   return (
-    <CSSProvider config={config}>
+    <CSSRuntimeProvider config={config}>
       <WsContext.Provider value={{Ws}}>
         <Sync/>
         <AlertMessageContext.Provider value={{alerts, setAlert}}>
@@ -58,6 +58,6 @@ render(() => {
 
         </AlertMessageContext.Provider>
       </WsContext.Provider>
-    </CSSProvider>
+    </CSSRuntimeProvider>
   );
 }, document.getElementById("root") as HTMLElement);

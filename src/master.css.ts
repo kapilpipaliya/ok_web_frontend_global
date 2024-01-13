@@ -1,17 +1,15 @@
 import MasterCSS, { Config } from "@master/css";
 
 export const config: Config = {
-  classes: {},
-  colors: {},
-  themes: {},
+  styles: {},
   rules: {},
-  values: {},
+  variables: {},
   semantics: {},
-  viewports: {},
   mediaQueries: {},
   animations: {},
   selectors: {},
-  functions: {}
+  functions: {},
+  themeDriver: 'media'
 };
 
 
