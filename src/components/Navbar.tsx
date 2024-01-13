@@ -1,9 +1,9 @@
 
 import { Icon } from "@iconify-icon/solid";
-import { DisplayComponentProps } from "../types/Component";
 import { JSXElement, Show, useContext } from "solid-js";
 import { PageContext } from "../lib/Record";
 import { createEffect, createSignal } from "solid-js";
+import {DisplayComponentProps} from "./ComponentType";
 
 export function Navbar(props: DisplayComponentProps & { left?: JSXElement, right?: JSXElement }) {
   const [isDarkMode, setDarkMode] = createSignal(false);
