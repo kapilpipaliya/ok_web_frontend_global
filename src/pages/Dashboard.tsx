@@ -2,6 +2,7 @@ import {
     Component,
     createEffect,
     createSignal,
+    createMemo,
     on,
     Show,
     useContext, For, lazy
@@ -33,9 +34,9 @@ import {
 import { Navbar } from "../components/Navbar";
 import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { AbstractSingleForm } from "../components/DynamicForm";
-import {PageDesignerDragAndDrop} from "../components/PageDesignerDragAndDrop";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {AllForms, SimpleImport} from "./FormsAdmin";
+import { PageDesignerDragAndDrop } from "../components/PageDesignerDragAndDrop";
+import { AttrsAdminTableData } from "../lib/apiAdmin";
+import { AllForms, SimpleImport } from "./FormsAdmin";
 
 const BackupRestore = lazy(() => import("./BackupRestore"));
 const GraphViewPage = lazy(() => import("./GraphViewPage"));
@@ -46,9 +47,6 @@ get("isSideBarOpen").then((data) => setSideBarOpen(data));
 
 export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
 export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
-
-// TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
-// Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
     const navigate = useNavigate();
 
@@ -65,7 +63,7 @@ export const StaticSideBar = () => {
                         console.log('no Nav Found')
                         return;
                     }
-                    const record = new Record({ws: Ws});
+                    const record = new Record({ ws: Ws });
                     record.load(nav.id);
                     record.createMeta(AttrsAdminTableData["Nav"])
                     renderNavTreeFromGraph(el, record, navigate);
@@ -79,41 +77,76 @@ export const StaticSideBar = () => {
 // Todo use mastercss
 const AlertDisplay = () => {
     const { alerts, setAlert } = useContext(AlertMessageContext);
-    return   <For each={alerts}>
-        {(alert, index) => <div color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={()=>setAlert(prev=> prev.filter((_, i) => i !== index()))}/>}
+    return <For each={alerts}>
+        {(alert, index) => <div color={alert.state} isClosable={true} content={alert.message} duration={5000} onHide={() => setAlert(prev => prev.filter((_, i) => i !== index()))} />}
     </For>
 }
 
 export const DashboardView = () => {
+
+    const prefersLightMode = createMemo(() => window.matchMedia('(prefers-color-scheme: light)').matches);
+    const prefersDarkMode = createMemo(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const initialTheme = localStorage.getItem('theme') || (prefersDarkMode() ? 'dark' : 'light') || (prefersLightMode() ? 'light' : 'dark');
+    const themeOptions = ["light", "dark", "system"];
+    const [selectedTheme, setSelectedTheme] = createSignal(initialTheme);
+
     const vertexId = getNewGraphId();
-    addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {class: "bb:1" + border}));
+    addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], { class: "bb:1" + border }));
+    const updateTheme = (theme) => {
+        setSelectedTheme(theme);
+        localStorage.setItem('theme', theme);
+
+        if (theme === 'system') {
+            applySystemDefaultTheme();
+        } else {
+            document.documentElement.style.backgroundColor = theme === 'dark' ? '#2b2b2b' : '#ffffff';
+            document.documentElement.style.color = theme === 'dark' ? '#ffffff' : '#000000';
+        }
+    };
+    const applySystemDefaultTheme = () => {
+        const systemDefaultTheme = prefersDarkMode() ? 'dark' : 'light';
+        setSelectedTheme(systemDefaultTheme);
+        localStorage.setItem('theme', systemDefaultTheme);
+
+        document.documentElement.style.backgroundColor = systemDefaultTheme === 'dark' ? '#2b2b2b' : '#ffffff';
+        document.documentElement.style.color = systemDefaultTheme === 'dark' ? '#ffffff' : '#000000';
+    };
 
     return (
         <div class="flex flex:col flex:1">
             <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, { title }) } }}>
                 <Navbar
-                    right={<Show
-                        when={graph.member?.id}
-                        fallback={
-                            <>
-                                <Link href={`/signup`} replace={true}>Register</Link>
-                                {/* @ts-ignore */}
-                                <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
-                            </>
-                        }
-                    >
-                        <Link href={`/logout`} replace={true}>Logout</Link>
-                    </Show>}
+                    right={
+                        <>
+                            <Show
+                                when={graph.member?.id}
+                                fallback={
+                                    <>
+                                        <Link href={`/signup`} replace={true}>Register</Link>
+                                        <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
+                                    </>
+                                }
+                            >
+                                <Link href={`/logout`} replace={true}>Logout</Link>
+                            </Show>
+                            <div>
+                                <select value={selectedTheme()} class="color:blue-30" onChange={(e) => updateTheme(e.target.value)}>
+                                    {themeOptions.map((theme) => (
+                                        <option class="color:blue-30" value={theme}>{theme}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        </>
+                    }
                     meta={graph.vertexes[vertexId]}
                 />
 
-                <AlertDisplay/>
+                <AlertDisplay />
 
                 <main class="p:20">
                     <Show when={graph.initialSynced}>
                         <Routes>
                             <Route path="/" component={() => <>Home Page</>} />
-                            {/* TODO: fix when incorrect entity is rendered */}
                             <Route
                                 path="/:entity"
                                 component={() => {
@@ -128,19 +161,19 @@ export const DashboardView = () => {
                                     return <AbstractSingleForm formId={params.entity} id={params.id} config={{}} />
                                 }}
                             />
-                            <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props}/>} />
-                            <Route path="/Nav/new" component={(props) => <NavDesigner {...props}/>} />
-                            <Route path="/dashboards" component={(props) => <AllDashboards {...props}/>} />
-                            <Route path="/forms" component={(props) => <AllForms {...props}/>} />
-                            <Route path="/grid/:name" component={(props) => <TableDashboard  {...props}/>} />
+                            <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props} />} />
+                            <Route path="/Nav/new" component={(props) => <NavDesigner {...props} />} />
+                            <Route path="/dashboards" component={(props) => <AllDashboards {...props} />} />
+                            <Route path="/forms" component={(props) => <AllForms {...props} />} />
+                            <Route path="/grid/:name" component={(props) => <TableDashboard  {...props} />} />
                             {/* Auth: */}
                             <Route path="/login" component={Login as Component} />
                             <Route path="/logout" component={Logout as Component} />
                             <Route path="/signup" component={SignUp as Component} />
                             {/* Utils */}
-                            <Route path="/backup_restore" component={(props) => <BackupRestore {...props}/>} />
-                            <Route path="/SimpleImport" component={(props) => <SimpleImport {...props}/>} />
-                            <Route path="/Graph" component={(props) => <GraphViewPage/>} />
+                            <Route path="/backup_restore" component={(props) => <BackupRestore {...props} />} />
+                            <Route path="/SimpleImport" component={(props) => <SimpleImport {...props} />} />
+                            <Route path="/Graph" component={(props) => <GraphViewPage />} />
                             {/* Error */}
                             <Route path="/**" component={Page404 as Component} />
                         </Routes>
@@ -173,11 +206,12 @@ export const FullDashboard = () => {
                                 opened: true,
                                 maxSize: 200,
                                 revealMode: "expand",
-                                elementAttr: {class: `br:1${border}_.dx-drawer-panel-content`}
+                                elementAttr: { class: `br:1${border}_.dx-drawer-panel-content` }
                             } as dxDrawerProperties
-                        }} as unknown as Vertex}
-                    ref={(instance: any)=> {
-                        createEffect(on(isSideBarOpen, (_) => instance.toggle(), {defer: true}));
+                        }
+                    } as unknown as Vertex}
+                    ref={(instance: any) => {
+                        createEffect(on(isSideBarOpen, (_) => instance.toggle(), { defer: true }));
                     }}
                 >
                     <DashboardView />
