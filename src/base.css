@@ -423,23 +423,3 @@ Make elements with the HTML hidden attribute stay hidden by default.
     display: none;
 }
 
-.dx-theme-generic-typography {
-    background-color: transparent !important;
-}
-
-@media (prefers-color-scheme: dark) {
-    .bg\:gray-10\@dark {
-        background-color: transparent !important;
-    }
-}
-
-.dx-widget ,
-.dx-treeview-toggle-item-visibility{
-    color: inherit !important;
-}
-
-@media (prefers-color-scheme: dark) {
-    .fg\:white\@dark {
-        color: inherit !important;
-    }
-}
