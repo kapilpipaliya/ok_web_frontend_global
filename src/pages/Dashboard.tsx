@@ -2,7 +2,6 @@ import {
     Component,
     createEffect,
     createSignal,
-    createMemo,
     on,
     Show,
     useContext, For, lazy
@@ -47,6 +46,9 @@ get("isSideBarOpen").then((data) => setSideBarOpen(data));
 
 export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
 export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
+
+// TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
+// Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
     const navigate = useNavigate();
 
@@ -83,70 +85,35 @@ const AlertDisplay = () => {
 }
 
 export const DashboardView = () => {
-
-    const prefersLightMode = createMemo(() => window.matchMedia('(prefers-color-scheme: light)').matches);
-    const prefersDarkMode = createMemo(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const initialTheme = localStorage.getItem('theme') || (prefersDarkMode() ? 'dark' : 'light') || (prefersLightMode() ? 'light' : 'dark');
-    const themeOptions = ["light", "dark", "system"];
-    const [selectedTheme, setSelectedTheme] = createSignal(initialTheme);
-
     const vertexId = getNewGraphId();
-    addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], { class: "bb:1" + border }));
-    const updateTheme = (theme) => {
-        setSelectedTheme(theme);
-        localStorage.setItem('theme', theme);
-
-        if (theme === 'system') {
-            applySystemDefaultTheme();
-        } else {
-            document.documentElement.style.backgroundColor = theme === 'dark' ? '#2b2b2b' : '#ffffff';
-            document.documentElement.style.color = theme === 'dark' ? '#ffffff' : '#000000';
-        }
-    };
-    const applySystemDefaultTheme = () => {
-        const systemDefaultTheme = prefersDarkMode() ? 'dark' : 'light';
-        setSelectedTheme(systemDefaultTheme);
-        localStorage.setItem('theme', systemDefaultTheme);
-
-        document.documentElement.style.backgroundColor = systemDefaultTheme === 'dark' ? '#2b2b2b' : '#ffffff';
-        document.documentElement.style.color = systemDefaultTheme === 'dark' ? '#ffffff' : '#000000';
-    };
+    addNewVertex(0, newVertex(vertexId, ['MainNavBarTitle'], {class: "bb:1" + border}));
 
     return (
         <div class="flex flex:col flex:1">
             <PageContext.Provider value={{ events: { setSideBarOpen, setTitle: (title: string) => mergeVertexProperties(0, vertexId, { title }) } }}>
                 <Navbar
-                    right={
-                        <>
-                            <Show
-                                when={graph.member?.id}
-                                fallback={
-                                    <>
-                                        <Link href={`/signup`} replace={true}>Register</Link>
-                                        <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
-                                    </>
-                                }
-                            >
-                                <Link href={`/logout`} replace={true}>Logout</Link>
-                            </Show>
-                            <div>
-                                <select value={selectedTheme()} class="color:blue-30" onChange={(e) => updateTheme(e.target.value)}>
-                                    {themeOptions.map((theme) => (
-                                        <option class="color:blue-30" value={theme}>{theme}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </>
-                    }
+                    right={<Show
+                        when={graph.member?.id}
+                        fallback={
+                            <>
+                                <Link href={`/signup`} replace={true}>Register</Link>
+                                {/* @ts-ignore */}
+                                <Link href={`/login`} replace={true} title={__APP_VERSION__}>Login</Link>
+                            </>
+                        }
+                    >
+                        <Link href={`/logout`} replace={true}>Logout</Link>
+                    </Show>}
                     meta={graph.vertexes[vertexId]}
                 />
 
-                <AlertDisplay />
+                <AlertDisplay/>
 
                 <main class="p:20">
                     <Show when={graph.initialSynced}>
                         <Routes>
                             <Route path="/" component={() => <>Home Page</>} />
+                            {/* TODO: fix when incorrect entity is rendered */}
                             <Route
                                 path="/:entity"
                                 component={() => {
