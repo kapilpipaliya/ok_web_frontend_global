@@ -114,7 +114,7 @@ export const replaceEdgeStart = (
     return { error: "" };
   }
   batch(() => {
-    setGraph("edges", edgeId, "start", newStartVertexId);
+    setGraph("edges", edgeId, "S", newStartVertexId);
     // @ts-ignore
     setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) =>
       Array.isArray(v)
@@ -152,7 +152,7 @@ export const replaceEdgeEnd = (
     return { error: "" };
   }
   batch(() => {
-    setGraph("edges", edgeId, "end", newEndVertexId);
+    setGraph("edges", edgeId, "E", newEndVertexId);
     // @ts-ignore
     setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) =>
       Array.isArray(v)
