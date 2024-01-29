@@ -1,6 +1,4 @@
-import { useLocation, useNavigate } from '@solidjs/router';
-import { For, createMemo, createUniqueId, untrack } from 'solid-js';
-import { AiFillCaretDown } from 'solidjs-icons/ai';
+import { createMemo, createUniqueId, untrack } from 'solid-js';
 import { Record } from '../lib/Record';
 import { getChildVertex } from '../lib/Traverse';
 import { findVertexByLabelAndUniqueId } from '../lib/Vertex';
@@ -8,6 +6,7 @@ import { AttrsAdminTableData } from '../lib/apiAdmin';
 import { Vertex } from '../lib/graph';
 import { showNav } from '../pages/Dashboard';
 import { ServerEventsDispatcher } from '../utils/ws_events_dispatcher';
+import SidebarElement from './SidebarElement';
 
 export interface navbarDataI {
 	children: navbarDataI[];
@@ -18,8 +17,6 @@ export interface navbarDataI {
 }
 
 function Sidebar(props: { Ws: ServerEventsDispatcher }) {
-	const navigate = useNavigate();
-
 	const navData = createMemo(() => {
 		const nav = findVertexByLabelAndUniqueId('Nav', 'name', 'main');
 		if (!nav) {
@@ -32,52 +29,63 @@ function Sidebar(props: { Ws: ServerEventsDispatcher }) {
 		return renderNavTreeFromGraph(record);
 	});
 
-	const location = useLocation();
-
 	return (
 		<div>
 			<nav class=''>
 				<input class='p:7.5 min-w:full' type='text' name='' id='' />
 			</nav>
 			<ul>
-				<For each={navData() ?? []} fallback={<div>Loading...</div>}>
+				<SidebarElement navbarData={navData() ?? []} />
+				{/* <For each={navData() ?? []} fallback={<div>Loading...</div>}>
 					{(item) => (
 						<li
-							class={`py:10 cursor:pointer ${
+							class={`bg:#b2b2b2:hover cursor:pointer ${
 								location.pathname.toLowerCase() ===
 								item.href.toLowerCase()
 									? 'bg:#337ab7'
 									: ''
 							}`}
-							onClick={() => {
-								if (item.expanded !== undefined) return;
-								navigate(item.href, { resolve: false });
-							}}
 						>
-							<div class='flex ai:center'>
-								<span
-									class='px:10'
-									style={{
-										visibility:
-											item.expanded === undefined
-												? 'hidden'
-												: 'visible',
-									}}
-								>
-									<AiFillCaretDown />
-								</span>
-								{item.name}
-							</div>
+							<Accordion.Root multiple>
+								{item.expanded === undefined ? (
+									<div
+										class='flex ai:center p:10'
+										onClick={() => {
+											navigate(item.href, {
+												resolve: false,
+											});
+										}}
+									>
+										<span class='font:14'>{item.name}</span>
+									</div>
+								) : (
+									<Accordion.Item
+										value={item.id}
+										class='p:10'
+									>
+										<Accordion.Trigger class='w:full px:10'>
+											<Accordion.Header class='w:full flex jc:left'>
+												<span class='font:14'>
+													{item.name}
+												</span>
+											</Accordion.Header>
+										</Accordion.Trigger>
+										<Accordion.Content class=''>
+											ok
+										</Accordion.Content>
+									</Accordion.Item>
+								)}
+							</Accordion.Root>
 						</li>
 					)}
-				</For>
+				</For> */}
 			</ul>
 		</div>
 	);
 }
 
 // ! Hover of menu add this to background color
-// bg:#b2b2b2
+// bg:
 
 export default Sidebar;
 
