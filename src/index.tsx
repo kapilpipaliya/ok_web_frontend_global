@@ -25,6 +25,10 @@ import {syncEvent} from "./lib/ws_events";
 import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
 import {AlertMessage} from "./components/ComponentType";
 
+// disable twMerge:
+import { defaultConfig } from 'tailwind-variants';
+defaultConfig.twMerge = false;
+
 render(() => {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const [alerts, setAlert] = createStore([] as AlertMessage[]);
