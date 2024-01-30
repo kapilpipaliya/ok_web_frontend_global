@@ -1,5 +1,4 @@
 import { Link, Route, Routes, useParams } from '@solidjs/router';
-import { Properties as dxDrawerProperties } from 'devextreme/ui/drawer';
 import { get, set } from 'idb-keyval';
 import {
 	Component,
@@ -12,7 +11,6 @@ import {
 	useContext,
 } from 'solid-js';
 import { Vertex, getNewGraphId, graph } from '../lib/graph';
-import { WsContext } from '../utils/ws_events_dispatcher';
 import Page404 from './404';
 import { Login, Logout, SignUp } from './Forms';
 
@@ -47,13 +45,11 @@ export const [isAdmin, setIsAdmin] = createSignal(
 // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
 // Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
 export const StaticSideBar = () => {
-	const { Ws } = useContext(WsContext);
-
 	// parent div is required else component is not rendered.
 	return (
 		<div>
 			<Show when={graph.initialSynced}>
-				<Sidebar Ws={Ws} />
+				<Sidebar />
 			</Show>
 		</div>
 	);
@@ -255,7 +251,7 @@ export const FullDashboard = () => {
 									elementAttr: {
 										class: `br:1${border}_.dx-drawer-panel-content`,
 									},
-								} as dxDrawerProperties,
+								},
 							},
 						} as unknown as Vertex
 					}

@@ -1,11 +1,18 @@
-import { createMemo, createUniqueId, untrack } from 'solid-js';
+import { Icon } from '@iconify-icon/solid';
+import {
+	createMemo,
+	createSignal,
+	createUniqueId,
+	untrack,
+	useContext,
+} from 'solid-js';
 import { Record } from '../lib/Record';
 import { getChildVertex } from '../lib/Traverse';
 import { findVertexByLabelAndUniqueId } from '../lib/Vertex';
 import { AttrsAdminTableData } from '../lib/apiAdmin';
 import { Vertex } from '../lib/graph';
 import { showNav } from '../pages/Dashboard';
-import { ServerEventsDispatcher } from '../utils/ws_events_dispatcher';
+import { WsContext } from '../utils/ws_events_dispatcher';
 import SidebarElement from './SidebarElement';
 
 export interface navbarDataI {
@@ -16,76 +23,103 @@ export interface navbarDataI {
 	name: string;
 }
 
-function Sidebar(props: { Ws: ServerEventsDispatcher }) {
+function Sidebar() {
+	let searchInputRef: HTMLInputElement;
+	const [isSearchMode, setIsSearchMode] = createSignal(false);
+	const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
+	const { Ws } = useContext(WsContext);
+
 	const navData = createMemo(() => {
 		const nav = findVertexByLabelAndUniqueId('Nav', 'name', 'main');
 		if (!nav) {
 			console.log('no Nav Found');
 			return;
 		}
-		const record = new Record({ ws: props.Ws });
+		const record = new Record({ ws: Ws });
 		record.load(nav.id);
 		untrack(() => record.createMeta(AttrsAdminTableData['Nav']));
 		return renderNavTreeFromGraph(record);
 	});
 
+	const searchDataDict = createMemo(() => {
+		const data = navData();
+		if (!data) return;
+
+		const searchDict: { [key: string]: navbarDataI[] } = {};
+
+		function createSearchIndex(data: navbarDataI[]) {
+			data.forEach((e) => {
+				const key = e.name.toLowerCase();
+				if (searchDict[key]) {
+				} else {
+					searchDict[key] = [];
+				}
+				searchDict[key].push(e);
+				if (e.children) {
+					createSearchIndex(e.children);
+				}
+			});
+		}
+
+		createSearchIndex(data);
+
+		return searchDict;
+	});
+
+	const searchKeys = createMemo(() => {
+		const data = searchDataDict();
+		if (!data) return;
+
+		return Object.keys(data);
+	});
+
+	function handleSearch(searchTerm: string) {
+		searchTerm = searchTerm.trim().toLowerCase();
+		setIsSearchMode(searchTerm.length > 0);
+
+		if (searchTerm.length === 0) return;
+		const data = searchDataDict();
+		const keys = searchKeys();
+		if (!keys || !data) return;
+
+		const filteredKeys = keys.filter((e) =>
+			e.toLowerCase().startsWith(searchTerm.toLowerCase())
+		);
+
+		const result = filteredKeys.map((e) => data[e]);
+		setSearchData(result.flat());
+	}
+
+	function resetSearch() {
+		setIsSearchMode(false);
+		setSearchData([]);
+		searchInputRef.value = '';
+	}
+
 	return (
 		<div>
-			<nav class=''>
-				<input class='p:7.5 min-w:full' type='text' name='' id='' />
+			<nav class='flex bg:white position:relative'>
+				<div class='position:absolute top:7 left:8 font:20'>
+					<Icon icon='ic:baseline-search' />
+				</div>
+				<input
+					ref={searchInputRef!}
+					class='p:7.5 min-w:full pl:2rem'
+					type='text'
+					onInput={(e) => {
+						handleSearch(e.target.value);
+					}}
+				/>
 			</nav>
 			<ul>
-				<SidebarElement navbarData={navData() ?? []} />
-				{/* <For each={navData() ?? []} fallback={<div>Loading...</div>}>
-					{(item) => (
-						<li
-							class={`bg:#b2b2b2:hover cursor:pointer ${
-								location.pathname.toLowerCase() ===
-								item.href.toLowerCase()
-									? 'bg:#337ab7'
-									: ''
-							}`}
-						>
-							<Accordion.Root multiple>
-								{item.expanded === undefined ? (
-									<div
-										class='flex ai:center p:10'
-										onClick={() => {
-											navigate(item.href, {
-												resolve: false,
-											});
-										}}
-									>
-										<span class='font:14'>{item.name}</span>
-									</div>
-								) : (
-									<Accordion.Item
-										value={item.id}
-										class='p:10'
-									>
-										<Accordion.Trigger class='w:full px:10'>
-											<Accordion.Header class='w:full flex jc:left'>
-												<span class='font:14'>
-													{item.name}
-												</span>
-											</Accordion.Header>
-										</Accordion.Trigger>
-										<Accordion.Content class=''>
-											ok
-										</Accordion.Content>
-									</Accordion.Item>
-								)}
-							</Accordion.Root>
-						</li>
-					)}
-				</For> */}
+				<SidebarElement
+					resetSearch={resetSearch}
+					navbarData={isSearchMode() ? searchData() : navData() ?? []}
+				/>
 			</ul>
 		</div>
 	);
 }
-
-// ! Hover of menu add this to background color
-// bg:
 
 export default Sidebar;
 
