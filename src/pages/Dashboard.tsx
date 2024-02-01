@@ -58,7 +58,7 @@ const AlertDisplay = () => {
 
 export const DashboardView = () => {
   const vertexId = getNewGraphId();
-  addNewVertex(0, newVertex(vertexId, ["MainNavBarTitle"], { class: "bb:1" + border }));
+  addNewVertex(0, newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }));
 
   return (
     <div class="flex flex:col flex:1">
@@ -76,12 +76,12 @@ export const DashboardView = () => {
               when={graph.member?.id}
               fallback={
                 <>
-                  <Link href={`/signup`} replace={true}>
+                  <Link href={"/signup"} replace={true}>
                     Register
                   </Link>
                   {/* @ts-ignore */}
                   <Link
-                    href={`/login`}
+                    href={"/login"}
                     replace={true}
                     // @ts-ignore
                     title={__APP_VERSION__}
@@ -91,7 +91,7 @@ export const DashboardView = () => {
                 </>
               }
             >
-              <Link href={`/logout`} replace={true}>
+              <Link href={"/logout"} replace={true}>
                 Logout
               </Link>
             </Show>
@@ -158,7 +158,7 @@ export const FullDashboard = () => {
 
   return (
     <div class="flex">
-      <Sidebar isVisible={showNav() && (graph.initialSynced || showNav())} />
+      <Sidebar isVisible={showNav() && (graph.initialSynced || showNav())} showNav={showNav} />
       <DashboardView />
     </div>
   );

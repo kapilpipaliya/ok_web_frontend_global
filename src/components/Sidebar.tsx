@@ -1,11 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
+import { Accessor, createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
 import { Record } from "../lib/Record";
 import { getChildVertex } from "../lib/Traverse";
 import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
 import { AttrsAdminTableData } from "../lib/apiAdmin";
 import { Vertex } from "../lib/graph";
-import { showNav } from "../pages/Dashboard";
+import treeViewFilter from "../lib/treeViewFilter";
 import { WsContext } from "../utils/ws_events_dispatcher";
 import SidebarElement from "./SidebarElement";
 
@@ -17,7 +17,7 @@ export interface navbarDataI {
   name: string;
 }
 
-function Sidebar(props: { isVisible: boolean }) {
+function Sidebar(props: { isVisible: boolean; showNav: Accessor<boolean> }) {
   let searchInputRef: HTMLInputElement;
   const [isSearchMode, setIsSearchMode] = createSignal(false);
   const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
@@ -32,39 +32,7 @@ function Sidebar(props: { isVisible: boolean }) {
     const record = new Record({ ws: Ws });
     record.load(nav.id);
     untrack(() => record.createMeta(AttrsAdminTableData["Nav"]));
-    return renderNavTreeFromGraph(record);
-  });
-
-  const searchDataDict = createMemo(() => {
-    const data = navData();
-    if (!data) return;
-
-    const searchDict: { [key: string]: navbarDataI[] } = {};
-
-    function createSearchIndex(data: navbarDataI[]) {
-      data.forEach((e) => {
-        const key = e.name.toLowerCase();
-        if (searchDict[key]) {
-        } else {
-          searchDict[key] = [];
-        }
-        searchDict[key].push(e);
-        if (e.children) {
-          createSearchIndex(e.children);
-        }
-      });
-    }
-
-    createSearchIndex(data);
-
-    return searchDict;
-  });
-
-  const searchKeys = createMemo(() => {
-    const data = searchDataDict();
-    if (!data) return;
-
-    return Object.keys(data);
+    return renderNavTreeFromGraph(record, props.showNav());
   });
 
   function handleSearch(searchTerm: string) {
@@ -72,14 +40,15 @@ function Sidebar(props: { isVisible: boolean }) {
     setIsSearchMode(searchTerm.length > 0);
 
     if (searchTerm.length === 0) return;
-    const data = searchDataDict();
-    const keys = searchKeys();
-    if (!keys || !data) return;
 
-    const filteredKeys = keys.filter((e) => e.toLowerCase().startsWith(searchTerm.toLowerCase()));
+    const res = navData();
+    if (!res) return;
 
-    const result = filteredKeys.map((e) => data[e]);
-    setSearchData(result.flat());
+    const result: navbarDataI[] = treeViewFilter(res, (node: navbarDataI) =>
+      node.name.toLowerCase().includes(searchTerm),
+    );
+
+    setSearchData(result);
   }
 
   function resetSearch() {
@@ -87,6 +56,7 @@ function Sidebar(props: { isVisible: boolean }) {
     setSearchData([]);
     searchInputRef.value = "";
   }
+
   return (
     <div
       class={`border-right:1 min-vh overflow-y:auto ${props.isVisible ? "w:200" : "w:0"}`}
@@ -106,7 +76,11 @@ function Sidebar(props: { isVisible: boolean }) {
         />
       </nav>
       <ul>
-        <SidebarElement resetSearch={resetSearch} navbarData={isSearchMode() ? searchData() : navData() ?? []} />
+        <SidebarElement
+          resetSearch={resetSearch}
+          navbarData={isSearchMode() ? searchData() : navData() ?? []}
+          isSearchMode={isSearchMode}
+        />
       </ul>
     </div>
   );
@@ -114,7 +88,7 @@ function Sidebar(props: { isVisible: boolean }) {
 
 export default Sidebar;
 
-const renderNavTreeFromGraph = (record: Record) => {
+const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
   // !!!TODO!!!: This code can we written in the code itself
   const getChildren = (meta: Vertex, vertex: Vertex) => {
     const result = [] as any[];
@@ -139,22 +113,22 @@ const renderNavTreeFromGraph = (record: Record) => {
           // TODO: Check Permission
           // add to result if its allowed
           navItem.name = name;
-          navItem.href = (showNav() ? "/nav" : "") + `/admin/${collVertex.P.name}`;
+          navItem.href = (showNav ? "/nav" : "") + `/admin/${collVertex.P.name}`;
         } else {
           const formVertex = getChildVertex(["$0Form"], child).vertex;
           if (formVertex) {
             // TODO: Check Permission
             // add to result if its allowed
             navItem.name = name;
-            navItem.href = `${showNav() ? "/nav" : ""}/admin/${formVertex.P.name}`;
+            navItem.href = `${showNav ? "/nav" : ""}/admin/${formVertex.P.name}`;
           } else {
-            const url = (showNav() ? "/nav" : "") + child.P.url;
+            const url = (showNav ? "/nav" : "") + child.P.url;
             navItem.name = name;
             navItem.href = url;
           }
         }
       } else {
-        const url = (showNav() ? "/nav" : "") + child.P.url;
+        const url = (showNav ? "/nav" : "") + child.P.url;
         navItem.name = name;
         navItem.href = url;
       }

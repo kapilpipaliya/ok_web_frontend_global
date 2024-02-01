@@ -2,7 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { JSXElement, Show, useContext } from "solid-js";
 import { PageContext } from "../lib/Record";
 import { setShowNav } from "../pages/Dashboard";
-import { DisplayComponentProps } from "../types/Component";
+import { DisplayComponentProps } from "./ComponentType";
 
 function NavToggleBtn() {
   return (
