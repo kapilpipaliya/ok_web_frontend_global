@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Accessor, createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
+import { createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
 import { Record } from "../lib/Record";
 import { getChildVertex } from "../lib/Traverse";
 import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
@@ -17,7 +17,7 @@ export interface navbarDataI {
   name: string;
 }
 
-function Sidebar(props: { isVisible: boolean; showNav: Accessor<boolean> }) {
+function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
   let searchInputRef: HTMLInputElement;
   const [isSearchMode, setIsSearchMode] = createSignal(false);
   const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
@@ -32,20 +32,20 @@ function Sidebar(props: { isVisible: boolean; showNav: Accessor<boolean> }) {
     const record = new Record({ ws: Ws });
     record.load(nav.id);
     untrack(() => record.createMeta(AttrsAdminTableData["Nav"]));
-    return renderNavTreeFromGraph(record, props.showNav());
+    return renderNavTreeFromGraph(record, props.isSideBarOpen);
   });
 
   function handleSearch(searchTerm: string) {
-    searchTerm = searchTerm.trim().toLowerCase();
-    setIsSearchMode(searchTerm.length > 0);
+    const searchName = searchTerm.trim().toLowerCase();
+    setIsSearchMode(searchName.length > 0);
 
-    if (searchTerm.length === 0) return;
+    if (searchName.length === 0) return;
 
     const res = navData();
     if (!res) return;
 
     const result: navbarDataI[] = treeViewFilter(res, (node: navbarDataI) =>
-      node.name.toLowerCase().includes(searchTerm),
+      node.name.toLowerCase().includes(searchName),
     );
 
     setSearchData(result);
@@ -67,6 +67,7 @@ function Sidebar(props: { isVisible: boolean; showNav: Accessor<boolean> }) {
           <Icon icon="ic:baseline-search" />
         </div>
         <input
+          // rome-ignore lint/style/noNonNullAssertion: <explanation>
           ref={searchInputRef!}
           class="p:7.5 min-w:full pl:2rem"
           type="text"
@@ -79,7 +80,7 @@ function Sidebar(props: { isVisible: boolean; showNav: Accessor<boolean> }) {
         <SidebarElement
           resetSearch={resetSearch}
           navbarData={isSearchMode() ? searchData() : navData() ?? []}
-          isSearchMode={isSearchMode}
+          isSearchMode={isSearchMode()}
         />
       </ul>
     </div>

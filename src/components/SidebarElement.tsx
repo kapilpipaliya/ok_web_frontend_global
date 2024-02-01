@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Accordion } from "@kobalte/core";
 import { useLocation, useNavigate } from "@solidjs/router";
-import { Accessor, For, createEffect, createSignal, untrack } from "solid-js";
+import { For, createEffect, createSignal, untrack } from "solid-js";
 import treeViewFilter from "../lib/treeViewFilter";
 import { navbarDataI } from "./Sidebar";
 
@@ -16,21 +16,24 @@ function getIds(data: navbarDataI[], ids: string[] = []) {
 export default function SidebarElement(props: {
   navbarData: navbarDataI[];
   resetSearch: () => void;
-  isSearchMode: Accessor<boolean>;
+  isSearchMode: boolean;
 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [openIds, setOpenIds] = createSignal<string[]>([]);
 
   createEffect(() => {
+    const navData = props.navbarData;
+    if (navData.length === 0) return;
+
     const loadPath = untrack(() => location.pathname);
-    const result: navbarDataI[] = treeViewFilter(props.navbarData, (node: navbarDataI) => node.href === loadPath);
+    const result: navbarDataI[] = untrack(() => treeViewFilter(navData, (node: navbarDataI) => node.href === loadPath));
 
     setOpenIds(getIds(result));
   });
 
   createEffect(() => {
-    if (props.isSearchMode()) {
+    if (props.isSearchMode) {
       const ids = props.navbarData
         .map((e) => {
           if (e.expanded !== undefined) return e.id;

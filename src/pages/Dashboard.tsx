@@ -1,6 +1,6 @@
 import { Link, Route, Routes, useParams } from "@solidjs/router";
 import { get, set } from "idb-keyval";
-import { Component, For, Show, createEffect, createSignal, lazy, useContext } from "solid-js";
+import { Component, For, Show, createSignal, lazy, useContext } from "solid-js";
 import { getNewGraphId, graph } from "../lib/graph";
 import Page404 from "./404";
 import { Login, Logout, SignUp } from "./Forms";
@@ -16,26 +16,19 @@ import { NavDesigner } from "./FormDesigner";
 import { AllForms, SimpleImport } from "./FormsAdmin";
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
 
+const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
+
 const BackupRestore = lazy(() => import("./BackupRestore"));
 // @ts-ignore
 const GraphViewPage = lazy(() => import("./GraphViewPage"));
 
 const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
-get("isSideBarOpen").then((data) => setSideBarOpen(data));
+get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
 export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
 
 export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
-
-// // TODO make navigation from https://tailwind-elements.com/docs/standard/navigation/sidenav/#!
-// // Other Menu Component: Solid-Blocks Menu: https://github.com/atk/solid-blocks/blob/main/src/blocks/menu.tsx
-// export const StaticSideBar = () => {
-// 	// parent div is required else component is not rendered.
-// 	return (
-
-// 	);
-// };
 
 // Todo use mastercss
 const AlertDisplay = () => {
@@ -71,6 +64,10 @@ export const DashboardView = () => {
         }}
       >
         <Navbar
+          toggleSidebar={() => {
+            set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
+            setSideBarOpen((prev) => !prev);
+          }}
           right={
             <Show
               when={graph.member?.id}
@@ -152,13 +149,12 @@ export const DashboardView = () => {
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
-  createEffect(() => {
-    set("isSideBarOpen", isSideBarOpen());
-  });
-
   return (
     <div class="flex">
-      <Sidebar isVisible={showNav() && (graph.initialSynced || showNav())} showNav={showNav} />
+      <Sidebar
+        isVisible={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}
+        isSideBarOpen={isSideBarOpen()}
+      />
       <DashboardView />
     </div>
   );
