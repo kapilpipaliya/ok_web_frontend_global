@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
-import { createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
+import { useLocation } from "@solidjs/router";
+import { createEffect, createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
 import { Record } from "../lib/Record";
 import { getChildVertex } from "../lib/Traverse";
 import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
@@ -7,6 +8,7 @@ import { AttrsAdminTableData } from "../lib/apiAdmin";
 import { Vertex } from "../lib/graph";
 import treeViewFilter from "../lib/treeViewFilter";
 import { WsContext } from "../utils/ws_events_dispatcher";
+import Loader from "./Loader";
 import SidebarElement from "./SidebarElement";
 
 export interface navbarDataI {
@@ -17,22 +19,41 @@ export interface navbarDataI {
   name: string;
 }
 
+function getIds(data: navbarDataI[], ids: string[] = []) {
+  data.forEach((e) => {
+    if (e.expanded !== undefined) ids.push(e.id);
+    getIds(e.children, ids);
+  });
+  return ids;
+}
+
+let searchInputRef: HTMLInputElement;
+
 function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
-  let searchInputRef: HTMLInputElement;
+  const location = useLocation();
+  const pathname = createMemo(() => location.pathname);
+  const [openIds, setOpenIds] = createSignal<string[]>([]);
   const [isSearchMode, setIsSearchMode] = createSignal(false);
   const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
   const { Ws } = useContext(WsContext);
 
   const navData = createMemo(() => {
     const nav = findVertexByLabelAndUniqueId("Nav", "name", "main");
-    if (!nav) {
-      console.log("no Nav Found");
-      return;
-    }
+    if (!nav) return;
+
     const record = new Record({ ws: Ws });
     record.load(nav.id);
     untrack(() => record.createMeta(AttrsAdminTableData["Nav"]));
     return renderNavTreeFromGraph(record, props.isSideBarOpen);
+  });
+
+  createEffect(() => {
+    const nav = navData();
+    if (!nav || nav.length === 0) return;
+
+    const loadPath = pathname();
+    const result: navbarDataI[] = treeViewFilter(nav, (node: navbarDataI) => node.href === loadPath);
+    setOpenIds(getIds(result));
   });
 
   function handleSearch(searchTerm: string) {
@@ -43,13 +64,29 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
 
     const res = navData();
     if (!res) return;
-
     const result: navbarDataI[] = treeViewFilter(res, (node: navbarDataI) =>
       node.name.toLowerCase().includes(searchName),
     );
 
     setSearchData(result);
   }
+
+  createEffect(() => {
+    const res = navData();
+    if (!res) return;
+
+    if (isSearchMode()) {
+      const ids = res
+        .map((e) => {
+          if (e.expanded !== undefined) return e.id;
+          return null;
+        })
+        .filter((e) => e) as string[];
+      setOpenIds(ids);
+      return;
+    }
+    resetSearch();
+  });
 
   function resetSearch() {
     setIsSearchMode(false);
@@ -76,13 +113,21 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
           }}
         />
       </nav>
-      <ul>
-        <SidebarElement
-          resetSearch={resetSearch}
-          navbarData={isSearchMode() ? searchData() : navData() ?? []}
-          isSearchMode={isSearchMode()}
-        />
-      </ul>
+      {navData() ? (
+        <ul>
+          <SidebarElement
+            openIds={openIds()}
+            setOpenIds={setOpenIds}
+            resetSearch={resetSearch}
+            navbarData={isSearchMode() ? searchData() : navData() ?? []}
+            isSearchMode={isSearchMode()}
+          />
+        </ul>
+      ) : (
+        <div class="flex jc:center ai:center mt:10">
+          <Loader />
+        </div>
+      )}
     </div>
   );
 }
@@ -92,6 +137,7 @@ export default Sidebar;
 const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
   // !!!TODO!!!: This code can we written in the code itself
   const getChildren = (meta: Vertex, vertex: Vertex) => {
+    // rome-ignore lint/suspicious/noExplicitAny: <explanation>
     const result = [] as any[];
 
     const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
@@ -105,6 +151,7 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
       const name = child.P.name;
       const func = child.P.func;
       const expanded = child.P.expanded;
+      // rome-ignore lint/suspicious/noExplicitAny: <explanation>
       const navItem = {} as any;
 
       if (func === "Table") {
@@ -114,7 +161,7 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
           // TODO: Check Permission
           // add to result if its allowed
           navItem.name = name;
-          navItem.href = (showNav ? "/nav" : "") + `/admin/${collVertex.P.name}`;
+          navItem.href = `${showNav ? "/nav" : ""}/admin/${collVertex.P.name}`;
         } else {
           const formVertex = getChildVertex(["$0Form"], child).vertex;
           if (formVertex) {
@@ -136,6 +183,7 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
       navItem.expanded = expanded;
       navItem.id = createUniqueId();
 
+      // rome-ignore lint/style/noNonNullAssertion: <explanation>
       navItem.children = getChildren(attrMeta!, child);
 
       result.push(navItem);
