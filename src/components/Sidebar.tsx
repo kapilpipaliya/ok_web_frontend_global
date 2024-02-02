@@ -27,11 +27,11 @@ function getIds(data: navbarDataI[], ids: string[] = []) {
   return ids;
 }
 
-let searchInputRef: HTMLInputElement;
-
 function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
+
+  const [searchTerm, setSearchTerm] = createSignal("");
   const [openIds, setOpenIds] = createSignal<string[]>([]);
   const [isSearchMode, setIsSearchMode] = createSignal(false);
   const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
@@ -56,8 +56,10 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
     setOpenIds(getIds(result));
   });
 
-  function handleSearch(searchTerm: string) {
-    const searchName = searchTerm.trim().toLowerCase();
+  function handleSearch(input: string) {
+    setSearchTerm(input);
+
+    const searchName = input.trim().toLowerCase();
     setIsSearchMode(searchName.length > 0);
 
     if (searchName.length === 0) return;
@@ -91,7 +93,7 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
   function resetSearch() {
     setIsSearchMode(false);
     setSearchData([]);
-    searchInputRef.value = "";
+    setSearchTerm("");
   }
 
   return (
@@ -104,10 +106,9 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
           <Icon icon="ic:baseline-search" />
         </div>
         <input
-          // rome-ignore lint/style/noNonNullAssertion: <explanation>
-          ref={searchInputRef!}
           class="p:7.5 min-w:full pl:2rem"
           type="text"
+          value={searchTerm()}
           onInput={(e) => {
             handleSearch(e.target.value);
           }}
