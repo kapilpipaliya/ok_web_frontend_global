@@ -1,19 +1,17 @@
-import { RenderIndicator, getDOMInfo } from '@craftjs/utils';
-import { createEffect } from 'solid-js';
+import { RenderIndicator, getDOMInfo } from "@craftjs/utils/src";
+import { createEffect } from "solid-js";
 
-import { useEventHandler } from './EventContext';
-import movePlaceholder from './movePlaceholder';
+import { useEventHandler } from "./EventContext";
+import movePlaceholder from "./movePlaceholder";
 
-import { useInternalEditor } from '../editor/useInternalEditor';
+import { useInternalEditor } from "../editor/useInternalEditor";
 
 export const RenderEditorIndicator = () => {
-  const { indicator, indicatorOptions, enabled } = useInternalEditor(
-    (state) => ({
-      indicator: state.indicator,
-      indicatorOptions: state.options.indicator,
-      enabled: state.options.enabled,
-    })
-  );
+  const { indicator, indicatorOptions, enabled } = useInternalEditor((state) => ({
+    indicator: state.indicator,
+    indicatorOptions: state.options.indicator,
+    enabled: state.options.enabled,
+  }));
 
   const handler = useEventHandler();
 
@@ -34,24 +32,16 @@ export const RenderEditorIndicator = () => {
     return null;
   }
 
-    const style = {
-      ...movePlaceholder(
-        indicator.placement,
-        getDOMInfo(indicator.placement.parent.dom),
-        indicator.placement.currentNode &&
-          getDOMInfo(indicator.placement.currentNode.dom),
-        indicatorOptions.thickness
-      ),
-      backgroundColor: indicator.error
-        ? indicatorOptions.error
-        : indicatorOptions.success,
-      transition: indicatorOptions.transition || '0.2s ease-in',
-    };
+  const style = {
+    ...movePlaceholder(
+      indicator.placement,
+      getDOMInfo(indicator.placement.parent.dom),
+      indicator.placement.currentNode && getDOMInfo(indicator.placement.currentNode.dom),
+      indicatorOptions.thickness,
+    ),
+    backgroundColor: indicator.error ? indicatorOptions.error : indicatorOptions.success,
+    transition: indicatorOptions.transition || "0.2s ease-in",
+  };
 
-    return (
-      <RenderIndicator
-        style={style}
-        parentDom={indicator.placement.parent.dom}
-      />
-    );
+  return <RenderIndicator style={style} parentDom={indicator.placement.parent.dom} />;
 };

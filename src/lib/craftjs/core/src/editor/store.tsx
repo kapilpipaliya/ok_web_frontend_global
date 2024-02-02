@@ -1,14 +1,10 @@
-import {
-  useMethods,
-  SubscriberAndCallbacksFor,
-  PatchListener,
-} from '@craftjs/utils';
+import { PatchListener, SubscriberAndCallbacksFor, useMethods } from "@craftjs/utils/src";
 
-import { ActionMethods } from './actions';
-import { QueryMethods } from './query';
+import { ActionMethods } from "./actions";
+import { QueryMethods } from "./query";
 
-import { DefaultEventHandlers } from '../events';
-import { EditorState, Options, NodeEventTypes, NodeId } from '../interfaces';
+import { DefaultEventHandlers } from "../events";
+import { EditorState, NodeEventTypes, NodeId, Options } from "../interfaces";
 
 export const editorInitialState: EditorState = {
   nodes: {},
@@ -25,8 +21,8 @@ export const editorInitialState: EditorState = {
     resolver: {},
     enabled: true,
     indicator: {
-      error: 'red',
-      success: 'rgb(98, 196, 98)',
+      error: "red",
+      success: "rgb(98, 196, 98)",
     },
     handlers: (store) =>
       new DefaultEventHandlers({
@@ -41,12 +37,12 @@ export const editorInitialState: EditorState = {
 export const ActionMethodsWithConfig = {
   methods: ActionMethods,
   ignoreHistoryForActions: [
-    'setDOM',
-    'setNodeEvent',
-    'selectNode',
-    'clearEvents',
-    'setOptions',
-    'setIndicator',
+    "setDOM",
+    "setNodeEvent",
+    "selectNode",
+    "clearEvents",
+    "setOptions",
+    "setIndicator",
   ] as const,
   normalizeHistory: (state: EditorState) => {
     /**
@@ -71,11 +67,7 @@ export const ActionMethodsWithConfig = {
       Object.keys(node.events).forEach((eventName: NodeEventTypes) => {
         const isEventActive = !!node.events[eventName];
 
-        if (
-          isEventActive &&
-          state.events[eventName] &&
-          !state.events[eventName].has(node.id)
-        ) {
+        if (isEventActive && state.events[eventName] && !state.events[eventName].has(node.id)) {
           node.events[eventName] = false;
         }
       });
@@ -83,18 +75,11 @@ export const ActionMethodsWithConfig = {
   },
 };
 
-export type EditorStore = SubscriberAndCallbacksFor<
-  typeof ActionMethodsWithConfig,
-  typeof QueryMethods
->;
+export type EditorStore = SubscriberAndCallbacksFor<typeof ActionMethodsWithConfig, typeof QueryMethods>;
 
 export const useEditorStore = (
   options: Partial<Options>,
-  patchListener: PatchListener<
-    EditorState,
-    typeof ActionMethodsWithConfig,
-    typeof QueryMethods
-  >
+  patchListener: PatchListener<EditorState, typeof ActionMethodsWithConfig, typeof QueryMethods>,
 ): EditorStore => {
   // TODO: fix type
   return useMethods(
@@ -107,6 +92,6 @@ export const useEditorStore = (
       },
     },
     QueryMethods,
-    patchListener
+    patchListener,
   ) as EditorStore;
 };

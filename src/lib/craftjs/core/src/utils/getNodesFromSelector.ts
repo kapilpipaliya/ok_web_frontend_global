@@ -1,52 +1,52 @@
-import { ERROR_INVALID_NODEID } from '@craftjs/utils';
+import { ERROR_INVALID_NODEID } from '@craftjs/utils/src';
 import invariant from 'tiny-invariant';
 
-import { Nodes, Node, NodeSelectorWrapper, NodeSelector } from '../interfaces';
+import { Node, NodeSelector, NodeSelectorWrapper, Nodes } from '../interfaces';
 
 type config = { existOnly: boolean; idOnly: boolean };
 export const getNodesFromSelector = (
-  nodes: Nodes,
-  selector: NodeSelector,
-  config?: Partial<config>
+	nodes: Nodes,
+	selector: NodeSelector,
+	config?: Partial<config>
 ): NodeSelectorWrapper[] => {
-  const items = Array.isArray(selector) ? selector : [selector];
+	const items = Array.isArray(selector) ? selector : [selector];
 
-  const mergedConfig = {
-    existOnly: false,
-    idOnly: false,
-    ...(config || {}),
-  };
+	const mergedConfig = {
+		existOnly: false,
+		idOnly: false,
+		...(config || {}),
+	};
 
-  const nodeSelectors = items
-    .filter((item) => !!item)
-    .map((item) => {
-      if (typeof item === 'string') {
-        return {
-          node: nodes[item],
-          exists: !!nodes[item],
-        };
-      }
+	const nodeSelectors = items
+		.filter((item) => !!item)
+		.map((item) => {
+			if (typeof item === 'string') {
+				return {
+					node: nodes[item],
+					exists: !!nodes[item],
+				};
+			}
 
-      if (typeof item === 'object' && !mergedConfig.idOnly) {
-        const node = item as Node;
-        return {
-          node,
-          exists: !!nodes[node.id],
-        };
-      }
+			if (typeof item === 'object' && !mergedConfig.idOnly) {
+				const node = item as Node;
+				return {
+					node,
+					exists: !!nodes[node.id],
+				};
+			}
 
-      return {
-        node: null,
-        exists: false,
-      };
-    });
+			return {
+				node: null,
+				exists: false,
+			};
+		});
 
-  if (mergedConfig.existOnly) {
-    invariant(
-      nodeSelectors.filter((selector) => !selector.exists).length === 0,
-      ERROR_INVALID_NODEID
-    );
-  }
+	if (mergedConfig.existOnly) {
+		invariant(
+			nodeSelectors.filter((selector) => !selector.exists).length === 0,
+			ERROR_INVALID_NODEID
+		);
+	}
 
-  return nodeSelectors;
+	return nodeSelectors;
 };

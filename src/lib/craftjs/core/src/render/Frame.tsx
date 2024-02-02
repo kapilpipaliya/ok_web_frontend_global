@@ -1,9 +1,9 @@
-import { deprecationWarning, ROOT_NODE } from '@craftjs/utils';
+import { deprecationWarning, ROOT_NODE } from "@craftjs/utils/src";
 
-import { useInternalEditor } from '../editor/useInternalEditor';
-import { SerializedNodes } from '../interfaces';
-import { NodeElement } from '../nodes/NodeElement';
-import { Accessor, children, Component, createEffect, JSXElement, Show } from 'solid-js';
+import { Accessor, children, Component, createEffect, JSXElement, Show } from "solid-js";
+import { useInternalEditor } from "../editor/useInternalEditor";
+import { SerializedNodes } from "../interfaces";
+import { NodeElement } from "../nodes/NodeElement";
 
 export type FrameProps = {
   json?: string;
@@ -12,26 +12,27 @@ export type FrameProps = {
 
 const RenderRootNode = () => {
   const { timestamp } = useInternalEditor((state) => ({
-    timestamp:
-      state.nodes[ROOT_NODE] && state.nodes[ROOT_NODE]._hydrationTimestamp,
+    timestamp: state.nodes[ROOT_NODE] && state.nodes[ROOT_NODE]._hydrationTimestamp,
   }));
 
-  return <Show when={timestamp}><NodeElement id={ROOT_NODE} key={timestamp} /></Show>;
+  return (
+    <Show when={timestamp}>
+      <NodeElement id={ROOT_NODE} key={timestamp} />
+    </Show>
+  );
 };
 
 /**
  * A React Component that defines the editable area
  */
-export const Frame: Component<FrameProps> & {children?: JSXElement} = (props) => {
-
+export const Frame: Component<FrameProps> & { children?: JSXElement } = (props) => {
   const { actions, query } = useInternalEditor();
 
   if (!!props.json) {
-    deprecationWarning('<Frame json={...} />', {
-      suggest: '<Frame data={...} />',
+    deprecationWarning("<Frame json={...} />", {
+      suggest: "<Frame data={...} />",
     });
   }
-
 
   let isInitialChildrenLoadedRef = false;
 
@@ -62,7 +63,7 @@ export const Frame: Component<FrameProps> & {children?: JSXElement} = (props) =>
     } else {
       throw new Error("Expected exactly one child.");
     }
-  
+
     const node = query.parseReactElement(rootNode).toNodeTree((node, jsx) => {
       if (jsx === rootNode) {
         node.id = ROOT_NODE;

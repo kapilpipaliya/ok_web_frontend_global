@@ -1,17 +1,17 @@
 import {
-  useCollector,
-  useCollectorReturnType,
-  QueryCallbacksFor,
-  wrapConnectorHooks,
-  EventHandlerConnectors,
-  ERROR_USE_EDITOR_OUTSIDE_OF_EDITOR_CONTEXT,
-} from '@craftjs/utils';
+	ERROR_USE_EDITOR_OUTSIDE_OF_EDITOR_CONTEXT,
+	EventHandlerConnectors,
+	QueryCallbacksFor,
+	useCollector,
+	useCollectorReturnType,
+	wrapConnectorHooks,
+} from '@craftjs/utils/src';
 import {
-  createEffect,
-  onCleanup,
-  useContext,
-  createMemo,
-  JSXElement,
+	JSXElement,
+	createEffect,
+	createMemo,
+	onCleanup,
+	useContext,
 } from 'solid-js';
 
 import invariant from 'tiny-invariant';
@@ -25,48 +25,50 @@ import { useEventHandler } from '../events/EventContext';
 import { EditorState } from '../interfaces';
 
 export type EditorCollector<C> = (
-  state: EditorState,
-  query: QueryCallbacksFor<typeof QueryMethods>
+	state: EditorState,
+	query: QueryCallbacksFor<typeof QueryMethods>
 ) => C;
 
 export type useInternalEditorReturnType<C = null> = useCollectorReturnType<
-  EditorStore,
-  C
+	EditorStore,
+	C
 > & {
-  inContext: boolean;
-  store: EditorStore;
-  connectors: EventHandlerConnectors<CoreEventHandlers, JSXElement>;
+	inContext: boolean;
+	store: EditorStore;
+	connectors: EventHandlerConnectors<CoreEventHandlers, JSXElement>;
 };
 
 export function useInternalEditor<C>(
-  collector?: EditorCollector<C>
+	collector?: EditorCollector<C>
 ): useInternalEditorReturnType<C> {
-  const handler = useEventHandler();
-  const store = useContext(EditorContext);
-  invariant(store, ERROR_USE_EDITOR_OUTSIDE_OF_EDITOR_CONTEXT);
+	const handler = useEventHandler();
+	const store = useContext(EditorContext);
+	invariant(store, ERROR_USE_EDITOR_OUTSIDE_OF_EDITOR_CONTEXT);
 
-  const collected = useCollector(store, collector);
+	const collected = useCollector(store, collector);
 
-  const connectorsUsage = createMemo(
-    () => handler && handler.createConnectorsUsage(),
-  );
+	const connectorsUsage = createMemo(
+		() => handler && handler.createConnectorsUsage()
+	);
 
-  createEffect(() => {
-      connectorsUsage()?.register();
+	createEffect(() => {
+		connectorsUsage()?.register();
 
-    onCleanup(() => {
-      connectorsUsage()?.cleanup();
-    });
-  });
+		onCleanup(() => {
+			connectorsUsage()?.cleanup();
+		});
+	});
 
-  const connectors = createMemo(
-    () => connectorsUsage() && wrapConnectorHooks(connectorsUsage().connectors)
-  );
+	const connectors = createMemo(
+		() =>
+			connectorsUsage() &&
+			wrapConnectorHooks(connectorsUsage().connectors)
+	);
 
-  return {
-    collected,
-    connectors: connectors(),
-    inContext: !!store,
-    store,
-  };
+	return {
+		collected,
+		connectors: connectors(),
+		inContext: !!store,
+		store,
+	};
 }

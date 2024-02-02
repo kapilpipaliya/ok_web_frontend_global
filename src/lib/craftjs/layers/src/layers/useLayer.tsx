@@ -1,16 +1,14 @@
-import { useEditor } from '@craftjs/core';
-import { wrapConnectorHooks } from '@craftjs/utils';
-import { useContext, useMemo } from 'react';
+import { useEditor } from "@craftjs/core";
+import { wrapConnectorHooks } from "@craftjs/utils/src";
+import { useContext, useMemo } from "react";
 
-import { LayerContext } from './LayerContext';
+import { LayerContext } from "./LayerContext";
 
-import { Layer } from '../interfaces';
-import { useLayerManager } from '../manager';
+import { Layer } from "../interfaces";
+import { useLayerManager } from "../manager";
 
 export function useLayer<S = null>(collect?: (layer: Layer) => S) {
-  const { id, depth, connectors: internalConnectors } = useContext(
-    LayerContext
-  );
+  const { id, depth, connectors: internalConnectors } = useContext(LayerContext);
 
   const { actions: managerActions, ...collected } = useLayerManager((state) => {
     return id && state.layers[id] && collect && collect(state.layers[id]);
@@ -23,8 +21,7 @@ export function useLayer<S = null>(collect?: (layer: Layer) => S) {
   const actions = useMemo(() => {
     return {
       toggleLayer: () => managerActions.toggleLayer(id),
-      setExpandedState: (expanded: boolean) =>
-        managerActions.setExpandedState(id, expanded),
+      setExpandedState: (expanded: boolean) => managerActions.setExpandedState(id, expanded),
     };
   }, [managerActions, id]);
 
@@ -33,10 +30,9 @@ export function useLayer<S = null>(collect?: (layer: Layer) => S) {
       wrapConnectorHooks({
         layer: (el: HTMLElement) => internalConnectors.layer(el, id),
         drag: (el: HTMLElement) => internalConnectors.drag(el, id),
-        layerHeader: (el: HTMLElement) =>
-          internalConnectors.layerHeader(el, id),
+        layerHeader: (el: HTMLElement) => internalConnectors.layerHeader(el, id),
       }),
-    [internalConnectors, id]
+    [internalConnectors, id],
   );
 
   return {

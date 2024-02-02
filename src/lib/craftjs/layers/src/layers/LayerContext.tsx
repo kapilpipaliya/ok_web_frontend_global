@@ -1,8 +1,8 @@
-import { NodeId } from '@craftjs/core';
-import { EventHandlerConnectors } from '@craftjs/utils';
-import React from 'react';
+import { NodeId } from "@craftjs/core";
+import { EventHandlerConnectors } from "@craftjs/utils/src";
+import React from "react";
 
-import { LayerHandlers } from '../events/LayerHandlers';
+import { LayerHandlers } from "../events/LayerHandlers";
 
 export type LayerContextType = {
   id: NodeId;
@@ -10,6 +10,4 @@ export type LayerContextType = {
   connectors: EventHandlerConnectors<LayerHandlers, JSXElement>;
 };
 
-export const LayerContext = React.createContext<LayerContextType>(
-  {} as LayerContextType
-);
+export const LayerContext = React.createContext<LayerContextType>({} as LayerContextType);

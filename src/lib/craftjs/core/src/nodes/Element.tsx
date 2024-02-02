@@ -1,24 +1,24 @@
-import { ERROR_TOP_LEVEL_ELEMENT_NO_ID, useEffectOnce } from '@craftjs/utils';
+import { ERROR_TOP_LEVEL_ELEMENT_NO_ID, useEffectOnce } from "@craftjs/utils/src";
 
-import invariant from 'tiny-invariant';
+import invariant from "tiny-invariant";
 
-import { NodeElement } from './NodeElement';
-import { useInternalNode } from './useInternalNode';
+import { NodeElement } from "./NodeElement";
+import { useInternalNode } from "./useInternalNode";
 
-import { useInternalEditor } from '../editor/useInternalEditor';
-import { NodeId } from '../interfaces';
-import { ComponentProps, JSXElement, Show, createSignal } from 'solid-js';
+import { ComponentProps, JSXElement, Show, createSignal } from "solid-js";
+import { useInternalEditor } from "../editor/useInternalEditor";
+import { NodeId } from "../interfaces";
 
 export const defaultElementProps = {
-  is: 'div',
+  is: "div",
   canvas: false,
   custom: {},
   hidden: false,
 };
 
 export const elementPropToNodeData = {
-  is: 'type',
-  canvas: 'isCanvas',
+  is: "type",
+  canvas: "isCanvas",
 };
 
 export type ElementProps<T extends string> = {
@@ -29,11 +29,7 @@ export type ElementProps<T extends string> = {
   canvas?: boolean;
 } & ComponentProps<T>;
 
-export function Element<T extends string>({
-  id,
-  children,
-  ...elementProps
-}: ElementProps<T>) {
+export function Element<T extends string>({ id, children, ...elementProps }: ElementProps<T>) {
   const { is } = {
     ...defaultElementProps,
     ...elementProps,
@@ -56,21 +52,14 @@ export function Element<T extends string>({
     if (inNodeContext) {
       let linkedNodeId;
 
-      const existingNode =
-        data.linkedNodes &&
-        data.linkedNodes[id] &&
-        query.node(data.linkedNodes[id]).get();
+      const existingNode = data.linkedNodes && data.linkedNodes[id] && query.node(data.linkedNodes[id]).get();
 
       // Render existing linked Node if it already exists (and is the same type as the JSX)
       if (existingNode && existingNode.data.type === is) {
         linkedNodeId = existingNode.id;
       } else {
         // otherwise, create and render a new linked Node
-        const linkedElement = (
-          <Element {...elementProps}>
-            {children}
-          </Element>
-        );        
+        const linkedElement = <Element {...elementProps}>{children}</Element>;
 
         const tree = query.parseReactElement(linkedElement).toNodeTree();
 
@@ -82,7 +71,9 @@ export function Element<T extends string>({
     }
   });
 
-  return <Show when={linkedNodeId()}>
-    <NodeElement id={linkedNodeId()} />
-  </Show>
+  return (
+    <Show when={linkedNodeId()}>
+      <NodeElement id={linkedNodeId()} />
+    </Show>
+  );
 }

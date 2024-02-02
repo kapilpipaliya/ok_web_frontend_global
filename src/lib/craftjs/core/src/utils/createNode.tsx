@@ -1,22 +1,12 @@
-import { getRandomId as getRandomNodeId } from '@craftjs/utils';
+import { getRandomId as getRandomNodeId } from "@craftjs/utils/src";
 
-import { Node, FreshNode, UserComponentConfig } from '../interfaces';
-import {
-  defaultElementProps,
-  Element,
-  Canvas,
-  elementPropToNodeData,
-  deprecateCanvasComponent,
-} from '../nodes';
-import { NodeProvider } from '../nodes/NodeContext';
+import { FreshNode, Node, UserComponentConfig } from "../interfaces";
+import { Canvas, Element, defaultElementProps, deprecateCanvasComponent, elementPropToNodeData } from "../nodes";
+import { NodeProvider } from "../nodes/NodeContext";
 
-const getNodeTypeName = (type: string | { name: string }) =>
-  typeof type == 'string' ? type : type.name;
+const getNodeTypeName = (type: string | { name: string }) => (typeof type == "string" ? type : type.name);
 
-export function createNode(
-  newNode: FreshNode,
-  normalize?: (node: Node) => void
-) {
+export function createNode(newNode: FreshNode, normalize?: (node: Node) => void) {
   let actualType = newNode.data.type as any;
   let id = newNode.id || getRandomNodeId();
 
@@ -90,10 +80,7 @@ export function createNode(
   const userComponentConfig = actualType.craft as UserComponentConfig<any>;
 
   if (userComponentConfig) {
-    node.data.displayName =
-      userComponentConfig.displayName ||
-      userComponentConfig.name ||
-      node.data.displayName;
+    node.data.displayName = userComponentConfig.displayName || userComponentConfig.name || node.data.displayName;
 
     node.data.props = {
       ...(userComponentConfig.props || userComponentConfig.defaultProps || {}),
@@ -105,16 +92,13 @@ export function createNode(
       ...node.data.custom,
     };
 
-    if (
-      userComponentConfig.isCanvas !== undefined &&
-      userComponentConfig.isCanvas !== null
-    ) {
+    if (userComponentConfig.isCanvas !== undefined && userComponentConfig.isCanvas !== null) {
       node.data.isCanvas = userComponentConfig.isCanvas;
     }
 
     if (userComponentConfig.rules) {
       Object.keys(userComponentConfig.rules).forEach((key) => {
-        if (['canDrag', 'canDrop', 'canMoveIn', 'canMoveOut'].includes(key)) {
+        if (["canDrag", "canDrop", "canMoveIn", "canMoveOut"].includes(key)) {
           node.rules[key] = userComponentConfig.rules[key];
         }
       });
@@ -134,7 +118,7 @@ export function createNode(
               <UserComponent {...props} />
             </NodeProvider>
           );
-        };        
+        };
       });
     }
   }

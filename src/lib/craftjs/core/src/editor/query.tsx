@@ -1,49 +1,46 @@
 import {
-	children,
-} from "solid-js";
-import {
-  QueryCallbacksFor,
-  ERROR_NOT_IN_RESOLVER,
-  getDOMInfo,
-  deprecationWarning,
   DEPRECATED_ROOT_NODE,
+  ERROR_NOT_IN_RESOLVER,
+  QueryCallbacksFor,
   ROOT_NODE,
-} from '@craftjs/utils';
+  deprecationWarning,
+  getDOMInfo,
+} from "@craftjs/utils/src";
+import { children } from "solid-js";
 
-import invariant from 'tiny-invariant';
+import invariant from "tiny-invariant";
 
-import { EventHelpers } from './EventHelpers';
-import { NodeHelpers } from './NodeHelpers';
+import { EventHelpers } from "./EventHelpers";
+import { NodeHelpers } from "./NodeHelpers";
 
-import findPosition from '../events/findPosition';
+import { JSXElement } from "solid-js";
+import findPosition from "../events/findPosition";
 import {
-  NodeId,
   EditorState,
+  FreshNode,
   Indicator,
   Node,
-  Options,
   NodeEventTypes,
+  NodeId,
   NodeInfo,
   NodeSelector,
   NodeTree,
-  SerializedNodes,
+  Options,
   SerializedNode,
-  FreshNode,
-} from '../interfaces';
-import { createNode } from '../utils/createNode';
-import { deserializeNode } from '../utils/deserializeNode';
-import { fromEntries } from '../utils/fromEntries';
-import { getNodesFromSelector } from '../utils/getNodesFromSelector';
-import { mergeTrees } from '../utils/mergeTrees';
-import { parseNodeFromJSX } from '../utils/parseNodeFromJSX';
-import { resolveComponent } from '../utils/resolveComponent';
-import { JSXElement } from 'solid-js';
+  SerializedNodes,
+} from "../interfaces";
+import { createNode } from "../utils/createNode";
+import { deserializeNode } from "../utils/deserializeNode";
+import { fromEntries } from "../utils/fromEntries";
+import { getNodesFromSelector } from "../utils/getNodesFromSelector";
+import { mergeTrees } from "../utils/mergeTrees";
+import { parseNodeFromJSX } from "../utils/parseNodeFromJSX";
+import { resolveComponent } from "../utils/resolveComponent";
 
 export function QueryMethods(state: EditorState) {
   const options = state && state.options;
 
-  const _: () => QueryCallbacksFor<typeof QueryMethods> = () =>
-    QueryMethods(state) as any;
+  const _: () => QueryCallbacksFor<typeof QueryMethods> = () => QueryMethods(state) as any;
 
   return {
     /**
@@ -55,15 +52,12 @@ export function QueryMethods(state: EditorState) {
       source: NodeSelector,
       target: NodeId,
       pos: { x: number; y: number },
-      nodesToDOM: (node: Node) => HTMLElement = (node) =>
-        state.nodes[node.id].dom
+      nodesToDOM: (node: Node) => HTMLElement = (node) => state.nodes[node.id].dom,
     ) => {
       const targetNode = state.nodes[target],
         isTargetCanvas = _().node(targetNode.id).isCanvas();
 
-      const targetParent = isTargetCanvas
-        ? targetNode
-        : state.nodes[targetNode.data.parent];
+      const targetParent = isTargetCanvas ? targetNode : state.nodes[targetNode.data.parent];
 
       if (!targetParent) return;
 
@@ -84,15 +78,8 @@ export function QueryMethods(state: EditorState) {
           }, [] as NodeInfo[])
         : [];
 
-      const dropAction = findPosition(
-        targetParent,
-        dimensionsInContainer,
-        pos.x,
-        pos.y
-      );
-      const currentNode =
-        targetParentNodes.length &&
-        state.nodes[targetParentNodes[dropAction.index]];
+      const dropAction = findPosition(targetParent, dimensionsInContainer, pos.x, pos.y);
+      const currentNode = targetParentNodes.length && state.nodes[targetParentNodes[dropAction.index]];
 
       const output: Indicator = {
         placement: {
@@ -144,10 +131,7 @@ export function QueryMethods(state: EditorState) {
      * Returns all the `nodes` in a serialized format
      */
     getSerializedNodes(): SerializedNodes {
-      const nodePairs = Object.keys(state.nodes).map((id: NodeId) => [
-        id,
-        this.node(id).toSerializedNode(),
-      ]);
+      const nodePairs = Object.keys(state.nodes).map((id: NodeId) => [id, this.node(id).toSerializedNode()]);
       return fromEntries(nodePairs);
     },
 
@@ -163,9 +147,7 @@ export function QueryMethods(state: EditorState) {
     },
 
     parseReactElement: (reactElement: JSXElement) => ({
-      toNodeTree(
-        normalize?: (node: Node, jsx: JSXElement) => void
-      ): NodeTree {
+      toNodeTree(normalize?: (node: Node, jsx: JSXElement) => void): NodeTree {
         let node = parseNodeFromJSX(reactElement, (node, jsx) => {
           const name = resolveComponent(state.options.resolver, node.data.type);
 
@@ -185,7 +167,7 @@ export function QueryMethods(state: EditorState) {
         if (resolvedChildren()) {
           childrenNodes = resolvedChildren.toArray().reduce<NodeTree[]>((accum, child: any) => {
             // if (React.isValidElement(child)) {
-              accum.push(_().parseReactElement(child).toNodeTree(normalize));
+            accum.push(_().parseReactElement(child).toNodeTree(normalize));
             // }
             return accum;
           }, []);
@@ -200,7 +182,7 @@ export function QueryMethods(state: EditorState) {
         const data = deserializeNode(serializedNode, state.options.resolver);
         invariant(data.type, ERROR_NOT_IN_RESOLVER);
 
-        const id = typeof normalize === 'string' && normalize;
+        const id = typeof normalize === "string" && normalize;
 
         if (id) {
           deprecationWarning(`query.parseSerializedNode(...).toNode(id)`, {

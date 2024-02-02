@@ -1,7 +1,7 @@
 import {
-  wrapConnectorHooks,
-  ERROR_USE_NODE_OUTSIDE_OF_EDITOR_CONTEXT,
-} from '@craftjs/utils';
+	ERROR_USE_NODE_OUTSIDE_OF_EDITOR_CONTEXT,
+	wrapConnectorHooks,
+} from '@craftjs/utils/src';
 import { createMemo, useContext } from 'solid-js';
 import invariant from 'tiny-invariant';
 
@@ -10,57 +10,61 @@ import { NodeContext } from './NodeContext';
 import { useInternalEditor } from '../editor/useInternalEditor';
 import { Node } from '../interfaces';
 
-
 export function useInternalNode<S = null>(collect?: (node: Node) => S) {
-  const context = useContext(NodeContext);
-  invariant(context, ERROR_USE_NODE_OUTSIDE_OF_EDITOR_CONTEXT);
+	const context = useContext(NodeContext);
+	invariant(context, ERROR_USE_NODE_OUTSIDE_OF_EDITOR_CONTEXT);
 
-  const { id, related } = context;
+	const { id, related } = context;
 
-  const {
-    actions: EditorActions,
-    query,
-    connectors: editorConnectors,
-    ...collected
-  } = useInternalEditor(
-    (state) => id && state.nodes[id] && collect && collect(state.nodes[id])
-  );
+	const {
+		actions: EditorActions,
+		query,
+		connectors: editorConnectors,
+		...collected
+	} = useInternalEditor(
+		(state) => id && state.nodes[id] && collect && collect(state.nodes[id])
+	);
 
-  const connectors = createMemo(
-    () =>
-      wrapConnectorHooks({
-        connect: (dom: HTMLElement) => editorConnectors.connect(dom, id),
-        drag: (dom: HTMLElement) => editorConnectors.drag(dom, id),
-      }),
-    [editorConnectors, id]
-  );
+	const connectors = createMemo(
+		() =>
+			wrapConnectorHooks({
+				connect: (dom: HTMLElement) =>
+					editorConnectors.connect(dom, id),
+				drag: (dom: HTMLElement) => editorConnectors.drag(dom, id),
+			}),
+		[editorConnectors, id]
+	);
 
-  const actions = createMemo(() => {
-    return {
-      setProp: (cb: any, throttleRate?: number) => {
-        if (throttleRate) {
-          EditorActions.history.throttle(throttleRate).setProp(id, cb);
-        } else {
-          EditorActions.setProp(id, cb);
-        }
-      },
-      setCustom: (cb: any, throttleRate?: number) => {
-        if (throttleRate) {
-          EditorActions.history.throttle(throttleRate).setCustom(id, cb);
-        } else {
-          EditorActions.setCustom(id, cb);
-        }
-      },
-      setHidden: (bool: boolean) => EditorActions.setHidden(id, bool),
-    };
-  });
+	const actions = createMemo(() => {
+		return {
+			setProp: (cb: any, throttleRate?: number) => {
+				if (throttleRate) {
+					EditorActions.history
+						.throttle(throttleRate)
+						.setProp(id, cb);
+				} else {
+					EditorActions.setProp(id, cb);
+				}
+			},
+			setCustom: (cb: any, throttleRate?: number) => {
+				if (throttleRate) {
+					EditorActions.history
+						.throttle(throttleRate)
+						.setCustom(id, cb);
+				} else {
+					EditorActions.setCustom(id, cb);
+				}
+			},
+			setHidden: (bool: boolean) => EditorActions.setHidden(id, bool),
+		};
+	});
 
-  return {
-    ...collected,
-    id,
-    related,
-    inNodeContext: !!context,
-    actions,
-    connectors,
-  };
+	return {
+		...collected,
+		id,
+		related,
+		inNodeContext: !!context,
+		actions,
+		connectors,
+	};
 }
