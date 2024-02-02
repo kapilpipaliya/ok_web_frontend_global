@@ -4,3 +4,4 @@ distweb
 pnpm-lock.yaml
 
 /.idea/
+dist
