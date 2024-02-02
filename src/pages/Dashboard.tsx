@@ -150,12 +150,13 @@ export const DashboardView = () => {
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
   return (
-    <div class="flex">
-      <Sidebar
-        isVisible={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}
-        isSideBarOpen={isSideBarOpen()}
-      />
-      <DashboardView />
-    </div>
+    <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())} fallback={<DashboardView />}>
+      <div class="flex">
+        <Sidebar isSideBarOpen={isSideBarOpen()} />
+        <div class="ml:200 flex:1">
+          <DashboardView />
+        </div>
+      </div>
+    </Show>
   );
 };

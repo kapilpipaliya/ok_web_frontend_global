@@ -20,14 +20,14 @@ export interface navbarDataI {
 }
 
 function getIds(data: navbarDataI[], ids: string[] = []) {
-  data.forEach((e) => {
+  for (const e of data) {
     if (e.expanded !== undefined) ids.push(e.id);
     getIds(e.children, ids);
-  });
+  }
   return ids;
 }
 
-function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
+function Sidebar(props: { isSideBarOpen: boolean }) {
   const location = useLocation();
   const pathname = createMemo(() => location.pathname);
 
@@ -97,10 +97,7 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
   }
 
   return (
-    <div
-      class={`border-right:1 min-vh overflow-y:auto ${props.isVisible ? "w:200" : "w:0"}`}
-      style={{ transition: "width .3s ease-in-out" }}
-    >
+    <div class="position:fixed top:0 left:0 border-right:1 h:full  overflow-y:auto w:200">
       <nav class="flex bg:white position:relative">
         <div class="position:absolute top:7 left:8 font:20">
           <Icon icon="ic:baseline-search" />
