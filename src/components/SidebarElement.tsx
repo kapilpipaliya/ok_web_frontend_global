@@ -26,6 +26,7 @@ export default function SidebarElement(props: {
           {(item) => {
             return (
               <li
+                style={{ transition: "all .2s ease-in-out" }}
                 class={`cursor:pointer ${
                   location.pathname.toLowerCase() === item.href.toLowerCase() ? "bg:#337ab7 fg:white" : ""
                 }`}
@@ -43,7 +44,7 @@ export default function SidebarElement(props: {
                     <span class="font:14">{item.name}</span>
                   </div>
                 ) : (
-                  <Accordion.Item value={item.id} data-expanded>
+                  <Accordion.Item value={item.id}>
                     <Accordion.Trigger class="w:full">
                       <Accordion.Header class="w:full flex ai:center jc:left px:10 bg:#b2b2b2:hover">
                         <div class="pr-4 font:15">

@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { useLocation } from "@solidjs/router";
-import { createEffect, createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
+import { Show, createEffect, createMemo, createSignal, createUniqueId, untrack, useContext } from "solid-js";
 import { Record } from "../lib/Record";
 import { getChildVertex } from "../lib/Traverse";
 import { findVertexByLabelAndUniqueId } from "../lib/Vertex";
@@ -113,7 +113,14 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
           }}
         />
       </nav>
-      {navData() ? (
+      <Show
+        when={navData()}
+        fallback={
+          <div class="flex jc:center ai:center mt:10">
+            <Loader class="h:30 w:30" />
+          </div>
+        }
+      >
         <ul>
           <SidebarElement
             openIds={openIds()}
@@ -123,11 +130,7 @@ function Sidebar(props: { isVisible: boolean; isSideBarOpen: boolean }) {
             isSearchMode={isSearchMode()}
           />
         </ul>
-      ) : (
-        <div class="flex jc:center ai:center mt:10">
-          <Loader />
-        </div>
-      )}
+      </Show>
     </div>
   );
 }
