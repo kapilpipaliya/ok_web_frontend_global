@@ -12,9 +12,7 @@ type EventsProps = {
 export const Events = (props: EventsProps) => {
   const store = useContext(EditorContext);
 
-  const handler = createMemo(() => store.query.getOptions().handlers(store), [
-    store,
-  ]);
+  const handler = createMemo(() => store().query.getOptions().handlers(store()));
 
   return (
     <Show when={handler}>

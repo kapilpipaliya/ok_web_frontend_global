@@ -1,5 +1,5 @@
 import { ERROR_RESOLVER_NOT_AN_OBJECT, HISTORY_ACTIONS } from "@craftjs/utils/src";
-import { JSXElement, createEffect, onCleanup, splitProps } from "solid-js";
+import {JSXElement, createEffect, onCleanup, splitProps, Show} from "solid-js";
 import invariant from "tiny-invariant";
 
 import { EditorContext } from "./EditorContext";

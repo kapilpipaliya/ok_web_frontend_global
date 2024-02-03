@@ -15,6 +15,7 @@ import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
 import { NavDesigner } from "./FormDesigner";
 import { AllForms, SimpleImport } from "./FormsAdmin";
 import { AbstractSingleGrid, AllDashboards, TableDashboard } from "./Grids";
+import {CraftPage} from "./CraftPage";
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -101,7 +102,7 @@ export const DashboardView = () => {
         <main class="p:20">
           <Show when={graph.initialSynced}>
             <Routes>
-              <Route path="/" component={() => <>Home Page</>} />
+              <Route path="/" component={() => <><CraftPage/></>} />
               {/* TODO: fix when incorrect entity is rendered */}
               <Route
                 path="/:entity"

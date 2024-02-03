@@ -17,7 +17,7 @@ const RenderRootNode = () => {
 
   return (
     <Show when={timestamp}>
-      <NodeElement id={ROOT_NODE} key={timestamp} />
+      <NodeElement id={ROOT_NODE} />
     </Show>
   );
 };
@@ -25,7 +25,7 @@ const RenderRootNode = () => {
 /**
  * A React Component that defines the editable area
  */
-export const Frame: Component<FrameProps> & { children?: JSXElement } = (props) => {
+export const Frame: Component<FrameProps & { children?: JSXElement }> = (props) => {
   const { actions, query } = useInternalEditor();
 
   if (!!props.json) {
