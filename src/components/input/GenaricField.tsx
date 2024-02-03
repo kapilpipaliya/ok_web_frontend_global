@@ -45,7 +45,8 @@ export const PageRenderUtils = {
   getAttrVertex: (item?: Vertex): Vertex | undefined => item && getChildVertex(["$0Att"], item).vertex,
   getAttr: (item?: Vertex): string | undefined => item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
   getID: (item?: Vertex): string | undefined => item && item.P["name"],
-  getId: (item?: Vertex): string | undefined => PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
+  getId: (item?: Vertex): string | undefined =>
+    PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
   getComponent: (item?: Vertex): Vertex | undefined => {
     if (!item) return;
@@ -128,11 +129,49 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
         const Label = () => {
           return <>{toTitle(PageRenderUtils.getId(item) || "")}</>;
         };
+        const Label = () => {
+          return <>{toTitle(PageRenderUtils.getId(item) || "")}</>;
+        };
 
         return (
           <Switch>
             {/* when the parent Component is FieldSetLabelLeft,
+        return (
+          <Switch>
+            {/* when the parent Component is FieldSetLabelLeft,
         we add label automatically */}
+            <Match when={parentComponent() === "FieldSetLabelLeft"}>
+              <Switch>
+                <Match when={component() === "Table"}>
+                  <h3>
+                    <Label />
+                  </h3>
+                  <PageComponent />
+                </Match>
+                <Match when={component() === "CollectionOption"}>
+                  <PageComponent />
+                </Match>
+                <Match when={true}>
+                  <div class="dx-field">
+                    <div class="dx-field-label">
+                      <Label />
+                    </div>
+                    <div class="dx-field-value">
+                      <PageComponent />
+                    </div>
+                  </div>
+                </Match>
+              </Switch>
+            </Match>
+            <Match when={true}>
+              <PageComponent />
+            </Match>
+          </Switch>
+        );
+      }}
+    </For>
+  );
+};
             <Match when={parentComponent() === "FieldSetLabelLeft"}>
               <Switch>
                 <Match when={component() === "Table"}>
@@ -184,6 +223,7 @@ export const getTextColumnValue = (value: any) => {
       values.push(getTextColumnValue(v));
     }
     value = values.join(", ");
+    value = values.join(", ");
   }
 
   return isObject(value) ? JSON.stringify(value) : value;
@@ -219,6 +259,7 @@ export function GenericField(
     const collectionVertex = createMemo(() => {
       return PageRenderUtils.getCollection(getLastItem(parentItems, 1));
     });
+    if (!collectionVertex()) return "No Collection Found";
     if (!collectionVertex()) return "No Collection Found";
     // const dataVertex =
     if (!props.data?.id) {
@@ -258,6 +299,7 @@ export function GenericField(
       } else {
         alert("please fix all errors");
       }
+    };
     };
 
     const onCancel = () => {
@@ -304,6 +346,32 @@ export function GenericField(
               >
                 {props.submitButton}
               </Show>
+            <div class="flex gap:10">
+              <Show
+                when={props.submitButton}
+                fallback={
+                  <GenericField
+                    // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+                    meta={
+                      {
+                        P: {
+                          component: "Button",
+                          props: {
+                            stylingMode: "contained",
+                            width: "120",
+                            type: "success",
+                            useSubmitBehavior: true,
+                            text: "Submit",
+                          },
+                        },
+                      } as any
+                    }
+                    onClick={onSubmit}
+                  />
+                }
+              >
+                {props.submitButton}
+              </Show>
 
               <GenericField
                 meta={
@@ -321,6 +389,7 @@ export function GenericField(
         </Show>
       </div>
     );
+  };
   };
 
   const repeaterContext = useContext(RepeaterContext);
@@ -359,6 +428,7 @@ export function GenericField(
                 <Link {...props.meta.P.props} href={(showNav() ? "/nav/" : "/") + vertex().P.name}>
                   <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
                     {props.children}
+                    <PageItemRender metaVertex={props.meta} />
                     <PageItemRender metaVertex={props.meta} />
                   </Show>
                 </Link>
@@ -461,6 +531,7 @@ export function GenericField(
 
 function getText(projection: string, repeaterContext: Vertex[]) {
   return getSelectionOptions(repeaterContext, projection).vertexes as string;
+  return getSelectionOptions(repeaterContext, projection).vertexes as string;
 }
 
 function getUrl(projection: string, repeaterContext: Vertex[]) {
@@ -506,7 +577,10 @@ export function PageView(props: {
 export function getAttrs(meta: Vertex) {
   if (meta.P.props?.attr) {
     return JSON.parse(meta.P.props?.attr);
+    return JSON.parse(meta.P.props?.attr);
   } else {
+    return {};
     return {};
   }
 }
+

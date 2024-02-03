@@ -39,7 +39,38 @@ export const PageDesigner = () => {
           // TODO: add dry option
         />
       </div>
+  const params = useParams();
+  const config = createStore({} as { record: Record });
+  const [count, setCount] = createSignal(1);
+  const rerender = () => {
+    setCount((prev) => prev + 1);
+  };
+  const Preview = () => {
+    return <PageItemRender metaVertex={config[0].record.vertex} />;
+  };
+  return (
+    <div class="flex">
+      <div class="border:1|solid|blue-60 p:10 m:5">
+        <AbstractSingleForm
+          formId={"Page"}
+          id={params.id}
+          config={config}
+          // TODO: add dry option
+        />
+      </div>
 
+      <div class="border:1|solid|blue-60 p:10 m:5 min-w:400">
+        <div class={"text:center mb:12"} onClick={rerender}>
+          Preview
+        </div>
+        <PageContext.Provider value={{ events: {} }}>
+          <Show when={count() && config[0].record?.vertex && count()} keyed>
+            <Preview />
+          </Show>
+        </PageContext.Provider>
+      </div>
+    </div>
+  );
       <div class="border:1|solid|blue-60 p:10 m:5 min-w:400">
         <div class={"text:center mb:12"} onClick={rerender}>
           Preview
@@ -70,26 +101,41 @@ export const NavDesigner = () => {
   const PreviewCode = () => {
     return <pre>{stringify(getExportCode(config[0].record))}</pre>;
   };
+  const params = useParams();
+  const config = createStore({} as { record: Record });
+  const [count, setCount] = createSignal(1);
+  const [previewCode, setPreviewCode] = createSignal(false);
+  const navigate = useNavigate();
+  const rerender = () => {
+    setCount((prev) => prev + 1);
+  };
+  const PreviewCode = () => {
+    return <pre>{stringify(getExportCode(config[0].record))}</pre>;
+  };
 
   const [importCode, setImportCode] = createSignal("");
+  const [importCode, setImportCode] = createSignal("");
 
-  const importCodeFn = () => {
-    importRecordWithYAMLSchema(importCode(), config[0].record);
-  };
-  return (
-    <div class="flex">
-      <div class="border:1|solid|blue-60 p:10 m:5">
-        <AbstractSingleForm
-          formId={"Nav"}
-          id={params.id}
-          config={config}
-          // TODO: add dry option
-        />
-        <textarea value={importCode()} onChange={(e) => setImportCode(e.target.value)} />
-        <button type="button" onClick={importCodeFn}>
-          Import Code
-        </button>
-      </div>
+	const importCodeFn = () => {
+		importRecordWithYAMLSchema(importCode(), config[0].record);
+	};
+	return (
+		<div class='flex'>
+			<div class='border:1|solid|blue-60 p:10 m:5'>
+				<AbstractSingleForm
+					formId={'Nav'}
+					id={params.id}
+					config={config}
+					// TODO: add dry option
+				/>
+				<textarea
+					value={importCode()}
+					onChange={(e) => setImportCode(e.target.value)}
+				/>
+				<button type='button' onClick={importCodeFn}>
+					Import Code
+				</button>
+			</div>
 
       <div class="border:1|solid|blue-60 p:10 m:5 min-w:300">
         <button type={"button"} onClick={rerender}>
@@ -117,11 +163,20 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
 
     const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
     const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
+    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+    const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
 
+    if (!attrMeta) return result;
     if (!attrMeta) return result;
 
     const children = record.getSublistRows(attrMeta, vertex);
+    const children = record.getSublistRows(attrMeta, vertex);
 
+    for (const child of children) {
+      const name = child.P.name;
+      const func = child.P.func;
+      const expanded = child.P.expanded;
+      const navItem = {} as dxTreeViewItem;
     for (const child of children) {
       const name = child.P.name;
       const func = child.P.func;
@@ -158,14 +213,21 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
       navItem.id = createUniqueId();
 
       navItem.children = getChildren(attrMeta!, child);
+      navItem.children = getChildren(attrMeta!, child);
 
+      result.push(navItem);
+    }
+    return result;
+  };
       result.push(navItem);
     }
     return result;
   };
 
   const navigation = getChildren(record.metaVertex, record.vertex);
+  const navigation = getChildren(record.metaVertex, record.vertex);
 
+  console.log(navigation);
   console.log(navigation);
 
   const instance = new TreeView(el, {
@@ -180,7 +242,21 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
       if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
     },
   });
+  const instance = new TreeView(el, {
+    dataSource: navigation,
+    dataStructure: "tree",
+    keyExpr: "id",
+    displayExpr: "name",
+    itemsExpr: "children",
+    width: 200,
+    searchEnabled: true,
+    onItemClick(e) {
+      if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
+    },
+  });
 
+  onCleanup(() => instance.dispose());
+  return instance;
   onCleanup(() => instance.dispose());
   return instance;
 };

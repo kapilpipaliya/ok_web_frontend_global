@@ -9,27 +9,27 @@ import {
   Show,
   Switch,
   useContext,
-  on, getOwner, runWithOwner
+  on,
+  getOwner,
+  runWithOwner,
 } from "solid-js";
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { toTitle } from "case-switcher-js";
 import {
   findVertexByLabelAndUniqueId,
-  replaceVertexProperties
+  replaceVertexProperties,
 } from "../../lib/Vertex";
 import {
   getNewTxnId,
   graph,
   IdAttr,
   revertTransaction,
-  Vertex
+  Vertex,
 } from "../../lib/graph";
 import { WsContext } from "../../utils/ws_events_dispatcher";
 import { klona } from "klona";
-import {
-  DynamicComponent,
-} from "../DynamicForm";
+import { DynamicComponent } from "../DynamicForm";
 import {
   addMeta,
   addMetaVertexes,
@@ -38,8 +38,10 @@ import {
   deleteRow,
   FieldAttribute,
   FormContext,
-  getCollAttrs, getStringComponent, getSublistRows,
-  rowMetaInitialize
+  getCollAttrs,
+  getStringComponent,
+  getSublistRows,
+  rowMetaInitialize,
 } from "../../lib/Record";
 import {
   getChildVertex,
@@ -51,14 +53,17 @@ import { Icon } from "@iconify-icon/solid";
 import {
   GenericField,
   PageRenderContext,
-  PageRenderUtils, RepeaterContext
+  PageRenderUtils,
+  RepeaterContext,
 } from "./GenaricField";
 import { getLastItem } from "../../utils/functions";
 
-export function TableInputField(props: ComponentProps & {txnId?: number; isRealTime?: boolean; }) {
+export function TableInputField(
+  props: ComponentProps & { txnId?: number; isRealTime?: boolean }
+) {
   const { Ws } = useContext(WsContext);
   // if there is no parent FormContext, it should still work.
-  let {  cleanUpConfig } = useContext(FormContext);
+  let { cleanUpConfig } = useContext(FormContext);
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
@@ -67,8 +72,11 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
 
   const getAttributes = () => {
     // If child vertexes, use it
-    const childAttrVertex = getChildVertexes(["Attr", "$0Att"], [props.meta]).vertexes;
-    if(childAttrVertex?.length) {
+    const childAttrVertex = getChildVertexes(
+      ["Attr", "$0Att"],
+      [props.meta]
+    ).vertexes;
+    if (childAttrVertex?.length) {
       return childAttrVertex;
     }
 
@@ -77,8 +85,13 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
     if (!attrVertex) return;
 
     return getChildVertexes(["Attr"], [attrVertex]).vertexes;
-  }
-  const tableColumnsTemplate = createMemo(() => getAttributes() || getChildVertexes(["MetaAttr"], [props.meta]).vertexes || []);
+  };
+  const tableColumnsTemplate = createMemo(
+    () =>
+      getAttributes() ||
+      getChildVertexes(["MetaAttr"], [props.meta]).vertexes ||
+      []
+  );
 
   // add dynamic meta from separate collection.
   // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
@@ -86,7 +99,11 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
     const metaData = componentProps(props.meta, props.data!);
     if (metaData.collection) {
       // add metadata from separate collection.
-      const collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, metaData.collection);
+      const collVertex = findVertexByLabelAndUniqueId(
+        "Coll",
+        IdAttr,
+        metaData.collection
+      );
       if (collVertex) {
         const vertexCollAttrResult = getChildVertexes(["Attr"], [collVertex]);
         if (!vertexCollAttrResult.error) {
@@ -127,24 +144,33 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
     // const sortable = createSortable(p.joinVertex.id);
 
-    createComputed(on(tableColumnsTemplate, columns => {
-      const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, columns);
+    createComputed(
+      on(tableColumnsTemplate, (columns) => {
+        const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, columns);
 
-      if (metaTxnId) {
-        if (cleanUpConfig) {
-          if (!cleanUpConfig.rowMetaTxnIds) {
-            cleanUpConfig.rowMetaTxnIds = [];
+        if (metaTxnId) {
+          if (cleanUpConfig) {
+            if (!cleanUpConfig.rowMetaTxnIds) {
+              cleanUpConfig.rowMetaTxnIds = [];
+            }
+            // currently, when we delete row and unmount form, it is not giving error, but it should, because revertTransaction is not strict.
+            if (cleanUpConfig.rowMetaTxnIds.includes(metaTxnId))
+              cleanUpConfig.rowMetaTxnIds.push(metaTxnId);
           }
-          // currently, when we delete row and unmount form, it is not giving error, but it should, because revertTransaction is not strict.
-          if(cleanUpConfig.rowMetaTxnIds.includes(metaTxnId)) cleanUpConfig.rowMetaTxnIds.push(metaTxnId);
         }
-      }
-    }))
+      })
+    );
 
-    const instResult = createMemo(() => getChildVertex(["AttrInst"], p.joinVertex).vertex);
+    const instResult = createMemo(
+      () => getChildVertex(["AttrInst"], p.joinVertex).vertex
+    );
     // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
-    const rowColumnsMetaAttrs = createMemo(() => tableColumnsTemplate().filter(vertex => vertex.P.tab !== "expand"));
-    const expandVertex = createMemo(() => tableColumnsTemplate()?.find(vertex => vertex.P.tab === "expand"));
+    const rowColumnsMetaAttrs = createMemo(() =>
+      tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand")
+    );
+    const expandVertex = createMemo(() =>
+      tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand")
+    );
 
     const [disabled, _] = createSignal(false);
 
@@ -152,12 +178,19 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
       return (
         <For each={rowColumnsMetaAttrs()}>
           {(column) => {
-            const metaVertex = createMemo(() => instResult() ? graph.vertexes[instResult()!.P.rows[column.id]] : {P: {component: "String"}} as unknown as Vertex)
+            const metaVertex = createMemo(() =>
+              instResult()
+                ? graph.vertexes[instResult()!.P.rows[column.id]]
+                : ({ P: { component: "String" } } as unknown as Vertex)
+            );
             const component = createMemo(() => {
               if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
                 console.log("refreshing");
-                const component = getSelectionOptions([p.joinVertex], metaVertex().P.component).vertexes;
+                const component = getSelectionOptions(
+                  [p.joinVertex],
+                  metaVertex().P.component
+                ).vertexes;
                 if (component) {
                   return component;
                 } else {
@@ -171,27 +204,40 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
             createEffect(() => {
               addMeta(metaVertex(), p.joinVertex);
             });
-            const DefaultValue = () => <>{metaVertex().P.props?.defaultValue &&
-                getSelectionOptions([p.joinVertex], metaVertex().P.props.defaultValue).vertexes}</>
-            const Content = () => <>
-              <DynamicComponent
-               component={component()}
-               // When we have a Table we pass original Table Meta Vertex
-               meta={component() === "Table" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
-               data={p.joinVertex}
-               setValue={props.setValue!}
-               disabled={disabled()}
-               txnId={props.txnId}
-               isRealTime={props.isRealTime}
-              />
-            </>
+            const DefaultValue = () => (
+              <>
+                {metaVertex().P.props?.defaultValue &&
+                  getSelectionOptions(
+                    [p.joinVertex],
+                    metaVertex().P.props.defaultValue
+                  ).vertexes}
+              </>
+            );
+            const Content = () => (
+              <>
+                <DynamicComponent
+                  component={component()}
+                  // When we have a Table we pass original Table Meta Vertex
+                  meta={
+                    component() === "Table"
+                      ? graph.vertexes[metaVertex().P.templateId]
+                      : metaVertex()
+                  }
+                  data={p.joinVertex}
+                  setValue={props.setValue!}
+                  disabled={disabled()}
+                  txnId={props.txnId}
+                  isRealTime={props.isRealTime}
+                />
+              </>
+            );
 
             return (
               <Switch>
                 <Match when={metaVertex().P.props?.hidden}>
                   <td>
                     <div class="">
-                      <DefaultValue/>
+                      <DefaultValue />
                     </div>
                   </td>
                 </Match>
@@ -199,8 +245,8 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                   <td>
                     <Show when={!props.disabled}>
                       <div class="">
-                        <DefaultValue/>
-                        <Content/>
+                        <DefaultValue />
+                        <Content />
                       </div>
                     </Show>
                   </td>
@@ -208,8 +254,8 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                 <Match when={true}>
                   <td class="max-w:600px">
                     <div class="flex align-items:center">
-                      <DefaultValue/>
-                      <Content/>
+                      <DefaultValue />
+                      <Content />
                     </div>
                   </td>
                 </Match>
@@ -221,60 +267,70 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
     };
 
     return (
-     <>
-       <tr
-        // use:sortable
-        // classList={{ "opacity-25": sortable.isActiveDraggable }}
-        class=""
-       >
-         <td>
-           <div class="flex align-items:center">
-             {p.joinVertex.P.pos}
-             {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
+      <>
+        <tr
+          // use:sortable
+          // classList={{ "opacity-25": sortable.isActiveDraggable }}
+          class=""
+        >
+          <td>
+            <div class="flex align-items:center">
+              {p.joinVertex.P.pos}
+              {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
 
+              {/*<Icon icon="mingcute:up-fill"  />*/}
+              {/*<Icon icon="mingcute:down-fill"  />*/}
+              {/*<Icon icon="material-symbols:add-box"  />*/}
+              <Icon
+                icon="material-symbols:restore-from-trash-outline"
+                class="cursor:pointer"
+                onClick={() =>
+                  deleteRow(p.joinVertex, props.isRealTime!, props.txnId!, Ws)
+                }
+              />
+              {/*<Show when={!props.disabled}>*/}
+              {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
+              {/*</Show>*/}
 
-             {/*<Icon icon="mingcute:up-fill"  />*/}
-             {/*<Icon icon="mingcute:down-fill"  />*/}
-             {/*<Icon icon="material-symbols:add-box"  />*/}
-             <Icon
-              icon="material-symbols:restore-from-trash-outline"
-              class="cursor:pointer"
-              onClick={() => deleteRow(p.joinVertex, props.isRealTime!, props.txnId!, Ws)}
-             />
-             {/*<Show when={!props.disabled}>*/}
-             {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
-             {/*</Show>*/}
-
-             <Show when={expandVertex()}>
-               <Icon icon="carbon:row-expand" class="cursor:pointer" onClick={() => {
-                 return addNewRow(props.txnId || 0, expandVertex()!, p.joinVertex, {}, props.isRealTime ?? false, Ws);
-               }} />
-             </Show>
-
-
-           </div>
-         </td>
-         <DisplayProperties />
-       </tr>
-       {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
-       {/*{getSelectionOptions([p.joinVertex], expandVertex.P.props.collection).vertexes?.length}*/}
-       <Show when={expandVertex()}>
-         <tr>
-           <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
-           <DynamicComponent
-            component={"Table"}
-            // When we have a Table we pass original Table Meta Vertex
-            meta={expandVertex()!}
-            data={p.joinVertex}
-            setValue={props.setValue!}
-            disabled={disabled()}
-            txnId={props.txnId}
-            isRealTime={props.isRealTime}
-           />
-         </td>
-         </tr>
-       </Show>
-     </>
+              <Show when={expandVertex()}>
+                <Icon
+                  icon="carbon:row-expand"
+                  class="cursor:pointer"
+                  onClick={() => {
+                    return addNewRow(
+                      props.txnId || 0,
+                      expandVertex()!,
+                      p.joinVertex,
+                      {},
+                      props.isRealTime ?? false,
+                      Ws
+                    );
+                  }}
+                />
+              </Show>
+            </div>
+          </td>
+          <DisplayProperties />
+        </tr>
+        {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
+        {/*{getSelectionOptions([p.joinVertex], expandVertex.P.props.collection).vertexes?.length}*/}
+        <Show when={expandVertex()}>
+          <tr>
+            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
+              <DynamicComponent
+                component={"Table"}
+                // When we have a Table we pass original Table Meta Vertex
+                meta={expandVertex()!}
+                data={p.joinVertex}
+                setValue={props.setValue!}
+                disabled={disabled()}
+                txnId={props.txnId}
+                isRealTime={props.isRealTime}
+              />
+            </td>
+          </tr>
+        </Show>
+      </>
     );
   };
 
@@ -316,34 +372,43 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
       return;
     }
 
-    return runWithOwner(outerOwner, () => addNewRow(props.txnId || 0, props.meta, props.data!, {}, props.isRealTime ?? false, Ws));
-  }
+    return runWithOwner(outerOwner, () =>
+      addNewRow(
+        props.txnId || 0,
+        props.meta,
+        props.data!,
+        {},
+        props.isRealTime ?? false,
+        Ws
+      )
+    );
+  };
   const AddNewButton = () => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
-    return <GenericField
-     meta={
-       {
-         P: {
-           component: "ButtonGroup",
-           props: {
-             class:"h:25",
-             keyExpr: "id",
-             items: [
-               {
-                 icon: "add",
-                 id: "add",
-                 hint: "Add New",
-
-               },
-             ],
-           },
-         },
-       } as unknown as Vertex
-     }
-     onClick={insertNewRow}
-    />
-  }
-
+    return (
+      <GenericField
+        meta={
+          {
+            P: {
+              component: "ButtonGroup",
+              props: {
+                class: "h:25",
+                keyExpr: "id",
+                items: [
+                  {
+                    icon: "add",
+                    id: "add",
+                    hint: "Add New",
+                  },
+                ],
+              },
+            },
+          } as unknown as Vertex
+        }
+        onClick={insertNewRow}
+      />
+    );
+  };
 
   return (
     <Switch>
@@ -360,22 +425,24 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
           <Show when={sortedVertexes().length}>
-            <AddNewButton/>
+            <AddNewButton />
           </Show>
 
           <div
             class={css`
-             table,
-             th,
-             td {
-               border: 1px solid rgba(0, 0, 0, 0.1);
-               border-collapse: collapse;
-             }
-           `}
+              table,
+              th,
+              td {
+                border: 1px solid rgba(0, 0, 0, 0.1);
+                border-collapse: collapse;
+              }
+            `}
           >
-            <table classList={{
-              "f:11": sortedVertexes().length === 0
-            }}>
+            <table
+              classList={{
+                "f:11": sortedVertexes().length === 0,
+              }}
+            >
               <thead>
                 <tr>
                   <th></th>
@@ -384,9 +451,21 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                       return (
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
-                          <Match when={attribute.P.tab === "expand"}><span></span></Match>
-                          <Match when={!attribute.P.hidden || attribute.P.defaultValue}>
-                            <th title={attribute.P.hint}>{toTitle(attribute.P.displayName || attribute.P[IdAttr] || '')}</th>
+                          <Match when={attribute.P.tab === "expand"}>
+                            <span></span>
+                          </Match>
+                          <Match
+                            when={
+                              !attribute.P.hidden || attribute.P.defaultValue
+                            }
+                          >
+                            <th title={attribute.P.hint}>
+                              {toTitle(
+                                attribute.P.displayName ||
+                                  attribute.P[IdAttr] ||
+                                  ""
+                              )}
+                            </th>
                           </Match>
                           <Match when={true}>
                             <th></th>
@@ -401,12 +480,26 @@ export function TableInputField(props: ComponentProps & {txnId?: number; isRealT
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
                 {/*  <SortableProvider ids={ids()}>*/}
-                <For each={sortedVertexes()} fallback={<tr class="cursor:pointer" onClick={insertNewRow}>
-                  <td class="text:center white-space:nowrap" colspan={tableColumnsTemplate().length + 1}>
-                    No Data
-                  </td>
-                </tr>}>
-                  {(vertex, index) => <RepeaterContext.Provider value={[vertex, ...useContext(RepeaterContext)]}><SortableRow joinVertex={vertex} index={index()} /></RepeaterContext.Provider>}
+                <For
+                  each={sortedVertexes()}
+                  fallback={
+                    <tr class="cursor:pointer" onClick={insertNewRow}>
+                      <td
+                        class="text:center white-space:nowrap"
+                        colspan={tableColumnsTemplate().length + 1}
+                      >
+                        No Data
+                      </td>
+                    </tr>
+                  }
+                >
+                  {(vertex, index) => (
+                    <RepeaterContext.Provider
+                      value={[vertex, ...useContext(RepeaterContext)]}
+                    >
+                      <SortableRow joinVertex={vertex} index={index()} />
+                    </RepeaterContext.Provider>
+                  )}
                 </For>
                 {/*  </SortableProvider>*/}
                 {/*</DragDropProvider>*/}
