@@ -26,10 +26,6 @@ const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
-export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
-
-export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
-
 // Todo use mastercss
 const AlertDisplay = () => {
   const { alerts, setAlert } = useContext(AlertMessageContext);
@@ -73,7 +69,7 @@ export const DashboardView = () => {
               when={graph.member?.id}
               fallback={
                 <>
-                  <Link href={"/signup"} replace={true}>
+                  <Link href="/signup" replace={true}>
                     Register
                   </Link>
                   {/* @ts-ignore */}

@@ -1,14 +1,14 @@
-import {createUniqueId, onCleanup, useContext} from "solid-js";
-import {useNavigate} from "@solidjs/router";
-import {resetDatabaseLogin, revertTransaction, setGraph, Vertex} from "../lib/graph";
-import {AbstractSingleForm} from "../components/DynamicForm";
-import {WsContext, WSEvent} from "../utils/ws_events_dispatcher";
-import {GenericField} from "../components/input/GenaricField";
-import {Record} from "../lib/Record";
-import {AlertMessageContext} from "../contexts/AlertMessageContext";
-import {createStore} from "solid-js/store";
-import {isAdmin} from "./Dashboard";
-import {Alert} from "../components/ComponentType";
+import { useNavigate } from "@solidjs/router";
+import { createUniqueId, onCleanup, useContext } from "solid-js";
+import { createStore } from "solid-js/store";
+import { Alert } from "../components/ComponentType";
+import { AbstractSingleForm } from "../components/DynamicForm";
+import { GenericField } from "../components/input/GenaricField";
+import { AlertMessageContext } from "../contexts/AlertMessageContext";
+import { Record } from "../lib/Record";
+import { Vertex, resetDatabaseLogin, revertTransaction, setGraph } from "../lib/graph";
+import { isAdmin } from "../signals/common";
+import { WSEvent, WsContext } from "../utils/ws_events_dispatcher";
 
 export const Login = (props: {}) => {
   const { setAlert } = useContext(AlertMessageContext);
@@ -39,7 +39,7 @@ export const Login = (props: {}) => {
             subscriptions: Ws.subscriptions,
           },
         ],
-      ])
+      ]);
       navigate("/");
     }
   });
@@ -54,23 +54,25 @@ export const Login = (props: {}) => {
   };
 
   return (
-   <AbstractSingleForm
-    formId={"LogIn"}
-    id="new"
-    config={config}
-    submitButton={<GenericField
-     meta={
-       {
-         P: {
-           component: "Button",
-           props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
-         },
-       } as unknown as Vertex
-     }
-     onClick={onLoginClick}
-    />}
-    // TODO: add dry option
-   />
+    <AbstractSingleForm
+      formId={"LogIn"}
+      id="new"
+      config={config}
+      submitButton={
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
+                props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
+              },
+            } as unknown as Vertex
+          }
+          onClick={onLoginClick}
+        />
+      }
+      // TODO: add dry option
+    />
   );
 };
 export const Logout = (props: {}) => {
@@ -83,7 +85,7 @@ export const Logout = (props: {}) => {
     if (data.error) {
       setAlert((prev) => [...prev, { id: createUniqueId(), state: Alert.Error, message: data.error }]);
     } else {
-      setGraph('member', null);
+      setGraph("member", null);
       // because we are doing sync processing in websocket class,
       // this will not be a problem
       resetDatabaseLogin();
@@ -96,13 +98,13 @@ export const Logout = (props: {}) => {
             subscriptions: Ws.subscriptions,
           },
         ],
-      ])
+      ]);
       navigate("/");
     }
   });
   Ws.trigger([[event, {}]]);
   onCleanup(() => Ws.unbind(event));
-  return <>Logging out...</>
+  return <>Logging out...</>;
 };
 
 export const SignUp = (props: {}) => {
@@ -114,7 +116,7 @@ export const SignUp = (props: {}) => {
     if (data.error) {
       setAlert((prev) => [...prev, { id: createUniqueId(), state: Alert.Error, message: data.error }]);
     } else {
-      revertTransaction(config[0].record.txnId)
+      revertTransaction(config[0].record.txnId);
       navigate("/");
     }
   });
@@ -133,24 +135,25 @@ export const SignUp = (props: {}) => {
   };
 
   return (
-   <AbstractSingleForm
-    formId={"SignUp"}
-    id="new"
-    config={config}
-    submitButton={<GenericField
-     meta={
-       {
-         P: {
-           component: "Button",
+    <AbstractSingleForm
+      formId={"SignUp"}
+      id="new"
+      config={config}
+      submitButton={
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
 
-           props: { stylingMode: "contained", width: "120", type: "success", text: "Register", },
-         },
-       } as unknown as Vertex
-     }
-     onClick={onSignupClick}
-    />}
-    // TODO: add dry option
-   />
+                props: { stylingMode: "contained", width: "120", type: "success", text: "Register" },
+              },
+            } as unknown as Vertex
+          }
+          onClick={onSignupClick}
+        />
+      }
+      // TODO: add dry option
+    />
   );
 };
-
