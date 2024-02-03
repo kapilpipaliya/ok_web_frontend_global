@@ -1,45 +1,104 @@
-import {createEffect, getOwner, onCleanup, runWithOwner, Show, useContext} from "solid-js";
+import {
+  createEffect,
+  getOwner,
+  onCleanup,
+  runWithOwner,
+  Show,
+  useContext,
+} from "solid-js";
 // Comment This Lines in web build
-import dxAutocomplete, {Properties as dxAutocompleteProperties} from "devextreme/ui/autocomplete";
-import dxBullet, {Properties as dxBulletProperties} from "devextreme/viz/bullet";
-import dxCalendar, {Properties as dxCalendarProperties} from "devextreme/ui/calendar";
-import dxCheckBox, {Properties as dxCheckBoxProperties} from "devextreme/ui/check_box";
-import dxCircularGauge, {Properties as dxCircularGaugeProperties} from "devextreme/viz/circular_gauge";
-import dxColorBox, {Properties as dxColorBoxProperties} from "devextreme/ui/color_box";
-import dxDateBox, {Properties as dxDateBoxProperties} from "devextreme/ui/date_box";
+import dxAutocomplete, {
+  Properties as dxAutocompleteProperties,
+} from "devextreme/ui/autocomplete";
+import dxBullet, {
+  Properties as dxBulletProperties,
+} from "devextreme/viz/bullet";
+import dxCalendar, {
+  Properties as dxCalendarProperties,
+} from "devextreme/ui/calendar";
+import dxCheckBox, {
+  Properties as dxCheckBoxProperties,
+} from "devextreme/ui/check_box";
+import dxCircularGauge, {
+  Properties as dxCircularGaugeProperties,
+} from "devextreme/viz/circular_gauge";
+import dxColorBox, {
+  Properties as dxColorBoxProperties,
+} from "devextreme/ui/color_box";
+import dxDateBox, {
+  Properties as dxDateBoxProperties,
+} from "devextreme/ui/date_box";
 // import dxDropDownBox, {Properties as dxDropDownBoxProperties} from "devextreme/ui/drop_down_box";
-import dxFileUploader, {Properties as dxFileUploaderProperties} from "devextreme/ui/file_uploader";
-import dxFilterBuilder, {Properties as dxFilterBuilderProperties} from "devextreme/ui/filter_builder";
-import dxHtmlEditor, {Properties as dxHtmlEditorProperties} from "devextreme/ui/html_editor";
-import dxLinearGauge, {Properties as dxLinearGaugeProperties} from "devextreme/viz/linear_gauge";
-import dxNumberBox, {Properties as dxNumberBoxProperties} from "devextreme/ui/number_box";
-import dxProgressBar, {Properties as dxProgressBarProperties} from "devextreme/ui/progress_bar";
-import dxRadioGroup, {Properties as dxRadioGroupProperties} from "devextreme/ui/radio_group";
-import dxRangeSelector, {Properties as dxRangeSelectorProperties} from "devextreme/viz/range_selector";
-import dxRangeSlider, {Properties as dxRangeSliderProperties} from "devextreme/ui/range_slider";
-import dxSlider, {Properties as dxSliderProperties} from "devextreme/ui/slider";
-import dxSwitch, {Properties as dxSwitchProperties} from "devextreme/ui/switch";
-import dxTextArea, {Properties as dxTextAreaProperties} from "devextreme/ui/text_area";
-import dxTextBox, {Properties as dxTextBoxProperties} from "devextreme/ui/text_box";
+import dxFileUploader, {
+  Properties as dxFileUploaderProperties,
+} from "devextreme/ui/file_uploader";
+import dxFilterBuilder, {
+  Properties as dxFilterBuilderProperties,
+} from "devextreme/ui/filter_builder";
+import dxHtmlEditor, {
+  Properties as dxHtmlEditorProperties,
+} from "devextreme/ui/html_editor";
+import dxLinearGauge, {
+  Properties as dxLinearGaugeProperties,
+} from "devextreme/viz/linear_gauge";
+import dxNumberBox, {
+  Properties as dxNumberBoxProperties,
+} from "devextreme/ui/number_box";
+import dxProgressBar, {
+  Properties as dxProgressBarProperties,
+} from "devextreme/ui/progress_bar";
+import dxRadioGroup, {
+  Properties as dxRadioGroupProperties,
+} from "devextreme/ui/radio_group";
+import dxRangeSelector, {
+  Properties as dxRangeSelectorProperties,
+} from "devextreme/viz/range_selector";
+import dxRangeSlider, {
+  Properties as dxRangeSliderProperties,
+} from "devextreme/ui/range_slider";
+import dxSlider, {
+  Properties as dxSliderProperties,
+} from "devextreme/ui/slider";
+import dxSwitch, {
+  Properties as dxSwitchProperties,
+} from "devextreme/ui/switch";
+import dxTextArea, {
+  Properties as dxTextAreaProperties,
+} from "devextreme/ui/text_area";
+import dxTextBox, {
+  Properties as dxTextBoxProperties,
+} from "devextreme/ui/text_box";
 
 import Validator from "devextreme/ui/validator";
-import {ValidationRule} from "devextreme/common";
+import { ValidationRule } from "devextreme/common";
 
-import {ComponentProps} from "../../types/Component";
-import {IdAttr} from "../../lib/graph";
-import {FormContext, isUpdatingInput} from "../../lib/Record";
-import {getValueFromVertexOrKey} from "../../utils/utils";
-import {mergeVertexProperties} from "../../lib/Vertex";
-import {getTextColumnValue} from "./GenaricField";
+import { ComponentProps } from "../../types/Component";
+import { IdAttr } from "../../lib/graph";
+import { FormContext, isUpdatingInput } from "../../lib/Record";
+import { getValueFromVertexOrKey } from "../../utils/utils";
+import { mergeVertexProperties } from "../../lib/Vertex";
+import { getTextColumnValue } from "./GenaricField";
 
-export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
+export function GenericInputField(
+  props: ComponentProps & {
+    component: string;
+    disabled: boolean;
+    txnId: number;
+  }
+) {
   const formContext = useContext(FormContext);
   const outerOwner = getOwner();
   return (
-    <div aria-labeledby={props["aria-labeledby"]} classList={{
-      'width:100%': props.component === 'TextArea'
-    }}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
+    <div
+      aria-labeledby={props["aria-labeledby"]}
+      classList={{
+        "width:100%": props.component === "TextArea",
+      }}
+    >
+      <Show
+        when={!props.disabled}
+        fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}
+      >
         <div
           // @ts-ignore
           ref={(el) => {
@@ -59,41 +118,44 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                       if (!file) return;
                       props.setValue(props.meta, props.data, file);
                       let formData = new FormData();
-                      formData.append(
-                          "",
-                          file,
-                          file.name
-                      );
+                      formData.append("", file, file.name);
                       const setResult = (media: {}[]) => {
                         runWithOwner(outerOwner, () => {
                           // props.setValue!(props.meta, props.data!, media[0]);
                           for (const m of media) {
                             if (m) {
-                              mergeVertexProperties(props.txnId, props.data.id, {...m.P, id: m.id});
+                              mergeVertexProperties(
+                                props.txnId,
+                                props.data.id,
+                                { ...m.P, id: m.id }
+                              );
                             }
                           }
-                        })
-                      }
+                        });
+                      };
 
                       // TODO: Delete Temp file vertex after form is saved.
                       fetch("http://49.12.190.36:1401/api/upload", {
                         method: "POST",
                         body: formData,
-                        headers: {temp: "true"},
+                        headers: { temp: "true" },
                         // redirect: "follow",
                         // mode: "no-cors",
                       })
-                          .then((response) => response.json())
-                          .then((result) => {
-                            if (result.media) {
-                              setResult(result.media);
-                            }
-                          })
-                          .catch((error) => console.log("error", error));
-                    } else if (data.event || props.component === "FilterBuilder") {
+                        .then((response) => response.json())
+                        .then((result) => {
+                          if (result.media) {
+                            setResult(result.media);
+                          }
+                        })
+                        .catch((error) => console.log("error", error));
+                    } else if (
+                      data.event ||
+                      props.component === "FilterBuilder"
+                    ) {
                       props.setValue(props.meta, props.data, data.value);
                     }
-                  })
+                  });
                 },
                 // onChange: (e: any) => {
                 //   props.setValue(props.meta, props.data, e.value);
@@ -146,14 +208,19 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                   // accept: "image/*",
                   // uploadMode: "instantly",
                   uploadMode: "useForm",
-                  value: []
+                  value: [],
                 } as dxFileUploaderProperties);
               } else if (props.component === "FilterBuilder") {
                 comp = dxFilterBuilder;
-                const fields = getValueFromVertexOrKey(props.meta.P.props, "fields") || [{
-                  dataField: 'name',
-                  dataType: 'string',
-                }];
+                const fields = getValueFromVertexOrKey(
+                  props.meta.P.props,
+                  "fields"
+                ) || [
+                  {
+                    dataField: "name",
+                    dataType: "string",
+                  },
+                ];
                 Object.assign(attributes, {
                   value: [],
                   // allowHierarchicalFields: true,
@@ -265,7 +332,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
               } else if (props.component === "TextArea") {
                 comp = dxTextArea;
                 Object.assign(attributes, {
-                  autoResizeEnabled: true
+                  autoResizeEnabled: true,
                 } as dxTextAreaProperties);
               } else if (props.component === "TextBox") {
                 comp = dxTextBox;
@@ -291,7 +358,13 @@ export function GenericInputField(props: ComponentProps & { component: string; d
 
               // try {
               if (
-               !["Autocomplete", "Bullet", "CircularGauge", "FilterBuilder", "LinearGauge"].includes(props.component)
+                ![
+                  "Autocomplete",
+                  "Bullet",
+                  "CircularGauge",
+                  "FilterBuilder",
+                  "LinearGauge",
+                ].includes(props.component)
               ) {
                 const validatorInstance = new Validator(el, {
                   validationGroup: formContext.validationGroup,
@@ -327,10 +400,13 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 //   }
                 // ],
                 createEffect(() =>
-                 validatorInstance.option(
-                  "validationRules",
-                  getValueFromVertexOrKey(props.meta.P.props || {}, "validationRules") as Array<ValidationRule>,
-                 ),
+                  validatorInstance.option(
+                    "validationRules",
+                    getValueFromVertexOrKey(
+                      props.meta.P.props || {},
+                      "validationRules"
+                    ) as Array<ValidationRule>
+                  )
                 );
               }
               // } catch (e) {
@@ -342,27 +418,32 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 if (isUpdatingInput) return;
                 if (!props.data) return;
                 let value = props.data.P[props.meta.P[IdAttr]];
-                if (props.component === "FilterBuilder" || props.component === "FileUploader") {
+                if (
+                  props.component === "FilterBuilder" ||
+                  props.component === "FileUploader"
+                ) {
                   if (!value) {
                     value = [];
                   } else if (Object.keys(value).length === 0) {
                     value = [];
-                  }
-
-                  else if (!Array.isArray(value)) {
+                  } else if (!Array.isArray(value)) {
                     value = [value];
                   }
                 }
                 instance.option("value", value);
                 if (props.component === "TextArea") {
-                  instance.option("hint", value)
+                  instance.option("hint", value);
                 }
               });
               createEffect(() => instance.option("disabled", props.disabled));
 
               createEffect(() => {
-                for (const property in props.meta.P.props) {// as dxTextBoxProperties
-                  let value = getValueFromVertexOrKey(props.meta.P.props, property);
+                for (const property in props.meta.P.props) {
+                  // as dxTextBoxProperties
+                  let value = getValueFromVertexOrKey(
+                    props.meta.P.props,
+                    property
+                  );
                   if (property === "items" && typeof value === "string") {
                     value = value.split("\n");
                   }
@@ -370,7 +451,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
                 }
               });
               onCleanup(() => instance.dispose());
-            })
+            });
           }}
         />
       </Show>

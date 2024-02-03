@@ -26,9 +26,13 @@ const border = "|solid|slate-80";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
-export const [showNav, setShowNav] = createSignal(window.location.pathname.includes("/nav/"));
+export const [showNav, setShowNav] = createSignal(
+  window.location.pathname.includes("/nav/")
+);
 
-export const [isAdmin, setIsAdmin] = createSignal(window.location.pathname.includes("/admin"));
+export const [isAdmin, setIsAdmin] = createSignal(
+  window.location.pathname.includes("/admin")
+);
 
 // Todo use mastercss
 const AlertDisplay = () => {
@@ -42,7 +46,9 @@ const AlertDisplay = () => {
           isClosable={true}
           content={alert.message}
           duration={5000}
-          onHide={() => setAlert((prev) => prev.filter((_, i) => i !== index()))}
+          onHide={() =>
+            setAlert((prev) => prev.filter((_, i) => i !== index()))
+          }
         />
       )}
     </For>
@@ -51,7 +57,10 @@ const AlertDisplay = () => {
 
 export const DashboardView = () => {
   const vertexId = getNewGraphId();
-  addNewVertex(0, newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }));
+  addNewVertex(
+    0,
+    newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` })
+  );
 
   return (
     <div class="flex flex:col flex:1">
@@ -59,7 +68,8 @@ export const DashboardView = () => {
         value={{
           events: {
             setSideBarOpen,
-            setTitle: (title: string) => mergeVertexProperties(0, vertexId, { title }),
+            setTitle: (title: string) =>
+              mergeVertexProperties(0, vertexId, { title }),
           },
         }}
       >
@@ -98,7 +108,7 @@ export const DashboardView = () => {
 
         <AlertDisplay />
 
-        <main class="p:20">
+        <main class="p:20 bg:white">
           <Show when={graph.initialSynced}>
             <Routes>
               <Route path="/" component={() => <>Home Page</>} />
@@ -124,18 +134,39 @@ export const DashboardView = () => {
                   );
                 }}
               />
-              <Route path="/Page/:id" component={(props) => <PageDesignerDragAndDrop {...props} />} />
-              <Route path="/Nav/new" component={(props) => <NavDesigner {...props} />} />
-              <Route path="/dashboards" component={(props) => <AllDashboards {...props} />} />
-              <Route path="/forms" component={(props) => <AllForms {...props} />} />
-              <Route path="/grid/:name" component={(props) => <TableDashboard {...props} />} />
+              <Route
+                path="/Page/:id"
+                component={(props) => <PageDesignerDragAndDrop {...props} />}
+              />
+              <Route
+                path="/Nav/new"
+                component={(props) => <NavDesigner {...props} />}
+              />
+              <Route
+                path="/dashboards"
+                component={(props) => <AllDashboards {...props} />}
+              />
+              <Route
+                path="/forms"
+                component={(props) => <AllForms {...props} />}
+              />
+              <Route
+                path="/grid/:name"
+                component={(props) => <TableDashboard {...props} />}
+              />
               {/* Auth: */}
               <Route path="/login" component={Login as Component} />
               <Route path="/logout" component={Logout as Component} />
               <Route path="/signup" component={SignUp as Component} />
               {/* Utils */}
-              <Route path="/backup_restore" component={(props) => <BackupRestore {...props} />} />
-              <Route path="/SimpleImport" component={(props) => <SimpleImport {...props} />} />
+              <Route
+                path="/backup_restore"
+                component={(props) => <BackupRestore {...props} />}
+              />
+              <Route
+                path="/SimpleImport"
+                component={(props) => <SimpleImport {...props} />}
+              />
               <Route path="/Graph" component={(props) => <GraphViewPage />} />
               {/* Error */}
               <Route path="/**" component={Page404 as Component} />
@@ -150,7 +181,10 @@ export const DashboardView = () => {
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = () => {
   return (
-    <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())} fallback={<DashboardView />}>
+    <Show
+      when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}
+      fallback={<DashboardView />}
+    >
       <div class="flex">
         <Sidebar isSideBarOpen={isSideBarOpen()} />
         <div class="ml:200 flex:1">
