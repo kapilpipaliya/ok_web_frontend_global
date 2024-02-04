@@ -50,10 +50,10 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
   createEffect(() => {
     const nav = navData();
     if (!nav || nav.length === 0) return;
-
     const loadPath = pathname();
-    const result: navbarDataI[] = treeViewFilter(nav, (node: navbarDataI) => node.href === loadPath);
-    setOpenIds(getIds(result));
+
+    const result: navbarDataI[] = treeViewFilter(nav, (node: navbarDataI) => loadPath === node.href);
+    setOpenIds((prev) => [...prev, ...getIds(result)]);
   });
 
   function handleSearch(input: string) {
