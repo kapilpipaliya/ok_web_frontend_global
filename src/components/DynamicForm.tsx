@@ -242,11 +242,11 @@ export function FormGroup(props: FormGroupProps) {
               <Content/>
             </Match>
             <Match when={true}>
-              <div class=" grid-cols:2 		h:55 py:5 w:450">
+              <div class=" grid-cols:2 py:5 w:450">
                 <div  id={id}>
                   <Label />
                 </div>
-                <div>
+                <div class="	">
                   <Content />
                 </div>
               </div>
@@ -488,7 +488,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <div class="b:2 b:blue:hover b:rgb(214,214,216) p:10 w:100% r:20|20|20|20 bg:#f5f5f5eb">
+                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                         <div class="w:full 	 justify-content:space-between	">
                           <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
                           <Show when={props.importExportButtons ?? true}>
@@ -530,7 +530,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             </div>
                           </Show>
                         </div>
-                        <div class="cols:2 p:10 w:1000 ">
+                        <div class=" p:10 w:1000 ">
                           <FormGroup
                             metaAttributes={groupByTabsAndGroup["main"][group]}
                             vertex={record.vertex}
