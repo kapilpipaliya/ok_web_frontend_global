@@ -493,6 +493,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+
                     
                        
                         <Show when={props.isLoginRegister ?? false}>
@@ -511,6 +512,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                        <div class=" p:10 w:full ">
                        <div class="w:full 	 justify-content:space-between	">
+
                           <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
                           <Show when={props.importExportButtons ?? true}>
                             <div class="flex  gap:10 jc:end ">
@@ -551,6 +553,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             </div>
                           </Show>
                         </div>
+
                           <FormGroup
                             metaAttributes={groupByTabsAndGroup["main"][group]}
                             vertex={record.vertex}
@@ -558,9 +561,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             txnId={record.txnId}
                           />
                         </div>
+
                         </div>   
                        </Show>
                                     </div>
+
                 </>
               )}
             </For>
