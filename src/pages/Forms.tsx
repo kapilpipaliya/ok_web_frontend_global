@@ -71,6 +71,7 @@ export const Login = (props: {}) => {
           onClick={onLoginClick}
         />
       }
+      importExportButtons={false}
       // TODO: add dry option
     />
   );
@@ -139,6 +140,7 @@ export const SignUp = (props: {}) => {
       formId={"SignUp"}
       id="new"
       config={config}
+      importExportButtons={false}
       submitButton={
         <GenericField
           meta={
