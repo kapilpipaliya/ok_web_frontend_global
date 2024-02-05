@@ -94,7 +94,7 @@ export const DashboardView = () => {
 
         <AlertDisplay />
 
-        <main class="p:20">
+        <main class="p:20 bg:white">
           <Show when={graph.initialSynced}>
             <Routes>
               <Route path="/" component={() => <>Home Page</>} />

@@ -242,12 +242,12 @@ export function FormGroup(props: FormGroupProps) {
               <Content/>
             </Match>
             <Match when={true}>
-              <div class="dx-field">
-                <div class="dx-field-label" id={id}>
-                  <Label/>
+              <div class=" grid-cols:2 py:5 w:450">
+                <div  id={id}>
+                  <Label />
                 </div>
-                <div class="dx-field-value">
-                  <Content/>
+                <div class="	">
+                  <Content />
                 </div>
               </div>
             </Match>
@@ -475,18 +475,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
       <Show when={props.showSubmitButtonOnTop ?? false}>
         <SubmitButton/>
       </Show>
-      <Show when={props.importExportButtons ?? true}>
-        <div class="flex gap:10 jc:end">
-          <GenericField
-           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import" }}} as any}
-           onClick={onImportClick}
-          />
-          <GenericField
-           meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Export" }}} as any}
-           onClick={onExportClick}
-          />
-        </div>
-      </Show>
+     
       <Show when={divRef()}>
         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
           {/* Main Tab is displayed as top level fields */}
@@ -496,11 +485,60 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 <>
                   <div
                     class="dx-fieldset"
-                    style={{"max-width": getTabsWidth(groupByTabsAndGroup["main"][group])}}
+                    style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <FormGroup metaAttributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} txnId={record.txnId}/>
-                  </div>
+                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                        <div class="w:full 	 justify-content:space-between	">
+                          <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
+                          <Show when={props.importExportButtons ?? true}>
+                            <div class="flex  gap:10 jc:end ">
+                              <GenericField
+                                meta={
+                                  {
+                                    P: {
+                                      component: "Button",
+                                      props: {
+                                        stylingMode: "contained",
+                                        width: "120",
+                                        text: "Import",
+                                        class:
+                                          "bg:blue bg:rgb(24,98,234):hover text-fill:white",
+                                      },
+                                    },
+                                  } as any
+                                }
+                                onClick={onImportClick}
+                              />
+                              <GenericField
+                                meta={
+                                  {
+                                    P: {
+                                      component: "Button",
+
+                                      props: {
+                                        stylingMode: "contained",
+                                        width: "120",
+                                        text: "Export",
+                                        class: " text-fill:blue b:blue",
+                                      },
+                                    },
+                                  } as any
+                                }
+                                onClick={onExportClick}
+                              />
+                            </div>
+                          </Show>
+                        </div>
+                        <div class=" p:10 w:1000 ">
+                          <FormGroup
+                            metaAttributes={groupByTabsAndGroup["main"][group]}
+                            vertex={record.vertex}
+                            setValue={record.setValue}
+                            txnId={record.txnId}
+                          />
+                        </div>
+                      </div>                  </div>
                 </>
               )}
             </For>
