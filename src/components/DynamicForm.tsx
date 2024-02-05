@@ -56,6 +56,8 @@ const genericComponents = [
   "TextArea",
   "TextBox",
 ];
+import { Register } from "./staticPages/Registration";
+import { Login } from "./staticPages/Login";
 
 const genericComponents2 = [
   "Box",
@@ -201,6 +203,7 @@ interface FormGroupProps {
   vertex: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   txnId: number;
+  isLoginRegister?:string
 }
 
 export function getComponentForCollRow(metaVertex: Vertex, data: Vertex) {
@@ -251,6 +254,7 @@ export function FormGroup(props: FormGroupProps) {
                 </div>
               </div>
             </Match>
+           
           </Switch>
         );
       }}
@@ -267,6 +271,7 @@ export interface DynamicFormProps {
   importExportButtons?: boolean;
   showMainFieldsOnly?: boolean;
   showSubmitButtonOnTop?: boolean;
+  isLoginRegister?:string;
 }
 
 function getTabsWidth(group: Vertex[]) {
@@ -479,7 +484,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
       <Show when={divRef()}>
         <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
           {/* Main Tab is displayed as top level fields */}
-          <Show when={groupByTabsAndGroup["main"]}>
+       <Show when={groupByTabsAndGroup["main"]}>
             <For each={Object.keys(groupByTabsAndGroup["main"])}>
               {(group) => (
                 <>
@@ -488,8 +493,24 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
-                        <div class="w:full 	 justify-content:space-between	">
+                    
+                       
+                        <Show when={props.isLoginRegister ?? false}>
+                          
+                          <Show when={props.isLoginRegister==="Register"}>
+                            <Register/>
+                          </Show>
+                          <Show when={props.isLoginRegister==="Login"}>
+                          <Login/>
+                          </Show>
+                          
+                          
+
+                        </Show>
+                       <Show when={!props.isLoginRegister }>
+                       <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                       <div class=" p:10 w:full ">
+                       <div class="w:full 	 justify-content:space-between	">
                           <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
                           <Show when={props.importExportButtons ?? true}>
                             <div class="flex  gap:10 jc:end ">
@@ -530,7 +551,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             </div>
                           </Show>
                         </div>
-                        <div class=" p:10 w:1000 ">
                           <FormGroup
                             metaAttributes={groupByTabsAndGroup["main"][group]}
                             vertex={record.vertex}
@@ -538,11 +558,15 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             txnId={record.txnId}
                           />
                         </div>
-                      </div>                  </div>
+                        </div>   
+                       </Show>
+                                    </div>
                 </>
               )}
             </For>
           </Show>
+
+        
 
           <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
             <div
@@ -585,7 +609,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
           {/* @ts-ignore */}
           <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
 
-        <Show when={!(props.showSubmitButtonOnTop ?? false)}>
+        <Show when={!(props.showSubmitButtonOnTop ?? false) && !props.isLoginRegister}>
           <SubmitButton/>
         </Show>
         </FormContext.Provider>
