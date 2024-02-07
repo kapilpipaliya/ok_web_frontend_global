@@ -56,9 +56,6 @@ const genericComponents = [
   "TextArea",
   "TextBox",
 ];
-import { Register } from "./staticPages/Registration";
-import { Login } from "./staticPages/Login";
-
 const genericComponents2 = [
   "Box",
   "TreeMap",
@@ -495,20 +492,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
 
                     
-                       
-                        <Show when={props.isLoginRegister ?? false}>
-                          
-                          <Show when={props.isLoginRegister==="Register"}>
-                            <Register/>
-                          </Show>
-                          <Show when={props.isLoginRegister==="Login"}>
-                          <Login/>
-                          </Show>
-                          
-                          
-
-                        </Show>
-                       <Show when={!props.isLoginRegister }>
                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                        <div class=" p:10 w:full ">
                        <div class="w:full 	 justify-content:space-between	">
@@ -563,7 +546,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                         </div>
 
                         </div>   
-                       </Show>
+                    
                                     </div>
 
                 </>
