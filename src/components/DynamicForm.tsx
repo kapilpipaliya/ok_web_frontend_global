@@ -30,6 +30,7 @@ import {GenericField, RepeaterContext} from "./input/GenaricField";
 import {FormContext, FormMetaData, getCollAttrComp, getExportCode, getFormMetaData, Record} from "../lib/Record";
 import {stringify} from "yaml";
 import {getPermissions} from "../lib/auth";
+import { TableTabs } from "./TableTabs";
 
 const genericComponents = [
   "Autocomplete",
@@ -550,17 +551,17 @@ export const DynamicForm = (props: DynamicFormProps) => {
                           />
                         </div>
 
-                      </div>                  </div>
+                      </div>
+                      </div>
 
 
-                        </div>   
+                    </div>   
                        
-                                    </div>
+                   </div>
 
-
-                        </div>   
+ 
                     
-                                    </div>
+                                
 
                 </>
               )}
@@ -573,7 +574,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
 
             {/* old code for tabs */}
-            <div
+            {/* <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
                   dataSource: tabs,
@@ -589,7 +590,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 onCleanup(() => tabsInstance.dispose());
               }}
               
-            />
+            /> */}
+            <TableTabs  tabs={tabs} setActiveTab={setActiveTab}/>
 
         
           
