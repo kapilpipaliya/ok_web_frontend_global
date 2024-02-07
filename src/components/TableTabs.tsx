@@ -8,12 +8,12 @@ interface TableTabProps{
 
 
 
-const [currentTab, setCurrentTab] = createSignal<string>("tabletab1");
 
 
 
 export function TableTabs(props: TableTabProps){
- 
+  const [currentTab, setCurrentTab] = createSignal<string>("tabletab1");
+
     return (
     <div  class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
 
