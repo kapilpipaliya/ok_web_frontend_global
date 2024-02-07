@@ -18,8 +18,8 @@ import {WsContext} from "../utils/ws_events_dispatcher";
 
 import {SelectInputField,} from "./input/SelectInputField";
 import {TableInputField,} from "./input/TableInputField";
-// Comment This Lines in web build
-import Tabs from "devextreme/ui/tabs";
+// // Comment This Lines in web build
+// import Tabs from "devextreme/ui/tabs";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 import dxPopup, {Properties as dxPopupProperties} from "devextreme/ui/popup";
