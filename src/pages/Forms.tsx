@@ -56,6 +56,7 @@ export const Login = (props: {}) => {
   };
 
   return (
+
     // <AbstractSingleForm
     //   formId={"LogIn"}
     //   id="new"
@@ -78,6 +79,7 @@ export const Login = (props: {}) => {
     //   // TODO: add dry option
     // />
     <LoginPage/>
+
   );
 };
 export const Logout = (props: {}) => {
@@ -152,6 +154,7 @@ export const SignUp = (props: {}) => {
     //         {
     //           P: {
     //             component: "Button",
+
 
     //             props: { stylingMode: "contained", width: "120", type: "success", text: "Register" },
     //           },
