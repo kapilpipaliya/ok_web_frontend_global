@@ -1,3 +1,5 @@
+import { createSignal } from "solid-js";
+
 import { For, createSignal } from "solid-js";
 
 interface TableTabProps{
@@ -5,13 +7,17 @@ interface TableTabProps{
   setActiveTab:(tab:string)=>string
 }
 
+
+
 const [currentTab, setCurrentTab] = createSignal<string>("tabletab1");
+
 
 
 export function TableTabs(props: TableTabProps){
  
     return (
     <div  class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
+
 
 <For each={props.tabs} fallback={<div>Loading...</div>}>
   {(item) => 
@@ -35,6 +41,7 @@ export function TableTabs(props: TableTabProps){
     {item}
   </div>}
 </For>
+
    </div>
    )
 }
