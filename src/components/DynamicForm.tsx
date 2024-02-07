@@ -18,8 +18,8 @@ import {WsContext} from "../utils/ws_events_dispatcher";
 
 import {SelectInputField,} from "./input/SelectInputField";
 import {TableInputField,} from "./input/TableInputField";
-// Comment This Lines in web build
-import Tabs from "devextreme/ui/tabs";
+// // Comment This Lines in web build
+// import Tabs from "devextreme/ui/tabs";
 import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 import dxPopup, {Properties as dxPopupProperties} from "devextreme/ui/popup";
@@ -30,6 +30,7 @@ import {GenericField, RepeaterContext} from "./input/GenaricField";
 import {FormContext, FormMetaData, getCollAttrComp, getExportCode, getFormMetaData, Record} from "../lib/Record";
 import {stringify} from "yaml";
 import {getPermissions} from "../lib/auth";
+import { TableTabs } from "./TableTabs";
 
 const genericComponents = [
   "Autocomplete",
@@ -56,9 +57,6 @@ const genericComponents = [
   "TextArea",
   "TextBox",
 ];
-import { Register } from "./staticPages/Registration";
-import { Login } from "./staticPages/Login";
-
 const genericComponents2 = [
   "Box",
   "TreeMap",
@@ -470,6 +468,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
     />
   </div>
 
+
+
   return (
       <RepeaterContext.Provider value={[record.vertex, ...useContext(RepeaterContext)]}><div
       ref={(el) => {
@@ -494,21 +494,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
 
-                    
-                       
-                        <Show when={props.isLoginRegister ?? false}>
-                          
-                          <Show when={props.isLoginRegister==="Register"}>
-                            <Register/>
-                          </Show>
-                          <Show when={props.isLoginRegister==="Login"}>
-                          <Login/>
-                          </Show>
-                          
-                          
+                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                        <div class="w:full 	 justify-content:space-between	">
 
-                        </Show>
-                       <Show when={!props.isLoginRegister }>
+                    
                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                        <div class=" p:10 w:full ">
                        <div class="w:full 	 justify-content:space-between	">
@@ -562,9 +551,17 @@ export const DynamicForm = (props: DynamicFormProps) => {
                           />
                         </div>
 
-                        </div>   
-                       </Show>
-                                    </div>
+                      </div>
+                      </div>
+
+
+                    </div>   
+                       
+                   </div>
+
+ 
+                    
+                                
 
                 </>
               )}
@@ -574,7 +571,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
         
 
           <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
-            <div
+
+
+            {/* old code for tabs */}
+            {/* <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
                   dataSource: tabs,
@@ -582,13 +582,19 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   scrollByContent: true,
                   showNavButtons: true,
                   selectedIndex: 0,
+                  
                   onItemClick(e) {
                     setActiveTab(e.itemData as string);
                   },
                 });
                 onCleanup(() => tabsInstance.dispose());
               }}
-            />
+              
+            /> */}
+            <TableTabs  tabs={tabs} setActiveTab={setActiveTab}/>
+
+        
+          
 
             <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
               {(group) => {
