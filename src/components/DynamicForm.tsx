@@ -467,6 +467,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
     />
   </div>
 
+
+
   return (
       <RepeaterContext.Provider value={[record.vertex, ...useContext(RepeaterContext)]}><div
       ref={(el) => {
@@ -490,6 +492,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+
+                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                        <div class="w:full 	 justify-content:space-between	">
 
                     
                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
@@ -545,6 +550,14 @@ export const DynamicForm = (props: DynamicFormProps) => {
                           />
                         </div>
 
+                      </div>                  </div>
+
+
+                        </div>   
+                       
+                                    </div>
+
+
                         </div>   
                     
                                     </div>
@@ -557,6 +570,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
         
 
           <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
+
+
+            {/* old code for tabs */}
             <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
@@ -565,13 +581,18 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   scrollByContent: true,
                   showNavButtons: true,
                   selectedIndex: 0,
+                  
                   onItemClick(e) {
                     setActiveTab(e.itemData as string);
                   },
                 });
                 onCleanup(() => tabsInstance.dispose());
               }}
+              
             />
+
+        
+          
 
             <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
               {(group) => {
