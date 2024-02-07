@@ -465,6 +465,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
     />
   </div>
 
+
+
   return (
       <RepeaterContext.Provider value={[record.vertex, ...useContext(RepeaterContext)]}><div
       ref={(el) => {
@@ -488,8 +490,17 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     style={{"max-width": "100%"}}
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+<<<<<<< Updated upstream
                     <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                         <div class="w:full 	 justify-content:space-between	">
+=======
+
+                    
+                       <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                       <div class=" p:10 w:full ">
+                       <div class="w:full 	 justify-content:space-between	">
+
+>>>>>>> Stashed changes
                           <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
                           <Show when={props.importExportButtons ?? true}>
                             <div class="flex  gap:10 jc:end ">
@@ -538,13 +549,24 @@ export const DynamicForm = (props: DynamicFormProps) => {
                             txnId={record.txnId}
                           />
                         </div>
+<<<<<<< Updated upstream
                       </div>                  </div>
+=======
+
+                        </div>   
+                       
+                                    </div>
+
+>>>>>>> Stashed changes
                 </>
               )}
             </For>
           </Show>
 
           <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
+
+
+            {/* old code for tabs */}
             <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
@@ -553,13 +575,18 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   scrollByContent: true,
                   showNavButtons: true,
                   selectedIndex: 0,
+                  
                   onItemClick(e) {
                     setActiveTab(e.itemData as string);
                   },
                 });
                 onCleanup(() => tabsInstance.dispose());
               }}
+              
             />
+
+        
+          
 
             <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
               {(group) => {

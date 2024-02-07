@@ -9,6 +9,8 @@ import { Record } from "../lib/Record";
 import { Vertex, resetDatabaseLogin, revertTransaction, setGraph } from "../lib/graph";
 import { isAdmin } from "../signals/common";
 import { WSEvent, WsContext } from "../utils/ws_events_dispatcher";
+import { LoginPage } from "../components/staticPages/LoginPage";
+import { Register } from "../components/staticPages/Registration";
 
 export const Login = (props: {}) => {
   const { setAlert } = useContext(AlertMessageContext);
@@ -54,25 +56,28 @@ export const Login = (props: {}) => {
   };
 
   return (
-    <AbstractSingleForm
-      formId={"LogIn"}
-      id="new"
-      config={config}
-      submitButton={
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-                props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
-              },
-            } as unknown as Vertex
-          }
-          onClick={onLoginClick}
-        />
-      }
-      // TODO: add dry option
-    />
+    // <AbstractSingleForm
+    //   formId={"LogIn"}
+    //   id="new"
+    //   config={config}
+    //   submitButton={
+    //     <GenericField
+    //       meta={
+    //         {
+    //           P: {
+    //             component: "Button",
+    //             props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
+    //           },
+    //         } as unknown as Vertex
+    //       }
+    //       onClick={onLoginClick}
+    //     />
+    //   }
+    //   importExportButtons={false}
+    //   isLoginRegister="Login"
+    //   // TODO: add dry option
+    // />
+    <LoginPage/>
   );
 };
 export const Logout = (props: {}) => {
@@ -135,25 +140,28 @@ export const SignUp = (props: {}) => {
   };
 
   return (
-    <AbstractSingleForm
-      formId={"SignUp"}
-      id="new"
-      config={config}
-      submitButton={
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
+    // <AbstractSingleForm
+    //   formId={"SignUp"}
+    //   id="new"
+    //   config={config}
+    //   importExportButtons={false}
+    //   isLoginRegister={"Register"}
+    //   submitButton={
+    //     <GenericField
+    //       meta={
+    //         {
+    //           P: {
+    //             component: "Button",
 
-                props: { stylingMode: "contained", width: "120", type: "success", text: "Register" },
-              },
-            } as unknown as Vertex
-          }
-          onClick={onSignupClick}
-        />
-      }
-      // TODO: add dry option
-    />
+    //             props: { stylingMode: "contained", width: "120", type: "success", text: "Register" },
+    //           },
+    //         } as unknown as Vertex
+    //       }
+    //       onClick={onSignupClick}
+    //     />
+    //   }
+    //   // TODO: add dry option
+    // />
+    <Register/>
   );
 };
