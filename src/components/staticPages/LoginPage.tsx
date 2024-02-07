@@ -4,7 +4,9 @@ import  logo from "../../../assests/signup/logo.png"
 export const LoginPage = () => {
     return (
       <div class="rel bg:#fff8f8 p:40 h:full w:full">
+      <div class="flex justify-content:center	">
       <img src={logo} alt="logo" class="w:200@md h:40@md  w:150 h:30" />
+      </div>
 
         <div class="mt:120@md mt:80 f:30 f:serif flex justify-content:center ">
           Welcome!
