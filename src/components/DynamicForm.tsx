@@ -494,8 +494,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   >
                     {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
 
-                    <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
-                        <div class="w:full 	 justify-content:space-between	">
+                   
 
                     
                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
@@ -551,9 +550,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                           />
                         </div>
 
-                      </div>
-                      </div>
-
+                    
 
                     </div>   
                        
