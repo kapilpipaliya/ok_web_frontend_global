@@ -1307,7 +1307,7 @@ export const PageDesignerDragAndDrop = () => {
 
   setClassName(activeTab()===tabs[0]?mobileClass:webClass)
  
- }, activeTab());
+ });
 
 
  return (
