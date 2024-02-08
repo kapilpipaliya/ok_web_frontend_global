@@ -3,7 +3,7 @@ import { For, createSignal } from "solid-js";
 
 interface TableTabProps{
   tabs:string[];
-  setActiveTab:(tab:string)=>string
+  setActiveTab?:(tab:string)=>string
 }
 
 
@@ -23,7 +23,10 @@ export function TableTabs(props: TableTabProps){
   <div id={`tabletab`+`${item}`} class={"px:20 f:sans f:15 cursor:pointer " }
      
   onClick={(event)=>{
-    props.setActiveTab(item as string)
+    if(props.setActiveTab){
+      props.setActiveTab(item as string)
+    }
+    
     
     const x = document.getElementById(currentTab());
     

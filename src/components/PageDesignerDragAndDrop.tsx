@@ -55,6 +55,8 @@ import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
 import {selectedLayout, setSelectedLayout} from "../pages/PageView"
 import {FormGroupProperties} from "../pages/FormsAdmin";
 
+import { TableTabs } from "./TableTabs";
+
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
  if (propVertexes.vertexes) {
@@ -1293,6 +1295,21 @@ export const PageDesignerDragAndDrop = () => {
    setSelectedColl({vertexId: -1});
   })
  })
+
+ const [className,setClassName]=createSignal("overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem")
+ const mobileClass="overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem"
+ const webClass="border:1|solid|blue-60 m:1rem"
+ const tabs=["Mobile Preview","Web Preview"]
+
+ const [activeTab,setActiveTab]=createSignal(tabs[0]);
+
+ createEffect(() => {
+
+  setClassName(activeTab()===tabs[0]?mobileClass:webClass)
+ 
+ });
+
+
  return (
   <div class="flex">
    <div class="border:1|solid|blue-60 p:10 m:5 flex:col">
@@ -1306,14 +1323,12 @@ export const PageDesignerDragAndDrop = () => {
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
-    <div class={"text:center mb:12"} onClick={rerender}>Mobile Preview</div>
-    <div class="overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem">
-     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
+   <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
+   
+    <div class={className() as string}>
+    <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
     </div>
-    <div class={"text:center mb:12"} onClick={rerender}>Web Preview</div>
-    <div class="border:1|solid|blue-60 m:1rem">
-     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
-    </div>
+   
    </div>
 
    <div class="border:1|solid|blue-60 p:10 m:5">
