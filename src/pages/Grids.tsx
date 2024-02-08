@@ -176,22 +176,22 @@ export const DataGrid = (props: DataGridProps) => {
     getCoreRowModel: getCoreRowModel(),
   })
 
-  const calculateRowStyle = (index: any) => {
-    return {
-      background: index.index % 2 === 0 ? "white" : "#e1dfdf",
-    };
-  };
+  // const calculateRowStyle = (index: any) => {
+  //   return {
+  //     background: index.index % 2 === 0 ? "white" : "#e1dfdf",
+  //   };
+  // };
   return (
     <div class="py:5">
-      <div class="p-2">
-        <table class="w:full">
-          <thead>
+      <div class="p:2 " >
+        <table class="w:full  bg:#f0f7fe " >
+          <thead class="b:1  ">
             <For each={table.getHeaderGroups()}>
               {headerGroup => (
-                <tr class="p:10 text:center">
+                <tr class="p:10   text:center h:50  ">
                   <For each={headerGroup.headers}>
                     {header => (
-                      <th>
+                      <th class="w:10% ">
                         {header.isPlaceholder
                           ? null
                           : flexRender(
@@ -205,12 +205,13 @@ export const DataGrid = (props: DataGridProps) => {
               )}
             </For>
           </thead>
-          <tbody>
+          <tbody class="bx:1">
             <For each={table.getRowModel().rows}>
               {(row) => (
                 <tr
-                  style={calculateRowStyle(row)}
-                  class="p-10 text-center"
+                 
+                  class="h:50 text:center f:sans bg:white bb:0.5"
+                  
                 >
                   <For each={row.getVisibleCells()}>
                     {cell => (
@@ -249,14 +250,19 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 
   return (
     <>
-      <div>
+      <div class="flex justify-content:right	">
         <GenericField
           meta={
             {
               P: {
                 component: "Button",
                 [IdAttr]: "meta",
-                props: {},
+                props: {
+                  class:"bg:blue bg:rgb(24,98,234):hover text-fill:white ",
+                  icon:"add",
+                  
+                 
+                },
               },
             } as unknown as Vertex
           }
