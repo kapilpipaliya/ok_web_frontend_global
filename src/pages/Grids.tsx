@@ -155,7 +155,9 @@ export const DataGrid = (props: DataGridProps) => {
     footer: '',
     cell: info => 
       // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
-      <button onClick={()=>{
+      {return props.tableId==='Page'?  <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>:<button onClick={()=>{
+        // if(props.tableId==='Page')
+        //     return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
         if(rowId()===null){
           setRowId(info.row.original.id);
         }
@@ -179,7 +181,7 @@ export const DataGrid = (props: DataGridProps) => {
         
       }} class="text-fill:rgb(35,106,239) font:semibold		"><Icon icon="tabler:edit" class="color:blue"/>Edit</button>
     
-  });
+  }});
   tableColumns.push({
     accessorKey: 'Delete',
     header: '',
