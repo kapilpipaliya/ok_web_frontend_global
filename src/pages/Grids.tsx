@@ -1,6 +1,7 @@
 // Comment This Lines in web build
 import { Link, useNavigate, useParams } from "@solidjs/router";
 import {
+  CellContext,
   ColumnDef,
   createSolidTable,
   flexRender,
@@ -13,7 +14,7 @@ import {
   createSignal,
   onCleanup,
   splitProps,
-  useContext
+  useContext, Switch, Match
 } from "solid-js";
 import {
   Id,
@@ -32,7 +33,7 @@ import {
   collectionNameDisplayExpr,
   selectedValue
 } from "../components/input/SelectInputField";
-import { FormMetaData, PageContext, getFormApiFromForm } from "../lib/Record";
+import {FormMetaData, PageContext, getFormApiFromForm, FieldAttribute} from "../lib/Record";
 import { getChildVertexes, getSelectionOptions } from "../lib/Traverse";
 import { deleteVertex, findVertexByLabelAndUniqueId } from "../lib/Vertex";
 import { AttrsTableData } from "../lib/api";
@@ -81,6 +82,35 @@ export const DataGrid = (props: DataGridProps) => {
   };
 
   const tableColumns = [] as ColumnDef<any>[];
+  const SelectValue = (props: {attribute: FieldAttribute, info: CellContext<any,any>}) => {
+    const vertex = selectedValue(
+      {
+        P: props.attribute,
+      } as unknown as Vertex,
+      props.info.row.original,
+    );
+    if (vertex[0]) {
+      return getSelectionOptions([graph.vertexes[vertex[0]]], props.attribute.props?.displayExpr || collectionNameDisplayExpr(props.attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
+    }
+    return "";
+  }
+  const TagValue = (props: {attribute: FieldAttribute, info: CellContext<any,any>}) => {
+    const vertex = selectedValue(
+      {
+        P: props.attribute,
+      } as unknown as Vertex,
+      props.info.row.original,
+    );
+    if (vertex) {
+      const textArray = [];
+      for (const v of vertex) {
+        const text = getSelectionOptions([graph.vertexes[v]], props.attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
+        textArray.push(text);
+      }
+      return textArray.join(', ');
+    }
+    return "";
+  }
   for (const attribute of formNew!.attributes) {
     const column = { ...attribute } as unknown as ColumnDef<any>;
     if (attribute.component === "Table") continue;
@@ -91,38 +121,23 @@ export const DataGrid = (props: DataGridProps) => {
     // column.accessorFn = row => row.lastName;
     column.id = attribute.name;
     column.cell = info => {
-      if (attribute.component === "SelectBox" && !attribute.props?.items) {
-        const vertex = selectedValue(
-          {
-            P: attribute,
-          } as unknown as Vertex,
-          info.row.original,
-        );
-        if (vertex[0]) {
-          return getSelectionOptions([graph.vertexes[vertex[0]]], attribute.props?.displayExpr || collectionNameDisplayExpr(attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
-        }
-        return "";
-      }
+       return <Switch>
+        <Match when={attribute.component === "SelectBox" && !attribute.props?.items}>
+          <SelectValue attribute={attribute} info={info}/>
+        </Match>
 
-      if (attribute.component === "TagBox" && !attribute.props?.items) {
-        const vertex = selectedValue(
-          {
-            P: attribute,
-          } as unknown as Vertex,
-          info.row.original,
-        );
-        if (vertex) {
-          const textArray = [];
-          for (const v of vertex) {
-            const text = getSelectionOptions([graph.vertexes[v]], attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
-            textArray.push(text);
-          }
-          return textArray.join(', ');
-        }
-        return "";
+        <Match when={attribute.component === "TagBox" && !attribute.props?.items}>
+          <TagValue attribute={attribute} info={info}/>
+        </Match>
 
-      }
-      return <i>{info.getValue<string>()}</i>;
+        <Match when={attribute.component === "CheckBox"}>
+              <span>{info.getValue() ? 'true' : ''}</span>
+        </Match>
+
+        <Match when={true}>
+          <i>{info.getValue<string>()}</i>
+        </Match>
+      </Switch>
     };
     // @ts-ignore
     column.header = (info) => capitalizeFirstLetter(info.column.columnDef.displayName || info.column.columnDef.name);
