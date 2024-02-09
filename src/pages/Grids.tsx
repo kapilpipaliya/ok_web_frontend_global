@@ -156,8 +156,6 @@ export const DataGrid = (props: DataGridProps) => {
     cell: info => 
       // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
       {return props.tableId==='Page'?  <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>:<button onClick={()=>{
-        // if(props.tableId==='Page')
-        //     return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
         if(rowId()===null){
           setRowId(info.row.original.id);
         }
