@@ -176,11 +176,6 @@ export const DataGrid = (props: DataGridProps) => {
     getCoreRowModel: getCoreRowModel(),
   })
 
-  // const calculateRowStyle = (index: any) => {
-  //   return {
-  //     background: index.index % 2 === 0 ? "white" : "#e1dfdf",
-  //   };
-  // };
   return (
     <div class="py:5">
       <div class="p:2 " >
@@ -210,8 +205,7 @@ export const DataGrid = (props: DataGridProps) => {
               {(row) => (
                 <tr
                  
-                  class="h:50 text:center f:sans bg:white bb:0.5"
-                  
+                  class={`h:50 text:center f:sans bb:0.5 bg:${row.index % 2 === 0 ? "white" : "gray-5"}`}
                 >
                   <For each={row.getVisibleCells()}>
                     {cell => (
