@@ -40,6 +40,7 @@ import { AttrsTableData } from "../lib/api";
 import { AttrsAdminTableData } from "../lib/apiAdmin";
 import { capitalizeFirstLetter, isNumber } from "../utils/utils";
 import { WsContext } from "../utils/ws_events_dispatcher";
+import { AbstractSingleForm } from "../components/DynamicForm";
 
 
 interface DataGridProps {
@@ -82,6 +83,7 @@ export const DataGrid = (props: DataGridProps) => {
   };
 
   const tableColumns = [] as ColumnDef<any>[];
+  const [rowId,setRowId]=createSignal(null);
   const SelectValue = (props: {attribute: FieldAttribute, info: CellContext<any,any>}) => {
     const vertex = selectedValue(
       {
@@ -151,15 +153,38 @@ export const DataGrid = (props: DataGridProps) => {
     accessorKey: 'Edit',
     header: '',
     footer: '',
-    cell: info => {
-      return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
-    }
+    cell: info => 
+      // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
+      <button onClick={()=>{
+        if(rowId()===null){
+          setRowId(info.row.original.id);
+        }
+        else if(rowId()===info.row.original.id){
+          setRowId(null);
+        }
+        else{
+          setRowId(null);
+          setRowId(info.row.original.id)
+        }
+       
+
+        let gridElement=document.getElementById(`grid${info.row.id}`)
+        let editElement=document.getElementById(`edit${rowId()}`)
+       
+        if(editElement){
+          gridElement?.after(editElement)
+          editElement?.scrollIntoView(false)
+        }
+        
+        
+      }} class="text-fill:rgb(35,106,239) font:semibold		"><Icon icon="tabler:edit" class="color:blue"/>Edit</button>
+    
   });
   tableColumns.push({
     accessorKey: 'Delete',
     header: '',
     footer: '',
-    cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}><Icon icon="fluent:delete-12-regular" />Delete</button>
+    cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)} class="text-fill:red font:semibold	" ><Icon icon="fluent:delete-12-regular" class="color:red"/>Delete</button>
   });
   console.log(tableColumns)
 
@@ -193,6 +218,7 @@ export const DataGrid = (props: DataGridProps) => {
 
   return (
     <div class="py:5">
+      
       <div class="p:2 " >
         <table class="w:full  bg:#f0f7fe " >
           <thead class="b:1  ">
@@ -211,32 +237,66 @@ export const DataGrid = (props: DataGridProps) => {
                       </th>
                     )}
                   </For>
+                 
+                  
                 </tr>
+                
               )}
             </For>
           </thead>
           <tbody class="bx:1">
+         
             <For each={table.getRowModel().rows}>
               {(row) => (
                 <tr
-                 
+                 id={`grid${row.id}`}
                   class={`h:50 text:center f:sans bb:0.5 bg:${row.index % 2 === 0 ? "white" : "gray-5"}`}
                 >
                   <For each={row.getVisibleCells()}>
                     {cell => (
                       <td>
+                        
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext()
                         )}
                       </td>
+                      
                     )}
+                    
                   </For>
+                 
                 </tr>
               )}
+               
             </For>
+            <Show when={rowId()!=null}>
+            <tr id={`edit${rowId()}`}>
+                
+              <td colSpan={"100%"} >
+                
+                    <div class="">
+                     
+                    <AbstractSingleForm
+                      formId={props.tableId}
+                      id={rowId() as unknown as string}
+                      // @ts-ignore
+                      config={{}}
+                      showMainFieldsOnly={true}
+                      importExportButtons={false}
+                  />
+                 
+                    </div>
+                
+             </td>
+                 
+            </tr>
+            </Show>
+          
+            
           </tbody>
         </table>
+       
       </div>
     </div>
   );
