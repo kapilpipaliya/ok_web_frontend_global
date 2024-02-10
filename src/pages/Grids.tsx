@@ -43,6 +43,7 @@ import { WsContext } from "../utils/ws_events_dispatcher";
 import { AbstractSingleForm } from "../components/DynamicForm";
 
 
+
 interface DataGridProps {
   tableId: string;
 }
@@ -171,7 +172,7 @@ export const DataGrid = (props: DataGridProps) => {
         let gridElement=document.getElementById(`grid${info.row.id}`)
         let editElement=document.getElementById(`edit${rowId()}`)
        
-        if(editElement){
+        if(editElement && gridElement){
           gridElement?.after(editElement)
           editElement?.scrollIntoView(false)
         }
@@ -284,6 +285,7 @@ export const DataGrid = (props: DataGridProps) => {
                       config={{}}
                       showMainFieldsOnly={true}
                       importExportButtons={false}
+                      doMount={false}
                   />
                  
                     </div>
