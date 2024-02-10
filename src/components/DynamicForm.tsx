@@ -270,6 +270,7 @@ export interface DynamicFormProps {
   showMainFieldsOnly?: boolean;
   showSubmitButtonOnTop?: boolean;
   isLoginRegister?:string;
+  doMount?:boolean
 }
 
 function getTabsWidth(group: Vertex[]) {
@@ -298,7 +299,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
   onMount(() => {
     // @ts-ignore
-    divRef()?.querySelector?.("input")?.focus();
+    if(props.doMount===null || props.doMount!==false)
+      divRef()?.querySelector?.("input")?.focus();
   });
 
   let validationGroup: dxValidationGroup;
