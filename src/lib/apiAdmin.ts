@@ -5,6 +5,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   User: {
     title: "User",
     name: "User",
+    isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "email", component: "TextBox" },
@@ -21,16 +22,19 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   Perm: {
     title: "Perm",
     name: "Perm",
+    isInlineEditable: true,
     attributes: [{ name: "name", component: "TextBox" }],
   },
   Role: {
     title: "Role",
     name: "Role",
+    isInlineEditable: true,
     attributes: [{ name: "name", component: "TextBox" }],
   },
   Dashboard: {
     title: "Dashboards",
     name: "Dashboard",
+    isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "description", component: "TextArea" },

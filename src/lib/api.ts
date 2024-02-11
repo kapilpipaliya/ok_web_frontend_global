@@ -259,6 +259,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   DataType: {
     title: "DataType",
     name: "DataType",
+    isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
       {
@@ -275,6 +276,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   CompCategory: {
     title: "Component Category",
     name: "CompCategory",
+    isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "description", component: "TextArea" },
@@ -283,6 +285,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   Comp: {
     title: "Component",
     name: "Comp",
+    isInlineEditable: true,
     attributes: [
       {
         name: "category",
@@ -427,6 +430,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   CollCategory: {
     title: "Collection Category",
     name: "CollCategory",
+    isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "description", component: "TextArea" },
@@ -497,6 +501,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       { name: "description", component: "TextArea" },
       { name: "public", component: "CheckBox" },
+      { name: "isInlineEditable", component: "CheckBox", },
       // { name: "supportCustomFields", component: "CheckBox" },
       // { name: "searchOnly", component: "CheckBox" },
       // { name: "supportDeletedRecordSearch", component: "CheckBox" },

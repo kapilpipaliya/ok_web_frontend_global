@@ -134,7 +134,7 @@ export const DataGrid = (props: DataGridProps) => {
         </Match>
 
         <Match when={attribute.component === "CheckBox"}>
-              <span>{info.getValue() ? 'true' : ''}</span>
+              <span>{info.getValue() === true ? 'true' : info.getValue() === false ? 'false' : ''}</span>
         </Match>
 
         <Match when={true}>
@@ -156,7 +156,7 @@ export const DataGrid = (props: DataGridProps) => {
     footer: '',
     cell: info => 
       // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
-      {return props.tableId==='Page'?  <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>:<button onClick={()=>{
+      {return !formNew.isInlineEditable?  <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>:<button onClick={()=>{
         if(rowId()===null){
           setRowId(info.row.original.id);
         }
@@ -176,9 +176,9 @@ export const DataGrid = (props: DataGridProps) => {
           gridElement?.after(editElement)
           editElement?.scrollIntoView(false)
         }
-        
-        
-      }} class="text-fill:rgb(35,106,239) font:semibold		"><Icon icon="tabler:edit" class="color:blue"/>Edit</button>
+
+
+      }} class="text-fill:#337ab7"><Icon icon="tabler:edit" class="color:blue"/>Edit</button>
     
   }});
   tableColumns.push({

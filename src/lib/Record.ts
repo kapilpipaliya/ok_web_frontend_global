@@ -55,6 +55,7 @@ export interface FieldAttribute {
 
 export interface FormMetaData {
  name: string; // required to create new vertex
+ isInlineEditable?: boolean;
  title: string;
  attributes: FieldAttribute[];
  isRealTime?: boolean;
@@ -213,10 +214,8 @@ export const getFormApiFromForm = (formId: string): { error: string; form?: Form
   return {
    error: "",
    form: {
+    ...coll.P,
     attributes: attrsResult.attrs!,
-    [IdAttr]: coll.P[IdAttr],
-    title: coll.P.title,
-    isRealTime: coll.P.isRealTime,
     // collection used in Grid, its same like id key
     // @ts-ignore
     collection: coll.P[IdAttr]
