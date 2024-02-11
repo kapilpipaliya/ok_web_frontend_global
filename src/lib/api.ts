@@ -1,6 +1,6 @@
 import { FieldAttribute, FormMetaData, IFormContext } from "./Record";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
-import {AttrsAdminTableData} from "./apiAdmin";
+import { AttrsAdminTableData } from "./apiAdmin";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
@@ -77,7 +77,7 @@ const collectionAttr = [
         name: "value",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
-         "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
       },
     ],
   },
@@ -125,9 +125,9 @@ const collectionAttr = [
   }
 ] as FieldAttribute[];
 let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
-for (let i = 0; i <5; i++) {
-  const attributes =  JSON.parse(JSON.stringify(collectionAttr));
-  childAttrs.attributes =  attributes;
+for (let i = 0; i < 5; i++) {
+  const attributes = JSON.parse(JSON.stringify(collectionAttr));
+  childAttrs.attributes = attributes;
   childAttrs = attributes[attributes.length - 1];
 }
 
@@ -205,7 +205,7 @@ const pageAttr = [
         name: "value",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
-            "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
       },
     ],
   },
@@ -249,9 +249,9 @@ const pageAttr = [
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];
 // Keep max level 10, else the page navigation is very slow. because revert transaction on record takes so much time.
-for (let i = 0; i <10; i++) {
-  const attributes =  JSON.parse(JSON.stringify(pageAttr));
-  pageChildAttrs.attributes =  attributes;
+for (let i = 0; i < 10; i++) {
+  const attributes = JSON.parse(JSON.stringify(pageAttr));
+  pageChildAttrs.attributes = attributes;
   pageChildAttrs = attributes[attributes.length - 1];
 }
 export const AdminAttrKeys = ["User", "Perm", "Role", "Dashboard", "Import", "Nav"];
@@ -262,11 +262,15 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "name", component: "TextBox" },
       {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
+      {
         name: "default",
         displayName: "Default Component",
         component: "SelectBox",
         props: {
-          
+
           collection: "g:'Comp'",
         },
       },
@@ -278,6 +282,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "description", component: "TextArea" },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
     ],
   },
   Comp: {
@@ -288,11 +296,15 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-          
+
           collection: "g:'CompCategory'",
           parentLabel: "CompCategory",
           inward: true,
         },
+      },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
       },
       { name: "name", component: "TextBox" },
       {
@@ -312,7 +324,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "DataType",
         component: "TagBox",
         props: {
-          
+
           collection: "g:'DataType'",
           inward: true,
           parentLabel: "DataType",
@@ -324,7 +336,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "CheckBox",
       },
       { name: "description", component: "TextArea" },
-     // TODO: add validation, duplicate row with same name is not allowed.
+      // TODO: add validation, duplicate row with same name is not allowed.
       {
         name: "Prop",
         component: "Table",
@@ -342,7 +354,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'DataType'",
               onchange: '["Comp",null]',
             },
@@ -352,7 +364,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              
+
               collection: "->$0DataType->$0Comp",
             },
           },
@@ -430,6 +442,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "name", component: "TextBox" },
       { name: "description", component: "TextArea" },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
     ],
   },
   // TODO: Coll has only one Attr. Add validation for that.
@@ -445,8 +461,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         },
       },
       {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
+      {
         name: "name",
         component: "TextBox",
+
         props: {
           validationRules: [
             {
@@ -489,7 +510,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          
+
           collection: "g:'Dashboard'",
           parentLabel: "Dashboard",
           inward: true,
@@ -505,7 +526,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Primary Key",
         component: "TagBox",
         props: {
-          
+
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -516,7 +537,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "nameKey",
         component: "TagBox",
         props: {
-          
+
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -571,14 +592,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 ((
 (((`,
                     },
-                  },{
+                  }, {
                     name: "layout",
                     displayName: "Layout",
                     component: "DropDownBoxTreeView",
                     props: {
                       // collection: "g:'DataType'",
                     },
-                  },{
+                  }, {
                     name: "field",
                     displayName: "Field",
                     component: "SelectBox",
@@ -629,75 +650,75 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 displayName: "Value",
                 meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
                 component:
-                 `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
+                  `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
               }
             ]
           }
         ],
       },
 
-/*      {
-        name: "Child",
-        component: "Table",
-        tab: "Child",
-        attributes: [
-          {
-            name: "coll",
-            component: "SelectBox",
-            props: {
-              
-              collection: "g:'Coll'",
-            },
-          },
-          {
-            name: "displayName",
-            component: "TextBox",
-            props: {
-              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-            }
-          },
-          {
-            name: "name",
-            component: "TextBox",
-          },
-          {
-            name: "tab",
-            component: "SelectBox",
-            props: {
-              
-              collection: "-CollChild->$0Tab",
-            },
-          },
-          {
-            name: "group",
-            component: "SelectBox",
-            props: {
-              collection: "-CollChild->$0Group",
-              
-            },
-          },
-          {
-            name: "Prop",
-            displayName: "Property",
-            component: "Table",
-            attributes: [
-              {
-                name: "name",
-                component: "SelectBox",
-                props: {
-                  displayExpr: "::'P.name'",
-                  collection: "g:'Comp[Table]'->$0Prop",
+      /*      {
+              name: "Child",
+              component: "Table",
+              tab: "Child",
+              attributes: [
+                {
+                  name: "coll",
+                  component: "SelectBox",
+                  props: {
+                    
+                    collection: "g:'Coll'",
+                  },
                 },
-              },
-              {
-                name: "value",
-                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-              },
-            ],
-          },
-        ],
-      },*/
+                {
+                  name: "displayName",
+                  component: "TextBox",
+                  props: {
+                    onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+                  }
+                },
+                {
+                  name: "name",
+                  component: "TextBox",
+                },
+                {
+                  name: "tab",
+                  component: "SelectBox",
+                  props: {
+                    
+                    collection: "-CollChild->$0Tab",
+                  },
+                },
+                {
+                  name: "group",
+                  component: "SelectBox",
+                  props: {
+                    collection: "-CollChild->$0Group",
+                    
+                  },
+                },
+                {
+                  name: "Prop",
+                  displayName: "Property",
+                  component: "Table",
+                  attributes: [
+                    {
+                      name: "name",
+                      component: "SelectBox",
+                      props: {
+                        displayExpr: "::'P.name'",
+                        collection: "g:'Comp[Table]'->$0Prop",
+                      },
+                    },
+                    {
+                      name: "value",
+                      meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+                      component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                    },
+                  ],
+                },
+              ],
+            },*/
       {
         name: "Transform",
         component: "Table",
@@ -707,7 +728,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Coll'",
             },
           },
@@ -750,7 +771,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Role'",
             },
           },
@@ -791,6 +812,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
     attributes: [
       { name: "email", component: "TextBox" },
       {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
+      {
         name: "pass",
         component: "TextBox",
         props: { mode: "password" },
@@ -808,6 +833,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "TextBox",
         props: { mode: "password" },
       },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
     ],
   },
   Page: {
@@ -820,6 +849,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         props: {
           onchange: '{"new": ["name","id"]}',
         },
+      },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
       },
       {
         name: "name",

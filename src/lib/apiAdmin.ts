@@ -16,17 +16,27 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
           collection: "g:'Role'",
         },
       },
+      {
+        name: "isInlineEditable",
+        component: "CheckBox",
+      },
     ],
   },
   Perm: {
     title: "Perm",
     name: "Perm",
-    attributes: [{ name: "name", component: "TextBox" }],
+    attributes: [{ name: "name", component: "TextBox" }, {
+      name: "isInlineEditable",
+      component: "CheckBox",
+    },],
   },
   Role: {
     title: "Role",
     name: "Role",
-    attributes: [{ name: "name", component: "TextBox" }],
+    attributes: [{ name: "name", component: "TextBox" }, {
+      name: "isInlineEditable",
+      component: "CheckBox",
+    },],
   },
   Dashboard: {
     title: "Dashboards",
@@ -159,7 +169,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
             name: "func",
             component: "SelectBox",
             props: {
-              
+
               items: `Table
 Form
 Url`,
@@ -169,7 +179,7 @@ Url`,
             name: "Coll",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Coll'",
             },
           },
@@ -177,7 +187,7 @@ Url`,
             name: "Form",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Form'",
             },
           },
@@ -238,7 +248,7 @@ Url`,
                 name: "func",
                 component: "SelectBox",
                 props: {
-                  
+
                   items: `Table
 Form
 Url`,
@@ -248,7 +258,7 @@ Url`,
                 name: "Coll",
                 component: "SelectBox",
                 props: {
-                  
+
                   collection: "g:'Coll'",
                 },
               },
@@ -256,7 +266,7 @@ Url`,
                 name: "Form",
                 component: "SelectBox",
                 props: {
-                  
+
                   collection: "g:'Form'",
                 },
               },
@@ -317,7 +327,7 @@ Url`,
                     name: "func",
                     component: "SelectBox",
                     props: {
-                      
+
                       items: `Table
 Form
 Url`,
@@ -327,7 +337,7 @@ Url`,
                     name: "Coll",
                     component: "SelectBox",
                     props: {
-                      
+
                       collection: "g:'Coll'",
                     },
                   },
@@ -335,7 +345,7 @@ Url`,
                     name: "Form",
                     component: "SelectBox",
                     props: {
-                      
+
                       collection: "g:'Form'",
                     },
                   },
@@ -396,7 +406,7 @@ Url`,
                         name: "func",
                         component: "SelectBox",
                         props: {
-                          
+
                           items: `Table
 Form
 Url`,
@@ -406,7 +416,7 @@ Url`,
                         name: "Coll",
                         component: "SelectBox",
                         props: {
-                          
+
                           collection: "g:'Coll'",
                         },
                       },
@@ -414,7 +424,7 @@ Url`,
                         name: "Form",
                         component: "SelectBox",
                         props: {
-                          
+
                           collection: "g:'Form'",
                         },
                       },
