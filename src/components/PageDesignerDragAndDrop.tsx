@@ -10,7 +10,7 @@ import {
  Record,
  setValueGlobal
 } from "../lib/Record";
-import {batch, createEffect, createSignal, For, on, onCleanup, onMount, Show, useContext} from "solid-js";
+import {batch, createEffect, createSignal, For, on, onCleanup, Switch, Match, onMount, Show, useContext} from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
 // Comment This Lines in web build
 import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
@@ -54,6 +54,8 @@ import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
 import {selectedLayout, setSelectedLayout} from "../pages/PageView"
 import {FormGroupProperties} from "../pages/FormsAdmin";
+import {dndzone} from "./solid_dnd_directive";
+console.log(dndzone)
 
 import { TableTabs } from "./TableTabs";
 
@@ -1296,75 +1298,71 @@ export const PageDesignerDragAndDrop = () => {
   })
  })
 
- const [className,setClassName]=createSignal("overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem")
- const mobileClass="overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem"
- const webClass="border:1|solid|blue-60 m:1rem"
- const tabs=["Mobile Preview","Web Preview"]
+  const [className,setClassName]=createSignal("overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem")
+  const mobileClass="overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem"
+  const webClass="border:1|solid|blue-60 m:1rem"
+  const tabs=["Mobile Preview","Web Preview"]
 
- const [activeTab,setActiveTab]=createSignal(tabs[0]);
+  const [activeTab,setActiveTab]=createSignal(tabs[0]);
 
- createEffect(() => {
+  createEffect(() => {
+    setClassName(activeTab()===tabs[0]?mobileClass:webClass)
+  });
 
-  setClassName(activeTab()===tabs[0]?mobileClass:webClass)
- 
- });
-
-
- return (
-  <div class="flex">
-   <div class="border:1|solid|blue-60 p:10 m:5 flex:col">
-    <div class="mb:10">Components:</div>
-    <OneComponents/>
-
-    <div class="bt:1|solid|gray py:10 mt:5 flex-grow:1">
+ const [leftColumns, setLeftColumns] = createSignal( ['components', 'collection'].map((column) => ({ id: column, name: column })));
+ const [rightColumns, setRightColumns] = createSignal( ['layout', 'properties', 'form'].map((column) => ({ id: column, name: column })));
+ const Column = (props: {type: string}) => <>
+  <div class="border:1|solid|blue-60 p:10 m:5">
+   <Switch>
+    <Match when={props.type === 'components'}>
+     <div class="mb:10">Components:</div>
+     <OneComponents/>
+    </Match>
+    <Match when={props.type === 'collection'}>
      <div class="mb:10">Collection Fields:</div>
      <TwoCollections/>
-    </div>
-   </div>
-
-   <div class="border:1|solid|blue-60 p:10 m:5 min-w:400 flex-grow:1">
-   <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
-   
-    <div class={className() as string}>
-    <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
-    </div>
-   
-   </div>
-
-   <div class="border:1|solid|blue-60 p:10 m:5">
-
-
-    <div class="flex-grow:1">
+    </Match>
+    <Match when={props.type === 'layout'}>
      <div class={"mb:12"}>Layout</div>
      <FourLayout/>
-    </div>
-    <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
-     <div class={"mb:12 flex ai:center justify-content:space-between"}>
-      <span>Properties</span>
-      <Show when={selectedLayout().vertexId !== -1}>
-       <GenericField
-         meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
-         onClick={deleteLayout}
-       />
-      </Show>
+    </Match>
+    <Match when={props.type === 'properties'}>
+     <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
+      <div class="mb:12 flex ai:center justify-content:space-between">
+       <span>Properties</span>
+       <Show when={selectedLayout().vertexId !== -1}>
+        <GenericField
+          meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
+          onClick={deleteLayout}/>
+       </Show>
+      </div>
+      <FiveProperties/>
      </div>
-     <FiveProperties/>
-    </div>
-
-    <div class="bt:1|solid|gray p:10 mt:5 ">
-     <AbstractSingleForm
-       formId={"Page"}
-       id={params.id}
-       config={pageConfig}
-       showMainFieldsOnly={true}
-       importExportButtons={false}
-       // TODO: add dry option
-     />
-    </div>
-
-   </div>
-
+    </Match>
+    <Match when={props.type === 'form'}>
+     <AbstractSingleForm formId={"Page"} id={params.id} config={pageConfig} showMainFieldsOnly={true}
+                         importExportButtons={false}/>
+    </Match>
+   </Switch>
   </div>
- );
-};
+ </>
+
+ return <div class="flex">
+  <div class="flex-col"
+       use:dndzone={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={e => setLeftColumns(e.detail.items)} on:finalize={e => setLeftColumns(e.detail.items)}
+  ><For each={leftColumns()}>{column => <Column type={column.id}/>}</For></div>
+  <div class="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
+    <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
+
+    <div class={className() as string}>
+      <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
+    </div>
+  </div>
+
+  <div class="flex-col"
+       use:dndzone={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={e => setRightColumns(e.detail.items)} on:finalize={e => setRightColumns(e.detail.items)}
+
+  ><For each={rightColumns()}>{column => <Column type={column.id}/>}</For></div>
+  </div>
+  };
 
