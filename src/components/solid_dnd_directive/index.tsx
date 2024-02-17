@@ -1,5 +1,5 @@
-import { dndzone as dndActionZone, setDebugMode, overrideItemIdKeyNameBeforeInitialisingDndZones as overrideId, Options } from "svelte-dnd-action";
-import {createEffect, createRenderEffect, onMount, onCleanup} from "solid-js";
+import { dndzone as dndActionZone, setDebugMode, SOURCES, TRIGGERS, overrideItemIdKeyNameBeforeInitialisingDndZones as overrideId, Options } from "svelte-dnd-action";
+import {createEffect, createRenderEffect, onMount, onCleanup, createSignal} from "solid-js";
 import {createFlipper, Flipper} from "./flip";
 export {
   TRIGGERS,
@@ -30,39 +30,106 @@ type SolidOptions = {
   dropTargetClasses?: string[] | (() => string[]);
 };
 
-export function dndzone(node: HTMLElement, optionsGetter: () => SolidOptions) {
-  const options = optionsGetter();
-  validateOptions(options);
-  const optionsAsGetters = addDefaultOptions(optionsToGetters(options));
-  const {flipDurationMs: getFlipDurationMs} = optionsAsGetters;
-  const getItems = optionsAsGetters.items as () => Array<Record<string, any>>;
-  let flipper: (Flipper | undefined) = undefined;
+export function createDragHandle() {
+  const [dragDisabled, setDragDisabled] = createSignal(true);
+  function dragHandleZone(node: HTMLElement, optionsGetter: () => SolidOptions) {
+    const options = optionsGetter();
+    validateOptions(options);
+    const optionsAsGetters = addDefaultOptions(optionsToGetters(options));
+    const {flipDurationMs: getFlipDurationMs} = optionsAsGetters;
+    const getItems = optionsAsGetters.items as () => Array<Record<string, any>>;
+    let flipper: (Flipper | undefined) = undefined;
 
-  onMount(() => {
-    const {update, destroy} = dndActionZone(node, gettersToOptions(optionsAsGetters));
-    onCleanup(destroy);
-    createEffect(function updateOptionsAndTriggerFlip() {
-      update(gettersToOptions(optionsAsGetters));
-      flipper?.flip(getItems().map(item => item[ID_KEY]));
+    const zone = dndActionZone(node, gettersToOptions(optionsAsGetters));
+    const {update, destroy} = zone;
+
+    onMount(() => {
+      onCleanup(destroy);
+      createEffect(function updateOptionsAndTriggerFlip() {
+        update({...gettersToOptions(optionsAsGetters),
+          // added drag handle:
+          dragDisabled: dragDisabled()
+        });
+        flipper?.flip(getItems().map(item => item[ID_KEY]));
+      });
     });
-  });
-  createEffect(function updateFlipperWhenFipDurationChanges() {
-    flipper = createFlipper(node, getFlipDurationMs())
-  })
-  createRenderEffect(function storeFlipInformation() {
-    function adaptConsider() {
-      flipper?.read(getItems().map(item => item[ID_KEY]));
-    }
-    function adaptFinalize() {
-      flipper?.read(getItems().map(item => item[ID_KEY]));
-    }
-    node.addEventListener('consider', adaptConsider);
-    node.addEventListener('finalize', adaptFinalize);
-    onCleanup(() => {
-      node.removeEventListener('consider', adaptConsider);
-      node.removeEventListener('finalize', adaptFinalize)
+    createEffect(function updateFlipperWhenFipDurationChanges() {
+      flipper = createFlipper(node, getFlipDurationMs())
     })
-  });
+    createRenderEffect(function storeFlipInformation() {
+      function adaptConsider(e: any) {
+        flipper?.read(getItems().map(item => item[ID_KEY]));
+
+        // added drag handle:
+        const {
+          info: { source, trigger },
+        } = e.detail;
+        // Ensure dragging is stopped on drag finish via keyboard
+        if (source === SOURCES.KEYBOARD && trigger === TRIGGERS.DRAG_STOPPED) {
+          setDragDisabled(true);
+        }
+      }
+
+      function adaptFinalize(e: any) {
+        flipper?.read(getItems().map(item => item[ID_KEY]));
+
+        // added drag handle:
+        const {
+          info: { source },
+        } = e.detail;
+        // Ensure dragging is stopped on drag finish via pointer (mouse, touch)
+        if (source === SOURCES.POINTER) {
+          setDragDisabled(true);
+        }
+      }
+
+      node.addEventListener('consider', adaptConsider);
+      node.addEventListener('finalize', adaptFinalize);
+      onCleanup(() => {
+        node.removeEventListener('consider', adaptConsider);
+        node.removeEventListener('finalize', adaptFinalize)
+      })
+    });
+  }
+
+  function dragHandle(node: HTMLElement) {
+    function startDrag(e: Event) {
+      // preventing default to prevent lag on touch devices (because of the browser checking for screen scrolling)
+      e.preventDefault();
+      setDragDisabled(false);
+    }
+    function stopDrag(e: any) {
+      setDragDisabled(true);
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Enter" || e.key === " ") setDragDisabled(false);
+    }
+
+    createEffect(() => {
+      node.tabIndex = dragDisabled() ? 0 : -1;
+      node.style.cursor = dragDisabled() ? "grab" : "grabbing";
+    });
+
+    createRenderEffect(function () {
+      node.addEventListener("mousedown", startDrag);
+      node.addEventListener("touchstart", startDrag);
+      node.addEventListener("keydown", handleKeyDown);
+      node.addEventListener("mouseup", stopDrag);
+      node.addEventListener("touchend", stopDrag);
+      onCleanup(() => {
+        node.removeEventListener("mousedown", startDrag);
+        node.removeEventListener("touchstart", startDrag);
+        node.removeEventListener("keydown", handleKeyDown);
+        node.removeEventListener("mouseup", stopDrag);
+        node.removeEventListener("touchend", stopDrag);
+      })
+    });
+  }
+  return {
+    dragHandleZone,
+    dragHandle,
+    dragDisabled
+  };
 }
 
 /* Helper functions */
@@ -94,3 +161,6 @@ function addDefaultOptions(optionGetters: Record<string, () => any>) {
 function gettersToOptions(optionGetters: Record<string, () => any>) : Options {
   return Object.keys(optionGetters).reduce((res:Record<string, any>, optName) => {res[optName] = optionGetters[optName](); return res;}, {}) as Options;
 }
+
+// copied drag handle code from:
+// https://github.com/isaacHagoel/svelte-dnd-action/issues/251

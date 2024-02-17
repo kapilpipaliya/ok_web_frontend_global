@@ -54,8 +54,7 @@ import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
 import {selectedLayout, setSelectedLayout} from "../pages/PageView"
 import {FormGroupProperties} from "../pages/FormsAdmin";
-import {dndzone} from "./solid_dnd_directive";
-console.log(dndzone)
+import {createDragHandle} from "./solid_dnd_directive";
 
 import { TableTabs } from "./TableTabs";
 
@@ -1311,46 +1310,63 @@ export const PageDesignerDragAndDrop = () => {
 
  const [leftColumns, setLeftColumns] = createSignal( ['components', 'collection'].map((column) => ({ id: column, name: column })));
  const [rightColumns, setRightColumns] = createSignal( ['layout', 'properties', 'form'].map((column) => ({ id: column, name: column })));
- const Column = (props: {type: string}) => <>
-  <div class="border:1|solid|blue-60 p:10 m:5">
-   <Switch>
-    <Match when={props.type === 'components'}>
-     <div class="mb:10">Components:</div>
-     <OneComponents/>
-    </Match>
-    <Match when={props.type === 'collection'}>
-     <div class="mb:10">Collection Fields:</div>
-     <TwoCollections/>
-    </Match>
-    <Match when={props.type === 'layout'}>
-     <div class={"mb:12"}>Layout</div>
-     <FourLayout/>
-    </Match>
-    <Match when={props.type === 'properties'}>
-     <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
-      <div class="mb:12 flex ai:center justify-content:space-between">
-       <span>Properties</span>
-       <Show when={selectedLayout().vertexId !== -1}>
-        <GenericField
-          meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
-          onClick={deleteLayout}/>
-       </Show>
+
+ const oneComponents = <OneComponents/>;
+ const twoCollections = <TwoCollections/>;
+ const fourLayout = <FourLayout/>;
+ const fiveProperties = <FiveProperties/>;
+ const abstractSingleForm = <AbstractSingleForm formId={"Page"} id={params.id} config={pageConfig} showMainFieldsOnly={true}
+                                                importExportButtons={false}/>;
+ const { dragHandleZone: dragHandleZone1, dragHandle: dragHandle1 } = createDragHandle();
+ const { dragHandleZone: dragHandleZone2, dragHandle: dragHandle2 } = createDragHandle();
+ // @ts-ignore
+ dragHandleZone1, dragHandleZone2, dragHandle1, dragHandle2
+
+ const Column = (props: {type: string, dragHandler: (node: HTMLElement) => void}) => {
+  const dragHandle = (el:HTMLElement) => props.dragHandler(el)
+  return <>
+   <div class="border:1|solid|blue-60 p:10 m:5"
+   >
+    <Switch>
+     <Match when={props.type === 'components'}>
+      <div class="mb:10" use:dragHandle>Components:</div>
+      {oneComponents}
+     </Match>
+     <Match when={props.type === 'collection'}>
+      <div class="mb:10" use:dragHandle>Collection Fields:</div>
+      {twoCollections}
+     </Match>
+     <Match when={props.type === 'layout'}>
+      <div class={"mb:12"} use:dragHandle>Layout</div>
+      {fourLayout}
+     </Match>
+     <Match when={props.type === 'properties'}>
+      <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
+       <div class="mb:12 flex ai:center justify-content:space-between">
+        <span use:dragHandle>Properties</span>
+        <Show when={selectedLayout().vertexId !== -1}>
+         <GenericField
+           meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
+           onClick={deleteLayout}/>
+        </Show>
+       </div>
+       {fiveProperties}
       </div>
-      <FiveProperties/>
-     </div>
-    </Match>
-    <Match when={props.type === 'form'}>
-     <AbstractSingleForm formId={"Page"} id={params.id} config={pageConfig} showMainFieldsOnly={true}
-                         importExportButtons={false}/>
-    </Match>
-   </Switch>
-  </div>
- </>
+     </Match>
+     <Match when={props.type === 'form'}>
+      <span  use:dragHandle>Form:</span>
+      {abstractSingleForm}
+     </Match>
+    </Switch>
+   </div>
+  </>;
+ }
 
  return <div class="flex">
   <div class="flex-col"
-       use:dndzone={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={e => setLeftColumns(e.detail.items)} on:finalize={e => setLeftColumns(e.detail.items)}
-  ><For each={leftColumns()}>{column => <Column type={column.id}/>}</For></div>
+       // @ts-ignore
+       use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
+  ><For each={leftColumns()}>{column => <Column dragHandler={dragHandle1} type={column.id}/>}</For></div>
   <div class="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
     <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
 
@@ -1360,9 +1376,10 @@ export const PageDesignerDragAndDrop = () => {
   </div>
 
   <div class="flex-col"
-       use:dndzone={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={e => setRightColumns(e.detail.items)} on:finalize={e => setRightColumns(e.detail.items)}
+       // @ts-ignore
+       use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
 
-  ><For each={rightColumns()}>{column => <Column type={column.id}/>}</For></div>
+  ><For each={rightColumns()}>{column => <Column dragHandler={dragHandle2} type={column.id}/>}</For></div>
   </div>
   };
 
