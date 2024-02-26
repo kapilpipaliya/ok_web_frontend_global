@@ -70,6 +70,7 @@ import {FormGroupProperties} from "../pages/FormsAdmin";
 import {createDragHandle} from "./solid_dnd_directive";
 
 import { TableTabs } from "./TableTabs";
+import { Icon } from "@iconify-icon/solid";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -596,6 +597,7 @@ export const PageDesignerDragAndDrop = () => {
    // TODO: Dont display "Form" Component
    child: { collection: "->CompCategoryComp" }
   });
+  console.log(data, "data")
   const boxStyle: JSX.CSSProperties = {
    border: '2px solid black',
    margin: '20px',
@@ -607,6 +609,7 @@ export const PageDesignerDragAndDrop = () => {
    "font-size": '20px',
    "font-weight": 'bold',
    "margin-bottom": '10px',
+   "margin-top": '10px',
   };
 
   const listStyle: JSX.CSSProperties = {
@@ -614,19 +617,75 @@ export const PageDesignerDragAndDrop = () => {
    padding: '0',
   };
 
+  const listBoxStyle: JSX.CSSProperties = {
+    display: "grid",
+    "grid-template-columns": "repeat(2, 1fr)",
+     "gap": "10px"
+   };
+
   const listItemStyle = {
    margin: '5px 0',
   };
+
+  const smallBoxStyle: JSX.CSSProperties ={
+    "background-color" : "white",
+    "box-shadow": "0 3px 10px rgb(0 0 0 / 0.2)",
+    height: "100px",
+    display: "flex",
+    "flex-direction": "column",
+    "align-items": "center",
+   "justify-content": "center",
+    width: "100%",
+    padding: "10px",
+  }
+
+  let ICon = [
+    {
+      catogery: "ActionSheet",
+      icon:  <Icon icon="ic:baseline-search" width="24" height="24" />
+    },
+    {
+      catogery: "Button",
+      icon:  <Icon icon="mdi:button" width="24" height="24" />
+
+    },
+    {
+      catogery: "ContextMenu",
+      icon:  <Icon icon="ep:menu" width="24" height="24" />
+    },
+    {
+      catogery: "DropDownButton",
+      icon:  <Icon icon="material-symbols:menu" width="24" height="24" />
+    },
+    {
+      catogery: "Resizable",
+      icon:  <Icon icon="material-symbols:photo-size-select-small" width="24" height="24" />
+    },
+    {
+      catogery: "SpeedDialAction",
+      icon:  <Icon icon="material-symbols:speed" width="24" height="24" />
+    }
+  ]
+
+  const getIcon = (name: any) =>{
+    const mainData =  ICon.find((item) =>item.catogery === name);
+    return mainData ? mainData.icon : "";
+  }
   return     <div>
    <div class="h:30rem overflow-y:auto">
     <For each={data}>
      {(category) => (
        <div>
         <div style={titleStyle}>{category.name}</div>
-        <ul style={listStyle}>
+        <ul style={category.name === "Action" ? listBoxStyle : listStyle} >
          <For each={category.children}>
           {(child) => (
-            <li style={listItemStyle}>{child.name}</li>
+            <>
+           {category.name === "Action" ? <div style={smallBoxStyle}>
+              <li>{getIcon(child?.name)}</li>
+              <li style={listItemStyle}>{child?.name}</li>
+            </div> : <li style={listItemStyle}>{child?.name}</li>}
+            </>
           )}
          </For>
         </ul>
