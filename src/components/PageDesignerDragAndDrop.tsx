@@ -10,7 +10,20 @@ import {
  Record,
  setValueGlobal
 } from "../lib/Record";
-import {batch, createEffect, createSignal, For, on, onCleanup, Switch, Match, onMount, Show, useContext} from "solid-js";
+import {
+ batch,
+ createEffect,
+ createSignal,
+ For,
+ on,
+ onCleanup,
+ Switch,
+ Match,
+ onMount,
+ Show,
+ useContext,
+ JSX
+} from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
 // Comment This Lines in web build
 import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
@@ -575,6 +588,52 @@ export const PageDesignerDragAndDrop = () => {
      });
     }}
    />
+  </div>
+ }
+ const OneComponents0 = () => {
+  const data = getTreeData({
+   collection: "g:'CompCategory'",
+   // TODO: Dont display "Form" Component
+   child: { collection: "->CompCategoryComp" }
+  });
+  const boxStyle: JSX.CSSProperties = {
+   border: '2px solid black',
+   margin: '20px',
+   padding: '10px',
+   'box-sizing': 'border-box',
+  };
+
+  const titleStyle: JSX.CSSProperties = {
+   "font-size": '20px',
+   "font-weight": 'bold',
+   "margin-bottom": '10px',
+  };
+
+  const listStyle: JSX.CSSProperties = {
+   "list-style-type": 'none',
+   padding: '0',
+  };
+
+  const listItemStyle = {
+   margin: '5px 0',
+  };
+  return     <div>
+   <div class="h:30rem overflow-y:auto">
+    <For each={data}>
+     {(category) => (
+       <div>
+        <div style={titleStyle}>{category.name}</div>
+        <ul style={listStyle}>
+         <For each={category.children}>
+          {(child) => (
+            <li style={listItemStyle}>{child.name}</li>
+          )}
+         </For>
+        </ul>
+       </div>
+     )}
+    </For>
+   </div>
   </div>
  }
  const TwoCollections = () => {
@@ -1311,7 +1370,8 @@ export const PageDesignerDragAndDrop = () => {
  const [leftColumns, setLeftColumns] = createSignal( ['components', 'collection'].map((column) => ({ id: column, name: column })));
  const [rightColumns, setRightColumns] = createSignal( ['layout', 'properties', 'form'].map((column) => ({ id: column, name: column })));
 
- const oneComponents = <OneComponents/>;
+ const oneComponents0 = <OneComponents0/>;
+ // const oneComponents = <OneComponents/>;
  const twoCollections = <TwoCollections/>;
  const fourLayout = <FourLayout/>;
  const fiveProperties = <FiveProperties/>;
@@ -1330,7 +1390,8 @@ export const PageDesignerDragAndDrop = () => {
     <Switch>
      <Match when={props.type === 'components'}>
       <div class="mb:10" use:dragHandle>Components:</div>
-      {oneComponents}
+      {oneComponents0}
+      {/*{oneComponents}*/}
      </Match>
      <Match when={props.type === 'collection'}>
       <div class="mb:10" use:dragHandle>Collection Fields:</div>
