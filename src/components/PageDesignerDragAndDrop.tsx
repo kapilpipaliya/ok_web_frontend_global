@@ -677,14 +677,14 @@ export const PageDesignerDragAndDrop = () => {
      {(category) => (
        <div>
         <div style={titleStyle}>{category.name}</div>
-        <ul style={category.name === "Action" ? listBoxStyle : listStyle} >
+        <ul style={{...listBoxStyle, ...listStyle}} >
          <For each={category.children}>
           {(child) => (
             <>
-           {category.name === "Action" ? <div style={smallBoxStyle}>
+            <div style={smallBoxStyle}>
               <li>{getIcon(child?.name)}</li>
               <li style={listItemStyle}>{child?.name}</li>
-            </div> : <li style={listItemStyle}>{child?.name}</li>}
+            </div>
             </>
           )}
          </For>
