@@ -642,7 +642,7 @@ export const PageDesignerDragAndDrop = () => {
   let ICon = [
     {
       catogery: "ActionSheet",
-      icon:  <Icon icon="ic:baseline-search" width="24" height="24" />
+      icon:  <Icon icon="lucide:file-spreadsheet" width="24" height="24" />
     },
     {
       catogery: "Button",
@@ -664,10 +664,187 @@ export const PageDesignerDragAndDrop = () => {
     {
       catogery: "SpeedDialAction",
       icon:  <Icon icon="material-symbols:speed" width="24" height="24" />
+    },
+    {
+      catogery: "Bullet",
+      icon:  <Icon icon="fluent:text-bullet-list-square-16-filled" width="24" height="24" />
+    },
+    {
+      catogery: "Chart",
+      icon:  <Icon icon="simple-icons:soundcharts" width="24" height="24" />
+    },
+    {
+      catogery: "Funnel",
+      icon:  <Icon icon="ph:funnel" width="24" height="24" />
+    },
+    {
+      catogery: "PieChart",
+      icon:  <Icon icon="fa6-solid:chart-pie" width="24" height="24" />
+    },
+    {
+      catogery: "PolarChart",
+      icon:  <Icon icon="ph:chart-polar-fill" width="24" height="24" />
+    },
+    {
+      catogery: "Sankey",
+      icon:  <Icon icon="carbon:sankey-diagram" width="24" height="24" />
+    },
+    {
+      catogery: "SparkLine",
+      icon:  <Icon icon="fa6-solid:wand-magic-sparkles" width="24" height="24" />
+    },
+    {
+      catogery: "TreeMap",
+      icon:  <Icon icon="fluent:data-treemap-20-regular" width="24" height="24" />
+    },
+    {
+      catogery: "PopOver",
+      icon:  <Icon icon="entypo:popup" width="24" height="24" />
+    },
+    {
+      catogery: "Popup",
+      icon:  <Icon icon="arcticons:hanping-popup" width="24" height="24" />
+    },
+    {
+      catogery: "Toast",
+      icon:  <Icon icon="material-symbols-light:toast-outline" width="24" height="24" />
+    },
+    {
+      catogery: "Tooltip",
+      icon:  <Icon icon="tabler:tooltip" width="24" height="24" />
+    },
+    {
+      catogery: "Autocomplete",
+      icon:  <Icon icon="fluent-mdl2:completed" width="24" height="24" />
+    },
+    {
+      catogery: "ButtonGroup",
+      icon:  <Icon icon="tdesign:button" width="24" height="24" />
+    },
+    {
+      catogery: "Calendar",
+      icon:  <Icon icon="bx:calendar" width="24" height="24" />
+    },
+    {
+      catogery: "CheckBox",
+      icon:  <Icon icon="tabler:checkbox" width="24" height="24" />
+    },
+    {
+      catogery: "ColorBox",
+      icon:  <Icon icon="mdi:color" width="24" height="24" />
+    },
+    {
+      catogery: "DateBox",
+      icon:  <Icon icon="circum:calendar-date" width="24" height="24" />
+    },
+    {
+      catogery: "DateRangeBox",
+      icon:  <Icon icon="bi:calendar4-range" width="24" height="24" />
+    },
+    {
+      catogery: "DateTimeBox",
+      icon:  <Icon icon="formkit:datetime"  width="24" height="24" />
+    },
+    {
+      catogery: "Diagram",
+      icon:  <Icon icon="la:project-diagram" width="24" height="24" />
+    },
+    {
+      catogery: "DropDownBox",
+      icon:  <Icon icon="gridicons:dropdown" width="24" height="24" />
+    },
+    {
+      catogery: "FieldSetLabelLeft",
+      icon:  <Icon icon="mdi:focus-field" width="24" height="24" />
+    },
+    {
+      catogery: "FileManager",
+      icon:  <Icon icon="arcticons:simplefilemanager" width="24" height="24" />
+    },
+    {
+      catogery: "FileUploader",
+      icon:  <Icon icon="arcticons:custom-uploader" width="24" height="24" />
+    },
+    {
+      catogery: "FilterBuilder",
+      icon:  <Icon icon="lets-icons:filter" width="24" height="24" />
+    },
+    {
+      catogery: "Float",
+      icon:  <Icon icon="mdi-light:format-float-center" width="24" height="24" />
+    },
+    {
+      catogery: "Form",
+      icon:  <Icon icon="lets-icons:form-duotone" width="24" height="24" />
+    },
+    {
+      catogery: "Gantt",
+      icon:  <Icon icon="mdi:chart-gantt" width="24" height="24" />
+    },
+    {
+      catogery: "HtmlEditor",
+      icon:  <Icon icon="openmoji:code-editor" width="24" height="24" />
+    },
+    {
+      catogery: "Int",
+      icon:  <Icon icon="mdi-light:format-float-center" width="24" height="24" /> //icons added
+    },
+    {
+      catogery: "Lookup",
+      icon:  <Icon icon="arcticons:lookup" width="24" height="24" />
+    },
+    {
+      catogery: "NumberBox",
+      icon:  <Icon icon="emojione-monotone:input-numbers" width="24" height="24" />
+    },
+    {
+      catogery: "RadioGroup",
+      icon:  <Icon icon="fluent:radio-button-16-filled" width="24" height="24" />
+    },
+    {
+      catogery: "RangeSelector",
+      icon:  <Icon icon="memory:range" width="24" height="24" />
+    },
+    {
+      catogery: "RangeSlider",
+      icon:  <Icon icon="ph:sliders-horizontal-light" width="24" height="24" />
+    },
+    {
+      catogery: "Scheduler",
+      icon:  <Icon icon="arcticons:smsscheduler" width="24" height="24" />
+    },
+    {
+      catogery: "Slider",
+      icon:  <Icon icon="radix-icons:slider" width="24" height="24" />
+    },
+    {
+      catogery: "Sortable",
+      icon:  <Icon icon="oui:sortable" width="24" height="24" />
+    },
+    {
+      catogery: "Switch",
+      icon:  <Icon icon="material-symbols:switch" width="24" height="24" />
+    },
+    {
+      catogery: "Table",
+      icon:  <Icon icon="tabler:table" width="24" height="24" />
+    },
+    {
+      catogery: "TextArea",
+      icon:  <Icon icon="bi:textarea" width="24" height="24" />
+    },
+    {
+      catogery: "TextBox",
+      icon:  <Icon icon="ph:textbox" width="24" height="24" />
+    },
+    {
+      catogery: "ScrollView",
+      icon:  <Icon icon="mdi:scroll" width="24" height="24" />
     }
   ]
 
   const getIcon = (name: any) =>{
+    console.log(name)
     const mainData =  ICon.find((item) =>item.catogery === name);
     return mainData ? mainData.icon : "";
   }
