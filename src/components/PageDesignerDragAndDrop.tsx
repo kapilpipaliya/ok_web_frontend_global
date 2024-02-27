@@ -1245,10 +1245,13 @@ export const PageDesignerDragAndDrop = () => {
      const data = getLayoutTreeData();
      setState(data);
    });
-   // TODO: Make Tree from data. all nodes should be expanded.
+   const [hoverId, setHoverId] = createSignal<Id>(-1);
    const TreeView = (props: { item: Item }) => {
      return (
-       <div class="">
+       <>
+        <div class={props.item.id === hoverId() ? 'bg:lightgray' : ''} onMouseOver={(e) => {
+         e.stopPropagation();
+         setHoverId(props.item.id)}} >
          <Show when={props.item.children.length}>
            <Show
              when={props.item.expanded}
@@ -1260,14 +1263,15 @@ export const PageDesignerDragAndDrop = () => {
            </Show>
          </Show>
          {props.item.name}
+        </div>
          <Show when={props.item.expanded && props.item.children.length > 0}>
-           <ul class="p:10 bg:lightgray:hover">
+           <ul class="p:10">
              <For each={props.item?.children}>
                {(item) => <TreeView item={item} />}
              </For>
            </ul>
          </Show>
-       </div>
+       </>
      );
    };
 
