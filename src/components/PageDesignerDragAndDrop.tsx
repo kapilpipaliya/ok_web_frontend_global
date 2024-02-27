@@ -1027,6 +1027,17 @@ export const PageDesignerDragAndDrop = () => {
    />
   </div>
  }
+ const FourLayout1 = () => {
+  const data = getLayoutTreeData();
+  // TODO: Make Tree from data. all nodes should be expanded.
+  return     <div>Layer2
+   <div
+    //class="max-h:30rem"
+
+
+   />
+  </div>
+ }
 
 
 
@@ -1433,6 +1444,7 @@ export const PageDesignerDragAndDrop = () => {
  // const oneComponents = <OneComponents/>;
  const twoCollections = <TwoCollections/>;
  const fourLayout = <FourLayout/>;
+ const fourLayout1 = <FourLayout1/>;
  const fiveProperties = <FiveProperties/>;
  const abstractSingleForm = <AbstractSingleForm formId={"Page"} id={params.id} config={pageConfig} showMainFieldsOnly={true}
                                                 importExportButtons={false}/>;
@@ -1459,6 +1471,7 @@ export const PageDesignerDragAndDrop = () => {
      <Match when={props.type === 'layout'}>
       <div class={"mb:12"} use:dragHandle>Layout</div>
       {fourLayout}
+      {fourLayout1}
      </Match>
      <Match when={props.type === 'properties'}>
       <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
