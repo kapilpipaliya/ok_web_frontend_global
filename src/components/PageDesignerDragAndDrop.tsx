@@ -1246,23 +1246,23 @@ export const PageDesignerDragAndDrop = () => {
      setState(data);
    });
    // TODO: Make Tree from data. all nodes should be expanded.
-   const TreeView = ({ item }: { item: Item }) => {
+   const TreeView = (props: { item: Item }) => {
      return (
        <div class="">
-         <Show when={item.children.length}>
+         <Show when={props.item.children.length}>
            <Show
-             when={item.expanded}
+             when={props.item.expanded}
              fallback={
-               <button onClick={() => toggleExpand(item.id)}>- </button>
+               <button onClick={() => toggleExpand(props.item.id)}>- </button>
              }
            >
-             <button onClick={() => toggleExpand(item.id)}> +</button>
+             <button onClick={() => toggleExpand(props.item.id)}> +</button>
            </Show>
          </Show>
-         {item.name}
-         <Show when={item.expanded && item.children.length > 0}>
+         {props.item.name}
+         <Show when={props.item.expanded && props.item.children.length > 0}>
            <ul class="p:10 bg:lightgray:hover">
-             <For each={item?.children}>
+             <For each={props.item?.children}>
                {(item) => <TreeView item={item} />}
              </For>
            </ul>
