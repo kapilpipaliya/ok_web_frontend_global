@@ -1212,7 +1212,7 @@ export const PageDesignerDragAndDrop = () => {
  }
  const FourLayout1 = () => {
    const [state, setState] = createStore<Item[]>([]);
-     
+
    const toggleExpandRecursive = (items: Item[], itemId: number): any => {
     return items.map((item) => {
      return itemUpdate(item, itemId);
@@ -1231,7 +1231,7 @@ export const PageDesignerDragAndDrop = () => {
         return item;
       }
     }
-  
+
 
    const toggleExpand = (itemId: number) => {
      setState(
@@ -1246,26 +1246,37 @@ export const PageDesignerDragAndDrop = () => {
      setState(data);
    });
    const [hoverId, setHoverId] = createSignal<Id>(-1);
+   const [selectedId, setSelectedId] = createSignal<Id>(-1);
    const TreeView = (props: { item: Item }) => {
      return (
        <>
-        <div class={props.item.id === hoverId() ? 'bg:lightgray' : ''} onMouseOver={(e) => {
-         e.stopPropagation();
-         setHoverId(props.item.id)}} >
+        <div
+          draggable={true}
+          onDragStart={e=>{}}
+          class={props.item.id === selectedId()  ? "bg:lightblue" : props.item.id === hoverId() ? 'bg:lightgray' : ''}
+          onClick={e => {
+           setSelectedId(props.item.id);
+          }}
+         onMouseOver={(e) => {
+          setHoverId(props.item.id)}
+         }
+        >
          <Show when={props.item.children.length}>
+          <button onClick={(e) => {
+           e.stopPropagation();
+           toggleExpand(props.item.id)}}>
            <Show
              when={props.item.expanded}
-             fallback={
-               <button onClick={() => toggleExpand(props.item.id)}>- </button>
-             }
+             fallback="-"
            >
-             <button onClick={() => toggleExpand(props.item.id)}> +</button>
+            +
            </Show>
+          </button>
          </Show>
          {props.item.name}
         </div>
-         <Show when={props.item.expanded && props.item.children.length > 0}>
-           <ul class="p:10">
+        <Show when={props.item.expanded && props.item.children.length > 0}>
+         <ul class="p:10">
              <For each={props.item?.children}>
                {(item) => <TreeView item={item} />}
              </For>
@@ -1742,7 +1753,7 @@ export const PageDesignerDragAndDrop = () => {
  return <div class="flex">
   <div class="flex-col"
        // @ts-ignore
-       use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
+       //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
   ><For each={leftColumns()}>{column => <Column dragHandler={dragHandle1} type={column.id}/>}</For></div>
   <div class="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
     <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
@@ -1754,7 +1765,7 @@ export const PageDesignerDragAndDrop = () => {
 
   <div class="flex-col"
        // @ts-ignore
-       use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
+       //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
 
   ><For each={rightColumns()}>{column => <Column dragHandler={dragHandle2} type={column.id}/>}</For></div>
   </div>
