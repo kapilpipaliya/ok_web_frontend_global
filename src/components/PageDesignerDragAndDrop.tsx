@@ -844,7 +844,6 @@ export const PageDesignerDragAndDrop = () => {
   ]
 
   const getIcon = (name: any) =>{
-    console.log(name)
     const mainData =  ICon.find((item) =>item.catogery === name);
     return mainData ? mainData.icon : "";
   }
@@ -1204,17 +1203,81 @@ export const PageDesignerDragAndDrop = () => {
    />
   </div>
  }
- const FourLayout1 = () => {
-  const data = getLayoutTreeData();
-  // TODO: Make Tree from data. all nodes should be expanded.
-  return     <div>Layer2
-   <div
-    //class="max-h:30rem"
 
-
-   />
-  </div>
+ interface Item {
+   id: number;
+   name: string;
+   expanded: boolean;
+   children: Item[];
  }
+ const FourLayout1 = () => {
+   const [state, setState] = createStore<Item[]>([]);
+     
+   const toggleExpandRecursive = (items: Item[], itemId: number): any => {
+    return items.map((item) => {
+     return itemUpdate(item, itemId);
+    });
+  };
+
+    const itemUpdate = (item: Item, itemId: number) => {
+      if (item.id === itemId) {
+        return { ...item, expanded: !item.expanded };
+      } else if (item.children && item.children.length > 0) {
+        return {
+          ...item,
+          children: toggleExpandRecursive(item.children, itemId),
+        };
+      } else {
+        return item;
+      }
+    }
+  
+
+   const toggleExpand = (itemId: number) => {
+     setState(
+       state.map((item) => {
+        return itemUpdate(item, itemId);
+       })
+     );
+   };
+
+   createEffect(() => {
+     const data = getLayoutTreeData();
+     setState(data);
+   });
+   // TODO: Make Tree from data. all nodes should be expanded.
+   const TreeView = ({ item }: { item: Item }) => {
+     return (
+       <div class="">
+         <Show when={item.children.length}>
+           <Show
+             when={item.expanded}
+             fallback={
+               <button onClick={() => toggleExpand(item.id)}>- </button>
+             }
+           >
+             <button onClick={() => toggleExpand(item.id)}> +</button>
+           </Show>
+         </Show>
+         {item.name}
+         <Show when={item.expanded && item.children.length > 0}>
+           <ul class="p:10 bg:lightgray:hover">
+             <For each={item?.children}>
+               {(item) => <TreeView item={item} />}
+             </For>
+           </ul>
+         </Show>
+       </div>
+     );
+   };
+
+   return (
+     <>
+       <div>Layer2</div>
+       <For each={state}>{(item) => <TreeView item={item} />}</For>
+     </>
+   );
+ };
 
 
 
