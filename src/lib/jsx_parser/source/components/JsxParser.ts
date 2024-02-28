@@ -8,7 +8,7 @@ import { randomHash } from '../helpers/hash'
 import { parseStyle } from '../helpers/parseStyle'
 import { resolvePath } from '../helpers/resolvePath'
 import {JSX} from "solid-js";
-import {componentDrag, selectedLayout, setPropertyValueGlobal, sortChildren} from "../../../../components/PageDesignerDragAndDrop";
+import {componentDrag, setPropertyValueGlobal} from "../../../../components/PageDesignerDragAndDrop";
 import {addNewVertex, findVertexByLabelAndUniqueId, newVertex} from "../../../Vertex";
 import {getNewGraphId, graph, Vertex} from "../../../graph";
 import {setParentValue, setSelectionValue} from "../../../../components/input/SelectInputField";

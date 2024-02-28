@@ -6,9 +6,6 @@ import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {PageView} from "../components/input/GenaricField";
 import {graph} from "../lib/graph";
 
-export const [selectedLayout, setSelectedLayout] = createSignal({vertexId: -1, itemIndex: -1} as {vertexId: number, itemIndex?: number});
-
-
 export const PageView_ = (props: {id: string, count: number}) => {
     const {Ws} = useContext(WsContext);
     if (!props.id) return "Page ID not specified.";

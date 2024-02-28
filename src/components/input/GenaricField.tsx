@@ -25,7 +25,6 @@ import { Dynamic } from "solid-js/web";
 import {commitTxn, graph, IdAttr, revertTransaction, setGraph, Vertex} from "../../lib/graph";
 import { FormContext, getCollAttrComp, getCompProps, getRowProps, PageContext, Record } from "../../lib/Record";
 import {getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions} from "../../lib/Traverse";
-import { selectedLayout } from "../../pages/PageView";
 import { showNav } from "../../signals/common";
 import { getLastItem } from "../../utils/functions";
 import { getValueFromVertexOrKey, isObject } from "../../utils/utils";
@@ -35,6 +34,7 @@ import { DynamicComponent } from "../DynamicForm";
 import { mountComponent } from "./MountDevExtremeComp";
 import {componentDrag} from "../PageDesignerDragAndDrop";
 import {setParentValue} from "./SelectInputField";
+import {selectedId} from "../pageStore";
 const GlobalDragData = {} as {from: Vertex};
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -83,7 +83,7 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
           const componentProps = componentVertex ? getCompProps(componentVertex) : {};
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
-          if (selectedLayout().vertexId === item.id) {
+          if (selectedId() === item.id) {
             if (compProps.class) {
               compProps.class += ` b:red|1px|dashed`;
             } else {

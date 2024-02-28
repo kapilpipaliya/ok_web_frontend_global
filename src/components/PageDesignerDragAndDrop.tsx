@@ -65,12 +65,12 @@ import {TableInputField} from "./input/TableInputField";
 import {AttrsTableData} from "../lib/api";
 import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
-import {selectedLayout, setSelectedLayout} from "../pages/PageView"
 import {FormGroupProperties} from "../pages/FormsAdmin";
 import {createDragHandle} from "./solid_dnd_directive";
 
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
+import {hoverId, selectedId, setHoverId, setSelectedId} from "./pageStore";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -857,7 +857,7 @@ export const PageDesignerDragAndDrop = () => {
          <For each={category.children}>
           {(child) => (
             <>
-            <div style={smallBoxStyle}>
+            <div style={smallBoxStyle} draggable={true} onDragStart={()=>{}}>
               <li>{getIcon(child?.name)}</li>
               <li style={listItemStyle}>{child?.name}</li>
             </div>
@@ -1186,11 +1186,11 @@ export const PageDesignerDragAndDrop = () => {
          return;
         }
         batch(() => {
-         setSelectedLayout({vertexId: -1});
+         setSelectedId(-1);
          setSelectedComponent({vertexId: -1});
          setSelectedColl({vertexId: -1});
 
-         setSelectedLayout({vertexId: args.itemData!.id! as number, itemIndex: args.itemIndex});
+         setSelectedId(args.itemData!.id! as number);
          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[args.itemData!.id!]);
          setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
          const componentVertex = getComponentFromLayoutRow(args.itemData!.id!);
@@ -1245,8 +1245,6 @@ export const PageDesignerDragAndDrop = () => {
      const data = getLayoutTreeData();
      setState(data);
    });
-   const [hoverId, setHoverId] = createSignal<Id>(-1);
-   const [selectedId, setSelectedId] = createSignal<Id>(-1);
    const TreeView = (props: { item: Item }) => {
      return (
        <>
@@ -1306,9 +1304,9 @@ export const PageDesignerDragAndDrop = () => {
   }
 
   createEffect(on(selectedComponent, v => {
-   if (selectedLayout().vertexId && selectedLayout().vertexId !== -1 && selectedComponent() && selectedComponent().vertexId !== -1) {
+   if (selectedId() !== -1 && selectedComponent() && selectedComponent().vertexId !== -1) {
     const componentProps = getCompProps(graph.vertexes[selectedComponent().vertexId]);
-    const layoutPropRows = getRowProps(graph.vertexes[selectedLayout().vertexId]);
+    const layoutPropRows = getRowProps(graph.vertexes[selectedId()]);
     const layoutPropRow = Object.assign(componentProps, layoutPropRows);
     // set existing layout props
     setGraph('vertexes', vertexId, 'P', reconcile(layoutPropRow));
@@ -1319,9 +1317,9 @@ export const PageDesignerDragAndDrop = () => {
   }));
 
   const setPropertyValue = (meta: Vertex, data: Vertex, value: any, valueSet?: boolean) => {
-   if (selectedLayout().vertexId !== -1 && selectedComponent().vertexId !== -1) {
+   if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
     if (valueSet ?? true) setGraph('vertexes', data.id, 'P', meta.P.name, value);
-    return setPropertyValueGlobal(pageConfig[0].record.txnId, meta, graph.vertexes[selectedLayout().vertexId], graph.vertexes[selectedComponent().vertexId], value, valueSet);
+    return setPropertyValueGlobal(pageConfig[0].record.txnId, meta, graph.vertexes[selectedId()], graph.vertexes[selectedComponent().vertexId], value, valueSet);
    }
    return;
   }
@@ -1340,7 +1338,7 @@ export const PageDesignerDragAndDrop = () => {
   let prevTxnIndex = -1;
   const onRulesSubmit = () => {
    // hack to refresh the select fields. no option is refereshing the label.
-   setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
+   setGraph('vertexes', selectedId(), 'OUT', 'Rules', v => v ? [...v] : v);
    toggleRulesModal();
   }
   const onRulesCancel = () => {
@@ -1350,7 +1348,7 @@ export const PageDesignerDragAndDrop = () => {
   const onImportsSubmit = () => {
    layoutTreeViewInstance.option("items", getLayoutTreeData());
    // hack to refresh the select fields. no option is refereshing the label.
-   setGraph('vertexes', selectedLayout().vertexId, 'OUT', 'Rules', v => v ? [...v] : v);
+   setGraph('vertexes', selectedId(), 'OUT', 'Rules', v => v ? [...v] : v);
    toggleImportsModal();
   }
   const onImportsCancel = () => {
@@ -1427,7 +1425,7 @@ export const PageDesignerDragAndDrop = () => {
    })
 
    return <TableInputField meta={graph.vertexes[metaVertexId]}
-                           data={graph.vertexes[selectedLayout().vertexId!]}
+                           data={graph.vertexes[selectedId()!]}
                            txnId={pageConfig[0].record.txnId}
                            setValue={pageConfig[0].record.setValue}
                            isRealTime={false}  />
@@ -1451,7 +1449,7 @@ export const PageDesignerDragAndDrop = () => {
     {
      meta: { P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Import", type: "success", }}} as any,
      onClick: () => {
-      const jsxParser = new JsxParser({showWarnings: true, txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedLayout().vertexId]});
+      const jsxParser = new JsxParser({showWarnings: true, txnId: pageConfig[0].record.txnId, jsx: graph.vertexes[dataVertexId].P.jsx || '', parent: graph.vertexes[selectedId()]});
       jsxParser.render();
       layoutTreeViewInstance.option("items", getLayoutTreeData());
      }
@@ -1540,7 +1538,7 @@ export const PageDesignerDragAndDrop = () => {
    return <>
     <span>Collection:</span>
     <SelectInputField
-      data={graph.vertexes[selectedLayout().vertexId!]}
+      data={graph.vertexes[selectedId()!]}
       meta={collMetaVertex.vertexes![0]!}
       disabled={false}
       component={"SelectBox"}
@@ -1551,7 +1549,7 @@ export const PageDesignerDragAndDrop = () => {
     />
     <span>Data:</span>
     <SelectInputField
-      data={graph.vertexes[selectedLayout().vertexId!]}
+      data={graph.vertexes[selectedId()!]}
       meta={collMetaVertex.vertexes![1]!}
       disabled={false}
       component={"SelectBox"}
@@ -1562,7 +1560,7 @@ export const PageDesignerDragAndDrop = () => {
     />
     <span>Expression:</span>
     <GenericInputField
-      data={graph.vertexes[selectedLayout().vertexId!]}
+      data={graph.vertexes[selectedId()!]}
       meta={collMetaVertex.vertexes![2]!}
       disabled={false}
       component={"TextBox"}
@@ -1572,7 +1570,7 @@ export const PageDesignerDragAndDrop = () => {
   }
 
   return <>
-   <Show when={selectedLayout().vertexId !== -1}>
+   <Show when={selectedId() !== -1}>
     <GenericField
      meta={{ P: {component: "Button", props: { stylingMode: "contained", width: "120", text: "Rules" }}} as any}
      onClick={toggleRulesModal}
@@ -1589,7 +1587,7 @@ export const PageDesignerDragAndDrop = () => {
       vertex={graph.vertexes[vertexId]}
       setValue={setPropertyValue}
       setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) => setValueGlobal(pageConfig[0].record.txnId, attribute, vertex, data, Ws, pageConfig[0].record.isRealTime)}
-      selectedLayout={graph.vertexes[selectedLayout().vertexId]}
+      selectedLayout={graph.vertexes[selectedId()]}
     />
    </Show>
    <Show when={isRulesModalOpen()}>
@@ -1652,10 +1650,10 @@ export const PageDesignerDragAndDrop = () => {
   </>
  }
  const deleteLayout = () => {
-  if(selectedLayout().vertexId !== -1) {
-   const layoutVertexId = selectedLayout().vertexId;
+  if(selectedId() !== -1) {
+   const layoutVertexId = selectedId();
    batch(() => {
-    setSelectedLayout({vertexId: -1});
+    setSelectedId(-1);
     setSelectedComponent({vertexId: -1});
     setSelectedColl({vertexId: -1});
    })
@@ -1675,7 +1673,7 @@ export const PageDesignerDragAndDrop = () => {
  }
  onCleanup(() => {
   batch(() => {
-   setSelectedLayout({vertexId: -1});
+   setSelectedId(-1);
    setSelectedComponent({vertexId: -1});
    setSelectedColl({vertexId: -1});
   })
@@ -1732,7 +1730,7 @@ export const PageDesignerDragAndDrop = () => {
       <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
        <div class="mb:12 flex ai:center justify-content:space-between">
         <span use:dragHandle>Properties</span>
-        <Show when={selectedLayout().vertexId !== -1}>
+        <Show when={selectedId() !== -1}>
          <GenericField
            meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
            onClick={deleteLayout}/>
