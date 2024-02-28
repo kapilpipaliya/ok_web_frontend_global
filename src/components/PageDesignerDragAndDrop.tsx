@@ -1210,87 +1210,123 @@ export const PageDesignerDragAndDrop = () => {
    expanded: boolean;
    children: Item[];
  }
- const FourLayout1 = () => {
-   const [state, setState] = createStore<Item[]>([]);
 
-   const toggleExpandRecursive = (items: Item[], itemId: number): any => {
-    return items.map((item) => {
-     return itemUpdate(item, itemId);
-    });
+ const FourLayout1 = () => {
+  const [state, setState] = createStore<Item[]>([]);
+
+  const [draggedItemId, setDraggedItemId] = createSignal<number>(null);
+
+  const [indicatorPosition, setIndicatorPosition] = createSignal<'before' | 'after' | 'center' | null>(null);
+
+  const toggleExpandRecursive = (items: Item[], itemId: number): Item[] => {
+   return items.map((item) => {
+    return itemUpdate(item, itemId);
+   });
   };
 
-    const itemUpdate = (item: Item, itemId: number) => {
-      if (item.id === itemId) {
-        return { ...item, expanded: !item.expanded };
-      } else if (item.children && item.children.length > 0) {
-        return {
-          ...item,
-          children: toggleExpandRecursive(item.children, itemId),
-        };
-      } else {
-        return item;
-      }
-    }
+  const itemUpdate = (item: Item, itemId: number) => {
+   if (item.id === itemId) {
+    return { ...item, expanded: !item.expanded };
+   } else if (item.children && item.children.length > 0) {
+    return {
+     ...item,
+     children: toggleExpandRecursive(item.children, itemId),
+    };
+   } else {
+    return item;
+   }
+  };
 
+  const toggleExpand = (itemId: number) => {
+   setState(
+     state.map((item) => {
+      return itemUpdate(item, itemId);
+     })
+   );
+  };
 
-   const toggleExpand = (itemId: number) => {
-     setState(
-       state.map((item) => {
-        return itemUpdate(item, itemId);
-       })
-     );
-   };
+  createEffect(() => {
+   const data = getLayoutTreeData();
+   setState(data);
+  });
 
-   createEffect(() => {
-     const data = getLayoutTreeData();
-     setState(data);
-   });
-   const TreeView = (props: { item: Item }) => {
-     return (
-       <>
-        <div
-          draggable={true}
-          onDragStart={e=>{}}
-          class={props.item.id === selectedId()  ? "bg:lightblue" : props.item.id === hoverId() ? 'bg:lightgray' : ''}
-          onClick={e => {
-           setSelectedId(props.item.id);
-          }}
-         onMouseOver={(e) => {
-          setHoverId(props.item.id)}
-         }
-        >
-         <Show when={props.item.children.length}>
-          <button onClick={(e) => {
-           e.stopPropagation();
-           toggleExpand(props.item.id)}}>
-           <Show
-             when={props.item.expanded}
-             fallback="-"
-           >
-            +
-           </Show>
-          </button>
-         </Show>
-         {props.item.name}
-        </div>
-        <Show when={props.item.expanded && props.item.children.length > 0}>
-         <ul class="p:10">
-             <For each={props.item?.children}>
-               {(item) => <TreeView item={item} />}
-             </For>
-           </ul>
-         </Show>
-       </>
-     );
-   };
+  const handleDragStart = (itemId: number) => {
+   setDraggedItemId(itemId);
+  };
 
+  const handleDragOver = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
+   e.preventDefault();
+   setIndicatorPosition(position);
+  };
+
+  const handleDragEnter = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
+   e.preventDefault();
+   setIndicatorPosition(position);
+  };
+
+  const handleDragLeave = () => {
+   setIndicatorPosition(null);
+  };
+
+  const handleDrop = () => {
+   // Handle drop action here
+   setIndicatorPosition(null);
+  };
+
+  const TreeView = (props: { item: Item }) => {
    return (
      <>
-       <div>Layer2</div>
-       <For each={state}>{(item) => <TreeView item={item} />}</For>
+      <div
+        draggable={true}
+        onDragStart={() => handleDragStart(props.item.id)}
+        onDragOver={(e) => handleDragOver(e, 'before')}
+        onDragEnter={(e) => handleDragEnter(e, 'before')}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
+        onClick={(e) => {
+         setSelectedId(props.item.id);
+        }}
+        onMouseOver={(e) => {
+         setHoverId(props.item.id);
+        }}
+      >
+       <Show when={props.item.children.length}>
+        <button
+          onClick={(e) => {
+           e.stopPropagation();
+           toggleExpand(props.item.id);
+          }}
+        >
+         <Show when={props.item.expanded} fallback="-">
+          +
+         </Show>
+        </button>
+       </Show>
+       {props.item.name}
+       <div
+         classList={{ indicator: true, 'before': indicatorPosition === 'before', 'after': indicatorPosition === 'after', 'center': indicatorPosition === 'center' }}
+       ></div>
+      </div>
+      <Show when={props.item.expanded && props.item.children.length > 0}>
+       <ul class="p:10">
+        <For each={props.item?.children}>
+         {(item) => <TreeView item={item} />}
+        </For>
+       </ul>
+      </Show>
      </>
    );
+  };
+
+  return (
+    <>
+     <div>Layer2</div>
+     <For each={state}>{(item) => <TreeView item={item} />}</For>
+    </>
+  );
  };
+
 
 
 
