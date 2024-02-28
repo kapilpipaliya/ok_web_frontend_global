@@ -1273,14 +1273,34 @@ export const PageDesignerDragAndDrop = () => {
    setIndicatorPosition(null);
   };
 
+  const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
+   const bounds = node.getBoundingClientRect();
+   const offset = e.clientY - bounds.top;
+   const height = bounds.bottom - bounds.top;
+   if (offset < height * 0.25) {
+    return 'before';
+   } else if (offset > height * 0.75) {
+    return 'after';
+   } else {
+    return 'center';
+   }
+  };
+
   const TreeView = (props: { item: Item }) => {
+   let indicatorPositionAfter = null;
+   let indicatorPositionBefore = null;
+   let indicatorPositionCenter = null;
+
    return (
      <>
       <div
         draggable={true}
         onDragStart={() => handleDragStart(props.item.id)}
         onDragOver={(e) => handleDragOver(e, 'before')}
-        onDragEnter={(e) => handleDragEnter(e, 'before')}
+        onDragEnter={(e) => {
+         handleDragEnter(e, 'before');
+         indicatorPositionBefore = getIndicatorPosition(e, e.currentTarget as HTMLElement);
+        }}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
