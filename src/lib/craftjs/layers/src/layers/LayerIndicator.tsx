@@ -6,7 +6,7 @@ export type Placeholder = {
   suggestedStyles: any;
 };
 
-export const LayerIndicator: React.FC<Placeholder> = ({
+export const LayerIndicator= ({
   placeholder,
   suggestedStyles,
 }) => {

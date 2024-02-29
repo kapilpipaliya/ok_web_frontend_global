@@ -1216,7 +1216,6 @@ export const PageDesignerDragAndDrop = () => {
 
   const [draggedItemId, setDraggedItemId] = createSignal<number>(null);
 
-  const [indicatorPosition, setIndicatorPosition] = createSignal<'before' | 'after' | 'center' | null>(null);
 
   const toggleExpandRecursive = (items: Item[], itemId: number): Item[] => {
    return items.map((item) => {
@@ -1250,64 +1249,86 @@ export const PageDesignerDragAndDrop = () => {
    setState(data);
   });
 
-  const handleDragStart = (itemId: number) => {
-   setDraggedItemId(itemId);
-  };
-
-  const handleDragOver = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
-   e.preventDefault();
-   setIndicatorPosition(position);
-  };
-
-  const handleDragEnter = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
-   e.preventDefault();
-   setIndicatorPosition(position);
-  };
-
-  const handleDragLeave = () => {
-   setIndicatorPosition(null);
-  };
-
-  const handleDrop = () => {
-   // Handle drop action here
-   setIndicatorPosition(null);
-  };
-
-  const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
-   const bounds = node.getBoundingClientRect();
-   const offset = e.clientY - bounds.top;
-   const height = bounds.bottom - bounds.top;
-   if (offset < height * 0.25) {
-    return 'before';
-   } else if (offset > height * 0.75) {
-    return 'after';
-   } else {
-    return 'center';
-   }
-  };
-
   const TreeView = (props: { item: Item }) => {
-   let indicatorPositionAfter = null;
-   let indicatorPositionBefore = null;
-   let indicatorPositionCenter = null;
+   const [indicatorPosition, setIndicatorPosition] = createSignal<'before' | 'after' | 'center' | null>(null);
 
+   const indicatorStyles = `width:100% height:2px background-color:green z-index:9999`;
+   // background-color: red; /* Change color as needed */
+   // z-index: 9999; /* Ensure it's above other elements */
+
+   const indicatorPositionStyles = () => {
+    if (indicatorPosition() === 'before') {
+     // return indicatorStyles + ' top:0'
+    } else if (indicatorPosition() === 'after') {
+     // return indicatorStyles + ' bottom:0';
+    } else if (indicatorPosition() === 'center') {
+     // return indicatorStyles +  ` top:50% transform:translateY(-50%)`
+    }
+    return indicatorStyles;
+   };
+
+
+   const handleDragStart = (e: DragEvent, itemId: number) => {
+    e.stopPropagation();
+    setDraggedItemId(itemId);
+   };
+
+   const handleDragOver = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIndicatorPosition(position);
+   };
+
+   const handleDragLeave = (e) => {
+    setIndicatorPosition(null);
+   };
+
+   const handleDrop = (e: DragEvent) => {
+    e.stopPropagation();
+    // Handle drop action here
+    setIndicatorPosition(null);
+   };
+
+   const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const bounds = node.getBoundingClientRect();
+    const offset = e.clientY - bounds.top;
+    const height = bounds.bottom - bounds.top;
+    if (offset < height * 0.25) {
+     return 'before';
+    } else if (offset > height * 0.75) {
+     return 'after';
+    } else {
+     return 'center';
+    }
+    // if (offset < (height + 10)) {
+    //  return 'before';
+    // } else if (offset > (height - 10)) {
+    //  return 'after';
+    // } else {
+    //  return 'center';
+    // }
+   };
    return (
      <>
+      <Show when={indicatorPosition() === 'before'}>
+       <div class={`${indicatorPositionStyles()}`}/>
+      </Show>
       <div
         draggable={true}
-        onDragStart={() => handleDragStart(props.item.id)}
-        onDragOver={(e) => handleDragOver(e, 'before')}
-        onDragEnter={(e) => {
-         handleDragEnter(e, 'before');
-         indicatorPositionBefore = getIndicatorPosition(e, e.currentTarget as HTMLElement);
-        }}
+        onDragStart={(e) => handleDragStart(e, props.item.id)}
+        onDragOver={(e) => handleDragOver(e, getIndicatorPosition(e, e.currentTarget as HTMLElement))}
+        onDragEnter={(e) => handleDragOver(e, getIndicatorPosition(e, e.currentTarget as HTMLElement))}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
+        classList={{'b:1px': indicatorPosition() === 'center'}}
         onClick={(e) => {
          setSelectedId(props.item.id);
         }}
         onMouseOver={(e) => {
+         e.stopPropagation();
          setHoverId(props.item.id);
         }}
       >
@@ -1324,14 +1345,17 @@ export const PageDesignerDragAndDrop = () => {
         </button>
        </Show>
        {props.item.name}
-       <div
-         classList={{ indicator: true, 'before': indicatorPosition === 'before', 'after': indicatorPosition === 'after', 'center': indicatorPosition === 'center' }}
-       ></div>
+
+
       </div>
+      <Show when={indicatorPosition() === 'after'}>
+       <div class={`${indicatorPositionStyles()}`}/>
+      </Show>
+
       <Show when={props.item.expanded && props.item.children.length > 0}>
        <ul class="p:10">
         <For each={props.item?.children}>
-         {(item) => <TreeView item={item} />}
+         {(item) => <TreeView item={item}/>}
         </For>
        </ul>
       </Show>
@@ -1342,7 +1366,7 @@ export const PageDesignerDragAndDrop = () => {
   return (
     <>
      <div>Layer2</div>
-     <For each={state}>{(item) => <TreeView item={item} />}</For>
+     <For each={state}>{(item) => <TreeView item={item}/>}</For>
     </>
   );
  };
@@ -1752,7 +1776,7 @@ export const PageDesignerDragAndDrop = () => {
  const oneComponents0 = <OneComponents0/>;
  // const oneComponents = <OneComponents/>;
  const twoCollections = <TwoCollections/>;
- const fourLayout = <FourLayout/>;
+ const fourLayout = <div/>;
  const fourLayout1 = <FourLayout1/>;
  const fiveProperties = <FiveProperties/>;
  const abstractSingleForm = <AbstractSingleForm formId={"Page"} id={params.id} config={pageConfig} showMainFieldsOnly={true}
