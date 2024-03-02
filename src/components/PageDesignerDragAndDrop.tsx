@@ -1212,45 +1212,24 @@ export const PageDesignerDragAndDrop = () => {
  }
 
  const FourLayout1 = () => {
-  const [state, setState] = createStore<Item[]>([]);
+  const [treeData, setTreeData] = createStore<Item[]>([]);
+  const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
+
+  const [indicatorPosition, setIndicatorPosition] = createSignal({activeItem: null as null | Id, position: null as 'before' | 'after' | 'center' | null});
+
 
   const [draggedItemId, setDraggedItemId] = createSignal<number>(null);
 
-
-  const toggleExpandRecursive = (items: Item[], itemId: number): Item[] => {
-   return items.map((item) => {
-    return itemUpdate(item, itemId);
-   });
-  };
-
-  const itemUpdate = (item: Item, itemId: number) => {
-   if (item.id === itemId) {
-    return { ...item, expanded: !item.expanded };
-   } else if (item.children && item.children.length > 0) {
-    return {
-     ...item,
-     children: toggleExpandRecursive(item.children, itemId),
-    };
-   } else {
-    return item;
-   }
-  };
-
   const toggleExpand = (itemId: number) => {
-   setState(
-     state.map((item) => {
-      return itemUpdate(item, itemId);
-     })
-   );
+    setCollapsedKeys(prev => prev.includes(itemId) ? prev.filter(item => item !== itemId) : [...prev, itemId]);
   };
 
   createEffect(() => {
    const data = getLayoutTreeData();
-   setState(data);
+   setTreeData(data);
   });
 
   const TreeView = (props: { item: Item }) => {
-   const [indicatorPosition, setIndicatorPosition] = createSignal<'before' | 'after' | 'center' | null>(null);
 
    const indicatorStyles = `width:100% height:2px background-color:green z-index:9999`;
    // background-color: red; /* Change color as needed */
@@ -1273,21 +1252,46 @@ export const PageDesignerDragAndDrop = () => {
     setDraggedItemId(itemId);
    };
 
-   const handleDragOver = (e: MouseEvent, position: 'before' | 'after' | 'center') => {
+   const handleDragOver = (e: MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setIndicatorPosition(position);
+
+    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement);
+
+    let activeItem: Id;
+    if (position === 'before') {
+     activeItem = props.item.id;
+    } else if (position === 'after') {
+     if (collapsedKeys().includes(props.item.id)) {
+      // collapsed state
+      activeItem = props.item.id;
+     } else {
+      // expanded State
+      if (props.item.children.length) {
+       activeItem = props.item.children[0].id;
+       position = 'before';
+      } else {
+       activeItem = props.item.id;
+      }
+     }
+    } else {
+     activeItem = props.item.id;
+    }
+
+    setIndicatorPosition({activeItem, position});
    };
 
-   const handleDragLeave = (e) => {
-    setIndicatorPosition(null);
+   const handleDragLeave = (e: DragEvent) => {
+    setIndicatorPosition({});
    };
 
    const handleDrop = (e: DragEvent) => {
     e.stopPropagation();
     // Handle drop action here
-    setIndicatorPosition(null);
+    setIndicatorPosition({});
    };
+
+   const isActiveItem = ()=> (indicatorPosition().activeItem === props.item.id)
 
    const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
     e.stopPropagation();
@@ -1312,18 +1316,18 @@ export const PageDesignerDragAndDrop = () => {
    };
    return (
      <>
-      <Show when={indicatorPosition() === 'before'}>
+      <Show when={isActiveItem() && indicatorPosition().position === 'before'}>
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
       <div
         draggable={true}
         onDragStart={(e) => handleDragStart(e, props.item.id)}
-        onDragOver={(e) => handleDragOver(e, getIndicatorPosition(e, e.currentTarget as HTMLElement))}
-        onDragEnter={(e) => handleDragOver(e, getIndicatorPosition(e, e.currentTarget as HTMLElement))}
+        onDragOver={(e) => handleDragOver(e)}
+        onDragEnter={(e) => handleDragOver(e)}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
-        classList={{'b:1px': indicatorPosition() === 'center'}}
+        classList={{'b:1px': isActiveItem()  && indicatorPosition().position === 'center'}}
         onClick={(e) => {
          setSelectedId(props.item.id);
         }}
@@ -1339,8 +1343,8 @@ export const PageDesignerDragAndDrop = () => {
            toggleExpand(props.item.id);
           }}
         >
-         <Show when={props.item.expanded} fallback="-">
-          +
+         <Show when={!collapsedKeys().includes(props.item.id)} fallback="+">
+          -
          </Show>
         </button>
        </Show>
@@ -1348,15 +1352,17 @@ export const PageDesignerDragAndDrop = () => {
 
 
       </div>
-      <Show when={indicatorPosition() === 'after'}>
+      <Show when={isActiveItem() && indicatorPosition().position === 'after'}>
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
 
       <Show when={props.item.expanded && props.item.children.length > 0}>
        <ul class="p:10">
-        <For each={props.item?.children}>
-         {(item) => <TreeView item={item}/>}
-        </For>
+        <Show when={!collapsedKeys().includes(props.item.id)}>
+         <For each={props.item?.children}>
+          {(item) => <TreeView item={item}/>}
+         </For>
+        </Show>
        </ul>
       </Show>
      </>
@@ -1366,7 +1372,7 @@ export const PageDesignerDragAndDrop = () => {
   return (
     <>
      <div>Layer2</div>
-     <For each={state}>{(item) => <TreeView item={item}/>}</For>
+     <For each={treeData}>{(item) => <TreeView item={item}/>}</For>
     </>
   );
  };
