@@ -22,7 +22,7 @@ import {
  onMount,
  Show,
  useContext,
- JSX
+ JSX, createMemo
 } from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
 // Comment This Lines in web build
@@ -71,6 +71,8 @@ import {createDragHandle} from "./solid_dnd_directive";
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
 import {hoverId, selectedId, setHoverId, setSelectedId} from "./pageStore";
+import {evaluate} from "../lib/jsep";
+import jsep from "jsep";
 
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
@@ -1212,7 +1214,6 @@ export const PageDesignerDragAndDrop = () => {
  }
 
  const FourLayout1 = () => {
-  const [treeData, setTreeData] = createStore<Item[]>([]);
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
   const [indicatorPosition, setIndicatorPosition] = createSignal({activeItem: null as null | Id, position: null as 'before' | 'after' | 'center' | null});
@@ -1224,23 +1225,22 @@ export const PageDesignerDragAndDrop = () => {
     setCollapsedKeys(prev => prev.includes(itemId) ? prev.filter(item => item !== itemId) : [...prev, itemId]);
   };
 
-  createEffect(() => {
-   const data = getLayoutTreeData();
-   setTreeData(data);
-  });
 
-  const TreeView = (props: { item: Item }) => {
+  const TreeView = (props: { vertex: Vertex }) => {
+   const child = () => graph.vertexes[props.vertex.id];
+   const children = createMemo(() => (evaluate(jsep("->Attr"), {vertexes: [child()]}) || []).sort((a, b) => a.P.pos - b.P.pos));
+   const isActiveItem = ()=> (indicatorPosition().activeItem === props.vertex.id)
 
    const indicatorStyles = `width:100% height:2px background-color:green z-index:9999`;
    // background-color: red; /* Change color as needed */
    // z-index: 9999; /* Ensure it's above other elements */
 
    const indicatorPositionStyles = () => {
-    if (indicatorPosition() === 'before') {
+    if (isActiveItem() && indicatorPosition().position === 'before') {
      // return indicatorStyles + ' top:0'
-    } else if (indicatorPosition() === 'after') {
+    } else if (isActiveItem() && indicatorPosition().position === 'after') {
      // return indicatorStyles + ' bottom:0';
-    } else if (indicatorPosition() === 'center') {
+    } else if (isActiveItem() && indicatorPosition().position === 'center') {
      // return indicatorStyles +  ` top:50% transform:translateY(-50%)`
     }
     return indicatorStyles;
@@ -1260,22 +1260,22 @@ export const PageDesignerDragAndDrop = () => {
 
     let activeItem: Id;
     if (position === 'before') {
-     activeItem = props.item.id;
+     activeItem = props.vertex.id;
     } else if (position === 'after') {
-     if (collapsedKeys().includes(props.item.id)) {
+     if (collapsedKeys().includes(props.vertex.id)) {
       // collapsed state
-      activeItem = props.item.id;
+      activeItem = props.vertex.id;
      } else {
       // expanded State
-      if (props.item.children.length) {
-       activeItem = props.item.children[0].id;
+      if (children().length) {
+       activeItem = children()[0].id;
        position = 'before';
       } else {
-       activeItem = props.item.id;
+       activeItem = props.vertex.id;
       }
      }
     } else {
-     activeItem = props.item.id;
+     activeItem = props.vertex.id;
     }
 
     setIndicatorPosition({activeItem, position});
@@ -1291,7 +1291,6 @@ export const PageDesignerDragAndDrop = () => {
     setIndicatorPosition({});
    };
 
-   const isActiveItem = ()=> (indicatorPosition().activeItem === props.item.id)
 
    const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
     e.stopPropagation();
@@ -1321,12 +1320,12 @@ export const PageDesignerDragAndDrop = () => {
       </Show>
       <div
         draggable={true}
-        onDragStart={(e) => handleDragStart(e, props.item.id)}
+        onDragStart={(e) => handleDragStart(e, props.vertex.id)}
         onDragOver={(e) => handleDragOver(e)}
         onDragEnter={(e) => handleDragOver(e)}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
+        class={props.vertex.id === selectedId() ? 'bg:lightblue' : props.vertex.id === hoverId() ? 'bg:lightgray' : ''}
         classList={{'b:1px': isActiveItem()  && indicatorPosition().position === 'center'}}
         onClick={(e) => {
          batch(() => {
@@ -1334,55 +1333,58 @@ export const PageDesignerDragAndDrop = () => {
           setSelectedComponent({vertexId: -1});
           setSelectedColl({vertexId: -1});
 
-          setSelectedId(props.item.id);
-          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.item!.id!]);
+          setSelectedId(props.vertex.id);
+          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.vertex!.id!]);
           setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
-          const componentVertex = getComponentFromLayoutRow(props.item!.id!);
+          const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
           setSelectedComponent({vertexId: componentVertex?.id || -1});
          });
         }}
         onMouseOver={(e) => {
          e.stopPropagation();
-         setHoverId(props.item.id);
+         setHoverId(props.vertex.id);
         }}
       >
-       <Show when={props.item.children.length}>
+       <Show when={children().length}>
         <button
           onClick={(e) => {
            e.stopPropagation();
-           toggleExpand(props.item.id);
+           toggleExpand(props.vertex.id);
           }}
         >
-         <Show when={!collapsedKeys().includes(props.item.id)} fallback="+">
+         <Show when={!collapsedKeys().includes(props.vertex.id)} fallback="+">
           -
          </Show>
         </button>
        </Show>
-       {props.item.name}
-
+       {nameExpr(child()) || child().P.name}
 
       </div>
       <Show when={isActiveItem() && indicatorPosition().position === 'after'}>
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
 
-      <Show when={props.item.expanded && props.item.children.length > 0}>
+      <Show when={!collapsedKeys().includes(props.vertex.id) && children().length > 0}>
        <ul class="p:10">
-        <Show when={!collapsedKeys().includes(props.item.id)}>
-         <For each={props.item?.children}>
-          {(item) => <TreeView item={item}/>}
+         <For each={children()}>
+          {(item) => <TreeView vertex={item}/>}
          </For>
-        </Show>
        </ul>
       </Show>
      </>
    );
   };
 
+  const rootVertexes = () => pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : []; // Starting point(s)
+  const nameExpr = (v: Vertex) => {
+   const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
+   return `${v.P.name}${component ? ` (${component})` : ""}`;
+  }
+
   return (
     <>
      <div>Layer2</div>
-     <For each={treeData}>{(item) => <TreeView item={item}/>}</For>
+     <For each={rootVertexes()}>{(item) => <TreeView vertex={item}/>}</For>
     </>
   );
  };

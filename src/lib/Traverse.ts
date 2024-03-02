@@ -322,6 +322,7 @@ export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[]
   return getChildren(treeLevels, vertexes);
 
 }
+
 export const deleteNestedLayout = (txnId: number, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
   const deleteChildren = (vertexes: Vertex[]) => {
 
