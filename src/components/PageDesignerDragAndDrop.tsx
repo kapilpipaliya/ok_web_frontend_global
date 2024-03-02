@@ -1329,7 +1329,17 @@ export const PageDesignerDragAndDrop = () => {
         class={props.item.id === selectedId() ? 'bg:lightblue' : props.item.id === hoverId() ? 'bg:lightgray' : ''}
         classList={{'b:1px': isActiveItem()  && indicatorPosition().position === 'center'}}
         onClick={(e) => {
-         setSelectedId(props.item.id);
+         batch(() => {
+          setSelectedId(-1);
+          setSelectedComponent({vertexId: -1});
+          setSelectedColl({vertexId: -1});
+
+          setSelectedId(props.item.id);
+          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.item!.id!]);
+          setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
+          const componentVertex = getComponentFromLayoutRow(props.item!.id!);
+          setSelectedComponent({vertexId: componentVertex?.id || -1});
+         });
         }}
         onMouseOver={(e) => {
          e.stopPropagation();
