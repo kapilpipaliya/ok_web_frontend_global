@@ -46,10 +46,11 @@ export const FullDashboard = (props: {children?: JSX.Element}) => {
 
 
   return (
-    <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())} fallback={props.children}>
       <div class="flex">
-        <Sidebar isSideBarOpen={isSideBarOpen()} />
-        <div class="ml:200 flex:1">
+        <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}>
+          <Sidebar isSideBarOpen={isSideBarOpen()} />
+        </Show>
+        <div class={`${isSideBarOpen() ? 'ml:200': ''} flex:1`}>
           <div class="flex flex:col flex:1">
             <PageContext.Provider
               value={{
@@ -103,6 +104,5 @@ export const FullDashboard = (props: {children?: JSX.Element}) => {
           </div>
         </div>
       </div>
-    </Show>
   );
 };
