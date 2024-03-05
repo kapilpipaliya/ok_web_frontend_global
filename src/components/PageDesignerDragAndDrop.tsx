@@ -1215,6 +1215,7 @@ export const PageDesignerDragAndDrop = () => {
 
  const FourLayout1 = () => {
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
+  const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
 
   const [indicatorPosition, setIndicatorPosition] = createSignal({activeItem: null as null | Id, position: null as 'before' | 'after' | 'center' | null});
 
@@ -1223,6 +1224,9 @@ export const PageDesignerDragAndDrop = () => {
 
   const toggleExpand = (itemId: number) => {
     setCollapsedKeys(prev => prev.includes(itemId) ? prev.filter(item => item !== itemId) : [...prev, itemId]);
+  };
+  const toggleHidden = (itemId: number) => {
+    setHiddenNodes(prev => prev.includes(itemId) ? prev.filter(item => item !== itemId) : [...prev, itemId]);
   };
 
 
@@ -1314,43 +1318,53 @@ export const PageDesignerDragAndDrop = () => {
     // }
    };
    return (
-     <>
+     <div >
       <Show when={isActiveItem() && indicatorPosition().position === 'before'}>
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
       <div
-        draggable={true}
-        onDragStart={(e) => handleDragStart(e, props.vertex.id)}
-        onDragOver={(e) => handleDragOver(e)}
-        onDragEnter={(e) => handleDragOver(e)}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        class={props.vertex.id === selectedId() ? 'bg:lightblue' : props.vertex.id === hoverId() ? 'bg:lightgray' : ''}
-        classList={{'b:1px': isActiveItem()  && indicatorPosition().position === 'center'}}
-        onClick={(e) => {
-         batch(() => {
-          setSelectedId(-1);
-          setSelectedComponent({vertexId: -1});
-          setSelectedColl({vertexId: -1});
+          draggable={true}
+          onDragStart={(e) => handleDragStart(e, props.vertex.id)}
+          onDragOver={(e) => handleDragOver(e)}
+          onDragEnter={(e) => handleDragOver(e)}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          class={props.vertex.id === selectedId() ? 'bg:lightblue' : props.vertex.id === hoverId() ? 'bg:lightgray' : ''}
+          classList={{'b:1px': isActiveItem() && indicatorPosition().position === 'center'}}
+          onClick={(e) => {
+           batch(() => {
+            setSelectedId(-1);
+            setSelectedComponent({vertexId: -1});
+            setSelectedColl({vertexId: -1});
 
-          setSelectedId(props.vertex.id);
-          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.vertex!.id!]);
-          setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
-          const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
-          setSelectedComponent({vertexId: componentVertex?.id || -1});
-         });
-        }}
-        onMouseOver={(e) => {
-         e.stopPropagation();
-         setHoverId(props.vertex.id);
-        }}
+            setSelectedId(props.vertex.id);
+            const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.vertex!.id!]);
+            setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
+            const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
+            setSelectedComponent({vertexId: componentVertex?.id || -1});
+           });
+          }}
+          onMouseOver={(e) => {
+           e.stopPropagation();
+           setHoverId(props.vertex.id);
+          }}
       >
+       <button
+           onClick={(e) => {
+            e.stopPropagation();
+            toggleHidden(props.vertex.id);
+           }}
+       >
+        <Show when={!hiddenNodes().includes(props.vertex.id)} fallback={<Icon icon="mdi:eye-off-outline"/>}>
+         <Icon icon="mdi:eye-outline"/>
+        </Show>
+       </button>
        <Show when={children().length}>
         <button
-          onClick={(e) => {
-           e.stopPropagation();
-           toggleExpand(props.vertex.id);
-          }}
+            onClick={(e) => {
+             e.stopPropagation();
+             toggleExpand(props.vertex.id);
+            }}
         >
          <Show when={!collapsedKeys().includes(props.vertex.id)} fallback="+">
           -
@@ -1366,12 +1380,12 @@ export const PageDesignerDragAndDrop = () => {
 
       <Show when={!collapsedKeys().includes(props.vertex.id) && children().length > 0}>
        <ul class="p:10">
-         <For each={children()}>
-          {(item) => <TreeView vertex={item}/>}
+        <For each={children()}>
+         {(item) => <TreeView vertex={item}/>}
          </For>
        </ul>
       </Show>
-     </>
+     </div>
    );
   };
 
@@ -1807,8 +1821,7 @@ export const PageDesignerDragAndDrop = () => {
  const Column = (props: {type: string, dragHandler: (node: HTMLElement) => void}) => {
   const dragHandle = (el:HTMLElement) => props.dragHandler(el)
   return <>
-   <div class="border:1|solid|blue-60 p:10 m:5"
-   >
+   <div class="border:1|solid|blue-60 p:10 m:5" >
     <Switch>
      <Match when={props.type === 'components'}>
       <div class="mb:10" use:dragHandle>Components:</div>
@@ -1846,24 +1859,32 @@ export const PageDesignerDragAndDrop = () => {
   </>;
  }
 
- return <div class="flex">
-  <div class="flex-col"
-       // @ts-ignore
-       //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
-  ><For each={leftColumns()}>{column => <Column dragHandler={dragHandle1} type={column.id}/>}</For></div>
-  <div class="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
-    <div class="flex justify-content:center" ><TableTabs tabs={tabs}  setActiveTab={setActiveTab} /></div>
-
-    <div class={className() as string}>
-      <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
-    </div>
+ return <div className="flex">
+  <div className="flex-col"
+      // @ts-ignore
+      //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
+  >
+   <For each={leftColumns()}>
+    {column => <Column dragHandler={dragHandle1} type={column.id}/>}
+   </For>
   </div>
-
-  <div class="flex-col"
-       // @ts-ignore
-       //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
-
-  ><For each={rightColumns()}>{column => <Column dragHandler={dragHandle2} type={column.id}/>}</For></div>
+  <div className="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
+   <div className="flex justify-content:center">
+    <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
+   </div>
+   <div className={className() as string}>
+    <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
+   </div>
   </div>
-  };
+  <div className="flex-col" style={{width:'30%'}}
+      // @ts-ignore
+      //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
+  >
+   <For each={rightColumns()}>
+    {column => <Column dragHandler={dragHandle2} type={column.id}/>}
+   </For>
+  </div>
+ </div>
+
+};
 

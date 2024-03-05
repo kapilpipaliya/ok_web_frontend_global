@@ -243,16 +243,17 @@ export function FormGroup(props: FormGroupProps) {
               <Content/>
             </Match>
             <Match when={true}>
-              <div class=" grid-cols:2 py:5 w:450">
-                <div  id={id}>
-                  <Label />
+              <div className=" grid-cols:2 py:5 w:450">
+                <div id={id}>
+                  <Label/>
                 </div>
-                <div class="	">
-                  <Content />
-                </div>
+
+              </div>
+              <div >
+                <Content/>
               </div>
             </Match>
-           
+
           </Switch>
         );
       }}

@@ -1,5 +1,6 @@
 
 import { For, createSignal } from "solid-js";
+import {Icon} from "@iconify-icon/solid";
 
 interface TableTabProps{
   tabs:string[];
@@ -20,7 +21,7 @@ export function TableTabs(props: TableTabProps){
 
 <For each={props.tabs} fallback={<div>Loading...</div>}>
   {(item) => 
-  <div id={`tabletab`+`${item}`} class={"px:20 f:sans f:15 cursor:pointer " }
+  <div id={`tabletab`+`${item}`} style={{"align-items":"center"}} class={"px:20 f:sans f:15 cursor:pointer " }
      
   onClick={(event)=>{
     if(props.setActiveTab){
@@ -40,8 +41,10 @@ export function TableTabs(props: TableTabProps){
    
     }
     } >
-    {item}
-  </div>}
+      <div style={{"align-items":'center',display:'flex'}}>
+          {item.includes('Mobile Preview')?<Icon icon="mdi:cellphone"/>:<Icon icon="mdi:monitor"/>}&nbsp;
+          {item}
+      </div>  </div>}
 </For>
 
    </div>
