@@ -1,7 +1,7 @@
 // TODO make default component property applied to
 import {graph, IdAttr, Vertex} from "../lib/graph";
 import {createMemo, For, Match, Switch, useContext} from "solid-js";
-import {Link} from "@solidjs/router";
+import {A} from "@solidjs/router";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {createStore} from "solid-js/store";
 import {Record} from "../lib/Record";
@@ -16,8 +16,8 @@ export const AllForms = () => {
 
     return (
         <div class="">
-            <For each={allForms()}>{(vertexId) => <Link
-                href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
+            <For each={allForms()}>{(vertexId) => <A
+                href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
         </div>
     );
 };

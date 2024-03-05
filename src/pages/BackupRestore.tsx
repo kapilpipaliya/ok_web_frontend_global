@@ -14,7 +14,7 @@ import {
   Vertex,
   waitTillAllEventsAreProcessed
 } from "../lib/graph";
-import {Link} from "@solidjs/router";
+import {A} from "@solidjs/router";
 import {addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties} from "../lib/Vertex";
 import {setSelectionValue} from "../components/input/SelectInputField";
 import {WsContext} from "../utils/ws_events_dispatcher";
@@ -1070,9 +1070,9 @@ OUT:
           <C title={"Links"} subtitle={"Simple Import"}>
             <div class="m:0 p:12">
               <div class="m:1rem flex gap:0.5rem">
-                <Link class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</Link>
-                <Link class="b:2|solid|blue-40" href="/Graph">Go to Graph</Link>
-                <Link class="b:2|solid|blue-40" href="/Nav">Configure Navigation</Link>
+                <A class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</A>
+                <A class="b:2|solid|blue-40" href="/Graph">Go to Graph</A>
+                <A class="b:2|solid|blue-40" href="/Nav">Configure Navigation</A>
               </div>
             </div>
           </C>

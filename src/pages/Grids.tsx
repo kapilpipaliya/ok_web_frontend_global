@@ -1,5 +1,5 @@
 // Comment This Lines in web build
-import { Link, useNavigate, useParams } from "@solidjs/router";
+import { A, useNavigate, useParams } from "@solidjs/router";
 import {
   CellContext,
   ColumnDef,
@@ -156,7 +156,7 @@ export const DataGrid = (props: DataGridProps) => {
     footer: '',
     cell: info => 
       // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
-      {return !formNew.isInlineEditable?  <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>:<button onClick={()=>{
+      {return !formNew.isInlineEditable?  <A href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</A>:<button onClick={()=>{
         if(rowId()===null){
           setRowId(info.row.original.id);
         }
@@ -219,7 +219,7 @@ export const DataGrid = (props: DataGridProps) => {
 
   return (
     <div class="py:5">
-      
+
       <div class="p:2 " >
         <table class="w:full  bg:#f0f7fe " >
           <thead class="b:1  ">
@@ -367,7 +367,7 @@ export const TableDashboard = () => {
           {(tableLayout) => (
             <div class="bg:gray-22 p:10 r:10 max-w:350 bg:gray-28:hover flex ji:center ai:center h:5rem">
               <h3 class="f:18@md font:semibold"></h3>
-              <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><Link href={`/${tableLayout.P[IdAttr]}`}>{tableLayout.P.title || tableLayout.P[IdAttr]}</Link></p>
+              <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><A href={`/${tableLayout.P[IdAttr]}`}>{tableLayout.P.title || tableLayout.P[IdAttr]}</A></p>
             </div>
           )}
         </For>
@@ -381,7 +381,7 @@ export const AllDashboards = () => {
 
   return (
     <div class="">
-      <For each={vertexes()}>{(vertexId) => <Link href={`/grid/${graph.vertexes[vertexId].P[IdAttr]}`}>{graph.vertexes[vertexId].P[IdAttr]}</Link>}</For>
+      <For each={vertexes()}>{(vertexId) => <A href={`/grid/${graph.vertexes[vertexId].P[IdAttr]}`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
     </div>
   );
 }

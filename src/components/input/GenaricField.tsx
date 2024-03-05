@@ -19,7 +19,7 @@ import dxValidationGroup from "devextreme/ui/validation_group";
 import dxValidationSummary from "devextreme/ui/validation_summary";
 
 import { Icon } from "@iconify-icon/solid";
-import { Link, useNavigate } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
 import { Dynamic } from "solid-js/web";
 import {commitTxn, graph, IdAttr, revertTransaction, setGraph, Vertex} from "../../lib/graph";
@@ -361,21 +361,21 @@ export function GenericField(
           <Switch>
             <Match when={PageRenderUtils.getDataVertex(props.meta)}>
               {(vertex) => (
-                <Link {...props.meta.P.props} href={(showNav() ? "/nav/" : "/") + vertex().P.name} draggable>
+                <A {...props.meta.P.props} href={(showNav() ? "/nav/" : "/") + vertex().P.name} draggable>
                   <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
                     {props.children}
                     <PageItemRender metaVertex={props.meta} />
                   </Show>
-                </Link>
+                </A>
               )}
             </Match>
             <Match when={props.meta.P.props?.href}>
-              <Link {...props.meta.P.props} href={getUrl(props.meta.P.props.href, repeaterContext)} draggable>
+              <A {...props.meta.P.props} href={getUrl(props.meta.P.props.href, repeaterContext)} draggable>
                 <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
                   {props.children}
                   <PageItemRender metaVertex={props.meta} />
                 </Show>
-              </Link>
+              </A>
             </Match>
             <Match when={true}>
               <a draggable>
