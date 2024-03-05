@@ -11,6 +11,7 @@ export function Navbar(
   props: DisplayComponentProps & { left?: JSXElement; right?: JSXElement; toggleSidebar: () => void },
 ) {
   let { events } = useContext(PageContext);
+
   // bg:white box-shadow:1|1|10|#ddd
   return (
     <nav class={`p:7.5 flex jc:space-between ai:center ${props.meta?.P.class || ""}`}>

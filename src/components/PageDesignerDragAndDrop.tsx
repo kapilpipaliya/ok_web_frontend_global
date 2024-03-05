@@ -73,7 +73,6 @@ import { Icon } from "@iconify-icon/solid";
 import {hoverId, selectedId, setHoverId, setSelectedId} from "./pageStore";
 import {evaluate} from "../lib/jsep";
 import jsep from "jsep";
-
 const addPropsToLayoutRow = (txnId: number, layoutRowId: Id, componentVertex: Vertex) => {
  const propVertexes =  getChildVertexes(['$0Prop'], [componentVertex]);
  if (propVertexes.vertexes) {
@@ -310,6 +309,7 @@ export const PageDesignerDragAndDrop = () => {
  const pageConfig = createStore({} as { record: Record });
  const [count, setCount] = createSignal(1);
  const { Ws } = useContext(WsContext);
+ const [isOpen, setIsOpen] = createSignal(false);
 
  const [selectedComponent, setSelectedComponent] = createSignal({vertexId: -1});
  // @ts-ignore
@@ -1218,8 +1218,6 @@ export const PageDesignerDragAndDrop = () => {
   const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
 
   const [indicatorPosition, setIndicatorPosition] = createSignal({activeItem: null as null | Id, position: null as 'before' | 'after' | 'center' | null});
-
-
   const [draggedItemId, setDraggedItemId] = createSignal<number>(null);
 
   const toggleExpand = (itemId: number) => {
@@ -1378,7 +1376,7 @@ export const PageDesignerDragAndDrop = () => {
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
 
-      <Show when={!collapsedKeys().includes(props.vertex.id) && children().length > 0}>
+      <Show when={!collapsedKeys().includes(props.vertex.id)  && children().length > 0}>
        <ul class="p:10">
         <For each={children()}>
          {(item) => <TreeView vertex={item}/>}
@@ -1397,7 +1395,6 @@ export const PageDesignerDragAndDrop = () => {
 
   return (
     <>
-     <div>Layer2</div>
      <For each={rootVertexes()}>{(item) => <TreeView vertex={item}/>}</For>
     </>
   );
@@ -1783,6 +1780,9 @@ export const PageDesignerDragAndDrop = () => {
    layoutTreeViewInstance.option("items", getLayoutTreeData());
   }
  }
+ const onClickLayout=() => {
+  setIsOpen(!isOpen());
+ }
  onCleanup(() => {
   batch(() => {
    setSelectedId(-1);
@@ -1833,9 +1833,19 @@ export const PageDesignerDragAndDrop = () => {
       {twoCollections}
      </Match>
      <Match when={props.type === 'layout'}>
-      <div class={"mb:12"} use:dragHandle>Layout</div>
-      {fourLayout}
-      {fourLayout1}
+
+      <div className="mb:12" style="display: flex; align-items: center;">
+       <div style="cursor: pointer; flex-grow: 1;" onClick={onClickLayout}>Layout</div>
+       <div style="cursor: pointer;" onClick={onClickLayout}>
+        {isOpen() ? (
+            <Icon icon={'mdi:chevron-up'} style="font-size: 24px; border-radius: 50%; margin-left: 5px;"/>
+        ) : (
+            <Icon icon={'mdi:chevron-down'} style="font-size: 24px; border-radius: 50%; margin-left: 5px;"/>
+        )}
+       </div>
+      </div>
+      {isOpen() && <div>{fourLayout1}</div>}
+
      </Match>
      <Match when={props.type === 'properties'}>
       <div class="bt:1|solid|gray p:10 mt:5 flex-grow:1">
@@ -1843,8 +1853,8 @@ export const PageDesignerDragAndDrop = () => {
         <span use:dragHandle>Properties</span>
         <Show when={selectedId() !== -1}>
          <GenericField
-           meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
-           onClick={deleteLayout}/>
+             meta={{P: {component: "Button", props: {stylingMode: 'text', type: "danger", icon: "trash"}}} as any}
+             onClick={deleteLayout}/>
         </Show>
        </div>
        {fiveProperties}
