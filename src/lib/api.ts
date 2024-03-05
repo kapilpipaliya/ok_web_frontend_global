@@ -285,7 +285,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
   Comp: {
     title: "Component",
     name: "Comp",
-    isInlineEditable: true,
+    isInlineEditable: false,
     attributes: [
       {
         name: "category",

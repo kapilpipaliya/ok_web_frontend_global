@@ -303,6 +303,10 @@ function getLayoutTreeJson() {
  };
 }
 
+function getChildrenAttrs(child: Vertex) {
+ return (evaluate(jsep("->Attr"), {vertexes: [child]}) || []).sort((a, b) => a.P.pos - b.P.pos);
+}
+
 export const PageDesignerDragAndDrop = () => {
  const itemsExpr = "children";
  const params = useParams();
@@ -1218,7 +1222,9 @@ export const PageDesignerDragAndDrop = () => {
   const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
 
   const [indicatorPosition, setIndicatorPosition] = createSignal({activeItem: null as null | Id, position: null as 'before' | 'after' | 'center' | null});
-  const [draggedItemId, setDraggedItemId] = createSignal<number>(null);
+
+
+  const [draggedVertex, setDraggedVertex] = createSignal<Vertex | null>(null);
 
   const toggleExpand = (itemId: number) => {
     setCollapsedKeys(prev => prev.includes(itemId) ? prev.filter(item => item !== itemId) : [...prev, itemId]);
@@ -1230,7 +1236,7 @@ export const PageDesignerDragAndDrop = () => {
 
   const TreeView = (props: { vertex: Vertex }) => {
    const child = () => graph.vertexes[props.vertex.id];
-   const children = createMemo(() => (evaluate(jsep("->Attr"), {vertexes: [child()]}) || []).sort((a, b) => a.P.pos - b.P.pos));
+   const children = createMemo(() => getChildrenAttrs(child()));
    const isActiveItem = ()=> (indicatorPosition().activeItem === props.vertex.id)
 
    const indicatorStyles = `width:100% height:2px background-color:green z-index:9999`;
@@ -1249,15 +1255,12 @@ export const PageDesignerDragAndDrop = () => {
    };
 
 
-   const handleDragStart = (e: DragEvent, itemId: number) => {
+   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    setDraggedItemId(itemId);
+    setDraggedVertex(props.vertex);
    };
 
-   const handleDragOver = (e: MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
+   const handleDragOverBase = (e: DragEvent) => {
     let position = getIndicatorPosition(e, e.currentTarget as HTMLElement);
 
     let activeItem: Id;
@@ -1277,26 +1280,125 @@ export const PageDesignerDragAndDrop = () => {
       }
      }
     } else {
+     // drop over
      activeItem = props.vertex.id;
     }
 
     setIndicatorPosition({activeItem, position});
+   }
+
+   const handleDragEnter = (e: DragEvent) => {
+    // e.stopPropagation();
+    console.log('enter',props.vertex.id)
+    handleDragOverBase(e);
+   }
+
+   const handleDragOver = (e: MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    handleDragOverBase(e);
    };
 
    const handleDragLeave = (e: DragEvent) => {
-    setIndicatorPosition({});
+    // e.stopPropagation();
+    // setIndicatorPosition({});
+    // console.log('leave',props.vertex.id)
+    // Do not uncomment this, because drag is called before on drop
+    // setDraggedVertex(null);
    };
 
    const handleDrop = (e: DragEvent) => {
+    console.log('drop')
     e.stopPropagation();
+
+
+     const fromVertex = draggedVertex();
+     const toVertexId = indicatorPosition().activeItem!;
+     const toVertex = graph.vertexes[toVertexId]; // props.vertex;
+     if (!fromVertex) {
+      alert('from vertex not found')
+      return;
+     }
+    const txnId = pageConfig[0].record.txnId;
+    const position = indicatorPosition().position;
+
+     const fromParentVertex = getParentVertex(['Attr'], fromVertex);
+     const toParentVertex = position === "center" ?  toVertex : getParentVertex(['Attr'], toVertex).vertex;
+
+     // const fromIndex = fromVertex.P.pos as number;
+     // const toIndex = toVertex.P.pos as number;
+     // if (fromIndex === undefined || toIndex === undefined) {
+     //  alert('from and to index should have position set')
+     //  return;
+     // }
+
+    function sortChildren() {
+     let pos = 1;
+     const childrenAttrs = getChildrenAttrs(toParentVertex!);
+     for (const child of childrenAttrs) {
+      if (child.id === fromVertex!.id) {
+       continue;
+      }
+      // const childIndex = child.P.pos;
+      // if (childIndex === undefined) {
+      //  alert ('childIndex Pos should not be undefined.');
+      // }
+
+      if (child.id === toVertex.id) { // childIndex === toIndex, childIndex may be undefined.
+       if (position === "before") {
+        mergeVertexProperties(txnId, fromVertex!.id, {pos});
+        pos++;
+        mergeVertexProperties(txnId, child.id, {pos});
+        pos++;
+       } else if (position === "after") {
+        mergeVertexProperties(txnId, child.id, {pos});
+        pos++;
+        mergeVertexProperties(txnId, fromVertex!.id, {pos});
+        pos++;
+       }
+      } else {
+       mergeVertexProperties(txnId, child.id, {pos});
+       pos++;
+      }
+     }
+    }
+
+    if (position !== "center" && fromParentVertex.vertex?.id === toParentVertex!.id) {
+      // Sort Children:
+     sortChildren();
+
+     ///sortChildren(childrenItems, pageConfig[0].record.txnId);
+     } else {
+      // remove previous incoming edge if present.
+      if (fromParentVertex.vertex) {
+       setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex)
+      }
+      // add new edge.
+      if (position === "center") {
+       setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toVertexId)
+       mergeVertexProperties(txnId, fromVertex!.id, {pos:9999999}); // move to end
+      } else {
+       setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex!.id);
+      }
+
+      // sort from parent's children
+      // sort if required.
+
+      // sort to parent's children
+      sortChildren();
+     }
+
+    setDraggedVertex(null);
+
+
     // Handle drop action here
     setIndicatorPosition({});
+
+
    };
 
 
    const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
-    e.stopPropagation();
-    e.preventDefault();
     const bounds = node.getBoundingClientRect();
     const offset = e.clientY - bounds.top;
     const height = bounds.bottom - bounds.top;
@@ -1321,31 +1423,31 @@ export const PageDesignerDragAndDrop = () => {
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
       <div
-          draggable={true}
-          onDragStart={(e) => handleDragStart(e, props.vertex.id)}
-          onDragOver={(e) => handleDragOver(e)}
-          onDragEnter={(e) => handleDragOver(e)}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          class={props.vertex.id === selectedId() ? 'bg:lightblue' : props.vertex.id === hoverId() ? 'bg:lightgray' : ''}
-          classList={{'b:1px': isActiveItem() && indicatorPosition().position === 'center'}}
-          onClick={(e) => {
-           batch(() => {
-            setSelectedId(-1);
-            setSelectedComponent({vertexId: -1});
-            setSelectedColl({vertexId: -1});
+        draggable={true}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        class={props.vertex.id === selectedId() ? 'bg:lightblue' : props.vertex.id === hoverId() ? 'bg:lightgray' : ''}
+        classList={{'b:1px': isActiveItem()  && indicatorPosition().position === 'center'}}
+        onClick={(e) => {
+         batch(() => {
+          setSelectedId(-1);
+          setSelectedComponent({vertexId: -1});
+          setSelectedColl({vertexId: -1});
 
-            setSelectedId(props.vertex.id);
-            const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.vertex!.id!]);
-            setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
-            const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
-            setSelectedComponent({vertexId: componentVertex?.id || -1});
-           });
-          }}
-          onMouseOver={(e) => {
-           e.stopPropagation();
-           setHoverId(props.vertex.id);
-          }}
+          setSelectedId(props.vertex.id);
+          const collVertex = getChildVertex(['$0Coll'], graph.vertexes[props.vertex!.id!]);
+          setSelectedColl({vertexId: collVertex?.vertex?.id || -1});
+          const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
+          setSelectedComponent({vertexId: componentVertex?.id || -1});
+         });
+        }}
+        onMouseOver={(e) => {
+         e.stopPropagation();
+         setHoverId(props.vertex.id);
+        }}
       >
        <button
            onClick={(e) => {
@@ -1376,10 +1478,10 @@ export const PageDesignerDragAndDrop = () => {
        <div class={`${indicatorPositionStyles()}`}/>
       </Show>
 
-      <Show when={!collapsedKeys().includes(props.vertex.id)  && children().length > 0}>
+      <Show when={!collapsedKeys().includes(props.vertex.id) && children().length > 0}>
        <ul class="p:10">
-        <For each={children()}>
-         {(item) => <TreeView vertex={item}/>}
+         <For each={children()}>
+          {(vertex) => <TreeView vertex={vertex}/>}
          </For>
        </ul>
       </Show>
@@ -1821,7 +1923,8 @@ export const PageDesignerDragAndDrop = () => {
  const Column = (props: {type: string, dragHandler: (node: HTMLElement) => void}) => {
   const dragHandle = (el:HTMLElement) => props.dragHandler(el)
   return <>
-   <div class="border:1|solid|blue-60 p:10 m:5" >
+   <div class="border:1|solid|blue-60 p:10 m:5"
+   >
     <Switch>
      <Match when={props.type === 'components'}>
       <div class="mb:10" use:dragHandle>Components:</div>
