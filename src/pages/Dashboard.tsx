@@ -50,7 +50,7 @@ export const FullDashboard = (props: {children?: JSX.Element}) => {
         <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}>
           <Sidebar isSideBarOpen={isSideBarOpen()} />
         </Show>
-        <div class={`${isSideBarOpen() ? 'ml:200': ''} flex:1`}>
+        <div class={`${isSideBarOpen() ? 'ml:200': ''} flex:1 transition:margin-left|500ms|ease-in-out`}>
           <div class="flex flex:col flex:1">
             <PageContext.Provider
               value={{
