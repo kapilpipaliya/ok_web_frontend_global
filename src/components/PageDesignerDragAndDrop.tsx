@@ -1937,7 +1937,7 @@ export const PageDesignerDragAndDrop = () => {
      </Match>
      <Match when={props.type === 'layout'}>
 
-      <div className="mb:12" style="display: flex; align-items: center;">
+      <div class="mb:12" style="display: flex; align-items: center;">
        <div style="cursor: pointer; flex-grow: 1;" onClick={onClickLayout}>Layout</div>
        <div style="cursor: pointer;" onClick={onClickLayout}>
         {isOpen() ? (
@@ -1972,8 +1972,8 @@ export const PageDesignerDragAndDrop = () => {
   </>;
  }
 
- return <div className="flex">
-  <div className="flex-col"
+ return <div class="flex">
+  <div class="flex-col"
       // @ts-ignore
       //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
   >
@@ -1981,15 +1981,15 @@ export const PageDesignerDragAndDrop = () => {
     {column => <Column dragHandler={dragHandle1} type={column.id}/>}
    </For>
   </div>
-  <div className="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
-   <div className="flex justify-content:center">
+  <div class="flex-grow:1 border:1|solid|blue-60 p:10 m:5 min-w:400">
+   <div class="flex justify-content:center">
     <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
    </div>
-   <div className={className() as string}>
+   <div class={className() as string}>
     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
    </div>
   </div>
-  <div className="flex-col" style={{width:'30%'}}
+  <div class="flex-col" style={{width:'30%'}}
       // @ts-ignore
       //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
   >
