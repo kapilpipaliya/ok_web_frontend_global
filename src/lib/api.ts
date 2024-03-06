@@ -326,6 +326,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Children",
         component: "CheckBox",
       },
+      {
+        name: "required",
+        displayName: "Required",
+        component: "CheckBox",
+      },
       { name: "description", component: "TextArea" },
      // TODO: add validation, duplicate row with same name is not allowed.
       {
@@ -336,6 +341,10 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             name: "name",
             component: "TextBox",
+          },
+          {
+            name: "need",
+            component: "CheckBox",
           },
           {
             name: "required",
