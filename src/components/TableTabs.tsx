@@ -1,52 +1,42 @@
-
-import { For, createSignal } from "solid-js";
+import {For, createSignal} from "solid-js";
 import {Icon} from "@iconify-icon/solid";
 
-interface TableTabProps{
-  tabs:string[];
-  setActiveTab?:(tab:string)=>string
+interface TableTabProps {
+    tabs: string[];
+    setActiveTab?: (tab: string) => string
 }
 
 
-
-
-
-
-export function TableTabs(props: TableTabProps){
-  const [currentTab, setCurrentTab] = createSignal<string>("tabletab1");
+export function TableTabs(props: TableTabProps) {
+    const [currentTab, setCurrentTab] = createSignal<string>(props.tabs[0]);
 
     return (
-    <div  class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
+        <div class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
 
 
-<For each={props.tabs} fallback={<div>Loading...</div>}>
-  {(item) => 
-  <div id={`tabletab`+`${item}`} style={{"align-items":"center"}} class={"px:20 f:sans f:15 cursor:pointer " }
-     
-  onClick={(event)=>{
-    if(props.setActiveTab){
-      props.setActiveTab(item as string)
-    }
-    
-    
-    const x = document.getElementById(currentTab());
-    
-    if(x?.className){
-      x.className=x.className.replace("border-bottom:2","")
-      x.className=x.className.replace("bb:blue","")
-      x.className=x.className.replace("text-fill:rgb(10,92,246)","");
-    }
-  setCurrentTab("tabletab"+item);
-  event.target.className =event.target.className.concat("border-bottom:2 bb:blue text-fill:rgb(10,92,246)")
-   
-    }
-    } >
-      <div style={{"align-items":'center',display:'flex'}}>
-          {item.includes('Mobile Preview')?<Icon icon="mdi:cellphone"/>:<Icon icon="mdi:monitor"/>}&nbsp;
-          {item}
-      </div>  </div>}
-</For>
+            <For each={props.tabs} fallback={<div>Loading...</div>}>
+                {(item) =>
+                    <div id={`tabletab-${item}`}
+                         style={{
+                             "border-bottom": currentTab() === `${item}` ? "2px solid green" : "2px solid transparent"
+                         }}
+                         class="px-20 f-sans f-15 cursor-pointer"
+                         onClick={() => {
+                             if (props.setActiveTab) {
+                                 props.setActiveTab(item);
+                             }
+                             setCurrentTab(item);
+                         }}
+                    >
+                        <div style={{"align-items": 'center', display: 'flex'}} class={'f-15'}>
+                            {item.includes('Mobile Preview') ? <Icon icon="mdi:cellphone"/> :
+                                <Icon icon="mdi:monitor"/>}&nbsp;
+                            {item.replace('Preview', '')}
+                        </div>
+                    </div>}
+            </For>
 
-   </div>
-   )
+
+        </div>
+    )
 }

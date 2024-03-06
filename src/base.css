@@ -382,3 +382,12 @@ Make elements with the HTML hidden attribute stay hidden by default.
 [hidden] {
     display: none;
 }
+.rotate-top {
+    transition: transform 0.2s linear;
+    transform: rotate(0deg);
+}
+
+.rotate-bottom {
+    transition: transform 0.2s linear;
+    transform: rotate(180deg);
+}
