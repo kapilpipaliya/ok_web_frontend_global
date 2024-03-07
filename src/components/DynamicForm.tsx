@@ -235,17 +235,20 @@ export function FormGroup(props: FormGroupProps) {
                     isRealTime={false}
                 />
                 const permissions = metaVertex.P.metaId ? getPermissions(graph.vertexes[metaVertex.P.metaId]) : getPermissions(metaVertex);
+                console.log(component())
                 return (
                     <Switch>
                         <Match when={component() === "Table"}>
-                            <h3><Label/></h3>
+                            {/* <h3><Label/></h3> */}
                             <Content/>
                         </Match>
+
                         <Match when={component() === "CollectionOption"}>
                             <Content/>
                         </Match>
+
                         <Match when={true}>
-                            <div className=" grid-cols:2 py:5 w:450">
+                            <div class=" grid-cols:2 py:5 w:450">
                                 <div id={id}>
                                     <Label/>
                                 </div>
@@ -491,101 +494,107 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
 
     return (
-        <RepeaterContext.Provider value={[record.vertex, ...useContext(RepeaterContext)]}>
-            <div
-                ref={(el) => {
-                    setDivRef(el);
-                    validationGroup = new dxValidationGroup(divRef()!);
-                }}
+      <RepeaterContext.Provider
+        value={[record.vertex, ...useContext(RepeaterContext)]}
+      >
+        <div
+          ref={(el) => {
+            setDivRef(el);
+            validationGroup = new dxValidationGroup(divRef()!);
+          }}
+        >
+          <Show when={props.showSubmitButtonOnTop ?? false}>
+            <SubmitButton />
+          </Show>
+
+          <Show when={divRef()}>
+            <FormContext.Provider
+              value={{
+                record,
+                cleanUpConfig,
+                validationGroup: validationGroup!,
+              }}
             >
-                <Show when={props.showSubmitButtonOnTop ?? false}>
-                    <SubmitButton/>
-                </Show>
+              {/* Main Tab is displayed as top level fields */}
+              <Show when={groupByTabsAndGroup["main"]}>
+                <For each={Object.keys(groupByTabsAndGroup["main"])}>
+                  {(group) => (
+                    <>
+                      <div class="dx-fieldset" style={{ "max-width": "100%" }}>
+                        {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
 
-                <Show when={divRef()}>
-                    <FormContext.Provider value={{record, cleanUpConfig, validationGroup: validationGroup!}}>
-                        {/* Main Tab is displayed as top level fields */}
-                        <Show when={groupByTabsAndGroup["main"]}>
-                            <For each={Object.keys(groupByTabsAndGroup["main"])}>
-                                {(group) => (
-                                    <>
-                                        <div
-                                            class="dx-fieldset"
-                                            style={{"max-width": "100%"}}
-                                        >
-                                            {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+                        <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
+                          <div class=" p:10 w:full ">
+                            <div class="w:full 	 justify-content:space-between	">
+                              <div class="f:16 font:sans font:bold	">
+                                QUICK EDIT
+                              </div>
+                              <Show when={props.importExportButtons ?? true}>
+                                <div
+                                  style={{
+                                    "justify-content": "center",
+                                    display: "flex",
+                                  }}
+                                >
+                                  <GenericField
+                                    meta={
+                                      {
+                                        P: {
+                                          component: "Button",
+                                          props: {
+                                            stylingMode: "contained",
+                                            width: "120",
+                                            text: "Import",
+                                            class:
+                                              "bg:blue bg:rgb(24,98,234):hover text-fill:white",
+                                          },
+                                        },
+                                      } as any
+                                    }
+                                    onClick={onImportClick}
+                                  />
+                                  <GenericField
+                                    meta={
+                                      {
+                                        P: {
+                                          component: "Button",
 
+                                          props: {
+                                            stylingMode: "contained",
+                                            width: "120",
+                                            text: "Export",
+                                            class: " text-fill:blue b:blue",
+                                          },
+                                        },
+                                      } as any
+                                    }
+                                    onClick={onExportClick}
+                                  />
+                                </div>
+                              </Show>
+                            </div>
 
-                                            <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
-                                                <div class=" p:10 w:full ">
-                                                    <div class="w:full 	 justify-content:space-between	">
+                            <FormGroup
+                              metaAttributes={
+                                groupByTabsAndGroup["main"][group]
+                              }
+                              vertex={record.vertex}
+                              setValue={record.setValue}
+                              txnId={record.txnId}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </For>
+              </Show>
 
-                                                        <div class="f:16 font:sans font:bold	">QUICK EDIT</div>
-                                                        <Show when={props.importExportButtons ?? true}>
-                                                            <div style={{"justify-content": "center", display: "flex"}}>
-                                                                <GenericField
-                                                                    meta={
-                                                                        {
-                                                                            P: {
-                                                                                component: "Button",
-                                                                                props: {
-                                                                                    stylingMode: "contained",
-                                                                                    width: "120",
-                                                                                    text: "Import",
-                                                                                    class:
-                                                                                        "bg:blue bg:rgb(24,98,234):hover text-fill:white",
-                                                                                },
-                                                                            },
-                                                                        } as any
-                                                                    }
-                                                                    onClick={onImportClick}
-                                                                />
-                                                                <GenericField
-                                                                    meta={
-                                                                        {
-                                                                            P: {
-                                                                                component: "Button",
-
-                                                                                props: {
-                                                                                    stylingMode: "contained",
-                                                                                    width: "120",
-                                                                                    text: "Export",
-                                                                                    class: " text-fill:blue b:blue",
-                                                                                },
-                                                                            },
-                                                                        } as any
-                                                                    }
-                                                                    onClick={onExportClick}
-                                                                />
-                                                            </div>
-                                                        </Show>
-                                                    </div>
-
-                                                    <FormGroup
-                                                        metaAttributes={groupByTabsAndGroup["main"][group]}
-                                                        vertex={record.vertex}
-                                                        setValue={record.setValue}
-                                                        txnId={record.txnId}
-                                                    />
-                                                </div>
-
-
-                                            </div>
-
-                                        </div>
-
-
-                                    </>
-                                )}
-                            </For>
-                        </Show>
-
-
-                        <Show when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}>
-
-
-                            {/* old code for tabs */}
-                            {/* <div
+              <Show
+                when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}
+              >
+                {/* old code for tabs */}
+                {/* <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
                   dataSource: tabs,
@@ -602,40 +611,58 @@ export const DynamicForm = (props: DynamicFormProps) => {
               }}
               
             /> */}
-                            <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
+                <TableTabs tabs={tabs} setActiveTab={setActiveTab} />
 
-
-                            <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
-                                {(group) => {
-                                    return (
-                                        <div
-                                            class="dx-fieldset"
-                                            style={{"max-width": getTabsWidth(groupByTabsAndGroup[activeTab()][group])}}
-                                        >
-                                            <Show when={group !== "main"}>
-                                                <div class="dx-fieldset-header">{group}</div>
-                                            </Show>
-                                            <FormGroup
-                                                metaAttributes={groupByTabsAndGroup[activeTab()][group]}
-                                                vertex={record.vertex}
-                                                setValue={record.setValue}
-                                                txnId={record.txnId}
-                                            />
-                                        </div>
-                                    );
-                                }}
-                            </For>
+                <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
+                  {(group) => {
+                    return (
+                      <div
+                        class="dx-fieldset"
+                        style={{
+                          "max-width": getTabsWidth(
+                            groupByTabsAndGroup[activeTab()][group]
+                          ),
+                        }}
+                      >
+                        <Show when={group !== "main"}>
+                          <div class="dx-fieldset-header">{group}</div>
                         </Show>
-                        {/* @ts-ignore */}
-                        <div ref={(el) => new dxValidationSummary(el, {validationGroup: validationGroup!})}/>
+                        <FormGroup
+                          metaAttributes={
+                            groupByTabsAndGroup[activeTab()][group]
+                          }
+                          vertex={record.vertex}
+                          setValue={record.setValue}
+                          txnId={record.txnId}
+                        />
+                      </div>
+                    );
+                  }}
+                </For>
+              </Show>
+              {/* @ts-ignore */}
+              <div
+                ref={(el) =>
+                  new dxValidationSummary(el, {
+                    validationGroup: validationGroup!,
+                  })
+                }
+              />
 
-                        <Show when={!(props.showSubmitButtonOnTop ?? false) && !props.isLoginRegister}>
-                            <SubmitButton/>
-                        </Show>
-                    </FormContext.Provider>
-                </Show>
-                <Show when={popup()}><PopOver/></Show>
-            </div>
-        </RepeaterContext.Provider>
+              <Show
+                when={
+                  !(props.showSubmitButtonOnTop ?? false) &&
+                  !props.isLoginRegister
+                }
+              >
+                <SubmitButton />
+              </Show>
+            </FormContext.Provider>
+          </Show>
+          <Show when={popup()}>
+            <PopOver />
+          </Show>
+        </div>
+      </RepeaterContext.Provider>
     );
 };

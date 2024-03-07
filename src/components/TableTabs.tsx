@@ -10,6 +10,17 @@ interface TableTabProps {
 export function TableTabs(props: TableTabProps) {
     const [currentTab, setCurrentTab] = createSignal<string>(props.tabs[0]);
 
+    const dynamicIcon = (name : string) => {
+        switch (name) {
+            case 'Mobile Preview':
+                return <Icon icon="mdi:cellphone"/>
+            case 'Web Preview':
+                return <Icon icon="mdi:monitor"/>
+            default:
+                return  <div/>
+        }
+    }
+
     return (
         <div class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
 
@@ -28,10 +39,8 @@ export function TableTabs(props: TableTabProps) {
                              setCurrentTab(item);
                          }}
                     >
-                        <div style={{"align-items": 'center', display: 'flex'}} class={'f-15'}>
-                            {item.includes('Mobile Preview') ? <Icon icon="mdi:cellphone"/> :
-                                <Icon icon="mdi:monitor"/>}&nbsp;
-                            {item.replace('Preview', '')}
+                        <div style={{cursor: 'pointer',"align-items": 'center', "font-weight": 'bold',display: 'flex'}} class={'f-15'}>
+                            {dynamicIcon(item)}&nbsp;{item}
                         </div>
                     </div>}
             </For>

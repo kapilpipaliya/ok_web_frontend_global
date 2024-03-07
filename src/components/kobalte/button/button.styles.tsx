@@ -21,7 +21,10 @@ export const buttonStyles = tv({
   },
   variants: {
     variant: {
-      solid: {},
+      solid: {
+        root: 
+          'f: #0070F3',
+      },
       soft: {},
       inverted: {},
       default: {
@@ -67,11 +70,15 @@ export const buttonStyles = tv({
       },
     },
     color: {
-      primary: {},
+      primary: {
+        root: ['background-color: #dc2626;']
+      },
       success: {},
       info: {},
       warning: {},
-      danger: {},
+      danger: {
+        root: 'bg:green',
+      },
       discovery: {},
     },
     size: {

@@ -1954,8 +1954,8 @@ export const PageDesignerDragAndDrop = () => {
         })
     })
 
-    const [className, setClassName] = createSignal("overflow:auto mx:auto w:412px h:914px border:1|solid|blue-60 m:1rem")
-    const mobileClass = "overflow:auto mx:auto w:412px h:800̉̉px border:1|solid|blue-60 m:1rem"
+    const [className, setClassName] = createSignal("overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5")
+    const mobileClass = "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem"
     const webClass = "border:1|solid|blue-60 m:1rem h:800px overflow:auto mx:auto"
     const tabs = ["Mobile Preview", "Web Preview"]
 
@@ -1996,19 +1996,19 @@ export const PageDesignerDragAndDrop = () => {
             >
                 <Switch>
                     <Match when={props.type === 'components'}>
-                        <div class="mb:10" use:dragHandle>Components</div>
+                        <div class="mb:10" style="font-weight: bold" use:dragHandle>Components</div>
                         {oneComponents0}
                         {/*{oneComponents}*/}
                     </Match>
                     <Match when={props.type === 'collection'}>
-                        <div class="mb:10" use:dragHandle>Collection Fields</div>
+                        <div class="mb:10" style="font-weight: bold" use:dragHandle>Collection Fields</div>
                         {twoCollections}
                     </Match>
                     <Match when={props.type === 'layout'}>
 
                         <div class="mb:12"
                              style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                            <div style="cursor: pointer; flex-grow: 1;" onClick={onClickLayout}>Layout</div>
+                            <div style="cursor: pointer; flex-grow: 1; font-weight: bold" onClick={onClickLayout}>Layout</div>
                             <div style="cursor: pointer;" onClick={onClickLayout}>
                                 <Icon
                                     icon={'mdi:chevron-up'}
@@ -2031,7 +2031,7 @@ export const PageDesignerDragAndDrop = () => {
                     <Match when={props.type === 'properties'}>
                         <div class="mb:12"
                              style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                            <div style="cursor: pointer; flex-grow: 1;" onClick={onClickProperties}>Properties</div>
+                            <div style="cursor: pointer; flex-grow: 1; font-weight: bold" onClick={onClickProperties}>Properties</div>
                             <Show when={selectedId() !== -1}>
                                 <GenericField
                                     meta={{
@@ -2062,7 +2062,7 @@ export const PageDesignerDragAndDrop = () => {
                     <Match when={props.type === 'form'}>
                         <div class="mb:12"
                              style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                            <div style="cursor: pointer; flex-grow: 1;" onClick={onClickForm}>Form</div>
+                            <div style="cursor: pointer; flex-grow: 1; font-weight: bold" onClick={onClickForm}>Form</div>
                             <div style="cursor: pointer;" onClick={onClickForm}>
                                 <Icon
                                     icon={'mdi:chevron-up'}

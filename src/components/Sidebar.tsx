@@ -97,7 +97,7 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
     }
 
     return (
-        <div class="position:fixed top:0 left:0 border-right:1 h:full  overflow-y:auto w:200">
+        <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:200">
             <nav class="flex bg:white position:relative">
                 <div class="position:absolute top:7 left:8 font:20">
                     <Icon icon="ic:baseline-search"/>
