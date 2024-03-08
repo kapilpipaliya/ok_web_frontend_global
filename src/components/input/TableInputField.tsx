@@ -337,28 +337,22 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
     }
     const AddNewButton = () => {
         // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
-        return <GenericField
+        return (
+          <GenericField
             meta={
-                {
-                    P: {
-                        component: "ButtonGroup",
-                        props: {
-                            keyExpr: "id",
-                            items: [
-                                {
-                                    text: "Add",
-                                    icon: "add",
-                                    id: "add",
-                                    hint: "Add New",
-                                    
-                                },
-                            ],
-                        },
-                    },
-                } as unknown as Vertex
+              {
+                P: {
+                  component: "Button",
+                  props: {
+                    children: "Add",
+                    variant: "secondary",
+                    onClick: insertNewRow,
+                  },
+                },
+              } as unknown as Vertex
             }
-            onClick={insertNewRow}
-        />
+          />
+        );
     }
 
 

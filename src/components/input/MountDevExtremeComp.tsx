@@ -49,6 +49,7 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
    
         let attributes: any = {};
         let comp: any;
+console.log("component",component);
 
         if (component === "Box") {
             // https://github.com/DevExpress/DevExtreme/blob/23_1/js/ui/box.js#L273
@@ -750,20 +751,19 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
                 },
             } as dxAccordionProperties);
 
-        } else if (component === "ButtonGroup") {
-            comp = dxButtonGroup;
-            Object.assign(attributes, {
-                items: [],
-                selectionMode: "none",
-
-                onItemClick: (e) => {
-                    // onClick: (item: any) => void;
-                    onClick?.(e.itemData);
-                },
-            } as dxButtonGroupProperties);
-
-
-        } else if (component === "Tooltip") {
+        }
+        //  else if (component === "ButtonGroup") {
+        //     comp = dxButtonGroup;
+        //     Object.assign(attributes, {
+        //         items: [],
+        //         selectionMode: "none",
+        //         onItemClick: (e) => {
+        //             // onClick: (item: any) => void;
+        //             onClick?.(e.itemData);
+        //         },
+        //     } as dxButtonGroupProperties);
+        // }
+         else if (component === "Tooltip") {
             comp = dxTooltip;
             Object.assign(attributes, {
                 target: "#target-item",
@@ -826,7 +826,6 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
                 },
             } as dxDropDownButtonProperties);
         } else if (
-            // drawer has problem when it rendered, it dont know the proper height of the content so sidebar height is not proper.
             component === "Drawer"
         ) {
             comp = dxDrawer;
@@ -896,15 +895,15 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
             }
         })
 
-        if (data?.P) {
-            if (component === "Button") {
-                createEffect(() => {
-                    instance()?.option("text", data!.P[meta.P[IdAttr]])
-                });
-            } else if (component === "ButtonGroup") {
-                createEffect(() => instance()?.option("selectedItems", data!.P[meta.P[IdAttr]]));
-            }
-        }
+        // if (data?.P) {
+        //     if (component === "Button") {
+        //         createEffect(() => {
+        //             instance()?.option("text", data!.P[meta.P[IdAttr]])
+        //         });
+        //     } else if (component === "ButtonGroup") {
+        //         createEffect(() => instance()?.option("selectedItems", data!.P[meta.P[IdAttr]]));
+        //     }
+        // }
 
         createEffect(() => {
             if (data?.P) {

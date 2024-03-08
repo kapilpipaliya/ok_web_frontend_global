@@ -414,7 +414,7 @@ Popup\t\t\tDialog\t
 Toast\t\t\tDialog\t
 Tooltip\t\t\tDialog\t
 Autocomplete\tString\t\tForm\t
-ButtonGroup\t\t\tForm\tTRUE
+// ButtonGroup\t\t\tForm\tTRUE
 Calendar\tInteger\t\tForm\t
 CheckBox\tBoolean\t\tForm\t
 ColorBox\tString\t\tForm\t

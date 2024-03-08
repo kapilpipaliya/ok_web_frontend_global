@@ -728,10 +728,10 @@ export const PageDesignerDragAndDrop = () => {
                 catogery: "Autocomplete",
                 icon: <Icon icon="fluent-mdl2:completed" width="24" height="24"/>
             },
-            {
-                catogery: "ButtonGroup",
-                icon: <Icon icon="tdesign:button" width="24" height="24"/>
-            },
+            // {
+            //     catogery: "ButtonGroup",
+            //     icon: <Icon icon="tdesign:button" width="24" height="24"/>
+            // },
             {
                 catogery: "Calendar",
                 icon: <Icon icon="bx:calendar" width="24" height="24"/>
