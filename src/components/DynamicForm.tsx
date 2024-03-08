@@ -320,7 +320,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
     const groupByTabsAndGroup = record.groupByTabsAndGroup();
     // TODO: Fix Tabs are not reactive
     const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
-    const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
     const cleanUpConfig = {} as { [key: string]: any };
 
@@ -491,7 +490,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
             onClick={onCancel}
         />
     </div>
-
+    const [activeTab, setActiveTab] = createSignal(tabs[0]);
+  
 
     return (
       <RepeaterContext.Provider

@@ -236,7 +236,7 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                 {/*<Icon icon="material-symbols:add-box"  />*/}
                 <div>
                   <Icon
-                    icon="mdi:delete"
+                    icon="mingcute:delete-line"
                     class="cursor:pointer"
                     style={{ color: "red" }}
                     onClick={() =>
@@ -255,7 +255,7 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
 
                 <Show when={expandVertex()}>
                   <Icon
-                    icon="mdi:plus"
+                    icon="icon-park-outline:plus"
                     class="cursor:pointer "
                     style={{ color: "green" }}
                     onClick={() => {
@@ -346,7 +346,7 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                             keyExpr: "id",
                             items: [
                                 {
-                                    text: "Add Properties",
+                                    text: "Add",
                                     icon: "add",
                                     id: "add",
                                     hint: "Add New",
@@ -377,9 +377,9 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
             {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
             {/*</Show>*/}
             
-            <Show when={sortedVertexes().length}>
+            {/* <Show when={sortedVertexes().length}> */}
             <AddNewButton />
-            </Show>
+            {/* </Show> */}
 
             <div
               class={css`
@@ -448,8 +448,7 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                     </tr>
                     </thead>
                 </Show>
-                <tbody
-                >
+                <tbody>
                   {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                   {/*  <DragDropSensors />*/}
                   {/*  <SortableProvider ids={ids()}>*/}
