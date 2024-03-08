@@ -35,7 +35,7 @@ import { mountComponent } from "./MountDevExtremeComp";
 import {componentDrag} from "../PageDesignerDragAndDrop";
 import {setParentValue} from "./SelectInputField";
 import {selectedId} from "../pageStore";
-import {Accordion, Avatar, Button, Select, Spinner, Tooltip} from "../solid-blocks/blocks";
+import {Accordion, Avatar, Bar, Breadcrumbs, Button, Progress, Select, Spinner, Tooltip} from "../solid-blocks/blocks";
 
 
 const GlobalDragData = {} as {from: Vertex};
@@ -490,11 +490,11 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Avatar>
         </Match>
-        <Match when={component() === "Select"}>
+        {/* <Match when={component() === "Select"}>
           <Select {...props.meta.P.props}>
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Select>
-        </Match>
+        </Match> */}
         <Match when={component() === "Loading"}>
           <Spinner {...props.meta.P.props}>
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
@@ -504,6 +504,16 @@ export function GenericField(
           <Accordion {...props.meta.P.props}>
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Accordion>
+        </Match>
+        <Match when={component() === "Breadcrumbs"}>
+          <Breadcrumbs {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Breadcrumbs>
+        </Match>
+        <Match when={component() === "Progress"}>
+          <Progress {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Progress>
         </Match>
         <Match when={true}>
           <Dynamic
@@ -544,7 +554,7 @@ export function GenericField(
               //   const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
               //   setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
               // }
-            }}  
+            }}
             // ref={(el: any) => {
             //   if (["Box"].includes(component())) return;
             //   runWithOwner(outerOwner, () => {

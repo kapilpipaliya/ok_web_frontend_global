@@ -350,6 +350,7 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                     onClick: insertNewRow,
                   },
                 },
+                // },
                 // P: {
                 //   component: "Avtar",
                 //   props: {
@@ -388,6 +389,26 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                 //         <p>Arbitrary content</p>
                 //       </>
                 //     ),
+                //   },
+                // },
+                // P: {
+                //   component: "Breadcrumbs",
+                //   props: {
+                //     children: (
+                //       <>
+                //         <a href="/">Home</a>
+                //         <a href="/docs">Docs</a>
+                //         <span>Breadcrumbs</span>
+                //       </>
+                //     ),
+                //   },
+                // },
+
+                // P: {
+                //   component: "Progress",
+                //   props: {
+                //     max:"100",
+                //     value:32
                 //   },
                 // },
               } as unknown as Vertex
