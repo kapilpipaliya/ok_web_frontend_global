@@ -97,7 +97,7 @@ const genericComponents2 = [
     "BarGauge",
     "ActionSheet",
     "Accordion",
-    "ButtonGroup",
+    // "ButtonGroup",
     "Tooltip",
     "PivotGrid",
     "DropDownButton",

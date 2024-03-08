@@ -35,7 +35,7 @@ import { mountComponent } from "./MountDevExtremeComp";
 import {componentDrag} from "../PageDesignerDragAndDrop";
 import {setParentValue} from "./SelectInputField";
 import {selectedId} from "../pageStore";
-import {Button} from "../solid-blocks/blocks";
+import {Accordion, Avatar, Button, Select, Spinner, Tooltip} from "../solid-blocks/blocks";
 
 
 const GlobalDragData = {} as {from: Vertex};
@@ -326,18 +326,28 @@ export function GenericField(
 
   const repeaterContext = useContext(RepeaterContext);
   return (
-    <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
+    <Show
+      when={!props.disabled}
+      fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}
+    >
       <Switch>
         <Match when={component() === "Repeater"}>
           <For
             each={
               props.data ||
-              getSelectionOptions([props.meta], `g:'${PageRenderUtils.getCollection(props.meta)!}'`).vertexes
+              getSelectionOptions(
+                [props.meta],
+                `g:'${PageRenderUtils.getCollection(props.meta)!}'`
+              ).vertexes
             }
           >
             {(vertex) => (
-              <RepeaterContext.Provider value={[vertex, ...useContext(RepeaterContext)]}>
-                <PageRenderContext.Provider value={[...useContext(PageRenderContext), props.meta]}>
+              <RepeaterContext.Provider
+                value={[vertex, ...useContext(RepeaterContext)]}
+              >
+                <PageRenderContext.Provider
+                  value={[...useContext(PageRenderContext), props.meta]}
+                >
                   <PageItemRender metaVertex={props.meta} data={vertex} />
                 </PageRenderContext.Provider>
               </RepeaterContext.Provider>
@@ -345,11 +355,19 @@ export function GenericField(
           </For>
         </Match>
         <Match when={component() === "Text"}>
-          <Show when={props.meta.P.props?.as} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
-            <Dynamic component={props.meta.P.props?.as} class={getValueFromVertexOrKey(props.meta.P.props, "class")} draggable onDragStart={e => {
-              e.stopPropagation();
-              return GlobalDragData.from = props.meta;
-            }}>
+          <Show
+            when={props.meta.P.props?.as}
+            fallback={getText(props.meta.P.props?.text, repeaterContext)}
+          >
+            <Dynamic
+              component={props.meta.P.props?.as}
+              class={getValueFromVertexOrKey(props.meta.P.props, "class")}
+              draggable
+              onDragStart={(e) => {
+                e.stopPropagation();
+                return (GlobalDragData.from = props.meta);
+              }}
+            >
               {getText(props.meta.P.props?.text, repeaterContext)}
               {props.children}
               <PageItemRender metaVertex={props.meta} />
@@ -360,8 +378,18 @@ export function GenericField(
           <Switch>
             <Match when={PageRenderUtils.getDataVertex(props.meta)}>
               {(vertex) => (
-                <A {...props.meta.P.props} href={(showNav() ? "/nav/" : "/") + vertex().P.name} draggable>
-                  <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+                <A
+                  {...props.meta.P.props}
+                  href={(showNav() ? "/nav/" : "/") + vertex().P.name}
+                  draggable
+                >
+                  <Show
+                    when={!props.meta.P.props?.text}
+                    fallback={getText(
+                      props.meta.P.props?.text,
+                      repeaterContext
+                    )}
+                  >
                     {props.children}
                     <PageItemRender metaVertex={props.meta} />
                   </Show>
@@ -369,8 +397,15 @@ export function GenericField(
               )}
             </Match>
             <Match when={props.meta.P.props?.href}>
-              <A {...props.meta.P.props} href={getUrl(props.meta.P.props.href, repeaterContext)} draggable>
-                <Show when={!props.meta.P.props?.text} fallback={getText(props.meta.P.props?.text, repeaterContext)}>
+              <A
+                {...props.meta.P.props}
+                href={getUrl(props.meta.P.props.href, repeaterContext)}
+                draggable
+              >
+                <Show
+                  when={!props.meta.P.props?.text}
+                  fallback={getText(props.meta.P.props?.text, repeaterContext)}
+                >
                   {props.children}
                   <PageItemRender metaVertex={props.meta} />
                 </Show>
@@ -389,7 +424,12 @@ export function GenericField(
           <PageView number={1} vertex={props.data} />
         </Match>
         <Match when={component() === "Image"}>
-          <img loading="lazy" {...props.meta.P.props} src={getText(props.meta.P.props?.src, repeaterContext)} draggable={true} />
+          <img
+            loading="lazy"
+            {...props.meta.P.props}
+            src={getText(props.meta.P.props?.src, repeaterContext)}
+            draggable={true}
+          />
         </Match>
         <Match when={component() === "Form"}>
           <Form />
@@ -417,17 +457,23 @@ export function GenericField(
             component={props.meta.P.props?.as || "div"}
             {...getAttrs(props.meta)}
             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
-            classList={{'bg:red': true}}
-            onDragOver={e=>{
+            classList={{ "bg:red": true }}
+            onDragOver={(e) => {
               e.stopPropagation();
-              e.preventDefault()}}
-            onDrop={e => {
-              debugger
+              e.preventDefault();
+            }}
+            onDrop={(e) => {
+              debugger;
               const parentAttrVertex = props.meta;
               // disable drag and drop if it not support child.
-              const fromVertex =  GlobalDragData.from;
+              const fromVertex = GlobalDragData.from;
               const toIndex = 5;
-              const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
+              const rowId = componentDrag(
+                props.txnId!,
+                fromVertex,
+                toIndex,
+                parentAttrVertex!
+              );
               if (rowId === -1) return;
             }}
           >
@@ -435,57 +481,87 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <Button {...props.meta.P.props}>{props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}</Button>
+          <Button {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Button>
+        </Match>
+        <Match when={component() === "Avtar"}>
+          <Avatar {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Avatar>
+        </Match>
+        <Match when={component() === "Select"}>
+          <Select {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Select>
+        </Match>
+        <Match when={component() === "Loading"}>
+          <Spinner {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Spinner>
+        </Match>
+        <Match when={component() === "Accordion"}>
+          <Accordion {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          </Accordion>
         </Match>
         <Match when={true}>
           <Dynamic
             component={props.meta.P.props?.as || "div"}
             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
             // classList={{'bg:red': true}}
-            onDragOver={e=>{
+            onDragOver={(e) => {
               e.stopPropagation();
-              e.preventDefault()}}
-            onDrop={e => {
+              e.preventDefault();
+            }}
+            onDrop={(e) => {
               // Stop the event from propagating further
               e.stopPropagation();
               const parentAttrVertex = props.meta;
               // disable drag and drop if it not support child.
-              const fromVertex =  GlobalDragData.from;
+              const fromVertex = GlobalDragData.from;
               const toIndex = 5;
-              console.log({parentAttrVertex,fromVertex, toIndex})
+              console.log({ parentAttrVertex, fromVertex, toIndex });
               // const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
               // if (rowId === -1) return;
-              const fromParentVertex = getParentVertex(['Attr'], fromVertex);
+              const fromParentVertex = getParentVertex(["Attr"], fromVertex);
               if (fromParentVertex.vertex) {
                 // remove previous incoming edge if present.
-                setParentValue(props.txnId!, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex)
+                setParentValue(props.txnId!, fromVertex, {
+                  P: { props: { type: "Attr" } },
+                } as unknown as Vertex);
               }
               const toId = props.meta!.id;
               // add new edge.
               // if (e.dropInsideItem) {
-                setParentValue(props.txnId!, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toId as number)
+              setParentValue(
+                props.txnId!,
+                fromVertex,
+                { P: { props: { type: "Attr" } } } as unknown as Vertex,
+                toId as number
+              );
               // } else {
               //   const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
               //   setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
               // }
-            }}
-            ref={(el: any) => {
-              if (["Box"].includes(component())) return;
-              runWithOwner(outerOwner, () => {
-                mountComponent(
-                  el,
-                  component(),
-                  props.meta,
-                  props.data,
-                  props.setValue!,
-                  outerOwner!,
-                  props.disabled!,
-                  props.ref,
-                  props.onClick,
-                  events,
-                );
-              });
-            }}
+            }}  
+            // ref={(el: any) => {
+            //   if (["Box"].includes(component())) return;
+            //   runWithOwner(outerOwner, () => {
+            //     mountComponent(
+            //       el,
+            //       component(),
+            //       props.meta,
+            //       props.data,
+            //       props.setValue!,
+            //       outerOwner!,
+            //       props.disabled!,
+            //       props.ref,
+            //       props.onClick,
+            //       events
+            //     );
+            //   });
+            // }}
           >
             <Switch>
               <Match when={component() === "Drawer"}>

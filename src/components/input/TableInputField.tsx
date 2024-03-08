@@ -54,6 +54,7 @@ import {
     PageRenderUtils, RepeaterContext
 } from "./GenaricField";
 import {getLastItem} from "../../utils/functions";
+import { AccordionHeader } from "../solid-blocks/blocks";
 
 export function TableInputField(props: ComponentProps & { txnId?: number; isRealTime?: boolean; }) {
     const {Ws} = useContext(WsContext);
@@ -349,6 +350,46 @@ export function TableInputField(props: ComponentProps & { txnId?: number; isReal
                     onClick: insertNewRow,
                   },
                 },
+                // P: {
+                //   component: "Avtar",
+                //   props: {
+                //     img: "dn.net/static_assets/staging/22spring/free/browse-vector-categories-collections/Card4_399895799.jpg?width=580",
+                //     name: "Savan",
+                //     fallback:<div>Error</div>,
+                //   },
+                // },
+                // P: {
+                //   component: "Select",
+                //   props: {
+                //     "aria-orientation": "vertical",
+                //     label: <div>framework</div>,
+                //     children: (
+                //       <>
+                //         <option value="5">5</option>
+                //         <option value="3">3</option>
+                //       </>
+                //     ),
+                //     // onchange: onchange,
+                //     // value:value,
+                //   },
+                // },
+                // P: {
+                //   component: "Loading",
+                //   props: {
+                //   },
+                // },
+                // P: {
+                //   component: "Accordion",
+                //   props: {
+                //     open: false,
+                //     children: (
+                //       <>
+                //         <AccordionHeader>Header</AccordionHeader>
+                //         <p>Arbitrary content</p>
+                //       </>
+                //     ),
+                //   },
+                // },
               } as unknown as Vertex
             }
           />
