@@ -677,11 +677,11 @@ export const mountComponent = (el: HTMLDivElement, component: string, meta: Vert
                     color: "#ffaa66",
                 },
             } as dxChartProperties);
-        } else if (component === "Button") {
-            comp = dxButton;
-            Object.assign(attributes, {
-                onClick: onClick,
-            } as dxButtonProperties);
+        // } else if (component === "Button") {
+        //     comp = dxButton;
+        //     Object.assign(attributes, {
+        //         onClick: onClick,
+        //     } as dxButtonProperties);
         } else if (component === "BarGauge") {
             comp = dxBarGauge;
             // [47.27, 65.32, 84.59, 71.86]

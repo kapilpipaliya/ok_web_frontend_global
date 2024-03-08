@@ -59,11 +59,10 @@ perm`
                         P: {
                             component: "Button",
                             [IdAttr]: "meta",
-                            props: {stylingMode: "contained", width: "120", type: "success"},
+                            props: {children: "Import"},
                         },
                     } as unknown as Vertex
                 }
-                data={{P: {meta: "Import"}} as unknown as Vertex}
                 onClick={() => onDataDirectoryImportClick(config[0].record, Ws)}
             />
         </>

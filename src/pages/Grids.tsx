@@ -333,12 +333,12 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 [IdAttr]: "meta",
                                 props: {
                                     class: "bg:blue bg:rgb(24,98,234):hover text-fill:white ",
-                                    icon: "add",
+                                    children: "Add New",
                                 },
                             },
                         } as unknown as Vertex
                     }
-                    data={{P: {meta: "Add new"}} as unknown as Vertex}
+
                     onClick={() => {
                         navigate("./new");
                     }}

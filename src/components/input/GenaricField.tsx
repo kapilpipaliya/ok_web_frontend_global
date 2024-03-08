@@ -35,6 +35,9 @@ import { mountComponent } from "./MountDevExtremeComp";
 import {componentDrag} from "../PageDesignerDragAndDrop";
 import {setParentValue} from "./SelectInputField";
 import {selectedId} from "../pageStore";
+import {Button} from "../solid-blocks/blocks";
+
+
 const GlobalDragData = {} as {from: Vertex};
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -291,11 +294,7 @@ export function GenericField(
                         P: {
                           component: "Button",
                           props: {
-                            stylingMode: "contained",
-                            width: "120",
-                            type: "success",
-                            useSubmitBehavior: true,
-                            text: "Submit",
+                            children: "Submit",
                           },
                         },
                       } as any
@@ -312,7 +311,7 @@ export function GenericField(
                   {
                     P: {
                       component: "Button",
-                      props: { stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel" },
+                      props: { variant: "secondary", children: "Cancel" },
                     },
                   } as any
                 }
@@ -434,6 +433,9 @@ export function GenericField(
           >
             {getText(props.meta.P.props?.text, repeaterContext)}
           </Dynamic>
+        </Match>
+        <Match when={component() === "Button"}>
+          <Button {...props.meta.P.props}>{props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}</Button>
         </Match>
         <Match when={true}>
           <Dynamic

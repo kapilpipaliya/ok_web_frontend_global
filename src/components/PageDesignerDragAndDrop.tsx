@@ -1678,7 +1678,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta: {
                         P: {
                             component: "Button",
-                            props: {stylingMode: "contained", width: "120", text: "Import", type: "success",}
+                            props: { children: "Import", variant: "primary",}
                         }
                     } as any,
                     onClick: () => {
@@ -1696,7 +1696,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta: {
                         P: {
                             component: "Button",
-                            props: {stylingMode: "contained", type: "success", text: "Submit"}
+                            props: { type: "primary", children: "Submit"}
                         }
                     } as any,
                     onClick: onImportsSubmit
@@ -1705,7 +1705,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta: {
                         P: {
                             component: "Button",
-                            props: {stylingMode: "contained", type: "danger", text: "Cancel"}
+                            props: { variant: "secondary", children: "Cancel"}
                         }
                     } as any,
                     onClick: onImportsCancel
@@ -1827,7 +1827,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta={{
                         P: {
                             component: "Button",
-                            props: {stylingMode: "contained", width: "120", text: "Rules"}
+                            props: {children: "Rules"}
                         }
                     } as any}
                     onClick={toggleRulesModal}
@@ -1837,7 +1837,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta={{
                         P: {
                             component: "Button",
-                            props: {stylingMode: "contained", width: "120", text: "Import"}
+                            props: { children: "Import"}
                         }
                     } as any}
                     onClick={toggleImportsModal}
@@ -1878,9 +1878,7 @@ export const PageDesignerDragAndDrop = () => {
                                             P: {
                                                 component: "Button",
                                                 props: {
-                                                    stylingMode: "contained",
-                                                    type: "success",
-                                                    text: "Submit"
+                                                    children: "Submit"
                                                 }
                                             }
                                         } as any}
@@ -1892,9 +1890,7 @@ export const PageDesignerDragAndDrop = () => {
                                             P: {
                                                 component: "Button",
                                                 props: {
-                                                    stylingMode: "contained",
-                                                    type: "danger",
-                                                    text: "Cancel"
+                                                    children: "Cancel"
                                                 }
                                             }
                                         } as any}
@@ -2037,7 +2033,7 @@ export const PageDesignerDragAndDrop = () => {
                                     meta={{
                                         P: {
                                             component: "Button",
-                                            props: {stylingMode: 'text', type: "danger", icon: "trash"}
+                                            props: {variant: 'secondary', children: "Delete"}
                                         }
                                     } as any}
                                     onClick={deleteLayout}/>

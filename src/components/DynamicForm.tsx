@@ -467,15 +467,13 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 P: {
                     component: "Button",
                     props: {
-                        stylingMode: "contained",
-                        width: "120",
-                        type: "success",
-                        useSubmitBehavior: true,
-                        text: "Submit"
+                        type: "primary",
+                        children: "Submit",
+                        onClick: onSubmit
                     }
                 }
             } as any}
-            onClick={onSubmit}
+
         />}>
             {props.submitButton}
         </Show>
@@ -484,10 +482,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
             meta={{
                 P: {
                     component: "Button",
-                    props: {stylingMode: "contained", width: "120", type: "danger", icon: "back", text: "Cancel"}
+                    props: {variant: "variant", children: "Cancel", onClick: onCancel}
                 }
             } as any}
-            onClick={onCancel}
+
         />
     </div>
     const [activeTab, setActiveTab] = createSignal(tabs[0]);
@@ -542,9 +540,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                         P: {
                                           component: "Button",
                                           props: {
-                                            stylingMode: "contained",
-                                            width: "120",
-                                            text: "Import",
+                                            children: "Import",
                                             class:
                                               "bg:blue bg:rgb(24,98,234):hover text-fill:white",
                                           },
@@ -560,9 +556,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                           component: "Button",
 
                                           props: {
-                                            stylingMode: "contained",
-                                            width: "120",
-                                            text: "Export",
+                                            children: "Export",
                                             class: " text-fill:blue b:blue",
                                           },
                                         },
