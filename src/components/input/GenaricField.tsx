@@ -573,19 +573,8 @@ export function GenericField(
             //   });
             // }}
           >
-            <Switch>
-              <Match when={component() === "Drawer"}>
-                {/* Min Height is set because drawer cant see height initially*/}
-                <div style={"min-height: 506px"}>
-                  {props.children}
-                  <PageItemRender metaVertex={props.meta} />
-                </div>
-              </Match>
-              <Match when={true}>
-                {props.children}
-                <PageItemRender metaVertex={props.meta} />
-              </Match>
-            </Switch>
+            {props.children}
+            <PageItemRender metaVertex={props.meta} />
           </Dynamic>
         </Match>
       </Switch>
