@@ -31,37 +31,94 @@ import {IdAttr} from "../../lib/graph";
 // import {mergeVertexProperties} from "../../lib/Vertex";
 import {getTextColumnValue} from "./GenaricField";
 import {ComponentProps} from "../ComponentType";
+import { Bar, Checkbox, Progress, RadioGroup, TextField } from "../solid-blocks/blocks";
 
 export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
   return (
-    <div aria-labeledby={props["aria-labeledby"]} classList={{
-      'width:100%': props.component === 'TextArea'
-    }}>
-      <Show when={!props.disabled} fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}>
+    <div
+      aria-labeledby={props["aria-labeledby"]}
+      classList={{
+        "width:100%": props.component === "TextArea",
+      }}
+    >
+      <Show
+        when={!props.disabled}
+        fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}
+      >
         <Switch>
-          <Match when={props.component === "Autocomplete"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "Bullet"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "Calendar"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "CheckBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "CircularGauge"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "ColorBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "DateBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "DropDownBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "FileUploader"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "FilterBuilder"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "HtmlEditor"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "LinearGauge"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "NumberBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "ProgressBar"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "RadioGroup"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "RangeSelector"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "RangeSlider"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "Slider"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "Switch"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "TextArea"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
-          <Match when={props.component === "TextBox"}>{props.data?.P[props.meta.P[IdAttr]]}</Match>
+          <Match when={props.component === "Autocomplete"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "Bullet"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "Calendar"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "CheckBox"}>
+            <Checkbox
+              {...props.data?.P.props}
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
+          </Match>
+          <Match when={props.component === "CircularGauge"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "ColorBox"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "DateBox"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "DropDownBox"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "FileUploader"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "FilterBuilder"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "HtmlEditor"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "LinearGauge"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "NumberBox"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "ProgressBar"}>
+            <Progress value={props.data?.P[props.meta.P[IdAttr]]} />
+          </Match>
+          <Match when={props.component === "RadioGroup"}>
+            <RadioGroup value={props.data?.P[props.meta.P[IdAttr]] ?? ""}>
+              {props.data?.P[props.meta.P[IdAttr]]}
+            </RadioGroup>
+          </Match>
+          <Match when={props.component === "RangeSelector"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "RangeSlider"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "Slider"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "Switch"}>
+            {props.data?.P[props.meta.P[IdAttr]]}
+          </Match>
+          <Match when={props.component === "TextArea"}>
+            <textarea value={props.data?.P[props.meta.P[IdAttr]] ?? ""} />
+          </Match>
+          <Match when={props.component === "TextBox"}>
+            <TextField
+              {...props.data?.P.props}
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
+          </Match>
         </Switch>
         {/*<div
           // @ts-ignore
