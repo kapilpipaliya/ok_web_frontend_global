@@ -3,9 +3,7 @@ import {createStore, reconcile} from "solid-js/store";
 import {klona} from "klona";
 import {get, set} from "idb-keyval";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
-import {isNumber} from "../utils/utils";
-
-window.s = createStore;
+import { isNumber } from "./CommonUtils/isNumber";
 
 export type Id = number;
 

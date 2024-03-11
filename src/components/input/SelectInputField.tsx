@@ -1,72 +1,28 @@
-import {
-  batch,
-  createEffect,
-  createResource,
-  For,
-  getOwner,
-  Match,
-  on,
-  onCleanup,
-  onMount,
-  runWithOwner,
-  Show,
-  Switch,
-  untrack,
-  useContext,
-} from "solid-js";
+import {batch, createResource, For, getOwner, runWithOwner, Show, untrack, useContext,} from "solid-js";
 
 // Comment This Lines in web build
-import SelectBox, { Properties } from "devextreme/ui/select_box";
-import TagBox, { Properties as TagBoxProperties } from "devextreme/ui/tag_box";
+import {commitTxn, getNewGraphId, getNewTxnId, graph, IdAttr, Vertex,} from "../../lib/graph";
+import {addNewEdge, deleteEdge, newEdge} from "../../lib/Edge";
+import {WsContext} from "../../utils/ws_events_dispatcher";
 import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
-  graph,
-  IdAttr,
-  Vertex,
-} from "../../lib/graph";
-import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { WsContext } from "../../utils/ws_events_dispatcher";
-import {
-  getChildVertex,
   getInEdge,
   getParentVertexValue,
   getSelectedVertexValue,
-  getSelectionOptions,
-  getToEdge,
-  replaceExpressionToLabel,
 } from "../../lib/Traverse";
-import { ComponentProps } from "../../types/Component";
 import {
-  FormContext,
-  getNameKeyForCollection,
+  getSelectionOptions,
+  getChildVertex,
   onChangeHandler,
-  setUpdateStatus,
-} from "../../lib/Record";
-import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
-import { getValueFromVertexOrKey } from "../../utils/utils";
-import { Select } from "../solid-blocks/blocks";
+  FormContext,
+  getValueFromVertexOrKey,
+} from "../../lib/Utils";
+import {getNameKeyForCollection, setUpdateStatus,} from "../../lib/Record";
+import {findVertexByLabelAndUniqueId} from "../../lib/Vertex";
 import MultiSelect from "../solid-multiselect";
-import { Icon } from "@iconify-icon/solid";
+import {Icon} from "@iconify-icon/solid";
+import {ComponentProps} from "../ComponentType";
+import {setSelectionValue} from "./SelectionUtils";
 
-function vertexOutEdgeContainVertex(
-  vertex: Vertex,
-  type: string,
-  vertexId: number
-) {
-  const outEdges = vertex.OUT[type] || [];
-  let containsVertexId = false;
-
-  for (const edgeId of outEdges) {
-    const endVertex = graph.edges[edgeId].E;
-    if (endVertex === vertexId) {
-      containsVertexId = true;
-      break;
-    }
-  }
-  return containsVertexId;
-}
 function vertexInEdgeContainVertex(
   vertex: Vertex,
   type: any,
@@ -82,45 +38,6 @@ function vertexInEdgeContainVertex(
     }
   }
   return includesVertexId;
-}
-
-// This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(
-  txnId: number,
-  vertex: Vertex,
-  meta: Vertex,
-  value?: number[] | number
-) {
-  // delete removed edges:
-  const type = getToEdge(meta, vertex);
-  const previousEdges = vertex.OUT[type] || [];
-
-  if (!Array.isArray(value)) {
-    if (value !== null && value !== undefined) {
-      value = [value];
-    } else {
-      value = [];
-    }
-  }
-
-  for (const edgeId of previousEdges) {
-    // we should not delete edge that end to same vertex
-    if (value.includes(graph.edges[edgeId].E)) continue;
-    const deleteEdgeResult = deleteEdge(txnId, edgeId);
-    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
-  }
-
-  // add added edges:
-  for (const vertexId of value) {
-    if (vertexOutEdgeContainVertex(vertex, type, vertexId)) {
-      continue;
-    }
-    const insertEdgeResult = addNewEdge(
-      txnId,
-      newEdge(getNewGraphId(), type, {}, vertex.id, vertexId)
-    );
-    if (insertEdgeResult.error) alert(insertEdgeResult.error);
-  }
 }
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.

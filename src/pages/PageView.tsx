@@ -1,7 +1,8 @@
 import {useParams} from "@solidjs/router";
 import {createEffect, createSignal, For, on, Show, useContext} from "solid-js";
 import {WsContext} from "../utils/ws_events_dispatcher";
-import {getFormMetaData, Record} from "../lib/Record";
+import {getFormMetaData} from "../lib/Record";
+import { Record } from "../lib/Utils";
 import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {PageView} from "../components/input/GenaricField";
 import {graph} from "../lib/graph";

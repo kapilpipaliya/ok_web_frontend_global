@@ -5,7 +5,7 @@ import {path} from "rambda";
 import {calculateFilter, getTextValue} from "./Traverse";
 import {findVertexIdsByLabel} from "./Vertex";
 import {jsonata} from "./jsonata/jsonata";
-import {isObject} from "../utils/utils";
+import { isObject } from "./Utils";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

@@ -3,7 +3,7 @@ import {createUniqueId, onCleanup, useContext} from "solid-js";
 import {createStore} from "solid-js/store";
 import {Alert} from "../components/ComponentType";
 import {AlertMessageContext} from "../contexts/AlertMessageContext";
-import {Record} from "../lib/Record";
+import { Record } from "../lib/Utils";
 import {resetDatabaseLogin, revertTransaction, setGraph} from "../lib/graph";
 import {isAdmin} from "../signals/common";
 import {WSEvent, WsContext} from "../utils/ws_events_dispatcher";

@@ -28,17 +28,22 @@ import {
 } from "../lib/graph";
 
 import {Icon} from "@iconify-icon/solid";
-import {GenericField} from "../components/input/GenaricField";
+import { GenericField } from "../components/input/Components/GenericFieldComponent";
 import {
     collectionNameDisplayExpr,
     selectedValue
 } from "../components/input/SelectInputField";
-import {FormMetaData, PageContext, getFormApiFromForm, FieldAttribute} from "../lib/Record";
-import {getChildVertexes, getSelectionOptions} from "../lib/Traverse";
+import {getFormApiFromForm} from "../lib/Record";
+import { FieldAttribute } from "../lib/Utils";
+import { FormMetaData } from "../lib/Utils";
+import { PageContext } from "../lib/Utils";
+import { getSelectionOptions } from "../lib/Utils";
+import { getChildVertexes } from "../lib/Utils";
 import {deleteVertex, findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {AttrsTableData} from "../lib/api";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {capitalizeFirstLetter, isNumber} from "../utils/utils";
+import { AttrsAdminTableData } from "../lib/Utils";
+import { isNumber } from "../lib/CommonUtils/isNumber";
+import { capitalizeFirstLetter } from "../lib/Utils";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {AbstractSingleForm} from "../components/DynamicForm";
 

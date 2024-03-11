@@ -1,4 +1,6 @@
-import {getPkForCollection, newRow, Record} from "./Record";
+import {getPkForCollection} from "./Record";
+import { newRow } from "./Utils";
+import { Record } from "./Utils";
 import {commitTxn, getNewGraphId, getNewTxnId, graph, IdAttr, Vertex} from "./graph";
 import {
   addNewVertex,
@@ -11,14 +13,16 @@ import {
 } from "./Vertex";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
 import csvtojson from "csvtojson";
-import {getChildVertex, getChildVertexes, getToEdge} from "./Traverse";
+import { getToEdge } from "./CommonUtils/getToEdge";
+import { getChildVertex, getChildVertexes } from "./Utils";
 import {A, D} from "@mobily/ts-belt";
-import {isSimpleCollection, setParentValue, setSelectionValue} from "../components/input/SelectInputField";
+import {isSimpleCollection, setParentValue} from "../components/input/SelectInputField";
 import {parse} from "yaml";
-import {isObject} from "../utils/utils";
+import { isObject } from "./Utils";
 import {deleteEdge} from "./Edge";
 import {AttrsTableData} from "./api";
-import {AttrsAdminTableData} from "./apiAdmin";
+import { AttrsAdminTableData } from "./Utils";
+import {setSelectionValue} from "../components/input/SelectionUtils";
 
 export const updateImportRecord = (type: string, record: Record, dry= true) => {
 

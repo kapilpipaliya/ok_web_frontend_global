@@ -7,7 +7,7 @@ Simplified WebSocket events dispatcher
 
 import { WSBase } from "./ws_reconnect";
 import { createContext } from "solid-js";
-import { commitTransaction, graph } from "../lib/graph";
+import { commitTransaction } from "../lib/graph";
 
 // automatically set NODE_ENV == 'production' when we build the project.
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";

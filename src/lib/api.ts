@@ -1,6 +1,8 @@
-import { FieldAttribute, FormMetaData, IFormContext } from "./Record";
+import { FieldAttribute } from "./Utils";
+import { FormMetaData } from "./Utils";
+import { IFormContext } from "./Utils";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
-import {AttrsAdminTableData} from "./apiAdmin";
+import { AttrsAdminTableData } from "./Utils";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {

@@ -1,7 +1,9 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { Show, createSignal, createUniqueId, onCleanup } from "solid-js";
 import { PageItemRender } from "../components/input/GenaricField";
-import { PageContext, Record, getExportCode } from "../lib/Record";
+import { getExportCode } from "../lib/Record";
+import { Record } from "../lib/Utils";
+import { PageContext } from "../lib/Utils";
 // Comment This Lines in web build
 import { Navigator } from "@solidjs/router/dist/types";
 import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
@@ -9,7 +11,7 @@ import { createStore } from "solid-js/store";
 import { stringify } from "yaml";
 import { AbstractSingleForm } from "../components/DynamicForm";
 import { importRecordWithYAMLSchema } from "../lib/Import";
-import { getChildVertex } from "../lib/Traverse";
+import { getChildVertex } from "../lib/Utils";
 import { Vertex } from "../lib/graph";
 import { showNav } from "../signals/common";
 

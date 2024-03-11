@@ -16,14 +16,19 @@ import {
 } from "../lib/graph";
 import {A} from "@solidjs/router";
 import {addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties} from "../lib/Vertex";
-import {setSelectionValue} from "../components/input/SelectInputField";
 import {WsContext} from "../utils/ws_events_dispatcher";
-import {getChildVertex, getParentVertex} from "../lib/Traverse";
-import {FormMetaData, getCompPropsMap, getFormMetaData, getId, newRow, Record} from "../lib/Record";
+import { getParentVertex } from "../lib/Utils";
+import { getChildVertex } from "../lib/Utils";
+import {getCompPropsMap, getFormMetaData} from "../lib/Record";
+import { getId } from "../lib/Utils";
+import { newRow } from "../lib/Utils";
+import { Record } from "../lib/Utils";
+import { FormMetaData } from "../lib/Utils";
 import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
 import {fileDownloader} from "../utils/dom_utils";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
+import { AttrsAdminTableData } from "../lib/Utils";
 import {NsMetaJson} from "./NSMetaDataType";
+import {setSelectionValue} from "../components/input/SelectionUtils";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);

@@ -1,5 +1,5 @@
 import {graph, Id, Vertex} from "./graph";
-import {getChildVertexes} from "./Traverse";
+import { getChildVertexes } from "./Utils";
 
 export function getPermissions(meta: Vertex) {
     const permissionResult = [] as [Id[], string][];

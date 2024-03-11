@@ -1,10 +1,10 @@
 import {Icon} from "@iconify-icon/solid";
 import {useLocation} from "@solidjs/router";
 import {Show, createEffect, createMemo, createSignal, createUniqueId, untrack, useContext} from "solid-js";
-import {Record} from "../lib/Record";
-import {getChildVertex} from "../lib/Traverse";
+import { Record } from "../lib/Utils";
+import { getChildVertex } from "../lib/Utils";
 import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
+import { AttrsAdminTableData } from "../lib/Utils";
 import {Vertex} from "../lib/graph";
 import treeViewFilter from "../lib/treeViewFilter";
 import {WsContext} from "../utils/ws_events_dispatcher";

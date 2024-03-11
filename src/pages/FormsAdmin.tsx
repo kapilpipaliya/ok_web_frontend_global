@@ -4,11 +4,12 @@ import {createMemo, For, Match, Switch, useContext} from "solid-js";
 import {A} from "@solidjs/router";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {createStore} from "solid-js/store";
-import {Record} from "../lib/Record";
+import { Record } from "../lib/Utils";
 import {SelectInputField} from "../components/input/SelectInputField";
 import {onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
-import {AbstractSingleForm, DynamicComponent, getComponentForCollRow} from "../components/DynamicForm";
-import {GenericField} from "../components/input/GenaricField";
+import {AbstractSingleForm, getComponentForCollRow} from "../components/DynamicForm";
+import { DynamicComponent } from "../components/DynamicComponent";
+import { GenericField } from "../components/input/Components/GenericFieldComponent";
 import {toTitle} from "case-switcher-js";
 
 export const AllForms = () => {

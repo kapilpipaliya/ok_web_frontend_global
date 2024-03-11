@@ -6,7 +6,7 @@ import {getNewGraphId, graph} from "../lib/graph";
 import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import {AlertMessageContext} from "../contexts/AlertMessageContext";
-import {PageContext} from "../lib/Record";
+import { PageContext } from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage} from "../signals/common";
 

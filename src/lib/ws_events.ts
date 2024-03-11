@@ -2,7 +2,7 @@ import { batch, useContext } from 'solid-js';
 import { getCookie, WsContext } from '../utils/ws_events_dispatcher';
 
 import { isAdmin } from '../signals/common';
-import { isObject } from '../utils/utils';
+import { isObject } from "./Utils";
 import { deleteEdge, updateEdgeId } from './Edge';
 import {
 	commitTransaction,

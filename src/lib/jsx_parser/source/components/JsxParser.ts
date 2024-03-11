@@ -11,9 +11,12 @@ import {JSX} from "solid-js";
 import {componentDrag, setPropertyValueGlobal} from "../../../../components/PageDesignerDragAndDrop";
 import {addNewVertex, findVertexByLabelAndUniqueId, newVertex} from "../../../Vertex";
 import {getNewGraphId, graph, Vertex} from "../../../graph";
-import {setParentValue, setSelectionValue} from "../../../../components/input/SelectInputField";
-import {getChildVertexes, getParentVertex} from "../../../Traverse";
-import {addNewRow, setValueGlobal} from "../../../Record";
+import {setParentValue} from "../../../../components/input/SelectInputField";
+import { getParentVertex } from "../../../Utils"
+import { getChildVertexes } from "../../../Utils"
+import { addNewRow } from "../../../Utils"
+import { setValueGlobal } from "../../../Utils"
+import {setSelectionValue} from "../../../../components/input/SelectionUtils";
 
 type ParsedJSX = JSX.Element | boolean | string
 type ParsedTree = ParsedJSX | ParsedJSX[] | null
