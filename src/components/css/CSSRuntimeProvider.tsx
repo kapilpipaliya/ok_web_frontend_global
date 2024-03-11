@@ -1,50 +1,94 @@
 import type { Config } from '@master/css'
-import { CSSRuntime } from '@master/css-runtime'
-import {createContext, createEffect, JSX, useContext} from "solid-js";
-import { createStore } from "solid-js/store";
+import { RuntimeCSS } from '@master/css-runtime'
+import {createContext, createEffect, createSignal, JSX, onCleanup, useContext} from "solid-js";
 
-export const CSSContext = createContext<{m?:  CSSRuntime }>({m: undefined});
-export function useCSS() {
-  return useContext(CSSContext)
+export  const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
+
+export function useRuntimeCSS() {
+  return useContext(RuntimeCSSContext)
 }
 
 // https://github.com/master-co/css/blob/beta/packages/react/src/CSSProvider.tsx
 export function CSSRuntimeProvider(props: {
   children: JSX.Element,
-  config?: Config | Promise<Config> | Promise<any>,
-  root?: Document | ShadowRoot | null
+  config?: Config | Promise<any>,
+  root?: Document | ShadowRoot
 }) {
-  const root = typeof document !== 'undefined' ? document : null
-  const [runtimeCSS, setRuntimeCSS] = createStore({} as {m?: CSSRuntime});
+  const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(undefined);
+  let identifier = 0;
+  let initializing = false;
+  let newRuntimeCSS: RuntimeCSS | undefined = undefined;
+  let isExternalRuntimeCSS = false;
+
+  const waitInitialized = async () => {
+    const currentIdentifier = ++identifier;
+    if (initializing) {
+      await new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+          if (!initializing) {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 10);
+      });
+    }
+    return currentIdentifier === identifier;
+  };
 
   createEffect(() => {
-    let newRuntimeCSS: CSSRuntime | undefined = globalThis.cssRuntimes?.find((eachCSS) => eachCSS.root === root)
-    if (newRuntimeCSS) {
-      setRuntimeCSS({m: newRuntimeCSS})
-    } else if (!runtimeCSS.m) {
-      const init = (resolvedConfig?: Config) => {
-        const existingCSS = globalThis.cssRuntimes.find((eachCSS) => eachCSS.root === root)
-        if (existingCSS) {
-          setRuntimeCSS({m: existingCSS})
+    (async () => {
+      if (!(typeof window !== 'undefined')) return;
+      if (!await waitInitialized()) return;
+
+      const configModule = await props.config;
+      const resolvedConfig = configModule?.config || configModule?.default || configModule;
+
+      const init = async () => {
+        initializing = true;
+
+        const currentRoot = props.root ?? document;
+        const existingCSSRuntime = (globalThis as any).runtimeCSSs.find((eachCSS: RuntimeCSS) => eachCSS.root === currentRoot);
+        if (existingCSSRuntime) {
+          setCSSRuntime(newRuntimeCSS = existingCSSRuntime);
+          isExternalRuntimeCSS = true;
         } else {
-          newRuntimeCSS = new CSSRuntime(root, resolvedConfig).observe()
-          setRuntimeCSS({m: newRuntimeCSS})
+          setCSSRuntime(newRuntimeCSS = new RuntimeCSS(props.root, resolvedConfig).observe());
+          isExternalRuntimeCSS = false;
         }
-      }
-      if (props.config instanceof Promise) {
-        (async () => {
-          const configModule = await props.config
-          init(configModule?.config || configModule?.default || configModule)
-        })()
+
+        initializing = false;
+      };
+
+      if (!newRuntimeCSS) {
+        await init();
+      } else if (
+        newRuntimeCSS.root !== props.root
+        && (props.root || newRuntimeCSS.root !== document)
+      ) {
+        newRuntimeCSS.destroy();
+        await init();
       } else {
-        init(props.config)
+        newRuntimeCSS.refresh(resolvedConfig);
       }
-    } else if (!runtimeCSS.m!.observing) {
-      runtimeCSS.m!.observe()
-    }
-    return () => {
-      newRuntimeCSS?.destroy()
-    }
-  })
-  return <CSSContext.Provider value={runtimeCSS}>{props.children}</CSSContext.Provider>
+    })();
+  });
+
+  createEffect(() => {
+    onCleanup(() => {
+      if (!isExternalRuntimeCSS) {
+        (async () => {
+          if (!await waitInitialized()) return;
+
+          newRuntimeCSS?.destroy();
+          newRuntimeCSS = undefined;
+        })();
+      }
+    });
+  });
+
+  return (
+    <RuntimeCSSContext.Provider value={runtimeCSS()}>
+      {props.children}
+    </RuntimeCSSContext.Provider>
+  );
 }

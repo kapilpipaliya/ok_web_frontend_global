@@ -6,7 +6,6 @@ import { Record } from "../lib/Utils";
 import { PageContext } from "../lib/Utils";
 // Comment This Lines in web build
 import { Navigator } from "@solidjs/router/dist/types";
-import TreeView, { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
 import { createStore } from "solid-js/store";
 import { stringify } from "yaml";
 import { AbstractSingleForm } from "../components/DynamicForm";
@@ -105,7 +104,9 @@ export const NavDesigner = () => {
           <PreviewCode />
         </Show>
         <Show when={count() && config[0].record?.vertex && count()} keyed>
-          <div ref={(el) => renderNavTreeFromGraph(el, config[0].record, navigate)}></div>
+          <div
+            // ref={(el) => renderNavTreeFromGraph(el, config[0].record, navigate)}
+          ></div>
         </Show>
       </div>
     </div>
@@ -115,7 +116,7 @@ export const NavDesigner = () => {
 export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navigate: Navigator) => {
   // !!!TODO!!!: This code can we written in the code itself
   const getChildren = (meta: Vertex, vertex: Vertex) => {
-    const result = [] as dxTreeViewItem[];
+    const result = [];
 
     const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
     const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
@@ -128,7 +129,7 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
       const name = child.P.name;
       const func = child.P.func;
       const expanded = child.P.expanded;
-      const navItem = {} as dxTreeViewItem;
+      const navItem = {};
 
       if (func === "Table") {
         const collVertex = getChildVertex(["$0Coll"], child).vertex;
@@ -170,19 +171,19 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
 
   console.log(navigation);
 
-  const instance = new TreeView(el, {
-    dataSource: navigation,
-    dataStructure: "tree",
-    keyExpr: "id",
-    displayExpr: "name",
-    itemsExpr: "children",
-    width: 200,
-    searchEnabled: true,
-    onItemClick(e) {
-      if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
-    },
-  });
+  // const instance = new TreeView(el, {
+  //   dataSource: navigation,
+  //   dataStructure: "tree",
+  //   keyExpr: "id",
+  //   displayExpr: "name",
+  //   itemsExpr: "children",
+  //   width: 200,
+  //   searchEnabled: true,
+  //   onItemClick(e) {
+  //     if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
+  //   },
+  // });
 
-  onCleanup(() => instance.dispose());
-  return instance;
+  // onCleanup(() => instance.dispose());
+  // return instance;
 };
