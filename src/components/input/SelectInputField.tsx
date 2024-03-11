@@ -2,12 +2,17 @@ import {
   batch,
   createEffect,
   createResource,
-  For, getOwner,
+  For,
+  getOwner,
+  Match,
   on,
-  onCleanup, onMount, runWithOwner,
+  onCleanup,
+  onMount,
+  runWithOwner,
   Show,
+  Switch,
   untrack,
-  useContext
+  useContext,
 } from "solid-js";
 
 // Comment This Lines in web build
@@ -19,7 +24,7 @@ import {
   getNewTxnId,
   graph,
   IdAttr,
-  Vertex
+  Vertex,
 } from "../../lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
 import { WsContext } from "../../utils/ws_events_dispatcher";
@@ -29,19 +34,27 @@ import {
   getParentVertexValue,
   getSelectedVertexValue,
   getSelectionOptions,
-  getToEdge, replaceExpressionToLabel
+  getToEdge,
+  replaceExpressionToLabel,
 } from "../../lib/Traverse";
 import { ComponentProps } from "../../types/Component";
 import {
   FormContext,
   getNameKeyForCollection,
   onChangeHandler,
-  setUpdateStatus
+  setUpdateStatus,
 } from "../../lib/Record";
 import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
 import { getValueFromVertexOrKey } from "../../utils/utils";
+import { Select } from "../solid-blocks/blocks";
+import MultiSelect from "../solid-multiselect";
+import { Icon } from "@iconify-icon/solid";
 
-function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: number) {
+function vertexOutEdgeContainVertex(
+  vertex: Vertex,
+  type: string,
+  vertexId: number
+) {
   const outEdges = vertex.OUT[type] || [];
   let containsVertexId = false;
 
@@ -54,7 +67,11 @@ function vertexOutEdgeContainVertex(vertex: Vertex, type: string, vertexId: numb
   }
   return containsVertexId;
 }
-function vertexInEdgeContainVertex(vertex: Vertex, type: any, vertexId: number) {
+function vertexInEdgeContainVertex(
+  vertex: Vertex,
+  type: any,
+  vertexId: number
+) {
   const inEdges = vertex.IN[type] || [];
   let includesVertexId = false;
   for (const edgeId of inEdges) {
@@ -68,7 +85,12 @@ function vertexInEdgeContainVertex(vertex: Vertex, type: any, vertexId: number) 
 }
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
+export function setSelectionValue(
+  txnId: number,
+  vertex: Vertex,
+  meta: Vertex,
+  value?: number[] | number
+) {
   // delete removed edges:
   const type = getToEdge(meta, vertex);
   const previousEdges = vertex.OUT[type] || [];
@@ -93,15 +115,21 @@ export function setSelectionValue(txnId: number, vertex: Vertex, meta: Vertex, v
     if (vertexOutEdgeContainVertex(vertex, type, vertexId)) {
       continue;
     }
-    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
+    const insertEdgeResult = addNewEdge(
+      txnId,
+      newEdge(getNewGraphId(), type, {}, vertex.id, vertexId)
+    );
     if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
 
-
-
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, value?: number[] | number) {
+export function setParentValue(
+  txnId: number,
+  vertex: Vertex,
+  meta: Vertex,
+  value?: number[] | number
+) {
   // delete removed edges:
   const type = getInEdge(meta, vertex);
   if (!type) alert("edge type cant be empty");
@@ -132,7 +160,10 @@ export function setParentValue(txnId: number, vertex: Vertex, meta: Vertex, valu
       continue;
     }
 
-    const insertEdgeResult = addNewEdge(txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id));
+    const insertEdgeResult = addNewEdge(
+      txnId,
+      newEdge(getNewGraphId(), type, {}, vertexId, vertex.id)
+    );
     if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
@@ -143,20 +174,27 @@ export const ensureArray = (value: any) => {
   } else {
     return value ? [value] : [];
   }
-}
+};
 export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
-  if (getValueFromVertexOrKey(meta.P.props, "stringValue") || getValueFromVertexOrKey(meta.P.props, "items")) {
+  if (
+    getValueFromVertexOrKey(meta.P.props, "stringValue") ||
+    getValueFromVertexOrKey(meta.P.props, "items")
+  ) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
-      return(ensureArray(data.P[meta.P[IdAttr]]));
+      return ensureArray(data.P[meta.P[IdAttr]]);
     });
   }
   try {
     // when new row added or modified this gives error.
-    return getValueFromVertexOrKey(meta.P.props, "inward") ? getParentVertexValue(data, meta) : getSelectedVertexValue(data, meta);
+    return getValueFromVertexOrKey(meta.P.props, "inward")
+      ? getParentVertexValue(data, meta)
+      : getSelectedVertexValue(data, meta);
+
   } catch (e) {
     return [];
   }
+  
 };
 
 // if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
@@ -173,48 +211,63 @@ export function collectionNameDisplayExpr(collection?: string) {
   if (!collection) {
     return;
   }
-    const collectionVertex = findVertexByLabelAndUniqueId("Coll", "name", collection);
-    if (collectionVertex) {
-      const nameKeys = getNameKeyForCollection(collectionVertex);
-      if (nameKeys.length === 1) {
-        return `P.${nameKeys[0]}`;
-      } else {
-        return nameKeys.map(name => `$P.${name}`).join(" ");
-      }
+  const collectionVertex = findVertexByLabelAndUniqueId(
+    "Coll",
+    "name",
+    collection
+  );
+  if (collectionVertex) {
+    const nameKeys = getNameKeyForCollection(collectionVertex);
+    if (nameKeys.length === 1) {
+      return `P.${nameKeys[0]}`;
+    } else {
+      return nameKeys.map((name) => `$P.${name}`).join(" ");
     }
-    return;
+  }
+  return;
 }
 
 // displayExpr is required when props.meta.P.props.collection is complex
-export function SelectInputField(props: ComponentProps & {component: string; txnId?: number; isRealTime?: boolean; }) {
+export function SelectInputField(
+  props: ComponentProps & {
+    component: string;
+    txnId?: number;
+    isRealTime?: boolean;
+  }
+) {
   const { Ws } = useContext(WsContext);
   let { record } = useContext(FormContext);
 
 
   // @ts-ignore
-  const [selectOptions, { refetch }] = createResource(() => {
-    let value = getValueFromVertexOrKey(props.meta.P.props, "items");
-    if (value) {
-      if (typeof value === "string") {
-        return value.split("\n");
-      } else if (Array.isArray(value)) {
-        return value;
+  const [selectOptions, { refetch }] = createResource(
+    () => {
+      let value = getValueFromVertexOrKey(props.meta.P.props, "items");
+      if (value) {
+        if (typeof value === "string") {
+          return value.split("\n");
+        } else if (Array.isArray(value)) {
+          return value;
+        } else {
+          return value ? [value] : [];
+        }
       } else {
-        return value ? [value] : [];
-      }
-    } else {
-      // this is not working when row is enabled, select field options is not updated
-      // if (props.disabled) {
-      //   return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
-      // }
+        // this is not working when row is enabled, select field options is not updated
+        // if (props.disabled) {
+        //   return selectedValue(props.meta, props.data).map((vertexId) => graph.vertexes[vertexId]);
+        // }
 
-      const collection = getChildVertex(["$0Coll"], props.meta).vertex?.['P']?.['name'] || getValueFromVertexOrKey(props.meta.P.props, "collection");
-      if (!collection) {
-        return [];
+        const collection =
+          getChildVertex(["$0Coll"], props.meta).vertex?.["P"]?.["name"] ||
+          getValueFromVertexOrKey(props.meta.P.props, "collection");
+        if (!collection) {
+          return [];
+        }
+        return getSelectionOptions([props.data], collection).vertexes || [];
       }
-      return getSelectionOptions([props.data], collection).vertexes || [];
-    }
-  }, (data) => data);
+    },
+    (data) => data
+  );
 
   function getComponent() {
     let component = props.component;
@@ -228,6 +281,53 @@ export function SelectInputField(props: ComponentProps & {component: string; txn
     }
     return component;
   }
+
+  const onChangeSelect=(e: any)=>{
+    const data = e[0];
+    runWithOwner(outerOwner, () => {
+      batch(() => {
+        // note: valueChanged is fired even when the value is changed programmatically,
+        // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
+        // used e.event check to prevent this.
+        // on simple import screen when value is selected first time event is not there
+        // if (e.previousValue && !e.event) {
+        // TODO: TO Prevent Onchange event firing on select set a flag
+        // when it should not fire the event In the form
+        // and remove it
+        // when calculations are done.
+        // return;
+        // }
+        // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
+        setUpdateStatus(true);
+        const optionId = data.id;
+        const optionvalue = data.P.name;
+
+        if (!props.data) {
+          return;
+        }
+        if (props.isRealTime) {
+          props.txnId = getNewTxnId();
+        }
+        if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
+          props.setValue?.(props.meta, props.data, optionvalue);
+        } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
+          props.setValue?.(props.meta, props.data, optionvalue);
+        } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
+          setParentValue(props.txnId || 0, props.data, props.meta, optionId);
+        } else {
+          setSelectionValue(props.txnId || 0, props.data, props.meta, optionId);
+        }
+        onChangeHandler(
+          props.txnId || 0,
+          record?.vertex,
+          props.data,
+          props.meta
+        );
+        if (props.isRealTime) commitTxn(props.txnId || 0, Ws);
+        setUpdateStatus(false);
+      });
+    });
+  }
   const outerOwner = getOwner();
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
@@ -235,152 +335,42 @@ export function SelectInputField(props: ComponentProps & {component: string; txn
         when={!props.disabled}
         fallback={
           <For each={selectedValue(props.meta, props.data)}>
-            {(vertexId) => <>{getSelectionOptions([graph.vertexes[vertexId]], getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || `::'P.${IdAttr}'`).vertexes}</>}
+            {(vertexId) => (
+              <>
+                {
+                  getSelectionOptions(
+                    [graph.vertexes[vertexId]],
+                    getValueFromVertexOrKey(
+                      props.meta.P.props,
+                      "displayExpr"
+                    ) || `::'P.${IdAttr}'`
+                  ).vertexes
+                }
+              </>
+            )}
           </For>
         }
       >
-        <div
-         class="min-w:140"
-          ref={(el) => {
-            onMount((() => {
-              runWithOwner(outerOwner, () => {
-                let component = getComponent();
-                let selectOp = {
-                  searchEnabled: true,
-                  disabled: props.disabled!,
-                  showSelectionControls: true,
-                  showClearButton: true,
-
-                  // This will work as initial value and setting value second time in createEffect will not call onValueChanged function.
-                  value: component === 'SelectBox' ? selectedValue(props.meta, props.data)[0] : selectedValue(props.meta, props.data),
-                  onValueChanged: function(e) {
-                    runWithOwner(outerOwner, () => {
-                      batch(() => {
-                        // note: valueChanged is fired even when the value is changed programmatically,
-                        // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
-                        // used e.event check to prevent this.
-                        // on simple import screen when value is selected first time event is not there
-                        // if (e.previousValue && !e.event) {
-                          // TODO: TO Prevent Onchange event firing on select set a flag
-                          // when it should not fire the event In the form
-                          // and remove it
-                          // when calculations are done.
-                          // return;
-                        // }
-                        // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
-
-                        if (e.value === e.previousValue) {
-                          return;
-                        }
-                        setUpdateStatus(true);
-                        if (!props.data) {
-                          return;
-                        }
-                        if (props.isRealTime) {
-                          props.txnId = getNewTxnId();
-                        }
-                        if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
-                          props.setValue?.(props.meta, props.data, e.value);
-                        } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
-                          props.setValue?.(props.meta, props.data, e.value);
-                        } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
-                          setParentValue(props.txnId || 0, props.data, props.meta, e.value);
-                        } else {
-                          setSelectionValue(props.txnId || 0, props.data, props.meta, e.value);
-                        }
-                        onChangeHandler(props.txnId || 0, record?.vertex, props.data, props.meta);
-                        if (props.isRealTime) commitTxn(props.txnId || 0, Ws);
-                        setUpdateStatus(false);
-                      })
-                    })
-                  },
-                  labelMode: "floating",
-                  // slow down performance.
-                  // onFocusIn: function (e) {
-                  //   refetch();
-                  // },
-                } as Properties;
-
-                if (getValueFromVertexOrKey(props.meta.P.props, "focusRefresh")) {
-                  Object.assign(selectOp, {
-                    onFocusIn: function(e) {
-                      refetch();
-                    },
-                  } as Properties)
-                }
-                if (!getValueFromVertexOrKey(props.meta.P.props, "items")) {
-                  let displayExpr: undefined | string;
-                  // Bug: When In a Coll, In Attr Row,
-                  // If DataType Selected, Submit
-                  // Open Coll again, Change DataType,
-                  // Component is not updated the First time.
-                  // To Simplify development, Temporary enables refresh on click
-                  if (!isSimpleCollection(getValueFromVertexOrKey(props.meta.P.props, "collection"))) {
-                    Object.assign(selectOp, {
-                      onFocusIn: function(e) {
-                        refetch();
-                      },
-                    } as Properties)
-                  } else {
-                  }
-
-                  Object.assign(selectOp, {
-                    // if valueExpr value is undefined onValueChange will not fire.
-                    valueExpr: "id",
-                    displayExpr: (item) => runWithOwner(outerOwner, () => getSelectionOptions([item], getValueFromVertexOrKey(props.meta.P.props, "displayExpr") || collectionNameDisplayExpr(replaceExpressionToLabel(getValueFromVertexOrKey(props.meta.P.props, "collection"), props.data)) || `::'P.${IdAttr}'`).vertexes),
-
-                  } as Properties)
-                }
-                // TODO: make this reactive when component change it should re-render component.
-                const instance = component === 'SelectBox' ? new SelectBox(el, selectOp) : new TagBox(el, selectOp as TagBoxProperties);
-                createEffect(() => {
-                  for (const property in props.meta.P.props) {// as Properties
-                    if (property === "displayExpr" || property === 'items') continue;
-                    instance.option(property, getValueFromVertexOrKey(props.meta.P.props, property));
-                  }
-                });
-                // when the value is changed by other components, we want to refetch the options
-                // createEffect(on(() => props.rawValue, (v) => refetch(v)))
-                createEffect(
-                 on(
-                  () => selectedValue(props.meta, props.data),
-                  (selectedValue) => {
-                    // as soon as value is changed, this effect is called.
-                    if (getComponent() === 'SelectBox') {
-                      if (selectedValue[0] === instance.option('value')) return;
-                    } else {
-                      // TODO compare array proper
-                      if (selectedValue === instance.option('value')) return;
-                    }
-                    // setting value will fire onValueChange too.
-                    instance.option("value", getComponent() === 'SelectBox' ? selectedValue[0] : selectedValue);
-                  },
-                  { defer: true },
-                 ),
-                );
-
-                // when the value is changed by other components, we want to refetch the options
-                // createEffect(on(() => props.rawValue, (v) => refetch(v)))
-
-
-                createEffect(() => instance.option("disabled", props.disabled));
-
-                createEffect(() => {
-                  setUpdateStatus(true);
-                  const options = selectOptions();
-                  if (options) {
-                    // Great Solves many times called onValueChanged problem.
-                    untrack(() => {
-                      // Immediately fires, onValueChange function. so check if e.event is not present we cancel it.
-                      instance.option("dataSource", options);
-                    })
-                  }
-                  setUpdateStatus(false);
-                });
-                onCleanup(() => instance.dispose());
-              });
-            }))
-          }}
+        <MultiSelect
+          isObject
+          displayValueParent="P"
+          disable={props.disabled!}
+          displayValueChild="name"
+          options={selectOptions()}
+          placeholder={
+            getComponent() != "SelectBox" ? "Select" : "Select Multiple"
+          }
+          onSelect={(e) => onChangeSelect(e)}
+          onRemove={onChangeSelect}
+          customCloseIcon={
+            getComponent() != "SelectBox" ? (
+              <Icon icon={"solar:close-circle-outline"} />
+            ) : null
+          }
+          singleSelect={getComponent() == "SelectBox"}
+          selectedValues={selectedValue(props.meta, props.data).map((id) => {
+            return graph.vertexes[id];
+          })}
         />
       </Show>
       {/* Todo: think about validations */}

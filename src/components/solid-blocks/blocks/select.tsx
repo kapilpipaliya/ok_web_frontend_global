@@ -23,7 +23,7 @@ export const Select: Component<SelectProps> = (props) => {
       classList={{ "sb-select": true, disabled: props.disabled }}
       aria-orientation={local["aria-orientation"]}
     >
-      <span class="sb-select-label">{local.label}</span>
+      {/* <span class="sb-select-label">{local.label}</span> */}
       <select
         {...fieldProps}
         onChange={(ev): void => {
