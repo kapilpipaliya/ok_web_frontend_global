@@ -12,22 +12,23 @@ import {
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
-import { commitTxn, IdAttr, revertTransaction, Vertex } from "../../lib/graph";
+import { commitTxn, IdAttr, revertTransaction, Vertex } from "../../../lib/graph";
 import {
   Record,
   FormContext,
   PageContext,
   getSelectionOptions, getValueFromVertexOrKey
-} from "../../lib/Utils";
-import { showNav } from "../../signals/common";
-import { getLastItem } from "../../utils/functions";
-import { WsContext } from "../../utils/ws_events_dispatcher";
-import { ComponentProps } from "../ComponentType";
-import { componentDrag } from "../PageDesignerDragAndDrop";
-import { setParentValue } from "./SelectInputField";
-import { Accordion, Avatar, Breadcrumbs, Button, Progress, Spinner } from "../solid-blocks/blocks";
-import { getParentVertexValue } from "../../lib/Traverse";
-import { PageRenderContext, PageRenderUtils, PageItemRender, RepeaterContext, getTextColumnValue, getText, GlobalDragData, getUrl, PageView, getAttrs } from "./GenaricField";
+} from "../../../lib/Utils";
+import { showNav } from "../../../signals/common";
+import { getLastItem } from "../../../utils/functions";
+import { WsContext } from "../../../utils/ws_events_dispatcher";
+import { ComponentProps } from "../../ComponentType";
+import { componentDrag } from "../../PageDesignerDragAndDrop";
+import { setParentValue } from "../SelectInputField";
+import { Accordion, Avatar, Breadcrumbs, Button, Progress, Spinner } from "../../solid-blocks/blocks";
+import { getParentVertexValue } from "../../../lib/Traverse";
+import { PageRenderContext, PageRenderUtils, PageItemRender, RepeaterContext, getText, GlobalDragData, getUrl, PageView, getAttrs } from "../GenaricField";
+import {getTextColumnValue} from "./Utils";
 
 // This component support rendering Child Themselves by calling PageRender.
 

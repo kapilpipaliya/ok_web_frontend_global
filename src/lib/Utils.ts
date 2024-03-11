@@ -1046,7 +1046,38 @@ export function deleteRow(
     }
   }
 }
-
+export function getParentVertex(path: string[], currentVertex: Vertex): { error: boolean; vertex?: Vertex } {
+  const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
+  const edges = currentVertex.IN[type];
+  if (!edges || (edges && edges.length != 1)) {
+    return {
+      error: true,
+    };
+  } else {
+    const edge = graph.edges[edges[0]];
+    if (edge) {
+      const newVertex = graph.vertexes[edge.S];
+      if (newVertex) {
+        if (path.length > 1) {
+          return getParentVertex(path.slice(0, -1), newVertex);
+        } else {
+          return {
+            error: false,
+            vertex: newVertex,
+          };
+        }
+      } else {
+        return {
+          error: true,
+        };
+      }
+    } else {
+      return {
+        error: true,
+      };
+    }
+  }
+}
 export function getChildVertexes(
   path: string[],
   currentVertexes: Vertex[],

@@ -1,5 +1,5 @@
 import { graph, Vertex } from "./graph";
-import { evaluate } from './Utils';
+import { evaluate } from './jsep'
 import jsep from "jsep";
 import {
   getChildVertexes,

@@ -4,7 +4,7 @@ import {IdAttr} from "../../lib/graph";
 // import {FormContext, isUpdatingInput} from "../../lib/Record";
 // import {getValueFromVertexOrKey} from "../../utils/utils";
 // import {mergeVertexProperties} from "../../lib/Vertex";
-import {getTextColumnValue} from "./GenaricField";
+import {getTextColumnValue} from "./Components/Utils";
 import {ComponentProps} from "../ComponentType";
 import { Bar, Checkbox, Progress, RadioGroup, TextField } from "../solid-blocks/blocks";
 
