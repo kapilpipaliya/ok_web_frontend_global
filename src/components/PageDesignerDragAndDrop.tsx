@@ -10,7 +10,7 @@ import {
   getChildVertexes,
   Record,
   getSelectionOptions,
-  setValueGlobal,
+  setValueGlobal, getParentVertex,
 } from "../lib/Utils";
 import {
   batch,
@@ -1390,11 +1390,8 @@ export const PageDesignerDragAndDrop = () => {
         const txnId = pageConfig[0].record.txnId;
         const position = indicatorPosition().position;
 
-        const fromParentVertex = getParentVertexValue(["Attr"], fromVertex);
-        const toParentVertex =
-          position === "center"
-            ? toVertex
-            : getParentVertexes(["Attr"], toVertex).vertex;
+        const fromParentVertex = getParentVertex(['Attr'], fromVertex);
+        const toParentVertex = position === "center" ? toVertex : getParentVertex(['Attr'], toVertex).vertex;
 
         // const fromIndex = fromVertex.P.pos as number;
         // const toIndex = toVertex.P.pos as number;
