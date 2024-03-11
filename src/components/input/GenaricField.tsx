@@ -14,10 +14,6 @@ import {
   useContext,
 } from "solid-js";
 
-// Comment This Lines in web build
-import dxValidationGroup from "devextreme/ui/validation_group";
-import dxValidationSummary from "devextreme/ui/validation_summary";
-
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { toTitle } from "case-switcher-js";
@@ -238,7 +234,7 @@ export function GenericField(
 
     const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
-    let validationGroup: dxValidationGroup;
+    // let validationGroup: dxValidationGroup;
     // letter if we need a record, write a solution.
     // but we should not need to access record,
     // everything will be configured from json.
@@ -274,14 +270,16 @@ export function GenericField(
       <div
         ref={(el) => {
           setDivRef(el);
-          validationGroup = new dxValidationGroup(divRef()!);
+          // validationGroup = new dxValidationGroup(divRef()!);
         }}
       >
         <Show when={divRef()}>
-          <FormContext.Provider value={{ record, cleanUpConfig, validationGroup: validationGroup! }}>
+          <FormContext.Provider value={{ record, cleanUpConfig }}>
             <PageItemRender metaVertex={props.meta} />
             {/* @ts-ignore */}
-            <div ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })} />
+            <div
+              // ref={(el) => new dxValidationSummary(el, { validationGroup: validationGroup! })}
+            />
 
             <div class="flex gap:10">
               <Show

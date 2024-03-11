@@ -18,11 +18,7 @@ import {WsContext} from "../utils/ws_events_dispatcher";
 
 import {SelectInputField,} from "./input/SelectInputField";
 import {TableInputField,} from "./input/TableInputField";
-// // Comment This Lines in web build
-// import Tabs from "devextreme/ui/tabs";
-import dxValidationGroup from "devextreme/ui/validation_group";
-import dxValidationSummary from "devextreme/ui/validation_summary";
-import dxPopup, {Properties as dxPopupProperties} from "devextreme/ui/popup";
+
 import {BeforeLeaveEventArgs, useBeforeLeave, useNavigate} from "@solidjs/router";
 import {GenericInputField,} from "./input/GenaricInputField";
 import {getSelectionOptions,} from "../lib/Traverse";
@@ -309,7 +305,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             divRef()?.querySelector?.("input")?.focus();
     });
 
-    let validationGroup: dxValidationGroup;
+    // let validationGroup: dxValidationGroup;
     props.config[1]?.("record", record);
     onCleanup(() => {
         props.config[1]?.("record", undefined);
@@ -330,8 +326,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
     let submit: boolean;
     const onSubmit = () => {
         // const valid = record.submitForm();
-        const result = validationGroup.validate();
-        if (result.isValid) {
+        // const result = validationGroup.validate();
+        const isValid = true; // result.isValid;
+        if (isValid) {
             console.log("valid");
             // !!!TODO!!! Handle Error Received From server when commit
             if (!record.isRealTime) {
@@ -365,7 +362,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         return <pre>{stringify(getExportCode(record))}</pre>;
     };
     const onImportClick = (data: any) => {
-        popupConfig = (instance: () => dxPopup) => ({
+/*        popupConfig = (instance: () => dxPopup) => ({
             contentTemplate: ImportComponent,
             width: 500,
             height: 500,
@@ -393,11 +390,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 },
             }],
         })
-        setPopup(true);
+        setPopup(true);*/
     }
 
     const onExportClick = (data: any) => {
-        popupConfig = (instance: () => dxPopup) => ({
+/*        popupConfig = (instance: () => dxPopup) => ({
             contentTemplate: PreviewCode,
             width: 500,
             height: 500,
@@ -416,11 +413,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 },
             }],
         })
-        setPopup(true);
+        setPopup(true);*/
     }
     const PopOver = () => {
         return <div ref={el => {
-            let instance: dxPopup;
+/*            let instance: dxPopup;
             onMount(() => {
                 instance = new dxPopup(el, {
                     container: '.dx-viewport',
@@ -439,7 +436,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 } as dxPopupProperties);
                 instance.show();
             })
-            onCleanup(() => instance.dispose());
+            onCleanup(() => instance.dispose());*/
         }}/>
     }
     // https://github.com/solidjs/solid-router
@@ -498,7 +495,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         <div
           ref={(el) => {
             setDivRef(el);
-            validationGroup = new dxValidationGroup(divRef()!);
+            // validationGroup = new dxValidationGroup(divRef()!);
           }}
         >
           <Show when={props.showSubmitButtonOnTop ?? false}>
@@ -510,7 +507,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               value={{
                 record,
                 cleanUpConfig,
-                validationGroup: validationGroup!,
+                // validationGroup: validationGroup!,
               }}
             >
               {/* Main Tab is displayed as top level fields */}
@@ -636,11 +633,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
               </Show>
               {/* @ts-ignore */}
               <div
-                ref={(el) =>
-                  new dxValidationSummary(el, {
-                    validationGroup: validationGroup!,
-                  })
-                }
+                // ref={(el) =>
+                  // new dxValidationSummary(el, {
+                  //   validationGroup: validationGroup!,
+                  // })
+                // }
               />
 
               <Show

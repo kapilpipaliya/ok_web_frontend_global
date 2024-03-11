@@ -25,9 +25,7 @@ import {
     JSX, createMemo
 } from "solid-js";
 import {GenericField, PageView} from "./input/GenaricField";
-// Comment This Lines in web build
-import TreeView, {Item as dxTreeViewItem, Node} from "devextreme/ui/tree_view";
-import dxSortable, {DragEndEvent} from "devextreme/ui/sortable";
+
 import {
     deleteNestedLayout,
     getChildVertex,
@@ -330,7 +328,7 @@ export const PageDesignerDragAndDrop = () => {
     };
 
 
-    let componentsTreeViewInstance: TreeView;
+   /* let componentsTreeViewInstance: TreeView;
     let collectionFieldsTreeViewInstance: TreeView;
     let layoutTreeViewInstance: TreeView;
 
@@ -547,37 +545,6 @@ export const PageDesignerDragAndDrop = () => {
                 class="h:30rem"
                 ref={el => {
                     onMount(() => {
-                        /*const instance = new dxList(el, {
-                         items: graph.vertexLabelIdMap["Comp"].map(id => graph.vertexes[id]),
-                         keyExpr: 'id',
-                         // if searchExpr is not specified, search will not work
-                         searchExpr: 'P.name',
-                         displayExpr: 'P.name',
-                         // scrollBottom don't work if we not use onMount
-                         pageLoadMode: 'scrollBottom',
-                         searchEnabled: true,
-                         width: '20rem',
-                         searchMode: 'contains',
-                         // hoverStateEnabled: false,
-                         activeStateEnabled: false,
-                         // focusStateEnabled: false,
-                         // https://supportcenter.devexpress.com/ticket/details/t622207/scheduler-how-to-drag-and-drop-an-item-from-list-and-vice-versa
-                         onItemRendered: (el) => {
-                          el.itemElement.draggable = true;
-                          el.itemElement.addEventListener("dragstart", (event) =>
-                           event.dataTransfer!.setData("text/plain", `${el.itemData?.id || ''}`)
-                          );
-                         },
-                         // Note:
-                         // cant enable dragging with itemTemplate
-                         // because parent cancels drag event.
-                         // And error received when searching with itemTemplate:
-                         // computations created outside a `createRoot`
-                         // or `render` will never be disposed
-                         onItemClick: (e) => {
-                          console.log(e.itemData);
-                         },
-                        })*/
                         const data = getTreeData({
                             collection: "g:'CompCategory'",
                             // TODO: Dont display "Form" Component
@@ -601,7 +568,7 @@ export const PageDesignerDragAndDrop = () => {
                 }}
             />
         </div>
-    }
+    }*/
     const OneComponents0 = () => {
         const data = getTreeData({
             collection: "g:'CompCategory'",
@@ -728,10 +695,6 @@ export const PageDesignerDragAndDrop = () => {
                 catogery: "Autocomplete",
                 icon: <Icon icon="fluent-mdl2:completed" width="24" height="24"/>
             },
-            // {
-            //     catogery: "ButtonGroup",
-            //     icon: <Icon icon="tdesign:button" width="24" height="24"/>
-            // },
             {
                 catogery: "Calendar",
                 icon: <Icon icon="bx:calendar" width="24" height="24"/>
@@ -883,7 +846,7 @@ export const PageDesignerDragAndDrop = () => {
             </div>
         </div>
     }
-    const TwoCollections = () => {
+    /*const TwoCollections = () => {
         return <div ref={el => {
             onMount(() => {
                 new dxSortable(el, {
@@ -1027,7 +990,7 @@ export const PageDesignerDragAndDrop = () => {
                 }}
             />
         </div>
-    }
+    }*/
 
     const getComponentFromLayoutRow = (layoutRowId: string | number) => {
         // There must be a component found.
@@ -1053,7 +1016,7 @@ export const PageDesignerDragAndDrop = () => {
         });
     }
 
-    const FourLayout = () => {
+    /*const FourLayout = () => {
         return <div ref={el => {
             onMount(() => {
                 new dxSortable(el, {
@@ -1213,14 +1176,7 @@ export const PageDesignerDragAndDrop = () => {
                 }}
             />
         </div>
-    }
-
-    interface Item {
-        id: number;
-        name: string;
-        expanded: boolean;
-        children: Item[];
-    }
+    }*/
 
     const FourLayout1 = () => {
         const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
@@ -1571,14 +1527,16 @@ export const PageDesignerDragAndDrop = () => {
             toggleRulesModal();
         }
         const onImportsSubmit = () => {
-            layoutTreeViewInstance.option("items", getLayoutTreeData());
+            // reset layout
+            // layoutTreeViewInstance.option("items", getLayoutTreeData());
             // hack to refresh the select fields. no option is refereshing the label.
             setGraph('vertexes', selectedId(), 'OUT', 'Rules', v => v ? [...v] : v);
             toggleImportsModal();
         }
         const onImportsCancel = () => {
             if (prevTxnIndex !== -1) revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
-            layoutTreeViewInstance.option("items", getLayoutTreeData());
+            // reset layout
+            // layoutTreeViewInstance.option("items", getLayoutTreeData());
             toggleImportsModal();
         }
 
@@ -1689,7 +1647,8 @@ export const PageDesignerDragAndDrop = () => {
                             parent: graph.vertexes[selectedId()]
                         });
                         jsxParser.render();
-                        layoutTreeViewInstance.option("items", getLayoutTreeData());
+                        // reset layout
+                        // layoutTreeViewInstance.option("items", getLayoutTreeData());
                     }
                 },
                 {
@@ -1927,7 +1886,8 @@ export const PageDesignerDragAndDrop = () => {
                fromItems?.splice(fromIndex, 1);*/
 
 
-            layoutTreeViewInstance.option("items", getLayoutTreeData());
+            // reset layout
+            // layoutTreeViewInstance.option("items", getLayoutTreeData());
         }
     }
     const onClickLayout = () => {
@@ -1972,7 +1932,7 @@ export const PageDesignerDragAndDrop = () => {
 
     const oneComponents0 = <OneComponents0/>;
     // const oneComponents = <OneComponents/>;
-    const twoCollections = <TwoCollections/>;
+    const twoCollections = <div></div>; //<TwoCollections/>;
     const fourLayout = <div/>;
     const fourLayout1 = <FourLayout1/>;
     const fiveProperties = <FiveProperties/>;

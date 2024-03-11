@@ -2,7 +2,7 @@ import { graph, IdAttr, Vertex } from "./graph";
 import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "./Vertex";
-import { Item as dxTreeViewItem } from "devextreme/ui/tree_view";
+
 import {evaluate} from "./jsep";
 import jsep from "jsep";
 import {deleteRow} from "./Record";
@@ -299,13 +299,13 @@ export function getSelectionOptions(
 
 export const getTreeData = (treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
   const getChildren = (levels: {[key: string]: any}, vertexes: Vertex[]) => {
-    const result = [] as dxTreeViewItem[];
+    const result = [] as any[];
     if (!levels.collection) return result;
 
     const children = evaluate(jsep(levels.collection), {vertexes: vertexes});
     for (const child of (children || []).sort((a, b) => a.P.pos - b.P.pos)) {
       const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
-      const navItem = {} as dxTreeViewItem;
+      const navItem = {} as any;
       navItem.name = name;
       navItem.expanded = true;
       navItem.id = child.id;

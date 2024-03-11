@@ -28,9 +28,7 @@ import {
  getToEdge
 } from "./Traverse";
 import { removeUndefinedProperties } from "../utils/functions";
-// Comment This Lines in web build
-import { ValidationRule } from "devextreme/common";
-import dxValidationGroup from "devextreme/ui/validation_group";
+
 import { addNewEdge, deleteEdge, newEdge } from "./Edge";
 import { setSelectionValue } from "../components/input/SelectInputField";
 import {capitalizeFirstLetter, getValueFromVertexOrKey, groupBy, isObject} from "../utils/utils";
@@ -47,7 +45,7 @@ export interface FieldAttribute {
  displayName?: string;
  props?: {
   [key: string]: any;
-  validationRules?: Array<ValidationRule>;
+  validationRules?: Array<{}>;
  };
  // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
  attributes?: FieldAttribute[];
@@ -66,7 +64,7 @@ export function getCompPropsMap(comp: Vertex) {
  return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
    acc[curr.P.name] = curr;
   return acc;
- }, {} as { [key: string]: Veretex });
+ }, {} as { [key: string]: Vertex });
 }
 
 export function getCompProps(comp: Vertex) {
@@ -538,8 +536,9 @@ export class Record {
 
  submitForm = () => {
   // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
-  const result = validationGroup.validate();
-  if (result.isValid) {
+  // const result = validationGroup.validate();
+  const isValid = true; // result.isValid;
+  if (isValid) {
    // !!!TODO!!! Handle Error Received From server when commit
    if (!this.isRealTime) {
     commitTxn(this.txnId, this.ws);
@@ -547,7 +546,7 @@ export class Record {
   } else {
    alert("please fix all errors");
   }
-  return result.isValid;
+  return isValid;
  }
  cancelForm = () => {
   revertTransaction(this.txnId);
@@ -671,7 +670,7 @@ export const addNewRow = (txnId: number, meta: Vertex, parentVertex: Vertex, pro
 
 export interface IFormContext {
  cleanUpConfig: {[key: string]: any};
- validationGroup: dxValidationGroup;
+ validationGroup: {};
  record: Record;
 }
 
