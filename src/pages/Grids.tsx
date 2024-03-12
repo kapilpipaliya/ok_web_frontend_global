@@ -337,16 +337,13 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 component: "Button",
                                 [IdAttr]: "meta",
                                 props: {
+                                    onClick: ()=>navigate("./new"),
                                     class: "bg:blue bg:rgb(24,98,234):hover text-fill:white ",
                                     children: "Add New",
                                 },
                             },
                         } as unknown as Vertex
                     }
-
-                    onClick={() => {
-                        navigate("./new");
-                    }}
                 />
             </div>
             <Show when={tableId()}>

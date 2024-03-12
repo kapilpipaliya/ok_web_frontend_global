@@ -252,7 +252,7 @@ export function TableInputField(
                   </td>
                 </Match>
                 <Match when={true}>
-                  <td class="max-w:600px">
+                  <td class="max-w:400px padding:3px">
                     <div class="align-items:center">
                       <DefaultValue />
                       <Content />
@@ -396,70 +396,9 @@ export function TableInputField(
               props: {
                 children: "Add",
                 variant: "secondary",
-                onClick: insertNewRow,
+                onClick: () => insertNewRow,
               },
             },
-            // },
-            // P: {
-            //   component: "Avtar",
-            //   props: {
-            //     img: "dn.net/static_assets/staging/22spring/free/browse-vector-categories-collections/Card4_399895799.jpg?width=580",
-            //     name: "Savan",
-            //     fallback:<div>Error</div>,
-            //   },
-            // },
-            // P: {
-            //   component: "Select",
-            //   props: {
-            //     "aria-orientation": "vertical",
-            //     label: <div>framework</div>,
-            //     children: (
-            //       <>
-            //         <option value="5">5</option>
-            //         <option value="3">3</option>
-            //       </>
-            //     ),
-            //     // onchange: onchange,
-            //     // value:value,
-            //   },
-            // },
-            // P: {
-            //   component: "Loading",
-            //   props: {
-            //   },
-            // },
-            // P: {
-            //   component: "Accordion",
-            //   props: {
-            //     open: false,
-            //     children: (
-            //       <>
-            //         <AccordionHeader>Header</AccordionHeader>
-            //         <p>Arbitrary content</p>
-            //       </>
-            //     ),
-            //   },
-            // },
-            // P: {
-            //   component: "Breadcrumbs",
-            //   props: {
-            //     children: (
-            //       <>
-            //         <a href="/">Home</a>
-            //         <a href="/docs">Docs</a>
-            //         <span>Breadcrumbs</span>
-            //       </>
-            //     ),
-            //   },
-            // },
-
-            // P: {
-            //   component: "Progress",
-            //   props: {
-            //     max:"100",
-            //     value:32
-            //   },
-            // },
           } as unknown as Vertex
         }
       />
@@ -468,10 +407,6 @@ export function TableInputField(
 
   return (
     <Switch>
-      {/*<Match when={isKanban()}>*/}
-      {/*  <Kanban/>*/}
-      {/*  <SortableKanban/>*/}
-      {/*</Match>*/}
       <Match when={tableColumnsTemplate().length === 0}>
         Please Define table columns
       </Match>

@@ -52,24 +52,29 @@ export const TextField: Component<TextFieldProps> = (props) => {
 
   return (
     <label
-      classList={mergeProps(local.classList ?? {}, { "sb-textfield": true })}
+      classList={mergeProps(local.classList ?? {}, { textfield: true })}
       aria-orientation={props["aria-orientation"]}
     >
-      <span class="sb-textfield-label">{local.label}</span>
-      <Show when={local.multiline} fallback={
-        <input
-          {...fieldProps as JSX.HTMLAttributes<HTMLInputElement>}
+      {/* <span class="sb-textfield-label">{local.label}</span> */}
+      <Show
+        when={local.multiline}
+        fallback={
+          <input
+            {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
+            style={{ width: "100%" }}
+            onInput={(ev) => {
+              runEvent(ev, local.onInput);
+              local.setValue?.(ev.currentTarget.value);
+            }}
+          />
+        }
+      >
+        <textarea
+          {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
+          style={{ resize: "both", width: "100%" }}
           onInput={(ev) => {
             runEvent(ev, local.onInput);
             local.setValue?.(ev.currentTarget.value);
-          }}
-        />
-      }>
-        <textarea
-          {...fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>}
-          onInput={(ev) => {
-            runEvent(ev, local.onInput);
-            local.setValue?.(ev.currentTarget.value); 
           }}
         />
       </Show>

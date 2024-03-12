@@ -216,8 +216,8 @@ export function SelectInputField(
         // }
         // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
         setUpdateStatus(true);
-        const optionId = data.id;
-        const optionvalue = data.P.name;
+        const optionId = data!.id;
+        const optionvalue = data!.P.name;
 
         if (!props.data) {
           return;
@@ -274,17 +274,16 @@ export function SelectInputField(
           disable={props.disabled!}
           displayValueChild="name"
           options={selectOptions()}
+          avoidHighlightFirstOption
           placeholder={
-            getComponent() != "SelectBox" ? "Select" : "Select Multiple"
+            getComponent() == "SelectBox" ? "Select" : "Select Multiple"
           }
           onSelect={(e) => onChangeSelect(e)}
           onRemove={onChangeSelect}
-          customCloseIcon={
-            getComponent() != "SelectBox" ? (
-              <Icon icon={"solar:close-circle-outline"} />
-            ) : null
+          customCloseIcon={<Icon icon={"solar:close-circle-outline"} />}
+          selectionLimit={
+            getComponent() == "SelectBox" ? 1 : 1000
           }
-          singleSelect={getComponent() == "SelectBox"}
           selectedValues={selectedValue(props.meta, props.data).map((id) => {
             return graph.vertexes[id];
           })}

@@ -19,6 +19,7 @@ import {
   AttrsAdminTableData,
   FieldAttribute,
   FormMetaData,
+  getParentVertex,
 } from "./Utils";
 import { getToEdge } from "./CommonUtils/getToEdge";
 import { removeUndefinedProperties } from "../utils/functions";

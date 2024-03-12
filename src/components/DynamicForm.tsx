@@ -222,39 +222,42 @@ export const DynamicForm = (props: DynamicFormProps) => {
         return <pre>{stringify(getExportCode(record))}</pre>;
     };
     const onImportClick = (data: any) => {
-/*        popupConfig = (instance: () => dxPopup) => ({
-            contentTemplate: ImportComponent,
-            width: 500,
-            height: 500,
-            title: 'Import',
-            'position.of': data.element,
-            toolbarItems: [{
-                widget: 'dxButton',
-                toolbar: 'bottom',
-                location: 'before',
-                options: {
-                    icon: 'import',
-                    text: 'Import',
-                    onClick: importCodeFn,
-                },
-            }, {
-                widget: 'dxButton',
-                toolbar: 'bottom',
-                location: 'after',
-                options: {
-                    text: 'Close',
-                    onClick() {
-                        instance().hide();
-                        setPopup(false);
-                    },
-                },
-            }],
-        })
-        setPopup(true);*/
+       popupConfig = (instance: () => dxPopup) => ({
+         contentTemplate: ImportComponent,
+         width: 500,
+         height: 500,
+         title: "Import",
+         "position.of": data.element,
+         toolbarItems: [
+           {
+             widget: "dxButton",
+             toolbar: "bottom",
+             location: "before",
+             options: {
+               icon: "import",
+               text: "Import",
+               onClick: () => importCodeFn,
+             },
+           },
+           {
+             widget: "dxButton",
+             toolbar: "bottom",
+             location: "after",
+             options: {
+               text: "Close",
+               onClick() {
+                 instance().hide();
+                 setPopup(false);
+               },
+             },
+           },
+         ],
+       });
+        setPopup(true);
     }
 
     const onExportClick = (data: any) => {
-/*        popupConfig = (instance: () => dxPopup) => ({
+        popupConfig = (instance: () => dxPopup) => ({
             contentTemplate: PreviewCode,
             width: 500,
             height: 500,
@@ -273,7 +276,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 },
             }],
         })
-        setPopup(true);*/
+        setPopup(true);
     }
     const PopOver = () => {
         return <div ref={el => {
@@ -317,34 +320,47 @@ export const DynamicForm = (props: DynamicFormProps) => {
         }, 100);
     });
 
-    const SubmitButton = () => <div style={{"justify-content": "space-evenly", 'display': 'flex'}}>
-        <Show when={props.submitButton} fallback={<GenericField
-            // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-            meta={{
-                P: {
+    const SubmitButton = () => (
+      <div style={{ "justify-content": "space-evenly", display: "flex" }}>
+        <Show
+          when={props.submitButton}
+          fallback={
+            <GenericField
+              // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+              meta={
+                {
+                  P: {
                     component: "Button",
                     props: {
-                        type: "primary",
-                        children: "Submit",
-                        onClick: onSubmit
-                    }
-                }
-            } as any}
-
-        />}>
-            {props.submitButton}
+                      type: "primary",
+                      children: "Submit",
+                      onClick: () => onSubmit,
+                    },
+                  },
+                } as any
+              }
+            />
+          }
+        >
+          {props.submitButton}
         </Show>
 
         <GenericField
-            meta={{
-                P: {
-                    component: "Button",
-                    props: {variant: "variant", children: "Cancel", onClick: onCancel}
-                }
-            } as any}
-
+          meta={
+            {
+              P: {
+                component: "Button",
+                props: {
+                  variant: "variant",
+                  children: "Cancel",
+                  onClick: () => onCancel,
+                },
+              },
+            } as any
+          }
         />
-    </div>
+      </div>
+    );
     const [activeTab, setActiveTab] = createSignal(tabs[0]);
   
 
@@ -398,28 +414,27 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                           component: "Button",
                                           props: {
                                             children: "Import",
+                                            onClick: () => onImportClick,
                                             class:
                                               "bg:blue bg:rgb(24,98,234):hover text-fill:white",
                                           },
                                         },
                                       } as any
                                     }
-                                    onClick={onImportClick}
                                   />
                                   <GenericField
                                     meta={
                                       {
                                         P: {
                                           component: "Button",
-
                                           props: {
                                             children: "Export",
-                                            class: " text-fill:blue b:blue",
+                                            onClick: () => onExportClick,
+                                            class: " b:blue",
                                           },
                                         },
                                       } as any
                                     }
-                                    onClick={onExportClick}
                                   />
                                 </div>
                               </Show>
@@ -463,7 +478,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               
             /> */}
                 <TableTabs tabs={tabs} setActiveTab={setActiveTab} />
-
+                <br />
                 <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
                   {(group) => {
                     return (
@@ -492,12 +507,13 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 </For>
               </Show>
               {/* @ts-ignore */}
+              <br />
               <div
-                // ref={(el) =>
-                  // new dxValidationSummary(el, {
-                  //   validationGroup: validationGroup!,
-                  // })
-                // }
+              // ref={(el) =>
+              // new dxValidationSummary(el, {
+              //   validationGroup: validationGroup!,
+              // })
+              // }
               />
 
               <Show

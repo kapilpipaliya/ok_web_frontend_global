@@ -69,7 +69,6 @@ import jsep from "jsep";
 import { setSelectionValue } from "./input/SelectionUtils";
 import { evaluate } from "../lib/jsep";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "./solid-blocks/blocks";
-import { Button } from "./kobalte";
 
 const addPropsToLayoutRow = (
   txnId: number,
@@ -1860,7 +1859,7 @@ export const PageDesignerDragAndDrop = () => {
               props: { type: "primary", children: "Submit" },
             },
           } as any,
-          onClick: onImportsSubmit,
+          onClick: () => onImportsSubmit,
         },
         {
           meta: {
@@ -1869,7 +1868,7 @@ export const PageDesignerDragAndDrop = () => {
               props: { variant: "secondary", children: "Cancel" },
             },
           } as any,
-          onClick: onImportsCancel,
+          onClick: () => onImportsCancel,
         },
       ];
       return (
@@ -2010,11 +2009,10 @@ export const PageDesignerDragAndDrop = () => {
               {
                 P: {
                   component: "Button",
-                  props: { children: "Rules" },
+                  props: { children: "Rules", onClick: () => toggleRulesModal },
                 },
               } as any
             }
-            onClick={toggleRulesModal}
           />
           &nbsp;&nbsp;
           <GenericField
@@ -2022,11 +2020,13 @@ export const PageDesignerDragAndDrop = () => {
               {
                 P: {
                   component: "Button",
-                  props: { children: "Import" },
+                  props: {
+                    children: "Import",
+                    onClick: () => toggleImportsModal,
+                  },
                 },
               } as any
             }
-            onClick={toggleImportsModal}
           />
           <CollAndData />
           <FormGroupProperties
@@ -2080,11 +2080,11 @@ export const PageDesignerDragAndDrop = () => {
                             component: "Button",
                             props: {
                               children: "Submit",
+                              onClick: () => onRulesSubmit,
                             },
                           },
                         } as any
                       }
-                      onClick={onRulesSubmit}
                     />
 
                     <GenericField
@@ -2094,11 +2094,11 @@ export const PageDesignerDragAndDrop = () => {
                             component: "Button",
                             props: {
                               children: "Cancel",
+                              onClick: onRulesCancel,
                             },
                           },
                         } as any
                       }
-                      onClick={onRulesCancel}
                     />
                   </div>
                 </ModalFooter>
@@ -2275,11 +2275,14 @@ export const PageDesignerDragAndDrop = () => {
                       {
                         P: {
                           component: "Button",
-                          props: { variant: "secondary", children: "Delete" },
+                          props: {
+                            onClick: () => deleteLayout,
+                            variant: "secondary",
+                            children: "Delete",
+                          },
                         },
                       } as any
                     }
-                    onClick={deleteLayout}
                   />
                   <div style="cursor: pointer;" onClick={onClickProperties}>
                     <Icon

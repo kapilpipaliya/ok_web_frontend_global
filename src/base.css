@@ -177,6 +177,12 @@ textarea {
     margin: 0; /* 2 */
     padding: 0; /* 3 */
 }
+.global-style {
+  border-radius: .3rem;
+  padding: .3rem;
+  border-color: #cccccc;
+  border-width: .1rem;
+}
 
 /*
 Remove the inheritance of text transform in Edge and Firefox.

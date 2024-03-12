@@ -5,6 +5,7 @@
 .multiSelectContainer {
     position: relative;
     text-align: left;
+    
     width: 100%;
 }
 
@@ -22,7 +23,7 @@
 }
 
 .multiSelectContainer input {
-    border: none;
+    
     margin-top: 3px;
     background: transparent;
 }
@@ -77,20 +78,23 @@
 .multiSelectContainer ul {
     display: block;
     padding: 0;
+    
     margin: 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #cccccc;
+    border-radius: .3rem;
     max-height: 250px;
     overflow-y: auto;
 }
 
 .multiSelectContainer li {
     padding: 10px 10px;
+    
 }
 
 .multiSelectContainer li:hover {
     background: #0096fb;
     color: #fff;
+    
     cursor: pointer;
 }
 

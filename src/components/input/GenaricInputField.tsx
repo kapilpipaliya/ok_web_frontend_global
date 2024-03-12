@@ -86,10 +86,16 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "TextArea"}>
-            <textarea value={props.data?.P[props.meta.P[IdAttr]] ?? ""} />
+            <TextField
+              class="global-style"
+              {...props.data?.P.props}
+              multiline
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
           </Match>
           <Match when={props.component === "TextBox"}>
             <TextField
+              class="global-style"
               {...props.data?.P.props}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />

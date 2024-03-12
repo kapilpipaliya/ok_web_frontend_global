@@ -592,23 +592,28 @@ const matchValues = (value: string, search: string) => {
                   <span
                     class="chip"
                     classList={{
-                      singleChip: props.singleSelect,
                       disableSelection: isDisablePreSelectedValues(value),
                     }}
                     style={props.style["chips"]}
                   >
                     {!props.isObject
                       ? (value || "").toString()
-                      : value
-                      ? value[props.displayValueParent][props.displayValueChild]
-                      : value}
+                      : value[props.displayValueParent][
+                          props.displayValueChild
+                        ]}
                     <Show when={!isDisablePreSelectedValues(value)}>
                       <Show
                         when={!props.customCloseIcon}
                         fallback={
                           <i
                             class="custom-close"
-                            onClick={() => onRemoveSelectedItem(value)}
+                            onClick={() => {
+                              if (selectedValues().length === 1) {
+                                setSelectedValues([]);
+                              } else {
+                                onRemoveSelectedItem(value);
+                              }
+                            }}
                             style={{
                               "margin-left": ".5rem",
                               cursor: "pointer",
@@ -639,7 +644,7 @@ const matchValues = (value: string, search: string) => {
             class="multiSelect-container multiSelectContainer"
             classList={{ disable_ms: disable }}
             id={id || "multiSelectContainerSolid"}
-            style={style["multiSelectContainer"]}
+            style={(style["multiSelectContainer"]),{"background-color":"white"}}
           >
             <div
               class="search-wrapper searchWrapper"

@@ -27,46 +27,51 @@ export const SimpleImport = (props: {}) => {
     const config = createStore({} as { record: Record });
 
     return (
-        <>
-            <SelectInputField
-                component={"SelectBox"}
-                data={{P: {}} as Vertex}
-                meta={
-                    {
-                        P: {
-                            [IdAttr]: "import",
-                            props: {
-                                stringValue: true,
-                                items: `dataType
+      <>
+        <SelectInputField
+          component={"SelectBox"}
+          data={{ P: {} } as Vertex}
+          meta={
+            {
+              P: {
+                [IdAttr]: "import",
+                props: {
+                  stringValue: true,
+                  items: `dataType
 component
 dataTypeDefault
 lookup
 attribute
 user
 role
-perm`
-                            },
-                        },
-                    } as unknown as Vertex
-                }
-                // @ts-ignore
-                setValue={(attr, vertex, data) => updateImportRecord(data, config[0].record)}
-            />
-            <AbstractSingleForm id={"new"} formId={"Import"} config={config}/>
+perm`,
+                },
+              },
+            } as unknown as Vertex
+          }
+          // @ts-ignore
+          setValue={(attr, vertex, data) =>
+            updateImportRecord(data, config[0].record)
+          }
+        />
+        <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
 
-            <GenericField
-                meta={
-                    {
-                        P: {
-                            component: "Button",
-                            [IdAttr]: "meta",
-                            props: {children: "Import"},
-                        },
-                    } as unknown as Vertex
-                }
-                onClick={() => onDataDirectoryImportClick(config[0].record, Ws)}
-            />
-        </>
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
+                [IdAttr]: "meta",
+                props: {
+                  children: "Import",
+                  onClick: () =>
+                    onDataDirectoryImportClick(config[0].record, Ws),
+                },
+              },
+            } as unknown as Vertex
+          }
+        />
+      </>
     );
 }; // group of the fields
 interface FormGroupPropertiesProps {

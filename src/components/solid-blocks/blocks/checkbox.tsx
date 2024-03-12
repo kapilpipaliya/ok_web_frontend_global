@@ -48,22 +48,21 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
   
   return (
     <label
-      class={`${content.align || "left"} ${
-        content.switch ? " switch" : ""
-      } sb-checkbox`}
-      {...labelProps as JSX.HTMLAttributes<HTMLLabelElement>}
+      class={`${content.align || "left"} ${content.switch ? " switch" : ""} `}
+      {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>{content.children}</Show>
-      <input
-        ref={props.ref}
-        type="checkbox"
-        role={content.switch ? "switch" : undefined}
-        {...inputProps}
-        onChange={(ev): void => {
-          runEvent(ev, content.onChange);
-          content.setChecked?.(ev.currentTarget.checked);
-        }}
-      />
+        <input
+          ref={props.ref}
+          type="checkbox"
+          style={{ height: "17px", width: "17px" }}
+          role={content.switch ? "switch" : undefined}
+          {...inputProps}
+          onChange={(ev): void => {
+            runEvent(ev, content.onChange);
+            content.setChecked?.(ev.currentTarget.checked);
+          }}
+        />
       <Show when={content.align !== "right"}>{content.children}</Show>
     </label>
   );

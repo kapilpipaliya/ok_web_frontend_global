@@ -2,16 +2,17 @@ button.sb-button,
 [role="button"].sb-button {
   appearance: none;
   border: 0.125em solid;
-  border-radius: var(--border-radius);
+  border-radius: .5rem;
   cursor: pointer;
   font-size: inherit;
   padding: 0.25em 0.75em;
   margin: 0.05em 0;
+  color: #0096fb;
 }
 button.primary.sb-button,
 [role="button"].primary.sb-button {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: #0099ff;
+  background: #0096fb;
   color: var(--primary-text);
 }
 button.sb-button:hover:not(:active, [aria-disabled="true"]),

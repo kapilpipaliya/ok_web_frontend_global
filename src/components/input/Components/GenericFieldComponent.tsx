@@ -122,29 +122,40 @@ export function GenericField(
             <div class="flex gap:10">
               <Show
                 when={props.submitButton}
-                fallback={<GenericField
-                  // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-                  meta={{
-                    P: {
-                      component: "Button",
-                      props: {
-                        children: "Submit",
-                      },
-                    },
-                  } as any}
-                  onClick={onSubmit} />}
+                fallback={
+                  <GenericField
+                    // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+                    meta={
+                      {
+                        P: {
+                          component: "Button",
+                          props: {
+                            children: "Submit",
+                            onClick: () => onSubmit,
+                          },
+                        },
+                      } as any
+                    }
+                  />
+                }
               >
                 {props.submitButton}
               </Show>
 
               <GenericField
-                meta={{
-                  P: {
-                    component: "Button",
-                    props: { variant: "secondary", children: "Cancel" },
-                  },
-                } as any}
-                onClick={onCancel} />
+                meta={
+                  {
+                    P: {
+                      component: "Button",
+                      props: {
+                        onClick: () => onCancel,
+                        variant: "secondary",
+                        children: "Cancel",
+                      },
+                    },
+                  } as any
+                }
+              />
             </div>
           </FormContext.Provider>
         </Show>
