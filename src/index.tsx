@@ -1,5 +1,7 @@
 /* @refresh reload */
 // css
+import './components/solid-blocks/css_var.css'
+// import 'components/solid-blocks/index.css'
 import "./base.css";
 import {config} from "./master.css";
 // import "uikit/dist/js/uikit";
