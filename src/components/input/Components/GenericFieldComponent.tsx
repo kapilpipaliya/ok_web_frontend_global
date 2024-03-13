@@ -119,7 +119,7 @@ export function GenericField(
             {/* @ts-ignore */}
             <div />
 
-            <div class="flex gap:10">
+            <div class="flex gap:1">
               <Show
                 when={props.submitButton}
                 fallback={

@@ -186,7 +186,8 @@ export function TableInputField(
             const component = createMemo(() => {
               if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
-                console.log("refreshing");
+                console.log(
+                  "refreshing");
                 const component = getSelectionOptions(
                   [p.joinVertex],
                   metaVertex().P.component
@@ -216,6 +217,9 @@ export function TableInputField(
             const Content = () => (
               <>
                 <DynamicComponent
+                  title={toTitle(
+                    column.P.displayName || column.P[IdAttr] || ""
+                  )}
                   component={component()}
                   // When we have a Table we pass original Table Meta Vertex
                   meta={
@@ -252,7 +256,7 @@ export function TableInputField(
                   </td>
                 </Match>
                 <Match when={true}>
-                  <td class="max-w:400px padding:3px">
+                  <td class="max-w:400px padding:1px">
                     <div class="align-items:center">
                       <DefaultValue />
                       <Content />

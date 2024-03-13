@@ -93,6 +93,7 @@ export const DynamicComponent = (props: {
   // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
+  title?: String,
   data?: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
@@ -102,43 +103,59 @@ export const DynamicComponent = (props: {
   return (
     <Switch>
       <Match when={!props.component}>NO INPUT</Match>
-      <Match when={props.component === "SelectBox" || props.component === "TagBox"} keyed>
+      <Match
+        when={props.component === "SelectBox" || props.component === "TagBox"}
+        keyed
+      >
         <SelectInputField
           data={props.data}
           meta={props.meta}
+          title={props.title}
           // passed setValue when we have a string value in select field
           setValue={props.setValue}
           disabled={props.disabled!}
           component={props.component}
           txnId={props.txnId}
-          isRealTime={props.isRealTime} />
+          isRealTime={props.isRealTime}
+        />
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!props.disabled} fallback={<>...</>}>
-          <TableInputField meta={props.meta} data={props.data}
+          <TableInputField
+            meta={props.meta}
+            data={props.data}
             disabled={props.disabled!}
             txnId={props.txnId}
             setValue={props.setValue}
-            isRealTime={props.isRealTime} />
+            isRealTime={props.isRealTime}
+          />
         </Show>
       </Match>
-      <Match when={genericComponents.includes(props.component) && props.component} keyed>
+      <Match
+        when={genericComponents.includes(props.component) && props.component}
+        keyed
+      >
         <GenericInputField
           data={props.data}
           meta={props.meta}
           txnId={props.txnId}
           component={props.component}
           setValue={props.setValue}
-          disabled={props.disabled!} />
+          disabled={props.disabled!}
+        />
       </Match>
-      <Match when={genericComponents2.includes(props.component) && props.component} keyed>
+      <Match
+        when={genericComponents2.includes(props.component) && props.component}
+        keyed
+      >
         <GenericField
           data={props.data}
           meta={props.meta}
           txnId={props.txnId}
           component={props.component}
           setValue={props.setValue}
-          disabled={props.disabled!} />
+          disabled={props.disabled!}
+        />
       </Match>
     </Switch>
   );

@@ -9,6 +9,7 @@ import {AlertMessageContext} from "../contexts/AlertMessageContext";
 import { PageContext } from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage} from "../signals/common";
+import { Avatar } from "../components/solid-blocks/blocks";
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -46,65 +47,76 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
     addNewVertex(0, newVertex(vertexId, ["MainNavBarTitle"], {class: `bb:1${border}`}));
 
     return (
-        <div class="flex">
-            <Show when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}>
-                <Sidebar isSideBarOpen={isSideBarOpen()}/>
-            </Show>
-            <div class={`${isSideBarOpen() ? 'ml:200' : ''} flex:1 transition:margin-left|200ms|ease-in-out`}>
-                <div class="flex flex:col flex:1">
-                    <PageContext.Provider
-                        value={{
-                            events: {
-                                setSideBarOpen,
-                                setTitle: (title: string) => mergeVertexProperties(0, vertexId, {title}),
-                            },
-                        }}
-                    >
-                        <Show when={!isLoginPage() && !isSignUpPage()}>
-                            <Navbar
-                                toggleSidebar={() => {
-                                    set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
-                                    setSideBarOpen((prev) => !prev);
-                                }}
-                                right={
-                                    <Show
-                                        when={graph.member?.id}
-                                        fallback={
-                                            <>
-                                                <A href="/signup" replace={true}>
-                                                    Register
-                                                </A>
-                                                {/* @ts-ignore */}
-                                                <A
-                                                    href={"/login"}
-                                                    replace={true}
-                                                    // @ts-ignore
-                                                    title={__APP_VERSION__}
-                                                >
-                                                    Login
-                                                </A>
-                                            </>
-                                        }
-                                    >
-                                        <A href={"/logout"} replace={true}>
-                                            Logout
-                                        </A>
-                                    </Show>
-                                }
-                                meta={graph.vertexes[vertexId]}
-                            />
-                        </Show>
+      <div class="flex">
+        <Show
+          when={isSideBarOpen() && (graph.initialSynced || isSideBarOpen())}
+        >
+          <Sidebar isSideBarOpen={isSideBarOpen()} />
+        </Show>
+        <div
+          class={`${
+            isSideBarOpen() ? "ml:200" : ""
+          } flex:1 transition:margin-left|200ms|ease-in-out`}
+        >
+          <div class="flex flex:col flex:1">
+            <PageContext.Provider
+              value={{
+                events: {
+                  setSideBarOpen,
+                  setTitle: (title: string) =>
+                    mergeVertexProperties(0, vertexId, { title }),
+                },
+              }}
+            >
+              <Show when={!isLoginPage() && !isSignUpPage()}>
+                <Navbar
+                  toggleSidebar={() => {
+                    set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
+                    setSideBarOpen((prev) => !prev);
+                  }}
+                  right={
+                    <Avatar
+                    style={{"background-color":"white",height:"40px",width:"40px"}}
+                      img={
+                        "https://icons.veryicon.com/png/o/miscellaneous/two-color-icon-library/user-286.png"
+                      }
+                    ></Avatar>
+                    // <Show
+                    //     when={graph.member?.id}
+                    //     fallback={
+                    //         <>
+                    //             <A href="/signup" replace={true}>
+                    //                 Register
+                    //             </A>
+                    //             {/* @ts-ignore */}
+                    //             <A
+                    //                 href={"/login"}
+                    //                 replace={true}
+                    //                 // @ts-ignore
+                    //                 title={__APP_VERSION__}
+                    //             >
+                    //                 Login
+                    //             </A>
+                    //         </>
+                    //     }
+                    // >
+                    //     <A href={"/logout"} replace={true}>
+                    //         Logout
+                    //     </A>
+                    // </Show>
+                  }
+                  meta={graph.vertexes[vertexId]}
+                />
+              </Show>
 
-                        <AlertDisplay/>
+              <AlertDisplay />
 
-                        <main class="p:20 bg:white">
-                            <Show when={graph.initialSynced}>
-                                {props.children}
-                            </Show>
-                        </main>
-                    </PageContext.Provider>
-                </div>
-            </div>
+              <main class="p:20 bg:white">
+                <Show when={graph.initialSynced}>{props.children}</Show>
+              </main>
+            </PageContext.Provider>
+          </div>
         </div>
+      </div>
     );
 };

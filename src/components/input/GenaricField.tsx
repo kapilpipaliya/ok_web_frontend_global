@@ -109,6 +109,7 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
                 getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes ||
                 PageRenderUtils.getDataVertex(item)
               }
+              title={toTitle(PageRenderUtils.getId(item) || "")}
               setValue={record?.setValue || (() => {})}
               disabled={false}
               component={component()}

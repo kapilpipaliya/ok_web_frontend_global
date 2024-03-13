@@ -148,13 +148,13 @@ export function collectionNameDisplayExpr(collection?: string) {
 export function SelectInputField(
   props: ComponentProps & {
     component: string;
+    title:String;
     txnId?: number;
     isRealTime?: boolean;
   }
 ) {
   const { Ws } = useContext(WsContext);
   let { record } = useContext(FormContext);
-
 
   // @ts-ignore
   const [selectOptions, { refetch }] = createResource(
@@ -199,7 +199,7 @@ export function SelectInputField(
     return component;
   }
 
-  const onChangeSelect=(e: any)=>{
+  const onChangeSelect = (e: any) => {
     const data = e[0];
     runWithOwner(outerOwner, () => {
       batch(() => {
@@ -244,8 +244,11 @@ export function SelectInputField(
         setUpdateStatus(false);
       });
     });
-  }
+  };
   const outerOwner = getOwner();
+  console.log("====================================");
+  console.log(props.meta.P);
+  console.log("====================================");
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <Show
@@ -275,15 +278,11 @@ export function SelectInputField(
           displayValueChild="name"
           options={selectOptions()}
           avoidHighlightFirstOption
-          placeholder={
-            getComponent() == "SelectBox" ? "Select" : "Select Multiple"
-          }
+          placeholder={`Add ${props.title}`}
           onSelect={(e) => onChangeSelect(e)}
           onRemove={onChangeSelect}
-          customCloseIcon={<Icon icon={"solar:close-circle-outline"} />}
-          selectionLimit={
-            getComponent() == "SelectBox" ? 1 : 1000
-          }
+          customCloseIcon={<Icon icon={"ic:round-close"} />}
+          selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
           selectedValues={selectedValue(props.meta, props.data).map((id) => {
             return graph.vertexes[id];
           })}

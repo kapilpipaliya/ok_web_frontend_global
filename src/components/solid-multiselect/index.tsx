@@ -615,7 +615,7 @@ const matchValues = (value: string, search: string) => {
                               }
                             }}
                             style={{
-                              "margin-left": ".5rem",
+                              "margin-left": ".3rem",
                               cursor: "pointer",
                             }}
                           >

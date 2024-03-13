@@ -2094,7 +2094,7 @@ export const PageDesignerDragAndDrop = () => {
                             component: "Button",
                             props: {
                               children: "Cancel",
-                              onClick: onRulesCancel,
+                              onClick: ()=>onRulesCancel,
                             },
                           },
                         } as any
