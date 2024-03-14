@@ -280,7 +280,7 @@ export function SelectInputField(
           avoidHighlightFirstOption
           placeholder={`Add ${props.title}`}
           onSelect={(e) => onChangeSelect(e)}
-          onRemove={onChangeSelect}
+          onRemove={(e) => onChangeSelect(e)}
           customCloseIcon={<Icon icon={"ic:round-close"} />}
           selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
           selectedValues={selectedValue(props.meta, props.data).map((id) => {

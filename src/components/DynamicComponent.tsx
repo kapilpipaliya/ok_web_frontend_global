@@ -121,6 +121,7 @@ export const DynamicComponent = (props: {
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!props.disabled} fallback={<>...</>}>
+          
           <TableInputField
             meta={props.meta}
             data={props.data}

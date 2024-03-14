@@ -24,7 +24,6 @@ export function Navbar(
 
             {/* Actions */}
             <div class="flex ai:center jc:center gap:8">
-                <Icon icon="material-symbols:search" width={20} class="cursor:pointer"/>
 
                 {props.right}
 

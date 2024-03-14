@@ -389,7 +389,7 @@ export function TableInputField(
       )
     );
   };
-  const AddNewButton = () => {
+  const AddNewButton = (isInTableButton: any) => {
     // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
     return (
       <GenericField
@@ -400,7 +400,7 @@ export function TableInputField(
               props: {
                 children: "Add",
                 variant: "secondary",
-                onClick: () => insertNewRow,
+                onClick: () => insertNewRow(),
               },
             },
           } as unknown as Vertex
@@ -419,7 +419,7 @@ export function TableInputField(
           {/*<Show when={props.meta.P.attributes}>*/}
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
-
+          
           {/* <Show when={sortedVertexes().length}> */}
           <AddNewButton />
           {/* </Show> */}

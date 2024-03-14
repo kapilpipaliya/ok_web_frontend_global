@@ -244,7 +244,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
              options: {
                icon: "import",
                text: "Import",
-               onClick: () => importCodeFn,
+               onClick: () => importCodeFn(),
              },
            },
            {
@@ -342,7 +342,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                     props: {
                       type: "primary",
                       children: "Submit",
-                      onClick: () => onSubmit,
+                      onClick: () => onSubmit(),
                     },
                   },
                 } as any
@@ -361,7 +361,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 props: {
                   variant: "variant",
                   children: "Cancel",
-                  onClick: () => onCancel,
+                  onClick: () => onCancel(),
                 },
               },
             } as any
@@ -493,7 +493,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                       <div
                         class="dx-fieldset"
                         style={{
-                          
                           "max-width": getTabsWidth(
                             groupByTabsAndGroup[activeTab()][group]
                           ),

@@ -303,6 +303,7 @@ export const MultiSelect: Component<IMultiSelectProps> = ( props: IMultiSelectPr
     {
         let index = 0;
         const newSelectedValues = [ ...selectedValues() ];
+
         if ( props.isObject )
         {
             index = newSelectedValues.findIndex(
@@ -315,8 +316,8 @@ export const MultiSelect: Component<IMultiSelectProps> = ( props: IMultiSelectPr
         {
             index = newSelectedValues.indexOf( item );
         }
-        newSelectedValues.splice( index, 1 );
         props.onRemove( newSelectedValues, item );
+        newSelectedValues.splice( index, 1 );
         setSelectedValues( newSelectedValues );
         if ( !props.showCheckbox )
         {
@@ -608,11 +609,11 @@ const matchValues = (value: string, search: string) => {
                           <i
                             class="custom-close"
                             onClick={() => {
-                              if (selectedValues().length === 1) {
-                                setSelectedValues([]);
-                              } else {
+                            //   if (selectedValues().length === 1) {
+                            //     setSelectedValues([]);
+                            //   } else {
                                 onRemoveSelectedItem(value);
-                              }
+                            //   }
                             }}
                             style={{
                               "margin-left": ".3rem",
@@ -644,13 +645,15 @@ const matchValues = (value: string, search: string) => {
             class="multiSelect-container multiSelectContainer"
             classList={{ disable_ms: disable }}
             id={id || "multiSelectContainerSolid"}
-            style={(style["multiSelectContainer"]),{"background-color":"white"}}
+            style={
+              (style["multiSelectContainer"], { "background-color": "white" })
+            }
           >
             <div
               class="search-wrapper searchWrapper"
               classList={{ singleSelect }}
               ref={searchWrapper}
-              style={(style["searchBox"])}
+              style={style["searchBox"]}
             >
               {renderSelectedList()}
               <input
