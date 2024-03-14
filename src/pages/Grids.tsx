@@ -162,7 +162,7 @@ export const DataGrid = (props: DataGridProps) => {
             // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
         {
             return !formNew.isInlineEditable ?
-                <A href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit"/>Edit</A> :
+                <A href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit"/></A> :
                 <button onClick={() => {
                     if (rowId() === null) {
                         setRowId(info.row.original.id);
@@ -192,8 +192,8 @@ export const DataGrid = (props: DataGridProps) => {
         header: '',
         footer: '',
         cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
-                              class="text-fill:red font:semibold	"><Icon icon="fluent:delete-12-regular"
-                                                                            class="color:red"/>Delete</button>
+                              class="text-fill:red font:semibold	"><Icon  icon="fluent:delete-12-regular"
+                                                                            class="color:red mr:1rem"/></button>
     });
     console.log(tableColumns)
 

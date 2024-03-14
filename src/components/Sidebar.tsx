@@ -97,39 +97,39 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
     }
 
     return (
-        <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:200">
-            <nav class="flex bg:white position:relative">
-                <div class="position:absolute top:7 left:8 font:20">
-                    <Icon icon="ic:baseline-search"/>
-                </div>
-                <input
-                    class="p:7.5 min-w:full pl:2rem"
-                    type="text"
-                    value={searchTerm()}
-                    onInput={(e) => {
-                        handleSearch(e.target.value);
-                    }}
-                />
-            </nav>
-            <Show
-                when={navData()}
-                fallback={
-                    <div class="flex jc:center ai:center mt:10">
-                        <Loader class="h:30 w:30"/>
-                    </div>
-                }
-            >
-                <ul>
-                    <SidebarElement
-                        openIds={openIds()}
-                        setOpenIds={setOpenIds}
-                        resetSearch={resetSearch}
-                        navbarData={isSearchMode() ? searchData() : navData() ?? []}
-                        isSearchMode={isSearchMode()}
-                    />
-                </ul>
-            </Show>
-        </div>
+      <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:200">
+        <nav class="flex bg:white position:relative">
+          <div class="position:absolute top:7 left:8 font:20">
+            <Icon icon="ic:baseline-search" />
+          </div>
+          <input
+            class="p:7.5 min-w:full pl:2rem"
+            type="text"
+            value={searchTerm()}
+            onInput={(e) => {
+              handleSearch(e.target.value);
+            }}
+          />
+        </nav>
+        <Show
+          when={navData()}
+          fallback={
+            <div class="flex jc:center ai:center mt:10">
+              <Loader class="h:30 w:30" />
+            </div>
+          }
+        >
+          <ul>
+            <SidebarElement
+              openIds={openIds()}
+              setOpenIds={setOpenIds}
+              resetSearch={resetSearch}
+              navbarData={isSearchMode() ? searchData() : navData() ?? []}
+              isSearchMode={isSearchMode()}
+            />
+          </ul>
+        </Show>
+      </div>
     );
 }
 
