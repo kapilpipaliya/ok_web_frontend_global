@@ -364,19 +364,20 @@ export const TableDashboard = () => {
 
     const allTableLayouts = () => [...new Set([...allCollTableLayouts, ...allFormTableLayouts])];
     return (
-        <div class="">
-            <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
-                <For each={allTableLayouts()}>
-                    {(tableLayout) => (
-                        <div class="bg:gray-22 p:10 r:10 max-w:350 bg:gray-28:hover flex ji:center ai:center h:5rem">
-                            <h3 class="f:18@md font:semibold"></h3>
-                            <p class="mt:5 mb:0 mx:auto f:18@md font:semibold"><A
-                                href={`/${tableLayout.P[IdAttr]}`}>{tableLayout.P.title || tableLayout.P[IdAttr]}</A>
-                            </p>
-                        </div>
-                    )}
-                </For>
-            </div>
+      
+        <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
+          <For each={allTableLayouts()}>
+            {(tableLayout) => (
+              <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
+                <h3 class="f:18@md font:semibold"></h3>
+                <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
+                  <A href={`/${tableLayout.P[IdAttr]}`}>
+                    {tableLayout.P.title || tableLayout.P[IdAttr]}
+                  </A>
+                </p>
+              </div>
+            )}
+          </For>
         </div>
     );
 };
