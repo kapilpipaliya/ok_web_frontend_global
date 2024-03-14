@@ -89,7 +89,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
               },
             }}
           >
-            <Show when={!isLoginPage() && !isSignUpPage()}>
+             <Show when={!isLoginPage() && !isSignUpPage()}>
               <Navbar
                 toggleSidebar={() => {
                   set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
@@ -104,7 +104,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                 }
                 meta={graph.vertexes[vertexId]}
               />
-            </Show>
+            </Show> 
 
             <AlertDisplay />
             <main class="p:20 bg:white">
