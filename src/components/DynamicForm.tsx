@@ -155,7 +155,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
 
-    const record = new Record({ws: Ws});
+    const record = new Record({ ws: Ws});
     if (!props.id) {
         const createResult = record.create(props.form[IdAttr]);
         if (createResult.error) return createResult.error;
@@ -197,9 +197,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
         // const result = validationGroup.validate();
         const isValid = true; // result.isValid;
         if (isValid) {
+          debugger
             console.log("valid");
             // !!!TODO!!! Handle Error Received From server when commit
             if (!record.isRealTime) {
+                console.log("isRealTime");
                 commitTxn(record.txnId, Ws);
             }
             submit = true;

@@ -4,9 +4,11 @@ import { SelectInputField } from "./input/SelectInputField";
 import { TableInputField } from "./input/TableInputField";
 import { GenericInputField } from "./input/GenaricInputField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
+import { Progress } from "./solid-blocks/blocks";
 
 export const genericInputComponents = [
   "Autocomplete",
+  
   "Bullet",
   "Calendar",
   "CheckBox",
@@ -34,6 +36,7 @@ export const genericComponents2 = [
   "Box",
   "TreeMap",
   "VectorMap",
+  "Breadcrumbs",
   "TreeView",
   "TreeList",
   "Toast",
@@ -121,7 +124,6 @@ export const DynamicComponent = (props: {
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!props.disabled} fallback={<>...</>}>
-          
           <TableInputField
             meta={props.meta}
             data={props.data}
@@ -133,7 +135,9 @@ export const DynamicComponent = (props: {
         </Show>
       </Match>
       <Match
-        when={genericInputComponents.includes(props.component) && props.component}
+        when={
+          genericInputComponents.includes(props.component) && props.component
+        }
         keyed
       >
         <GenericInputField

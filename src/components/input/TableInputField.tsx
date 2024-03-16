@@ -216,6 +216,7 @@ export function TableInputField(
             );
             const Content = () => (
               <>
+              
                 <DynamicComponent
                   title={toTitle(
                     column.P.displayName || column.P[IdAttr] || ""

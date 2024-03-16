@@ -244,9 +244,6 @@ export function SelectInputField(
     });
   };
   const outerOwner = getOwner();
-  console.log("====================================");
-  console.log(props.meta.P);
-  console.log("====================================");
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <Show

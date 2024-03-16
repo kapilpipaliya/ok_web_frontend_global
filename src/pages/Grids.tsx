@@ -119,6 +119,7 @@ export const DataGrid = (props: DataGridProps) => {
         return "";
     }
     for (const attribute of formNew!.attributes) {
+        
         const column = {...attribute} as unknown as ColumnDef<any>;
         if (attribute.component === "Table") continue;
         // if (attribute.props?.skip) continue;

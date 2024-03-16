@@ -172,11 +172,13 @@ export function GenericField(
       <Switch>
         <Match when={component() === "Repeater"}>
           <For
-            each={props.data ||
+            each={
+              props.data ||
               getSelectionOptions(
                 [props.meta],
                 `g:'${PageRenderUtils.getCollection(props.meta)!}'`
-              ).vertexes}
+              ).vertexes
+            }
           >
             {(vertex) => (
               <RepeaterContext.Provider
@@ -265,22 +267,23 @@ export function GenericField(
             loading="lazy"
             {...props.meta.P.props}
             src={getText(props.meta.P.props?.src, repeaterContext)}
-            draggable={true} />
+            draggable={true}
+          />
         </Match>
         <Match when={component() === "Form"}>
           <Form />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
-            icon={getText(props.meta.P.props?.icon, repeaterContext)}
-            class={getValueFromVertexOrKey(props.meta.P.props, "class")}
+            icon={props.meta.P.props?.icon}
+            class={getValueFromVertexOrKey(props.meta.P?.props, "class")}
             width={props.meta.P.props?.width || "24"}
-            height={props.meta.P.props?.height || "24"} />
+            height={props.meta.P.props?.height || "24"}
+            {...props.meta.P.props}
+          />
         </Match>
         <Match when={component() === "FieldSetLabelLeft"}>
-          <div
-            class="dx-fieldset"
-          >
+          <div class="dx-fieldset">
             {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
             <PageItemRender metaVertex={props.meta} />
             {/*<FormGroup attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />*/}
@@ -315,7 +318,7 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <Button {...props.meta.P.props}>
+          <Button style={props.meta.P.props} {...props.meta.P.props}>
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Button>
         </Match>
@@ -329,7 +332,7 @@ export function GenericField(
                 {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
               </Select>
             </Match> */}
-        <Match when={component() === "Loading"}>
+        <Match when={component() === "LoadIndicator"}>
           <Spinner {...props.meta.P.props}>
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Spinner>
@@ -344,10 +347,8 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Breadcrumbs>
         </Match>
-        <Match when={component() === "Progress"}>
-          <Progress {...props.meta.P.props}>
-            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
-          </Progress>
+        <Match when={component() === "ProgressBar"}>
+          <Progress {...props.meta.P.props} />
         </Match>
         <Match when={true}>
           <Dynamic
@@ -368,7 +369,10 @@ export function GenericField(
               console.log({ parentAttrVertex, fromVertex, toIndex });
               // const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
               // if (rowId === -1) return;
-              const fromParentVertex = getParentVertexValue(["Attr"], fromVertex);
+              const fromParentVertex = getParentVertexValue(
+                ["Attr"],
+                fromVertex
+              );
               if (fromParentVertex.vertex) {
                 // remove previous incoming edge if present.
                 setParentValue(props.txnId!, fromVertex, {

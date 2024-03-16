@@ -50,9 +50,7 @@ export function GenericInputField(props: ComponentProps & { component: string; d
           <Match when={props.component === "DateBox"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
-          <Match when={props.component === "DropDownBox"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
+          <Match when={props.component === "DropDownBox"}>Dropdown</Match>
           <Match when={props.component === "FileUploader"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
@@ -69,14 +67,18 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "ProgressBar"}>
-            <Progress value={props.data?.P[props.meta.P[IdAttr]]} />
+            <Progress
+              style={{ ...props.meta?.P.props }}
+              {...props.meta?.P.props}
+            />
           </Match>
           <Match when={props.component === "RadioGroup"}>
             <RadioGroup
               value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onChange={(e: any) => {
-              props.setValue?.(props.meta, props.data, e.target.value);
-            }}>
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
+            >
               {props.data?.P[props.meta.P[IdAttr]]}
             </RadioGroup>
           </Match>
@@ -107,7 +109,6 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             <TextField
               class="global-style"
               onChange={(e: any) => {
-                debugger
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
               {...props.data?.P.props}
