@@ -16,7 +16,7 @@ import {
   FormContext,
   getValueFromVertexOrKey,
 } from "../../lib/Utils";
-import {getNameKeyForCollection, setUpdateStatus,} from "../../lib/Record";
+import {getNameKeyForCollection,} from "../../lib/Record";
 import {findVertexByLabelAndUniqueId} from "../../lib/Vertex";
 import MultiSelect from "../solid-multiselect";
 import {Icon} from "@iconify-icon/solid";
@@ -215,7 +215,6 @@ export function SelectInputField(
         // return;
         // }
         // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
-        setUpdateStatus(true);
         const optionId = data!.id;
         const optionvalue = data!.P.name;
 
@@ -241,7 +240,6 @@ export function SelectInputField(
           props.meta
         );
         if (props.isRealTime) commitTxn(props.txnId || 0, Ws);
-        setUpdateStatus(false);
       });
     });
   };

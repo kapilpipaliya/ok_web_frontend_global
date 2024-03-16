@@ -371,6 +371,8 @@ export const PageDesignerDragAndDrop = () => {
   const [selectedComponent, setSelectedComponent] = createSignal({
     vertexId: -1,
   });
+  const [draggedVertex, setDraggedVertex] = createSignal<Vertex | null>(null);
+
   // @ts-ignore
   const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
   const rerender = () => {
@@ -917,7 +919,10 @@ export const PageDesignerDragAndDrop = () => {
                         <div
                           style={smallBoxStyle}
                           draggable={true}
-                          onDragStart={() => {}}
+                          onDragStart={(e) => {
+                            e.stopPropagation();
+                            setDraggedVertex(graph.vertexes[child.id]);
+                          }}
                         >
                           <li>{getIcon(child?.name)}</li>
                           <li style={listItemStyle}>{child?.name}</li>
@@ -1282,7 +1287,6 @@ export const PageDesignerDragAndDrop = () => {
       position: null as "before" | "after" | "center" | null,
     });
 
-    const [draggedVertex, setDraggedVertex] = createSignal<Vertex | null>(null);
 
     const toggleExpand = (itemId: number) => {
       setCollapsedKeys((prev) =>
@@ -1344,7 +1348,7 @@ export const PageDesignerDragAndDrop = () => {
               activeItem = children()[0].id;
               position = "before";
             } else {
-              activeItem = props.vertex.id;
+                activeItem = props.vertex.id;
             }
           }
         } else {
@@ -1386,6 +1390,7 @@ export const PageDesignerDragAndDrop = () => {
           alert("from vertex not found");
           return;
         }
+        const fromVertexLabel = fromVertex.L[0];
         const txnId = pageConfig[0].record.txnId;
         const position = indicatorPosition().position;
 
@@ -1430,6 +1435,39 @@ export const PageDesignerDragAndDrop = () => {
             }
           }
         }
+
+        if (fromVertexLabel === "Comp") {
+          console.log('component draggig');
+          debugger
+          if (position === "center") {
+            // parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
+            // childrenItems = toNode!.itemData![itemsExpr];
+
+
+            const compVertex = getComponentFromLayoutRow(toVertexId);
+            if (!compVertex?.P.child) {
+              return;
+            }
+          } else {
+          }
+
+          const toIndex = 99999;
+
+          let parentVertex = graph.vertexes[indicatorPosition().activeItem!];
+          const compVertex = getComponentFromLayoutRow(props.vertex.id);
+          if (!compVertex?.P.child) {
+            const toParentVertex = getParentVertex(['Attr'], graph.vertexes[props.vertex.id]);
+            parentVertex = toParentVertex.vertex!;
+          }
+
+          const rowId = componentDrag(pageConfig[0].record.txnId, fromVertex, toIndex,  parentVertex || pageConfig[0].record.vertex);
+          if (rowId === -1) return;
+
+          sortChildren();
+
+          return;
+        }
+
 
         if (
           position !== "center" &&

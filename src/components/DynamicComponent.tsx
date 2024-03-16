@@ -5,7 +5,7 @@ import { TableInputField } from "./input/TableInputField";
 import { GenericInputField } from "./input/GenaricInputField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
 
-export const genericComponents = [
+export const genericInputComponents = [
   "Autocomplete",
   "Bullet",
   "Calendar",
@@ -133,7 +133,7 @@ export const DynamicComponent = (props: {
         </Show>
       </Match>
       <Match
-        when={genericComponents.includes(props.component) && props.component}
+        when={genericInputComponents.includes(props.component) && props.component}
         keyed
       >
         <GenericInputField

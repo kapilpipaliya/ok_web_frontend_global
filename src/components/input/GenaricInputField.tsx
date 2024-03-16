@@ -1,7 +1,7 @@
 import {createEffect, getOwner, Match, onCleanup, runWithOwner, Show, Switch, useContext} from "solid-js";
 
 import {IdAttr} from "../../lib/graph";
-// import {FormContext, isUpdatingInput} from "../../lib/Record";
+// import {FormContext} from "../../lib/Record";
 // import {getValueFromVertexOrKey} from "../../utils/utils";
 // import {mergeVertexProperties} from "../../lib/Vertex";
 import {getTextColumnValue} from "./Components/Utils";
@@ -35,6 +35,9 @@ export function GenericInputField(props: ComponentProps & { component: string; d
           <Match when={props.component === "CheckBox"}>
             <Checkbox
               {...props.data?.P.props}
+              onChange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
@@ -69,7 +72,11 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             <Progress value={props.data?.P[props.meta.P[IdAttr]]} />
           </Match>
           <Match when={props.component === "RadioGroup"}>
-            <RadioGroup value={props.data?.P[props.meta.P[IdAttr]] ?? ""}>
+            <RadioGroup
+              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
+              onChange={(e: any) => {
+              props.setValue?.(props.meta, props.data, e.target.value);
+            }}>
               {props.data?.P[props.meta.P[IdAttr]]}
             </RadioGroup>
           </Match>
@@ -88,6 +95,9 @@ export function GenericInputField(props: ComponentProps & { component: string; d
           <Match when={props.component === "TextArea"}>
             <TextField
               class="global-style"
+              onChange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
               {...props.data?.P.props}
               multiline
               value={props.data?.P[props.meta.P[IdAttr]]}
@@ -96,6 +106,10 @@ export function GenericInputField(props: ComponentProps & { component: string; d
           <Match when={props.component === "TextBox"}>
             <TextField
               class="global-style"
+              onChange={(e: any) => {
+                debugger
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
               {...props.data?.P.props}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
@@ -400,7 +414,6 @@ export function GenericInputField(props: ComponentProps & { component: string; d
 
               // set value:
               createEffect(() => {
-                if (isUpdatingInput) return;
                 if (!props.data) return;
                 let value = props.data.P[props.meta.P[IdAttr]];
                 if (props.component === "FilterBuilder" || props.component === "FileUploader") {

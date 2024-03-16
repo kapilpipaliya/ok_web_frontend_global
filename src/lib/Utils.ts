@@ -1882,11 +1882,11 @@ export function setValueGlobal(txnId: number, attribute: Vertex, vertex: Vertex,
   if (isRealTime) {
     txnId = getNewTxnId();
   }
-  isUpdatingInput = true;
+
   mergeVertexProperties(txnId, vertex.id, {
     [attribute.P[IdAttr]]: data
   });
-  isUpdatingInput = false;
+
   // we directly save the dataType on vertex:
   setGraph("vertexes", vertex.id, "D", { [attribute.P[IdAttr]]: attribute.P["dataType"] });
 

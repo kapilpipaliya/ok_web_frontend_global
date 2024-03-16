@@ -142,10 +142,7 @@ export function getCollAttrs(vertexCollAttr: Vertex): { error: boolean; attr?: F
  attr.props = collProps;
  return { error: false, attr };
 }
-export let isUpdatingInput = false;
-export function setUpdateStatus(value: boolean) {
- isUpdatingInput = value;
-}
+
 const getCollectionOneLevelAttrs = (collVertex: Vertex): { error: string; attrs?: FieldAttribute[] } => {
  const vertexCollAttrResult = getChildVertexes(["Attr"], [collVertex]);
  if (vertexCollAttrResult.error) {
