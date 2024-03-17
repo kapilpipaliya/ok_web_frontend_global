@@ -96,8 +96,8 @@ const addPropsToLayoutRow = (
 export const componentDrag = (
   txnId: number,
   fromVertex: Vertex,
-  index: number,
-  parentVertex: Vertex
+  parentVertex: Vertex,
+  toIndex?: number,
 ) => {
   // handle (toNode === null) case.
   if (fromVertex) {
@@ -114,7 +114,7 @@ export const componentDrag = (
       txnId,
       attrMetaVertex,
       parentVertex,
-      { pos: index },
+      toIndex ? { pos: toIndex } : {},
       false,
       {} as any
     );
@@ -1415,7 +1415,7 @@ export const PageDesignerDragAndDrop = () => {
         console.log("drop");
         e.stopPropagation();
 
-        const fromVertex = draggedVertex();
+        let fromVertex = draggedVertex();
         const toVertexId = indicatorPosition().activeItem!;
         const toVertex = graph.vertexes[toVertexId]; // props.vertex;
         if (!fromVertex) {
@@ -1472,12 +1472,7 @@ export const PageDesignerDragAndDrop = () => {
         }
 
         if (fromVertexLabel === "Comp") {
-          console.log("component draggig");
-          debugger;
           if (position === "center") {
-            // parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
-            // childrenItems = toNode!.itemData![itemsExpr];
-
             const compVertex = getComponentFromLayoutRow(toVertexId);
             if (!compVertex?.P.child) {
               return;
@@ -1485,32 +1480,22 @@ export const PageDesignerDragAndDrop = () => {
           } else {
           }
 
-          const toIndex = 99999;
-
-          let parentVertex = graph.vertexes[indicatorPosition().activeItem!];
-          const compVertex = getComponentFromLayoutRow(props.vertex.id);
-          if (!compVertex?.P.child) {
-            const toParentVertex = getParentVertex(
-              ["Attr"],
-              graph.vertexes[props.vertex.id]
-            );
-            parentVertex = toParentVertex.vertex!;
-          }
+          const parentVertex = position !== "center"
+            ? getParentVertex(["Attr"], toVertex).vertex!
+            : toVertex;
 
           const rowId = componentDrag(
             pageConfig[0].record.txnId,
             fromVertex,
-            toIndex,
             parentVertex || pageConfig[0].record.vertex
           );
           if (rowId === -1) return;
 
+          fromVertex = graph.vertexes[rowId];
+
           sortChildren();
 
-          return;
-        }
-
-        if (
+        } else if (
           position !== "center" &&
           fromParentVertex.vertex?.id === toParentVertex!.id
         ) {
