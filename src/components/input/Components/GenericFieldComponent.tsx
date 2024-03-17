@@ -300,7 +300,6 @@ export function GenericField(
               e.preventDefault();
             }}
             onDrop={(e) => {
-              debugger;
               const parentAttrVertex = props.meta;
               // disable drag and drop if it not support child.
               const fromVertex = GlobalDragData.from;

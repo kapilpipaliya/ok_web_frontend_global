@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { JSXElement, Show, createSignal } from "solid-js";
+import {JSXElement, Show, createSignal, Match, Switch} from "solid-js";
 import { DisplayComponentProps } from "./ComponentType";
-import { themeMode } from "./css/Theme";
+// import {currentTheme, onChangeTheme, setCurrentTheme, themeMode} from "./css/Theme";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
   return (
@@ -22,13 +22,8 @@ export function Navbar(
   }
 ) {
   // let {events} = useContext(PageContext);
-  const [currentTheme, setCurrentTheme] = createSignal(themeMode.preference);
   // bg:white box-shadow:1|1|10|#ddd
 
-  const onChangeTheme = (e: any) => {
-    themeMode.preference = e.target.value;
-    setCurrentTheme(e.target.value);
-  };
   return (
     <nav
       class={`p:7.5 flex jc:space-between ai:center ${
@@ -46,8 +41,19 @@ export function Navbar(
       {props.left}
 
       <div>{props.meta?.P?.title}</div>
+{/*   Theme Change Button
       <button class="px:5x r:2x font:18 h:48 bg:slate-10@light bg:gray-80@dark fg:strong rel">
-        {currentTheme() === "dark" ? "🌜" : "☀️"} {currentTheme()}
+        <Switch>
+          <Match when={currentTheme() === 'dark'}>
+            <span>🌜 Dark Theme</span>
+          </Match>
+          <Match when={currentTheme() === 'light'}>
+            <span>☀️ Light Theme</span>
+          </Match>
+          <Match when={true}>
+            <span>{currentTheme().charAt(0).toUpperCase() + currentTheme().slice(1)} Theme</span>
+          </Match>
+        </Switch>
         <select
           class="abs full inset:0 opacity:0"
           value={currentTheme()}
@@ -57,7 +63,7 @@ export function Navbar(
           <option value="dark">🌜 Dark</option>
           <option value="system">System</option>
         </select>
-      </button>
+      </button>*/}
       {/* Actions */}
       <div class="flex ai:center jc:center gap:8">
         {props.right}

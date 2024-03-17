@@ -23,7 +23,6 @@ import {syncEvent} from "./lib/ws_events";
 import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
 
 // disable twMerge:
-import {defaultConfig} from "tailwind-variants";
 import {isAdmin, showNav} from "./signals/common";
 import {AbstractSingleGrid, AllDashboards, TableDashboard} from "./pages/Grids";
 import {AbstractSingleForm} from "./components/DynamicForm";
@@ -35,7 +34,6 @@ import Page404 from "./pages/404";
 import BackupRestore from "./pages/BackupRestore";
 import {GraphViewPage} from "./pages/GraphViewPage";
 
-defaultConfig.twMerge = false;
 
 render(() => {
     const Ws = new ServerEventsDispatcher(WS_PATH);

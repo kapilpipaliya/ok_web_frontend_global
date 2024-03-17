@@ -197,8 +197,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
         // const result = validationGroup.validate();
         const isValid = true; // result.isValid;
         if (isValid) {
-          debugger
-            console.log("valid");
             // !!!TODO!!! Handle Error Received From server when commit
             if (!record.isRealTime) {
                 console.log("isRealTime");
