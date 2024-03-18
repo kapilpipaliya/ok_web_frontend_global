@@ -26,7 +26,7 @@ const defaultProps = {
 export interface IMultiSelectProps {
   options: Option[];
   disablePreSelectedValues?: boolean;
-  selectedValues?: Option[];
+  selectedValues?: any;
   isObject?: boolean;
   displayValue?: string;
   displayValueChild?: string;

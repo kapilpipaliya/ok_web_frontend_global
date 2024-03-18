@@ -1996,6 +1996,7 @@ export function onChangeHandler(txnId: number, formVertex: Vertex, vertex: Verte
       });
     }
   } catch (e) {
+    console.log("Error In On Change ", e);
   }
 }
 //'setValue(component,null)'

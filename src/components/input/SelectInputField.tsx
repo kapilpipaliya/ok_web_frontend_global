@@ -1,9 +1,25 @@
-import {batch, createResource, For, getOwner, runWithOwner, Show, untrack, useContext,} from "solid-js";
+import {
+  batch,
+  createResource,
+  For,
+  getOwner,
+  runWithOwner,
+  Show,
+  untrack,
+  useContext,
+} from "solid-js";
 
 // Comment This Lines in web build
-import {commitTxn, getNewGraphId, getNewTxnId, graph, IdAttr, Vertex,} from "../../lib/graph";
-import {addNewEdge, deleteEdge, newEdge} from "../../lib/Edge";
-import {WsContext} from "../../utils/ws_events_dispatcher";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  graph,
+  IdAttr,
+  Vertex,
+} from "../../lib/graph";
+import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
+import { WsContext } from "../../utils/ws_events_dispatcher";
 import {
   getInEdge,
   getParentVertexValue,
@@ -16,12 +32,12 @@ import {
   FormContext,
   getValueFromVertexOrKey,
 } from "../../lib/Utils";
-import {getNameKeyForCollection,} from "../../lib/Record";
-import {findVertexByLabelAndUniqueId} from "../../lib/Vertex";
+import { getNameKeyForCollection } from "../../lib/Record";
+import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
 import MultiSelect from "../solid-multiselect";
-import {Icon} from "@iconify-icon/solid";
-import {ComponentProps} from "../ComponentType";
-import {setSelectionValue} from "./SelectionUtils";
+import { Icon } from "@iconify-icon/solid";
+import { ComponentProps } from "../ComponentType";
+import { setSelectionValue } from "./SelectionUtils";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,
@@ -107,11 +123,9 @@ export const selectedValue = (meta: Vertex, data: Vertex): number[] => {
     return getValueFromVertexOrKey(meta.P.props, "inward")
       ? getParentVertexValue(data, meta)
       : getSelectedVertexValue(data, meta);
-
   } catch (e) {
     return [];
   }
-  
 };
 
 // if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
@@ -148,7 +162,7 @@ export function collectionNameDisplayExpr(collection?: string) {
 export function SelectInputField(
   props: ComponentProps & {
     component: string;
-    title:String;
+    title: String;
     txnId?: number;
     isRealTime?: boolean;
   }
@@ -180,7 +194,7 @@ export function SelectInputField(
         if (!collection) {
           return [];
         }
-        return getSelectionOptions([props.data], collection).vertexes || [];
+        return getSelectionOptions([props.data as Vertex], collection).vertexes || [];
       }
     },
     (data) => data
@@ -199,8 +213,17 @@ export function SelectInputField(
     return component;
   }
 
-  const onChangeSelect = (e: any) => {
-    const data = e[0];
+  const onChangeSelect = (e: any, isRemove: any) => {
+    let data;
+    let optionId: number | number[] | undefined;
+    let optionvalue: any;
+    if (isRemove && e.length > 0) {
+      data = [];
+    } else {
+      data = e[0];
+      optionId = data!.id;
+      optionvalue = data!.P.name;
+    }
     runWithOwner(outerOwner, () => {
       batch(() => {
         // note: valueChanged is fired even when the value is changed programmatically,
@@ -215,8 +238,6 @@ export function SelectInputField(
         // return;
         // }
         // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
-        const optionId = data!.id;
-        const optionvalue = data!.P.name;
 
         if (!props.data) {
           return;
@@ -239,6 +260,7 @@ export function SelectInputField(
           props.data,
           props.meta
         );
+        console.log(optionvalue);
         if (props.isRealTime) commitTxn(props.txnId || 0, Ws);
       });
     });
@@ -249,7 +271,7 @@ export function SelectInputField(
       <Show
         when={!props.disabled}
         fallback={
-          <For each={selectedValue(props.meta, props.data)}>
+          <For each={selectedValue(props.meta, props.data as Vertex)}>
             {(vertexId) => (
               <>
                 {
@@ -274,13 +296,15 @@ export function SelectInputField(
           options={selectOptions()}
           avoidHighlightFirstOption
           placeholder={`Add ${props.title}`}
-          onSelect={(e) => onChangeSelect(e)}
-          onRemove={(e) => onChangeSelect(e)}
+          onSelect={(e) => onChangeSelect(e, false)}
+          onRemove={(e) => onChangeSelect(e, true)}
           customCloseIcon={<Icon icon={"ic:round-close"} />}
           selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
-          selectedValues={selectedValue(props.meta, props.data).map((id) => {
-            return graph.vertexes[id];
-          })}
+          selectedValues={
+            selectedValue(props.meta, props.data as Vertex).map((id) => {
+              return graph.vertexes[id];
+            }) 
+          }
         />
       </Show>
       {/* Todo: think about validations */}
