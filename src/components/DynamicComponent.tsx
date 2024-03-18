@@ -36,7 +36,7 @@ export const genericComponents2 = [
   "Box",
   "TreeMap",
   "VectorMap",
-  "Breadcrumbs",
+  "Breadcrumb",
   "TreeView",
   "TreeList",
   "Toast",

@@ -341,9 +341,10 @@ export function GenericField(
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Accordion>
         </Match>
-        <Match when={component() === "Breadcrumbs"}>
+        <Match when={component() === "Breadcrumb"}>
           <Breadcrumbs {...props.meta.P.props}>
-            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+            {props.children}
+            <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>

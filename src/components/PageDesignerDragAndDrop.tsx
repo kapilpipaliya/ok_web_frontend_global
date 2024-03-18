@@ -1442,7 +1442,7 @@ export const PageDesignerDragAndDrop = () => {
         console.log("drop");
         e.stopPropagation();
 
-        const fromVertex = draggedVertex();
+        let fromVertex = draggedVertex();
         const toVertexId = indicatorPosition().activeItem!;
         const toVertex = graph.vertexes[toVertexId]; // props.vertex;
         if (!fromVertex) {
