@@ -1,6 +1,7 @@
 /// <reference types="vitest" />
 
 import { defineConfig, Plugin } from "vite";
+import path from 'path'
 import solidPlugin from "vite-plugin-solid";
 import devtools from 'solid-devtools/vite'
 import type { ImportSpecifier } from 'es-module-lexer'
@@ -80,19 +81,7 @@ export default defineConfig({
    /* additional options */
    autoname: true, // e.g. enable autoname
   }),
-  solidPlugin({
-   babel: {
-    plugins: [
-     // Locator JS giving error in windows
-     // [
-     //   "@locator/babel-jsx/dist",
-     //   {
-     //     env: "development",
-     //   },
-     // ],
-    ]
-   }
-  }),
+  solidPlugin(),
   isBuildForWeb && removeDevExpressImport()
  ],
  define: {
@@ -115,7 +104,7 @@ export default defineConfig({
  optimizeDeps: {
   // Add both @codemirror/state and @codemirror/view to included deps for optimization
   include: ["@codemirror/state", "@codemirror/view"],
-  extensions: ["jsx"],
+  // extensions: ["jsx"],
   exclude: [
    "@iconify-icon/solid"
   ]
