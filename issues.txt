@@ -1,3 +1,3 @@
 1. Submit and cancel no change router when pressing button
 2. Dropdown and other components not supported
-3. Add component search bar 
+3. Add component search bar - Done

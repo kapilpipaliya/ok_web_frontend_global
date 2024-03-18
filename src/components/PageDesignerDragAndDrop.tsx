@@ -10,7 +10,8 @@ import {
   getChildVertexes,
   Record,
   getSelectionOptions,
-  setValueGlobal, getParentVertex,
+  setValueGlobal,
+  getParentVertex,
 } from "../lib/Utils";
 import {
   batch,
@@ -30,7 +31,12 @@ import {
 import { PageView } from "./input/GenaricField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
 
-import { deleteNestedLayout, getParentVertexes, getParentVertexValue, getTreeData } from "../lib/Traverse";
+import {
+  deleteNestedLayout,
+  getParentVertexes,
+  getParentVertexValue,
+  getTreeData,
+} from "../lib/Traverse";
 
 import {
   getNewGraphId,
@@ -68,7 +74,13 @@ import { hoverId, selectedId, setHoverId, setSelectedId } from "./pageStore";
 import jsep from "jsep";
 import { setSelectionValue } from "./input/SelectionUtils";
 import { evaluate } from "../lib/jsep";
-import { ModalBody, ModalContent, ModalFooter, ModalHeader, TextField } from "./solid-blocks/blocks";
+import {
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  TextField,
+} from "./solid-blocks/blocks";
 
 const addPropsToLayoutRow = (
   txnId: number,
@@ -902,26 +914,36 @@ export const PageDesignerDragAndDrop = () => {
       padding: "10px",
     };
     const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
-
     const updateFilteredData = () => {
       if (!searchQuery()) {
         setFilteredData(data);
       } else {
-        
-       const datas = data.filter((item) => {
-         // Filter the children of each item based on the searchQuery
-         const match = item.children.filter((child) => {
-           // Check if the child name is undefined
-           if (!child.name) return false;
-           // Check if the child name includes the searchQuery (case-insensitive)
-           return child.name.toLowerCase().includes(searchQuery().toLowerCase());
-         });
+        const filteredData = data
+          .map((item) => {
+            // Filter the children of each item based on the searchQuery
+            const category = data.find((i) => i.name === item.name);
 
-         // If any child matches the searchQuery, include the parent item in the filtered data
-         return match.length > 0;
-       });
+            if (category) {
+              // Create a copy of the category's children array
+              const filteredChildren = category.children.filter((child: any) => {
+                return (
+                  child.name &&
+                  child.name.toLowerCase().includes(searchQuery().toLowerCase())
+                );
+              });
 
-        setFilteredData(datas);
+              // Return a new object with the filtered children
+              return {
+                ...item,
+                children: filteredChildren,
+              };
+            } else {
+              return item;
+            }
+          })
+          .filter((item) => item.children.length > 0); // Filter out items with no matching children
+
+        setFilteredData(filteredData);
       }
     };
     const getIcon = (name: any) => {
@@ -930,17 +952,24 @@ export const PageDesignerDragAndDrop = () => {
     };
     return (
       <div>
-        <input
-          type="text"
-          placeholder="Search Component..."
-          value={searchQuery()}
-          onInput={(e) => {
-            setSearchQuery(e.target.value);
-            updateFilteredData(); // Update filteredData when searchQuery changes
-          }}
-        />
+          <TextField
+            label="Name"
+            class="b:1|solid|blue-30 r:5|5|5|5 p:4"
+            type="text"
+            placeholder="Search Component..."
+            value={searchQuery()}
+            onInput={(e) => {
+              setSearchQuery(e.target.value);
+              updateFilteredData(); // Update filteredData when searchQuery changes
+            }}
+          />
         <div class="h:30rem overflow-y:auto">
-          <For each={filteredData()}>
+          <For
+            each={filteredData()}
+            fallback={
+              <div class="p:10 font-weight:bold">No Component Found !</div>
+            }
+          >
             {(item) => (
               <div>
                 <div style={titleStyle}>{item.name}</div>
@@ -1473,7 +1502,6 @@ export const PageDesignerDragAndDrop = () => {
 
         if (fromVertexLabel === "Comp") {
           console.log("component draggig");
-          debugger;
           if (position === "center") {
             // parentAttrVertex = graph.vertexes[toNode?.itemData!.id!];
             // childrenItems = toNode!.itemData![itemsExpr];

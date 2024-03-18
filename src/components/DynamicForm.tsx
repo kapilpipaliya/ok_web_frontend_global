@@ -29,6 +29,7 @@ import {stringify} from "yaml";
 import {getPermissions} from "../lib/auth";
 import {TableTabs} from "./TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
+import { useRouter } from "@solidjs/router/dist/routing";
 
 
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
@@ -193,24 +194,25 @@ export const DynamicForm = (props: DynamicFormProps) => {
     });
     let submit: boolean;
     const onSubmit = () => {
-        // const valid = record.submitForm();
-        // const result = validationGroup.validate();
-        const isValid = true; // result.isValid;
-        if (isValid) {
-          debugger
-            console.log("valid");
-            // !!!TODO!!! Handle Error Received From server when commit
-            if (!record.isRealTime) {
-                console.log("isRealTime");
-                commitTxn(record.txnId, Ws);
-            }
-            submit = true;
-            // currently we are navigating back.
-            navigate(-1);
-        } else {
-            alert("please fix all errors");
+      // const valid = record.submitForm();
+      // const result = validationGroup.validate();
+      const isValid = true; // result.isValid;
+
+      const navigate = useNavigate(); // Initialize useNavigate hook
+
+      if (isValid) {
+        console.log("valid");
+        // !!!TODO!!! Handle Error Received From server when commit
+        if (!record.isRealTime) {
+          console.log("isRealTime");
+          commitTxn(record.txnId, Ws);
         }
-    }
+        // Navigate back
+        navigate(-1);
+      } else {
+        alert("Please fix all errors");
+      }
+    };
 
     const onCancel = () => {
         revertTransaction(record.txnId);
