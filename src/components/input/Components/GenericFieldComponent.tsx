@@ -343,7 +343,6 @@ export function GenericField(
         </Match>
         <Match when={component() === "Breadcrumb"}>
           <Breadcrumbs {...props.meta.P.props}>
-            {props.children}
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>

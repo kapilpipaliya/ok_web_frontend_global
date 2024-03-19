@@ -8,7 +8,7 @@ import {getTextColumnValue} from "./Components/Utils";
 import {ComponentProps} from "../ComponentType";
 import { Bar, Checkbox, Progress, RadioGroup, TextField } from "../solid-blocks/blocks";
 
-export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
+export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number; title: any }) {
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
   return (
@@ -33,12 +33,23 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "CheckBox"}>
+            
             <Checkbox
               {...props.data?.P.props}
               onChange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
+                props.setValue?.(
+                  props.meta,
+                  props.data,
+                  e.target.checked ? true : false
+                );
+                console.log("s = " + JSON.stringify(e.target.value));
               }}
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              checked={
+                (props.title.includes("Required") && props.data?.P.required) ===
+                  true ||
+                (props.title.includes("Children") &&
+                  props.data?.P.child === true)
+              }
             />
           </Match>
           <Match when={props.component === "CircularGauge"}>

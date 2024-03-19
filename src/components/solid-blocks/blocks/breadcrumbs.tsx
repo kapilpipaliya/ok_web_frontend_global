@@ -10,11 +10,11 @@ export type BreadcrumbsProps = JSX.HTMLAttributes<HTMLOListElement> & {
 export const Breadcrumbs: Component<BreadcrumbsProps> = (props) => (
   <nav class="sb-breadcrumbs">
     <ol {...props}>
-      <For
-        each={Array.isArray(props.children) ? props.children : [props.children]}
+      {/* <For each={Array.isArray(props.children) ? props.children : [props.children]}
       >
         {(item) => <li>{item}</li>}
-      </For>
+      </For> */}
+      {props.children}
     </ol>
   </nav>
 );
