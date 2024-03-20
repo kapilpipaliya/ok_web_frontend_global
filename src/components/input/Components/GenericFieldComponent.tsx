@@ -308,40 +308,10 @@ export function GenericField(
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          {props.meta.OUT["Attr"].length &&
-            props.meta.OUT["Attr"].map((attrId, i) => {
-              // Clone the props.meta object to avoid mutating the original props
-              const modifiedMeta = JSON.parse(JSON.stringify(props.meta));
-
-              // Modify the OUT.Attr array to include only the current attrId
-              modifiedMeta.OUT["Attr"] = [props.meta.OUT["Attr"][i]];
-              return (
-                
-                <TabContainer>
-                  {JSON.stringify(modifiedMeta)}
-                  <PageItemRender metaVertex={props.meta} />
-                </TabContainer>
-              );
-            })}
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          {props.meta.OUT["Attr"] && (
-            <TabList>
-              {props.meta.OUT["Attr"].map((attrId, i) => {
-                // Clone the props.meta object to avoid mutating the original props
-                const modifiedMeta = JSON.parse(JSON.stringify(props.meta));
-
-                // Modify the OUT.Attr array to include only the current attrId
-                modifiedMeta.OUT["Attr"] = [attrId];
-
-                return (
-                  <Tab>
-                    <PageItemRender metaVertex={modifiedMeta} />
-                  </Tab>
-                );
-              })}
-            </TabList>
-          )}
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon

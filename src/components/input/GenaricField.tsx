@@ -23,6 +23,7 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import {selectedId} from "../pageStore";
+import {Tab, TabContainer} from "../solid-blocks/blocks";
 
 
 export const GlobalDragData = {} as {from: Vertex};
@@ -148,6 +149,12 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
                   </div>
                 </Match>
               </Switch>
+            </Match>
+            <Match when={parentComponent() === "TabList"}>
+              <Tab><PageComponent /></Tab>
+            </Match>
+            <Match when={parentComponent() === "TabContainer"}>
+              <TabContainer><PageComponent /></TabContainer>
             </Match>
             <Match when={true}>
               <PageComponent />
