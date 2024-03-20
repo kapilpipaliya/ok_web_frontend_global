@@ -31,10 +31,7 @@ import {
 import { PageView } from "./input/GenaricField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
 
-import {
-  deleteNestedLayout,
-  getTreeData,
-} from "../lib/Traverse";
+import { deleteNestedLayout, getTreeData } from "../lib/Traverse";
 
 import {
   getNewGraphId,
@@ -107,7 +104,7 @@ export const componentDrag = (
   txnId: number,
   fromVertex: Vertex,
   parentVertex: Vertex,
-  toIndex?: number,
+  toIndex?: number
 ) => {
   // handle (toNode === null) case.
   if (fromVertex) {
@@ -630,260 +627,23 @@ export const PageDesignerDragAndDrop = () => {
             />
         </div>
     }*/
-  const ICon = [
-    {
-      catogery: "ActionSheet",
-      icon: <Icon icon="lucide:file-spreadsheet" width="24" height="24" />,
-    },
-    {
-      catogery: "Button",
-      icon: <Icon icon="mdi:button" width="24" height="24" />,
-    },
-    {
-      catogery: "Breadcrumb",
-      icon: <Icon icon="tdesign:component-breadcrumb" width="24" height="24" />,
-    },
-    {
-      catogery: "ContextMenu",
-      icon: <Icon icon="ep:menu" width="24" height="24" />,
-    },
-    {
-      catogery: "DropDownButton",
-      icon: <Icon icon="material-symbols:menu" width="24" height="24" />,
-    },
-    {
-      catogery: "Resizable",
-      icon: (
-        <Icon
-          icon="material-symbols:photo-size-select-small"
-          width="24"
-          height="24"
-        />
-      ),
-    },
-    {
-      catogery: "SpeedDialAction",
-      icon: <Icon icon="material-symbols:speed" width="24" height="24" />,
-    },
-    {
-      catogery: "Bullet",
-      icon: (
-        <Icon
-          icon="fluent:text-bullet-list-square-16-filled"
-          width="24"
-          height="24"
-        />
-      ),
-    },
-    {
-      catogery: "Chart",
-      icon: <Icon icon="simple-icons:soundcharts" width="24" height="24" />,
-    },
-    {
-      catogery: "Funnel",
-      icon: <Icon icon="ph:funnel" width="24" height="24" />,
-    },
-    {
-      catogery: "PieChart",
-      icon: <Icon icon="fa6-solid:chart-pie" width="24" height="24" />,
-    },
-    {
-      catogery: "PolarChart",
-      icon: <Icon icon="ph:chart-polar-fill" width="24" height="24" />,
-    },
-    {
-      catogery: "Sankey",
-      icon: <Icon icon="carbon:sankey-diagram" width="24" height="24" />,
-    },
-    {
-      catogery: "SparkLine",
-      icon: (
-        <Icon icon="fa6-solid:wand-magic-sparkles" width="24" height="24" />
-      ),
-    },
-    {
-      catogery: "TreeMap",
-      icon: (
-        <Icon icon="fluent:data-treemap-20-regular" width="24" height="24" />
-      ),
-    },
-    {
-      catogery: "PopOver",
-      icon: <Icon icon="entypo:popup" width="24" height="24" />,
-    },
-    {
-      catogery: "Popup",
-      icon: <Icon icon="arcticons:hanping-popup" width="24" height="24" />,
-    },
-    {
-      catogery: "Toast",
-      icon: (
-        <Icon
-          icon="material-symbols-light:toast-outline"
-          width="24"
-          height="24"
-        />
-      ),
-    },
-    {
-      catogery: "Tooltip",
-      icon: <Icon icon="tabler:tooltip" width="24" height="24" />,
-    },
-    {
-      catogery: "Autocomplete",
-      icon: <Icon icon="fluent-mdl2:completed" width="24" height="24" />,
-    },
-    {
-      catogery: "Calendar",
-      icon: <Icon icon="bx:calendar" width="24" height="24" />,
-    },
-    {
-      catogery: "CheckBox",
-      icon: <Icon icon="tabler:checkbox" width="24" height="24" />,
-    },
-    {
-      catogery: "ColorBox",
-      icon: <Icon icon="mdi:color" width="24" height="24" />,
-    },
-    {
-      catogery: "DateBox",
-      icon: <Icon icon="circum:calendar-date" width="24" height="24" />,
-    },
-    {
-      catogery: "DateRangeBox",
-      icon: <Icon icon="bi:calendar4-range" width="24" height="24" />,
-    },
-    {
-      catogery: "DateTimeBox",
-      icon: <Icon icon="formkit:datetime" width="24" height="24" />,
-    },
-    {
-      catogery: "Diagram",
-      icon: <Icon icon="la:project-diagram" width="24" height="24" />,
-    },
-    {
-      catogery: "DropDownBox",
-      icon: <Icon icon="gridicons:dropdown" width="24" height="24" />,
-    },
-    {
-      catogery: "FieldSetLabelLeft",
-      icon: <Icon icon="mdi:focus-field" width="24" height="24" />,
-    },
-    {
-      catogery: "FileManager",
-      icon: <Icon icon="arcticons:simplefilemanager" width="24" height="24" />,
-    },
-    {
-      catogery: "FileUploader",
-      icon: <Icon icon="arcticons:custom-uploader" width="24" height="24" />,
-    },
-    {
-      catogery: "FilterBuilder",
-      icon: <Icon icon="lets-icons:filter" width="24" height="24" />,
-    },
-    {
-      catogery: "Float",
-      icon: (
-        <Icon icon="mdi-light:format-float-center" width="24" height="24" />
-      ),
-    },
-    {
-      catogery: "Form",
-      icon: <Icon icon="lets-icons:form-duotone" width="24" height="24" />,
-    },
-    {
-      catogery: "Gantt",
-      icon: <Icon icon="mdi:chart-gantt" width="24" height="24" />,
-    },
-    {
-      catogery: "HtmlEditor",
-      icon: <Icon icon="openmoji:code-editor" width="24" height="24" />,
-    },
-    {
-      catogery: "Int",
-      icon: (
-        <Icon icon="mdi-light:format-float-center" width="24" height="24" />
-      ), //icons added
-    },
-    {
-      catogery: "Lookup",
-      icon: <Icon icon="arcticons:lookup" width="24" height="24" />,
-    },
-    {
-      catogery: "NumberBox",
-      icon: (
-        <Icon icon="emojione-monotone:input-numbers" width="24" height="24" />
-      ),
-    },
-    {
-      catogery: "RadioGroup",
-      icon: (
-        <Icon icon="fluent:radio-button-16-filled" width="24" height="24" />
-      ),
-    },
-    {
-      catogery: "RangeSelector",
-      icon: <Icon icon="memory:range" width="24" height="24" />,
-    },
-    {
-      catogery: "RangeSlider",
-      icon: <Icon icon="ph:sliders-horizontal-light" width="24" height="24" />,
-    },
-    {
-      catogery: "Scheduler",
-      icon: <Icon icon="arcticons:smsscheduler" width="24" height="24" />,
-    },
-    {
-      catogery: "Slider",
-      icon: <Icon icon="radix-icons:slider" width="24" height="24" />,
-    },
-    {
-      catogery: "Sortable",
-      icon: <Icon icon="oui:sortable" width="24" height="24" />,
-    },
-    {
-      catogery: "Switch",
-      icon: <Icon icon="material-symbols:switch" width="24" height="24" />,
-    },
-    {
-      catogery: "Table",
-      icon: <Icon icon="tabler:table" width="24" height="24" />,
-    },
-    {
-      catogery: "TextArea",
-      icon: <Icon icon="bi:textarea" width="24" height="24" />,
-    },
-    {
-      catogery: "TextBox",
-      icon: <Icon icon="ph:textbox" width="24" height="24" />,
-    },
-    {
-      catogery: "ScrollView",
-      icon: <Icon icon="mdi:scroll" width="24" height="24" />,
-    },
-  ]; // Use state for ICon
 
   const OneComponents0 = () => {
-    const [searchQuery, setSearchQuery] = createSignal("");
-
     const data = getTreeData({
       collection: "g:'CompCategory'",
       // TODO: Dont display "Form" Component
       child: { collection: "->CompCategoryComp" },
     });
 
-    const boxStyle: JSX.CSSProperties = {
-      border: "2px solid black",
-      margin: "20px",
-      padding: "10px",
-      "box-sizing": "border-box",
-    };
+    const [searchQuery, setSearchQuery] = createSignal("");
+    const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
 
+  
     const titleStyle: JSX.CSSProperties = {
-      "font-size": "20px",
+      "font-size": "15px",
       "font-weight": "bold",
-      "margin-bottom": "10px",
-      "margin-top": "10px",
+      "margin-bottom": "8px",
+      "margin-top": "8px",
     };
 
     const listStyle: JSX.CSSProperties = {
@@ -896,22 +656,48 @@ export const PageDesignerDragAndDrop = () => {
       "grid-template-columns": "repeat(2, 1fr)",
       gap: "10px",
     };
-
-    const listItemStyle = {
-      margin: "5px 0",
+    const iconMap = {
+      TextInput: "streamline:input-box",
+      Icon: "mynaui:letter-i-hexagon",
+      Image: "mage:image",
+      A: "ph:link-bold",
+      Text: "ci:text",
+      Repeater: "formkit:repeater",
+      Page: "fluent:document-one-page-20-regular",
+      Box: "radix-icons:box",
+      ProgressBar: "carbon:progress-bar",
+      LoadIndicator: "ep:loading",
+      SelectBox: "radix-icons:dropdown-menu",
+      TagBox: "radix-icons:dropdown-menu",
+      Tabs: "material-symbols-light:tabs-outline",
+      Button: "formkit:button",
+      Breadcrumb: "tdesign:component-breadcrumb",
+      Autocomplete: "fluent-mdl2:completed",
+      CheckBox: "tabler:checkbox",
+      ColorBox: "ic:outline-color-lens",
+      DateBox: "circum:calendar-date",
+      FileUploader: "arcticons:custom-uploader",
+      Form: "lets-icons:form-duotone",
+      NumberBox: "fluent-emoji-high-contrast:input-numbers",
+      RadioGroup: "fluent:radio-button-16-filled",
+      Switch: "iconoir:switch-off",
+      HtmlEditor: "mdi:code-block-html",
+      Table: "tabler:table",
+      TextArea: "bi:textarea",
+      TextBox: "ph:textbox",
+      ScrollView: "mdi:scroll",
     };
 
-    const smallBoxStyle: JSX.CSSProperties = {
-      "background-color": "white",
-      "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 5px 2px",
-      height: "100px",
-      display: "flex",
-      "flex-direction": "column",
-      "align-items": "center",
-      "justify-content": "center",
-      padding: "10px",
-    };
-    const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
+    // Function to get icon by category
+    function getIconByCategory(category: any) {
+      return (
+        <Icon
+          icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
+          width="20"
+          height="20"
+        />
+      ); // Returns null if category is not found
+    }
     const updateFilteredData = () => {
       if (!searchQuery()) {
         setFilteredData(data);
@@ -923,12 +709,16 @@ export const PageDesignerDragAndDrop = () => {
 
             if (category) {
               // Create a copy of the category's children array
-              const filteredChildren = category.children.filter((child: any) => {
-                return (
-                  child.name &&
-                  child.name.toLowerCase().includes(searchQuery().toLowerCase())
-                );
-              });
+              const filteredChildren = category.children.filter(
+                (child: any) => {
+                  return (
+                    child.name &&
+                    child.name
+                      .toLowerCase()
+                      .includes(searchQuery().toLowerCase())
+                  );
+                }
+              );
 
               // Return a new object with the filtered children
               return {
@@ -944,28 +734,67 @@ export const PageDesignerDragAndDrop = () => {
         setFilteredData(filteredData);
       }
     };
-    const getIcon = (name: any) => {
-      const mainData = ICon.find((item) => item.catogery === name);
-      return mainData ? mainData.icon : "";
-    };
+    function ListItemComponent({ child, getIconByCategory }) {
+      const [isHovered, setIsHovered] = createSignal(false);
+
+      const baseStyle = {
+        "border-radius": ".2rem",
+        "margin-left": "3px",
+        "margin-right": "3px",
+        transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+        padding: "10px",
+        "background-color": "white",
+        display: "flex",
+        "flex-direction": "row",
+        "align-items": "center",
+        "justify-content": "space-between",
+        height: "35px",
+        "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
+      };
+
+      const hoverStyle = {
+        "background-color": "#F2EDED",
+        cursor: "move",
+        boxShadow: "4px 4px 4px",
+      };
+
+      const itemStyle = () =>
+        isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+
+      return (
+        <div
+          style={itemStyle()}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          draggable={true}
+          onDragStart={(e) => {
+            e.stopPropagation();
+            setDraggedVertex(graph.vertexes[child.id]);
+          }}
+        >
+          <div class="pt:5px">{getIconByCategory(child?.name)}</div>
+          <div style={{ "font-size": "14px" }}>{child?.name}</div>
+        </div>
+      );
+    }
     return (
       <div>
-          <TextField
-            label="Name"
-            class="b:1|solid|blue-30 r:5|5|5|5 p:4"
-            type="text"
-            placeholder="Search Component..."
-            value={searchQuery()}
-            onInput={(e) => {
-              setSearchQuery(e.target.value);
-              updateFilteredData(); // Update filteredData when searchQuery changes
-            }}
-          />
-        <div class="h:30rem overflow-y:auto">
+        <TextField
+          label="Name"
+          class="b:1|solid|blue-30 r:5|5|5|5 p:4"
+          type="text"
+          placeholder="Search Component..."
+          value={searchQuery()}
+          onInput={(e) => {
+            setSearchQuery(e.target.value);
+            updateFilteredData(); // Update filteredData when searchQuery changes
+          }}
+        />
+        <div class="h:30rem w:20rem overflow-y:auto overflow-x:auto">
           <For
             each={filteredData()}
             fallback={
-              <div class="p:10 font-weight:bold">No Component Found !</div>
+              <div class="p:3 font-weight:bold">No Component Found !</div>
             }
           >
             {(item) => (
@@ -974,20 +803,10 @@ export const PageDesignerDragAndDrop = () => {
                 <ul style={{ ...listBoxStyle, ...listStyle }}>
                   <For each={item.children}>
                     {(child) => (
-                      <>
-                        <div
-                          style={smallBoxStyle}
-                          draggable={true}
-                          class="r:5|5|5|5 box-shadow:8|8|rgb(211,211,211) ml:3px mr:3px"
-                          onDragStart={(e) => {
-                            e.stopPropagation();
-                            setDraggedVertex(graph.vertexes[child.id]);
-                          }}
-                        >
-                          <li>{getIcon(child?.name)}</li>
-                          <li style={listItemStyle}>{child?.name}</li>
-                        </div>
-                      </>
+                      <ListItemComponent
+                        child={child}
+                        getIconByCategory={getIconByCategory}
+                      />
                     )}
                   </For>
                 </ul>
@@ -1507,9 +1326,10 @@ export const PageDesignerDragAndDrop = () => {
           } else {
           }
 
-          const parentVertex = position !== "center"
-            ? getParentVertex(["Attr"], toVertex).vertex!
-            : toVertex;
+          const parentVertex =
+            position !== "center"
+              ? getParentVertex(["Attr"], toVertex).vertex!
+              : toVertex;
 
           const rowId = componentDrag(
             pageConfig[0].record.txnId,
@@ -1521,7 +1341,6 @@ export const PageDesignerDragAndDrop = () => {
           fromVertex = graph.vertexes[rowId];
 
           sortChildren();
-
         } else if (
           position !== "center" &&
           fromParentVertex.vertex?.id === toParentVertex!.id

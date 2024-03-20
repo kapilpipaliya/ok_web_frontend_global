@@ -5,19 +5,26 @@ import {
   getOwner,
   JSXElement,
   Match,
-  onCleanup, Show,
+  onCleanup,
+  Show,
   Switch,
-  useContext
+  useContext,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
-import { commitTxn, IdAttr, revertTransaction, Vertex } from "../../../lib/graph";
+import {
+  commitTxn,
+  IdAttr,
+  revertTransaction,
+  Vertex,
+} from "../../../lib/graph";
 import {
   Record,
   FormContext,
   PageContext,
-  getSelectionOptions, getValueFromVertexOrKey
+  getSelectionOptions,
+  getValueFromVertexOrKey,
 } from "../../../lib/Utils";
 import { showNav } from "../../../signals/common";
 import { getLastItem } from "../../../utils/functions";
@@ -25,10 +32,31 @@ import { WsContext } from "../../../utils/ws_events_dispatcher";
 import { ComponentProps } from "../../ComponentType";
 import { componentDrag } from "../../PageDesignerDragAndDrop";
 import { setParentValue } from "../SelectInputField";
-import { Accordion, Avatar, Breadcrumbs, Button, Progress, Spinner } from "../../solid-blocks/blocks";
+import {
+  Accordion,
+  Avatar,
+  Breadcrumbs,
+  Button,
+  Progress,
+  Spinner,
+  Tab,
+  TabContainer,
+  TabList,
+  Tabs,
+} from "../../solid-blocks/blocks";
 import { getParentVertexValue } from "../../../lib/Traverse";
-import { PageRenderContext, PageRenderUtils, PageItemRender, RepeaterContext, getText, GlobalDragData, getUrl, PageView, getAttrs } from "../GenaricField";
-import {getTextColumnValue} from "./Utils";
+import {
+  PageRenderContext,
+  PageRenderUtils,
+  PageItemRender,
+  RepeaterContext,
+  getText,
+  GlobalDragData,
+  getUrl,
+  PageView,
+  getAttrs,
+} from "../GenaricField";
+import { getTextColumnValue } from "./Utils";
 
 // This component support rendering Child Themselves by calling PageRender.
 
@@ -80,10 +108,11 @@ export function GenericField(
     // but we should not need to access record,
     // everything will be configured from json.
     // props.config["record"] = record;
-    const cleanUpConfig = {} as { [key: string]: any; };
+    const cleanUpConfig = {} as { [key: string]: any };
 
     onCleanup(() => {
-      for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || []) revertTransaction(rowMetaTxnId);
+      for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+        revertTransaction(rowMetaTxnId);
     });
 
     const onSubmit = () => {
@@ -272,6 +301,47 @@ export function GenericField(
         </Match>
         <Match when={component() === "Form"}>
           <Form />
+        </Match>
+        <Match when={component() === "Tabs"}>
+          <Tabs {...props.meta.P.props}>
+            <PageItemRender metaVertex={props.meta} />
+          </Tabs>
+        </Match>
+        <Match when={component() === "TabContainer"}>
+          {props.meta.OUT["Attr"].length &&
+            props.meta.OUT["Attr"].map((attrId, i) => {
+              // Clone the props.meta object to avoid mutating the original props
+              const modifiedMeta = JSON.parse(JSON.stringify(props.meta));
+
+              // Modify the OUT.Attr array to include only the current attrId
+              modifiedMeta.OUT["Attr"] = [props.meta.OUT["Attr"][i]];
+              return (
+                
+                <TabContainer>
+                  {JSON.stringify(modifiedMeta)}
+                  <PageItemRender metaVertex={props.meta} />
+                </TabContainer>
+              );
+            })}
+        </Match>
+        <Match when={component() === "TabList"}>
+          {props.meta.OUT["Attr"] && (
+            <TabList>
+              {props.meta.OUT["Attr"].map((attrId, i) => {
+                // Clone the props.meta object to avoid mutating the original props
+                const modifiedMeta = JSON.parse(JSON.stringify(props.meta));
+
+                // Modify the OUT.Attr array to include only the current attrId
+                modifiedMeta.OUT["Attr"] = [attrId];
+
+                return (
+                  <Tab>
+                    <PageItemRender metaVertex={modifiedMeta} />
+                  </Tab>
+                );
+              })}
+            </TabList>
+          )}
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
