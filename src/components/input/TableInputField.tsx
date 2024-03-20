@@ -13,6 +13,7 @@ import {
   getOwner,
   runWithOwner,
 } from "solid-js";
+import { SimpleTable } from "solid-simple-table"
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { toTitle } from "case-switcher-js";
@@ -57,6 +58,8 @@ import {
 } from "./GenaricField";
 import { GenericField } from "./Components/GenericFieldComponent";
 import { getLastItem } from "../../utils/functions";
+import { MySimpleTable } from "../simple-table/solid-simple-table/demo/simple";
+import { Separator } from "@kobalte/core";
 
 export function TableInputField(
   props: ComponentProps & { txnId?: number; isRealTime?: boolean }
@@ -420,7 +423,6 @@ export function TableInputField(
           {/*<Show when={props.meta.P.attributes}>*/}
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
-          
           {/* <Show when={sortedVertexes().length}> */}
           <AddNewButton />
           {/* </Show> */}

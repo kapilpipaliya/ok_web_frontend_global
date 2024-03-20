@@ -287,6 +287,7 @@ export function GenericField(
             </Match>
           </Switch>
         </Match>
+        
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
           <PageView number={1} vertex={props.data} />
@@ -303,15 +304,15 @@ export function GenericField(
           <Form />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs {...props.meta.P.props}>
+          <Tabs style={props.meta.P.props} {...props.meta.P.props}>
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemRender  metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemRender  metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon

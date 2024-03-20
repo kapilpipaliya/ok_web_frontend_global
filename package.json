@@ -93,6 +93,7 @@
     "solid-plyr": "^1.0.10",
     "solid-popper": "^0.3.0",
     "solid-signals": "^1.9.1",
+    "solid-simple-table": "^2.0.0",
     "solid-slider": "^1.3.17",
     "solid-styled": "^0.11.1",
     "solid-styled-components": "^0.28.5",

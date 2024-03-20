@@ -11,7 +11,7 @@ import {
 } from "solid-js";
 
 import { toTitle } from "case-switcher-js";
-import {graph, IdAttr, setGraph, Vertex} from "../../lib/graph";
+import { graph, IdAttr, setGraph, Vertex } from "../../lib/graph";
 import { getCollAttrComp, getCompProps, getRowProps } from "../../lib/Record";
 import {
   FormContext,
@@ -22,11 +22,10 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import {selectedId} from "../pageStore";
-import {Tab, TabContainer} from "../solid-blocks/blocks";
+import { selectedId } from "../pageStore";
+import { Tab, TabContainer } from "../solid-blocks/blocks";
 
-
-export const GlobalDragData = {} as {from: Vertex};
+export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -34,11 +33,15 @@ export const PageRenderContext = createContext([] as Vertex[]);
 export const RepeaterContext = createContext([] as Vertex[]); // DataVertex[]
 
 export const PageRenderUtils = {
-  getCollection: (item?: Vertex): string | undefined => item && getChildVertex(["$0Coll"], item).vertex?.P[IdAttr],
-  getAttrVertex: (item?: Vertex): Vertex | undefined => item && getChildVertex(["$0Att"], item).vertex,
-  getAttr: (item?: Vertex): string | undefined => item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
+  getCollection: (item?: Vertex): string | undefined =>
+    item && getChildVertex(["$0Coll"], item).vertex?.P[IdAttr],
+  getAttrVertex: (item?: Vertex): Vertex | undefined =>
+    item && getChildVertex(["$0Att"], item).vertex,
+  getAttr: (item?: Vertex): string | undefined =>
+    item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
   getID: (item?: Vertex): string | undefined => item && item.P["name"],
-  getId: (item?: Vertex): string | undefined => PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
+  getId: (item?: Vertex): string | undefined =>
+    PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
   getComponent: (item?: Vertex): Vertex | undefined => {
     if (!item) return;
@@ -50,17 +53,25 @@ export const PageRenderUtils = {
     if (!attrVertex) return;
     return getCollAttrComp(attrVertex);
   },
-  getDataVertex: (item?: Vertex) => item && getChildVertex(["$0Data"], item).vertex,
+  getDataVertex: (item?: Vertex) =>
+    item && getChildVertex(["$0Data"], item).vertex,
 };
 
-export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => {
+export const PageItemRender = (props: {
+  metaVertex: Vertex;
+  data?: Vertex;
+}) => {
   const parentItems = useContext(PageRenderContext);
   // @ts-ignore
   let { record, cleanUpConfig } = useContext(FormContext);
 
   // children:
   return (
-    <For each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort((a, b) => a.P.pos - b.P.pos)}>
+    <For
+      each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort(
+        (a, b) => a.P.pos - b.P.pos
+      )}
+    >
       {(item) => {
         // createComputed is hard to debug
         createComputed(() => {
@@ -71,7 +82,9 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
           // 1. this will re-render when Props length changes.
           // 2. when Prop Key changes.
           const componentVertex = PageRenderUtils.getComponent(item);
-          const componentProps = componentVertex ? getCompProps(componentVertex) : {};
+          const componentProps = componentVertex
+            ? getCompProps(componentVertex)
+            : {};
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
           if (selectedId() === item.id) {
@@ -84,13 +97,21 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
 
           // supported deleted properties.
           // mergeProperties only merge top level properties. so props will be replaced.
-          setGraph("vertexes", item.id, "P", { props: compProps, name: PageRenderUtils.getId(item) });
+          setGraph("vertexes", item.id, "P", {
+            props: compProps,
+            name: PageRenderUtils.getId(item),
+          });
           // untrack(() => { mergeVertexProperties(getNewTxnId(), item.id, { props: compProps }); })
         });
 
-        const component = createMemo(() => item.P.component || PageRenderUtils.getComponent(item)?.P[IdAttr]);
+        const component = createMemo(
+          () =>
+            item.P.component || PageRenderUtils.getComponent(item)?.P[IdAttr]
+        );
         const parentComponent = createMemo(() => {
-          return PageRenderUtils.getComponent(getLastItem(parentItems, 1))?.P[IdAttr];
+          return PageRenderUtils.getComponent(getLastItem(parentItems, 1))?.P[
+            IdAttr
+          ];
         });
         // TODO: Is This Parent Vertex is ok?
         // Need Repetitive parent checks?
@@ -100,14 +121,19 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
         };
 
         const PageComponent = () => (
-          <PageRenderContext.Provider value={[...useContext(PageRenderContext), item]}>
+          <PageRenderContext.Provider
+            value={[...useContext(PageRenderContext), item]}
+          >
             <DynamicComponent
               meta={item}
               // NOTE: For repeater we cant use parentData
               // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
               data={
                 props.data ||
-                getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes ||
+                getSelectionOptions(
+                  [...useContext(RepeaterContext)],
+                  item.P.data
+                ).vertexes ||
                 PageRenderUtils.getDataVertex(item)
               }
               title={toTitle(PageRenderUtils.getId(item) || "")}
@@ -119,42 +145,18 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
         );
         // currently context is not reactive, but we are assuming it will work.
 
-        const Label = () => {
-          return <>{toTitle(PageRenderUtils.getId(item) || "")}</>;
-        };
 
         return (
           <Switch>
-            {/* when the parent Component is FieldSetLabelLeft,
-        we add label automatically */}
-            <Match when={parentComponent() === "FieldSetLabelLeft"}>
-              <Switch>
-                <Match when={component() === "Table"}>
-                  <h3>
-                    <Label />
-                  </h3>
-                  <PageComponent />
-                </Match>
-                <Match when={component() === "CollectionOption"}>
-                  <PageComponent />
-                </Match>
-                <Match when={true}>
-                  <div class="dx-field">
-                    <div class="dx-field-label">
-                      <Label />
-                    </div>
-                    <div class="dx-field-value">
-                      <PageComponent />
-                    </div>
-                  </div>
-                </Match>
-              </Switch>
-            </Match>
             <Match when={parentComponent() === "TabList"}>
-              <Tab><PageComponent /></Tab>
+              <Tab style={item.P.props}>
+                <PageComponent />
+              </Tab>
             </Match>
             <Match when={parentComponent() === "TabContainer"}>
-              <TabContainer><PageComponent /></TabContainer>
+              <TabContainer>
+                <PageComponent />
+              </TabContainer>
             </Match>
             <Match when={true}>
               <PageComponent />
@@ -169,32 +171,39 @@ export const PageItemRender = (props: { metaVertex: Vertex; data?: Vertex }) => 
 // It's best to use dataSource, but we are using items for simplicity.
 // Components that don't have children.
 
-
 export function getText(projection: string, repeaterContext: Vertex[]) {
   return getSelectionOptions(repeaterContext, projection).vertexes as string;
 }
 
 export function getUrl(projection: string, repeaterContext: Vertex[]) {
-  let url = getSelectionOptions(repeaterContext, projection).vertexes as string | undefined;
+  let url = getSelectionOptions(repeaterContext, projection).vertexes as
+    | string
+    | undefined;
   if (typeof url === "string" && url.startsWith("/")) {
     // url = (showNav() ? '/nav' : '') + url;
   }
   return url;
 }
 
-export function PageView(props: {
-  number: number;
-  vertex?: Vertex;
-}) {
-  const collection = createMemo(() => PageRenderUtils.getCollection(props.vertex));
-  const dataVertex = createMemo(() => PageRenderUtils.getDataVertex(props.vertex));
+export function PageView(props: { number: number; vertex?: Vertex }) {
+  const collection = createMemo(() =>
+    PageRenderUtils.getCollection(props.vertex)
+  );
+  const dataVertex = createMemo(() =>
+    PageRenderUtils.getDataVertex(props.vertex)
+  );
 
   return (
     <PageContext.Provider value={{ events: {} }}>
       <Show when={props.number && props.vertex && props.number} keyed>
         <Switch>
           <Match when={collection() && !dataVertex()}>
-            <For each={getSelectionOptions([props.vertex!], `'g:${collection()!}'`).vertexes}>
+            <For
+              each={
+                getSelectionOptions([props.vertex!], `'g:${collection()!}'`)
+                  .vertexes
+              }
+            >
               {(vertex) => (
                 <PageRenderContext.Provider value={[props.vertex!]}>
                   <PageItemRender metaVertex={props.vertex!} data={vertex} />

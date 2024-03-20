@@ -21,6 +21,7 @@ export const genericInputComponents = [
   // "LinearGauge",
   "NumberBox",
   "ProgressBar",
+  "Radio",
   "RadioGroup",
   // "RangeSelector",
   // "RangeSlider",

@@ -10,6 +10,7 @@ import { PageContext } from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
 
+
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
 const BackupRestore = lazy(() => import("./BackupRestore"));
@@ -49,7 +50,12 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
   );
 
   const location = useLocation();
+const [isDrawerOpen, setDrawerOpen] = createSignal(false);
 
+const toggleDrawer = () => {
+  setDrawerOpen(!isDrawerOpen());
+  set(IS_SIDEBAR_OPEN_KEY, !isDrawerOpen()); // Optionally synchronize state with IndexedDB
+};
 
   createEffect(()=>{
     if(location.pathname.includes('/nav/admin/login')){
@@ -113,7 +119,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
           </PageContext.Provider>
         </div>
       </div>
-    </div>
+  </div>
   );
 };
 

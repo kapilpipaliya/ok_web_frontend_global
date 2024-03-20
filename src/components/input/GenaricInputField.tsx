@@ -1,14 +1,37 @@
-import {createEffect, getOwner, Match, onCleanup, runWithOwner, Show, Switch, useContext} from "solid-js";
+import {
+  createEffect,
+  getOwner,
+  Match,
+  onCleanup,
+  runWithOwner,
+  Show,
+  Switch,
+  useContext,
+} from "solid-js";
 
-import {IdAttr} from "../../lib/graph";
+import { IdAttr } from "../../lib/graph";
 // import {FormContext} from "../../lib/Record";
 // import {getValueFromVertexOrKey} from "../../utils/utils";
 // import {mergeVertexProperties} from "../../lib/Vertex";
-import {getTextColumnValue} from "./Components/Utils";
-import {ComponentProps} from "../ComponentType";
-import { Bar, Checkbox, Progress, RadioGroup, TextField } from "../solid-blocks/blocks";
+import { getTextColumnValue } from "./Components/Utils";
+import { ComponentProps } from "../ComponentType";
+import {
+  Bar,
+  Checkbox,
+  Progress,
+  Radio,
+  RadioGroup,
+  TextField,
+} from "../solid-blocks/blocks";
+import { PageItemRender } from "./GenaricField";
 
-export function GenericInputField(props: ComponentProps & { component: string; disabled: boolean; txnId: number }) {
+export function GenericInputField(
+  props: ComponentProps & {
+    component: string;
+    disabled: boolean;
+    txnId: number;
+  }
+) {
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
   return (
@@ -33,15 +56,10 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "CheckBox"}>
-            
             <Checkbox
               {...props.data?.P.props}
               onChange={(e: any) => {
-                props.setValue?.(
-                  props.meta,
-                  props.data,
-                  e.target.checked
-                );
+                props.setValue?.(props.meta, props.data, e.target.checked);
               }}
               checked={props.data?.P[props.meta.P[IdAttr]]}
             />
@@ -71,6 +89,19 @@ export function GenericInputField(props: ComponentProps & { component: string; d
           <Match when={props.component === "NumberBox"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
+          <Match when={props.component === "Radio"}>
+            <Radio
+              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
+              onChange={(e: any) => {
+                props.setValue?.(props.meta, props.data as any, e.target.checked);
+              }}
+              name={props.meta?.P.props?.label ?? "radio"}
+              align="left"
+              {...props.meta?.P.props}
+            >
+              {props.meta?.P.props?.label ?? "radio"}
+            </Radio>
+          </Match>
           <Match when={props.component === "ProgressBar"}>
             <Progress
               style={{ ...props.meta?.P.props }}
@@ -78,13 +109,8 @@ export function GenericInputField(props: ComponentProps & { component: string; d
             />
           </Match>
           <Match when={props.component === "RadioGroup"}>
-            <RadioGroup
-              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
-              onChange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
-              }}
-            >
-              {props.data?.P[props.meta.P[IdAttr]]}
+            <RadioGroup>
+              <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
           <Match when={props.component === "RangeSelector"}>
