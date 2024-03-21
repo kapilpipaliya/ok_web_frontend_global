@@ -12,7 +12,7 @@ export const genericInputComponents = [
   // "Calendar",
   "CheckBox",
   // "CircularGauge",
-  // "ColorBox",
+  "ColorBox",
   // "DateBox",
   // "DropDownBox",
   "FileUploader",

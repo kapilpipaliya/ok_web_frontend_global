@@ -1,15 +1,23 @@
-import {A, useLocation, useNavigate} from "@solidjs/router";
-import {get, set} from "idb-keyval";
-import {createEffect, createSignal, For, JSX, lazy, onMount, Show, useContext} from "solid-js";
-import {getNewGraphId, graph} from "../lib/graph";
+import { A, useLocation, useNavigate } from "@solidjs/router";
+import { get, set } from "idb-keyval";
+import {
+  createEffect,
+  createSignal,
+  For,
+  JSX,
+  lazy,
+  onMount,
+  Show,
+  useContext,
+} from "solid-js";
+import { getNewGraphId, graph } from "../lib/graph";
 import Dismiss from "solid-dismiss";
-import {Navbar} from "../components/Navbar";
+import { Navbar } from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import {AlertMessageContext} from "../contexts/AlertMessageContext";
+import { AlertMessageContext } from "../contexts/AlertMessageContext";
 import { PageContext } from "../lib/Utils";
-import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
-import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
-
+import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
+import { isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage } from "../signals/common";
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -23,23 +31,24 @@ get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
 // Todo use mastercss
 const AlertDisplay = () => {
-    const {alerts, setAlert} = useContext(AlertMessageContext);
-    return (
-        <For each={alerts}>
-            {(alert, index) => (
-                <div
-                    color={alert.state}
-                    // @ts-ignore
-                    isClosable={true}
-                    content={alert.message}
-                    duration={5000}
-                    onHide={() => setAlert((prev) => prev.filter((_, i) => i !== index()))}
-                />
-            )}
-        </For>
-    );
+  const { alerts, setAlert } = useContext(AlertMessageContext);
+  return (
+    <For each={alerts}>
+      {(alert, index) => (
+        <div
+          color={alert.state}
+          // @ts-ignore
+          isClosable={true}
+          content={alert.message}
+          duration={5000}
+          onHide={() =>
+            setAlert((prev) => prev.filter((_, i) => i !== index()))
+          }
+        />
+      )}
+    </For>
+  );
 };
-
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = (props: { children?: JSX.Element }) => {
@@ -50,39 +59,32 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
   );
 
   const location = useLocation();
-const [isDrawerOpen, setDrawerOpen] = createSignal(false);
+  const [isShowDrawer, setIsShowDrawer] = createSignal(true);
 
-const toggleDrawer = () => {
-  setDrawerOpen(!isDrawerOpen());
-  set(IS_SIDEBAR_OPEN_KEY, !isDrawerOpen()); // Optionally synchronize state with IndexedDB
-};
 
-  createEffect(()=>{
-    if(location.pathname.includes('/nav/admin/login')){
-      setIsLoginPage(true);
-      // setIsLoginPage();
-    }
-    if (location.pathname.includes("/nav/admin/signup")) {
-      setSignUpPage(true);
-      // setIsLoginPage();
-    }
-  })
+  createEffect(() => {
+    const path = location.pathname;
+
+    setIsLoginPage(path.includes("/nav/admin/login"));
+    setSignUpPage(path.includes("/nav/admin/signup"));
+    setIsShowDrawer(
+      !(
+        path.includes("/nav/admin/login") ||
+        path.includes("/nav/admin/signup") ||
+        path.includes("/nav/admin/Page/")
+      )
+    );
+
+  });
 
   return (
     <div class="flex">
-      <Show
-        when={
-          isSideBarOpen() &&
-          graph.initialSynced &&
-          !isLoginPage() &&
-          !isSignUpPage()
-        }
-      >
+      <Show when={isSideBarOpen() && graph.initialSynced && isShowDrawer()}>
         <Sidebar isSideBarOpen={isSideBarOpen()} />
       </Show>
       <div
         class={`${
-          isSideBarOpen() && !isLoginPage() && !isSignUpPage() ? "ml:200" : ""
+          isSideBarOpen() && isShowDrawer() ? "ml:200" : ""
         } flex:1 transition:margin-left|200ms|ease-in-out`}
       >
         <div class="flex flex:col flex:1">
@@ -97,6 +99,7 @@ const toggleDrawer = () => {
           >
             <Show when={!isLoginPage() && !isSignUpPage()}>
               <Navbar
+                showNavBar={isShowDrawer()}
                 toggleSidebar={() => {
                   set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
                   setSideBarOpen((prev) => !prev);
@@ -119,7 +122,7 @@ const toggleDrawer = () => {
           </PageContext.Provider>
         </div>
       </div>
-  </div>
+    </div>
   );
 };
 

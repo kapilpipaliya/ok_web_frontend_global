@@ -1,6 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import {JSXElement, Show, createSignal, Match, Switch} from "solid-js";
+import { JSXElement, Show, createSignal, Match, Switch } from "solid-js";
 import { DisplayComponentProps } from "./ComponentType";
+import { isFormEditPage } from "../signals/common";
+import { useNavigate } from "@solidjs/router";
 // import {currentTheme, onChangeTheme, setCurrentTheme, themeMode} from "./css/Theme";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
@@ -18,12 +20,13 @@ export function Navbar(
   props: DisplayComponentProps & {
     left?: JSXElement;
     right?: JSXElement;
+    showNavBar: boolean;
     toggleSidebar: () => void;
   }
 ) {
   // let {events} = useContext(PageContext);
   // bg:white box-shadow:1|1|10|#ddd
-
+  const navigate = useNavigate();
   return (
     <nav
       class={`p:7.5 flex jc:space-between ai:center ${
@@ -35,13 +38,26 @@ export function Navbar(
           props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition
         }
       >
-        <NavToggleBtn toggleSidebar={props.toggleSidebar} />
+        <Show
+          when={props.showNavBar}
+          fallback={
+            <Icon
+              class="pointer:cursor"
+              onclick={() => {
+                navigate(-1);
+              }}
+              icon={"ic:round-arrow-back-ios"}
+            />
+          }
+        >
+          <NavToggleBtn toggleSidebar={props.toggleSidebar} />
+        </Show>
       </Show>
 
       {props.left}
 
       <div>{props.meta?.P?.title}</div>
-{/*   Theme Change Button
+      {/*   Theme Change Button
       <button class="px:5x r:2x font:18 h:48 bg:slate-10@light bg:gray-80@dark fg:strong rel">
         <Switch>
           <Match when={currentTheme() === 'dark'}>

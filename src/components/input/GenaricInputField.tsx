@@ -1,12 +1,12 @@
 import {
   createEffect,
+  createSignal,
   getOwner,
   Match,
   onCleanup,
   runWithOwner,
   Show,
   Switch,
-  useContext,
 } from "solid-js";
 
 import { IdAttr } from "../../lib/graph";
@@ -16,7 +16,6 @@ import { IdAttr } from "../../lib/graph";
 import { getTextColumnValue } from "./Components/Utils";
 import { ComponentProps } from "../ComponentType";
 import {
-  Bar,
   Checkbox,
   Progress,
   Radio,
@@ -24,6 +23,52 @@ import {
   TextField,
 } from "../solid-blocks/blocks";
 import { PageItemRender } from "./GenaricField";
+import { ColorBox } from "../solid-blocks/blocks/colorbox";
+import { FileUploader } from "../solid-blocks/blocks/fileuploader";
+// const FileUploader = () => {
+  
+
+  
+//   return (
+    // <div
+    //   onDrop={handleDrop}
+    //   onDragOver={handleDragOver}
+    //   onClick={handleFullBoxClick}
+    //   style={{
+    //     border: "2px dashed #ccc",
+    //     padding: "20px",
+    //     "border-radius": "10px",
+    //     "text-align": "center",
+    //     cursor: "pointer",
+    //     "background-size": "cover",
+    //     "background-position": "center",
+    //   }}
+    // >
+//       <input
+//         type="file"
+//         id="fileInput"
+//         style={{ display: "none" }}
+//         onChange={handleInputChange}
+//       />
+      // {fullBoxImage() ? (
+      //   <img
+      //     src={fullBoxImage()}
+      //     alt="Selected Image"
+      //     style={{ "max-width": "100%", "max-height": "100%", "border-radius": "10px" }}
+      //   />
+      // ) : (
+      //   <label>Click to Pick Image</label>
+      // )}
+//       {file() && (
+//         <div>
+//           <p>File: {file().name}</p>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default FileUploader;
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -57,25 +102,34 @@ export function GenericInputField(
           </Match>
           <Match when={props.component === "CheckBox"}>
             <Checkbox
-              {...props.data?.P.props}
-              onChange={(e: any) => {
+              {...props.meta?.P.props}
+              switch={false}
+              onchange={(e: any) => {
+                console.log("====================================");
                 props.setValue?.(props.meta, props.data, e.target.checked);
               }}
-              checked={props.data?.P[props.meta.P[IdAttr]]}
+              align="left"
+              children={props.meta?.P.props?.text}
+              setChecked={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={props.component === "CircularGauge"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "ColorBox"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
+            <ColorBox {...props.meta?.P.props} />
           </Match>
           <Match when={props.component === "DateBox"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "DropDownBox"}>Dropdown</Match>
           <Match when={props.component === "FileUploader"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
+            <FileUploader
+              {...props.meta?.P.props}
+              image={
+                props.meta?.P.props.image
+              }
+            />
           </Match>
           <Match when={props.component === "FilterBuilder"}>
             {props.data?.P[props.meta.P[IdAttr]]}
@@ -93,7 +147,11 @@ export function GenericInputField(
             <Radio
               value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onChange={(e: any) => {
-                props.setValue?.(props.meta, props.data as any, e.target.checked);
+                props.setValue?.(
+                  props.meta,
+                  props.data as any,
+                  e.target.checked
+                );
               }}
               name={props.meta?.P.props?.label ?? "radio"}
               align="left"

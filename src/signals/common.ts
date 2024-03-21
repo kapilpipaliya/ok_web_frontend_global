@@ -16,4 +16,3 @@ export const [isLoginPage, setIsLoginPage] = createSignal(
 export const [isSignUpPage, setSignUpPage] = createSignal(
 	window.location.pathname.includes('/nav/admin/signup')
 );
-
