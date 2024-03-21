@@ -1325,6 +1325,7 @@ export const PageDesignerDragAndDrop = () => {
           }
         });
       }
+      const getComponent = () => getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
 
       return (
         <div>
@@ -1399,7 +1400,7 @@ export const PageDesignerDragAndDrop = () => {
               </button>
             </Show>
             {nameExpr(child()) || child().P.name}
-          </div>
+          </div>{getComponent()}
           <Show
             when={isActiveItem() && indicatorPosition().position === "after"}
           >
