@@ -2128,8 +2128,6 @@ export const PageDesignerDragAndDrop = () => {
     <div class="flex">
       <div
         class="flex-col"
-        // @ts-ignore
-        //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
       >
         <For each={leftColumns()}>
           {(column) => <Column type={column.id} />}
@@ -2144,10 +2142,7 @@ export const PageDesignerDragAndDrop = () => {
         </div>
       </div>
       <div
-        class="flex-col"
-        style={{ width: "30%" }}
-        // @ts-ignore
-        //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
+        class="flex-col width:25rem"
       >
         <For each={rightColumns()}>
           {(column) => <Column type={column.id} />}
