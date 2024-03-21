@@ -18,11 +18,9 @@ import {
   createEffect,
   createSignal,
   For,
-  on,
   onCleanup,
   Switch,
   Match,
-  onMount,
   Show,
   useContext,
   JSX,
@@ -61,7 +59,6 @@ import { AttrsTableData } from "../lib/api";
 import { GenericInputField } from "./input/GenaricInputField";
 import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
 import { FormGroupProperties } from "../pages/FormsAdmin";
-import { createDragHandle } from "./solid_dnd_directive";
 
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
@@ -70,6 +67,7 @@ import jsep from "jsep";
 import { setSelectionValue } from "./input/SelectionUtils";
 import { evaluate } from "../lib/jsep";
 import {
+  Button,
   ModalBody,
   ModalContent,
   ModalFooter,
@@ -186,16 +184,6 @@ export const componentDrag = (
   return -1;
 };
 
-export function sortChildren(childrenItems: dxTreeViewItem[], txnId: number) {
-  if (!childrenItems) return;
-  for (let i = 0; i < childrenItems.length; i++) {
-    const child = childrenItems[i];
-    mergeVertexProperties(txnId, child.id! as number, { pos: i + 1 });
-  }
-}
-
-// @ts-ignore
-
 export const setPropertyValueGlobal = (
   txnId: number,
   meta: Vertex,
@@ -252,113 +240,6 @@ export const setPropertyValueGlobal = (
   return row;
 };
 
-function getLayoutTreeJson() {
-  return {
-    collection: "->Attr",
-    child: {
-      collection: "->Attr",
-      child: {
-        collection: "->Attr",
-        child: {
-          collection: "->Attr",
-          child: {
-            collection: "->Attr",
-            child: {
-              collection: "->Attr",
-              child: {
-                collection: "->Attr",
-                child: {
-                  collection: "->Attr",
-                  child: {
-                    collection: "->Attr",
-                    child: {
-                      collection: "->Attr",
-                      child: {
-                        collection: "->Attr",
-                        child: {
-                          collection: "->Attr",
-                          child: {
-                            collection: "->Attr",
-                            child: {
-                              collection: "->Attr",
-                              child: {
-                                collection: "->Attr",
-                                child: {
-                                  collection: "->Attr",
-                                  child: {
-                                    collection: "->Attr",
-                                    child: {
-                                      collection: "->Attr",
-                                      child: {
-                                        collection: "->Attr",
-                                        child: {
-                                          collection: "->Attr",
-                                          child: {
-                                            collection: "->Attr",
-                                            child: {
-                                              collection: "->Attr",
-                                              child: {
-                                                collection: "->Attr",
-                                                child: {
-                                                  collection: "->Attr",
-                                                  child: {
-                                                    collection: "->Attr",
-                                                    child: {
-                                                      collection: "->Attr",
-                                                      child: {
-                                                        collection: "->Attr",
-                                                        child: {
-                                                          collection: "->Attr",
-                                                          child: {
-                                                            collection:
-                                                              "->Attr",
-                                                            child: {
-                                                              collection:
-                                                                "->Attr",
-                                                              child: {
-                                                                collection:
-                                                                  "->Attr",
-                                                                child: {
-                                                                  collection:
-                                                                    "->Attr",
-                                                                  child: {
-                                                                    collection:
-                                                                      "->Attr",
-                                                                  },
-                                                                },
-                                                              },
-                                                            },
-                                                          },
-                                                        },
-                                                      },
-                                                    },
-                                                  },
-                                                },
-                                              },
-                                            },
-                                          },
-                                        },
-                                      },
-                                    },
-                                  },
-                                },
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  };
-}
-
 function getChildrenAttrs(child: Vertex) {
   return (evaluate(jsep("->Attr"), { vertexes: [child] }) || []).sort(
     (a, b) => a.P.pos - b.P.pos
@@ -366,7 +247,6 @@ function getChildrenAttrs(child: Vertex) {
 }
 
 export const PageDesignerDragAndDrop = () => {
-  const itemsExpr = "children";
   const params = useParams();
   const pageConfig = createStore({} as { record: Record });
   const [count, setCount] = createSignal(1);
@@ -735,7 +615,8 @@ export const PageDesignerDragAndDrop = () => {
         setFilteredData(filteredData);
       }
     };
-    function ListItemComponent({ child, getIconByCategory }) {
+    function ListItemComponent(props: { child: Vertex}) {
+
       const [isHovered, setIsHovered] = createSignal(false);
 
       const baseStyle = {
@@ -770,11 +651,11 @@ export const PageDesignerDragAndDrop = () => {
           draggable={true}
           onDragStart={(e) => {
             e.stopPropagation();
-            setDraggedVertex(graph.vertexes[child.id]);
+            setDraggedVertex(graph.vertexes[props.child.id]);
           }}
         >
-          <div class="pt:5px">{getIconByCategory(child?.name)}</div>
-          <div style={{ "font-size": "14px" }}>{child?.name}</div>
+          <div class="pt:5px">{getIconByCategory(props.child?.P.name)}</div>
+          <div style={{ "font-size": "14px" }}>{props.child?.P.name}</div>
         </div>
       );
     }
@@ -806,7 +687,6 @@ export const PageDesignerDragAndDrop = () => {
                     {(child) => (
                       <ListItemComponent
                         child={child}
-                        getIconByCategory={getIconByCategory}
                       />
                     )}
                   </For>
@@ -983,7 +863,7 @@ export const PageDesignerDragAndDrop = () => {
     return findVertexByLabelAndUniqueId("DataType", "name", "String");
   };
 
-  function getLayoutTreeData() {
+/*  function getLayoutTreeData() {
     return getTreeData(
       getLayoutTreeJson(),
       pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [],
@@ -994,7 +874,7 @@ export const PageDesignerDragAndDrop = () => {
         },
       }
     );
-  }
+  }*/
 
   /*const FourLayout = () => {
         return <div ref={el => {
@@ -1246,7 +1126,7 @@ export const PageDesignerDragAndDrop = () => {
         handleDragOverBase(e);
       };
 
-      const handleDragOver = (e: MouseEvent) => {
+      const handleDragOver = (e: DragEvent) => {
         e.stopPropagation();
         e.preventDefault();
         handleDragOverBase(e);
@@ -1410,7 +1290,7 @@ export const PageDesignerDragAndDrop = () => {
         // }
       };
 
-      const onLayoutItemClick = (e) => {
+      const onLayoutItemClick = () => {
         batch(() => {
           setSelectedId(-1);
           setSelectedComponent({ vertexId: -1 });
@@ -1877,22 +1757,24 @@ export const PageDesignerDragAndDrop = () => {
       return (
         <>
           <br />
-          <span>Collection:</span>
+          {/*<span>Collection:</span>*/}
           <SelectInputField
             data={graph.vertexes[selectedId()!]}
             meta={collMetaVertex.vertexes![0]!}
             disabled={false}
+            title={'Collection:'}
             component={"SelectBox"}
             txnId={pageConfig[0].record.txnId}
             // passed setValue when we have a string value in select field
             setValue={pageConfig[0].record.setValue}
             isRealTime={false}
           />
-          <span>Data:</span>
+          {/*<span>Data:</span>*/}
           <SelectInputField
             data={graph.vertexes[selectedId()!]}
             meta={collMetaVertex.vertexes![1]!}
             disabled={false}
+            title={'Data:'}
             component={"SelectBox"}
             txnId={pageConfig[0].record.txnId}
             // passed setValue when we have a string value in select field
@@ -2110,31 +1992,23 @@ export const PageDesignerDragAndDrop = () => {
       importExportButtons={false}
     />
   );
-  const { dragHandleZone: dragHandleZone1, dragHandle: dragHandle1 } =
-    createDragHandle();
-  const { dragHandleZone: dragHandleZone2, dragHandle: dragHandle2 } =
-    createDragHandle();
-  // @ts-ignore
-  dragHandleZone1, dragHandleZone2, dragHandle1, dragHandle2;
 
   const Column = (props: {
     type: string;
-    dragHandler: (node: HTMLElement) => void;
   }) => {
-    const dragHandle = (el: HTMLElement) => props.dragHandler(el);
     return (
       <>
         <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5">
           <Switch>
             <Match when={props.type === "components"}>
-              <div class="mb:10" style="font-weight: bold" use:dragHandle>
+              <div class="mb:10" style="font-weight: bold">
                 Components
               </div>
               {oneComponents0}
               {/*{oneComponents}*/}
             </Match>
             <Match when={props.type === "collection"}>
-              <div class="mb:10" style="font-weight: bold" use:dragHandle>
+              <div class="mb:10" style="font-weight: bold">
                 Collection Fields
               </div>
               {twoCollections}
@@ -2258,7 +2132,7 @@ export const PageDesignerDragAndDrop = () => {
         //use:dragHandleZone1={{items: ()=>leftColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setLeftColumns(e.detail.items)} on:finalize={(e: any) => setLeftColumns(e.detail.items)}
       >
         <For each={leftColumns()}>
-          {(column) => <Column dragHandler={dragHandle1} type={column.id} />}
+          {(column) => <Column type={column.id} />}
         </For>
       </div>
       <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5">
@@ -2276,7 +2150,7 @@ export const PageDesignerDragAndDrop = () => {
         //use:dragHandleZone2={{items: ()=>rightColumns(), type: "column", flipDurationMs: 300}} on:consider={(e:any) => setRightColumns(e.detail.items)} on:finalize={(e:any) => setRightColumns(e.detail.items)}
       >
         <For each={rightColumns()}>
-          {(column) => <Column dragHandler={dragHandle2} type={column.id} />}
+          {(column) => <Column type={column.id} />}
         </For>
       </div>
     </div>
