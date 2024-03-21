@@ -44,7 +44,7 @@ export function Navbar(
             <Icon
               class="pointer:cursor"
               onclick={() => {
-                navigate(-1);
+                navigate("/Page");
               }}
               icon={"ic:round-arrow-back-ios"}
             />

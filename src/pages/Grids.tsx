@@ -163,7 +163,15 @@ export const DataGrid = (props: DataGridProps) => {
             // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
         {
             return !formNew.isInlineEditable ?
-                <A href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit"/></A> :
+                <A
+                 href={`/${props.tableId}/${info.row.original.id}`}
+                  replace={true}
+                  class="bg:#cccccc:hover r:5|5|5|5 p:5"
+                  // @ts-ignore
+                  title={__APP_VERSION__}
+                >
+                  <Icon icon="tabler:edit"/>
+                </A> :
                 <button onClick={() => {
                     if (rowId() === null) {
                         setRowId(info.row.original.id);
