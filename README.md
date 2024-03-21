@@ -41,11 +41,6 @@ npm install
 ### Rules:
 - User doesn't need to open multiple tabs. he can do whatever he wants in one tab.
 
-### 3rdParty Libraries
-
-- devExpress: https://js.devexpress.com/Documentation/Guide/UI_Components/Common/Advanced/3rd-Party_Frameworks_Integration_API/#Create_and_Configure_a_Widget
-
-
 ### Eval Libs
 https://www.npmjs.com/package/@nx-js/compiler-util
 evalute in a window:
@@ -61,4 +56,8 @@ https://github.com/ttessarolo/safe-evaluate-expression
 ### How to import HTML in Page Builder:
 - Wrap For Loop With <Repeater> component.
 - replace expression with formula string.
-Q
+
+
+Find Circular dependencies:
+madge --circular  --extensions ts,tsx src
+
