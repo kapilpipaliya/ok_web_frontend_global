@@ -26,39 +26,37 @@ import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
 // const FileUploader = () => {
-  
 
-  
 //   return (
-    // <div
-    //   onDrop={handleDrop}
-    //   onDragOver={handleDragOver}
-    //   onClick={handleFullBoxClick}
-    //   style={{
-    //     border: "2px dashed #ccc",
-    //     padding: "20px",
-    //     "border-radius": "10px",
-    //     "text-align": "center",
-    //     cursor: "pointer",
-    //     "background-size": "cover",
-    //     "background-position": "center",
-    //   }}
-    // >
+// <div
+//   onDrop={handleDrop}
+//   onDragOver={handleDragOver}
+//   onClick={handleFullBoxClick}
+//   style={{
+//     border: "2px dashed #ccc",
+//     padding: "20px",
+//     "border-radius": "10px",
+//     "text-align": "center",
+//     cursor: "pointer",
+//     "background-size": "cover",
+//     "background-position": "center",
+//   }}
+// >
 //       <input
 //         type="file"
 //         id="fileInput"
 //         style={{ display: "none" }}
 //         onChange={handleInputChange}
 //       />
-      // {fullBoxImage() ? (
-      //   <img
-      //     src={fullBoxImage()}
-      //     alt="Selected Image"
-      //     style={{ "max-width": "100%", "max-height": "100%", "border-radius": "10px" }}
-      //   />
-      // ) : (
-      //   <label>Click to Pick Image</label>
-      // )}
+// {fullBoxImage() ? (
+//   <img
+//     src={fullBoxImage()}
+//     alt="Selected Image"
+//     style={{ "max-width": "100%", "max-height": "100%", "border-radius": "10px" }}
+//   />
+// ) : (
+//   <label>Click to Pick Image</label>
+// )}
 //       {file() && (
 //         <div>
 //           <p>File: {file().name}</p>
@@ -91,15 +89,6 @@ export function GenericInputField(
         fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}
       >
         <Switch>
-          <Match when={props.component === "Autocomplete"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
-          <Match when={props.component === "Bullet"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
-          <Match when={props.component === "Calendar"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
           <Match when={props.component === "CheckBox"}>
             <Checkbox
               {...props.meta?.P.props}
@@ -113,35 +102,28 @@ export function GenericInputField(
               setChecked={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
-          <Match when={props.component === "CircularGauge"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
           <Match when={props.component === "ColorBox"}>
             <ColorBox {...props.meta?.P.props} />
-          </Match>
-          <Match when={props.component === "DateBox"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "DropDownBox"}>Dropdown</Match>
           <Match when={props.component === "FileUploader"}>
             <FileUploader
               {...props.meta?.P.props}
-              image={
-                props.meta?.P.props.image
-              }
+              image={props.meta?.P.props.image}
             />
-          </Match>
-          <Match when={props.component === "FilterBuilder"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "HtmlEditor"}>
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
-          <Match when={props.component === "LinearGauge"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
           <Match when={props.component === "NumberBox"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
+            <TextField
+              onChange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
+              {...props.meta?.P.props}
+              isNumber
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
           </Match>
           <Match when={props.component === "Radio"}>
             <Radio
@@ -171,17 +153,16 @@ export function GenericInputField(
               <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
-          <Match when={props.component === "RangeSelector"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
-          <Match when={props.component === "RangeSlider"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
-          <Match when={props.component === "Slider"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
-          </Match>
           <Match when={props.component === "Switch"}>
-            {props.data?.P[props.meta.P[IdAttr]]}
+            <Checkbox
+              {...props.meta?.P.props}
+              switch
+              onchange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.checked);
+              }}
+              align="left"
+              children={props.meta?.P.props?.label ?? "switch"}
+            />
           </Match>
           <Match when={props.component === "TextArea"}>
             <TextField
@@ -200,7 +181,6 @@ export function GenericInputField(
               onChange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
-              {...props.data?.P.props}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>

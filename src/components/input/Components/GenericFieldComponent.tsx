@@ -323,13 +323,6 @@ export function GenericField(
             {...props.meta.P.props}
           />
         </Match>
-        <Match when={component() === "FieldSetLabelLeft"}>
-          <div class="dx-fieldset">
-            {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
-            <PageItemRender metaVertex={props.meta} />
-            {/*<FormGroup attributes={groupByTabsAndGroup["main"][group]} vertex={record.vertex} setValue={record.setValue} />*/}
-          </div>
-        </Match>
         <Match when={component() === "Box" && props.meta.P.props?.text}>
           <Dynamic
             component={props.meta.P.props?.as || "div"}

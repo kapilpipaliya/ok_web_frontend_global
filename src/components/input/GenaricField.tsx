@@ -89,9 +89,9 @@ export const PageItemRender = (props: {
           const compProps = Object.assign(componentProps, rowProps);
           if (selectedId() === item.id) {
             if (compProps.class) {
-              compProps.class += ` b:red|1px|dashed`;
+              compProps.class += ` b:rgb(249,0,8)|1px|dashed`;
             } else {
-              compProps.class = `b:red|1px|dashed`;
+              compProps.class = `b:rgb(255,55,59)|1px|dashed`;
             }
           }
 
