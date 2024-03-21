@@ -1,4 +1,4 @@
-import { Component, JSX, splitProps, mergeProps } from "solid-js";
+import { Component, JSX, splitProps, mergeProps, Switch, Match } from "solid-js";
 import { Show } from "solid-js/web";
 import { runEvent } from "./tools";
 
@@ -25,17 +25,20 @@ export type TextFieldType =
 export type SingleLineTextFieldProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
   "aria-orientation"?: "horizontal" | "vertical";
   multiline?: false;
+  isNumber?: false;
   label: JSX.Element;
   type?: TextFieldType;
   setValue?: (value: string) => void;
 };
 
-export type MultiLineTextFieldProps = JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  "aria-orientation"?: "horizontal" | "vertical";
-  multiline: true;
-  label: JSX.Element;
-  setValue?: (value: string) => void;
-};
+export type MultiLineTextFieldProps =
+  JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
+    "aria-orientation"?: "horizontal" | "vertical";
+    multiline: true;
+    isNumber: false;
+    label: JSX.Element;
+    setValue?: (value: string) => void;
+  };
 
 export type TextFieldProps = SingleLineTextFieldProps | MultiLineTextFieldProps;
 
@@ -45,9 +48,11 @@ export const TextField: Component<TextFieldProps> = (props) => {
     "classList",
     "label",
     "multiline",
+    "isNumber",
     "onInput",
     "children",
-    "setValue"
+    "setValue",
+    'class'
   ]);
 
   return (
@@ -56,28 +61,42 @@ export const TextField: Component<TextFieldProps> = (props) => {
       aria-orientation={props["aria-orientation"]}
     >
       {/* <span class="sb-textfield-label">{local.label}</span> */}
-      <Show
-        when={local.multiline}
-        fallback={
+      <Switch>
+        <Match when={local.isNumber}>
           <input
             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
+            type="number"
+            class={`${local.class ?? ""}  global-style`}
             style={{ width: "100%" }}
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
             }}
           />
-        }
-      >
-        <textarea
-          {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
-          style={{ resize: "both", width: "100%" }}
-          onInput={(ev) => {
-            runEvent(ev, local.onInput);
-            local.setValue?.(ev.currentTarget.value);
-          }}
-        />
-      </Show>
+        </Match>
+        <Match when={local.multiline}>
+          <textarea
+            {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
+            style={{ resize: "both", width: "100%" }}
+            class={`${local.class ?? ""}  global-style`}
+            onInput={(ev) => {
+              runEvent(ev, local.onInput);
+              local.setValue?.(ev.currentTarget.value);
+            }}
+          />
+        </Match>
+        <Match when={!local.multiline}>
+          <input
+            {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
+            style={{ width: "100%" }}
+            class={`${local.class ?? ""} global-style`}
+            onInput={(ev) => {
+              runEvent(ev, local.onInput);
+              local.setValue?.(ev.currentTarget.value);
+            }}
+          />
+        </Match>
+      </Switch>
       {local.children}
     </label>
   );
