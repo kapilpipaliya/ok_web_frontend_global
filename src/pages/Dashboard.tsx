@@ -140,7 +140,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
   };
 
   return (
-    <div style="position: relative; display: inline-block; z-index:100px">
+    <div style="position: relative; display: inline-block; z-index:1">
       <button
         onClick={handleToggle}
         style="background: none; border: none; cursor: pointer;"
@@ -156,7 +156,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
           isOpen() ? 1 : 0
         }; pointer-events: ${
           isOpen() ? "auto" : "none"
-        }; transition: opacity 0.3s ease-in-out; width: 150px;`} // Adjust width here
+        }; transition: opacity 0.2s ease-in-out; width: 150px;`} // Adjust width here
       >
         <ul style="list-style-type: none; padding: 0; margin: 0;">
           {props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in

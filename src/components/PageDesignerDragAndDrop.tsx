@@ -74,7 +74,16 @@ import {
   ModalHeader,
   TextField,
 } from "./solid-blocks/blocks";
-
+import { iconMap } from "./Utils";
+function getIconByCategory(category: any, size?: any) {
+  return (
+    <Icon
+      icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
+      width={size || 20}
+      height={size || 20}
+    />
+  ); // Returns null if category is not found
+}
 const addPropsToLayoutRow = (
   txnId: number,
   layoutRowId: Id,
@@ -518,7 +527,6 @@ export const PageDesignerDragAndDrop = () => {
     const [searchQuery, setSearchQuery] = createSignal("");
     const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
 
-  
     const titleStyle: JSX.CSSProperties = {
       "font-size": "15px",
       "font-weight": "bold",
@@ -536,49 +544,9 @@ export const PageDesignerDragAndDrop = () => {
       "grid-template-columns": "repeat(2, 1fr)",
       gap: "10px",
     };
-    const iconMap = {
-      TextInput: "streamline:input-box",
-      Icon: "mynaui:letter-i-hexagon",
-      Image: "mage:image",
-      A: "ph:link-bold",
-      Text: "ci:text",
-      Repeater: "formkit:repeater",
-      Page: "fluent:document-one-page-20-regular",
-      Box: "radix-icons:box",
-      ProgressBar: "carbon:progress-bar",
-      LoadIndicator: "ep:loading",
-      SelectBox: "radix-icons:dropdown-menu",
-      TagBox: "radix-icons:dropdown-menu",
-      Tabs: "material-symbols-light:tabs-outline",
-      Button: "formkit:button",
-      Breadcrumb: "tdesign:component-breadcrumb",
-      Autocomplete: "fluent-mdl2:completed",
-      CheckBox: "tabler:checkbox",
-      ColorBox: "ic:outline-color-lens",
-      DateBox: "circum:calendar-date",
-      FileUploader: "arcticons:custom-uploader",
-      Form: "lets-icons:form-duotone",
-      NumberBox: "fluent-emoji-high-contrast:input-numbers",
-      RadioGroup: "ri:list-radio",
-      Radio: "fluent:radio-button-16-filled",
-      Switch: "iconoir:switch-off",
-      HtmlEditor: "mdi:code-block-html",
-      Table: "tabler:table",
-      TextArea: "bi:textarea",
-      TextBox: "ph:textbox",
-      ScrollView: "mdi:scroll",
-    };
 
     // Function to get icon by category
-    function getIconByCategory(category: any) {
-      return (
-        <Icon
-          icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
-          width="20"
-          height="20"
-        />
-      ); // Returns null if category is not found
-    }
+
     const updateFilteredData = () => {
       if (!searchQuery()) {
         setFilteredData(data);
@@ -615,8 +583,7 @@ export const PageDesignerDragAndDrop = () => {
         setFilteredData(filteredData);
       }
     };
-    function ListItemComponent(props: { child: Vertex}) {
-
+    function ListItemComponent(props: { child: Vertex }) {
       const [isHovered, setIsHovered] = createSignal(false);
 
       const baseStyle = {
@@ -684,11 +651,7 @@ export const PageDesignerDragAndDrop = () => {
                 <div style={titleStyle}>{item.name}</div>
                 <ul style={{ ...listBoxStyle, ...listStyle }}>
                   <For each={item.children}>
-                    {(child) => (
-                      <ListItemComponent
-                        child={child}
-                      />
-                    )}
+                    {(child) => <ListItemComponent child={child} />}
                   </For>
                 </ul>
               </div>
@@ -863,7 +826,7 @@ export const PageDesignerDragAndDrop = () => {
     return findVertexByLabelAndUniqueId("DataType", "name", "String");
   };
 
-/*  function getLayoutTreeData() {
+  /*  function getLayoutTreeData() {
     return getTreeData(
       getLayoutTreeJson(),
       pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : [],
@@ -1303,9 +1266,7 @@ export const PageDesignerDragAndDrop = () => {
             graph.vertexes[props.vertex!.id!]
           );
           setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
-          const componentVertex = getComponentFromLayoutRow(
-            props.vertex!.id!
-          );
+          const componentVertex = getComponentFromLayoutRow(props.vertex!.id!);
           setSelectedComponent({ vertexId: componentVertex?.id || -1 });
 
           if (
@@ -1319,13 +1280,19 @@ export const PageDesignerDragAndDrop = () => {
             const layoutPropRows = getRowProps(graph.vertexes[selectedId()]);
             const layoutPropRow = Object.assign(componentProps, layoutPropRows);
             // set existing layout props
-            setGraph("vertexes", propertiesVertexId, "P", reconcile(layoutPropRow));
+            setGraph(
+              "vertexes",
+              propertiesVertexId,
+              "P",
+              reconcile(layoutPropRow)
+            );
           } else {
             setGraph("vertexes", propertiesVertexId, "P", reconcile({}));
           }
         });
-      }
-      const getComponent = () => getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
+      };
+      const getComponent = () =>
+        getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
 
       return (
         <div>
@@ -1341,13 +1308,15 @@ export const PageDesignerDragAndDrop = () => {
             onDragEnter={handleDragEnter}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            class={
+            class={`${
               props.vertex.id === selectedId()
                 ? "bg:lightblue"
                 : props.vertex.id === hoverId()
-                ? "bg:lightgray"
+                ? "#F2EDED"
                 : ""
-            }
+            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${
+              children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+            }`}
             classList={{
               "b:1px":
                 isActiveItem() && indicatorPosition().position === "center",
@@ -1357,50 +1326,84 @@ export const PageDesignerDragAndDrop = () => {
               e.stopPropagation();
               setHoverId(props.vertex.id);
             }}
+            onmouseleave={(e) => {
+              e.stopPropagation();
+              setHoverId(-1);
+            }}
             style={{
               "font-weight": children().length ? "bold" : "normal",
-              "margin-left": !children().length ? "10px" : "0px",
+              "margin-left": !children().length ? "5px" : "0px",
+              "margin-bottom": children().length ? "4px" : "3px",
+              "box-shadow": children().length
+                ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
+                : "0px",
+              "border-left": children().length ? "" : "1px dashed black",
               "align-items": "center",
+              "justify-content": "space-between",
+              display: "flex",
             }}
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleHidden(props.vertex.id);
-              }}
-            >
-              <Show
-                when={!hiddenNodes().includes(props.vertex.id)}
-                fallback={
+            <div style="display: flex;align-items: center;">
+              &nbsp;
+              <Show when={children().length}>
+                <button
+                  class="cursor: pointer;"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log(props.vertex);
+
+                    toggleExpand(props.vertex.id);
+                  }}
+                >
                   <Icon
-                    icon="mdi:eye-off-outline"
-                    class="transition: 0.5s ease-in-out;"
+                    icon="mingcute:down-fill"
+                    class={"transform 2s ease-in-out"}
+                    style={{
+                      transition: "transform 0.2s linear",
+                      "margin-top": "7px",
+                      transform: `${
+                        collapsedKeys().includes(props.vertex.id)
+                          ? "rotate(0deg)"
+                          : "rotate(180deg)"
+                      }`,
+                    }}
                   />
-                }
-              >
-                <Icon
-                  icon="mdi:eye-outline"
-                  class="transition: 0.5s ease-in-out;"
-                />
+                </button>
               </Show>
-            </button>
-            <Show when={children().length}>
+              &nbsp;
+              {getIconByCategory(getComponent(), 17)}&nbsp;&nbsp;
+              {nameExpr(child()) || child().P.name}
+            </div>
+            <div>
               <button
+                class="opacity:.3 opacity:1:hover"
                 onClick={(e) => {
                   e.stopPropagation();
-                  toggleExpand(props.vertex.id);
+                  toggleHidden(props.vertex.id);
                 }}
               >
                 <Show
-                  when={!collapsedKeys().includes(props.vertex.id)}
-                  fallback={<Icon icon="mdi:plus" />}
+                  when={!hiddenNodes().includes(props.vertex.id)}
+                  fallback={
+                    <Icon
+                      height={18}
+                      width={18}
+                      icon="mdi:eye-off-outline"
+                      class="transition: 0.5s ease-in-out;"
+                    />
+                  }
                 >
-                  <Icon icon="mdi:minus" class={"transform 1s ease-in-out"} />
+                  <Icon
+                    height={18}
+                    width={18}
+                    icon="mdi:eye-outline"
+                    class="transition: 0.5s ease-in-out;"
+                  />
                 </Show>
               </button>
-            </Show>
-            {nameExpr(child()) || child().P.name}
-          </div>{getComponent()}
+              &nbsp;
+            </div>
+          </div>
           <Show
             when={isActiveItem() && indicatorPosition().position === "after"}
           >
@@ -1412,7 +1415,7 @@ export const PageDesignerDragAndDrop = () => {
               children().length > 0
             }
           >
-            <ul class="p:10">
+            <ul class="pl:8 pt:3 pb:5">
               <For each={children()}>
                 {(vertex) => <TreeView vertex={vertex} />}
               </For>
@@ -1763,7 +1766,7 @@ export const PageDesignerDragAndDrop = () => {
             data={graph.vertexes[selectedId()!]}
             meta={collMetaVertex.vertexes![0]!}
             disabled={false}
-            title={'Collection:'}
+            title={"Collection:"}
             component={"SelectBox"}
             txnId={pageConfig[0].record.txnId}
             // passed setValue when we have a string value in select field
@@ -1775,7 +1778,7 @@ export const PageDesignerDragAndDrop = () => {
             data={graph.vertexes[selectedId()!]}
             meta={collMetaVertex.vertexes![1]!}
             disabled={false}
-            title={'Data:'}
+            title={"Data:"}
             component={"SelectBox"}
             txnId={pageConfig[0].record.txnId}
             // passed setValue when we have a string value in select field
@@ -1994,9 +1997,7 @@ export const PageDesignerDragAndDrop = () => {
     />
   );
 
-  const Column = (props: {
-    type: string;
-  }) => {
+  const Column = (props: { type: string }) => {
     return (
       <>
         <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5">
@@ -2127,9 +2128,7 @@ export const PageDesignerDragAndDrop = () => {
 
   return (
     <div class="flex">
-      <div
-        class="flex-col"
-      >
+      <div class="flex-col">
         <For each={leftColumns()}>
           {(column) => <Column type={column.id} />}
         </For>
@@ -2142,9 +2141,7 @@ export const PageDesignerDragAndDrop = () => {
           <PageView number={count()} vertex={pageConfig[0].record?.vertex} />
         </div>
       </div>
-      <div
-        class="flex-col width:25rem"
-      >
+      <div class="flex-col width:25rem">
         <For each={rightColumns()}>
           {(column) => <Column type={column.id} />}
         </For>
