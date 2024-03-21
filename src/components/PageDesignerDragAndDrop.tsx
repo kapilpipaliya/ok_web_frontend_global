@@ -1158,6 +1158,8 @@ export const PageDesignerDragAndDrop = () => {
         </div>
     }*/
 
+  const propertiesVertexId = getNewGraphId();
+
   const FourLayout1 = () => {
     const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
     const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
@@ -1408,6 +1410,42 @@ export const PageDesignerDragAndDrop = () => {
         // }
       };
 
+      const onLayoutItemClick = (e) => {
+        batch(() => {
+          setSelectedId(-1);
+          setSelectedComponent({ vertexId: -1 });
+          setSelectedColl({ vertexId: -1 });
+
+          setSelectedId(props.vertex.id);
+          setIsPropertiesOpen(true);
+          const collVertex = getChildVertex(
+            ["$0Coll"],
+            graph.vertexes[props.vertex!.id!]
+          );
+          setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
+          const componentVertex = getComponentFromLayoutRow(
+            props.vertex!.id!
+          );
+          setSelectedComponent({ vertexId: componentVertex?.id || -1 });
+
+          if (
+            selectedId() !== -1 &&
+            selectedComponent() &&
+            selectedComponent().vertexId !== -1
+          ) {
+            const componentProps = getCompProps(
+              graph.vertexes[selectedComponent().vertexId]
+            );
+            const layoutPropRows = getRowProps(graph.vertexes[selectedId()]);
+            const layoutPropRow = Object.assign(componentProps, layoutPropRows);
+            // set existing layout props
+            setGraph("vertexes", propertiesVertexId, "P", reconcile(layoutPropRow));
+          } else {
+            setGraph("vertexes", propertiesVertexId, "P", reconcile({}));
+          }
+        });
+      }
+
       return (
         <div>
           <Show
@@ -1433,25 +1471,7 @@ export const PageDesignerDragAndDrop = () => {
               "b:1px":
                 isActiveItem() && indicatorPosition().position === "center",
             }}
-            onClick={(e) => {
-              batch(() => {
-                setSelectedId(-1);
-                setSelectedComponent({ vertexId: -1 });
-                setSelectedColl({ vertexId: -1 });
-
-                setSelectedId(props.vertex.id);
-                setIsPropertiesOpen(true);
-                const collVertex = getChildVertex(
-                  ["$0Coll"],
-                  graph.vertexes[props.vertex!.id!]
-                );
-                setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
-                const componentVertex = getComponentFromLayoutRow(
-                  props.vertex!.id!
-                );
-                setSelectedComponent({ vertexId: componentVertex?.id || -1 });
-              });
-            }}
+            onClick={onLayoutItemClick}
             onMouseOver={(e) => {
               e.stopPropagation();
               setHoverId(props.vertex.id);
@@ -1538,34 +1558,14 @@ export const PageDesignerDragAndDrop = () => {
   const FiveProperties = () => {
     const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
     const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
-    const vertexId = getNewGraphId();
+
     const addNewVertexResult = addNewVertex(
       0,
-      newVertex(vertexId, ["PropsJson"], { sample: true })
+      newVertex(propertiesVertexId, ["PropsJson"], { sample: true })
     );
     if (addNewVertexResult.error) {
       console.warn("error while inserting");
     }
-
-    createEffect(
-      on(selectedComponent, (v) => {
-        if (
-          selectedId() !== -1 &&
-          selectedComponent() &&
-          selectedComponent().vertexId !== -1
-        ) {
-          const componentProps = getCompProps(
-            graph.vertexes[selectedComponent().vertexId]
-          );
-          const layoutPropRows = getRowProps(graph.vertexes[selectedId()]);
-          const layoutPropRow = Object.assign(componentProps, layoutPropRows);
-          // set existing layout props
-          setGraph("vertexes", vertexId, "P", reconcile(layoutPropRow));
-        } else {
-          setGraph("vertexes", vertexId, "P", reconcile({}));
-        }
-      })
-    );
 
     const setPropertyValue = (
       meta: Vertex,
@@ -1943,7 +1943,7 @@ export const PageDesignerDragAndDrop = () => {
           <FormGroupProperties
             txnId={pageConfig[0].record.txnId}
             metaAttributes={selectedComponentProperties().vertexes || []}
-            vertex={graph.vertexes[vertexId]}
+            vertex={graph.vertexes[propertiesVertexId]}
             setValue={setPropertyValue}
             setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) =>
               setValueGlobal(

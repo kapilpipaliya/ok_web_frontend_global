@@ -167,8 +167,6 @@ export const DataGrid = (props: DataGridProps) => {
                  href={`/${props.tableId}/${info.row.original.id}`}
                   replace={true}
                   class="bg:#cccccc:hover r:5|5|5|5 p:5"
-                  // @ts-ignore
-                  title={__APP_VERSION__}
                 >
                   <Icon icon="tabler:edit"/>
                 </A> :

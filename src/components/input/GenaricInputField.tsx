@@ -189,7 +189,7 @@ export function GenericInputField(
               onChange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
-              {...props.data?.P.props}
+              {...props.meta?.P.props}
               multiline
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
