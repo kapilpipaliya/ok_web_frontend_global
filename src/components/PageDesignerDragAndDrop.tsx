@@ -62,7 +62,7 @@ import { FormGroupProperties } from "../pages/FormsAdmin";
 
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
-import { hoverId, selectedId, setHoverId, setSelectedId } from "./pageStore";
+import {hiddenNodes, hoverId, selectedId, setHiddenNodes, setHoverId, setSelectedId} from "./pageStore";
 import jsep from "jsep";
 import { setSelectionValue } from "./input/SelectionUtils";
 import { evaluate } from "../lib/jsep";
@@ -1005,7 +1005,7 @@ export const PageDesignerDragAndDrop = () => {
 
   const FourLayout1 = () => {
     const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
-    const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
+
 
     const [indicatorPosition, setIndicatorPosition] = createSignal({
       activeItem: null as null | Id,
