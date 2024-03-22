@@ -62,7 +62,14 @@ import { FormGroupProperties } from "../pages/FormsAdmin";
 
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
-import {hiddenNodes, hoverId, selectedId, setHiddenNodes, setHoverId, setSelectedId} from "./pageStore";
+import {
+  hiddenNodes,
+  hoverId,
+  selectedId,
+  setHiddenNodes,
+  setHoverId,
+  setSelectedId,
+} from "./pageStore";
 import jsep from "jsep";
 import { setSelectionValue } from "./input/SelectionUtils";
 import { evaluate } from "../lib/jsep";
@@ -274,7 +281,16 @@ export const PageDesignerDragAndDrop = () => {
   const rerender = () => {
     setCount((prev) => prev + 1);
   };
-
+const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
+const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
+const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
+const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
+const [isFormExpanded, toggleFormExpansion] = useExpansion();
+function useExpansion(defaultValue = true) {
+  const [expanded, setExpanded] = createSignal(defaultValue);
+  const toggleExpansion = () => setExpanded(!expanded());
+  return [expanded, toggleExpansion];
+}
   /* let componentsTreeViewInstance: TreeView;
     let collectionFieldsTreeViewInstance: TreeView;
     let layoutTreeViewInstance: TreeView;
@@ -1006,7 +1022,6 @@ export const PageDesignerDragAndDrop = () => {
   const FourLayout1 = () => {
     const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
-
     const [indicatorPosition, setIndicatorPosition] = createSignal({
       activeItem: null as null | Id,
       position: null as "before" | "after" | "center" | null,
@@ -1375,7 +1390,7 @@ export const PageDesignerDragAndDrop = () => {
             </div>
             <div>
               <button
-                class="opacity:.3 opacity:1:hover pt:4px"
+                class="opacity:.5 opacity:1:hover pt:4px"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleHidden(props.vertex.id);
@@ -1982,8 +1997,7 @@ export const PageDesignerDragAndDrop = () => {
 
   const oneComponents0 = <OneComponents0 />;
   // const oneComponents = <OneComponents/>;
-  const twoCollections = <div></div>; //<TwoCollections/>;
-  const fourLayout = <div />;
+  const twoCollections = <div>No Collection Found</div>; //<TwoCollections/>;
   const fourLayout1 = <FourLayout1 />;
   const fiveProperties = <FiveProperties />;
   const abstractSingleForm = (
@@ -1999,135 +2013,364 @@ export const PageDesignerDragAndDrop = () => {
   const Column = (props: { type: string }) => {
     return (
       <>
-        <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5">
+        <div>
           <Switch>
             <Match when={props.type === "components"}>
-              <div class="mb:10" style="font-weight: bold">
-                Components
-              </div>
-              {oneComponents0}
+              {!isComponentsExpanded() && (
+                <div
+                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                  style="transition: opacity 0.3s ease-in-out;"
+                  onclick={toggleComponentsExpansion}
+                  title="Components"
+                >
+                  <Icon icon={"mynaui:components"} height={25} width={25} />
+                </div>
+              )}
+              {isComponentsExpanded() && (
+                <div
+                  class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5"
+                  title="Close Components"
+                >
+                  <div
+                    class="mb:10px"
+                    style={{
+                      display: "flex",
+                      "justify-content": "space-between",
+                      "align-items": "center",
+                    }}
+                  >
+                    <div style="font-weight: bold">Components</div>
+                    <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px">
+                      {isComponentsExpanded() && (
+                        <div
+                          onClick={toggleComponentsExpansion}
+                          class="cursor:pointer"
+                        >
+                          <Icon
+                            icon={"mingcute:left-line"}
+                            height={25}
+                            width={25}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {oneComponents0}
+                </div>
+              )}
               {/*{oneComponents}*/}
             </Match>
             <Match when={props.type === "collection"}>
-              <div class="mb:10" style="font-weight: bold">
-                Collection Fields
-              </div>
-              {twoCollections}
+              {!isCollectionExpanded() && (
+                <div
+                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                  style="transition: opacity 0.3s ease-in-out;"
+                  onclick={toggleCollectionExpansion}
+                  title="Collection"
+                >
+                  <Icon
+                    icon={"fluent:collections-24-regular"}
+                    height={25}
+                    width={25}
+                  />
+                </div>
+              )}
+              {isCollectionExpanded() && (
+                <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:21.5rem">
+                  <div
+                    class="mb:10px"
+                    style={{
+                      display: "flex",
+                      "justify-content": "space-between",
+                      "align-items": "center",
+                    }}
+                  >
+                    <div style="font-weight: bold">Collection Fields</div>
+                    <div
+                      class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                      title="Close Collection"
+                    >
+                      {isCollectionExpanded() && (
+                        <div
+                          onClick={toggleCollectionExpansion}
+                          class="cursor:pointer"
+                        >
+                          <Icon
+                            icon={"mingcute:left-line"}
+                            height={25}
+                            width={25}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  {twoCollections}
+                </div>
+              )}
             </Match>
             <Match when={props.type === "layout"}>
-              <div
-                class="mb:12"
-                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
-              >
-                <div
-                  style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                  onClick={onClickLayout}
-                >
-                  Layout
-                </div>
-                <div style="cursor: pointer;" onClick={onClickLayout}>
-                  <Icon
-                    icon={"mdi:chevron-up"}
-                    style={{
-                      "font-size": "24px",
-                      "border-radius": "50%",
-                      "margin-left": "5px",
-                      transition: "transform 0.2s linear",
-                      transform: `${
-                        isLayoutOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                      }`,
-                    }}
-                    class="flex-1"
-                  />
-                </div>
-              </div>
+              <div style={{ display: "flex", "justify-content": "end" }}>
+                {!isLayoutExpanded() && (
+                  <div
+                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                    style="transition: opacity 0.3s ease-in-out;"
+                    onclick={toggleLayoutExpansion}
+                    title="Layout"
+                  >
+                    <Icon icon={"tabler:layout"} height={25} width={25} />
+                  </div>
+                )}
 
-              {isLayoutOpen() && fourLayout1}
+                {isLayoutExpanded() && (
+                  <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
+                    <div
+                      class={`mb:${isLayoutOpen() ? "10px" : "0px"}`}
+                      style={{
+                        display: "flex",
+                        "justify-content": "space-between",
+                        "align-items": "center",
+                      }}
+                    >
+                      {isLayoutExpanded() && (
+                        <div
+                          class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                          title="Close Layout"
+                        >
+                          {isLayoutExpanded() && (
+                            <div
+                              onClick={toggleLayoutExpansion}
+                              class="cursor:pointer"
+                            >
+                              <Icon
+                                icon={"mingcute:right-line"}
+                                height={25}
+                                width={25}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div
+                        class="mb:2px ml:5px"
+                        style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                        onClick={onClickLayout}
+                      >
+                        Layout
+                      </div>
+                      <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                        <div style="cursor: pointer;" onClick={onClickLayout}>
+                          <Icon
+                            icon={"mdi:chevron-up"}
+                            style={{
+                              "font-size": "24px",
+                              "border-radius": "50%",
+                              "margin-left": "5px",
+                              transition: "transform 0.2s linear",
+                              transform: `${
+                                isLayoutOpen()
+                                  ? "rotate(0deg)"
+                                  : "rotate(180deg)"
+                              }`,
+                            }}
+                            class="flex-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {isLayoutOpen() && fourLayout1}
+                  </div>
+                )}
+              </div>
             </Match>
             <Match when={props.type === "properties"}>
-              <div
-                class="mb:12"
-                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
-              >
-                <div
-                  style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                  onClick={onClickProperties}
-                >
-                  Properties
-                </div>
-                <Show when={selectedId() !== -1}>
-                  <GenericField
-                    meta={
-                      {
-                        P: {
-                          component: "Icon",
-                          props: {
-                            style: { color: "red" },
-                            onClick: () => deleteLayout(),
-                            icon: "fluent:delete-12-regular",
-                          },
-                        },
-                      } as any
-                    }
-                  />
-                  <div style="cursor: pointer;" onClick={onClickProperties}>
+              <div style={{ display: "flex", "justify-content": "end" }}>
+                {!isPropertiesExpanded() && (
+                  <div
+                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                    style="transition: opacity 0.3s ease-in-out;"
+                    onclick={togglePropertiesExpansion}
+                    title="Properties"
+                  >
                     <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
+                      icon={"mingcute:settings-6-line"}
+                      height={25}
+                      width={25}
                     />
                   </div>
-                </Show>
+                )}
+
+                {isPropertiesExpanded() && (
+                  <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
+                    <div
+                      class={`mb:${isPropertiesOpen() ? "10px" : "0px"}`}
+                      style={{
+                        display: "flex",
+                        "justify-content": "space-between",
+                        "align-items": "center",
+                      }}
+                    >
+                      {isPropertiesExpanded() && (
+                        <div
+                          class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                          title="Close Properties"
+                        >
+                          {isPropertiesExpanded() && (
+                            <div
+                              onClick={togglePropertiesExpansion}
+                              class="cursor:pointer"
+                            >
+                              <Icon
+                                icon={"mingcute:right-line"}
+                                height={25}
+                                width={25}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div
+                        class="mb:2px ml:5px"
+                        style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                        onClick={onClickProperties}
+                      >
+                        Properties
+                      </div>
+                      <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                        <div
+                          class="mb:12"
+                          style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
+                        >
+                          <Show when={selectedId() !== -1}>
+                            <GenericField
+                              meta={
+                                {
+                                  P: {
+                                    component: "Icon",
+                                    props: {
+                                      style: { color: "red" },
+                                      onClick: () => deleteLayout(),
+                                      icon: "fluent:delete-12-regular",
+                                    },
+                                  },
+                                } as any
+                              }
+                            />
+                          </Show>
+                          <div
+                            style="cursor: pointer;"
+                            onClick={onClickProperties}
+                          >
+                            <Icon
+                              icon={"mdi:chevron-up"}
+                              style={{
+                                "font-size": "24px",
+                                "border-radius": "50%",
+                                "margin-left": "5px",
+                                transition: "transform 0.2s linear",
+                                transform: `${
+                                  isPropertiesOpen()
+                                    ? "rotate(0deg)"
+                                    : "rotate(180deg)"
+                                }`,
+                              }}
+                              class="flex-1"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {isPropertiesOpen() && fiveProperties}
+                  </div>
+                )}
               </div>
-              {isPropertiesOpen() && fiveProperties}
             </Match>
             <Match when={props.type === "form"}>
-              <div
-                class="mb:12"
-                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
-              >
-                <div
-                  style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                  onClick={onClickForm}
-                >
-                  Form
-                </div>
-                <div style="cursor: pointer;" onClick={onClickForm}>
-                  <Icon
-                    icon={"mdi:chevron-up"}
-                    style={{
-                      "font-size": "24px",
-                      "border-radius": "50%",
-                      "margin-left": "5px",
-                      transition: "transform 0.2s linear",
-                      transform: `${
-                        isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                      }`,
-                    }}
-                    class="flex-1"
-                  />
-                </div>
-              </div>
+              <div style={{ display: "flex", "justify-content": "end" }}>
+                {!isFormExpanded() && (
+                  <div
+                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                    style="transition: opacity 0.3s ease-in-out;"
+                    onclick={toggleFormExpansion}
+                    title="Form"
+                  >
+                    <Icon
+                      icon={"fluent:form-multiple-24-regular"}
+                      height={25}
+                      width={25}
+                    />
+                  </div>
+                )}
 
-              {isFormOpen() && abstractSingleForm}
+                {isFormExpanded() && (
+                  <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
+                    <div
+                      class={`mb:${isFormOpen() ? "10px" : "0px"}`}
+                      style={{
+                        display: "flex",
+                        "justify-content": "space-between",
+                        "align-items": "center",
+                      }}
+                    >
+                      {isFormExpanded() && (
+                        <div
+                          class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                          title="Close Form"
+                        >
+                          {isFormExpanded() && (
+                            <div
+                              onClick={toggleFormExpansion}
+                              class="cursor:pointer"
+                            >
+                              <Icon
+                                icon={"mingcute:right-line"}
+                                height={25}
+                                width={25}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <div
+                        class="mb:2px ml:5px"
+                        style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                        onClick={onClickForm}
+                      >
+                        Form
+                      </div>
+                      <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                        <div style="cursor: pointer;" onClick={onClickForm}>
+                          <Icon
+                            icon={"mdi:chevron-up"}
+                            style={{
+                              "font-size": "24px",
+                              "border-radius": "50%",
+                              "margin-left": "5px",
+                              transition: "transform 0.2s linear",
+                              transform: `${
+                                isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                              }`,
+                            }}
+                            class="flex-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    {isFormOpen() && abstractSingleForm}
+                  </div>
+                )}
+              </div>
             </Match>
           </Switch>
         </div>
       </>
     );
   };
-
+  
   return (
     <div class="flex">
-      <div class="flex-col">
+      <div
+        class="flex-col"
+      >
         <For each={leftColumns()}>
           {(column) => <Column type={column.id} />}
         </For>
@@ -2140,7 +2383,9 @@ export const PageDesignerDragAndDrop = () => {
           <PageView number={count()} vertex={pageConfig[0].record?.vertex} />
         </div>
       </div>
-      <div class="flex-col width:25rem">
+      <div
+        class={`flex-col max-width:"25rem"`}
+      >
         <For each={rightColumns()}>
           {(column) => <Column type={column.id} />}
         </For>

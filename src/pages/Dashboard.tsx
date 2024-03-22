@@ -116,7 +116,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
             </Show>
 
             <AlertDisplay />
-            <main class="p:20 bg:white">
+            <main class="p:10 bg:white">
               <Show when={graph.initialSynced}>{props.children}</Show>
             </main>
           </PageContext.Provider>

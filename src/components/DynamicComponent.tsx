@@ -4,7 +4,7 @@ import { SelectInputField } from "./input/SelectInputField";
 import { TableInputField } from "./input/TableInputField";
 import { GenericInputField } from "./input/GenaricInputField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
-import { Progress } from "./solid-blocks/blocks";
+import { hiddenNodes } from "./pageStore";
 
 export const genericInputComponents = [
   "Autocomplete",
@@ -13,6 +13,10 @@ export const genericInputComponents = [
   "CheckBox",
   // "CircularGauge",
   "ColorBox",
+  "FormSubmit",
+  "FormCancel",
+  "Form",
+  "TableColumn",
   // "DateBox",
   // "DropDownBox",
   "FileUploader",
@@ -100,7 +104,7 @@ export const DynamicComponent = (props: {
   // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
-  title?: String,
+  title?: String;
   data?: Vertex;
   setValue(attribute: Vertex, vertex: Vertex, data: any): void;
   disabled?: boolean;
@@ -114,28 +118,33 @@ export const DynamicComponent = (props: {
         when={props.component === "SelectBox" || props.component === "TagBox"}
         keyed
       >
-        <SelectInputField
-          data={props.data}
-          meta={props.meta}
-          title={props.title}
-          // passed setValue when we have a string value in select field
-          setValue={props.setValue}
-          disabled={props.disabled!}
-          component={props.component}
-          txnId={props.txnId}
-          isRealTime={props.isRealTime}
-        />
-      </Match>
-      <Match when={props.component === "Table"}>
-        <Show when={!props.disabled} fallback={<>...</>}>
-          <TableInputField
-            meta={props.meta}
+        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+          <SelectInputField
             data={props.data}
-            disabled={props.disabled!}
-            txnId={props.txnId}
+            meta={props.meta}
+            title={props.title}
+            // passed setValue when we have a string value in select field
             setValue={props.setValue}
+            disabled={props.disabled!}
+            component={props.component}
+            txnId={props.txnId}
             isRealTime={props.isRealTime}
           />
+        </Show>
+      </Match>
+      <Match when={props.component === "Table"}>
+        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+          <></>
+          {/* <Show when={!props.disabled} fallback={<>...</>}>
+            <TableInputField
+              meta={props.meta}
+              data={props.data}
+              disabled={props.disabled!}
+              txnId={props.txnId}
+              setValue={props.setValue}
+              isRealTime={props.isRealTime}
+            />
+          </Show> */}
         </Show>
       </Match>
       <Match
@@ -144,27 +153,31 @@ export const DynamicComponent = (props: {
         }
         keyed
       >
-        <GenericInputField
-          data={props.data}
-          meta={props.meta}
-          txnId={props.txnId!}
-          component={props.component}
-          setValue={props.setValue}
-          disabled={props.disabled!}
-        />
+        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+          <GenericInputField
+            data={props.data}
+            meta={props.meta}
+            txnId={props.txnId!}
+            component={props.component}
+            setValue={props.setValue}
+            disabled={props.disabled!}
+          />
+        </Show>
       </Match>
       <Match
         when={genericComponents2.includes(props.component) && props.component}
         keyed
       >
-        <GenericField
-          data={props.data}
-          meta={props.meta}
-          txnId={props.txnId}
-          component={props.component}
-          setValue={props.setValue}
-          disabled={props.disabled!}
-        />
+        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+          <GenericField
+            data={props.data}
+            meta={props.meta}
+            txnId={props.txnId}
+            component={props.component}
+            setValue={props.setValue}
+            disabled={props.disabled!}
+          />
+        </Show>
       </Match>
     </Switch>
   );

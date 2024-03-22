@@ -268,45 +268,47 @@ export function SelectInputField(
   const outerOwner = getOwner();
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
-      <Show
-        when={!props.disabled}
-        fallback={
-          <For each={selectedValue(props.meta, props.data as Vertex)}>
-            {(vertexId) => (
-              <>
-                {
-                  getSelectionOptions(
-                    [graph.vertexes[vertexId]],
-                    getValueFromVertexOrKey(
-                      props.meta.P.props,
-                      "displayExpr"
-                    ) || `::'P.${IdAttr}'`
-                  ).vertexes
-                }
-              </>
-            )}
-          </For>
-        }
-      >
-        <MultiSelect
-          isObject
-          displayValueParent="P"
-          disable={props.disabled!}
-          displayValueChild="name"
-          options={selectOptions()}
-          avoidHighlightFirstOption
-          placeholder={`Add ${props.title}`}
-          onSelect={(e) => onChangeSelect(e, false)}
-          onRemove={(e) => onChangeSelect(e, true)}
-          customCloseIcon={<Icon icon={"ic:round-close"} />}
-          selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
-          selectedValues={
-            selectedValue(props.meta, props.data as Vertex).map((id) => {
-              return graph.vertexes[id];
-            }) 
+      
+        <Show
+          when={!props.disabled}
+          fallback={
+            <For each={selectedValue(props.meta, props.data as Vertex)}>
+              {(vertexId) => (
+                <>
+                  {
+                    getSelectionOptions(
+                      [graph.vertexes[vertexId]],
+                      getValueFromVertexOrKey(
+                        props.meta.P.props,
+                        "displayExpr"
+                      ) || `::'P.${IdAttr}'`
+                    ).vertexes
+                  }
+                </>
+              )}
+            </For>
           }
-        />
-      </Show>
+        >
+          <MultiSelect
+            isObject
+            displayValueParent="P"
+            disable={props.disabled!}
+            displayValueChild="name"
+            options={selectOptions()}
+            avoidHighlightFirstOption
+            placeholder={`Add ${props.title}`}
+            onSelect={(e) => onChangeSelect(e, false)}
+            onRemove={(e) => onChangeSelect(e, true)}
+            customCloseIcon={<Icon icon={"ic:round-close"} />}
+            selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
+            selectedValues={selectedValue(props.meta, props.data as Vertex).map(
+              (id) => {
+                return graph.vertexes[id];
+              }
+            )}
+          />
+        </Show>
+      
       {/* Todo: think about validations */}
     </div>
   );

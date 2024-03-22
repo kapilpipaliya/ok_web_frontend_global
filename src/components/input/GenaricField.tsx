@@ -22,7 +22,7 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import { hoverId, selectedId } from "../pageStore";
+import { hiddenNodes, hoverId, selectedId } from "../pageStore";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 
 export const GlobalDragData = {} as { from: Vertex };
@@ -124,23 +124,24 @@ export const PageItemRender = (props: {
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
-            <DynamicComponent
-              meta={item}
-              // NOTE: For repeater we cant use parentData
-              // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-              data={
-                props.data ||
-                getSelectionOptions(
-                  [...useContext(RepeaterContext)],
-                  item.P.data
-                ).vertexes ||
-                PageRenderUtils.getDataVertex(item)
-              }
-              title={toTitle(PageRenderUtils.getId(item) || "")}
-              setValue={record?.setValue || (() => {})}
-              disabled={false}
-              component={component()}
-            />
+              <DynamicComponent
+                meta={item}
+                // NOTE: For repeater we cant use parentData
+                // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+                data={
+                  props.data ||
+                  getSelectionOptions(
+                    [...useContext(RepeaterContext)],
+                    item.P.data
+                  ).vertexes ||
+                  PageRenderUtils.getDataVertex(item)
+                }
+                title={toTitle(PageRenderUtils.getId(item) || "")}
+                setValue={record?.setValue || (() => {})}
+                disabled={false}
+                component={component()}
+              />
+              
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.

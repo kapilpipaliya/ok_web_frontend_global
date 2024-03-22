@@ -16,6 +16,7 @@ import { IdAttr } from "../../lib/graph";
 import { getTextColumnValue } from "./Components/Utils";
 import { ComponentProps } from "../ComponentType";
 import {
+  Button,
   Checkbox,
   Progress,
   Radio,
@@ -25,6 +26,7 @@ import {
 import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
+import { setSelectedId } from "../pageStore";
 // const FileUploader = () => {
 
 //   return (
@@ -89,6 +91,32 @@ export function GenericInputField(
         fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}
       >
         <Switch>
+          <Match when={props.component === "Form"}>
+            <PageItemRender metaVertex={props.meta} />
+          </Match>
+          <Match when={props.component === "FormSubmit"}>
+            <Button
+              onClick={() => setSelectedId(props.meta.id)}
+              style={props.meta.P.props}
+              {...props.meta.P.props}
+            >
+              {props.data?.P[props.meta.P[IdAttr]] ??
+                props.meta.P.props.children}
+            </Button>
+          </Match>
+          <Match when={props.component === "FormCancel"}>
+            <Button
+              onClick={() => setSelectedId(props.meta.id)}
+              style={props.meta.P.props}
+              {...props.meta.P.props}
+            >
+              {props.data?.P[props.meta.P[IdAttr]] ??
+                props.meta.P.props.children}
+            </Button>
+          </Match>
+          <Match when={props.component === "TableColumn"}>
+            <PageItemRender metaVertex={props.meta} />
+          </Match>
           <Match when={props.component === "CheckBox"}>
             <Checkbox
               {...props.meta?.P.props}

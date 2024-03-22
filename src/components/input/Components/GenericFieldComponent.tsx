@@ -311,9 +311,6 @@ export function GenericField(
             draggable={true}
           />
         </Match>
-        <Match when={component() === "Form"}>
-          <Form />
-        </Match>
         <Match when={component() === "Tabs"}>
           <Tabs style={props.meta.P.props} {...props.meta.P.props}>
             <PageItemRender metaVertex={props.meta} />
