@@ -281,16 +281,17 @@ export const PageDesignerDragAndDrop = () => {
   const rerender = () => {
     setCount((prev) => prev + 1);
   };
-const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
-const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
-const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
-const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
-const [isFormExpanded, toggleFormExpansion] = useExpansion();
-function useExpansion(defaultValue = true) {
-  const [expanded, setExpanded] = createSignal(defaultValue);
-  const toggleExpansion = () => setExpanded(!expanded());
-  return [expanded, toggleExpansion];
-}
+  function useExpansion(defaultValue = true) {
+    const [expanded, setExpanded] = createSignal(defaultValue);
+    const toggleExpansion = () => setExpanded(!expanded());
+    return [expanded, toggleExpansion];
+  }
+  const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
+  const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
+  const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
+  const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
+  const [isFormExpanded, toggleFormExpansion] = useExpansion();
+
   /* let componentsTreeViewInstance: TreeView;
     let collectionFieldsTreeViewInstance: TreeView;
     let layoutTreeViewInstance: TreeView;

@@ -118,7 +118,7 @@ export const DynamicComponent = (props: {
         when={props.component === "SelectBox" || props.component === "TagBox"}
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+        <Show when={!hiddenNodes().includes(props.meta?.id)}>
           <SelectInputField
             data={props.data}
             meta={props.meta}
@@ -133,7 +133,7 @@ export const DynamicComponent = (props: {
         </Show>
       </Match>
       <Match when={props.component === "Table"}>
-        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+        <Show when={!hiddenNodes().includes(props.meta?.id)}>
           <></>
           {/* <Show when={!props.disabled} fallback={<>...</>}>
             <TableInputField
@@ -153,7 +153,7 @@ export const DynamicComponent = (props: {
         }
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+        <Show when={!hiddenNodes().includes(props.meta?.id )}>
           <GenericInputField
             data={props.data}
             meta={props.meta}
@@ -168,7 +168,7 @@ export const DynamicComponent = (props: {
         when={genericComponents2.includes(props.component) && props.component}
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id ?? props.data?.id)}>
+        <Show when={!hiddenNodes().includes(props.meta?.id )}>
           <GenericField
             data={props.data}
             meta={props.meta}

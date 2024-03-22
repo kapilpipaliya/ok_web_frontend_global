@@ -312,7 +312,7 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs style={props.meta.P.props} {...props.meta.P.props}>
+          <Tabs {...props.meta.P.props}>
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
@@ -363,7 +363,6 @@ export function GenericField(
         <Match when={component() === "Button"}>
           <Button
             onClick={() => setSelectedId(props.meta.id)}
-            style={props.meta.P.props}
             {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}

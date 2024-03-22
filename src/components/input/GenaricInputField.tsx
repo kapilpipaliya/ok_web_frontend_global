@@ -97,7 +97,6 @@ export function GenericInputField(
           <Match when={props.component === "FormSubmit"}>
             <Button
               onClick={() => setSelectedId(props.meta.id)}
-              style={props.meta.P.props}
               {...props.meta.P.props}
             >
               {props.data?.P[props.meta.P[IdAttr]] ??
@@ -107,7 +106,6 @@ export function GenericInputField(
           <Match when={props.component === "FormCancel"}>
             <Button
               onClick={() => setSelectedId(props.meta.id)}
-              style={props.meta.P.props}
               {...props.meta.P.props}
             >
               {props.data?.P[props.meta.P[IdAttr]] ??
