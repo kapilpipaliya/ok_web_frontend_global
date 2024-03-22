@@ -64,7 +64,7 @@ import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
 import {
   hiddenNodes,
-  hoverId,
+  isSelectedHoverId, isSelectedLayoutId,
   selectedId,
   setHiddenNodes,
   setHoverId,
@@ -1325,9 +1325,9 @@ export const PageDesignerDragAndDrop = () => {
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             class={`${
-              props.vertex.id === selectedId()
+              isSelectedLayoutId(props.vertex.id)
                 ? "bg:lightblue"
-                : props.vertex.id === hoverId()
+                : isSelectedHoverId(props.vertex.id)
                 ? "bg:#F2EDED"
                 : ""
             } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${
@@ -2370,7 +2370,7 @@ export const PageDesignerDragAndDrop = () => {
   return (
     <div class="flex">
       <div
-        class="flex-col"
+        class="flex-col  max-width:25rem"
       >
         <For each={leftColumns()}>
           {(column) => <Column type={column.id} />}
@@ -2385,7 +2385,7 @@ export const PageDesignerDragAndDrop = () => {
         </div>
       </div>
       <div
-        class={`flex-col max-width:"25rem"`}
+        class={`flex-col max-width:25rem`}
       >
         <For each={rightColumns()}>
           {(column) => <Column type={column.id} />}

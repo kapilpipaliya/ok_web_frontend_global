@@ -22,7 +22,7 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import { hiddenNodes, hoverId, selectedId } from "../pageStore";
+import { isSelectedHoverId, isSelectedLayoutId} from "../pageStore";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 
 export const GlobalDragData = {} as { from: Vertex };
@@ -87,7 +87,8 @@ export const PageItemRender = (props: {
             : {};
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
-          if (selectedId() === item.id || item.id === hoverId()) {
+
+          if (isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)) {
             if (compProps.class) {
               compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
             } else {
