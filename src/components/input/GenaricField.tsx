@@ -1,7 +1,7 @@
 import {
   createComputed,
   createContext,
-  createMemo,
+  createMemo, createSelector,
   For,
   Match,
   runWithOwner,
@@ -22,8 +22,8 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import { isSelectedHoverId, isSelectedLayoutId} from "../pageStore";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
+import {hoverId, selectedId} from "../pageStore";
 
 export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
@@ -64,7 +64,8 @@ export const PageItemRender = (props: {
   const parentItems = useContext(PageRenderContext);
   // @ts-ignore
   let { record, cleanUpConfig } = useContext(FormContext);
-
+  const isSelectedLayoutId = createSelector(selectedId);
+  const isSelectedHoverId = createSelector(hoverId);
   // children:
   return (
     <For

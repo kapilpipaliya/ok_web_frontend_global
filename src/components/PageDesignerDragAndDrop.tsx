@@ -24,7 +24,7 @@ import {
   Show,
   useContext,
   JSX,
-  createMemo,
+  createMemo, createSelector,
 } from "solid-js";
 import { PageView } from "./input/GenaricField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
@@ -63,8 +63,7 @@ import { FormGroupProperties } from "../pages/FormsAdmin";
 import { TableTabs } from "./TableTabs";
 import { Icon } from "@iconify-icon/solid";
 import {
-  hiddenNodes,
-  isSelectedHoverId, isSelectedLayoutId,
+  hiddenNodes, hoverId,
   selectedId,
   setHiddenNodes,
   setHoverId,
@@ -275,6 +274,9 @@ export const PageDesignerDragAndDrop = () => {
     vertexId: -1,
   });
   const [draggedVertex, setDraggedVertex] = createSignal<Vertex | null>(null);
+
+  const isSelectedLayoutId = createSelector(selectedId);
+  const isSelectedHoverId = createSelector(hoverId);
 
   // @ts-ignore
   const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
