@@ -1312,7 +1312,7 @@ export const PageDesignerDragAndDrop = () => {
               props.vertex.id === selectedId()
                 ? "bg:lightblue"
                 : props.vertex.id === hoverId()
-                ? "#F2EDED"
+                ? "bg:#F2EDED"
                 : ""
             } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${
               children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
@@ -1332,8 +1332,7 @@ export const PageDesignerDragAndDrop = () => {
             }}
             style={{
               "font-weight": children().length ? "bold" : "normal",
-              "margin-left": !children().length ? "5px" : "0px",
-              "margin-bottom": children().length ? "4px" : "3px",
+              "margin-bottom": children().length ? "0px" : "3px",
               "box-shadow": children().length
                 ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
                 : "0px",
@@ -1376,7 +1375,7 @@ export const PageDesignerDragAndDrop = () => {
             </div>
             <div>
               <button
-                class="opacity:.3 opacity:1:hover"
+                class="opacity:.3 opacity:1:hover pt:4px"
                 onClick={(e) => {
                   e.stopPropagation();
                   toggleHidden(props.vertex.id);

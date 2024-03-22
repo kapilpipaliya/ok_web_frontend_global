@@ -1,6 +1,7 @@
-import { createSignal } from "solid-js";
-export const ColorBox = () => {
-  const [color, setColor] = createSignal("#ff0000"); // Initial color is red
+import { createEffect, createSignal } from "solid-js";
+
+export const ColorBox = (props: any) => {
+  const [color, setColor] = createSignal("#EEBEBE"); // Initial color is red
 
   const handleChange = (event: any) => {
     setColor(event.target.value);
@@ -8,10 +9,10 @@ export const ColorBox = () => {
 
   return (
     <div>
-      <div
-        style={{ "background-color": color(), width: "100px", height: "100px" }}
-      >
-        <input type="color" value={color()} onInput={handleChange} />
+      <div class={`${props.class ?? ""} bg:${color()} w:100px h:100px`}>
+        {props.colorPick && (
+          <input type="color" value={color()} onInput={handleChange} />
+        )}
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ export type SingleLineTextFieldProps = JSX.InputHTMLAttributes<HTMLInputElement>
   isNumber?: false;
   label: JSX.Element;
   type?: TextFieldType;
+  placeholder?: String;
   setValue?: (value: string) => void;
 };
 
@@ -37,6 +38,7 @@ export type MultiLineTextFieldProps =
     multiline: true;
     isNumber: false;
     label: JSX.Element;
+    placeholder?: String;
     setValue?: (value: string) => void;
   };
 
@@ -52,7 +54,8 @@ export const TextField: Component<TextFieldProps> = (props) => {
     "onInput",
     "children",
     "setValue",
-    'class'
+    'class',
+    'placeholder',
   ]);
 
   return (
@@ -66,8 +69,8 @@ export const TextField: Component<TextFieldProps> = (props) => {
           <input
             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
             type="number"
-            class={`${local.class ?? ""}  global-style`}
-            style={{ width: "100%" }}
+            placeholder={local.placeholder ? local.placeholder : ""}
+            class={`${local.class ?? ""} global-style w:100%`}
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
@@ -78,6 +81,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
           <textarea
             {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
             style={{ resize: "both", width: "100%" }}
+            placeholder={local.placeholder ? local.placeholder : ""}
             class={`${local.class ?? ""}  global-style`}
             onInput={(ev) => {
               runEvent(ev, local.onInput);
@@ -89,6 +93,8 @@ export const TextField: Component<TextFieldProps> = (props) => {
           <input
             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
             style={{ width: "100%" }}
+            
+            placeholder={local.placeholder ? local.placeholder : ""}
             class={`${local.class ?? ""} global-style`}
             onInput={(ev) => {
               runEvent(ev, local.onInput);

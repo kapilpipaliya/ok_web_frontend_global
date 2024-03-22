@@ -22,7 +22,7 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import { selectedId } from "../pageStore";
+import { hoverId, selectedId } from "../pageStore";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 
 export const GlobalDragData = {} as { from: Vertex };
@@ -87,11 +87,11 @@ export const PageItemRender = (props: {
             : {};
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
-          if (selectedId() === item.id) {
+          if (selectedId() === item.id || item.id === hoverId()) {
             if (compProps.class) {
-              compProps.class += ` b:rgb(249,0,8)|1px|dashed`;
+              compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
             } else {
-              compProps.class = `b:rgb(255,55,59)|1px|dashed`;
+              compProps.class = `b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
             }
           }
 
@@ -223,10 +223,3 @@ export function PageView(props: { number: number; vertex?: Vertex }) {
   );
 }
 
-export function getAttrs(meta: Vertex) {
-  if (meta.P.props?.attr) {
-    return JSON.parse(meta.P.props?.attr);
-  } else {
-    return {};
-  }
-}

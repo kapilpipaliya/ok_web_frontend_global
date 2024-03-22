@@ -7,17 +7,17 @@ export const Register = () => {
   return (
     <div class="rel bg:#fff8f8 p:40 h:full w:full">
       <div class="flex justify-content:center">
-        <img src={logo} alt="logo" className="mt:30 w:200@md h:70  w:150 h:30"/>
+        <img src={logo} alt="logo" class="mt:30 w:200@md h:70  w:150 h:30"/>
       </div>
 
 
       <div class="p:10@md box-shadow:100 shadow:black mt:70">
       <img src={bg} alt="bg" class="abs z:1 ml:240@lg  ml:200@md ml:200@s mb:50 mt:160 w:200@md h:200@md hidden block@md " />
 
-        <div className="mx:400@lg mx:300@md mx:200@s   mx:0 mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex justify-content:center r:10|10|10|10 ">
+        <div class="mx:400@lg mx:300@md mx:200@s   mx:0 mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex justify-content:center r:10|10|10|10 ">
 
-          <div className="flex flex:col	m:30@md m:20 w:fit">
-            <div className=" mb:10 f:30 f:serif flex justify-content:center z:10">
+          <div class="flex flex:col	m:30@md m:20 w:fit">
+            <div class=" mb:10 f:30 f:serif flex justify-content:center z:10">
               Sign Up
             </div>
             <input
@@ -44,8 +44,8 @@ export const Register = () => {
                 minlength="8"
                 class="my:10 p:10 w:full r:5|5|5|5"
             />
-            <div className="m:10">
-              <div className="flex justify-content:space-between ">
+            <div class="m:10">
+              <div class="flex justify-content:space-between ">
                 <input type="checkbox"/>
                 <span class="mx:10 f:15@md f:9">
                   I agree to easyform's{" "}

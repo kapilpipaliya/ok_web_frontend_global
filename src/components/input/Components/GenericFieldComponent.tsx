@@ -54,11 +54,18 @@ import {
   GlobalDragData,
   getUrl,
   PageView,
-  getAttrs,
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
+import { setSelectedId } from "../../pageStore";
 
 // This component support rendering Child Themselves by calling PageRender.
+function getAttrs(meta: Vertex) {
+  if (meta.P.props?.attr) {
+    return JSON.parse(meta.P.props?.attr);
+  } else {
+    return {};
+  }
+}
 
 export function GenericField(
   props: ComponentProps & {
@@ -231,6 +238,7 @@ export function GenericField(
               component={props.meta.P.props?.as}
               class={getValueFromVertexOrKey(props.meta.P.props, "class")}
               draggable
+              onClick={() => setSelectedId(props.meta.id)}
               onDragStart={(e) => {
                 e.stopPropagation();
                 return (GlobalDragData.from = props.meta);
@@ -247,6 +255,7 @@ export function GenericField(
             <Match when={PageRenderUtils.getDataVertex(props.meta)}>
               {(vertex) => (
                 <A
+                  onClick={() => setSelectedId(props.meta.id)}
                   {...props.meta.P.props}
                   href={(showNav() ? "/nav/" : "/") + vertex().P.name}
                   draggable
@@ -266,6 +275,7 @@ export function GenericField(
             </Match>
             <Match when={props.meta.P.props?.href}>
               <A
+                onClick={() => setSelectedId(props.meta.id)}
                 {...props.meta.P.props}
                 href={getUrl(props.meta.P.props.href, repeaterContext)}
                 draggable
@@ -280,14 +290,14 @@ export function GenericField(
               </A>
             </Match>
             <Match when={true}>
-              <a draggable>
+              <a draggable onClick={() => setSelectedId(props.meta.id)}>
                 {props.children}
                 <PageItemRender metaVertex={props.meta} />
               </a>
             </Match>
           </Switch>
         </Match>
-        
+
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
           <PageView number={1} vertex={props.data} />
@@ -295,6 +305,7 @@ export function GenericField(
         <Match when={component() === "Image"}>
           <img
             loading="lazy"
+            onClick={() => setSelectedId(props.meta.id)}
             {...props.meta.P.props}
             src={getText(props.meta.P.props?.src, repeaterContext)}
             draggable={true}
@@ -309,14 +320,15 @@ export function GenericField(
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender  metaVertex={props.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender  metaVertex={props.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
             icon={props.meta.P.props?.icon}
+            onClick={() => setSelectedId(props.meta.id)}
             class={getValueFromVertexOrKey(props.meta.P?.props, "class")}
             width={props.meta.P.props?.width || "24"}
             height={props.meta.P.props?.height || "24"}
@@ -326,6 +338,7 @@ export function GenericField(
         <Match when={component() === "Box" && props.meta.P.props?.text}>
           <Dynamic
             component={props.meta.P.props?.as || "div"}
+            onClick={() => setSelectedId(props.meta.id)}
             {...getAttrs(props.meta)}
             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
             classList={{ "bg:red": true }}
@@ -351,12 +364,19 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <Button style={props.meta.P.props} {...props.meta.P.props}>
+          <Button
+            onClick={() => setSelectedId(props.meta.id)}
+            style={props.meta.P.props}
+            {...props.meta.P.props}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Button>
         </Match>
         <Match when={component() === "Avtar"}>
-          <Avatar {...props.meta.P.props}>
+          <Avatar
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta.P.props}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Avatar>
         </Match>
@@ -366,22 +386,35 @@ export function GenericField(
               </Select>
             </Match> */}
         <Match when={component() === "LoadIndicator"}>
-          <Spinner {...props.meta.P.props}>
-            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
+          {component()}
+          <Spinner
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta?.P.props}
+          >
+            {props.meta.P.props.children}
           </Spinner>
         </Match>
         <Match when={component() === "Accordion"}>
-          <Accordion {...props.meta.P.props}>
+          <Accordion
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta.P.props}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Accordion>
         </Match>
         <Match when={component() === "Breadcrumb"}>
-          <Breadcrumbs {...props.meta.P.props}>
+          <Breadcrumbs
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta.P.props}
+          >
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
-          <Progress {...props.meta.P.props} />
+          <Progress
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta.P.props}
+          />
         </Match>
         <Match when={true}>
           <Dynamic

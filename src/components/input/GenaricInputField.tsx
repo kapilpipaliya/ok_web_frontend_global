@@ -92,18 +92,22 @@ export function GenericInputField(
           <Match when={props.component === "CheckBox"}>
             <Checkbox
               {...props.meta?.P.props}
-              switch={false}
               onchange={(e: any) => {
-                console.log("====================================");
                 props.setValue?.(props.meta, props.data, e.target.checked);
               }}
               align="left"
+              checked={
+                props.data?.P[props.meta.P[IdAttr]] ??
+                props.meta?.P.props?.checked
+              }
               children={props.meta?.P.props?.text}
-              setChecked={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={props.component === "ColorBox"}>
-            <ColorBox {...props.meta?.P.props} />
+            <ColorBox
+              {...props.meta?.P.props}
+              colorPick={props.meta?.P.props?.pickColor ?? true}
+            />
           </Match>
           <Match when={props.component === "DropDownBox"}>Dropdown</Match>
           <Match when={props.component === "FileUploader"}>
@@ -117,6 +121,7 @@ export function GenericInputField(
           </Match>
           <Match when={props.component === "NumberBox"}>
             <TextField
+              placeholder={props.meta?.P.props.label ?? ""}
               onChange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
@@ -170,6 +175,7 @@ export function GenericInputField(
               onChange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
+              placeholder={props.meta?.P.props?.label}
               {...props.meta?.P.props}
               multiline
               value={props.data?.P[props.meta.P[IdAttr]]}
@@ -178,6 +184,7 @@ export function GenericInputField(
           <Match when={props.component === "TextBox"}>
             <TextField
               class="global-style"
+              placeholder={props.meta?.P.props?.label}
               onChange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
