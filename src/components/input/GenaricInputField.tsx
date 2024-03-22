@@ -19,10 +19,9 @@ import {
   Button,
   Checkbox,
   Progress,
-  Radio,
-  RadioGroup,
   TextField,
 } from "../solid-blocks/blocks";
+import { RadioGroup } from '@ark-ui/solid'
 import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
@@ -157,21 +156,12 @@ export function GenericInputField(
             />
           </Match>
           <Match when={props.component === "Radio"}>
-            <Radio
-              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
-              onChange={(e: any) => {
-                props.setValue?.(
-                  props.meta,
-                  props.data as any,
-                  e.target.checked
-                );
-              }}
-              name={props.meta?.P.props?.label ?? "radio"}
-              align="left"
+            <RadioGroup.Item
               {...props.meta?.P.props}
             >
-              {props.meta?.P.props?.label ?? "radio"}
-            </Radio>
+              <RadioGroup.ItemText>{props.meta?.P.props?.label ?? "radio"}</RadioGroup.ItemText>
+              <RadioGroup.ItemControl />
+            </RadioGroup.Item>
           </Match>
           <Match when={props.component === "ProgressBar"}>
             <Progress
@@ -180,9 +170,17 @@ export function GenericInputField(
             />
           </Match>
           <Match when={props.component === "RadioGroup"}>
-            <RadioGroup>
+            <RadioGroup.Root
+              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
+              onValueChange={(details) => {
+                props.setValue?.(
+                  props.meta,
+                  props.data as any,
+                  details.value
+                );
+            }}>
               <PageItemRender metaVertex={props.meta} />
-            </RadioGroup>
+            </RadioGroup.Root>
           </Match>
           <Match when={props.component === "Switch"}>
             <Checkbox
