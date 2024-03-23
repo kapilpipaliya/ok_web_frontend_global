@@ -36,6 +36,12 @@ import {GraphViewPage} from "./pages/GraphViewPage";
 import {createTheme, ThemeProvider} from "@suid/material";
 
 const theme = createTheme({
+  palette: {
+    primary: {
+      main: 'rgb(255,0,0)',
+      dark: 'rgb(255,0,0)'
+    }
+  },
     components: {
         // Name of the component ⚛️
         MuiButtonBase: {
