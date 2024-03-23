@@ -6,18 +6,18 @@ import {
   JSX,
   on,
   Setter,
-  splitProps,  
+  splitProps,
   Show,
   createContext,
   createEffect,
-  useContext
+  useContext, createUniqueId
 } from "solid-js";
 import { runEvent } from "./tools";
 
 import "./base.css";
 import "./radio.css";
 
-export const radioContext = createContext<[Accessor<string>, Setter<string>, (value: string) => boolean] | []>([]);
+export const radioContext = createContext<[Accessor<string>, Setter<string>, (value: string) => boolean, string] | []>([]);
 
 export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
     /**
@@ -61,7 +61,7 @@ export const Radio: Component<RadioProps> = (props) => {
     ["align", "checked", "onChange", "setChecked", "children"]
   );
 
-  const [_value, setValue, isValueActive] = useContext(radioContext);
+  const [_value, setValue, isValueActive, uniqueId] = useContext(radioContext);
   
   return (
     <label
@@ -74,6 +74,7 @@ export const Radio: Component<RadioProps> = (props) => {
       <input
         type="radio"
         ref={props.ref}
+        name={uniqueId}
         {...inputProps}
         checked={isValueActive ? isValueActive(inputProps.value || "") : content.checked}
         onChange={(ev: Event & { currentTarget: HTMLInputElement, target: Element }): void => {
@@ -94,19 +95,21 @@ export type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
   value?: Accessor<string>;
 };
 
-export const RadioGroup: Component<RadioGroupProps> = (props) => {  
+// This is just a wrapper that run setValue when value is changed.
+export const RadioGroup: Component<RadioGroupProps> = (props) => {
   const [local, divProps] = splitProps(props, [
     "setValue",
     "value",
     "children",
   ]);
+  const uniqueId = createUniqueId();
   const [value, setValue] = createSignal(typeof props.value === 'function' ? props.value() : "");
 
   createEffect(() => setValue(typeof props.value === 'function' ? props.value() : ""));
   createEffect(on([value], ([value]) => local.setValue?.(value), { defer: true }));
   
   return (
-    <radioContext.Provider value={[value, setValue, createSelector(value)]}>
+    <radioContext.Provider value={[value, setValue, createSelector(value), uniqueId]}>
       <div
         role="radiogroup"
         {...divProps}

@@ -110,7 +110,7 @@ export function GenericInputField(
           <Match when={props.component === "Radio"}>
             <Radio
               {...props.meta?.P.props}
-              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
+              // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue?.(
                   props.meta,
@@ -118,7 +118,7 @@ export function GenericInputField(
                   e.target.checked
                 );
               }}
-              name={props.meta?.P.props?.label ?? "radio"}
+              // name={props.meta?.P.props?.label ?? "radio"}
               align="left"
             >
               {props.meta?.P.props?.label ?? "radio"}
