@@ -77,8 +77,7 @@ export function GenericInputField(
                 props.data?.P[props.meta.P[IdAttr]] ??
                 props.meta?.P.props?.checked
               }
-              children={props.meta?.P.props?.text}
-            />
+            >{<PageItemRender metaVertex={props.meta} />}</Checkbox>
           </Match>
           <Match when={props.component === "ColorBox"}>
             <ColorBox
@@ -134,17 +133,6 @@ export function GenericInputField(
             <RadioGroup>
               <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
-          </Match>
-          <Match when={props.component === "Switch"}>
-            <Checkbox
-              {...props.meta?.P.props}
-              switch
-              onchange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.checked);
-              }}
-              align="left"
-              children={props.meta?.P.props?.label ?? "switch"}
-            />
           </Match>
           <Match when={props.component === "TextArea"}>
             <TextField

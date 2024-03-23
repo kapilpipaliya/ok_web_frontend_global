@@ -50,7 +50,8 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
     <label
       class={`${content.align || "left"} ${
         content.switch ? " switch" : ""
-      } sb-checkbox`}
+      // } sb-checkbox`}
+      } `}
       {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>{content.children}</Show>
