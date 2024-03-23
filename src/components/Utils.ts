@@ -7,7 +7,7 @@ export const iconMap = {
   Text: "ci:text",
   Repeater: "formkit:repeater",
   Page: "fluent:document-one-page-20-regular",
-  Box: "radix-icons:box",
+  Box: "mage:box-3d-scan",
   ProgressBar: "carbon:progress-bar",
   LoadIndicator: "ep:loading",
   SelectBox: "radix-icons:dropdown-menu",

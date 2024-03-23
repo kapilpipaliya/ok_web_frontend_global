@@ -57,6 +57,7 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 interface FormGroupProps {
     metaAttributes: Vertex[];
     vertex: Vertex;
+    labelPrefix: String;
 
     setValue(attribute: Vertex, vertex: Vertex, data: any): void;
 
@@ -100,7 +101,7 @@ export function FormGroup(props: FormGroupProps) {
                   />
                 );
                 const permissions = metaVertex.P.metaId ? getPermissions(graph.vertexes[metaVertex.P.metaId]) : getPermissions(metaVertex);
-                console.log(component())
+
                 return (
                     <Switch>
                         <Match when={component() === "Table"}>
@@ -115,7 +116,7 @@ export function FormGroup(props: FormGroupProps) {
                         <Match when={true}>
                             <div class=" grid-cols:2 py:5 w:450">
                                 <div id={id}>
-                                    <Label/>
+                                    {props.labelPrefix as string} <Label/>
                                 </div>
 
                             </div>
@@ -406,9 +407,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                         <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
                           <div class=" p:10 w:full ">
                             <div class="w:full 	 justify-content:space-between	">
-                              <div class="f:16 font:sans font:bold	">
-                                QUICK EDIT
-                              </div>
                               <Show when={props.importExportButtons ?? true}>
                                 <div
                                   style={{
@@ -453,6 +451,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                               metaAttributes={
                                 groupByTabsAndGroup["main"][group]
                               }
+                              labelPrefix={'Form'}
                               vertex={record.vertex}
                               setValue={record.setValue}
                               txnId={record.txnId}

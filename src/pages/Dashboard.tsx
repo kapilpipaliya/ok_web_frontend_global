@@ -146,7 +146,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
         style="background: none; border: none; cursor: pointer;"
       >
         <img
-          src="https://icons.veryicon.com/png/o/miscellaneous/two-color-icon-library/user-286.png"
+          src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
           alt="User icon"
           style="width: 40px; height: 40px;"
         />

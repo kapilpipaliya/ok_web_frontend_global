@@ -1,7 +1,7 @@
 import {
   createComputed,
   createContext,
-  createMemo, createSelector,
+  createMemo, createSelector, createSignal,
   For,
   Match,
   runWithOwner,
@@ -24,6 +24,7 @@ import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 import {hoverId, selectedId} from "../pageStore";
+import Dismiss from "solid-dismiss";
 
 export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
@@ -66,7 +67,8 @@ export const PageItemRender = (props: {
   let { record, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
-  // children:
+
+
   return (
     <For
       each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort(
@@ -90,11 +92,12 @@ export const PageItemRender = (props: {
           const compProps = Object.assign(componentProps, rowProps);
 
           if (isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)) {
-            if (compProps.class) {
-              compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
-            } else {
-              compProps.class = `b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
-            }
+              if (compProps.class) {
+                compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
+              } else {
+                compProps.class = `b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
+              }
+
           }
 
           // supported deleted properties.
@@ -126,45 +129,71 @@ export const PageItemRender = (props: {
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
+            <Show when={isSelectedLayoutId(item.id)}>
+              <Dismiss
+                  menuButton={<>Hello</>}
+                  open={()=>isSelectedLayoutId(item.id)}
+                  // setOpen={setOpenEditPopUp}
+                  // onOpen={setOpenEditPopUpFun}
+                  focusElementOnClose="menuButton"
+                  animation={{
+                    name: "fade",
+                  }}
+                  mount="body"
+              >
+                <div class="popup">
+                  <h4>Popup Text</h4>
+                  <p>Lorem <a href="#">ipsum</a>.</p>
+
+                  <button
+                      class="x-btn"
+                      aria-label="close modal"
+                      onClick={()=>{}}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </Dismiss>
+            </Show>
               <DynamicComponent
-                meta={item}
-                // NOTE: For repeater we cant use parentData
-                // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-                data={
-                  props.data ||
-                  getSelectionOptions(
-                    [...useContext(RepeaterContext)],
-                    item.P.data
-                  ).vertexes ||
-                  PageRenderUtils.getDataVertex(item)
-                }
-                title={toTitle(PageRenderUtils.getId(item) || "")}
-                setValue={record?.setValue || (() => {})}
-                disabled={false}
-                component={component()}
+                  meta={item}
+                  // NOTE: For repeater we cant use parentData
+                  // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+                  data={
+                      props.data ||
+                      getSelectionOptions(
+                          [...useContext(RepeaterContext)],
+                          item.P.data
+                      ).vertexes ||
+                      PageRenderUtils.getDataVertex(item)
+                  }
+                  title={toTitle(PageRenderUtils.getId(item) || "")}
+                  setValue={record?.setValue || (() => {
+                  })}
+                  disabled={false}
+                  component={component()}
               />
-              
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
 
 
         return (
-          <Switch>
-            <Match when={parentComponent() === "TabList"}>
-              <Tab style={item.P.props}>
-                <PageComponent />
-              </Tab>
-            </Match>
-            <Match when={parentComponent() === "TabContainer"}>
-              <TabContainer>
-                <PageComponent />
-              </TabContainer>
-            </Match>
-            <Match when={true}>
-              <PageComponent />
-            </Match>
-          </Switch>
+            <Switch>
+              <Match when={parentComponent() === "TabList"}>
+                <Tab style={item.P.props}>
+                  <PageComponent/>
+                </Tab>
+              </Match>
+              <Match when={parentComponent() === "TabContainer"}>
+                <TabContainer>
+                  <PageComponent/>
+                </TabContainer>
+              </Match>
+              <Match when={true}>
+                <PageComponent/>
+              </Match>
+            </Switch>
         );
       }}
     </For>

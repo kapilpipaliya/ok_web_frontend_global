@@ -1057,7 +1057,7 @@ export const PageDesignerDragAndDrop = () => {
 
       const indicatorPositionStyles = () => {
         if (isActiveItem() && indicatorPosition().position === "before") {
-          // return indicatorStyles + ' top:0'
+          // return indicatorStyles + 'border-top:2px solid green;';
         } else if (isActiveItem() && indicatorPosition().position === "after") {
           // return indicatorStyles + ' bottom:0';
         } else if (
@@ -1314,11 +1314,7 @@ export const PageDesignerDragAndDrop = () => {
 
       return (
         <div>
-          <Show
-            when={isActiveItem() && indicatorPosition().position === "before"}
-          >
-            <div class={`${indicatorPositionStyles()}`} />
-          </Show>
+
           <div
             draggable={true}
             onDragStart={handleDragStart}
@@ -1350,16 +1346,20 @@ export const PageDesignerDragAndDrop = () => {
             }}
             style={{
               "font-weight": children().length ? "bold" : "normal",
-              "margin-bottom": children().length ? "0px" : "3px",
+              "margin-bottom": children().length || !(isActiveItem() && indicatorPosition().position === "after") ? "0px" : "10px",
               "box-shadow": children().length
                 ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
                 : "0px",
+              "margin-top": isActiveItem() && indicatorPosition().position === "before"?"10px":"",
+              "border-top":isActiveItem() && indicatorPosition().position === "before"?"2px solid green":"",
+              "border-bottom":isActiveItem() && indicatorPosition().position === "after"?"2px solid green":"",
               "border-left": children().length ? "" : "1px dashed black",
               "align-items": "center",
               "justify-content": "space-between",
               display: "flex",
             }}
           >
+
             <div style="display: flex;align-items: center;">
               &nbsp;
               <Show when={children().length}>
@@ -1421,11 +1421,7 @@ export const PageDesignerDragAndDrop = () => {
               &nbsp;
             </div>
           </div>
-          <Show
-            when={isActiveItem() && indicatorPosition().position === "after"}
-          >
-            <div class={`${indicatorPositionStyles()}`} />
-          </Show>
+
           <Show
             when={
               !collapsedKeys().includes(props.vertex.id) &&
@@ -2305,7 +2301,7 @@ export const PageDesignerDragAndDrop = () => {
                 )}
 
                 {isFormExpanded() && (
-                  <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
+                  <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:24.3rem">
                     <div
                       class={`mb:${isFormOpen() ? "10px" : "0px"}`}
                       style={{
@@ -2338,7 +2334,7 @@ export const PageDesignerDragAndDrop = () => {
                         style="cursor: pointer; flex-grow: 1; font-weight: bold"
                         onClick={onClickForm}
                       >
-                        Form
+                        Form Configuration
                       </div>
                       <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
                         <div style="cursor: pointer;" onClick={onClickForm}>
@@ -2368,31 +2364,28 @@ export const PageDesignerDragAndDrop = () => {
       </>
     );
   };
-  
+
   return (
-    <div class="flex">
-      <div
-        class="flex-col  max-width:25rem"
-      >
-        <For each={leftColumns()}>
-          {(column) => <Column type={column.id} />}
-        </For>
-      </div>
-      <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5">
-        <div class="flex justify-content:center">
-          <TableTabs tabs={tabs} setActiveTab={setActiveTab} />
+      <div class="flex">
+        <div class="flex-col max-width:25rem overflow:auto" style={{ "max-height": '100vh' }}>
+          <For each={leftColumns()}>
+            {(column) => <Column type={column.id} />}
+          </For>
         </div>
-        <div class={className() as string}>
-          <PageView number={count()} vertex={pageConfig[0].record?.vertex} />
+        <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto" style={{ "max-height": '100vh' }}>
+          <div class="flex justify-content:center">
+            <TableTabs tabs={tabs} setActiveTab={setActiveTab} />
+          </div>
+          <div class={className() as string}>
+            <PageView number={count()} vertex={pageConfig[0].record?.vertex} />
+          </div>
+        </div>
+        <div class="flex-col max-width:25rem overflow:auto" style={{ "max-height": '100vh' }}>
+          <For each={rightColumns()}>
+            {(column) => <Column type={column.id} />}
+          </For>
         </div>
       </div>
-      <div
-        class={`flex-col max-width:25rem`}
-      >
-        <For each={rightColumns()}>
-          {(column) => <Column type={column.id} />}
-        </For>
-      </div>
-    </div>
-  );
+);
+
 };
