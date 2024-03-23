@@ -35,6 +35,8 @@ import { setParentValue } from "../SelectInputField";
 import {
   Accordion,
   Avatar,
+  Breadcrumbs,
+  Button,
   Progress,
   Spinner,
   Tab,
@@ -55,8 +57,6 @@ import {
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
 import { setSelectedId } from "../../pageStore";
-import {Button, Link, Typography, Breadcrumbs} from "@suid/material";
-
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -166,7 +166,7 @@ export function GenericField(
                         P: {
                           component: "Button",
                           props: {
-                            children: "Submit",variant:"contained",style:"margin-right:10px",
+                            children: "Submit",
                             onClick: () => onSubmit,
                           },
                         },
@@ -185,7 +185,7 @@ export function GenericField(
                       component: "Button",
                       props: {
                         onClick: () => onCancel,
-                        variant: "outlined",
+                        variant: "secondary",
                         children: "Cancel",
                       },
                     },
@@ -200,7 +200,6 @@ export function GenericField(
   };
 
   const repeaterContext = useContext(RepeaterContext);
-
   return (
     <Show
       when={!props.disabled}
@@ -362,17 +361,12 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          {JSON.stringify(props.meta.P.props)}
           <Button
-              onClick={() => setSelectedId(props.meta.id)}
-              class={`${
-                  props.meta.P.props?.class || "" // Existing classes
-              } p:5px` }
-              {...props.meta.P.props}
+            onClick={() => setSelectedId(props.meta.id)}
+            {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
           </Button>
-
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar

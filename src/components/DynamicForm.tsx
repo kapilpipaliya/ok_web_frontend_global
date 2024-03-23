@@ -225,7 +225,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     const ImportComponent = () => {
         return <textarea class="h:95% w:100%" value={importCode()}
-                         onChange={e => setImportCode(e.target.value)}/>
+                         onchange={e => setImportCode(e.target.value)}/>
     }
     const PreviewCode = () => {
         return <pre>{stringify(getExportCode(record))}</pre>;
@@ -341,8 +341,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   P: {
                     component: "Button",
                     props: {
-                        variant:"contained",
-                      children: "Submit",style:"margin-right:10px",
+                      type: "primary",
+                      children: "Submit",
                       onClick: () => onSubmit(),
                     },
                   },
@@ -360,7 +360,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               P: {
                 component: "Button",
                 props: {
-                    variant:"outlined",
+                  variant: "variant",
                   children: "Cancel",
                   onClick: () => onCancel(),
                 },
@@ -421,11 +421,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                       {
                                         P: {
                                           component: "Button",
-                                          props: {variant:"contained",
-                                              size:"medium",
-                                              style:"margin-right:10px",
+                                          props: {
                                             children: "Import",
                                             onClick: () => onImportClick,
+                                            class:
+                                              "bg:blue bg:rgb(24,98,234):hover text-fill:white",
                                           },
                                         },
                                       } as any
@@ -436,9 +436,10 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                       {
                                         P: {
                                           component: "Button",
-                                          props: {variant:"contained",
+                                          props: {
                                             children: "Export",
                                             onClick: () => onExportClick,
+                                            class: " b:blue",
                                           },
                                         },
                                       } as any

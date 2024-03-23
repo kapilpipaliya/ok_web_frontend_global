@@ -24,7 +24,6 @@ import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 import {hoverId, selectedId} from "../pageStore";
-import {Link} from "@suid/material";
 
 export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.

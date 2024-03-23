@@ -3,7 +3,6 @@
 import { defineConfig, Plugin } from "vite";
 import path from 'path'
 import solidPlugin from "vite-plugin-solid";
-import suidPlugin from "@suid/vite-plugin";
 import devtools from 'solid-devtools/vite'
 import type { ImportSpecifier } from 'es-module-lexer'
 import { init, parse } from 'es-module-lexer'
@@ -82,7 +81,6 @@ export default defineConfig({
    /* additional options */
    autoname: true, // e.g. enable autoname
   }),
-  suidPlugin(),
   solidPlugin(),
   isBuildForWeb && removeDevExpressImport()
  ],

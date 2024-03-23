@@ -9,13 +9,16 @@ import { getTextColumnValue } from "./Components/Utils";
 import { ComponentProps } from "../ComponentType";
 import {
   Button,
+  Checkbox,
   Progress,
+  Radio,
+  RadioGroup,
+  TextField,
 } from "../solid-blocks/blocks";
 import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
 import { setSelectedId } from "../pageStore";
-import {Checkbox, TextField} from "@suid/material";
 
 
 export function GenericInputField(
@@ -29,7 +32,7 @@ export function GenericInputField(
   // const outerOwner = getOwner();
   return (
     <div
-      aria-labelledby={props["aria-labeledby"]}
+      aria-labeledby={props["aria-labeledby"]}
       classList={{
         "width:100%": props.component === "TextArea",
       }}
@@ -64,16 +67,18 @@ export function GenericInputField(
             <PageItemRender metaVertex={props.meta} />
           </Match>
           <Match when={props.component === "CheckBox"}>
-            {JSON.stringify(props.meta?.P?.props)}
             <Checkbox
-                class={props.meta?.P?.props?.class}
-                onChange={(event, checked) => {
-                  props.setValue?.(props.meta, props.data as any, checked)
-                }}
-                defaultChecked={props.data?.P[props.meta.P[IdAttr]] ??
-                    props.meta?.P.props?.checked}
-                inputProps={{ "aria-label": "controlled" }}
-            >{props.meta?.P.props?.text}</Checkbox>
+              {...props.meta?.P.props}
+              onchange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.checked);
+              }}
+              align="left"
+              checked={
+                props.data?.P[props.meta.P[IdAttr]] ??
+                props.meta?.P.props?.checked
+              }
+              children={props.meta?.P.props?.text}
+            />
           </Match>
           <Match when={props.component === "ColorBox"}>
             <ColorBox
@@ -94,7 +99,7 @@ export function GenericInputField(
           <Match when={props.component === "NumberBox"}>
             <TextField
               placeholder={props.meta?.P.props.label ?? ""}
-              onChange={(e: any) => {
+              onchange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
               {...props.meta?.P.props}
@@ -102,13 +107,22 @@ export function GenericInputField(
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
-          <Match when={props.component === "Radio"}><></>
-            {/*<RadioGroup.Item*/}
-            {/*  {...props.meta?.P.props}*/}
-            {/*>*/}
-            {/*  <RadioGroup.ItemText>{props.meta?.P.props?.label ?? "radio"}</RadioGroup.ItemText>*/}
-            {/*  <RadioGroup.ItemControl />*/}
-            {/*</RadioGroup.Item>*/}
+          <Match when={props.component === "Radio"}>
+            <Radio
+              {...props.meta?.P.props}
+              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
+              onchange={(e: any) => {
+                props.setValue?.(
+                  props.meta,
+                  props.data as any,
+                  e.target.checked
+                );
+              }}
+              name={props.meta?.P.props?.label ?? "radio"}
+              align="left"
+            >
+              {props.meta?.P.props?.label ?? "radio"}
+            </Radio>
           </Match>
           <Match when={props.component === "ProgressBar"}>
             <Progress
@@ -116,42 +130,45 @@ export function GenericInputField(
               {...props.meta?.P.props}
             />
           </Match>
-          <Match when={props.component === "RadioGroup"}><></>
-            {/*<RadioGroup.Root*/}
-            {/*  value={props.data?.P[props.meta.P[IdAttr]] ?? ""}*/}
-            {/*  onValueChange={(details) => {*/}
-            {/*    props.setValue?.(*/}
-            {/*      props.meta,*/}
-            {/*      props.data as any,*/}
-            {/*      details.value*/}
-            {/*    );*/}
-            {/*}}>*/}
-            {/*  <PageItemRender metaVertex={props.meta} />*/}
-            {/*</RadioGroup.Root>*/}
+          <Match when={props.component === "RadioGroup"}>
+            <RadioGroup>
+              <PageItemRender metaVertex={props.meta} />
+            </RadioGroup>
           </Match>
-          <Match when={props.component === "Switch"}><></>
-            {/*<Checkbox*/}
-            {/*  {...props.meta?.P.props}*/}
-            {/*  switch*/}
-            {/*  onchange={(e: any) => {*/}
-            {/*    props.setValue?.(props.meta, props.data, e.target.checked);*/}
-            {/*  }}*/}
-            {/*  align="left"*/}
-            {/*  children={props.meta?.P.props?.label ?? "switch"}*/}
-            {/*/>*/}
+          <Match when={props.component === "Switch"}>
+            <Checkbox
+              {...props.meta?.P.props}
+              switch
+              onchange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.checked);
+              }}
+              align="left"
+              children={props.meta?.P.props?.label ?? "switch"}
+            />
           </Match>
           <Match when={props.component === "TextArea"}>
-            <TextField  value={props.data?.P[props.meta.P[IdAttr]]} onChange={(e: any) => {
-              props.setValue?.(props.meta, props.data, e.target.value);
+            <TextField
+              class="global-style"
+              {...props.meta?.P.props}
+              onchange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
+              placeholder={props.meta?.P.props?.label}
 
-            }} multiline fullWidth id="outlined-basic" style={{ height: "100%" }} placeholder={props.meta?.P.props?.label} label={props.meta?.P.props?.label} variant="outlined" />
-
+              multiline
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
           </Match>
           <Match when={props.component === "TextBox"}>
-            <TextField  value={props.data?.P[props.meta.P[IdAttr]]} onChange={(e: any) => {
-              props.setValue?.(props.meta, props.data, e.target.value);
-            }} id="outlined-basic" fullWidth size={props.meta?.P.props?.label || "small"} placeholder={props.meta?.P.props?.label} label={props.meta?.P.props?.label} variant="outlined" />
-
+            <TextField
+              class="global-style"
+              {...props.meta?.P.props}
+              placeholder={props.meta?.P.props?.label}
+              onchange={(e: any) => {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
+              value={props.data?.P[props.meta.P[IdAttr]]}
+            />
           </Match>
         </Switch>
         {/*<div
@@ -209,7 +226,7 @@ export function GenericInputField(
                     }
                   })
                 },
-                // onChange: (e: any) => {
+                // onchange: (e: any) => {
                 //   props.setValue(props.meta, props.data, e.value);
                 // },
                 validationGroup: formContext.validationGroup,
@@ -321,7 +338,7 @@ export function GenericInputField(
                 } as dxProgressBarProperties);
               } else if (props.component === "RadioGroup") {
                 comp = dxRadioGroup;
-                // radioBox can support any value in the array, it will return the value on onChange like object.
+                // radioBox can support any value in the array, it will return the value on onchange like object.
                 Object.assign(attributes, {} as dxRadioGroupProperties);
               } else if (props.component === "RangeSelector") {
                 comp = dxRangeSelector;
