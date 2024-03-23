@@ -113,6 +113,7 @@ export const DynamicComponent = (props: {
 }) => {
   return (
     <Switch>
+
       <Match when={!props.component}>NO INPUT</Match>
       <Match
         when={props.component === "SelectBox" || props.component === "TagBox"}

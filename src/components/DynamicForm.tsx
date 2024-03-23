@@ -341,8 +341,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
                   P: {
                     component: "Button",
                     props: {
-                      type: "primary",
-                      children: "Submit",
+                        variant:"contained",
+                      children: "Submit",style:"margin-right:10px",
                       onClick: () => onSubmit(),
                     },
                   },
@@ -360,7 +360,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               P: {
                 component: "Button",
                 props: {
-                  variant: "variant",
+                    variant:"outlined",
                   children: "Cancel",
                   onClick: () => onCancel(),
                 },
@@ -421,11 +421,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                       {
                                         P: {
                                           component: "Button",
-                                          props: {
+                                          props: {variant:"contained",
+                                              size:"medium",
+                                              style:"margin-right:10px",
                                             children: "Import",
                                             onClick: () => onImportClick,
-                                            class:
-                                              "bg:blue bg:rgb(24,98,234):hover text-fill:white",
                                           },
                                         },
                                       } as any
@@ -436,10 +436,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                       {
                                         P: {
                                           component: "Button",
-                                          props: {
+                                          props: {variant:"contained",
                                             children: "Export",
                                             onClick: () => onExportClick,
-                                            class: " b:blue",
                                           },
                                         },
                                       } as any

@@ -422,22 +422,25 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'",
             // component: "->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'||defaultComp|->$0DataType::'P.name'",
           },
-          {
-            name: "reset",
-            component: "Button",
-            props: {
-              children: "Reset",
-              // TODO:
-              // function: "reset",
-              // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
-            },
-          },
+
           {
             name: "description",
             component: "TextArea",
             props: {
               // autoResizeEnabled: true,
               width: "550px",
+            },
+          },
+          {
+            name: "reset",
+            component: "Button",
+            props: {
+              children: "Reset",
+              color:"error",
+              variant:"outlined"
+              // TODO:
+              // function: "reset",
+              // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
             },
           },
         ],

@@ -10,13 +10,12 @@ import { ComponentProps } from "../ComponentType";
 import {
   Button,
   Progress,
-  TextField,
 } from "../solid-blocks/blocks";
-import {RadioGroup, Checkbox, NumberInput, Avatar} from '@ark-ui/solid'
 import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
 import { setSelectedId } from "../pageStore";
+import {Checkbox, TextField} from "@suid/material";
 
 
 export function GenericInputField(
@@ -30,7 +29,7 @@ export function GenericInputField(
   // const outerOwner = getOwner();
   return (
     <div
-      aria-labeledby={props["aria-labeledby"]}
+      aria-labelledby={props["aria-labeledby"]}
       classList={{
         "width:100%": props.component === "TextArea",
       }}
@@ -65,14 +64,16 @@ export function GenericInputField(
             <PageItemRender metaVertex={props.meta} />
           </Match>
           <Match when={props.component === "CheckBox"}>
-
-            <Checkbox.Root {...props.meta?.P.props} onCheckedChange={(e) => {
-              props.setValue?.(props.meta, props.data, e.checked)
-            }}>
-              <Checkbox.Control />
-              <Checkbox.Label >{props.meta?.P.props?.text}</Checkbox.Label>
-            </Checkbox.Root>
-
+            {JSON.stringify(props.meta?.P?.props)}
+            <Checkbox
+                class={props.meta?.P?.props?.class}
+                onChange={(event, checked) => {
+                  props.setValue?.(props.meta, props.data as any, checked)
+                }}
+                defaultChecked={props.data?.P[props.meta.P[IdAttr]] ??
+                    props.meta?.P.props?.checked}
+                inputProps={{ "aria-label": "controlled" }}
+            >{props.meta?.P.props?.text}</Checkbox>
           </Match>
           <Match when={props.component === "ColorBox"}>
             <ColorBox
@@ -101,13 +102,13 @@ export function GenericInputField(
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
-          <Match when={props.component === "Radio"}>
-            <RadioGroup.Item
-              {...props.meta?.P.props}
-            >
-              <RadioGroup.ItemText>{props.meta?.P.props?.label ?? "radio"}</RadioGroup.ItemText>
-              <RadioGroup.ItemControl />
-            </RadioGroup.Item>
+          <Match when={props.component === "Radio"}><></>
+            {/*<RadioGroup.Item*/}
+            {/*  {...props.meta?.P.props}*/}
+            {/*>*/}
+            {/*  <RadioGroup.ItemText>{props.meta?.P.props?.label ?? "radio"}</RadioGroup.ItemText>*/}
+            {/*  <RadioGroup.ItemControl />*/}
+            {/*</RadioGroup.Item>*/}
           </Match>
           <Match when={props.component === "ProgressBar"}>
             <Progress
@@ -115,52 +116,42 @@ export function GenericInputField(
               {...props.meta?.P.props}
             />
           </Match>
-          <Match when={props.component === "RadioGroup"}>
-            <RadioGroup.Root
-              value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
-              onValueChange={(details) => {
-                props.setValue?.(
-                  props.meta,
-                  props.data as any,
-                  details.value
-                );
-            }}>
-              <PageItemRender metaVertex={props.meta} />
-            </RadioGroup.Root>
+          <Match when={props.component === "RadioGroup"}><></>
+            {/*<RadioGroup.Root*/}
+            {/*  value={props.data?.P[props.meta.P[IdAttr]] ?? ""}*/}
+            {/*  onValueChange={(details) => {*/}
+            {/*    props.setValue?.(*/}
+            {/*      props.meta,*/}
+            {/*      props.data as any,*/}
+            {/*      details.value*/}
+            {/*    );*/}
+            {/*}}>*/}
+            {/*  <PageItemRender metaVertex={props.meta} />*/}
+            {/*</RadioGroup.Root>*/}
           </Match>
-          <Match when={props.component === "Switch"}>
-            <Checkbox
-              {...props.meta?.P.props}
-              switch
-              onchange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.checked);
-              }}
-              align="left"
-              children={props.meta?.P.props?.label ?? "switch"}
-            />
+          <Match when={props.component === "Switch"}><></>
+            {/*<Checkbox*/}
+            {/*  {...props.meta?.P.props}*/}
+            {/*  switch*/}
+            {/*  onchange={(e: any) => {*/}
+            {/*    props.setValue?.(props.meta, props.data, e.target.checked);*/}
+            {/*  }}*/}
+            {/*  align="left"*/}
+            {/*  children={props.meta?.P.props?.label ?? "switch"}*/}
+            {/*/>*/}
           </Match>
           <Match when={props.component === "TextArea"}>
-            <TextField
-              class="global-style"
-              onChange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
-              }}
-              placeholder={props.meta?.P.props?.label}
-              {...props.meta?.P.props}
-              multiline
-              value={props.data?.P[props.meta.P[IdAttr]]}
-            />
+            <TextField  value={props.data?.P[props.meta.P[IdAttr]]} onChange={(e: any) => {
+              props.setValue?.(props.meta, props.data, e.target.value);
+
+            }} multiline fullWidth id="outlined-basic" style={{ height: "100%" }} placeholder={props.meta?.P.props?.label} label={props.meta?.P.props?.label} variant="outlined" />
+
           </Match>
           <Match when={props.component === "TextBox"}>
-            <TextField
-                label={''}
-              class="global-style"
-              placeholder={props.meta?.P.props?.label}
-              onChange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
-              }}
-              value={props.data?.P[props.meta.P[IdAttr]]}
-            />
+            <TextField  value={props.data?.P[props.meta.P[IdAttr]]} onChange={(e: any) => {
+              props.setValue?.(props.meta, props.data, e.target.value);
+            }} id="outlined-basic" fullWidth size={props.meta?.P.props?.label || "small"} placeholder={props.meta?.P.props?.label} label={props.meta?.P.props?.label} variant="outlined" />
+
           </Match>
         </Switch>
         {/*<div

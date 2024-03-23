@@ -1649,7 +1649,7 @@ export const PageDesignerDragAndDrop = () => {
           meta: {
             P: {
               component: "Button",
-              props: { children: "Import", variant: "primary" },
+              props: { children: "Import", variant: "contained" },
             },
           } as any,
           onClick: () => {
@@ -1668,7 +1668,7 @@ export const PageDesignerDragAndDrop = () => {
           meta: {
             P: {
               component: "Button",
-              props: { type: "primary", children: "Submit" },
+              props: { variant: "contained", children: "Submit" },
             },
           } as any,
           onClick: () => onImportsSubmit,
@@ -1677,7 +1677,7 @@ export const PageDesignerDragAndDrop = () => {
           meta: {
             P: {
               component: "Button",
-              props: { variant: "secondary", children: "Cancel" },
+              props: { variant: "outlined", children: "Cancel" },
             },
           } as any,
           onClick: () => onImportsCancel,
@@ -1823,7 +1823,7 @@ export const PageDesignerDragAndDrop = () => {
               {
                 P: {
                   component: "Button",
-                  props: { children: "Rules", onClick: () => toggleRulesModal },
+                  props: { children: "Rules",style: {"margin-bottom": "10px"},variant:"contained", onClick: () => toggleRulesModal },
                 },
               } as any
             }
@@ -1835,7 +1835,7 @@ export const PageDesignerDragAndDrop = () => {
                 P: {
                   component: "Button",
                   props: {
-                    children: "Import",
+                    children: "Import",class:"background-color:#ffffff",style: {"margin-bottom": "10px"},variant:"contained",
                     onClick: () => toggleImportsModal,
                   },
                 },
@@ -1893,7 +1893,7 @@ export const PageDesignerDragAndDrop = () => {
                           P: {
                             component: "Button",
                             props: {
-                              children: "Submit",
+                              children: "Submit",variant:"contained",
                               onClick: () => onRulesSubmit,
                             },
                           },
@@ -1907,7 +1907,7 @@ export const PageDesignerDragAndDrop = () => {
                           P: {
                             component: "Button",
                             props: {
-                              children: "Cancel",
+                              children: "Cancel",variant:"outlined",
                               onClick: () => onRulesCancel,
                             },
                           },

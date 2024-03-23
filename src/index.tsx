@@ -33,7 +33,19 @@ import {Login, Logout, SignUp} from "./pages/Forms";
 import Page404 from "./pages/404";
 import BackupRestore from "./pages/BackupRestore";
 import {GraphViewPage} from "./pages/GraphViewPage";
+import {createTheme, ThemeProvider} from "@suid/material";
 
+const theme = createTheme({
+    components: {
+        // Name of the component ⚛️
+        MuiButtonBase: {
+            defaultProps: {
+                // The default props to change
+                disableRipple: true, // No more ripple, on the whole application 💣!
+            },
+        },
+    },
+});
 
 render(() => {
     const Ws = new ServerEventsDispatcher(WS_PATH);
@@ -45,6 +57,7 @@ render(() => {
 
     return (
       <CSSRuntimeProvider config={config}>
+          <ThemeProvider theme={theme}>
         <WsContext.Provider value={{ Ws }}>
           <Sync />
           <AlertMessageContext.Provider value={{ alerts, setAlert }}>
@@ -132,6 +145,7 @@ render(() => {
             </Show>
           </AlertMessageContext.Provider>
         </WsContext.Provider>
+          </ThemeProvider>
       </CSSRuntimeProvider>
     );
 }, document.getElementById("root") as HTMLElement);

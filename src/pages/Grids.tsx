@@ -345,7 +345,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 [IdAttr]: "meta",
                                 props: {
                                     onClick: () => navigate("new"),
-                                    class: "bg:blue bg:rgb(24,98,234):hover text-fill:white ",
+                                    // class: "bg:blue bg:rgb(24,98,234):hover text-fill:white ",
+                                    variant:"contained",
                                     children: "Add New",
                                 },
                             },
