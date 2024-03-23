@@ -134,8 +134,7 @@ export const DynamicComponent = (props: {
       </Match>
       <Match when={props.component === "Table"}>
         <Show when={!hiddenNodes().includes(props.meta?.id)}>
-          <></>
-          {/* <Show when={!props.disabled} fallback={<>...</>}>
+          <Show when={!props.disabled} fallback={<>...</>}>
             <TableInputField
               meta={props.meta}
               data={props.data}
@@ -144,7 +143,7 @@ export const DynamicComponent = (props: {
               setValue={props.setValue}
               isRealTime={props.isRealTime}
             />
-          </Show> */}
+          </Show>
         </Show>
       </Match>
       <Match
