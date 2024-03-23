@@ -1,10 +1,12 @@
 import {
-  createMemo,
+  createComputed,
+  createEffect,
+  createMemo, createRenderEffect, createSelector,
   createSignal,
   For,
   getOwner,
   JSXElement,
-  Match,
+  Match, on,
   onCleanup,
   Show,
   Switch,
@@ -56,7 +58,7 @@ import {
   PageView,
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
-import { setSelectedId } from "../../pageStore";
+import {hoverId, selectedDom, selectedId, setSelectedId} from "../../pageStore";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -200,6 +202,9 @@ export function GenericField(
   };
 
   const repeaterContext = useContext(RepeaterContext);
+  const isSelectedLayoutId = createSelector(selectedId);
+  const isSelectedHoverId = createSelector(hoverId);
+
   return (
     <Show
       when={!props.disabled}
@@ -304,6 +309,12 @@ export function GenericField(
         </Match>
         <Match when={component() === "Image"}>
           <img
+            ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
             loading="lazy"
             onClick={() => setSelectedId(props.meta.id)}
             {...props.meta.P.props}

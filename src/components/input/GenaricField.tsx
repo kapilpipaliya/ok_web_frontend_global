@@ -23,7 +23,7 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
-import {hoverId, selectedId} from "../pageStore";
+import {hoverId, selectedDom, selectedId} from "../pageStore";
 import Dismiss from "solid-dismiss";
 
 export const GlobalDragData = {} as { from: Vertex };
@@ -68,6 +68,26 @@ export const PageItemRender = (props: {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
 
+
+  const [open, setOpen] = createSignal(false);
+
+  let popupEl;
+
+  const onClickClose = () => {
+    setOpen(false);
+  };
+
+  const setOpenEditPopUp = (open) => {
+    if (open) {
+      const { bottom, left } = selectedDom.dom!.getBoundingClientRect();
+      const { scrollX, scrollY } = window;
+
+      popupEl.style.position = "absolute";
+      popupEl.style.top = bottom + scrollY + "px";
+      popupEl.style.left = left + scrollX + "px";
+      popupEl.style.zIndex = "1000";
+    }
+  };
 
   return (
     <For
@@ -129,32 +149,6 @@ export const PageItemRender = (props: {
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
-            <Show when={isSelectedLayoutId(item.id)}>
-              <Dismiss
-                  menuButton={<>Hello</>}
-                  open={()=>isSelectedLayoutId(item.id)}
-                  // setOpen={setOpenEditPopUp}
-                  // onOpen={setOpenEditPopUpFun}
-                  focusElementOnClose="menuButton"
-                  animation={{
-                    name: "fade",
-                  }}
-                  mount="body"
-              >
-                <div class="popup">
-                  <h4>Popup Text</h4>
-                  <p>Lorem <a href="#">ipsum</a>.</p>
-
-                  <button
-                      class="x-btn"
-                      aria-label="close modal"
-                      onClick={()=>{}}
-                  >
-                    ✕
-                  </button>
-                </div>
-              </Dismiss>
-            </Show>
               <DynamicComponent
                   meta={item}
                   // NOTE: For repeater we cant use parentData
@@ -173,6 +167,34 @@ export const PageItemRender = (props: {
                   disabled={false}
                   component={component()}
               />
+            <Show when={isSelectedLayoutId(item.id)}>
+              <Dismiss
+                ref={popupEl}
+                menuButton={() => selectedDom.dom}
+                open={()=>isSelectedLayoutId(item.id)}
+                setOpen={()=>0}
+                onOpen={setOpenEditPopUp}
+                // onOpen={setOpenEditPopUpFun}
+                focusElementOnClose="menuButton"
+                animation={{
+                  name: "fade",
+                }}
+                mount="body"
+              >
+                <div class="popup">
+                  <h4>Popup Text</h4>
+                  <p>Lorem <a href="#">ipsum</a>.</p>
+
+                  <button
+                    class="x-btn"
+                    aria-label="close modal"
+                    onClick={onClickClose}
+                  >
+                    ✕
+                  </button>
+                </div>
+              </Dismiss>
+            </Show>
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
