@@ -228,7 +228,12 @@ export function GenericField(
                 <PageRenderContext.Provider
                   value={[...useContext(PageRenderContext), props.meta]}
                 >
-                  <PageItemRender metaVertex={props.meta} data={vertex} />
+                  <PageItemRender ref={el => {
+                    createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                      console.log(1)
+                      selectedDom.dom = el;
+                    }))
+                  }} metaVertex={props.meta} data={vertex} />
                 </PageRenderContext.Provider>
               </RepeaterContext.Provider>
             )}
@@ -239,7 +244,12 @@ export function GenericField(
             when={props.meta.P.props?.as}
             fallback={getText(props.meta.P.props?.text, repeaterContext)}
           >
-            <Dynamic
+            <Dynamic ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               component={props.meta.P.props?.as}
               class={getValueFromVertexOrKey(props.meta.P.props, "class")}
               draggable
@@ -259,7 +269,12 @@ export function GenericField(
           <Switch>
             <Match when={PageRenderUtils.getDataVertex(props.meta)}>
               {(vertex) => (
-                <A
+                <A ref={el => {
+                  createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                    console.log(1)
+                    selectedDom.dom = el;
+                  }))
+                }}
                   onClick={() => setSelectedId(props.meta.id)}
                   {...props.meta.P.props}
                   href={(showNav() ? "/nav/" : "/") + vertex().P.name}
@@ -279,7 +294,12 @@ export function GenericField(
               )}
             </Match>
             <Match when={props.meta.P.props?.href}>
-              <A
+              <A ref={el => {
+                createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                  console.log(1)
+                  selectedDom.dom = el;
+                }))
+              }}
                 onClick={() => setSelectedId(props.meta.id)}
                 {...props.meta.P.props}
                 href={getUrl(props.meta.P.props.href, repeaterContext)}
@@ -295,7 +315,12 @@ export function GenericField(
               </A>
             </Match>
             <Match when={true}>
-              <a draggable onClick={() => setSelectedId(props.meta.id)}>
+              <a ref={el => {
+                createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                  console.log(1)
+                  selectedDom.dom = el;
+                }))
+              }} draggable onClick={() => setSelectedId(props.meta.id)}>
                 {props.children}
                 <PageItemRender metaVertex={props.meta} />
               </a>
@@ -305,7 +330,12 @@ export function GenericField(
 
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView number={1} vertex={props.data} />
+          <PageView ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }} number={1} vertex={props.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
@@ -323,18 +353,38 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs {...props.meta.P.props}>
+          <Tabs {...props.meta.P.props} ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }}>
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemRender ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemRender ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }} metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
-          <Icon
+          <Icon ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }}
             icon={props.meta.P.props?.icon}
             onClick={() => setSelectedId(props.meta.id)}
             class={getValueFromVertexOrKey(props.meta.P?.props, "class")}
@@ -344,7 +394,12 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.props?.text}>
-          <Dynamic
+          <Dynamic ref={el => {
+            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+              console.log(1)
+              selectedDom.dom = el;
+            }))
+          }}
             component={props.meta.P.props?.as || "div"}
             onClick={() => setSelectedId(props.meta.id)}
             {...getAttrs(props.meta)}

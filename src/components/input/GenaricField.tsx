@@ -1,6 +1,6 @@
 import {
   createComputed,
-  createContext,
+  createContext, createEffect,
   createMemo, createSelector, createSignal,
   For,
   Match,
@@ -23,8 +23,9 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
-import {hoverId, selectedDom, selectedId} from "../pageStore";
+import {hoverId, selectedDom, selectedId, setSelectedId} from "../pageStore";
 import Dismiss from "solid-dismiss";
+import {Icon} from "@iconify-icon/solid";
 
 export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
@@ -69,14 +70,13 @@ export const PageItemRender = (props: {
   const isSelectedHoverId = createSelector(hoverId);
 
 
-  const [open, setOpen] = createSignal(false);
+  const [open, setOpen] = createSignal(true);
 
   let popupEl;
 
   const onClickClose = () => {
     setOpen(false);
   };
-
   const setOpenEditPopUp = (open) => {
     if (open) {
       const { bottom, left } = selectedDom.dom!.getBoundingClientRect();
@@ -85,7 +85,7 @@ export const PageItemRender = (props: {
       popupEl.style.position = "absolute";
       popupEl.style.top = bottom + scrollY + "px";
       popupEl.style.left = left + scrollX + "px";
-      popupEl.style.zIndex = "1000";
+      popupEl.style.zIndex = "1";
     }
   };
 
@@ -171,8 +171,8 @@ export const PageItemRender = (props: {
               <Dismiss
                 ref={popupEl}
                 menuButton={() => selectedDom.dom}
-                open={()=>isSelectedLayoutId(item.id)}
-                setOpen={()=>0}
+                open={open}
+                setOpen={setOpen}
                 onOpen={setOpenEditPopUp}
                 // onOpen={setOpenEditPopUpFun}
                 focusElementOnClose="menuButton"
@@ -181,17 +181,10 @@ export const PageItemRender = (props: {
                 }}
                 mount="body"
               >
-                <div class="popup">
-                  <h4>Popup Text</h4>
-                  <p>Lorem <a href="#">ipsum</a>.</p>
-
-                  <button
-                    class="x-btn"
-                    aria-label="close modal"
-                    onClick={onClickClose}
-                  >
-                    ✕
-                  </button>
+                <div class="popup bg:rgb(38,128,235) r:3|3|3|3 " >
+                  <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
+                  <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
+                  <Icon onclick={()=>{onClickClose();setSelectedId(-1)}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
                 </div>
               </Dismiss>
             </Show>

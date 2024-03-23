@@ -1,5 +1,6 @@
 import {
-  Match,
+  createComputed, createSelector,
+  Match, on,
   Show,
   Switch,
 } from "solid-js";
@@ -18,7 +19,7 @@ import {
 import { PageItemRender } from "./GenaricField";
 import { ColorBox } from "../solid-blocks/blocks/colorbox";
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
-import { setSelectedId } from "../pageStore";
+import {selectedDom, selectedId, setSelectedId} from "../pageStore";
 
 
 export function GenericInputField(
@@ -30,6 +31,7 @@ export function GenericInputField(
 ) {
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
+  const isSelectedLayoutId = createSelector(selectedId);
   return (
     <div
       aria-labeledby={props["aria-labeledby"]}
@@ -43,10 +45,20 @@ export function GenericInputField(
       >
         <Switch>
           <Match when={props.component === "Form"}>
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemRender ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }} metaVertex={props.meta} />
           </Match>
           <Match when={props.component === "FormSubmit"}>
-            <Button
+            <Button ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               onClick={() => setSelectedId(props.meta.id)}
               {...props.meta.P.props}
             >
@@ -55,7 +67,12 @@ export function GenericInputField(
             </Button>
           </Match>
           <Match when={props.component === "FormCancel"}>
-            <Button
+            <Button ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               onClick={() => setSelectedId(props.meta.id)}
               {...props.meta.P.props}
             >
@@ -64,10 +81,20 @@ export function GenericInputField(
             </Button>
           </Match>
           <Match when={props.component === "TableColumn"}>
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemRender ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }} metaVertex={props.meta} />
           </Match>
           <Match when={props.component === "CheckBox"}>
-            <Checkbox
+            <Checkbox ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               {...props.meta?.P.props}
               onchange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.checked);
@@ -80,14 +107,24 @@ export function GenericInputField(
             >{<PageItemRender metaVertex={props.meta} />}</Checkbox>
           </Match>
           <Match when={props.component === "ColorBox"}>
-            <ColorBox
+            <ColorBox ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               {...props.meta?.P.props}
               colorPick={props.meta?.P.props?.pickColor ?? true}
             />
           </Match>
           <Match when={props.component === "DropDownBox"}>Dropdown</Match>
           <Match when={props.component === "FileUploader"}>
-            <FileUploader
+            <FileUploader ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               {...props.meta?.P.props}
               image={props.meta?.P.props.image}
             />
@@ -96,7 +133,12 @@ export function GenericInputField(
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={props.component === "NumberBox"}>
-            <TextField
+            <TextField ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               placeholder={props.meta?.P.props.label ?? ""}
               onchange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
@@ -107,7 +149,12 @@ export function GenericInputField(
             />
           </Match>
           <Match when={props.component === "Radio"}>
-            <Radio
+            <Radio ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               {...props.meta?.P.props}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
@@ -124,18 +171,33 @@ export function GenericInputField(
             </Radio>
           </Match>
           <Match when={props.component === "ProgressBar"}>
-            <Progress
+            <Progress ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               style={{ ...props.meta?.P.props }}
               {...props.meta?.P.props}
             />
           </Match>
           <Match when={props.component === "RadioGroup"}>
-            <RadioGroup>
+            <RadioGroup ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}>
               <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
           <Match when={props.component === "TextArea"}>
-            <TextField
+            <TextField ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               class="global-style"
               {...props.meta?.P.props}
               onchange={(e: any) => {
@@ -148,7 +210,12 @@ export function GenericInputField(
             />
           </Match>
           <Match when={props.component === "TextBox"}>
-            <TextField
+            <TextField ref={el => {
+              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
+                console.log(1)
+                selectedDom.dom = el;
+              }))
+            }}
               class="global-style"
               {...props.meta?.P.props}
               placeholder={props.meta?.P.props?.label}
