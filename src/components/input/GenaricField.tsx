@@ -23,9 +23,10 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
-import {hoverId, selectedDom, selectedId, setSelectedId} from "../pageStore";
-import Dismiss from "solid-dismiss";
+import {hoverId, selectedId, setSelectedId, setTargetId, targetId} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
+import {getParentVertexValue} from "../../lib/Traverse";
+import {setParentValue} from "./SelectInputField";
 
 export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
@@ -67,27 +68,10 @@ export const PageItemRender = (props: {
   // @ts-ignore
   let { record, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
+  const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
 
 
-  const [open, setOpen] = createSignal(true);
-
-  let popupEl;
-
-  const onClickClose = () => {
-    setOpen(false);
-  };
-  const setOpenEditPopUp = (open) => {
-    if (open) {
-      const { bottom, left } = selectedDom.dom!.getBoundingClientRect();
-      const { scrollX, scrollY } = window;
-
-      popupEl.style.position = "absolute";
-      popupEl.style.top = bottom + scrollY + "px";
-      popupEl.style.left = left + scrollX + "px";
-      popupEl.style.zIndex = "1";
-    }
-  };
 
   return (
     <For
@@ -111,7 +95,7 @@ export const PageItemRender = (props: {
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
 
-          if (isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)) {
+          if (isSelectedLayoutId(item.id) || isSelectedHoverId(item.id) || isSelectedTargetId(item.id)) {
               if (compProps.class) {
                 compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
               } else {
@@ -149,45 +133,82 @@ export const PageItemRender = (props: {
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
-              <DynamicComponent
+              <span
+                class='contents '
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedId(item.id)}
+              }
+                onDragOver={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setTargetId(item.id);
+                }}
+                onDrop={(e) => {
+                  // Stop the event from propagating further
+                  e.stopPropagation();
+                  console.log('dropping');
+                  /*const parentAttrVertex = item;
+                  // disable drag and drop if it not support child.
+                  const fromVertex = GlobalDragData.from;
+                  const toIndex = 5;
+                  console.log({ parentAttrVertex, fromVertex, toIndex });
+                  // const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
+                  // if (rowId === -1) return;
+                  const fromParentVertex = getParentVertexValue(
+                    ["Attr"],
+                    fromVertex
+                  );
+                  if (fromParentVertex.length) {
+                    // remove previous incoming edge if present.
+                    setParentValue(record.txnId, fromVertex, {
+                      P: { props: { type: "Attr" } },
+                    } as unknown as Vertex);
+                  }
+                  const toId = item!.id;
+                  // add new edge.
+                  // if (e.dropInsideItem) {
+                  setParentValue(
+                    record.txnId,
+                    fromVertex,
+                    { P: { props: { type: "Attr" } } } as unknown as Vertex,
+                    toId as number
+                  );
+                  // } else {
+                  //   const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
+                  //   setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
+                  // }*/
+                }}
+              
+              >
+                <Show when={isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)}>
+                  <span class="position:relative">
+                    <div class="abs bottom:100% w:5remx bg:rgb(38,128,235) r:3|3|3|3 ">
+                      <Icon icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon onclick={() => {}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                    </div>
+                  </span>
+                </Show>
+                <DynamicComponent
                   meta={item}
                   // NOTE: For repeater we cant use parentData
                   // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
                   data={
-                      props.data ||
-                      getSelectionOptions(
-                          [...useContext(RepeaterContext)],
-                          item.P.data
-                      ).vertexes ||
-                      PageRenderUtils.getDataVertex(item)
+                    props.data ||
+                    getSelectionOptions(
+                      [...useContext(RepeaterContext)],
+                      item.P.data
+                    ).vertexes ||
+                    PageRenderUtils.getDataVertex(item)
                   }
                   title={toTitle(PageRenderUtils.getId(item) || "")}
                   setValue={record?.setValue || (() => {
                   })}
                   disabled={false}
                   component={component()}
-              />
-            <Show when={isSelectedLayoutId(item.id)}>
-              <Dismiss
-                ref={popupEl}
-                menuButton={() => selectedDom.dom}
-                open={open}
-                setOpen={setOpen}
-                onOpen={setOpenEditPopUp}
-                // onOpen={setOpenEditPopUpFun}
-                focusElementOnClose="menuButton"
-                animation={{
-                  name: "fade",
-                }}
-                mount="body"
-              >
-                <div class="popup bg:rgb(38,128,235) r:3|3|3|3 " >
-                  <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
-                  <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
-                  <Icon onclick={()=>{onClickClose();setSelectedId(-1)}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color:"white"}}/>
-                </div>
-              </Dismiss>
-            </Show>
+                /></span>
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.

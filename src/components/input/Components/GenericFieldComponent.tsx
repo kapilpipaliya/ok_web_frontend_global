@@ -58,7 +58,7 @@ import {
   PageView,
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
-import {hoverId, selectedDom, selectedId, setSelectedId} from "../../pageStore";
+import {hoverId, selectedId, setSelectedId} from "../../pageStore";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -228,12 +228,7 @@ export function GenericField(
                 <PageRenderContext.Provider
                   value={[...useContext(PageRenderContext), props.meta]}
                 >
-                  <PageItemRender ref={el => {
-                    createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                      console.log(1)
-                      selectedDom.dom = el;
-                    }))
-                  }} metaVertex={props.meta} data={vertex} />
+                  <PageItemRender metaVertex={props.meta} data={vertex} />
                 </PageRenderContext.Provider>
               </RepeaterContext.Provider>
             )}
@@ -244,16 +239,11 @@ export function GenericField(
             when={props.meta.P.props?.as}
             fallback={getText(props.meta.P.props?.text, repeaterContext)}
           >
-            <Dynamic ref={el => {
-              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                console.log(1)
-                selectedDom.dom = el;
-              }))
-            }}
+            <Dynamic
               component={props.meta.P.props?.as}
               class={getValueFromVertexOrKey(props.meta.P.props, "class")}
               draggable
-              onClick={() => setSelectedId(props.meta.id)}
+              
               onDragStart={(e) => {
                 e.stopPropagation();
                 return (GlobalDragData.from = props.meta);
@@ -269,13 +259,8 @@ export function GenericField(
           <Switch>
             <Match when={PageRenderUtils.getDataVertex(props.meta)}>
               {(vertex) => (
-                <A ref={el => {
-                  createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                    console.log(1)
-                    selectedDom.dom = el;
-                  }))
-                }}
-                  onClick={() => setSelectedId(props.meta.id)}
+                <A
+                  
                   {...props.meta.P.props}
                   href={(showNav() ? "/nav/" : "/") + vertex().P.name}
                   draggable
@@ -294,13 +279,8 @@ export function GenericField(
               )}
             </Match>
             <Match when={props.meta.P.props?.href}>
-              <A ref={el => {
-                createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                  console.log(1)
-                  selectedDom.dom = el;
-                }))
-              }}
-                onClick={() => setSelectedId(props.meta.id)}
+              <A
+                
                 {...props.meta.P.props}
                 href={getUrl(props.meta.P.props.href, repeaterContext)}
                 draggable
@@ -315,12 +295,7 @@ export function GenericField(
               </A>
             </Match>
             <Match when={true}>
-              <a ref={el => {
-                createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                  console.log(1)
-                  selectedDom.dom = el;
-                }))
-              }} draggable onClick={() => setSelectedId(props.meta.id)}>
+              <a draggable >
                 {props.children}
                 <PageItemRender metaVertex={props.meta} />
               </a>
@@ -330,63 +305,32 @@ export function GenericField(
 
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }} number={1} vertex={props.data} />
+          <PageView number={1} vertex={props.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
-            ref={el => {
-              createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                console.log(1)
-                selectedDom.dom = el;
-              }))
-            }}
             loading="lazy"
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...props.meta.P.props}
             src={getText(props.meta.P.props?.src, repeaterContext)}
             draggable={true}
           />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs {...props.meta.P.props} ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }}>
+          <Tabs {...props.meta.P.props}>
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }} metaVertex={props.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }} metaVertex={props.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
-          <Icon ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }}
+          <Icon
             icon={props.meta.P.props?.icon}
-            onClick={() => setSelectedId(props.meta.id)}
+            
             class={getValueFromVertexOrKey(props.meta.P?.props, "class")}
             width={props.meta.P.props?.width || "24"}
             height={props.meta.P.props?.height || "24"}
@@ -394,41 +338,18 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.props?.text}>
-          <Dynamic ref={el => {
-            createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-              console.log(1)
-              selectedDom.dom = el;
-            }))
-          }}
+          <Dynamic
             component={props.meta.P.props?.as || "div"}
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...getAttrs(props.meta)}
             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
-            classList={{ "bg:red": true }}
-            onDragOver={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onDrop={(e) => {
-              const parentAttrVertex = props.meta;
-              // disable drag and drop if it not support child.
-              const fromVertex = GlobalDragData.from;
-              const toIndex = 5;
-              const rowId = componentDrag(
-                props.txnId!,
-                fromVertex,
-                toIndex,
-                parentAttrVertex!
-              );
-              if (rowId === -1) return;
-            }}
           >
             {getText(props.meta.P.props?.text, repeaterContext)}
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
           <Button
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
@@ -436,7 +357,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
@@ -450,7 +371,7 @@ export function GenericField(
         <Match when={component() === "LoadIndicator"}>
           {component()}
           <Spinner
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...props.meta?.P.props}
           >
             {props.meta.P.props.children}
@@ -458,7 +379,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
-            onClick={() => setSelectedId(props.meta.id)}
+            
             {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
@@ -466,14 +387,14 @@ export function GenericField(
         </Match>
         <Match when={component() === "Breadcrumb"}>
 
-          <Breadcrumbs separator={props.meta.P.props.separator ?? "›"} aria-label="breadcrumb" onClick={() => setSelectedId(props.meta.id)}
+          <Breadcrumbs separator={props.meta.P.props.separator ?? "›"} aria-label="breadcrumb" 
                        {...props.meta.P.props}>
                        <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
           <Progress
-              onClick={() => setSelectedId(props.meta.id)}
+              
               {...props.meta.P.props}
           />
         </Match>
@@ -481,45 +402,6 @@ export function GenericField(
           <Dynamic
             component={props.meta.P.props?.as || "div"}
             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
-            // classList={{'bg:red': true}}
-            onDragOver={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-            onDrop={(e) => {
-              // Stop the event from propagating further
-              e.stopPropagation();
-              const parentAttrVertex = props.meta;
-              // disable drag and drop if it not support child.
-              const fromVertex = GlobalDragData.from;
-              const toIndex = 5;
-              console.log({ parentAttrVertex, fromVertex, toIndex });
-              // const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
-              // if (rowId === -1) return;
-              const fromParentVertex = getParentVertexValue(
-                ["Attr"],
-                fromVertex
-              );
-              if (fromParentVertex.vertex) {
-                // remove previous incoming edge if present.
-                setParentValue(props.txnId!, fromVertex, {
-                  P: { props: { type: "Attr" } },
-                } as unknown as Vertex);
-              }
-              const toId = props.meta!.id;
-              // add new edge.
-              // if (e.dropInsideItem) {
-              setParentValue(
-                props.txnId!,
-                fromVertex,
-                { P: { props: { type: "Attr" } } } as unknown as Vertex,
-                toId as number
-              );
-              // } else {
-              //   const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
-              //   setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
-              // }
-            }}
           >
             {props.children}
             <PageItemRender metaVertex={props.meta} />

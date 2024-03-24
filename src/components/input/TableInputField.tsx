@@ -11,7 +11,7 @@ import {
   useContext,
   on,
   getOwner,
-  runWithOwner, createSelector,
+  runWithOwner,
 } from "solid-js";
 import { SimpleTable } from "solid-simple-table"
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
@@ -60,7 +60,6 @@ import { GenericField } from "./Components/GenericFieldComponent";
 import { getLastItem } from "../../utils/functions";
 import { MySimpleTable } from "../simple-table/solid-simple-table/demo/simple";
 import { Separator } from "@kobalte/core";
-import {selectedDom, selectedId} from "../pageStore";
 
 export function TableInputField(
   props: ComponentProps & { txnId?: number; isRealTime?: boolean }
@@ -413,7 +412,6 @@ export function TableInputField(
       />
     );
   };
-  const isSelectedLayoutId = createSelector(selectedId);
 
   return (
     <Switch>
@@ -421,12 +419,7 @@ export function TableInputField(
         Please Define table columns
       </Match>
       <Match when={true}>
-        <div ref={el => {
-          createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-            console.log(1)
-            selectedDom.dom = el;
-          }))
-        }}>
+        <div>
           {/*<Show when={props.meta.P.attributes}>*/}
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}

@@ -1,8 +1,8 @@
 import {
-  batch, createComputed,
-  createResource, createSelector,
+  batch,
+  createResource,
   For,
-  getOwner, on,
+  getOwner,
   runWithOwner,
   Show,
   untrack,
@@ -38,7 +38,6 @@ import MultiSelect from "../solid-multiselect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "../ComponentType";
 import { setSelectionValue } from "./SelectionUtils";
-import {selectedDom, selectedId} from "../pageStore";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,
@@ -266,8 +265,6 @@ export function SelectInputField(
       });
     });
   };
-  const isSelectedLayoutId = createSelector(selectedId);
-
   const outerOwner = getOwner();
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
@@ -293,12 +290,6 @@ export function SelectInputField(
           }
         >
           <MultiSelect
-              ref={el => {
-                createComputed(on(() => isSelectedLayoutId(props.meta.id), v=>{
-                  console.log(1)
-                  selectedDom.dom = el;
-                }))
-              }}
             isObject
             displayValueParent="P"
             disable={props.disabled!}

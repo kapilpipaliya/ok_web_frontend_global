@@ -1,4 +1,4 @@
-import { graph, Vertex } from "./graph";
+import {graph, Id, Vertex} from "./graph";
 import { evaluate } from './jsep'
 import jsep from "jsep";
 import {
@@ -25,7 +25,7 @@ export function getInEdge(meta: Vertex, vertex: Vertex) {
   return capitalizeFirstLetter(parentLabel) + capitalizeFirstLetter((childLabel || vertex.L[0]));
 }
 
-export function getParentVertexValue(vertex: Vertex, meta: Vertex): number[] {
+export function getParentVertexValue(vertex: Vertex, meta: Vertex): Id[] {
   const type = getInEdge(meta, vertex);
   if (!type) {
     return [];
