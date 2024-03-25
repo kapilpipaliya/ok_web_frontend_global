@@ -18,7 +18,7 @@ import {
   PageContext,
   getSelectionOptions,
   getChildVertex,
-  getChildVertexes,
+  getChildVertexes, getParentVertex,
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
@@ -174,7 +174,13 @@ export const PageItemRender = (props: {
                   <span class="position:relative">
                     <div class="abs bottom:100% w:10rem bg:rgb(38,128,235) r:3|3|3|3 z:9999">
                       <Icon draggable={true}  onDragStart={handleDragStart} icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
-                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}} onclick={e => {
+                        const parentResult = getParentVertex(['Attr'], item);
+                        if (parentResult.error) {
+                          return;
+                        }
+                        setSelectedId(parentResult.vertex!.id);
+                      }}/>
                       <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
                       <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
                       <Icon onclick={() => {}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
