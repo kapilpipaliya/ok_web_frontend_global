@@ -1879,6 +1879,10 @@ export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: Field
   }
 };
 export function setValueGlobal(txnId: number, attribute: Vertex, vertex: Vertex, data: any, ws: ServerEventsDispatcher, isRealTime: boolean) {
+  if (!vertex) {
+    return;
+  }
+
   // after commit, we can not use same txnId();
   if (isRealTime) {
     txnId = getNewTxnId();

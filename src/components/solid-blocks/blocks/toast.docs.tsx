@@ -1,5 +1,4 @@
 import { createSignal, Show } from "solid-js"
-import { Button } from "./button";
 import { Message } from "./message";
 import { Select } from "./select";
 import { TextField } from "./textfield";
@@ -47,7 +46,7 @@ ToastProps {
     <TextField type="number" min="0" label="timeout" onchange={(t) => setTimeout(Number(t))} value={timeout()} />{" "}
     <TextField label="content" onchange={setContent} value={content()} /><br/><br/>
     <div class="example">
-      <Button onclick={() => setShown(s => !s)}>Toggle toast</Button>
+      <button onclick={() => setShown(s => !s)}>Toggle toast</button>
       <Show when={shown()}>
         <Toast 
           position={pos() as ToastPosition}
@@ -55,7 +54,7 @@ ToastProps {
           onhide={() => setShown(false)}
         >{({hide}) => 
           <Message type="info">
-            <Button style={{float: "right"}} variant="icon" onclick={hide}>✕</Button>
+            <button style={{float: "right"}} variant="icon" onclick={hide}>✕</button>
             {content()}
           </Message>
         }</Toast>
@@ -66,7 +65,7 @@ ToastProps {
   timeout={${timeout()}}
 >{({hide}) => 
   <Message type="info">
-    <Button style={{float: "right"}} variant="icon" onclick={hide}>✕</Button>
+    <button style={{float: "right"}} variant="icon" onclick={hide}>✕</button>
     {"${content()}"}
   </Message>
 }</Toast>`}

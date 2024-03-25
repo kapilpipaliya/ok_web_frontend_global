@@ -23,12 +23,11 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
-import {hoverId, selectedId, setSelectedId, setTargetId, targetId} from "../pageStore";
+import {hoverId, indicatorPosition, selectedId, setSelectedId, setTargetId, targetId, useDragDrop} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
 import {getParentVertexValue} from "../../lib/Traverse";
 import {setParentValue} from "./SelectInputField";
 
-export const GlobalDragData = {} as { from: Vertex };
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -80,6 +79,8 @@ export const PageItemRender = (props: {
       )}
     >
       {(item) => {
+        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick} = useDragDrop(record, item, () => [], true);
+
         // createComputed is hard to debug
         createComputed(() => {
           // @Note:(Question)
@@ -102,6 +103,21 @@ export const PageItemRender = (props: {
                 compProps.class = `b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
               }
 
+          }
+          if (isActiveItem()) {
+            if (indicatorPosition().position === "before") {
+              if (compProps.class) {
+                compProps.class += ` bt:rgb(0,255,8)|1px|solid`;
+              } else {
+                compProps.class = `bt:rgb(0,255,8)|1px|solid`;
+              }
+            } else if (indicatorPosition().position === "after") {
+              if (compProps.class) {
+                compProps.class += ` bb:rgb(0,255,8)|2px|solid`;
+              } else {
+                compProps.class = `bb:rgb(0,255,8)|2px|solid`;
+              }
+            }
           }
 
           // supported deleted properties.
@@ -129,6 +145,8 @@ export const PageItemRender = (props: {
           return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
         };
 
+
+
         const PageComponent = () => (
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
@@ -138,53 +156,17 @@ export const PageItemRender = (props: {
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedId(item.id)}
-              }
-                onDragOver={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setTargetId(item.id);
-                }}
-                onDrop={(e) => {
-                  // Stop the event from propagating further
-                  e.stopPropagation();
-                  console.log('dropping');
-                  /*const parentAttrVertex = item;
-                  // disable drag and drop if it not support child.
-                  const fromVertex = GlobalDragData.from;
-                  const toIndex = 5;
-                  console.log({ parentAttrVertex, fromVertex, toIndex });
-                  // const rowId = componentDrag(props.txnId!, fromVertex,  toIndex, parentAttrVertex!);
-                  // if (rowId === -1) return;
-                  const fromParentVertex = getParentVertexValue(
-                    ["Attr"],
-                    fromVertex
-                  );
-                  if (fromParentVertex.length) {
-                    // remove previous incoming edge if present.
-                    setParentValue(record.txnId, fromVertex, {
-                      P: { props: { type: "Attr" } },
-                    } as unknown as Vertex);
-                  }
-                  const toId = item!.id;
-                  // add new edge.
-                  // if (e.dropInsideItem) {
-                  setParentValue(
-                    record.txnId,
-                    fromVertex,
-                    { P: { props: { type: "Attr" } } } as unknown as Vertex,
-                    toId as number
-                  );
-                  // } else {
-                  //   const toParentVertex = toNode === null ? pageConfig[0].record?.vertex :  getParentVertex(['Attr'], graph.vertexes[toId!]).vertex;
-                  //   setParentValue(pageConfig[0].record.txnId, fromVertex, {P: {props: {type: "Attr"}}} as unknown as Vertex, toParentVertex?.id)
-                  // }*/
-                }}
-              
+                }
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
-                <Show when={isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)}>
+                <Show when={isSelectedLayoutId(item.id)}>
                   <span class="position:relative">
-                    <div class="abs bottom:100% w:5remx bg:rgb(38,128,235) r:3|3|3|3 ">
-                      <Icon icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                    <div class="abs bottom:100% w:10rem bg:rgb(38,128,235) r:3|3|3|3 z:9999">
+                      <Icon draggable={true}  onDragStart={handleDragStart} icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
                       <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
                       <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
                       <Icon onclick={() => {}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>

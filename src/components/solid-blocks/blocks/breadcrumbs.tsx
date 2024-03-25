@@ -1,4 +1,4 @@
-import { Component, JSX, For } from "solid-js";
+import { Component, JSX } from "solid-js";
 
 import "./base.css";
 import "./breadcrumbs.css";

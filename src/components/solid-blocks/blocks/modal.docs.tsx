@@ -1,4 +1,4 @@
-import { Button } from "./button";
+
 import {
   Modal,
   ModalBody,
@@ -63,23 +63,23 @@ ModalProps {
         <Modal closeOnClickOutside closeOnEsc>
           {({ open, toggle }) => (
             <>
-              <Button
+              <button
                 aria-disabled={open()}
                 style={{ margin: "auto" }}
                 onclick={toggle}
               >
                 Press to open
-              </Button>
+              </button>
               <ModalContent>
                 <ModalHeader>
                   Header
-                  <Button
+                  <button
                     variant="icon"
                     onclick={toggle}
                     style={{ float: "right" }}
                   >
                     ✕
-                  </Button>
+                  </button>
                 </ModalHeader>
                 <ModalBody>
                   <p>
@@ -87,7 +87,7 @@ ModalProps {
                   </p>
                 </ModalBody>
                 <ModalFooter>
-                  <Button onclick={toggle}>OK</Button>
+                  <button onclick={toggle}>OK</button>
                 </ModalFooter>
               </ModalContent>
             </>
@@ -98,21 +98,21 @@ ModalProps {
 <Modal closeOnClickOutside closeOnEsc>
 {({ open, toggle }) => (
   <>
-    <Button
+    <button
       aria-disabled={open()}
       style={{ margin: "auto" }}
       onclick={toggle}
-    >Press to open</Button>
+    >Press to open</button>
     <ModalContent>
       <ModalHeader>
         Header
-        <Button
+        <button
           variant="icon"
           onclick={toggle}
           style={{ float: "right" }}
         >
           ✕
-        </Button>
+        </button>
       </ModalHeader>
       <ModalBody>
         <p>
@@ -120,7 +120,7 @@ ModalProps {
         </p>
       </ModalBody>
       <ModalFooter>
-        <Button onclick={toggle}>OK</Button>
+        <button onclick={toggle}>OK</button>
       </ModalFooter>
     </ModalContent>
   </>

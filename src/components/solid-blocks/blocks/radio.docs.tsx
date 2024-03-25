@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js"
-import { Button } from "./button";
+
 import { Radio, RadioGroup } from "./radio"
 
 export const RadioDocs = () => {
@@ -26,12 +26,12 @@ RadioGroupProps {
   value?: () => string;
 }`}
     </pre>
-    <Button variant="secondary" onClick={() => setValue("1")}>
+    <button variant="secondary" onClick={() => setValue("1")}>
       Activate first
-    </Button>
-    <Button variant="secondary" onClick={() => setValue("2")}>
+    </button>
+    <button variant="secondary" onClick={() => setValue("2")}>
       Activate second
-    </Button>
+    </button>
     <pre data-title="setValue-calls" style={{ "max-height": "9em" }}>{events()}</pre>
     <div class="example">
       <RadioGroup class="flex-row" value={value} setValue={(value) => {

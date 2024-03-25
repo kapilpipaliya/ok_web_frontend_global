@@ -53,7 +53,6 @@ import {
   PageItemRender,
   RepeaterContext,
   getText,
-  GlobalDragData,
   getUrl,
   PageView,
 } from "../GenaricField";
@@ -242,12 +241,6 @@ export function GenericField(
             <Dynamic
               component={props.meta.P.props?.as}
               class={getValueFromVertexOrKey(props.meta.P.props, "class")}
-              draggable
-              
-              onDragStart={(e) => {
-                e.stopPropagation();
-                return (GlobalDragData.from = props.meta);
-              }}
             >
               {getText(props.meta.P.props?.text, repeaterContext)}
               {props.children}
@@ -348,12 +341,11 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <Button
-            
+          <button
             {...props.meta.P.props}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
-          </Button>
+          </button>
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar

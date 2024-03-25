@@ -12,7 +12,7 @@ import {
   createEffect,
   Show,
 } from "solid-js";
-import { Button, ButtonProps } from "./button";
+
 import { getElements } from "./tools";
 
 import "./base.css";
@@ -182,10 +182,10 @@ export const Menu: Component<MenuProps> = (props) => {
   );
 };
 
-export type MenuButtonProps = ButtonProps;
+export type MenuButtonProps = JSX.HTMLAttributes<HTMLButtonElement>;
 
 export const MenuButton: Component<MenuButtonProps> = (props) => (
-  <Button {...props} aria-haspopup="menu" />
+  <button {...props} aria-haspopup="menu" />
 );
 
 export type MenuItemProps = JSX.HTMLAttributes<HTMLDivElement>;

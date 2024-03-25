@@ -9,7 +9,6 @@ import { IdAttr } from "../../lib/graph";
 import { getTextColumnValue } from "./Components/Utils";
 import { ComponentProps } from "../ComponentType";
 import {
-  Button,
   Checkbox,
   Progress,
   Radio,
@@ -17,7 +16,7 @@ import {
   TextField,
 } from "../solid-blocks/blocks";
 import { PageItemRender } from "./GenaricField";
-import { ColorBox } from "../solid-blocks/blocks/colorbox";
+
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
 import {selectedId, setSelectedId} from "../pageStore";
 
@@ -31,7 +30,6 @@ export function GenericInputField(
 ) {
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
-  const isSelectedLayoutId = createSelector(selectedId);
   return (
     <div
       aria-labeledby={props["aria-labeledby"]}
@@ -48,22 +46,22 @@ export function GenericInputField(
             <PageItemRender metaVertex={props.meta} />
           </Match>
           <Match when={props.component === "FormSubmit"}>
-            <Button
+            <button
               onClick={() => setSelectedId(props.meta.id)}
               {...props.meta.P.props}
             >
               {props.data?.P[props.meta.P[IdAttr]] ??
                 props.meta.P.props.children}
-            </Button>
+            </button>
           </Match>
           <Match when={props.component === "FormCancel"}>
-            <Button
+            <button
               onClick={() => setSelectedId(props.meta.id)}
               {...props.meta.P.props}
             >
               {props.data?.P[props.meta.P[IdAttr]] ??
                 props.meta.P.props.children}
-            </Button>
+            </button>
           </Match>
           <Match when={props.component === "TableColumn"}>
             <PageItemRender metaVertex={props.meta} />
@@ -82,9 +80,13 @@ export function GenericInputField(
             >{<PageItemRender metaVertex={props.meta} />}</Checkbox>
           </Match>
           <Match when={props.component === "ColorBox"}>
-            <ColorBox
+            <input
+              type="color"
               {...props.meta?.P.props}
-              colorPick={props.meta?.P.props?.pickColor ?? true}
+              value={props.data?.P[props.meta.P[IdAttr]]}
+              onInput={e=> {
+                props.setValue?.(props.meta, props.data, e.target.value);
+              }}
             />
           </Match>
           <Match when={props.component === "DropDownBox"}>Dropdown</Match>
