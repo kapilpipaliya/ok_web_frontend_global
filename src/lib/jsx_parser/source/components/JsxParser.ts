@@ -311,7 +311,7 @@ export default class JsxParser {
 			isText = true;
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
 		}
-		const rowId = componentDrag(this.props.txnId, componentVertex!,  1000, scope.parent);
+		const rowId = componentDrag(this.props.txnId, componentVertex!,  scope.parent, 1000);
 		if (rowId === -1) return;
 		const parentVertex = graph.vertexes[rowId];
 		if (isText) {
@@ -379,7 +379,6 @@ export default class JsxParser {
 			if (key === "key") {
 				continue;
 			}
-
 			setPropertyValueGlobal(this.props.txnId, {P: {name: (key === "className" || key === "class") ? "class" : key}} as any, graph.vertexes[rowId], componentVertex, nonUiKitProps[key] );
 		}
 
@@ -394,7 +393,7 @@ export default class JsxParser {
 				const value =  this.#parseExpression(node, {...scope, parent: parentVertex});
 				if (typeof (value) === "string" && childNodes.length > 1) {
 					const componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
-					const rowId = componentDrag(this.props.txnId, componentVertex!,  1000, parentVertex);
+					const rowId = componentDrag(this.props.txnId, componentVertex!,   parentVertex, 1000);
 					if (rowId === -1) return;
 					setPropertyValueGlobal(this.props.txnId, {P: {name: "text"}} as any, graph.vertexes[rowId], componentVertex, `'${value.replaceAll("'", "\\'")}'` );
 				}

@@ -1490,19 +1490,18 @@ export const PageDesignerDragAndDrop = () => {
           meta: {
             P: {
               component: "Button",
-              props: { type: "primary", children: "Submit" },
+              props: { type: "primary", children: "Submit", onClick: onImportsSubmit, },
             },
           } as any,
-          onClick: () => onImportsSubmit,
+
         },
         {
           meta: {
             P: {
               component: "Button",
-              props: { variant: "secondary", children: "Cancel" },
+              props: { variant: "secondary", children: "Cancel", onClick: onImportsCancel },
             },
           } as any,
-          onClick: () => onImportsCancel,
         },
       ];
       return (
