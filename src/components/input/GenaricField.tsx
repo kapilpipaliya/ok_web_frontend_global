@@ -1,10 +1,10 @@
 import {
+  batch,
   createComputed,
-  createContext, createEffect,
-  createMemo, createSelector, createSignal,
+  createContext,
+  createMemo, createSelector,
   For,
   Match,
-  runWithOwner,
   Show,
   Switch,
   useContext,
@@ -23,10 +23,20 @@ import {
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
-import {hoverId, indicatorPosition, selectedId, setSelectedId, setTargetId, targetId, useDragDrop} from "../pageStore";
+import {
+  hoverId,
+  indicatorPosition,
+  selectedId, setSelectedColl,
+  setSelectedComponent,
+  setSelectedId,
+  setTargetId,
+  targetId,
+  useDragDrop
+} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
-import {getParentVertexValue} from "../../lib/Traverse";
+import {deleteNestedLayout, getParentVertexValue} from "../../lib/Traverse";
 import {setParentValue} from "./SelectInputField";
+import {createStore} from "solid-js/store";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -159,10 +169,11 @@ export const PageItemRender = (props: {
             value={[...useContext(PageRenderContext), item]}
           >
               <span
-                class='contents '
+                class='contents cursor:pointer'
 
                 onClick={(e) => {
                   e.stopPropagation();
+                  onLayoutItemClick();
                   setSelectedId(item.id)}
                 }
                 onDragOver={handleDragOver}
@@ -172,18 +183,29 @@ export const PageItemRender = (props: {
               >
                 <Show when={isSelectedLayoutId(item.id)}>
                   <span class="position:relative">
-                    <div class="abs bottom:100% w:10rem bg:rgb(38,128,235) r:3|3|3|3 z:9999">
+                    <div class="abs bottom:100% w:8rem bg:rgb(38,128,235) r:3|3|3|3 z:9999">
                       <Icon draggable={true}  onDragStart={handleDragStart} icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
-                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}} onclick={e => {
+                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}} onclick={e => {
                         const parentResult = getParentVertex(['Attr'], item);
                         if (parentResult.error) {
                           return;
                         }
                         setSelectedId(parentResult.vertex!.id);
                       }}/>
-                      <Icon icon={'mdi:edit'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
-                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
-                      <Icon onclick={() => {}} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon onclick={(e) => {
+                        if (selectedId() !== -1) {
+                          const layoutVertexId = selectedId();
+                          batch(() => {
+                            setSelectedId(-1);
+                            setSelectedComponent({ vertexId: -1 });
+                            setSelectedColl({ vertexId: -1 });
+                          });
+                          deleteNestedLayout(record.txnId, [
+                            graph.vertexes[layoutVertexId],
+                          ]);
+                          }
+                      }} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
                     </div>
                   </span>
                 </Show>
