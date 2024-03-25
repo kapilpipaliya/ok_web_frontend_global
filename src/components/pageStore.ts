@@ -122,8 +122,38 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
 
   const handleDragOver = (e: DragEvent) => {
     e.stopPropagation();
-    e.preventDefault();
     handleDragOverBase(e);
+
+    let fromVertex = draggedVertex();
+    const toVertexId = indicatorPosition().activeItem!;
+    if (!fromVertex) {
+      // Don't allow drag and drop
+      return;
+    }
+    const fromVertexLabel = fromVertex.L[0];
+    const position = indicatorPosition().position;
+
+    if (fromVertexLabel === "Comp") {
+      if (position === "center") {
+        const compVertex = getComponentFromLayoutRow(toVertexId);
+        if (!compVertex?.P.child) {
+          // Don't allow drag and drop
+          return;
+        }
+      }
+    }  else {
+      if (position === "center") {
+        const compVertex = getComponentFromLayoutRow(toVertexId);
+        if (!compVertex?.P.child) {
+          // Don't allow drag and drop
+          return;
+        }
+      }
+    }
+
+    // This is necessary to allow the drop action to proceed
+    e.preventDefault();
+
   };
 
   const handleDragLeave = (e: DragEvent) => {
@@ -225,6 +255,13 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
 
       ///sortChildren(childrenItems, record.txnId);
     } else {
+      if (position === "center") {
+        const compVertex = getComponentFromLayoutRow(toVertexId);
+        if (!compVertex?.P.child) {
+          return;
+        }
+      }
+
       // remove previous incoming edge if present.
       if (fromParentVertex.vertex) {
         setParentValue(record.txnId, fromVertex, {
