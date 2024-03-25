@@ -1353,20 +1353,19 @@ export const PageDesignerDragAndDrop = () => {
           meta: {
             P: {
               component: "Button",
-              props: { children: "Import", variant: "primary" },
+              props: { children: "Import", variant: "primary", onClick: () => {
+                  const jsxParser = new JsxParser({
+                    showWarnings: true,
+                    txnId: pageConfig[0].record.txnId,
+                    jsx: graph.vertexes[dataVertexId].P.jsx || "",
+                    parent: graph.vertexes[selectedId()],
+                  });
+                  jsxParser.render();
+                  // reset layout
+                  // layoutTreeViewInstance.option("items", getLayoutTreeData());
+                }, },
             },
-          } as any,
-          onClick: () => {
-            const jsxParser = new JsxParser({
-              showWarnings: true,
-              txnId: pageConfig[0].record.txnId,
-              jsx: graph.vertexes[dataVertexId].P.jsx || "",
-              parent: graph.vertexes[selectedId()],
-            });
-            jsxParser.render();
-            // reset layout
-            // layoutTreeViewInstance.option("items", getLayoutTreeData());
-          },
+          } as any
         },
         {
           meta: {
@@ -1424,7 +1423,7 @@ export const PageDesignerDragAndDrop = () => {
                   >
                     <For each={footerButtons}>
                       {(item) => (
-                        <GenericField meta={item.meta} onClick={item.onClick} />
+                        <GenericField meta={item.meta} />
                       )}
                     </For>
                   </div>
@@ -1540,7 +1539,7 @@ export const PageDesignerDragAndDrop = () => {
                   component: "Button",
                   props: {
                     children: "Import",
-                    onClick: () => toggleImportsModal,
+                    onClick: toggleImportsModal,
                   },
                 },
               } as any
