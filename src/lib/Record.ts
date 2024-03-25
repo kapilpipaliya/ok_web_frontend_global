@@ -1,4 +1,5 @@
 import {
+ getNewGraphId,
  getNewTxnId,
  graph,
  Id,
@@ -8,23 +9,25 @@ import {
 import { klona } from "klona/json";
 import {
  findVertexByLabelAndUniqueId,
- mergeVertexProperties} from "./Vertex";
+ mergeVertexProperties, newVertex
+} from "./Vertex";
 import { batch, onCleanup, untrack } from "solid-js";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getSelectionOptions,
-  AdminAttrKeys,
-  AttrsTableData,
-  AttrsAdminTableData,
-  FieldAttribute,
-  FormMetaData,
-  getParentVertex,
+ getChildVertex,
+ getChildVertexes,
+ getSelectionOptions,
+ AdminAttrKeys,
+ AttrsTableData,
+ AttrsAdminTableData,
+ FieldAttribute,
+ FormMetaData,
+ getParentVertex, addNewRow,
 } from "./Utils";
 import { getToEdge } from "./CommonUtils/getToEdge";
 import { removeUndefinedProperties } from "../utils/functions";
 import { Record } from "./Utils";
 import { newRow } from "./Utils";
+import {setSelectionValue} from "../components/input/SelectionUtils";
 
 export function getCompPropsMap(comp: Vertex) {
  return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {
@@ -52,6 +55,33 @@ export function getRowProps(comp: Vertex) {
 
   return acc;
  }, {} as { [key: string]: any });
+}
+export function cloneRowProps(txnId: number, fromVertex: Vertex, toVertex: Vertex) {
+ const propRows = (getChildVertexes(["$0Prop"], [fromVertex]).vertexes || []);
+
+ const attrPropMetaVertex = newVertex(getNewGraphId(), [], {
+  name: "Prop",
+ });
+ const attrNameVertex = newVertex(getNewGraphId(), [], {
+  name: "Name",
+  component: "SelectBox",
+ });
+
+ for (const propRow of propRows) {
+  const nameVertex = getChildVertex(["$0Name"], propRow);
+  if (nameVertex.vertex) {
+   const rowResult = addNewRow(
+     txnId,
+     attrPropMetaVertex,
+     toVertex,
+     klona(propRow.P),
+     false,
+     {} as any
+   );
+   const rowVertex = graph.vertexes[rowResult.vertexId!];
+   setSelectionValue(txnId, rowVertex, attrNameVertex, nameVertex.vertex.id);
+  }
+ }
 }
 
 function getComponentProperties(metaRows: Vertex[]) {

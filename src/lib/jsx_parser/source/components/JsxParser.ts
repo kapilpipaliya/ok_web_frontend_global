@@ -8,7 +8,6 @@ import { randomHash } from '../helpers/hash'
 import { parseStyle } from '../helpers/parseStyle'
 import { resolvePath } from '../helpers/resolvePath'
 import {JSX} from "solid-js";
-import {componentDrag, setPropertyValueGlobal} from "../../../../components/PageDesignerDragAndDrop";
 import {addNewVertex, findVertexByLabelAndUniqueId, newVertex} from "../../../Vertex";
 import {getNewGraphId, graph, Vertex} from "../../../graph";
 import {setParentValue} from "../../../../components/input/SelectInputField";
@@ -17,6 +16,7 @@ import { getChildVertexes } from "../../../Utils"
 import { addNewRow } from "../../../Utils"
 import { setValueGlobal } from "../../../Utils"
 import {setSelectionValue} from "../../../../components/input/SelectionUtils";
+import {componentDrag, setPropertyValueGlobal} from "../../../../components/pageStore";
 
 type ParsedJSX = JSX.Element | boolean | string
 type ParsedTree = ParsedJSX | ParsedJSX[] | null

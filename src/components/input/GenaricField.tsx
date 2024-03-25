@@ -24,6 +24,7 @@ import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
 import { Tab, TabContainer } from "../solid-blocks/blocks";
 import {
+  componentDrag,
   hoverId,
   indicatorPosition,
   selectedId, setSelectedColl,
@@ -89,7 +90,7 @@ export const PageItemRender = (props: {
       )}
     >
       {(item) => {
-        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick} = useDragDrop(record, item, () => [], true);
+        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone} = useDragDrop(record, item, () => [], true);
 
         // createComputed is hard to debug
         createComputed(() => {
@@ -169,13 +170,12 @@ export const PageItemRender = (props: {
             value={[...useContext(PageRenderContext), item]}
           >
               <span
-                class='contents cursor:pointer'
+                class='contents '
 
                 onClick={(e) => {
                   e.stopPropagation();
                   onLayoutItemClick();
-                  setSelectedId(item.id)}
-                }
+                }}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
@@ -192,7 +192,7 @@ export const PageItemRender = (props: {
                         }
                         setSelectedId(parentResult.vertex!.id);
                       }}/>
-                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
+                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}} onclick={clone}/>
                       <Icon onclick={(e) => {
                         if (selectedId() !== -1) {
                           const layoutVertexId = selectedId();

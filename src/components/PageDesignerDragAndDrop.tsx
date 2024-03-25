@@ -1,35 +1,32 @@
 // TODO: make multiple Fields Drag and Drop once.
-import { useParams } from "@solidjs/router";
-import { createStore, reconcile } from "solid-js/store";
-import { getCompProps, getRowProps } from "../lib/Record";
+import {useParams} from "@solidjs/router";
+import {createStore} from "solid-js/store";
 import {
-  addNewRow,
   addMetaVertexes,
   FieldAttribute,
+  FormContext,
   getChildVertex,
   getChildVertexes,
   Record,
-  getSelectionOptions,
   setValueGlobal,
-  getParentVertex, FormContext,
 } from "../lib/Utils";
 import {
   batch,
   createEffect,
+  createSelector,
   createSignal,
   For,
-  onCleanup,
-  Switch,
-  Match,
-  Show,
-  useContext,
   JSX,
-  createMemo, createSelector,
+  Match,
+  onCleanup,
+  Show,
+  Switch,
+  useContext,
 } from "solid-js";
-import { PageView } from "./input/GenaricField";
-import { GenericField } from "./input/Components/GenericFieldComponent";
+import {PageView} from "./input/GenaricField";
+import {GenericField} from "./input/Components/GenericFieldComponent";
 
-import { deleteNestedLayout, getTreeData } from "../lib/Traverse";
+import {deleteNestedLayout, getTreeData} from "../lib/Traverse";
 
 import {
   getNewGraphId,
@@ -43,45 +40,39 @@ import {
   transactions,
   Vertex,
 } from "../lib/graph";
-import { AbstractSingleForm } from "./DynamicForm";
-import { SelectInputField, setParentValue } from "./input/SelectInputField";
-import {
-  addNewVertex,
-  findVertexByLabelAndUniqueId,
-  mergeVertexProperties,
-  newVertex,
-  replaceVertexProperties,
-} from "../lib/Vertex";
-import { WsContext } from "../utils/ws_events_dispatcher";
-import { Portal } from "solid-js/web";
-import { TableInputField } from "./input/TableInputField";
-import { AttrsTableData } from "../lib/api";
-import { GenericInputField } from "./input/GenaricInputField";
+import {AbstractSingleForm} from "./DynamicForm";
+import {SelectInputField} from "./input/SelectInputField";
+import {addNewVertex, newVertex,} from "../lib/Vertex";
+import {WsContext} from "../utils/ws_events_dispatcher";
+import {Portal} from "solid-js/web";
+import {TableInputField} from "./input/TableInputField";
+import {AttrsTableData} from "../lib/api";
+import {GenericInputField} from "./input/GenaricInputField";
 import JsxParser from "../lib/jsx_parser/source/components/JsxParser";
-import { FormGroupProperties } from "../pages/FormsAdmin";
+import {FormGroupProperties} from "../pages/FormsAdmin";
 
-import { TableTabs } from "./TableTabs";
-import { Icon } from "@iconify-icon/solid";
+import {TableTabs} from "./TableTabs";
+import {Icon} from "@iconify-icon/solid";
 import {
-  draggedVertex, getIndicatorPosition,
-  hiddenNodes, hoverId, indicatorPosition, propertiesVertexId, selectedColl, selectedComponent,
-  selectedId, setDraggedVertex,
+  hiddenNodes,
+  hoverId,
+  indicatorPosition,
+  propertiesVertexId,
+  selectedComponent,
+  selectedId,
+  setDraggedVertex,
   setHiddenNodes,
-  setHoverId, setIndicatorPosition, setSelectedColl, setSelectedComponent,
-  setSelectedId, useDragDrop,
+  setHoverId,
+  setPropertyValueGlobal,
+  setSelectedColl,
+  setSelectedComponent,
+  setSelectedId,
+  useDragDrop,
 } from "./pageStore";
-import jsep from "jsep";
-import { setSelectionValue } from "./input/SelectionUtils";
-import { evaluate } from "../lib/jsep";
-import {
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  TextField,
-} from "./solid-blocks/blocks";
-import { iconMap } from "./Utils";
+import {ModalBody, ModalContent, ModalFooter, ModalHeader, TextField,} from "./solid-blocks/blocks";
+import {iconMap} from "./Utils";
 import {toTitle} from "case-switcher-js";
+
 function getIconByCategory(category: any, size?: any) {
   return (
     <Icon
@@ -91,170 +82,6 @@ function getIconByCategory(category: any, size?: any) {
     />
   ); // Returns null if category is not found
 }
-const addPropsToLayoutRow = (
-  txnId: number,
-  layoutRowId: Id,
-  componentVertex: Vertex
-) => {
-  const propVertexes = getChildVertexes(["$0Prop"], [componentVertex]);
-  if (propVertexes.vertexes) {
-    const initialValues = propVertexes.vertexes.reduce((acc, curr) => {
-      if (typeof curr.P.value === "boolean") {
-        acc[curr.P.key] = curr.P.value;
-      } else if (curr.P.value) {
-        acc[curr.P.key] = curr.P.value;
-      }
-      return acc;
-    }, {} as { [key: string]: any });
-    replaceVertexProperties(txnId, layoutRowId, initialValues);
-  }
-};
-
-// @Note:
-// From Component To Layout drag:
-// 1. Create a Row to proper parent.
-// 2. Sort properly
-export const componentDrag = (
-  txnId: number,
-  fromVertex: Vertex,
-  parentVertex: Vertex,
-  toIndex?: number
-) => {
-  // handle (toNode === null) case.
-  if (fromVertex) {
-    const attrMetaVertex = newVertex(getNewTxnId(), [], {
-      name: "Attr",
-      component: "Table",
-      tab: "Attribute",
-      props: {
-        type: "Attr",
-        label: "Attr",
-      },
-    });
-    const rowResult = addNewRow(
-      txnId,
-      attrMetaVertex,
-      parentVertex,
-      toIndex ? { pos: toIndex } : {},
-      false,
-      {} as any
-    );
-    const rowVertex = graph.vertexes[rowResult.vertexId!];
-
-    if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
-      const attrCompMetaVertex = newVertex(getNewTxnId(), [], {
-        name: "Comp",
-        component: "SelectBox",
-        props: {
-          collection: "g:'Comp'",
-        },
-      });
-
-      if (fromVertex.L[0] === "Comp") {
-        // set Component to the row
-        setSelectionValue(txnId, rowVertex, attrCompMetaVertex, fromVertex.id);
-        addPropsToLayoutRow(txnId, rowVertex.id, fromVertex);
-      } else if (fromVertex.L[0] === "Coll") {
-        // set Collection to the row
-        const attrCollMetaVertex = newVertex(getNewTxnId(), [], {
-          name: "coll",
-          displayName: "Collection",
-          component: "SelectBox",
-          props: {
-            collection: "g:'Coll'",
-            parentLabel: "Coll",
-          },
-        });
-        setSelectionValue(txnId, rowVertex, attrCollMetaVertex, fromVertex.id);
-        const formVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, "Form");
-        if (!formVertex) {
-          alert("cant find form");
-        } else {
-          setSelectionValue(
-            txnId,
-            rowVertex,
-            attrCompMetaVertex,
-            formVertex.id
-          );
-          addPropsToLayoutRow(txnId, rowVertex.id, formVertex);
-        }
-      }
-    } else if (fromVertex.L[0] === "Attr") {
-      // set Collection Attribute to the row
-      const attMetaVertex = newVertex(getNewTxnId(), [], {
-        name: "Att",
-        displayName: "Attribute",
-        component: "SelectBox",
-        props: {
-          displayExpr: "$P.displayName ($P.name)",
-          collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
-        },
-      });
-      setSelectionValue(txnId, rowVertex, attMetaVertex, fromVertex.id);
-      // TODO add comp prop default values
-      // addPropsToLayoutRow(pageConfig[0].record.txnId, rowVertex.id, formVertex);
-    }
-
-    return rowResult.vertexId!;
-  }
-  return -1;
-};
-
-export const setPropertyValueGlobal = (
-  txnId: number,
-  meta: Vertex,
-  layoutVertex: Vertex,
-  componentVertex: Vertex,
-  value: any,
-  valueSet?: boolean
-) => {
-  // find existing row;
-  const rowProps = getChildVertexes(["$0Prop"], [layoutVertex]).vertexes || [];
-  let row = rowProps.find((vertex) => {
-    const name = getChildVertex(["$0Name"], vertex).vertex;
-    return name?.P.name === meta.P.name;
-  });
-  if (row) {
-    if (valueSet ?? true) mergeVertexProperties(txnId, row.id, { value });
-  } else {
-    const propMetaVertex = newVertex(0, ["Meta"], {
-      name: "Prop",
-      displayName: "Property",
-    });
-    const componentProps =
-      getChildVertexes(["$0Prop"], [componentVertex]).vertexes || [];
-    const componentProp = componentProps.find((vertex) => {
-      return vertex.P.name === meta.P.name;
-    });
-    if (componentProp) {
-      const properties = valueSet ?? true ? { value } : {};
-      const addRowResult = addNewRow(
-        txnId,
-        propMetaVertex,
-        layoutVertex,
-        properties,
-        false,
-        {} as any
-      );
-      if (addRowResult.vertexId) {
-        row = graph.vertexes[addRowResult.vertexId];
-        setSelectionValue(
-          txnId,
-          graph.vertexes[addRowResult.vertexId],
-          { P: { name: "Name" } } as unknown as Vertex,
-          componentProp.id
-        );
-      }
-    } else {
-      console.error(
-        `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`
-      );
-    }
-  }
-  // TODO: if reset, delete the row.
-
-  return row;
-};
 
 
 

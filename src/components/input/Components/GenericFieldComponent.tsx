@@ -32,7 +32,6 @@ import { showNav } from "../../../signals/common";
 import { getLastItem } from "../../../utils/functions";
 import { WsContext } from "../../../utils/ws_events_dispatcher";
 import { ComponentProps } from "../../ComponentType";
-import { componentDrag } from "../../PageDesignerDragAndDrop";
 import { setParentValue } from "../SelectInputField";
 import {
   Accordion,
@@ -57,7 +56,7 @@ import {
   PageView,
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
-import {hoverId, selectedId, setSelectedId} from "../../pageStore";
+import {componentDrag, hoverId, selectedId, setSelectedId} from "../../pageStore";
 import CustomButton from "../../solid-blocks/blocks/buttons";
 
 // This component support rendering Child Themselves by calling PageRender.
