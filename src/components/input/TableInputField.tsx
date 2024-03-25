@@ -403,7 +403,7 @@ export function TableInputField(
               component: "Button",
               props: {
                 children: "Add",
-                variant: "secondary",
+                variant: "contained",
                 onClick: () => insertNewRow(),
               },
             },

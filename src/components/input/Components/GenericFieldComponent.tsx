@@ -58,6 +58,7 @@ import {
 } from "../GenaricField";
 import { getTextColumnValue } from "./Utils";
 import {hoverId, selectedId, setSelectedId} from "../../pageStore";
+import CustomButton from "../../solid-blocks/blocks/buttons";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -341,11 +342,7 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <button
-            {...props.meta.P.props}
-          >
-            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}
-          </button>
+          <CustomButton {...props.meta.P.props}>{props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}</CustomButton>
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar

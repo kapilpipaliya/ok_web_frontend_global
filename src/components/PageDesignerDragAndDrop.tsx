@@ -81,6 +81,7 @@ import {
   TextField,
 } from "./solid-blocks/blocks";
 import { iconMap } from "./Utils";
+import {toTitle} from "case-switcher-js";
 function getIconByCategory(category: any, size?: any) {
   return (
     <Icon
@@ -280,6 +281,7 @@ export const PageDesignerDragAndDrop = () => {
     return [expanded, toggleExpansion];
   }
   const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
+  const [isPagesExpanded, togglePagesExpansion] = useExpansion();
   const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
   const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
@@ -527,7 +529,7 @@ export const PageDesignerDragAndDrop = () => {
         </div>
     }*/
 
-  const OneComponents0 = () => {
+  const ComponentPart = () => {
     const data = getTreeData({
       collection: "g:'CompCategory'",
       // TODO: Dont display "Form" Component
@@ -671,6 +673,123 @@ export const PageDesignerDragAndDrop = () => {
       </div>
     );
   };
+
+  const PagesPart = () => {
+    const data = getTreeData({
+      collection: "g:'Page'",
+    });
+    console.log(data)
+    const [searchQuery, setSearchQuery] = createSignal("");
+    const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
+
+    const titleStyle: JSX.CSSProperties = {
+      "font-size": "15px",
+      "font-weight": "bold",
+      "margin-bottom": "8px",
+      "margin-top": "8px",
+    };
+
+    const listStyle: JSX.CSSProperties = {
+      "list-style-type": "none",
+      padding: "0",
+    };
+
+    const listBoxStyle: JSX.CSSProperties = {
+      display: "grid",
+      margin:"7px",
+      gap: "10px",
+    };
+
+    // Function to get icon by category
+
+    const updateFilteredData = () => {
+      if (!searchQuery()) {
+        setFilteredData(data);
+      } else {
+        const filteredData = data
+            .filter((item) => {
+              return item.name
+                  .toLowerCase()
+                  .includes(searchQuery().toLowerCase());
+            }); // Filter out items with no matching children
+
+        setFilteredData(filteredData);
+      }
+    };
+    function ListItemComponent(props: { child: Vertex }) {
+      const [isHovered, setIsHovered] = createSignal(false);
+
+      const baseStyle = {
+        "border-radius": ".2rem",
+        "margin": "5px",
+        transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+        padding: "10px",
+        "background-color": "white",
+        display: "flex",
+        "flex-direction": "row",
+        "align-items": "center",
+        "justify-content": "space-between",
+        height: "35px",
+        "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
+      };
+
+      const hoverStyle = {
+        "background-color": "#F2EDED",
+        cursor: "move",
+        boxShadow: "4px 4px 4px",
+      };
+
+      const itemStyle = () =>
+          isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+
+      return (
+          <div
+              style={itemStyle()}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+              draggable={true}
+              onDragStart={(e) => {
+                e.stopPropagation();
+                setDraggedVertex(graph.vertexes[props.child.id]);
+              }}
+          >
+            <div style={{ "font-size": "14px" }}>{toTitle((props.child))}</div>
+          </div>
+      );
+    }
+    return (
+        <div>
+          <TextField
+              label="Name"
+              class="b:1|solid|blue-30 r:5|5|5|5 p:4"
+              type="text"
+              placeholder="Search Page..."
+              value={searchQuery()}
+              onInput={(e) => {
+                setSearchQuery(e.target.value);
+                updateFilteredData(); // Update filteredData when searchQuery changes
+              }}
+          />
+          <div class="overflow-y:auto overflow-x:auto m:2px"  style={{display:"grid" , "grid-template-columns": "repeat(2, 1fr)"}}>
+            <For
+                each={filteredData()}
+                fallback={
+                  <div class="p:3 font-weight:bold">No Page Found !</div>
+                }
+            >
+              {(item, index) => (
+
+                       <ListItemComponent child={item.name}/>
+
+            )}
+          </For>
+        </div>
+  </div>
+  )
+    ;
+  };
+
+
   /*const TwoCollections = () => {
         return <div ref={el => {
             onMount(() => {
@@ -995,7 +1114,7 @@ export const PageDesignerDragAndDrop = () => {
     }*/
 
 
-  const FourLayout1 = () => {
+  const LayoutPart = () => {
     const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
 
     const toggleExpand = (itemId: number) => {
@@ -1158,7 +1277,7 @@ export const PageDesignerDragAndDrop = () => {
     );
   };
 
-  const FiveProperties = () => {
+  const PropertiesPart = () => {
     const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
     const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
 
@@ -1676,6 +1795,7 @@ export const PageDesignerDragAndDrop = () => {
   const [className, setClassName] = createSignal(
     "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
   );
+
   const mobileClass =
     "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem";
   const webClass =
@@ -1689,7 +1809,7 @@ export const PageDesignerDragAndDrop = () => {
   });
 
   const [leftColumns, setLeftColumns] = createSignal(
-    ["components", "collection"].map((column) => ({
+    ["components", "pages","collection"].map((column) => ({
       id: column,
       name: column,
     }))
@@ -1701,11 +1821,12 @@ export const PageDesignerDragAndDrop = () => {
     }))
   );
 
-  const oneComponents0 = <OneComponents0 />;
-  // const oneComponents = <OneComponents/>;
-  const twoCollections = <div>No Collection Found</div>; //<TwoCollections/>;
-  const fourLayout1 = <FourLayout1 />;
-  const fiveProperties = <FiveProperties />;
+  const componentPart = <ComponentPart />;
+  const pagesPart = <PagesPart />;
+  const collectionPart = <div>No Collection Found</div>; //<TwoCollections/>;
+  const layoutPart = <LayoutPart />;
+  const propertiesPart = <PropertiesPart />;
+
   const abstractSingleForm = (
     <AbstractSingleForm
       formId={"Page"}
@@ -1761,10 +1882,54 @@ export const PageDesignerDragAndDrop = () => {
                       )}
                     </div>
                   </div>
-                  {oneComponents0}
+                  {componentPart}
                 </div>
               )}
               {/*{oneComponents}*/}
+            </Match>
+            <Match when={props.type === "pages"}>
+              {!isPagesExpanded() && (
+                  <div
+                      class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                      style="transition: opacity 0.3s ease-in-out;"
+                      onclick={togglePagesExpansion}
+                      title="Pages"
+                  >
+                    <Icon icon={"iconoir:multiple-pages"} height={25} width={25} />
+                  </div>
+              )}
+              {isPagesExpanded() && (
+                  <div
+                      class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:21.5rem"
+                      title="Close Pages"
+                  >
+                    <div
+                        class="mb:10px"
+                        style={{
+                          display: "flex",
+                          "justify-content": "space-between",
+                          "align-items": "center",
+                        }}
+                    >
+                      <div style="font-weight: bold">Pages</div>
+                      <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px">
+                        {isPagesExpanded() && (
+                            <div
+                                onClick={togglePagesExpansion}
+                                class="cursor:pointer"
+                            >
+                              <Icon
+                                  icon={"mingcute:left-line"}
+                                  height={25}
+                                  width={25}
+                              />
+                            </div>
+                        )}
+                      </div>
+                    </div>
+                    {pagesPart}
+                  </div>
+              )}
             </Match>
             <Match when={props.type === "collection"}>
               {!isCollectionExpanded() && (
@@ -1810,7 +1975,7 @@ export const PageDesignerDragAndDrop = () => {
                       )}
                     </div>
                   </div>
-                  {twoCollections}
+                  {collectionPart}
                 </div>
               )}
             </Match>
@@ -1883,7 +2048,7 @@ export const PageDesignerDragAndDrop = () => {
                         </div>
                       </div>
                     </div>
-                    {isLayoutOpen() && fourLayout1}
+                    {isLayoutOpen() && layoutPart}
                   </div>
                 )}
               </div>
@@ -1985,7 +2150,7 @@ export const PageDesignerDragAndDrop = () => {
                         </div>
                       </div>
                     </div>
-                    {isPropertiesOpen() && fiveProperties}
+                    {isPropertiesOpen() && propertiesPart}
                   </div>
                 )}
               </div>
@@ -2079,7 +2244,7 @@ export const PageDesignerDragAndDrop = () => {
             {(column) => <Column type={column.id} />}
           </For>
         </div>
-        <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto" style={{ "max-height": '100vh' }}>
+        <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto">
           <div class="flex justify-content:center">
             <TableTabs tabs={tabs} setActiveTab={setActiveTab} />
           </div>

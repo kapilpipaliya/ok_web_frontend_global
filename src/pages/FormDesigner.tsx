@@ -13,6 +13,7 @@ import { importRecordWithYAMLSchema } from "../lib/Import";
 import { getChildVertex } from "../lib/Utils";
 import { Vertex } from "../lib/graph";
 import { showNav } from "../signals/common";
+import CustomButton from "../components/solid-blocks/blocks/buttons";
 
 /*
   Tasks:
@@ -87,9 +88,9 @@ export const NavDesigner = () => {
           // TODO: add dry option
         />
         <textarea value={importCode()} onChange={(e) => setImportCode(e.target.value)} />
-        <button type="button" onClick={importCodeFn}>
+        <CustomButton variant="contained" onClick={importCodeFn}>
           Import Code
-        </button>
+        </CustomButton>
       </div>
 
       <div class="border:1|solid|blue-60 p:10 m:5 min-w:300">

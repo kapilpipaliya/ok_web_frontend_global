@@ -361,7 +361,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
               P: {
                 component: "Button",
                 props: {
-                  variant: "variant",
+                  variant: "outlined",
                   children: "Cancel",
                   onClick: () => onCancel(),
                 },

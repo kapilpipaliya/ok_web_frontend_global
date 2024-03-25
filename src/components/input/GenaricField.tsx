@@ -96,14 +96,21 @@ export const PageItemRender = (props: {
           const rowProps = getRowProps(item);
           const compProps = Object.assign(componentProps, rowProps);
 
-          if (isSelectedLayoutId(item.id) || isSelectedHoverId(item.id) || isSelectedTargetId(item.id)) {
+          if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
               if (compProps.class) {
-                compProps.class += ` b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
+                compProps.class += ` b:rgb(252,0,0)|1px|dashed r:5|5|5|5`;
               } else {
-                compProps.class = `b:rgb(249,0,8)|1px|dashed r:5|5|5|5`;
+                compProps.class = `b:rgb(252,0,0)|1px|dashed r:5|5|5|5`;
               }
-
           }
+          if(isSelectedHoverId(item.id)){
+            if (compProps.class) {
+              compProps.class += ` b:rgb(38,128,235)|1px|dashed r:5|5|5|5`;
+            } else {
+              compProps.class = `b:rgb(38,128,235)|1px|dashed r:5|5|5|5`;
+            }
+          }
+
           if (isActiveItem()) {
             if (indicatorPosition().position === "before") {
               if (compProps.class) {
@@ -153,6 +160,7 @@ export const PageItemRender = (props: {
           >
               <span
                 class='contents '
+
                 onClick={(e) => {
                   e.stopPropagation();
                   setSelectedId(item.id)}
@@ -175,6 +183,7 @@ export const PageItemRender = (props: {
                 </Show>
                 <DynamicComponent
                   meta={item}
+
                   // NOTE: For repeater we cant use parentData
                   // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
                   data={

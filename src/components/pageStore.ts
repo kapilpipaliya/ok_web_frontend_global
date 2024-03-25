@@ -199,7 +199,6 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
         if (!compVertex?.P.child) {
           return;
         }
-      } else {
       }
 
       const parentVertex =
