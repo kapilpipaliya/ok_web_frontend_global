@@ -133,6 +133,20 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
     const fromVertexLabel = fromVertex.L[0];
     const position = indicatorPosition().position;
 
+    // Don't allow parent to move inside children.
+    let parentVertex = graph.vertexes[toVertexId];
+    while(true) {
+      const parentResult = getParentVertex(['Attr'], parentVertex);
+      if (parentResult.error) {
+        break;
+      }
+      if (parentResult.vertex!.id === fromVertex.id) {
+        // Don't allow drag and drop
+        return;
+      }
+      parentVertex = parentResult.vertex!;
+    }
+
     if (fromVertexLabel === "Comp") {
       if (position === "center") {
         const compVertex = getComponentFromLayoutRow(toVertexId);
