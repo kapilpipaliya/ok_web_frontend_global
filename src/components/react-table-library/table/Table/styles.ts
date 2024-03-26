@@ -14,7 +14,7 @@ export default (configuration: Configuration) => `
   overflow: auto;
   position: relative;
 
-  border-collapse: collapse;
+  border-collapse: separate;
 
   display: grid;
 

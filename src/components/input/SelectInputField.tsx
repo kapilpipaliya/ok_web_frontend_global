@@ -296,7 +296,7 @@ export function SelectInputField(
             displayValueChild="name"
             options={selectOptions()}
             avoidHighlightFirstOption
-            placeholder={`Add ${props.title}`}
+            placeholder={`${props.title}`}
             onSelect={(e) => onChangeSelect(e, false)}
             onRemove={(e) => onChangeSelect(e, true)}
             customCloseIcon={<Icon icon={"ic:round-close"} />}

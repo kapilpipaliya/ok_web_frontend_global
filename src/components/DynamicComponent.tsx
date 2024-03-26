@@ -156,6 +156,7 @@ export const DynamicComponent = (props: {
           <GenericInputField
             data={props.data}
             meta={props.meta}
+            title={props.title}
             txnId={props.txnId!}
             component={props.component}
             setValue={props.setValue}

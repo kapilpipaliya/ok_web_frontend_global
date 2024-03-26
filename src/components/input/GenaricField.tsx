@@ -22,7 +22,7 @@ import {
 } from "../../lib/Utils";
 import { getLastItem } from "../../utils/functions";
 import { DynamicComponent } from "../DynamicComponent";
-import { Tab, TabContainer } from "../solid-blocks/blocks";
+import {Tab, TabContainer, Tooltip} from "../solid-blocks/blocks";
 import {
   componentDrag,
   hoverId,
@@ -36,8 +36,7 @@ import {
 } from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
 import {deleteNestedLayout, getParentVertexValue} from "../../lib/Traverse";
-import {setParentValue} from "./SelectInputField";
-import {createStore} from "solid-js/store";
+import {nameExpr} from "../Utils";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -164,69 +163,80 @@ export const PageItemRender = (props: {
         };
 
 
+        const getComponent = () =>
+            getChildVertex(["$0Comp"], item).vertex?.P.name;
 
         const PageComponent = () => (
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
               <span
-                class='contents '
-
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLayoutItemClick();
-                }}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                  class='contents '
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLayoutItemClick();
+                  }}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
               >
                 <Show when={isSelectedLayoutId(item.id)}>
                   <span class="position:relative">
-                    <div class="abs bottom:100% w:8rem bg:rgb(38,128,235) r:3|3|3|3 z:9999">
-                      <Icon draggable={true}  onDragStart={handleDragStart} icon={'material-symbols-light:drag-pan-rounded'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
-                      <Icon icon={'mdi:arrow-up'}  height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}} onclick={e => {
+                    <div class="abs bottom:100% display:flex bg:rgb(38,128,235) r:3|3|3|3 z:9999">
+                      <Tooltip content={'Name'} nowrap><div class={'m:4px mr:10px fg:#ffffff f:14'}>{getComponent()}</div></Tooltip>
+                      <Tooltip content={'Move'} nowrap><Icon draggable={true}
+                                                                                      onDragStart={handleDragStart}
+                                                                                      icon={'material-symbols-light:drag-pan-rounded'}
+                                                                                      height={20} width={20}
+                                                                                      color={'white'}
+                                                                                      class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'}
+                                                                                      style={{color: "white"}}/></Tooltip>
+                      <Tooltip content={'Parent'} nowrap><Icon icon={'mdi:arrow-up'} height={20} width={20} color={'white'}
+                            class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}} onclick={e => {
                         const parentResult = getParentVertex(['Attr'], item);
                         if (parentResult.error) {
                           return;
                         }
                         setSelectedId(parentResult.vertex!.id);
-                      }}/>
-                      <Icon icon={'ion:duplicate-outline'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}} onclick={clone}/>
-                      <Icon onclick={(e) => {
+                      }}/></Tooltip>
+                      <Tooltip content={'Duplicate'}><Icon icon={'mage:copy'} height={20} width={20} color={'white'}
+                                                               class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}} onclick={clone}/></Tooltip>
+                      <Tooltip content={'Delete'}><Icon onclick={(e) => {
                         if (selectedId() !== -1) {
                           const layoutVertexId = selectedId();
                           batch(() => {
                             setSelectedId(-1);
-                            setSelectedComponent({ vertexId: -1 });
-                            setSelectedColl({ vertexId: -1 });
+                            setSelectedComponent({vertexId: -1});
+                            setSelectedColl({vertexId: -1});
                           });
                           deleteNestedLayout(record.txnId, [
                             graph.vertexes[layoutVertexId],
                           ]);
-                          }
-                      }} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'} class={'cursor:pointer m:5px c:#ffffff'} style={{color: "white"}}/>
+                        }
+                      }} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'}
+                                                           class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}}/></Tooltip>
                     </div>
                   </span>
                 </Show>
                 <DynamicComponent
-                  meta={item}
+                    meta={item}
 
-                  // NOTE: For repeater we cant use parentData
-                  // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-                  data={
-                    props.data ||
-                    getSelectionOptions(
-                      [...useContext(RepeaterContext)],
-                      item.P.data
-                    ).vertexes ||
-                    PageRenderUtils.getDataVertex(item)
-                  }
-                  title={toTitle(PageRenderUtils.getId(item) || "")}
-                  setValue={record?.setValue || (() => {
-                  })}
-                  disabled={false}
-                  component={component()}
+                    // NOTE: For repeater we cant use parentData
+                    // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+                    data={
+                        props.data ||
+                        getSelectionOptions(
+                            [...useContext(RepeaterContext)],
+                            item.P.data
+                        ).vertexes ||
+                        PageRenderUtils.getDataVertex(item)
+                    }
+                    title={toTitle(PageRenderUtils.getId(item) || "")}
+                    setValue={record?.setValue || (() => {
+                    })}
+                    disabled={false}
+                    component={component()}
                 /></span>
           </PageRenderContext.Provider>
         );

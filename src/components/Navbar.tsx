@@ -38,26 +38,34 @@ export function Navbar(
           props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition
         }
       >
-        <Show
-          when={props.showNavBar}
-          fallback={
-            <Icon
-              class="pointer:cursor"
-              onclick={() => {
-                navigate("/Page");
-              }}
-              icon={"ic:round-arrow-back-ios"}
-            />
+          <Show
+              when={props.showNavBar}
+              fallback={
+                  <div
+                      class="bg:rgb(255,253,253) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
+                      onclick={()=>{navigate("/Page");}}
+                      title="Back"
+                  >
+
+
+                              <Icon
+                                  icon={"ic:round-arrow-back-ios"}
+                                  height={20}
+                                  width={20}
+                              />
+                  </div>
           }
-        >
-          <NavToggleBtn toggleSidebar={props.toggleSidebar} />
-        </Show>
+      >
+          <NavToggleBtn toggleSidebar={props.toggleSidebar}/>
       </Show>
+    </Show>
 
-      {props.left}
+{
+    props.left
+}
 
-      <div>{props.meta?.P?.title}</div>
-      {/*   Theme Change Button
+    <div>{props.meta?.P?.title}</div>
+{/*   Theme Change Button
       <button class="px:5x r:2x font:18 h:48 bg:slate-10@light bg:gray-80@dark fg:strong rel">
         <Switch>
           <Match when={currentTheme() === 'dark'}>
