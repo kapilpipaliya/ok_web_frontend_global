@@ -120,6 +120,28 @@ export const componentDrag = (
       // set Component to the row
       setSelectionValue(txnId, rowVertex, attrCompMetaVertex, compVertex.id);
       cloneRowProps(txnId, fromVertex, rowVertex);
+
+      function processChildren(fromVertex: Vertex, toVertex: Vertex) {
+        const childrenVertexes = getChildrenAttrs(fromVertex);
+        for (const child of childrenVertexes) {
+          const rowResult2 = addNewRow(
+            txnId,
+            attrMetaVertex,
+            toVertex,
+            {pos: child.P.pos},
+            false,
+            {} as any
+          );
+          const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
+
+          const compVertex = getComponentFromLayoutRow(child.id);
+          // set Component to the row
+          setSelectionValue(txnId, rowVertex2, attrCompMetaVertex, compVertex.id);
+          cloneRowProps(txnId, child, rowVertex2);
+          processChildren(child, rowVertex2);
+        }
+      }
+      processChildren(fromVertex, rowVertex);
     }
 
     return rowResult.vertexId!;
