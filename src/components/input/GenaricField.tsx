@@ -89,7 +89,7 @@ export const PageItemRender = (props: {
       )}
     >
       {(item) => {
-        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone} = useDragDrop(record, item, () => [], true);
+        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout} = useDragDrop(record, item, () => [], true);
 
         // createComputed is hard to debug
         createComputed(() => {
@@ -206,19 +206,7 @@ export const PageItemRender = (props: {
                       }}/></Tooltip>
                       <Tooltip content={'Duplicate'}><Icon icon={'mage:copy'} height={20} width={20} color={'white'}
                                                                class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}} onclick={clone}/></Tooltip>
-                      <Tooltip content={'Delete'}><Icon onclick={(e) => {
-                        if (selectedId() !== -1) {
-                          const layoutVertexId = selectedId();
-                          batch(() => {
-                            setSelectedId(-1);
-                            setSelectedComponent({vertexId: -1});
-                            setSelectedColl({vertexId: -1});
-                          });
-                          deleteNestedLayout(record.txnId, [
-                            graph.vertexes[layoutVertexId],
-                          ]);
-                        }
-                      }} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'}
+                      <Tooltip content={'Delete'}><Icon onclick={deleteLayout} icon={'fluent:delete-20-regular'} height={20} width={20} color={'white'}
                                                            class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}}/></Tooltip>
                     </div>
                   </span>

@@ -114,7 +114,7 @@ export const Row = <T extends TableNode>(props: RowProps<T>) => {
         ${theme?.BaseRow}
         ${theme?.Row}
       `}
-      className={cs('tr', 'tr-body', classNamesByFeature, className, {
+      class={cs('tr', 'tr-body', classNamesByFeature, className, {
         disabled,
         clickable: clickable || !!onDoubleClick,
       })}

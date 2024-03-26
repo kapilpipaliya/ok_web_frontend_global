@@ -8,6 +8,7 @@ import {reconcile} from "solid-js/store";
 import {evaluate} from "../lib/jsep";
 import jsep from "jsep";
 import {setSelectionValue} from "./input/SelectionUtils";
+import {deleteNestedLayout} from "../lib/Traverse";
 
 export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
 
@@ -518,9 +519,24 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
       }
     });
   };
+
+  const deleteLayout = () => {
+      batch(() => {
+        if (selectedId() === vertex.id) {
+          setSelectedId(-1);
+          setSelectedComponent({vertexId: -1});
+          setSelectedColl({vertexId: -1});
+        }
+        if (hoverId() === vertex.id) {
+          setHoverId(-1);
+        }
+      });
+
+      deleteNestedLayout(record.txnId, [vertex]);
+  };
   
   return {
-    children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, clone, onLayoutItemClick
+    children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, clone, onLayoutItemClick, deleteLayout
   }
 }
 export const setPropertyValueGlobal = (

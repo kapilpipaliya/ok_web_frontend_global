@@ -122,7 +122,7 @@ export const HeaderCell: React.FC<HeaderCellProps> = ({
           ${theme?.BaseCell}
           ${isFooter ? theme?.FooterCell : theme?.HeaderCell}
         `}
-        className={cs('th', className, {
+        class={cs('th', className, {
           stiff,
           hide,
           resize,
@@ -134,15 +134,15 @@ export const HeaderCell: React.FC<HeaderCellProps> = ({
       >
         <div>{children}</div>
         {resize && !hide && (
-          <div className="resizer-area" ref={resizeRef} css={resizerStyle(resize).area}>
-            <span className="resizer-handle" css={resizerStyle(resize).handle} />
+          <div class="resizer-area" ref={resizeRef} css={resizerStyle(resize).area}>
+            <span class="resizer-handle" css={resizerStyle(resize).handle} />
           </div>
         )}
       </HeaderCellContainer>
 
       {/* column grouping */}
       {Array.from({ length: colSpan }, () => (
-        <HeaderCellContainer className={cs('th', 'hide', 'colspan')} />
+        <HeaderCellContainer class={cs('th', 'hide', 'colspan')} />
       ))}
     </>
   );

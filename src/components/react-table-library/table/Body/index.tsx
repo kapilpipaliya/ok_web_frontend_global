@@ -29,7 +29,7 @@ export const Body: React.FC<BodyProps> = ({ children, ...rest }: BodyProps) => {
         display: contents;
       `}
       data-table-library_body=""
-      className="tbody"
+      class="tbody"
       {...rest}
     >
       {children}

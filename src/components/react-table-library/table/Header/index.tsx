@@ -29,7 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ isFooter, children, ...rest }: H
   return (
     <As
       role="rowgroup"
-      className={cs({ tfoot: isFooter, thead: !isFooter })}
+      class={cs({ tfoot: isFooter, thead: !isFooter })}
       css={css`
         ${headerRow}
         ${isFooter ? theme?.Footer : theme?.Header}

@@ -75,7 +75,7 @@ export const HeaderRow: React.FC<HeaderRowProps> = ({
         ${theme?.BaseRow}
         ${isFooter ? theme?.FooterRow : theme?.HeaderRow}
       `}
-      className={cs('tr', className, {
+      class={cs('tr', className, {
         'tr-footer': isFooter,
         'tr-header': !isFooter,
       })}

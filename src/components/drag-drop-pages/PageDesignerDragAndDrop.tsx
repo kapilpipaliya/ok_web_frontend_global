@@ -980,7 +980,8 @@ export const PageDesignerDragAndDrop = () => {
                 handleDragLeave,
                 handleDrop,
                 onLayoutItemClick,
-                clone
+                clone,
+                deleteLayout
             } = useDragDrop(pageConfig[0].record, props.vertex, collapsedKeys);
             const getComponent = () =>
                 getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
@@ -1069,13 +1070,32 @@ export const PageDesignerDragAndDrop = () => {
                             {nameExpr(props.vertex) || props.vertex.P.name}
                         </div>
                         <div>
-                            <Tooltip content={'Duplicate'} nowrap><Icon icon={'mage:copy'} height={20} width={20}
-                                                                        color={'black'}
-                                                                        class={'cursor:pointer mt:5px mb:2px ml:2px mr:5px opacity:.5 opacity:1:hover'}
-                                                                        onclick={clone}/></Tooltip>
+                            <Show when={isSelectedLayoutId(props.vertex.id) || isSelectedHoverId(props.vertex.id)}>
+                                <Tooltip content={'Duplicate'} nowrap><Icon icon={'mage:copy'} height={18} width={18}
+                                                                            color={'black'}
+                                                                            class={'cursor:pointer mr:5px opacity:.5 opacity:1:hover'}
+                                                                            onclick={clone}/></Tooltip>
+                                <Tooltip content={'Delete'} nowrap><GenericField
+                                  meta={
+                                      {
+                                          P: {
+                                              component: "Icon",
+                                              props: {
+                                                  style: {color: "red"},
+                                                  onClick: () => deleteLayout(),
+                                                  width: 18,
+                                                  height: 18,
+                                                  class: 'cursor:pointer  mr:5px opacity:.5 opacity:1:hover',
+                                                  icon: "mage:trash",
+                                              },
+                                          },
+                                      } as any
+                                  }
+                                /></Tooltip>
+                            </Show>
                             <Tooltip content={`${!hiddenNodes().includes(props.vertex.id) ? "Hide" : "Show"}`} nowrap>
                                 <button
-                                    class="opacity:.5 opacity:1:hover pt:4px"
+                                    class="opacity:.5 opacity:1:hover"
                                     onClick={(e) => {
                                         e.stopPropagation();
                                         toggleHidden(props.vertex.id);
@@ -1604,30 +1624,7 @@ export const PageDesignerDragAndDrop = () => {
             </>
         );
     };
-    const deleteLayout = () => {
-        if (selectedId() !== -1) {
-            const layoutVertexId = selectedId();
-            batch(() => {
-                setSelectedId(-1);
-                setSelectedComponent({vertexId: -1});
-                setSelectedColl({vertexId: -1});
-            });
 
-            deleteNestedLayout(pageConfig[0].record.txnId, [
-                graph.vertexes[layoutVertexId],
-            ]);
-            /*
-                     const layoutItemIndex = selectedLayout().itemIndex;
-                     const fromNode = findNode(layoutTreeViewInstance, layoutItemIndex!);
-                     const fromItems = layoutTreeViewInstance.option("items");
-                     if (!fromItems) return;
-                     const fromIndex = findIndex(fromItems, fromNode!.itemData!.id as string);
-                     fromItems?.splice(fromIndex, 1);*/
-
-            // reset layout
-            // layoutTreeViewInstance.option("items", getLayoutTreeData());
-        }
-    };
     const onClickLayout = () => {
         setIsLayoutOpen(!isLayoutOpen());
     };
@@ -1756,7 +1753,7 @@ export const PageDesignerDragAndDrop = () => {
                             )}
                             {isPagesExpanded() && (
                                 <div
-                                    class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:21.5rem"
+                                    class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 "
                                     title="Close Pages"
                                 >
                                     <div
@@ -1969,22 +1966,6 @@ export const PageDesignerDragAndDrop = () => {
                                                     class="mb:12"
                                                     style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
                                                 >
-                                                    <Show when={selectedId() !== -1}>
-                                                        <GenericField
-                                                            meta={
-                                                                {
-                                                                    P: {
-                                                                        component: "Icon",
-                                                                        props: {
-                                                                            style: {color: "red"},
-                                                                            onClick: () => deleteLayout(),
-                                                                            icon: "fluent:delete-12-regular",
-                                                                        },
-                                                                    },
-                                                                } as any
-                                                            }
-                                                        />
-                                                    </Show>
                                                     <div
                                                         style="cursor: pointer;"
                                                         onClick={onClickProperties}
@@ -2126,7 +2107,7 @@ export const PageDesignerDragAndDrop = () => {
                                              aria-hidden="true">
                                             <Show when={step.id !== 3}>
                                                 <div
-                                                    className={`h:0.125rem width:100%  bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
+                                                    class={`h:0.125rem width:100%  bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
                                             </Show>
                                         </div>
 
@@ -2152,22 +2133,22 @@ export const PageDesignerDragAndDrop = () => {
 
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
-                        <div className="flex-col max-width:25rem overflow:auto" style={{"max-height": '100vh'}}>
+                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": '85vh'}}>
                             <For each={leftColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>
                         </div>
-                        <div className="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto">
-                            <div className="flex justify-content:center">
+                        <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto">
+                            <div class="flex justify-content:center">
                                 <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
                             </div>
-                            <div className={className() as string}>
+                            <div class={className() as string}>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
                                     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
                                 </FormContext.Provider>
                             </div>
                         </div>
-                        <div className="flex-col max-width:25rem overflow:auto" style={{"max-height": '100vh'}}>
+                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": '85vh'}}>
                             <For each={rightColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>

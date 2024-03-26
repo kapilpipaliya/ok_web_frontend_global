@@ -116,7 +116,7 @@ const Table = React.forwardRef(
           ${styles({ isShiftDown })}
           ${theme?.Table}
         `}
-        className={cs(className)}
+        class={cs(className)}
         ref={callbackRef}
         {...rest}
       >

@@ -71,7 +71,7 @@ const ShareSection = () => {
                 <button onClick={copyToClipboard} class={'r:5|0|0|5 p:10 bg:#F5F5F5'}><Icon
                     icon={'system-uicons:mail'} height={25} width={25}/></button>
 
-                <input className={'w:full r:0|5|5|0 p:10'} type={'email'} name='email'
+                <input class={'w:full r:0|5|5|0 p:10'} type={'email'} name='email'
                     placeholder="Enter email, for multiple email use ';' separate"/>
             </div>
             <div style={inlineStyles.shareOther}>

@@ -14,7 +14,7 @@ export const LoginPage = () => {
 
           <div>
             {/*<img src={bg} alt="bg"*/}
-            {/*     className="abs z:1 w:200@md h:200@md"/>*/}
+            {/*     class="abs z:1 w:200@md h:200@md"/>*/}
             <div>
 
               <div

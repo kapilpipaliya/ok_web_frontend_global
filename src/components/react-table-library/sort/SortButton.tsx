@@ -71,7 +71,7 @@ export const SortButton = <T extends TableNode>({
 
   return (
     <Button
-      className={cs({
+      class={cs({
         active: state.sortKey === sortKey,
       })}
       onClick={handleToggleSort}

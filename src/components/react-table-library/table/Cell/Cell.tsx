@@ -51,7 +51,7 @@ export const Cell: React.FC<CellProps> = ({
           ${theme?.BaseCell}
           ${theme?.Cell}
         `}
-        className={cs('td', className, {
+        class={cs('td', className, {
           stiff,
           hide,
           'pin-left': pinLeft,
@@ -65,7 +65,7 @@ export const Cell: React.FC<CellProps> = ({
 
       {/* column grouping */}
       {Array.from({ length: colSpan }, () => (
-        <CellContainer className={cs('td', 'hide', 'colspan')} />
+        <CellContainer class={cs('td', 'hide', 'colspan')} />
       ))}
     </>
   );
