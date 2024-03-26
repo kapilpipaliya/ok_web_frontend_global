@@ -65,13 +65,13 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
   createEffect(() => {
     const path = location.pathname;
 
-    setIsLoginPage(path.includes("/nav/admin/login"));
-    setSignUpPage(path.includes("/nav/admin/signup"));
+    setIsLoginPage(path.includes("/admin/login"));
+    setSignUpPage(path.includes("/admin/signup"));
     setIsShowDrawer(
       !(
-        path.includes("/nav/admin/login") ||
-        path.includes("/nav/admin/signup") ||
-        path.includes("/nav/admin/Page/")
+        path.includes("/admin/login") ||
+        path.includes("/admin/signup") ||
+        path.includes("/admin/Page/")
       )
     );
 

@@ -59,7 +59,7 @@ export const LoginPage = () => {
             <div class="flex justify-content:center mt:20 f:15">
           <span>
             Don't have an account?{" "}
-            <a href="/nav/admin/signup">
+            <a href="/admin/signup">
               <u class="font:bolder text-fill:black">Sign Up</u>
             </a>
           </span>

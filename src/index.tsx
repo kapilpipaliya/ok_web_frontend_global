@@ -23,7 +23,7 @@ import {syncEvent} from "./lib/ws_events";
 import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
 
 // disable twMerge:
-import {isAdmin, showNav} from "./signals/common";
+import {isAdmin} from "./signals/common";
 import {AbstractSingleGrid, AllDashboards, TableDashboard} from "./pages/Grids";
 import {AbstractSingleForm} from "./components/DynamicForm";
 import {PageDesignerDragAndDrop} from "./components/drag-drop-pages/PageDesignerDragAndDrop";
@@ -50,7 +50,7 @@ render(() => {
           <AlertMessageContext.Provider value={{ alerts, setAlert }}>
             <Show when={isAdmin()}>
               <Router
-                base={showNav() ? "/nav/admin" : "/admin"}
+                base={"/admin"}
                 root={FullDashboard}
               >
                 <Route

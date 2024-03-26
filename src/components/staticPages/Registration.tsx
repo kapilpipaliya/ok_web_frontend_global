@@ -66,7 +66,7 @@ export const Register = () => {
             <div class="flex justify-content:center mt:20 f:15">
           <span>
             Already have an account?{" "}
-            <a href="/nav/admin/login">
+            <a href="/admin/login">
               <u class="font:bolder text-fill:black">Sign In</u>
             </a>
           </span>

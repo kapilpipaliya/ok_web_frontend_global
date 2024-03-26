@@ -28,7 +28,6 @@ import {
   getSelectionOptions,
   getValueFromVertexOrKey, getChildVertexes,
 } from "../../../lib/Utils";
-import { showNav } from "../../../signals/common";
 import { getLastItem } from "../../../utils/functions";
 import { WsContext } from "../../../utils/ws_events_dispatcher";
 import { ComponentProps } from "../../ComponentType";
@@ -255,7 +254,7 @@ export function GenericField(
                 <A
                   
                   {...props.meta.P.props}
-                  href={(showNav() ? "/nav/" : "/") + vertex().P.name}
+                  href={("/") + vertex().P.name}
                   draggable
                 >
                   <Show

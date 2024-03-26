@@ -124,15 +124,15 @@ export const PageItemRender = (props: {
           if (isActiveItem()) {
             if (indicatorPosition().position === "before") {
               if (compProps.class) {
-                compProps.class += ` bt:rgb(0,255,8)|1px|solid`;
+                compProps.class += ` bt:rgb(0,0,255)|1px|solid`;
               } else {
-                compProps.class = `bt:rgb(0,255,8)|1px|solid`;
+                compProps.class = `bt:rgb(0,0,255)|1px|solid`;
               }
             } else if (indicatorPosition().position === "after") {
               if (compProps.class) {
-                compProps.class += ` bb:rgb(0,255,8)|2px|solid`;
+                compProps.class += ` bb:rgb(0,0,255)|2px|solid`;
               } else {
-                compProps.class = `bb:rgb(0,255,8)|2px|solid`;
+                compProps.class = `bb:rgb(0,0,255)|2px|solid`;
               }
             }
           }

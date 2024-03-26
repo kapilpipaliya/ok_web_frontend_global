@@ -12,7 +12,6 @@ import { AbstractSingleForm } from "../components/DynamicForm";
 import { importRecordWithYAMLSchema } from "../lib/Import";
 import { getChildVertex } from "../lib/Utils";
 import { Vertex } from "../lib/graph";
-import { showNav } from "../signals/common";
 import CustomButton from "../components/solid-blocks/blocks/buttons";
 
 /*
@@ -139,22 +138,22 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
           // TODO: Check Permission
           // add to result if its allowed
           navItem.name = name;
-          navItem.href = (showNav() ? "/nav" : "") + `/admin/${collVertex.P.name}`;
+          navItem.href = ("") + `/admin/${collVertex.P.name}`;
         } else {
           const formVertex = getChildVertex(["$0Form"], child).vertex;
           if (formVertex) {
             // TODO: Check Permission
             // add to result if its allowed
             navItem.name = name;
-            navItem.href = `${showNav() ? "/nav" : ""}/admin/${formVertex.P.name}`;
+            navItem.href = `${""}/admin/${formVertex.P.name}`;
           } else {
-            const url = (showNav() ? "/nav" : "") + child.P.url;
+            const url = ("") + child.P.url;
             navItem.name = name;
             navItem.href = url;
           }
         }
       } else {
-        const url = (showNav() ? "/nav" : "") + child.P.url;
+        const url = ("") + child.P.url;
         navItem.name = name;
         navItem.href = url;
       }
