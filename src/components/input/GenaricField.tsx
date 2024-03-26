@@ -27,7 +27,7 @@ import {
   componentDrag,
   hoverId,
   indicatorPosition,
-  selectedId, setSelectedColl,
+  selectedId, setHoverId, setSelectedColl,
   setSelectedComponent,
   setSelectedId,
   setTargetId,
@@ -171,7 +171,10 @@ export const PageItemRender = (props: {
           >
               <span
                 class='contents '
-
+                onMouseOver={(e) => {
+                  e.stopPropagation();
+                  setHoverId(item.id);
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onLayoutItemClick();
