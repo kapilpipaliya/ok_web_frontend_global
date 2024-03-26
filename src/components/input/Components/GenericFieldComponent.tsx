@@ -26,7 +26,7 @@ import {
   FormContext,
   PageContext,
   getSelectionOptions,
-  getValueFromVertexOrKey,
+  getValueFromVertexOrKey, getChildVertexes,
 } from "../../../lib/Utils";
 import { showNav } from "../../../signals/common";
 import { getLastItem } from "../../../utils/functions";
@@ -37,7 +37,6 @@ import {
   Accordion,
   Avatar,
   Breadcrumbs,
-  Button,
   Progress,
   Spinner,
   Tab,
@@ -58,6 +57,7 @@ import {
 import { getTextColumnValue } from "./Utils";
 import {componentDrag, hoverId, selectedId, setSelectedId} from "../../pageStore";
 import CustomButton from "../../solid-blocks/blocks/buttons";
+import {TableColumn, TableGroup} from "../../solid-blocks/blocks/table";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -342,6 +342,28 @@ export function GenericField(
         </Match>
         <Match when={component() === "Button"}>
           <CustomButton {...props.meta.P.props}>{props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}</CustomButton>
+        </Match>
+        <Match when={props.component === "Table"}>
+          <TableGroup>
+            <tr>
+              <PageItemRender metaVertex={props.meta} />
+            </tr>
+          </TableGroup>
+        </Match>
+
+        <Match when={props.component === "TableColumn" && getChildVertexes(["Attr"], [props.meta]).vertexes?.length} >
+          <TableColumn
+            {...props.meta?.P.props}
+          >
+            <PageItemRender metaVertex={props.meta} />
+          </TableColumn>
+        </Match>
+        <Match when={props.component === "TableColumn"} >
+          <TableColumn
+            {...props.meta?.P.props}
+          >
+            {props.meta?.P.props?.title ?? "Header"}
+          </TableColumn>
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar

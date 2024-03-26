@@ -64,9 +64,6 @@ export function GenericInputField(
                 props.meta.P.props.children}
             </button>
           </Match>
-          <Match when={props.component === "TableColumn"}>
-            <PageItemRender metaVertex={props.meta} />
-          </Match>
           <Match when={props.component === "CheckBox"}>
             <Checkbox
               {...props.meta?.P.props}
@@ -139,6 +136,7 @@ export function GenericInputField(
               <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
+
           <Match when={props.component === "TextArea"}>
             <TextField
               class="global-style"

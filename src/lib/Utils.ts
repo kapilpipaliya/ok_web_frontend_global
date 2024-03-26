@@ -99,7 +99,7 @@ const collectionAttr = [
   {
     name: "Prop",
     displayName: "Properties",
-    component: "Table",
+    component: "Table2",
     attributes: [
       {
         name: "name",
@@ -120,7 +120,7 @@ const collectionAttr = [
   {
     name: "Role",
     displayName: "Permissions",
-    component: "Table",
+    component: "Table2",
     attributes: [
       {
         name: "role",
@@ -131,7 +131,7 @@ const collectionAttr = [
       },
       {
         name: "Perm",
-        component: "Table",
+        component: "Table2",
         attributes: [
           {
             name: "perm",
@@ -150,7 +150,7 @@ const collectionAttr = [
   },
   {
     name: "Attr",
-    component: "Table",
+    component: "Table2",
     tab: "expand",
     props: {
       type: "Attr",
@@ -223,7 +223,7 @@ const pageAttr = [
   {
     name: "Prop",
     displayName: "Property",
-    component: "Table",
+    component: "Table2",
     attributes: [
       {
         name: "name",
@@ -243,7 +243,7 @@ const pageAttr = [
   },
   {
     name: "Role",
-    component: "Table",
+    component: "Table2",
     attributes: [
       {
         name: "role",
@@ -254,7 +254,7 @@ const pageAttr = [
       },
       {
         name: "Perm",
-        component: "Table",
+        component: "Table2",
         attributes: [
           {
             name: "perm",
@@ -269,7 +269,7 @@ const pageAttr = [
   },
   {
     name: "Attr",
-    component: "Table",
+    component: "Table2",
     tab: "expand",
     props: {
       type: "Attr",
@@ -362,7 +362,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       // TODO: add validation, duplicate row with same name is not allowed.
       {
         name: "Prop",
-        component: "Table",
+        component: "Table2",
         tab: "Properties",
         attributes: [
           {
@@ -397,7 +397,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           //   // TODO: Be sure the name is ok, it will not change in production.
           //   name: "valueProp",
           //   displayName: "Value Property",
-          //   component: "Table",
+          //   component: "Table2",
           //   tab: "Properties",
           //   attributes: [
           //     {
@@ -447,7 +447,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "Event",
-        component: "Table",
+        component: "Table2",
         tab: "Events",
         attributes: [
           {
@@ -575,7 +575,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 
       {
         name: "Attr",
-        component: "Table",
+        component: "Table2",
         tab: "Attribute",
         props: {
           type: "Attr",
@@ -585,7 +585,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "Rules",
-        component: "Table",
+        component: "Table2",
         tab: "Rules",
         props: {
           type: "Rules",
@@ -599,7 +599,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             name: "Rule",
-            component: "Table",
+            component: "Table2",
             tab: "Rule",
             props: {
               type: "Rule",
@@ -609,7 +609,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               {
                 name: "cond",
                 displayName: "Conditions",
-                component: "Table",
+                component: "Table2",
                 attributes: [
                   {
                     name: "left",
@@ -688,7 +688,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 
       /*      {
         name: "Child",
-        component: "Table",
+        component: "Table2",
         tab: "Child",
         attributes: [
           {
@@ -729,7 +729,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             name: "Prop",
             displayName: "Property",
-            component: "Table",
+            component: "Table2",
             attributes: [
               {
                 name: "name",
@@ -750,7 +750,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },*/
       {
         name: "Transform",
-        component: "Table",
+        component: "Table2",
         tab: "Transform",
         attributes: [
           {
@@ -771,7 +771,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           {
             name: "Prop",
             displayName: "Property",
-            component: "Table",
+            component: "Table2",
             attributes: [
               {
                 name: "name",
@@ -793,7 +793,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "Role",
-        component: "Table",
+        component: "Table2",
         tab: "Permission",
         attributes: [
           {
@@ -818,7 +818,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "uniqueConstrain",
-        component: "Table",
+        component: "Table2",
         tab: "Unique Constrain",
         attributes: [
           {
@@ -930,7 +930,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "Attr",
-        component: "Table",
+        component: "Table2",
         tab: "Attribute",
         props: {
           type: "Attr",
@@ -940,7 +940,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       {
         name: "Role",
-        component: "Table",
+        component: "Table2",
         tab: "Permission",
         attributes: [
           {
@@ -952,7 +952,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
           },
           {
             name: "Perm",
-            component: "Table",
+            component: "Table2",
             attributes: [
               {
                 name: "perm",
@@ -1228,7 +1228,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
       { name: "lookupChild", component: "TextBox" },
       {
         name: "meta",
-        component: "Table",
+        component: "Table2",
         attributes: [
           { name: "column", component: "TextBox" },
           // {
@@ -1310,7 +1310,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
       { name: "description", component: "TextArea" },
       {
         name: "Attr",
-        component: "Table",
+        component: "Table2",
         tab: "Attributes",
         props: {
           type: "NavAttr"
@@ -1359,7 +1359,7 @@ Url`,
           },
           {
             name: "Role",
-            component: "Table",
+            component: "Table2",
             tab: "Permission",
             attributes: [
               {
@@ -1371,7 +1371,7 @@ Url`,
               },
               {
                 name: "Perm",
-                component: "Table",
+                component: "Table2",
                 attributes: [
                   {
                     name: "perm",
@@ -1386,7 +1386,7 @@ Url`,
           },
           {
             name: "Attr",
-            component: "Table",
+            component: "Table2",
             tab: "expand",
             props: {
               type: "NavAttr"
@@ -1435,7 +1435,7 @@ Url`,
               },
               {
                 name: "Role",
-                component: "Table",
+                component: "Table2",
                 tab: "Permission",
                 attributes: [
                   {
@@ -1447,7 +1447,7 @@ Url`,
                   },
                   {
                     name: "Perm",
-                    component: "Table",
+                    component: "Table2",
                     attributes: [
                       {
                         name: "perm",
@@ -1462,7 +1462,7 @@ Url`,
               },
               {
                 name: "Attr",
-                component: "Table",
+                component: "Table2",
                 tab: "expand",
                 props: {
                   type: "NavAttr"
@@ -1511,7 +1511,7 @@ Url`,
                   },
                   {
                     name: "Role",
-                    component: "Table",
+                    component: "Table2",
                     tab: "Permission",
                     attributes: [
                       {
@@ -1523,7 +1523,7 @@ Url`,
                       },
                       {
                         name: "Perm",
-                        component: "Table",
+                        component: "Table2",
                         attributes: [
                           {
                             name: "perm",
@@ -1538,7 +1538,7 @@ Url`,
                   },
                   {
                     name: "Attr",
-                    component: "Table",
+                    component: "Table2",
                     tab: "expand",
                     props: {
                       type: "NavAttr"
@@ -1587,7 +1587,7 @@ Url`,
                       },
                       {
                         name: "Role",
-                        component: "Table",
+                        component: "Table2",
                         tab: "Permission",
                         attributes: [
                           {
@@ -1599,7 +1599,7 @@ Url`,
                           },
                           {
                             name: "Perm",
-                            component: "Table",
+                            component: "Table2",
                             attributes: [
                               {
                                 name: "perm",
@@ -1867,13 +1867,13 @@ export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: Field
     const attr = klona(attribute);
     if (!attr.tab) attr.tab = "main";
     if (!attr.group) attr.group = "main";
-    // if(attribute.component === "Table") attribute.group = attribute.id;
+    // if(attribute.component === "Table2") attribute.group = attribute.id;
     const addAttributeResult = newRow(txnId, vertex, "MetaAttr", "MetaAttr", attr);
     if (addAttributeResult.error) {
       alert(addAttributeResult.error);
     }
     // todo discard transaction
-    // if (attribute.component === "Table" && attribute.attributes) {
+    // if (attribute.component === "Table2" && attribute.attributes) {
     if (attribute.attributes) {
       addMetaVertexes(txnId, graph.vertexes[addAttributeResult.vertexId!], attribute.attributes);
     }

@@ -16,7 +16,6 @@ export const genericInputComponents = [
   "FormSubmit",
   "FormCancel",
   "Form",
-  "TableColumn",
   // "DateBox",
   // "DropDownBox",
   "FileUploader",
@@ -35,7 +34,7 @@ export const genericInputComponents = [
   // "TagBox", // giving error with undefined values
   "TextArea",
   "TextBox",
-  "TextInput",
+  "TextInput"
 ];
 export const genericComponents2 = [
   "Box",
@@ -46,6 +45,8 @@ export const genericComponents2 = [
   // "TreeList",
   // "Toast",
   // "TileView",
+  "Table",
+  "TableColumn",
   "Tabs",
   "TabContainer",
   "TabList",
@@ -132,7 +133,7 @@ export const DynamicComponent = (props: {
           />
         </Show>
       </Match>
-      <Match when={props.component === "Table"}>
+      <Match when={props.component === "Table2"}>
         <Show when={!hiddenNodes().includes(props.meta?.id)}>
           <Show when={!props.disabled} fallback={<>...</>}>
             <TableInputField

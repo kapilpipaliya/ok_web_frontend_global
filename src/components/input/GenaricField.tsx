@@ -27,7 +27,7 @@ import {
   componentDrag,
   hoverId,
   indicatorPosition,
-  selectedId, setSelectedColl,
+  selectedId, setHoverId, setSelectedColl,
   setSelectedComponent,
   setSelectedId,
   setTargetId,
@@ -171,15 +171,19 @@ export const PageItemRender = (props: {
             value={[...useContext(PageRenderContext), item]}
           >
               <span
-                  class='contents '
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLayoutItemClick();
-                  }}
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
+                class='contents '
+                onMouseOver={(e) => {
+                  e.stopPropagation();
+                  setHoverId(item.id);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLayoutItemClick();
+                }}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
                 <Show when={isSelectedLayoutId(item.id)}>
                   <span class="position:relative">
