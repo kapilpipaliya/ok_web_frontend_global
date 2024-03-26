@@ -26,7 +26,7 @@ import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
 import {isAdmin, showNav} from "./signals/common";
 import {AbstractSingleGrid, AllDashboards, TableDashboard} from "./pages/Grids";
 import {AbstractSingleForm} from "./components/DynamicForm";
-import {PageDesignerDragAndDrop} from "./components/PageDesignerDragAndDrop";
+import {PageDesignerDragAndDrop} from "./components/drag-drop-pages/PageDesignerDragAndDrop";
 import {NavDesigner} from "./pages/FormDesigner";
 import {AllForms, SimpleImport} from "./pages/FormsAdmin";
 import {Login, Logout, SignUp} from "./pages/Forms";

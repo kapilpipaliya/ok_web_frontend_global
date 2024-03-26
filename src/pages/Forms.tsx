@@ -54,30 +54,7 @@ export const Login = (props: {}) => {
     // };
 
     return (
-
-        // <AbstractSingleForm
-        //   formId={"LogIn"}
-        //   id="new"
-        //   config={config}
-        //   submitButton={
-        //     <GenericField
-        //       meta={
-        //         {
-        //           P: {
-        //             component: "Button",
-        //             props: { stylingMode: "contained", width: "120", type: "success", text: "Login" },
-        //           },
-        //         } as unknown as Vertex
-        //       }
-        //       onClick={onLoginClick}
-        //     />
-        //   }
-        //   importExportButtons={false}
-        //   isLoginRegister="Login"
-        //   // TODO: add dry option
-        // />
         <LoginPage/>
-
     );
 };
 export const Logout = (props: {}) => {
@@ -140,29 +117,6 @@ export const SignUp = (props: {}) => {
     // };
 
     return (
-        // <AbstractSingleForm
-        //   formId={"SignUp"}
-        //   id="new"
-        //   config={config}
-        //   importExportButtons={false}
-        //   isLoginRegister={"Register"}
-        //   submitButton={
-        //     <GenericField
-        //       meta={
-        //         {
-        //           P: {
-        //             component: "Button",
-
-
-        //             props: { stylingMode: "contained", width: "120", type: "success", text: "Register" },
-        //           },
-        //         } as unknown as Vertex
-        //       }
-        //       onClick={onSignupClick}
-        //     />
-        //   }
-        //   // TODO: add dry option
-        // />
-        <Register/>
+        <Register />
     );
 };

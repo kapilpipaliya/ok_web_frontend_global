@@ -16,6 +16,10 @@
     border-style: solid; /* 2 */
 }
 
+.login {
+    height: 97vh;
+}
+
 ::before,
 ::after {
     --tw-content: '';
