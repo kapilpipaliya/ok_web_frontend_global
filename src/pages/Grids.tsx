@@ -46,6 +46,7 @@ import { isNumber } from "../lib/CommonUtils/isNumber";
 import { capitalizeFirstLetter } from "../lib/Utils";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {AbstractSingleForm} from "../components/DynamicForm";
+import CustomButton from "../components/solid-blocks/blocks/buttons";
 
 
 interface DataGridProps {
@@ -143,7 +144,7 @@ export const DataGrid = (props: DataGridProps) => {
                 </Match>
 
                 <Match when={true}>
-                    <i>{info.getValue<string>()}</i>
+                    {info.getValue<string>()}
                 </Match>
             </Switch>
         };
@@ -166,9 +167,9 @@ export const DataGrid = (props: DataGridProps) => {
                 <A
                  href={`/${props.tableId}/${info.row.original.id}`}
                   replace={true}
-                  class="bg:#cccccc:hover r:5|5|5|5 p:5"
+                  class="r:5|5|5|5 p:5"
                 >
-                  <Icon icon="tabler:edit"/>
+                    <CustomButton variant={'custom'} class={'bg:red'}><Icon icon="fluent:edit-12-regular"/></CustomButton>
                 </A> :
                 <button onClick={() => {
                     if (rowId() === null) {
@@ -190,7 +191,7 @@ export const DataGrid = (props: DataGridProps) => {
                     }
 
 
-                }} class="text-fill:#337ab7"><Icon icon="tabler:edit" class="color:blue"/>Edit</button>
+                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon icon="fluent:edit-12-regular"/></CustomButton></button>
 
         }
     });
@@ -199,8 +200,10 @@ export const DataGrid = (props: DataGridProps) => {
         header: '',
         footer: '',
         cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
-                              class="text-fill:red font:semibold	"><Icon  icon="fluent:delete-12-regular"
-                                                                            class="color:red mr:1rem"/></button>
+                              class="text-fill:red font:semibold	">
+            <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon  icon="fluent:delete-12-regular"
+                                                                     class="color:red mr:1rem"/></CustomButton>
+            </button>
     });
     console.log(tableColumns)
 
@@ -230,22 +233,21 @@ export const DataGrid = (props: DataGridProps) => {
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
     })
-
+    console.log(table.getHeaderGroups())
     return (
         <div class="py:5">
 
-            <div class="p:2 ">
-                <table class="w:full  bg:#f0f7fe ">
-                    <thead class="b:1  ">
+            <div class="p:2">
+                <table class="b:1.5px|solid|rgb(190,211,238) w:full bg:rgb(232,237,241) r:5|5|5|5 ">
+                    <thead class="r:5|5|5|5">
                     <For each={table.getHeaderGroups()}>
                         {headerGroup => (
                             <tr class="p:10 text:center h:50">
-
-
                                 <For each={headerGroup.headers}>
-                                    {header => (
-                                        <th class="w:10% ">
-                                            {header.isPlaceholder
+                                    {(header,index) => (
+
+                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"}`}>
+                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
                                                     header.column.columnDef.header,
@@ -260,13 +262,13 @@ export const DataGrid = (props: DataGridProps) => {
                         )}
                     </For>
                     </thead>
-                    <tbody class="bx:1">
+                    <tbody class="r:5|5|5|5 rounded-md">
 
                     <For each={table.getRowModel().rows}>
                         {(row) => (
                             <tr
                                 id={`grid${row.id}`}
-                                class={`h:50 text:center f:sans bb:0.5 bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover`}
+                                class={`h:50 text:center f:sans bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover`}
                             >
                                 <For each={row.getVisibleCells()}>
                                     {cell => (
@@ -371,7 +373,7 @@ export const TableDashboard = () => {
 
     const allTableLayouts = () => [...new Set([...allCollTableLayouts, ...allFormTableLayouts])];
     return (
-      
+
         <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
           <For each={allTableLayouts()}>
             {(tableLayout) => (

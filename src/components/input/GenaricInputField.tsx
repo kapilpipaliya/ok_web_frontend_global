@@ -25,6 +25,7 @@ export function GenericInputField(
   props: ComponentProps & {
     component: string;
     disabled: boolean;
+    title:string;
     txnId: number;
   }
 ) {
@@ -143,7 +144,7 @@ export function GenericInputField(
               onchange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}
-              placeholder={props.meta?.P.props?.label}
+              placeholder={props.meta?.P.props?.label ?? props.title}
 
               multiline
               value={props.data?.P[props.meta.P[IdAttr]]}
@@ -153,7 +154,7 @@ export function GenericInputField(
             <TextField
               class="global-style"
               {...props.meta?.P.props}
-              placeholder={props.meta?.P.props?.label}
+              placeholder={props.meta?.P.props?.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue?.(props.meta, props.data, e.target.value);
               }}

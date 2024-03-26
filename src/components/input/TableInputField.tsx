@@ -281,7 +281,7 @@ export function TableInputField(
           // classList={{ "opacity-25": sortable.isActiveDraggable }}
           style={{ "text-align": "center", width: "50px" }}
         >
-          <td style={{}}>
+          <td >
             {p.joinVertex.P.pos}
             {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
 
@@ -291,7 +291,7 @@ export function TableInputField(
             <div>
               <Icon
                 icon="mingcute:delete-line"
-                class="cursor:pointer"
+                class="cursor:pointer m:5px"
                 style={{ color: "red" }}
                 onClick={() =>
                   deleteRow(p.joinVertex, props.isRealTime!, props.txnId!, Ws)
@@ -432,8 +432,10 @@ export function TableInputField(
               table,
               th,
               td {
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                border-collapse: collapse;
+                border: .5px solid rgba(0, 0, 0, 0.1);
+                border-collapse: separate;
+                border-spacing: 0;
+                
               }
             `}
             style={{ "margin-top": "5px" }}

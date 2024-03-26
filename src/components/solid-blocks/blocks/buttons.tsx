@@ -15,7 +15,6 @@ const CustomButton = (props) => {
         display: 'inline-block',
         textAlign: 'center',
         transition: 'background-color 0.3s, color 0.3s',
-
     };
 
     // Define styles for different variants
@@ -23,13 +22,17 @@ const CustomButton = (props) => {
         outlined: {
             ...baseStyles,
             color: '#37c',
-            border: '2px solid #37c',
             "background-color": 'transparent',
+            border: '1.5px solid #37c',
         },
         contained: {
             ...baseStyles,
             color: 'white',
             "background-color": '#37c',
+        },
+        custom: {
+            ...baseStyles,
+            ...(props.style || {}), // Merge with user-defined styles
         },
     };
 

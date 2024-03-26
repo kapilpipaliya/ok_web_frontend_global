@@ -69,8 +69,8 @@ import {
   setSelectedId,
   useDragDrop,
 } from "./pageStore";
-import {ModalBody, ModalContent, ModalFooter, ModalHeader, TextField,} from "./solid-blocks/blocks";
-import {iconMap} from "./Utils";
+import {ModalBody, ModalContent, ModalFooter, ModalHeader, TextField, Tooltip,} from "./solid-blocks/blocks";
+import {iconMap, nameExpr} from "./Utils";
 import {toTitle} from "case-switcher-js";
 
 function getIconByCategory(category: any, size?: any) {
@@ -960,7 +960,7 @@ export const PageDesignerDragAndDrop = () => {
     };
 
     const TreeView = (props: { vertex: Vertex }) => {
-      const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick} = useDragDrop(pageConfig[0].record, props.vertex, collapsedKeys);
+      const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick,clone} = useDragDrop(pageConfig[0].record, props.vertex, collapsedKeys);
       const getComponent = () =>
         getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
 
@@ -1015,7 +1015,7 @@ export const PageDesignerDragAndDrop = () => {
             <div style="display: flex;align-items: center;">
               &nbsp;
               <Show when={children().length}>
-                <button
+                <Tooltip content={`${collapsedKeys().includes(props.vertex.id) ? "Expand" : "Collapse"}`} nowrap><button
                   class="cursor: pointer;"
                   onClick={(e) => {
                     e.stopPropagation();
@@ -1037,14 +1037,16 @@ export const PageDesignerDragAndDrop = () => {
                       }`,
                     }}
                   />
-                </button>
+                </button></Tooltip>
               </Show>
               &nbsp;
               {getIconByCategory(getComponent(), 17)}&nbsp;&nbsp;
               {nameExpr(props.vertex) || props.vertex.P.name}
             </div>
             <div>
-              <button
+              <Tooltip content={'Duplicate'} nowrap><Icon icon={'mage:copy'} height={20} width={20} color={'black'}
+                                                       class={'cursor:pointer mt:5px mb:2px ml:2px mr:5px opacity:.5 opacity:1:hover'} onclick={clone}/></Tooltip>
+              <Tooltip content={`${!hiddenNodes().includes(props.vertex.id) ? "Hide" : "Show"}`} nowrap><button
                 class="opacity:.5 opacity:1:hover pt:4px"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -1069,7 +1071,7 @@ export const PageDesignerDragAndDrop = () => {
                     class="transition: 0.5s ease-in-out;"
                   />
                 </Show>
-              </button>
+              </button></Tooltip>
               &nbsp;
             </div>
           </div>
@@ -1092,10 +1094,7 @@ export const PageDesignerDragAndDrop = () => {
 
     const rootVertexes = () =>
       pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : []; // Starting point(s)
-    const nameExpr = (v: Vertex) => {
-      const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
-      return `${v.P.name}${component ? ` (${component})` : ""}`;
-    };
+
 
     return (
       <>

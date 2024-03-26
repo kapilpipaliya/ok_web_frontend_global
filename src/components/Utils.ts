@@ -1,3 +1,5 @@
+import {Vertex} from "../lib/graph";
+import {getChildVertex} from "../lib/Utils";
 
 export const iconMap = {
   TextInput: "streamline:input-box",
@@ -30,4 +32,9 @@ export const iconMap = {
   TextArea: "bi:textarea",
   TextBox: "ph:textbox",
   ScrollView: "mdi:scroll",
+};
+
+export const nameExpr = (v: Vertex) => {
+  const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
+  return `${v.P.name}${component ? ` (${component})` : ""}`;
 };
