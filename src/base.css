@@ -52,10 +52,12 @@ html,
 :root {
     --font-family: 'Open Sans', sans-serif;
 }
-tr:last-of-type td:first-of-type {
+tr:last-child td:first-child {
     border-bottom-left-radius: 5px;
 }
-tr:last-of-type td:last-of-type {
+
+/* Apply rounded border to the bottom right corner of the last row */
+tr:last-child td:last-child {
     border-bottom-right-radius: 5px;
 }
 body {

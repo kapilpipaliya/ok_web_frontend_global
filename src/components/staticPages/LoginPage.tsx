@@ -7,10 +7,10 @@ export const LoginPage = () => {
   return (
       <div class="login rel bg:#FFF1F1 r:5|5|5|5">
       <div class="flex justify-content:center ai:center">
-        <img src={logo} alt="logo" class="mt:30 w:200@md h:70  w:150 h:30"/>
+        <img src={logo} alt="logo" class="mt:80px w:200 h:50"/>
       </div>
 
-        <div class="p:10@md box-shadow:100 shadow:black mt:70 h:70% flex ai:center jc:center">
+        <div class="p:10@md box-shadow:100 shadow:black mt:50 h:70% flex ai:center jc:center">
 
           <div>
             {/*<img src={bg} alt="bg"*/}

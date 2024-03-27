@@ -9,6 +9,8 @@ import {evaluate} from "../lib/jsep";
 import jsep from "jsep";
 import {setSelectionValue} from "./input/SelectionUtils";
 import {deleteNestedLayout} from "../lib/Traverse";
+import {toast} from "solid-toast";
+import {useToast} from "./Toast/toast";
 
 export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
 
@@ -199,7 +201,9 @@ function getChildrenAttrs(child: Vertex) {
 }
 
 export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Accessor<Id[]>, isPreview?: boolean) => {
-
+  const {
+    showSuccessToast
+  } = useToast();
   const children = createMemo(() => getChildrenAttrs(vertex));
 
   const activeItemChanged = createSelector<any, Vertex>(indicatorPosition, (a,b) => a.id === b.activeItem)
@@ -520,7 +524,7 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
     });
   };
 
-  const deleteLayout = () => {
+  const deleteLayout = (name) => {
       batch(() => {
         if (selectedId() === vertex.id) {
           setSelectedId(-1);
@@ -533,7 +537,10 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
       });
 
       deleteNestedLayout(record.txnId, [vertex]);
+
+    showSuccessToast(`${name} deleted Successfully`)
   };
+
   
   return {
     children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, clone, onLayoutItemClick, deleteLayout

@@ -9,12 +9,20 @@ export type TableCellProps = JSX.HTMLAttributes<HTMLTableCellElement> & {
     disabled?: boolean;
   };
 
-export const TableColumn: Component<TableCellProps> = (props) => {
+export const TableHeader: Component<TableCellProps> = (props) => {
   const [] = useContext(tableContext);
   
   return (
       <th {...props}/>
   );
+};
+
+export const TableRow: Component<TableCellProps> = (props) => {
+    const [] = useContext(tableContext);
+
+    return (
+        <td {...props}/>
+    );
 };
 
 export type TableProps = JSX.HTMLAttributes<HTMLTableElement> & {

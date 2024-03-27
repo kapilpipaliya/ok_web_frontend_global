@@ -189,8 +189,6 @@ export function TableInputField(
             const component = createMemo(() => {
               if (metaVertex().P.component.includes("-")) {
                 // Todo Fix: why this prints two times:
-                console.log(
-                  "refreshing");
                 const component = getSelectionOptions(
                   [p.joinVertex],
                   metaVertex().P.component
@@ -260,10 +258,26 @@ export function TableInputField(
                   </td>
                 </Match>
                 <Match when={true}>
-                  <td class="max-w:400px padding:1px">
+                  <td class={`max-w:400px padding:1px ${
+                      (() => {
+                        const comp = component();
+                        switch (comp) {
+                          case 'TextBox':
+                            return 'min-w:150px';
+                          case 'TextArea':
+                            return 'min-w:200px';
+                          case 'CheckBox':
+                            return 'min-w:50px';
+                          case 'SelectBox':
+                            return 'min-w:200px';
+                          default:
+                            return '';
+                        }
+                      })()}`}>
+
                     <div class="align-items:center">
-                      <DefaultValue />
-                      <Content />
+                      <DefaultValue/>
+                      <Content/>
                     </div>
                   </td>
                 </Match>
@@ -275,17 +289,17 @@ export function TableInputField(
     };
 
     return (
-      <>
-        <tr
-          // use:sortable
-          // classList={{ "opacity-25": sortable.isActiveDraggable }}
-          style={{ "text-align": "center", width: "50px" }}
-        >
-          <td >
-            {p.joinVertex.P.pos}
-            {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
+        <>
+          <tr
+              // use:sortable
+              // classList={{ "opacity-25": sortable.isActiveDraggable }}
+              style={{"text-align": "center", width: "50px"}}
+          >
+            <td>
+              {p.joinVertex.P.pos}
+              {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
 
-            {/*<Icon icon="mingcute:up-fill"  />*/}
+              {/*<Icon icon="mingcute:up-fill"  />*/}
             {/*<Icon icon="mingcute:down-fill"  />*/}
             {/*<Icon icon="material-symbols:add-box"  />*/}
             <div>

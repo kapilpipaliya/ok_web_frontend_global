@@ -80,30 +80,30 @@ export const TextField: Component<TextFieldProps> = (props) => {
         <Match when={local.multiline}>
           <textarea
             {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
-            style={{ resize: "both", width: "100%" }}
+            style={{ resize: "horizontal", width: "100%" , "max-width": "-webkit-fit-available"}}
             placeholder={local.placeholder ? local.placeholder : ""}
-            class={`${local.class ?? ""}  global-style`}
+            class={`${local.class ?? ""}  global-style max-w:100% h:50px`}
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
             }}
           />
         </Match>
-        <Match when={!local.multiline}>
-          <input
-            {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
-            style={{ width: "100%" }}
-            
-            placeholder={local.placeholder ? local.placeholder : ""}
-            class={`${local.class ?? ""} global-style`}
-            onInput={(ev) => {
-              runEvent(ev, local.onInput);
-              local.setValue?.(ev.currentTarget.value);
-            }}
-          />
-        </Match>
+          <Match when={!local.multiline}>
+              <input
+                  {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
+                  style={{width: "100%"}}
+
+                  placeholder={local.placeholder ? local.placeholder : ""}
+                  className={`${local.class ?? ""} global-style `}
+                  onInput={(ev) => {
+                      runEvent(ev, local.onInput);
+                      local.setValue?.(ev.currentTarget.value);
+                  }}
+              />
+          </Match>
       </Switch>
-      {local.children}
+        {local.children}
     </label>
   );
 };

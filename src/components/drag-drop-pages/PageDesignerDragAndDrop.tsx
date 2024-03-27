@@ -1,3 +1,4 @@
+// @ts-nocheck
 // TODO: make multiple Fields Drag and Drop once.
 import {useParams} from "@solidjs/router";
 import {createStore} from "solid-js/store";
@@ -75,18 +76,12 @@ import {toTitle} from "case-switcher-js";
 import ShareSection from "./share";
 import PreviewSection from "./preview";
 
-function getIconByCategory(category: any, size?: any) {
-    return (
-        <Icon
-            icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
-            width={size || 20}
-            height={size || 20}
-        />
-    ); // Returns null if category is not found
-}
-
-
 export const PageDesignerDragAndDrop = () => {
+    const mobileClass =
+        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem";
+    const webClass =
+        "border:1|solid|blue-60 m:1rem h:800px overflow:auto mx:auto";
+    const tabs = ["Mobile Preview", "Web Preview"];
     const params = useParams();
     const pageConfig = createStore({} as { record: Record });
     const [count, setCount] = createSignal(1);
@@ -100,26 +95,71 @@ export const PageDesignerDragAndDrop = () => {
         {id: 3, name: 'Preview', href: '#', status: 'upcoming', active: false},
     ]);
     const [selectedStepId, setSelectedStepId] = createSignal(1); // Initially set to the first step
-    const isSelectedLayoutId = createSelector(selectedId);
-    const isSelectedHoverId = createSelector(hoverId);
-
-
-    const rerender = () => {
-        setCount((prev) => prev + 1);
-    };
-
-    function useExpansion(defaultValue = true) {
-        const [expanded, setExpanded] = createSignal(defaultValue);
-        const toggleExpansion = () => setExpanded(!expanded());
-        return [expanded, toggleExpansion];
-    }
-
     const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
     const [isPagesExpanded, togglePagesExpansion] = useExpansion();
     const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
     const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
     const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
     const [isFormExpanded, toggleFormExpansion] = useExpansion();
+    const [className, setClassName] = createSignal(
+        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
+    );
+
+    const [leftColumns, setLeftColumns] = createSignal(
+        ["components", "pages", "collection"].map((column) => ({
+            id: column,
+            name: column,
+        }))
+    );
+    const [rightColumns, setRightColumns] = createSignal(
+        ["layout", "properties", "form"].map((column) => ({
+            id: column,
+            name: column,
+        }))
+    );
+    const [activeTab, setActiveTab] = createSignal(tabs[0]);
+    const isSelectedLayoutId = createSelector(selectedId);
+    const isSelectedHoverId = createSelector(hoverId);
+
+    function handleKeypressed(event) {
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+        if ((isMac && event.metaKey && event.key === 'z') || (!isMac && event.ctrlKey && event.key === 'z')) {
+            console.log("CTRL+z")
+        }
+    }
+
+    window.addEventListener('keydown', handleKeypressed);
+    onCleanup(() => {
+        window.removeEventListener('keydown', handleKeypressed);
+        batch(() => {
+            setSelectedId(-1);
+            setSelectedComponent({vertexId: -1});
+            setSelectedColl({vertexId: -1});
+        });
+    });
+
+    createEffect(() => {
+        setClassName(activeTab() === tabs[0] ? mobileClass : webClass);
+    });
+    const rerender = () => {
+        setCount((prev) => prev + 1);
+    };
+
+    function getIconByCategory(category: any, size?: any) {
+        return (
+            <Icon
+                icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
+                width={size || 20}
+                height={size || 20}
+            />
+        ); // Returns null if category is not found
+    }
+
+    function useExpansion(defaultValue = true) {
+        const [expanded, setExpanded] = createSignal(defaultValue);
+        const toggleExpansion = () => setExpanded(!expanded());
+        return [expanded, toggleExpansion];
+    }
 
     const ComponentPart = () => {
         const data = getTreeData({
@@ -226,8 +266,15 @@ export const PageDesignerDragAndDrop = () => {
                         setDraggedVertex(graph.vertexes[props.child.id]);
                     }}
                 >
+
                     <div class="pt:5px">{getIconByCategory(props.child?.P.name)}</div>
                     <div style={{"font-size": "14px"}}>{props.child?.P.name}</div>
+                    {isHovered() && <Tooltip textContent={'Double click to Edit'}> <Icon ondblclick={() => {
+                        const currentURL = window.location.href;
+                        const navigateUrl = currentURL.split('/').slice(0, -2).join('/')+'/Comp/'+ props.child.id;
+                        window.open(navigateUrl, '_blank')
+                    }}
+                                          class={'cursor:pointer'} icon={'solar:settings-linear'}/></Tooltip>}
                 </div>
             );
         }
@@ -355,9 +402,7 @@ export const PageDesignerDragAndDrop = () => {
                         }
                     >
                         {(item, index) => (
-
                             <ListItemComponent child={item.name}/>
-
                         )}
                     </For>
                 </div>
@@ -401,7 +446,6 @@ export const PageDesignerDragAndDrop = () => {
 
             return (
                 <div>
-
                     <div
                         draggable={true}
                         onDragStart={handleDragStart}
@@ -411,16 +455,19 @@ export const PageDesignerDragAndDrop = () => {
                         onDrop={handleDrop}
                         class={`${
                             isSelectedLayoutId(props.vertex.id)
-                                ? "bg:lightblue"
+                                ? "bg:rgb(197,221,255)"
                                 : isSelectedHoverId(props.vertex.id)
                                     ? "bg:#F2EDED"
                                     : ""
                         } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${
-                            children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+                            children().length
+                                ? "box-shadow:1px|1px|1px|1px #F2EDED"
+                                : ""
                         }`}
                         classList={{
                             "b:1px":
-                                isActiveItem() && indicatorPosition().position === "center",
+                                isActiveItem() &&
+                                indicatorPosition().position === "center",
                         }}
                         onClick={onLayoutItemClick}
                         onMouseOver={(e) => {
@@ -433,26 +480,48 @@ export const PageDesignerDragAndDrop = () => {
                         }}
                         style={{
                             "font-weight": children().length ? "bold" : "normal",
-                            "margin-bottom": children().length || !(isActiveItem() && indicatorPosition().position === "after") ? "0px" : "10px",
+                            "margin-bottom":
+                                children().length ||
+                                !(
+                                    isActiveItem() &&
+                                    indicatorPosition().position === "after"
+                                )
+                                    ? "0px"
+                                    : "10px",
                             "box-shadow": children().length
                                 ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
                                 : "0px",
-                            "margin-top": isActiveItem() && indicatorPosition().position === "before" ? "10px" : "",
-                            "border-top": isActiveItem() && indicatorPosition().position === "before" ? "2px solid green" : "",
-                            "border-bottom": isActiveItem() && indicatorPosition().position === "after" ? "2px solid green" : "",
+                            "margin-top":
+                                isActiveItem() &&
+                                indicatorPosition().position === "before"
+                                    ? "10px"
+                                    : "",
+                            "border-top":
+                                isActiveItem() &&
+                                indicatorPosition().position === "before"
+                                    ? "2px solid green"
+                                    : "",
+                            "border-bottom":
+                                isActiveItem() && indicatorPosition().position === "after"
+                                    ? "2px solid green"
+                                    : "",
                             "border-left": children().length ? "" : "1px dashed black",
                             "align-items": "center",
                             "justify-content": "space-between",
                             display: "flex",
                         }}
                     >
-
                         <div style="display: flex;align-items: center;">
                             &nbsp;
                             <Show when={children().length}>
                                 <Tooltip
-                                    content={`${collapsedKeys().includes(props.vertex.id) ? "Expand" : "Collapse"}`}
-                                    nowrap>
+                                    content={`${
+                                        collapsedKeys().includes(props.vertex.id)
+                                            ? "Expand"
+                                            : "Collapse"
+                                    }`}
+                                    nowrap
+                                >
                                     <button
                                         class="cursor: pointer;"
                                         onClick={(e) => {
@@ -482,58 +551,87 @@ export const PageDesignerDragAndDrop = () => {
                             {nameExpr(props.vertex) || props.vertex.P.name}
                         </div>
                         <div>
-                            <Show when={isSelectedLayoutId(props.vertex.id) || isSelectedHoverId(props.vertex.id)}>
-                                <Tooltip content={'Duplicate'} nowrap><Icon icon={'mage:copy'} height={18} width={18}
-                                                                            color={'black'}
-                                                                            class={'cursor:pointer mr:5px opacity:.5 opacity:1:hover'}
-                                                                            onclick={clone}/></Tooltip>
-                                <Tooltip content={'Delete'} nowrap><GenericField
-                                  meta={
-                                      {
-                                          P: {
-                                              component: "Icon",
-                                              props: {
-                                                  style: {color: "red"},
-                                                  onClick: () => deleteLayout(),
-                                                  width: 18,
-                                                  height: 18,
-                                                  class: 'cursor:pointer  mr:5px opacity:.5 opacity:1:hover',
-                                                  icon: "mage:trash",
-                                              },
-                                          },
-                                      } as any
-                                  }
-                                /></Tooltip>
+                            <Show
+                                when={
+                                    isSelectedLayoutId(props.vertex.id) ||
+                                    isSelectedHoverId(props.vertex.id)
+                                }
+                            >
+                                <Tooltip content={"Duplicate"} nowrap>
+                                    <Icon
+                                        icon={"mage:copy"}
+                                        height={18}
+                                        width={18}
+                                        color={"black"}
+                                        class={
+                                            "cursor:pointer mr:5px opacity:.5 opacity:1:hover mt:4px"
+                                        }
+                                        onclick={clone}
+                                    />
+                                </Tooltip>
+                                <Tooltip content={"Delete"} nowrap>
+                                    <GenericField
+                                        meta={
+                                            {
+                                                P: {
+                                                    component: "Icon",
+                                                    props: {
+                                                        style: {color: "red"},
+                                                        onClick: () => deleteLayout(getComponent()),
+                                                        width: 18,
+                                                        height: 18,
+                                                        class:
+                                                            "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
+                                                        icon: "mage:trash",
+                                                    },
+                                                },
+                                            } as any
+                                        }
+                                    />
+                                </Tooltip>
                             </Show>
-                            <Tooltip content={`${!hiddenNodes().includes(props.vertex.id) ? "Hide" : "Show"}`} nowrap>
-                                <button
-                                    class="opacity:.5 opacity:1:hover"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        toggleHidden(props.vertex.id);
-                                    }}
+                            <Show when={isSelectedLayoutId(props.vertex.id) ||
+                                isSelectedHoverId(props.vertex.id) || hiddenNodes().includes(props.vertex.id)}>
+                                <Tooltip
+                                    content={`${
+                                        !hiddenNodes().includes(props.vertex.id)
+                                            ? "Hide"
+                                            : "Show"
+                                    }`}
+                                    nowrap
                                 >
-                                    <Show
-                                        when={!hiddenNodes().includes(props.vertex.id)}
-                                        fallback={
+                                    <button
+                                        class="opacity:.5 opacity:1:hover"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleHidden(props.vertex.id);
+                                        }}
+                                    >
+                                        <Show
+                                            when={
+                                                !hiddenNodes().includes(props.vertex.id)
+
+                                            }
+                                            fallback={
+                                                <Icon
+                                                    height={18}
+                                                    width={18}
+                                                    icon="mdi:eye-off-outline"
+                                                    class="transition: 0.5s ease-in-out;"
+                                                />
+                                            }
+                                        >
                                             <Icon
                                                 height={18}
                                                 width={18}
-                                                icon="mdi:eye-off-outline"
+                                                icon="mdi:eye-outline"
                                                 class="transition: 0.5s ease-in-out;"
                                             />
-                                        }
-                                    >
-                                        <Icon
-                                            height={18}
-                                            width={18}
-                                            icon="mdi:eye-outline"
-                                            class="transition: 0.5s ease-in-out;"
-                                        />
-                                    </Show>
-                                </button>
-                            </Tooltip>
-                            &nbsp;
+                                        </Show>
+                                    </button>
+                                </Tooltip>
+                                &nbsp;
+                            </Show>
                         </div>
                     </div>
 
@@ -760,7 +858,14 @@ export const PageDesignerDragAndDrop = () => {
                         P: {
                             component: "Button",
                             props: {
-                                children: "Import", variant: "primary", onClick: () => {
+                                style: {
+                                    "margin-top": "10px",
+                                    "background-color": "rgb(51, 119, 204)",
+                                    "color": "white"
+                                },
+                                variant: "custom",
+                                children: "Import",
+                                onClick: () => {
                                     const jsxParser = new JsxParser({
                                         showWarnings: true,
                                         txnId: pageConfig[0].record.txnId,
@@ -779,7 +884,14 @@ export const PageDesignerDragAndDrop = () => {
                     meta: {
                         P: {
                             component: "Button",
-                            props: {type: "primary", children: "Submit", onClick: onImportsSubmit,},
+                            props: {
+                                style: {
+                                    "margin-top": "10px",
+                                    "background-color": "rgb(51, 119, 204)",
+                                    "color": "white"
+                                },
+                                variant: "custom", children: "Submit", onClick: onImportsSubmit,
+                            },
                         },
                     } as any,
 
@@ -788,7 +900,14 @@ export const PageDesignerDragAndDrop = () => {
                     meta: {
                         P: {
                             component: "Button",
-                            props: {variant: "secondary", children: "Cancel", onClick: onImportsCancel},
+                            props: {
+                                style: {
+                                    "margin-top": "10px",
+                                    "background-color": "white",
+                                    "color": "rgb(252,0,0)", "border": "1px solid rgb(252,0,0)"
+                                },
+                                variant: "custom", children: "Cancel", onClick: onImportsCancel
+                            },
                         },
                     } as any,
                 },
@@ -796,8 +915,8 @@ export const PageDesignerDragAndDrop = () => {
             return (
                 <>
                     <Portal>
-                        <div role="dialog" tabIndex={-1} class="sb-modal">
-                            <ModalContent>
+                        <div role="dialog" tabIndex={-1} class="sb-modal r:10|10|10|10">
+                            <ModalContent class={'min-w:30%'}>
                                 <ModalHeader>
                                     Import HTML
                                     <button
@@ -808,9 +927,10 @@ export const PageDesignerDragAndDrop = () => {
                                         ✕
                                     </button>
                                 </ModalHeader>
-                                <ModalBody>
+                                <ModalBody class={'mt:1rem'}>
                                     <GenericInputField
                                         txnId={dataVertexId}
+                                        title={'Write HTML'}
                                         component="TextArea"
                                         meta={graph.vertexes[metaVertexId]}
                                         data={graph.vertexes[dataVertexId]}
@@ -824,6 +944,7 @@ export const PageDesignerDragAndDrop = () => {
                                     <div
                                         style={{
                                             display: "flex",
+
                                             "justify-content": "center",
                                             "align-items": "center",
                                         }}
@@ -933,7 +1054,16 @@ export const PageDesignerDragAndDrop = () => {
                             {
                                 P: {
                                     component: "Button",
-                                    props: {children: "Rules", onClick: () => toggleRulesModal},
+                                    props: {
+                                        children: "Rules",
+                                        style: {
+                                            "margin-bottom": "10px",
+                                            "background-color": "rgb(51, 119, 204)",
+                                            "color": "white"
+                                        },
+                                        variant: "custom",
+                                        onClick: () => toggleRulesModal
+                                    },
                                 },
                             } as any
                         }
@@ -1049,43 +1179,6 @@ export const PageDesignerDragAndDrop = () => {
         setIsPropertiesOpen(!isPropertiesOpen());
     };
 
-    onCleanup(() => {
-        batch(() => {
-            setSelectedId(-1);
-            setSelectedComponent({vertexId: -1});
-            setSelectedColl({vertexId: -1});
-        });
-    });
-
-    const [className, setClassName] = createSignal(
-        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
-    );
-
-    const mobileClass =
-        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem";
-    const webClass =
-        "border:1|solid|blue-60 m:1rem h:800px overflow:auto mx:auto";
-    const tabs = ["Mobile Preview", "Web Preview"];
-
-    const [activeTab, setActiveTab] = createSignal(tabs[0]);
-
-    createEffect(() => {
-        setClassName(activeTab() === tabs[0] ? mobileClass : webClass);
-    });
-
-    const [leftColumns, setLeftColumns] = createSignal(
-        ["components", "pages", "collection"].map((column) => ({
-            id: column,
-            name: column,
-        }))
-    );
-    const [rightColumns, setRightColumns] = createSignal(
-        ["layout", "properties", "form"].map((column) => ({
-            id: column,
-            name: column,
-        }))
-    );
-
     const componentPart = <ComponentPart/>;
     const pagesPart = <PagesPart/>;
     const collectionPart = <div>No Collection Found</div>; //<TwoCollections/>;
@@ -1121,7 +1214,7 @@ export const PageDesignerDragAndDrop = () => {
                             {isComponentsExpanded() && (
                                 <div
                                     class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5"
-                                    title="Close Components"
+
                                 >
                                     <div
                                         class="mb:10px"
@@ -1132,7 +1225,7 @@ export const PageDesignerDragAndDrop = () => {
                                         }}
                                     >
                                         <div style="font-weight: bold">Components</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px">
+                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px" title="Close Components">
                                             {isComponentsExpanded() && (
                                                 <div
                                                     onClick={toggleComponentsExpansion}
@@ -1166,7 +1259,7 @@ export const PageDesignerDragAndDrop = () => {
                             {isPagesExpanded() && (
                                 <div
                                     class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 "
-                                    title="Close Pages"
+
                                 >
                                     <div
                                         class="mb:10px"
@@ -1177,7 +1270,7 @@ export const PageDesignerDragAndDrop = () => {
                                         }}
                                     >
                                         <div style="font-weight: bold">Pages</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px">
+                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px" title="Close Pages">
                                             {isPagesExpanded() && (
                                                 <div
                                                     onClick={togglePagesExpansion}
@@ -1424,7 +1517,7 @@ export const PageDesignerDragAndDrop = () => {
                                 )}
 
                                 {isFormExpanded() && (
-                                    <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:24.3rem">
+                                    <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:23.5rem">
                                         <div
                                             class={`mb:${isFormOpen() ? "10px" : "0px"}`}
                                             style={{
@@ -1489,7 +1582,6 @@ export const PageDesignerDragAndDrop = () => {
         );
     };
 
-
     const onChangeStep = (selectedStepId: number) => {
         const newSteps = steps().map(step => {
             return {
@@ -1504,6 +1596,7 @@ export const PageDesignerDragAndDrop = () => {
     const getStepId = () => {
         return steps().map(step => step.active ? step.id : null).find(id => id !== null);
     };
+
     return (
         <>
             <div class={'w:100% h:50px display:flex align-items:center justify-content:center'}>
@@ -1523,8 +1616,10 @@ export const PageDesignerDragAndDrop = () => {
                                             </Show>
                                         </div>
 
-                                        <Tooltip position={'n'} content={step.id === 1?'Edit Page':step.id === 2?'Preview':'Share'}><a href="#" onclick={() => onChangeStep(step.id)}
-                                           class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
+                                        <Tooltip position={'n'}
+                                                 content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}><a
+                                            href="#" onclick={() => onChangeStep(step.id)}
+                                            class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
                                             <Icon
                                                 icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
                                                 style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
@@ -1541,8 +1636,6 @@ export const PageDesignerDragAndDrop = () => {
             </div>
 
             <Switch>
-
-
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
                         <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": '85vh'}}>

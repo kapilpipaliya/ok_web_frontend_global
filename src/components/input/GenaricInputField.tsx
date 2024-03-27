@@ -37,7 +37,7 @@ export function GenericInputField(
       classList={{
         "width:100%": props.component === "TextArea",
       }}
-    >
+  >
       <Show
         when={!props.disabled}
         fallback={getTextColumnValue(props.data?.P[props.meta.P[IdAttr]])}

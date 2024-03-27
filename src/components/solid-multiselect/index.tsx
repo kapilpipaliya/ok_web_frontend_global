@@ -659,24 +659,24 @@ const matchValues = (value: string, search: string) => {
               <input
                 type="text"
                 ref={searchBox}
-                class="searchBox"
+                class="searchBox max-w:0px"
                 classList={{ searchSingle: singleSelect }}
                 id={`${id || "search"}_input`}
                 onInput={onInput}
                 value={inputValue()}
                 onFocus={onFocus}
                 onBlur={onBlur}
-                placeholder={
-                  (singleSelect && selectedValues().length) ||
-                  (hidePlaceholder && selectedValues().length)
-                    ? ""
-                    : placeholder
-                }
                 onKeyDown={onArrowKeyNavigation}
                 style={style["inputField"]}
                 autocomplete="off"
                 disabled={disable}
               />
+                <span class={'fg:#afa6a6'}>{
+                    (singleSelect && selectedValues().length) ||
+                    (hidePlaceholder && selectedValues().length)
+                        ? ""
+                        : placeholder
+                }</span>
               <Show when={singleSelect || showArrow}>
                 <img class="icon_cancel icon_down_dir" src={DownArrow} />
               </Show>

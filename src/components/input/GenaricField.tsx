@@ -1,8 +1,8 @@
 import {
-  batch,
   createComputed,
   createContext,
-  createMemo, createSelector,
+  createMemo,
+  createSelector,
   For,
   Match,
   Show,
@@ -10,33 +10,23 @@ import {
   useContext,
 } from "solid-js";
 
-import { toTitle } from "case-switcher-js";
-import { graph, IdAttr, setGraph, Vertex } from "../../lib/graph";
-import { getCollAttrComp, getCompProps, getRowProps } from "../../lib/Record";
+import {toTitle} from "case-switcher-js";
+import {IdAttr, setGraph, Vertex} from "../../lib/graph";
+import {getCollAttrComp, getCompProps, getRowProps} from "../../lib/Record";
 import {
   FormContext,
-  PageContext,
-  getSelectionOptions,
   getChildVertex,
-  getChildVertexes, getParentVertex,
+  getChildVertexes,
+  getParentVertex,
+  getSelectionOptions,
+  PageContext,
 } from "../../lib/Utils";
-import { getLastItem } from "../../utils/functions";
-import { DynamicComponent } from "../DynamicComponent";
+import {getLastItem} from "../../utils/functions";
+import {DynamicComponent} from "../DynamicComponent";
 import {Tab, TabContainer, Tooltip} from "../solid-blocks/blocks";
-import {
-  componentDrag,
-  hoverId,
-  indicatorPosition,
-  selectedId, setHoverId, setSelectedColl,
-  setSelectedComponent,
-  setSelectedId,
-  setTargetId,
-  targetId,
-  useDragDrop
-} from "../pageStore";
+import {hoverId, indicatorPosition, selectedId, setHoverId, setSelectedId, targetId, useDragDrop} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
-import {deleteNestedLayout, getParentVertexValue} from "../../lib/Traverse";
-import {nameExpr} from "../Utils";
+import {toNumber} from "lodash";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -80,18 +70,16 @@ export const PageItemRender = (props: {
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
 
-
-
   return (
     <For
       each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort(
         (a, b) => a.P.pos - b.P.pos
       )}
     >
-      {(item) => {
+      {(item,index) => {
+
         const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout} = useDragDrop(record, item, () => [], true);
 
-        // createComputed is hard to debug
         createComputed(() => {
           // @Note:(Question)
           // We may need to link vertex with meta,
@@ -234,7 +222,6 @@ export const PageItemRender = (props: {
         );
         // currently context is not reactive, but we are assuming it will work.
 
-
         return (
             <Switch>
               <Match when={parentComponent() === "TabList"}>
@@ -246,6 +233,17 @@ export const PageItemRender = (props: {
                 <TabContainer>
                   <PageComponent/>
                 </TabContainer>
+              </Match>
+              <Match when={parentComponent() === "TableHeader"}>
+                <th class={'p:10px'}>
+                  <PageComponent/>
+                </th>
+              </Match>
+              <Match when={parentComponent() === "TableRow"}>
+                <td class={`p:10px`}>
+                  <PageComponent/>
+                  {/*<div class=" h:1px  bg:rgb(229,231,235) w:100% " />*/}
+                </td>
               </Match>
               <Match when={true}>
                 <PageComponent/>

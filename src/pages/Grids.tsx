@@ -246,7 +246,7 @@ export const DataGrid = (props: DataGridProps) => {
                                 <For each={headerGroup.headers}>
                                     {(header,index) => (
 
-                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"}`}>
+                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px`}>
                                              {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -268,11 +268,11 @@ export const DataGrid = (props: DataGridProps) => {
                         {(row) => (
                             <tr
                                 id={`grid${row.id}`}
-                                class={`h:50 text:center f:sans bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover`}
+                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover`}
                             >
                                 <For each={row.getVisibleCells()}>
                                     {cell => (
-                                        <td>
+                                        <td class={'p:10px'}>
 
                                             {flexRender(
                                                 cell.column.columnDef.cell,

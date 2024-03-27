@@ -33,6 +33,7 @@ import {Login, Logout, SignUp} from "./pages/Forms";
 import Page404 from "./pages/404";
 import BackupRestore from "./pages/BackupRestore";
 import {GraphViewPage} from "./pages/GraphViewPage";
+import {Toaster} from "solid-toast";
 
 
 render(() => {
@@ -130,6 +131,7 @@ render(() => {
                 <Route path="sitemap.txt" component={SiteMap as Component} />
               </Router>
             </Show>
+              <Toaster />
           </AlertMessageContext.Provider>
         </WsContext.Provider>
       </CSSRuntimeProvider>

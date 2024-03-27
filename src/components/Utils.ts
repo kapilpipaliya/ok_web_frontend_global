@@ -28,10 +28,16 @@ export const iconMap = {
   Radio: "fluent:radio-button-16-filled",
   Switch: "iconoir:switch-off",
   HtmlEditor: "mdi:code-block-html",
-  Table: "tabler:table",
+  Table: "material-symbols-light:table",
   TextArea: "bi:textarea",
   TextBox: "ph:textbox",
   ScrollView: "mdi:scroll",
+  FormSubmit: "ant-design:file-done-outlined",
+  FormCancel: "oui:index-close",
+  TableHeader: "fluent:dual-screen-header-20-regular",
+  TableRow:"carbon:row",
+  TabContainer: "fluent:tabs-20-regular",
+  TabList: "fluent:tab-desktop-20-regular",
 };
 
 export const nameExpr = (v: Vertex) => {

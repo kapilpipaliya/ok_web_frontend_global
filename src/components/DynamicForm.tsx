@@ -114,11 +114,10 @@ export function FormGroup(props: FormGroupProps) {
                         </Match>
 
                         <Match when={true}>
-                            <div class=" grid-cols:2 py:5 w:450">
+                            <div class="grid-cols:2 w:450" style={{'padding-top':"5px"}}>
                                 <div id={id}>
                                     {props.labelPrefix as string} <Label/>
                                 </div>
-
                             </div>
                             <div >
                                 <Content/>
