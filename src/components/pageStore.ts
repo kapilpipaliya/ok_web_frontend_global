@@ -202,7 +202,11 @@ const getComponentFromLayoutRow = (layoutRowId: string | number) => {
 export const getIndicatorPosition = (e: MouseEvent, node: HTMLElement) => {
   let bounds: DOMRect;
   if (node.classList.contains('contents')) {
-    bounds = node.lastElementChild!.getBoundingClientRect();
+    if (node.lastElementChild) {
+      bounds = node.lastElementChild.getBoundingClientRect();
+    } else {
+      return undefined;
+    }
   } else {
     bounds = node.getBoundingClientRect();
   }
@@ -246,6 +250,11 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
 
   const handleDragOverBase = (e: DragEvent) => {
     let position = getIndicatorPosition(e, e.currentTarget as HTMLElement);
+    if (!position) {
+      setIndicatorPosition({ activeItem: null, position: null });
+      setTargetId(-1);
+      return;
+    }
 
     let activeItem: Id;
     if (position === "before") {
