@@ -71,6 +71,41 @@ export const componentDrag = (
         label: "Attr",
       },
     });
+    const attrCompMetaVertex = newVertex(getNewGraphId(), [], {
+      name: "Comp",
+      component: "SelectBox",
+      props: {
+        collection: "g:'Comp'",
+      },
+    });
+
+    if (fromVertex.L[0] === "Page") {
+      function processChildren(fromVertex: Vertex, toVertex: Vertex) {
+        const childrenVertexes = getChildrenAttrs(fromVertex);
+        const results = [];
+        for (const child of childrenVertexes) {
+          const rowResult2 = addNewRow(
+            txnId,
+            attrMetaVertex,
+            toVertex,
+            {pos: child.P.pos},
+            false,
+            {} as any
+          );
+          const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
+
+          const compVertex = getComponentFromLayoutRow(child.id);
+          // set Component to the row
+          setSelectionValue(txnId, rowVertex2, attrCompMetaVertex, compVertex.id);
+          cloneRowProps(txnId, child, rowVertex2);
+          processChildren(child, rowVertex2);
+          results.push(rowResult2.vertexId!);
+        }
+        return results;
+      }
+      return processChildren(fromVertex, parentVertex)[0] ?? -1;
+    }
+
     const rowResult = addNewRow(
       txnId,
       attrMetaVertex,
@@ -80,13 +115,7 @@ export const componentDrag = (
       {} as any
     );
     const rowVertex = graph.vertexes[rowResult.vertexId!];
-    const attrCompMetaVertex = newVertex(getNewGraphId(), [], {
-      name: "Comp",
-      component: "SelectBox",
-      props: {
-        collection: "g:'Comp'",
-      },
-    });
+
 
     if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
       if (fromVertex.L[0] === "Comp") {
@@ -275,21 +304,11 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
       parentVertex = parentResult.vertex!;
     }
 
-    if (fromVertexLabel === "Comp") {
-      if (position === "center") {
-        const compVertex = getComponentFromLayoutRow(toVertexId);
-        if (!compVertex?.P.child) {
-          // Don't allow drag and drop
-          return;
-        }
-      }
-    }  else {
-      if (position === "center") {
-        const compVertex = getComponentFromLayoutRow(toVertexId);
-        if (!compVertex?.P.child) {
-          // Don't allow drag and drop
-          return;
-        }
+    if (position === "center") {
+      const compVertex = getComponentFromLayoutRow(toVertexId);
+      if (!compVertex?.P.child) {
+        // Don't allow drag and drop
+        return;
       }
     }
 
@@ -366,6 +385,29 @@ export const useDragDrop = (record: Record, vertex: Vertex, collapsedKeys: Acces
     }
 
     if (fromVertexLabel === "Comp") {
+      if (position === "center") {
+        const compVertex = getComponentFromLayoutRow(toVertexId);
+        if (!compVertex?.P.child) {
+          return;
+        }
+      }
+
+      const parentVertex =
+        position !== "center"
+          ? getParentVertex(["Attr"], toVertex).vertex!
+          : toVertex;
+
+      const rowId = componentDrag(
+        record.txnId,
+        fromVertex,
+        parentVertex || record.vertex
+      );
+      if (rowId === -1) return;
+
+      fromVertex = graph.vertexes[rowId];
+
+      sortChildren();
+    } else if (fromVertexLabel === "Page") {
       if (position === "center") {
         const compVertex = getComponentFromLayoutRow(toVertexId);
         if (!compVertex?.P.child) {

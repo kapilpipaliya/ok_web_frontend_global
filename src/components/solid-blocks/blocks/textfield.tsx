@@ -95,7 +95,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
                   style={{width: "100%"}}
 
                   placeholder={local.placeholder ? local.placeholder : ""}
-                  className={`${local.class ?? ""} global-style `}
+                  class={`${local.class ?? ""} global-style `}
                   onInput={(ev) => {
                       runEvent(ev, local.onInput);
                       local.setValue?.(ev.currentTarget.value);

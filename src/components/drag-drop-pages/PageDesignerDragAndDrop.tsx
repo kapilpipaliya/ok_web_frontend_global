@@ -1,4 +1,3 @@
-// @ts-nocheck
 // TODO: make multiple Fields Drag and Drop once.
 import {useParams} from "@solidjs/router";
 import {createStore} from "solid-js/store";
@@ -145,16 +144,6 @@ export const PageDesignerDragAndDrop = () => {
         setCount((prev) => prev + 1);
     };
 
-    function getIconByCategory(category: any, size?: any) {
-        return (
-            <Icon
-                icon={iconMap[category] ?? "material-symbols:widgets-outline-rounded"}
-                width={size || 20}
-                height={size || 20}
-            />
-        ); // Returns null if category is not found
-    }
-
     function useExpansion(defaultValue = true) {
         const [expanded, setExpanded] = createSignal(defaultValue);
         const toggleExpansion = () => setExpanded(!expanded());
@@ -267,7 +256,11 @@ export const PageDesignerDragAndDrop = () => {
                     }}
                 >
 
-                    <div class="pt:5px">{getIconByCategory(props.child?.P.name)}</div>
+                    <div class="pt:5px"><Icon
+                      icon={iconMap[props.child?.P.name] ?? "material-symbols:widgets-outline-rounded"}
+                      width={20}
+                      height={20}
+                    /></div>
                     <div style={{"font-size": "14px"}}>{props.child?.P.name}</div>
                     {isHovered() && <Tooltip textContent={'Double click to Edit'}> <Icon ondblclick={() => {
                         const currentURL = window.location.href;
@@ -338,7 +331,7 @@ export const PageDesignerDragAndDrop = () => {
             }
         };
 
-        function ListItemComponent(props: { child: Vertex }) {
+        function ListItemComponent(props: { child: any }) {
             const [isHovered, setIsHovered] = createSignal(false);
 
             const baseStyle = {
@@ -375,7 +368,7 @@ export const PageDesignerDragAndDrop = () => {
                         setDraggedVertex(graph.vertexes[props.child.id]);
                     }}
                 >
-                    <div style={{"font-size": "14px"}}>{toTitle((props.child))}</div>
+                    <div style={{"font-size": "14px"}}>{toTitle((props.child.name))}</div>
                 </div>
             );
         }
@@ -402,7 +395,7 @@ export const PageDesignerDragAndDrop = () => {
                         }
                     >
                         {(item, index) => (
-                            <ListItemComponent child={item.name}/>
+                            <ListItemComponent child={item}/>
                         )}
                     </For>
                 </div>
@@ -547,7 +540,11 @@ export const PageDesignerDragAndDrop = () => {
                                 </Tooltip>
                             </Show>
                             &nbsp;
-                            {getIconByCategory(getComponent(), 17)}&nbsp;&nbsp;
+                            <Icon
+                              icon={iconMap[getComponent()] ?? "material-symbols:widgets-outline-rounded"}
+                              width={17}
+                              height={17}
+                            />&nbsp;&nbsp;
                             {nameExpr(props.vertex) || props.vertex.P.name}
                         </div>
                         <div>
@@ -1062,7 +1059,7 @@ export const PageDesignerDragAndDrop = () => {
                                             "color": "white"
                                         },
                                         variant: "custom",
-                                        onClick: () => toggleRulesModal
+                                        onClick: toggleRulesModal
                                     },
                                 },
                             } as any
@@ -1638,7 +1635,7 @@ export const PageDesignerDragAndDrop = () => {
             <Switch>
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
-                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": '85vh'}}>
+                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": 'calc(100vh - 120px)'}}>
                             <For each={leftColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>
@@ -1653,7 +1650,7 @@ export const PageDesignerDragAndDrop = () => {
                                 </FormContext.Provider>
                             </div>
                         </div>
-                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": '85vh'}}>
+                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": 'calc(100vh - 120px)'}}>
                             <For each={rightColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>

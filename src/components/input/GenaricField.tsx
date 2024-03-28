@@ -26,7 +26,6 @@ import {DynamicComponent} from "../DynamicComponent";
 import {Tab, TabContainer, Tooltip} from "../solid-blocks/blocks";
 import {hoverId, indicatorPosition, selectedId, setHoverId, setSelectedId, targetId, useDragDrop} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
-import {toNumber} from "lodash";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -80,6 +79,7 @@ export const PageItemRender = (props: {
 
         const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout} = useDragDrop(record, item, () => [], true);
 
+        // createComputed is hard to debug
         createComputed(() => {
           // @Note:(Question)
           // We may need to link vertex with meta,

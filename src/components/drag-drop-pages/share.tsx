@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {createEffect, createSignal} from 'solid-js';
 import {Icon} from "@iconify-icon/solid";
 import {Tooltip} from "../solid-blocks/blocks";
