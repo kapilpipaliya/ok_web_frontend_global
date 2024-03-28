@@ -384,7 +384,9 @@ export function GenericField(
                     </Spinner>
                 </Match>
                 <Match when={component() === "TreeViewItem"}>
-                        <TreeView data={<PageItemRender metaVertex={props.meta}/>}/>
+                    <TreeView title={props.meta.P?.props['title'] ?? "MenuItem"} meta={props.meta}>
+                        <PageItemRender metaVertex={props.meta}/>
+                    </TreeView>
                 </Match>
                 <Match when={component() === "TreeViewChild"}>
                     <li>
