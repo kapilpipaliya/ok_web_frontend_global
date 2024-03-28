@@ -239,6 +239,11 @@ export const PageItemRender = (props: {
                   <PageComponent/>
                 </th>
               </Match>
+              <Match when={parentComponent() === "TreeViewChild"}>
+                <li>
+                  <PageComponent/>
+                </li>
+              </Match>
               <Match when={parentComponent() === "TableRow"}>
                 <td class={`p:10px`}>
                   <PageComponent/>

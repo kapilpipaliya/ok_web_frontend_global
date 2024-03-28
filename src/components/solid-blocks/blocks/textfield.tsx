@@ -65,42 +65,47 @@ export const TextField: Component<TextFieldProps> = (props) => {
     >
       {/* <span class="sb-textfield-label">{local.label}</span> */}
       <Switch>
-        <Match when={local.isNumber}>
-          <input
-            {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
-            type="number"
-            placeholder={local.placeholder ? local.placeholder : ""}
-            class={`${local.class ?? ""} global-style w:100%`}
-            onInput={(ev) => {
-              runEvent(ev, local.onInput);
-              local.setValue?.(ev.currentTarget.value);
-            }}
-          />
-        </Match>
-        <Match when={local.multiline}>
+          <Match when={local.isNumber}>
+              <div className="textInputWrapper">
+                  <input
+                      name='number'
+                      {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
+                      type="number"
+                      placeholder={local.placeholder ? local.placeholder : ""}
+                      class={`${local.class ?? ""} global-style textInput`}
+                      onInput={(ev) => {
+                          runEvent(ev, local.onInput);
+                          local.setValue?.(ev.currentTarget.value);
+                      }}
+                  />
+              </div>
+          </Match>
+          <Match when={local.multiline}>
           <textarea
-            {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
-            style={{ resize: "horizontal", width: "100%" , "max-width": "-webkit-fit-available"}}
-            placeholder={local.placeholder ? local.placeholder : ""}
-            class={`${local.class ?? ""}  global-style max-w:100% h:50px`}
-            onInput={(ev) => {
-              runEvent(ev, local.onInput);
-              local.setValue?.(ev.currentTarget.value);
-            }}
+              {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
+              style={{resize: "horizontal", width: "100%", "max-width": "-webkit-fit-available"}}
+              placeholder={local.placeholder ? local.placeholder : ""}
+              class={`${local.class ?? ""}  global-style max-w:100% h:50px `}
+              onInput={(ev) => {
+                  runEvent(ev, local.onInput);
+                  local.setValue?.(ev.currentTarget.value);
+              }}
           />
-        </Match>
+          </Match>
           <Match when={!local.multiline}>
-              <input
+              <div class="textInputWrapper">
+                  <input
+                  name="text"
+                  type="search"
                   {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
-                  style={{width: "100%"}}
-
                   placeholder={local.placeholder ? local.placeholder : ""}
-                  class={`${local.class ?? ""} global-style `}
+                  class={`${local.class ?? ""} global-style textInput`}
                   onInput={(ev) => {
                       runEvent(ev, local.onInput);
                       local.setValue?.(ev.currentTarget.value);
                   }}
               />
+              </div>
           </Match>
       </Switch>
         {local.children}

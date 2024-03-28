@@ -47,24 +47,51 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
   );
   
   return (
-    <label
-      class={`${content.align || "left"} ${
-        content.switch ? " switch" : ""
-      } ${inputProps.class || ""}`}
-      {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
-    >
-      <Show when={content.align === "right"}>{content.children}</Show>
-      <input
-        ref={props.ref}
-        type="checkbox"
-        role={content.switch ? "switch" : undefined}
-        {...inputProps}
-        onChange={(ev): void => {
-          runEvent(ev, content.onChange);
-          content.setChecked?.(ev.currentTarget.checked);
-        }}
-      />
-      <Show when={content.align !== "right"}>{content.children}</Show>
-    </label>
-  );
+      <label
+          class={`${content.align || "left"} ${
+              content.switch ? " switch" : ""
+          } ${inputProps.class || ""}`}
+          {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
+      >
+          <Show when={content.align === "right"}><span class={'mr:5px'}>{props.text}{content.children}</span></Show>
+          <div class={`checkbox-wrapper m:-5px`}>
+              <input
+                  ref={props.ref}
+                  type="checkbox"
+                  role={content.switch ? "switch" : undefined}
+                  {...inputProps}
+                  onChange={(ev): void => {
+                      runEvent(ev, content.onChange);
+                      content.setChecked?.(ev.currentTarget.checked);
+                  }}
+              />
+              <svg viewBox="0 0 35.6 35.6">
+                  <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
+                  <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
+                  <polyline class="check" points="11.78 18.12 15.55 22.23 25.17 12.87"></polyline>
+              </svg>
+          </div>
+          <Show when={content.align !== "right"}><span class={'ml:5px'}> {props.text}{content.children}</span></Show>
+      </label>
+
+
+      // <div class={`${inputProps.class || ''}`}>
+      //     <Show when={content.align === "right"}><span class={'mr:5px'}>{props.text}{content.children}</span></Show>
+      //     <div class={`checkbox-wrapper m:-5px`}>
+    //         <input
+    //             ref={props.ref}
+    //             type="checkbox"
+    //             {...inputProps}
+    //             onChange={(ev): void => {
+    //                 runEvent(ev, content.onChange);
+    //                 content.setChecked?.(ev.currentTarget.checked);
+    //             }}
+    //         />
+
+    //     </div>
+    //
+    //     <Show when={content.align !== "right"}><span class={'ml:5px'}> {props.text}{content.children}</span></Show>
+    // </div>
+)
+    ;
 };

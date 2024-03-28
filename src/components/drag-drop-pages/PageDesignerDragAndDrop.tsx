@@ -74,6 +74,7 @@ import {iconMap, nameExpr} from "../Utils";
 import {toTitle} from "case-switcher-js";
 import ShareSection from "./share";
 import PreviewSection from "./preview";
+import ResizableContainer from "./resizableDiv";
 
 export const PageDesignerDragAndDrop = () => {
     const mobileClass =
@@ -87,7 +88,7 @@ export const PageDesignerDragAndDrop = () => {
     const {Ws} = useContext(WsContext);
     const [isFormOpen, setIsFormOpen] = createSignal(true);
     const [isLayoutOpen, setIsLayoutOpen] = createSignal(true);
-    const [isPropertiesOpen, setIsPropertiesOpen] = createSignal(false);
+    const [isPropertiesOpen, setIsPropertiesOpen] = createSignal(selectedId());
     const [steps, setSteps] = createSignal([
         {id: 1, name: 'Job details', href: '#', status: 'current', active: true},
         {id: 2, name: 'Application form', href: '#', status: 'upcoming', active: false},
@@ -101,7 +102,7 @@ export const PageDesignerDragAndDrop = () => {
     const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
     const [isFormExpanded, toggleFormExpansion] = useExpansion();
     const [className, setClassName] = createSignal(
-        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
+        "overflow:auto resize:both mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
     );
 
     const [leftColumns, setLeftColumns] = createSignal(
@@ -139,6 +140,7 @@ export const PageDesignerDragAndDrop = () => {
 
     createEffect(() => {
         setClassName(activeTab() === tabs[0] ? mobileClass : webClass);
+        setIsPropertiesOpen(selectedId() !== -1);
     });
     const rerender = () => {
         setCount((prev) => prev + 1);
@@ -1593,45 +1595,36 @@ export const PageDesignerDragAndDrop = () => {
     const getStepId = () => {
         return steps().map(step => step.active ? step.id : null).find(id => id !== null);
     };
+    // @ts-ignore
+    const NavigationBar = ({ steps, getStepId, onChangeStep }) => (
+        <div class={'w:100% h:50px display:flex align-items:center justify-content:center'}>
+            <nav aria-label="Progress">
+                <ol role="list" class="flex align-items:center">
+                    <For each={steps()}>
+                        {(step) => (
+                            <li class={`position:relative pr:${step.id !== 3 ? '2rem' : ''} pr:${step.id !== 3 ? '5rem@sm' : ''}`}>
+                                {/* Completed Step */}
+                                <div class="position:absolute inset:0px flex align-items:center " aria-hidden="true">
+                                    <Show when={step.id !== 3}>
+                                        <div class={`h:0.125rem width:100% bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
+                                    </Show>
+                                </div>
+                                <Tooltip position={'n'} content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}>
+                                    <a href="#" onClick={() => onChangeStep(step.id)} class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
+                                        <Icon icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'} style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
+                                        <span class="sr-only">Step {step.id}</span>
+                                    </a>
+                                </Tooltip>
+                            </li>
+                        )}
+                    </For>
+                </ol>
+            </nav>
+        </div>
+    );
 
     return (
         <>
-            <div class={'w:100% h:50px display:flex align-items:center justify-content:center'}>
-                <nav aria-label="Progress">
-                    <ol role="list" class="flex align-items:center">
-                        <For each={steps()}>
-                            {(step) => (<>
-
-                                    <li
-                                        class={`position:relative pr:${step.id !== 3 ? '2rem' : ''} pr:${step.id !== 3 ? '5rem@sm' : ''}`}>
-                                        {/* Completed Step */}
-                                        <div class="position:absolute  inset:0px flex align-items:center "
-                                             aria-hidden="true">
-                                            <Show when={step.id !== 3}>
-                                                <div
-                                                    class={`h:0.125rem width:100%  bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
-                                            </Show>
-                                        </div>
-
-                                        <Tooltip position={'n'}
-                                                 content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}><a
-                                            href="#" onclick={() => onChangeStep(step.id)}
-                                            class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
-                                            <Icon
-                                                icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
-                                                style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
-                                            <span class="sr-only">Step 1</span>
-                                        </a></Tooltip>
-                                    </li>
-                                </>
-                            )}
-                        </For>
-
-
-                    </ol>
-                </nav>
-            </div>
-
             <Switch>
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
@@ -1641,14 +1634,12 @@ export const PageDesignerDragAndDrop = () => {
                             </For>
                         </div>
                         <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto">
-                            <div class="flex justify-content:center">
-                                <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
-                            </div>
-                            <div class={className() as string}>
+                            <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                            <ResizableContainer>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
                                     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
                                 </FormContext.Provider>
-                            </div>
+                            </ResizableContainer>
                         </div>
                         <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": 'calc(100vh - 120px)'}}>
                             <For each={rightColumns()}>
@@ -1658,13 +1649,16 @@ export const PageDesignerDragAndDrop = () => {
                     </div>
                 </Match>
                 <Match when={selectedStepId() === 2}>
+                    <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
                     <PreviewSection/>
                 </Match>
                 <Match when={selectedStepId() === 3}>
+                    <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
                     <ShareSection/>
                 </Match>
             </Switch>
         </>
     );
+
 
 };

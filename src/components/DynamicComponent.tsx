@@ -51,6 +51,8 @@ export const genericComponents2 = [
   "Tabs",
   "TabContainer",
   "TabList",
+    "TreeViewItem",
+    "TreeViewChild",
   // "Page",
   // "TabPanel",
   // "SpeedDialAction",

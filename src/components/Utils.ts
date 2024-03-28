@@ -38,6 +38,8 @@ export const iconMap = {
   TableRow:"carbon:row",
   TabContainer: "fluent:tabs-20-regular",
   TabList: "fluent:tab-desktop-20-regular",
+  TreeViewItem: "tdesign:tree-list",
+  TreeViewChild: "carbon:tree-view-alt",
 };
 
 export const nameExpr = (v: Vertex) => {

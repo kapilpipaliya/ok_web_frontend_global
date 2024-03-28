@@ -57,6 +57,7 @@ import {getTextColumnValue} from "./Utils";
 import {componentDrag, hoverId, selectedId, setSelectedId} from "../../pageStore";
 import CustomButton from "../../solid-blocks/blocks/buttons";
 import {TableHeader, TableGroup, TableRow} from "../../solid-blocks/blocks/table";
+import TreeView from "../../solid-blocks/blocks/treeview";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -376,13 +377,19 @@ export function GenericField(
               </Select>
             </Match> */}
                 <Match when={component() === "LoadIndicator"}>
-                    {component()}
                     <Spinner
-
                         {...props.meta?.P.props}
                     >
                         {props.meta.P.props.children}
                     </Spinner>
+                </Match>
+                <Match when={component() === "TreeViewItem"}>
+                        <TreeView data={<PageItemRender metaVertex={props.meta}/>}/>
+                </Match>
+                <Match when={component() === "TreeViewChild"}>
+                    <li>
+                        <PageItemRender metaVertex={props.meta}/>
+                    </li>
                 </Match>
                 <Match when={component() === "Accordion"}>
                     <Accordion

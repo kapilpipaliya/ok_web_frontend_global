@@ -10,6 +10,7 @@ import treeViewFilter from "../lib/treeViewFilter";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import Loader from "./Loader";
 import SidebarElement from "./SidebarElement";
+import MiniVariantDrawer from "./sidebar2";
 
 export interface navbarDataI {
     children: navbarDataI[];
@@ -98,13 +99,15 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
 
     return (
       <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:200">
-        <nav class="flex bg:white position:relative">
+
+    <nav class="flex bg:white position:relative">
           <div class="position:absolute top:7 left:8 font:20">
             <Icon icon="ic:baseline-search" />
           </div>
           <input
             class="p:7.5 min-w:full pl:2rem"
             type="text"
+            placeholder={'Search '}
             value={searchTerm()}
             onInput={(e) => {
               handleSearch(e.target.value);
