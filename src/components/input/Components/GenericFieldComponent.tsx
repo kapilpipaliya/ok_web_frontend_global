@@ -31,7 +31,6 @@ import {
 import {getLastItem} from "../../../utils/functions";
 import {WsContext} from "../../../utils/ws_events_dispatcher";
 import {ComponentProps} from "../../ComponentType";
-import {setParentValue} from "../SelectInputField";
 import {
     Accordion,
     Avatar,
@@ -58,6 +57,7 @@ import {componentDrag, hoverId, selectedId, setSelectedId} from "../../pageStore
 import CustomButton from "../../solid-blocks/blocks/buttons";
 import {TableHeader, TableGroup, TableRow} from "../../solid-blocks/blocks/table";
 import TreeView from "../../solid-blocks/blocks/treeview";
+import {Collapsible} from "../../solid-blocks/blocks/collapsible";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -201,8 +201,6 @@ export function GenericField(
     };
 
     const repeaterContext = useContext(RepeaterContext);
-    const isSelectedLayoutId = createSelector(selectedId);
-    const isSelectedHoverId = createSelector(hoverId);
 
     return (
         <Show
@@ -303,11 +301,10 @@ export function GenericField(
                 <Match when={component() === "Image"}>
                     <img
                         loading="lazy"
-
                         {...props.meta.P.props}
                         src={getText(props.meta.P.props?.src, repeaterContext)}
                         draggable={true}
-                    />
+                        alt={'img'}/>
                 </Match>
                 <Match when={component() === "Tabs"}>
                     <Tabs {...props.meta.P.props}>
@@ -351,21 +348,27 @@ export function GenericField(
                 <Match
                     when={props.component === "TableHeader" && getChildVertexes(["Attr"], [props.meta]).vertexes?.length}>
                     <thead class={'r:5|5|5|5'}>
-                       <tr class={'p:10 text:center h:5'}>
-                            <PageItemRender metaVertex={props.meta}/>
-                       </tr>
+                    <tr class={'p:10 text:center h:5'}>
+                        <PageItemRender metaVertex={props.meta}/>
+                    </tr>
                     </thead>
                 </Match>
                 <Match when={props.component === "TableRow"}>
                     <tbody>
-                        <tr class={'h:50 text:center bg:#ffffff b:1px|solid|#000'} >
-                            <PageItemRender metaVertex={props.meta}/>
-                        </tr>
+                    <tr class={'h:50 text:center bg:#ffffff b:1px|solid|#000'}>
+                        <PageItemRender metaVertex={props.meta}/>
+                    </tr>
                     </tbody>
+                </Match>
+                <Match when={props.component === "Collapsible"}>
+                    <Collapsible
+                        {...props.meta.P.props}
+                    >
+                        <PageItemRender metaVertex={props.meta}/>
+                    </Collapsible>
                 </Match>
                 <Match when={component() === "Avtar"}>
                     <Avatar
-
                         {...props.meta.P.props}
                     >
                         {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.props.children}

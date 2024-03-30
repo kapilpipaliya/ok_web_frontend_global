@@ -40,6 +40,7 @@ export const iconMap = {
   TabList: "fluent:tab-desktop-20-regular",
   TreeViewItem: "tdesign:tree-list",
   TreeViewChild: "carbon:tree-view-alt",
+  Collapsible: "lets-icons:collapse",
 };
 
 export const nameExpr = (v: Vertex) => {

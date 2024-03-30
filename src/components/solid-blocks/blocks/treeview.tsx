@@ -25,18 +25,33 @@ const TreeView = (props: { title: string, meta: Vertex, children: any }) => {
         const isExpanded = () => expandedItems().has(props.meta.id);
         const childrenLength = () => getChildVertexes(["Attr"], [props.meta]).vertexes?.length || 0;
         return (
-            <div>
-          <span class={`display:inline-flex pr:${childrenLength() > 0 ? "40px" : ""}`}>
+            <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
+          <span class={`display:inline-flex`}>
               <Show when={childrenLength() > 0}>
-
                   <span
+                      style="cursor: pointer;"
                       onClick={() => toggleExpansion(props.meta.id)}
-                  >+&nbsp;&nbsp;</span>
+                  >
+                      <Icon
+                          icon={"mdi:chevron-right"}
+                          style={{
+                              "font-size": "24px",
+                              "border-radius": "50%",
+                              transition: "transform 0.2s linear",
+                              transform: `${
+                                  !isExpanded()
+                                      ? "rotate(0deg)"
+                                      : "rotate(90deg)"
+                              }`,
+                          }}
+                          class="flex-1"
+                      />
+                  </span>
               </Show>
-              <span>{TreeItemProps.title}</span>
+              {TreeItemProps.title}
           </span>
                 {isExpanded() && (
-                    <span>
+                    <span class={`ml:40px`}>
                         {props.children}
                     </span>
                 )}

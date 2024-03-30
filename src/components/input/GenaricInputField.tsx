@@ -68,6 +68,7 @@ export function GenericInputField(
             <Checkbox
               {...props.meta?.P.props}
               onchange={(e: any) => {
+
                 props.setValue?.(props.meta, props.data, e.target.checked);
               }}
               align="left"
