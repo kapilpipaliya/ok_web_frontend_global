@@ -18,9 +18,6 @@ import {
  getSelectionOptions,
  AdminAttrKeys,
  AttrsTableData,
- AttrsAdminTableData,
- FieldAttribute,
- FormMetaData,
  getParentVertex, addNewRow,
 } from "./Utils";
 import { getToEdge } from "./CommonUtils/getToEdge";
@@ -28,6 +25,8 @@ import { removeUndefinedProperties } from "../utils/functions";
 import { Record } from "./Utils";
 import { newRow } from "./Utils";
 import {setSelectionValue} from "../components/input/SelectionUtils";
+import {AttrsAdminTableData} from "./apiAdmin";
+import {FieldAttribute, FormMetaData} from "./Type";
 
 export function getCompPropsMap(comp: Vertex) {
  return (getChildVertexes(["$0Prop"], [comp]).vertexes || []).reduce((acc, curr) => {

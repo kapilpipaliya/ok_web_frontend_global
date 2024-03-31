@@ -21,8 +21,8 @@ import {parse} from "yaml";
 import { isObject } from "./Utils";
 import {deleteEdge} from "./Edge";
 import {AttrsTableData} from "./api";
-import { AttrsAdminTableData } from "./Utils";
 import {setSelectionValue} from "../components/input/SelectionUtils";
+import {AttrsAdminTableData} from "./apiAdmin";
 
 export const updateImportRecord = (type: string, record: Record, dry= true) => {
 

@@ -23,12 +23,12 @@ import {getCompPropsMap, getFormMetaData} from "../lib/Record";
 import { getId } from "../lib/Utils";
 import { newRow } from "../lib/Utils";
 import { Record } from "../lib/Utils";
-import { FormMetaData } from "../lib/Utils";
 import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
 import {fileDownloader} from "../utils/dom_utils";
-import { AttrsAdminTableData } from "../lib/Utils";
 import {NsMetaJson} from "./NSMetaDataType";
 import {setSelectionValue} from "../components/input/SelectionUtils";
+import {AttrsAdminTableData} from "../lib/apiAdmin";
+import {FormMetaData} from "../lib/Type";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);

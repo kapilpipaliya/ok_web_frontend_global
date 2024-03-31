@@ -19,7 +19,6 @@ import {BeforeLeaveEventArgs, useBeforeLeave, useNavigate} from "@solidjs/router
 import {
   getSelectionOptions,
   Record,
-  FormMetaData,
   FormContext,
 } from "../lib/Utils";
 import {RepeaterContext} from "./input/GenaricField";
@@ -30,6 +29,7 @@ import {getPermissions} from "../lib/auth";
 import {TableTabs} from "./TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
 import { useRouter } from "@solidjs/router/dist/routing";
+import {FormMetaData} from "../lib/Type";
 
 
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {

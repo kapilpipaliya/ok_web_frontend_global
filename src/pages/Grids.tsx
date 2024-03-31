@@ -34,19 +34,18 @@ import {
     selectedValue
 } from "../components/input/SelectInputField";
 import {getFormApiFromForm} from "../lib/Record";
-import { FieldAttribute } from "../lib/Utils";
-import { FormMetaData } from "../lib/Utils";
 import { PageContext } from "../lib/Utils";
 import { getSelectionOptions } from "../lib/Utils";
 import { getChildVertexes } from "../lib/Utils";
 import {deleteVertex, findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {AttrsTableData} from "../lib/api";
-import { AttrsAdminTableData } from "../lib/Utils";
 import { isNumber } from "../lib/CommonUtils/isNumber";
 import { capitalizeFirstLetter } from "../lib/Utils";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {AbstractSingleForm} from "../components/DynamicForm";
 import CustomButton from "../components/solid-blocks/blocks/buttons";
+import {AttrsAdminTableData} from "../lib/apiAdmin";
+import {FieldAttribute, FormMetaData} from "../lib/Type";
 
 
 interface DataGridProps {

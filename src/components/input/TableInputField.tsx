@@ -43,7 +43,6 @@ import {
   addNewRow,
   getSublistRows,
   addMetaVertexes,
-  FieldAttribute,
   FormContext,
   deleteRow,
   getSelectionOptions,
@@ -60,6 +59,7 @@ import { GenericField } from "./Components/GenericFieldComponent";
 import { getLastItem } from "../../utils/functions";
 import { MySimpleTable } from "../simple-table/solid-simple-table/demo/simple";
 import { Separator } from "@kobalte/core";
+import {FieldAttribute} from "../../lib/Type";
 
 export function TableInputField(
   props: ComponentProps & { txnId?: number; isRealTime?: boolean }

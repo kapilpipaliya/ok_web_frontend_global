@@ -3,7 +3,6 @@ import {useParams} from "@solidjs/router";
 import {createStore} from "solid-js/store";
 import {
     addMetaVertexes,
-    FieldAttribute,
     FormContext,
     getChildVertex,
     getChildVertexes,
@@ -75,6 +74,7 @@ import {toTitle} from "case-switcher-js";
 import ShareSection from "./share";
 import PreviewSection from "./preview";
 import ResizableContainer from "./resizableDiv";
+import {FieldAttribute} from "../../lib/Type";
 
 export const PageDesignerDragAndDrop = () => {
     const mobileClass =
