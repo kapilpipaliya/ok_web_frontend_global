@@ -1290,12 +1290,6 @@ export class Record {
     }
     return isValid;
   };
-  setValue = (attribute: Vertex, vertex: Vertex, data: any) => {
-    setValueGlobal(this.txnId, attribute, vertex, data, this.ws, this.isRealTime);
-  };
-
-
-
 }
 
 export const addMetaVertexes = (txnId: number, vertex: Vertex, attributes: FieldAttribute[]) => {

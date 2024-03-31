@@ -13,7 +13,6 @@ import {
   getOwner,
   runWithOwner,
 } from "solid-js";
-import { SimpleTable } from "solid-simple-table"
 // import { closestCenter, createSortable, DragDropProvider, DragDropSensors, DragEventHandler, SortableProvider, } from "@thisbeyond/solid-dnd";
 import { css } from "solid-styled-components";
 import { toTitle } from "case-switcher-js";
@@ -57,8 +56,6 @@ import {
 } from "./GenaricField";
 import { GenericField } from "./Components/GenericFieldComponent";
 import { getLastItem } from "../../utils/functions";
-import { MySimpleTable } from "../simple-table/solid-simple-table/demo/simple";
-import { Separator } from "@kobalte/core";
 import {FieldAttribute} from "../../lib/Type";
 
 export function TableInputField(
@@ -227,7 +224,7 @@ export function TableInputField(
                       : metaVertex()
                   }
                   data={p.joinVertex}
-                  setValue={props.setValue!}
+                  setValue={props.setValue}
                   disabled={disabled()}
                   txnId={props.txnId}
                   isRealTime={props.isRealTime}
@@ -343,7 +340,7 @@ export function TableInputField(
                 // When we have a Table we pass original Table Meta Vertex
                 meta={expandVertex()!}
                 data={p.joinVertex}
-                setValue={props.setValue!}
+                setValue={props.setValue}
                 disabled={disabled()}
                 txnId={props.txnId}
                 isRealTime={props.isRealTime}

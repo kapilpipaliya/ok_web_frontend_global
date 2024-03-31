@@ -1,8 +1,7 @@
 import {
-  createComputed, createSelector,
-  Match, on,
+  Match,
   Show,
-  Switch,
+  Switch, useContext,
 } from "solid-js";
 
 import { IdAttr } from "../../lib/graph";
@@ -18,7 +17,9 @@ import {
 import { PageItemRender } from "./GenaricField";
 
 import { FileUploader } from "../solid-blocks/blocks/fileuploader";
-import {selectedId, setSelectedId} from "../pageStore";
+import {setSelectedId} from "../pageStore";
+import {setValueGlobal} from "../../lib/Utils";
+import {WsContext} from "../../utils/ws_events_dispatcher";
 
 
 export function GenericInputField(
@@ -29,6 +30,7 @@ export function GenericInputField(
     txnId: number;
   }
 ) {
+  const { Ws } = useContext(WsContext);
   // const formContext = useContext(FormContext);
   // const outerOwner = getOwner();
   return (
@@ -68,8 +70,7 @@ export function GenericInputField(
             <Checkbox
               {...props.meta?.P.props}
               onchange={(e: any) => {
-
-                props.setValue?.(props.meta, props.data, e.target.checked);
+                props.setValue ?  props.setValue(e.target.checked) : setValueGlobal(props.txnId!, props.meta, props.data, e.target.checked, Ws, false);
               }}
               align="left"
               checked={
@@ -84,7 +85,7 @@ export function GenericInputField(
               {...props.meta?.P.props}
               value={props.data?.P[props.meta.P[IdAttr]]}
               onInput={e=> {
-                props.setValue?.(props.meta, props.data, e.target.value);
+                props.setValue ?  props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
               }}
             />
           </Match>
@@ -102,7 +103,7 @@ export function GenericInputField(
             <TextField
               placeholder={props.meta?.P.props.label ?? ""}
               onchange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
+                props.setValue ?  props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
               }}
               {...props.meta?.P.props}
               isNumber
@@ -114,11 +115,7 @@ export function GenericInputField(
               {...props.meta?.P.props}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
-                props.setValue?.(
-                  props.meta,
-                  props.data as any,
-                  e.target.checked
-                );
+                props.setValue ?  props.setValue(e.target.checked) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.checked, Ws, false);
               }}
               // name={props.meta?.P.props?.label ?? "radio"}
               align="left"
@@ -143,7 +140,7 @@ export function GenericInputField(
               class="global-style"
               {...props.meta?.P.props}
               onchange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
+                props.setValue ?  props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
               }}
               placeholder={props.meta?.P.props?.label ?? props.title}
 
@@ -157,7 +154,7 @@ export function GenericInputField(
               {...props.meta?.P.props}
               placeholder={props.meta?.P.props?.label ?? props.title}
               onchange={(e: any) => {
-                props.setValue?.(props.meta, props.data, e.target.value);
+                props.setValue ?  props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
               }}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
@@ -180,7 +177,7 @@ export function GenericInputField(
                       // data.event is always undefined
                       const file = data.component._files[0]?.value;
                       if (!file) return;
-                      props.setValue(props.meta, props.data, file);
+                      props.setValue ?  props.setValue(file) : setValueGlobal(props.txnId!, props.meta, props.data!, file, Ws, false);
                       let formData = new FormData();
                       formData.append(
                           "",

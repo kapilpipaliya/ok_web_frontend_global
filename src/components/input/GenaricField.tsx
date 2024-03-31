@@ -213,8 +213,7 @@ export const PageItemRender = (props: {
                         PageRenderUtils.getDataVertex(item)
                     }
                     title={toTitle(PageRenderUtils.getId(item) || "")}
-                    setValue={record?.setValue || (() => {
-                    })}
+                    // setValue={props.setValue}
                     disabled={false}
                     component={component()}
                 /></span>

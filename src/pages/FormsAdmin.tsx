@@ -78,9 +78,7 @@ interface FormGroupPropertiesProps {
     metaAttributes: Vertex[];
     vertex: Vertex;
 
-    setValue(attribute: Vertex, vertex: Vertex, data: any, valueSet?: boolean): Vertex | undefined;
-
-    setValueGeneric(attribute: Vertex, vertex: Vertex, data: any): void;
+    setValue(meta: Vertex, data: any): Vertex | undefined;
 
     txnId: number;
     selectedLayout: Vertex;
@@ -122,7 +120,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                             component={component()}
                             meta={metaVertex}
                             data={props.vertex}
-                            setValue={props.setValue}
+                            setValue={(data) => props.setValue(metaVertex, data)}
                             // disabled={props.d}
                             txnId={props.txnId}
                             isRealTime={false}

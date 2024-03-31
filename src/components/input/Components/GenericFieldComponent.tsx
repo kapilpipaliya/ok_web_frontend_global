@@ -124,6 +124,7 @@ export function GenericField(
         });
 
         const onSubmit = () => {
+            // todo fix validations
             const result = validationGroup.validate();
             if (result.isValid) {
                 console.log("valid");

@@ -111,7 +111,7 @@ export const DynamicComponent = (props: {
     meta: Vertex;
     title?: String;
     data?: Vertex;
-    setValue(attribute: Vertex, vertex: Vertex, data: any): void;
+    setValue?: (data: any) => void;
     disabled?: boolean;
     isRealTime?: boolean;
     txnId?: number;

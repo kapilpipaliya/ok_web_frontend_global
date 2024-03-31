@@ -675,22 +675,16 @@ export const PageDesignerDragAndDrop = () => {
             }
         }
 
-        const setPropertyValue = (
-            meta: Vertex,
-            data: Vertex,
+        const setPropertyValue = (meta: Vertex,
             value: any,
-            valueSet?: boolean
         ) => {
             if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
-                if (valueSet ?? true)
-                    setGraph("vertexes", data.id, "P", meta.P.name, value);
                 return setPropertyValueGlobal(
                     pageConfig[0].record.txnId,
                     meta,
                     graph.vertexes[selectedId()],
                     graph.vertexes[selectedComponent().vertexId],
-                    value,
-                    valueSet
+                    value
                 );
             }
             return;
@@ -828,7 +822,6 @@ export const PageDesignerDragAndDrop = () => {
                     meta={graph.vertexes[metaVertexId]}
                     data={graph.vertexes[selectedId()!]}
                     txnId={pageConfig[0].record.txnId}
-                    setValue={pageConfig[0].record.setValue}
                     isRealTime={false}
                 />
             );
@@ -933,8 +926,8 @@ export const PageDesignerDragAndDrop = () => {
                                         component="TextArea"
                                         meta={graph.vertexes[metaVertexId]}
                                         data={graph.vertexes[dataVertexId]}
-                                        setValue={(attribute: Vertex, vertex: Vertex, data: any) =>
-                                            setGraph("vertexes", vertex.id, "P", {jsx: data})
+                                        setValue={(data: any) =>
+                                            setGraph("vertexes", dataVertexId, "P", {jsx: data})
                                         }
                                         disabled={false}
                                     />
@@ -1016,8 +1009,6 @@ export const PageDesignerDragAndDrop = () => {
                         title={"Collection:"}
                         component={"SelectBox"}
                         txnId={pageConfig[0].record.txnId}
-                        // passed setValue when we have a string value in select field
-                        setValue={pageConfig[0].record.setValue}
                         isRealTime={false}
                     />
                     {/*<span>Data:</span>*/}
@@ -1029,17 +1020,16 @@ export const PageDesignerDragAndDrop = () => {
                         component={"SelectBox"}
                         txnId={pageConfig[0].record.txnId}
                         // passed setValue when we have a string value in select field
-                        setValue={pageConfig[0].record.setValue}
                         isRealTime={false}
                     />
                     <span>Expression:</span>
                     <GenericInputField
                         txnId={txnId}
+                        title={''}
                         data={graph.vertexes[selectedId()!]}
                         meta={collMetaVertex.vertexes![2]!}
                         disabled={false}
                         component={"TextBox"}
-                        setValue={pageConfig[0].record.setValue}
                     />
                 </>
             );
@@ -1087,16 +1077,6 @@ export const PageDesignerDragAndDrop = () => {
                         metaAttributes={selectedComponentProperties().vertexes || []}
                         vertex={graph.vertexes[propertiesVertexId]}
                         setValue={setPropertyValue}
-                        setValueGeneric={(attribute: Vertex, vertex: Vertex, data: any) =>
-                            setValueGlobal(
-                                pageConfig[0].record.txnId,
-                                attribute,
-                                vertex,
-                                data,
-                                Ws,
-                                pageConfig[0].record.isRealTime
-                            )
-                        }
                         selectedLayout={graph.vertexes[selectedId()]}
                     />
                 </Show>

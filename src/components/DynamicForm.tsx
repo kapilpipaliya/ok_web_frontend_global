@@ -57,8 +57,6 @@ interface FormGroupProps {
     vertex: Vertex;
     labelPrefix: String;
 
-    setValue(attribute: Vertex, vertex: Vertex, data: any): void;
-
     txnId: number;
     isLoginRegister?: string
 }
@@ -468,7 +466,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                               }
                               labelPrefix={'Form'}
                               vertex={record.vertex}
-                              setValue={record.setValue}
                               txnId={record.txnId}
                             />
                           </div>
@@ -520,8 +517,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
                           metaAttributes={
                             groupByTabsAndGroup[activeTab()][group]
                           }
+                          labelPrefix={''}
                           vertex={record.vertex}
-                          setValue={record.setValue}
                           txnId={record.txnId}
                         />
                       </div>

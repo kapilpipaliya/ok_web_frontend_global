@@ -30,7 +30,7 @@ import {
   getChildVertex,
   onChangeHandler,
   FormContext,
-  getValueFromVertexOrKey,
+  getValueFromVertexOrKey, setValueGlobal,
 } from "../../lib/Utils";
 import { getNameKeyForCollection } from "../../lib/Record";
 import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
@@ -246,9 +246,9 @@ export function SelectInputField(
           props.txnId = getNewTxnId();
         }
         if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
-          props.setValue?.(props.meta, props.data, optionvalue);
+          props.setValue ?  props.setValue(optionvalue) : setValueGlobal(props.txnId!, props.meta, props.data, data, Ws, false);
         } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
-          props.setValue?.(props.meta, props.data, optionvalue);
+          props.setValue ?  props.setValue(optionvalue) : setValueGlobal(props.txnId!, props.meta, props.data, data, Ws, false);
         } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
           setParentValue(props.txnId || 0, props.data, props.meta, optionId);
         } else {
