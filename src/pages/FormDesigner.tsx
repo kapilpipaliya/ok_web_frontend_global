@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "@solidjs/router";
 import { Show, createSignal, createUniqueId, onCleanup } from "solid-js";
 import { PageItemRender } from "../components/input/GenaricField";
 import { getExportCode } from "../lib/Record";
-import { Record } from "../lib/Utils";
+import {getSublistRows, getSublistRowsForType, Record} from "../lib/Utils";
 import { PageContext } from "../lib/Utils";
 // Comment This Lines in web build
 import { Navigator } from "@solidjs/router/dist/types";
@@ -118,12 +118,12 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
   const getChildren = (meta: Vertex, vertex: Vertex) => {
     const result = [];
 
-    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+    const metaVertexes = getSublistRowsForType("MetaAttr", meta);
     const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
 
     if (!attrMeta) return result;
 
-    const children = record.getSublistRows(attrMeta, vertex);
+    const children = getSublistRows(attrMeta, vertex);
 
     for (const child of children) {
       const name = child.P.name;

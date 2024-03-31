@@ -15,7 +15,13 @@ import {
   waitTillAllEventsAreProcessed
 } from "../lib/graph";
 import {A} from "@solidjs/router";
-import {addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties} from "../lib/Vertex";
+import {
+  addNewVertex,
+  findVertexByLabelAndUniqueId,
+  mergeVertexProperties,
+  newVertex,
+  replaceVertexProperties
+} from "../lib/Vertex";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import { getParentVertex } from "../lib/Utils";
 import { getChildVertex } from "../lib/Utils";
@@ -55,177 +61,6 @@ export const BackupRestore = () => {
       });
     }
   };
-  const importComponentProps = () => {
-    const file = componentPropsInputRef!.files![0];
-
-    if (file) {
-      file.text().then(async (jsonText) => {
-        const json = JSON.parse(jsonText);
-        // const d = new Set();
-        // const v = new Set();
-        // const da = new Set();
-        // const it = new Set();
-        let txnId = getNewTxnId(); // Note txnId 0 not working
-        // Issue with big websocket messages, its not received at all when debugging, It cant received at websocket message handler,
-        // so spliting it.
-        // If we splitTransaction, it's very slow
-        const splitTransaction = true;
-        for (const componentId in json) {
-
-          const component = json[componentId];
-          const componentConfiguration = component["Configuration"];
-          if (!componentConfiguration) continue;
-
-          for (const property in componentConfiguration) {
-            if (splitTransaction) txnId = getNewTxnId();
-            const propertyObj = componentConfiguration[property];
-            const name = propertyObj["Name"];
-            let description = propertyObj["description"] as string;
-            if (description) {
-              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
-            }
-            let type = propertyObj["Type"];
-            // if(name === 'displayExpr') d.add(componentId);
-            // if(name === 'valueExpr') v.add(componentId);
-            // if(name === 'dataSource') da.add(componentId);
-            // if(name === 'items') it.add(componentId);
-            // continue;
-            // Do not specify the items property if you specified the dataSource, and vice versa.
-            // if (name === "dataSource") continue;
-            // @ts-ignore
-            const default_ = propertyObj["Default"];
-            // @ts-ignore
-            const readOnly = propertyObj["ReadOnly"];
-            // @ts-ignore
-            const acceptedValues = propertyObj["AcceptedValues"];
-            // s.add(type);
-            if (type) {
-              let dataType;
-              type = type
-                .split(" | ")
-                // @ts-ignore
-                .filter((t) => !t.includes("function"))
-                // @ts-ignore
-                .filter((t) => ![
-                  "false",
-                  "null",
-                  "AnimationConfig",
-                  "dxCalendar_Options",
-                  "UserDefinedElement",
-                  "template",
-                  "any",
-                  "undefined",
-                  "Store",
-                  // "DataSource",
-                  "DataSource_Options",
-                  "dxFilterBuilder_Options",
-                  "Format",
-                  "DxPromise",
-                  "dxSortable_Options",
-                  "dxTextBox_Options",
-                  "dxPopup_Options",
-                  "dxPopover_Options",
-                  "PivotGridDataSource",
-                  "getter",
-                  "Filter expression",
-                ].includes(t));
-              if (!type.length) continue;
-              let typeJoined = type.join(',');
-              if (typeJoined === "Number,String") {
-                dataType = 'String';
-              } else if (typeJoined === "String,Number") {
-                dataType = 'Float';
-              } else if (typeJoined === "Date,Number,String") {
-                dataType = 'String';
-              } else if (typeJoined === "String,UserDefinedElement") {
-                dataType = 'String';
-                // @ts-ignore
-              } else if (type.some((t) => t.includes("Array"))) {
-                dataType = "List";
-                // @ts-ignore
-              } else if (type.some((t) => t.includes("DataSource"))) {
-                dataType = "List";
-                // @ts-ignore
-              } else if (type.some((t) => t.includes("PositionConfig"))) {
-                dataType = "Map";
-              } else if (typeJoined === "Boolean,String") {
-                dataType = "Boolean";
-              } else if (type.length > 1) {
-                console.log("skipped multiple result type", propertyObj);
-              } else {
-                dataType = type[0];
-                if (dataType === "Number") {
-                  dataType = "Float";
-                } else if (
-                  dataType === "object" ||
-                  dataType === "Object" ||
-                  dataType === "Group" ||
-                  dataType === "PositionConfig"
-                ) {
-                  dataType = "Map";
-                }
-              }
-              if (dataType) {
-                const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
-                if (compVertex) {
-                  const rowResult = newRow(txnId, compVertex, "CompProp");
-                  replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
-
-                  const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
-                  if (!dataTypeVertex) {
-                    console.log("dataType not found", dataType);
-                  } else {
-                    setSelectionValue(
-                      txnId,
-                      graph.vertexes[rowResult.vertexId!],
-                      {P: {[IdAttr]: "DataType"}} as unknown as Vertex,
-                      dataTypeVertex.id,
-                    );
-                  }
-                  // It takes too much time to commit the full transaction.
-                } else {
-                  console.log('Component Not Found:', name);
-                }
-              } else {
-                console.log('DataType Not Found:', name, type);
-              }
-            }
-            if (splitTransaction) {
-              commitTxn(txnId, Ws);
-              await waitTillAllEventsAreProcessed();
-            }
-          }
-
-          const componentEvents = component["Events"];
-          if (!componentEvents) continue;
-          for (const property in componentEvents) {
-            if (splitTransaction) txnId = getNewTxnId();
-            const propertyObj = componentEvents[property];
-            const name = propertyObj["Name"];
-            let description = propertyObj["description"] as string;
-            if (description) {
-              description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
-            }
-            const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
-            if (compVertex) {
-              const rowResult = newRow(txnId, compVertex, "CompEvent");
-              replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
-            }else {
-                console.log('Component Not Found:', name);
-              }
-
-            if (splitTransaction) {
-              commitTxn(txnId, Ws);
-              await waitTillAllEventsAreProcessed();
-            }
-          }
-        }
-        if (!splitTransaction) commitTxn(txnId, Ws);
-        alert("inserting properties finished.");
-      });
-    }
-  };
-
   const insertAttributes = (txnId: Id, parentVertex: Vertex, collectionMetaData: FormMetaData) => {
 
     const collectionAttributes = collectionMetaData["attributes"];
@@ -379,7 +214,7 @@ export const BackupRestore = () => {
 
     // 1. import dataTypes
     updateImportRecord('dataType', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name
 Null
 String
@@ -398,7 +233,7 @@ LocalDateTime
     onDataDirectoryImportClick(record, Ws);
     // 2. Import components
     updateImportRecord('component', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name\tdataType\tparent\tcategory\tchild
 ActionSheet\t\t\tAction\tTRUE
 Button\t\t\tAction\t
@@ -479,7 +314,7 @@ ScrollView\t\t\tView\t`,
     onDataDirectoryImportClick(record, Ws);
     // 3. Import dataTypeDefault
     updateImportRecord('dataTypeDefault', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name\tdefault
 String\tTextBox
 Boolean\tCheckBox
@@ -497,7 +332,7 @@ LocalDateTime\tDateBox
     onDataDirectoryImportClick(record, Ws);
 
     updateImportRecord('user', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name\temail\tpass\trole
 Test1\ttest1@test.com\ttest1\tAdmin
 Test2\ttest2@test.com\ttest2\tUser`,
@@ -505,7 +340,7 @@ Test2\ttest2@test.com\ttest2\tUser`,
     onDataDirectoryImportClick(record, Ws);
 
     updateImportRecord('role', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name
 Admin
 User`,
@@ -513,7 +348,7 @@ User`,
     onDataDirectoryImportClick(record, Ws);
 
     updateImportRecord('perm', record, false);
-    record.mergeFieldValues({
+    mergeVertexProperties(record.txnId, record.vertex.id, {
       csv: `name
 insert
 edit
@@ -1078,16 +913,6 @@ OUT:
                 <A class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</A>
                 <A class="b:2|solid|blue-40" href="/Graph">Go to Graph</A>
                 <A class="b:2|solid|blue-40" href="/Nav">Configure Navigation</A>
-              </div>
-            </div>
-          </C>
-          <C title={"Dev Component Properties"} subtitle={"Import all DevExpress Components properties"}>
-            <div class="m:0 p:12">
-              <div class="m:1rem flex gap:0.5rem">
-                <input ref={componentPropsInputRef!} type="file" accept="json" style="display: hidden"></input>
-                <button type="button" onClick={importComponentProps}>
-                  <span>Import DevExpress.json</span>
-                </button>
               </div>
             </div>
           </C>

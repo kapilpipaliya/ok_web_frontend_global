@@ -19,7 +19,7 @@ import {BeforeLeaveEventArgs, useBeforeLeave, useNavigate} from "@solidjs/router
 import {
   getSelectionOptions,
   Record,
-  FormContext,
+  FormContext, getChildVertexes, groupBy,
 } from "../lib/Utils";
 import {RepeaterContext} from "./input/GenaricField";
 import { GenericField } from "./input/Components/GenericFieldComponent";
@@ -28,9 +28,7 @@ import {stringify} from "yaml";
 import {getPermissions} from "../lib/auth";
 import {TableTabs} from "./TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
-import { useRouter } from "@solidjs/router/dist/routing";
 import {FormMetaData} from "../lib/Type";
-
 
 interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> {
     formId: string;
@@ -178,11 +176,29 @@ export const DynamicForm = (props: DynamicFormProps) => {
     props.config[1]?.("record", record);
     onCleanup(() => {
         props.config[1]?.("record", undefined);
-    })
+    });
+
+    const groupByTabsAndGroupFn = () => {
+      const mainAttributes = getChildVertexes(["MetaAttr"], [record.metaVertex]); //.sort((a, b) => a.P.pos - b.P.pos);
+
+      const groupByTabs = groupBy(mainAttributes.vertexes!, (item) => item.P.tab!) as unknown as {
+        [tab: string]: Vertex[];
+      };
+
+      const groupByTabsAndGroup = {} as {
+        [tab: string]: { [group: string]: Vertex[]; };
+      };
+      for (const tab in groupByTabs) {
+        groupByTabsAndGroup[tab] = groupBy(groupByTabs[tab]!, (item) => item.P.group!) as unknown as {
+          [group: string]: Vertex[];
+        };
+      }
+      return groupByTabsAndGroup;
+    };
 
     // For new Form component, user will define layout, not a fixed layout;
     // We may use this component for render from the json.
-    const groupByTabsAndGroup = record.groupByTabsAndGroup();
+    const groupByTabsAndGroup = groupByTabsAndGroupFn();
     // TODO: Fix Tabs are not reactive
     const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
 

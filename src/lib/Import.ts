@@ -1,5 +1,5 @@
 import {getPkForCollection} from "./Record";
-import { newRow } from "./Utils";
+import {addNewRow, deleteRow, getSublistRows, getSublistRowsForType, newRow} from "./Utils";
 import { Record } from "./Utils";
 import {commitTxn, getNewGraphId, getNewTxnId, graph, IdAttr, Vertex} from "./graph";
 import {
@@ -9,7 +9,7 @@ import {
   findVertexByLabelAndPks,
   findVertexByLabelAndUniqueId,
   mergeVertexProperties,
-  newVertex
+  newVertex, replaceVertexProperties
 } from "./Vertex";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
 import csvtojson from "csvtojson";
@@ -26,11 +26,18 @@ import {AttrsAdminTableData} from "./apiAdmin";
 
 export const updateImportRecord = (type: string, record: Record, dry= true) => {
 
- record.deleteAllRows("ImportMeta");
+  // TODO: Is this method valid? does it delete nested Rows set by this form?, check code written in NavDesigner component to clear the form.
+  const deleteAllRows = (edgeType: string) => {
+      const vertexes = getChildVertexes([edgeType], [record.vertex]).vertexes || [];
+      for (const row of vertexes) {
+        deleteRow(row, record.isRealTime, record.txnId, record.ws);
+      }
+    };
+ deleteAllRows("ImportMeta");
 
  switch (type) {
   case "component": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "Comp",
     dry
    });
@@ -52,20 +59,20 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
     inward: true
    }];
    for (const row of rows) {
-    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+     newRow(record.txnId, record.vertex, "ImportMeta", "ImportMeta", row);
    }
 
    break;
   }
   case "dataType": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "DataType",
     dry
    });
    break;
   }
   case "dataTypeDefault": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "DataType",
     dry
    });
@@ -76,12 +83,12 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
     collId: IdAttr
    }];
    for (const row of rows) {
-    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+     newRow(record.txnId, record.vertex, "ImportMeta", "ImportMeta", row);
    }
    break;
   }
   case "lookup": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "Coll",
     lookup: "LookupName",
     lookupId: IdAttr,
@@ -95,12 +102,12 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
     attrId: "description"
    }];
    for (const row of rows) {
-    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+     newRow(record.txnId, record.vertex, "ImportMeta", "ImportMeta", row);
    }
    break;
   }
   case "attribute": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "Coll",
     lookup: "ResourceName",
     lookupChild: "Attr",
@@ -140,12 +147,12 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
     // }
    ];
    for (const row of rows) {
-    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+     newRow(record.txnId, record.vertex, "ImportMeta", "ImportMeta", row);
    }
    break;
   }
   case "user": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "User",
     lookup: "",
     lookupChild: "",
@@ -160,12 +167,12 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
     },
    ];
    for (const row of rows) {
-    record.selectNewLine({ sublistId: "ImportMeta", properties: row });
+     newRow(record.txnId, record.vertex, "ImportMeta", "ImportMeta", row);
    }
    break;
   }
   case "role": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "Role",
     lookup: "",
     lookupChild: "",
@@ -175,7 +182,7 @@ export const updateImportRecord = (type: string, record: Record, dry= true) => {
    break;
   }
   case "perm": {
-   record.replaceFieldValues({
+   replaceVertexProperties(record.txnId, record.vertex.id, {
     label: "Perm",
     lookup: "",
     lookupChild: "",
@@ -485,11 +492,11 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
     return;
   }
 
-  record.replaceFieldValues({});
+  replaceVertexProperties(record.txnId, record.vertex.id, {});
 
   const clearChildren = (meta: Vertex, vertex: Vertex) => {
     // 2. loop through meta and set all the data.
-    const metaVertexes = record.getSublistRowsForType("MetaAttr", record.metaVertex);
+    const metaVertexes = getSublistRowsForType("MetaAttr", record.metaVertex);
 
     const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
     const tableMetaVertexes = metaVertexes.filter(meta => ["Table"].includes(meta.P.component));
@@ -510,7 +517,7 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
       if (metaProps.inward) {
         // not possible now
       } else {
-        const childVertexes = record.getSublistRows(metaVertex, vertex);
+        const childVertexes = getSublistRows(metaVertex, vertex);
         const edge = getToEdge(metaVertex, vertex);
         const outEdges = vertex.OUT[edge] || [];
 
@@ -541,7 +548,7 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
   const insertChildren = (meta: Vertex, vertex: Vertex, input: {
     [key: string]: any
   }) => {
-    const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+    const metaVertexes = getSublistRowsForType("MetaAttr", meta);
     // const props = meta.P.props || {};
 
     const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
@@ -610,7 +617,7 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
         const childVertexes = input?.["OUT"]?.[type] || [];
 
         for (const v of childVertexes) {
-          const newRowResult = record.addNewRowUI(metaVertex, vertex, v.P || {});
+          const newRowResult = addNewRow(record.txnId, metaVertex, vertex, v.P || {}, record.isRealTime, record.ws);
           if (!newRowResult.error) {
             insertChildren(metaVertex, graph.vertexes[newRowResult.vertexId!], v);
           }
@@ -621,6 +628,6 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
     return input;
   };
 
-  record.replaceFieldValues(input.P || {});
+  replaceVertexProperties(record.txnId, record.vertex.id, input.P || {});
   insertChildren(record.metaVertex, record.vertex, input);
 }

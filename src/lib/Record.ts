@@ -18,7 +18,7 @@ import {
  getSelectionOptions,
  AdminAttrKeys,
  AttrsTableData,
- getParentVertex, addNewRow,
+ getParentVertex, addNewRow, getSublistRows, getSublistRowsForType,
 } from "./Utils";
 import { getToEdge } from "./CommonUtils/getToEdge";
 import { removeUndefinedProperties } from "../utils/functions";
@@ -345,7 +345,7 @@ export const getExportCode = (record: Record) => {
  const getChildren = (meta: Vertex, vertex: Vertex, result: {
   [key: string]: any
  }) => {
-  const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+  const metaVertexes = getSublistRowsForType("MetaAttr", meta);
   // const props = meta.P.props || {};
 
   const selectMetaVertexes = metaVertexes.filter(meta => ["SelectBox", "TagBox"].includes(meta.P.component));
@@ -361,7 +361,7 @@ export const getExportCode = (record: Record) => {
    } else {
     const type = getToEdge(metaVertex, vertex);
     // also can use selectedValue function;
-    const childVertexes = record.getSublistRows(metaVertex, vertex);
+    const childVertexes = getSublistRows(metaVertex, vertex);
 
     for (const v of childVertexes) {
      // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
@@ -417,7 +417,7 @@ export const getExportCode = (record: Record) => {
     // not possible now
    } else {
     const type = getToEdge(metaVertex, vertex);
-    const childVertexes = record.getSublistRows(metaVertex, vertex);
+    const childVertexes = getSublistRows(metaVertex, vertex);
 
 
     const out = childVertexes.map(v => getChildren(metaVertex, v, {

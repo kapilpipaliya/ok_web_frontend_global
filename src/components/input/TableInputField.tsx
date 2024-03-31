@@ -70,9 +70,6 @@ export function TableInputField(
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
-  // columns
-  // finally remove props.getMetaAttributes(props.meta)
-
   const getAttributes = () => {
     // If child vertexes, use it
     const childAttrVertex = getChildVertexes(

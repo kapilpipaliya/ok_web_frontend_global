@@ -1,7 +1,7 @@
 import {Icon} from "@iconify-icon/solid";
 import {useLocation} from "@solidjs/router";
 import {Show, createEffect, createMemo, createSignal, createUniqueId, untrack, useContext} from "solid-js";
-import { Record } from "../lib/Utils";
+import {getSublistRows, getSublistRowsForType, Record} from "../lib/Utils";
 import { getChildVertex } from "../lib/Utils";
 import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {Vertex} from "../lib/graph";
@@ -144,12 +144,12 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
         // rome-ignore lint/suspicious/noExplicitAny: <explanation>
         const result = [] as any[];
 
-        const metaVertexes = record.getSublistRowsForType("MetaAttr", meta);
+        const metaVertexes = getSublistRowsForType("MetaAttr", meta);
         const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
 
         if (!attrMeta) return result;
 
-        const children = record.getSublistRows(attrMeta, vertex);
+        const children = getSublistRows(attrMeta, vertex);
 
         for (const child of children) {
             const name = child.P.name;
