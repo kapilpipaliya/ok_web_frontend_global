@@ -563,7 +563,7 @@ export const PageDesignerDragAndDrop = () => {
                                         width={18}
                                         color={"black"}
                                         class={
-                                            "cursor:pointer mr:5px opacity:.5 opacity:1:hover mt:4px"
+                                            "cursor:pointer mr:5px opacity:.5 opacity:1:hover"
                                         }
                                         onclick={clone}
                                     />

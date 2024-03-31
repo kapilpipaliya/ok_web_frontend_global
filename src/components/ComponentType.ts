@@ -10,10 +10,8 @@ export interface ComponentProps {
   setValue?(attribute: Vertex, vertex: Vertex, data: any): void;
 }
 export interface DisplayComponentProps {
-  // meta?: Vertex;
-  meta?: VertexUnsafe;
-  // data?: Vertex;
-  data?: VertexUnsafe;
+  meta?: Vertex;
+  data?: Vertex;
 }
 
 export enum Alert {

@@ -1,9 +1,6 @@
-// src/components/CustomToast.jsx
-import {Accessor, Component, For, JSXElement, Show} from "solid-js";
+import {Component, Show} from "solid-js";
 import {toast} from "solid-toast";
 import {Icon} from "@iconify-icon/solid";
-import {Record} from "../../lib/Utils";
-import {Id, Vertex} from "../../lib/graph";
 
 const DismissButton: Component<{
     onDismiss: () => void;
