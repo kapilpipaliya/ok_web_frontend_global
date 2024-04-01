@@ -235,7 +235,7 @@ export const PageItemRender = (props: {
                 </TabContainer>
               </Match>
               <Match when={parentComponent() === "TableHeader"}>
-                <th class={'p:10px'}>
+                <th class={'p:10px bb:1px|solid|rgb(190,211,238)'}>
                   <PageComponent/>
                 </th>
               </Match>

@@ -225,7 +225,7 @@ export function TableInputField(
                   component={component()}
                   // When we have a Table we pass original Table Meta Vertex
                   meta={
-                    component() === "Table"
+                    component() === "Table2"
                       ? graph.vertexes[metaVertex().P.templateId]
                       : metaVertex()
                   }
@@ -342,7 +342,7 @@ export function TableInputField(
           <tr>
             <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
               <DynamicComponent
-                component={"Table"}
+                component={"Table2"}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={expandVertex()!}
                 data={p.joinVertex}
@@ -437,9 +437,9 @@ export function TableInputField(
           {/*<Show when={props.meta.P.attributes}>*/}
           {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
           {/*</Show>*/}
-          {/* <Show when={sortedVertexes().length}> */}
+          <Show when={sortedVertexes().length}>
           <AddNewButton />
-          {/* </Show> */}
+           </Show>
 
           <div
             class={css`
@@ -449,10 +449,9 @@ export function TableInputField(
                 border: .5px solid rgba(0, 0, 0, 0.1);
                 border-collapse: separate;
                 border-spacing: 0;
-                
               }
             `}
-            style={{ "margin-top": "5px" }}
+            style={{ "margin-top": "5px"}}
           >
             <table
               style={{ "align-content": "center" }}

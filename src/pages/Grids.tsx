@@ -239,14 +239,14 @@ export const DataGrid = (props: DataGridProps) => {
 
             <div class="p:2">
                 <table class="b:1.5px|solid|rgb(190,211,238) w:full bg:rgb(232,237,241) r:5|5|5|5 ">
-                    <thead class="r:5|5|5|5">
+                    <thead class="r:5|5|5|5 ">
                     <For each={table.getHeaderGroups()}>
                         {headerGroup => (
-                            <tr class="p:10 text:center h:50">
+                            <tr class="p:10 text:center h:50 ">
                                 <For each={headerGroup.headers}>
                                     {(header,index) => (
 
-                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px`}>
+                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
                                              {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -265,10 +265,10 @@ export const DataGrid = (props: DataGridProps) => {
                     <tbody class="r:5|5|5|5 rounded-md">
 
                     <For each={table.getRowModel().rows}>
-                        {(row) => (
+                        {(row,index) => (
                             <tr
                                 id={`grid${row.id}`}
-                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover`}
+                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover `}
                             >
                                 <For each={row.getVisibleCells()}>
                                     {cell => (
