@@ -1,5 +1,5 @@
-import bg from "../../../assests/signup/bg.png";
-import logo from "../../../assests/signup/logo.png";
+import bg from "../../../assets/signup/bg.png";
+import logo from "../../../assets/signup/logo.png";
 
 
 export const LoginPage = () => {

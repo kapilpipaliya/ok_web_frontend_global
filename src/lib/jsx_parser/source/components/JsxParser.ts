@@ -293,7 +293,8 @@ export default class JsxParser {
 		}
 		let componentVertex: Vertex;
 		let isText = false;
-		// if comp is undefined it means a framgment and handle it properly by rendering a div
+
+		// if comp is undefined it means a fragment and handle it properly by rendering a div
 		if (containerTags.includes(comp) || !comp) {
 			componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Box")!;
 			if (comp !== "div") {
@@ -392,6 +393,8 @@ export default class JsxParser {
 			children = childNodes.map(node => {
 				const value =  this.#parseExpression(node, {...scope, parent: parentVertex});
 				if (typeof (value) === "string" && childNodes.length > 1) {
+					// Remove empty nodes from import code
+					if (value.trim() === '') return;
 					const componentVertex = findVertexByLabelAndUniqueId("Comp", "name", "Text")!;
 					const rowId = componentDrag(this.props.txnId, componentVertex!,   parentVertex, 1000);
 					if (rowId === -1) return;
@@ -408,6 +411,7 @@ export default class JsxParser {
 			}
 
 			if (children.length === 0) {
+
 				children = undefined
 			} else if (children.length === 1) {
 				[children] = children;

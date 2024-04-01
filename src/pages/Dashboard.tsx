@@ -84,7 +84,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
       </Show>
       <div
         class={`${
-          isSideBarOpen() && isShowDrawer() ? "ml:200" : ""
+          isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
         } flex:1 transition:margin-left|200ms|ease-in-out`}
       >
         <div class="flex flex:col flex:1">
