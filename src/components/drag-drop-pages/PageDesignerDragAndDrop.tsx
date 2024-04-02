@@ -509,14 +509,7 @@ export const PageDesignerDragAndDrop = () => {
                         <div style="display: flex;align-items: center;">
                             &nbsp;
                             <Show when={children().length}>
-                                <Tooltip
-                                    content={`${
-                                        collapsedKeys().includes(props.vertex.id)
-                                            ? "Expand"
-                                            : "Collapse"
-                                    }`}
-                                    nowrap
-                                >
+
                                     <button
                                         class="cursor: pointer;"
                                         onClick={(e) => {
@@ -539,7 +532,6 @@ export const PageDesignerDragAndDrop = () => {
                                             }}
                                         />
                                     </button>
-                                </Tooltip>
                             </Show>
                             &nbsp;
                             <Icon

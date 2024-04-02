@@ -37,7 +37,12 @@ const DEFAULT_PRECEDENCE = {
     '%': 10
 };
 
-const binops = {
+export const binops = {
+    '+': function (a, b) { return a + b; },
+    '-': function (a, b) { return a - b; },
+    '*': function (a, b) { return a * b; },
+    '/': function (a, b) { return a / b; },
+    '%': function (a, b) { return a % b; },
     '||': function (a, b) { return a || b; },
     '&&': function (a, b) { return a && b; },
     '|': function (a, b) { return a | b; },
@@ -54,11 +59,6 @@ const binops = {
     '<<': function (a, b) { return a << b; },
     '>>': function (a, b) { return a >> b; },
     '>>>': function (a, b) { return a >>> b; },
-    '+': function (a, b) { return a + b; },
-    '-': function (a, b) { return a - b; },
-    '*': function (a, b) { return a * b; },
-    '/': function (a, b) { return a / b; },
-    '%': function (a, b) { return a % b; }
 } as {[key: string]: (v1: any, v2: any)=>any};
 
 const unops = {
