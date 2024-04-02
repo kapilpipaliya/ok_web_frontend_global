@@ -140,7 +140,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                                         <td class="pr:2" id={id}>
                                             <Label/>
                                         </td>
-                                        <td class="flex gap:2 justify-content:space-between">
+                                        <td class="justify-content:end">
                                             <Content/>
                                             {/* Select Rules: */}
                                             {/*<SelectInputField*/}

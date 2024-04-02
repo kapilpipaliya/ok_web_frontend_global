@@ -7,7 +7,6 @@ const CustomButton = (props) => {
     const baseStyles = {
         padding: '0.3rem 1rem',
         "border-radius": '0.3rem',
-        border: 'none',
         cursor: 'pointer',
         fontSize: '1rem',
         margin: '1px',

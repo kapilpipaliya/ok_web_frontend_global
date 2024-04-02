@@ -93,19 +93,22 @@ export const TextField: Component<TextFieldProps> = (props) => {
           />
           </Match>
           <Match when={!local.multiline}>
-              <div class="textInputWrapper">
-                  <input
+              <div class={` ${props.trailing || props.leading ? "flex gap:3 ai:center" : ""}`}>
+                  {props.leading}
+                  <div class={'textInputWrapper w:full'}><input
                   name="text"
                   type="search"
                   {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
                   placeholder={local.placeholder ? local.placeholder : ""}
-                  class={`${local.class ?? ""} global-style textInput`}
+                  class={`${local.class ?? ""} global-style textInput `}
                   onInput={(ev) => {
                       runEvent(ev, local.onInput);
                       local.setValue?.(ev.currentTarget.value);
                   }}
-              />
+                  /></div>
+                  {props.trailing}
               </div>
+
           </Match>
       </Switch>
         {local.children}
