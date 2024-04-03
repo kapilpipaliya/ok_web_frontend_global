@@ -267,7 +267,7 @@ export const DataGrid = (props: DataGridProps) => {
                             <tr
                                 id={`grid${row.id}`}
                                 class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>
-                            >
+
                                 <For each={row.getVisibleCells()}>
                                     {cell => (
                                         <td class={'bb:1px|solid|rgb(227,231,236)'}>
