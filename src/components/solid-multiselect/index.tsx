@@ -677,7 +677,7 @@ const matchValues = (value: string, search: string) => {
                         ? ""
                         : placeholder
                 }</span>
-              <Show when={singleSelect || showArrow}>
+              <Show when={showArrow}>
                 <img class="icon_cancel icon_down_dir" src={DownArrow} />
               </Show>
             </div>

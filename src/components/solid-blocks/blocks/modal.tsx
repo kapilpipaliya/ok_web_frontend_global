@@ -107,7 +107,6 @@ export const Modal = (props: ModalProps): JSX.Element => {
     onkeyup: createMemo(() =>
       props.closeOnEsc !== false
         ? (ev: KeyboardEvent) => {
-            console.log(ev);
             if (ev.key === "Escape" && !ev.defaultPrevented) {
               setOpen(false);
             }

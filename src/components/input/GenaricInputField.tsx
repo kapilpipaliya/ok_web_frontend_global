@@ -21,7 +21,7 @@ import {setSelectedId} from "../pageStore";
 import {setValueGlobal} from "../../lib/Utils";
 import {WsContext} from "../../utils/ws_events_dispatcher";
 import CommonDialog from "./Components/CommonDialog";
-import {ExpressionBuilder} from "./Components/expressionBuilder";
+import {ExpressionBuilder} from "./Components/ExpressionBuilder";
 
 
 export function GenericInputField(

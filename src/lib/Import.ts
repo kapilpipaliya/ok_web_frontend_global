@@ -487,7 +487,6 @@ export const onDataDirectoryImportClick = (record: Record, Ws: ServerEventsDispa
 
 export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
   const input = parse(yamlInput);
-  console.log(input);
   if (!isObject(input)) {
     return;
   }

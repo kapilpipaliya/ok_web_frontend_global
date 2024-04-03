@@ -1,43 +1,67 @@
-import {Modal, ModalBody, ModalContent, ModalFooter, ModalHeader} from "../../solid-blocks/blocks";
+import '../../css/modal.css'
+import Dismiss from "solid-dismiss";
+import {createSignal} from "solid-js";
 import {Icon} from "@iconify-icon/solid";
 
-const CommonDialog = (props: any) => {
+const CustomModal = (props) => {
+    const [open, setOpen] = createSignal(false);
+    let btnEl;
+    let btnSaveEl;
+
+    const onClickClose = () => {
+        setOpen(false);
+    };
+
+    const onClickOverlay = (e) => {
+        if (e.target !== e.currentTarget) return;
+        setOpen(false);
+    };
 
     return (
         <>
-            <Modal  closeOnEsc={props.closeOnEsc} closeOnClickOutside={props.closeOnClickOutside}>
-                {({ open, toggle }) => (
-                    <>
-                        {props.openButton !== false && (
-                            <Icon height={25} width={25} color={'grey'} aria-disabled={open()} class={'bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5'} onClick={toggle} icon={props.buttonLabel}></Icon>
-                        )}
-                        <ModalContent class={`${props.dialogClass}`} style={{'border-radius': '10px'}} >
-                            <ModalHeader class={'p:4'}>
-                                {props.title}
-                                {props.closeButton !== false && (
-                                    <button
-                                        title={'Close'}
-                                        onClick={toggle}
-                                        class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
-                                        style={{float: "right"}}
-                                    >
-                                        ✕
-                                    </button>
-                                )}
-                            </ModalHeader>
-                            <hr class={'fg:#f4e9e9'}/>
-                            <ModalBody class={`${props.bodyClass} m:.5rem`}>
-                                {props.body}
-                            </ModalBody>
-                            <ModalFooter class={`${props.footerClass} mt:1.5rem`}>
-                                {props.footer(toggle)}
-                            </ModalFooter>
-                        </ModalContent>
-                    </>
-                )}
-            </Modal>
+            {props.openButton !== false && (
+                <Icon height={25} width={25} color={'grey'} aria-disabled={open()}
+                      class={'bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5'} onClick={() => setOpen(true)}
+                      icon={props.buttonLabel}></Icon>
+            )}
+            <Dismiss
+                menuButton={btnEl}
+                open={open}
+                setOpen={setOpen}
+                modal
+                focusElementOnOpen={() => btnSaveEl}
+            >
+                <div
+                    class="modal-container"
+                    onClick={onClickOverlay}
+                    role="presentation"
+                >
+                    <div class="modal r:10" role="dialog" aria-modal="true" tabindex="-1">
+                        <div class={'mb:4 font-weight:bold'}>
+                            {props.title}
+                            {props.closeButton !== false && (
+                                <button
+                                    title={'Close'}
+                                    onClick={onClickClose}
+                                    class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
+                                    style={{float: "right"}}
+                                >
+                                    ✕
+                                </button>
+                            )}
+                        </div>
+                        <hr class={'fg:lightgrey'}/>
+                        <div class={'p:3 max-h:50vh overflow:auto'}>
+                            {props.body}
+                        </div>
+                        <div class={'pt:5'}>
+                            {props.footer(setOpen)}
+                        </div>
+                    </div>
+                </div>
+            </Dismiss>
         </>
     );
 };
 
-export default CommonDialog;
+export default CustomModal;

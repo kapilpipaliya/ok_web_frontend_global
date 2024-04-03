@@ -60,7 +60,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
         'class',
         'placeholder',
     ]);
-    const mergedClassList = mergeProps({ textfield: true }, local.classList ?? {});
+    const mergedClassList = mergeProps({textfield: true}, local.classList ?? {});
 
     return (
         <label
