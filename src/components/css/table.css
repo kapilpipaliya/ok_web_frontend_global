@@ -1,0 +1,43 @@
+.styled-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr {
+    background-color: #37c;
+    height: 40px;
+    color: #ffffff;
+    text-align: center;
+}
+.styled-table thead td {
+    color: #ffffff;
+    text-align: left;
+
+    align-items: center;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 5px 3px;
+    align-content: center;
+}
+
+.styled-table tbody tr {
+    border-radius: 10px;
+    border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even) {
+    background-color: #f3f3f4;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: 2px solid #37c;
+}
+
+.styled-table {
+    border-radius: .4rem;
+    overflow: hidden; /* Ensure contents stay within the circular border */
+}

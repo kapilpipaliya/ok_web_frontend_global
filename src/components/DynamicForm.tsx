@@ -90,7 +90,7 @@ export function FormGroup(props: FormGroupProps) {
                         ""
                     )}
                     data={props.vertex}
-                    setValue={props.setValue}
+                    // setValue={props.setValue}
                     // disabled={props.d}
                     txnId={props.txnId}
                     isRealTime={false}
@@ -375,6 +375,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 component: "Button",
                 props: {
                   variant: "outlined",
+                    class: "border-color:#FF0000 color:#FF0000",
                   children: "Cancel",
                   onClick: () => onCancel(),
                 },
@@ -435,8 +436,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                           props: {
                                             children: "Import",
                                             onClick: () => onImportClick,
-                                            class:
-                                              "bg:blue bg:rgb(24,98,234):hover text-fill:white",
                                           },
                                         },
                                       } as any

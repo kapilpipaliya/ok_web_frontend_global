@@ -259,17 +259,18 @@ export const PageDesignerDragAndDrop = () => {
                 >
 
                     <div class="pt:5px"><Icon
-                      icon={iconMap[props.child?.P.name] ?? "material-symbols:widgets-outline-rounded"}
-                      width={20}
-                      height={20}
+                        icon={iconMap[props.child?.P.name] ?? "material-symbols:widgets-outline-rounded"}
+                        width={20}
+                        height={20}
                     /></div>
                     <div style={{"font-size": "14px"}}>{props.child?.P.name}</div>
                     {isHovered() && <Tooltip textContent={'Double click to Edit'}> <Icon ondblclick={() => {
                         const currentURL = window.location.href;
-                        const navigateUrl = currentURL.split('/').slice(0, -2).join('/')+'/Comp/'+ props.child.id;
+                        const navigateUrl = currentURL.split('/').slice(0, -2).join('/') + '/Comp/' + props.child.id;
                         window.open(navigateUrl, '_blank')
                     }}
-                                          class={'cursor:pointer'} icon={'solar:settings-linear'}/></Tooltip>}
+                                                                                         class={'cursor:pointer'}
+                                                                                         icon={'solar:settings-linear'}/></Tooltip>}
                 </div>
             );
         }
@@ -510,34 +511,34 @@ export const PageDesignerDragAndDrop = () => {
                             &nbsp;
                             <Show when={children().length}>
 
-                                    <button
-                                        class="cursor: pointer;"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
+                                <button
+                                    class="cursor: pointer;"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
 
-                                            toggleExpand(props.vertex.id);
+                                        toggleExpand(props.vertex.id);
+                                    }}
+                                >
+                                    <Icon
+                                        icon="mingcute:down-fill"
+                                        class={"transform 2s ease-in-out"}
+                                        style={{
+                                            transition: "transform 0.2s linear",
+                                            "margin-top": "7px",
+                                            transform: `${
+                                                collapsedKeys().includes(props.vertex.id)
+                                                    ? "rotate(0deg)"
+                                                    : "rotate(180deg)"
+                                            }`,
                                         }}
-                                    >
-                                        <Icon
-                                            icon="mingcute:down-fill"
-                                            class={"transform 2s ease-in-out"}
-                                            style={{
-                                                transition: "transform 0.2s linear",
-                                                "margin-top": "7px",
-                                                transform: `${
-                                                    collapsedKeys().includes(props.vertex.id)
-                                                        ? "rotate(0deg)"
-                                                        : "rotate(180deg)"
-                                                }`,
-                                            }}
-                                        />
-                                    </button>
+                                    />
+                                </button>
                             </Show>
                             &nbsp;
                             <Icon
-                              icon={iconMap[getComponent()] ?? "material-symbols:widgets-outline-rounded"}
-                              width={17}
-                              height={17}
+                                icon={iconMap[getComponent()] ?? "material-symbols:widgets-outline-rounded"}
+                                width={17}
+                                height={17}
                             />&nbsp;&nbsp;
                             {nameExpr(props.vertex) || props.vertex.P.name}
                         </div>
@@ -668,7 +669,7 @@ export const PageDesignerDragAndDrop = () => {
         }
 
         const setPropertyValue = (meta: Vertex,
-            value: any,
+                                  value: any,
         ) => {
             if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
                 return setPropertyValueGlobal(
@@ -842,13 +843,9 @@ export const PageDesignerDragAndDrop = () => {
                         P: {
                             component: "Button",
                             props: {
-                                style: {
-                                    "margin-top": "10px",
-                                    "background-color": "rgb(51, 119, 204)",
-                                    "color": "white"
-                                },
-                                variant: "custom",
                                 children: "Import",
+                                variant: "soft",
+
                                 onClick: () => {
                                     const jsxParser = new JsxParser({
                                         showWarnings: true,
@@ -869,12 +866,7 @@ export const PageDesignerDragAndDrop = () => {
                         P: {
                             component: "Button",
                             props: {
-                                style: {
-                                    "margin-top": "10px",
-                                    "background-color": "rgb(51, 119, 204)",
-                                    "color": "white"
-                                },
-                                variant: "custom", children: "Submit", onClick: onImportsSubmit,
+                                children: "Submit", onClick: onImportsSubmit,
                             },
                         },
                     } as any,
@@ -885,12 +877,10 @@ export const PageDesignerDragAndDrop = () => {
                         P: {
                             component: "Button",
                             props: {
-                                style: {
-                                    "margin-top": "10px",
-                                    "background-color": "white",
-                                    "color": "rgb(252,0,0)", "border": "1px solid rgb(252,0,0)"
-                                },
-                                variant: "custom", children: "Cancel", onClick: onImportsCancel
+                                children: "Cancel",
+                                class: "border-color:#FF0000 color:#FF0000",
+                                variant: 'outlined',
+                                onClick: onImportsCancel
                             },
                         },
                     } as any,
@@ -1037,12 +1027,7 @@ export const PageDesignerDragAndDrop = () => {
                                     component: "Button",
                                     props: {
                                         children: "Rules",
-                                        style: {
-                                            "margin-bottom": "10px",
-                                            "background-color": "rgb(51, 119, 204)",
-                                            "color": "white"
-                                        },
-                                        variant: "custom",
+                                        class: 'mb:5',
                                         onClick: toggleRulesModal
                                     },
                                 },
@@ -1118,6 +1103,8 @@ export const PageDesignerDragAndDrop = () => {
                                                     P: {
                                                         component: "Button",
                                                         props: {
+                                                            variant: 'outlined',
+                                                            class: "border-color:#FF0000 color:#FF0000",
                                                             children: "Cancel",
                                                             onClick: () => onRulesCancel,
                                                         },
@@ -1196,7 +1183,8 @@ export const PageDesignerDragAndDrop = () => {
                                         }}
                                     >
                                         <div style="font-weight: bold">Components</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px" title="Close Components">
+                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                                             title="Close Components">
                                             {isComponentsExpanded() && (
                                                 <div
                                                     onClick={toggleComponentsExpansion}
@@ -1241,7 +1229,8 @@ export const PageDesignerDragAndDrop = () => {
                                         }}
                                     >
                                         <div style="font-weight: bold">Pages</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px" title="Close Pages">
+                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                                             title="Close Pages">
                                             {isPagesExpanded() && (
                                                 <div
                                                     onClick={togglePagesExpansion}
@@ -1568,7 +1557,7 @@ export const PageDesignerDragAndDrop = () => {
         return steps().map(step => step.active ? step.id : null).find(id => id !== null);
     };
     // @ts-ignore
-    const NavigationBar = ({ steps, getStepId, onChangeStep }) => (
+    const NavigationBar = ({steps, getStepId, onChangeStep}) => (
         <div class={'w:100% h:50px display:flex align-items:center justify-content:center'}>
             <nav aria-label="Progress">
                 <ol role="list" class="flex align-items:center">
@@ -1578,12 +1567,17 @@ export const PageDesignerDragAndDrop = () => {
                                 {/* Completed Step */}
                                 <div class="position:absolute inset:0px flex align-items:center " aria-hidden="true">
                                     <Show when={step.id !== 3}>
-                                        <div class={`h:0.125rem width:100% bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
+                                        <div
+                                            class={`h:0.125rem width:100% bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
                                     </Show>
                                 </div>
-                                <Tooltip position={'n'} content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}>
-                                    <a href="#" onClick={() => onChangeStep(step.id)} class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
-                                        <Icon icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'} style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
+                                <Tooltip position={'n'}
+                                         content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}>
+                                    <a href="#" onClick={() => onChangeStep(step.id)}
+                                       class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
+                                        <Icon
+                                            icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
+                                            style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
                                         <span class="sr-only">Step {step.id}</span>
                                     </a>
                                 </Tooltip>
@@ -1600,7 +1594,8 @@ export const PageDesignerDragAndDrop = () => {
             <Switch>
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
-                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": 'calc(100vh - 120px)'}}>
+                        <div class="flex-col max-width:25rem overflow:auto"
+                             style={{"max-height": 'calc(100vh - 120px)'}}>
                             <For each={leftColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>
@@ -1613,7 +1608,8 @@ export const PageDesignerDragAndDrop = () => {
                                 </FormContext.Provider>
                             </ResizableContainer>
                         </div>
-                        <div class="flex-col max-width:25rem overflow:auto" style={{"max-height": 'calc(100vh - 120px)'}}>
+                        <div class="flex-col max-width:25rem overflow:auto"
+                             style={{"max-height": 'calc(100vh - 120px)'}}>
                             <For each={rightColumns()}>
                                 {(column) => <Column type={column.id}/>}
                             </For>

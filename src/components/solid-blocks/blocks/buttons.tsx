@@ -1,53 +1,24 @@
-import { createSignal } from 'solid-js';
-
+import {createSignal, splitProps} from 'solid-js';
+import './button.css'
 const CustomButton = (props) => {
+    const [local, field] = splitProps(props, [
+        "class",
+    ]);
     const [variant, setVariant] = createSignal(props.variant || 'contained');
 
-    // Define base styles
-    const baseStyles = {
-        padding: '0.3rem 1rem',
-        "border-radius": '0.3rem',
-        cursor: 'pointer',
-        fontSize: '1rem',
-        margin: '1px',
-        "text-decoration": 'none',
-        display: 'inline-block',
-        textAlign: 'center',
-        transition: 'background-color 0.3s, color 0.3s',
+    // Define styles for different variants as CSS classes
+    const styles = {
+        outlined: 'outlined-button',
+        contained: 'contained-button',
+        soft: 'soft-button',
+        custom: 'custom-button',
     };
-
-    // Define styles for different variants
-    const variants = {
-        outlined: {
-            ...baseStyles,
-            color: '#37c',
-            "background-color": 'transparent',
-            border: '1.5px solid #37c',
-        },
-        contained: {
-            ...baseStyles,
-            color: 'white',
-            "background-color": '#37c',
-        },
-        custom: {
-            ...baseStyles,
-            ...(props.style || {}), // Merge with user-defined styles
-        },
-    };
-
-
-    // Get styles based on the variant
-    const buttonStyles = {
-        ...variants[variant()],
-        ...(props.class ? { class: props.class } : {}),
-    };
-
     return (
         <button
-            style={buttonStyles}
-            {...props}
+            class={`${styles[variant()]} ${local.class || ''}`}
+            {...field}
         >
-            {props.children}
+            {props.leading ? <>{props.leading}&nbsp;</> : '' }{props.children} {props.trailing ? <>&nbsp;{props.trailing}</> : '' }
         </button>
     );
 };

@@ -61,7 +61,7 @@ export const binops = {
     '>>>': function (a, b) { return a >>> b; },
 } as {[key: string]: (v1: any, v2: any)=>any};
 
-const unops = {
+export const unops = {
     '-': function (a) { return -a; },
     '+': function (a) { return +a; },
     '~': function (a) { return ~a; },

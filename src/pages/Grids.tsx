@@ -168,7 +168,7 @@ export const DataGrid = (props: DataGridProps) => {
                   replace={true}
                   class="r:5|5|5|5 p:5"
                 >
-                    <CustomButton variant={'custom'} class={'bg:red'}><Icon icon="fluent:edit-12-regular"/></CustomButton>
+                    <CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21} icon="fluent:edit-12-regular"/></CustomButton>
                 </A> :
                 <button onClick={() => {
                     if (rowId() === null) {
@@ -190,7 +190,7 @@ export const DataGrid = (props: DataGridProps) => {
                     }
 
 
-                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon icon="fluent:edit-12-regular"/></CustomButton></button>
+                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21} icon="fluent:edit-12-regular"/></CustomButton></button>
 
         }
     });
@@ -200,11 +200,10 @@ export const DataGrid = (props: DataGridProps) => {
         footer: '',
         cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
                               class="text-fill:red font:semibold	">
-            <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon  icon="fluent:delete-12-regular"
+            <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon height={21} width={21} icon="fluent:delete-12-regular"
                                                                      class="color:red mr:1rem"/></CustomButton>
             </button>
     });
-    console.log(tableColumns)
 
     if (!collection) {
         return <>Incorrect Configuration</>
@@ -237,15 +236,15 @@ export const DataGrid = (props: DataGridProps) => {
         <div class="py:5">
 
             <div class="p:2">
-                <table class="b:1.5px|solid|rgb(190,211,238) w:full bg:rgb(232,237,241) r:5|5|5|5 ">
+                <table class="mt:5 styled-table">
                     <thead class="r:5|5|5|5 ">
                     <For each={table.getHeaderGroups()}>
                         {headerGroup => (
-                            <tr class="p:10 text:center h:50 ">
+                            <tr class="p:10 text:center">
                                 <For each={headerGroup.headers}>
                                     {(header,index) => (
 
-                                        <th class={`w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
+                                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
                                              {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
@@ -261,17 +260,17 @@ export const DataGrid = (props: DataGridProps) => {
                         )}
                     </For>
                     </thead>
-                    <tbody class="r:5|5|5|5 rounded-md">
+                    <tbody class="r:5|5|5|5 rounded-md ">
 
                     <For each={table.getRowModel().rows}>
                         {(row,index) => (
                             <tr
                                 id={`grid${row.id}`}
-                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} {bg:#E0F1FF;px:50}:hover `}
+                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>
                             >
                                 <For each={row.getVisibleCells()}>
                                     {cell => (
-                                        <td class={'p:10px'}>
+                                        <td class={'bb:1px|solid|rgb(227,231,236)'}>
 
                                             {flexRender(
                                                 cell.column.columnDef.cell,
@@ -346,7 +345,9 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 [IdAttr]: "meta",
                                 props: {
                                     onClick: () => navigate("new"),
-                                    variant: "contained",
+                                    variant: "soft",
+                                    class:'p:7px',
+                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22} />,
                                     children: "Add New",
                                 },
                             },

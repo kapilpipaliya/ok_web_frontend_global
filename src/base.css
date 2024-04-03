@@ -52,14 +52,7 @@ html,
 :root {
     --font-family: 'Open Sans', sans-serif;
 }
-tr:last-child td:first-child {
-    border-bottom-left-radius: 5px;
-}
 
-/* Apply rounded border to the bottom right corner of the last row */
-tr:last-child td:last-child {
-    border-bottom-right-radius: 5px;
-}
 body {
     font-family: var(--font-family);
     margin: 0; /* 1 */
@@ -166,13 +159,6 @@ sup {
 2. Correct table border color inheritance in all Chrome and Safari. (https://bugs.chromium.org/p/chromium/issues/detail?id=935729, https://bugs.webkit.org/show_bug.cgi?id=195016)
 3. Remove gaps between table borders by default.
 */
-
-table {
-    border-spacing: 0;
-    text-indent: 0; /* 1 */
-    border-color: inherit; /* 2 */
-    border-collapse: separate; /* 3 */
-}
 
 /*
 1. Change the font styles in all browsers.

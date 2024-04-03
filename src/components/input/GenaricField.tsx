@@ -234,7 +234,7 @@ export const PageItemRender = (props: {
                 </TabContainer>
               </Match>
               <Match when={parentComponent() === "TableHeader"}>
-                <th class={'p:10px bb:1px|solid|rgb(190,211,238)'}>
+                <th class={'font-weight:medium h:40'}>
                   <PageComponent/>
                 </th>
               </Match>
@@ -244,7 +244,7 @@ export const PageItemRender = (props: {
                 </li>
               </Match>
               <Match when={parentComponent() === "TableRow"}>
-                <td class={`p:10px`}>
+                <td class={`p:10px bb:1px|solid|rgb(227,231,236)`}>
                   <PageComponent/>
                   {/*<div class=" h:1px  bg:rgb(229,231,235) w:100% " />*/}
                 </td>

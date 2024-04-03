@@ -1,13 +1,14 @@
 import CommonDialog from "./CommonDialog";
-import {batch, createResource, createSignal, getOwner, runWithOwner, Show} from "solid-js";
+import {batch, createResource, createSignal, getOwner, runWithOwner, Show, useContext} from "solid-js";
 import {For} from "solid-js";
 import {TextField} from "../../solid-blocks/blocks";
 import CustomButton from "../../solid-blocks/blocks/buttons";
 import {Icon} from "@iconify-icon/solid";
 import {commitTxn, getNewTxnId, graph, Vertex} from "../../../lib/graph";
 import MultiSelect from "../../solid-multiselect";
-import {binops} from "../../../lib/jsep";
+import {binops, unops} from "../../../lib/jsep";
 import {
+    FormContext,
     getChildVertex,
     getSelectionOptions,
     getValueFromVertexOrKey,
@@ -29,6 +30,7 @@ export const ExpressionBuilder = (props: any) => {
         setContentList(prev => prev.filter((_, i) => i !== index));
     };
     const outerOwner = getOwner();
+    let { record } = useContext(FormContext);
     const onChangeSelect = (e: any, isRemove: any) => {
         let data;
         let optionId: number | number[] | undefined;
@@ -37,24 +39,12 @@ export const ExpressionBuilder = (props: any) => {
             data = [];
         } else {
             data = e[0];
-            optionId = data!.id;
-            optionvalue = data!.P.name;
+            optionId = data?.id;
+            optionvalue = data?.P.name;
         }
         runWithOwner(outerOwner, () => {
             batch(() => {
-                // note: valueChanged is fired even when the value is changed programmatically,
-                // that is causing problem: when transaction is reverted, it again calls onValueChanged callback.
-                // used e.event check to prevent this.
-                // on simple import screen when value is selected first time event is not there
-                // if (e.previousValue && !e.event) {
-                // TODO: TO Prevent Onchange event firing on select set a flag
-                // when it should not fire the event In the form
-                // and remove it
-                // when calculations are done.
-                // return;
-                // }
                 // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
-
                 if (!props.data) {
                     return;
                 }
@@ -100,8 +90,24 @@ export const ExpressionBuilder = (props: any) => {
                                                 onclick={() => handleDelete(index())}/>
                                         </Show></div>
                                     <div class={'flex ai:center jc:space-between'}>
+                                        <div class={'flex'}>
+                                            <MultiSelect
+                                                isObject
+                                                displayValueParent="P"
+                                                displayValueChild="name"
+                                                disable={props.disabled!}
+                                                options={Object.keys(unops).map((key) => ({id: key, P: {name: key}}))}
+                                                avoidHighlightFirstOption
+                                                placeholder={'Unary'}
+                                                onSelect={(e) => onChangeSelect(e, false)}
+                                                onRemove={(e) => onChangeSelect(e, true)}
+                                                customCloseIcon={<Icon icon={"ic:round-close"}/>}
+                                                selectionLimit={1}
+                                                singleSelect
+                                            />
+                                        </div>
                                         <TextField
-                                            labelClass={'w:100% mr:.5rem'}
+                                            labelClass={'w:100% mr:.5rem ml:.5rem'}
                                             class="global-style flex-col"
                                             {...props.meta?.P.props}
                                             placeholder={'Write Expression...'}
@@ -114,10 +120,13 @@ export const ExpressionBuilder = (props: any) => {
                                         />
                                         <div class={'flex'}>
                                             <MultiSelect
+                                                isObject
+                                                displayValueParent="P"
+                                                displayValueChild="name"
                                                 disable={props.disabled!}
-                                                options={Object.keys(binops)}
+                                                options={Object.keys(binops).map((key) => ({id: key, P: {name: key}}))}
                                                 avoidHighlightFirstOption
-                                                placeholder={'Expression'}
+                                                placeholder={'Binary'}
                                                 onSelect={(e) => onChangeSelect(e, false)}
                                                 onRemove={(e) => onChangeSelect(e, true)}
                                                 customCloseIcon={<Icon icon={"ic:round-close"}/>}
@@ -143,8 +152,8 @@ export const ExpressionBuilder = (props: any) => {
                             Add
                         </CustomButton>
                         <CustomButton
-                            variant={'custom'} class={'fg:rgb(252,0,0) b:1|solid|rgb(252,0,0)'}
-                            style={{'margin-right': '5px'}}
+                            class="border-color:#FF0000 color:#FF0000 mr:5"
+
                             onclick={toggle}
                             {...props.meta.P.props}
                         >

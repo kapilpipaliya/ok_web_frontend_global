@@ -55,13 +55,13 @@ export default function SidebarElement(props: {
                   style={{ transition: "all .2s ease-in-out" }}
                   class={`cursor:pointer ${
                     location.pathname.toLowerCase() === item.href.toLowerCase()
-                      ? "bg:#337ab7 fg:white"
+                      ? "bg:#3477CC fg:white"
                       : ""
                   }`}
                 >
                   {item.expanded === undefined ? (
                     <div
-                      class="flex ai:center p:8 r:5|5|5|5 bg:#b2b2b2:hover fg:black:hover"
+                      class="flex ai:center p:8 r:5|5|5|5 bg:#CDDDF3:hover fg:black:hover"
                       onclick={() => {
                         navigate(item.href, {
                           resolve: false,
@@ -75,7 +75,7 @@ export default function SidebarElement(props: {
                   ) : (
                     <Accordion.Item value={item.id}>
                       <Accordion.Trigger class="w:full">
-                        <Accordion.Header class="w:full flex r:5|5|5|5 m:3 ai:center jc:left px:10 bg:#b2b2b2:hover">
+                        <Accordion.Header class="w:full flex r:5|5|5|5 m:3 ai:center jc:left px:10 bg:#CDDDF3:hover">
                           <div class="pr-4 font:15">
                             <Icon
                               icon={"mdi:chevron-up"}

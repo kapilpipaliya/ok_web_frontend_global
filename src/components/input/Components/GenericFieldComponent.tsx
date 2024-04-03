@@ -187,7 +187,8 @@ export function GenericField(
                                             component: "Button",
                                             props: {
                                                 onClick: () => onCancel,
-                                                variant: "secondary",
+                                                variant: "outlined",
+                                                class: "border-color:#FF0000 color:#FF0000",
                                                 children: "Cancel",
                                             },
                                         },

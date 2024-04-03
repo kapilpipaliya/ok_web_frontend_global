@@ -411,8 +411,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "Button",
             props: {
               children: "Reset",
-              style: {"color": "rgb(252,0,0)","border":"1px solid rgb(252,0,0)"},
-              variant: "custom",
+              class: "border-color:#FF0000 color:#FF0000",
+              variant: 'outlined',
               // TODO:
               // function: "reset",
               // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
