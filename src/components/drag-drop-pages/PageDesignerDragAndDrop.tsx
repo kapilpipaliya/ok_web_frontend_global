@@ -1600,7 +1600,7 @@ export const PageDesignerDragAndDrop = () => {
                                 {(column) => <Column type={column.id}/>}
                             </For>
                         </div>
-                        <div class="flex-grow:1 border:1|solid|blue-60 mt:5 p:10 min-w:400 r:5|5|5|5 overflow:auto">
+                        <div class="flex-grow:1 min-w:400 overflow:auto">
                             <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
                             <ResizableContainer>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
