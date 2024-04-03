@@ -1,76 +1,36 @@
 import CommonDialog from "./CommonDialog";
-import {batch, createResource, createSignal, getOwner, runWithOwner, Show, useContext} from "solid-js";
+import {Show} from "solid-js";
 import {For} from "solid-js";
 import {TextField} from "../../solid-blocks/blocks";
 import CustomButton from "../../solid-blocks/blocks/buttons";
 import {Icon} from "@iconify-icon/solid";
-import {commitTxn, getNewTxnId, graph, Vertex} from "../../../lib/graph";
+import {Vertex} from "../../../lib/graph";
 import MultiSelect from "../../solid-multiselect";
 import {binops, unops} from "../../../lib/jsep";
-import {
-    FormContext,
-    getChildVertex,
-    getSelectionOptions,
-    getValueFromVertexOrKey,
-    onChangeHandler,
-    setValueGlobal
-} from "../../../lib/Utils";
-import {setSelectionValue} from "../SelectionUtils";
-import {selectedValue, setParentValue} from "../SelectInputField";
+import {createStore} from "solid-js/store";
+import {Option} from "../../solid-multiselect/Option";
 
-export const ExpressionBuilder = (props: any) => {
+export const ExpressionBuilder = (props: {content: string, meta: Vertex}) => {
 
-    const [contentList, setContentList] = createSignal(props.content.split("+"));
+    let state = props.content.split("+").map(value => ({value} as { unAryOperator?: Option, value: string, binAryOperator?: Option}));
+
+    const [contentList, setContentList] = createStore(state);
 
     const handleInsert = () => {
-        setContentList(prev => [...prev, '']);
+        setContentList(prev => [...prev, {value: ''}]);
     };
 
     const handleDelete = (index: number) => {
         setContentList(prev => prev.filter((_, i) => i !== index));
     };
-    const outerOwner = getOwner();
-    let { record } = useContext(FormContext);
-    const onChangeSelect = (e: any, isRemove: any) => {
-        let data;
-        let optionId: number | number[] | undefined;
-        let optionvalue: any;
-        if (isRemove && e.length > 0) {
-            data = [];
-        } else {
-            data = e[0];
-            optionId = data?.id;
-            optionvalue = data?.P.name;
-        }
-        runWithOwner(outerOwner, () => {
-            batch(() => {
-                // only way to solve multi onValueChangeFire is set null value only. when undefined we assume value should not be set and changed programmatically again.
-                if (!props.data) {
-                    return;
-                }
-                if (props.isRealTime) {
-                    props.txnId = getNewTxnId();
-                }
-                if (getValueFromVertexOrKey(props.meta.P.props, "stringValue")) {
-                    props.setValue ? props.setValue(optionvalue) : setValueGlobal(props.txnId!, props.meta, props.data, data, Ws, false);
-                } else if (getValueFromVertexOrKey(props.meta.P.props, "items")) {
-                    props.setValue ? props.setValue(optionvalue) : setValueGlobal(props.txnId!, props.meta, props.data, data, Ws, false);
-                } else if (getValueFromVertexOrKey(props.meta.P.props, "inward")) {
-                    setParentValue(props.txnId || 0, props.data, props.meta, optionId);
-                } else {
-                    setSelectionValue(props.txnId || 0, props.data, props.meta, optionId);
-                }
-                onChangeHandler(
-                    props.txnId || 0,
-                    record?.vertex,
-                    props.data,
-                    props.meta
-                );
-                console.log(optionvalue);
-                if (props.isRealTime) commitTxn(props.txnId || 0, Ws);
-            });
-        });
+
+    const onUnaryOperatorChange = (index: number, value?: Option) => {
+      setContentList(index, {unAryOperator: value});
     };
+    const onBinaryOperatorChange = (index: number, value?: Option) => {
+      setContentList(index, {binAryOperator: value});
+    };
+
     return (
         <div>
             <CommonDialog
@@ -78,7 +38,7 @@ export const ExpressionBuilder = (props: any) => {
                 title="Expression Builder"
                 body={
                     <div>
-                        <For each={contentList()}>
+                        <For each={contentList}>
                             {(item, index) =>
                                 <div class={'p:2'}>
                                     <div class={'flex ai:center jc:space-between mt:4 mb:2'}><span
@@ -95,15 +55,15 @@ export const ExpressionBuilder = (props: any) => {
                                                 isObject
                                                 displayValueParent="P"
                                                 displayValueChild="name"
-                                                disable={props.disabled!}
                                                 options={Object.keys(unops).map((key) => ({id: key, P: {name: key}}))}
                                                 avoidHighlightFirstOption
                                                 placeholder={'Unary'}
-                                                onSelect={(e) => onChangeSelect(e, false)}
-                                                onRemove={(e) => onChangeSelect(e, true)}
+                                                onSelect={(e) => onUnaryOperatorChange(index(),e[0])}
+                                                onRemove={(e) => onUnaryOperatorChange(index())}
                                                 customCloseIcon={<Icon icon={"ic:round-close"}/>}
                                                 selectionLimit={1}
                                                 singleSelect
+                                                // selectedValues={}
                                             />
                                         </div>
                                         <TextField
@@ -112,26 +72,26 @@ export const ExpressionBuilder = (props: any) => {
                                             {...props.meta?.P.props}
                                             placeholder={'Write Expression...'}
                                             onchange={(e: any) => {
-                                                const updatedList = [...contentList()];
+                                                const updatedList = [...contentList];
                                                 updatedList[index()] = e.target.value;
                                                 setContentList(updatedList);
                                             }}
-                                            value={item}
+                                            value={item.value}
                                         />
                                         <div class={'flex'}>
                                             <MultiSelect
                                                 isObject
                                                 displayValueParent="P"
                                                 displayValueChild="name"
-                                                disable={props.disabled!}
                                                 options={Object.keys(binops).map((key) => ({id: key, P: {name: key}}))}
                                                 avoidHighlightFirstOption
                                                 placeholder={'Binary'}
-                                                onSelect={(e) => onChangeSelect(e, false)}
-                                                onRemove={(e) => onChangeSelect(e, true)}
+                                                onSelect={(e) => onBinaryOperatorChange(index(),e[0])}
+                                                onRemove={(e) => onBinaryOperatorChange(index())}
                                                 customCloseIcon={<Icon icon={"ic:round-close"}/>}
                                                 selectionLimit={1}
                                                 singleSelect
+                                                // selectedValues={}
                                             />
                                         </div>
                                     </div>
