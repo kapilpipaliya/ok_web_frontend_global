@@ -110,7 +110,7 @@ export function FormGroup(props: FormGroupProps) {
                         </Match>
 
                         <Match when={true}>
-                            <div class="grid-cols:2 w:450" style={{'padding-top':"5px"}}>
+                            <div class="grid-cols:2 " style={{'padding-top':"5px"}}>
                                 <div id={id}>
                                     {props.labelPrefix as string} <Label/>
                                 </div>
@@ -375,7 +375,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 component: "Button",
                 props: {
                   variant: "outlined",
-                    class: "border-color:#FF0000 color:#FF0000",
+                    class: "border-color:#FF0000 color:#FF0000 danger",
                   children: "Cancel",
                   onClick: () => onCancel(),
                 },

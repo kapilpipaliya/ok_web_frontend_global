@@ -8,7 +8,7 @@ import {AttrsAdminTableData} from "../lib/apiAdmin";
 import {Vertex} from "../lib/graph";
 import treeViewFilter from "../lib/treeViewFilter";
 import {WsContext} from "../utils/ws_events_dispatcher";
-import Loader from "./Loader";
+import {LoaderNew, LoaderSimple} from "./LoaderSimple";
 import SidebarElement from "./SidebarElement";
 import logo from "../../assets/logo/RGB_logo_web.jpg";
 import './css/sideBarSearch.css'; // Import the CSS file
@@ -100,9 +100,9 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
     }
 
     return (
-        <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:220">
+        <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:220 r:0|10|10|0" style={{"box-shadow":"-15px 0px 31px rgba(0,0,0,0.75)","border-right":"1px solid lightgray"}}>
             <img src={logo} height={30} alt={'logo'} style={{'padding': '10px'}}/>
-            <nav class="flex bg:white">
+            <nav class="flex bg:white 0px 0px 10px 10px">
                 <div class="group">
                     <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
                         <g>
@@ -115,11 +115,12 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
                     }}/>
                 </div>
             </nav>
+
             <Show
                 when={navData()}
                 fallback={
-                    <div class="flex jc:center ai:center mt:10">
-                        <Loader class="h:30 w:30"/>
+                    <div class="flex jc:center ai:center h:70%">
+                        <LoaderNew class="h:30 w:30 align-self:center"/>
                     </div>
                 }
             >

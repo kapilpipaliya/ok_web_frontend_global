@@ -1,23 +1,26 @@
-import { A, useLocation, useNavigate } from "@solidjs/router";
-import { get, set } from "idb-keyval";
+import {A, useLocation, useNavigate} from "@solidjs/router";
+import {get, set} from "idb-keyval";
 import {
-  createEffect,
-  createSignal,
-  For,
-  JSX,
-  lazy,
-  onMount,
-  Show,
-  useContext,
+    createEffect,
+    createSignal,
+    For,
+    JSX,
+    lazy, onCleanup,
+    onMount,
+    Show,
+    useContext,
 } from "solid-js";
-import { getNewGraphId, graph } from "../lib/graph";
+import {getNewGraphId, graph} from "../lib/graph";
 import Dismiss from "solid-dismiss";
-import { Navbar } from "../components/Navbar";
+import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import { AlertMessageContext } from "../contexts/AlertMessageContext";
-import { PageContext } from "../lib/Utils";
-import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
-import { isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage } from "../signals/common";
+import {AlertMessageContext} from "../contexts/AlertMessageContext";
+import {PageContext} from "../lib/Utils";
+import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
+import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
+import '../components/css/modal.css'
+import {Icon} from "@iconify-icon/solid";
+import '../components/css/modal.css'
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -25,189 +28,285 @@ const BackupRestore = lazy(() => import("./BackupRestore"));
 // @ts-ignore
 const GraphViewPage = lazy(() => import("./GraphViewPage"));
 
-const border = "|solid|slate-80";
+const border = "|solid|rgb(212,219,231)";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
 // Todo use mastercss
 const AlertDisplay = () => {
-  const { alerts, setAlert } = useContext(AlertMessageContext);
-  return (
-    <For each={alerts}>
-      {(alert, index) => (
-        <div
-          color={alert.state}
-          // @ts-ignore
-          isClosable={true}
-          content={alert.message}
-          duration={5000}
-          onHide={() =>
-            setAlert((prev) => prev.filter((_, i) => i !== index()))
-          }
-        />
-      )}
-    </For>
-  );
+    const {alerts, setAlert} = useContext(AlertMessageContext);
+    return (
+        <For each={alerts}>
+            {(alert, index) => (
+                <div
+                    color={alert.state}
+                    // @ts-ignore
+                    isClosable={true}
+                    content={alert.message}
+                    duration={5000}
+                    onHide={() =>
+                        setAlert((prev) => prev.filter((_, i) => i !== index()))
+                    }
+                />
+            )}
+        </For>
+    );
 };
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = (props: { children?: JSX.Element }) => {
-  const vertexId = getNewGraphId();
-  addNewVertex(
-    0,
-    newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` })
-  );
-
-  const location = useLocation();
-  const [isShowDrawer, setIsShowDrawer] = createSignal(true);
-
-
-  createEffect(() => {
-    const path = location.pathname;
-
-    setIsLoginPage(path.includes("/admin/login"));
-    setSignUpPage(path.includes("/admin/signup"));
-    setIsShowDrawer(
-      !(
-        path.includes("/admin/login") ||
-        path.includes("/admin/signup") ||
-        path.includes("/admin/Page/")
-      )
+    const vertexId = getNewGraphId();
+    addNewVertex(
+        0,
+        newVertex(vertexId, ["MainNavBarTitle"], {class: `bb:1${border}`})
     );
 
-  });
+    const location = useLocation();
+    const [isShowDrawer, setIsShowDrawer] = createSignal(true);
 
-  return (
-    <div class="flex">
-      <Show when={isSideBarOpen() && graph.initialSynced && isShowDrawer()}>
-        <Sidebar isSideBarOpen={isSideBarOpen()} />
-      </Show>
-      <div
-        class={`${
-          isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
-        } flex:1 transition:margin-left|200ms|ease-in-out`}
-      >
-        <div class="flex flex:col flex:1">
-          <PageContext.Provider
-            value={{
-              events: {
-                setSideBarOpen,
-                setTitle: (title: string) =>
-                  mergeVertexProperties(0, vertexId, { title }),
-              },
-            }}
-          >
-            <Show when={!isLoginPage() && !isSignUpPage()}>
-              <Navbar
-                showNavBar={isShowDrawer()}
-                toggleSidebar={() => {
-                  set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
-                  setSideBarOpen((prev) => !prev);
-                }}
-                right={
-                  <>
-                    <div class="container">
-                      <DropdownMenu isLoggedIn={graph.member?.id} />
-                    </div>
-                  </>
-                }
-                meta={graph.vertexes[vertexId]}
-              />
+
+    createEffect(() => {
+        const path = location.pathname;
+
+        setIsLoginPage(path.includes("/admin/login"));
+        setSignUpPage(path.includes("/admin/signup"));
+        setIsShowDrawer(
+            !(
+                path.includes("/admin/login") ||
+                path.includes("/admin/signup") ||
+                path.includes("/admin/Page/")
+            )
+        );
+
+    });
+
+    return (
+        <div class="flex">
+            <Show when={isSideBarOpen() && isShowDrawer()}>
+                <Sidebar isSideBarOpen={isSideBarOpen()}/>
             </Show>
+            <div
+                class={`${
+                    isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
+                } flex:1 transition:margin-left|200ms|ease-in-out`}
+            >
+                <div class="flex flex:col flex:1">
+                    <PageContext.Provider
+                        value={{
+                            events: {
+                                setSideBarOpen,
+                                setTitle: (title: string) =>
+                                    mergeVertexProperties(0, vertexId, {title}),
+                            },
+                        }}
+                    >
+                        <Show when={!isLoginPage() && !isSignUpPage()}>
+                            <Navbar
+                                showNavBar={isShowDrawer()}
+                                toggleSidebar={() => {
+                                    set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
+                                    setSideBarOpen((prev) => !prev);
+                                }}
+                                right={
+                                    <>
+                                        <div class="container">
+                                            <DropdownMenu isLoggedIn={graph.member?.id}/>
+                                        </div>
+                                    </>
+                                }
+                                meta={graph.vertexes[vertexId]}
+                            />
+                        </Show>
 
-            <AlertDisplay />
-            <main class="p:10 bg:white">
-              <Show when={graph.initialSynced}>{props.children}</Show>
-            </main>
-          </PageContext.Provider>
+                        <AlertDisplay/>
+                        <main class="p:10 bg:white">
+                            <Show when={graph.initialSynced}>{props.children}</Show>
+                        </main>
+                    </PageContext.Provider>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 const DropdownMenu = (props: { isLoggedIn: boolean }) => {
-  const [isOpen, setIsOpen] = createSignal(false);
+    const [isOpen, setIsOpen] = createSignal(false);
+    let btnEl;
+    let dropdownContainerEl;
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen());
-  };
+    const handleOpen = () => {
+        setIsOpen(true);
+    };
+    const handleClose = () => {
+        setIsOpen(false);
+    };
+    const handleLogout = () => {
+        setIsOpen(false);
+    };
 
-  const handleLogout = () => {
-    // Perform logout actions here
-    console.log("Logged out");
-    setIsOpen(false); // Close dropdown after logout
-  };
+    createEffect(() => {
+        if (isOpen()) {
+            const {bottom, left, width} = btnEl.getBoundingClientRect();
+            const {scrollX, scrollY} = window;
 
-  return (
-    <div style="position: relative; display: inline-block; z-index:1">
-      <button
-        onClick={handleToggle}
-        style="background: none; border: none; cursor: pointer;"
-      >
-        <img
-          src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-          alt="User icon"
-          style="width: 40px; height: 40px;"
-        />
-      </button>
-      <div
-        style={`position: absolute; top: calc(100% + 15px); right: 4px; background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-          isOpen() ? 1 : 0
-        }; pointer-events: ${
-          isOpen() ? "auto" : "none"
-        }; transition: opacity 0.2s ease-in-out; width: 150px;`} // Adjust width here
-      >
-        <ul style="list-style-type: none; padding: 0; margin: 0;">
-          {props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
-            <li style="margin-bottom: 5px;">
-              <a
-                href="#"
-                onClick={handleLogout}
-                class="bg:#cccccc:hover r:5|5|5|5"
-                style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px;"
-              >
-                <span>Log Out</span>
-              </a>
-            </li>
-          ) : (
-            <>
-              <li style="margin-bottom: 5px;">
-                <A
-                  href={"/login"}
-                  replace={true}
-                  onclick={() => {
-                    setIsOpen(false);
-                  }}
-                  class="bg:#cccccc:hover r:5|5|5|5"
-                  style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px;"
-                  // @ts-ignore
-                  title={__APP_VERSION__}
+            dropdownContainerEl.style.position = "absolute";
+            dropdownContainerEl.style.top = bottom + scrollY + "px";
+            dropdownContainerEl.style.left = left + scrollX + "px";
+            dropdownContainerEl.style.width = width + "px";
+            dropdownContainerEl.style.zIndex = "100";
+        }
+    });
+
+    return (
+        <>
+            <button
+                id="dropdown-toggle"
+                ref={btnEl}
+                onClick={handleOpen}
+                class={'flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:6|6|6|6'}
+                style="border: none; cursor: pointer;"
+            >
+                <img
+                    src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
+                    alt="profile"
+                    style="width: 40px; height: 40px;"
+                />
+                <div class={'ml:5 mr:1rem'}>
+                    <div class={'text-align:start f:15 font-weight:bold'}>Username</div>
+                    <div class={'text-align:start f:13'}>useremail@gmail.com</div>
+                </div>
+                <div>
+                    <Icon
+                        icon="mingcute:down-fill"
+                        class={"transform 2s ease-in-out"}
+                        height={25} width={25}
+                        style={{
+                            transition: "transform 0.2s linear",
+                            "margin-top": "7px",
+                            color: 'royalblue',
+                            transform: `${
+                                !isOpen()
+                                    ? "rotate(0deg)"
+                                    : "rotate(180deg)"
+                            }`,
+                        }}
+                    />
+                </div>
+            </button>
+            <Dismiss
+                menuButton={btnEl}
+                open={isOpen}
+                setOpen={setIsOpen}
+                mount="body"
+                overlay
+                cursorKeys
+                ref={dropdownContainerEl}
+            >
+                <div
+                    style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
+                        isOpen() ? 1 : 0
+                    }; pointer-events: ${
+                        isOpen() ? "auto" : "none"
+                    }; transition: opacity 0.2s ease-in-out; width: 100%; right: -15px`} // Adjust width here
                 >
-                  <span>Log In</span>
-                </A>
-              </li>
-              <div style="margin:1px; border-bottom: 1px dotted #cccccc;"></div>
-              <li style="margin-top: 5px;">
-                <A
-                  href={"/signup"}
-                  onclick={() => {
-                    setIsOpen(false);
-                  }}
-                  replace={true}
-                  class="bg:#cccccc:hover r:5|5|5|5"
-                  style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 5px 10px;"
-                  // @ts-ignore
-                  title={__APP_VERSION__}
-                >
-                  <span>Sign Up</span>
-                  {/* Right arrow icon */}
-                </A>
-              </li>
-            </>
-          )}
-        </ul>
-      </div>
-    </div>
-  );
+                    <div style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;" onClick={handleClose}></div>
+                    <ul style="list-style-type: none; padding: 0; margin: 0; position:relative;">
+                        {props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
+                            <div>
+                                <li style="margin-bottom: 5px;">
+                                    <A
+                                        href={"/login"}
+                                        replace={true}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'ic:twotone-login'}/>Log In
+                                    </A>
+                                </li>
+                                <li style="margin-bottom: 5px;">
+                                    <A
+                                        href={"/signup"}
+                                        replace={true}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'mdi:register-outline'}/>Sign Up
+                                    </A>
+                                </li>
+                            </div>
+                        ) : (
+                            <div>
+                                <li style="margin-bottom: 5px;">
+                                    <A
+                                        href={"/"}
+                                        replace={true}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'tdesign:edit'}/>Edit
+                                    </A>
+                                </li>
+
+                                <li style="margin-top: 5px;">
+                                    <A
+                                        href={"/"}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        replace={true}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'solar:settings-linear'}/>Setting
+                                    </A>
+                                </li>
+                                <li style="margin-top: 5px;">
+                                    <A
+                                        href={"/"}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        replace={true}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'material-symbols:help-outline'}/>Help
+                                    </A>
+                                </li>
+                                <hr style="color:lightgrey" class={'mt:.5rem'}/>
+                                <li style="margin-top: 5px;">
+                                    <A
+                                        href={"/login"}
+                                        onclick={() => {
+                                            setIsOpen(false);
+                                        }}
+                                        replace={true}
+                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
+                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px; font-weight:bold"
+
+                                    >
+                                        <Icon height={22} width={22} icon={'tabler:logout'}/>Log Out
+                                    </A>
+                                </li>
+                            </div>
+                        )}
+                    </ul>
+                </div>
+            </Dismiss>
+        </>
+    );
 };

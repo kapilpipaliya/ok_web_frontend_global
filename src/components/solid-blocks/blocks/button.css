@@ -49,3 +49,8 @@
 .contained-button:hover {
     background-color: #1d5091;
 }
+
+.outlined-button.danger:hover {
+    background-color: rgb(255, 0, 0);
+    color: #fff;
+}

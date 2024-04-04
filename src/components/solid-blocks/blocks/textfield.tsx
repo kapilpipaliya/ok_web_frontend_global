@@ -114,7 +114,6 @@ export const TextField: Component<TextFieldProps> = (props) => {
                         </div>
                         {props.trailing}
                     </div>
-
                 </Match>
             </Switch>
             {local.children}

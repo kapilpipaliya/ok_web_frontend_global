@@ -86,15 +86,24 @@ export const PageDesignerDragAndDrop = () => {
     const pageConfig = createStore({} as { record: Record });
     const [count, setCount] = createSignal(1);
     const {Ws} = useContext(WsContext);
-    const [isFormOpen, setIsFormOpen] = createSignal(true);
-    const [isLayoutOpen, setIsLayoutOpen] = createSignal(true);
-    const [isPropertiesOpen, setIsPropertiesOpen] = createSignal(selectedId());
+
     const [steps, setSteps] = createSignal([
         {id: 1, name: 'Job details', href: '#', status: 'current', active: true},
         {id: 2, name: 'Application form', href: '#', status: 'upcoming', active: false},
         {id: 3, name: 'Preview', href: '#', status: 'upcoming', active: false},
     ]);
+
+    // For Expand and collpase section
     const [selectedStepId, setSelectedStepId] = createSignal(1); // Initially set to the first step
+    const [isFormOpen, toggleIsFormOpen] = useExpansion(true);
+    const [isLayoutOpen, toggleIsLayoutOpen] = useExpansion(true);
+    const [isComponentOpen, toggleComponentOpen] = useExpansion(true);
+    const [isPagesOpen, togglePagesOpen] = useExpansion(true);
+    const [isCollFieldsOpen, toggleCollFieldsOpen] = useExpansion(true);
+    const [isPropertiesOpen, toggleIsPropertiesOpen] = useExpansion(true);
+
+
+    // For Close section
     const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
     const [isPagesExpanded, togglePagesExpansion] = useExpansion();
     const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
@@ -140,7 +149,6 @@ export const PageDesignerDragAndDrop = () => {
 
     createEffect(() => {
         setClassName(activeTab() === tabs[0] ? mobileClass : webClass);
-        setIsPropertiesOpen(selectedId() !== -1);
     });
     const rerender = () => {
         setCount((prev) => prev + 1);
@@ -164,7 +172,7 @@ export const PageDesignerDragAndDrop = () => {
 
         const titleStyle: JSX.CSSProperties = {
             "font-size": "15px",
-            "font-weight": "bold",
+            "font-weight": "bolder",
             "margin-bottom": "8px",
             "margin-top": "8px",
         };
@@ -288,7 +296,7 @@ export const PageDesignerDragAndDrop = () => {
                         updateFilteredData(); // Update filteredData when searchQuery changes
                     }}
                 />
-                <div class="h:30rem w:20rem overflow-y:auto overflow-x:auto">
+                <div class="p:10">
                     <For
                         each={filteredData()}
                         fallback={
@@ -389,7 +397,7 @@ export const PageDesignerDragAndDrop = () => {
                         updateFilteredData(); // Update filteredData when searchQuery changes
                     }}
                 />
-                <div class="overflow-y:auto overflow-x:auto m:2px"
+                <div class="overflow-y:auto overflow-x:auto m:6px"
                      style={{display: "grid", "grid-template-columns": "repeat(2, 1fr)"}}>
                     <For
                         each={filteredData()}
@@ -1125,17 +1133,6 @@ export const PageDesignerDragAndDrop = () => {
         );
     };
 
-    const onClickLayout = () => {
-        setIsLayoutOpen(!isLayoutOpen());
-    };
-
-    const onClickForm = () => {
-        setIsFormOpen(!isFormOpen());
-    };
-
-    const onClickProperties = () => {
-        setIsPropertiesOpen(!isPropertiesOpen());
-    };
 
     const componentPart = <ComponentPart/>;
     const pagesPart = <PagesPart/>;
@@ -1153,26 +1150,24 @@ export const PageDesignerDragAndDrop = () => {
         />
     );
 
-    const Column = (props: { type: string }) => {
+    const Column = (props: { type: string, index: number }) => {
         return (
             <>
-                <div>
+                {props.index > 0 ? <hr class={'color:#ccc mt:5 mb:5'}/> : <div></div>}
+                <div class={'p:5 direction:ltr'}>
                     <Switch>
                         <Match when={props.type === "components"}>
-                            {!isComponentsExpanded() && (
+                            <Show when={isComponentsExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={toggleComponentsExpansion}
+                                title="Components"
+                            >
+                                <Icon icon={"mynaui:components"} height={25} width={25}/>
+                            </div>
+                            }>
                                 <div
-                                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                    style="transition: opacity 0.3s ease-in-out;"
-                                    onclick={toggleComponentsExpansion}
-                                    title="Components"
-                                >
-                                    <Icon icon={"mynaui:components"} height={25} width={25}/>
-                                </div>
-                            )}
-                            {isComponentsExpanded() && (
-                                <div
-                                    class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5"
-
+                                    class="m:5"
                                 >
                                     <div
                                         class="mb:10px"
@@ -1182,8 +1177,29 @@ export const PageDesignerDragAndDrop = () => {
                                             "align-items": "center",
                                         }}
                                     >
+
                                         <div style="font-weight: bold">Components</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                                            <div style="cursor: pointer;" onClick={toggleComponentOpen}>
+                                                <Icon
+                                                    icon={"mdi:chevron-up"}
+                                                    style={{
+                                                        "font-size": "24px",
+                                                        "border-radius": "50%",
+                                                        "margin-left": "5px",
+                                                        transition: "transform 0.2s linear",
+                                                        transform: `${
+                                                            isComponentOpen()
+                                                                ? "rotate(0deg)"
+                                                                : "rotate(180deg)"
+                                                        }`,
+                                                    }}
+                                                    class="flex-1"
+                                                />
+                                            </div>
+                                        </div>
+                                        {/*<div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                              title="Close Components">
                                             {isComponentsExpanded() && (
                                                 <div
@@ -1197,27 +1213,27 @@ export const PageDesignerDragAndDrop = () => {
                                                     />
                                                 </div>
                                             )}
-                                        </div>
+                                        </div>*/}
                                     </div>
-                                    {componentPart}
+
+                                    <Show when={isComponentOpen()}>
+                                        {componentPart}
+                                    </Show>
                                 </div>
-                            )}
-                            {/*{oneComponents}*/}
+
+                            </Show>
                         </Match>
                         <Match when={props.type === "pages"}>
-                            {!isPagesExpanded() && (
+                            <Show when={isPagesExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={togglePagesExpansion}
+                                title="Pages"
+                            >
+                                <Icon icon={"iconoir:multiple-pages"} height={25} width={25}/>
+                            </div>}>
                                 <div
-                                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                    style="transition: opacity 0.3s ease-in-out;"
-                                    onclick={togglePagesExpansion}
-                                    title="Pages"
-                                >
-                                    <Icon icon={"iconoir:multiple-pages"} height={25} width={25}/>
-                                </div>
-                            )}
-                            {isPagesExpanded() && (
-                                <div
-                                    class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 "
+                                    class="m:5 "
 
                                 >
                                     <div
@@ -1228,8 +1244,9 @@ export const PageDesignerDragAndDrop = () => {
                                             "align-items": "center",
                                         }}
                                     >
+
                                         <div style="font-weight: bold">Pages</div>
-                                        <div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
+                                        {/*<div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                              title="Close Pages">
                                             {isPagesExpanded() && (
                                                 <div
@@ -1243,29 +1260,48 @@ export const PageDesignerDragAndDrop = () => {
                                                     />
                                                 </div>
                                             )}
+                                        </div>*/}
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                                            <div style="cursor: pointer;" onClick={togglePagesOpen}>
+                                                <Icon
+                                                    icon={"mdi:chevron-up"}
+                                                    style={{
+                                                        "font-size": "24px",
+                                                        "border-radius": "50%",
+                                                        "margin-left": "5px",
+                                                        transition: "transform 0.2s linear",
+                                                        transform: `${
+                                                            isPagesOpen()
+                                                                ? "rotate(0deg)"
+                                                                : "rotate(180deg)"
+                                                        }`,
+                                                    }}
+                                                    class="flex-1"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                    {pagesPart}
+                                    <Show when={isPagesOpen()}>
+                                        {pagesPart}
+                                    </Show>
                                 </div>
-                            )}
+                            </Show>
                         </Match>
                         <Match when={props.type === "collection"}>
-                            {!isCollectionExpanded() && (
-                                <div
-                                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                    style="transition: opacity 0.3s ease-in-out;"
-                                    onclick={toggleCollectionExpansion}
-                                    title="Collection"
-                                >
-                                    <Icon
-                                        icon={"fluent:collections-24-regular"}
-                                        height={25}
-                                        width={25}
-                                    />
-                                </div>
-                            )}
-                            {isCollectionExpanded() && (
-                                <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:21.5rem">
+                            <Show when={isCollectionExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={toggleCollectionExpansion}
+                                title="Collection"
+                            >
+                                <Icon
+                                    icon={"fluent:collections-24-regular"}
+                                    height={25}
+                                    width={25}
+                                />
+                            </div>}>
+                                <div class="m:5">
                                     <div
                                         class="mb:10px"
                                         style={{
@@ -1274,8 +1310,9 @@ export const PageDesignerDragAndDrop = () => {
                                             "align-items": "center",
                                         }}
                                     >
+
                                         <div style="font-weight: bold">Collection Fields</div>
-                                        <div
+                                        {/*<div
                                             class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                             title="Close Collection"
                                         >
@@ -1291,36 +1328,53 @@ export const PageDesignerDragAndDrop = () => {
                                                     />
                                                 </div>
                                             )}
+                                        </div>*/}
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                                            <div style="cursor: pointer;" onClick={toggleCollFieldsOpen}>
+                                                <Icon
+                                                    icon={"mdi:chevron-up"}
+                                                    style={{
+                                                        "font-size": "24px",
+                                                        "border-radius": "50%",
+                                                        "margin-left": "5px",
+                                                        transition: "transform 0.2s linear",
+                                                        transform: `${
+                                                            isCollFieldsOpen()
+                                                                ? "rotate(0deg)"
+                                                                : "rotate(180deg)"
+                                                        }`,
+                                                    }}
+                                                    class="flex-1"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
-                                    {collectionPart}
+                                    <Show when={isCollFieldsOpen()}>
+                                        {collectionPart}
+                                    </Show>
                                 </div>
-                            )}
+                            </Show>
                         </Match>
                         <Match when={props.type === "layout"}>
-                            <div style={{display: "flex", "justify-content": "end"}}>
-                                {!isLayoutExpanded() && (
+                            <Show when={isLayoutExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={toggleLayoutExpansion}
+                                title="Layout"
+                            >
+                                <Icon icon={"tabler:layout"} height={25} width={25}/>
+                            </div>}>
+                                <div class="m:5">
                                     <div
-                                        class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                        style="transition: opacity 0.3s ease-in-out;"
-                                        onclick={toggleLayoutExpansion}
-                                        title="Layout"
+                                        class={`mb:${isLayoutOpen() ? "10px" : "0px"}`}
+                                        style={{
+                                            display: "flex",
+                                            "justify-content": "space-between",
+                                            "align-items": "center",
+                                        }}
                                     >
-                                        <Icon icon={"tabler:layout"} height={25} width={25}/>
-                                    </div>
-                                )}
-
-                                {isLayoutExpanded() && (
-                                    <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
-                                        <div
-                                            class={`mb:${isLayoutOpen() ? "10px" : "0px"}`}
-                                            style={{
-                                                display: "flex",
-                                                "justify-content": "space-between",
-                                                "align-items": "center",
-                                            }}
-                                        >
-                                            {isLayoutExpanded() && (
+                                        {/*{isLayoutExpanded() && (
                                                 <div
                                                     class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                                     title="Close Layout"
@@ -1338,68 +1392,66 @@ export const PageDesignerDragAndDrop = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
-                                            <div
-                                                class="mb:2px ml:5px"
-                                                style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                                onClick={onClickLayout}
-                                            >
-                                                Layout
-                                            </div>
-                                            <div
-                                                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                                <div style="cursor: pointer;" onClick={onClickLayout}>
-                                                    <Icon
-                                                        icon={"mdi:chevron-up"}
-                                                        style={{
-                                                            "font-size": "24px",
-                                                            "border-radius": "50%",
-                                                            "margin-left": "5px",
-                                                            transition: "transform 0.2s linear",
-                                                            transform: `${
-                                                                isLayoutOpen()
-                                                                    ? "rotate(0deg)"
-                                                                    : "rotate(180deg)"
-                                                            }`,
-                                                        }}
-                                                        class="flex-1"
-                                                    />
-                                                </div>
+                                            )}*/}
+                                        <div
+                                            class="mb:2px ml:5px"
+                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                                            onClick={toggleIsLayoutOpen}
+                                        >
+                                            Layout
+                                        </div>
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                                            <div style="cursor: pointer;" onClick={toggleIsLayoutOpen}>
+                                                <Icon
+                                                    icon={"mdi:chevron-up"}
+                                                    style={{
+                                                        "font-size": "24px",
+                                                        "border-radius": "50%",
+                                                        "margin-left": "5px",
+                                                        transition: "transform 0.2s linear",
+                                                        transform: `${
+                                                            isLayoutOpen()
+                                                                ? "rotate(0deg)"
+                                                                : "rotate(180deg)"
+                                                        }`,
+                                                    }}
+                                                    class="flex-1"
+                                                />
                                             </div>
                                         </div>
-                                        {isLayoutOpen() && layoutPart}
                                     </div>
-                                )}
-                            </div>
+
+                                    <Show when={isLayoutOpen()}>
+                                        {layoutPart}
+                                    </Show>
+                                </div>
+                            </Show>
                         </Match>
                         <Match when={props.type === "properties"}>
-                            <div style={{display: "flex", "justify-content": "end"}}>
-                                {!isPropertiesExpanded() && (
-                                    <div
-                                        class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                        style="transition: opacity 0.3s ease-in-out;"
-                                        onclick={togglePropertiesExpansion}
-                                        title="Properties"
-                                    >
-                                        <Icon
-                                            icon={"mingcute:settings-6-line"}
-                                            height={25}
-                                            width={25}
-                                        />
-                                    </div>
-                                )}
+                            <Show when={isPropertiesExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={togglePropertiesExpansion}
+                                title="Properties"
+                            >
+                                <Icon
+                                    icon={"mingcute:settings-6-line"}
+                                    height={25}
+                                    width={25}
+                                />
+                            </div>}>
 
-                                {isPropertiesExpanded() && (
-                                    <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:25rem">
-                                        <div
-                                            class={`mb:${isPropertiesOpen() ? "10px" : "0px"}`}
-                                            style={{
-                                                display: "flex",
-                                                "justify-content": "space-between",
-                                                "align-items": "center",
-                                            }}
-                                        >
-                                            {isPropertiesExpanded() && (
+                                <div class="ml:5 mr:5">
+                                    <div
+
+                                        style={{
+                                            display: "flex",
+                                            "justify-content": "space-between",
+                                            "align-items": "center",
+                                        }}
+                                    >
+                                        {/*{isPropertiesExpanded() && (
                                                 <div
                                                     class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                                     title="Close Properties"
@@ -1417,76 +1469,72 @@ export const PageDesignerDragAndDrop = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
+                                            )}*/}
+                                        <div
+                                            class="mb:2px ml:5px"
+                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                                            onClick={toggleIsPropertiesOpen}
+                                        >
+                                            Properties
+                                        </div>
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
                                             <div
-                                                class="mb:2px ml:5px"
-                                                style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                                onClick={onClickProperties}
+                                                class="mb:12"
+                                                style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
                                             >
-                                                Properties
-                                            </div>
-                                            <div
-                                                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
                                                 <div
-                                                    class="mb:12"
-                                                    style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
+                                                    style="cursor: pointer;"
+                                                    onClick={toggleIsPropertiesOpen}
                                                 >
-                                                    <div
-                                                        style="cursor: pointer;"
-                                                        onClick={onClickProperties}
-                                                    >
-                                                        <Icon
-                                                            icon={"mdi:chevron-up"}
-                                                            style={{
-                                                                "font-size": "24px",
-                                                                "border-radius": "50%",
-                                                                "margin-left": "5px",
-                                                                transition: "transform 0.2s linear",
-                                                                transform: `${
-                                                                    isPropertiesOpen()
-                                                                        ? "rotate(0deg)"
-                                                                        : "rotate(180deg)"
-                                                                }`,
-                                                            }}
-                                                            class="flex-1"
-                                                        />
-                                                    </div>
+                                                    <Icon
+                                                        icon={"mdi:chevron-up"}
+                                                        style={{
+                                                            "font-size": "24px",
+                                                            "border-radius": "50%",
+                                                            "margin-left": "5px",
+                                                            transition: "transform 0.2s linear",
+                                                            transform: `${
+                                                                isPropertiesOpen()
+                                                                    ? "rotate(0deg)"
+                                                                    : "rotate(180deg)"
+                                                            }`,
+                                                        }}
+                                                        class="flex-1"
+                                                    />
                                                 </div>
                                             </div>
                                         </div>
-                                        {isPropertiesOpen() && propertiesPart}
                                     </div>
-                                )}
-                            </div>
+                                    <Show when={isPropertiesOpen()}>
+                                        {propertiesPart}
+                                    </Show>
+                                </div>
+                            </Show>
                         </Match>
                         <Match when={props.type === "form"}>
-                            <div style={{display: "flex", "justify-content": "end"}}>
-                                {!isFormExpanded() && (
+                            <Show when={isFormExpanded()} fallback={<div
+                                class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+                                style="transition: opacity 0.3s ease-in-out;"
+                                onClick={toggleFormExpansion}
+                                title="Form"
+                            >
+                                <Icon
+                                    icon={"fluent:form-multiple-24-regular"}
+                                    height={25}
+                                    width={25}
+                                />
+                            </div>}>
+                                <div class="m:5">
                                     <div
-                                        class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                                        style="transition: opacity 0.3s ease-in-out;"
-                                        onclick={toggleFormExpansion}
-                                        title="Form"
+                                        class={`mb:${isFormOpen() ? "10px" : "0px"}`}
+                                        style={{
+                                            display: "flex",
+                                            "justify-content": "space-between",
+                                            "align-items": "center",
+                                        }}
                                     >
-                                        <Icon
-                                            icon={"fluent:form-multiple-24-regular"}
-                                            height={25}
-                                            width={25}
-                                        />
-                                    </div>
-                                )}
-
-                                {isFormExpanded() && (
-                                    <div class="border:1|solid|blue-30 p:10 m:5 r:5|5|5|5 w:23.5rem">
-                                        <div
-                                            class={`mb:${isFormOpen() ? "10px" : "0px"}`}
-                                            style={{
-                                                display: "flex",
-                                                "justify-content": "space-between",
-                                                "align-items": "center",
-                                            }}
-                                        >
-                                            {isFormExpanded() && (
+                                        {/*{isFormExpanded() && (
                                                 <div
                                                     class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                                     title="Close Form"
@@ -1504,37 +1552,39 @@ export const PageDesignerDragAndDrop = () => {
                                                         </div>
                                                     )}
                                                 </div>
-                                            )}
-                                            <div
-                                                class="mb:2px ml:5px"
-                                                style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                                onClick={onClickForm}
-                                            >
-                                                Form Configuration
-                                            </div>
-                                            <div
-                                                style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                                <div style="cursor: pointer;" onClick={onClickForm}>
-                                                    <Icon
-                                                        icon={"mdi:chevron-up"}
-                                                        style={{
-                                                            "font-size": "24px",
-                                                            "border-radius": "50%",
-                                                            "margin-left": "5px",
-                                                            transition: "transform 0.2s linear",
-                                                            transform: `${
-                                                                isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                                                            }`,
-                                                        }}
-                                                        class="flex-1"
-                                                    />
-                                                </div>
+                                            )}*/}
+                                        <div
+                                            class="mb:2px ml:5px"
+                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
+                                            onClick={toggleIsFormOpen}
+                                        >
+                                            Form Configuration
+                                        </div>
+                                        <div
+                                            style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                                            <div style="cursor: pointer;" onClick={toggleIsFormOpen}>
+                                                <Icon
+                                                    icon={"mdi:chevron-up"}
+                                                    style={{
+                                                        "font-size": "24px",
+                                                        "border-radius": "50%",
+                                                        "margin-left": "5px",
+                                                        transition: "transform 0.2s linear",
+                                                        transform: `${
+                                                            isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                                                        }`,
+                                                    }}
+                                                    class="flex-1"
+                                                />
                                             </div>
                                         </div>
-                                        {isFormOpen() && abstractSingleForm}
                                     </div>
-                                )}
-                            </div>
+                                    <Show when={isFormOpen()}>
+                                        {abstractSingleForm}
+                                    </Show>
+                                </div>
+                            </Show>
+
                         </Match>
                     </Switch>
                 </div>
@@ -1558,7 +1608,7 @@ export const PageDesignerDragAndDrop = () => {
     };
     // @ts-ignore
     const NavigationBar = ({steps, getStepId, onChangeStep}) => (
-        <div class={'w:100% h:50px display:flex align-items:center justify-content:center'}>
+        <div class={'w:100% h:50px display:flex align-items:center mb:10 justify-content:center'}>
             <nav aria-label="Progress">
                 <ol role="list" class="flex align-items:center">
                     <For each={steps()}>
@@ -1589,18 +1639,43 @@ export const PageDesignerDragAndDrop = () => {
         </div>
     );
 
+    const [isLeftOpen, toggleIsLeftOpen] = useExpansion(true);
+    const [isRightOpen, toggleIsRightOpen] = useExpansion(true);
+
     return (
         <>
             <Switch>
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
-                        <div class="flex-col max-width:25rem overflow:auto"
-                             style={{"max-height": 'calc(100vh - 120px)'}}>
-                            <For each={leftColumns()}>
-                                {(column) => <Column type={column.id}/>}
-                            </For>
+                        <div
+                            class={`flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? 'w:23rem' : 'w:1.8rem'} direction:rtl`}
+                            style={{
+                                "max-height": 'calc(100vh - 120px)', "scrollbar-width": "thin",
+                                "scrollbar-color": "lightgrey"
+                            }}>
+                            <Show when={isLeftOpen()}>
+                                <For each={leftColumns()}>
+                                    {(column, index) => <Column type={column.id} index={index()}/>}
+                                </For>
+                            </Show>
                         </div>
-                        <div class="flex-grow:1 min-w:400 overflow:auto">
+
+                        <button
+                            onClick={toggleIsLeftOpen}
+                            type="button"
+                            title={`${isLeftOpen() ? 'Close' : 'Open'}`}
+                            class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                            style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
+                        >
+                            <Show when={isLeftOpen()}
+                                  fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
+                                                  style={{'color': '#c1c1c1'}}/>}>
+                                <Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
+                                      style={{'color': '#c1c1c1'}}/>
+                            </Show>
+                        </button>
+
+                        <div class="flex-grow:1 min-w:400">
                             <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
                             <ResizableContainer>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
@@ -1608,12 +1683,35 @@ export const PageDesignerDragAndDrop = () => {
                                 </FormContext.Provider>
                             </ResizableContainer>
                         </div>
-                        <div class="flex-col max-width:25rem overflow:auto"
-                             style={{"max-height": 'calc(100vh - 120px)'}}>
-                            <For each={rightColumns()}>
-                                {(column) => <Column type={column.id}/>}
-                            </For>
+                        <button
+                            onClick={toggleIsRightOpen}
+                            type="button"
+                            title={`${isRightOpen() ? 'Close' : 'Open'}`}
+                            class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                            style={`style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? 'margin-left: 76.4%' : 'margin-left: 96.3%'};`}
+                        >
+                            <Show when={isRightOpen()}
+                                  fallback={<Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
+                                                  style={{'color': '#c1c1c1'}}/>}>
+                                <Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
+                                      style={{'color': '#c1c1c1'}}/>
+                            </Show>
+                        </button>
+                        <div
+                            class={`flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isRightOpen() ? 'w:24rem' : 'w:1.8rem'}`}
+                            style={{
+                                "max-height": 'calc(100vh - 120px)',
+                                "scrollbar-width": "thin",
+                                "scrollbar-color": "lightgrey"
+                            }}>
+                            <Show when={isRightOpen()}>
+                                <For each={rightColumns()}>
+                                    {(column, index) => <Column type={column.id} index={index()}/>}
+                                </For>
+                            </Show>
                         </div>
+
+
                     </div>
                 </Match>
                 <Match when={selectedStepId() === 2}>

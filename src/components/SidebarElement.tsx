@@ -53,7 +53,7 @@ export default function SidebarElement(props: {
               return (
                 <li
                   style={{ transition: "all .2s ease-in-out" }}
-                  class={`cursor:pointer ${
+                  class={`cursor:pointer r:5 mr:2 ${
                     location.pathname.toLowerCase() === item.href.toLowerCase()
                       ? "bg:#3477CC fg:white"
                       : ""
@@ -75,7 +75,7 @@ export default function SidebarElement(props: {
                   ) : (
                     <Accordion.Item value={item.id}>
                       <Accordion.Trigger class="w:full">
-                        <Accordion.Header class="w:full flex r:5|5|5|5 m:3 ai:center jc:left px:10 bg:#CDDDF3:hover">
+                        <Accordion.Header class="w:full flex r:5|5|5|5 p:1 ai:center jc:left px:10 py:0 bg:#CDDDF3:hover">
                           <div class="pr-4 font:15">
                             <Icon
                               icon={"mdi:chevron-up"}

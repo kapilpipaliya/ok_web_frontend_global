@@ -252,7 +252,7 @@ export function TableInputField(
                                     </td>
                                 </Match>
                                 <Match when={true}>
-                                    <td class={`max-w:400px padding:1px overflow:auto ${
+                                    <td class={`padding:1px ${
                                         (() => {
                                             const comp = component();
                                             switch (comp) {
