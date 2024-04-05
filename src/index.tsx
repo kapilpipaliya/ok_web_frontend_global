@@ -18,7 +18,13 @@ import {ServerEventsDispatcher, WS_PATH, WsContext} from "./utils/ws_events_disp
 import {Component, Show, createUniqueId} from "solid-js";
 import {AlertMessage} from "./components/ComponentType";
 import {AlertMessageContext} from "./contexts/AlertMessageContext";
-import {graph} from "./lib/graph";
+import {
+ EdgeMap,
+ GraphContext,
+ GraphInterface,
+ Id,
+ VertexMap
+} from "./lib/graph";
 import {syncEvent} from "./lib/ws_events";
 import {PagePreview, PageView_, RobotsTxt, SiteMap} from "./pages/PageView";
 
@@ -41,12 +47,22 @@ render(() => {
     const Ws = new ServerEventsDispatcher(WS_PATH);
     const [alerts, setAlert] = createStore([] as AlertMessage[]);
 
+    const graph = createStore<GraphInterface>({
+     _isPartialSynced: false,
+     vertexes: {} as VertexMap,
+     edges: {} as EdgeMap,
+     vertexLabelIdMap: {} as { [key: string]: Id[] },
+     initialSynced: false, // TODO: Display initialSynced status to the UI
+     lastSyncedTime: 0,
+     member: {},
+    });
     const Sync = () => {
         syncEvent();
         return <></>;
     };
 
     return (
+     <GraphContext.Provider value={graph}>
         <CSSRuntimeProvider config={config}>
             <WsContext.Provider value={{Ws}}>
                 <Sync/>
@@ -145,5 +161,6 @@ render(() => {
                 </AlertMessageContext.Provider>
             </WsContext.Provider>
         </CSSRuntimeProvider>
+     </GraphContext.Provider>
     );
 }, document.getElementById("root") as HTMLElement);

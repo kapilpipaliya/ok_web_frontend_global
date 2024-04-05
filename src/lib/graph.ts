@@ -1,4 +1,4 @@
-import {batch} from "solid-js";
+import { batch, createContext } from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
 import {klona} from "klona";
 import {get, set} from "idb-keyval";
@@ -43,7 +43,7 @@ let uniqueId = -50000;
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
-export const [graph, setGraph] = createStore<{
+export interface GraphInterface {
   _isPartialSynced: boolean,
   vertexes: VertexMap,
   edges: EdgeMap,
@@ -51,15 +51,11 @@ export const [graph, setGraph] = createStore<{
   initialSynced: boolean,
   lastSyncedTime: 0,
   member?: { [key: string]: any } | null,
-}>({
-  _isPartialSynced: false,
-  vertexes: {} as VertexMap,
-  edges: {} as EdgeMap,
-  vertexLabelIdMap: {} as { [key: string]: Id[] },
-  initialSynced: false, // TODO: Display initialSynced status to the UI
-  lastSyncedTime: 0,
-  member: {},
-});
+}
+
+export const GraphContext = createContext<ReturnType<typeof createStore<GraphInterface>>>();
+
+
 export type Revert = { revert: () => any };
 export type InsertFn = {
   [key in
