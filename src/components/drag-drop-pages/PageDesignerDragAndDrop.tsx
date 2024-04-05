@@ -1,4 +1,5 @@
-// TODO: make multiple Fields Drag and Drop once.
+// @ts-nocheck
+
 import {useParams} from "@solidjs/router";
 import {createStore} from "solid-js/store";
 import {
@@ -7,11 +8,9 @@ import {
     getChildVertex,
     getChildVertexes,
     Record,
-    setValueGlobal,
 } from "../../lib/Utils";
 import {
     batch,
-    createEffect,
     createSelector,
     createSignal,
     For,
@@ -30,27 +29,23 @@ import {getTreeData} from "../../lib/Traverse";
 import {
     getNewGraphId,
     getNewTxnId,
-    graph,
+    GraphContext,
     Id,
     IdAttr,
     revertTransaction,
     revertTransactionUpTo,
-    setGraph,
     transactions,
     Vertex,
 } from "../../lib/graph";
 import {AbstractSingleForm} from "../DynamicForm";
 import {SelectInputField} from "../input/SelectInputField";
 import {addNewVertex, newVertex,} from "../../lib/Vertex";
-import {WsContext} from "../../utils/ws_events_dispatcher";
 import {Portal} from "solid-js/web";
 import {TableInputField} from "../input/TableInputField";
 import {AttrsTableData} from "../../lib/api";
 import {GenericInputField} from "../input/GenaricInputField";
 import JsxParser from "../../lib/jsx_parser/source/components/JsxParser";
 import {FormGroupProperties} from "../../pages/FormsAdmin";
-
-import {TableTabs} from "../TableTabs";
 import {Icon} from "@iconify-icon/solid";
 import {
     hiddenNodes,
@@ -77,15 +72,10 @@ import ResizableContainer from "./resizableDiv";
 import {FieldAttribute} from "../../lib/Type";
 
 export const PageDesignerDragAndDrop = () => {
-    const mobileClass =
-        "overflow:auto mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem";
-    const webClass =
-        "border:1|solid|blue-60 m:1rem h:800px overflow:auto mx:auto";
-    const tabs = ["Mobile Preview", "Web Preview"];
+    const [graph, setGraph] = useContext(GraphContext)!;
     const params = useParams();
     const pageConfig = createStore({} as { record: Record });
-    const [count, setCount] = createSignal(1);
-    const {Ws} = useContext(WsContext);
+    const [count] = createSignal(1);
 
     const [steps, setSteps] = createSignal([
         {id: 1, name: 'Job details', href: '#', status: 'current', active: true},
@@ -93,7 +83,7 @@ export const PageDesignerDragAndDrop = () => {
         {id: 3, name: 'Preview', href: '#', status: 'upcoming', active: false},
     ]);
 
-    // For Expand and collpase section
+    // For Expand and collapse section
     const [selectedStepId, setSelectedStepId] = createSignal(1); // Initially set to the first step
     const [isFormOpen, toggleIsFormOpen] = useExpansion(true);
     const [isLayoutOpen, toggleIsLayoutOpen] = useExpansion(true);
@@ -110,49 +100,40 @@ export const PageDesignerDragAndDrop = () => {
     const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
     const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
     const [isFormExpanded, toggleFormExpansion] = useExpansion();
-    const [className, setClassName] = createSignal(
-        "overflow:auto resize:both mx:auto w:412px h:800px border:1|solid|blue-60 m:1rem r:5|5|5|5"
-    );
 
+    // @ts-ignore
     const [leftColumns, setLeftColumns] = createSignal(
         ["components", "pages", "collection"].map((column) => ({
             id: column,
             name: column,
         }))
     );
+    // @ts-ignore
     const [rightColumns, setRightColumns] = createSignal(
         ["layout", "properties", "form"].map((column) => ({
             id: column,
             name: column,
         }))
     );
-    const [activeTab, setActiveTab] = createSignal(tabs[0]);
     const isSelectedLayoutId = createSelector(selectedId);
     const isSelectedHoverId = createSelector(hoverId);
 
-    function handleKeypressed(event) {
+    function handleKeyPressed(event: any) {
         const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
         if ((isMac && event.metaKey && event.key === 'z') || (!isMac && event.ctrlKey && event.key === 'z')) {
             console.log("CTRL+z")
         }
     }
 
-    window.addEventListener('keydown', handleKeypressed);
+    window.addEventListener('keydown', handleKeyPressed);
     onCleanup(() => {
-        window.removeEventListener('keydown', handleKeypressed);
+        window.removeEventListener('keydown', handleKeyPressed);
         batch(() => {
             setSelectedId(-1);
             setSelectedComponent({vertexId: -1});
             setSelectedColl({vertexId: -1});
         });
     });
-
-    createEffect(() => {
-        setClassName(activeTab() === tabs[0] ? mobileClass : webClass);
-    });
-    const rerender = () => {
-        setCount((prev) => prev + 1);
-    };
 
     function useExpansion(defaultValue = true) {
         const [expanded, setExpanded] = createSignal(defaultValue);
@@ -161,7 +142,7 @@ export const PageDesignerDragAndDrop = () => {
     }
 
     const ComponentPart = () => {
-        const data = getTreeData({
+        const data = getTreeData(graph, setGraph, {
             collection: "g:'CompCategory'",
             // TODO: Dont display "Form" Component
             child: {collection: "->CompCategoryComp"},
@@ -272,13 +253,13 @@ export const PageDesignerDragAndDrop = () => {
                         height={20}
                     /></div>
                     <div style={{"font-size": "14px"}}>{props.child?.P.name}</div>
-                    {isHovered() && <Tooltip textContent={'Double click to Edit'}> <Icon ondblclick={() => {
+                    {isHovered() && <Tooltip content={'Double click to Edit'}> <Icon ondblclick={() => {
                         const currentURL = window.location.href;
                         const navigateUrl = currentURL.split('/').slice(0, -2).join('/') + '/Comp/' + props.child.id;
                         window.open(navigateUrl, '_blank')
                     }}
-                                                                                         class={'cursor:pointer'}
-                                                                                         icon={'solar:settings-linear'}/></Tooltip>}
+                                                                                     class={'cursor:pointer'}
+                                                                                     icon={'solar:settings-linear'}/></Tooltip>}
                 </div>
             );
         }
@@ -320,7 +301,7 @@ export const PageDesignerDragAndDrop = () => {
     };
 
     const PagesPart = () => {
-        const data = getTreeData({
+        const data = getTreeData(graph, setGraph, {
             collection: "g:'Page'",
         });
 
@@ -444,9 +425,9 @@ export const PageDesignerDragAndDrop = () => {
                 onLayoutItemClick,
                 clone,
                 deleteLayout
-            } = useDragDrop(pageConfig[0].record, props.vertex, collapsedKeys);
+            } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex, collapsedKeys);
             const getComponent = () =>
-                getChildVertex(["$0Comp"], props.vertex).vertex?.P.name;
+                getChildVertex(graph,["$0Comp"], props.vertex,).vertex?.P.name;
 
             return (
                 <div>
@@ -548,7 +529,7 @@ export const PageDesignerDragAndDrop = () => {
                                 width={17}
                                 height={17}
                             />&nbsp;&nbsp;
-                            {nameExpr(props.vertex) || props.vertex.P.name}
+                            {nameExpr(props.vertex, graph) || props.vertex.P.name}
                         </div>
                         <div>
                             <Show
@@ -669,7 +650,7 @@ export const PageDesignerDragAndDrop = () => {
         if (!graph.vertexes[propertiesVertexId]) {
             const addNewVertexResult = addNewVertex(
                 0,
-                newVertex(propertiesVertexId, ["PropsJson"], {sample: true})
+                newVertex(propertiesVertexId, ["PropsJson"], {sample: true}), graph, setGraph
             );
             if (addNewVertexResult.error) {
                 console.warn("error while inserting");
@@ -680,12 +661,12 @@ export const PageDesignerDragAndDrop = () => {
                                   value: any,
         ) => {
             if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
-                return setPropertyValueGlobal(
+                return setPropertyValueGlobal(graph,setGraph,
                     pageConfig[0].record.txnId,
                     meta,
                     graph.vertexes[selectedId()],
                     graph.vertexes[selectedComponent().vertexId],
-                    value
+                    value,graph,setGraph
                 );
             }
             return;
@@ -697,7 +678,7 @@ export const PageDesignerDragAndDrop = () => {
                 return {error: true};
             }
 
-            return getChildVertexes(["$0Prop"], [selectedComp]);
+            return getChildVertexes(graph,["$0Prop"], [selectedComp]);
         };
 
         const toggleRulesModal = () => setIsRulesModalOpen((prev) => !prev);
@@ -747,7 +728,7 @@ export const PageDesignerDragAndDrop = () => {
                 newVertex(metaVertexId, ["MetaAttr"], {
                     name: metaAttributes?.name,
                     props: metaAttributes?.props,
-                })
+                }), graph, setGraph
             );
             const attributes: FieldAttribute[] = JSON.parse(
                 JSON.stringify(metaAttributes!.attributes!)
@@ -759,7 +740,7 @@ export const PageDesignerDragAndDrop = () => {
                         if (ruleattribute.name === "cond") {
                             for (const condAttribute of ruleattribute.attributes!) {
                                 if (condAttribute.name === "layout") {
-                                    const data = getTreeData(
+                                    const data = getTreeData(graph, setGraph,
                                         {
                                             collection: "->Attr",
                                             child: {
@@ -778,7 +759,7 @@ export const PageDesignerDragAndDrop = () => {
                                             : [],
                                         {
                                             nameExpr: (v: Vertex) => {
-                                                const component = getChildVertex(["$0Comp"], v).vertex
+                                                const component = getChildVertex(graph,["$0Comp"], v).vertex
                                                     ?.P.name;
                                                 return `${v.P.name}${
                                                     component ? ` (${component})` : ""
@@ -813,7 +794,7 @@ export const PageDesignerDragAndDrop = () => {
                 }
             }
 
-            addMetaVertexes(txnId, graph.vertexes[metaVertexId], attributes);
+            addMetaVertexes(graph, setGraph, txnId, graph.vertexes[metaVertexId], attributes);
             onCleanup(() => {
                 revertTransaction(txnId);
             });
@@ -861,7 +842,7 @@ export const PageDesignerDragAndDrop = () => {
                                         jsx: graph.vertexes[dataVertexId].P.jsx || "",
                                         parent: graph.vertexes[selectedId()],
                                     });
-                                    jsxParser.render();
+                                    jsxParser.render(graph,setGraph);
                                     // reset layout
                                     // layoutTreeViewInstance.option("items", getLayoutTreeData());
                                 },
@@ -902,7 +883,6 @@ export const PageDesignerDragAndDrop = () => {
                                 <ModalHeader>
                                     Import HTML
                                     <button
-                                        variant="icon"
                                         onclick={toggleImportsModal}
                                         style={{float: "right"}}
                                     >
@@ -957,7 +937,7 @@ export const PageDesignerDragAndDrop = () => {
                         type: "Attr",
                         label: "Attr",
                     },
-                })
+                }), graph, setGraph
             );
             const attributes: FieldAttribute[] = [
                 {
@@ -981,12 +961,12 @@ export const PageDesignerDragAndDrop = () => {
                     component: "TextBox",
                 },
             ];
-            addMetaVertexes(txnId, graph.vertexes[metaVertexId], attributes);
+            addMetaVertexes(graph,setGraph,txnId, graph.vertexes[metaVertexId], attributes);
             onCleanup(() => {
                 revertTransaction(txnId);
             });
             const metaVertex = graph.vertexes[metaVertexId];
-            const collMetaVertex = getChildVertexes(["MetaAttr"], [metaVertex]);
+            const collMetaVertex = getChildVertexes(graph,["MetaAttr"], [metaVertex]);
 
             return (
                 <>
@@ -1072,7 +1052,6 @@ export const PageDesignerDragAndDrop = () => {
                                 <ModalHeader>
                                     Header
                                     <button
-                                        variant="icon"
                                         onclick={toggleRulesModal}
                                         style={{float: "right"}}
                                     >
@@ -1144,6 +1123,7 @@ export const PageDesignerDragAndDrop = () => {
         <AbstractSingleForm
             formId={"Page"}
             id={params.id}
+            graph={graph}
             config={pageConfig}
             showMainFieldsOnly={true}
             importExportButtons={false}

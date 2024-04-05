@@ -1,5 +1,5 @@
-import { batch, createContext } from "solid-js";
-import {createStore, reconcile} from "solid-js/store";
+import {batch, createContext } from "solid-js";
+import {createStore, reconcile, SetStoreFunction, Store} from "solid-js/store";
 import {klona} from "klona";
 import {get, set} from "idb-keyval";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
@@ -185,7 +185,7 @@ export function getNewGraphId(): Id {
   // return `${new Date().getTime()}`;
 }
 
-export function resetDatabase() {
+export function resetDatabase(setGraph: SetStoreFunction<GraphInterface>) {
   setGraph(
     reconcile({
       _isPartialSynced: true,
@@ -197,7 +197,7 @@ export function resetDatabase() {
     }),
   );
 }
-export function resetDatabaseLogin() {
+export function resetDatabaseLogin(setGraph: SetStoreFunction<GraphInterface>) {
   setGraph(
     reconcile({
       _isPartialSynced: false,
@@ -214,9 +214,7 @@ export function isValidId(startVertexId: Id) {
   return isNumber(startVertexId);
 }
 // @ts-ignore
-window.graph = graph;
-// @ts-ignore
-window.setGraph = setGraph;
+
 /*
 // ***********
 // Development
@@ -237,20 +235,20 @@ createComputed(() => {
 */
 
 // Backup graphDb to IndexDB using idb-keyval key-value store
-export function backupToIndexDB() {
+export function backupToIndexDB(graph: Store<GraphInterface>) {
   return set("graph", klona(graph));
 }
 
-export function restoreFromIndexDB() {
+export function restoreFromIndexDB(setGraph: SetStoreFunction<GraphInterface>) {
   get("graph").then((data) => setGraph(reconcile(data)));
 }
 
-export function backupToJson() {
+export function backupToJson(graph: Store<GraphInterface>) {
   return klona(graph);
 }
 
-export function restoreFromJson(json: { [key: string]: any }) {
-  resetDatabase();
+export function restoreFromJson(json: { [key: string]: any},setGraph: SetStoreFunction<GraphInterface>) {
+  resetDatabase(setGraph);
   setGraph(json);
 }
 

@@ -8,7 +8,7 @@ export interface FormMetaData {
 
 export interface FieldAttribute {
   name: string;
-  // tab?: string;
+  tab?: string;
   // group?: string;
   dataType?: string;
   meta?: string;

@@ -2,6 +2,8 @@ import {findVertexByLabelAndUniqueIdWithSkip} from "./Vertex";
 import {AttrsAdminTableData} from "./apiAdmin";
 import {FieldAttribute, FormMetaData} from "./Type";
 import {IFormContext} from "./Utils";
+import {useContext} from "solid-js";
+import {GraphContext} from "./graph";
 
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
@@ -475,14 +477,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               type: "custom",
               ignoreEmptyValue: true,
               message: "This ID is already taken",
-              validationCallback: (options) => {
+              validationCallback: (options: any) => {
                 const { record } = options.validator.context || {} as IFormContext;
-
+                const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
                 if (Object.keys(AttrsTableData).includes(val) || Object.keys(AttrsAdminTableData).includes(val)) {
                   return false;
                 } else {
-                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id);
+                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id,graph);
                 }
               },
             },
@@ -853,11 +855,11 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               type: "custom",
               ignoreEmptyValue: true,
               message: "This ID is already taken",
-              validationCallback: (options) => {
+              validationCallback: (options: any) => {
                 const { record } = options.validator.context || {} as IFormContext;
-
+                const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Page", "id", val, record.vertex.id);
+                return !findVertexByLabelAndUniqueIdWithSkip("Page", "id", val, record.vertex.id,graph);
               },
             },
           ],

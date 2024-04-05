@@ -11,7 +11,7 @@ import {
 } from "solid-js";
 
 import {toTitle} from "case-switcher-js";
-import {IdAttr, setGraph, Vertex} from "../../lib/graph";
+import {GraphContext, GraphInterface, IdAttr, Vertex} from "../../lib/graph";
 import {getCollAttrComp, getCompProps, getRowProps} from "../../lib/Record";
 import {
   FormContext,
@@ -26,6 +26,7 @@ import {DynamicComponent} from "../DynamicComponent";
 import {Tab, TabContainer, Tooltip} from "../solid-blocks/blocks";
 import {hoverId, indicatorPosition, selectedId, setHoverId, setSelectedId, targetId, useDragDrop} from "../pageStore";
 import {Icon} from "@iconify-icon/solid";
+import {SetStoreFunction, Store} from "solid-js/store";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -34,28 +35,28 @@ export const PageRenderContext = createContext([] as Vertex[]);
 export const RepeaterContext = createContext([] as Vertex[]); // DataVertex[]
 
 export const PageRenderUtils = {
-  getCollection: (item?: Vertex): string | undefined =>
-    item && getChildVertex(["$0Coll"], item).vertex?.P[IdAttr],
-  getAttrVertex: (item?: Vertex): Vertex | undefined =>
-    item && getChildVertex(["$0Att"], item).vertex,
-  getAttr: (item?: Vertex): string | undefined =>
-    item && PageRenderUtils.getAttrVertex(item)?.P[IdAttr],
+  getCollection: (graph: Store<GraphInterface>,item?: Vertex): string | undefined =>
+    item && getChildVertex(graph,["$0Coll"], item).vertex?.P[IdAttr],
+  getAttrVertex: (graph: Store<GraphInterface>,item?: Vertex): Vertex | undefined =>
+    item && getChildVertex(graph,["$0Att"], item).vertex,
+  getAttr: (graph: Store<GraphInterface>,item?: Vertex): string | undefined =>
+    item && PageRenderUtils.getAttrVertex(graph,item)?.P[IdAttr],
   getID: (item?: Vertex): string | undefined => item && item.P["name"],
-  getId: (item?: Vertex): string | undefined =>
-    PageRenderUtils.getAttr(item) || PageRenderUtils.getID(item) || "",
+  getId: (graph: Store<GraphInterface>,item?: Vertex): string | undefined =>
+    PageRenderUtils.getAttr(graph,item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
-  getComponent: (item?: Vertex): Vertex | undefined => {
+  getComponent: (graph: Store<GraphInterface>,item?: Vertex): Vertex | undefined => {
     if (!item) return;
 
-    const currentComp = getChildVertex(["$0Comp"], item).vertex;
+    const currentComp = getChildVertex(graph,["$0Comp"], item).vertex;
     if (currentComp) return currentComp;
 
-    const attrVertex = PageRenderUtils.getAttrVertex(item);
+    const attrVertex = PageRenderUtils.getAttrVertex(graph,item);
     if (!attrVertex) return;
-    return getCollAttrComp(attrVertex);
+    return getCollAttrComp(attrVertex,graph);
   },
-  getDataVertex: (item?: Vertex) =>
-    item && getChildVertex(["$0Data"], item).vertex,
+  getDataVertex: (graph: Store<GraphInterface>,item?: Vertex) =>
+    item && getChildVertex(graph,["$0Data"], item).vertex,
 };
 
 export const PageItemRender = (props: {
@@ -63,6 +64,7 @@ export const PageItemRender = (props: {
   data?: Vertex;
 }) => {
   const parentItems = useContext(PageRenderContext);
+  const [graph,setGraph] = useContext(GraphContext)!;
   // @ts-ignore
   let { record, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
@@ -71,13 +73,13 @@ export const PageItemRender = (props: {
 
   return (
     <For
-      each={getChildVertexes(["Attr"], [props.metaVertex]).vertexes?.sort(
+      each={getChildVertexes(graph,["Attr"], [props.metaVertex]).vertexes?.sort(
         (a, b) => a.P.pos - b.P.pos
       )}
     >
       {(item,index) => {
 
-        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout} = useDragDrop(record, item, () => [], true);
+        const {children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout} = useDragDrop(graph,setGraph,record, item, () => [], true);
 
         // createComputed is hard to debug
         createComputed(() => {
@@ -87,11 +89,11 @@ export const PageItemRender = (props: {
 
           // 1. this will re-render when Props length changes.
           // 2. when Prop Key changes.
-          const componentVertex = PageRenderUtils.getComponent(item);
+          const componentVertex = PageRenderUtils.getComponent(graph,item);
           const componentProps = componentVertex
-            ? getCompProps(componentVertex)
+            ? getCompProps(graph,componentVertex)
             : {};
-          const rowProps = getRowProps(item);
+          const rowProps = getRowProps(graph,setGraph,item);
           const compProps = Object.assign(componentProps, rowProps);
 
           if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
@@ -129,17 +131,17 @@ export const PageItemRender = (props: {
           // mergeProperties only merge top level properties. so props will be replaced.
           setGraph("vertexes", item.id, "P", {
             props: compProps,
-            name: PageRenderUtils.getId(item),
+            name: PageRenderUtils.getId(graph,item),
           });
           // untrack(() => { mergeVertexProperties(getNewTxnId(), item.id, { props: compProps }); })
         });
 
         const component = createMemo(
           () =>
-            item.P.component || PageRenderUtils.getComponent(item)?.P[IdAttr]
+            item.P.component || PageRenderUtils.getComponent(graph,item)?.P[IdAttr]
         );
         const parentComponent = createMemo(() => {
-          return PageRenderUtils.getComponent(getLastItem(parentItems, 1))?.P[
+          return PageRenderUtils.getComponent(graph,getLastItem(parentItems, 1))?.P[
             IdAttr
           ];
         });
@@ -147,12 +149,12 @@ export const PageItemRender = (props: {
         // Need Repetitive parent checks?
         // @ts-ignore
         const parentData = () => {
-          return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
+          return PageRenderUtils.getDataVertex(graph,getLastItem(parentItems, 1));
         };
 
 
         const getComponent = () =>
-            getChildVertex(["$0Comp"], item).vertex?.P.name;
+            getChildVertex(graph,["$0Comp"], item).vertex?.P.name;
 
         const PageComponent = () => (
           <PageRenderContext.Provider
@@ -186,7 +188,7 @@ export const PageItemRender = (props: {
                                                                                       style={{color: "white"}}/></Tooltip>
                       <Tooltip content={'Parent'} nowrap><Icon icon={'mdi:arrow-up'} height={20} width={20} color={'white'}
                             class={'cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff'} style={{color: "white"}} onclick={e => {
-                        const parentResult = getParentVertex(['Attr'], item);
+                        const parentResult = getParentVertex(['Attr'], item,graph);
                         if (parentResult.error) {
                           return;
                         }
@@ -206,13 +208,13 @@ export const PageItemRender = (props: {
                     // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
                     data={
                         props.data ||
-                        getSelectionOptions(
+                        getSelectionOptions(graph,setGraph,
                             [...useContext(RepeaterContext)],
                             item.P.data
                         ).vertexes ||
-                        PageRenderUtils.getDataVertex(item)
+                        PageRenderUtils.getDataVertex(graph,item)
                     }
-                    title={toTitle(PageRenderUtils.getId(item) || "")}
+                    title={toTitle(PageRenderUtils.getId(graph,item) || "")}
                     // setValue={props.setValue}
                     disabled={false}
                     component={component()}
@@ -262,12 +264,12 @@ export const PageItemRender = (props: {
 // It's best to use dataSource, but we are using items for simplicity.
 // Components that don't have children.
 
-export function getText(projection: string, repeaterContext: Vertex[]) {
-  return getSelectionOptions(repeaterContext, projection).vertexes as string;
+export function getText(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>,projection: string, repeaterContext: Vertex[]) {
+  return getSelectionOptions(graph,setGraph,repeaterContext, projection).vertexes as string;
 }
 
-export function getUrl(projection: string, repeaterContext: Vertex[]) {
-  let url = getSelectionOptions(repeaterContext, projection).vertexes as
+export function getUrl(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>,projection: string, repeaterContext: Vertex[]) {
+  let url = getSelectionOptions(graph,setGraph,repeaterContext, projection).vertexes as
     | string
     | undefined;
   if (typeof url === "string" && url.startsWith("/")) {
@@ -277,11 +279,12 @@ export function getUrl(projection: string, repeaterContext: Vertex[]) {
 }
 
 export function PageView(props: { number: number; vertex?: Vertex }) {
+  const [graph, setGraph] = useContext(GraphContext)!;
   const collection = createMemo(() =>
-    PageRenderUtils.getCollection(props.vertex)
+    PageRenderUtils.getCollection(graph,props.vertex)
   );
   const dataVertex = createMemo(() =>
-    PageRenderUtils.getDataVertex(props.vertex)
+    PageRenderUtils.getDataVertex(graph,props.vertex)
   );
 
   return (
@@ -291,7 +294,7 @@ export function PageView(props: { number: number; vertex?: Vertex }) {
           <Match when={collection() && !dataVertex()}>
             <For
               each={
-                getSelectionOptions([props.vertex!], `'g:${collection()!}'`)
+                getSelectionOptions(graph,setGraph,[props.vertex!], `'g:${collection()!}'`)
                   .vertexes
               }
             >

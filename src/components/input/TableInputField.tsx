@@ -20,8 +20,7 @@ import {
     replaceVertexProperties,
 } from "../../lib/Vertex";
 import {
-    getNewTxnId,
-    graph,
+    getNewTxnId, GraphContext,
     IdAttr,
     revertTransaction,
     Vertex,
@@ -62,6 +61,7 @@ export function TableInputField(
     props: ComponentProps & { txnId?: number; isRealTime?: boolean }
 ) {
     const {Ws} = useContext(WsContext);
+    const [graph, setGraph] = useContext(GraphContext)!;
     // if there is no parent FormContext, it should still work.
     let {cleanUpConfig} = useContext(FormContext);
     const outerOwner = getOwner();
@@ -69,7 +69,7 @@ export function TableInputField(
 
     const getAttributes = () => {
         // If child vertexes, use it
-        const childAttrVertex = getChildVertexes(
+        const childAttrVertex = getChildVertexes(graph,
             ["Attr", "$0Att"],
             [props.meta]
         ).vertexes;
@@ -78,44 +78,44 @@ export function TableInputField(
         }
 
         // else get attributes from a collection.
-        const attrVertex = getChildVertex(["$0Att"], props.meta).vertex;
+        const attrVertex = getChildVertex(graph,["$0Att"], props.meta).vertex;
         if (!attrVertex) return;
 
-        return getChildVertexes(["Attr"], [attrVertex]).vertexes;
+        return getChildVertexes(graph,["Attr"], [attrVertex]).vertexes;
     };
     const tableColumnsTemplate = createMemo(
         () =>
             getAttributes() ||
-            getChildVertexes(["MetaAttr"], [props.meta]).vertexes ||
+            getChildVertexes(graph,["MetaAttr"], [props.meta]).vertexes ||
             []
     );
 
     // add dynamic meta from separate collection.
     // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
     if (!props.meta.P.attributes && props.meta.P.meta) {
-        const metaData = componentProps(props.meta, props.data!);
+        const metaData = componentProps(graph,setGraph,props.meta, props.data!);
         if (metaData.collection) {
             // add metadata from separate collection.
             const collVertex = findVertexByLabelAndUniqueId(
                 "Coll",
                 IdAttr,
-                metaData.collection
+                metaData.collection,graph
             );
             if (collVertex) {
-                const vertexCollAttrResult = getChildVertexes(["Attr"], [collVertex]);
+                const vertexCollAttrResult = getChildVertexes(graph,["Attr"], [collVertex]);
                 if (!vertexCollAttrResult.error) {
                     const vertexCollAttr = vertexCollAttrResult.vertexes!;
                     const attrs = [] as FieldAttribute[];
                     for (const attr of vertexCollAttr) {
-                        const props = getCollAttrs(attr);
+                        const props = getCollAttrs(graph,setGraph,attr);
                         if (!props.error) attrs.push(props.attr!);
                     }
                     const newProperties = klona(props.meta.P);
                     newProperties.attributes = attrs;
-                    replaceVertexProperties(getNewTxnId(), props.meta.id, newProperties);
+                    replaceVertexProperties(getNewTxnId(), props.meta.id,graph,setGraph, newProperties);
 
                     const txnId = getNewTxnId();
-                    addMetaVertexes(txnId, props.meta, attrs);
+                    addMetaVertexes(graph,setGraph,txnId, props.meta, attrs);
                     onCleanup(() => {
                         revertTransaction(txnId);
                     });
@@ -126,14 +126,14 @@ export function TableInputField(
     const parentItems = useContext(PageRenderContext);
 
     const parentData = createMemo(() => {
-        return PageRenderUtils.getDataVertex(getLastItem(parentItems, 1));
+        return PageRenderUtils.getDataVertex(graph,getLastItem(parentItems, 1));
     });
     // load data:
     // add row vertexes data to store
     createEffect(() => {
         // if a parent has data vertex use it,
         // TODO: else if it has a parent Form Container(Record) use it.
-        const vertexes = getSublistRows(props.meta, props.data || parentData());
+        const vertexes = getSublistRows(graph,props.meta, props.data || parentData());
         setSortedVertexes(vertexes);
     });
 
@@ -143,7 +143,7 @@ export function TableInputField(
 
         createComputed(
             on(tableColumnsTemplate, (columns) => {
-                const metaTxnId = rowMetaInitialize(p.joinVertex, props.meta, columns);
+                const metaTxnId = rowMetaInitialize(graph,setGraph,p.joinVertex, props.meta, columns);
 
                 if (metaTxnId) {
                     if (cleanUpConfig) {
@@ -159,7 +159,7 @@ export function TableInputField(
         );
 
         const instResult = createMemo(
-            () => getChildVertex(["AttrInst"], p.joinVertex).vertex
+            () => getChildVertex(graph,["AttrInst"], p.joinVertex).vertex
         );
         // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
         const rowColumnsMetaAttrs = createMemo(() =>
@@ -183,14 +183,14 @@ export function TableInputField(
                         const component = createMemo(() => {
                             if (metaVertex().P.component.includes("-")) {
                                 // Todo Fix: why this prints two times:
-                                const component = getSelectionOptions(
+                                const component = getSelectionOptions(graph,setGraph,
                                     [p.joinVertex],
                                     metaVertex().P.component
                                 ).vertexes;
                                 if (component) {
                                     return component;
                                 } else {
-                                    return getStringComponent()?.P.name;
+                                    return getStringComponent(graph)?.P.name;
                                 }
                             } else {
                                 return metaVertex().P.component;
@@ -198,12 +198,12 @@ export function TableInputField(
                         });
                         // if mergeProps not keep reactivity use memo
                         createEffect(() => {
-                            addMeta(metaVertex(), p.joinVertex);
+                            addMeta(graph,setGraph,metaVertex(), p.joinVertex);
                         });
                         const DefaultValue = () => (
                             <>
                                 {metaVertex().P.props?.defaultValue &&
-                                    getSelectionOptions(
+                                    getSelectionOptions(graph,setGraph,
                                         [p.joinVertex],
                                         metaVertex().P.props.defaultValue
                                     ).vertexes}
@@ -304,7 +304,7 @@ export function TableInputField(
                                 class="cursor:pointer m:5px"
                                 style={{color: "red"}}
                                 onClick={() =>
-                                    deleteRow(p.joinVertex, props.isRealTime!, props.txnId!, Ws)
+                                    deleteRow(p.joinVertex, props.isRealTime!, graph,setGraph,props.txnId!, Ws)
                                 }
                             />
                         </div>
@@ -322,7 +322,7 @@ export function TableInputField(
                                 onClick={() => {
                                     return addNewRow(
                                         props.txnId || 0,
-                                        expandVertex()!,
+                                        expandVertex()!,graph,setGraph,
                                         p.joinVertex,
                                         {},
                                         props.isRealTime ?? false,
@@ -397,7 +397,7 @@ export function TableInputField(
         return runWithOwner(outerOwner, () =>
             addNewRow(
                 props.txnId || 0,
-                props.meta,
+                props.meta,graph,setGraph,
                 props.data!,
                 {},
                 props.isRealTime ?? false,

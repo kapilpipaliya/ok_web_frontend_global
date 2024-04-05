@@ -4,7 +4,7 @@ import {
     Switch, useContext,
 } from "solid-js";
 
-import {IdAttr} from "../../lib/graph";
+import {GraphContext, IdAttr} from "../../lib/graph";
 import {getTextColumnValue} from "./Components/Utils";
 import {ComponentProps} from "../ComponentType";
 import {
@@ -20,7 +20,6 @@ import {FileUploader} from "../solid-blocks/blocks/fileuploader";
 import {setSelectedId} from "../pageStore";
 import {setValueGlobal} from "../../lib/Utils";
 import {WsContext} from "../../utils/ws_events_dispatcher";
-import CommonDialog from "./Components/CommonDialog";
 import {ExpressionBuilder} from "./Components/ExpressionBuilder";
 
 
@@ -33,6 +32,7 @@ export function GenericInputField(
     }
 ) {
     const {Ws} = useContext(WsContext);
+    const [graph, setGraph] = useContext(GraphContext)!;
     // const formContext = useContext(FormContext);
     // const outerOwner = getOwner();
 
@@ -73,7 +73,7 @@ export function GenericInputField(
                         <Checkbox
                             {...props.meta?.P.props}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.checked) : setValueGlobal(props.txnId!, props.meta, props.data, e.target.checked, Ws, false);
+                                props.setValue ? props.setValue(e.target.checked) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.checked, Ws, false);
                             }}
                             align="left"
                             checked={
@@ -88,7 +88,7 @@ export function GenericInputField(
                             {...props.meta?.P.props}
                             value={props.data?.P[props.meta.P[IdAttr]]}
                             onInput={e => {
-                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
+                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
                             }}
                         />
                     </Match>
@@ -106,7 +106,7 @@ export function GenericInputField(
                         <TextField
                             placeholder={props.meta?.P.props.label ?? ""}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
+                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
                             }}
                             {...props.meta?.P.props}
                             isNumber
@@ -118,7 +118,7 @@ export function GenericInputField(
                             {...props.meta?.P.props}
                             // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.checked) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.checked, Ws, false);
+                                props.setValue ? props.setValue(e.target.checked) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.checked, Ws, false);
                             }}
                             // name={props.meta?.P.props?.label ?? "radio"}
                             align="left"
@@ -143,7 +143,7 @@ export function GenericInputField(
                             class="global-style"
                             {...props.meta?.P.props}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
+                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
                             }}
                             placeholder={props.meta?.P.props?.label ?? props.title}
 
@@ -157,7 +157,7 @@ export function GenericInputField(
                             class="global-style"
                             {...props.meta?.P.props}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
+                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
                             }}
                             placeholder={props.meta?.P.props?.label ?? props.title}
                             value={props.data?.P[props.meta.P[IdAttr]]}
@@ -173,7 +173,7 @@ export function GenericInputField(
                             {...props.meta?.P.props}
                             placeholder={props.meta?.P.props?.label ?? props.title}
                             onchange={(e: any) => {
-                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
+                                props.setValue ? props.setValue(e.target.value) : setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, e.target.value, Ws, false);
                             }}
                             value={props.data?.P[props.meta.P[IdAttr]]}
                         />

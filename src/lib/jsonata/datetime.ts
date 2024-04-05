@@ -3,7 +3,7 @@
  *   Project name: JSONata
  *   This project is licensed under the MIT License, see LICENSE
  */
-
+// @ts-nocheck
 import {stringToArray} from "./utils";
 
 /**

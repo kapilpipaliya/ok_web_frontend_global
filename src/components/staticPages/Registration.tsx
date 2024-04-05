@@ -1,4 +1,3 @@
-import  bg from "../../../assets/signup/bg.png"
 import  logo from "../../../assets/signup/logo.png"
 
 

@@ -5,23 +5,28 @@ import {getFormMetaData} from "../lib/Record";
 import { Record } from "../lib/Utils";
 import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {PageView} from "../components/input/GenaricField";
-import {graph} from "../lib/graph";
+import {GraphContext, GraphInterface} from "../lib/graph";
+import {Store} from "solid-js/store";
 
-export const PageView_ = (props: {id: string, count: number}) => {
-    const {Ws} = useContext(WsContext);
-    if (!props.id) return "Page ID not specified.";
-    const record = new Record({ws: Ws});
-    const result = findVertexByLabelAndUniqueId("Page", "name", props.id);
-    if (!result) return "No Page Found";
-    const loadResult = record.load(result.id);
-    if (loadResult.error) return loadResult.error;
+export const PageView_ = (props: {
+  id: string;
+  count: number;
+}) => {
+  const { Ws } = useContext(WsContext);
+  const [graph, setGraph] = useContext(GraphContext)!;
+  if (!props.id) return "Page ID not specified.";
+  const record = new Record({ ws: Ws });
+  const result = findVertexByLabelAndUniqueId("Page", "name", props.id, graph);
+  if (!result) return "No Page Found";
+  const loadResult = record.load(graph, result.id);
+  if (loadResult.error) return loadResult.error;
 
-    const form = getFormMetaData("Page");
-    if (form.error) return form.error;
-    record.createMeta(form.form!);
+  const form = getFormMetaData(graph,setGraph, "Page");
+  if (form.error) return form.error;
+  record.createMeta(form.form!, graph, setGraph);
 
-    return <PageView number={props.count} vertex={record?.vertex}/>
-}
+  return <PageView number={props.count} vertex={record?.vertex} />;
+};
 
 export const PagePreview = (props: {}) => {
     const params = useParams();
@@ -39,7 +44,7 @@ export const RobotsTxt = (props: {}) => {
         Sitemap: {window.location.origin + '/sitemap.txt'}
     </>
 }
-export const SiteMap = (props: {}) => {
+export const SiteMap = (props: {},graph: Store<GraphInterface>) => {
     return <For each={graph.vertexLabelIdMap["Page"]?.filter(vertex => graph.vertexes[vertex].P.public)}>
         {vertex => <>{window.location.origin + graph.vertexes[vertex].P.name}</>}
     </For>

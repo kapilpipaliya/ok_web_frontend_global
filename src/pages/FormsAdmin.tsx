@@ -1,5 +1,5 @@
 // TODO make default component property applied to
-import {graph, IdAttr, Vertex} from "../lib/graph";
+import {GraphContext, IdAttr, Vertex} from "../lib/graph";
 import {createMemo, For, Match, Switch, useContext} from "solid-js";
 import {A} from "@solidjs/router";
 import {WsContext} from "../utils/ws_events_dispatcher";
@@ -13,6 +13,7 @@ import { GenericField } from "../components/input/Components/GenericFieldCompone
 import {toTitle} from "case-switcher-js";
 
 export const AllForms = () => {
+    const [graph,setGraph] = useContext(GraphContext)!;
     const allForms = () => graph.vertexLabelIdMap["Form"] || [];
 
     return (
@@ -25,7 +26,7 @@ export const AllForms = () => {
 export const SimpleImport = (props: {}) => {
     const {Ws} = useContext(WsContext);
     const config = createStore({} as { record: Record });
-
+const [graph, setGraph] = useContext(GraphContext)!;
     return (
       <>
         <SelectInputField
@@ -51,10 +52,10 @@ perm`,
           }
           // @ts-ignore
           setValue={(attr, vertex, data) =>
-            updateImportRecord(data, config[0].record)
+            updateImportRecord(graph, setGraph,data, config[0].record)
           }
         />
-        <AbstractSingleForm id={"new"} formId={"Import"} config={config} />
+        <AbstractSingleForm id={"new"} formId={"Import"} config={config}  graph={graph}/>
 
         <GenericField
           meta={
@@ -65,7 +66,7 @@ perm`,
                 props: {
                   children: "Import",
                   onClick: () =>
-                    onDataDirectoryImportClick(config[0].record, Ws),
+                    onDataDirectoryImportClick(config[0].record, Ws,graph,setGraph),
                 },
               },
             } as unknown as Vertex
@@ -87,6 +88,7 @@ interface FormGroupPropertiesProps {
 export function FormGroupProperties(props: FormGroupPropertiesProps) {
     // @ts-ignore
     const {Ws} = useContext(WsContext);
+    const [graph, setGraph] = useContext(GraphContext)!;
     return (
         <>
             {/*<div class="dx-field">*/}
@@ -114,7 +116,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                 <For each={props.metaAttributes}>
                     {(metaVertex) => {
                         const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-                        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex));
+                        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex,graph,setGraph));
                         const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
                         const Content = () => <DynamicComponent
                             component={component()}

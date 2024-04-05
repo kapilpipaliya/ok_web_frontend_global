@@ -1,7 +1,7 @@
 import {Icon} from "@iconify-icon/solid";
 import {Accordion} from "@kobalte/core";
 import {useLocation, useNavigate} from "@solidjs/router";
-import {For, Setter, Show} from "solid-js";
+import {For, Setter} from "solid-js";
 import {navbarDataI} from "./Sidebar";
 
 export default function SidebarElement(props: {
@@ -48,8 +48,6 @@ export default function SidebarElement(props: {
           >
 
             {(item) => {
-
-                console.log(item.href)
               return (
                 <li
                   style={{ transition: "all .2s ease-in-out" }}

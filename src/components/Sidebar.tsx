@@ -1,17 +1,17 @@
-import {Icon} from "@iconify-icon/solid";
 import {useLocation} from "@solidjs/router";
 import {Show, createEffect, createMemo, createSignal, createUniqueId, untrack, useContext} from "solid-js";
 import {getSublistRows, getSublistRowsForType, Record} from "../lib/Utils";
 import { getChildVertex } from "../lib/Utils";
 import {findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {Vertex} from "../lib/graph";
+import {GraphContext, GraphInterface, Vertex} from "../lib/graph";
 import treeViewFilter from "../lib/treeViewFilter";
 import {WsContext} from "../utils/ws_events_dispatcher";
-import {LoaderNew, LoaderSimple} from "./LoaderSimple";
+import {LoaderNew} from "./LoaderSimple";
 import SidebarElement from "./SidebarElement";
 import logo from "../../assets/logo/RGB_logo_web.jpg";
-import './css/sideBarSearch.css'; // Import the CSS file
+import './css/sideBarSearch.css';
+import {Store} from "solid-js/store"; // Import the CSS file
 
 
 export interface navbarDataI {
@@ -33,7 +33,7 @@ function getIds(data: navbarDataI[], ids: string[] = []) {
 function Sidebar(props: { isSideBarOpen: boolean }) {
     const location = useLocation();
     const pathname = createMemo(() => location.pathname);
-
+    const [graph, setGraph] = useContext(GraphContext)!;
     const [searchTerm, setSearchTerm] = createSignal("");
     const [openIds, setOpenIds] = createSignal<string[]>([]);
     const [isSearchMode, setIsSearchMode] = createSignal(false);
@@ -41,13 +41,13 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
     const {Ws} = useContext(WsContext);
 
     const navData = createMemo(() => {
-        const nav = findVertexByLabelAndUniqueId("Nav", "name", "main");
+        const nav = findVertexByLabelAndUniqueId("Nav", "name", "main",graph);
         if (!nav) return;
 
         const record = new Record({ws: Ws});
-        record.load(nav.id);
-        untrack(() => record.createMeta(AttrsAdminTableData["Nav"]));
-        return renderNavTreeFromGraph(record, props.isSideBarOpen);
+        record.load(graph,nav.id);
+        untrack(() => record.createMeta(AttrsAdminTableData["Nav"],graph,setGraph));
+        return renderNavTreeFromGraph(record, props.isSideBarOpen,graph);
     });
 
     createEffect(() => {
@@ -140,18 +140,18 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
 
 export default Sidebar;
 
-const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
+const renderNavTreeFromGraph = (record: Record, showNav: boolean,graph: Store<GraphInterface>) => {
     // !!!TODO!!!: This code can we written in the code itself
     const getChildren = (meta: Vertex, vertex: Vertex) => {
         // rome-ignore lint/suspicious/noExplicitAny: <explanation>
         const result = [] as any[];
 
-        const metaVertexes = getSublistRowsForType("MetaAttr", meta);
+        const metaVertexes = getSublistRowsForType(graph,"MetaAttr", meta);
         const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
 
         if (!attrMeta) return result;
 
-        const children = getSublistRows(attrMeta, vertex);
+        const children = getSublistRows(graph,attrMeta, vertex);
 
         for (const child of children) {
             const name = child.P.name;
@@ -161,7 +161,7 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
             const navItem = {} as any;
 
             if (func === "Table") {
-                const collVertex = getChildVertex(["$0Coll"], child).vertex;
+                const collVertex = getChildVertex(graph,["$0Coll"], child,).vertex;
                 // TODO: Check Permission
                 if (collVertex) {
                     // TODO: Check Permission
@@ -169,7 +169,7 @@ const renderNavTreeFromGraph = (record: Record, showNav: boolean) => {
                     navItem.name = name;
                     navItem.href = `/admin/${collVertex.P.name}`;
                 } else {
-                    const formVertex = getChildVertex(["$0Form"], child).vertex;
+                    const formVertex = getChildVertex(graph,["$0Form"], child).vertex;
                     if (formVertex) {
                         // TODO: Check Permission
                         // add to result if its allowed

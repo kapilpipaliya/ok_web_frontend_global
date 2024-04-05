@@ -4,7 +4,7 @@ const CustomButton = (props) => {
     const [local, field] = splitProps(props, [
         "class",
     ]);
-    const [variant, setVariant] = createSignal(props.variant || 'contained');
+    const [variant] = createSignal(props.variant || 'contained');
 
     // Define styles for different variants as CSS classes
     const styles = {

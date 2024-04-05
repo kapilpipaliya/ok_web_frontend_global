@@ -2,7 +2,7 @@ import {For, Show, useContext} from "solid-js";
 import {TextField} from "../../solid-blocks/blocks";
 import CustomButton from "../../solid-blocks/blocks/buttons";
 import {Icon} from "@iconify-icon/solid";
-import {Vertex} from "../../../lib/graph";
+import {GraphContext, Vertex} from "../../../lib/graph";
 import MultiSelect from "../../solid-multiselect";
 import {binops, unops} from "../../../lib/jsep";
 import {createStore} from "solid-js/store";
@@ -68,7 +68,7 @@ export const ExpressionBuilder = (props: {
     // const data =  fetchData(jsep(props.content));
     // console.log(data);
 
-
+    const [graph, setGraph] = useContext(GraphContext)!;
     const [contentList, setContentList] = createStore(state);
     const {Ws} = useContext(WsContext);
     const handleInsert = () => {
@@ -124,7 +124,7 @@ export const ExpressionBuilder = (props: {
         if (props.setValue) {
             props.setValue(finalExpression)
         } else {
-            setValueGlobal(props.txnId!, props.meta, props.data!, finalExpression, Ws, false);
+            setValueGlobal(graph,setGraph,props.txnId!, props.meta, props.data!, finalExpression, Ws, false);
         }
     };
 
@@ -209,7 +209,7 @@ export const ExpressionBuilder = (props: {
                         </For>
                     </div>
                 }
-                footer={(toggle) =>
+                footer={(toggle: any) =>
                     <div class={'flex ai:center jc:end'}>
                         <CustomButton
                             variant={'soft'}

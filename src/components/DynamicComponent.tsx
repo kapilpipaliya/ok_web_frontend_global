@@ -109,7 +109,7 @@ export const DynamicComponent = (props: {
     // component is required, cant refactor it to remove it, because parent component needs it too.
     component: string;
     meta: Vertex;
-    title?: String;
+    title?: string;
     data?: Vertex;
     setValue?: (data: any) => void;
     disabled?: boolean;
@@ -127,7 +127,7 @@ export const DynamicComponent = (props: {
                     <SelectInputField
                         data={props.data}
                         meta={props.meta}
-                        title={props.title}
+                        title={props.title ?? ''}
                         // passed setValue when we have a string value in select field
                         setValue={props.setValue}
                         disabled={props.disabled!}
@@ -161,7 +161,7 @@ export const DynamicComponent = (props: {
                     <GenericInputField
                         data={props.data}
                         meta={props.meta}
-                        title={props.title}
+                        title={props.title ?? ''}
                         txnId={props.txnId!}
                         component={props.component}
                         setValue={props.setValue}

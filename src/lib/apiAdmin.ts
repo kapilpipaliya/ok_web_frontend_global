@@ -2,6 +2,8 @@ import {findVertexByLabelAndUniqueIdWithSkip} from "./Vertex";
 
 import {FormMetaData} from "./Type";
 import {IFormContext} from "./Utils";
+import {GraphContext} from "./graph";
+import {useContext} from "solid-js";
 
 export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
   User: {
@@ -130,9 +132,10 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
               message: "This ID is already taken",
               validationCallback: (options: any) => {
                 const {record} = options.validator.context || {} as IFormContext;
+                const [graph, setGraph] = useContext(GraphContext)!;
 
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Navigation", "id", val, record.vertex.id);
+                return !findVertexByLabelAndUniqueIdWithSkip("Navigation", "id", val, record.vertex.id,graph);
               },
             },
           ],

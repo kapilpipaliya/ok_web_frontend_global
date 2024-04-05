@@ -23,24 +23,23 @@ import {
     Vertex,
     commitTransaction,
     getNewTxnId,
-    graph,
-    transactions
+    transactions, GraphContext
 } from "../lib/graph";
 
 import {Icon} from "@iconify-icon/solid";
-import { GenericField } from "../components/input/Components/GenericFieldComponent";
+import {GenericField} from "../components/input/Components/GenericFieldComponent";
 import {
     collectionNameDisplayExpr,
     selectedValue
 } from "../components/input/SelectInputField";
 import {getFormApiFromForm} from "../lib/Record";
-import { PageContext } from "../lib/Utils";
-import { getSelectionOptions } from "../lib/Utils";
-import { getChildVertexes } from "../lib/Utils";
+import {PageContext} from "../lib/Utils";
+import {getSelectionOptions} from "../lib/Utils";
+import {getChildVertexes} from "../lib/Utils";
 import {deleteVertex, findVertexByLabelAndUniqueId} from "../lib/Vertex";
 import {AttrsTableData} from "../lib/api";
-import { isNumber } from "../lib/CommonUtils/isNumber";
-import { capitalizeFirstLetter } from "../lib/Utils";
+import {isNumber} from "../lib/CommonUtils/isNumber";
+import {capitalizeFirstLetter} from "../lib/Utils";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {AbstractSingleForm} from "../components/DynamicForm";
 import CustomButton from "../components/solid-blocks/blocks/buttons";
@@ -54,8 +53,8 @@ interface DataGridProps {
 
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
-    const form = getFormApiFromForm(props.tableId);
-
+    const [graph, setGraph] = useContext(GraphContext)!;
+    const form = getFormApiFromForm(graph,setGraph,props.tableId);
     let formNew: FormMetaData;
     let collection: string;
 
@@ -76,7 +75,7 @@ export const DataGrid = (props: DataGridProps) => {
     const deleteObject = (id: Id) => {
         if (confirm("are you sure")) {
             const txnId = getNewTxnId();
-            const deleteResult = deleteVertex(txnId, id);
+            const deleteResult = deleteVertex(txnId, id, graph, setGraph);
             // @ts-ignore
             if (deleteResult?.error) {
                 alert(data);
@@ -94,10 +93,10 @@ export const DataGrid = (props: DataGridProps) => {
             {
                 P: props.attribute,
             } as unknown as Vertex,
-            props.info.row.original,
+            props.info.row.original,graph
         );
         if (vertex[0]) {
-            return getSelectionOptions([graph.vertexes[vertex[0]]], props.attribute.props?.displayExpr || collectionNameDisplayExpr(props.attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
+            return getSelectionOptions(graph,setGraph,[graph.vertexes[vertex[0]]], props.attribute.props?.displayExpr || collectionNameDisplayExpr(graph,props.attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
         }
         return "";
     }
@@ -106,12 +105,12 @@ export const DataGrid = (props: DataGridProps) => {
             {
                 P: props.attribute,
             } as unknown as Vertex,
-            props.info.row.original,
+            props.info.row.original,graph
         );
         if (vertex) {
             const textArray = [];
             for (const v of vertex) {
-                const text = getSelectionOptions([graph.vertexes[v]], props.attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
+                const text = getSelectionOptions(graph,setGraph,[graph.vertexes[v]], props.attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
                 textArray.push(text);
             }
             return textArray.join(', ');
@@ -119,7 +118,7 @@ export const DataGrid = (props: DataGridProps) => {
         return "";
     }
     for (const attribute of formNew!.attributes) {
-        
+
         const column = {...attribute} as unknown as ColumnDef<any>;
         if (attribute.component === "Table") continue;
         // if (attribute.props?.skip) continue;
@@ -164,11 +163,12 @@ export const DataGrid = (props: DataGridProps) => {
         {
             return !formNew.isInlineEditable ?
                 <A
-                 href={`/${props.tableId}/${info.row.original.id}`}
-                  replace={true}
-                  class="r:5|5|5|5 p:5"
+                    href={`/${props.tableId}/${info.row.original.id}`}
+                    replace={true}
+                    class="r:5|5|5|5 p:5"
                 >
-                    <CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21} icon="fluent:edit-12-regular"/></CustomButton>
+                    <CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21}
+                                                                            icon="fluent:edit-12-regular"/></CustomButton>
                 </A> :
                 <button onClick={() => {
                     if (rowId() === null) {
@@ -190,7 +190,10 @@ export const DataGrid = (props: DataGridProps) => {
                     }
 
 
-                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21} icon="fluent:edit-12-regular"/></CustomButton></button>
+                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon height={21}
+                                                                                                     width={21}
+                                                                                                     icon="fluent:edit-12-regular"/></CustomButton>
+                </button>
 
         }
     });
@@ -200,9 +203,10 @@ export const DataGrid = (props: DataGridProps) => {
         footer: '',
         cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
                               class="text-fill:red font:semibold	">
-            <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon height={21} width={21} icon="fluent:delete-12-regular"
-                                                                     class="color:red mr:1rem"/></CustomButton>
-            </button>
+            <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon height={21} width={21}
+                                                                             icon="fluent:delete-12-regular"
+                                                                             class="color:red mr:1rem"/></CustomButton>
+        </button>
     });
 
     if (!collection) {
@@ -222,7 +226,7 @@ export const DataGrid = (props: DataGridProps) => {
     // }
     const [_] = splitProps(props, ["tableId"]);
 
-    const [data] = createSignal((graph.vertexLabelIdMap[coll] || []).map(vertexId => graph.vertexes[vertexId]))
+    const [data] = createSignal((graph.vertexLabelIdMap[coll] || []).map((vertexId: any) => graph.vertexes[vertexId]))
 
     const table = createSolidTable({
         get data() {
@@ -242,10 +246,10 @@ export const DataGrid = (props: DataGridProps) => {
                         {headerGroup => (
                             <tr class="p:10 text:center">
                                 <For each={headerGroup.headers}>
-                                    {(header,index) => (
+                                    {(header) => (
 
-                                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit")||header.id.includes("Delete")?"2%":"2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
-                                             {header.isPlaceholder
+                                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit") || header.id.includes("Delete") ? "2%" : "2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
+                                            {header.isPlaceholder
                                                 ? null
                                                 : flexRender(
                                                     header.column.columnDef.header,
@@ -263,7 +267,7 @@ export const DataGrid = (props: DataGridProps) => {
                     <tbody class="r:5|5|5|5 rounded-md ">
 
                     <For each={table.getRowModel().rows}>
-                        {(row,index) => (
+                        {(row) => (
                             <tr
                                 id={`grid${row.id}`}
                                 class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>
@@ -295,6 +299,7 @@ export const DataGrid = (props: DataGridProps) => {
 
                                     <AbstractSingleForm
                                         formId={props.tableId}
+                                        graph={graph}
                                         id={rowId() as unknown as string}
                                         // @ts-ignore
                                         config={{}}
@@ -346,8 +351,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 props: {
                                     onClick: () => navigate("new"),
                                     variant: "soft",
-                                    class:'p:7px',
-                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22} />,
+                                    class: 'p:7px',
+                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22}/>,
                                     children: "Add New",
                                 },
                             },
@@ -364,34 +369,38 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 
 export const TableDashboard = () => {
     const params = useParams();
-    const dashboard = findVertexByLabelAndUniqueId('Dashboard', IdAttr, params.name);
+    const [graph,setGraph] = useContext(GraphContext)!;
+    const dashboard = findVertexByLabelAndUniqueId('Dashboard', IdAttr, params.name, graph);
     if (!dashboard) {
         return "No Dashboard Found";
     }
-    const allFormTableLayouts = getChildVertexes(['$0Form'], [dashboard]).vertexes || [];
-    const allCollTableLayouts = getChildVertexes(['$0Coll'], [dashboard]).vertexes || [];
+    const allFormTableLayouts =
+      getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
+    const allCollTableLayouts =
+      getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
 
     const allTableLayouts = () => [...new Set([...allCollTableLayouts, ...allFormTableLayouts])];
     return (
 
         <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
-          <For each={allTableLayouts()}>
-            {(tableLayout) => (
-              <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
-                <h3 class="f:18@md font:semibold"></h3>
-                <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
-                  <A href={`/${tableLayout.P[IdAttr]}`}>
-                    {tableLayout.P.title || tableLayout.P[IdAttr]}
-                  </A>
-                </p>
-              </div>
-            )}
-          </For>
+            <For each={allTableLayouts()}>
+                {(tableLayout) => (
+                    <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
+                        <h3 class="f:18@md font:semibold"></h3>
+                        <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
+                            <A href={`/${tableLayout.P[IdAttr]}`}>
+                                {tableLayout.P.title || tableLayout.P[IdAttr]}
+                            </A>
+                        </p>
+                    </div>
+                )}
+            </For>
         </div>
     );
 };
 
 export const AllDashboards = () => {
+    const [graph,setGraph] = useContext(GraphContext)!;
     const vertexes = () => graph.vertexLabelIdMap["Dashboard"] || [];
     return (
         <div class="">

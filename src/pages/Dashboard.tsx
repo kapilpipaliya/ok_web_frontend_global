@@ -1,16 +1,15 @@
-import {A, useLocation, useNavigate} from "@solidjs/router";
+import {A, useLocation} from "@solidjs/router";
 import {get, set} from "idb-keyval";
 import {
     createEffect,
     createSignal,
     For,
     JSX,
-    lazy, onCleanup,
-    onMount,
+    lazy,
     Show,
     useContext,
 } from "solid-js";
-import {getNewGraphId, graph} from "../lib/graph";
+import {getNewGraphId, GraphContext} from "../lib/graph";
 import Dismiss from "solid-dismiss";
 import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
@@ -24,7 +23,6 @@ import '../components/css/modal.css'
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
-const BackupRestore = lazy(() => import("./BackupRestore"));
 // @ts-ignore
 const GraphViewPage = lazy(() => import("./GraphViewPage"));
 
@@ -55,10 +53,11 @@ const AlertDisplay = () => {
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = (props: { children?: JSX.Element }) => {
+    const [graph, setGraph] = useContext(GraphContext)!;
     const vertexId = getNewGraphId();
     addNewVertex(
         0,
-        newVertex(vertexId, ["MainNavBarTitle"], {class: `bb:1${border}`})
+        newVertex(vertexId, ["MainNavBarTitle"], {class: `bb:1${border}`}), graph, setGraph
     );
 
     const location = useLocation();
@@ -96,7 +95,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             events: {
                                 setSideBarOpen,
                                 setTitle: (title: string) =>
-                                    mergeVertexProperties(0, vertexId, {title}),
+                                    mergeVertexProperties(0, vertexId,graph, setGraph ,{title}),
                             },
                         }}
                     >
@@ -131,16 +130,13 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
 
 const DropdownMenu = (props: { isLoggedIn: boolean }) => {
     const [isOpen, setIsOpen] = createSignal(false);
-    let btnEl;
-    let dropdownContainerEl;
+    let btnEl : any;
+    let dropdownContainerEl : any;
 
     const handleOpen = () => {
         setIsOpen(true);
     };
     const handleClose = () => {
-        setIsOpen(false);
-    };
-    const handleLogout = () => {
         setIsOpen(false);
     };
 
@@ -209,7 +205,8 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                         isOpen() ? "auto" : "none"
                     }; transition: opacity 0.2s ease-in-out; width: 100%; right: -15px`} // Adjust width here
                 >
-                    <div style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;" onClick={handleClose}></div>
+                    <div style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
+                         onClick={handleClose}></div>
                     <ul style="list-style-type: none; padding: 0; margin: 0; position:relative;">
                         {props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
                             <div>

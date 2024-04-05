@@ -43,7 +43,7 @@ export const Avatar: Component<AvatarProps> = (props) => {
         {...divProps}
       >
         <img src={local.img} alt={local.name} />
-        <span aria-hidden="true">{initials}</span>
+        <span aria-hidden="true">{initials()}</span>
         {local.children}
       </div>
     );
@@ -57,7 +57,7 @@ export const Avatar: Component<AvatarProps> = (props) => {
         data-random={getRandom()}
         {...divProps}
       >
-        {initials}
+        {initials()}
         {local.children}
       </div>
     );

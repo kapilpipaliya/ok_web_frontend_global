@@ -1,8 +1,10 @@
-import { createEffect, createSignal, Show } from "solid-js";
-import { graph } from "../lib/graph";
+import {createEffect, createSignal, Show, useContext} from "solid-js";
+
 import { GraphView } from "../components/GraphView";
+import {GraphContext} from "../lib/graph";
 
 export const GraphViewPage = () => {
+    const [graph,setGraph] = useContext(GraphContext)!;
  const [load, setLoad] = createSignal(false);
  createEffect(() => {
   if (graph.vertexes && graph.edges) {

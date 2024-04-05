@@ -1,5 +1,5 @@
 import {Accessor, createContext, createSignal, Setter, Show, useContext} from "solid-js";
-import {Id, Vertex} from "../../../lib/graph";
+import {GraphContext, Id, Vertex} from "../../../lib/graph";
 import {getChildVertexes} from "../../../lib/Utils";
 import {Icon} from "@iconify-icon/solid";
 
@@ -19,11 +19,11 @@ const toggleExpansion = (id: Id) => {
 
 const TreeView = (props: { title: string, meta: Vertex, children: any }) => {
     let parentValues = useContext(treeContext);
-
+    const [graph, setGraph] = useContext(GraphContext)!;
     // Recursive function to render tree nodes
     const RenderTreeNode = (TreeItemProps: any) => {
         const isExpanded = () => expandedItems().has(props.meta.id);
-        const childrenLength = () => getChildVertexes(["Attr"], [props.meta]).vertexes?.length || 0;
+        const childrenLength = () => getChildVertexes(graph,["Attr"], [props.meta]).vertexes?.length || 0;
         return (
             <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
           <span class={`display:inline-flex`}>

@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 
-const ResizableContainer = (props) => {
+const ResizableContainer = (props: any) => {
     const [width, setWidth] = createSignal(500);
     const [height, setHeight] = createSignal(800);
 

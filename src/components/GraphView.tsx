@@ -39,12 +39,10 @@ export const GraphView = (props: GraphViewProps) => {
 
     // @ts-ignore
     orb.events.on(Orb.OrbEventType.NODE_CLICK, (event) => {
-      console.log("Event: node-click", event);
       setJson({ ...event.node.data });
     });
     // @ts-ignore
     orb.events.on(Orb.OrbEventType.EDGE_CLICK, (event) => {
-      console.log("Event: edge-click", event);
       setJson({ ...event.edge.data });
     });
   };

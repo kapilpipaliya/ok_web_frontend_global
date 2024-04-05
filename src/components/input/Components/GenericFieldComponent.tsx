@@ -1,12 +1,9 @@
 import {
-    createComputed,
-    createEffect,
-    createMemo, createRenderEffect, createSelector,
+    createMemo,
     createSignal,
     For,
-    getOwner,
     JSXElement,
-    Match, on,
+    Match,
     onCleanup,
     Show,
     Switch,
@@ -16,7 +13,7 @@ import {Icon} from "@iconify-icon/solid";
 import {A, useNavigate} from "@solidjs/router";
 import {Dynamic} from "solid-js/web";
 import {
-    commitTxn,
+    commitTxn, GraphContext,
     IdAttr,
     revertTransaction,
     Vertex,
@@ -24,7 +21,6 @@ import {
 import {
     Record,
     FormContext,
-    PageContext,
     getSelectionOptions,
     getValueFromVertexOrKey, getChildVertexes,
 } from "../../../lib/Utils";
@@ -37,12 +33,8 @@ import {
     Breadcrumbs,
     Progress,
     Spinner,
-    Tab,
-    TabContainer,
-    TabList,
     Tabs,
 } from "../../solid-blocks/blocks";
-import {getParentVertexValue} from "../../../lib/Traverse";
 import {
     PageRenderContext,
     PageRenderUtils,
@@ -53,9 +45,7 @@ import {
     PageView,
 } from "../GenaricField";
 import {getTextColumnValue} from "./Utils";
-import {componentDrag, hoverId, selectedId, setSelectedId} from "../../pageStore";
 import CustomButton from "../../solid-blocks/blocks/buttons";
-import {TableHeader, TableGroup, TableRow} from "../../solid-blocks/blocks/table";
 import TreeView from "../../solid-blocks/blocks/treeview";
 import {Collapsible} from "../../solid-blocks/blocks/collapsible";
 
@@ -79,15 +69,13 @@ export function GenericField(
 ) {
     // @ts-ignore
     const formContext = useContext(FormContext);
-    let {events} = useContext(PageContext);
+    const [graph, setGraph] = useContext(GraphContext)!;
     const parentItems = useContext(PageRenderContext);
     const component = createMemo(() => props.component || props.meta.P.component);
     // @ts-ignore
     const parentComponent = createMemo(() => {
-        return PageRenderUtils.getComponent(getLastItem(parentItems, 2))?.P[IdAttr];
+        return PageRenderUtils.getComponent(graph,getLastItem(parentItems, 2))?.P[IdAttr];
     });
-
-    const outerOwner = getOwner();
 
     const Form = () => {
         const {Ws} = useContext(WsContext);
@@ -95,17 +83,17 @@ export function GenericField(
 
         const record = new Record({ws: Ws});
         const collectionVertex = createMemo(() => {
-            return PageRenderUtils.getCollection(getLastItem(parentItems, 1));
+            return PageRenderUtils.getCollection(graph,getLastItem(parentItems, 1));
         });
         if (!collectionVertex()) return "No Collection Found";
         // const dataVertex =
         if (!props.data?.id) {
             // create new vertex from Collection vertex
-            const createResult = record.create(collectionVertex()!);
+            const createResult = record.create(graph,setGraph,collectionVertex()!);
             if (createResult.error) return createResult.error;
         } else {
             // load data vertex
-            const loadResult = record.load(props.data.id);
+            const loadResult = record.load(graph,props.data.id);
             if (loadResult.error) return loadResult.error;
         }
 
@@ -214,9 +202,9 @@ export function GenericField(
                     <For
                         each={
                             props.data ||
-                            getSelectionOptions(
+                            getSelectionOptions(graph,setGraph,
                                 [props.meta],
-                                `g:'${PageRenderUtils.getCollection(props.meta)!}'`
+                                `g:'${PageRenderUtils.getCollection(graph,props.meta)!}'`
                             ).vertexes
                         }
                     >
@@ -236,13 +224,13 @@ export function GenericField(
                 <Match when={component() === "Text"}>
                     <Show
                         when={props.meta.P.props?.as}
-                        fallback={getText(props.meta.P.props?.text, repeaterContext)}
+                        fallback={getText(graph,setGraph,props.meta.P.props?.text, repeaterContext)}
                     >
                         <Dynamic
                             component={props.meta.P.props?.as}
                             class={getValueFromVertexOrKey(props.meta.P.props, "class")}
                         >
-                            {getText(props.meta.P.props?.text, repeaterContext)}
+                            {getText(graph,setGraph,props.meta.P.props?.text, repeaterContext)}
                             {props.children}
                             <PageItemRender metaVertex={props.meta}/>
                         </Dynamic>
@@ -250,7 +238,7 @@ export function GenericField(
                 </Match>
                 <Match when={component() === "A"}>
                     <Switch>
-                        <Match when={PageRenderUtils.getDataVertex(props.meta)}>
+                        <Match when={PageRenderUtils.getDataVertex(graph,props.meta)}>
                             {(vertex) => (
                                 <A
 
@@ -260,7 +248,7 @@ export function GenericField(
                                 >
                                     <Show
                                         when={!props.meta.P.props?.text}
-                                        fallback={getText(
+                                        fallback={getText(graph,setGraph,
                                             props.meta.P.props?.text,
                                             repeaterContext
                                         )}
@@ -275,12 +263,12 @@ export function GenericField(
                             <A
 
                                 {...props.meta.P.props}
-                                href={getUrl(props.meta.P.props.href, repeaterContext)}
+                                href={getUrl(graph,setGraph,props.meta.P.props.href, repeaterContext)}
                                 draggable
                             >
                                 <Show
                                     when={!props.meta.P.props?.text}
-                                    fallback={getText(props.meta.P.props?.text, repeaterContext)}
+                                    fallback={getText(graph,setGraph,props.meta.P.props?.text, repeaterContext)}
                                 >
                                     {props.children}
                                     <PageItemRender metaVertex={props.meta}/>
@@ -304,7 +292,7 @@ export function GenericField(
                     <img
                         loading="lazy"
                         {...props.meta.P.props}
-                        src={getText(props.meta.P.props?.src, repeaterContext)}
+                        src={getText(graph,setGraph,props.meta.P.props?.src, repeaterContext)}
                         draggable={true}
                         alt={'img'}/>
                 </Match>
@@ -336,7 +324,7 @@ export function GenericField(
                         {...getAttrs(props.meta)}
                         class={getValueFromVertexOrKey(props.meta.P.props, "class")}
                     >
-                        {getText(props.meta.P.props?.text, repeaterContext)}
+                        {getText(graph,setGraph,props.meta.P.props?.text, repeaterContext)}
                     </Dynamic>
                 </Match>
                 <Match when={component() === "Button"}>
@@ -348,7 +336,7 @@ export function GenericField(
                     </table>
                 </Match>
                 <Match
-                    when={props.component === "TableHeader" && getChildVertexes(["Attr"], [props.meta]).vertexes?.length}>
+                    when={props.component === "TableHeader" && getChildVertexes(graph,["Attr"], [props.meta]).vertexes?.length}>
                     <thead class={'r:5|5|5|5'}>
                     <tr class={'p:10 text:center h:5'}>
                         <PageItemRender metaVertex={props.meta}/>

@@ -4,7 +4,7 @@ import {createStore} from "solid-js/store";
 import {Alert} from "../components/ComponentType";
 import {AlertMessageContext} from "../contexts/AlertMessageContext";
 import { Record } from "../lib/Utils";
-import {resetDatabaseLogin, revertTransaction, setGraph} from "../lib/graph";
+import {GraphContext, resetDatabaseLogin, revertTransaction} from "../lib/graph";
 import {isAdmin} from "../signals/common";
 import {WSEvent, WsContext} from "../utils/ws_events_dispatcher";
 import {LoginPage} from "../components/staticPages/LoginPage";
@@ -12,6 +12,7 @@ import {Register} from "../components/staticPages/Registration";
 
 export const Login = (props: {}) => {
     const {setAlert} = useContext(AlertMessageContext);
+    const [graph,setGraph] = useContext(GraphContext)!;
     const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
     const event = ["post", "login", 0] as WSEvent;
@@ -29,7 +30,7 @@ export const Login = (props: {}) => {
             revertTransaction(config[0].record.txnId);
             // because we are doing sync processing in websocket class,
             // this will not be a problem
-            resetDatabaseLogin();
+            resetDatabaseLogin(setGraph);
             Ws.trigger([
                 [
                     ["get", "sync", 0],
@@ -60,6 +61,7 @@ export const Login = (props: {}) => {
 export const Logout = (props: {}) => {
     const {setAlert} = useContext(AlertMessageContext);
     const {Ws} = useContext(WsContext);
+    const [graph, setGraph] = useContext(GraphContext)!;
     const navigate = useNavigate();
     const event = ["post", "logout", 0] as WSEvent;
 
@@ -70,7 +72,7 @@ export const Logout = (props: {}) => {
             setGraph("member", null);
             // because we are doing sync processing in websocket class,
             // this will not be a problem
-            resetDatabaseLogin();
+            resetDatabaseLogin(setGraph);
             Ws.trigger([
                 [
                     ["get", "sync", 0],

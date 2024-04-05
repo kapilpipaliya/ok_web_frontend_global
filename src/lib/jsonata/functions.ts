@@ -3,7 +3,7 @@
  *   Project name: JSONata
  *   This project is licensed under the MIT License, see LICENSE
  */
-
+// @ts-nocheck
 import {isNumeric, isArrayOfStrings, isArrayOfNumbers, createSequence, isSequence, isFunction, isLambda, isPromise, getFunctionArity, isDeepEqual as deepEquals, stringToArray} from './utils';
 
     /**

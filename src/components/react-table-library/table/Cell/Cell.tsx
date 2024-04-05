@@ -2,7 +2,7 @@ import * as React from 'react';
 import cs from 'clsx';
 /** @jsxRuntime classic */
 /** @jsx jsx */
-import { css, jsx } from '@emotion/react';
+import { css } from '@emotion/react';
 
 import { CellContainer } from '@table-library/react-table-library/common/components/Cell';
 import { ThemeContext } from '@table-library/react-table-library/common/context/Theme';

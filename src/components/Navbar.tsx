@@ -1,9 +1,8 @@
 import {Icon} from "@iconify-icon/solid";
-import {JSXElement, Match, Show, Switch} from "solid-js";
+import {JSXElement,  Show} from "solid-js";
 import {DisplayComponentProps} from "./ComponentType";
 import {useNavigate} from "@solidjs/router";
 import './css/sideBarSearch.css';
-import {currentTheme, onChangeTheme} from "./css/Theme";
 import './css/table.css'
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {

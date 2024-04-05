@@ -1,5 +1,6 @@
+
 import { useNavigate, useParams } from "@solidjs/router";
-import { Show, createSignal, createUniqueId, onCleanup } from "solid-js";
+import { Show, createSignal, createUniqueId, useContext } from "solid-js";
 import { PageItemRender } from "../components/input/GenaricField";
 import { getExportCode } from "../lib/Record";
 import {getSublistRows, getSublistRowsForType, Record} from "../lib/Utils";
@@ -11,7 +12,7 @@ import { stringify } from "yaml";
 import { AbstractSingleForm } from "../components/DynamicForm";
 import { importRecordWithYAMLSchema } from "../lib/Import";
 import { getChildVertex } from "../lib/Utils";
-import { Vertex } from "../lib/graph";
+import { GraphContext, Vertex } from "../lib/graph";
 import CustomButton from "../components/solid-blocks/blocks/buttons";
 
 /*
@@ -24,6 +25,7 @@ export const PageDesigner = () => {
   const params = useParams();
   const config = createStore({} as { record: Record });
   const [count, setCount] = createSignal(1);
+  const [graph, setGraph] = useContext(GraphContext)!;
   const rerender = () => {
     setCount((prev) => prev + 1);
   };
@@ -35,6 +37,7 @@ export const PageDesigner = () => {
       <div class="border:1|solid|blue-60 p:10 m:5">
         <AbstractSingleForm
           formId={"Page"}
+          graph={graph}
           id={params.id}
           config={config}
           // TODO: add dry option
@@ -61,6 +64,7 @@ Instead of this use Page Builder
  */
 export const NavDesigner = () => {
   const params = useParams();
+  const [graph, setGraph] = useContext(GraphContext)!;
   const config = createStore({} as { record: Record });
   const [count, setCount] = createSignal(1);
   const [previewCode, setPreviewCode] = createSignal(false);
@@ -69,19 +73,20 @@ export const NavDesigner = () => {
     setCount((prev) => prev + 1);
   };
   const PreviewCode = () => {
-    return <pre>{stringify(getExportCode(config[0].record))}</pre>;
+    return <pre>{stringify(getExportCode(graph,config[0].record))}</pre>;
   };
 
   const [importCode, setImportCode] = createSignal("");
 
   const importCodeFn = () => {
-    importRecordWithYAMLSchema(importCode(), config[0].record);
+    importRecordWithYAMLSchema(importCode(), config[0].record,graph,setGraph);
   };
   return (
     <div class="flex">
       <div class="border:1|solid|blue-60 p:10 m:5">
         <AbstractSingleForm
           formId={"Nav"}
+          graph={graph}
           id={params.id}
           config={config}
           // TODO: add dry option
@@ -113,17 +118,22 @@ export const NavDesigner = () => {
   );
 };
 
-export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navigate: Navigator) => {
+export const renderNavTreeFromGraph = (
+  el: HTMLDivElement,
+  record: Record,
+  navigate: Navigator,
+  graph
+: any) => {
   // !!!TODO!!!: This code can we written in the code itself
   const getChildren = (meta: Vertex, vertex: Vertex) => {
     const result = [];
 
-    const metaVertexes = getSublistRowsForType("MetaAttr", meta);
+    const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
 
     if (!attrMeta) return result;
 
-    const children = getSublistRows(attrMeta, vertex);
+    const children = getSublistRows(graph,attrMeta, vertex);
 
     for (const child of children) {
       const name = child.P.name;
@@ -132,28 +142,28 @@ export const renderNavTreeFromGraph = (el: HTMLDivElement, record: Record, navig
       const navItem = {};
 
       if (func === "Table") {
-        const collVertex = getChildVertex(["$0Coll"], child).vertex;
+        const collVertex = getChildVertex(graph,["$0Coll"], child, ).vertex;
         // TODO: Check Permission
         if (collVertex) {
           // TODO: Check Permission
           // add to result if its allowed
           navItem.name = name;
-          navItem.href = ("") + `/admin/${collVertex.P.name}`;
+          navItem.href = "" + `/admin/${collVertex.P.name}`;
         } else {
-          const formVertex = getChildVertex(["$0Form"], child).vertex;
+          const formVertex = getChildVertex(graph,["$0Form"], child, ).vertex;
           if (formVertex) {
             // TODO: Check Permission
             // add to result if its allowed
             navItem.name = name;
             navItem.href = `${""}/admin/${formVertex.P.name}`;
           } else {
-            const url = ("") + child.P.url;
+            const url = "" + child.P.url;
             navItem.name = name;
             navItem.href = url;
           }
         }
       } else {
-        const url = ("") + child.P.url;
+        const url = "" + child.P.url;
         navItem.name = name;
         navItem.href = url;
       }

@@ -1,6 +1,6 @@
 import jsep from 'jsep';
 //import { eval as eval1} from 'expression-eval';
-import {graph, IdAttr, Vertex} from "./graph";
+import { IdAttr, Vertex} from "./graph";
 import {path} from "rambda";
 import {calculateFilter, getTextValue} from "./Traverse";
 import {findVertexIdsByLabel} from "./Vertex";
@@ -130,7 +130,7 @@ export function evaluate(_node: jsep.Expression, context: object) {
             return evaluateArray(node.elements, context);
 
         case 'BinaryExpression':
-            return binops[node.operator](evaluate(node.left, context), evaluate(node.right, context));
+            return binops[node.operator](evaluate(node.left, context), evaluate(node.right, context), context);
 
         case 'CallExpression':
             let caller, fn, assign;
@@ -162,7 +162,7 @@ export function evaluate(_node: jsep.Expression, context: object) {
             } else if (node.operator === '&&') {
                 return evaluate(node.left, context) && evaluate(node.right, context);
             }
-            return binops[node.operator](evaluate(node.left, context), evaluate(node.right, context));
+            return binops[node.operator](evaluate(node.left, context), evaluate(node.right, context),context);
 
         case 'MemberExpression':
             return evaluateMember(node, context)[1];
@@ -195,7 +195,7 @@ export async function evalAsync(_node: jsep.Expression, context: object) {
                 evalAsync(node.left, context),
                 evalAsync(node.right, context)
             ]);
-            return binops[node.operator](left, right);
+            return binops[node.operator](left, right,context);
         }
 
         case 'CallExpression': {
@@ -245,7 +245,7 @@ export async function evalAsync(_node: jsep.Expression, context: object) {
                 evalAsync(node.right, context)
             ]);
 
-            return binops[node.operator](left, right);
+            return binops[node.operator](left, right,context);
         }
 
         case 'MemberExpression':
@@ -305,7 +305,7 @@ jsep.addUnaryOp("ids:");
 jsep.addUnaryOp("T:");
 jsep.addUnaryOp("::");
 
-binops ['->'] = (vertexes, edgeType) => {
+binops ['->'] = (vertexes, edgeType, context) => {
     if(!vertexes) return;
     const stepVertexes = new Map<number, Vertex>();
 
@@ -322,11 +322,10 @@ binops ['->'] = (vertexes, edgeType) => {
                 continue;
             }
         }
-
         for (const edgeId of edgeIds) {
-            const edge = graph.edges[edgeId];
+            const edge = context.graph.edges[edgeId];
             if (edge) {
-                const newVertex = graph.vertexes[edge.E];
+                const newVertex = context.graph.vertexes[edge.E];
                 if (newVertex) {
                     stepVertexes.set(newVertex.id, newVertex);
                 } else {
@@ -339,7 +338,7 @@ binops ['->'] = (vertexes, edgeType) => {
     }
     return Array.from(stepVertexes.values());
 }
-binops ['<-'] = (vertexes, edgeType) => {
+binops ['<-'] = (vertexes, edgeType, context) => {
     if(!vertexes) return;
     const stepVertexes = new Map<number, Vertex>();
 
@@ -352,9 +351,9 @@ binops ['<-'] = (vertexes, edgeType) => {
         }
 
         for (const edgeId of edgeIds) {
-            const edge = graph.edges[edgeId];
+            const edge = context.graph.edges[edgeId];
             if (edge) {
-                const newVertex = graph.vertexes[edge.S];
+                const newVertex = context.graph.vertexes[edge.S];
                 if (newVertex) {
                     stepVertexes.set(newVertex.id, newVertex);
                 } else {
@@ -371,12 +370,12 @@ binops ['++'] = (vertexes1, vertexes2) => {
     return [...(Array.isArray(vertexes1) ? vertexes1 : []), ...(Array.isArray(vertexes2) ? vertexes2 : [])];
 }
 // Filter Operator
-binops [':-'] = (vertexes1, projection) => {
+binops [':-'] = (vertexes1, projection,context) => {
     if (!vertexes1) {
         return;
     }
     try {
-        return jsonata(projection).evaluate(vertexes1);
+        return jsonata(projection).evaluate(vertexes1,context);
     } catch (e) {
         return;
     }
@@ -406,7 +405,7 @@ unops['->'] = (collection, context) => {
         if (vertex) return [vertex];
         return [];
     }
-    return binops ['->'](context.vertexes, collection);
+    return binops ['->'](context.vertexes, collection,context);
 }
 unops['<-'] = (collection, context) => {
     if (/^\$[1-9]+[0-9]*$/.test(collection)) {
@@ -415,7 +414,7 @@ unops['<-'] = (collection, context) => {
         if (vertex) return [vertex];
         return [];
     }
-    return binops ['<-'](context.vertexes, collection);
+    return binops ['<-'](context.vertexes, collection,context);
 }
 unops['json:'] = (string) => {
     try {
@@ -440,31 +439,32 @@ unops['json:'] = (string) => {
 //     return idValue;
 // }
 
-unops['g:'] = (edgeType) => {
+unops['g:'] = (edgeType,context) => {
     const [type, filter, isMultiple] = calculateFilter(edgeType)
     if (filter) {
-        const vertexIds = findVertexIdsByLabel(type);
+        const vertexIds = findVertexIdsByLabel(context.graph,type);
         const filteredVertexes = [];
         for (const vertexId of vertexIds) {
-            if (graph.vertexes[vertexId].P[IdAttr] === filter) {
-                filteredVertexes.push(graph.vertexes[vertexId]);
+            if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
+                filteredVertexes.push(context.graph.vertexes[vertexId]);
             }
         }
         return filteredVertexes;
     } else {
-        return findVertexIdsByLabel(edgeType).map((id) => graph.vertexes[id]);
+        return findVertexIdsByLabel(context.graph,edgeType).map((id) => context.graph.vertexes[id]);
     }
 }
-unops['ids:'] = (edgeType: string | number | string[] | Vertex[]) => {
+
+unops['ids:'] = (edgeType: string | number | string[] | Vertex[],context) => {
     if ( typeof edgeType === "number") {
-        return graph.vertexes[edgeType]
+        return context.graph.vertexes[edgeType]
     } else if (typeof edgeType === "string") {
-        return edgeType.split(',').map(id => graph.vertexes[id]).filter(x => x);
+        return edgeType.split(',').map(id => context.graph.vertexes[id]).filter(x => x);
     } else if (Array.isArray(edgeType)) {
         if (edgeType.length === 0) {
             return [];
         } else if (typeof edgeType[0] === "string" || typeof edgeType[0] === "number") {
-            return edgeType.map(id => graph.vertexes[id]).filter(x => x);
+            return edgeType.map(id => context.graph.vertexes[id]).filter(x => x);
         }
     }
 }

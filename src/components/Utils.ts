@@ -1,5 +1,6 @@
-import {Vertex} from "../lib/graph";
+import {GraphInterface, Vertex} from "../lib/graph";
 import {getChildVertex} from "../lib/Utils";
+import {Store} from "solid-js/store";
 
 export const iconMap = {
   TextInput: "streamline:input-box",
@@ -43,7 +44,7 @@ export const iconMap = {
   Collapsible: "lets-icons:collapse",
 };
 
-export const nameExpr = (v: Vertex) => {
-  const component = getChildVertex(["$0Comp"], v).vertex?.P.name;
+export const nameExpr = (v: Vertex,graph: Store<GraphInterface>) => {
+  const component = getChildVertex(graph,["$0Comp"], v).vertex?.P.name;
   return `${v.P.name}${component ? ` (${component})` : ""}`;
 };
