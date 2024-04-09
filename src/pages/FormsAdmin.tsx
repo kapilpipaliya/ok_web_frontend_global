@@ -4,16 +4,18 @@ import {createMemo, For, Match, Switch, useContext} from "solid-js";
 import {A} from "@solidjs/router";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {createStore} from "solid-js/store";
-import { Record } from "../lib/Utils";
+import {Record} from "../lib/Utils";
 import {SelectInputField} from "../components/input/SelectInputField";
 import {onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
 import {AbstractSingleForm, getComponentForCollRow} from "../components/DynamicForm";
-import { DynamicComponent } from "../components/DynamicComponent";
-import { GenericField } from "../components/input/Components/GenericFieldComponent";
+import {DynamicComponent} from "../components/DynamicComponent";
+import {GenericField} from "../components/input/Components/GenericFieldComponent";
 import {toTitle} from "case-switcher-js";
+import {Tab, TabContainer, TabList} from "../components/solid-blocks/blocks";
+import {ClassDesignTab} from "../components/drag-drop-pages/classDesignTab";
 
 export const AllForms = () => {
-    const [graph,setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useContext(GraphContext)!;
     const allForms = () => graph.vertexLabelIdMap["Form"] || [];
 
     return (
@@ -26,19 +28,19 @@ export const AllForms = () => {
 export const SimpleImport = (props: {}) => {
     const {Ws} = useContext(WsContext);
     const config = createStore({} as { record: Record });
-const [graph, setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useContext(GraphContext)!;
     return (
-      <>
-        <SelectInputField
-          component={"SelectBox"}
-          data={{ P: {} } as Vertex}
-          meta={
-            {
-              P: {
-                [IdAttr]: "import",
-                props: {
-                  stringValue: true,
-                  items: `dataType
+        <>
+            <SelectInputField
+                component={"SelectBox"}
+                data={{P: {}} as Vertex}
+                meta={
+                    {
+                        P: {
+                            [IdAttr]: "import",
+                            props: {
+                                stringValue: true,
+                                items: `dataType
 component
 dataTypeDefault
 lookup
@@ -46,33 +48,33 @@ attribute
 user
 role
 perm`,
-                },
-              },
-            } as unknown as Vertex
-          }
-          // @ts-ignore
-          setValue={(attr, vertex, data) =>
-            updateImportRecord(graph, setGraph,data, config[0].record)
-          }
-        />
-        <AbstractSingleForm id={"new"} formId={"Import"} config={config}  graph={graph}/>
+                            },
+                        },
+                    } as unknown as Vertex
+                }
+                // @ts-ignore
+                setValue={(attr, vertex, data) =>
+                    updateImportRecord(graph, setGraph, data, config[0].record)
+                }
+            />
+            <AbstractSingleForm id={"new"} formId={"Import"} config={config} graph={graph}/>
 
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-                [IdAttr]: "meta",
-                props: {
-                  children: "Import",
-                  onClick: () =>
-                    onDataDirectoryImportClick(config[0].record, Ws,graph,setGraph),
-                },
-              },
-            } as unknown as Vertex
-          }
-        />
-      </>
+            <GenericField
+                meta={
+                    {
+                        P: {
+                            component: "Button",
+                            [IdAttr]: "meta",
+                            props: {
+                                children: "Import",
+                                onClick: () =>
+                                    onDataDirectoryImportClick(config[0].record, Ws, graph, setGraph),
+                            },
+                        },
+                    } as unknown as Vertex
+                }
+            />
+        </>
     );
 }; // group of the fields
 interface FormGroupPropertiesProps {
@@ -116,7 +118,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                 <For each={props.metaAttributes}>
                     {(metaVertex) => {
                         const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-                        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex,graph,setGraph));
+                        const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex, graph, setGraph));
                         const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
                         const Content = () => <DynamicComponent
                             component={component()}
@@ -136,6 +138,13 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                                 </Match>
                                 <Match when={component() === "CollectionOption"}>
                                     <Content/>
+                                </Match>
+                                <Match when={metaVertex.P.name === 'class'}>
+                                    <ClassDesignTab component={component()}
+                                                    meta={metaVertex}
+                                                    data={props.vertex}
+                                                    setValue={(data) => props.setValue(metaVertex, data)}
+                                                    txnId={props.txnId}/>
                                 </Match>
                                 <Match when={props.selectedLayout}>
                                     <tr>
@@ -170,6 +179,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                 </For>
                 </tbody>
             </table>
+
         </>
     );
 }

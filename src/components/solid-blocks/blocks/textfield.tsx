@@ -57,7 +57,6 @@ export const TextField: Component<TextFieldProps> = (props) => {
         "onInput",
         "children",
         "setValue",
-        'class',
         'placeholder',
     ]);
     const mergedClassList = mergeProps({textfield: true}, local.classList ?? {});
@@ -77,7 +76,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
                             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
                             type="number"
                             placeholder={local.placeholder ? local.placeholder : ""}
-                            class={`${local.class ?? ""} global-style textInput`}
+                            class={`${fieldProps.class ?? ""} global-style textInput`}
                             onInput={(ev) => {
                                 runEvent(ev, local.onInput);
                                 local.setValue?.(ev.currentTarget.value);
@@ -102,7 +101,6 @@ export const TextField: Component<TextFieldProps> = (props) => {
                         {props.leading}
                         <div class={'textInputWrapper w:full'}><input
                             name="text"
-                            type="search"
                             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
                             placeholder={local.placeholder ? local.placeholder : ""}
                             class={`${local.class ?? ""} global-style textInput `}

@@ -1626,9 +1626,25 @@ export const PageDesignerDragAndDrop = () => {
         <>
             <Switch>
                 <Match when={selectedStepId() === 1}>
-                    <div class="flex">
+                    <div className="flex">
+                        <div className={`abs z-index:1 mt:40vh ${isLeftOpen() ? 'ml:22.5rem' : 'ml:1.2rem'}`}>
+                            <button
+                                onClick={toggleIsLeftOpen}
+                                type="button"
+                                title={`${isLeftOpen() ? 'Close' : 'Open'}`}
+                                className="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                                style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
+                            >
+                                <Show when={isLeftOpen()}
+                                      fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
+                                                      style={{'color': '#c1c1c1'}}/>}>
+                                    <Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
+                                          style={{'color': '#c1c1c1'}}/>
+                                </Show>
+                            </button>
+                        </div>
                         <div
-                            class={`flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? 'w:23rem' : 'w:1.8rem'} direction:rtl`}
+                            className={`flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? 'w:23rem' : 'w:1.8rem'} direction:rtl`}
                             style={{
                                 "max-height": 'calc(100vh - 120px)', "scrollbar-width": "thin",
                                 "scrollbar-color": "lightgrey"
@@ -1640,22 +1656,7 @@ export const PageDesignerDragAndDrop = () => {
                             </Show>
                         </div>
 
-                        <button
-                            onClick={toggleIsLeftOpen}
-                            type="button"
-                            title={`${isLeftOpen() ? 'Close' : 'Open'}`}
-                            class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                            style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
-                        >
-                            <Show when={isLeftOpen()}
-                                  fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
-                                                  style={{'color': '#c1c1c1'}}/>}>
-                                <Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
-                                      style={{'color': '#c1c1c1'}}/>
-                            </Show>
-                        </button>
-
-                        <div class="flex-grow:1 min-w:400">
+                        <div className="flex-grow:1 min-w:400">
                             <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
                             <ResizableContainer>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
@@ -1663,22 +1664,24 @@ export const PageDesignerDragAndDrop = () => {
                                 </FormContext.Provider>
                             </ResizableContainer>
                         </div>
-                        <button
-                            onClick={toggleIsRightOpen}
-                            type="button"
-                            title={`${isRightOpen() ? 'Close' : 'Open'}`}
-                            class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                            style={`style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? 'margin-left: 76.4%' : 'margin-left: 96.3%'};`}
-                        >
-                            <Show when={isRightOpen()}
-                                  fallback={<Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
-                                                  style={{'color': '#c1c1c1'}}/>}>
-                                <Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
-                                      style={{'color': '#c1c1c1'}}/>
-                            </Show>
-                        </button>
+                        <div className="rel mt:40vh mr:10px">
+                            <button
+                                onClick={toggleIsRightOpen}
+                                type="button"
+                                title={`${isRightOpen() ? 'Close' : 'Open'}`}
+                                className="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                                style={`style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? 'margin-left: 76.4%' : 'margin-left: 96.3%'};`}
+                            >
+                                <Show when={isRightOpen()}
+                                      fallback={<Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
+                                                      style={{'color': '#c1c1c1'}}/>}>
+                                    <Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
+                                          style={{'color': '#c1c1c1'}}/>
+                                </Show>
+                            </button>
+                        </div>
                         <div
-                            class={`flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isRightOpen() ? 'w:24rem' : 'w:1.8rem'}`}
+                            className={`flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isRightOpen() ? 'w:24rem' : 'w:1.8rem'}`}
                             style={{
                                 "max-height": 'calc(100vh - 120px)',
                                 "scrollbar-width": "thin",
