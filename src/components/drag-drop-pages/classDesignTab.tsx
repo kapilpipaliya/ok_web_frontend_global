@@ -1,8 +1,7 @@
-import {Tab, TabContainer, TabList, Tabs, TextField} from "../solid-blocks/blocks";
-import {IdAttr, Vertex} from "../../lib/graph";
-import {GenericInputField} from "../input/GenaricInputField";
+import {Tab, TabContainer, TabList, Tabs } from "../solid-blocks/blocks";
+import {Vertex} from "../../lib/graph";
 import StyleEditor from "./styleEditor";
-import {ComponentUtils} from "../componentUtils";
+import {StyleCSSComponents} from "../StyleCSSComponents";
 
 export const ClassDesignTab = (props: {
     component: string;
@@ -14,31 +13,7 @@ export const ClassDesignTab = (props: {
     isRealTime?: boolean;
     txnId?: number;
 }) => {
-    const {ContainerLabel,Container,IconifyIcon} = ComponentUtils();
-
-    const VisibilitySection = () => {
-        return <>
-            <ContainerLabel title={'Visiblity'}/>
-            <GenericInputField
-                data={props.data}
-                meta={props.meta}
-                component={'CheckBox'}
-                setValue={props.setValue}
-                disabled={props.disabled!}
-                title={'asd'}
-                txnId={props.txnId!}
-            />
-        </>
-    }
-
-    const SizeSection = () => {
-        return <>
-            <ContainerLabel title={'Size'}/>
-            <TextField label={'adf'} style={{"background-color": "#eeeeec", "font-size": "14px"}}
-                       type={'text'}/>
-        </>
-
-    }
+    const {Container} = StyleCSSComponents();
 
     return <tr class={'min-w:100% m:5px'}>
         <td colspan="2">
@@ -46,13 +21,9 @@ export const ClassDesignTab = (props: {
                 <TabList>
                     <Tab>Design</Tab>
                 </TabList>
-
                 <TabContainer>
                     <Container>
-                    <StyleEditor/>
-                    </Container>
-                    <Container>
-                        <VisibilitySection/>
+                        <StyleEditor/>
                     </Container>
                 </TabContainer>
             </Tabs>

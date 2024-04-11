@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 
 const ResizableContainer = (props: any) => {
     const [width, setWidth] = createSignal(500);
-    const [height, setHeight] = createSignal(800);
+    const [height, setHeight] = createSignal('calc(-50px + 90vh)');
 
     // const handleMouseDown = (e, direction) => {
     //     e.preventDefault();
@@ -32,8 +32,7 @@ const ResizableContainer = (props: any) => {
     // };
 
     return (
-        <div class={'w:full  h:full flex jc:center'}>
-            <div class="resizable-container r:10|10|10|10"
+            <div class="resizable-container r:10|10|10|10 max-height:77vh min-width:30vw max-width:53vw"
                  style={`width: ${width()}px; height: ${height()}px; resize: both; border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}>
                 {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
@@ -45,7 +44,6 @@ const ResizableContainer = (props: any) => {
                     onMouseDown={(e) => handleMouseDown(e, "vertical")}
                 />*/}
             </div>
-        </div>
     );
 };
 
