@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import {useParams} from "@solidjs/router";
 import {createStore} from "solid-js/store";
 import {

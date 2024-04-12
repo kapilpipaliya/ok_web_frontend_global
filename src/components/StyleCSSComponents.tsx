@@ -1,4 +1,4 @@
-import {Icon} from "@iconify-icon/solid";
+import {Icon, IconifyIconProps} from "@iconify-icon/solid";
 import {
     Accessor,
     createEffect,
@@ -9,34 +9,34 @@ import {
     Match,
     onCleanup,
     Setter,
-    Show,
+    Show, splitProps,
     Switch
 } from "solid-js";
 import {TextField} from "./solid-blocks/blocks";
 import {RenderComponent} from "./RenderComponent";
 
 export const StyleCSSComponents = () => {
-    const IconifyIcon = (props: any) => {
-        const {icon, height = 23, width, ...restProps} = props;
-        return <Icon icon={icon} height={height ?? 23} width={width ?? 23} {...restProps} />;
+    const IconifyIcon = (props: IconifyIconProps) => {
+        const [selected, restProps] = splitProps(props,['icon', 'height', 'width']);
+        return <Icon icon={selected.icon} height={selected.height ?? 23} width={selected.width ?? 23} {...restProps} />;
     };
 
     const ContainerLabel =
-        (props: { title: any, showIcon?: boolean, onIconClick?: any, class?: any }) => <span
+        (props: { title: JSXElement, showIcon?: boolean, onIconClick?: any, class?: any }) => <span
             class={`flex ai:center m:0 font:15px font-weight:500 ${props.class}`}>{props.title}<Show
             when={props.showIcon ?? false}>
             &nbsp;<Icon onClick={props.onIconClick} icon={'mdi:close'} class={'cursor:pointer'}/></Show></span>
 
     const Container =
-        (props: any) => <span
+        (props: {class?: string, children: JSXElement}) => <span
             class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}>{props.children}</span>
 
 
     const DisplaySelector = (props: {
-        options: any,
+        options: {key: any, value: string}[] | string[],
         title: string,
-        selected: Accessor<any>,
-        setSelected: Setter<any>,
+        selected: Accessor<string>,
+        setSelected: Setter<string>,
         selectorDivClass?: string
         selectorClass?: string
         labelClass?: string
@@ -65,10 +65,10 @@ export const StyleCSSComponents = () => {
     }
 
     const ButtonGroups = (props: {
-        options: { key: JSX.Element; value: any }[],
+        options: { key: JSX.Element; value: string }[],
         name: string,
-        selectedOption: Accessor<any>,
-        setSelectedOption: Setter<any>,
+        selectedOption: Accessor<string>,
+        setSelectedOption: Setter<string>,
         showIcon?: boolean,
         onIconClick?: any,
         radioInputStyle?: JSX.CSSProperties,
@@ -78,7 +78,7 @@ export const StyleCSSComponents = () => {
         labelClass?: string
     }) => {
 
-        const handleChange = (option: any) => {
+        const handleChange = (option: { key: JSX.Element; value: string }) => {
             props.setSelectedOption(option.value);
         };
 
@@ -105,15 +105,15 @@ export const StyleCSSComponents = () => {
             </div>
         </>
     };
-    const CenterDiv = (props: any) => <div class={'w:full flex ai:center jc:space-between'}>{props.children}</div>;
+    const CenterDiv = (props: {children: JSXElement}) => <div class={'w:full flex ai:center jc:space-between'}>{props.children}</div>;
 
     const TextFieldWithSelectOption = (props: {
-        inputValue: Accessor<any>,
-        setInputValue: Setter<any>,
-        options?: any,
-        selectedOption?: Accessor<any>,
-        setOption?: Setter<any>,
-        leftIcon?: any,
+        inputValue: Accessor<string>,
+        setInputValue: Setter<string>,
+        options?: string[],
+        selectedOption?: Accessor<string>,
+        setOption?: Setter<string>,
+        leftIcon?: JSXElement,
         isLabelOnTop?: boolean,
         label?: string,
         showInside?: boolean,
@@ -121,10 +121,6 @@ export const StyleCSSComponents = () => {
         placeholder?: string
     }) => {
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
-
-        onCleanup(() => {
-            document.removeEventListener('click', () => setIsDropdownOpen(false));
-        });
 
         const toggleDropdown = (event: any) => {
             event.stopPropagation(); // Prevent click from immediately closing the dropdown
@@ -207,10 +203,10 @@ export const StyleCSSComponents = () => {
 
 
     const ToggleButton = (props: {
-        options: any,
-        label: any,
-        selected: Accessor<any>,
-        setSelected: Setter<any>,
+        options: { key: JSX.Element; value: string }[],
+        label: JSXElement,
+        selected: Accessor<string>,
+        setSelected: Setter<string>,
         divClass?: string,
         optionClass?: string
         labelClass?: string
@@ -261,11 +257,11 @@ export const StyleCSSComponents = () => {
             props.setOption([...props.option(), {x: 0, y: 0, blur: 5, spread: 0, color: 'black', style: ''}]);
         };
 
-        const deleteOption = (index: any) => {
+        const deleteOption = (index: number) => {
             props.setOption(props.option().filter((_: any, i: any) => i !== index));
         };
 
-        const openPopup = (index: any) => {
+        const openPopup = (index: number) => {
             props.setOpenMenu(index);
         };
 
@@ -273,7 +269,7 @@ export const StyleCSSComponents = () => {
             props.setOpenMenu(null);
         };
 
-        const renderPopup = (option: any, index: any) => {
+        const renderPopup = (option: any, index: number) => {
             return (
                 <Show when={props.openMenu() === index}>
                     <div style={{

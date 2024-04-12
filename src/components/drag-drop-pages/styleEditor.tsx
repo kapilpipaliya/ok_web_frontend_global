@@ -157,11 +157,11 @@ const StyleEditor = () => {
 
     const CollapsibleSection = (props: { index: any, title: any, properties: any }) => {
         const [isOpen, setIsOpen] = createSignal(false);
-        const isFirst = props.index === 0;
-        const isLast = props.index === Object.entries(JSONSchema).length - 1;
+        const isFirst = () => props.index === 0;
+        const isLast = () => props.index === Object.entries(JSONSchema).length - 1;
 
         return (
-            <div class={`p:5|10 w:full b:1px|solid|lightgray ${isFirst ? 'r:5|5|0|0' : isLast ? 'r:0|0|5|5' : ''}`}>
+            <div class={`p:5|10 w:full b:1px|solid|lightgray ${isFirst() ? 'r:5|5|0|0' : isLast() ? 'r:0|0|5|5' : ''}`}>
                 <div onClick={() => setIsOpen(!isOpen())} class={'cursor:pointer flex ai:center jc:space-between'}>
                     <span class={'f:14 font-weight:medium'}>{props.title}</span>
 
