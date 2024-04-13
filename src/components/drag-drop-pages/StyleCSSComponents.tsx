@@ -10,11 +10,12 @@ import {
     onCleanup,
     Setter,
     Show, splitProps,
-    Switch
+    Switch, useContext
 } from "solid-js";
 import {TextField} from "../solid-blocks/blocks";
 import {RenderComponent} from "./RenderComponent";
 import {CustomTooltip} from "../custom-component/Tooltip";
+import {CssEditorContext} from "./cssEditorContext";
 
 export const StyleCSSComponents = () => {
     const IconifyIcon = (props: IconifyIconProps) => {
@@ -223,6 +224,7 @@ export const StyleCSSComponents = () => {
         class={'w:full flex ai:center jc:space-between'}>{props.children}</div>;
 
     const TextFieldWithSelectOption = (props: {
+        name: string,
         inputValue: Accessor<string>,
         setInputValue: Setter<string>,
         options?: string[],
@@ -235,6 +237,7 @@ export const StyleCSSComponents = () => {
         inputType?: string,
         placeholder?: string
     }) => {
+        const [cssState, setCssState] = useContext(CssEditorContext);
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
 
         const toggleDropdown = (event: any) => {
@@ -263,16 +266,16 @@ export const StyleCSSComponents = () => {
                 <Show when={props.showInside} fallback={<TextField
                     label={props.label}
                     placeholder={props.placeholder}
-                    value={props.inputValue()}
-                    onInput={(e) => props.setInputValue(e.target.value)}
+                    value={cssState[props.name] ?? ''}
+                    onInput={(e) => setCssState(props.name, e.target.value)}
                     class={`f:14`}
                     style={{width: '100%'}} // Set width to 100%
                 />}>
                     <input
                         type={props.inputType || 'text'}
                         placeholder={props.placeholder}
-                        value={props.inputValue()}
-                        onInput={(e) => props.setInputValue(e.target.value)}
+                        value={cssState[props.name] ?? ''}
+                        onInput={(e) => setCssState(props.name, e.target.value)}
                         class={`f:14 outline:none p:5`}
                         style={{width: '100%'}} // Set width to 100%
                     />

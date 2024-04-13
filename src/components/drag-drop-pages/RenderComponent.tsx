@@ -10,90 +10,90 @@ export const RenderComponent = (props: { value: any }) => {
         ToggleButton,
         TextFieldWithSelectOption
     } = StyleCSSComponents();
-    const field = props.value;
     return <Switch>
-        <Match when={field.component === 'colorPicker'}>
+        <Match when={props.value.component === 'colorPicker'}>
             <ColorPickerInput
-                label={field.label}
-                isLabelOnTop={field.isLabelOnTop}
-                color={field.state[0]}
-                setColor={field.state[1]}
+                label={props.value.label}
+                isLabelOnTop={props.value.isLabelOnTop}
+                color={props.value.state[0]}
+                setColor={props.value.state[1]}
             />
         </Match>
-        <Match when={field.component === 'select'}>
+        <Match when={props.value.component === 'select'}>
             <DisplaySelector
-                label={field.label}
-                isLabelOnTop={field.isLabelOnTop}
-                options={field.options}
-                selected={field.state[0]}
-                setSelected={field.state[1]}/>
+                name={props.value.name}
+                label={props.value.label}
+                isLabelOnTop={props.value.isLabelOnTop}
+                options={props.value.options}
+                selected={props.value.state[0]}
+                setSelected={props.value.state[1]}/>
         </Match>
-        <Match when={field.component === 'toggleButton'}>
+        <Match when={props.value.component === 'toggleButton'}>
             <ToggleButton
-                isLabelOnTop={field.isLabelOnTop}
-                label={field.label}
-                setSelected={field.state[1]}
-                selected={field.state[0]}
-                options={field.options}/>
+                isLabelOnTop={props.value.isLabelOnTop}
+                label={props.value.label}
+                setSelected={props.value.state[1]}
+                selected={props.value.state[0]}
+                options={props.value.options}/>
         </Match>
-        <Match when={field.component === 'textField'}>
-            <TextFieldWithSelectOption setInputValue={field.state[1]} isLabelOnTop={field.isLabelOnTop}
-                                       label={field.label} inputValue={field.state[0]}
-                                       inputType={field.type}/>
+        <Match when={props.value.component === 'textField'}>
+            <TextFieldWithSelectOption name={props.value.name} setInputValue={props.value.state[1]} isLabelOnTop={props.value.isLabelOnTop}
+                                       label={props.value.label} inputValue={props.value.state[0]}
+                                       inputType={props.value.type}/>
 
         </Match>
-        <Match when={field.component === 'textFieldOptions'}>
+        <Match when={props.value.component === 'textFieldOptions'}>
 
-            <TextFieldWithSelectOption showInside={true} leftIcon={field.leftIcon}
-                                       isLabelOnTop={field.isLabelOnTop}
-                                       label={field.label}
-                                       setInputValue={field.state[1]}
-                                       inputValue={field.state[0]}
-                                       inputType={field.type} options={field.options}
-                                       setOption={field.optionState[1]}
-                                       selectedOption={field.optionState[0]}/>
+            <TextFieldWithSelectOption name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
+                                       isLabelOnTop={props.value.isLabelOnTop}
+                                       label={props.value.label}
+                                       setInputValue={props.value.state[1]}
+                                       inputValue={props.value.state[0]}
+                                       inputType={props.value.type} options={props.value.options}
+                                       setOption={props.value.optionState[1]}
+                                       selectedOption={props.value.optionState[0]}/>
 
         </Match>
-        <Match when={field.component === 'grid'}>
+        <Match when={props.value.component === 'grid'}>
 
             <div style={{
-                padding: field['padding'] || 0,
+                padding: props.value['padding'] || 0,
                 display: 'grid',
-                gap: field['gap'] || 10,
-                'align-items': field['align'] || 'center',
-                'grid-template-columns': field['grid-template-columns']
+                gap: props.value['gap'] || 10,
+                'align-items': props.value['align'] || 'center',
+                'grid-template-columns': props.value['grid-template-columns']
             }}>
-                <For each={field.children}>
+                <For each={props.value.children}>
                     {item => {
                         return <RenderComponent value={item}/>
                     }}
                 </For>
             </div>
         </Match>
-        <Match when={field.component === 'buttonGroups'}>
+        <Match when={props.value.component === 'buttonGroups'}>
             <ButtonGroups
-                isLabelOnTop={field.isLabelOnTop}
-                name={field.name}
-                label={field.label}
-                selectedOption={field.state[0]}
-                setSelectedOption={field.state[1]}
-                options={field.options}/>
+                isLabelOnTop={props.value.isLabelOnTop}
+                name={props.value.name}
+                label={props.value.label}
+                selectedOption={props.value.state[0]}
+                setSelectedOption={props.value.state[1]}
+                options={props.value.options}/>
         </Match>
-        <Match when={field.component === 'dataEditor'}>
-            <DataEditor dialogLabel={field.dialogLabel} fallback={field.fallback}
-                        centerComponent={field.centerComponent} children={field.children}
-                        options={field.options[0]}
-                        setOption={field.options[1]} openMenu={field.openMenu[0]}
-                        setOpenMenu={field.openMenu[1]} label={field.label}/>
+        <Match when={props.value.component === 'dataEditor'}>
+            <DataEditor dialogLabel={props.value.dialogLabel} fallback={props.value.fallback}
+                        centerComponent={props.value.centerComponent} children={props.value.children}
+                        options={props.value.options[0]}
+                        setOption={props.value.options[1]} openMenu={props.value.openMenu[0]}
+                        setOpenMenu={props.value.openMenu[1]} label={props.value.label}/>
         </Match>
-        <Match when={field.component === 'divider'}>
+        <Match when={props.value.component === 'divider'}>
             <hr class={'w:full color:lightgrey m:5|0'}/>
-            <Show  when={field.title}>
-                <div class={'f:15'}>{field.title}</div>
+            <Show  when={props.value.title}>
+                <div class={'f:15'}>{props.value.title}</div>
             </Show>
         </Match>
         <Match when={true}>
-            {JSON.stringify(field)}
+            {JSON.stringify(props.value)}
         </Match>
     </Switch>
 }

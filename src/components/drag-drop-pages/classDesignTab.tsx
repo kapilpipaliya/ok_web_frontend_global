@@ -2,8 +2,9 @@ import {Tab, TabContainer, TabList, Tabs} from "../solid-blocks/blocks";
 import {Vertex} from "../../lib/graph";
 import StyleEditor from "./styleEditor";
 import {StyleCSSComponents} from "./StyleCSSComponents";
-import {createEffect, createSignal, For, onCleanup, onMount, Show} from "solid-js";
-import {Icon} from "@iconify-icon/solid";
+import {createEffect, createSignal} from "solid-js";
+import {createStore, reconcile} from "solid-js/store";
+import {CssEditorContext, CssEditorContext as CssEditorContext1} from "./cssEditorContext";
 
 export const ClassDesignTab = (props: {
     component: string;
@@ -16,6 +17,26 @@ export const ClassDesignTab = (props: {
     txnId?: number;
 }) => {
     const {Container} = StyleCSSComponents();
+
+    const [cssState, setCssState] = createStore({} as {[key: string]: any});
+
+    createEffect(() => {
+        const valueString: string = props.data.P[props.meta.P.name] ?? '';
+
+        const cssRules = {} as {[key: string]: string};
+
+        for (const [key, value] of valueString.split(' ').map(rule => rule.split(':'))) {
+            if (key === '') continue;
+            cssRules[key] = value;
+        }
+        setCssState(reconcile(cssRules));
+    })
+
+
+    createEffect(()=> {
+        props.setValue?.(Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join(' '));
+    })
+
     const TextEditor = () => {
         const [text, setText] = createSignal("#i3vvs {\n" +
             "\tcolor:black;\n" +
@@ -56,7 +77,7 @@ export const ClassDesignTab = (props: {
             />
         );
     };
-    return <tr class={'min-w:100% m:5px'}>
+    return <CssEditorContext.Provider value={[cssState, setCssState]}><tr class={'min-w:100% m:5px'}>
         <td colspan="2">
             <Tabs>
                 <TabList class={'m:5px'}>
@@ -75,5 +96,5 @@ export const ClassDesignTab = (props: {
                 </TabContainer>
             </Tabs>
         </td>
-    </tr>
+    </tr></CssEditorContext.Provider>
 }
