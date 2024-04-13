@@ -1,9 +1,8 @@
 import {createSignal} from "solid-js";
 import {Icon} from "@iconify-icon/solid";
 import {StyleCSSComponents} from "./StyleCSSComponents";
+import {sizeTypes, timesTypes} from "./cssEditorContext";
 
-const sizeTypes = ['px', '%', 'em', 'rem', 'vh', 'vw'];
-const timesTypes = ['s', 'ms'];
 
 const {IconifyIcon} = StyleCSSComponents()
 const AllSVGIcon = () => <svg viewBox="0 0 24 24" role="presentation" style="width: 20px; height: 20px;">
@@ -53,10 +52,9 @@ const GeneralSection = {
         label: 'Visibility',
         name: 'visibility',
         options: [
-            {key: Icons.visibility.yes, value: true},
-            {key: Icons.visibility.no, value: false}
+            {key: Icons.visibility.yes, value: 'visible'},
+            {key: Icons.visibility.no, value: 'hidden'},
         ],
-        state: createSignal(true)
     },
 };
 
@@ -66,31 +64,17 @@ const LayoutSection = {
         label: 'Display',
         component: 'select',
         options: ['block', 'inline', 'inline block', 'flex', 'none'],
-        state: createSignal('block')
-    },
-    flex: {
-        name: 'flex',
-        label: 'Flex',
-        component: 'buttonGroups', isLabelOnTop: true,
-        options: [
-            {key: Icons.flex.auto, value: 'auto'},
-            {key: Icons.flex.expand, value: 'expand'},
-            {key: Icons.flex.collapse, value: 'collapse'},
-            {key: <CustomSVGIcon/>, value: 'custom'},
-        ],
-        state: createSignal('auto')
     },
     direction: {
         name: 'flex-direction',
         label: 'Direction',
         component: 'buttonGroups', isLabelOnTop: true,
         options: [
-            {key: Icons.direction.horizontal, value: 'horizontal'},
-            {key: Icons.direction.horizontalReverse, value: 'horizontal-reverse'},
-            {key: Icons.direction.vertical, value: 'vertical'},
-            {key: Icons.direction.verticalReverse, value: 'vertical-reverse'},
+            {key: Icons.direction.horizontal, value: 'row'},
+            {key: Icons.direction.horizontalReverse, value: 'row-reverse'},
+            {key: Icons.direction.vertical, value: 'column'},
+            {key: Icons.direction.verticalReverse, value: 'column-reverse'},
         ],
-        state: createSignal('horizontal')
     },
     justify: {
         name: 'justify-content',
@@ -104,26 +88,89 @@ const LayoutSection = {
             {key: Icons.justify.spaceBetween, value: 'space-between'},
             {key: Icons.justify.spaceEvenly, value: 'space-evenly'},
         ],
-        state: createSignal('start')
     },
-    align: {
+    alignFlex: {
         name: 'align-items',
+        label: 'Align',
+        component: 'buttonGroups',
+        isLabelOnTop: true,
+        options: [
+            {key: <IconifyIcon icon="material-symbols:align-start-rounded"/>, value: 'flex-start'},
+            {key: <IconifyIcon icon="material-symbols:align-center-rounded"/>, value: 'center'},
+            {key: <IconifyIcon icon="material-symbols:align-end-rounded"/>, value: 'flex-end'},
+            {key: <IconifyIcon icon="material-symbols:align-items-stretch-rounded"/>, value: 'stretch'},
+        ],
+    },
+    gap: {
+        'name': 'size Grid',
+        'padding': '5px',
+        'gap': '5px 10px',
+        'align': 'end',
+        'component': 'grid',
+        'grid-template-columns': '1fr 25%',
+        children: [
+            {
+                name: 'gap',
+                type: 'number', isLabelOnTop: true,
+                label: 'Gap',
+                component: 'textFieldOptions',
+                options: sizeTypes,
+
+            },
+            {
+                name: 'gapType',
+                label: false,
+                component: 'buttonGroups',
+                options: [
+                    {key: <AllSVGIcon/>, value: 'all'},
+                    {key: <CustomSVGIcon/>, value: 'custom'},
+                ],
+
+            },
+        ]
+    },
+    flexWrap: {
+        name: 'flex-wrap',
+        label: 'Flex wrap',
+        component: 'select',
+        options: [
+            {label: 'No Wrap', value: 'nowrap'},
+            {label: 'Wrap', value: 'wrap'},
+            {label: 'Reverse Wrap', value: 'wrap-reverse'}
+        ],
+    },
+    divider4: {
+        title: 'Flex Child',
+        component: 'divider',
+    },
+    flex: {
+        name: 'flex',
+        label: 'Flex',
+        component: 'buttonGroups', isLabelOnTop: true,
+        options: [
+            {key: <IconifyIcon icon="mi:close"/>, value: '0 0 auto', tooltip: 'auto'},
+            {key: Icons.flex.expand, value: '1 1 0%', tooltip: 'expand'},
+            {key: Icons.flex.collapse, value: '0 1 auto', tooltip: 'collapse'},
+            {key: <CustomSVGIcon/>, value: 'custom', tooltip: 'custom'},
+        ],
+    },
+    alignSelf: {
+        name: 'align-self',
         label: 'Align',
         component: 'buttonGroups', isLabelOnTop: true,
         options: [
-            {key: Icons.align.stretch, value: 'stretch'},
-            {key: Icons.align.start, value: 'start'},
+            {key: Icons.flex.auto, value: 'auto'},
+            {key: Icons.align.start, value: 'flex-start'},
             {key: Icons.align.center, value: 'center'},
-            {key: Icons.align.end, value: 'end'},
+            {key: Icons.align.end, value: 'flex-end'},
+            {key: Icons.align.stretch, value: 'stretch'},
         ],
-        state: createSignal('stretch')
     },
     order: {
-        name: 'Order',
+        name: 'order',
         label: 'Order',
         type: 'number',
         component: 'textFieldOptions',
-        state: createSignal('0'),
         leftIcon: (
             <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
                 <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
@@ -146,8 +193,7 @@ const SizeSection = {
                 label: 'Height',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'width',
@@ -155,8 +201,7 @@ const SizeSection = {
                 label: 'Width',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'min-height',
@@ -164,8 +209,7 @@ const SizeSection = {
                 label: 'Min height',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'min-width',
@@ -173,8 +217,7 @@ const SizeSection = {
                 label: 'Min width',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'max-height',
@@ -182,8 +225,7 @@ const SizeSection = {
                 label: 'Max height',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'max-width',
@@ -191,8 +233,7 @@ const SizeSection = {
                 label: 'Max width',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             }
         ]
     }
@@ -213,8 +254,7 @@ const SpaceSection = {
                 label: 'Padding',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'paddingType',
@@ -224,7 +264,6 @@ const SpaceSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
             },
         ]
     },
@@ -242,8 +281,7 @@ const SpaceSection = {
                 label: 'Margin',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'marginType',
@@ -253,7 +291,6 @@ const SpaceSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
             },
         ]
     }
@@ -265,7 +302,6 @@ const PositionSection = {
         label: 'Position',
         component: 'select',
         options: ['static', 'relative', 'absolute', 'fixed', 'sticky'],
-        state: createSignal('static')
     },
 };
 
@@ -276,14 +312,12 @@ const TypographySection = {
         isLabelOnTop: true,
         component: 'select',
         options: ['Arial Black', 'Brush Script MT', 'Comic Sans MS', 'Courier New', 'Georgia', 'Helvetica', 'Impact', 'Lucida Sans Unicode', 'Tahoma', 'Times New Roman', 'Trebuchet MS', 'Verdana'],
-        state: createSignal('')
     },
     colorPicker: {
         name: 'color',
         label: 'Color',
         isLabelOnTop: true,
         component: 'colorPicker',
-        state: createSignal('#000')
     },
     typography: {
         'name': 'size Grid',
@@ -298,8 +332,7 @@ const TypographySection = {
                 label: 'Size',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'font-weight',
@@ -307,7 +340,7 @@ const TypographySection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['thin', 'extra-light', 'light', 'normal', 'medium', 'semi-bold', 'bold', 'extra-bold', 'ultra-bold'],
-                state: createSignal('normal')
+
             },
             {
                 name: 'line-height',
@@ -315,8 +348,7 @@ const TypographySection = {
                 label: 'Line height',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'letter-spacing',
@@ -324,8 +356,7 @@ const TypographySection = {
                 label: 'Spacing',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'text-align',
@@ -333,7 +364,6 @@ const TypographySection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['left', 'center', 'right', 'justify'],
-                state: createSignal('left')
             },
             {
                 name: 'text-decoration',
@@ -341,7 +371,6 @@ const TypographySection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['none', 'underline', 'overline', 'line through'],
-                state: createSignal('none')
             },
             {
                 name: 'text-transform',
@@ -349,15 +378,13 @@ const TypographySection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['none', 'capitalize', 'uppercase', 'lowercase'],
-                state: createSignal('none')
             },
             {
                 name: 'direction',
                 label: 'Direction',
                 isLabelOnTop: true,
                 component: 'select',
-                options: ['LTR', 'RTL'],
-                state: createSignal('LTR')
+                options: [{label: 'RTL', value: 'rtl'}, {label: 'LTR', value: 'ltr'}],
             },
         ]
     },
@@ -366,16 +393,21 @@ const TypographySection = {
         label: 'Breaking',
         isLabelOnTop: true,
         component: 'select',
-        options: ['normal', 'no wrap', 'pre', 'pre wrap', 'pre line', 'break spaces'],
-        state: createSignal('normal')
+        options: [
+            {label: 'Normal', value: 'normal'},
+            {label: 'No Wrap', value: 'nowrap'},
+            {label: 'Pre', value: 'pre'},
+            {label: 'Pre Wrap', value: 'pre-wrap'},
+            {label: 'Pre Line', value: 'pre-line'},
+            {label: 'Break Spaces', value: 'break-spaces'},
+        ],
     },
 };
 
 const BackgroundSection = {
     background: {
-        name: 'Shadow',
+        name: 'box-shadow',
         component: 'dataEditor',
-        options: createSignal([]),
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Shadow',
         fallback: 'No Shadow Effects',
@@ -388,7 +420,6 @@ const BackgroundSection = {
                     {key: 'Outside', value: ''},
                     {key: 'Inside', value: 'inset'}
                 ],
-                state: createSignal('')
             },
             shadow: {
                 name: 'Shadow Grid',
@@ -403,8 +434,7 @@ const BackgroundSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
                     },
                     {
                         name: 'Y Offset',
@@ -413,8 +443,7 @@ const BackgroundSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
                     },
                     {
                         name: 'Blur',
@@ -423,8 +452,7 @@ const BackgroundSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
                     },
                     {
                         name: 'Spread',
@@ -433,8 +461,7 @@ const BackgroundSection = {
                         isLabelOnTop: true,
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
                     }
                 ]
             }
@@ -446,7 +473,6 @@ const BackgroundSection = {
         label: 'Background Color',
         isLabelOnTop: true,
         component: 'colorPicker',
-        state: createSignal('#ffffff')
     },
     clip: {
         name: 'clip',
@@ -454,7 +480,6 @@ const BackgroundSection = {
         isLabelOnTop: true,
         component: 'select',
         options: ['Border Box', 'Padding Box', 'Content Box', 'Text'],
-        state: createSignal('Border Box')
     },
 };
 
@@ -474,8 +499,7 @@ const BorderSection = {
                 label: 'Border Radius',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'borderRadiusType',
@@ -485,7 +509,7 @@ const BorderSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     },
@@ -503,8 +527,7 @@ const BorderSection = {
                 label: 'Border Width',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'border-widthType',
@@ -514,7 +537,7 @@ const BorderSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     },
@@ -532,7 +555,6 @@ const BorderSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'Ridge', 'inset', 'outset'],
-                state: createSignal('none')
             },
             {
                 name: 'borderStyleType',
@@ -542,7 +564,7 @@ const BorderSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     },
@@ -559,7 +581,6 @@ const BorderSection = {
                 label: 'Border Color',
                 isLabelOnTop: true,
                 component: 'colorPicker',
-                state: createSignal('#ffffff')
             },
             {
                 name: 'borderColorType',
@@ -569,7 +590,7 @@ const BorderSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     }
@@ -589,8 +610,7 @@ const EffectsSection = {
                 label: 'Opacity',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'blend-mode',
@@ -598,7 +618,7 @@ const EffectsSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color dodge', 'color burn', 'hard light', 'soft light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'],
-                state: createSignal('normal')
+
             },
         ]
     },
@@ -608,7 +628,6 @@ const EffectsSection = {
         isLabelOnTop: true,
         component: 'select',
         options: ['auto', 'pointer', 'copy', 'crosshair', 'grab', 'grabbing', 'help', 'move', 'text'],
-        state: createSignal('auto')
     },
     divider: {
         component: 'divider',
@@ -616,7 +635,6 @@ const EffectsSection = {
     boxShadow: {
         name: 'box-shadow',
         component: 'dataEditor',
-        options: createSignal([]),
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Shadow',
         fallback: 'No Shadow Effects',
@@ -629,7 +647,6 @@ const EffectsSection = {
                     {key: 'Outside', value: ''},
                     {key: 'Inside', value: 'inset'}
                 ],
-                state: createSignal(null)
             },
             shadow: {
                 name: 'Shadow Grid',
@@ -643,8 +660,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Y Offset',
@@ -653,8 +670,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Blur',
@@ -663,8 +680,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Spread',
@@ -673,8 +690,8 @@ const EffectsSection = {
                         isLabelOnTop: true,
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     }
                 ]
             }
@@ -684,7 +701,6 @@ const EffectsSection = {
     textShadow: {
         name: 'text-shadow',
         component: 'dataEditor',
-        options: createSignal([]),
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Shadow',
         fallback: 'No Shadow Effects',
@@ -701,8 +717,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Y Offset',
@@ -711,8 +727,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Blur',
@@ -721,8 +737,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                     {
                         name: 'Spread',
@@ -731,8 +747,8 @@ const EffectsSection = {
                         isLabelOnTop: true,
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     }
                 ]
             }
@@ -742,7 +758,7 @@ const EffectsSection = {
     filter: {
         name: 'filter',
         component: 'dataEditor',
-        options: createSignal([]),
+
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Filter',
         fallback: 'No Filter Effects',
@@ -759,7 +775,7 @@ const EffectsSection = {
                         isLabelOnTop: true,
                         component: 'select',
                         options: ['blur', 'brightness', 'contrast', 'grayscale', 'hue rotate', 'invert', 'saturate', 'sepia'],
-                        state: createSignal('blur')
+
                     },
                     {
                         name: 'value',
@@ -768,8 +784,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                 ]
             }
@@ -779,7 +795,7 @@ const EffectsSection = {
     backdropFilter: {
         name: 'backdrop-filter',
         component: 'dataEditor',
-        options: createSignal([]),
+
         openMenu: createSignal(null),
         dialogLabel: 'Backdrop Filter',
         children: {
@@ -795,7 +811,7 @@ const EffectsSection = {
                         isLabelOnTop: true,
                         component: 'select',
                         options: ['blur', 'brightness', 'contrast', 'grayscale', 'hue rotate', 'invert', 'saturate', 'sepia'],
-                        state: createSignal('blur')
+
                     },
                     {
                         name: 'value',
@@ -804,8 +820,8 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     },
                 ]
             }
@@ -815,7 +831,7 @@ const EffectsSection = {
     transition: {
         name: 'transition',
         component: 'dataEditor',
-        options: createSignal([]),
+
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Transition',
         fallback: 'No transition',
@@ -826,7 +842,7 @@ const EffectsSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['height', 'width', 'min height', 'min width', 'max height', 'max width', 'padding', 'margin', 'color', 'font', 'font size', 'line height', 'letter height', 'border', 'border radius', 'background', 'opacity', 'box shadow', 'text shadow', 'filter', 'backdrop filter', 'transform', 'all'],
-                state: createSignal('opacity')
+
             },
             easing: {
                 name: 'easing',
@@ -834,7 +850,7 @@ const EffectsSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['ease', 'ease-in', 'ease-in-out', 'ease-out', 'linear'],
-                state: createSignal('ease')
+
             },
             shadow: {
                 'name': 'size Grid',
@@ -850,8 +866,6 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: timesTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('s')
                     },
                     {
                         name: 'delay',
@@ -860,8 +874,7 @@ const EffectsSection = {
                         type: 'number',
                         component: 'textFieldOptions',
                         options: timesTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('s')
+
                     },
                 ]
             }
@@ -871,7 +884,7 @@ const EffectsSection = {
     transform: {
         name: 'transform',
         component: 'dataEditor',
-        options: createSignal([]),
+
         openMenu: createSignal(null),
         dialogLabel: 'Adjust Transform',
         children: {
@@ -887,7 +900,7 @@ const EffectsSection = {
                         label: 'Type', isLabelOnTop: true,
                         component: 'select',
                         options: ['move x', 'move y', 'move z', 'rotate x', 'rotate y', 'rotate z', 'scale', 'scale x', 'scale y', 'scale z', 'skew x', 'skew y'],
-                        state: createSignal('move x')
+
                     },
                     {
                         name: 'value',
@@ -896,8 +909,8 @@ const EffectsSection = {
                         isLabelOnTop: true,
                         component: 'textFieldOptions',
                         options: sizeTypes,
-                        state: createSignal(null),
-                        optionState: createSignal('px')
+
+
                     }
                 ]
             }
@@ -921,8 +934,7 @@ const EffectsSection = {
                 label: 'Transform Origin',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
                 name: 'transformOriginType',
@@ -932,7 +944,7 @@ const EffectsSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     },
@@ -950,7 +962,6 @@ const EffectsSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['visible', 'hidden', 'scroll', 'auto'],
-                state: createSignal('visible')
             },
             {
                 name: 'overflowType',
@@ -960,7 +971,6 @@ const EffectsSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
             },
         ]
     },
@@ -968,12 +978,11 @@ const EffectsSection = {
         component: 'toggleButton',
         label: 'Backface',
         isLabelOnTop: true,
-        name: 'backface',
+        name: 'backface-visibility',
         options: [
-            {key: 'Visible', value: true},
-            {key: 'Hidden', value: false}
+            {key: 'Visible', value: 'visible'},
+            {key: 'Hidden', value: 'hidden'}
         ],
-        state: createSignal(true)
     },
     divider4: {
         title: 'Children transform',
@@ -993,19 +1002,17 @@ const EffectsSection = {
                 label: 'Perspective',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('px'),
+
             },
             {
-                name: 'perspectiveType',
+                name: 'transform-style',
                 label: 'Type',
                 isLabelOnTop: true,
                 component: 'buttonGroups',
                 options: [
-                    {key: '2D', value: '2d'},
-                    {key: '3D', value: '3d'},
+                    {key: '2D', value: 'flat', tooltip: '2D'},
+                    {key: '3D', value: 'preserve-3d', tooltip: '3D'},
                 ],
-                state: createSignal('2d')
             },
         ]
     },
@@ -1023,8 +1030,6 @@ const EffectsSection = {
                 label: 'Perspective origin',
                 component: 'textFieldOptions',
                 options: sizeTypes,
-                state: createSignal(0),
-                optionState: createSignal('%'),
             },
             {
                 name: 'perspectiveOriginType',
@@ -1034,7 +1039,7 @@ const EffectsSection = {
                     {key: <AllSVGIcon/>, value: 'all'},
                     {key: <CustomSVGIcon/>, value: 'custom'},
                 ],
-                state: createSignal('all')
+
             },
         ]
     },

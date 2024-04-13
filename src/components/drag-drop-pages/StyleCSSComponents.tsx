@@ -15,7 +15,8 @@ import {
 import {TextField} from "../solid-blocks/blocks";
 import {RenderComponent} from "./RenderComponent";
 import {CustomTooltip} from "../custom-component/Tooltip";
-import {CssEditorContext} from "./cssEditorContext";
+import {CssEditorContext, sizeTypes} from "./cssEditorContext";
+import {number} from "../../lib/jsonata/functions";
 
 export const StyleCSSComponents = () => {
     const IconifyIcon = (props: IconifyIconProps) => {
@@ -32,18 +33,21 @@ export const StyleCSSComponents = () => {
     const Container =
         (props: { class?: string, children: JSXElement }) => <span
             class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}>{props.children}</span>
+
     const DisplaySelector = (props: {
+        name: string,
         options: any,
         isLabelOnTop: boolean,
         label: string,
-        selected: Accessor<any>,
-        setSelected: Setter<any>,
     }) => {
+        const [cssState, setCssState] = useContext(CssEditorContext);
         const [isActive, setIsActive] = createSignal(false);
         const toggleDropdown = () => setIsActive(!isActive());
+        console.log(cssState[props.name] || props.options[0].value || props.options[0])
+        const selected = () => cssState[props.name] || props.options[0].value || props.options[0];
 
         const selectOption = (option: any) => {
-            props.setSelected(option);
+            setCssState(props.name, option.value || option);
             setIsActive(false);
         };
 
@@ -59,6 +63,7 @@ export const StyleCSSComponents = () => {
             onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
         });
 
+
         return (
             <Container>
                 <Show when={props.isLabelOnTop} fallback={
@@ -73,13 +78,13 @@ export const StyleCSSComponents = () => {
                         <ContainerLabel title={props.label}/>
                         <Content/>
                     </div>
-
                 </Show>
             </Container>
         );
 
         function Content() {
             return (
+
                 <div class={`rel ${props.isLabelOnTop ? 'w:full' : 'w:50%'}`}>
                     <div
                         class={`flex ai:center jc:space-between b:1px|solid|lightgray r:5 p:2|7 f:14 ${isActive() ? 'open' : ''}`}
@@ -93,7 +98,7 @@ export const StyleCSSComponents = () => {
                             aria-expanded={isActive()}
                         >
                         <span
-                            class="selected-value">{props.selected().charAt(0).toUpperCase() + props.selected().slice(1)}</span>
+                            class="selected-value">{selected().charAt(0).toUpperCase() + selected().slice(1)}</span>
                             <span class="arrow"></span>
                         </button>
                         <div><Icon icon={'teenyicons:down-small-outline'} height={22} width={22}/></div>
@@ -103,45 +108,49 @@ export const StyleCSSComponents = () => {
                         style={'max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;'}
                         role="listbox" id={`select-dropdown${props.label}`}>
                         <For each={props.options}>
-                            {(option: string) =>
-                                <li class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${props.selected() !== option ? 'bg:#efefef:hover' : 'bg:rgb(229,234,253):hover'} font-weight:${props.selected() === option ? 'medium' : ''} r:5 ${props.selected() === option ? 'bg:rgb(229,234,253)' : ''}`}
+                            {(option) => {
+                                const label = () => option.value || option
+                                return <li
+                                    class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${selected() !== label() ? 'bg:#efefef:hover' : 'bg:rgb(229,234,253):hover'} font-weight:${selected() === label() ? 'medium' : ''} r:5 ${selected() === label() ? 'bg:rgb(229,234,253)' : ''}`}
                                     role="option" onClick={() => selectOption(option)}>
-                                    <label for={option}>
-                                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                                    <label>
+                                        {label().charAt(0).toUpperCase() + label().slice(1)}
                                     </label>
-                                    <Show when={props.selected() === option}>
+                                    <Show when={selected() === label()}>
                                         <Icon icon={'icon-park-outline:check-one'} height={22} width={22}
                                               style={{color: 'dodgerblue'}}/>
                                     </Show>
                                 </li>
-                            }</For>
+                            }}</For>
                     </ul>
                 </div>
+
+
             );
         }
     }
 
     const ColorPickerInput = (props: {
-        color: Accessor<any>,
-        setColor: Setter<any>,
         isLabelOnTop: boolean,
+        name: string,
         label: any
     }) => {
-        const handleChange = (event) => {
-            props.setColor(event.target.value);
+        const [cssState, setCssState] = useContext(CssEditorContext);
+        const handleChange = (event: any) => {
+            setCssState(props.name, event.target.value);
         };
 
         const Content = () => <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
             <input
                 type="color"
                 class="color-picker__input-color mr:10 cursor:pointer; h:25px w:30px r:5 p:0 bg:#ffffff b:none"
-                value={props.color()}
+                value={cssState[props.name] ?? ''}
                 onInput={handleChange}
             />
             <input
                 type="text"
                 class="b:none w:100% f:14 outline:none"
-                value={props.color()}
+                value={cssState[props.name] ?? ''}
                 onInput={handleChange}
             />
         </div>
@@ -168,38 +177,29 @@ export const StyleCSSComponents = () => {
     };
 
     const ButtonGroups = (props: {
-        options: { key: JSX.Element; value: string }[],
+        options: { key: JSX.Element; value: string; tooltip?: string }[],
         name: string,
-        selectedOption: Accessor<string>,
-        setSelectedOption: Setter<string>,
-        showIcon?: boolean,
         label: any,
         isLabelOnTop: boolean,
-        onIconClick?: any,
-        radioInputStyle?: JSX.CSSProperties,
-        radioStyle?: JSX.CSSProperties,
-        inputStyle?: JSX.CSSProperties,
-        nameStyle?: JSX.CSSProperties
-        labelClass?: string
     }) => {
-
+        const [cssState, setCssState] = useContext(CssEditorContext);
+        const selected = () => cssState[props.name] ?? props.options[0].value;
         const handleChange = (option: { key: JSX.Element; value: string }) => {
-            props.setSelectedOption(option.value);
+            setCssState(props.name, option.value);
         };
 
-        const Content = () => <div class={`radio-inputs w:100%`} style={props.radioInputStyle}>
+        const Content = () => <div class={`radio-inputs w:100%`}>
             <For each={props.options}>
                 {(option, index) => {
-                    return <label class={`radio`} style={props.radioStyle}>
-                        <CustomTooltip message={option.value}>
+                    return <label class={`radio`}>
+                        <CustomTooltip message={option.tooltip ?? option.value}>
                             <input
                                 type="radio"
                                 name={props.name}
-                                style={props.inputStyle}
-                                checked={props.selectedOption() === option.value}
+                                checked={selected() === option.value}
                                 onChange={() => handleChange(option)}
                             />
-                            <span class={`name`} style={props.nameStyle}>{option.key}</span>
+                            <span class={`name`}>{option.key}</span>
                         </CustomTooltip>
                     </label>
                 }}
@@ -209,7 +209,7 @@ export const StyleCSSComponents = () => {
         return <Show when={props.isLabelOnTop} fallback={
             <Show when={props.label} fallback={<Content/>}>
                 <CenterDiv>
-                    <ContainerLabel title={props.label}/>
+                    <ContainerLabel title={props.label} showIcon={true}/>
                     <Content/>
                 </CenterDiv>
             </Show>
@@ -225,11 +225,7 @@ export const StyleCSSComponents = () => {
 
     const TextFieldWithSelectOption = (props: {
         name: string,
-        inputValue: Accessor<string>,
-        setInputValue: Setter<string>,
         options?: string[],
-        selectedOption?: Accessor<string>,
-        setOption?: Setter<string>,
         leftIcon?: JSXElement,
         isLabelOnTop?: boolean,
         label?: string,
@@ -239,6 +235,8 @@ export const StyleCSSComponents = () => {
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
+        const [selectedOption, setOption] = createSignal('px');
+
 
         const toggleDropdown = (event: any) => {
             event.stopPropagation(); // Prevent click from immediately closing the dropdown
@@ -247,8 +245,33 @@ export const StyleCSSComponents = () => {
 
         const selectOption = (option: string) => {
             setIsDropdownOpen(false);
-            if (props.setOption) props.setOption(option); // Check if the handler is provided
+            setCssState(props.name, removeSizeTypesFromString(cssState[props.name]) + option)
+            setOption(option); // Check if the handler is provided
         };
+
+        const removeSizeTypesFromString = (inputString) => {
+            if (!inputString) return '';
+            if (inputString.toLowerCase().includes('px')) {
+                return inputString.replace(/\b(\d+)px\b/g, '$1');
+            }
+            if (inputString.toLowerCase().includes('%')) {
+                return inputString.replace(/\b(\d+)%\b/g, '$1');
+            }
+            if (inputString.toLowerCase().includes('em')) {
+                return inputString.replace(/\b(\d+)em\b/g, '$1');
+            }
+            if (inputString.toLowerCase().includes('rem')) {
+                return inputString.replace(/\b(\d+)rem\b/g, '$1');
+            }
+            if (inputString.toLowerCase().includes('vh')) {
+                return inputString.replace(/\b(\d+)vh\b/g, '$1');
+            }
+            if (inputString.toLowerCase().includes('vw')) {
+                return inputString.replace(/\b(\d+)vw\b/g, '$1');
+            }
+
+        };
+
         const Content = () => <div
             class={`flex ai:center jc:space-between ${props.showInside ? 'b:1px|solid|#ccc' : ''} r:5 ${props.showInside ? "p:0|5|0|5" : ""} rel ${!props.isLabelOnTop ? 'max-w:50%' : ''}`}>
 
@@ -265,33 +288,38 @@ export const StyleCSSComponents = () => {
                 </Show>
                 <Show when={props.showInside} fallback={<TextField
                     label={props.label}
-                    placeholder={props.placeholder}
+                    type={props.inputType || 'text'}
+                    placeholder={`${props.inputType === 'number' ? '0' : props.placeholder}`}
                     value={cssState[props.name] ?? ''}
-                    onInput={(e) => setCssState(props.name, e.target.value)}
+                    onInput={(e) => setCssState(props.name, e.target.value + selectedOption())}
                     class={`f:14`}
                     style={{width: '100%'}} // Set width to 100%
                 />}>
                     <input
                         type={props.inputType || 'text'}
-                        placeholder={props.placeholder}
-                        value={cssState[props.name] ?? ''}
-                        onInput={(e) => setCssState(props.name, e.target.value)}
-                        class={`f:14 outline:none p:5`}
-                        style={{width: '100%'}} // Set width to 100%
+                        placeholder={props.inputType === 'number' ? '0' : props.placeholder}
+                        value={removeSizeTypesFromString(cssState[props.name] || '')}
+                        onInput={(e) => {
+                            const inputValue = e.target.value;
+                            const newValue = inputValue.endsWith(selectedOption()) ? inputValue : inputValue + selectedOption();
+                            setCssState(props.name, newValue);
+                        }}
+                        className="f:14 outline:none p:5"
+                        style={{width: '100%'}}
                     />
                 </Show>
             </div>
             <Show when={props.options}>
                 <span onClick={toggleDropdown}
-                      class={'color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none'}>{props.selectedOption!()}</span>
+                      class={'color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none'}>{selectedOption!()}</span>
                 <Show when={isDropdownOpen()}>
                     <div
                         class={`bg:white w:full box-shadow:0px|2px|5px|rgba(0,0,0,0.2) r:5 p:5 abs z-index:1000 top:100% left:0`}>
                         <For each={props.options}>{(option) => (
                             <div onClick={() => selectOption(option)}
-                                 class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${props.selectedOption!() === option ? 'bg:rgb(229,234,253) font-weight:medium' : 'bg:transparent'} r:5`}>
+                                 class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${selectedOption!() === option ? 'bg:rgb(229,234,253) font-weight:medium' : 'bg:transparent'} r:5`}>
                                 {option}
-                                <Show when={props.selectedOption!() === option}>
+                                <Show when={selectedOption!() === option}>
                                     <Icon icon={'mdi:check'}/>
                                 </Show>
                             </div>
@@ -300,57 +328,59 @@ export const StyleCSSComponents = () => {
                 </Show>
             </Show>
         </div>
+        /*
 
-        const JSONSS = {
-            'visibility': {
-                'component': 'toggleButton',
-                'label': 'Visibility',
-                'name': 'Visibility',
-                'options': [
-                    {'key': <IconifyIcon icon="solar:eye-broken"/>, 'value': true},
-                    {'key': <IconifyIcon icon="ant-design:eye-invisible-outlined"/>, 'value': false}
-                ],
-                'state': createSignal(true)
-            },
-            'FlexGrow': {
-                name: 'Flex Grow',
-                label: 'Flex Grow',
-                type: 'number',
-                component: 'textFieldOptions',
-                state: createSignal('0'),
-                leftIcon: (
-                    <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                        <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                    </button>
-                )
-            },
-            'FlexShrink': {
-                name: 'Flex Shrink',
-                label: 'Flex Shrink',
-                type: 'number',
-                component: 'textFieldOptions',
-                state: createSignal('0'),
-                leftIcon: (
-                    <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                        <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                    </button>
-                )
-            },
-            'FlexBase': {
-                name: 'Flex Base',
-                label: 'Flex Base',
-                type: 'number',
-                component: 'textFieldOptions',
-                options: ['px'],
-                optionState: createSignal('%'),
-                state: createSignal('0'),
-                leftIcon: (
-                    <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                        <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                    </button>
-                )
-            }
-        }
+                const JSONSS = {
+                    'visibility': {
+                        'component': 'toggleButton',
+                        'label': 'Visibility',
+                        'name': 'Visibility',
+                        'options': [
+                            {'key': <IconifyIcon icon="solar:eye-broken"/>, 'value': true},
+                            {'key': <IconifyIcon icon="ant-design:eye-invisible-outlined"/>, 'value': false}
+                        ],
+                        'state': createSignal(true)
+                    },
+                    'FlexGrow': {
+                        name: 'Flex Grow',
+                        label: 'Flex Grow',
+                        type: 'number',
+                        component: 'textFieldOptions',
+                        state: createSignal('0'),
+                        leftIcon: (
+                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
+                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
+                            </button>
+                        )
+                    },
+                    'FlexShrink': {
+                        name: 'Flex Shrink',
+                        label: 'Flex Shrink',
+                        type: 'number',
+                        component: 'textFieldOptions',
+                        state: createSignal('0'),
+                        leftIcon: (
+                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
+                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
+                            </button>
+                        )
+                    },
+                    'FlexBase': {
+                        name: 'Flex Base',
+                        label: 'Flex Base',
+                        type: 'number',
+                        component: 'textFieldOptions',
+                        options: ['px'],
+                        optionState: createSignal('%'),
+                        state: createSignal('0'),
+                        leftIcon: (
+                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
+                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
+                            </button>
+                        )
+                    }
+                }
+        */
 
         return (
             <Container>
@@ -387,27 +417,25 @@ export const StyleCSSComponents = () => {
     const ToggleButton = (props: {
         options: { key: JSX.Element; value: string }[],
         label: JSXElement,
+        name: string,
         isLabelOnTop: boolean,
-        selected: Accessor<string>,
-        setSelected: Setter<string>,
-        divClass?: string,
-        optionClass?: string
-        labelClass?: string
     }) => {
-        const isSelected = (option: any) => props.selected() === option.value;
+        const [cssState, setCssState] = useContext(CssEditorContext);
+        const selected = () => cssState[props.name] ?? props.options[0].value;
+        const isSelected = (option: any) => selected() === option.value;
 
         const Content = () => <div
-            class={`inline-flex b:1px|solid|#ccc r:5 overflow:hidden ${props.divClass} ${!props.isLabelOnTop && props.label ? 'w:50%' : "w:100%"}`}>
+            class={`inline-flex b:1px|solid|#ccc r:5 overflow:hidden ${!props.isLabelOnTop && props.label ? 'w:50%' : "w:100%"}`}>
             <For each={props.options}>
                 {(option) => {
                     return <div
-                        onClick={() => props.setSelected(option.value)}
+                        onClick={() => setCssState(props.name, option.value)}
                         class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
                                      bg:${isSelected(option) ? '#e0e7f3' : 'transparent'}
                                       color:${isSelected(option) ? '#5252f1' : 'black'}
                                        r:${props.options.indexOf(option) === 0 ? '5|0|0|5' :
                             props.options.indexOf(option) === props.options.length - 1 ?
-                                '0|5|5|0' : '0'} ${props.optionClass}`}
+                                '0|5|5|0' : '0'}`}
                     >
                         {option.key}
                     </div>
@@ -436,29 +464,94 @@ export const StyleCSSComponents = () => {
 
     const DataEditor = (props: {
         label: any,
+        name: string,
         openMenu: Accessor<any>,
         setOpenMenu: Setter<any>,
-        options: Accessor<any>,
-        setOption: Setter<any>,
         centerComponent?: JSXElement,
         dialogLabel: any,
         children: any,
         fallback?: any,
     }) => {
+        const [cssState, setCssState] = useContext(CssEditorContext);
         const addOption = () => {
-            if (props.label.includes('Shadow')) {
-                props.setOption([...props.options(), {x: 0, y: 0, blur: 5, spread: 0, color: 'black', style: ''}]);
+
+            if (props.label.includes('Text Shadow')) {
+                let currentOptions = cssState[props.name] ? cssState[props.name].split(',') : [];
+                currentOptions.push('0|0|5px|black');
+                const newValue = currentOptions.join(',');
+                setCssState(props.name, newValue);
             } else if (props.label.includes('Filter')) {
-                props.setOption([...props.options(), {value: 0, type: 'blur'}]);
-            } else if (props.label.includes('Transform')) {
-                props.setOption([...props.options(), {value: 0, type: 'move x'}]);
+                let currentOptions = cssState[props.name] ? cssState[props.name].split('|') : [];
+                currentOptions.push('blur(3px)');
+                const newValue = currentOptions.join('|');
+                setCssState(props.name, newValue);
+            } else if (props.label.includes('Box Shadow')) {
+                let currentOptions = cssState[props.name] ? cssState[props.name].split(',') : [];
+                currentOptions.push('0|0|5px|0|black');
+                const newValue = currentOptions.join(',');
+                setCssState(props.name, newValue);
             } else if (props.label.includes('Transition')) {
-                props.setOption([...props.options(), {easing: 'ease-in', duration: 0, delay: 0, type: 'opacity'}]);
+                let currentOptions = cssState[props.name] ? cssState[props.name].split(',') : [];
+                currentOptions.push('opacity|1s|ease|0s');
+                const newValue = currentOptions.join(',');
+                setCssState(props.name, newValue);
+            } else if (props.label.includes('Transform')) {
+                let currentOptions = cssState[props.name] ? cssState[props.name].split('|') : [];
+                currentOptions.push('rotate(10deg)');
+                const newValue = currentOptions.join('|');
+                setCssState(props.name, newValue);
             }
+
+
+            // // Get the current value for the property
+            // const currentOptions = cssState[props.name] ?? [];
+            //
+            // // Determine the new value based on the label
+            // let newValue;
+            // if (props.label.includes('Shadow')) {
+            //     newValue = [...currentOptions, '0|0|5px|0|black'];
+            //     setCssState(props.name, newValue.join(','));
+            // } else if (props.label.includes('Filter')) {
+            //     newValue = [...currentOptions, 'blur(3px)'];
+            //     setCssState(props.name, newValue.join('|'));
+            // } else if (props.label.includes('Transform')) {
+            //     newValue = [...currentOptions, {value: 0, type: 'move x'}];
+            //     setCssState(props.name, newValue.join('|'));
+            // } else if (props.label.includes('Transition')) {
+            //     newValue = [...currentOptions, {
+            //         easing: 'ease-in',
+            //         duration: 0,
+            //         delay: 0,
+            //         type: 'opacity'
+            //     }];
+            //     setCssState(props.name, newValue.join('|'));
+            // }
         };
 
+        const getOptions = () => {
+            if (props.label.includes('Shadow') || props.label.includes('Transition')) {
+                return (cssState[props.name] && cssState[props.name].split(',')) || []
+            } else if (props.label.includes('Filter')) {
+                return (cssState[props.name] && cssState[props.name].split('|')) || []
+            } else if (props.label.includes('Transform')) {
+                return (cssState[props.name] && cssState[props.name].split('|')) || []
+            } else {
+                return []
+            }
+        }
+
         const deleteOption = (index: number) => {
-            props.setOption(props.options().filter((_: any, i: any) => i !== index));
+            if (props.label.includes('Shadow') || props.label.includes('Transition')) {
+                const data = cssState[props.name].split(',').filter((_: any, i: any) => i !== index);
+                setCssState(props.name, data.join(','));
+            } else if (props.label.includes('Filter')) {
+                const data = cssState[props.name].split('|').filter((_: any, i: any) => i !== index);
+                setCssState(props.name, data.join('|'));
+            } else if (props.label.includes('Transform')) {
+                const data = cssState[props.name].split('|').filter((_: any, i: any) => i !== index);
+                setCssState(props.name, data.join('|'));
+            }
+
         };
 
         const openPopup = (index: number) => {
@@ -510,7 +603,7 @@ export const StyleCSSComponents = () => {
         });
 
         const Component = (p: { option: any, i: any }) => {
-            console.log(props.label)
+
             return <Switch>
                 <Match when={props.label.includes('Shadow')}>
                     <span class={'f:14'} onClick={(e) => {
@@ -518,9 +611,8 @@ export const StyleCSSComponents = () => {
                     }} style={{
                         flex: '1',
                         'margin-right': '8px'
-                    }}>{`${p.option.x}px ${p.option.y} ${p.option.blur}px ${p.option.spread}`}</span>
-                    <div class={'mr:10 h:20px bg:#fff w:20px r:5'}
-                         style={{'box-shadow': `${p.option.x}px ${p.option.y}px ${p.option.blur}px ${p.option.color} ${p.option.style}`}}/>
+                    }}>{p.option.replaceAll('|', ' ')}</span>
+                    <div class={`mr:10 h:20px bg:#fff w:20px r:5 box-shadow:${p.option}`}/>
                 </Match>
                 {props.label}
                 <Match when={props.label.includes('Filter')}>
@@ -529,7 +621,7 @@ export const StyleCSSComponents = () => {
                     }} style={{
                         flex: '1',
                         'margin-right': '8px'
-                    }}>{`${p.option.value}px ${p.option.type}`}</span>
+                    }}>{p.option.replaceAll(')', '').replaceAll('(', ' ')}</span>
                 </Match>
                 <Match when={props.label.includes('Transition')}>
                     <span class={'f:14'} onClick={(e) => {
@@ -537,7 +629,7 @@ export const StyleCSSComponents = () => {
                     }} style={{
                         flex: '1',
                         'margin-right': '8px'
-                    }}>{`${p.option.type}: ${p.option.duration}s`}</span>
+                    }}>{p.option.replaceAll('|', ' ')}</span>
                 </Match>
                 <Match when={props.label.includes('Transform')}>
                     <span class={'f:14'} onClick={(e) => {
@@ -545,7 +637,7 @@ export const StyleCSSComponents = () => {
                     }} style={{
                         flex: '1',
                         'margin-right': '8px'
-                    }}>{`${p.option.type}: ${p.option.value}px`}</span>
+                    }}>{p.option.replaceAll(')', '').replaceAll('(', ' ')}</span>
                 </Match>
                 <Match when={true}>
                     {props.centerComponent}
@@ -560,16 +652,18 @@ export const StyleCSSComponents = () => {
                 margin: '10px',
                 "width": '-webkit-fill-available'
             }}>
-                <div class={`${props.options().length > 0 ? 'bb:1|solid|lightgrey m:1 pb:5' : ''}`} style={{
-                    display: 'flex',
-                    'justify-content': 'space-between',
-                    'align-items': 'center',
-                    'margin-bottom': '6px'
-                }}>
+                <div
+                    class={`${getOptions().length > 0 ? 'bb:1|solid|lightgrey m:1 pb:5' : ''}`}
+                    style={{
+                        display: 'flex',
+                        'justify-content': 'space-between',
+                        'align-items': 'center',
+                        'margin-bottom': '6px'
+                    }}>
                     <ContainerLabel title={props.label}/>
                     <Icon class={'cursor:pointer'} onClick={addOption} icon={'lets-icons:add-round'}/>
                 </div>
-                <For each={props.options()}>
+                <For each={getOptions()}>
                     {(option, i) => (
                         <div style={{
                             display: 'flex',

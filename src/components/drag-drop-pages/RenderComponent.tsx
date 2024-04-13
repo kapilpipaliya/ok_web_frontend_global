@@ -13,10 +13,9 @@ export const RenderComponent = (props: { value: any }) => {
     return <Switch>
         <Match when={props.value.component === 'colorPicker'}>
             <ColorPickerInput
+                name={props.value.name}
                 label={props.value.label}
                 isLabelOnTop={props.value.isLabelOnTop}
-                color={props.value.state[0]}
-                setColor={props.value.state[1]}
             />
         </Match>
         <Match when={props.value.component === 'select'}>
@@ -24,21 +23,23 @@ export const RenderComponent = (props: { value: any }) => {
                 name={props.value.name}
                 label={props.value.label}
                 isLabelOnTop={props.value.isLabelOnTop}
-                options={props.value.options}
-                selected={props.value.state[0]}
-                setSelected={props.value.state[1]}/>
+                options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'toggleButton'}>
             <ToggleButton
                 isLabelOnTop={props.value.isLabelOnTop}
                 label={props.value.label}
-                setSelected={props.value.state[1]}
-                selected={props.value.state[0]}
+                name={props.value.name}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'textField'}>
-            <TextFieldWithSelectOption name={props.value.name} setInputValue={props.value.state[1]} isLabelOnTop={props.value.isLabelOnTop}
-                                       label={props.value.label} inputValue={props.value.state[0]}
+            <TextFieldWithSelectOption name={props.value.name}
+                                       isLabelOnTop={props.value.isLabelOnTop}
+                                       label={props.value.label}
+                                       placeholder={props.value.placeholder}
+                                       leftIcon={props.value.leftIcon}
+                                       options={props.value.options}
+                                       showInside={props.value.showInside}
                                        inputType={props.value.type}/>
 
         </Match>
@@ -47,11 +48,8 @@ export const RenderComponent = (props: { value: any }) => {
             <TextFieldWithSelectOption name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        label={props.value.label}
-                                       setInputValue={props.value.state[1]}
-                                       inputValue={props.value.state[0]}
-                                       inputType={props.value.type} options={props.value.options}
-                                       setOption={props.value.optionState[1]}
-                                       selectedOption={props.value.optionState[0]}/>
+                                       placeholder={props.value.placeholder}
+                                       inputType={props.value.type} options={props.value.options}/>
 
         </Match>
         <Match when={props.value.component === 'grid'}>
@@ -75,20 +73,18 @@ export const RenderComponent = (props: { value: any }) => {
                 isLabelOnTop={props.value.isLabelOnTop}
                 name={props.value.name}
                 label={props.value.label}
-                selectedOption={props.value.state[0]}
-                setSelectedOption={props.value.state[1]}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'dataEditor'}>
             <DataEditor dialogLabel={props.value.dialogLabel} fallback={props.value.fallback}
+                        name={props.value.name}
                         centerComponent={props.value.centerComponent} children={props.value.children}
-                        options={props.value.options[0]}
-                        setOption={props.value.options[1]} openMenu={props.value.openMenu[0]}
+                        openMenu={props.value.openMenu[0]}
                         setOpenMenu={props.value.openMenu[1]} label={props.value.label}/>
         </Match>
         <Match when={props.value.component === 'divider'}>
             <hr class={'w:full color:lightgrey m:5|0'}/>
-            <Show  when={props.value.title}>
+            <Show when={props.value.title}>
                 <div class={'f:15'}>{props.value.title}</div>
             </Show>
         </Match>
