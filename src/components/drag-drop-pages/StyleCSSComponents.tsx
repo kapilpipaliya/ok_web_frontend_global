@@ -14,6 +14,7 @@ import {
 } from "solid-js";
 import {TextField} from "../solid-blocks/blocks";
 import {RenderComponent} from "./RenderComponent";
+import {CustomTooltip} from "../custom-component/Tooltip";
 
 export const StyleCSSComponents = () => {
     const IconifyIcon = (props: IconifyIconProps) => {
@@ -30,43 +31,32 @@ export const StyleCSSComponents = () => {
     const Container =
         (props: { class?: string, children: JSXElement }) => <span
             class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}>{props.children}</span>
-
-
     const DisplaySelector = (props: {
-        options: { key: any, value: string }[] | string[],
+        options: any,
         isLabelOnTop: boolean,
         label: string,
-        selected: Accessor<string>,
-        setSelected: Setter<string>,
+        selected: Accessor<any>,
+        setSelected: Setter<any>,
     }) => {
+        const [isActive, setIsActive] = createSignal(false);
+        const toggleDropdown = () => setIsActive(!isActive());
 
-        const Content = () => <div class={`w:${!props.isLabelOnTop ? "50%" : '100%'}`}>
-            <select
-                value={props.selected() || props.options[0]}
-                onInput={(e) => props.setSelected(e.currentTarget.value)}
-                class={`ui search dropdown w:100% p:5 b:1px|solid|#ccc r:5 f:14 appearance:none bg:white`}
-            >
-                <For each={props.options}>
-                    {(option) =>
-                        <option
-                            value={option.key ?? option}>{option.value ? option.value.charAt(0).toUpperCase() + option.value.slice(1) : option.charAt(0).toUpperCase() + option.slice(1)}
-                        </option>
-                    }
-                </For>
-            </select>
-            <span style={{position: 'relative'}}>
-                <Icon
-                    icon={'icon-park-outline:down'}
-                    style={{
-                        position: 'absolute',
-                        right: '10px',
-                        top: '50%',
-                        transform: 'translateY(-50%)',
-                        color: 'grey'
-                    }}
-                />
-            </span>
-        </div>;
+        const selectOption = (option: any) => {
+            props.setSelected(option);
+            setIsActive(false);
+        };
+
+        const handleClickOutside = (event: MouseEvent) => {
+            const dropdown = document.getElementById(`select-dropdown${props.label}`);
+            if (dropdown && !dropdown.contains(event.target as Node)) {
+                setIsActive(false);
+            }
+        };
+
+        createEffect(() => {
+            document.addEventListener('mousedown', handleClickOutside);
+            onCleanup(() => document.removeEventListener('mousedown', handleClickOutside));
+        });
 
         return (
             <Container>
@@ -86,6 +76,48 @@ export const StyleCSSComponents = () => {
                 </Show>
             </Container>
         );
+
+        function Content() {
+            return (
+                <div class={`rel ${props.isLabelOnTop ? 'w:full' : 'w:50%'}`}>
+                    <div
+                        class={`flex ai:center jc:space-between b:1px|solid|lightgray r:5 p:2|7 f:14 ${isActive() ? 'open' : ''}`}
+                        onClick={toggleDropdown}>
+                        <button
+                            class="select-button"
+                            role="combobox"
+                            aria-labelledby="select button"
+                            aria-haspopup="listbox"
+                            aria-controls={`select-dropdown${props.label}`}
+                            aria-expanded={isActive()}
+                        >
+                        <span
+                            class="selected-value">{props.selected().charAt(0).toUpperCase() + props.selected().slice(1)}</span>
+                            <span class="arrow"></span>
+                        </button>
+                        <div><Icon icon={'teenyicons:down-small-outline'} height={22} width={22}/></div>
+                    </div>
+
+                    <ul class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${isActive() ? 'visible' : 'hidden'}`}
+                        style={'max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;'}
+                        role="listbox" id={`select-dropdown${props.label}`}>
+                        <For each={props.options}>
+                            {(option: string) =>
+                                <li class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${props.selected() !== option ? 'bg:#efefef:hover' : 'bg:rgb(229,234,253):hover'} font-weight:${props.selected() === option ? 'medium' : ''} r:5 ${props.selected() === option ? 'bg:rgb(229,234,253)' : ''}`}
+                                    role="option" onClick={() => selectOption(option)}>
+                                    <label for={option}>
+                                        {option.charAt(0).toUpperCase() + option.slice(1)}
+                                    </label>
+                                    <Show when={props.selected() === option}>
+                                        <Icon icon={'icon-park-outline:check-one'} height={22} width={22}
+                                              style={{color: 'dodgerblue'}}/>
+                                    </Show>
+                                </li>
+                            }</For>
+                    </ul>
+                </div>
+            );
+        }
     }
 
     const ColorPickerInput = (props: {
@@ -158,16 +190,16 @@ export const StyleCSSComponents = () => {
             <For each={props.options}>
                 {(option, index) => {
                     return <label class={`radio`} style={props.radioStyle}>
-                        {/*<Tooltip content={option.value}>*/}
-                        <input
-                            type="radio"
-                            name={props.name}
-                            style={props.inputStyle}
-                            checked={props.selectedOption() === option.value}
-                            onChange={() => handleChange(option)}
-                        />
-                        <span class={`name`} style={props.nameStyle}>{option.key}</span>
-                        {/*</Tooltip>*/}
+                        <CustomTooltip message={option.value}>
+                            <input
+                                type="radio"
+                                name={props.name}
+                                style={props.inputStyle}
+                                checked={props.selectedOption() === option.value}
+                                onChange={() => handleChange(option)}
+                            />
+                            <span class={`name`} style={props.nameStyle}>{option.key}</span>
+                        </CustomTooltip>
                     </label>
                 }}
             </For>

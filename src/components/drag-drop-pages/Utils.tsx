@@ -74,8 +74,8 @@ const LayoutSection = {
         component: 'buttonGroups', isLabelOnTop: true,
         options: [
             {key: Icons.flex.auto, value: 'auto'},
-            {key: Icons.flex.expand, value: 'center'},
-            {key: Icons.flex.collapse, value: 'end'},
+            {key: Icons.flex.expand, value: 'expand'},
+            {key: Icons.flex.collapse, value: 'collapse'},
             {key: <CustomSVGIcon/>, value: 'custom'},
         ],
         state: createSignal('auto')
@@ -85,12 +85,12 @@ const LayoutSection = {
         label: 'Direction',
         component: 'buttonGroups', isLabelOnTop: true,
         options: [
-            {key: Icons.direction.horizontal, value: 'start'},
-            {key: Icons.direction.horizontalReverse, value: 'center'},
-            {key: Icons.direction.vertical, value: 'end'},
-            {key: Icons.direction.verticalReverse, value: 'end'},
+            {key: Icons.direction.horizontal, value: 'horizontal'},
+            {key: Icons.direction.horizontalReverse, value: 'horizontal-reverse'},
+            {key: Icons.direction.vertical, value: 'vertical'},
+            {key: Icons.direction.verticalReverse, value: 'vertical-reverse'},
         ],
-        state: createSignal('start')
+        state: createSignal('horizontal')
     },
     justify: {
         name: 'justify-content',
@@ -111,12 +111,12 @@ const LayoutSection = {
         label: 'Align',
         component: 'buttonGroups', isLabelOnTop: true,
         options: [
-            {key: Icons.align.stretch, value: 'start'},
-            {key: Icons.align.start, value: 'center'},
-            {key: Icons.align.center, value: 'end'},
+            {key: Icons.align.stretch, value: 'stretch'},
+            {key: Icons.align.start, value: 'start'},
+            {key: Icons.align.center, value: 'center'},
             {key: Icons.align.end, value: 'end'},
         ],
-        state: createSignal('start')
+        state: createSignal('stretch')
     },
     order: {
         name: 'Order',
@@ -602,7 +602,7 @@ const EffectsSection = {
             },
         ]
     },
-    cursor: {
+    cursors: {
         name: 'cursor',
         label: 'Cursor',
         isLabelOnTop: true,
@@ -946,7 +946,8 @@ const EffectsSection = {
         children: [
             {
                 name: 'overflow',
-                label: 'Overflow', isLabelOnTop: true,
+                label: 'Overflow',
+                isLabelOnTop: true,
                 component: 'select',
                 options: ['visible', 'hidden', 'scroll', 'auto'],
                 state: createSignal('visible')

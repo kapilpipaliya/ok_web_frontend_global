@@ -9,7 +9,7 @@ import {evaluate} from "../lib/jsep";
 import jsep from "jsep";
 import {setSelectionValue} from "./input/SelectionUtils";
 import {deleteNestedLayout} from "../lib/Traverse";
-import {useToast} from "./Toast/toast";
+import {useToast} from "./custom-component/toast";
 
 export const [selectedColl, setSelectedColl] = createSignal({vertexId: -1});
 
