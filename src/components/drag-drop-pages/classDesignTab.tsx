@@ -4,7 +4,7 @@ import StyleEditor from "./styleEditor";
 import {StyleCSSComponents} from "./StyleCSSComponents";
 import {createEffect, createSignal} from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
-import {CssEditorContext, CssEditorContext as CssEditorContext1} from "./cssEditorContext";
+import {CssEditorContext} from "./cssEditorContext";
 
 export const ClassDesignTab = (props: {
     component: string;
@@ -21,7 +21,7 @@ export const ClassDesignTab = (props: {
     const [cssState, setCssState] = createStore({} as {[key: string]: any});
 
     createEffect(() => {
-        const valueString: string = props.data.P[props.meta.P.name] ?? '';
+        const valueString: string = props.data?.P[props.meta.P.name] ?? '';
 
         const cssRules = {} as {[key: string]: string};
 
@@ -32,24 +32,19 @@ export const ClassDesignTab = (props: {
         setCssState(reconcile(cssRules));
     })
 
+    function getCssValue() {
+        return Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join(" ");
+    }
 
     createEffect(()=> {
-        props.setValue?.(Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join(' '));
+        props.setValue?.(getCssValue());
     })
 
     const TextEditor = () => {
-        const [text, setText] = createSignal("#i3vvs {\n" +
-            "\tcolor:black;\n" +
-            "\tborder-top-left-radius:35px;\n" +
-            "\tborder-top-right-radius:35px;\n" +
-            "\tborder-bottom-right-radius:35px;\n" +
-            "\tborder-bottom-left-radius:35px;\n" +
-            "\tmax-width:100%;\n" +
-            "\tmargin-top:38px;\n" +
-            "\tmargin-right:38px;\n" +
-            "\tmargin-bottom:38px;\n" +
-            "\tmargin-left:100px;\n" +
-            "}");
+        const [text, setText] = createSignal('');
+        createEffect(() => {
+            setText(getCssValue());
+        })
 
         const style = {
             color: "black",
@@ -62,7 +57,7 @@ export const ClassDesignTab = (props: {
             'border-radius': "6px"
         };
 
-        // This effect could be used for autosaving or other side effects as the text changes.
+        // This effect could be used for auto-saving or other side effects as the text changes.
         createEffect(() => {
             console.log("Text changed: ", text());
             // Here you could include logic to save the text to local storage, an API, etc.
@@ -72,7 +67,10 @@ export const ClassDesignTab = (props: {
             <textarea
                 style={style}
                 value={text()}
-                onInput={(e) => setText(e.target.value)}
+                onInput={(e) => {
+                    props.setValue?.(e.target.value);
+                    return setText(e.target.value);
+                }}
                 placeholder="Start typing..."
             />
         );
