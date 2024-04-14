@@ -1,4 +1,11 @@
-import {Accessor, batch, createMemo, createSelector, createSignal} from "solid-js";
+import {
+    Accessor,
+    batch,
+    createMemo,
+    createSelector,
+    createSignal,
+    untrack
+} from "solid-js";
 import {getNewGraphId, GraphInterface, Id, IdAttr, Vertex} from "../lib/graph";
 import {addNewRow, getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions, Record} from "../lib/Utils";
 import {findVertexByLabelAndUniqueId, mergeVertexProperties, newVertex} from "../lib/Vertex";
@@ -621,50 +628,52 @@ export const setPropertyValueGlobal = (
     value: any,
     valueSet?: boolean
 ) => {
-    // find existing row;
-    const rowProps = getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
-    let row = rowProps.find((vertex) => {
-        const name = getChildVertex(graph,["$0Name"], vertex).vertex;
-        return name?.P.name === meta.P.name;
-    });
-    if (row) {
-        if (valueSet ?? true) mergeVertexProperties(txnId, row.id, graph, setGraph, {value});
-    } else {
-        const propMetaVertex = newVertex(0, ["Meta"], {
-            name: "Prop",
-            displayName: "Property",
+    return untrack(() => {
+        // find existing row;
+        const rowProps = getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
+        let row = rowProps.find((vertex) => {
+            const name = getChildVertex(graph,["$0Name"], vertex).vertex;
+            return name?.P.name === meta.P.name;
         });
-        const componentProps =
-            getChildVertexes(graph, ["$0Prop"], [componentVertex]).vertexes || [];
-        const componentProp = componentProps.find((vertex) => {
-            return vertex.P.name === meta.P.name;
-        });
-        if (componentProp) {
-            const properties = valueSet ?? true ? {value} : {};
-            const addRowResult = addNewRow(
-                txnId,
-                propMetaVertex, graph,setGraph,
-                layoutVertex,
-                properties,
-                false,
-                {} as any
-            );
-            if (addRowResult.vertexId) {
-                row = graph.vertexes[addRowResult.vertexId];
-                setSelectionValue(
-                    txnId,
-                    graph.vertexes[addRowResult.vertexId], graph, setGraph,
-                    {P: {name: "Name"}} as unknown as Vertex,
-                    componentProp.id
+        if (row) {
+            if (valueSet ?? true) mergeVertexProperties(txnId, row.id, graph, setGraph, {value});
+        } else {
+            const propMetaVertex = newVertex(0, ["Meta"], {
+                name: "Prop",
+                displayName: "Property",
+            });
+            const componentProps =
+             getChildVertexes(graph, ["$0Prop"], [componentVertex]).vertexes || [];
+            const componentProp = componentProps.find((vertex) => {
+                return vertex.P.name === meta.P.name;
+            });
+            if (componentProp) {
+                const properties = valueSet ?? true ? {value} : {};
+                const addRowResult = addNewRow(
+                 txnId,
+                 propMetaVertex, graph,setGraph,
+                 layoutVertex,
+                 properties,
+                 false,
+                 {} as any
+                );
+                if (addRowResult.vertexId) {
+                    row = graph.vertexes[addRowResult.vertexId];
+                    setSelectionValue(
+                     txnId,
+                     graph.vertexes[addRowResult.vertexId], graph, setGraph,
+                     {P: {name: "Name"}} as unknown as Vertex,
+                     componentProp.id
+                    );
+                }
+            } else {
+                console.error(
+                 `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`
                 );
             }
-        } else {
-            console.error(
-                `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`
-            );
         }
-    }
-    // TODO: if reset, delete the row.
+        // TODO: if reset, delete the row.
 
-    return row;
+        return row;
+    })
 };

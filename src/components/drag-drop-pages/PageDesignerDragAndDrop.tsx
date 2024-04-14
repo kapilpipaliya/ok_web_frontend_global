@@ -664,7 +664,7 @@ export const PageDesignerDragAndDrop = () => {
                     meta,
                     graph.vertexes[selectedId()],
                     graph.vertexes[selectedComponent().vertexId],
-                    value,graph,setGraph
+                    value
                 );
             }
             return;

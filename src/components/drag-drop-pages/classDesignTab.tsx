@@ -2,7 +2,7 @@ import {Tab, TabContainer, TabList, Tabs} from "../solid-blocks/blocks";
 import {Vertex} from "../../lib/graph";
 import StyleEditor from "./styleEditor";
 import {StyleCSSComponents} from "./StyleCSSComponents";
-import {createEffect, createSignal} from "solid-js";
+import { createEffect, createSignal, on } from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
 import {CssEditorContext} from "./cssEditorContext";
 
@@ -10,7 +10,7 @@ export const ClassDesignTab = (props: {
     component: string;
     meta: Vertex;
     title?: string;
-    data?: Vertex;
+    data?: Vertex; // temp vertex
     setValue?: (data: any) => void;
     disabled?: boolean;
     isRealTime?: boolean;
@@ -20,20 +20,20 @@ export const ClassDesignTab = (props: {
 
     const [cssState, setCssState] = createStore({} as {[key: string]: any});
 
-    createEffect(() => {
-        const valueString: string = props.data?.P[props.meta.P.name] ?? '';
-
+    // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
+    const parseAndApplyCssRules = (valueString: string) => {
         const cssRules = {} as {[key: string]: string};
 
-        for (const [key, value] of valueString.split(' ').map(rule => rule.split(':'))) {
+        for (const [key, value] of valueString.split(/[\s\n]+/).map(rule => rule.split(':'))) {
             if (key === '') continue;
             cssRules[key] = value;
         }
         setCssState(reconcile(cssRules));
-    })
+    };
+    createEffect(on(() => props.data?.P[props.meta.P.name] as string ?? '', parseAndApplyCssRules));
 
     function getCssValue() {
-        return Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join(" ");
+        return Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join("\n");
     }
 
     createEffect(()=> {
@@ -41,7 +41,7 @@ export const ClassDesignTab = (props: {
     })
 
     const TextEditor = () => {
-        const [text, setText] = createSignal('');
+        const [text, setText] = createSignal(getCssValue());
         createEffect(() => {
             setText(getCssValue());
         })
@@ -57,19 +57,14 @@ export const ClassDesignTab = (props: {
             'border-radius': "6px"
         };
 
-        // This effect could be used for auto-saving or other side effects as the text changes.
-        createEffect(() => {
-            console.log("Text changed: ", text());
-            // Here you could include logic to save the text to local storage, an API, etc.
-        });
-
         return (
             <textarea
                 style={style}
                 value={text()}
                 onInput={(e) => {
-                    props.setValue?.(e.target.value);
-                    return setText(e.target.value);
+                    setText(e.target.value);
+                    parseAndApplyCssRules(e.target.value);
+                    // props.setValue?.(e.target.value);
                 }}
                 placeholder="Start typing..."
             />
