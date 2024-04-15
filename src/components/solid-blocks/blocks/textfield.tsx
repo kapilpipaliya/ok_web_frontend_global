@@ -70,7 +70,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
             {/* <span class="sb-textfield-label">{local.label}</span> */}
             <Switch>
                 <Match when={local.isNumber}>
-                    <div className="textInputWrapper">
+                    <div class="textInputWrapper">
                         <input
                             name='number'
                             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}

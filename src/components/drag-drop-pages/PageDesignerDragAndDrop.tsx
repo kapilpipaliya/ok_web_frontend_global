@@ -264,17 +264,22 @@ export const PageDesignerDragAndDrop = () => {
 
         return (
             <div>
-                <TextField
-                    label="Name"
-                    class="b:1|solid|blue-30 r:5|5|5|5 p:4"
-                    type="text"
-                    placeholder="Search Component..."
-                    value={searchQuery()}
-                    onInput={(e) => {
-                        setSearchQuery(e.target.value);
-                        updateFilteredData(); // Update filteredData when searchQuery changes
-                    }}
-                />
+                <nav class="bg:white 0px 0px 10px 10px w:full">
+                    <div class="group">
+                        <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
+                            <g>
+                                <path
+                                    d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
+                            </g>
+                        </svg>
+                        <input placeholder="Search Component..." type="search" class="inputSearch f:14" value={searchQuery()}
+                               onInput={(e) => {
+                                   setSearchQuery(e.target.value);
+                                   updateFilteredData(); // Update filteredData when searchQuery changes
+                               }}
+                        />
+                    </div>
+                </nav>
                 <div class="p:10">
                     <For
                         each={filteredData()}
@@ -425,7 +430,7 @@ export const PageDesignerDragAndDrop = () => {
                 deleteLayout
             } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex, collapsedKeys);
             const getComponent = () =>
-                getChildVertex(graph,["$0Comp"], props.vertex,).vertex?.P.name;
+                getChildVertex(graph, ["$0Comp"], props.vertex,).vertex?.P.name;
 
             return (
                 <div>
@@ -559,8 +564,7 @@ export const PageDesignerDragAndDrop = () => {
                                                         onClick: () => deleteLayout(getComponent()),
                                                         width: 18,
                                                         height: 18,
-                                                        class:
-                                                            "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
+                                                        class: "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
                                                         icon: "mage:trash",
                                                     },
                                                 },
@@ -659,7 +663,7 @@ export const PageDesignerDragAndDrop = () => {
                                   value: any,
         ) => {
             if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
-                return setPropertyValueGlobal(graph,setGraph,
+                return setPropertyValueGlobal(graph, setGraph,
                     pageConfig[0].record.txnId,
                     meta,
                     graph.vertexes[selectedId()],
@@ -676,7 +680,7 @@ export const PageDesignerDragAndDrop = () => {
                 return {error: true};
             }
 
-            return getChildVertexes(graph,["$0Prop"], [selectedComp]);
+            return getChildVertexes(graph, ["$0Prop"], [selectedComp]);
         };
 
         const toggleRulesModal = () => setIsRulesModalOpen((prev) => !prev);
@@ -757,7 +761,7 @@ export const PageDesignerDragAndDrop = () => {
                                             : [],
                                         {
                                             nameExpr: (v: Vertex) => {
-                                                const component = getChildVertex(graph,["$0Comp"], v).vertex
+                                                const component = getChildVertex(graph, ["$0Comp"], v).vertex
                                                     ?.P.name;
                                                 return `${v.P.name}${
                                                     component ? ` (${component})` : ""
@@ -840,7 +844,7 @@ export const PageDesignerDragAndDrop = () => {
                                         jsx: graph.vertexes[dataVertexId].P.jsx || "",
                                         parent: graph.vertexes[selectedId()],
                                     });
-                                    jsxParser.render(graph,setGraph);
+                                    jsxParser.render(graph, setGraph);
                                     // reset layout
                                     // layoutTreeViewInstance.option("items", getLayoutTreeData());
                                 },
@@ -959,12 +963,12 @@ export const PageDesignerDragAndDrop = () => {
                     component: "TextBox",
                 },
             ];
-            addMetaVertexes(graph,setGraph,txnId, graph.vertexes[metaVertexId], attributes);
+            addMetaVertexes(graph, setGraph, txnId, graph.vertexes[metaVertexId], attributes);
             onCleanup(() => {
                 revertTransaction(txnId);
             });
             const metaVertex = graph.vertexes[metaVertexId];
-            const collMetaVertex = getChildVertexes(graph,["MetaAttr"], [metaVertex]);
+            const collMetaVertex = getChildVertexes(graph, ["MetaAttr"], [metaVertex]);
 
             return (
                 <>
@@ -1128,10 +1132,14 @@ export const PageDesignerDragAndDrop = () => {
         />
     );
 
-    const Column = (props: { type: string, index: number }) => {
+    const Column = (props: { type: string, index: number, vertex: Vertex }) => {
+        const {
+            deleteLayout
+        } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex);
         return (
             <>
-                {props.index > 0 ? <hr class={'color:#ccc mt:5 mb:5'}/> : <div></div>}
+                {props.index > 0 && props.type === 'properties' && selectedId() === -1 ? <div/> : props.index > 0 ?
+                    <hr class={'color:#ccc mt:5 mb:5'}/> : <div></div>}
                 <div class={'p:5 direction:ltr'}>
                     <Switch>
                         <Match when={props.type === "components"}>
@@ -1345,7 +1353,6 @@ export const PageDesignerDragAndDrop = () => {
                             </div>}>
                                 <div class="m:5">
                                     <div
-                                        class={`mb:${isLayoutOpen() ? "10px" : "0px"}`}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
@@ -1376,7 +1383,7 @@ export const PageDesignerDragAndDrop = () => {
                                             style="cursor: pointer; flex-grow: 1; font-weight: bold"
                                             onClick={toggleIsLayoutOpen}
                                         >
-                                            Layout
+                                            Layers
                                         </div>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
@@ -1401,12 +1408,13 @@ export const PageDesignerDragAndDrop = () => {
                                     </div>
 
                                     <Show when={isLayoutOpen()}>
+                                        <hr class={'color:lightgrey m:.4rem|0'}/>
                                         {layoutPart}
                                     </Show>
                                 </div>
                             </Show>
                         </Match>
-                        <Match when={props.type === "properties"}>
+                        <Match when={props.type === "properties" && selectedId() !== -1}>
                             <Show when={isPropertiesExpanded()} fallback={<div
                                 class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
                                 style="transition: opacity 0.3s ease-in-out;"
@@ -1449,16 +1457,34 @@ export const PageDesignerDragAndDrop = () => {
                                                 </div>
                                             )}*/}
                                         <div
-                                            class="mb:2px ml:5px"
+                                            class="mb:2px ml:5px p:3|0"
                                             style="cursor: pointer; flex-grow: 1; font-weight: bold"
                                             onClick={toggleIsPropertiesOpen}
                                         >
                                             Properties
                                         </div>
+                                        <Tooltip content={"Delete"} nowrap>
+                                            <GenericField
+                                                meta={
+                                                    {
+                                                        P: {
+                                                            component: "Icon",
+                                                            props: {
+                                                                style: {color: "red"},
+                                                                onClick: () => deleteLayout(getChildVertex(graph, ["$0Comp"], props.vertex,).vertex?.P.name),
+                                                                width: 18,
+                                                                height: 18,
+                                                                class: "cursor:pointer  mr:5px",
+                                                                icon: "mage:trash",
+                                                            },
+                                                        },
+                                                    } as any
+                                                }
+                                            />
+                                        </Tooltip>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
                                             <div
-                                                class="mb:12"
                                                 style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
                                             >
                                                 <div
@@ -1485,6 +1511,9 @@ export const PageDesignerDragAndDrop = () => {
                                         </div>
                                     </div>
                                     <Show when={isPropertiesOpen()}>
+                                        <Show when={selectedId() !== -1}>
+                                            <hr class={'color:lightgrey m:.4rem|0'}/>
+                                        </Show>
                                         {propertiesPart}
                                     </Show>
                                 </div>
@@ -1558,6 +1587,7 @@ export const PageDesignerDragAndDrop = () => {
                                         </div>
                                     </div>
                                     <Show when={isFormOpen()}>
+                                        <hr class={'color:lightgrey m:.4rem|0'}/>
                                         {abstractSingleForm}
                                     </Show>
                                 </div>
@@ -1649,7 +1679,8 @@ export const PageDesignerDragAndDrop = () => {
                             }}>
                             <Show when={isLeftOpen()}>
                                 <For each={leftColumns()}>
-                                    {(column, index) => <Column type={column.id} index={index()}/>}
+                                    {(column, index) => <Column type={column.id} index={index()}
+                                                                vertex={pageConfig[0].record?.vertex}/>}
                                 </For>
                             </Show>
                         </div>
@@ -1687,7 +1718,8 @@ export const PageDesignerDragAndDrop = () => {
                             }}>
                             <Show when={isRightOpen()}>
                                 <For each={rightColumns()}>
-                                    {(column, index) => <Column type={column.id} index={index()}/>}
+                                    {(column, index) => <Column type={column.id} index={index()}
+                                                                vertex={pageConfig[0].record?.vertex}/>}
                                 </For>
                             </Show>
                         </div>

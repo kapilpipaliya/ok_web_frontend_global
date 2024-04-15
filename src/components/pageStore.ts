@@ -245,7 +245,7 @@ function getChildrenAttrs(graph: Store<GraphInterface>, setGraph: SetStoreFuncti
     );
 }
 
-export const useDragDrop = (graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>,record: Record, vertex: Vertex, collapsedKeys: Accessor<Id[]>, isPreview?: boolean) => {
+export const useDragDrop = (graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>,record: Record, vertex: Vertex, collapsedKeys?: Accessor<Id[]>, isPreview?: boolean) => {
     const {
         showSuccessToast
     } = useToast();

@@ -7,7 +7,7 @@ export const RenderComponent = (props: { value: any }) => {
         ButtonGroups,
         DataEditor,
         ColorPickerInput,
-        ToggleButton,
+        ToggleButton,FieldWithCustomProperty,
         TextFieldWithSelectOption
     } = StyleCSSComponents();
     return <Switch>
@@ -29,6 +29,7 @@ export const RenderComponent = (props: { value: any }) => {
             <ToggleButton
                 isLabelOnTop={props.value.isLabelOnTop}
                 label={props.value.label}
+
                 name={props.value.name}
                 options={props.value.options}/>
         </Match>
@@ -36,6 +37,7 @@ export const RenderComponent = (props: { value: any }) => {
             <TextFieldWithSelectOption name={props.value.name}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        label={props.value.label}
+                                       onChangeInput={props.value.onChangeInput}
                                        placeholder={props.value.placeholder}
                                        leftIcon={props.value.leftIcon}
                                        options={props.value.options}
@@ -47,6 +49,7 @@ export const RenderComponent = (props: { value: any }) => {
 
             <TextFieldWithSelectOption name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
                                        isLabelOnTop={props.value.isLabelOnTop}
+                                       onChangeInput={props.value.onChangeInput}
                                        label={props.value.label}
                                        placeholder={props.value.placeholder}
                                        inputType={props.value.type} options={props.value.options}/>
@@ -73,6 +76,17 @@ export const RenderComponent = (props: { value: any }) => {
                 isLabelOnTop={props.value.isLabelOnTop}
                 name={props.value.name}
                 label={props.value.label}
+                options={props.value.options}/>
+        </Match>
+        <Match when={props.value.component === 'fieldWithCustomProperty'}>
+            <FieldWithCustomProperty
+                isLabelOnTop={props.value.isLabelOnTop}
+                customProperty={props.value.customProperty}
+                gridType={props.value.gridType}
+                component={props.value.component}
+                name={props.value.name}
+                label={props.value.label}
+                inputType={props.value.inputType}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'dataEditor'}>

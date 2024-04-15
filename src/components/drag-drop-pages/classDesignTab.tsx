@@ -2,9 +2,11 @@ import {Tab, TabContainer, TabList, Tabs} from "../solid-blocks/blocks";
 import {Vertex} from "../../lib/graph";
 import StyleEditor from "./styleEditor";
 import {StyleCSSComponents} from "./StyleCSSComponents";
-import { createEffect, createSignal, on } from "solid-js";
+import {createEffect, createSignal, For, on, Show} from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
-import {CssEditorContext} from "./cssEditorContext";
+import {CssEditorContext, sizeTypes} from "./cssEditorContext";
+import {RenderComponent} from "./RenderComponent";
+import {Icon} from "@iconify-icon/solid";
 
 export const ClassDesignTab = (props: {
     component: string;
@@ -16,13 +18,13 @@ export const ClassDesignTab = (props: {
     isRealTime?: boolean;
     txnId?: number;
 }) => {
-    const {Container} = StyleCSSComponents();
+    const {Container,ButtonGroups} = StyleCSSComponents();
 
-    const [cssState, setCssState] = createStore({} as {[key: string]: any});
+    const [cssState, setCssState] = createStore({} as { [key: string]: any });
 
     // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
     const parseAndApplyCssRules = (valueString: string) => {
-        const cssRules = {} as {[key: string]: string};
+        const cssRules = {} as { [key: string]: string };
 
         for (const [key, value] of valueString.split(/[\s\n]+/).map(rule => rule.split(':'))) {
             if (key === '') continue;
@@ -36,7 +38,7 @@ export const ClassDesignTab = (props: {
         return Object.entries(cssState).map(([key, value]) => `${key}:${value}`).join("\n");
     }
 
-    createEffect(()=> {
+    createEffect(() => {
         props.setValue?.(getCssValue());
     })
 
@@ -70,15 +72,21 @@ export const ClassDesignTab = (props: {
             />
         );
     };
-    return <CssEditorContext.Provider value={[cssState, setCssState]}><tr class={'min-w:100% m:5px'}>
-        <td colspan="2">
-            <Tabs>
+
+
+
+    return <CssEditorContext.Provider value={[cssState, setCssState]}>
+        <tr class={'min-w:100% m:5px'}>
+            <td colspan="2">
+<span class={'m:10|0'}>
+     <Tabs style={{padding: "10px"}}>
                 <TabList class={'m:5px'}>
                     <Tab class={'w:50%'}>Design</Tab>
                     <Tab class={'w:50%'}>Code</Tab>
                 </TabList>
                 <TabContainer>
                     <Container>
+
                         <StyleEditor/>
                     </Container>
                 </TabContainer>
@@ -88,6 +96,8 @@ export const ClassDesignTab = (props: {
                     </Container>
                 </TabContainer>
             </Tabs>
-        </td>
-    </tr></CssEditorContext.Provider>
+</span>
+            </td>
+        </tr>
+    </CssEditorContext.Provider>
 }

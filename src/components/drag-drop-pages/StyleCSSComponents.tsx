@@ -9,16 +9,25 @@ import {
     Match,
     onCleanup,
     Setter,
-    Show, splitProps,
-    Switch, useContext
+    Show,
+    splitProps,
+    Switch,
+    useContext
 } from "solid-js";
 import {TextField} from "../solid-blocks/blocks";
 import {RenderComponent} from "./RenderComponent";
 import {CustomTooltip} from "../custom-component/Tooltip";
 import {CssEditorContext, sizeTypes} from "./cssEditorContext";
-import {number} from "../../lib/jsonata/functions";
 
 export const StyleCSSComponents = () => {
+    const AllSVGIcon = () => <svg viewBox="0 0 24 24" role="presentation" style="width: 20px; height: 20px;">
+        <path d="M3,21V3H21V21H3M5,5V19H19V5H5Z" style="fill: currentcolor;"></path>
+    </svg>
+    const CustomSVGIcon = () => <svg viewBox="0 0 24 24" role="presentation" style="width: 20px; height: 20px;">
+        <path
+            d="M15,21H17V19H15M19,21H21V19H19M7,21H9V19H7M11,21H13V19H11M19,17H21V15H19M19,13H21V11H19M3,3V21H5V5H21V3M19,9H21V7H19"
+            style="fill: currentcolor;"></path>
+    </svg>
     const IconifyIcon = (props: IconifyIconProps) => {
         const [selected, restProps] = splitProps(props, ['icon', 'height', 'width']);
         return <Icon icon={selected.icon} height={selected.height ?? 23} width={selected.width ?? 23} {...restProps} />;
@@ -43,7 +52,6 @@ export const StyleCSSComponents = () => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isActive, setIsActive] = createSignal(false);
         const toggleDropdown = () => setIsActive(!isActive());
-        console.log(cssState[props.name] || props.options[0].value || props.options[0])
         const selected = () => cssState[props.name] || props.options[0].value || props.options[0];
 
         const selectOption = (option: any) => {
@@ -181,10 +189,12 @@ export const StyleCSSComponents = () => {
         name: string,
         label: any,
         isLabelOnTop: boolean,
+        onChange?: any,
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const selected = () => cssState[props.name] ?? props.options[0].value;
         const handleChange = (option: { key: JSX.Element; value: string }) => {
+            props.onChange();
             setCssState(props.name, option.value);
         };
 
@@ -226,6 +236,7 @@ export const StyleCSSComponents = () => {
     const TextFieldWithSelectOption = (props: {
         name: string,
         options?: string[],
+        onChangeInput?: any,
         leftIcon?: JSXElement,
         isLabelOnTop?: boolean,
         label?: string,
@@ -235,8 +246,26 @@ export const StyleCSSComponents = () => {
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
-        const [selectedOption, setOption] = createSignal('px');
 
+        createEffect(v => {
+            setOption(determineSelectedOption())
+        })
+        const determineSelectedOption = () => {
+            if (!cssState[props.name]) return props.options?.[0];
+            return sizeTypes.find(unit => cssState[props.name].includes(unit));
+        };
+
+        const [selectedOption, setOption] = createSignal(determineSelectedOption());
+
+
+        const handleChange = (event: any) => {
+            const value = event.target.value;
+            const numericValue = parseFloat(value);
+            setCssState(props.name, `${numericValue}${selectedOption()}`);
+            if (props.onChangeInput) {
+                props.onChangeInput();
+            }
+        };
 
         const toggleDropdown = (event: any) => {
             event.stopPropagation(); // Prevent click from immediately closing the dropdown
@@ -245,32 +274,18 @@ export const StyleCSSComponents = () => {
 
         const selectOption = (option: string) => {
             setIsDropdownOpen(false);
-            setCssState(props.name, removeSizeTypesFromString(cssState[props.name]) + option)
-            setOption(option); // Check if the handler is provided
+            setOption(option);
+            const value = getValueWithoutUnits(cssState[props.name]);
+            setCssState(props.name, `${value}${selectedOption()}`);
         };
 
-        const removeSizeTypesFromString = (inputString) => {
-            if (!inputString) return '';
-            if (inputString.toLowerCase().includes('px')) {
-                return inputString.replace(/\b(\d+)px\b/g, '$1');
-            }
-            if (inputString.toLowerCase().includes('%')) {
-                return inputString.replace(/\b(\d+)%\b/g, '$1');
-            }
-            if (inputString.toLowerCase().includes('em')) {
-                return inputString.replace(/\b(\d+)em\b/g, '$1');
-            }
-            if (inputString.toLowerCase().includes('rem')) {
-                return inputString.replace(/\b(\d+)rem\b/g, '$1');
-            }
-            if (inputString.toLowerCase().includes('vh')) {
-                return inputString.replace(/\b(\d+)vh\b/g, '$1');
-            }
-            if (inputString.toLowerCase().includes('vw')) {
-                return inputString.replace(/\b(\d+)vw\b/g, '$1');
-            }
-
+        const getValueWithoutUnits = (valueWithUnits: string) => {
+            if (!valueWithUnits) return "";
+            const unitsToRemove = ['px', '%', 'em', 'rem', 'vh', 'vw'];
+            const regexPattern = new RegExp(unitsToRemove.join('|'), 'g');
+            return parseFloat(valueWithUnits.replace(regexPattern, ''));
         };
+
 
         const Content = () => <div
             class={`flex ai:center jc:space-between ${props.showInside ? 'b:1px|solid|#ccc' : ''} r:5 ${props.showInside ? "p:0|5|0|5" : ""} rel ${!props.isLabelOnTop ? 'max-w:50%' : ''}`}>
@@ -290,21 +305,17 @@ export const StyleCSSComponents = () => {
                     label={props.label}
                     type={props.inputType || 'text'}
                     placeholder={`${props.inputType === 'number' ? '0' : props.placeholder}`}
-                    value={cssState[props.name] ?? ''}
-                    onInput={(e) => setCssState(props.name, e.target.value + selectedOption())}
+                    value={getValueWithoutUnits(cssState[props.name] ?? '')}
+                    onInput={handleChange}
                     class={`f:14`}
                     style={{width: '100%'}} // Set width to 100%
                 />}>
                     <input
                         type={props.inputType || 'text'}
-                        placeholder={props.inputType === 'number' ? '0' : props.placeholder}
-                        value={removeSizeTypesFromString(cssState[props.name] || '')}
-                        onInput={(e) => {
-                            const inputValue = e.target.value;
-                            const newValue = inputValue.endsWith(selectedOption()) ? inputValue : inputValue + selectedOption();
-                            setCssState(props.name, newValue);
-                        }}
-                        className="f:14 outline:none p:5"
+                        placeholder={`${props.inputType === 'number' ? '0' : props.placeholder}`}
+                        value={getValueWithoutUnits(cssState[props.name] ?? '')}
+                        class="f:14 outline:none p:5"
+                        onInput={handleChange}
                         style={{width: '100%'}}
                     />
                 </Show>
@@ -687,13 +698,97 @@ export const StyleCSSComponents = () => {
             </div>
         );
     };
+    const FieldWithCustomProperty = (props: {
+        label: string,
+        name: string,
+        component: string,
+        isLabelOnTop: boolean,
+        options: any,
+        customProperty: any,
+        gridType?: string,
+        inputType?: string
+    }) => {
+        const [optionType, setOptionType] = createSignal('all')
+        const [cssState, setCssState] = useContext(CssEditorContext);
 
+
+        const onChangeAllField = () => {
+            let newState = {...cssState};
+            props.customProperty.forEach((property) => {
+                newState[property.name] = cssState[props.name];
+            });
+            setCssState(newState);
+        }
+
+        return <div>
+            <div style={{
+                display: 'grid',
+                'gap': '10px',
+                'align-items': 'end',
+                'grid-template-columns': '1fr 20%'
+            }}>
+                <RenderComponent value={{
+                    name: props.name,
+                    placeholder: '0',
+                    isLabelOnTop: props.isLabelOnTop,
+                    label: props.label,
+                    onChangeInput: () => {
+                        onChangeAllField()
+                    },
+                    component: props.inputType ?? 'textFieldOptions',
+                    options: props.options,
+                }
+                }/>
+                <ButtonGroups
+                    isLabelOnTop={false}
+                    name={'label'}
+                    label={false}
+                    onChange={() => {
+                        if (optionType() === 'all') {
+                            setOptionType('custom')
+                        } else {
+                            setOptionType('all')
+                        }
+                    }}
+                    options={[
+                        {
+                            key: <AllSVGIcon/>, value: 'all', tooltip: 'all'
+                        },
+                        {
+                            key: <CustomSVGIcon/>, value: 'custom', tooltip: 'custom'
+                        },
+                    ]}/>
+            </div>
+            <Show when={optionType() === 'custom'}>
+                <div class={'b:1px|solid|lightgray p:0|10 pb:7 r:5 m:5|10'} style={{
+                    display: 'grid',
+                    'gap': '10px',
+                    'align-items': 'end',
+                    'grid-template-columns': props.gridType ?? 'repeat(2,auto)'
+                }}>
+                    <For each={props.customProperty}>
+                        {(item) => {
+                            return <RenderComponent value={{
+                                name: item.name,
+                                isLabelOnTop: props.isLabelOnTop,
+                                placeholder: '0',
+                                label:item.label,
+                                component: props.inputType ?? 'textFieldOptions',
+                                options: props.options,
+                            }
+                            }/>
+                        }}
+                    </For>
+                </div>
+            </Show>
+        </div>
+    }
     return {
         IconifyIcon,
         Container,
         ContainerLabel,
         DisplaySelector,
-        ButtonGroups,
+        ButtonGroups, FieldWithCustomProperty,
         TextFieldWithSelectOption, DataEditor, ColorPickerInput,
         CenterDiv,
         ToggleButton

@@ -102,32 +102,20 @@ const LayoutSection = {
         ],
     },
     gap: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'gap',
-                type: 'number', isLabelOnTop: true,
-                label: 'Gap',
-                component: 'textFieldOptions',
-                options: sizeTypes,
-
-            },
-            {
-                name: 'gapType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-
-            },
-        ]
+        name: 'gap',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Padding',
+        inputType: 'number',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Padding Top", name: 'pt'},
+            {label: "Padding Left", name: 'pl'},
+            {label: "Padding Right", name: 'pr'},
+            {label: "Padding Bottom", name: 'pb'}
+        ],
+        component: 'fieldWithCustomProperty',
+        options: sizeTypes,
     },
     flexWrap: {
         name: 'flex-wrap',
@@ -240,60 +228,38 @@ const SizeSection = {
 };
 
 const SpaceSection = {
-    space: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'padding',
-                type: 'number', isLabelOnTop: true,
-                label: 'Padding',
-                component: 'textFieldOptions',
-                options: sizeTypes,
-
-            },
-            {
-                name: 'paddingType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-            },
-        ]
+    padding: {
+        name: 'padding',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Padding',
+        inputType: 'number',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Padding Top", name: 'pt'},
+            {label: "Padding Left", name: 'pl'},
+            {label: "Padding Right", name: 'pr'},
+            {label: "Padding Bottom", name: 'pb'}
+        ],
+        component: 'fieldWithCustomProperty',
+        options: sizeTypes,
     },
     margin: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'margin',
-                type: 'number', isLabelOnTop: true,
-                label: 'Margin',
-                component: 'textFieldOptions',
-                options: sizeTypes,
-
-            },
-            {
-                name: 'marginType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-            },
-        ]
-    }
+        name: 'margin',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Margin',
+        inputType: 'number',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Margin Top", name: 'mt'},
+            {label: "Margin Left", name: 'ml'},
+            {label: "Margin Right", name: 'mr'},
+            {label: "Margin Bottom", name: 'mb'}
+        ],
+        component: 'fieldWithCustomProperty',
+        options: sizeTypes,
+    },
 };
 
 const PositionSection = {
@@ -485,114 +451,68 @@ const BackgroundSection = {
 
 const BorderSection = {
     borderRadius: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'border-radius',
-                type: 'number',
-                isLabelOnTop: true,
-                label: 'Border Radius',
-                component: 'textFieldOptions',
-                options: sizeTypes,
+        name: 'border-radius',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Border Radius',
 
-            },
-            {
-                name: 'borderRadiusType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-
-            },
-        ]
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Top Left", name: 'rtl'},
+            {label: "Top Right", name: 'rtr'},
+            {label: "Bottom Right", name: 'rbl'},
+            {label: "Bottom Bottom", name: 'rbr'}
+        ],
+        inputType: 'textFieldOptions',
+        component: 'fieldWithCustomProperty',
+        options: sizeTypes,
     },
     borderWidth: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'border-width',
-                type: 'number', isLabelOnTop: true,
-                label: 'Border Width',
-                component: 'textFieldOptions',
-                options: sizeTypes,
-
-            },
-            {
-                name: 'border-widthType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-
-            },
-        ]
+        name: 'border-width',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Border Width',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Border Top", name: 'border-top'},
+            {label: "Border Left", name: 'border-left'},
+            {label: "Border Right", name: 'border-right'},
+            {label: "Border Bottom", name: 'border-bottom'}
+        ],
+        inputType: 'textFieldOptions',
+        component: 'fieldWithCustomProperty',
+        options: sizeTypes,
     },
     borderStyle: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'border-style',
-                label: 'Border Style',
-                isLabelOnTop: true,
-                component: 'select',
-                options: ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'Ridge', 'inset', 'outset'],
-            },
-            {
-                name: 'borderStyleType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-
-            },
-        ]
+        name: 'border-style',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Border Style',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Border Top", name: 'border-top'},
+            {label: "Border Left", name: 'border-left'},
+            {label: "Border Right", name: 'border-right'},
+            {label: "Border Bottom", name: 'border-bottom'}
+        ],
+        inputType: 'select',
+        component: 'fieldWithCustomProperty',
+        options: ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'Ridge', 'inset', 'outset'],
     },
     borderColor: {
-        'name': 'size Grid',
-        'padding': '5px',
-        'gap': '5px 10px',
-        'align': 'end',
-        'component': 'grid',
-        'grid-template-columns': '1fr 25%',
-        children: [
-            {
-                name: 'border-color',
-                label: 'Border Color',
-                isLabelOnTop: true,
-                component: 'colorPicker',
-            },
-            {
-                name: 'borderColorType',
-                label: false,
-                component: 'buttonGroups',
-                options: [
-                    {key: <AllSVGIcon/>, value: 'all'},
-                    {key: <CustomSVGIcon/>, value: 'custom'},
-                ],
-
-            },
-        ]
+        name: 'border-color',
+        type: 'number',
+        isLabelOnTop: true,
+        label: 'Border Color',
+        gridType: 'repeat(2,auto)',
+        customProperty: [
+            {label: "Border Top", name: 'border-top'},
+            {label: "Border Left", name: 'border-left'},
+            {label: "Border Right", name: 'border-right'},
+            {label: "Border Bottom", name: 'border-bottom'}
+        ],
+        inputType: 'colorPicker',
+        component: 'fieldWithCustomProperty',
     }
 };
 
@@ -606,7 +526,8 @@ const EffectsSection = {
         children: [
             {
                 name: 'opacity',
-                type: 'number', isLabelOnTop: true,
+                type: 'number',
+                isLabelOnTop: true,
                 label: 'Opacity',
                 component: 'textFieldOptions',
                 options: sizeTypes,
@@ -618,7 +539,6 @@ const EffectsSection = {
                 isLabelOnTop: true,
                 component: 'select',
                 options: ['normal', 'multiply', 'screen', 'overlay', 'darken', 'lighten', 'color dodge', 'color burn', 'hard light', 'soft light', 'difference', 'exclusion', 'hue', 'saturation', 'color', 'luminosity'],
-
             },
         ]
     },

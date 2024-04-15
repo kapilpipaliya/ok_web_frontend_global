@@ -101,7 +101,6 @@ export const ExpressionBuilder = (props: {
             }
         });
         setContentList(updatedList);
-        console.log(contentList)
         const hasErrors = contentList.some(item => item.error);
         if (hasErrors) return;
 
@@ -119,7 +118,6 @@ export const ExpressionBuilder = (props: {
             }
         });
         const finalExpression = expressionParts.join('');
-        console.log(finalExpression);
 
         if (props.setValue) {
             props.setValue(finalExpression)
