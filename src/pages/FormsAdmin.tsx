@@ -132,19 +132,19 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
 
                         return (
                             <Switch>
-                                <Match when={component() === "Table"}>
-                                    <h3><Label/></h3>
-                                    <Content/>
-                                </Match>
-                                <Match when={component() === "CollectionOption"}>
-                                    <Content/>
-                                </Match>
                                 <Match when={metaVertex.P.name === 'class'}>
                                     <ClassDesignTab component={component()}
                                                     meta={metaVertex}
                                                     data={props.vertex}
                                                     setValue={(data) => props.setValue(metaVertex, data)}
                                                     txnId={props.txnId}/>
+                                </Match>
+                                <Match when={component() === "Table"}>
+                                    <h3><Label/></h3>
+                                    <Content/>
+                                </Match>
+                                <Match when={component() === "CollectionOption"}>
+                                    <Content/>
                                 </Match>
                                 <Match when={props.selectedLayout}>
                                     <tr>

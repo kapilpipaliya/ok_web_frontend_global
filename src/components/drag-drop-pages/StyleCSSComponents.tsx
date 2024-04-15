@@ -49,6 +49,12 @@ export const StyleCSSComponents = () => {
         isLabelOnTop: boolean,
         label: string,
     }) => {
+        function formatString(str) {
+            return str
+                .split('-') // Split the string by hyphen
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each part
+                .join(' '); // Join the parts with a space
+        }
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isActive, setIsActive] = createSignal(false);
         const toggleDropdown = () => setIsActive(!isActive());
@@ -106,7 +112,7 @@ export const StyleCSSComponents = () => {
                             aria-expanded={isActive()}
                         >
                         <span
-                            class="selected-value">{selected().charAt(0).toUpperCase() + selected().slice(1)}</span>
+                            class="selected-value">{formatString(selected())}</span>
                             <span class="arrow"></span>
                         </button>
                         <div><Icon icon={'teenyicons:down-small-outline'} height={22} width={22}/></div>
@@ -122,7 +128,7 @@ export const StyleCSSComponents = () => {
                                     class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${selected() !== label() ? 'bg:#efefef:hover' : 'bg:rgb(229,234,253):hover'} font-weight:${selected() === label() ? 'medium' : ''} r:5 ${selected() === label() ? 'bg:rgb(229,234,253)' : ''}`}
                                     role="option" onClick={() => selectOption(option)}>
                                     <label>
-                                        {label().charAt(0).toUpperCase() + label().slice(1)}
+                                        {formatString(label())}
                                     </label>
                                     <Show when={selected() === label()}>
                                         <Icon icon={'icon-park-outline:check-one'} height={22} width={22}
@@ -152,13 +158,13 @@ export const StyleCSSComponents = () => {
             <input
                 type="color"
                 class="color-picker__input-color mr:10 cursor:pointer; h:25px w:30px r:5 p:0 bg:#ffffff b:none"
-                value={cssState[props.name] ?? ''}
+                value={cssState[props.name] ?? '#000'}
                 onInput={handleChange}
             />
             <input
                 type="text"
                 class="b:none w:100% f:14 outline:none"
-                value={cssState[props.name] ?? ''}
+                value={cssState[props.name] ?? '#000'}
                 onInput={handleChange}
             />
         </div>
@@ -189,13 +195,16 @@ export const StyleCSSComponents = () => {
         name: string,
         label: any,
         isLabelOnTop: boolean,
+        isAddToClass?: boolean,
         onChange?: any,
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const selected = () => cssState[props.name] ?? props.options[0].value;
         const handleChange = (option: { key: JSX.Element; value: string }) => {
             props.onChange();
-            setCssState(props.name, option.value);
+            if (props.isAddToClass) {
+                setCssState(props.name, option.value);
+            }
         };
 
         const Content = () => <div class={`radio-inputs w:100%`}>
@@ -261,7 +270,7 @@ export const StyleCSSComponents = () => {
         const handleChange = (event: any) => {
             const value = event.target.value;
             const numericValue = parseFloat(value);
-            setCssState(props.name, `${numericValue}${selectedOption()}`);
+            setCssState(props.name, `${numericValue}${selectedOption() ?? ''}`);
             if (props.onChangeInput) {
                 props.onChangeInput();
             }
@@ -706,11 +715,11 @@ export const StyleCSSComponents = () => {
         options: any,
         customProperty: any,
         gridType?: string,
+        mainFieldType?: string
         inputType?: string
     }) => {
         const [optionType, setOptionType] = createSignal('all')
         const [cssState, setCssState] = useContext(CssEditorContext);
-
 
         const onChangeAllField = () => {
             let newState = {...cssState};
@@ -732,16 +741,18 @@ export const StyleCSSComponents = () => {
                     placeholder: '0',
                     isLabelOnTop: props.isLabelOnTop,
                     label: props.label,
+                    type: props.inputType ?? 'number',
                     onChangeInput: () => {
                         onChangeAllField()
                     },
-                    component: props.inputType ?? 'textFieldOptions',
+                    component: props.mainFieldType ?? 'textFieldOptions',
                     options: props.options,
                 }
                 }/>
                 <ButtonGroups
                     isLabelOnTop={false}
-                    name={'label'}
+                    name={props.name}
+                    isAddToClass={false}
                     label={false}
                     onChange={() => {
                         if (optionType() === 'all') {
@@ -752,10 +763,10 @@ export const StyleCSSComponents = () => {
                     }}
                     options={[
                         {
-                            key: <AllSVGIcon/>, value: 'all', tooltip: 'all'
+                            key: <AllSVGIcon/>, value: 'all', tooltip: 'All'
                         },
                         {
-                            key: <CustomSVGIcon/>, value: 'custom', tooltip: 'custom'
+                            key: <CustomSVGIcon/>, value: 'custom', tooltip: 'Custom'
                         },
                     ]}/>
             </div>
@@ -772,8 +783,9 @@ export const StyleCSSComponents = () => {
                                 name: item.name,
                                 isLabelOnTop: props.isLabelOnTop,
                                 placeholder: '0',
-                                label:item.label,
-                                component: props.inputType ?? 'textFieldOptions',
+                                label: item.label,
+                                type: props.inputType ?? 'number',
+                                component: props.mainFieldType ?? 'textFieldOptions',
                                 options: props.options,
                             }
                             }/>

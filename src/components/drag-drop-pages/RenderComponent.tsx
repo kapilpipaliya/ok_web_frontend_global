@@ -75,6 +75,7 @@ export const RenderComponent = (props: { value: any }) => {
             <ButtonGroups
                 isLabelOnTop={props.value.isLabelOnTop}
                 name={props.value.name}
+                isAddToClass={props.value.isAddToClass ?? true}
                 label={props.value.label}
                 options={props.value.options}/>
         </Match>
@@ -85,8 +86,9 @@ export const RenderComponent = (props: { value: any }) => {
                 gridType={props.value.gridType}
                 component={props.value.component}
                 name={props.value.name}
-                label={props.value.label}
                 inputType={props.value.inputType}
+                label={props.value.label}
+                mainFieldType={props.value.mainFieldType}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'dataEditor'}>

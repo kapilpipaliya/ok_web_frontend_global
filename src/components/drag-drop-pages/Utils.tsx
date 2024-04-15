@@ -105,15 +105,13 @@ const LayoutSection = {
         name: 'gap',
         type: 'number',
         isLabelOnTop: true,
-        label: 'Padding',
-        inputType: 'number',
+        label: 'Gap',
         gridType: 'repeat(2,auto)',
         customProperty: [
-            {label: "Padding Top", name: 'pt'},
-            {label: "Padding Left", name: 'pl'},
-            {label: "Padding Right", name: 'pr'},
-            {label: "Padding Bottom", name: 'pb'}
+            {label: "Column", name: 'gap-x'},
+            {label: "Row", name: 'gap-y'},
         ],
+        mainFieldType: 'textFieldOptions',
         component: 'fieldWithCustomProperty',
         options: sizeTypes,
     },
@@ -233,7 +231,7 @@ const SpaceSection = {
         type: 'number',
         isLabelOnTop: true,
         label: 'Padding',
-        inputType: 'number',
+
         gridType: 'repeat(2,auto)',
         customProperty: [
             {label: "Padding Top", name: 'pt'},
@@ -241,6 +239,7 @@ const SpaceSection = {
             {label: "Padding Right", name: 'pr'},
             {label: "Padding Bottom", name: 'pb'}
         ],
+        mainFieldType: 'textFieldOptions',
         component: 'fieldWithCustomProperty',
         options: sizeTypes,
     },
@@ -249,7 +248,6 @@ const SpaceSection = {
         type: 'number',
         isLabelOnTop: true,
         label: 'Margin',
-        inputType: 'number',
         gridType: 'repeat(2,auto)',
         customProperty: [
             {label: "Margin Top", name: 'mt'},
@@ -257,6 +255,7 @@ const SpaceSection = {
             {label: "Margin Right", name: 'mr'},
             {label: "Margin Bottom", name: 'mb'}
         ],
+        mainFieldType: 'textFieldOptions',
         component: 'fieldWithCustomProperty',
         options: sizeTypes,
     },
@@ -441,11 +440,11 @@ const BackgroundSection = {
         component: 'colorPicker',
     },
     clip: {
-        name: 'clip',
+        name: 'clip-path',
         label: 'Clip',
         isLabelOnTop: true,
         component: 'select',
-        options: ['Border Box', 'Padding Box', 'Content Box', 'Text'],
+        options: ['border-box', 'padding-box', 'content-box', 'fill-box','stroke-box','margin-box'],
     },
 };
 
@@ -463,7 +462,7 @@ const BorderSection = {
             {label: "Bottom Right", name: 'rbl'},
             {label: "Bottom Bottom", name: 'rbr'}
         ],
-        inputType: 'textFieldOptions',
+        mainFieldType: 'textFieldOptions',
         component: 'fieldWithCustomProperty',
         options: sizeTypes,
     },
@@ -479,7 +478,7 @@ const BorderSection = {
             {label: "Border Right", name: 'border-right'},
             {label: "Border Bottom", name: 'border-bottom'}
         ],
-        inputType: 'textFieldOptions',
+        mainFieldType: 'textFieldOptions',
         component: 'fieldWithCustomProperty',
         options: sizeTypes,
     },
@@ -495,7 +494,7 @@ const BorderSection = {
             {label: "Border Right", name: 'border-right'},
             {label: "Border Bottom", name: 'border-bottom'}
         ],
-        inputType: 'select',
+        mainFieldType: 'select',
         component: 'fieldWithCustomProperty',
         options: ['none', 'solid', 'dotted', 'dashed', 'double', 'groove', 'Ridge', 'inset', 'outset'],
     },
@@ -511,7 +510,7 @@ const BorderSection = {
             {label: "Border Right", name: 'border-right'},
             {label: "Border Bottom", name: 'border-bottom'}
         ],
-        inputType: 'colorPicker',
+        mainFieldType: 'colorPicker',
         component: 'fieldWithCustomProperty',
     }
 };
