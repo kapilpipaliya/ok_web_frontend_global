@@ -14,6 +14,8 @@ export const RenderComponent = (props: { value: any }) => {
         <Match when={props.value.component === 'colorPicker'}>
             <ColorPickerInput
                 name={props.value.name}
+                onChangeInput={props.value.onChangeInput}
+                isAddToClass={props.value.isAddToClass}
                 label={props.value.label}
                 isLabelOnTop={props.value.isLabelOnTop}
             />
@@ -27,14 +29,15 @@ export const RenderComponent = (props: { value: any }) => {
         </Match>
         <Match when={props.value.component === 'toggleButton'}>
             <ToggleButton
+                onChangeInput={props.value.onChangeInput}
+                isAddToClass={props.value.isAddToClass}
                 isLabelOnTop={props.value.isLabelOnTop}
                 label={props.value.label}
-
                 name={props.value.name}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'textField'}>
-            <TextFieldWithSelectOption name={props.value.name}
+            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass} name={props.value.name}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        label={props.value.label}
                                        onChangeInput={props.value.onChangeInput}
@@ -47,7 +50,7 @@ export const RenderComponent = (props: { value: any }) => {
         </Match>
         <Match when={props.value.component === 'textFieldOptions'}>
 
-            <TextFieldWithSelectOption name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
+            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass} name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        onChangeInput={props.value.onChangeInput}
                                        label={props.value.label}
@@ -75,6 +78,7 @@ export const RenderComponent = (props: { value: any }) => {
             <ButtonGroups
                 isLabelOnTop={props.value.isLabelOnTop}
                 name={props.value.name}
+                onChangeInput={props.value.onChangeInput}
                 isAddToClass={props.value.isAddToClass ?? true}
                 label={props.value.label}
                 options={props.value.options}/>

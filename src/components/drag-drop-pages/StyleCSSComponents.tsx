@@ -55,6 +55,7 @@ export const StyleCSSComponents = () => {
                 .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // Capitalize the first letter of each part
                 .join(' '); // Join the parts with a space
         }
+
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isActive, setIsActive] = createSignal(false);
         const toggleDropdown = () => setIsActive(!isActive());
@@ -147,11 +148,18 @@ export const StyleCSSComponents = () => {
     const ColorPickerInput = (props: {
         isLabelOnTop: boolean,
         name: string,
+        onChangeInput: any,
+        isAddToClass: boolean,
         label: any
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const handleChange = (event: any) => {
-            setCssState(props.name, event.target.value);
+            if (props.onChangeInput) {
+                props.onChangeInput(event.target.value);
+            }
+            if (props.isAddToClass) {
+                setCssState(props.name, event.target.value);
+            }
         };
 
         const Content = () => <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
@@ -196,12 +204,14 @@ export const StyleCSSComponents = () => {
         label: any,
         isLabelOnTop: boolean,
         isAddToClass?: boolean,
-        onChange?: any,
+        onChangeInput?: any,
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const selected = () => cssState[props.name] ?? props.options[0].value;
-        const handleChange = (option: { key: JSX.Element; value: string }) => {
-            props.onChange();
+        const handleChange = (e, option: { key: JSX.Element; value: string }) => {
+            if (props.onChangeInput) {
+                props.onChangeInput(option.value);
+            }
             if (props.isAddToClass) {
                 setCssState(props.name, option.value);
             }
@@ -216,7 +226,7 @@ export const StyleCSSComponents = () => {
                                 type="radio"
                                 name={props.name}
                                 checked={selected() === option.value}
-                                onChange={() => handleChange(option)}
+                                onChange={(e) => handleChange(e, option)}
                             />
                             <span class={`name`}>{option.key}</span>
                         </CustomTooltip>
@@ -245,6 +255,7 @@ export const StyleCSSComponents = () => {
     const TextFieldWithSelectOption = (props: {
         name: string,
         options?: string[],
+        value?: () => any,
         onChangeInput?: any,
         leftIcon?: JSXElement,
         isLabelOnTop?: boolean,
@@ -252,6 +263,7 @@ export const StyleCSSComponents = () => {
         showInside?: boolean,
         inputType?: string,
         placeholder?: string
+        isAddToClass?: boolean
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
@@ -270,9 +282,11 @@ export const StyleCSSComponents = () => {
         const handleChange = (event: any) => {
             const value = event.target.value;
             const numericValue = parseFloat(value);
-            setCssState(props.name, `${numericValue}${selectedOption() ?? ''}`);
+            if (props.isAddToClass) {
+                setCssState(props.name, `${numericValue}${selectedOption() ?? ''}`);
+            }
             if (props.onChangeInput) {
-                props.onChangeInput();
+                props.onChangeInput(`${numericValue}${selectedOption() ?? ''}`);
             }
         };
 
@@ -289,6 +303,7 @@ export const StyleCSSComponents = () => {
         };
 
         const getValueWithoutUnits = (valueWithUnits: string) => {
+            console.log(`getValueWithoutUnits`, valueWithUnits)
             if (!valueWithUnits) return "";
             const unitsToRemove = ['px', '%', 'em', 'rem', 'vh', 'vw'];
             const regexPattern = new RegExp(unitsToRemove.join('|'), 'g');
@@ -322,7 +337,7 @@ export const StyleCSSComponents = () => {
                     <input
                         type={props.inputType || 'text'}
                         placeholder={`${props.inputType === 'number' ? '0' : props.placeholder}`}
-                        value={getValueWithoutUnits(cssState[props.name] ?? '')}
+                        value={getValueWithoutUnits(props.value ? props.value() : cssState[props.name] ?? '')}
                         class="f:14 outline:none p:5"
                         onInput={handleChange}
                         style={{width: '100%'}}
@@ -348,72 +363,8 @@ export const StyleCSSComponents = () => {
                 </Show>
             </Show>
         </div>
-        /*
-
-                const JSONSS = {
-                    'visibility': {
-                        'component': 'toggleButton',
-                        'label': 'Visibility',
-                        'name': 'Visibility',
-                        'options': [
-                            {'key': <IconifyIcon icon="solar:eye-broken"/>, 'value': true},
-                            {'key': <IconifyIcon icon="ant-design:eye-invisible-outlined"/>, 'value': false}
-                        ],
-                        'state': createSignal(true)
-                    },
-                    'FlexGrow': {
-                        name: 'Flex Grow',
-                        label: 'Flex Grow',
-                        type: 'number',
-                        component: 'textFieldOptions',
-                        state: createSignal('0'),
-                        leftIcon: (
-                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                            </button>
-                        )
-                    },
-                    'FlexShrink': {
-                        name: 'Flex Shrink',
-                        label: 'Flex Shrink',
-                        type: 'number',
-                        component: 'textFieldOptions',
-                        state: createSignal('0'),
-                        leftIcon: (
-                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                            </button>
-                        )
-                    },
-                    'FlexBase': {
-                        name: 'Flex Base',
-                        label: 'Flex Base',
-                        type: 'number',
-                        component: 'textFieldOptions',
-                        options: ['px'],
-                        optionState: createSignal('%'),
-                        state: createSignal('0'),
-                        leftIcon: (
-                            <button style={{border: 'none', background: 'transparent', cursor: 'pointer'}}>
-                                <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
-                            </button>
-                        )
-                    }
-                }
-        */
-
         return (
             <Container>
-                {/*
-
-                <div class={'b:1px|solid|#ccc r:5 p:5'}>
-                    {JSON}
-                    <For each={Object.entries(JSONSS)}>
-                        {([name, value]) => <RenderComponent value={value}/>}
-                    </For>
-                </div>
-*/}
-
                 <Show when={props.isLabelOnTop} fallback={
                     <Show when={props.label} fallback={<Content/>}>
                         <CenterDiv>
@@ -437,6 +388,8 @@ export const StyleCSSComponents = () => {
     const ToggleButton = (props: {
         options: { key: JSX.Element; value: string }[],
         label: JSXElement,
+        onChangeInput: any,
+        isAddToClass: boolean,
         name: string,
         isLabelOnTop: boolean,
     }) => {
@@ -449,7 +402,15 @@ export const StyleCSSComponents = () => {
             <For each={props.options}>
                 {(option) => {
                     return <div
-                        onClick={() => setCssState(props.name, option.value)}
+                        onClick={() => {
+                            if (props.onChangeInput) {
+                                props.onChangeInput(option.value);
+                            }
+                            if (props.isAddToClass) {
+                                setCssState(props.name, option.value)
+                            }
+
+                        }}
                         class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
                                      bg:${isSelected(option) ? '#e0e7f3' : 'transparent'}
                                       color:${isSelected(option) ? '#5252f1' : 'black'}
@@ -493,11 +454,51 @@ export const StyleCSSComponents = () => {
         fallback?: any,
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
-        const addOption = () => {
+        const [changedData, setChangedData] = createSignal({});
 
+        interface CssProperties {
+            'x-offset': string;
+            'y-offset': string;
+            blur: string;
+            spread: string;
+            color: string;
+            type: string;
+        }
+
+        // Function to parse CSS parts
+        function getCssParts(option: string): CssProperties {
+            const parts = option.split('|');
+            return {
+                'x-offset': parts[0] || '',
+                'y-offset': parts[1] || '',
+                blur: parts[2] || '',
+                spread: parts[3] || '',
+                color: parts[4] || '',
+                type: parts[5] || ''
+            };
+        }
+
+        function createCssOption(css) {
+            // Deconstruct the cssProperties object to extract each property
+            const {
+                'x-offset': xOffset = '0',
+                'y-offset': yOffset = '0',
+                blur = '0',
+                spread = '0',
+                color = '#000',
+                type = ''
+            } = css;
+            console.log(css)
+            setCssState(props.name, `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`)
+        }
+
+        createEffect(v => {
+            console.log('createEffect', cssState[props.name])
+        })
+        const addOption = () => {
             if (props.label.includes('Text Shadow')) {
                 let currentOptions = cssState[props.name] ? cssState[props.name].split(',') : [];
-                currentOptions.push('0|0|5px|black');
+                currentOptions.push('0|0|5|0|#000|inset');
                 const newValue = currentOptions.join(',');
                 setCssState(props.name, newValue);
             } else if (props.label.includes('Filter')) {
@@ -507,7 +508,7 @@ export const StyleCSSComponents = () => {
                 setCssState(props.name, newValue);
             } else if (props.label.includes('Box Shadow')) {
                 let currentOptions = cssState[props.name] ? cssState[props.name].split(',') : [];
-                currentOptions.push('0|0|5px|0|black');
+                currentOptions.push('0|0|5|0|#000|inset');
                 const newValue = currentOptions.join(',');
                 setCssState(props.name, newValue);
             } else if (props.label.includes('Transition')) {
@@ -521,31 +522,6 @@ export const StyleCSSComponents = () => {
                 const newValue = currentOptions.join('|');
                 setCssState(props.name, newValue);
             }
-
-
-            // // Get the current value for the property
-            // const currentOptions = cssState[props.name] ?? [];
-            //
-            // // Determine the new value based on the label
-            // let newValue;
-            // if (props.label.includes('Shadow')) {
-            //     newValue = [...currentOptions, '0|0|5px|0|black'];
-            //     setCssState(props.name, newValue.join(','));
-            // } else if (props.label.includes('Filter')) {
-            //     newValue = [...currentOptions, 'blur(3px)'];
-            //     setCssState(props.name, newValue.join('|'));
-            // } else if (props.label.includes('Transform')) {
-            //     newValue = [...currentOptions, {value: 0, type: 'move x'}];
-            //     setCssState(props.name, newValue.join('|'));
-            // } else if (props.label.includes('Transition')) {
-            //     newValue = [...currentOptions, {
-            //         easing: 'ease-in',
-            //         duration: 0,
-            //         delay: 0,
-            //         type: 'opacity'
-            //     }];
-            //     setCssState(props.name, newValue.join('|'));
-            // }
         };
 
         const getOptions = () => {
@@ -559,7 +535,7 @@ export const StyleCSSComponents = () => {
                 return []
             }
         }
-
+        const getValueOfInput = (name: string) => changedData()[name];
         const deleteOption = (index: number) => {
             if (props.label.includes('Shadow') || props.label.includes('Transition')) {
                 const data = cssState[props.name].split(',').filter((_: any, i: any) => i !== index);
@@ -581,8 +557,47 @@ export const StyleCSSComponents = () => {
         const closePopup = () => {
             props.setOpenMenu(null);
         };
-
         const renderPopup = (option: any, index: number) => {
+            const setCssStateFromProperties = (property: {
+                name: keyof CssProperties;
+                children?: any[]
+            }) => {
+                const data = getCssParts(option);
+
+                if (property.name === 'grid' && property.children) {
+                    property.children.forEach((child: any) => setCssStateFromProperties(child));
+                    return;
+                }
+
+                if (data.hasOwnProperty(property.name)) {
+                    setCssState(property.name, data[property.name]);
+                }
+            };
+
+            const addOnChangeToProperties = (properties) => {
+                // Ensure properties is an object and not null
+                if (!properties || typeof properties !== 'object') {
+                    return properties;
+                }
+
+                // If properties.children is an array, iterate over it and enhance each child
+                if (Array.isArray(properties.children)) {
+                    properties.children = properties.children.map(child => addOnChangeToProperties(child));
+                }
+
+                // Add onChangeInput handler to the properties object
+                return {
+                    ...properties,
+                    isAddToClass: false,
+                    value: () => getValueOfInput(properties.name),
+                    onChangeInput: (value) => {
+                        setChangedData({...changedData(), [properties.name]: value});
+                        console.log("changedData()", changedData())
+                        createCssOption(changedData())
+                    }
+                };
+            };
+
             return (
                 <Show when={props.openMenu() === index}>
                     <div style={{
@@ -602,9 +617,12 @@ export const StyleCSSComponents = () => {
                             <Icon onClick={closePopup} icon={'mdi:close'} style={{color: "grey"}}/>
                         </div>
                         <For each={Object.entries(props.children)}>
-                            {([sectionName, properties], index) => (
-                                <RenderComponent value={properties}/>
-                            )}
+                            {([sectionName, properties], index) => {
+                                setCssStateFromProperties(properties)
+                                const enhancedProperties = addOnChangeToProperties(properties);
+
+                                return <RenderComponent value={enhancedProperties}/>
+                            }}
                         </For>
                     </div>
                 </Show>
@@ -754,7 +772,7 @@ export const StyleCSSComponents = () => {
                     name={props.name}
                     isAddToClass={false}
                     label={false}
-                    onChange={() => {
+                    onChangeInput={() => {
                         if (optionType() === 'all') {
                             setOptionType('custom')
                         } else {

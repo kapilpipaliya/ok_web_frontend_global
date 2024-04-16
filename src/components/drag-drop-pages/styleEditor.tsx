@@ -31,7 +31,6 @@ const StyleEditor = () => {
                         acc[propertyName] = property;
                         return acc;
                     }, {});
-                console.log(query.toLowerCase(),sectionName,filteredProperties)
                 return {[sectionName]: {properties: filteredProperties, isOpen: isOpen}};
             })
             .reduce((acc, section) => {

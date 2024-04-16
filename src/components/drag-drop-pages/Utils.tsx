@@ -380,56 +380,67 @@ const BackgroundSection = {
             style: {
                 component: 'toggleButton',
                 label: false,
-                name: 'Style',
+                name: 'type',
                 options: [
                     {key: 'Outside', value: ''},
                     {key: 'Inside', value: 'inset'}
                 ],
             },
             shadow: {
-                name: 'Shadow Grid',
+                name: 'grid',
                 component: 'grid',
                 'gap': '0px 10px',
                 'grid-template-columns': 'repeat(2, auto)',
                 children: [
                     {
-                        name: 'X Offset',
+                        name: 'x-offset',
                         label: 'X Offset',
                         isLabelOnTop: true,
                         type: 'number',
+                        isAddToClass: false,
                         component: 'textFieldOptions',
                         options: sizeTypes,
 
                     },
                     {
-                        name: 'Y Offset',
+                        name: 'y-offset',
                         label: 'Y Offset',
                         isLabelOnTop: true,
                         type: 'number',
+                        isAddToClass: false,
                         component: 'textFieldOptions',
                         options: sizeTypes,
 
                     },
                     {
-                        name: 'Blur',
+                        name: 'blur',
                         label: 'Blur',
                         isLabelOnTop: true,
                         type: 'number',
+                        isAddToClass: false,
                         component: 'textFieldOptions',
                         options: sizeTypes,
 
                     },
                     {
-                        name: 'Spread',
+                        name: 'spread',
                         type: 'number',
                         label: 'Spread',
                         isLabelOnTop: true,
+                        isAddToClass: false,
                         component: 'textFieldOptions',
                         options: sizeTypes,
 
-                    }
+                    },
+
                 ]
-            }
+            },
+            data: {
+                name: 'color',
+                label: 'Shadow Color',
+                isLabelOnTop: true,
+                component: 'colorPicker',
+            },
         },
         label: 'Box Shadow'
     },
