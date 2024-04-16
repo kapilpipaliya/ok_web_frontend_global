@@ -251,13 +251,16 @@ export const PageDesignerDragAndDrop = () => {
                         height={20}
                     /></div>
                     <div style={{"font-size": "14px"}}>{props.child?.P.name}</div>
-                    {isHovered() && <Tooltip content={'Double click to Edit'}> <Icon ondblclick={() => {
-                        const currentURL = window.location.href;
-                        const navigateUrl = currentURL.split('/').slice(0, -2).join('/') + '/Comp/' + props.child.id;
-                        window.open(navigateUrl, '_blank')
-                    }}
-                                                                                     class={'cursor:pointer'}
-                                                                                     icon={'solar:settings-linear'}/></Tooltip>}
+
+                    <Show when={isHovered()}>
+                        <Tooltip content={'Double click to Edit'}> <Icon ondblclick={() => {
+                            const currentURL = window.location.href;
+                            const navigateUrl = currentURL.split('/').slice(0, -2).join('/') + '/Comp/' + props.child.id;
+                            window.open(navigateUrl, '_blank')
+                        }}
+                                                                         class={'cursor:pointer'}
+                                                                         icon={'solar:settings-linear'}/></Tooltip>
+                    </Show>
                 </div>
             );
         }
@@ -272,7 +275,8 @@ export const PageDesignerDragAndDrop = () => {
                                     d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
                             </g>
                         </svg>
-                        <input placeholder="Search Component..." type="search" class="inputSearch f:14" value={searchQuery()}
+                        <input placeholder="Search Component..." type="search" class="inputSearch f:14"
+                               value={searchQuery()}
                                onInput={(e) => {
                                    setSearchQuery(e.target.value);
                                    updateFilteredData(); // Update filteredData when searchQuery changes
@@ -1138,8 +1142,17 @@ export const PageDesignerDragAndDrop = () => {
         } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex);
         return (
             <>
-                {props.index > 0 && props.type === 'properties' && selectedId() === -1 ? <div/> : props.index > 0 ?
-                    <hr class={'color:#ccc mt:5 mb:5'}/> : <div></div>}
+                <Show
+                    when={props.index > 0}
+                    fallback={<div/>}
+                >
+                    <Show
+                        when={props.type === 'properties' && selectedId() === -1}
+                        fallback={<hr class="color:#ccc mt:5 mb:5"/>}
+                    >
+                        <div/>
+                    </Show>
+                </Show>
                 <div class={'p:5 direction:ltr'}>
                     <Switch>
                         <Match when={props.type === "components"}>
@@ -1157,33 +1170,35 @@ export const PageDesignerDragAndDrop = () => {
                                 >
                                     <div
                                         class="mb:10px"
+                                        onClick={toggleComponentOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
 
                                         <div style="font-weight: bold">Components</div>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div style="cursor: pointer;" onClick={toggleComponentOpen}>
-                                                <Icon
-                                                    icon={"mdi:chevron-up"}
-                                                    style={{
-                                                        "font-size": "24px",
-                                                        "border-radius": "50%",
-                                                        "margin-left": "5px",
-                                                        transition: "transform 0.2s linear",
-                                                        transform: `${
-                                                            isComponentOpen()
-                                                                ? "rotate(0deg)"
-                                                                : "rotate(180deg)"
-                                                        }`,
-                                                    }}
-                                                    class="flex-1"
-                                                />
-                                            </div>
+
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isComponentOpen()
+                                                            ? "rotate(0deg)"
+                                                            : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
+
                                         </div>
                                         {/*<div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
                                              title="Close Components">
@@ -1203,6 +1218,7 @@ export const PageDesignerDragAndDrop = () => {
                                     </div>
 
                                     <Show when={isComponentOpen()}>
+                                        <hr class={'color:lightgrey m:.4rem|0'}/>
                                         {componentPart}
                                     </Show>
                                 </div>
@@ -1224,51 +1240,40 @@ export const PageDesignerDragAndDrop = () => {
                                 >
                                     <div
                                         class="mb:10px"
+                                        onClick={togglePagesOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
 
                                         <div style="font-weight: bold">Pages</div>
-                                        {/*<div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                             title="Close Pages">
-                                            {isPagesExpanded() && (
-                                                <div
-                                                    onClick={togglePagesExpansion}
-                                                    class="cursor:pointer"
-                                                >
-                                                    <Icon
-                                                        icon={"mingcute:left-line"}
-                                                        height={25}
-                                                        width={25}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>*/}
+
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div style="cursor: pointer;" onClick={togglePagesOpen}>
-                                                <Icon
-                                                    icon={"mdi:chevron-up"}
-                                                    style={{
-                                                        "font-size": "24px",
-                                                        "border-radius": "50%",
-                                                        "margin-left": "5px",
-                                                        transition: "transform 0.2s linear",
-                                                        transform: `${
-                                                            isPagesOpen()
-                                                                ? "rotate(0deg)"
-                                                                : "rotate(180deg)"
-                                                        }`,
-                                                    }}
-                                                    class="flex-1"
-                                                />
-                                            </div>
+
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isPagesOpen()
+                                                            ? "rotate(0deg)"
+                                                            : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
+
                                         </div>
                                     </div>
                                     <Show when={isPagesOpen()}>
+                                        <hr class={'color:lightgrey m:.4rem|0'}/>
                                         {pagesPart}
                                     </Show>
                                 </div>
@@ -1290,53 +1295,39 @@ export const PageDesignerDragAndDrop = () => {
                                 <div class="m:5">
                                     <div
                                         class="mb:10px"
+                                        onClick={toggleCollFieldsOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
 
                                         <div style="font-weight: bold">Collection Fields</div>
-                                        {/*<div
-                                            class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                            title="Close Collection"
-                                        >
-                                            {isCollectionExpanded() && (
-                                                <div
-                                                    onClick={toggleCollectionExpansion}
-                                                    class="cursor:pointer"
-                                                >
-                                                    <Icon
-                                                        icon={"mingcute:left-line"}
-                                                        height={25}
-                                                        width={25}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>*/}
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div style="cursor: pointer;" onClick={toggleCollFieldsOpen}>
-                                                <Icon
-                                                    icon={"mdi:chevron-up"}
-                                                    style={{
-                                                        "font-size": "24px",
-                                                        "border-radius": "50%",
-                                                        "margin-left": "5px",
-                                                        transition: "transform 0.2s linear",
-                                                        transform: `${
-                                                            isCollFieldsOpen()
-                                                                ? "rotate(0deg)"
-                                                                : "rotate(180deg)"
-                                                        }`,
-                                                    }}
-                                                    class="flex-1"
-                                                />
-                                            </div>
+
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isCollFieldsOpen()
+                                                            ? "rotate(0deg)"
+                                                            : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
+
                                         </div>
                                     </div>
                                     <Show when={isCollFieldsOpen()}>
+                                        <hr class={'color:lightgrey m:.4rem|0'}/>
                                         {collectionPart}
                                     </Show>
                                 </div>
@@ -1353,57 +1344,39 @@ export const PageDesignerDragAndDrop = () => {
                             </div>}>
                                 <div class="m:5">
                                     <div
+                                        onClick={toggleIsLayoutOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
-                                        {/*{isLayoutExpanded() && (
-                                                <div
-                                                    class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                                    title="Close Layout"
-                                                >
-                                                    {isLayoutExpanded() && (
-                                                        <div
-                                                            onClick={toggleLayoutExpansion}
-                                                            class="cursor:pointer"
-                                                        >
-                                                            <Icon
-                                                                icon={"mingcute:right-line"}
-                                                                height={25}
-                                                                width={25}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}*/}
                                         <div
                                             class="mb:2px ml:5px"
-                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                            onClick={toggleIsLayoutOpen}
+                                            style="flex-grow: 1; font-weight: bold"
                                         >
                                             Layers
                                         </div>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div style="cursor: pointer;" onClick={toggleIsLayoutOpen}>
-                                                <Icon
-                                                    icon={"mdi:chevron-up"}
-                                                    style={{
-                                                        "font-size": "24px",
-                                                        "border-radius": "50%",
-                                                        "margin-left": "5px",
-                                                        transition: "transform 0.2s linear",
-                                                        transform: `${
-                                                            isLayoutOpen()
-                                                                ? "rotate(0deg)"
-                                                                : "rotate(180deg)"
-                                                        }`,
-                                                    }}
-                                                    class="flex-1"
-                                                />
-                                            </div>
+
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isLayoutOpen()
+                                                            ? "rotate(0deg)"
+                                                            : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
+
                                         </div>
                                     </div>
 
@@ -1430,36 +1403,17 @@ export const PageDesignerDragAndDrop = () => {
 
                                 <div class="ml:5 mr:5">
                                     <div
-
+                                        onClick={toggleIsPropertiesOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
-                                        {/*{isPropertiesExpanded() && (
-                                                <div
-                                                    class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                                    title="Close Properties"
-                                                >
-                                                    {isPropertiesExpanded() && (
-                                                        <div
-                                                            onClick={togglePropertiesExpansion}
-                                                            class="cursor:pointer"
-                                                        >
-                                                            <Icon
-                                                                icon={"mingcute:right-line"}
-                                                                height={25}
-                                                                width={25}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}*/}
                                         <div
                                             class="mb:2px ml:5px p:3|0"
-                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                            onClick={toggleIsPropertiesOpen}
+                                            style="flex-grow: 1; font-weight: bold"
                                         >
                                             Properties
                                         </div>
@@ -1484,30 +1438,23 @@ export const PageDesignerDragAndDrop = () => {
                                         </Tooltip>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div
-                                                style="cursor: pointer; display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out"
-                                            >
-                                                <div
-                                                    style="cursor: pointer;"
-                                                    onClick={toggleIsPropertiesOpen}
-                                                >
-                                                    <Icon
-                                                        icon={"mdi:chevron-up"}
-                                                        style={{
-                                                            "font-size": "24px",
-                                                            "border-radius": "50%",
-                                                            "margin-left": "5px",
-                                                            transition: "transform 0.2s linear",
-                                                            transform: `${
-                                                                isPropertiesOpen()
-                                                                    ? "rotate(0deg)"
-                                                                    : "rotate(180deg)"
-                                                            }`,
-                                                        }}
-                                                        class="flex-1"
-                                                    />
-                                                </div>
-                                            </div>
+
+
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isPropertiesOpen()
+                                                            ? "rotate(0deg)"
+                                                            : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
                                         </div>
                                     </div>
                                     <Show when={isPropertiesOpen()}>
@@ -1535,55 +1482,35 @@ export const PageDesignerDragAndDrop = () => {
                                 <div class="m:5">
                                     <div
                                         class={`mb:${isFormOpen() ? "10px" : "0px"}`}
+                                        onClick={toggleIsFormOpen}
                                         style={{
                                             display: "flex",
                                             "justify-content": "space-between",
                                             "align-items": "center",
+                                            cursor: 'pointer',
                                         }}
                                     >
-                                        {/*{isFormExpanded() && (
-                                                <div
-                                                    class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                                    title="Close Form"
-                                                >
-                                                    {isFormExpanded() && (
-                                                        <div
-                                                            onClick={toggleFormExpansion}
-                                                            class="cursor:pointer"
-                                                        >
-                                                            <Icon
-                                                                icon={"mingcute:right-line"}
-                                                                height={25}
-                                                                width={25}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}*/}
                                         <div
                                             class="mb:2px ml:5px"
-                                            style="cursor: pointer; flex-grow: 1; font-weight: bold"
-                                            onClick={toggleIsFormOpen}
+                                            style="flex-grow: 1; font-weight: bold"
                                         >
                                             Form Configuration
                                         </div>
                                         <div
                                             style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                                            <div style="cursor: pointer;" onClick={toggleIsFormOpen}>
-                                                <Icon
-                                                    icon={"mdi:chevron-up"}
-                                                    style={{
-                                                        "font-size": "24px",
-                                                        "border-radius": "50%",
-                                                        "margin-left": "5px",
-                                                        transition: "transform 0.2s linear",
-                                                        transform: `${
-                                                            isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                                                        }`,
-                                                    }}
-                                                    class="flex-1"
-                                                />
-                                            </div>
+                                            <Icon
+                                                icon={"mdi:chevron-up"}
+                                                style={{
+                                                    "font-size": "24px",
+                                                    "border-radius": "50%",
+                                                    "margin-left": "5px",
+                                                    transition: "transform 0.2s linear",
+                                                    transform: `${
+                                                        isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                                                    }`,
+                                                }}
+                                                class="flex-1"
+                                            />
                                         </div>
                                     </div>
                                     <Show when={isFormOpen()}>
@@ -1616,35 +1543,34 @@ export const PageDesignerDragAndDrop = () => {
     };
     // @ts-ignore
     const NavigationBar = ({steps, getStepId, onChangeStep}) => (
-        <div class={'w:100% h:50px display:flex align-items:center mb:10 justify-content:center'}>
-            <nav aria-label="Progress">
-                <ol role="list" class="flex align-items:center">
-                    <For each={steps()}>
-                        {(step) => (
-                            <li class={`position:relative pr:${step.id !== 3 ? '2rem' : ''} pr:${step.id !== 3 ? '5rem@sm' : ''}`}>
-                                {/* Completed Step */}
-                                <div class="position:absolute inset:0px flex align-items:center " aria-hidden="true">
-                                    <Show when={step.id !== 3}>
-                                        <div
-                                            class={`h:0.125rem width:100% bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
-                                    </Show>
-                                </div>
-                                <Tooltip position={'n'}
-                                         content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}>
-                                    <a href="#" onClick={() => onChangeStep(step.id)}
-                                       class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
-                                        <Icon
-                                            icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
-                                            style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
-                                        <span class="sr-only">Step {step.id}</span>
-                                    </a>
-                                </Tooltip>
-                            </li>
-                        )}
-                    </For>
-                </ol>
-            </nav>
-        </div>
+
+        <nav aria-label="Progress">
+            <ol role="list" class="flex align-items:center">
+                <For each={steps()}>
+                    {(step) => (
+                        <li class={`position:relative pr:${step.id !== 3 ? '2rem' : ''} pr:${step.id !== 3 ? '5rem@sm' : ''}`}>
+                            {/* Completed Step */}
+                            <div class="position:absolute inset:0px flex align-items:center " aria-hidden="true">
+                                <Show when={step.id !== 3}>
+                                    <div
+                                        class={`h:0.125rem width:100% bg:${step.id < getStepId() ? 'rgb(79,70,229)' : 'rgb(229,231,235)'}`}/>
+                                </Show>
+                            </div>
+                            <Tooltip position={'n'}
+                                     content={step.id === 1 ? 'Edit Page' : step.id === 2 ? 'Preview' : 'Share'}>
+                                <a href="#" onClick={() => onChangeStep(step.id)}
+                                   class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
+                                    <Icon
+                                        icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
+                                        style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
+                                    <span class="sr-only">Step {step.id}</span>
+                                </a>
+                            </Tooltip>
+                        </li>
+                    )}
+                </For>
+            </ol>
+        </nav>
     );
 
     const [isLeftOpen, toggleIsLeftOpen] = useExpansion(true);
@@ -1655,38 +1581,61 @@ export const PageDesignerDragAndDrop = () => {
             <Switch>
                 <Match when={selectedStepId() === 1}>
                     <div class="flex">
-                        <div class={`abs z-index:1 mt:40vh ${isLeftOpen() ? 'ml:22.5rem' : 'ml:1.2rem'}`}>
-                            <button
-                                onClick={toggleIsLeftOpen}
-                                type="button"
-                                title={`${isLeftOpen() ? 'Close' : 'Open'}`}
-                                class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                                style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
-                            >
-                                <Show when={isLeftOpen()}
-                                      fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
-                                                      style={{'color': '#c1c1c1'}}/>}>
-                                    <Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
-                                          style={{'color': '#c1c1c1'}}/>
+                        <div class={'rel'}>
+                            <div
+                                class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? 'w:20rem' : 'w:1.8rem'} direction:rtl`}
+                                style={{
+                                    "max-height": 'calc(100vh - 100px)', "scrollbar-width": "thin",
+                                    "scrollbar-color": "lightgrey"
+                                }}>
+                                <Show when={isLeftOpen()}>
+                                    <For each={leftColumns()}>
+                                        {(column, index) => <Column type={column.id} index={index()}
+                                                                    vertex={pageConfig[0].record?.vertex}/>}
+                                    </For>
                                 </Show>
-                            </button>
-                        </div>
-                        <div
-                            class={`flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? 'w:23rem' : 'w:1.8rem'} direction:rtl`}
-                            style={{
-                                "max-height": 'calc(100vh - 100px)', "scrollbar-width": "thin",
-                                "scrollbar-color": "lightgrey"
-                            }}>
-                            <Show when={isLeftOpen()}>
-                                <For each={leftColumns()}>
-                                    {(column, index) => <Column type={column.id} index={index()}
-                                                                vertex={pageConfig[0].record?.vertex}/>}
-                                </For>
-                            </Show>
+                            </div>
+                            <div class={`abs z-index:1 top:40vh right:1.2rem`}>
+                                <button
+                                    onClick={toggleIsLeftOpen}
+                                    type="button"
+                                    title={`${isLeftOpen() ? 'Close' : 'Open'}`}
+                                    class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                                    style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
+                                >
+                                    <Show when={isLeftOpen()}
+                                          fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
+                                                          style={{'color': '#c1c1c1'}}/>}>
+                                        <Icon icon={'line-md:chevron-left-circle'} height={30} width={30}
+                                              style={{'color': '#c1c1c1'}}/>
+                                    </Show>
+                                </button>
+                            </div>
                         </div>
 
+
                         <div class="flex-grow:1 min-w:400 grid ji:center">
-                            <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                            <div
+                                class={'ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between justify-content:center mb:5 p:10 r:7 w:90%'}>
+                                <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                                <div
+                                    class={'ai:center justify-content:space-between flex gap:5'}>
+                                    <Tooltip content={'Undo'} position={'n'}>
+                                        <div
+                                            class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
+                                        >
+                                            <Icon icon={'ci:arrow-undo-up-left'} height={22} width={22}/>
+                                        </div>
+                                    </Tooltip>
+                                    <Tooltip content={'Redo'} position={'n'}>
+                                        <div
+                                            class="b:1px|solid|lightgrey color:#000:hover color:grey bg:white flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
+                                        >
+                                            <Icon icon={'ci:arrow-undo-up-right'} height={22} width={22}/>
+                                        </div>
+                                    </Tooltip>
+                                </div>
+                            </div>
                             <ResizableContainer>
                                 <FormContext.Provider value={{record: pageConfig[0].record}}>
                                     <PageView number={count()} vertex={pageConfig[0].record?.vertex}/>
@@ -1728,11 +1677,15 @@ export const PageDesignerDragAndDrop = () => {
                     </div>
                 </Match>
                 <Match when={selectedStepId() === 2}>
-                    <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                    <div class={'w:100% h:50px display:flex align-items:center mb:10 justify-content:center'}>
+                        <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                    </div>
                     <PreviewSection/>
                 </Match>
                 <Match when={selectedStepId() === 3}>
-                    <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                    <div class={'w:100% h:50px display:flex align-items:center mb:10 justify-content:center'}>
+                        <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep}/>
+                    </div>
                     <ShareSection/>
                 </Match>
             </Switch>

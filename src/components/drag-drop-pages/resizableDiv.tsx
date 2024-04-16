@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 
 const ResizableContainer = (props: any) => {
-    const [width, setWidth] = createSignal(500);
+    const [width, setWidth] = createSignal(null);
     const [height, setHeight] = createSignal('calc(-50px + 90vh)');
 
     // const handleMouseDown = (e, direction) => {
@@ -32,7 +32,7 @@ const ResizableContainer = (props: any) => {
     // };
 
     return (
-            <div class="resizable-container r:10|10|10|10 max-height:77vh min-width:30vw max-width:53vw"
+            <div class="resizable-container r:10|10|10|10 max-height:77vh min-width:20vw max-width:45vw"
                  style={`width: ${width()}px; height: ${height()}px; resize: both; border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}>
                 {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}

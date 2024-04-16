@@ -267,6 +267,9 @@ export const StyleCSSComponents = () => {
     }) => {
         const [cssState, setCssState] = useContext(CssEditorContext);
         const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
+        const [isMoving, setIsMoving] = createSignal(false);
+        const [startY, setStartY] = createSignal(0);
+        const [startValue, setStartValue] = createSignal(cssState[props.name]);
 
         createEffect(v => {
             setOption(determineSelectedOption())
@@ -277,7 +280,6 @@ export const StyleCSSComponents = () => {
         };
 
         const [selectedOption, setOption] = createSignal(determineSelectedOption());
-
 
         const handleChange = (event: any) => {
             const value = event.target.value;
@@ -303,21 +305,51 @@ export const StyleCSSComponents = () => {
         };
 
         const getValueWithoutUnits = (valueWithUnits: string) => {
-            console.log(`getValueWithoutUnits`, valueWithUnits)
             if (!valueWithUnits) return "";
             const unitsToRemove = ['px', '%', 'em', 'rem', 'vh', 'vw'];
             const regexPattern = new RegExp(unitsToRemove.join('|'), 'g');
             return parseFloat(valueWithUnits.replace(regexPattern, ''));
         };
 
+        // Function to normalize and set the new value based on mouse movement
+        const moveIncrement = (event) => {
+            if (isMoving()) {
+                const diff = startY() - event.pageY;
+                setCssState(props.name, `${startValue() + diff}${selectedOption()}`); // Assuming each pixel move changes the value by 1
+            }
+        };
 
+        // Function to start the increment process
+        const downIncrement = (event) => {
+            event.preventDefault();
+            setIsMoving(true);
+            setStartY(event.pageY);
+            setStartValue(getValueWithoutUnits(props.value ? props.value() : cssState[props.name] ?? ''));
+
+            document.addEventListener('mousemove', moveIncrement);
+            document.addEventListener('mouseup', upIncrement);
+        };
+
+        // Function to stop the increment process
+        const upIncrement = () => {
+            setIsMoving(false);
+            document.removeEventListener('mousemove', moveIncrement);
+            document.removeEventListener('mouseup', upIncrement);
+        };
+
+        // Clean up event listeners when the component unmounts
+        onCleanup(() => {
+            document.removeEventListener('mousemove', moveIncrement);
+            document.removeEventListener('mouseup', upIncrement);
+        });
         const Content = () => <div
             class={`flex ai:center jc:space-between ${props.showInside ? 'b:1px|solid|#ccc' : ''} r:5 ${props.showInside ? "p:0|5|0|5" : ""} rel ${!props.isLabelOnTop ? 'max-w:50%' : ''}`}>
 
             <div class={'flex ai:center'} style={{flex: '1'}}>
                 <Show when={props.leftIcon || props.inputType === 'number'}>
-                    <Show when={props.leftIcon} fallback={
-                        <button style={{border: 'none', background: 'transparent', cursor: 'ns-resize'}}>
+                    <Show when={props.inputType !== 'number'} fallback={
+                        <button onMouseDown={downIncrement}
+                                style={{border: 'none', background: 'transparent', cursor: 'ns-resize'}}>
                             <Icon icon="gg:scroll-v" style={{color: 'grey'}}/>
                         </button>
                     }>
@@ -409,7 +441,6 @@ export const StyleCSSComponents = () => {
                             if (props.isAddToClass) {
                                 setCssState(props.name, option.value)
                             }
-
                         }}
                         class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
                                      bg:${isSelected(option) ? '#e0e7f3' : 'transparent'}

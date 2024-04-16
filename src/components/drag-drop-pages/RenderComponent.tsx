@@ -7,7 +7,7 @@ export const RenderComponent = (props: { value: any }) => {
         ButtonGroups,
         DataEditor,
         ColorPickerInput,
-        ToggleButton,FieldWithCustomProperty,
+        ToggleButton, FieldWithCustomProperty,
         TextFieldWithSelectOption
     } = StyleCSSComponents();
     return <Switch>
@@ -15,7 +15,7 @@ export const RenderComponent = (props: { value: any }) => {
             <ColorPickerInput
                 name={props.value.name}
                 onChangeInput={props.value.onChangeInput}
-                isAddToClass={props.value.isAddToClass}
+                isAddToClass={props.value.isAddToClass ?? true}
                 label={props.value.label}
                 isLabelOnTop={props.value.isLabelOnTop}
             />
@@ -30,14 +30,15 @@ export const RenderComponent = (props: { value: any }) => {
         <Match when={props.value.component === 'toggleButton'}>
             <ToggleButton
                 onChangeInput={props.value.onChangeInput}
-                isAddToClass={props.value.isAddToClass}
+                isAddToClass={props.value.isAddToClass ?? true}
                 isLabelOnTop={props.value.isLabelOnTop}
                 label={props.value.label}
                 name={props.value.name}
                 options={props.value.options}/>
         </Match>
         <Match when={props.value.component === 'textField'}>
-            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass} name={props.value.name}
+            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass ?? true}
+                                       name={props.value.name}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        label={props.value.label}
                                        onChangeInput={props.value.onChangeInput}
@@ -50,7 +51,8 @@ export const RenderComponent = (props: { value: any }) => {
         </Match>
         <Match when={props.value.component === 'textFieldOptions'}>
 
-            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass} name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
+            <TextFieldWithSelectOption value={props.value.value} isAddToClass={props.value.isAddToClass ?? true}
+                                       name={props.value.name} showInside={true} leftIcon={props.value.leftIcon}
                                        isLabelOnTop={props.value.isLabelOnTop}
                                        onChangeInput={props.value.onChangeInput}
                                        label={props.value.label}

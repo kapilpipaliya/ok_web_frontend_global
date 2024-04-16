@@ -2,7 +2,7 @@ import {Tab, TabContainer, TabList, Tabs} from "../solid-blocks/blocks";
 import {Vertex} from "../../lib/graph";
 import StyleEditor from "./styleEditor";
 import {StyleCSSComponents} from "./StyleCSSComponents";
-import {createEffect, createSignal, For, on, Show} from "solid-js";
+import {createEffect, createSignal, For, on, onCleanup, Show} from "solid-js";
 import {createStore, reconcile} from "solid-js/store";
 import {CssEditorContext, sizeTypes} from "./cssEditorContext";
 import {RenderComponent} from "./RenderComponent";
@@ -74,8 +74,7 @@ export const ClassDesignTab = (props: {
     };
 
 
-
-    return <CssEditorContext.Provider value={[cssState, setCssState]}>
+        return <CssEditorContext.Provider value={[cssState, setCssState]}>
         <tr class={'min-w:100% m:5px'}>
             <td colspan="2">
 <span class={'m:10|0'}>
