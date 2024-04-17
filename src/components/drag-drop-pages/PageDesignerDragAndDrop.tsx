@@ -78,7 +78,7 @@ export const PageDesignerDragAndDrop = () => {
     const [steps, setSteps] = createSignal([
         {id: 1, name: 'Job details', href: '#', status: 'current', active: true},
         {id: 2, name: 'Application form', href: '#', status: 'upcoming', active: false},
-        {id: 3, name: 'Preview', href: '#', status: 'upcoming', active: false},
+        {id: 3, name: 'Preview', href: '#', status: 'upcoming', active: false}
     ]);
 
     // For Expand and collapse section

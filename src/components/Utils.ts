@@ -10,7 +10,7 @@ export const iconMap = {
   A: "ph:link-bold",
   Text: "ci:text",
   Repeater: "formkit:repeater",
-  Page: "fluent:document-one-page-20-regular",
+  Page: "fluent:document-one-Page-20-regular",
   Box: "mage:box-3d-scan",
   ProgressBar: "carbon:progress-bar",
   LoadIndicator: "ep:loading",

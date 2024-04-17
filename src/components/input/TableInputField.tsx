@@ -504,8 +504,8 @@ export function TableInputField(
                     </table>
                 </div>
 
-                {/*<Show when={props.page}>*/}
-                {/*  <For each={Object.values(props.page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
+                {/*<Show when={props.Page}>*/}
+                {/*  <For each={Object.values(props.Page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}
                 {/*</Show>*/}
             </Match>
         </Switch>

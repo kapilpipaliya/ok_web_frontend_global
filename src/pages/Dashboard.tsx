@@ -32,25 +32,25 @@ const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 // get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
 // Todo use mastercss
-const AlertDisplay = () => {
-    const {alerts, setAlert} = useContext(AlertMessageContext);
-    return (
-        <For each={alerts}>
-            {(alert, index) => (
-                <div
-                    color={alert.state}
-                    // @ts-ignore
-                    isClosable={true}
-                    content={alert.message}
-                    duration={5000}
-                    // onHide={() =>
-                    //     setAlert((prev) => prev.filter((_, i) => i !== index()))
-                    // }
-                />
-            )}
-        </For>
-    );
-};
+// const AlertDisplay = () => {
+//     const {alerts, setAlert} = useContext(AlertMessageContext);
+//     return (
+//         <For each={alerts}>
+//             {(alert, index) => (
+//                 <div
+//                     color={alert.state}
+//                     // @ts-ignore
+//                     isClosable={true}
+//                     content={alert.message}
+//                     duration={5000}
+//                     // onHide={() =>
+//                     //     setAlert((prev) => prev.filter((_, i) => i !== index()))
+//                     // }
+//                 />
+//             )}
+//         </For>
+//     );
+// };
 
 // Best Template: https://www.tailwind-kit.com/templates#dashboard
 export const FullDashboard = (props: { children?: JSX.Element }) => {
@@ -118,7 +118,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             />
                         </Show>
 
-                        <AlertDisplay/>
+                        {/*<AlertDisplay/>*/}
                         <main class="p:10 bg:white">
                             <Show when={graph.initialSynced}>{props.children}</Show>
                         </main>
