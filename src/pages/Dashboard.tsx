@@ -1,5 +1,5 @@
 import {A, useLocation} from "@solidjs/router";
-import {get, set} from "idb-keyval";
+// import {get, set} from "idb-keyval";
 import {
     createEffect,
     createSignal,
@@ -20,6 +20,7 @@ import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signa
 import '../components/css/modal.css'
 import {Icon} from "@iconify-icon/solid";
 import '../components/css/modal.css'
+import useWindow from "solid-bootstrap/dist/esm/core/src/useWindow";
 
 const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -28,7 +29,7 @@ const GraphViewPage = lazy(() => import("./GraphViewPage"));
 
 const border = "|solid|rgb(212,219,231)";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
-get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
+// get(IS_SIDEBAR_OPEN_KEY).then((data) => setSideBarOpen(data));
 
 // Todo use mastercss
 const AlertDisplay = () => {
@@ -42,9 +43,9 @@ const AlertDisplay = () => {
                     isClosable={true}
                     content={alert.message}
                     duration={5000}
-                    onHide={() =>
-                        setAlert((prev) => prev.filter((_, i) => i !== index()))
-                    }
+                    // onHide={() =>
+                    //     setAlert((prev) => prev.filter((_, i) => i !== index()))
+                    // }
                 />
             )}
         </For>
@@ -103,7 +104,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             <Navbar
                                 showNavBar={isShowDrawer()}
                                 toggleSidebar={() => {
-                                    set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
+                                    // set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
                                     setSideBarOpen((prev) => !prev);
                                 }}
                                 right={

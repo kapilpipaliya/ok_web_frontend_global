@@ -1,7 +1,7 @@
 import {batch, createContext } from "solid-js";
 import {createStore, reconcile, SetStoreFunction, Store} from "solid-js/store";
 import {klona} from "klona";
-import {get, set} from "idb-keyval";
+// import {get, set} from "idb-keyval";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
 import { isNumber } from "./CommonUtils/isNumber";
 
@@ -79,7 +79,7 @@ export enum ProcessStatus {
 export type TransactionValue = InsertFn & Revert & {data: any};
 export const transactions = new Map<number, { status: ProcessStatus; steps: TransactionValue[] }>();
 // @ts-ignore
-window.t = transactions;
+
 export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
@@ -236,11 +236,11 @@ createComputed(() => {
 
 // Backup graphDb to IndexDB using idb-keyval key-value store
 export function backupToIndexDB(graph: Store<GraphInterface>) {
-  return set("graph", klona(graph));
+  // return set("graph", klona(graph));
 }
 
 export function restoreFromIndexDB(setGraph: SetStoreFunction<GraphInterface>) {
-  get("graph").then((data) => setGraph(reconcile(data)));
+  // get("graph").then((data) => setGraph(reconcile(data)));
 }
 
 export function backupToJson(graph: Store<GraphInterface>) {

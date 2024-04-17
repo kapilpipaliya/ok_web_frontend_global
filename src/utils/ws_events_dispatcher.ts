@@ -12,19 +12,22 @@ import { commitTransaction } from "../lib/graph";
 // automatically set NODE_ENV == 'production' when we build the project.
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
 
-const http_proto = location.protocol;
+// const http_proto = location.protocol;
+const http_proto = 'http:';
 // @ts-ignore
-let domain = window.location.hostname;
+// let domain = window.location.hostname;
+let domain = 'localhost';
 // @ts-ignore
-let port = "";
-if (window.location.hostname == "localhost") {
+let port = ":3001";
+if (domain == "localhost") {
   // domain = "65.21.181.71"
   domain = "easyformforge.com"
   port = ":1101";
 
   // port = ":1101";
 } else if (IS_PRODUCTION) {
-  port = `:${window.location.port}`;
+  // port = `:${window.location.port}`;
+  port = `:$3001`;
 }
 // const port = location.protocol == "http:" ? (IS_PRODUCTION ? "" : ":8500") : IS_PRODUCTION ? "" : ":8504";
 // const port = ''; // ':8500';

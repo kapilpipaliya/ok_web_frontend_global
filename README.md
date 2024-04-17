@@ -1,63 +1,32 @@
-## Usage
+# SolidStart
+
+Everything you need to build a Solid project, powered by [`solid-start`](https://start.solidjs.com);
+
+## Creating a project
 
 ```bash
-npm install
+# create a new project in the current directory
+npm init solid@latest
+
+# create a new project in my-app
+npm init solid@latest my-app
 ```
 
-## Available Scripts
+## Developing
 
-- `npm run dev`: Runs the app in the development mode
-- `npm run build`: Builds the app for production to the `dist` folder
-- `npm run lint:check`: Find linting errors
-- `npm run lint:fix`: Fix linting errors in directory
-- `npm run prettier:check`: Find prettier formatting suggestions in project.
-- `npm run prettier:format`: Find & fix prettier formatting suggestions in project.
+Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
 
-## Deployment
+```bash
+npm run dev
 
-- You can deploy the `dist` folder to any static host provider
+# or start the server and open the app in a new browser tab
+npm run dev -- --open
+```
 
-## Linting
+## Building
 
-- `camelcase`: Use `camelCase` for naming objects, functions, and instances
-- `new-cap`: Use `PascalCase` for naming constructor and classes,
-- `no-underscore-dangle`: Do not use leading or trailing underscore
+Solid apps are built with _presets_, which optimise your project for deployment to different environments.
 
-## Naming conventions
+By default, `npm run build` will generate a Node app that you can run with `npm start`. To use a different preset, add it to the `devDependencies` in `package.json` and specify in your `app.config.js`.
 
-- File name - A base filename should `exactly match` the name of its default export.
-- Export function - Use `camelCase` when you export-default a function.
-- Export constructor/class/object - use `PascalCase` when export a constructor/class/object/function library.
-- Optionally uppercase const only if it is
-  -- Exported
-  -- is constant
-
-## Formatting
-- npx rome format <files> --write
-
-### css rules
-- don't use css child selectors.
-
-### Rules:
-- User doesn't need to open multiple tabs. he can do whatever he wants in one tab.
-
-### Eval Libs
-https://www.npmjs.com/package/@nx-js/compiler-util
-evalute in a window:
-https://github.com/amasad/context-eval/blob/master/lib/context-browser.js
-https://github.com/ttessarolo/safe-evaluate-expression
-
-
-### Web Build
-- Do not compile dev extreme
-- only send Web Components data.
-- Analyze Web build size: https://www.npmjs.com/package/vite-bundle-visualizer
-
-### How to import HTML in Page Builder:
-- Wrap For Loop With <Repeater> component.
-- replace expression with formula string.
-
-
-Find Circular dependencies:
-madge --circular  --extensions ts,tsx src
-
+## This project was created with the [Solid CLI](https://solid-cli.netlify.app)
