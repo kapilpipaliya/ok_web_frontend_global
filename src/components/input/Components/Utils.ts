@@ -1,4 +1,8 @@
-import { isObject } from "lodash";
+function isObject(value: any): boolean {
+  // Check if the value is not null and its type is 'object'
+  return value !== null && typeof value === 'object';
+}
+
 
 export const getTextColumnValue = (value: any) => {
   if (value === true) {

@@ -52,9 +52,8 @@ export type ToastProps = Omit<
   onhide?: () => void;
 };
 
-const div = document.createElement("div");
-
 const addMountPoint = (position: ToastPosition = "top-right") => {
+  const div = document.createElement("div");
   const mountPoint = div.cloneNode() as HTMLDivElement;
   mountPoint.id = `sb-toast-${position}`;
   toastMountPoints[position] = mountPoint;

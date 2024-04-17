@@ -79,7 +79,7 @@ export default function App() {
             <GraphContext.Provider value={graph}>
                 <MetaProvider>
                     <CSSRuntimeProvider config={config}>
-                        <Sync />
+                        {/*<Sync />*/}
                         <AlertMessageContext.Provider value={{alerts, setAlert}}>
                             <Show when={isAdmin()}>
                                 <Router
@@ -88,7 +88,7 @@ export default function App() {
                                 >
                                     <Route
                                         path="/"
-                                        component={() => <PageView_ count={1} id={"home"}/>}
+                                        component={Counter}
                                     />
                                     {/* TODO: fix when incorrect entity is rendered */}
                                     <Route
@@ -152,24 +152,24 @@ export default function App() {
                                     <Route path="/**" component={Page404 as Component}/>
                                 </Router>
                             </Show>
-                            <Show when={!graph[0].initialSynced}>
-                                <div class="flex jc:center h:75vh w:100vw">
-                                    <div class={'align-self:center'}>
-                                        <LoaderNew/>
-                                    </div>
-                                </div>
-                            </Show>
-                            <Show when={!isAdmin() && graph[0].initialSynced}>
-                                <Router>
-                                    <Route
-                                        path="/"
-                                        component={() => <PageView_ count={1} id={"home"}/>}
-                                    />
-                                    <Route path=":id" component={PagePreview as Component}/>
-                                    <Route path="robots.txt" component={RobotsTxt as Component}/>
-                                    <Route path="sitemap.txt" component={SiteMap as Component}/>
-                                </Router>
-                            </Show>
+                            {/*<Show when={!graph[0].initialSynced}>*/}
+                            {/*    <div class="flex jc:center h:75vh w:100vw">*/}
+                            {/*        <div class={'align-self:center'}>*/}
+                            {/*            <LoaderNew/>*/}
+                            {/*        </div>*/}
+                            {/*    </div>*/}
+                            {/*</Show>*/}
+                            {/*<Show when={!isAdmin() && graph[0].initialSynced}>*/}
+                            {/*    <Router>*/}
+                            {/*        <Route*/}
+                            {/*            path="/"*/}
+                            {/*            component={() => <PageView_ count={1} id={"home"}/>}*/}
+                            {/*        />*/}
+                            {/*        <Route path=":id" component={PagePreview as Component}/>*/}
+                            {/*        <Route path="robots.txt" component={RobotsTxt as Component}/>*/}
+                            {/*        <Route path="sitemap.txt" component={SiteMap as Component}/>*/}
+                            {/*    </Router>*/}
+                            {/*</Show>*/}
                             {/*<Toaster/>*/}
                           </AlertMessageContext.Provider>
                     </CSSRuntimeProvider>
