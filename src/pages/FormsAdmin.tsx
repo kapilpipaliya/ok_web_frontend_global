@@ -4,7 +4,7 @@ import {createMemo, For, Match, Switch, useContext} from "solid-js";
 import {A} from "@solidjs/router";
 import {WsContext} from "../utils/ws_events_dispatcher";
 import {createStore} from "solid-js/store";
-import {Record} from "../lib/Utils";
+import {APP_BASE_URL, Record} from "../lib/Utils";
 import {SelectInputField} from "../components/input/SelectInputField";
 import {onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
 import {AbstractSingleForm, getComponentForCollRow} from "../components/DynamicForm";
@@ -21,7 +21,7 @@ export const AllForms = () => {
     return (
         <div class="">
             <For each={allForms()}>{(vertexId) => <A
-                href={`/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
+                href={`${APP_BASE_URL}/${graph.vertexes[vertexId].P[IdAttr]}/new`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
         </div>
     );
 };

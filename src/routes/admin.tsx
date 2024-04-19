@@ -3,11 +3,10 @@ import {EdgeMap, GraphContext, GraphInterface, Id, VertexMap} from "~/lib/graph"
 import {CSSRuntimeProvider} from "~/components/css/CSSRuntimeProvider";
 import {ServerEventsDispatcher, WS_PATH, WsContext} from "~/utils/ws_events_dispatcher";
 import {createStore} from "solid-js/store";
-import {Show} from "solid-js";
-import {LoaderNew} from "~/components/LoaderSimple";
 import {config} from "~/master.css";
-import Counter from "~/components/Counter";
 import {FullDashboard} from "~/pages/Dashboard";
+import {API, DataFetcher} from "~/components/DataFetcher";
+import {LoaderNew} from "~/components/LoaderSimple";
 
 export default function UsersLayout(props: RouteSectionProps) {
     const Ws = new ServerEventsDispatcher(WS_PATH);
@@ -20,13 +19,12 @@ export default function UsersLayout(props: RouteSectionProps) {
         lastSyncedTime: 0,
         member: {},
     });
-
     return (
         <GraphContext.Provider value={graph}>
             <CSSRuntimeProvider config={config}>
                 <WsContext.Provider value={{ Ws }}>
-                    <Counter />
-                    {props.children}
+                    <DataFetcher fetchData={API.fetchDataUrl} renderContent={<FullDashboard children={props.children}/>}/>
+                    {/*{props.children}*/}
                 </WsContext.Provider>
             </CSSRuntimeProvider>
         </GraphContext.Provider>

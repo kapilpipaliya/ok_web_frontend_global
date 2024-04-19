@@ -33,7 +33,7 @@ import {
     selectedValue
 } from "../components/input/SelectInputField";
 import {getFormApiFromForm} from "../lib/Record";
-import {PageContext} from "../lib/Utils";
+import {APP_BASE_URL, PageContext} from "../lib/Utils";
 import {getSelectionOptions} from "../lib/Utils";
 import {getChildVertexes} from "../lib/Utils";
 import {deleteVertex, findVertexByLabelAndUniqueId} from "../lib/Vertex";
@@ -54,7 +54,7 @@ interface DataGridProps {
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const form = getFormApiFromForm(graph,setGraph,props.tableId);
+    const form = getFormApiFromForm(graph, setGraph, props.tableId);
     let formNew: FormMetaData;
     let collection: string;
 
@@ -93,10 +93,10 @@ export const DataGrid = (props: DataGridProps) => {
             {
                 P: props.attribute,
             } as unknown as Vertex,
-            props.info.row.original,graph
+            props.info.row.original, graph
         );
         if (vertex[0]) {
-            return getSelectionOptions(graph,setGraph,[graph.vertexes[vertex[0]]], props.attribute.props?.displayExpr || collectionNameDisplayExpr(graph,props.attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
+            return getSelectionOptions(graph, setGraph, [graph.vertexes[vertex[0]]], props.attribute.props?.displayExpr || collectionNameDisplayExpr(graph, props.attribute.props?.collection) || `::'P.${IdAttr}'`).vertexes;
         }
         return "";
     }
@@ -105,12 +105,12 @@ export const DataGrid = (props: DataGridProps) => {
             {
                 P: props.attribute,
             } as unknown as Vertex,
-            props.info.row.original,graph
+            props.info.row.original, graph
         );
         if (vertex) {
             const textArray = [];
             for (const v of vertex) {
-                const text = getSelectionOptions(graph,setGraph,[graph.vertexes[v]], props.attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
+                const text = getSelectionOptions(graph, setGraph, [graph.vertexes[v]], props.attribute.props?.displayExpr || `::'P.${IdAttr}'`).vertexes;
                 textArray.push(text);
             }
             return textArray.join(', ');
@@ -163,7 +163,7 @@ export const DataGrid = (props: DataGridProps) => {
         {
             return !formNew.isInlineEditable ?
                 <A
-                    href={`/${props.tableId}/${info.row.original.id}`}
+                    href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
                     replace={true}
                     class="r:5|5|5|5 p:5"
                 >
@@ -235,10 +235,8 @@ export const DataGrid = (props: DataGridProps) => {
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
     })
-    console.log(table.getHeaderGroups())
     return (
         <div class="py:5">
-
             <div class="p:2">
                 <table class="mt:5 styled-table">
                     <thead class="r:5|5|5|5 ">
@@ -306,7 +304,7 @@ export const DataGrid = (props: DataGridProps) => {
                                         showMainFieldsOnly={true}
                                         importExportButtons={false}
                                         doMount={false}
-                                    />
+                                        setGraph={setGraph}/>
 
                                 </div>
 
@@ -361,6 +359,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                 />
             </div>
             <Show when={tableId()}>
+
                 <DataGrid tableId={tableId()}/>
             </Show>
         </>
@@ -369,15 +368,15 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 
 export const TableDashboard = () => {
     const params = useParams();
-    const [graph,setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useContext(GraphContext)!;
     const dashboard = findVertexByLabelAndUniqueId('Dashboard', IdAttr, params.name, graph);
     if (!dashboard) {
         return "No Dashboard Found";
     }
     const allFormTableLayouts =
-      getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
+        getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
     const allCollTableLayouts =
-      getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
+        getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
 
     const allTableLayouts = () => [...new Set([...allCollTableLayouts, ...allFormTableLayouts])];
     return (
@@ -388,7 +387,7 @@ export const TableDashboard = () => {
                     <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
                         <h3 class="f:18@md font:semibold"></h3>
                         <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
-                            <A href={`/${tableLayout.P[IdAttr]}`}>
+                            <A href={`${APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
                                 {tableLayout.P.title || tableLayout.P[IdAttr]}
                             </A>
                         </p>
@@ -400,12 +399,12 @@ export const TableDashboard = () => {
 };
 
 export const AllDashboards = () => {
-    const [graph,setGraph] = useContext(GraphContext)!;
+    const [graph, setGraph] = useContext(GraphContext)!;
     const vertexes = () => graph.vertexLabelIdMap["Dashboard"] || [];
     return (
         <div class="">
             <For each={vertexes()}>{(vertexId) => <A
-                href={`/grid/${graph.vertexes[vertexId].P[IdAttr]}`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
+                href={`${APP_BASE_URL}/grid/${graph.vertexes[vertexId].P[IdAttr]}`}>{graph.vertexes[vertexId].P[IdAttr]}</A>}</For>
         </div>
     );
 }

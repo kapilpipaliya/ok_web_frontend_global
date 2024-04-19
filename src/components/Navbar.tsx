@@ -4,6 +4,7 @@ import {DisplayComponentProps} from "./ComponentType";
 import {useNavigate} from "@solidjs/router";
 import './css/sideBarSearch.css';
 import './css/table.css'
+import {APP_BASE_URL} from "~/lib/Utils";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
     return (
@@ -45,7 +46,7 @@ export function Navbar(
                         <div
                             class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
                             onclick={() => {
-                                navigate("/Page");
+                                navigate(`${APP_BASE_URL}/Page`);
                             }}
                             title="Back"
                         >

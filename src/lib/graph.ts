@@ -4,6 +4,7 @@ import {klona} from "klona";
 // import {get, set} from "idb-keyval";
 import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
 import { isNumber } from "./CommonUtils/isNumber";
+import {useNavigate} from "@solidjs/router";
 
 export type Id = number;
 

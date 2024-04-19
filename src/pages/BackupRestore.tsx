@@ -12,7 +12,7 @@ import {
     restoreFromIndexDB,
     restoreFromJson,
     Vertex,
-} from "../lib/graph";
+} from "~/lib/graph";
 import {A} from "@solidjs/router";
 import {
     addNewVertex,
@@ -20,20 +20,16 @@ import {
     mergeVertexProperties,
     newVertex,
     replaceVertexProperties
-} from "../lib/Vertex";
-import {WsContext} from "../utils/ws_events_dispatcher";
-import {getParentVertex} from "../lib/Utils";
-import {getChildVertex} from "../lib/Utils";
-import {getCompPropsMap, getFormMetaData} from "../lib/Record";
-import {getId} from "../lib/Utils";
-import {newRow} from "../lib/Utils";
-import {Record} from "../lib/Utils";
-import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
-import {fileDownloader} from "../utils/dom_utils";
+} from "~/lib/Vertex";
+import {WsContext} from "~/utils/ws_events_dispatcher";
+import {getParentVertex, getChildVertex, getId, newRow, Record, APP_BASE_URL} from "~/lib/Utils";
+import {getCompPropsMap, getFormMetaData} from "~/lib/Record";
+import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "~/lib/Import";
+import {fileDownloader} from "~/utils/dom_utils";
 import {Field, NsMetaJson} from "./NSMetaDataType";
-import {setSelectionValue} from "../components/input/SelectionUtils";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {FormMetaData} from "../lib/Type";
+import {setSelectionValue} from "~/components/input/SelectionUtils";
+import {AttrsAdminTableData} from "~/lib/apiAdmin";
+import {FormMetaData} from "~/lib/Type";
 
 export const BackupRestore = () => {
     const {Ws} = useContext(WsContext);
@@ -76,13 +72,13 @@ export const BackupRestore = () => {
             }
             // const description = attribute.description;
             const rowResult = newRow(
-              graph,
-              setGraph,
-              txnId,
-              parentVertex,
-              "Attr",
-              "Attr",
-              { name, displayName }
+                graph,
+                setGraph,
+                txnId,
+                parentVertex,
+                "Attr",
+                "Attr",
+                {name, displayName}
             );
 
             const setDataType = (rowVertex: Vertex, dataType: string) => {
@@ -92,7 +88,7 @@ export const BackupRestore = () => {
                 } else {
                     setSelectionValue(
                         txnId,
-                        rowVertex,graph,setGraph,
+                        rowVertex, graph, setGraph,
                         {P: {[IdAttr]: "DataType"}} as unknown as Vertex,
                         dataTypeVertex.id,
                     );
@@ -108,7 +104,7 @@ export const BackupRestore = () => {
                 } else {
                     setSelectionValue(
                         txnId,
-                        rowVertex,graph,setGraph,
+                        rowVertex, graph, setGraph,
                         {P: {[IdAttr]: "Comp"}} as unknown as Vertex,
                         compVertex.id,
                     );
@@ -125,7 +121,7 @@ export const BackupRestore = () => {
             if (component && (component !== "TextBox" || attribute.props)) {
                 const compVertex = setComponent(graph.vertexes[rowResult.vertexId!], component);
                 if (compVertex && !dataTypeVertex) {
-                    const dataTypeDefault = getChildVertex(graph,["$0Default"], compVertex,);
+                    const dataTypeDefault = getChildVertex(graph, ["$0Default"], compVertex,);
                     if (dataTypeDefault.error) {
                         console.warn(`Component dataType not configured ${component}`);
                     } else {
@@ -135,13 +131,13 @@ export const BackupRestore = () => {
 
                 if (compVertex && attribute.props) {
                     for (const property in attribute.props) {
-                        const props = getCompPropsMap(graph,compVertex);
+                        const props = getCompPropsMap(graph, compVertex);
                         if (props[property]) {
-                            const rowResult = newRow(graph,setGraph,txnId, parentVertex, "AttrProp", "AttrProp", {value: attribute.props[property]});
+                            const rowResult = newRow(graph, setGraph, txnId, parentVertex, "AttrProp", "AttrProp", {value: attribute.props[property]});
                             if (!rowResult.error) {
                                 setSelectionValue(
                                     txnId,
-                                    graph.vertexes[rowResult.vertexId!],graph,setGraph,
+                                    graph.vertexes[rowResult.vertexId!], graph, setGraph,
                                     {P: {[IdAttr]: "Name"}} as unknown as Vertex,
                                     props[property].id,
                                 );
@@ -190,24 +186,24 @@ export const BackupRestore = () => {
             const componentVertex = graph.vertexes[compVertexId];
             const componentName = componentVertex.P[IdAttr];
             if (["DropDownBox", "Bullet", "CircularGauge", "LinearGauge", "ProgressBar"].includes(componentName)) continue;
-            const newRow1 = newRow(graph,setGraph,txnId, existingVertex, "Attr");
+            const newRow1 = newRow(graph, setGraph, txnId, existingVertex, "Attr");
             replaceVertexProperties(txnId, newRow1.vertexId!, graph, setGraph, {
                 [IdAttr]: getId(componentName),
                 displayName: componentName
             });
-            const dataType = getParentVertex(["DataType$0"], componentVertex,graph);
+            const dataType = getParentVertex(["DataType$0"], componentVertex, graph);
             if (!dataType.error) {
                 // set component dataType and component
                 setSelectionValue(
                     txnId,
-                    graph.vertexes[newRow1.vertexId!],graph,setGraph,
+                    graph.vertexes[newRow1.vertexId!], graph, setGraph,
                     // @ts-ignore
                     {P: {[IdAttr]: "dataType"}} as Vertex,
                     dataType.vertex!.id,
                 );
                 setSelectionValue(
                     txnId,
-                    graph.vertexes[newRow1.vertexId!],graph,setGraph,
+                    graph.vertexes[newRow1.vertexId!], graph, setGraph,
                     // @ts-ignore
                     {P: {[IdAttr]: "comp"}} as Vertex,
                     compVertexId,
@@ -219,16 +215,16 @@ export const BackupRestore = () => {
 
     // @ts-ignore
     const importAllCSV = () => {
-        const form = getFormMetaData(graph,setGraph,'Import');
+        const form = getFormMetaData(graph, setGraph, 'Import');
         if (form.error) return form.error;
         const record = new Record({ws: Ws});
-        const createResult = record.create(graph, setGraph,form.form![IdAttr]);
-        record.createMeta(form.form!, graph,setGraph);
+        const createResult = record.create(graph, setGraph, form.form![IdAttr]);
+        record.createMeta(form.form!, graph, setGraph);
         if (createResult.error) return createResult.error;
 
 
         // 1. import dataTypes
-        updateImportRecord(graph, setGraph,"dataType", record, false);
+        updateImportRecord(graph, setGraph, "dataType", record, false);
         mergeVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
             csv: `name
 Null
@@ -245,9 +241,9 @@ LocalDateTime
 ->
 =>`,
         });
-        onDataDirectoryImportClick(record, Ws, graph,setGraph);
+        onDataDirectoryImportClick(record, Ws, graph, setGraph);
         // 2. Import components
-        updateImportRecord(graph,setGraph,'component', record, false);
+        updateImportRecord(graph, setGraph, 'component', record, false);
         mergeVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
             csv: `name\tdataType\tparent\tcategory\tchild
 ActionSheet\t\t\tAction\tTRUE
@@ -326,9 +322,9 @@ ProgressBar\tFloat\t\tNotification\t
 Box\t\t\tView\tTRUE
 ScrollView\t\t\tView\t`,
         });
-        onDataDirectoryImportClick(record, Ws,graph, setGraph);
+        onDataDirectoryImportClick(record, Ws, graph, setGraph);
         // 3. Import dataTypeDefault
-        updateImportRecord(graph,setGraph,'dataTypeDefault', record, false);
+        updateImportRecord(graph, setGraph, 'dataTypeDefault', record, false);
         mergeVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
             csv: `name\tdefault
 String\tTextBox
@@ -346,15 +342,15 @@ LocalDateTime\tDateBox
         });
         onDataDirectoryImportClick(record, Ws, graph, setGraph);
 
-        updateImportRecord(graph,setGraph,'user', record, false);
+        updateImportRecord(graph, setGraph, 'user', record, false);
         mergeVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
             csv: `name\temail\tpass\trole
 Test1\ttest1@test.com\ttest1\tAdmin
 Test2\ttest2@test.com\ttest2\tUser`,
         });
-        onDataDirectoryImportClick(record, Ws,graph, setGraph);
+        onDataDirectoryImportClick(record, Ws, graph, setGraph);
 
-        updateImportRecord(graph,setGraph,'role', record, false);
+        updateImportRecord(graph, setGraph, 'role', record, false);
         mergeVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
             csv: `name
 Admin
@@ -378,7 +374,7 @@ delete`,
         record.create(graph, setGraph, "Nav", {});
         record.createMeta(AttrsAdminTableData["Nav"], graph, setGraph);
         importRecordWithYAMLSchema(
-          `L: Nav
+            `L: Nav
 P:
   title: Main
   name: main
@@ -463,9 +459,9 @@ OUT:
         name: Dashboards
         url: /admin/dashboards
 `,
-          record,
-          graph,
-          setGraph
+            record,
+            graph,
+            setGraph
         );
         record.commitTxn();
         alert("Imported Navigation")
@@ -707,11 +703,11 @@ OUT:
                                 }
 
                                 const rowResult = newRow(
-                                  graph,
-                                  setGraph,
-                                  txnId,
-                                  collectionVertex,
-                                  "Attr"
+                                    graph,
+                                    setGraph,
+                                    txnId,
+                                    collectionVertex,
+                                    "Attr"
                                 );
                                 replaceVertexProperties(txnId, rowResult.vertexId!, graph, setGraph, {
                                     name: field.id,
@@ -721,7 +717,7 @@ OUT:
                                 });
                                 setSelectionValue(
                                     txnId,
-                                    graph.vertexes[rowResult.vertexId!],graph,setGraph,
+                                    graph.vertexes[rowResult.vertexId!], graph, setGraph,
                                     {P: {[IdAttr]: "DataType"}} as unknown as Vertex,
                                     dataTypeVertex.id
                                 );
@@ -792,11 +788,11 @@ OUT:
                     }
 
                     const rowResult = newRow(
-                      graph,
-                      setGraph,
-                      txnId,
-                      collectionVertex,
-                      "CollChild"
+                        graph,
+                        setGraph,
+                        txnId,
+                        collectionVertex,
+                        "CollChild"
                     );
                     replaceVertexProperties(txnId, rowResult.vertexId!, graph, setGraph, {
                         displayName: sublist.label,
@@ -804,7 +800,7 @@ OUT:
                     });
                     setSelectionValue(
                         txnId,
-                        graph.vertexes[rowResult.vertexId!],graph,setGraph,
+                        graph.vertexes[rowResult.vertexId!], graph, setGraph,
                         {P: {[IdAttr]: "coll"}} as unknown as Vertex,
                         collVertex.id
                     );
@@ -824,11 +820,11 @@ OUT:
 
                 for (const tab of tabs) {
                     const rowResult = newRow(
-                      graph,
-                      setGraph,
-                      txnId,
-                      collectionVertex,
-                      "CollTab"
+                        graph,
+                        setGraph,
+                        txnId,
+                        collectionVertex,
+                        "CollTab"
                     );
                     replaceVertexProperties(txnId, rowResult.vertexId!, graph, setGraph, {
                         displayName: tab.label,
@@ -848,11 +844,11 @@ OUT:
 
                 for (const transformType of transformTypes) {
                     const rowResult = newRow(
-                      graph,
-                      setGraph,
-                      txnId,
-                      collectionVertex,
-                      "CollTransform"
+                        graph,
+                        setGraph,
+                        txnId,
+                        collectionVertex,
+                        "CollTransform"
                     );
                     replaceVertexProperties(txnId, rowResult.vertexId!, graph, setGraph, {
                         fieldDefaults: transformType.fieldDefaults
@@ -864,7 +860,7 @@ OUT:
                     }
                     setSelectionValue(
                         txnId,
-                        graph.vertexes[rowResult.vertexId!],graph,setGraph,
+                        graph.vertexes[rowResult.vertexId!], graph, setGraph,
                         {P: {[IdAttr]: "coll"}} as unknown as Vertex,
                         collVertex.id
                     );
@@ -955,9 +951,9 @@ OUT:
                     <C title={"Links"} subtitle={"Simple Import"}>
                         <div class="m:0 p:12">
                             <div class="m:1rem flex gap:0.5rem">
-                                <A class="b:2|solid|blue-40" href="/SimpleImport">Go to Simple Import</A>
-                                <A class="b:2|solid|blue-40" href="/Graph">Go to Graph</A>
-                                <A class="b:2|solid|blue-40" href="/Nav">Configure Navigation</A>
+                                <A class="b:2|solid|blue-40" href={`${APP_BASE_URL}/SimpleImport`}>Go to Simple Import</A>
+                                <A class="b:2|solid|blue-40" href={`${APP_BASE_URL}/Graph`}>Go to Graph</A>
+                                <A class="b:2|solid|blue-40" href={`${APP_BASE_URL}/Nav`}>Configure Navigation</A>
                             </div>
                         </div>
                     </C>

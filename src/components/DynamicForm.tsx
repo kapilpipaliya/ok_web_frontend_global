@@ -24,11 +24,11 @@ import {
     Vertex
 } from "../lib/graph";
 import {WsContext} from "../utils/ws_events_dispatcher";
-import {BeforeLeaveEventArgs, useBeforeLeave, useNavigate} from "@solidjs/router";
+import {BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate} from "@solidjs/router";
 import {
     getSelectionOptions,
     Record,
-    FormContext, getChildVertexes, groupBy,
+    FormContext, getChildVertexes, groupBy, removeLastAttribute,
 } from "../lib/Utils";
 import {RepeaterContext} from "./input/GenaricField";
 import {GenericField} from "./input/Components/GenericFieldComponent";
@@ -56,10 +56,8 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
 
     const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
     return (
-        <div class="">
             <DynamicForm form={form.form!} id={id() as Id} {...customProps}
                          config={props.config || []}/>
-        </div>
     );
 };
 
@@ -163,6 +161,7 @@ function getTabsWidth(group: Vertex[]) {
 export const DynamicForm = (props: DynamicFormProps) => {
     const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
+    const location = useLocation();
     const [graph, setGraph] = useContext(GraphContext)!;
 
     const record = new Record({ws: Ws});
@@ -232,7 +231,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
             }
             submit = true;
             // currently we are navigating back.
-            navigate(-1);
+            const url = location.pathname.split("/").slice(0, -1).join('/');
+            setTimeout(() => navigate(url),0);
         } else {
             alert("please fix all errors");
         }
@@ -240,7 +240,8 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     const onCancel = () => {
         revertTransaction(record.txnId);
-        setTimeout(() => navigate(-1));
+        const url = location.pathname.split("/").slice(0, -1).join('/');
+        setTimeout(() => navigate(url),0);
     }
 
     const [popup, setPopup] = createSignal(false);

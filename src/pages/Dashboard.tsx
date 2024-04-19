@@ -14,7 +14,7 @@ import Dismiss from "solid-dismiss";
 import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import {AlertMessageContext} from "../contexts/AlertMessageContext";
-import {PageContext} from "../lib/Utils";
+import {APP_BASE_URL, PageContext} from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
 import '../components/css/modal.css'
@@ -213,7 +213,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                             <div>
                                 <li style="margin-bottom: 5px;">
                                     <A
-                                        href={"/login"}
+                                        href={`${APP_BASE_URL}/login`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
@@ -227,7 +227,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 </li>
                                 <li style="margin-bottom: 5px;">
                                     <A
-                                        href={"/signup"}
+                                        href={`${APP_BASE_URL}/signup`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
@@ -244,7 +244,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                             <div>
                                 <li style="margin-bottom: 5px;">
                                     <A
-                                        href={"/"}
+                                        href={`${APP_BASE_URL}/`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
@@ -259,7 +259,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
 
                                 <li style="margin-top: 5px;">
                                     <A
-                                        href={"/"}
+                                        href={`${APP_BASE_URL}/`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
@@ -273,7 +273,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 </li>
                                 <li style="margin-top: 5px;">
                                     <A
-                                        href={"/"}
+                                        href={`${APP_BASE_URL}/`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
@@ -288,7 +288,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 <hr style="color:lightgrey" class={'mt:.5rem'}/>
                                 <li style="margin-top: 5px;">
                                     <A
-                                        href={"/login"}
+                                        href={`${APP_BASE_URL}/login`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}

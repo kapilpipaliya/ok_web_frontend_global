@@ -64,6 +64,7 @@ import {
 import {ModalBody, ModalContent, ModalFooter, ModalHeader, TextField, Tooltip,} from "../solid-blocks/blocks";
 import {iconMap, nameExpr} from "../Utils";
 import {toTitle} from "case-switcher-js";
+import '../css/sideBarSearch.css'
 import ShareSection from "./share";
 import PreviewSection from "./preview";
 import ResizableContainer from "./resizableDiv";

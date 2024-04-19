@@ -3,7 +3,7 @@ import {createUniqueId, onCleanup, useContext} from "solid-js";
 import {createStore} from "solid-js/store";
 import {Alert} from "../components/ComponentType";
 import {AlertMessageContext} from "../contexts/AlertMessageContext";
-import { Record } from "../lib/Utils";
+import {APP_BASE_URL, Record} from "../lib/Utils";
 import {GraphContext, resetDatabaseLogin, revertTransaction} from "../lib/graph";
 import {isAdmin} from "../signals/common";
 import {WSEvent, WsContext} from "../utils/ws_events_dispatcher";
@@ -15,6 +15,7 @@ export const Login = (props: {}) => {
     // const [graph,setGraph] = useContext(GraphContext)!;
     // const {Ws} = useContext(WsContext);
     // const navigate = useNavigate();
+
     // const event = ["post", "login", 0] as WSEvent;
     // Ws.bind(event, (data) => {
     //     if (data.error) {
@@ -83,7 +84,7 @@ export const Logout = (props: {}) => {
                     },
                 ],
             ]);
-            navigate("/");
+            navigate(`${APP_BASE_URL}/`);
         }
     });
     Ws.trigger([[event, {}]]);

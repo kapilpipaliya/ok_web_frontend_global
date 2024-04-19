@@ -29,6 +29,8 @@ export function LoaderSimple(props: { class?: string }) {
 
 export function LoaderNew(props: { class?: string }) {
     return (
-        <div class={`${props.class} loader`} />
+        <div style={'height:100vh;place-content:center;display:grid;'}>
+            <div class={`${props.class} loader`}/>
+        </div>
     );
 }

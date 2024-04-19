@@ -1,4 +1,5 @@
 import  logo from "../../../assets/signup/logo.png"
+import {APP_BASE_URL} from "~/lib/Utils";
 
 
 export const Register = () => {
@@ -65,7 +66,7 @@ export const Register = () => {
             <div class="flex justify-content:center mt:20 f:15">
           <span>
             Already have an account?{" "}
-            <a href="/admin/login">
+            <a href={`${APP_BASE_URL}/admin/login`}>
               <u class="font:bolder text-fill:black">Sign In</u>
             </a>
           </span>

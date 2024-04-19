@@ -8,7 +8,6 @@ export default function App() {
         <Router
             root={props => {
                 return <MetaProvider>
-
                     <Suspense>
                         {props.children}
                     </Suspense>

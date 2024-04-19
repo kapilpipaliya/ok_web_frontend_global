@@ -22,7 +22,7 @@ import {
     Record,
     FormContext,
     getSelectionOptions,
-    getValueFromVertexOrKey, getChildVertexes,
+    getValueFromVertexOrKey, getChildVertexes, APP_BASE_URL,
 } from "../../../lib/Utils";
 import {getLastItem} from "../../../utils/functions";
 import {WsContext} from "../../../utils/ws_events_dispatcher";
@@ -243,7 +243,7 @@ export function GenericField(
                                 <A
 
                                     {...props.meta.P.props}
-                                    href={("/") + vertex().P.name}
+                                    href={(`${APP_BASE_URL}/`) + vertex().P.name}
                                     draggable
                                 >
                                     <Show

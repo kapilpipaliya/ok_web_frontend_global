@@ -1,23 +1,26 @@
-import {createEffect, createResource, JSX, Match, Show, Switch, useContext} from "solid-js";
+import {children, createEffect, createResource, JSX, Match, Show, Switch, useContext} from "solid-js";
 import {GraphContext} from "~/lib/graph";
 import {setGraphData} from "~/lib/ws_events";
 import {LoaderNew} from "~/components/LoaderSimple";
-import {PageDesignerDragAndDrop} from "~/components/drag-drop-pages/PageDesignerDragAndDrop";
 
-export const DataFetcher = (props: { fetchData: string, renderContent: () => JSX.Element, errorMessage?: string }) => {
+export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Element, errorMessage?: string }) => {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [WsData] = createResource(async () => {
+    const [WsData, {refetch}] = createResource(async () => {
         try {
             const response = await fetch(props.fetchData);
-          return await response.json();
+            return await response.json();
         } catch (error) {
             throw error;
         }
     });
 
     createEffect(() => {
-      setGraphData(graph, setGraph, WsData());
-    })
+        if (WsData() === undefined) {
+            refetch();
+        } else {
+            setGraphData(graph, setGraph, WsData());
+        }
+    });
 
     return (
         <Switch>
@@ -25,17 +28,16 @@ export const DataFetcher = (props: { fetchData: string, renderContent: () => JSX
                 <div>Error: {props.errorMessage ?? WsData.error}</div>
             </Match>
             <Match when={WsData.loading}>
-                <LoaderNew/>
+                    <LoaderNew/>
             </Match>
             <Match when={true}>
-              {graph.initialSynced ? 'true' : 'false'}
-                <Show when={graph.initialSynced} fallback={<div>{JSON.stringify(graph)}</div>}>
-                  <PageDesignerDragAndDrop/>
+                <Show when={graph.initialSynced}>
+                    {props.renderContent}
                 </Show>
             </Match>
         </Switch>
     );
-};
+}
 
 export const API = {
     fetchDataUrl: "https://easyformforge.com/get_data",
