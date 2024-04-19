@@ -1,20 +1,23 @@
-import {JSX, Match, Show, Switch, useContext, createResource} from "solid-js";
+import {createEffect, createResource, JSX, Match, Show, Switch, useContext} from "solid-js";
 import {GraphContext} from "~/lib/graph";
 import {setGraphData} from "~/lib/ws_events";
 import {LoaderNew} from "~/components/LoaderSimple";
+import {PageDesignerDragAndDrop} from "~/components/drag-drop-pages/PageDesignerDragAndDrop";
 
-export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Element, errorMessage?: string }) => {
+export const DataFetcher = (props: { fetchData: string, renderContent: () => JSX.Element, errorMessage?: string }) => {
     const [graph, setGraph] = useContext(GraphContext)!;
     const [WsData] = createResource(async () => {
         try {
             const response = await fetch(props.fetchData);
-            const data = await response.json();
-            setGraphData(graph, setGraph, data);
-            return data;
+          return await response.json();
         } catch (error) {
             throw error;
         }
     });
+
+    createEffect(() => {
+      setGraphData(graph, setGraph, WsData());
+    })
 
     return (
         <Switch>
@@ -25,8 +28,9 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
                 <LoaderNew/>
             </Match>
             <Match when={true}>
+              {graph.initialSynced ? 'true' : 'false'}
                 <Show when={graph.initialSynced} fallback={<div>{JSON.stringify(graph)}</div>}>
-                    {props.renderContent}
+                  <PageDesignerDragAndDrop/>
                 </Show>
             </Match>
         </Switch>
