@@ -9,13 +9,13 @@ import {API, DataFetcher} from "~/components/DataFetcher";
 export default function admin() {
     const params = useParams();
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [entity, id] = params.entity.toString().split('/')
+
     return <DataFetcher fetchData={API.fetchDataUrl}
                         renderContent={
                             <AbstractSingleForm
                                 graph={graph}
-                                formId={entity}
-                                id={id}
+                                formId={params.entity}
+                                id={params.id}
                                 config={config}
                                 setGraph={setGraph}/>
                         }/>
