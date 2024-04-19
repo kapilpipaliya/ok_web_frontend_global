@@ -18,101 +18,100 @@ import {
 import {deleteVertex, updateVertexId} from './Vertex';
 import {reconcile, SetStoreFunction, Store} from "solid-js/store";
 
+export const onDataGet = (d: [
+    number,
+    {
+        [key in | 'insert'
+        | 'replace'
+        | 'deleteVertex'
+        | 'insertEdge'
+        | 'replaceEdge'
+        | 'replaceEdgeStart'
+        | 'replaceEdgeEnd'
+        | 'deleteEdge']?: any;
+    }[]
+][]
+) => {
+    if (isObject(d) && d.ack) {
+        if (Array.isArray(d.txnIds)) {
+            for (const txnId of d.txnIds as number[]) {
+                // what if ack is not received?
+                if (transactions.has(txnId))
+                    transactions.get(txnId)!.status =
+                      ProcessStatus.AckReceived;
+            }
+        }
+    }
+    batch(() => {
+        if (Array.isArray(d)) {
+            for (const [txnId, txnResult] of d) {
+                if (transactions.has(txnId))
+                    transactions.get(txnId)!.status =
+                      ProcessStatus.Processed;
+                for (const txnObject of txnResult) {
+                    // Vertexes and edges are interlinked.
+                    // It's complicated to insert replace without error.
+                    // When saving Form with Select field, table is giving error.
+                    if (txnObject.insert) {
+                        vertexOldIdToNewIdMap.set(
+                          txnObject.insert[0],
+                          txnObject.insert[1]
+                        );
+                        updateVertexId(
+                          txnObject.insert[0],
+                          txnObject.insert[1], graph, setGraph
+                        );
+                    }
+                    if (txnObject.insertEdge) {
+                        edgeOldIdToNewIdMap.set(
+                          txnObject.insertEdge[0],
+                          txnObject.insertEdge[1]
+                        );
+                        updateEdgeId(
+                          txnObject.insertEdge[0],
+                          txnObject.insertEdge[1], graph, setGraph
+                        );
+                    }
+                    if (txnObject.replace) {
+                        // TODO: handle on backend
+                        // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
+                    }
+                    if (txnObject.deleteVertex) {
+                        if (txnObject.deleteVertex.error) {
+                            alert(txnObject.deleteVertex.message);
+                        }
+                        // TODO: handle on backend
+                        // deleteVertex(0, txnObject.insert[0]);
+                    }
+                    if (txnObject.replaceEdge) {
+                        // TODO: handle on backend
+                        // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
+                    }
+                    // if(txnObject.replaceEdgeStart){
+                    //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
+                    // }
+                    // if(txnObject.replaceEdgeEnd){
+                    //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
+                    // }
+                    if (txnObject.deleteEdge) {
+                        // TODO: handle on backend
+                        // deleteEdge(0, txnObject.insert[0]);
+                    }
+                }
+            }
+        }
+
+        if (isAllTxnProcessed()) {
+            vertexOldIdToNewIdMap.clear();
+            edgeOldIdToNewIdMap.clear();
+        } else commitTransaction(Ws);
+    });
+}
 export const syncEvent = (graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) => {
     const {Ws} = useContext(WsContext);
     Ws.bind(
         ['post', 'mutate', 0],
-        (
-            d: [
-                number,
-                {
-                    [key in | 'insert'
-                    | 'replace'
-                    | 'deleteVertex'
-                    | 'insertEdge'
-                    | 'replaceEdge'
-                    | 'replaceEdgeStart'
-                    | 'replaceEdgeEnd'
-                    | 'deleteEdge']?: any;
-                }[]
-            ][]
-        ) => {
-            if (isObject(d) && d.ack) {
-                if (Array.isArray(d.txnIds)) {
-                    for (const txnId of d.txnIds as number[]) {
-                        // what if ack is not received?
-                        if (transactions.has(txnId))
-                            transactions.get(txnId)!.status =
-                                ProcessStatus.AckReceived;
-                    }
-                }
-            }
-            batch(() => {
-                if (Array.isArray(d)) {
-                    for (const [txnId, txnResult] of d) {
-                        if (transactions.has(txnId))
-                            transactions.get(txnId)!.status =
-                                ProcessStatus.Processed;
-                        for (const txnObject of txnResult) {
-                            // Vertexes and edges are interlinked.
-                            // It's complicated to insert replace without error.
-                            // When saving Form with Select field, table is giving error.
-                            if (txnObject.insert) {
-                                vertexOldIdToNewIdMap.set(
-                                    txnObject.insert[0],
-                                    txnObject.insert[1]
-                                );
-                                updateVertexId(
-                                    txnObject.insert[0],
-                                    txnObject.insert[1], graph, setGraph
-                                );
-                            }
-                            if (txnObject.insertEdge) {
-                                edgeOldIdToNewIdMap.set(
-                                    txnObject.insertEdge[0],
-                                    txnObject.insertEdge[1]
-                                );
-                                updateEdgeId(
-                                    txnObject.insertEdge[0],
-                                    txnObject.insertEdge[1], graph, setGraph
-                                );
-                            }
-                            if (txnObject.replace) {
-                                // TODO: handle on backend
-                                // replaceVertexProperties(0, txnObject.insert[0], txnObject.insert[1]);
-                            }
-                            if (txnObject.deleteVertex) {
-                                if (txnObject.deleteVertex.error) {
-                                    alert(txnObject.deleteVertex.message);
-                                }
-                                // TODO: handle on backend
-                                // deleteVertex(0, txnObject.insert[0]);
-                            }
-                            if (txnObject.replaceEdge) {
-                                // TODO: handle on backend
-                                // replaceEdgeProperties(0, txnObject.insert[0], txnObject.insert[1]);
-                            }
-                            // if(txnObject.replaceEdgeStart){
-                            //  replaceEdgeStart(0, txnObject.insert[0], txnObject.insert[1]);
-                            // }
-                            // if(txnObject.replaceEdgeEnd){
-                            //  replaceEdgeEnd(0, txnObject.insert[0], txnObject.insert[1]);
-                            // }
-                            if (txnObject.deleteEdge) {
-                                // TODO: handle on backend
-                                // deleteEdge(0, txnObject.insert[0]);
-                            }
-                        }
-                    }
-                }
-
-                if (isAllTxnProcessed()) {
-                    vertexOldIdToNewIdMap.clear();
-                    edgeOldIdToNewIdMap.clear();
-                } else commitTransaction(Ws);
-            });
-        }
-    );
+        onDataGet);
 
     const setGraphData = (args: {
         timestamp: number;

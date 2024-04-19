@@ -1,3 +1,4 @@
+import { WebSocket } from 'isows'
 import { IS_PRODUCTION } from "./ws_events_dispatcher";
 import atom from "./dom_utils";
 
@@ -54,14 +55,15 @@ export class WSBase {
       console.warn("please setup onMessage handler");
       return;
     }
-    this.socket = new WebSocket(this.path, []);
+    // Temporary we dont use websocket.
+   /* this.socket = new WebSocket(this.path, []);
     // this.socket.onopen = this.onopen;
     this.socket.addEventListener("open", this.onopen);
     this.socket.onmessage = this.onMessage_;
     this.socket.onclose = this.onclose;
     this.socket.onerror = (e) => {
       console.log(e);
-    };
+    };*/
     return this.socket;
   }
 
