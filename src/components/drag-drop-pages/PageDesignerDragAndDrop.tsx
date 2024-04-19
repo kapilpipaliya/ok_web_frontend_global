@@ -6,7 +6,7 @@ import {
     getChildVertex,
     getChildVertexes,
     Record,
-} from "../../lib/Utils";
+} from "~/lib/Utils";
 import {
     batch,
     createSelector,
@@ -22,7 +22,7 @@ import {
 import {PageView} from "../input/GenaricField";
 import {GenericField} from "../input/Components/GenericFieldComponent";
 
-import {getTreeData} from "../../lib/Traverse";
+import {getTreeData} from "~/lib/Traverse";
 
 import {
     getNewGraphId,
@@ -34,16 +34,16 @@ import {
     revertTransactionUpTo,
     transactions,
     Vertex,
-} from "../../lib/graph";
+} from "~/lib/graph";
 import {AbstractSingleForm} from "../DynamicForm";
 import {SelectInputField} from "../input/SelectInputField";
-import {addNewVertex, newVertex,} from "../../lib/Vertex";
+import {addNewVertex, newVertex,} from "~/lib/Vertex";
 import {Portal} from "solid-js/web";
 import {TableInputField} from "../input/TableInputField";
-import {AttrsTableData} from "../../lib/api";
+import {AttrsTableData} from "~/lib/api";
 import {GenericInputField} from "../input/GenaricInputField";
-import JsxParser from "../../lib/jsx_parser/source/components/JsxParser";
-import {FormGroupProperties} from "../../pages/FormsAdmin";
+import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
+import {FormGroupProperties} from "~/pages/FormsAdmin";
 import {Icon} from "@iconify-icon/solid";
 import {
     hiddenNodes,
@@ -67,7 +67,7 @@ import {toTitle} from "case-switcher-js";
 import ShareSection from "./share";
 import PreviewSection from "./preview";
 import ResizableContainer from "./resizableDiv";
-import {FieldAttribute} from "../../lib/Type";
+import {FieldAttribute} from "~/lib/Type";
 
 export const PageDesignerDragAndDrop = () => {
     const [graph, setGraph] = useContext(GraphContext)!;
@@ -419,8 +419,8 @@ export const PageDesignerDragAndDrop = () => {
                     : [...prev, itemId]
             );
         };
-
         const TreeView = (props: { vertex: Vertex }) => {
+
             const {
                 children,
                 isActiveItem,
@@ -1133,13 +1133,13 @@ export const PageDesignerDragAndDrop = () => {
             config={pageConfig}
             showMainFieldsOnly={true}
             importExportButtons={false}
-        />
+            setGraph={setGraph}/>
     );
 
     const Column = (props: { type: string, index: number, vertex: Vertex }) => {
-        const {
-            deleteLayout
-        } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex);
+        // const {
+        //     deleteLayout
+        // } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex);
         return (
             <>
                 <Show

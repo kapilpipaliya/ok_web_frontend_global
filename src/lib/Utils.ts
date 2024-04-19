@@ -1232,10 +1232,7 @@ export class Record {
     meta?: Vertex;
     metaVertex: Vertex;
 
-    constructor({
-                    ws, meta
-                }: { ws: ServerEventsDispatcher; meta?: Vertex; }) {
-
+    constructor({ws, meta}: { ws: ServerEventsDispatcher; meta?: Vertex; }) {
         this.txnId = getNewTxnId();
         this.isRealTime = false;
         this.ws = ws;

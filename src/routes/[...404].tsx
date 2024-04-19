@@ -1,5 +1,7 @@
 import NotFound from "~/pages/404";
 
-export default function notfound() {
-  return <NotFound />;
+export default function Notfound() {
+  return <div>
+    <NotFound />
+  </div>;
 }

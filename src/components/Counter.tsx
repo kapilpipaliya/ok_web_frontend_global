@@ -23,12 +23,12 @@ export default function Counter() {
         }
     `;
 
-    return <div class="flex gap-10 flex-direction:column">
+    return <div class="flex gap:10">
 
         <For each={[
             {text: 'Home', href: '/'},
             {text: 'Admin', href: '/admin'},
-            {text: '/admin/Components/2212', href: '/admin/Components/2212'},
+            {text: '/admin/Components/2215', href: '/admin/Page/2215'},
             {text: '/admin/Page', href: '/admin/Page'},
             {text: '/admin/login', href: '/admin/login'},
             {text: '/admin/signup', href: '/admin/signup'},
@@ -42,7 +42,7 @@ export default function Counter() {
         ]}>
 
             {(link, index) => (
-                <div><A key={index} href={link.href}>{link.text}</A></div>
+                <div class={'text:underline'}><A key={index} href={link.href}>{link.text}</A></div>
             )}
         </For>
     </div>

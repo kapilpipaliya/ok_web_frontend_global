@@ -181,6 +181,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         // @ts-ignore
         if (props.doMount === null || props.doMount !== false)
             divRef()?.querySelector?.("input")?.focus();
+
     });
 
     // let validationGroup: dxValidationGroup;

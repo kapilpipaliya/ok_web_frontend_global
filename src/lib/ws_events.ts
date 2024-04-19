@@ -1,7 +1,7 @@
 import {batch, useContext} from 'solid-js';
-import {getCookie, WsContext} from '../utils/ws_events_dispatcher';
+import {getCookie, ServerEventsDispatcher, WsContext} from '~/utils/ws_events_dispatcher';
 
-import {isAdmin} from '../signals/common';
+import {isAdmin} from '~/signals/common';
 import {isObject} from "./Utils";
 import {deleteEdge, updateEdgeId} from './Edge';
 import {
@@ -18,27 +18,124 @@ import {
 import {deleteVertex, updateVertexId} from './Vertex';
 import {reconcile, SetStoreFunction, Store} from "solid-js/store";
 
-export const onDataGet = (d: [
-    number,
-    {
-        [key in | 'insert'
-        | 'replace'
-        | 'deleteVertex'
-        | 'insertEdge'
-        | 'replaceEdge'
-        | 'replaceEdgeStart'
-        | 'replaceEdgeEnd'
-        | 'deleteEdge']?: any;
-    }[]
-][]
+export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, args: {
+    timestamp: number;
+    vertexes: VertexMap;
+    vertexLabelIdMap: { [key: string]: Id[] };
+    edges: EdgeMap;
+    deleted_vertexes: string[];
+    deleted_edges: string[];
+}) => {
+    batch(() => {
+
+        if (args.timestamp) {
+            setGraph('lastSyncedTime', args.timestamp);
+        }
+        // let start = Date.now();
+        // for (const v of args.vertexes || []) {
+        //  addNewVertexUnSafe(v);
+        // }
+        // faster:
+        // calculating shapes takes two seconds, this should be done on server if possible.
+        // const vertexes = {} as VertexMap;
+        // const vertexLabelIdMap = {} as { [key: string]: Id[] };
+        //  for (const v of args.vertexes || []) {
+        //   vertexes[v.id] = v;
+        //   for (const label of v.L) {
+        //    if (!vertexLabelIdMap[label]) vertexLabelIdMap[label] = [v.id];
+        //    else
+        //     vertexLabelIdMap[label] = [...vertexLabelIdMap[label], v.id];
+        //    }
+        //  }
+        // fastest:
+
+        // let timeTaken = Date.now() - start;
+        // console.log("Total time taken : " + timeTaken + " milliseconds");
+
+        // for (const e of args.edges || []) {
+        //  addNewEdgeUnSafe(e);
+        // }
+
+        // timeTaken = Date.now() - start;
+        // console.log("Total time taken : " + timeTaken + " milliseconds");
+
+        for (const vertexId in args.vertexes) {
+            setGraph('vertexes', vertexId, args.vertexes[vertexId]);
+        }
+
+        for (const label in args.vertexLabelIdMap) {
+            setGraph('vertexLabelIdMap', label, (vertexIds) => {
+                return Array.isArray(vertexIds)
+                    ? [
+                        ...new Set([
+                            ...vertexIds,
+                            ...args.vertexLabelIdMap[label],
+                        ]),
+                    ]
+                    : args.vertexLabelIdMap[label];
+            });
+        }
+
+        for (const edgeId in args.edges) {
+            setGraph('edges', edgeId, args.edges[edgeId]);
+        }
+
+        for (const edgeId in args.edges) {
+            const edge = args.edges[edgeId];
+            try {
+                setGraph('vertexes', edge.S, 'OUT', edge.T, (out_edges) =>
+                    Array.isArray(out_edges)
+                        ? [...out_edges, edge.id]
+                        : [edge.id]
+                );
+            } catch (e) {
+                debugger;
+            }
+
+            try {
+                setGraph('vertexes', edge.E, 'IN', edge.T, (in_edges) =>
+                    Array.isArray(in_edges)
+                        ? [...in_edges, edge.id]
+                        : [edge.id]
+                );
+            } catch (e) {
+                debugger;
+            }
+        }
+        // timeTaken = Date.now() - start;
+        // console.log("Total time taken : " + timeTaken + " milliseconds");
+
+        for (const edgeId of args.deleted_edges || []) {
+            deleteEdge(0, parseInt(edgeId), graph, setGraph);
+        }
+        for (const vertexId of args.deleted_vertexes || []) {
+            deleteVertex(0, parseInt(vertexId), graph, setGraph);
+        }
+        setGraph('initialSynced', reconcile(true));
+    });
+};
+export const onMutatDataGet = (Ws: ServerEventsDispatcher, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, d: [
+                                   number,
+                                   {
+                                       [key in | 'insert'
+                                       | 'replace'
+                                       | 'deleteVertex'
+                                       | 'insertEdge'
+                                       | 'replaceEdge'
+                                       | 'replaceEdgeStart'
+                                       | 'replaceEdgeEnd'
+                                       | 'deleteEdge']?: any;
+                                   }[]
+                               ][]
 ) => {
+    console.log('asd', d)
     if (isObject(d) && d.ack) {
         if (Array.isArray(d.txnIds)) {
             for (const txnId of d.txnIds as number[]) {
                 // what if ack is not received?
                 if (transactions.has(txnId))
                     transactions.get(txnId)!.status =
-                      ProcessStatus.AckReceived;
+                        ProcessStatus.AckReceived;
             }
         }
     }
@@ -47,29 +144,29 @@ export const onDataGet = (d: [
             for (const [txnId, txnResult] of d) {
                 if (transactions.has(txnId))
                     transactions.get(txnId)!.status =
-                      ProcessStatus.Processed;
+                        ProcessStatus.Processed;
                 for (const txnObject of txnResult) {
                     // Vertexes and edges are interlinked.
                     // It's complicated to insert replace without error.
                     // When saving Form with Select field, table is giving error.
                     if (txnObject.insert) {
                         vertexOldIdToNewIdMap.set(
-                          txnObject.insert[0],
-                          txnObject.insert[1]
+                            txnObject.insert[0],
+                            txnObject.insert[1]
                         );
                         updateVertexId(
-                          txnObject.insert[0],
-                          txnObject.insert[1], graph, setGraph
+                            txnObject.insert[0],
+                            txnObject.insert[1], graph, setGraph
                         );
                     }
                     if (txnObject.insertEdge) {
                         edgeOldIdToNewIdMap.set(
-                          txnObject.insertEdge[0],
-                          txnObject.insertEdge[1]
+                            txnObject.insertEdge[0],
+                            txnObject.insertEdge[1]
                         );
                         updateEdgeId(
-                          txnObject.insertEdge[0],
-                          txnObject.insertEdge[1], graph, setGraph
+                            txnObject.insertEdge[0],
+                            txnObject.insertEdge[1], graph, setGraph
                         );
                     }
                     if (txnObject.replace) {
@@ -111,104 +208,9 @@ export const syncEvent = (graph: Store<GraphInterface>, setGraph: SetStoreFuncti
     const {Ws} = useContext(WsContext);
     Ws.bind(
         ['post', 'mutate', 0],
-        onDataGet);
+        onMutatDataGet);
 
-    const setGraphData = (args: {
-        timestamp: number;
-        vertexes: VertexMap;
-        vertexLabelIdMap: { [key: string]: Id[] };
-        edges: EdgeMap;
-        deleted_vertexes: string[];
-        deleted_edges: string[];
-    }) => {
-        batch(() => {
 
-            if (args.timestamp) {
-                setGraph('lastSyncedTime', args.timestamp);
-            }
-            // let start = Date.now();
-            // for (const v of args.vertexes || []) {
-            //  addNewVertexUnSafe(v);
-            // }
-            // faster:
-            // calculating shapes takes two seconds, this should be done on server if possible.
-            // const vertexes = {} as VertexMap;
-            // const vertexLabelIdMap = {} as { [key: string]: Id[] };
-            //  for (const v of args.vertexes || []) {
-            //   vertexes[v.id] = v;
-            //   for (const label of v.L) {
-            //    if (!vertexLabelIdMap[label]) vertexLabelIdMap[label] = [v.id];
-            //    else
-            //     vertexLabelIdMap[label] = [...vertexLabelIdMap[label], v.id];
-            //    }
-            //  }
-            // fastest:
-
-            // let timeTaken = Date.now() - start;
-            // console.log("Total time taken : " + timeTaken + " milliseconds");
-
-            // for (const e of args.edges || []) {
-            //  addNewEdgeUnSafe(e);
-            // }
-
-            // timeTaken = Date.now() - start;
-            // console.log("Total time taken : " + timeTaken + " milliseconds");
-
-            for (const vertexId in args.vertexes) {
-                setGraph('vertexes', vertexId, args.vertexes[vertexId]);
-            }
-
-            for (const label in args.vertexLabelIdMap) {
-                setGraph('vertexLabelIdMap', label, (vertexIds) => {
-                    return Array.isArray(vertexIds)
-                        ? [
-                            ...new Set([
-                                ...vertexIds,
-                                ...args.vertexLabelIdMap[label],
-                            ]),
-                        ]
-                        : args.vertexLabelIdMap[label];
-                });
-            }
-
-            for (const edgeId in args.edges) {
-                setGraph('edges', edgeId, args.edges[edgeId]);
-            }
-
-            for (const edgeId in args.edges) {
-                const edge = args.edges[edgeId];
-                try {
-                    setGraph('vertexes', edge.S, 'OUT', edge.T, (out_edges) =>
-                        Array.isArray(out_edges)
-                            ? [...out_edges, edge.id]
-                            : [edge.id]
-                    );
-                } catch (e) {
-                    debugger;
-                }
-
-                try {
-                    setGraph('vertexes', edge.E, 'IN', edge.T, (in_edges) =>
-                        Array.isArray(in_edges)
-                            ? [...in_edges, edge.id]
-                            : [edge.id]
-                    );
-                } catch (e) {
-                    debugger;
-                }
-            }
-            // timeTaken = Date.now() - start;
-            // console.log("Total time taken : " + timeTaken + " milliseconds");
-
-            for (const edgeId of args.deleted_edges || []) {
-                deleteEdge(0, parseInt(edgeId), graph, setGraph);
-            }
-            for (const vertexId of args.deleted_vertexes || []) {
-                deleteVertex(0, parseInt(vertexId), graph, setGraph);
-            }
-            setGraph('initialSynced', reconcile(true));
-        });
-    };
     Ws.bind(['get', 'sync', 0], setGraphData);
     Ws.bind(['post', 'loginJwt', 0], (d) => {
         if (!d?.error) {

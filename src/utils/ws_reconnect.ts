@@ -8,7 +8,7 @@ export class WSBase {
   socket?: WebSocket | null;
   state = atom<number>(WebSocket.CLOSED);
   // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
-  private isOnline = window.navigator.onLine;
+  // private isOnline = window.navigator.onLine;
   private onOpen_: (() => void) | undefined;
   private onClose_: (() => void) | undefined;
   private onMessage_: ((message: MessageEvent) => void) | undefined;
@@ -31,20 +31,20 @@ export class WSBase {
   }
 
   start() {
-    if (IS_PRODUCTION) {
-      if (window.navigator.onLine) {
-        this.socket = this.setupConnection();
-      }
-      window.addEventListener("online", () => {
-        this.isOnline = true;
-        this.setupConnection();
-      });
-      window.addEventListener("offline", () => {
-        this.isOnline = false;
-      });
-    } else {
+    // if (IS_PRODUCTION) {
+    //   if (window.navigator.onLine) {
+    //     this.socket = this.setupConnection();
+    //   }
+    //   window.addEventListener("online", () => {
+    //     this.isOnline = true;
+    //     this.setupConnection();
+    //   });
+    //   window.addEventListener("offline", () => {
+    //     this.isOnline = false;
+    //   });
+    // } else {
       this.setupConnection();
-    }
+    // }
   }
 
   setupConnection() {
