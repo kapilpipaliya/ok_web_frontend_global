@@ -59,7 +59,7 @@ import '../../base.css'
 import CollapsibleTable, {DataTable} from "~/components/custom-component/Table";
 
 export function TableInputField(
-    props: ComponentProps & { txnId?: number; isRealTime?: boolean }
+    props: ComponentProps & { txnId?: number; isRealTime?: boolean; isShowAdd?: boolean; }
 ) {
     const {Ws} = useContext(WsContext);
     const [graph, setGraph] = useContext(GraphContext)!;
@@ -169,6 +169,7 @@ export function TableInputField(
         const expandVertex = createMemo(() =>
             tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand")
         );
+        const [expanded, setExpanded] = createSignal(false);
 
         const [disabled, _] = createSignal(false);
 
@@ -216,6 +217,7 @@ export function TableInputField(
                                     title={toTitle(
                                         column.P.displayName || column.P[IdAttr] || ""
                                     )}
+                                    isShowAdd={true}
                                     component={component()}
                                     // When we have a Table we pass original Table Meta Vertex
                                     meta={
@@ -236,7 +238,7 @@ export function TableInputField(
                             <Switch>
                                 <Match when={metaVertex().P.props?.hidden}>
                                     <td>
-                                        <div class={`padding:1px ${
+                                        <div class={`flex ai:center jc:center ${
                                             (() => {
                                                 const comp = component();
                                                 switch (comp) {
@@ -257,9 +259,9 @@ export function TableInputField(
                                     </td>
                                 </Match>
                                 <Match when={component() === "Table2"}>
-                                    <td style={{padding: "1rem"}}>
+                                    <td>
                                         <Show when={!props.disabled}>
-                                            <div class={`padding:1px ${
+                                            <div class={`flex ai:center jc:center ${
                                                 (() => {
                                                     const comp = component();
                                                     switch (comp) {
@@ -320,13 +322,20 @@ export function TableInputField(
                     style={{"text-align": "center", width: "50px"}}
                 >
                     <td>
-                        {p.joinVertex.P.pos}
-                        {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
+                        <Show when={props.meta.P.props?.hidden}>
+                            <button onClick={() => setExpanded(!expanded())}>
+                                {expanded() ? "↑" : "↓"}
+                            </button>
+                        </Show>
+                    </td>
+                    <td>
+                        <div class={'flex ai:center jc:center'}>
+                            {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
 
-                        {/*<Icon icon="mingcute:up-fill"  />*/}
-                        {/*<Icon icon="mingcute:down-fill"  />*/}
-                        {/*<Icon icon="material-symbols:add-box"  />*/}
-                        <div>
+                            {/*<Icon icon="mingcute:up-fill"  />*/}
+                            {/*<Icon icon="mingcute:down-fill"  />*/}
+                            {/*<Icon icon="material-symbols:add-box"  />*/}
+
                             <Icon
                                 height={20}
                                 width={20}
@@ -337,50 +346,52 @@ export function TableInputField(
                                     deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!, Ws)
                                 }
                             />
+                            <Show when={expandVertex()}>
+                                <Icon
+                                    height={20}
+                                    width={20}
+                                    icon="icon-park-outline:plus"
+                                    class="cursor:pointer "
+                                    style={{color: "green"}}
+                                    onClick={() => {
+                                        return addNewRow(
+                                            props.txnId || 0,
+                                            expandVertex()!, graph, setGraph,
+                                            p.joinVertex,
+                                            {},
+                                            props.isRealTime ?? false,
+                                            Ws
+                                        );
+                                    }}
+                                />
+                            </Show>
                         </div>
                         {/*<Show when={!props.disabled}>*/}
                         {/*  <Icon icon="material-symbols:edit"  onClick={() => setDisabled((v) => !v)} />*/}
                         {/*</Show>*/}
-
-                        <Show when={expandVertex()}>
-                            <Icon
-                                height={20}
-                                width={20}
-                                icon="icon-park-outline:plus"
-                                class="cursor:pointer "
-                                style={{color: "green"}}
-                                onClick={() => {
-                                    return addNewRow(
-                                        props.txnId || 0,
-                                        expandVertex()!, graph, setGraph,
-                                        p.joinVertex,
-                                        {},
-                                        props.isRealTime ?? false,
-                                        Ws
-                                    );
-                                }}
-                            />
-                        </Show>
                     </td>
                     <DisplayProperties/>
                 </tr>
                 {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
                 {/*{getSelectionOptions([p.joinVertex], expandVertex.P.props.collection).vertexes?.length}*/}
                 <Show when={expandVertex()}>
-                    <tr>
-                        <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
-                            <DynamicComponent
-                                component={"Table2"}
-                                // When we have a Table we pass original Table Meta Vertex
-                                meta={expandVertex()!}
-                                data={p.joinVertex}
-                                setValue={props.setValue}
-                                disabled={disabled()}
-                                txnId={props.txnId}
-                                isRealTime={props.isRealTime}
-                            />
-                        </td>
-                    </tr>
+                    <Show when={sortedVertexes().length}>
+                        <tr>
+                            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
+                                <DynamicComponent
+                                    component={"Table2"}
+                                    // When we have a Table we pass original Table Meta Vertex
+                                    meta={expandVertex()!}
+                                    isShowAdd={true}
+                                    data={p.joinVertex}
+                                    setValue={props.setValue}
+                                    disabled={disabled()}
+                                    txnId={props.txnId}
+                                    isRealTime={props.isRealTime}
+                                />
+                            </td>
+                        </tr>
+                    </Show>
                 </Show>
             </>
         );
@@ -428,63 +439,64 @@ export function TableInputField(
                 Please Define table columns
             </Match>
             <Match when={true}>
-                <div>
-                    {/*<Show when={props.meta.P.attributes}>*/}
-                    {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
-                    {/*</Show>*/}
-                    {/*<Show when={sortedVertexes().length}>*/}
+
+                {/*<Show when={props.meta.P.attributes}>*/}
+                {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
+                {/*</Show>*/}
+                <Show when={!props.isShowAdd}>
                     <AddNewButton/>
-                    {/*</Show>*/}
+                </Show>
 
-                    <DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>
-
+                {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
+                <Show when={sortedVertexes().length}>
+                    <div class={' w:80vw overflow:auto scroll-bar:thin'}>
                     <table class="styled-table mt:3">
-                        {}
-                        <Show when={sortedVertexes().length}>
-                            <thead>
-                            <tr
-                                style={{
-                                    width: "max-content",
-                                }}
-                            >
-                                <td></td>
-                                <For each={tableColumnsTemplate()}>
-                                    {(attribute) => {
-                                        return (
-                                            <Switch>
-                                                {/*<Match when={attribute.props?.skip}></Match>*/}
-                                                <Match when={attribute.P.tab === "expand"}>
-                                                    <span></span>
-                                                </Match>
-                                                <Match
-                                                    when={
-                                                        !attribute.P.hidden || attribute.P.defaultValue
-                                                    }
-                                                >
-                                                    <th
-                                                        class={'font-weight:medium'}
-                                                        style={{
-                                                            "justify-content": "center",
-                                                        }}
-                                                    >
-                                                        {toTitle(
-                                                            attribute.P.displayName ||
-                                                            attribute.P[IdAttr] ||
-                                                            ""
-                                                        )}
-                                                    </th>
-                                                </Match>
 
-                                                <Match when={true}>
-                                                    <th></th>
-                                                </Match>
-                                            </Switch>
-                                        );
-                                    }}
-                                </For>
-                            </tr>
-                            </thead>
-                        </Show>
+                        <thead>
+                        <tr
+                            style={{
+                                width: "max-content",
+                            }}
+                        >
+                            <td></td>
+                            <td>&nbsp;Actions</td>
+                            <For each={tableColumnsTemplate()}>
+                                {(attribute) => {
+                                    return (
+                                        <Switch>
+                                            {/*<Match when={attribute.props?.skip}></Match>*/}
+                                            <Match when={attribute.P.tab === "expand"}>
+                                                <span></span>
+                                            </Match>
+                                            <Match
+                                                when={
+                                                    !attribute.P.hidden || attribute.P.defaultValue
+                                                }
+                                            >
+                                                <th
+                                                    class={'font-weight:medium'}
+                                                    style={{
+                                                        "justify-content": "center",
+                                                    }}
+                                                >
+                                                    {toTitle(
+                                                        attribute.P.displayName ||
+                                                        attribute.P[IdAttr] ||
+                                                        ""
+                                                    )}
+                                                </th>
+                                            </Match>
+
+                                            <Match when={true}>
+                                                <th></th>
+                                            </Match>
+                                        </Switch>
+                                    );
+                                }}
+                            </For>
+                        </tr>
+                        </thead>
+
                         <tbody>
                         {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                         {/*  <DragDropSensors />*/}
@@ -502,8 +514,8 @@ export function TableInputField(
                         {/*</DragDropProvider>*/}
                         </tbody>
                     </table>
-
-                </div>
+                    </div>
+                </Show>
 
                 {/*<Show when={props.Page}>*/}
                 {/*  <For each={Object.values(props.Page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}

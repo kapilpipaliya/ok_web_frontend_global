@@ -1,13 +1,13 @@
 .styled-table {
     border-collapse: collapse;
-    margin: 25px 0;
+    margin: 5px 5px;
     font-size: 0.9em;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
 .styled-table thead tr {
     background-color: #37c;
-    height: 40px;
+    height: 35px;
     color: #ffffff;
     text-align: center;
 }

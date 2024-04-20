@@ -111,6 +111,7 @@ export const DynamicComponent = (props: {
     meta: Vertex;
     title?: string;
     data?: Vertex;
+    isShowAdd?: boolean;
     setValue?: (data: any) => void;
     disabled?: boolean;
     isRealTime?: boolean;
@@ -143,6 +144,7 @@ export const DynamicComponent = (props: {
                         <TableInputField
                             meta={props.meta}
                             data={props.data}
+                            isShowAdd={props.isShowAdd}
                             disabled={props.disabled!}
                             txnId={props.txnId}
                             setValue={props.setValue}
