@@ -163,19 +163,19 @@ export const DataGrid = (props: DataGridProps) => {
         accessorKey: 'Edit',
         header: '',
         footer: '',
-        cell: (id) =>
+        cell: (info) =>
           <Show when={!formNew.isInlineEditable} fallback={<button onClick={() => {
               if (rowId() === null) {
-                  setRowId(id);
-              } else if (rowId() === id) {
+                  setRowId(info.row.original.id);
+              } else if (rowId() === info.row.original.id) {
                   setRowId(null);
               } else {
                   setRowId(null);
-                  setRowId(id)
+                  setRowId(info.row.original.id)
               }
 
 
-              let gridElement = document.getElementById(`grid${id}`)
+              let gridElement = document.getElementById(`grid${info.row.original.id}`)
               let editElement = document.getElementById(`edit${rowId()}`)
 
               if (editElement && gridElement) {
@@ -189,7 +189,7 @@ export const DataGrid = (props: DataGridProps) => {
                                                                                   icon="fluent:edit-12-regular"/></CustomButton>
 
           </button>}><A
-            href={`${APP_BASE_URL}/${props.tableId}/${id}`}
+            href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
             class="r:5|5|5|5 p:5"
           >
               <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
