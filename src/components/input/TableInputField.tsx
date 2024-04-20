@@ -56,6 +56,7 @@ import {GenericField} from "./Components/GenericFieldComponent";
 import {getLastItem} from "../../utils/functions";
 import {FieldAttribute} from "../../lib/Type";
 import '../../base.css'
+import CollapsibleTable, {DataTable} from "~/components/custom-component/Table";
 
 export function TableInputField(
     props: ComponentProps & { txnId?: number; isRealTime?: boolean }
@@ -78,44 +79,44 @@ export function TableInputField(
         }
 
         // else get attributes from a collection.
-        const attrVertex = getChildVertex(graph,["$0Att"], props.meta).vertex;
+        const attrVertex = getChildVertex(graph, ["$0Att"], props.meta).vertex;
         if (!attrVertex) return;
 
-        return getChildVertexes(graph,["Attr"], [attrVertex]).vertexes;
+        return getChildVertexes(graph, ["Attr"], [attrVertex]).vertexes;
     };
     const tableColumnsTemplate = createMemo(
         () =>
             getAttributes() ||
-            getChildVertexes(graph,["MetaAttr"], [props.meta]).vertexes ||
+            getChildVertexes(graph, ["MetaAttr"], [props.meta]).vertexes ||
             []
     );
 
     // add dynamic meta from separate collection.
     // If props.meta.P.attributes are not present and props.meta.props.collection is present then get attributes from the collection
     if (!props.meta.P.attributes && props.meta.P.meta) {
-        const metaData = componentProps(graph,setGraph,props.meta, props.data!);
+        const metaData = componentProps(graph, setGraph, props.meta, props.data!);
         if (metaData.collection) {
             // add metadata from separate collection.
             const collVertex = findVertexByLabelAndUniqueId(
                 "Coll",
                 IdAttr,
-                metaData.collection,graph
+                metaData.collection, graph
             );
             if (collVertex) {
-                const vertexCollAttrResult = getChildVertexes(graph,["Attr"], [collVertex]);
+                const vertexCollAttrResult = getChildVertexes(graph, ["Attr"], [collVertex]);
                 if (!vertexCollAttrResult.error) {
                     const vertexCollAttr = vertexCollAttrResult.vertexes!;
                     const attrs = [] as FieldAttribute[];
                     for (const attr of vertexCollAttr) {
-                        const props = getCollAttrs(graph,setGraph,attr);
+                        const props = getCollAttrs(graph, setGraph, attr);
                         if (!props.error) attrs.push(props.attr!);
                     }
                     const newProperties = klona(props.meta.P);
                     newProperties.attributes = attrs;
-                    replaceVertexProperties(getNewTxnId(), props.meta.id,graph,setGraph, newProperties);
+                    replaceVertexProperties(getNewTxnId(), props.meta.id, graph, setGraph, newProperties);
 
                     const txnId = getNewTxnId();
-                    addMetaVertexes(graph,setGraph,txnId, props.meta, attrs);
+                    addMetaVertexes(graph, setGraph, txnId, props.meta, attrs);
                     onCleanup(() => {
                         revertTransaction(txnId);
                     });
@@ -126,14 +127,14 @@ export function TableInputField(
     const parentItems = useContext(PageRenderContext);
 
     const parentData = createMemo(() => {
-        return PageRenderUtils.getDataVertex(graph,getLastItem(parentItems, 1));
+        return PageRenderUtils.getDataVertex(graph, getLastItem(parentItems, 1));
     });
     // load data:
     // add row vertexes data to store
     createEffect(() => {
         // if a parent has data vertex use it,
         // TODO: else if it has a parent Form Container(Record) use it.
-        const vertexes = getSublistRows(graph,props.meta, props.data || parentData());
+        const vertexes = getSublistRows(graph, props.meta, props.data || parentData());
         setSortedVertexes(vertexes);
     });
 
@@ -143,7 +144,7 @@ export function TableInputField(
 
         createComputed(
             on(tableColumnsTemplate, (columns) => {
-                const metaTxnId = rowMetaInitialize(graph,setGraph,p.joinVertex, props.meta, columns);
+                const metaTxnId = rowMetaInitialize(graph, setGraph, p.joinVertex, props.meta, columns);
 
                 if (metaTxnId) {
                     if (cleanUpConfig) {
@@ -159,7 +160,7 @@ export function TableInputField(
         );
 
         const instResult = createMemo(
-            () => getChildVertex(graph,["AttrInst"], p.joinVertex).vertex
+            () => getChildVertex(graph, ["AttrInst"], p.joinVertex).vertex
         );
         // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
         const rowColumnsMetaAttrs = createMemo(() =>
@@ -183,7 +184,7 @@ export function TableInputField(
                         const component = createMemo(() => {
                             if (metaVertex().P.component.includes("-")) {
                                 // Todo Fix: why this prints two times:
-                                const component = getSelectionOptions(graph,setGraph,
+                                const component = getSelectionOptions(graph, setGraph,
                                     [p.joinVertex],
                                     metaVertex().P.component
                                 ).vertexes;
@@ -198,12 +199,12 @@ export function TableInputField(
                         });
                         // if mergeProps not keep reactivity use memo
                         createEffect(() => {
-                            addMeta(graph,setGraph,metaVertex(), p.joinVertex);
+                            addMeta(graph, setGraph, metaVertex(), p.joinVertex);
                         });
                         const DefaultValue = () => (
                             <>
                                 {metaVertex().P.props?.defaultValue &&
-                                    getSelectionOptions(graph,setGraph,
+                                    getSelectionOptions(graph, setGraph,
                                         [p.joinVertex],
                                         metaVertex().P.props.defaultValue
                                     ).vertexes}
@@ -211,7 +212,6 @@ export function TableInputField(
                         );
                         const Content = () => (
                             <>
-
                                 <DynamicComponent
                                     title={toTitle(
                                         column.P.displayName || column.P[IdAttr] || ""
@@ -236,15 +236,45 @@ export function TableInputField(
                             <Switch>
                                 <Match when={metaVertex().P.props?.hidden}>
                                     <td>
-                                        <div class="">
+                                        <div class={`padding:1px ${
+                                            (() => {
+                                                const comp = component();
+                                                switch (comp) {
+                                                    case 'TextBox':
+                                                        return 'min-w:150px';
+                                                    case 'TextArea':
+                                                        return 'min-w:200px';
+                                                    case 'CheckBox':
+                                                        return 'min-w:50px';
+                                                    case 'SelectBox':
+                                                        return 'min-w:200px';
+                                                    default:
+                                                        return '';
+                                                }
+                                            })()}`}>
                                             <DefaultValue/>
                                         </div>
                                     </td>
                                 </Match>
-                                <Match when={component() === "Table"}>
+                                <Match when={component() === "Table2"}>
                                     <td style={{padding: "1rem"}}>
                                         <Show when={!props.disabled}>
-                                            <div class="">
+                                            <div class={`padding:1px ${
+                                                (() => {
+                                                    const comp = component();
+                                                    switch (comp) {
+                                                        case 'TextBox':
+                                                            return 'min-w:150px';
+                                                        case 'TextArea':
+                                                            return 'min-w:200px';
+                                                        case 'CheckBox':
+                                                            return 'min-w:50px';
+                                                        case 'SelectBox':
+                                                            return 'min-w:200px';
+                                                        default:
+                                                            return '';
+                                                    }
+                                                })()}`}>
                                                 <DefaultValue/>
                                                 <Content/>
                                             </div>
@@ -304,7 +334,7 @@ export function TableInputField(
                                 class="cursor:pointer m:5px"
                                 style={{color: "red"}}
                                 onClick={() =>
-                                    deleteRow(p.joinVertex, props.isRealTime!, graph,setGraph,props.txnId!, Ws)
+                                    deleteRow(p.joinVertex, props.isRealTime!, graph, setGraph, props.txnId!, Ws)
                                 }
                             />
                         </div>
@@ -322,7 +352,7 @@ export function TableInputField(
                                 onClick={() => {
                                     return addNewRow(
                                         props.txnId || 0,
-                                        expandVertex()!,graph,setGraph,
+                                        expandVertex()!, graph, setGraph,
                                         p.joinVertex,
                                         {},
                                         props.isRealTime ?? false,
@@ -356,38 +386,6 @@ export function TableInputField(
         );
     };
 
-    // @commented drag and drop related code.
-    // const [activeDragItem, setActiveDragItem] = createSignal<number | string | null>(null);
-    // const ids = () => sortedVertexes().map((vertex) => vertex.id);
-    // const onDragStart: DragEventHandler = ({ draggable }) => {
-    //   setActiveDragItem(draggable.id);
-    // };
-    // const onDragEnd: DragEventHandler = ({ draggable, droppable }) => {
-    //   if (draggable && droppable) {
-    //     const currentItems = ids();
-    //     const fromIndex = currentItems.indexOf(draggable.id as number);
-    //     const toIndex = currentItems.indexOf(droppable.id as number);
-    //     if (isRealTime) {
-    //       txnId = getNewTxnId();
-    //     }
-    //     if (fromIndex !== toIndex) {
-    //       const updatedItems = currentItems.slice();
-    //       updatedItems.splice(toIndex, 0, ...updatedItems.splice(fromIndex, 1));
-    //       // runWithOwner(owner, () => {
-    //       batch(() => {
-    //         updatedItems.forEach((vertexId, index) => {
-    //           const { error } = mergeVertexProperties(txnId, vertexId, {
-    //             pos: index + 1,
-    //           });
-    //           if (error) alert(error);
-    //         });
-    //       });
-    //     }
-    //     if (isRealTime) commitTxn(txnId, Ws);
-    //   }
-    //   setActiveDragItem(null);
-    // };
-
     const insertNewRow = () => {
         if (!props.data) {
             alert("Table data is not set");
@@ -397,7 +395,7 @@ export function TableInputField(
         return runWithOwner(outerOwner, () =>
             addNewRow(
                 props.txnId || 0,
-                props.meta,graph,setGraph,
+                props.meta, graph, setGraph,
                 props.data!,
                 {},
                 props.isRealTime ?? false,
@@ -406,7 +404,6 @@ export function TableInputField(
         );
     };
     const AddNewButton = (isInTableButton: any) => {
-        // return <Icon icon="material-symbols:add-box" onClick={() => addNewRow(record.txnId, props.meta, props.data!, {},record.isRealTime, Ws)}/>
         return (
             <GenericField
                 meta={
@@ -436,10 +433,13 @@ export function TableInputField(
                     {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
                     {/*</Show>*/}
                     {/*<Show when={sortedVertexes().length}>*/}
-                        <AddNewButton/>
+                    <AddNewButton/>
                     {/*</Show>*/}
 
+                    <DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>
+
                     <table class="styled-table mt:3">
+                        {}
                         <Show when={sortedVertexes().length}>
                             <thead>
                             <tr
@@ -502,6 +502,7 @@ export function TableInputField(
                         {/*</DragDropProvider>*/}
                         </tbody>
                     </table>
+
                 </div>
 
                 {/*<Show when={props.Page}>*/}

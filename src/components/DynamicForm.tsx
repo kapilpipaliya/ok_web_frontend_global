@@ -44,20 +44,23 @@ interface AbstractSingleFormProps extends Omit<DynamicFormProps, "form" | "id"> 
     graph: Store<GraphInterface>;
     setGraph: SetStoreFunction<GraphInterface>;
     id: string | number;
+    buttonAlign?: string;
+    isDialogContext?: boolean;
 }
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
     // TODO: add validation on form that AttrsTableData keys should not available.
 
-    const form = getFormMetaData(props.graph,props.setGraph,props.formId);
+    const form = getFormMetaData(props.graph, props.setGraph, props.formId);
     if (form.error) return form.error;
 
     const [p, customProps] = splitProps(props, ["formId", "id"]);
 
     const id = createMemo(() => (p.id === "new" ? undefined : parseInt(p.id as string)));
     return (
-            <DynamicForm form={form.form!} id={id() as Id} {...customProps}
-                         config={props.config || []}/>
+        <DynamicForm form={form.form!} id={id() as Id} isDialogContext={props.isDialogContext} {...customProps}
+                     buttonAlign={props.buttonAlign}
+                     config={props.config || []}/>
     );
 };
 
@@ -71,11 +74,11 @@ interface FormGroupProps {
     isLoginRegister?: string
 }
 
-export function getComponentForCollRow(metaVertex: Vertex, data: Vertex,graph: Store<GraphInterface>,setGraph: SetStoreFunction<GraphInterface>){
+export function getComponentForCollRow(metaVertex: Vertex, data: Vertex, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) {
     if (!metaVertex.P.component) {
-        return getCollAttrComp(metaVertex,graph)?.P[IdAttr];
+        return getCollAttrComp(metaVertex, graph)?.P[IdAttr];
     } else if (metaVertex.P.component.includes("-")) {
-        return getSelectionOptions(graph,setGraph,[data], metaVertex.P.component).vertexes;
+        return getSelectionOptions(graph, setGraph, [data], metaVertex.P.component).vertexes;
     } else {
         return metaVertex.P.component as string;
     }
@@ -87,7 +90,7 @@ export function FormGroup(props: FormGroupProps) {
         <For each={props.metaAttributes}>
             {(metaVertex) => {
                 const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
-                const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex,props.graph,props.setGraph));
+                const component = createMemo(() => getComponentForCollRow(metaVertex, props.vertex, props.graph, props.setGraph));
                 const Label = () => <>{toTitle(metaVertex.P.displayName || metaVertex.P[IdAttr] || metaVertex.P.key || '')}</>
                 const Content = () => (
                     <DynamicComponent
@@ -141,6 +144,8 @@ export interface DynamicFormProps {
     meta?: Vertex;
     form: FormMetaData;
     id?: Id;
+    isDialogContext?: boolean;
+    buttonAlign?: string;
     config: [Store<{ [key: string]: any }>, SetStoreFunction<{ [key: string]: any }>];
     submitButton?: JSXElement
     importExportButtons?: boolean;
@@ -166,13 +171,13 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     const record = new Record({ws: Ws});
     if (!props.id) {
-        const createResult = record.create(graph,setGraph,props.form[IdAttr]);
+        const createResult = record.create(graph, setGraph, props.form[IdAttr]);
         if (createResult.error) return createResult.error;
     } else {
-        const loadResult = record.load(graph,props.id);
+        const loadResult = record.load(graph, props.id);
         if (loadResult.error) return loadResult.error;
     }
-    record.createMeta(props.form,graph,setGraph);
+    record.createMeta(props.form, graph, setGraph);
 
     // focus first input
     const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -190,7 +195,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     });
 
     const groupByTabsAndGroupFn = () => {
-        const mainAttributes = getChildVertexes(graph,["MetaAttr"], [record.metaVertex]); //.sort((a, b) => a.P.pos - b.P.pos);
+        const mainAttributes = getChildVertexes(graph, ["MetaAttr"], [record.metaVertex]); //.sort((a, b) => a.P.pos - b.P.pos);
 
         const groupByTabs = groupBy(mainAttributes.vertexes!, (item) => item.P.tab!) as unknown as {
             [tab: string]: Vertex[];
@@ -231,7 +236,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             }
             submit = true;
             // currently we are navigating back.
-            setTimeout(() => navigate(-1),0);
+            setTimeout(() => navigate(-1), 0);
         } else {
             alert("please fix all errors");
         }
@@ -239,9 +244,13 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     const onCancel = () => {
         revertTransaction(record.txnId);
-        setTimeout(() => {
-            navigate(-1);
-        },0);
+        if (props.isDialogContext) {
+
+        }else{
+            setTimeout(() => {
+                navigate(-1);
+            }, 0);
+        }
     }
 
     const [popup, setPopup] = createSignal(false);
@@ -256,7 +265,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                          onchange={e => setImportCode(e.target.value)}/>
     }
     const PreviewCode = () => {
-        return <pre>{stringify(getExportCode(graph,record))}</pre>;
+        return <pre>{stringify(getExportCode(graph, record))}</pre>;
     };
     const onImportClick = (data: any) => {
         popupConfig = (instance: () => dxPopup) => ({
@@ -315,30 +324,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         })
         setPopup(true);
     }
-    const PopOver = () => {
-        return <div ref={el => {
-            /*            let instance: dxPopup;
-                        onMount(() => {
-                            instance = new dxPopup(el, {
-                                container: '.dx-viewport',
-                                showTitle: true,
-                                visible: false,
-                                dragEnabled: false,
-                                hideOnOutsideClick: true,
-                                showCloseButton: false,
-                                onHidden: () => setPopup(false),
-                                position: {
-                                    at: 'bottom',
-                                    my: 'center',
-                                    collision: 'fit',
-                                },
-                                ...popupConfig(() => instance)
-                            } as dxPopupProperties);
-                            instance.show();
-                        })
-                        onCleanup(() => instance.dispose());*/
-        }}/>
-    }
+
     // https://github.com/solidjs/solid-router
     useBeforeLeave((e: BeforeLeaveEventArgs) => {
         if (submit || !txnHasSteps(record.txnId)) {
@@ -357,7 +343,22 @@ export const DynamicForm = (props: DynamicFormProps) => {
     });
 
     const SubmitButton = () => (
-        <div style={{"justify-content": "center", display: "flex"}}>
+        <div style={{"justify-content": props.buttonAlign || "start", display: "flex"}}>
+            <GenericField
+                meta={
+                    {
+                        P: {
+                            component: "Button",
+                            props: {
+                                variant: "outlined",
+                                class: "border-color:#FF0000 color:#FF0000 danger",
+                                children: "Cancel",
+                                onClick: () => onCancel(),
+                            },
+                        },
+                    } as any
+                }
+            />
             <Show
                 when={props.submitButton}
                 fallback={
@@ -381,21 +382,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
                 {props.submitButton}
             </Show>
 
-            <GenericField
-                meta={
-                    {
-                        P: {
-                            component: "Button",
-                            props: {
-                                variant: "outlined",
-                                class: "border-color:#FF0000 color:#FF0000 danger",
-                                children: "Cancel",
-                                onClick: () => onCancel(),
-                            },
-                        },
-                    } as any
-                }
-            />
+
         </div>
     );
     const [activeTab, setActiveTab] = createSignal(tabs[0]);
@@ -429,49 +416,49 @@ export const DynamicForm = (props: DynamicFormProps) => {
                                 {(group) => (
                                     <>
                                         <div class="dx-fieldset" style={{"max-width": "100%"}}>
-                                            {/*<div class="dx-fieldset-header">Simple Field Set</div>*/}
+                                            <Show when={props.importExportButtons ?? true}>
+                                                <div
+                                                    style={{
+                                                        "justify-content": "end",
+                                                        "margin-bottom": "10px",
+                                                        display: "flex",
+                                                    }}
+                                                >
+                                                    <GenericField
+                                                        meta={
+                                                            {
+                                                                P: {
+                                                                    component: "Button",
+                                                                    props: {
+                                                                        children: "Import",
+                                                                        variant: "outlined",
+                                                                        onClick: () => onImportClick,
+                                                                    },
+                                                                },
+                                                            } as any
+                                                        }
+                                                    />
+                                                    <GenericField
+                                                        meta={
+                                                            {
+                                                                P: {
+                                                                    component: "Button",
+                                                                    props: {
+                                                                        children: "Export",
+                                                                        onClick: () => onExportClick,
+                                                                        class: " b:blue",
+                                                                    },
+                                                                },
+                                                            } as any
+                                                        }
+                                                    />
+                                                </div>
+                                            </Show>
 
-                                            <div class="b:2  b:rgb(214,214,216) p:10 w:100% r:10|10|10|10 bg:#f5f5f5eb">
-                                                <div class=" p:10 w:full ">
-                                                    <div class="w:full 	 justify-content:space-between	">
-                                                        <Show when={props.importExportButtons ?? true}>
-                                                            <div
-                                                                style={{
-                                                                    "justify-content": "center",
-                                                                    display: "flex",
-                                                                }}
-                                                            >
-                                                                <GenericField
-                                                                    meta={
-                                                                        {
-                                                                            P: {
-                                                                                component: "Button",
-                                                                                props: {
-                                                                                    children: "Import",
-                                                                                    onClick: () => onImportClick,
-                                                                                },
-                                                                            },
-                                                                        } as any
-                                                                    }
-                                                                />
-                                                                <GenericField
-                                                                    meta={
-                                                                        {
-                                                                            P: {
-                                                                                component: "Button",
-                                                                                props: {
-                                                                                    children: "Export",
-                                                                                    onClick: () => onExportClick,
-                                                                                    class: " b:blue",
-                                                                                },
-                                                                            },
-                                                                        } as any
-                                                                    }
-                                                                />
-                                                            </div>
-                                                        </Show>
-                                                    </div>
+                                            <div
+                                                class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
 
+                                                <div class="p:5|15|15|15 w:full">
                                                     <FormGroup
                                                         graph={graph}
                                                         setGraph={setGraph}

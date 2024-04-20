@@ -1,24 +1,27 @@
 import {createMemo, createSignal, For, Match, Switch} from "solid-js";
 import {Show} from "solid-js";
 import '../css/table.css'
-import {capitalizeFirstLetter} from "~/lib/Utils";
-import {Vertex} from "~/lib/graph";
+import {addNewRow, capitalizeFirstLetter} from "~/lib/Utils";
+import {IdAttr, Vertex} from "~/lib/graph";
 import {ColumnDef} from "@tanstack/solid-table";
+import {toTitle} from "case-switcher-js";
+import {TableRow} from "~/components/solid-blocks/blocks/table";
+import {Icon} from "@iconify-icon/solid";
 
 // Row component for each data entry
-function Row(props: { row: Vertex,  index: number, headers: ColumnDef<any>[] }) {
+function CollapsibleTableRow(props: { row: Vertex, index: number, headers: ColumnDef<any>[] }) {
     const [open, setOpen] = createSignal(false);
     const getValue = (header: ColumnDef<any>) => {
-                const keys = header.accessorKey.split('.'); // Split accessorKey by '.'
-                let value = props.row;
-                for (const key of keys) {
-                    value = value[key];
-                }
-                return value;
+        const keys = header.accessorKey.split('.'); // Split accessorKey by '.'
+        let value = props.row;
+        for (const key of keys) {
+            value = value[key];
+        }
+        return value;
     }
     return (
         <>
-            <TableBodyRow index={props.index}>
+            <TableBodyRow index={props.index} id={`grid${props.row.id}   `}>
                 <For each={props.headers}>
                     {(header, columnIndex) => {
                         return <TableData>
@@ -51,7 +54,7 @@ function Row(props: { row: Vertex,  index: number, headers: ColumnDef<any>[] }) 
 }
 
 // Main component that renders the table
-function CollapsibleTable(props: { headers: ColumnDef<any>[], rows: Vertex[] }) {
+export const CollapsibleTable = (props: { headers: ColumnDef<any>[], rows: Vertex[] }) => {
     return (
         <div class={'w:full'}>
             <Table>
@@ -66,15 +69,116 @@ function CollapsibleTable(props: { headers: ColumnDef<any>[], rows: Vertex[] }) 
                     </TableHeadRow>
                 </TableHead>
                 <TableBody>
-                    <For each={props.rows}>{(row, index) => <Row row={row} index={index()}
-                                                                 headers={props.headers}/>}</For>
+                    <For each={props.rows}>{(row, index) => <CollapsibleTableRow row={row} index={index()}
+                                                                                 headers={props.headers}/>}</For>
                 </TableBody>
             </Table>
         </div>
     );
 }
 
-const Table = (props: any) => <table {...props} class={'mt:5 styled-table w:100%'}>{props.children}</table>
+function DataTableRow(props: { index: any, vertex: any }) {
+    const [open, setOpen] = createSignal(false);
+
+    return (
+        <>
+            <TableBodyRow index={props.index}>
+                <TableData>
+                    <button onClick={() => setOpen(!open())}>
+                        {open() ? "↑" : "↓"}
+                    </button>
+                </TableData>
+                <TableData>
+                    <div class={'flex ai:center jc:center'}>
+                        <Icon
+                            height={20}
+                            width={20}
+                            icon="mingcute:delete-line"
+                            class="cursor:pointer m:5px"
+                            style={{color: "red"}}
+                        />
+                        <Icon
+                            height={20}
+                            width={20}
+                            icon="icon-park-outline:plus"
+                            class="cursor:pointer "
+                            style={{color: "green"}}
+                        />
+                    </div>
+                </TableData>
+                <For each={['asd', 'asd']}>
+                    {(header, columnIndex) => {
+                        return <TableData>
+                            {header}
+                        </TableData>;
+                    }}
+                </For>
+
+            </TableBodyRow>
+            <Show when={open()}>
+
+                <TableBodyRow>
+                    <TableData colSpan={12}>asd</TableData>
+                </TableBodyRow>
+            </Show>
+        </>
+    );
+}
+
+export const DataTable = (props: { headers: any, rows: any }) => {
+    return (
+        <div class={'w:80vw overflow:auto'}>
+            <Table>
+                <Show when={props.rows.length > 0}>
+                    <TableHead>
+                        <TableHeadRow>
+                            <TableHeader />
+                            <TableHeader>Actions</TableHeader>
+                            <For each={props.headers}>
+                                {(attribute) => {
+                                    return <Switch>
+                                        <Match when={attribute.P.tab === "expand"}>
+                                            <span></span>
+                                        </Match>
+                                        <Match
+                                            when={
+                                                !attribute.P.hidden || attribute.P.defaultValue
+                                            }
+                                        >
+                                            <TableHeader
+                                                class={'font-weight:medium'}
+                                                style={{
+                                                    "justify-content": "center",
+                                                }}
+                                            >
+                                                {toTitle(
+                                                    attribute.P.displayName ||
+                                                    attribute.P[IdAttr] ||
+                                                    ""
+                                                )}
+                                            </TableHeader>
+                                        </Match>
+
+                                        <Match when={true}>
+                                            <TableHeader></TableHeader>
+                                        </Match>
+                                    </Switch>
+                                }}
+                            </For>
+                        </TableHeadRow>
+                    </TableHead>
+
+                    <TableBody>
+                        <For each={props.rows}>{(vertex, index) => <DataTableRow vertex={vertex}
+                                                                                 index={index()}/>}</For>
+                    </TableBody>
+                </Show>
+            </Table>
+        </div>
+    );
+}
+
+const Table = (props: any) => <table {...props} class={'styled-table w:100%'}>{props.children}</table>
 
 const TableHeader = (props: any) => <th {...props}
                                         class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238)`}>{props.children}</th>
@@ -82,7 +186,6 @@ const TableBody = (props: any) => <tbody {...props} class="r:5|5|5|5 rounded-md 
 const TableHead = (props: any) => <thead {...props} class="r:5|5|5|5 ">{props.children}</thead>
 const TableHeadRow = (props: any) => <tr {...props} class="p:10 text:center">{props.children}</tr>
 const TableBodyRow = (props: any) => <tr {...props}
-                                         class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>{props.children}</tr>
-const TableData = (props: any) => <td {...props} class={'bb:1px|solid|rgb(227,231,236)'}>{props.children}</td>
+                                         class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} bg:#3478cc0d:hover`}>{props.children}</tr>
+const TableData = (props: any) => <td {...props} style={{"text-align-last":"center",'padding':'inherit'}} class={'bb:1px|solid|rgb(227,231,236)'}>{props.children}</td>
 
-export default CollapsibleTable;

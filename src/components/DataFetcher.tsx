@@ -9,8 +9,8 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
         try {
             const response = await fetch(props.fetchData);
             const data = await response.json();
-          setGraphData(graph, setGraph, data);
-          return data;
+            setGraphData(graph, setGraph, data);
+            return data;
         } catch (error) {
             throw error;
         }
@@ -30,7 +30,7 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
                 <div>Error: {props.errorMessage ?? WsData.error}</div>
             </Match>
             <Match when={WsData.loading}>
-                    <LoaderNew/>
+                <LoaderNew/>
             </Match>
             <Match when={true}>
                 <Show when={graph.initialSynced}>

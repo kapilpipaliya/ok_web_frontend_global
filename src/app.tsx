@@ -8,13 +8,14 @@ export default function App() {
         <Router
             root={props => {
                 return <MetaProvider>
+                    <div id="popup-root" />
                     <Suspense>
                         {props.children}
                     </Suspense>
                 </MetaProvider>
             }}
         >
-            <FileRoutes/>
+        <FileRoutes/>
         </Router>
     )
 }

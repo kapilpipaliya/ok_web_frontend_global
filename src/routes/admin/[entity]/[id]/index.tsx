@@ -16,6 +16,7 @@ export default function admin() {
                                 graph={graph}
                                 formId={params.entity}
                                 id={params.id}
+
                                 config={config}
                                 setGraph={setGraph}/>
                         }/>

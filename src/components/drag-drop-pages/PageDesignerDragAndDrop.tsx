@@ -1128,6 +1128,7 @@ export const PageDesignerDragAndDrop = () => {
 
     const abstractSingleForm = (
         <AbstractSingleForm
+            buttonAlign={'center'}
             formId={"Page"}
             id={params.id}
             graph={graph}
@@ -1602,7 +1603,7 @@ export const PageDesignerDragAndDrop = () => {
                                     type="button"
                                     title={`${isLeftOpen() ? 'Close' : 'Open'}`}
                                     class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                                    style={`style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
+                                    style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? 'margin-left: 20%' : 'margin-left: 1%'};`}
                                 >
                                     <Show when={isLeftOpen()}
                                           fallback={<Icon icon={'line-md:chevron-right-circle'} height={30} width={30}
@@ -1649,7 +1650,7 @@ export const PageDesignerDragAndDrop = () => {
                                 type="button"
                                 title={`${isRightOpen() ? 'Close' : 'Open'}`}
                                 class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                                style={`style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? 'margin-left: 76.4%' : 'margin-left: 96.3%'};`}
+                                style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? 'margin-left: 76.4%' : 'margin-left: 96.3%'};`}
                             >
                                 <Show when={isRightOpen()}
                                       fallback={<Icon icon={'line-md:chevron-left-circle'} height={30} width={30}

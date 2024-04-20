@@ -9,7 +9,7 @@ jest.unmock('acorn-jsx')
 jest.unmock('./JsxParser')
 
 const Custom = ({ children = [], className, text }) => (
-	<div className={className}>
+	<div class={className}>
 		{text}
 		{children}
 	</div>

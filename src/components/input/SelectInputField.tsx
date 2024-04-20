@@ -85,6 +85,7 @@ export function setParentValue(
 
     for (const edgeId of previousEdges) {
         // we should not delete edge that start with same vertex
+        console.log(graph.edges[edgeId].S)
         if (valueArray.includes(graph.edges[edgeId].S)) continue;
         const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
         if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);

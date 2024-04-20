@@ -14,7 +14,7 @@ import {
     createSignal,
     onCleanup,
     splitProps,
-    useContext, Switch, Match
+    useContext, Switch, Match, Accessor, Setter
 } from "solid-js";
 import {
     Id,
@@ -23,7 +23,7 @@ import {
     Vertex,
     commitTransaction,
     getNewTxnId,
-    transactions, GraphContext
+    transactions, GraphContext, GraphInterface
 } from "~/lib/graph";
 
 import {Icon} from "@iconify-icon/solid";
@@ -45,7 +45,9 @@ import {AbstractSingleForm} from "~/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/buttons";
 import {AttrsAdminTableData} from "~/lib/apiAdmin";
 import {FieldAttribute, FormMetaData} from "~/lib/Type";
-import CollapsibleTable from "~/components/custom-component/Table";
+import {CollapsibleTable} from "~/components/custom-component/Table";
+import Dismiss from "solid-dismiss";
+import {SetStoreFunction} from "solid-js/store";
 
 interface AbstractSingleGridProps {
     tableId: string;
@@ -55,6 +57,86 @@ interface DataGridProps {
     tableId: string;
 }
 
+const Modal = (p: {
+    graph: GraphInterface,
+    setGraph: SetStoreFunction<GraphInterface>,
+    rowId: Accessor<any>,
+    setRowId: Setter<any>,
+    tableId: any,
+    info: any
+}) => {
+    const [open, setOpen] = createSignal(false);
+    let btnEl;
+    let btnPopUp;
+
+    const closePopUp = () => {
+        console.log(p.rowId())
+        setOpen(false);
+    };
+
+    return (
+        <>
+
+            <Icon ref={btnEl} height={22} width={22} color={'grey'} aria-disabled={open()}
+                  class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue`}
+                  onClick={() => {
+                      p.setRowId(p.info.row.original.id);
+
+                      console.log(p.rowId())
+                      setOpen(true)
+                  }}
+                  icon={'fluent:edit-12-regular'}>
+            </Icon>
+            <Show when={p.rowId()}>
+                <Dismiss
+                    closeWhenEscapeKeyIsPressed={true}
+                    menuButton={btnEl}
+                    open={open}
+                    setOpen={setOpen}
+                    menuPopup={btnPopUp}
+                    animation={{name: "fade", appendToElement: "menuPopup"}}
+                    modal
+                >
+                    <div
+                        class="modal-container"
+                        role="presentation"
+                        ref={btnPopUp}
+                    >
+                        <div class="modal min-w:30% r:10px p:0" role="dialog" aria-modal="true" tabindex="-1">
+                            <div class={'mb:4 font-weight:bold'}>
+                                Quick Edit
+                                <button
+                                    title={'Close'}
+                                    onClick={closePopUp}
+
+                                    class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
+                                    style={{float: "right"}}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <hr class={'fg:lightgrey'}/>
+                            <div class={'p:3 mt:10 max-h:50vh overflow:auto'}>
+                                <AbstractSingleForm
+                                    formId={p.tableId}
+                                    graph={p.graph}
+                                    id={p.rowId()}
+                                    buttonAlign="end"
+                                    isDialogContext={true}
+                                    // @ts-ignore
+                                    config={{}}
+                                    showMainFieldsOnly={true}
+                                    importExportButtons={false}
+                                    doMount={false}
+                                    setGraph={p.setGraph}/>
+                            </div>
+                        </div>
+                    </div>
+                </Dismiss>
+            </Show>
+        </>
+    );
+};
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
     const [graph, setGraph] = useContext(GraphContext)!;
@@ -74,10 +156,9 @@ export const DataGrid = (props: DataGridProps) => {
         // @ts-ignore
         collection = form.form.collection as string;
     }
-    console.log(formNew);
 
     const deleteObject = (id: Id) => {
-        if (confirm("are you sure")) {
+        if (confirm("Are you sure you want to delete this item?")) {
             const txnId = getNewTxnId();
             const deleteResult = deleteVertex(txnId, id, graph, setGraph);
             // @ts-ignore
@@ -164,38 +245,18 @@ export const DataGrid = (props: DataGridProps) => {
         header: '',
         footer: '',
         cell: (info) =>
-          <Show when={!formNew.isInlineEditable} fallback={<button onClick={() => {
-              if (rowId() === null) {
-                  setRowId(info.row.original.id);
-              } else if (rowId() === info.row.original.id) {
-                  setRowId(null);
-              } else {
-                  setRowId(null);
-                  setRowId(info.row.original.id)
-              }
+            <Show when={!formNew.isInlineEditable} fallback={
+                <Modal info={info} graph={graph} setGraph={setGraph} rowId={rowId} setRowId={setRowId}
+                       tableId={props.tableId}/>
+            }>
+                <A
+                    href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
+                    class="r:5|5|5|5 p:5"
+                >
+                    <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
+                                                           icon="fluent:edit-12-regular"/></CustomButton>
 
-
-              let gridElement = document.getElementById(`grid${info.row.original.id}`)
-              let editElement = document.getElementById(`edit${rowId()}`)
-
-              if (editElement && gridElement) {
-                  gridElement?.after(editElement)
-                  editElement?.scrollIntoView(false)
-              }
-
-
-          }} class="text-fill:#337ab7"><CustomButton variant={'custom'}><Icon height={21} width={21}
-                                                                                  class={'color:#3477CC'}
-                                                                                  icon="fluent:edit-12-regular"/></CustomButton>
-
-          </button>}><A
-            href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
-            class="r:5|5|5|5 p:5"
-          >
-              <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
-                                                     icon="fluent:edit-12-regular"/></CustomButton>
-
-          </A></Show>
+                </A></Show>
 
 
     });
@@ -238,92 +299,10 @@ export const DataGrid = (props: DataGridProps) => {
         getCoreRowModel: getCoreRowModel(),
     })
 
-    console.log('Dataa => ', data())
-    console.log('tableColumns => ', tableColumns)
 
     return (
-        <div class="py:5">
-            <div class="p:2">
-                {/*<table class="mt:5 styled-table">*/}
-                {/*    <thead class="r:5|5|5|5 ">*/}
-                {/*    <For each={table.getHeaderGroups()}>*/}
-                {/*        {headerGroup => (*/}
-                {/*            <tr class="p:10 text:center">*/}
-                {/*                <For each={headerGroup.headers}>*/}
-                {/*                    {(header) => (*/}
-
-                {/*                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit") || header.id.includes("Delete") ? "2%" : "2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>*/}
-                {/*                            {header.isPlaceholder*/}
-                {/*                                ? null*/}
-                {/*                                : flexRender(*/}
-                {/*                                    header.column.columnDef.header,*/}
-                {/*                                    header.getContext()*/}
-                {/*                                )}*/}
-                {/*                        </th>*/}
-                {/*                    )}*/}
-                {/*                </For>*/}
-
-                {/*            </tr>*/}
-
-                {/*        )}*/}
-                {/*    </For>*/}
-                {/*    </thead>*/}
-                {/*    <tbody class="r:5|5|5|5 rounded-md ">*/}
-
-                {/*    <For each={table.getRowModel().rows}>*/}
-                {/*        {(row) => (*/}
-                {/*            <tr*/}
-                {/*                id={`grid${row.id}`}*/}
-                {/*                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>*/}
-
-                {/*                <For each={row.getVisibleCells()}>*/}
-                {/*                    {cell => (*/}
-                {/*                        <td class={'bb:1px|solid|rgb(227,231,236)'}>*/}
-
-                {/*                            {flexRender(*/}
-                {/*                                cell.column.columnDef.cell,*/}
-                {/*                                cell.getContext()*/}
-                {/*                            )}*/}
-                {/*                        </td>*/}
-
-                {/*                    )}*/}
-
-                {/*                </For>*/}
-
-                {/*            </tr>*/}
-                {/*        )}*/}
-
-                {/*    </For>*/}
-                {/*    <Show when={rowId() != null}>*/}
-                {/*        <tr id={`edit${rowId()}`}>*/}
-
-                {/*            <td colSpan={"100%"}>*/}
-
-                {/*                <div class="">*/}
-
-                {/*                    <AbstractSingleForm*/}
-                {/*                        formId={props.tableId}*/}
-                {/*                        graph={graph}*/}
-                {/*                        id={rowId() as unknown as string}*/}
-                {/*                        // @ts-ignore*/}
-                {/*                        config={{}}*/}
-                {/*                        showMainFieldsOnly={true}*/}
-                {/*                        importExportButtons={false}*/}
-                {/*                        doMount={false}*/}
-                {/*                        setGraph={setGraph}/>*/}
-
-                {/*                </div>*/}
-
-                {/*            </td>*/}
-
-                {/*        </tr>*/}
-                {/*    </Show>*/}
-
-
-                {/*    </tbody>*/}
-                {/*</table>*/}
+        <div class="">
                 <CollapsibleTable headers={tableColumns} rows={data()}/>
-            </div>
         </div>
     );
 };
@@ -351,7 +330,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 props: {
                                     onClick: () => navigate("new"),
                                     variant: "soft",
-                                    class: 'p:7px',
+                                    style: {"padding":"7px 10px"},
                                     leading: <Icon icon={'lets-icons:add-round'} height={22} width={22}/>,
                                     children: "Add New",
                                 },

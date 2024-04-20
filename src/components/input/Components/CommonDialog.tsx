@@ -6,7 +6,6 @@ import {Icon} from "@iconify-icon/solid";
 const CustomModal = (props) => {
     const [open, setOpen] = createSignal(false);
     let btnEl;
-    let btnSaveEl;
 
     const onClickClose = () => {
         setOpen(false);
@@ -20,16 +19,16 @@ const CustomModal = (props) => {
     return (
         <>
             {props.openButton !== false && (
-                <Icon height={25} width={25} color={'grey'} aria-disabled={open()}
-                      class={'bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5'} onClick={() => setOpen(true)}
-                      icon={props.buttonLabel}></Icon>
+                <Icon ref={btnEl} height={props.iconSize ?? 25} width={props.iconSize ?? 25} color={'grey'} aria-disabled={open()}
+                      class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} onClick={() => setOpen(true)}
+                      icon={props.buttonLabel}>
+                </Icon>
             )}
             <Dismiss
                 menuButton={btnEl}
                 open={open}
                 setOpen={setOpen}
                 modal
-                focusElementOnOpen={() => btnSaveEl}
             >
                 <div
                     class="modal-container"
@@ -42,7 +41,7 @@ const CustomModal = (props) => {
                             {props.closeButton !== false && (
                                 <button
                                     title={'Close'}
-                                    onClick={onClickClose}
+                                    onClick={onClickOverlay}
                                     class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
                                     style={{float: "right"}}
                                 >

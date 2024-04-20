@@ -159,7 +159,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                 ref={btnEl}
                 onClick={handleOpen}
                 class={'flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:6|6|6|6'}
-                style="border: none; cursor: pointer;"
+                style="border: none; cursor: pointer;background-color:rgb(237,237,255)"
             >
                 <img
                     src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"

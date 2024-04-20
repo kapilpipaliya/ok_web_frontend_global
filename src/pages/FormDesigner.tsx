@@ -87,6 +87,7 @@ export const NavDesigner = () => {
         <AbstractSingleForm
           formId={"Nav"}
           graph={graph}
+          setGraph={setGraph}
           id={params.id}
           config={config}
           // TODO: add dry option
