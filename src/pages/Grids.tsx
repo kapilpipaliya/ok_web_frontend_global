@@ -24,28 +24,32 @@ import {
     commitTransaction,
     getNewTxnId,
     transactions, GraphContext
-} from "../lib/graph";
+} from "~/lib/graph";
 
 import {Icon} from "@iconify-icon/solid";
-import {GenericField} from "../components/input/Components/GenericFieldComponent";
+import {GenericField} from "~/components/input/Components/GenericFieldComponent";
 import {
     collectionNameDisplayExpr,
     selectedValue
-} from "../components/input/SelectInputField";
-import {getFormApiFromForm} from "../lib/Record";
-import {APP_BASE_URL, PageContext} from "../lib/Utils";
-import {getSelectionOptions} from "../lib/Utils";
-import {getChildVertexes} from "../lib/Utils";
-import {deleteVertex, findVertexByLabelAndUniqueId} from "../lib/Vertex";
-import {AttrsTableData} from "../lib/api";
-import {isNumber} from "../lib/CommonUtils/isNumber";
-import {capitalizeFirstLetter} from "../lib/Utils";
-import {WsContext} from "../utils/ws_events_dispatcher";
-import {AbstractSingleForm} from "../components/DynamicForm";
-import CustomButton from "../components/solid-blocks/blocks/buttons";
-import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {FieldAttribute, FormMetaData} from "../lib/Type";
+} from "~/components/input/SelectInputField";
+import {getFormApiFromForm} from "~/lib/Record";
+import {APP_BASE_URL, PageContext} from "~/lib/Utils";
+import {getSelectionOptions} from "~/lib/Utils";
+import {getChildVertexes} from "~/lib/Utils";
+import {deleteVertex, findVertexByLabelAndUniqueId} from "~/lib/Vertex";
+import {AttrsTableData} from "~/lib/api";
+import {isNumber} from "~/lib/CommonUtils/isNumber";
+import {capitalizeFirstLetter} from "~/lib/Utils";
+import {WsContext} from "~/utils/ws_events_dispatcher";
+import {AbstractSingleForm} from "~/components/DynamicForm";
+import CustomButton from "~/components/solid-blocks/blocks/buttons";
+import {AttrsAdminTableData} from "~/lib/apiAdmin";
+import {FieldAttribute, FormMetaData} from "~/lib/Type";
+import CollapsibleTable from "~/components/custom-component/Table";
 
+interface AbstractSingleGridProps {
+    tableId: string;
+}
 
 interface DataGridProps {
     tableId: string;
@@ -89,6 +93,7 @@ export const DataGrid = (props: DataGridProps) => {
     const tableColumns = [] as ColumnDef<any>[];
     const [rowId, setRowId] = createSignal(null);
     const SelectValue = (props: { attribute: FieldAttribute, info: CellContext<any, any> }) => {
+
         const vertex = selectedValue(
             {
                 P: props.attribute,
@@ -141,9 +146,9 @@ export const DataGrid = (props: DataGridProps) => {
                     <span>{info.getValue() === true ? 'true' : info.getValue() === false ? 'false' : ''}</span>
                 </Match>
 
-                <Match when={true}>
-                    {info.getValue<string>()}
-                </Match>
+                {/*<Match when={true}>*/}
+                {/*    {info.getValue<string>()}*/}
+                {/*</Match>*/}
             </Switch>
         };
         // @ts-ignore
@@ -158,43 +163,42 @@ export const DataGrid = (props: DataGridProps) => {
         accessorKey: 'Edit',
         header: '',
         footer: '',
-        cell: info =>
-            // return <Link href={`/${props.tableId}/${info.row.original.id}`}><Icon icon="tabler:edit" />Edit</Link>;
-        {
-            return !formNew.isInlineEditable ?
-                <A
-                    href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
-                    class="r:5|5|5|5 p:5"
-                >
-                    <CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21}
-                                                                            icon="fluent:edit-12-regular"/></CustomButton>
-                </A> :
-                <button onClick={() => {
-                    if (rowId() === null) {
-                        setRowId(info.row.original.id);
-                    } else if (rowId() === info.row.original.id) {
-                        setRowId(null);
-                    } else {
-                        setRowId(null);
-                        setRowId(info.row.original.id)
-                    }
+        cell: (id) => 123
+    // !formNew.isInlineEditable ?
+    //         <A
+    //             href={`${APP_BASE_URL}/${props.tableId}/${id}`}
+    //             class="r:5|5|5|5 p:5"
+    //         >
+    //             <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
+    //                                                    icon="fluent:edit-12-regular"/></CustomButton>
+    //
+    //         </A> :
+    //         <button onClick={() => {
+    //             if (rowId() === null) {
+    //                 setRowId(id);
+    //             } else if (rowId() === id) {
+    //                 setRowId(null);
+    //             } else {
+    //                 setRowId(null);
+    //                 setRowId(id)
+    //             }
+    //
+    //
+    //             let gridElement = document.getElementById(`grid${id}`)
+    //             let editElement = document.getElementById(`edit${rowId()}`)
+    //
+    //             if (editElement && gridElement) {
+    //                 gridElement?.after(editElement)
+    //                 editElement?.scrollIntoView(false)
+    //             }
+    //
+    //
+    //         }} class="text-fill:#337ab7"><CustomButton variant={'custom'}><Icon height={21} width={21}
+    //                                                                             class={'color:#3477CC'}
+    //                                                                             icon="fluent:edit-12-regular"/></CustomButton>
+    //
+    //         </button>
 
-
-                    let gridElement = document.getElementById(`grid${info.row.id}`)
-                    let editElement = document.getElementById(`edit${rowId()}`)
-
-                    if (editElement && gridElement) {
-                        gridElement?.after(editElement)
-                        editElement?.scrollIntoView(false)
-                    }
-
-
-                }} class="text-fill:#337ab7"><CustomButton variant={'custom'} class={'bg:red'}><Icon height={21}
-                                                                                                     width={21}
-                                                                                                     icon="fluent:edit-12-regular"/></CustomButton>
-                </button>
-
-        }
     });
     tableColumns.push({
         accessorKey: 'Delete',
@@ -234,96 +238,96 @@ export const DataGrid = (props: DataGridProps) => {
         columns: tableColumns,
         getCoreRowModel: getCoreRowModel(),
     })
+
+    console.log('Dataa => ', data())
+    console.log('tableColumns => ', tableColumns)
+
     return (
         <div class="py:5">
             <div class="p:2">
-                <table class="mt:5 styled-table">
-                    <thead class="r:5|5|5|5 ">
-                    <For each={table.getHeaderGroups()}>
-                        {headerGroup => (
-                            <tr class="p:10 text:center">
-                                <For each={headerGroup.headers}>
-                                    {(header) => (
+                {/*<table class="mt:5 styled-table">*/}
+                {/*    <thead class="r:5|5|5|5 ">*/}
+                {/*    <For each={table.getHeaderGroups()}>*/}
+                {/*        {headerGroup => (*/}
+                {/*            <tr class="p:10 text:center">*/}
+                {/*                <For each={headerGroup.headers}>*/}
+                {/*                    {(header) => (*/}
 
-                                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit") || header.id.includes("Delete") ? "2%" : "2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>
-                                            {header.isPlaceholder
-                                                ? null
-                                                : flexRender(
-                                                    header.column.columnDef.header,
-                                                    header.getContext()
-                                                )}
-                                        </th>
-                                    )}
-                                </For>
+                {/*                        <th class={`font-weight:medium h:45 w:${header.id.includes("Edit") || header.id.includes("Delete") ? "2%" : "2%"} p:10px bb:1px|solid|rgb(190,211,238)`}>*/}
+                {/*                            {header.isPlaceholder*/}
+                {/*                                ? null*/}
+                {/*                                : flexRender(*/}
+                {/*                                    header.column.columnDef.header,*/}
+                {/*                                    header.getContext()*/}
+                {/*                                )}*/}
+                {/*                        </th>*/}
+                {/*                    )}*/}
+                {/*                </For>*/}
 
-                            </tr>
+                {/*            </tr>*/}
 
-                        )}
-                    </For>
-                    </thead>
-                    <tbody class="r:5|5|5|5 rounded-md ">
+                {/*        )}*/}
+                {/*    </For>*/}
+                {/*    </thead>*/}
+                {/*    <tbody class="r:5|5|5|5 rounded-md ">*/}
 
-                    <For each={table.getRowModel().rows}>
-                        {(row) => (
-                            <tr
-                                id={`grid${row.id}`}
-                                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>
+                {/*    <For each={table.getRowModel().rows}>*/}
+                {/*        {(row) => (*/}
+                {/*            <tr*/}
+                {/*                id={`grid${row.id}`}*/}
+                {/*                class={`h:50 text:center bg:${row.index % 2 === 0 ? "white" : "gray-5"} bg:#E0F1FF:hover`}>*/}
 
-                                <For each={row.getVisibleCells()}>
-                                    {cell => (
-                                        <td class={'bb:1px|solid|rgb(227,231,236)'}>
+                {/*                <For each={row.getVisibleCells()}>*/}
+                {/*                    {cell => (*/}
+                {/*                        <td class={'bb:1px|solid|rgb(227,231,236)'}>*/}
 
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </td>
+                {/*                            {flexRender(*/}
+                {/*                                cell.column.columnDef.cell,*/}
+                {/*                                cell.getContext()*/}
+                {/*                            )}*/}
+                {/*                        </td>*/}
 
-                                    )}
+                {/*                    )}*/}
 
-                                </For>
+                {/*                </For>*/}
 
-                            </tr>
-                        )}
+                {/*            </tr>*/}
+                {/*        )}*/}
 
-                    </For>
-                    <Show when={rowId() != null}>
-                        <tr id={`edit${rowId()}`}>
+                {/*    </For>*/}
+                {/*    <Show when={rowId() != null}>*/}
+                {/*        <tr id={`edit${rowId()}`}>*/}
 
-                            <td colSpan={"100%"}>
+                {/*            <td colSpan={"100%"}>*/}
 
-                                <div class="">
+                {/*                <div class="">*/}
 
-                                    <AbstractSingleForm
-                                        formId={props.tableId}
-                                        graph={graph}
-                                        id={rowId() as unknown as string}
-                                        // @ts-ignore
-                                        config={{}}
-                                        showMainFieldsOnly={true}
-                                        importExportButtons={false}
-                                        doMount={false}
-                                        setGraph={setGraph}/>
+                {/*                    <AbstractSingleForm*/}
+                {/*                        formId={props.tableId}*/}
+                {/*                        graph={graph}*/}
+                {/*                        id={rowId() as unknown as string}*/}
+                {/*                        // @ts-ignore*/}
+                {/*                        config={{}}*/}
+                {/*                        showMainFieldsOnly={true}*/}
+                {/*                        importExportButtons={false}*/}
+                {/*                        doMount={false}*/}
+                {/*                        setGraph={setGraph}/>*/}
 
-                                </div>
+                {/*                </div>*/}
 
-                            </td>
+                {/*            </td>*/}
 
-                        </tr>
-                    </Show>
+                {/*        </tr>*/}
+                {/*    </Show>*/}
 
 
-                    </tbody>
-                </table>
-
+                {/*    </tbody>*/}
+                {/*</table>*/}
+                <CollapsibleTable headers={tableColumns} rows={data()}/>
             </div>
         </div>
     );
 };
-
-interface AbstractSingleGridProps {
-    tableId: string;
-}
 
 export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     const navigate = useNavigate();
