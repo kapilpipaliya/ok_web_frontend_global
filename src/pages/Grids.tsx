@@ -146,9 +146,9 @@ export const DataGrid = (props: DataGridProps) => {
                     <span>{info.getValue() === true ? 'true' : info.getValue() === false ? 'false' : ''}</span>
                 </Match>
 
-                {/*<Match when={true}>*/}
-                {/*    {info.getValue<string>()}*/}
-                {/*</Match>*/}
+                <Match when={true}>
+                    {info.getValue<string>()}
+                </Match>
             </Switch>
         };
         // @ts-ignore
@@ -163,41 +163,40 @@ export const DataGrid = (props: DataGridProps) => {
         accessorKey: 'Edit',
         header: '',
         footer: '',
-        cell: (id) => 123
-    // !formNew.isInlineEditable ?
-    //         <A
-    //             href={`${APP_BASE_URL}/${props.tableId}/${id}`}
-    //             class="r:5|5|5|5 p:5"
-    //         >
-    //             <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
-    //                                                    icon="fluent:edit-12-regular"/></CustomButton>
-    //
-    //         </A> :
-    //         <button onClick={() => {
-    //             if (rowId() === null) {
-    //                 setRowId(id);
-    //             } else if (rowId() === id) {
-    //                 setRowId(null);
-    //             } else {
-    //                 setRowId(null);
-    //                 setRowId(id)
-    //             }
-    //
-    //
-    //             let gridElement = document.getElementById(`grid${id}`)
-    //             let editElement = document.getElementById(`edit${rowId()}`)
-    //
-    //             if (editElement && gridElement) {
-    //                 gridElement?.after(editElement)
-    //                 editElement?.scrollIntoView(false)
-    //             }
-    //
-    //
-    //         }} class="text-fill:#337ab7"><CustomButton variant={'custom'}><Icon height={21} width={21}
-    //                                                                             class={'color:#3477CC'}
-    //                                                                             icon="fluent:edit-12-regular"/></CustomButton>
-    //
-    //         </button>
+        cell: (id) =>
+          <Show when={!formNew.isInlineEditable} fallback={<button onClick={() => {
+              if (rowId() === null) {
+                  setRowId(id);
+              } else if (rowId() === id) {
+                  setRowId(null);
+              } else {
+                  setRowId(null);
+                  setRowId(id)
+              }
+
+
+              let gridElement = document.getElementById(`grid${id}`)
+              let editElement = document.getElementById(`edit${rowId()}`)
+
+              if (editElement && gridElement) {
+                  gridElement?.after(editElement)
+                  editElement?.scrollIntoView(false)
+              }
+
+
+          }} class="text-fill:#337ab7"><CustomButton variant={'custom'}><Icon height={21} width={21}
+                                                                                  class={'color:#3477CC'}
+                                                                                  icon="fluent:edit-12-regular"/></CustomButton>
+
+          </button>}><A
+            href={`${APP_BASE_URL}/${props.tableId}/${id}`}
+            class="r:5|5|5|5 p:5"
+          >
+              <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
+                                                     icon="fluent:edit-12-regular"/></CustomButton>
+
+          </A></Show>
+
 
     });
     tableColumns.push({

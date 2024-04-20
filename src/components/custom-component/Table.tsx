@@ -2,52 +2,32 @@ import {createMemo, createSignal, For, Match, Switch} from "solid-js";
 import {Show} from "solid-js";
 import '../css/table.css'
 import {capitalizeFirstLetter} from "~/lib/Utils";
-import {Icon} from "@iconify-icon/solid";
-import CustomButton from "~/components/solid-blocks/blocks/buttons";
-
-// Helper function to create row data
-function createData(name, calories, fat, carbs, protein, price, children?) {
-    return {
-        name,
-        calories,
-        fat,
-        carbs,
-        protein,
-        price,
-        children,
-    };
-}
+import {Vertex} from "~/lib/graph";
+import {ColumnDef} from "@tanstack/solid-table";
 
 // Row component for each data entry
-function Row(props: { row: any,  index: any, headers: any }) {
+function Row(props: { row: Vertex,  index: number, headers: ColumnDef<any>[] }) {
     const [open, setOpen] = createSignal(false);
-    const rowData = createMemo(() => {
-        return props.headers.map(header => {
-            console.log(props.row)
-            if (header.accessorKey === 'Edit' || header.accessorKey === 'Delete') {
-                return header.accessorKey;
-            }
-            const keys = header.accessorKey.split('.'); // Split accessorKey by '.'
-            let value = props.row;
-            for (const key of keys) {
-                value = value[key];
-            }
-            return value;
-        });
-    });
+    const getValue = (header: ColumnDef<any>) => {
+                const keys = header.accessorKey.split('.'); // Split accessorKey by '.'
+                let value = props.row;
+                for (const key of keys) {
+                    value = value[key];
+                }
+                return value;
+    }
     return (
         <>
             <TableBodyRow index={props.index}>
-                <For each={rowData()}>
-                    {(value, columnIndex) => {
-                        return <TableData key={columnIndex()}>
+                <For each={props.headers}>
+                    {(header, columnIndex) => {
+                        return <TableData>
                             <Switch>
-                                <Match when={value === 'Edit'}>
-                                    {/*{JSON.stringify(props.headers)}*/}
-                                    {props.headers?.cell?.()}
+                                <Match when={header.accessorKey === 'Edit' || header.accessorKey === 'Delete'}>
+                                    {header.cell?.({row: {original: props.row}, getValue: () => getValue(header)})}
                                 </Match>
-                                <Match when={value}>
-                                    {value ? capitalizeFirstLetter(value.toString()) : value}
+                                <Match when={true}>
+                                    {header.cell?.({row: {original: props.row}, getValue: () => getValue(header)})}
                                 </Match>
                             </Switch>
                         </TableData>;
@@ -71,7 +51,7 @@ function Row(props: { row: any,  index: any, headers: any }) {
 }
 
 // Main component that renders the table
-function CollapsibleTable(props: { headers: any, rows: any }) {
+function CollapsibleTable(props: { headers: ColumnDef<any>[], rows: Vertex[] }) {
     return (
         <div class={'w:full'}>
             <Table>

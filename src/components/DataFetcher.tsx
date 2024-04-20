@@ -8,7 +8,9 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
     const [WsData, {refetch}] = createResource(async () => {
         try {
             const response = await fetch(props.fetchData);
-            return await response.json();
+            const data = await response.json();
+          setGraphData(graph, setGraph, data);
+          return data;
         } catch (error) {
             throw error;
         }
