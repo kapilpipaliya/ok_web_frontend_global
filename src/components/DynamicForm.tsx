@@ -28,7 +28,7 @@ import {BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate} from "@s
 import {
     getSelectionOptions,
     Record,
-    FormContext, getChildVertexes, groupBy, removeLastAttribute,
+    FormContext, getChildVertexes, groupBy,
 } from "../lib/Utils";
 import {RepeaterContext} from "./input/GenaricField";
 import {GenericField} from "./input/Components/GenericFieldComponent";
@@ -231,8 +231,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             }
             submit = true;
             // currently we are navigating back.
-            const url = location.pathname.split("/").slice(0, -1).join('/');
-            setTimeout(() => navigate(url),0);
+            setTimeout(() => navigate(-1),0);
         } else {
             alert("please fix all errors");
         }
@@ -240,8 +239,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     const onCancel = () => {
         revertTransaction(record.txnId);
-        const url = location.pathname.split("/").slice(0, -1).join('/');
-        setTimeout(() => navigate(url),0);
+        setTimeout(() => {
+            navigate(-1);
+        },0);
     }
 
     const [popup, setPopup] = createSignal(false);
@@ -341,13 +341,12 @@ export const DynamicForm = (props: DynamicFormProps) => {
     }
     // https://github.com/solidjs/solid-router
     useBeforeLeave((e: BeforeLeaveEventArgs) => {
+        if (submit || !txnHasSteps(record.txnId)) {
+            return;
+        }
         // if (form.isDirty && !e.defaultPrevented) {
         // preventDefault to block immediately and prompt user async
         e.preventDefault();
-        if (submit || !txnHasSteps(record.txnId)) {
-            e.retry(true);
-            return;
-        }
         setTimeout(() => {
             if (window.confirm("Discard unsaved changes - are you sure?")) {
                 revertTransaction(record.txnId);

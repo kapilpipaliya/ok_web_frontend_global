@@ -164,7 +164,6 @@ export const DataGrid = (props: DataGridProps) => {
             return !formNew.isInlineEditable ?
                 <A
                     href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
-                    replace={true}
                     class="r:5|5|5|5 p:5"
                 >
                     <CustomButton variant={'custom'} class={'bg:red'}><Icon height={21} width={21}

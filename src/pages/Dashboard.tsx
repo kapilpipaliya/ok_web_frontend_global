@@ -13,16 +13,14 @@ import {getNewGraphId, GraphContext} from "../lib/graph";
 import Dismiss from "solid-dismiss";
 import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import {AlertMessageContext} from "../contexts/AlertMessageContext";
 import {APP_BASE_URL, PageContext} from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
 import '../components/css/modal.css'
 import {Icon} from "@iconify-icon/solid";
 import '../components/css/modal.css'
-import useWindow from "solid-bootstrap/dist/esm/core/src/useWindow";
 
-const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
+// const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
 // @ts-ignore
 const GraphViewPage = lazy(() => import("./GraphViewPage"));
@@ -245,7 +243,6 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 <li style="margin-bottom: 5px;">
                                     <A
                                         href={`${APP_BASE_URL}/`}
-                                        replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
@@ -263,7 +260,6 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        replace={true}
                                         class="bg:rgb(229,234,253):hover r:5|5|5|5"
                                         style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
 
@@ -277,7 +273,6 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        replace={true}
                                         class="bg:rgb(229,234,253):hover r:5|5|5|5"
                                         style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
 
