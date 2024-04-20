@@ -85,7 +85,7 @@ export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<G
             try {
                 setGraph('vertexes', edge.S, 'OUT', edge.T, (out_edges) =>
                     Array.isArray(out_edges)
-                        ? [...out_edges, edge.id]
+                        ? [...new Set([...out_edges, edge.id])]
                         : [edge.id]
                 );
             } catch (e) {
@@ -95,7 +95,7 @@ export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<G
             try {
                 setGraph('vertexes', edge.E, 'IN', edge.T, (in_edges) =>
                     Array.isArray(in_edges)
-                        ? [...in_edges, edge.id]
+                        ? [...new Set([...in_edges, edge.id])]
                         : [edge.id]
                 );
             } catch (e) {
