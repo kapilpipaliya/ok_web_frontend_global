@@ -42,5 +42,5 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
 }
 
 export const API = {
-    fetchDataUrl: "https://easyformforge.com/get_data",
+    fetchDataUrl: "http://localhost:3000/api/get_data",
 };

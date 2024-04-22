@@ -375,14 +375,13 @@ export function TableInputField(
                 {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
                 {/*{getSelectionOptions([p.joinVertex], expandVertex.P.props.collection).vertexes?.length}*/}
                 <Show when={expandVertex()}>
-                    <Show when={sortedVertexes().length}>
                         <tr>
                             <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
                                 <DynamicComponent
                                     component={"Table2"}
                                     // When we have a Table we pass original Table Meta Vertex
                                     meta={expandVertex()!}
-                                    isShowAdd={true}
+                                    isShowAdd={false}
                                     data={p.joinVertex}
                                     setValue={props.setValue}
                                     disabled={disabled()}
@@ -391,7 +390,6 @@ export function TableInputField(
                                 />
                             </td>
                         </tr>
-                    </Show>
                 </Show>
             </>
         );
@@ -443,7 +441,7 @@ export function TableInputField(
                 {/*<Show when={props.meta.P.attributes}>*/}
                 {/*  <FormGroup form={{title: '', label: props.meta.P.props.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={props.vertex}/>*/}
                 {/*</Show>*/}
-                <Show when={!props.isShowAdd}>
+                <Show when={props.isShowAdd || sortedVertexes().length>  0}>
                     <AddNewButton/>
                 </Show>
 

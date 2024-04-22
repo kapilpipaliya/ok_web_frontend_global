@@ -36,7 +36,7 @@ const isIntegerId = true;
 // Functions to handle database values and convert them to JSON
 function convertNodeToJson(node: Node): JsonNode {
   return {
-    id: isIntegerId ? node.identity.toNumber() : node.identity,
+    id: !isIntegerId ? node.identity.toNumber() : node.identity,
     L: node.labels,
     P: node.properties,
     OUT: {},
@@ -46,10 +46,10 @@ function convertNodeToJson(node: Node): JsonNode {
 
 function convertRelationshipToJson(relationship: Relationship): JsonRelationship {
   return {
-    id: isIntegerId ? relationship.identity.toNumber() : relationship.identity,
+    id: !isIntegerId ? relationship.identity.toNumber() : relationship.identity,
     T: relationship.type,
-    S: isIntegerId ? relationship.start.toNumber() : relationship.identity,
-    E: isIntegerId ? relationship.end.toNumber() : relationship.identity,
+    S: !isIntegerId ? relationship.start.toNumber() : relationship.start,
+    E: !isIntegerId ? relationship.end.toNumber() : relationship.end,
     // when disableLosslessIntegers is false, we get object in number property.
     // Todo: data is not handled as properly, object is returned from server
     P: relationship.properties
@@ -82,7 +82,7 @@ async function fetchFromMGAndSaveToArray(session: Session, query: string, params
     for (const record of result.records) {
       record.forEach(value => {
         if (value instanceof types.Node) {
-          const id = isIntegerId ? value.identity.toNumber() : value.identity;
+          const id = !isIntegerId ? value.identity.toNumber() : value.identity;
           for (const label of value.labels) {
             if (!vertexLabelIdMap.has(label)) {
               vertexLabelIdMap.set(label, new Set<number>());
@@ -94,7 +94,7 @@ async function fetchFromMGAndSaveToArray(session: Session, query: string, params
           relationships.push(convertRelationshipToJson(value));
         } else if (Array.isArray(value)) {
           for (const item of value) {
-            const id = isIntegerId ? item.identity.toNumber() : item.identity;
+            const id = !isIntegerId ? item.identity.toNumber() : item.identity;
             if (item instanceof types.Node) {
               for (const label of item.labels) {
                 if (!vertexLabelIdMap.has(label)) {
@@ -266,7 +266,7 @@ async function getInitialData(session: Session, args: {}): Promise<{[key: string
 
   return {
     timestamp: new Date().getTime(),
-    vertices: nodeObj,
+    vertexes: nodeObj,
     vertexLabelIdMap: convertMapToObject(vertexLabelIdMap),
     edges: relationshipObj
   };

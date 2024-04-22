@@ -93,7 +93,6 @@ describe("replaceVertexProperties", () => {
 
 describe("deleteVertex", () => {
   beforeEach(() => {
-    console.log("hhi");
     transactions.clear();
   });
   test("modifying properties dont change store", async () => {

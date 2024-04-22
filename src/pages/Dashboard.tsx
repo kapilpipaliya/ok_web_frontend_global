@@ -19,6 +19,7 @@ import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signa
 import '../components/css/modal.css'
 import {Icon} from "@iconify-icon/solid";
 import '../components/css/modal.css'
+import {logout} from "~/pages/auth/auth";
 
 // const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -66,12 +67,12 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
     createEffect(() => {
         const path = location.pathname;
 
-        setIsLoginPage(path.includes("/admin/login"));
-        setSignUpPage(path.includes("/admin/signup"));
+        setIsLoginPage(path.includes("/auth/login"));
+        setSignUpPage(path.includes("/auth/signup"));
         setIsShowDrawer(
             !(
-                path.includes("/admin/login") ||
-                path.includes("/admin/signup") ||
+                path.includes("/auth/login") ||
+                path.includes("/auth/signup") ||
                 path.includes("/admin/Page/")
             )
         );
@@ -94,7 +95,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             events: {
                                 setSideBarOpen,
                                 setTitle: (title: string) =>
-                                    mergeVertexProperties(0, vertexId,graph, setGraph ,{title}),
+                                    mergeVertexProperties(0, vertexId, graph, setGraph, {title}),
                             },
                         }}
                     >
@@ -129,8 +130,8 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
 
 const DropdownMenu = (props: { isLoggedIn: boolean }) => {
     const [isOpen, setIsOpen] = createSignal(false);
-    let btnEl : any;
-    let dropdownContainerEl : any;
+    let btnEl: any;
+    let dropdownContainerEl: any;
 
     const handleOpen = () => {
         setIsOpen(true);
@@ -211,7 +212,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                             <div>
                                 <li style="margin-bottom: 5px;">
                                     <A
-                                        href={`${APP_BASE_URL}/login`}
+                                        href={`/auth/login`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
@@ -225,7 +226,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 </li>
                                 <li style="margin-bottom: 5px;">
                                     <A
-                                        href={`${APP_BASE_URL}/signup`}
+                                        href={`/auth/signup`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
@@ -283,11 +284,11 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                                 <hr style="color:lightgrey" class={'mt:.5rem'}/>
                                 <li style="margin-top: 5px;">
                                     <A
-                                        href={`${APP_BASE_URL}/login`}
-                                        onclick={() => {
+                                        href={`/`}
+                                        onClick={async () => {
+                                            await logout();
                                             setIsOpen(false);
                                         }}
-                                        replace={true}
                                         class="bg:rgb(229,234,253):hover r:5|5|5|5"
                                         style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px; font-weight:bold"
 

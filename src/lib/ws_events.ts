@@ -128,7 +128,6 @@ export const onMutatDataGet = (Ws: ServerEventsDispatcher, graph: GraphInterface
                                    }[]
                                ][]
 ) => {
-    console.log('asd', d)
     if (isObject(d) && d.ack) {
         if (Array.isArray(d.txnIds)) {
             for (const txnId of d.txnIds as number[]) {

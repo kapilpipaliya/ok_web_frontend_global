@@ -143,7 +143,6 @@ describe("updateEdgeStartAndEnd Test", () => {
     });
     const { error, txnDetailIndex } = addNewVertex(1, vertex1);
     expect(error).toBe(false);
-    console.log(transactions);
     expect(txnDetailIndex).toBe(0);
     const { error: error1, txnDetailIndex: txnDetailIndex1 } = addNewVertex(1, vertex2);
     expect(error1).toBe(false);
