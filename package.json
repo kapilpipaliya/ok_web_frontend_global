@@ -49,6 +49,7 @@
     "jsoneditor": "^10.0.2",
     "klona": "^2.0.6",
     "nanoid": "^5.0.7",
+    "neo4j-driver": "^5.19.0",
     "perfectly-scrollable": "^1.1.0",
     "rallax": "^0.1.0",
     "rambda": "^9.2.0",
