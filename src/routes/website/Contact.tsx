@@ -1,13 +1,19 @@
 import { createSignal } from 'solid-js';
 
 import {A} from "@solidjs/router";
-import './krd.css';
-import './style.css';
+import './css/krd.css';
+import './css/style.css';
 import logoImage from './graphics/logo.png';
 import ukFlagImage from './graphics/ukflag.png';
-
+interface FormData {
+ firstname: string;
+ lastname: string;
+ email: string;
+ phone: string;
+ subject: string;
+}
 const ContactUs = () => {
- const [formData, setFormData] = createSignal({
+ const [formData, setFormData] = createSignal<FormData>({
   firstname: '',
   lastname: '',
   email: '',
@@ -15,11 +21,12 @@ const ContactUs = () => {
   subject: ''
  });
 
- const updateField = (field) => (event) => {
-  setFormData((prev) => ({ ...prev, [field]: event.target.value }));
+ const updateField = (field: keyof FormData) => (event: Event) => {
+  const target = event.target as HTMLInputElement | HTMLTextAreaElement;
+  setFormData((prev) => ({ ...prev, [field]: target.value }));
  };
 
- const handleSubmit = (event) => {
+ const handleSubmit = (event: Event) => {
   event.preventDefault();
   console.log('Form data:', formData());
   // Add form submission logic here, e.g., API call
@@ -29,11 +36,11 @@ const ContactUs = () => {
   <div>
    <section class="header container">
     <div class="logo">
-     <A href="/"><img class="headerLogo" src={logoImage} alt="logo" /></A>
+     <A href="/public"><img class="headerLogo" src={logoImage} alt="logo" /></A>
     </div>
     <div class="links">
      <ul>
-      <li><A class="bodycopytext-16" href="/">Home</A></li>
+      <li><A class="bodycopytext-16" href="/public">Home</A></li>
       <li><A class="bodycopytext-16" href="/pricing.html">Pricing</A></li>
       <li><A class="bodycopytext-16" href="/contactus.html">Contact Us</A></li>
       <div class="dropdown">
@@ -90,7 +97,7 @@ const ContactUs = () => {
     <div class="row container d-flex pb-3">
      <div class="info d-grid align-content-spacebetween">
       <div>
-       <A href="/"><img class="headerLogo" src={logoImage} alt="logo" /></A>
+       <A href="/public"><img class="headerLogo" src={logoImage} alt="logo" /></A>
        <p>Design and publish forms faster, smoother</p>
       </div>
       <div class="footericon">
