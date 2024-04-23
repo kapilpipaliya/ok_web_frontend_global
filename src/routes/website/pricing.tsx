@@ -1,7 +1,8 @@
 import { Title } from "@solidjs/meta";
 import Footer from "./Footer";
 import Header from "./Header";
-
+import './css/krd.css'
+import './css/style.css'
 export default function Pricing() {
   return (
     <>

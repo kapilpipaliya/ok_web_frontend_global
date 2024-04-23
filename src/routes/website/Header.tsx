@@ -22,7 +22,7 @@ export default function Header() {
               </a>
             </li>
             <li>
-              <a class="bodycopytext-16" href="/contactus">
+              <a class="bodycopytext-16" href="/website/Contact">
                 Contact Us
               </a>
             </li>

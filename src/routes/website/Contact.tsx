@@ -1,7 +1,8 @@
 import Footer from "./Footer";
 import Header from "./Header";
-
-export default function ContactUs() {
+import './css/krd.css'
+import './css/style.css'
+export default function Contact() {
   return (
     <>
       <Header />
