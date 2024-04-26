@@ -1,16 +1,7 @@
-import type { APIEvent } from "@solidjs/start/server";
-import {
-  auth,
-  Driver,
-  driver as createDriver,
-  Node,
-  QueryResult,
-  RecordShape,
-  Relationship,
-  Session,
-  types
-} from "neo4j-driver";
-import { NumberOrInteger } from "neo4j-driver-core/types/graph-types";
+import type {APIEvent} from "@solidjs/start/server";
+import {Node, QueryResult, RecordShape, Relationship, Session, types} from "neo4j-driver";
+import {NumberOrInteger} from "neo4j-driver-core/types/graph-types";
+import {isIntegerId, session} from "~/globals/global";
 
 interface JsonNode {
   id: NumberOrInteger;
@@ -30,8 +21,6 @@ interface JsonRelationship {
 
 type VertexLabelIdMap = Map<string, Set<number>>;
 type JsonData = Record<string, any>;
-
-const isIntegerId = true;
 
 // Functions to handle database values and convert them to JSON
 function convertNodeToJson(node: Node): JsonNode {
@@ -216,7 +205,6 @@ async function getInitialData(session: Session, args: {}): Promise<{[key: string
     // MATCH (c:Comp)-[cp]->()-[cp2]->() RETURN cp, cp2
 
     if (!args.admin) {
-      console.log('hiiiiii')
       const labelVec = ["CompProp", "CompEvent"];
       const typeVec = ["CompProp", "CompEvent","CompPropDataType", "CompPropComp", "AttrPropName"];
       await fetchFromMGAndSaveToArray(session,"MATCH (n) WHERE NOT all(l IN LABELS(n) WHERE l IN $labels) RETURN n", { labels: labelVec }, nodes, relationships, vertexLabelIdMap);
@@ -271,13 +259,7 @@ async function getInitialData(session: Session, args: {}): Promise<{[key: string
     edges: relationshipObj
   };
 }
-
 export async function GET({ params }: APIEvent) {
-  const driver = createDriver("bolt://65.109.174.193:1102", undefined,
-   isIntegerId ? {disableLosslessIntegers: true} : undefined
-  );
-  const session = driver.session();
-
   let data = {};
   try {
     data = getInitialData(session, {});
