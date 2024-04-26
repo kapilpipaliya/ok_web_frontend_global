@@ -2,6 +2,7 @@ import {MetaProvider} from "@solidjs/meta";
 import {A, Route, Router, useMatch, useParams} from "@solidjs/router";
 import {FileRoutes} from "@solidjs/start/router";
 import {Component, Show, Suspense} from "solid-js";
+import {Toaster} from "solid-toast";
 
 export default function App() {
     return (
@@ -12,6 +13,7 @@ export default function App() {
                     <Suspense>
                         {props.children}
                     </Suspense>
+                    <Toaster />
                 </MetaProvider>
             }}
         >

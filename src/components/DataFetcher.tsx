@@ -43,4 +43,5 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
 
 export const API = {
     fetchDataUrl: "http://localhost:3000/api/get_data",
+    loginUrl: "http://localhost:3000/api/login",
 };

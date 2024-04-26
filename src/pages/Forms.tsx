@@ -1,17 +1,21 @@
 import {createSignal} from "solid-js";
-import {createStore} from "solid-js/store";
-import {APP_BASE_URL, Record} from "~/lib/Utils";
+import {APP_BASE_URL} from "~/lib/Utils";
 import logo from "../../assets/signup/logo.png";
 import {loginOrRegister} from "~/pages/auth/auth";
 import {A, useNavigate} from "@solidjs/router";
 import '../base.css'
+import axios from "axios";
+import {API} from "~/components/DataFetcher";
+import {useToast} from "~/components/custom-component/toast";
+import {toast} from "solid-toast";
+import {error} from "neo4j-driver";
 
 export const Login = () => {
     // const {setAlert} = useContext(AlertMessageContext);
     // const [graph,setGraph] = useContext(GraphContext)!;
     // const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
-
+    const {showErrorToast} = useToast();
     // const event = ["post", "login", 0] as WSEvent;
     // Ws.bind(event, (data) => {
     //     if (data.error) {
@@ -46,15 +50,44 @@ export const Login = () => {
     // const config = createStore({} as { record: Record });
 
     const [formData, setFormData] = createSignal({username: '', password: '', loginType: 'login'});
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const result = await loginOrRegister(formData());
-        if (result instanceof Error) {
-            console.log("Error login or register", result);
-        } else {
-            navigate(`${APP_BASE_URL}`);
+    const loginCall = async () => {
+        try {
+            let response = await fetch(API.loginUrl, {
+                method: 'POST',
+                body: JSON.stringify({username: formData().username, password: formData().password})
+            });
+            if(response.ok){
+            const result = await response.json();
+                console.log("res => "+ result)
+                return result;
+            }else{
+                return response.json();
+            }
+        } catch (error) {
+            return error.response;
         }
+    }
+    const handleSubmit = async (e) => {
+        await toast.promise(
+            loginCall(),
+            {
+                loading: 'Logging In...',
+                success: (val) => {
+                    console.log("res => "+ val)
+                    return <span>{val}</span>
+                },
+                error: (error) => {
+                    console.log("error => "+ error)
+                    return <span>{error.data}</span>
+                }
+            }
+        )
+        // const result = await loginOrRegister(formData());
+        // if (result instanceof Error) {
+        //     console.log("Error login or register", result);
+        // } else {
+        //     navigate(`${APP_BASE_URL}`);
+        // }
     };
 
 
