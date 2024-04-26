@@ -7,8 +7,8 @@ import {
 } from '@table-library/react-table-library/common/util/tree';
 import { useIdReducer } from '@table-library/react-table-library/common/util/useIdReducer';
 import { useSyncRefState } from '@table-library/react-table-library/common/util/useSyncRefState';
-import IconChevronSingleDown from '@table-library/react-table-library/common/icons/IconChevronSingleDown';
-import IconChevronSingleRight from '@table-library/react-table-library/common/icons/IconChevronSingleRight';
+import IconChevronSingleDown from '@table-library/react-table-library/common/Website Icons/IconChevronSingleDown';
+import IconChevronSingleRight from '@table-library/react-table-library/common/Website Icons/IconChevronSingleRight';
 
 import { State, StateAndChange } from '@table-library/react-table-library/types/common';
 import {

@@ -1,10 +1,13 @@
-import Footer from "./Footer";
-import Header from "./Header";
-import './css/krd.css'
-import './css/style.css'
+import Footer from "~/components/website/Footer";
+import Header from "~/components/website/Header";
+import '../../css/style.css'
+import '../../css/krd.css'
+import SiteTitle from "~/components/website/utils";
 export default function Contact() {
   return (
     <>
+      <SiteTitle>Contact Us</SiteTitle>
+
       <Header />
       <div class="cntc pt-5">
         <div class="innersection container pb-100">

@@ -331,7 +331,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                     onClick: () => navigate("new"),
                                     variant: "soft",
                                     style: {"padding":"7px 10px"},
-                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22}/>,
+                                    leading: <Icon icon={'lets-Website Icons:add-round'} height={22} width={22}/>,
                                     children: "Add New",
                                 },
                             },

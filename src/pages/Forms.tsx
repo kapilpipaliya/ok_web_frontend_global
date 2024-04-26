@@ -3,7 +3,7 @@ import {createStore} from "solid-js/store";
 import {APP_BASE_URL, Record} from "~/lib/Utils";
 import logo from "../../assets/signup/logo.png";
 import {loginOrRegister} from "~/pages/auth/auth";
-import {useNavigate} from "@solidjs/router";
+import {A, useNavigate} from "@solidjs/router";
 import '../base.css'
 
 export const Login = () => {
@@ -45,7 +45,7 @@ export const Login = () => {
     //
     // const config = createStore({} as { record: Record });
 
-    const [formData, setFormData] = createSignal({username: 'admin', password: 'admin', loginType: 'login'});
+    const [formData, setFormData] = createSignal({username: '', password: '', loginType: 'login'});
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -115,9 +115,9 @@ export const Login = () => {
                     <div class="flex justify-content:center mt:20 f:15">
           <span>
             Don't have an account?{" "}
-              <a href={`auth/signup`}>
+              <A href={`/auth/signup`}>
               <u class="font:bolder text-fill:black">Sign Up</u>
-            </a>
+            </A>
           </span>
                     </div>
                 </div>
@@ -145,9 +145,9 @@ export const SignUp = () => {
     // 3. validations
     // 4. clear form on success
     const [formData, setFormData] = createSignal({
-        username: 'admin',
-        email: 'savan@gmail.com',
-        password: 'admin',
+        username: '',
+        email: '',
+        password: '',
         loginType: 'signup'
     });
 
@@ -232,9 +232,9 @@ export const SignUp = () => {
                     <div class="flex justify-content:center mt:20 f:15">
           <span>
             Already have an account?{" "}
-              <a href={`/auth/login`}>
+              <A href={`/auth/signup`} replace={true}>
               <u class="font:bold">Sign In</u>
-            </a>
+            </A>
           </span>
                     </div>
                 </div>

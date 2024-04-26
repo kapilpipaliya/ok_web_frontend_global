@@ -3,9 +3,9 @@ import * as React from 'react';
 import { useReducerWithMiddleware } from '@table-library/react-table-library/common/util/useReducerWithMiddleware';
 import { useSyncControlledState } from '@table-library/react-table-library/common/util//useSyncControlledState';
 import { useSyncRefState } from '@table-library/react-table-library/common/util/useSyncRefState';
-import IconChevronSingleDown from '@table-library/react-table-library/common/icons/IconChevronSingleDown';
-import IconChevronSingleUp from '@table-library/react-table-library/common/icons/IconChevronSingleUp';
-import IconChevronSingleUpDown from '@table-library/react-table-library/common/icons/IconChevronSingleUpDown';
+import IconChevronSingleDown from '@table-library/react-table-library/common/Website Icons/IconChevronSingleDown';
+import IconChevronSingleUp from '@table-library/react-table-library/common/Website Icons/IconChevronSingleUp';
+import IconChevronSingleUpDown from '@table-library/react-table-library/common/Website Icons/IconChevronSingleUpDown';
 
 import { Action, State, StateAndChange } from '@table-library/react-table-library/types/common';
 import { Data, ExtendedNode, TableNode } from '@table-library/react-table-library/types/table';

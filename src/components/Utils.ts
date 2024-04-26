@@ -14,8 +14,8 @@ export const iconMap = {
   Box: "mage:box-3d-scan",
   ProgressBar: "carbon:progress-bar",
   LoadIndicator: "ep:loading",
-  SelectBox: "radix-icons:dropdown-menu",
-  TagBox: "radix-icons:dropdown-menu",
+  SelectBox: "radix-Website Icons:dropdown-menu",
+  TagBox: "radix-Website Icons:dropdown-menu",
   Tabs: "material-symbols-light:tabs-outline",
   Button: "formkit:button",
   Breadcrumb: "tdesign:component-breadcrumb",
@@ -24,7 +24,7 @@ export const iconMap = {
   ColorBox: "ic:outline-color-lens",
   DateBox: "circum:calendar-date",
   FileUploader: "arcticons:custom-uploader",
-  Form: "lets-icons:form-duotone",
+  Form: "lets-Website Icons:form-duotone",
   NumberBox: "fluent-emoji-high-contrast:input-numbers",
   RadioGroup: "ri:list-radio",
   Radio: "fluent:radio-button-16-filled",
@@ -42,7 +42,7 @@ export const iconMap = {
   TabList: "fluent:tab-desktop-20-regular",
   TreeViewItem: "tdesign:tree-list",
   TreeViewChild: "carbon:tree-view-alt",
-  Collapsible: "lets-icons:collapse",
+  Collapsible: "lets-Website Icons:collapse",
 };
 
 export const nameExpr = (v: Vertex,graph: Store<GraphInterface>) => {

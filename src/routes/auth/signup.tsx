@@ -1,5 +1,9 @@
-import {SignUp} from "~/pages/Forms";
+import {Login, SignUp} from "~/pages/Forms";
+import SiteTitle from "~/components/website/utils";
 
 export default function signUp() {
-    return <SignUp/>;
+    return <>
+        <SiteTitle>Sign Up</SiteTitle>
+        <SignUp/>
+    </>;
 }

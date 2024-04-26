@@ -730,7 +730,7 @@ export const StyleCSSComponents = () => {
                         'margin-bottom': '6px'
                     }}>
                     <ContainerLabel title={props.label}/>
-                    <Icon class={'cursor:pointer'} onClick={addOption} icon={'lets-icons:add-round'}/>
+                    <Icon class={'cursor:pointer'} onClick={addOption} icon={'lets-Website Icons:add-round'}/>
                 </div>
                 <For each={getOptions()}>
                     {(option, i) => (

@@ -16,7 +16,7 @@ const getBaseStyle = () => `
 
   ${() => {
     /* #1 */
-    // otherwise tree + resize would have overflow icons */
+    // otherwise tree + resize would have overflow Website Icons */
     // otherwise pin shine through */
   }}
   background-color: #ffffff;

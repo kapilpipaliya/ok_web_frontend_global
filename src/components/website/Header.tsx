@@ -1,10 +1,14 @@
 "use client";
 
+import {useNavigate} from "@solidjs/router";
+
 export default function Header() {
+  const navigate = useNavigate();
   return (
     <section class="header container">
+
         <div class="logo">
-          <a href="index.html">
+          <a href="/">
             <img class="headerLogo" src="graphics/logo.png" alt="logo" />
           </a>
         </div>
@@ -22,7 +26,7 @@ export default function Header() {
               </a>
             </li>
             <li>
-              <a class="bodycopytext-16" href="/website/Contact">
+              <a class="bodycopytext-16" href="/contact">
                 Contact Us
               </a>
             </li>
@@ -45,7 +49,7 @@ export default function Header() {
             </div>
           </ul>
         </div>
-        <button class="btn-small-icon-filled">
+        <button class="btn-small-icon-filled" onClick={()=>navigate("/auth/login")}>
           Get Started <i class="fa-solid fa-chevron-right"></i>
         </button>
       </section>

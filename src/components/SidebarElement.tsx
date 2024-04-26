@@ -15,7 +15,7 @@ export default function SidebarElement(props: {
     const navigate = useNavigate();
 
     const mainIcon = {
-        '/admin/dashboards': 'akar-icons:dashboard',
+        '/admin/dashboards': 'akar-Website Icons:dashboard',
         '/admin/': 'fluent:home-24-regular',
         '/admin/DataType': 'carbon:data-1',
         '/admin/CompCategory': 'material-symbols-light:settings-input-component-outline',
@@ -23,7 +23,7 @@ export default function SidebarElement(props: {
         '/admin/SimpleImport': 'uil:import',
         '/admin/backup_restore': 'lucide:database-backup',
         '/admin/User': 'ci:users',
-        '/admin/Role': 'eos-icons:role-binding-outlined',
+        '/admin/Role': 'eos-Website Icons:role-binding-outlined',
         '/admin/Perm': 'tabler:lock-access',
         '/admin/Coll': 'ep:collection-tag',
         '/admin/CollCategory': 'ic:outline-collections-bookmark',

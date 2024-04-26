@@ -1,13 +1,15 @@
 import { Title } from "@solidjs/meta";
-import Footer from "./Footer";
-import Header from "./Header";
-import './css/krd.css'
-import './css/style.css'
+import Footer from "~/components/website/Footer";
+import Header from "~/components/website/Header";
+import '../../css/style.css'
+import '../../css/krd.css'
+import SiteTitle from "~/components/website/utils";
 export default function Pricing() {
   return (
     <>
-      <Header />
+      <SiteTitle>Pricing</SiteTitle>
 
+      <Header />
       <section class="pricingContent mb-5 pt-100">
         <div class="container d-grid justify-content-center justify-item-center">
           <h1>

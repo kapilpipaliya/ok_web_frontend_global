@@ -8,7 +8,12 @@ export default createHandler(() => (
             <head>
                 <meta charset="utf-8"/>
                 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-                <link rel="icon" href="/favicon.ico"/>
+                <link rel="apple-touch-icon" sizes="180x180" href="/assets/Website%20Icons/apple-touch-icon.png"/>
+                <link rel="icon" type="image/png" sizes="32x32" href="/assets/Website%20Icons//favicon-32x32.png"/>
+                <link rel="icon" type="image/png" sizes="16x16" href="/assets/Website%20Icons//favicon-16x16.png"/>
+                <link rel="manifest" href="/assets/Website%20Icons/site.webmanifest"/>
+                <meta name="msapplication-TileColor" content="#da532c"/>
+                <meta name="theme-color" content="#ffffff"/>
 
                 {assets}
             </head>
