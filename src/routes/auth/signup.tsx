@@ -5,5 +5,5 @@ export default function signUp() {
     return <>
         <SiteTitle>Sign Up</SiteTitle>
         <SignUp/>
-    </>;
+    </>
 }
