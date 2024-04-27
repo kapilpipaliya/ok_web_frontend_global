@@ -46,4 +46,5 @@ export const API = {
     fetchDataUrl: `${API_BASE_URL}/get_data`,
     loginUrl: `${API_BASE_URL}/login`,
     signUpUrl: `${API_BASE_URL}/signup`,
+    profileUrl: `${API_BASE_URL}/profile`,
 };

@@ -24,7 +24,7 @@ body {
   --normal-line: 0.125em;
   --wide-line: 0.25em;
   --accordion-icon: "\2303";
-  --breadcrumb-icon: " > ";
+  --breadcrumb-icon: " › ";
   --stack-hide: -1;
   --stack-base: 0;
   --stack-dropdown: 1000;

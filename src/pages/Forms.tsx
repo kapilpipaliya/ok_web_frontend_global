@@ -14,7 +14,7 @@ import {LoadingContext} from "~/globals/global";
 export const Login = () => {
     const navigate = useNavigate();
     const {showErrorToast} = useToast();
-    const [loadingSite,setLoadingSite] = useContext(LoadingContext);
+    const [loadingSite, setLoadingSite] = useContext(LoadingContext);
 
     const [formData, setFormData] = createSignal({email: '', password: '', loginType: 'login'});
     const [showPassword, setShowPassword] = createSignal(false);
@@ -44,39 +44,38 @@ export const Login = () => {
     const handleSubmit = async (event: SubmitEvent) => {
 
         event.preventDefault();
-        // const emailError = validateEmail(formData().email);
-        // const passwordError = validatePassword(formData().password);
-        // if (emailError) {
-        //     showErrorToast(emailError); // Show the error message if validation fails
-        // } else if (passwordError) {
-        //     showErrorToast(passwordError); // Show the error message if validation fails
-        // } else {
-        setLoadingSite(true);
-        let response;
-        await toast.promise(
-            loginCall(),
-            {
-                loading: 'Logging In...',
-                success: (val) => {
-                    response = val;
-                    return <span>Login Successfully</span>
-                },
-                error: (error) => {
-                    console.log("error => ", error)
-                    return <span>{error}</span>
+        const emailError = validateEmail(formData().email);
+        const passwordError = validatePassword(formData().password);
+        if (emailError) {
+            showErrorToast(emailError); // Show the error message if validation fails
+        } else if (passwordError) {
+            showErrorToast(passwordError); // Show the error message if validation fails
+        } else {
+            setLoadingSite(true);
+            let response;
+            await toast.promise(
+                loginCall(),
+                {
+                    loading: 'Logging In...',
+                    success: (val) => {
+                        response = val;
+                        return <span>Login Successfully</span>
+                    },
+                    error: (error) => {
+                        console.log("error => ", error)
+                        return <span>{error}</span>
+                    }
                 }
+            )
+            setLoadingSite(false);
+            if (response!.error) {
+                showErrorToast(response!.error);
+                return;
             }
-        )
-        setLoadingSite(false);
-        if (response!.error) {
-            showErrorToast(response!.error);
-            return;
+            if (response != null && response.id !== null) {
+                navigate(`${APP_BASE_URL}/Page`)
+            }
         }
-        if (response != null && response.id !== null) {
-            navigate(`${APP_BASE_URL}/Page`)
-        }
-
-        // }
     };
 
 
@@ -199,7 +198,7 @@ export const SignUp = () => {
         const passwordError = validatePassword(formData().password);
         if (usernameError) {
             showErrorToast(usernameError); // Show the error message if validation fails
-        }else if (emailError) {
+        } else if (emailError) {
             showErrorToast(emailError); // Show the error message if validation fails
         } else if (passwordError) {
             showErrorToast(passwordError); // Show the error message if validation fails
@@ -232,7 +231,7 @@ export const SignUp = () => {
     return (
         <div class="login rel bg:#FFF1F1 r:5|5|5|5 flex ai:center jc:center" style={{'flex-flow': 'column'}}>
             <div class="flex justify-content:center ai:center mt:80px">
-                <img src={logo} alt="logo" onClick={()=>navigate('/')} class="h:60"/>
+                <img src={logo} alt="logo" onClick={() => navigate('/')} class="h:60"/>
             </div>
 
             <div class="p:10@md box-shadow:100 shadow:black h:70% flex ai:center jc:center">

@@ -1,5 +1,6 @@
 import {APIEvent} from "@solidjs/start/dist/server";
 import {isIntegerId,  driver} from "~/globals/global";
+import {getSession} from "~/pages/auth/_server";
 
 export async function POST({request}: APIEvent) {
     // if (!await isLoggedIn()) {
@@ -24,6 +25,14 @@ export async function POST({request}: APIEvent) {
 
         // User found, now check the password
         const user = result.records[0].get('u');
+        const http_session = await getSession();
+        await http_session.update(oldData => ({
+            ...oldData,
+            // userId: user.id,
+            // username: user.username,
+            // password: user.password,
+            email: user.properties.email
+        }));
         return {
             id: !isIntegerId ? user.identity.toNumber() : user.identity,
             properties: user.properties
