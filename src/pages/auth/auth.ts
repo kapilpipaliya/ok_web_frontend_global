@@ -1,20 +1,31 @@
 import {action, cache, redirect, useNavigate} from "@solidjs/router";
 import {getSession, login, logout as logoutSession, register, validatePassword, validateUsername} from "./_server";
-import {APP_BASE_URL} from "~/lib/Utils";
+import {isIntegerId, neo4jSession} from "~/globals/global";
 
+// use this function in all api to find if user is logged in or not?
 export const getUser = async () => {
     "use server";
     // try {
         const session = await getSession();
-        const userId = session.data.userId;
-        if (userId === undefined) {
-            return redirect("/auth/login");
+        const email = session.data.email;
+        if (email === undefined) {
+            return {error: "Not Authorized"};
         }
-        // const user = await db.user.findUnique({where: {id: userId}});
-        // if (!user) throw new Error("User not found");
-        return {id: userId, user: session.data.user, password: session.data.password, email: session.data.email};
-    // } catch {
-    //     console.log("Error");
+        const query = `MATCH (u:User {email: $email}) return u;`;
+        const result = await neo4jSession.run(query, {email: email});
+
+        if (result.records.length === 0) {
+            return {error: "Not Authorized"};
+        }
+        const user = result.records[0].get('u');
+        const {password, ...properties} = user.properties;
+        return {
+            id: !isIntegerId ? user.identity.toNumber() : user.identity,
+            properties
+        }
+    // } catch (error) {
+    //     console.error('Server error Failed to login:', error);
+    //     return new Response('Internal Server Error', {status: 500});
     // }
 };
 

@@ -1,8 +1,8 @@
 import {APIEvent} from "@solidjs/start/dist/server";
-import {isLoggedIn} from "~/routes/api/login";
+import {getUser} from "~/pages/auth/auth";
 
 export async function GET({params}: APIEvent) {
-    if (!await isLoggedIn()) {
+    if (!await getUser()) {
         return new Response('Unauthorized', {status: 401});
     }
     return {

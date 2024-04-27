@@ -49,21 +49,23 @@ export const Login = () => {
 
     const [formData, setFormData] = createSignal({username: '', password: '', loginType: 'login'});
     const loginCall = async () => {
-        try {
+        // try {
             let response = await fetch(API.loginUrl, {
                 method: 'POST',
                 body: JSON.stringify({username: formData().username, password: formData().password})
             });
             if(response.ok){
-            const result = await response.json();
-                console.log("res => "+ result)
-                return result;
-            }else{
-                return response.json();
+              const result = await response.json();
+              if (result.error) {
+                throw new Error(result.error);
+              }
+              return result;
+            } else {
+                throw new Error(response.statusText);
             }
-        } catch (error: any) {
-            return error.message;
-        }
+        // } catch (error: any) {
+        //     return error.message;
+        // }
     }
     const handleSubmit = async (e) => {
         await toast.promise(
@@ -71,12 +73,12 @@ export const Login = () => {
             {
                 loading: 'Logging In...',
                 success: (val) => {
-                    console.log("res => "+ val)
+                    console.log("res => ", val)
                     return <span>{val}</span>
                 },
                 error: (error) => {
-                    console.log("error => "+ error)
-                    return <span>{error.data}</span>
+                    console.log("error => ", error)
+                    return <span>{error.message}</span>
                 }
             }
         )

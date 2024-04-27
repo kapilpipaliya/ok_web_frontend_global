@@ -1,7 +1,7 @@
 import type {APIEvent} from "@solidjs/start/server";
 import {Node, QueryResult, RecordShape, Relationship, Session, types} from "neo4j-driver";
 import {NumberOrInteger} from "neo4j-driver-core/types/graph-types";
-import {isIntegerId, session} from "~/globals/global";
+import {isIntegerId, neo4jSession} from "~/globals/global";
 
 interface JsonNode {
   id: NumberOrInteger;
@@ -160,7 +160,6 @@ function getNodeAndEdgeObj(
       if (!vertexLabelIdMap.has(label)) {
         vertexLabelIdMap.set(label, new Set([id]));
       } else {
-        console.log(id)
         vertexLabelIdMap.get(label)!.add(id);
       }
     }
@@ -262,7 +261,7 @@ async function getInitialData(session: Session, args: {}): Promise<{[key: string
 export async function GET({ params }: APIEvent) {
   let data = {};
   try {
-    data = getInitialData(session, {});
+    data = getInitialData(neo4jSession, {});
   } catch (error) {
     console.error('Failed to execute query:', error);
     throw error;
