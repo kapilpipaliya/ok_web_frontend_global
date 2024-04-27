@@ -5,8 +5,8 @@ import {config} from "~/master.css";
 
 export default function auth(props: RouteSectionProps) {
     return (
-        <CSSRuntimeProvider config={config}>
+        <>
             {props.children}
-        </CSSRuntimeProvider>
+        </>
     );
 }

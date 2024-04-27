@@ -4,13 +4,14 @@ import {FieldAttribute, FormMetaData} from "./Type";
 import {IFormContext} from "./Utils";
 import {useContext} from "solid-js";
 import {GraphContext} from "./graph";
-
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
   return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
 };
 */
+
+export const API_BASE_URL = 'http://localhost:3000/api';
 
 const collectionAttr = [
   {
@@ -270,7 +271,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Default Component",
         component: "SelectBox",
         props: {
-          
+
           collection: "g:'Comp'",
         },
       },
@@ -294,7 +295,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-          
+
           collection: "g:'CompCategory'",
           parentLabel: "CompCategory",
           inward: true,
@@ -318,7 +319,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "DataType",
         component: "TagBox",
         props: {
-          
+
           collection: "g:'DataType'",
           inward: true,
           parentLabel: "DataType",
@@ -357,7 +358,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'DataType'",
               onchange: '["Comp",null]',
             },
@@ -367,7 +368,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-              
+
               collection: "->$0DataType->$0Comp",
             },
           },
@@ -509,7 +510,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-          
+
           collection: "g:'Dashboard'",
           parentLabel: "Dashboard",
           inward: true,
@@ -526,7 +527,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Primary Key",
         component: "TagBox",
         props: {
-          
+
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -537,7 +538,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "nameKey",
         component: "TagBox",
         props: {
-          
+
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -666,7 +667,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Coll'",
             },
           },
@@ -685,7 +686,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "tab",
             component: "SelectBox",
             props: {
-              
+
               collection: "-CollChild->$0Tab",
             },
           },
@@ -694,7 +695,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "SelectBox",
             props: {
               collection: "-CollChild->$0Group",
-              
+
             },
           },
           {
@@ -728,7 +729,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Coll'",
             },
           },
@@ -771,7 +772,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-              
+
               collection: "g:'Role'",
             },
           },

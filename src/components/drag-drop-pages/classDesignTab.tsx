@@ -18,7 +18,7 @@ export const ClassDesignTab = (props: {
     isRealTime?: boolean;
     txnId?: number;
 }) => {
-    const {Container,ButtonGroups} = StyleCSSComponents();
+    const {Container, ButtonGroups} = StyleCSSComponents();
 
     const [cssState, setCssState] = createStore({} as { [key: string]: any });
 
@@ -74,7 +74,7 @@ export const ClassDesignTab = (props: {
     };
 
 
-        return <CssEditorContext.Provider value={[cssState, setCssState]}>
+    return <CssEditorContext.Provider value={[cssState, setCssState]}>
         <tr class={'min-w:100% m:5px'}>
             <td colspan="2">
 <span class={'m:10|0'}>

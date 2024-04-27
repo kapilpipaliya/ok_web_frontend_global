@@ -15,7 +15,7 @@ export default function Home() {
     }
     return (
         <>
-            <SiteTitle>Home</SiteTitle>
+            <SiteTitle children={'Home'} />
             <Header />
             <section class="hero">
                 <div class="heroInner container">
@@ -26,10 +26,11 @@ export default function Home() {
 
                     <div class="iconRow mt-2 mb-2">
                         <div class="iconcard">
-                            <div class="iconBackground d-flex justify-content-center align-content-center">
+                            <div class="iconBackground" style={{'display':'flex','justify-content':'center'}}>
                                 <svg
                                     width="33"
                                     height="33"
+                                    style={{'place-self': 'center'}}
                                     viewBox="0 0 33 33"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -58,10 +59,11 @@ export default function Home() {
                             </p>
                         </div>
                         <div class="iconcard">
-                            <div class="iconBackground d-flex justify-content-center align-content-center">
+                            <div class="iconBackground" style={{'display':'flex','justify-content':'center'}}>
                                 <svg
                                     width="44"
                                     height="25"
+                                    style={{'place-self': 'center'}}
                                     viewBox="0 0 44 25"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -105,10 +107,11 @@ export default function Home() {
                             </p>
                         </div>
                         <div class="iconcard">
-                            <div class="iconBackground d-flex justify-content-center align-content-center">
+                            <div class="iconBackground" style={{'display':'flex','justify-content':'center'}}>
                                 <svg
                                     width="28"
                                     height="33"
+                                    style={{'place-self': 'center'}}
                                     viewBox="0 0 28 33"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"
@@ -148,10 +151,11 @@ export default function Home() {
                             </p>
                         </div>
                         <div class="iconcard">
-                            <div class="iconBackground d-flex justify-content-center align-content-center">
+                            <div class="iconBackground" style={{'display':'flex','justify-content':'center'}}>
                                 <svg
                                     width="33"
                                     height="33"
+                                    style={{'place-self': 'center'}}
                                     viewBox="0 0 33 33"
                                     fill="none"
                                     xmlns="http://www.w3.org/2000/svg"

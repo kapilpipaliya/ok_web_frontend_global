@@ -1,10 +1,12 @@
 import {Icon} from "@iconify-icon/solid";
-import {JSXElement,  Show} from "solid-js";
+import {createSignal, JSXElement, Show} from "solid-js";
 import {DisplayComponentProps} from "./ComponentType";
 import {useNavigate} from "@solidjs/router";
 import './css/sideBarSearch.css';
 import './css/table.css'
 import {APP_BASE_URL} from "~/lib/Utils";
+import {getUser} from "~/pages/auth/auth";
+import {createStore} from "solid-js/store";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
     return (
@@ -29,6 +31,7 @@ export function Navbar(
     // let {events} = useContext(PageContext);
     // bg:white box-shadow:1|1|10|#ddd
     const navigate = useNavigate();
+
     return (
         <nav
             class={`p:5|10 flex jc:space-between ai:center r:0|0|10|10 ${

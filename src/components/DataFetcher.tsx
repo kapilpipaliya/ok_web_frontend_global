@@ -2,6 +2,7 @@ import {children, createEffect, createResource, JSX, Match, Show, Switch, useCon
 import {GraphContext} from "~/lib/graph";
 import {setGraphData} from "~/lib/ws_events";
 import {LoaderNew} from "~/components/LoaderSimple";
+import {API_BASE_URL} from "~/lib/api";
 
 export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Element, errorMessage?: string }) => {
     const [graph, setGraph] = useContext(GraphContext)!;
@@ -42,6 +43,7 @@ export const DataFetcher = (props: { fetchData: string, renderContent: JSX.Eleme
 }
 
 export const API = {
-    fetchDataUrl: "http://localhost:3000/api/get_data",
-    loginUrl: "http://localhost:3000/api/login",
+    fetchDataUrl: `${API_BASE_URL}/get_data`,
+    loginUrl: `${API_BASE_URL}/login`,
+    signUpUrl: `${API_BASE_URL}/signup`,
 };

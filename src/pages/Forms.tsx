@@ -1,5 +1,5 @@
-import {createSignal} from "solid-js";
-import {APP_BASE_URL} from "~/lib/Utils";
+import {createSignal, useContext} from "solid-js";
+import {APP_BASE_URL, validateEmail, validatePassword, validateUsername} from "~/lib/Utils";
 import logo from "../../assets/signup/logo.png";
 import {loginOrRegister} from "~/pages/auth/auth";
 import {A, useNavigate} from "@solidjs/router";
@@ -7,152 +7,144 @@ import '../base.css'
 import {API} from "~/components/DataFetcher";
 import {useToast} from "~/components/custom-component/toast";
 import {toast} from "solid-toast";
+import {Icon} from "@iconify-icon/solid";
+import {setLoadingSite} from "~/app";
+import {LoadingContext} from "~/globals/global";
 
 export const Login = () => {
-    // const {setAlert} = useContext(AlertMessageContext);
-    // const [graph,setGraph] = useContext(GraphContext)!;
-    // const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
     const {showErrorToast} = useToast();
-    // const event = ["post", "login", 0] as WSEvent;
-    // Ws.bind(event, (data) => {
-    //     if (data.error) {
-    //         setAlert((prev) => [
-    //             ...prev,
-    //             {
-    //                 id: createUniqueId(),
-    //                 state: Alert.Error,
-    //                 message: data.description,
-    //             },
-    //         ]);
-    //     } else {
-    //         revertTransaction(config[0].record.txnId);
-    //         // because we are doing sync processing in websocket class,
-    //         // this will not be a problem
-    //         resetDatabaseLogin(setGraph);
-    //         Ws.trigger([
-    //             [
-    //                 ["get", "sync", 0],
-    //                 {
-    //                     admin: isAdmin() ? true : undefined,
-    //                     from: 0,
-    //                     subscriptions: Ws.subscriptions,
-    //                 },
-    //             ],
-    //         ]);
-    //         navigate("/");
-    //     }
-    // });
-    // onCleanup(() => Ws.unbind(event));
-    //
-    // const config = createStore({} as { record: Record });
+    const [loadingSite,setLoadingSite] = useContext(LoadingContext);
 
-    const [formData, setFormData] = createSignal({username: '', password: '', loginType: 'login'});
+    const [formData, setFormData] = createSignal({email: '', password: '', loginType: 'login'});
+    const [showPassword, setShowPassword] = createSignal(false);
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword());
+    };
     const loginCall = async () => {
-        // try {
+        try {
             let response = await fetch(API.loginUrl, {
                 method: 'POST',
-                body: JSON.stringify({username: formData().username, password: formData().password})
+                body: JSON.stringify({email: formData().email, password: formData().password})
             });
-            if(response.ok){
-              const result = await response.json();
-              if (result.error) {
-                throw new Error(result.error);
-              }
-              return result;
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    return Promise.reject(result.error);
+                }
+                return result;
             } else {
-                throw new Error(response.statusText);
+                return Promise.reject(response.statusText);
             }
-        // } catch (error: any) {
-        //     return error.message;
-        // }
+        } catch (error) {
+            return Promise.reject(error.response);
+        }
     }
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (event: SubmitEvent) => {
+
+        event.preventDefault();
+        // const emailError = validateEmail(formData().email);
+        // const passwordError = validatePassword(formData().password);
+        // if (emailError) {
+        //     showErrorToast(emailError); // Show the error message if validation fails
+        // } else if (passwordError) {
+        //     showErrorToast(passwordError); // Show the error message if validation fails
+        // } else {
+        setLoadingSite(true);
+        let response;
         await toast.promise(
             loginCall(),
             {
                 loading: 'Logging In...',
                 success: (val) => {
-                    console.log("res => ", val)
-                    return <span>{val}</span>
+                    response = val;
+                    return <span>Login Successfully</span>
                 },
                 error: (error) => {
                     console.log("error => ", error)
-                    return <span>{error.message}</span>
+                    return <span>{error}</span>
                 }
             }
         )
-        // const result = await loginOrRegister(formData());
-        // if (result instanceof Error) {
-        //     console.log("Error login or register", result);
-        // } else {
-        //     navigate(`${APP_BASE_URL}`);
+        if (response!.error) {
+            showErrorToast(response!.error);
+            return;
+        }
+        if (response != null && response.id !== null) {
+            navigate(`${APP_BASE_URL}/Page`)
+        }
+        setLoadingSite(false);
         // }
     };
 
 
     return (
-        <div class="login rel bg:#FFF1F1 r:5|5|5|5">
-            <div class="flex justify-content:center ai:center">
-                <img src={logo} alt="logo" class="mt:80px w:200 h:50"/>
+        <div class="login rel bg:#FFF1F1 r:5|5|5|5 flex ai:center jc:center" style={{'flex-flow': 'column'}}>
+            <div class="flex justify-content:center ai:center mt:80px">
+                <img src={logo} alt="logo" onClick={() => navigate('/')} class="h:60"/>
             </div>
 
-            <div class="p:10@md box-shadow:100 shadow:black mt:50 h:70% flex ai:center jc:center">
+            <div class="p:10@md box-shadow:100 shadow:black h:70% flex ai:center jc:center">
 
-                <div>
-                    {/*<img src={bg} alt="bg"*/}
-                    {/*     class="abs z:1 w:200@md h:200@md"/>*/}
-                    <div>
-
-                        <div
-                            class="mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex justify-content:center r:10|10|10|10 m:10">
-
-                            <div class="flex:col m:20@md m:20 w:fit p:20">
-                                <div class=" mb:10 f:30 font-weight:bold flex justify-content:center z:10">
-                                    Sign In
-                                </div>
+                <div
+                    class="mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex justify-content:center r:10|10|10|10 m:10 w:70vw@<xs w:35vw@md w:40vw@lg w:25vw@>xl">
+                    <form onSubmit={handleSubmit} class={'w:full'}>
+                        <div class="w:100% flex:col w:fit p:3.25rem">
+                            <div class="mb:10 f:30 font-weight:bold flex jc:center z:10">
+                                Sign In
+                            </div>
+                            <input
+                                type="Email"
+                                value={formData().email}
+                                onChange={(e) => setFormData({...formData(), email: e.target.value})}
+                                placeholder="Email"
+                                required={true}
+                                minLength="8"
+                                autocomplete='email'
+                                class="my:10 p:10 w:full r:5|5|5|5"
+                            />
+                            <div class="rel">
                                 <input
-                                    type="Email"
-                                    value={formData().username}
-                                    onChange={(e) => setFormData({...formData(), username: e.target.value})}
-                                    placeholder="Email"
-                                    required={true}
-                                    minLength="8"
-                                    class="my:10 p:10 w:full r:5|5|5|5"
-                                />
-                                <input
-                                    type="text"
+                                    type={showPassword() ? 'text' : 'password'}
                                     value={formData().password}
+                                    autocomplete="password"
                                     onChange={(e) => setFormData({...formData(), password: e.target.value})}
                                     placeholder="Password"
                                     required={true}
+
                                     class="my:10 p:10 w:full r:5|5|5|5"
                                 />
+                                <Icon
+                                    onClick={togglePasswordVisibility}
+                                    class="abs top:20 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                                    aria-label="Toggle password visibility"
+                                    icon={`${showPassword() ? 'iconamoon:eye-light' : 'iconamoon:eye-off'}`}
+                                />
+                            </div>
+                            <div>
+                                <button class="w:100% h:40 r:5|5|5|5 text-fill:white"
+                                        style={{"background-color": "#4A92FD"}}
+                                        type="submit">
+                                    Login
+                                </button>
+                            </div>
 
-                                <div>
-                                    <button class="w:full bg:#4A92FD h:40 r:5|5|5|5 text-fill:white"
-                                            onClick={handleSubmit}>
-                                        Login
-                                    </button>
-                                </div>
-
-                                <span class="my:10 flex justify-content:center">
+                            <span class="my:10 flex justify-content:center">
               <a>
                 <u class="font:bolder text-fill:black f:15 cursor:pointer">Forgot password ?</u>
               </a>
             </span>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="flex justify-content:center mt:20 f:15">
+                            <div class="flex justify-content:center mt:20 f:15">
           <span>
             Don't have an account?{" "}
               <A href={`/auth/signup`}>
               <u class="font:bolder text-fill:black">Sign Up</u>
             </A>
           </span>
-                    </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -162,61 +154,96 @@ export const SignUp = () => {
     // const {setAlert} = useContext(AlertMessageContext);
     // const {Ws} = useContext(WsContext);
     const navigate = useNavigate();
-    // const event = ["post", "register", 0] as WSEvent;
-    // Ws.bind(event, (data) => {
-    //     if (data.error) {
-    //         setAlert((prev) => [...prev, {id: createUniqueId(), state: Alert.Error, message: data.error}]);
-    //     } else {
-    //         revertTransaction(config[0].record.txnId);
-    //         navigate("/");
-    //     }
-    // });
-    // onCleanup(() => Ws.unbind(event));
-    // TODO:
-    // 1. Save button text
-    // 2. disable save button when submitting
-    // 3. validations
-    // 4. clear form on success
+    const {showErrorToast} = useToast();
+
     const [formData, setFormData] = createSignal({
         username: '',
         email: '',
         password: '',
         loginType: 'signup'
     });
+    const [showPassword, setShowPassword] = createSignal(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        const result = await loginOrRegister(formData());
-        if (result instanceof Error) {
-            console.log("Error login or register", result);
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword());
+    };
+    const loginCall = async () => {
+        try {
+            let response = await fetch(API.signUpUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: formData().username,
+                    email: formData().email,
+                    password: formData().password
+                })
+            });
+            if (response.ok) {
+                const result = await response.json();
+                if (result.error) {
+                    return Promise.reject(result.error);
+                }
+                return result;
+            } else {
+                return Promise.reject(response.statusText);
+            }
+        } catch (error) {
+            return Promise.reject(error.response);
+        }
+    }
+    const handleSubmit = async (event: SubmitEvent) => {
+        event.preventDefault();
+
+        const usernameError = validateUsername(formData().username);
+        const emailError = validateEmail(formData().email);
+        const passwordError = validatePassword(formData().password);
+        if (usernameError) {
+            showErrorToast(usernameError); // Show the error message if validation fails
+        }else if (emailError) {
+            showErrorToast(emailError); // Show the error message if validation fails
+        } else if (passwordError) {
+            showErrorToast(passwordError); // Show the error message if validation fails
         } else {
-            navigate(`${APP_BASE_URL}`);
+            let response;
+            await toast.promise(
+                loginCall(),
+                {
+                    loading: 'Logging In...',
+                    success: (val) => {
+                        response = val;
+                        return <span>Login Successfully</span>
+                    },
+                    error: (error) => {
+                        console.log("error => ", error)
+                        return <span>{error}</span>
+                    }
+                }
+            )
+            if (response!.error) {
+                showErrorToast(response!.error);
+                return;
+            }
+            if (response != null && response.id !== null) {
+                navigate(`${APP_BASE_URL}/Page`)
+            }
         }
     };
-    // const onSignupClick = () => {
-    //     const email = config[0].record.vertex.P.email as string;
-    //     const pass = config[0].record.vertex.P.pass as string;
-    //     Ws.trigger([[event, {body: {email, pass}}]]);
-    // };
 
     return (
-        <div class="login rel bg:#FFF1F1 r:5|5|5|5">
-            <div class="flex justify-content:center ai:center">
-                <img src={logo} alt="logo" class="mt:80px w:200 h:50"/>
+        <div class="login rel bg:#FFF1F1 r:5|5|5|5 flex ai:center jc:center" style={{'flex-flow': 'column'}}>
+            <div class="flex justify-content:center ai:center mt:80px">
+                <img src={logo} alt="logo" onClick={()=>navigate('/')} class="h:60"/>
             </div>
 
-            <div class="p:10@md box-shadow:100 shadow:black mt:50 h:70% flex ai:center jc:center">
+            <div class="p:10@md box-shadow:100 shadow:black h:70% flex ai:center jc:center">
 
-                <div>
-                    {/*<img src={bg} alt="bg"*/}
-                    {/*     class="abs z:1 w:200@md h:200@md"/>*/}
-                    <div class={'flex justify-content:center ai:centernp'}>
+                <div class={'flex justify-content:center ai:center'}>
 
-                        <div
-                            class="mt:50 w:70% b:2 b:#c5daff bg:#f4f8fe z:10 flex justify-content:center r:10|10|10|10">
+                    <div
+                        class="mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex jc:center r:10|10|10|10 m:10 w:70vw@<xs w:35vw@md w:40vw@lg w:25vw@>xl">
+                        <form onSubmit={handleSubmit} class={'w:full'}>
 
-                            <div class="flex:col m:20 w:70%">
-                                <div class=" mb:10 f:30 font-weight:bold flex justify-content:center z:10">
+                            <div class="w:100% flex:col w:fit p:3.25rem">
+                                <div class="jc:center mb:10 f:30 font-weight:bold flex z:10">
                                     Sign Up
                                 </div>
                                 <input
@@ -225,51 +252,61 @@ export const SignUp = () => {
                                     onChange={(e) => setFormData({...formData(), username: e.target.value})}
                                     placeholder="Enter Name"
                                     required={true}
-                                    class="my:10 p:10 w:full r:5|5|5|5"
+                                    class="my:10 p:10 w:100% r:5|5|5|5"
                                 />
                                 <input
                                     type="Email"
                                     value={formData().email}
                                     onChange={(e) => setFormData({...formData(), email: e.target.value})}
                                     placeholder="Enter Email"
+                                    autocomplete='email'
                                     required={true}
                                     minLength="4"
-                                    class="my:10 p:10 w:full r:5|5|5|5"
-                                />
-                                <input
-                                    type="text"
-                                    value={formData().password}
-                                    onChange={(e) => setFormData({...formData(), password: e.target.value})}
-                                    placeholder="Enter Password"
-                                    required={true}
-                                    minLength="8"
-                                    class="my:10 p:10 w:full r:5|5|5|5"
+                                    class="my:10 p:10 w:100% r:5|5|5|5"
                                 />
 
+                                <div class="rel">
+                                    <input
+                                        type={showPassword() ? 'text' : 'password'}
+                                        value={formData().password}
+                                        onChange={(e) => setFormData({...formData(), password: e.target.value})}
+                                        placeholder="Enter Password"
+                                        required={true}
+                                        autocomplete='password'
+                                        class="my:10 p:10 w:100% r:5|5|5|5"
+                                    />
+                                    <Icon
+                                        onClick={togglePasswordVisibility}
+                                        class="abs top:20 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                                        aria-label="Toggle password visibility"
+                                        icon={`${showPassword() ? 'iconamoon:eye-light' : 'iconamoon:eye-off'}`}
+                                    />
+                                </div>
                                 <div>
-                                    <button onClick={handleSubmit}
-                                            class="w:full bg:#4A92FD h:40 r:5|5|5|5 text-fill:white">
+                                    <button class="w:100% h:40 r:5|5|5|5 text-fill:white"
+                                            style={{"background-color": "#4A92FD"}}
+                                            type="submit">
                                         Sign Up
                                     </button>
                                 </div>
 
-                                <span class="my:10 flex justify-content:center">
+                                <span class="my:10 flex jc:end">
               <a>
                 <u class="font:bolder text-fill:black f:15 cursor:pointer">Forgot password ?</u>
               </a>
             </span>
-                            </div>
-
-                        </div>
-                    </div>
-                    <div class="flex justify-content:center mt:20 f:15">
-          <span>
-            Already have an account?{" "}
-              <A href={`/auth/signup`} replace={true}>
+                                <span class={'flex jc:center mt:20'}>
+            Already have an account?&nbsp;
+                                    <a href={`/auth/login`} replace={true}>
               <u class="font:bold">Sign In</u>
-            </A>
+            </a>
           </span>
+                            </div>
+                        </form>
                     </div>
+                </div>
+                <div class="flex justify-content:center mt:20 f:15">
+
                 </div>
             </div>
         </div>

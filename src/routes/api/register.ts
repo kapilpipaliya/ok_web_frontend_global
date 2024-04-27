@@ -1,11 +1,12 @@
-import {neo4jSession} from "~/globals/global";
+import {driver, neo4jSession} from "~/globals/global";
 import {APIEvent} from "@solidjs/start/dist/server";
 import {getSession} from "~/pages/auth/_server";
 
 export async function POST({request}: APIEvent) {
+    console.log('Start')
     const {username, password} = await request.json();
-
     try {
+    const neo4jSession = driver.session();
         // const existingUser = await db.user.findUnique({ where: { username } });
         // if (existingUser) throw new Error("User already exists");
         // return db.user.create({
@@ -34,5 +35,8 @@ export async function POST({request}: APIEvent) {
     } catch (error) {
         console.error('Server error Failed to register:', error);
         return new Response('Internal Server Error', {status: 500});
+    } finally {
+        await neo4jSession.close();
     }
+    console.log('ens')
 }

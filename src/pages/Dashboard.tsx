@@ -19,7 +19,8 @@ import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signa
 import '../components/css/modal.css'
 import {Icon} from "@iconify-icon/solid";
 import '../components/css/modal.css'
-import {logout} from "~/pages/auth/auth";
+import {getUser, logout} from "~/pages/auth/auth";
+import {createStore} from "solid-js/store";
 
 // const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -62,7 +63,13 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
 
     const location = useLocation();
     const [isShowDrawer, setIsShowDrawer] = createSignal(true);
+    const [userData, setUserData] = createStore({});
 
+
+    getUser().then(value => {
+        setUserData(value)
+        console.log(value)
+    });
 
     createEffect(() => {
         const path = location.pathname;
@@ -109,7 +116,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                                 right={
                                     <>
                                         <div class="container">
-                                            <DropdownMenu isLoggedIn={graph.member?.id}/>
+                                            <DropdownMenu isLoggedIn={graph.member?.id} user={userData}/>
                                         </div>
                                     </>
                                 }
@@ -128,11 +135,10 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
     );
 };
 
-const DropdownMenu = (props: { isLoggedIn: boolean }) => {
+const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any } }) => {
     const [isOpen, setIsOpen] = createSignal(false);
     let btnEl: any;
     let dropdownContainerEl: any;
-
     const handleOpen = () => {
         setIsOpen(true);
     };
@@ -168,8 +174,8 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
                     style="width: 40px; height: 40px;"
                 />
                 <div class={'ml:5 mr:1rem'}>
-                    <div class={'text-align:start f:15 font-weight:bold'}>Username</div>
-                    <div class={'text-align:start f:13'}>useremail@gmail.com</div>
+                    <div class={'text-align:start f:15 font-weight:bold'}>{props.user.properties?.username ?? 'anonymus'}</div>
+                    <div class={'text-align:start f:13'}>{props.user.properties?.email ?? 'anonymus@gmail.com'}</div>
                 </div>
                 <div>
                     <Icon
@@ -257,7 +263,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean }) => {
 
                                 <li style="margin-top: 5px;">
                                     <A
-                                        href={`${APP_BASE_URL}/`}
+                                        href={`${APP_BASE_URL}/setting`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
