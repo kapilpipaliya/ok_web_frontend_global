@@ -1563,7 +1563,7 @@ export const PageDesignerDragAndDrop = () => {
                                 <a href="#" onClick={() => onChangeStep(step.id)}
                                    class={`position:relative b:1px|solid|${step.status === 'current' ? 'rgb(79,70,229)' : 'rgb(229,231,235)'} flex h:2rem w:2rem align-items:center justify-content:center  border-radius:9999px  bg:${step.id >= getStepId() ? '#ffffff' : 'rgb(85,79,220)'}`}>
                                     <Icon
-                                        icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-Website Icons:share-rounded'}
+                                        icon={step.id === 1 ? 'material-symbols-light:edit-calendar-outline-rounded' : step.id === 2 ? 'solar:eye-broken' : 'grommet-icons:share-rounded'}
                                         style={{color: step.id < getStepId() ? 'white' : 'black'}}/>
                                     <span class="sr-only">Step {step.id}</span>
                                 </a>

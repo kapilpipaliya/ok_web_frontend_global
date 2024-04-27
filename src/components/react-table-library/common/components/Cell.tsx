@@ -48,7 +48,7 @@ const BASE_STYLE = `
 
   ${() => {
     /* #1 */
-    // otherwise tree + resize would have overflow Website Icons */
+    // otherwise tree + resize would have overflow icons */
     // otherwise pin shine through */
   }}
   background-color: inherit;

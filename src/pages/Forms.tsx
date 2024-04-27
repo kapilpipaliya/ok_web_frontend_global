@@ -4,11 +4,9 @@ import logo from "../../assets/signup/logo.png";
 import {loginOrRegister} from "~/pages/auth/auth";
 import {A, useNavigate} from "@solidjs/router";
 import '../base.css'
-import axios from "axios";
 import {API} from "~/components/DataFetcher";
 import {useToast} from "~/components/custom-component/toast";
 import {toast} from "solid-toast";
-import {error} from "neo4j-driver";
 
 export const Login = () => {
     // const {setAlert} = useContext(AlertMessageContext);
@@ -63,8 +61,8 @@ export const Login = () => {
             }else{
                 return response.json();
             }
-        } catch (error) {
-            return error.response;
+        } catch (error: any) {
+            return error.message;
         }
     }
     const handleSubmit = async (e) => {

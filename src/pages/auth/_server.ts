@@ -1,8 +1,4 @@
 import {useSession} from "vinxi/http";
-import {createResource} from "solid-js";
-import {setGraphData} from "~/lib/ws_events";
-import {API} from "~/components/DataFetcher";
-import axios from "axios";
 
 export function validateUsername(username: unknown) {
     if (typeof username !== "string" || username.length < 3) {
@@ -17,7 +13,6 @@ export function validatePassword(password: any) {
 }
 
 export async function login(username: string, password: string) {
-
     const user = {id: 1, username: username, password: 'admin', email: 'savan@gmail.com'};
     if (!user || password !== user.password) throw new Error("Invalid login");
     return user;

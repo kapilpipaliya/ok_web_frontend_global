@@ -2,7 +2,9 @@ import {session} from "~/globals/global";
 import {APIEvent} from "@solidjs/start/dist/server";
 import {useToast} from "~/components/custom-component/toast";
 import {getCookie, setCookie} from "vinxi/http";
+// @ts-ignore
 import bcrypt from 'bcryptjs';
+// @ts-ignore
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = 'JWTSECRETKEY'; // Use an environment variable in production

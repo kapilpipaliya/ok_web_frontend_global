@@ -1,5 +1,5 @@
 import {action, cache, redirect, useNavigate} from "@solidjs/router";
-import {getSession, login, logout as logoutSession, register, validatePassword, validateUsername} from "./server";
+import {getSession, login, logout as logoutSession, register, validatePassword, validateUsername} from "./_server";
 import {APP_BASE_URL} from "~/lib/Utils";
 
 export const getUser = async () => {
