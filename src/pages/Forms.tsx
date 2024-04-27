@@ -67,6 +67,7 @@ export const Login = () => {
                 }
             }
         )
+        setLoadingSite(false);
         if (response!.error) {
             showErrorToast(response!.error);
             return;
@@ -74,7 +75,7 @@ export const Login = () => {
         if (response != null && response.id !== null) {
             navigate(`${APP_BASE_URL}/Page`)
         }
-        setLoadingSite(false);
+
         // }
     };
 

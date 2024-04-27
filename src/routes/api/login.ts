@@ -10,7 +10,7 @@ export async function POST({request}: APIEvent) {
 
         const query = `MATCH (u:User {email: $email, password: $password}) return u;`;
         const result = await session.run(query, {email: email, password: password});
-
+        await session.close();
         if (result.records.length === 0) {
             return {error: "Not Authorized !"};
         }

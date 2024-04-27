@@ -1,7 +1,7 @@
 import type {APIEvent} from "@solidjs/start/server";
 import {Node, QueryResult, RecordShape, Relationship, Session, types} from "neo4j-driver";
 import {NumberOrInteger} from "neo4j-driver-core/types/graph-types";
-import {driver, isIntegerId, neo4jSession} from "~/globals/global";
+import {driver, isIntegerId} from "~/globals/global";
 
 interface JsonNode {
     id: NumberOrInteger;

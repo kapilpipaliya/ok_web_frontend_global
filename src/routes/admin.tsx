@@ -32,7 +32,7 @@ export default function UsersLayout(props: RouteSectionProps) {
 
 
     return (
-            <CSSRuntimeProvider config={config}>
+            // <CSSRuntimeProvider config={config}>
         <GraphContext.Provider value={graph}>
                 <WsContext.Provider value={{ Ws }}>
                     {/* In DataFetch fetch only side bar data*/}
@@ -40,6 +40,6 @@ export default function UsersLayout(props: RouteSectionProps) {
                     {/*{props.children}*/}
                 </WsContext.Provider>
         </GraphContext.Provider>
-            </CSSRuntimeProvider>
+            // </CSSRuntimeProvider>
     );
 }

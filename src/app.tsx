@@ -11,25 +11,27 @@ import {LoadingContext} from "~/globals/global";
 export default function App() {
     const loadingSite = createSignal(false);
     return (
-        <CSSRuntimeProvider config={config}>
-            <LoadingContext.Provider value={loadingSite}>
+
                 <Router
                     root={props => {
-                        return <MetaProvider>
+                        return         <CSSRuntimeProvider config={config}>
+                          <LoadingContext.Provider value={loadingSite}><MetaProvider>
                             <div id="popup-root"/>
                             <Suspense>
-                                <Show when={!loadingSite[0]()} fallback={<LoaderNew/>}>
-                                  FDSA  {props.children}
-                                </Show>
+
+                              {props.children}
+                              <Show when={loadingSite[0]()}>
+                                <LoaderNew/>
+                              </Show>
                             </Suspense>
                             <Toaster/>
 
                         </MetaProvider>
+                          </LoadingContext.Provider>
+                        </CSSRuntimeProvider>
                     }}
                 >
                     <FileRoutes/>
                 </Router>
-            </LoadingContext.Provider>
-        </CSSRuntimeProvider>
     )
 }

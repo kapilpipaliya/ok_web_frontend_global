@@ -15,6 +15,7 @@ export async function POST({request}: APIEvent) {
 
         const query = `CREATE (u:User {email: $username, password: $password}) return u;`;
         const result = await neo4jSession.run(query, {username: username, password: password});
+        await neo4jSession.close();
 
         if (result.records.length === 0) {
             return new Response('User can not created', {status: 404});

@@ -5,7 +5,7 @@ import {config} from "~/master.css";
 
 export default function auth(props: RouteSectionProps) {
     return (
-        <>
+      <>
             {props.children}
         </>
     );
