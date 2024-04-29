@@ -104,6 +104,7 @@ export const TextField: Component<TextFieldProps> = (props) => {
                             {...(fieldProps as JSX.HTMLAttributes<HTMLInputElement>)}
                             placeholder={local.placeholder ? local.placeholder : ""}
                             class={`${local.class ?? ""} global-style textInput `}
+
                             onInput={(ev) => {
                                 runEvent(ev, local.onInput);
                                 local.setValue?.(ev.currentTarget.value);

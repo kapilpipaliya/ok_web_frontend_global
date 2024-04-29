@@ -4,5 +4,7 @@ import {API, DataFetcher} from "~/components/DataFetcher";
 
 export default function Components() {
     const params = useParams();
+    console.log(params)
+
     return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<DataFetcher fetchData={API.fetchDataUrl} renderContent={<AbstractSingleGrid tableId={params.entity}/>}/>}/>;
 }

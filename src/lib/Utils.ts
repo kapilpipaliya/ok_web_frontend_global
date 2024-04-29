@@ -29,7 +29,10 @@ import {FieldAttribute, FormMetaData} from "./Type";
 import {SetStoreFunction, Store} from "solid-js/store";
 
 export const APP_BASE_URL = '/admin';
-
+export const APP_BASE_URL_NAME = 'Admin';
+export const breadcrumbData = [
+    {name: 'Home', href: `${APP_BASE_URL}`},
+];
 export function validateEmail(email: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {

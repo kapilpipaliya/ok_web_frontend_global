@@ -1,3 +1,2 @@
-1. Submit and cancel no change router when pressing button
-2. Dropdown and other components not supported
-3. Add component search bar - Done
+
+// TODO: when profile is updated a username will be changed in navbar

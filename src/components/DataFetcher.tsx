@@ -47,4 +47,5 @@ export const API = {
     loginUrl: `${API_BASE_URL}/login`,
     signUpUrl: `${API_BASE_URL}/signup`,
     profileUrl: `${API_BASE_URL}/profile`,
+    logOutUrl: `${API_BASE_URL}/logout`,
 };

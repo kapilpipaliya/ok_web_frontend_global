@@ -10,5 +10,6 @@ import {AbstractSingleGrid} from "~/pages/Grids";
 
 export default function admin() {
     const params = useParams();
+    console.log(params.entity)
     return <DataFetcher renderContent={<AbstractSingleGrid tableId={params.entity}/>} fetchData={API.fetchDataUrl}/>
 }

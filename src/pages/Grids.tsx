@@ -1,5 +1,5 @@
 // Comment This Lines in web build
-import {A, useNavigate, useParams} from "@solidjs/router";
+import {A, useLocation, useNavigate, useParams} from "@solidjs/router";
 import {
     CellContext,
     ColumnDef,
@@ -14,7 +14,7 @@ import {
     createSignal,
     onCleanup,
     splitProps,
-    useContext, Switch, Match, Accessor, Setter
+    useContext, Switch, Match, Accessor, Setter, createMemo, untrack
 } from "solid-js";
 import {
     Id,
@@ -33,7 +33,7 @@ import {
     selectedValue
 } from "~/components/input/SelectInputField";
 import {getFormApiFromForm} from "~/lib/Record";
-import {APP_BASE_URL, PageContext} from "~/lib/Utils";
+import {APP_BASE_URL, breadcrumbData, PageContext, Record} from "~/lib/Utils";
 import {getSelectionOptions} from "~/lib/Utils";
 import {getChildVertexes} from "~/lib/Utils";
 import {deleteVertex, findVertexByLabelAndUniqueId} from "~/lib/Vertex";
@@ -48,6 +48,8 @@ import {FieldAttribute, FormMetaData} from "~/lib/Type";
 import {CollapsibleTable} from "~/components/custom-component/Table";
 import Dismiss from "solid-dismiss";
 import {SetStoreFunction} from "solid-js/store";
+import PageHeader from "~/components/custom-component/Breadcumb";
+import {renderNavTreeFromGraph} from "~/components/Sidebar";
 
 interface AbstractSingleGridProps {
     tableId: string;
@@ -308,6 +310,24 @@ export const DataGrid = (props: DataGridProps) => {
 };
 
 export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
+    const params = useParams();
+    const [graph, setGraph] = useContext(GraphContext)!;
+    const data = findVertexByLabelAndUniqueId('Coll', IdAttr, props.tableId, graph);
+
+    const nestedName = createMemo(() => findVertexByLabelAndUniqueId('Coll', IdAttr, props.tableId, graph)?.P?.name);
+    console.log(findVertexByLabelAndUniqueId('Coll', IdAttr, props.tableId, graph))
+    const navData = createMemo(() => {
+        const nav = findVertexByLabelAndUniqueId("Nav", "name", "main",graph);
+        if (!nav) return;
+
+        const record = new Record({ws: undefined});
+        record.load(graph,nav.id);
+        untrack(() => record.createMeta(AttrsAdminTableData["Nav"],graph,setGraph));
+        const navData = renderNavTreeFromGraph( record,true, graph);
+        const navigation = getParentFromNav(navData);
+        return navigation;
+    });
+
     const navigate = useNavigate();
     // used to refresh table:
     const [tableId, setTableId] = createSignal("");
@@ -320,7 +340,11 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 
     return (
         <>
-            <div class="flex justify-content:right	">
+            <PageHeader
+                title={`${navData().child || nestedName()}`}
+                breadcrumb={[...breadcrumbData,{name: navData().parent}, {name: navData().child || nestedName()}]}
+            />
+            <div class="flex justify-content:start p:5">
                 <GenericField
                     meta={
                         {
@@ -340,12 +364,36 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                 />
             </div>
             <Show when={tableId()}>
-
                 <DataGrid tableId={tableId()}/>
             </Show>
         </>
     );
 };
+
+export function getParentFromNav(navData: any) {
+    const  param = useLocation();
+    const dats = JSON.parse(JSON.stringify(navData));
+    let result = {}; // Initialize an empty object to store the result
+    dats.forEach((value: any) => {
+        let data = {};
+        let childName = null;
+        if (value.children) {
+            value.children.forEach((child) => {
+                if (child.href === param.pathname) {
+                    data = child;
+                    childName = child.name;
+                }
+            });
+            if (Object.entries(data).length > 0) {
+                data["child"] = childName;
+                data["parent"] = value.name;
+                result = data; // Store the result in the object
+            }
+        }
+    });
+
+    return result;
+}
 
 export const TableDashboard = () => {
     const params = useParams();

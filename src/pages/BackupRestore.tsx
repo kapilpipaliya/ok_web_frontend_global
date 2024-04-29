@@ -392,7 +392,7 @@ OUT:
         NavAttr:
           - L: NavAttr
             P:
-              name: DataTypes
+              name: 
               url: /admin/DataType
           - L: NavAttr
             P:

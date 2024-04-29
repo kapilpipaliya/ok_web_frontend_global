@@ -8,11 +8,6 @@ import '../../css/krd.css'
 import {Title} from "@solidjs/meta";
 import SiteTitle from "~/components/website/utils";
 export default function Home() {
-    const navigate = useNavigate();
-    const user = createAsync(() => getUser(), {deferStream: true});
-    if (user()?.id) {
-        navigate(`${APP_BASE_URL}`)
-    }
     return (
         <>
             <SiteTitle children={'Home'} />

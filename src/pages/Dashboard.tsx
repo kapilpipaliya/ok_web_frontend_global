@@ -1,4 +1,4 @@
-import {A, useLocation} from "@solidjs/router";
+import {A, useLocation, useNavigate} from "@solidjs/router";
 // import {get, set} from "idb-keyval";
 import {
     createEffect,
@@ -13,7 +13,7 @@ import {getNewGraphId, GraphContext} from "../lib/graph";
 import Dismiss from "solid-dismiss";
 import {Navbar} from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
-import {APP_BASE_URL, PageContext} from "../lib/Utils";
+import {APP_BASE_URL, PageContext, validateEmail, validatePassword} from "../lib/Utils";
 import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
 import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
 import '../components/css/modal.css'
@@ -21,6 +21,10 @@ import {Icon} from "@iconify-icon/solid";
 import '../components/css/modal.css'
 import {getUser, logout} from "~/pages/auth/auth";
 import {createStore} from "solid-js/store";
+import {toast} from "solid-toast";
+import {LoadingContext} from "~/globals/global";
+import {API} from "~/components/DataFetcher";
+import {useToast} from "~/components/custom-component/toast";
 
 // const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -106,6 +110,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             },
                         }}
                     >
+
                         <Show when={!isLoginPage() && !isSignUpPage()}>
                             <Navbar
                                 showNavBar={isShowDrawer()}
@@ -115,8 +120,10 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                                 }}
                                 right={
                                     <>
+
                                         <div class="container">
-                                            <DropdownMenu isLoggedIn={graph.member?.id} user={userData}/>
+
+                                            <DropdownMenu isLoggedIn={userData?.id} user={userData}/>
                                         </div>
                                     </>
                                 }
@@ -136,6 +143,9 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
 };
 
 const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any } }) => {
+    const [loadingSite, setLoadingSite] = useContext(LoadingContext);
+    const navigate = useNavigate();
+    const {showErrorToast} = useToast();
     const [isOpen, setIsOpen] = createSignal(false);
     let btnEl: any;
     let dropdownContainerEl: any;
@@ -145,6 +155,17 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
     const handleClose = () => {
         setIsOpen(false);
     };
+
+    const onLogOut = async () => {
+        try {
+            await fetch(API.logOutUrl, {
+                method: 'POST',
+            });
+            return  Promise.resolve('logged out successfully');
+        } catch (error) {
+            return Promise.reject(error.response);
+        }
+    }
 
     createEffect(() => {
         if (isOpen()) {
@@ -165,7 +186,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                 id="dropdown-toggle"
                 ref={btnEl}
                 onClick={handleOpen}
-                class={'flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:6|6|6|6'}
+                class={'flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%'}
                 style="border: none; cursor: pointer;background-color:rgb(237,237,255)"
             >
                 <img
@@ -173,27 +194,6 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                     alt="profile"
                     style="width: 40px; height: 40px;"
                 />
-                <div class={'ml:5 mr:1rem'}>
-                    <div class={'text-align:start f:15 font-weight:bold'}>{props.user.properties?.username ?? 'anonymus'}</div>
-                    <div class={'text-align:start f:13'}>{props.user.properties?.email ?? 'anonymus@gmail.com'}</div>
-                </div>
-                <div>
-                    <Icon
-                        icon="mingcute:down-fill"
-                        class={"transform 2s ease-in-out"}
-                        height={25} width={25}
-                        style={{
-                            transition: "transform 0.2s linear",
-                            "margin-top": "7px",
-                            color: 'royalblue',
-                            transform: `${
-                                !isOpen()
-                                    ? "rotate(0deg)"
-                                    : "rotate(180deg)"
-                            }`,
-                        }}
-                    />
-                </div>
             </button>
             <Dismiss
                 menuButton={btnEl}
@@ -205,102 +205,127 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                 ref={dropdownContainerEl}
             >
                 <div
-                    style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
+                    style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
                         isOpen() ? 1 : 0
                     }; pointer-events: ${
                         isOpen() ? "auto" : "none"
-                    }; transition: opacity 0.2s ease-in-out; width: 100%; right: -15px`} // Adjust width here
+                    }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
                 >
                     <div style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
                          onClick={handleClose}></div>
                     <ul style="list-style-type: none; padding: 0; margin: 0; position:relative;">
-                        {props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
+                        <li style="margin-bottom: 5px; padding: 10px; " class={'flex p:13'}>
+                            <img
+                                src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
+                                alt="profile"
+                                style="height: 45px;"
+                            />
+                            <div class={'ml:10 mr:1rem'}>
+                                <div
+                                    class={'text-align:start f:15 font-weight:bold'}>{!props.isLoggedIn ? 'Guest User' : props.user.properties?.username ?? 'anonymous'}</div>
+                                <div
+                                    class={'text-align:start f:13'}>{!props.isLoggedIn ? 'guest@gmail.com' : props.user.properties?.email ?? 'anonymous@gmail.com'}</div>
+                            </div>
+                        </li>
+                        <hr class={'color:rgb(223,223,223)'}/>
+                        {!props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
                             <div>
-                                <li style="margin-bottom: 5px;">
+                                <li style="margin-top: 5px; " class={'m:5|10'}>
                                     <A
                                         href={`/auth/login`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+                                        class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
 
                                     >
-                                        <Icon height={22} width={22} icon={'ic:twotone-login'}/>Log In
+                                        Log In
                                     </A>
                                 </li>
-                                <li style="margin-bottom: 5px;">
+                                <li style="margin-top: 5px; " class={'m:5|10'}>
                                     <A
                                         href={`/auth/signup`}
                                         replace={true}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+                                        class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
 
                                     >
-                                        <Icon height={22} width={22} icon={'mdi:register-outline'}/>Sign Up
+                                        Sign Up
                                     </A>
                                 </li>
                             </div>
                         ) : (
                             <div>
-                                <li style="margin-bottom: 5px;">
-                                    <A
-                                        href={`${APP_BASE_URL}/`}
-                                        onclick={() => {
-                                            setIsOpen(false);
-                                        }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text-decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
-
-                                    >
-                                        <Icon height={22} width={22} icon={'tdesign:edit'}/>Edit
-                                    </A>
-                                </li>
-
-                                <li style="margin-top: 5px;">
+                                <li style="margin-top: 5px; " class={'m:5|10'}>
                                     <A
                                         href={`${APP_BASE_URL}/setting`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+                                        class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
 
                                     >
-                                        <Icon height={22} width={22} icon={'solar:settings-linear'}/>Setting
+                                        Account Setting
                                     </A>
                                 </li>
-                                <li style="margin-top: 5px;">
+                                <li style="margin-top: 5px; " class={'m:5|10'}>
                                     <A
-                                        href={`${APP_BASE_URL}/`}
+                                        href={`${APP_BASE_URL}/setting`}
                                         onclick={() => {
                                             setIsOpen(false);
                                         }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px;"
+                                        class="bg:rgb(241,241,241):hover r:5|5|5|5"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 5px 7px;"
 
                                     >
-                                        <Icon height={22} width={22} icon={'material-symbols:help-outline'}/>Help
+                                        Help
                                     </A>
                                 </li>
-                                <hr style="color:lightgrey" class={'mt:.5rem'}/>
-                                <li style="margin-top: 5px;">
-                                    <A
-                                        href={`/`}
-                                        onClick={async () => {
-                                            await logout();
+                                <hr class={'color:rgb(223,223,223)'}/>
+
+                                {/*<hr style="color:lightgrey" class={'mt:.5rem'}/>*/}
+                                <li style="margin-top: 5px; " class={'m:5|10'}>
+                                    <a
+                                        onclick={async () => {
                                             setIsOpen(false);
+                                            setLoadingSite(true);
+                                            let response;
+                                            await toast.promise(
+                                                onLogOut(),
+                                                {
+                                                    loading: 'Logging Out...',
+                                                    success: (val) => {
+                                                        response = val;
+                                                        return <span>Log Out Successfully</span>
+                                                    },
+                                                    error: (error) => {
+                                                        return <span>{error}</span>
+                                                    }
+                                                }
+                                            )
+                                            setLoadingSite(false);
+                                            if (response!.error) {
+                                                showErrorToast(response!.error);
+                                                return;
+                                            }
+                                            if (response != null && response.message !== null) {
+                                                navigate(`/auth/login`)
+                                            }
+
+
                                         }}
-                                        class="bg:rgb(229,234,253):hover r:5|5|5|5"
-                                        style="text  -decoration: none; color: #333; display: flex; align-items: center; justify-content: space-between; padding: 3px 7px; font-weight:bold"
+                                        class="r:5|5|5|5 cursor:default"
+                                        style="text-decoration: none; color: #333; display: flex; align-items: center; padding: 10px 7px;"
 
                                     >
-                                        <Icon height={22} width={22} icon={'tabler:logout'}/>Log Out
-                                    </A>
+                                        Sign Out
+                                    </a>
                                 </li>
                             </div>
                         )}

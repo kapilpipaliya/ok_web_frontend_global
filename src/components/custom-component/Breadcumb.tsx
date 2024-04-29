@@ -1,7 +1,6 @@
 import {For, Show} from 'solid-js';
-import {Title} from "@solidjs/meta";
 import {Breadcrumbs} from "~/components/solid-blocks/blocks";
-import {A} from "@solidjs/router";
+import SiteTitle from "~/components/website/utils";
 
 export type PageHeaderProps = {
     title: string;
@@ -17,26 +16,21 @@ export default function PageHeader(props: PageHeaderProps) {
 
 
     const titleStyle = {
-        'margin-bottom': '0.8rem', // 'mb-2'
+        'margin-bottom': '0.8rem',
         'font-size': '22px',
         'font-weight': 'bold',
         fontFamily: '"Public Sans", sans-serif'
-        // ...add more responsive styles as needed
     };
 
     const breadcrumbsStyle = {
-        'flex-wrap': 'wrap', // 'flex-wrap'
+        'flex-wrap': 'wrap',
     };
 
-    const breadcrumbItemStyle = {
-        // Define your breadcrumb item inline styles here
-    };
-
-    // You can still use `cn` if you want to combine inline styles with class names
     return (
         <header style={{...headerStyle, ...props.className && {className: props.className}}}>
 
             <div>
+                <SiteTitle>{props.title}</SiteTitle>
                 <h2 style={titleStyle}>
                     {props.title}
                 </h2>
@@ -44,9 +38,7 @@ export default function PageHeader(props: PageHeaderProps) {
                 <Breadcrumbs separator={" › "} aria-label="breadcrumb" style={breadcrumbsStyle}>
                     <For each={props.breadcrumb}>
                         {(item) => (
-                            <li
-                                style={breadcrumbItemStyle}
-                            >
+                            <li>
                                 <Show when={item.href}
                                       fallback={<span class={'f:15 color:#9c9797 letter-spacing:.5 font-weight:500'}
                                                       style={{'font-family': '"Public Sans", sans-serif'}}>{item.name}</span>}>

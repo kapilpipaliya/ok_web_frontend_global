@@ -44,7 +44,6 @@ export async function logout() {
     const session = await getSession();
     await session.update((d) => (d.userId = undefined));
     await session.clear();
-    // throw redirect("/login");
 }
 export async function register(username: string, password: string, email: string) {
     // const existingUser = await db.user.findUnique({ where: { username } });

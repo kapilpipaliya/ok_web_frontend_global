@@ -100,7 +100,7 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
     }
 
     return (
-        <div class="z-index:99999 position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:220 r:0|10|10|0" style={{"box-shadow":"-15px 0px 31px rgba(0,0,0,0.75)","border-right":"1px solid lightgray"}}>
+        <div class="position:fixed top:0 left:0 border-right:1 h:full bg:white overflow-y:auto w:220 r:0|10|10|0" style={{"box-shadow":"-15px 0px 31px rgba(0,0,0,0.75)","border-right":"1px solid lightgray"}}>
             <img src={logo} height={30} alt={'logo'} style={{'padding': '10px'}}/>
             <nav class="flex bg:white 0px 0px 10px 10px">
                 <div class="group">
@@ -140,7 +140,7 @@ function Sidebar(props: { isSideBarOpen: boolean }) {
 
 export default Sidebar;
 
-const renderNavTreeFromGraph = (record: Record, showNav: boolean,graph: Store<GraphInterface>) => {
+export const renderNavTreeFromGraph = (record: Record, showNav: boolean,graph: Store<GraphInterface>) => {
     // !!!TODO!!!: This code can we written in the code itself
     const getChildren = (meta: Vertex, vertex: Vertex) => {
         // rome-ignore lint/suspicious/noExplicitAny: <explanation>
