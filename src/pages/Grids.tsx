@@ -341,8 +341,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     return (
         <>
             <PageHeader
-                title={`${navData().child || nestedName()}`}
-                breadcrumb={[...breadcrumbData,{name: navData().parent}, {name: navData().child || nestedName()}]}
+                title={`${navData()?.child || nestedName()}`}
+                breadcrumb={[...breadcrumbData,{name: navData()?.parent}, {name: navData()?.child || nestedName()}]}
             />
             <div class="flex justify-content:start p:5">
                 <GenericField
