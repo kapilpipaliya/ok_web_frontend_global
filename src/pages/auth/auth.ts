@@ -1,10 +1,10 @@
 import {getSession, login, logout as logoutSession, register, validatePassword, validateUsername} from "./_server";
-import {isIntegerId, driver} from "~/globals/global";
+import {getDriver, isIntegerId,} from "~/globals/global";
 
 export const getPlans = async () => {
     "use server";
     const session = await getSession();
-    const neoSession = driver.session();
+    const neoSession = getDriver('super').session();
 
     const email = session.data.email;
     if (email === undefined) {
@@ -22,7 +22,7 @@ export const getPlans = async () => {
 export const updatePassword = async (currentPassword: string, newPassword: string, username: string) => {
     "use server";
     const session = await getSession();
-    const neoSession = driver.session();
+    const neoSession = getDriver('super').session();
 
     const email = session.data.email;
     if (email === undefined) {
@@ -50,7 +50,7 @@ export const getUser = async () => {
     "use server";
     // try {
     const session = await getSession();
-    const neoSession = driver.session();
+    const neoSession = getDriver('super').session();
 
     const email = session.data.email;
     if (email === undefined) {

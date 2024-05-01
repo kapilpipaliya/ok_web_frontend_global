@@ -1,12 +1,11 @@
 import {APIEvent} from "@solidjs/start/dist/server";
-import {driver, isIntegerId} from "~/globals/global";
-import {getSession} from "~/pages/auth/_server";
+import {getDriver, isIntegerId} from "~/globals/global";
 
 export async function POST({request}: APIEvent) {
     const {email, username, country, userId} = await request.json();
 
     try {
-        const session = driver.session();
+        const session = getDriver('super').session();
 
         // Check if user not exists
         const userExists = await session.run(`MATCH (u:User) WHERE id(u) = $userId RETURN u;`, {userId: userId});
@@ -37,6 +36,10 @@ export async function POST({request}: APIEvent) {
 
         const parameters = {
             userId: userId
+        } as {
+            userId: string,
+            email?: string,
+            username?: string
         };
 
         if (email) {
@@ -72,8 +75,8 @@ export async function POST({request}: APIEvent) {
             id: !isIntegerId ? user.identity.toNumber() : user.identity,
             properties,
         };
-    } catch (error) {
+    } catch (error: any) {
         console.log("Error",error.stack)
-        return new Response('Internal Server Error', {status: 500});
+        return new Response(`Internal Server Error: ${error.message}`, {status: 500});
     }
 }

@@ -1,7 +1,8 @@
 import type {APIEvent} from "@solidjs/start/server";
 import {Node, QueryResult, RecordShape, Relationship, Session, types} from "neo4j-driver";
 import {NumberOrInteger} from "neo4j-driver-core/types/graph-types";
-import {driver, isIntegerId} from "~/globals/global";
+import {getDriver,isIntegerId} from "~/globals/global";
+
 
 interface JsonNode {
     id: NumberOrInteger;
@@ -112,8 +113,8 @@ async function fetchFromMGAndSaveToArray(session: Session, query: string, params
 }
 
 // async function reconnect(): Promise<void> {
-//   await driver.close();
-//   session = driver.session();
+//   await getDriver('super').close();
+//   session = getDriver('super').session();
 //   console.log('Reconnected to the database');
 // }
 
@@ -182,7 +183,7 @@ async function getInitialData(args: {}): Promise<{ [key: string]: any }> {
     const vertexLabelIdMap: VertexLabelIdMap = new Map();
     const nodeObj: JsonData = {};
     const relationshipObj: JsonData = {};
-    const session = driver.session();
+    const session = getDriver('super').session();
     // 1. get all coll nodes.
     // 2. if no memberKey send all public nodes and relationships.
     // 3. if memberKey, send data that user is allowed to see.
@@ -273,7 +274,7 @@ export async function GET({params}: APIEvent) {
     } finally {
         // TODO: If I uncomment its giving error
         // await session.close();
-        // await driver.close();
+        // await getDriver('super').close();
     }
     return data;
 }

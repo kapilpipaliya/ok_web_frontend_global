@@ -1,4 +1,4 @@
-import {isIntegerId, driver} from "~/globals/global";
+import {getDriver, isIntegerId} from "~/globals/global";
 import {APIEvent} from "@solidjs/start/dist/server";
 import {getSession} from "~/pages/auth/_server";
 
@@ -6,7 +6,7 @@ export async function POST({request}: APIEvent) {
     const {email, password} = await request.json();
 
     try {
-        const session = driver.session();
+        const session = getDriver('super').session();
 
         const query = `MATCH (u:User {email: $email, password: $password}) return u;`;
         const result = await session.run(query, {email: email, password: password});

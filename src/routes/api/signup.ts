@@ -1,12 +1,12 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { Session } from "neo4j-driver";
 import { TransactionPromise } from "neo4j-driver-core";
-import { isIntegerId, driver } from "~/globals/global";
+import { getDriver, isIntegerId } from "~/globals/global";
 import { getSession } from "~/pages/auth/_server";
 
 export async function POST({ request }: APIEvent) {
     const { username, email, password } = await request.json();
-    const session = driver.session();
+    const session = getDriver('super').session();
     const tx = session.beginTransaction();
 
     try {
@@ -29,10 +29,14 @@ export async function POST({ request }: APIEvent) {
 
         const user = createUserResult.records[0].get('u');
 
+        let port1, port2, port3;
         try {
-            await PortConfigure(tx, username, session);
+            const portResult = await PortConfigure(tx, username);
+            port1 = portResult.port1;
+            port2 = portResult.port2;
+            port3 = portResult.port3;
         } catch (error: any) {
-            console.error('Transaction commit error:', error.message);
+            console.error('DB Setup error:', error.message);
             await tx.rollback();
             await session.close();
             return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { 'Content-Type': 'application/json' } });
@@ -40,6 +44,8 @@ export async function POST({ request }: APIEvent) {
 
         await tx.commit();
         await session.close();
+
+        
 
         const http_session = await getSession();
         await http_session.update(oldData => ({
@@ -64,7 +70,7 @@ export async function POST({ request }: APIEvent) {
 }
 
 
-async function PortConfigure(tx: TransactionPromise, username: string, session: Session) {
+async function PortConfigure(tx: TransactionPromise, username: string) {
    
     const query = `MATCH (n:DBPort) RETURN n;`;
     const resultPort = await tx.run(query);
@@ -76,35 +82,49 @@ async function PortConfigure(tx: TransactionPromise, username: string, session: 
     } else {
         portsResult = resultPort.records[0].get('n').properties
     }
-    const { port1, port2, port3 } = portsResult
+    let { port1, port2, port3 } = portsResult
 
     const response = await fetch('http://easyformforge.com:5000/docker/createNew', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
+        
         body: JSON.stringify({
+            Image: 'memgraph/memgraph-platform',
             name: username,
-            port1: port1,
-            port2: port2,
-            port3: port3
+            "portBindings": {[port1]: "7687", [port2]: "7444", [port3]: "3000"},
         })
     });
 
     if (!response.ok) {
-        await tx.rollback();
-        await session.close();
         const errorMessage = await response.text();
         return Promise.reject(new Error(errorMessage || response.statusText));
     }
 
     const result = await response.json();
     if (result.error) {
-        await tx.rollback();
-        await session.close();
         return Promise.reject(new Error(result.error));
     }
 
-    const updatePort = `MATCH (n:DBPort) SET n.port1 = ${port1 + 10}, n.port2 = ${port2 + 10}, n.port3 = ${port3 + 10} RETURN n;`;
+   
+
+    let userDriver;
+    if (!getDriver(username)) {
+        userDriver = getDriver(username, port1);
+    }
+    const server = await fetch(`http://localhost:3100/loadData/${username}/${port1}`)
+    // TODO : sync initial data to drivers[username]
+    console.log(`http://localhost:3100/loadData/${username}/${port3}`);
+
+    if (server.status !== 200) {
+        console.error('Server error:', server.error);
+        return Promise.reject(new Error(server.error));
+    }
+    port1 = port1 + 10;
+    port2 = port2 + 10;
+    port3 = port3 + 10;
+    const updatePort = `MATCH (n:DBPort) SET n.port1 = ${port1}, n.port2 = ${port2}, n.port3 = ${port3} RETURN n;`;
     await tx.run(updatePort);
+    return {port1, port2, port3}
 }
