@@ -33,6 +33,7 @@
     "acorn": "^8.11.3",
     "acorn-jsx": "^5.3.2",
     "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
     "case-switcher-js": "^1.1.10",
     "clsx": "^2.1.0",
     "csvtojson": "^2.0.10",
@@ -40,6 +41,7 @@
     "effector": "^23.2.0",
     "effector-solid": "^0.23.0",
     "eslint": "^9.0.0",
+    "express": "^4.19.2",
     "expression-eval": "^5.0.1",
     "fast-memoize": "^2.5.2",
     "idb-keyval": "^6.2.1",
@@ -52,6 +54,7 @@
     "klona": "^2.0.6",
     "nanoid": "^5.0.7",
     "neo4j-driver": "^5.19.0",
+    "nodemailer": "^6.9.13",
     "perfectly-scrollable": "^1.1.0",
     "rallax": "^0.1.0",
     "rambda": "^9.2.0",
@@ -84,6 +87,7 @@
     "solidjs-div-100vh": "^1.0.1",
     "solidjs-hooks": "^1.1.2",
     "solidjs-icons": "^1.0.12",
+    "stream-browserify": "^3.0.0",
     "svelte-dnd-action": "^0.9.43",
     "theme-mode": "^1.1.0",
     "tiny-debounce": "^0.1.1",
@@ -95,5 +99,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.14"
   }
 }

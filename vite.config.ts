@@ -146,3 +146,29 @@
 //   // alias
 //  },
 // });
+
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+    plugins: [
+        nodePolyfills({
+            include: ["stream"] // Specify the Node modules you need to polyfill
+        })
+    ],
+    resolve: {
+        alias: {
+            'stream': 'stream-browserify'
+        }
+    },
+    build: {
+        rollupOptions: {
+            // additional Rollup options if needed
+        }
+    }
+});
+function nodePolyfills(arg0: {
+    include: string[]; // Specify the Node modules you need to polyfill
+}): import("vite").PluginOption {
+    throw new Error('Function not implemented.');
+}
+
