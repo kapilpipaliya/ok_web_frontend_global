@@ -1,9 +1,9 @@
-import {batch, useContext} from 'solid-js';
-import {getCookie, ServerEventsDispatcher, WsContext} from '~/utils/ws_events_dispatcher';
+import { batch, useContext } from 'solid-js';
+import { getCookie, ServerEventsDispatcher, WsContext } from '~/utils/ws_events_dispatcher';
 
-import {isAdmin} from '~/signals/common';
-import {isObject} from "./Utils";
-import {deleteEdge, updateEdgeId} from './Edge';
+import { isAdmin } from '~/signals/common';
+import { isObject } from "./Utils";
+import { deleteEdge, updateEdgeId } from './Edge';
 import {
     commitTransaction,
     EdgeMap,
@@ -15,8 +15,8 @@ import {
     VertexMap,
     vertexOldIdToNewIdMap,
 } from './graph';
-import {deleteVertex, updateVertexId} from './Vertex';
-import {reconcile, SetStoreFunction, Store} from "solid-js/store";
+import { deleteVertex, updateVertexId } from './Vertex';
+import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 
 export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, args: {
     timestamp: number;
@@ -31,33 +31,6 @@ export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<G
         if (args.timestamp) {
             setGraph('lastSyncedTime', args.timestamp);
         }
-        // let start = Date.now();
-        // for (const v of args.vertexes || []) {
-        //  addNewVertexUnSafe(v);
-        // }
-        // faster:
-        // calculating shapes takes two seconds, this should be done on server if possible.
-        // const vertexes = {} as VertexMap;
-        // const vertexLabelIdMap = {} as { [key: string]: Id[] };
-        //  for (const v of args.vertexes || []) {
-        //   vertexes[v.id] = v;
-        //   for (const label of v.L) {
-        //    if (!vertexLabelIdMap[label]) vertexLabelIdMap[label] = [v.id];
-        //    else
-        //     vertexLabelIdMap[label] = [...vertexLabelIdMap[label], v.id];
-        //    }
-        //  }
-        // fastest:
-
-        // let timeTaken = Date.now() - start;
-        // console.log("Total time taken : " + timeTaken + " milliseconds");
-
-        // for (const e of args.edges || []) {
-        //  addNewEdgeUnSafe(e);
-        // }
-
-        // timeTaken = Date.now() - start;
-        // console.log("Total time taken : " + timeTaken + " milliseconds");
 
         for (const vertexId in args.vertexes) {
             setGraph('vertexes', vertexId, args.vertexes[vertexId]);
@@ -82,25 +55,19 @@ export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<G
 
         for (const edgeId in args.edges) {
             const edge = args.edges[edgeId];
-            try {
-                setGraph('vertexes', edge.S, 'OUT', edge.T, (out_edges) =>
-                    Array.isArray(out_edges)
-                        ? [...new Set([...out_edges, edge.id])]
-                        : [edge.id]
-                );
-            } catch (e) {
-                debugger;
-            }
 
-            try {
-                setGraph('vertexes', edge.E, 'IN', edge.T, (in_edges) =>
-                    Array.isArray(in_edges)
-                        ? [...new Set([...in_edges, edge.id])]
-                        : [edge.id]
-                );
-            } catch (e) {
-                debugger;
-            }
+            setGraph('vertexes', edge.S, 'OUT', edge.T, (out_edges) =>
+                Array.isArray(out_edges)
+                    ? [...new Set([...out_edges, edge.id])]
+                    : [edge.id]
+            );
+
+            setGraph('vertexes', edge.E, 'IN', edge.T, (in_edges) =>
+                Array.isArray(in_edges)
+                    ? [...new Set([...in_edges, edge.id])]
+                    : [edge.id]
+            );
+
         }
         // timeTaken = Date.now() - start;
         // console.log("Total time taken : " + timeTaken + " milliseconds");
@@ -115,18 +82,18 @@ export const setGraphData = (graph: GraphInterface, setGraph: SetStoreFunction<G
     });
 };
 export const onMutatDataGet = (Ws: ServerEventsDispatcher, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, d: [
-                                   number,
-                                   {
-                                       [key in | 'insert'
-                                       | 'replace'
-                                       | 'deleteVertex'
-                                       | 'insertEdge'
-                                       | 'replaceEdge'
-                                       | 'replaceEdgeStart'
-                                       | 'replaceEdgeEnd'
-                                       | 'deleteEdge']?: any;
-                                   }[]
-                               ][]
+    number,
+    {
+        [key in | 'insert'
+        | 'replace'
+        | 'deleteVertex'
+        | 'insertEdge'
+        | 'replaceEdge'
+        | 'replaceEdgeStart'
+        | 'replaceEdgeEnd'
+        | 'deleteEdge']?: any;
+    }[]
+][]
 ) => {
     if (isObject(d) && d.ack) {
         if (Array.isArray(d.txnIds)) {
@@ -204,7 +171,7 @@ export const onMutatDataGet = (Ws: ServerEventsDispatcher, graph: GraphInterface
     });
 }
 export const syncEvent = (graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) => {
-    const {Ws} = useContext(WsContext);
+    const { Ws } = useContext(WsContext);
     Ws.bind(
         ['post', 'mutate', 0],
         onMutatDataGet);

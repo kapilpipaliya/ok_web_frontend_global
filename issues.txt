@@ -1,2 +1,2 @@
 
-// TODO: when profile is updated a username will be changed in navbar
+// TODO: when profile is updated a username will be changed in navbar(Kapil)

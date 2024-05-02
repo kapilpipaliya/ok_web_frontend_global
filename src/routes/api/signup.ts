@@ -4,6 +4,9 @@ import { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, isIntegerId } from "~/globals/global";
 import { getSession } from "~/pages/auth/_server";
 
+// Port1 : 7687 -> For Driver // TODO : Last Digit 0
+// Port3 : 3000 -> For Memgraph Lab // TODO : Last Digit 2
+
 export async function POST({ request }: APIEvent) {
     const { username, email, password } = await request.json();
     const session = getDriver('super').session();
@@ -113,9 +116,11 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     if (!getDriver(username)) {
         userDriver = getDriver(username, port1);
     }
-    const server = await fetch(`http://localhost:3100/loadData/${username}/${port1}`)
+    const server = await fetch(`http://localhost:3100/loadData/${port1}`)
+    console.log(await server.text());
+    
     // TODO : sync initial data to drivers[username]
-    console.log(`http://localhost:3100/loadData/${username}/${port3}`);
+    console.log(`http://localhost:3100/loadData/${port3}`);
 
     if (server.status !== 200) {
         console.error('Server error:', server.error);
