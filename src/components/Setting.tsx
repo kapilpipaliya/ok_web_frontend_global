@@ -1,28 +1,34 @@
-import {createSignal, For, Match, Show, Switch, untrack} from "solid-js";
+import { createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import '../base.css'
-import {TextField} from "~/components/solid-blocks/blocks";
-import {Icon} from "@iconify-icon/solid";
+import { TextField } from "~/components/solid-blocks/blocks";
+import { Icon } from "@iconify-icon/solid";
 import PageHeader from "~/components/custom-component/Breadcumb";
-import {getPlans, getUser, updatePassword} from "~/pages/auth/auth";
+import { deleteContactTicket, getContactUsForm, getPlans, getUser, updatePassword } from "~/pages/auth/auth";
 import './css/tab.css'
-import {createStore} from "solid-js/store";
-import {API} from "~/components/DataFetcher";
-import {useToast} from "~/components/custom-component/toast";
-import {validatePassword} from "~/lib/Utils";
-import {toast} from "solid-toast";
+import { createStore } from "solid-js/store";
+import { API } from "~/components/DataFetcher";
+import { useToast } from "~/components/custom-component/toast";
+import { validatePassword } from "~/lib/Utils";
+import { toast } from "solid-toast";
+import { Table, TableBody, TableBodyRow, TableData, TableHead, TableHeader, TableHeadRow } from "./custom-component/Table";
+import StatusChip from "./custom-component/Chip";
+import CustomModal from "./input/Components/CommonDialog";
 
 
 function Settings() {
-    const {showErrorToast} = useToast();
-    const [selectedTab, setSelectedTab] = createSignal('General');
+    const { showErrorToast,showSuccessToast } = useToast();
+    const [selectedTab, setSelectedTab] = createSignal('Contact');
     const [isDataFetching, setIsDataFetching] = createSignal(false);
     const breadcrumbData = [
-        {name: 'Admin', href: '/admin'},
-        {name: 'Settings'},
+        { name: 'Admin', href: '/admin' },
+        { name: 'Settings' },
     ];
+    // detete - deleteNodeMGCall
+    // new reply - newRowMGCall(driver, parentVertex.id, 'SupportReply', {text: 'text', timestamp: 'timestamp', personal: 'personal'})
+    // to get all reply getChildVertexes(driver, ['SupportReply'], parentVertex)
 
 
-    const icons = {
+    const icons: any = {
         'Basic': 'quill:stack-alt',
         'Premium': 'ant-design:fire-outlined',
         'Pro': 'mage:electricity',
@@ -30,6 +36,7 @@ function Settings() {
     }
     const [selectedPlan, setSelectedPlan] = createSignal('');
     const [plans, setPlans] = createSignal([]);
+    const [contactList, setContactList] = createSignal([]);
     const isSelected = (planName: string) => selectedPlan() === planName;
     const [originalProfileData, setOriginalProfileData] = createStore<{ [key: string]: any }>({}); // Track original data
     const [profileData, setProfileData] = createStore<{ [key: string]: any }>({
@@ -46,6 +53,7 @@ function Settings() {
             id: data.id,
             country: 'United States'
         });
+        loadContactData()
         setOriginalProfileData(profileData); // Set original data
     });
     const sectionStyle = {
@@ -81,27 +89,43 @@ function Settings() {
         'color': '#5b7dff',
         cursor: 'pointer',
     };
-    const loadPlans = async () => {
+    const loadContactData = async () => {
         setIsDataFetching(true);
         console.error('Loading')
         untrack(() => {
-            getPlans().then(value => {
-                if (value.plans.length > 0) {
-                    setPlans(value.plans)
-                    setSelectedPlan(value.plans[0].name)
+            getContactUsForm(profileData.email).then((value: any) => {
+                if (value.contact.length > 0) {
+                    setContactList(value.contact)
                 }
-                console.log("sad")
                 setIsDataFetching(false);
             });
         });
 
     }
 
+    const loadPlans = async () => {
+        setIsDataFetching(true);
+        untrack(() => {
+            getPlans().then((value: any) => {
+                if (value.plans && value.plans.length > 0) {
+                    setPlans(value.plans)
+                }else{
+                    setPlans([])
+                }
+                setIsDataFetching(false);
+            });
+        });
+
+    }
+
+
+
     loadPlans();
+
     const GeneralSection = () => {
-        const handleInputChange = (e) => {
-            const {name, value} = e.target;
-            setProfileData({...profileData, [name]: value});
+        const handleInputChange = (e: any) => {
+            const { name, value } = e.target;
+            setProfileData({ ...profileData, [name]: value });
         };
 
         const profileCall = async () => {
@@ -129,7 +153,7 @@ function Settings() {
                 } else {
                     return Promise.reject(response.statusText);
                 }
-            } catch (error) {
+            } catch (error: any) {
                 return Promise.reject(error.response);
             }
         }
@@ -163,31 +187,31 @@ function Settings() {
                     class={'flex ai:center jc:space-between p:20|20|0|20 m:10|0|5|0 bt:1px|solid|lightgrey'}>
                     <span class={'font-weight:600'}>User Id</span>
                     <TextField labelClass={'w:40%'} name={'id'} label={'Id'} disabled={true}
-                               value={profileData.id}
-                               onChange={handleInputChange}/>
+                        value={profileData.id}
+                        onChange={handleInputChange} />
                 </div>
                 <div
                     class={'flex ai:center jc:space-between p:20 m:10|0 bt:1px|dashed|lightgrey bb:1px|dashed|lightgrey'}>
                     <span class={'font-weight:600'}>UserName</span>
                     <TextField name={'username'} disabled={!isEdit()} labelClass={'w:40%'}
-                               label={'Username'}
-                               value={profileData.username}
-                               onChange={handleInputChange}/>
+                        label={'Username'}
+                        value={profileData.username}
+                        onChange={handleInputChange} />
                 </div>
                 <div
                     class={'flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|dashed|lightgrey'}>
                     <span class={'font-weight:600'}>Email Address</span>
                     <TextField name={'email'} disabled={!isEdit()} labelClass={'w:40%'}
-                               label={'Email Address'}
-                               value={profileData.email}
-                               onChange={handleInputChange}/>
+                        label={'Email Address'}
+                        value={profileData.email}
+                        onChange={handleInputChange} />
                 </div>
                 <div
                     class={'flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|solid|lightgrey'}>
                     <span class={'font-weight:600'}>Country</span>
                     <select name={'country'} disabled={!isEdit()} style={inputStyle}
-                            value={profileData.country}
-                            onChange={handleInputChange}>
+                        value={profileData.country}
+                        onChange={handleInputChange}>
                         <option>United States</option>
                         <option>Canada</option>
                         <option>United Kingdom</option>
@@ -197,10 +221,10 @@ function Settings() {
             </div>
             <div class={'flex jc:end'}>
                 <Show when={isEdit()} fallback={<button style={buttonStyle}
-                                                        onClick={() => {
+                    onClick={() => {
 
-                                                            setIsEdit(true)
-                                                        }}>Edit
+                        setIsEdit(true)
+                    }}>Edit
                     Settings
                 </button>}>
                     <button style={outlineStyle} onClick={() => {
@@ -236,7 +260,7 @@ function Settings() {
                                 <div class={'flex ai:center'}>
                                     <div class={'h:35 w:35 bg:rgb(227,227,227) r:50% grid place-items:center'}>
                                         <Icon height={22} width={22} class={'color:black'}
-                                              icon={icons[plan.name]}
+                                            icon={icons[plan.name]}
                                         />
                                     </div>
                                     <div class={'p:5|10'}>
@@ -256,7 +280,7 @@ function Settings() {
         </>
     };
     const CurrentPlan = () => {
-        const [plan, setPlan] = createStore({name: 'Premium', currency: 'INR', price: 1000, type: 'Monthly'});
+        const [plan, setPlan] = createStore<any>({ name: 'Premium', currency: 'INR', price: 1000, type: 'Monthly' });
         return <div class={'m:10|20'}>
             <div class={'font-weight:700'}>Current Plan</div>
             <span class={'font-weight:500 color:grey f:14'}>We’ll credit your account if you need to downgrade during the billing cycle.</span>
@@ -268,7 +292,7 @@ function Settings() {
                         <div class={'flex ai:center'}>
                             <div class={'h:35 w:35 bg:rgb(227,227,227) r:50% grid place-items:center'}>
                                 <Icon height={22} width={22} class={'color:black'}
-                                      icon={icons[plan.name]}
+                                    icon={icons[plan.name]}
                                 />
                             </div>
                             <div class={'p:5|10'}>
@@ -296,12 +320,12 @@ function Settings() {
             newPassword: false,
             confirmPassword: false
         })
-        const handleInputChange = (e) => {
-            const {name, value} = e.target;
-            setPasswordData({...passwordData, [name]: value});
+        const handleInputChange = (e: any) => {
+            const { name, value } = e.target;
+            setPasswordData({ ...passwordData, [name]: value });
         };
         const togglePasswordVisibility = (name: any) => {
-            setShowPassword((prev) => ({
+            setShowPassword((prev: any) => ({
                 ...prev,
                 [name]: !prev[name],
             }));
@@ -314,12 +338,12 @@ function Settings() {
                     return Promise.reject(response.error);
                 }
                 return response;
-            } catch (error) {
+            } catch (error: any) {
                 return Promise.reject(error.response);
             }
         }
         const onClickSave = async () => {
-            const {currentPassword, newPassword, confirmPassword} = passwordData;
+            const { currentPassword, newPassword, confirmPassword } = passwordData;
             if (!currentPassword.trim()) {
                 showErrorToast("Please enter current password");
                 return false;
@@ -358,8 +382,8 @@ function Settings() {
                     loading: 'Updating Password...',
                     success: (val) => {
                         response = val;
-                        setPasswordData({currentPassword: '', newPassword: '', confirmPassword: ''});
-                        setShowPassword({currentPassword: false, newPassword: false, confirmPassword: false});
+                        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                        setShowPassword({ currentPassword: false, newPassword: false, confirmPassword: false });
                         return <span>Password Updated Successfully</span>
                     },
                     error: (error) => {
@@ -381,10 +405,10 @@ function Settings() {
                     class={'flex@md rel ai:center jc:space-between p:20 m:10|0 bt:1px|solid|lightgrey bb:1px|dashed|lightgrey'}>
                     <span class={'font-weight:600'}>Current Password</span>
                     <TextField name={'currentPassword'} type={`${showPassword.currentPassword ? 'text' : 'password'}`}
-                               labelClass={'w:40%'}
-                               placeholder={'Enter Current Password'}
-                               value={passwordData.currentPassword}
-                               onChange={handleInputChange}/>
+                        labelClass={'w:40%'}
+                        placeholder={'Enter Current Password'}
+                        value={passwordData.currentPassword}
+                        onChange={handleInputChange} />
                     <Icon
                         onClick={() => togglePasswordVisibility('currentPassword')}
                         class="abs top:50px top:25px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
@@ -396,10 +420,10 @@ function Settings() {
                     class={'flex@md rel ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|dashed|lightgrey'}>
                     <span class={'font-weight:600'}>New Password</span>
                     <TextField name={'newPassword'} type={`${showPassword.newPassword ? 'text' : 'password'}`}
-                               labelClass={'w:40%'}
-                               placeholder={'Enter New Password'}
-                               value={passwordData.newPassword}
-                               onChange={handleInputChange}/>
+                        labelClass={'w:40%'}
+                        placeholder={'Enter New Password'}
+                        value={passwordData.newPassword}
+                        onChange={handleInputChange} />
                     <Icon
                         onClick={() => togglePasswordVisibility('newPassword')}
                         class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
@@ -411,10 +435,10 @@ function Settings() {
                     class={'flex@md rel ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|solid|lightgrey'}>
                     <span class={'font-weight:600'}>Confirm Password</span>
                     <TextField name={'confirmPassword'} type={`${showPassword.confirmPassword ? 'text' : 'password'}`}
-                               labelClass={'w:40%'}
-                               placeholder={'Enter Confirm Password'}
-                               value={passwordData.confirmPassword}
-                               onChange={handleInputChange}/>
+                        labelClass={'w:40%'}
+                        placeholder={'Enter Confirm Password'}
+                        value={passwordData.confirmPassword}
+                        onChange={handleInputChange} />
                     <Icon
                         onClick={() => togglePasswordVisibility('confirmPassword')}
                         class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
@@ -431,46 +455,207 @@ function Settings() {
         </div>;
     }
 
+    const ContactSection = () => {
+        const [messages, setMessages] = createSignal([]);
+        const [inputMessage, setInputMessage] = createSignal('');
+
+        const sendMessage = () => {
+            if (inputMessage().trim() !== "") {
+                const newMessage = {
+                    text: inputMessage(),
+                    timestamp: new Date().toLocaleTimeString(),
+                    personal: true
+                };
+                setMessages([...messages()!, newMessage]);
+                setInputMessage('');
+                setTimeout(fakeReply, 1000);
+            }
+        };
+
+        const fakeReply = () => {
+            const replies = [
+                "Hi there, how can I assist?",
+                "Thanks for your message!",
+                "We're looking into this for you.",
+                "Can you provide more detail?",
+                "Thank you for waiting."
+            ];
+            const randomIndex = Math.floor(Math.random() * replies.length);
+            const reply = {
+                text: replies[randomIndex],
+                timestamp: new Date().toLocaleTimeString(),
+                personal: false
+            };
+            setMessages([...messages()!, reply]);
+            console.log(messages());
+        };
+
+        const Chat = () => {
+            return (
+                <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div class="grid flex-col" style="overflow-y: auto; padding: 10px;">
+                        <For each={messages()} fallback={<div class="text-align:-webkit-center">
+                            <img class="h:30vh" src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826" />
+                            <div style="text-align:center;" class="font-weight:600">No messages yet</div>
+                        </div>}
+                        >
+                            {(msg) => <>
+                                <div class="rel mb:10 @fade|.5s">
+                                    <div style={`color: #fff; float: ${msg.personal ? 'right' : 'left'}; text-align: ${msg.personal ? 'right' : 'left'}; background: ${msg.personal ? 'linear-gradient(120deg, #248A52, #257287)' : 'rgb(29 92 194 / 76%)'}; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}>
+                                        {msg.text}
+                                    </div>
+                                    <div class={`abs bottom:-10 ${msg.personal ? 'right:0' : 'left:0'}`} style="font-size: 8px;">
+                                        {msg.timestamp}
+                                    </div>
+                                    <div class={`abs ${msg.personal ? 'right:0 bg:#267e70 h:7px bottom:7px' : 'left:0 bg:#5783d2 h:7px bottom:8px'}`} style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;" />
+                                </div>
+
+                            </>}
+                        </For>
+                    </div>
+                </div>
+            );
+        };
+
+        const OpenDialog = () => {
+            return <CustomModal
+                bodyStyle={{'max-height': 'none', 'overflow': 'auto'}}
+                openButton={false}
+                buttonLabel={<div class="color:#37c">Reply</div>}
+                title="Chat With Support"
+                body={
+                    <div>
+                        <Chat />
+                    </div>
+                }
+                footer={(toggle: () => void) =>
+                    <div class={'flex ai:center jc:center'}>
+                        <div class="b:1.5px|solid|lightseagreen r:5" style="width: 100%;position: relative;">
+                            <input
+                                type="text"
+                                value={inputMessage()}
+                                onChange={e => setInputMessage(e.target.value)}
+                                style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
+                                onKeyPress={e => {
+                                    console.log(e);
+                                    
+                                    if (e.key === 'Enter') {
+                                        sendMessage()
+                                    }
+                                }}
+                                placeholder="Type message..."
+                            />
+                            <div
+                                onClick={sendMessage}
+                                class="flex jc:center"
+                                style="position: absolute; top: 5px; right: 10px; color: #fff; border: none; background: #248A52; font-size: 10px; text-transform: uppercase;padding: 4px 6px; border-radius: 10px; cursor: pointer;"
+                            >
+                                <Icon icon={'fluent:send-48-filled'} height={22} width={22} />
+                            </div>
+                        </div>
+                    </div>
+                }
+                dialogClass="min-w:30% r:10px p:0"
+            />
+        }
+
+        const deleteContact = async (ticketName: string) => {
+            if (ticketName){
+                const res: any = await deleteContactTicket(ticketName);
+                if (res.error) {
+                    showErrorToast(res.error.message);
+                }
+                showSuccessToast(res.message);
+                const data= contactList().filter((c: any) => c.name != ticketName);
+                setContactList(data);
+            }
+        }
+
+        return <div class={'w:full'}>
+            <div class={'m:10|20'}>
+                <div class={'font-weight:700'}>Contact Details</div>
+                <span class={'font-weight:500 color:grey f:14'}>List of all your contacts with our platforms</span>
+            </div>
+            <div class="m:0|15">
+                <Table>
+                    <TableHead>
+                        <TableHeadRow>
+                            <For each={['Name', 'Subject', 'Message', 'Status', 'Actions']}>
+                                {(header) => {
+                                    return <TableHeader>{header}</TableHeader>
+                                }}
+                            </For>
+                            <TableHeader />
+                        </TableHeadRow>
+                    </TableHead>
+                    <TableBody>
+                        <For each={contactList()}>{(row: any, index) => {
+                            return <TableBodyRow index={index()}>
+                                <TableData>{row.name}</TableData>
+                                <TableData>{row.subject}</TableData>
+                                <TableData>{row.message}</TableData>
+                                <TableData><StatusChip status={row.status} /></TableData>
+                                <TableData>
+                                    <div class={'flex jc:center'}>
+                                        <OpenDialog />
+                                        <button class="ml:10 color:rgb(255,0,0)" onClick={() => deleteContact(row.name)}>Delete</button>
+                                    </div>
+                                </TableData>
+                            </TableBodyRow>;
+                        }}</For>
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
+    }
+
 
     return (<>
-            <PageHeader
-                title="Account Setting"
-                breadcrumb={breadcrumbData}
-            />
-            <div class="radio-inputs m:20">
-                <label class="radio" onClick={() => setSelectedTab('General')}>
-                    <input type="radio" name="radio" checked={selectedTab() === 'General'}/>
-                    <span class="name">General</span>
-                </label>
-                <label class="radio" onClick={() => setSelectedTab('Pricing')}>
-                    <input type="radio" name="radio" checked={selectedTab() === 'Pricing'}/>
-                    <span class="name">Pricing</span>
-                </label>
-                <label class="radio" onClick={() => setSelectedTab('Password')}>
-                    <input type="radio" name="radio" checked={selectedTab() === 'Password'}/>
-                    <span class="name">Password</span>
-                </label>
-            </div>
+        <PageHeader
+            title="Account Setting"
+            breadcrumb={breadcrumbData}
+        />
+        <div class="radio-inputs m:20">
+            <label class="radio" onClick={() => setSelectedTab('General')}>
+                <input type="radio" name="radio" checked={selectedTab() === 'General'} />
+                <span class="name">General</span>
+            </label>
+            <label class="radio" onClick={() => setSelectedTab('Pricing')}>
+                <input type="radio" name="radio" checked={selectedTab() === 'Pricing'} />
+                <span class="name">Pricing</span>
+            </label>
+            <label class="radio" onClick={() => setSelectedTab('Password')}>
+                <input type="radio" name="radio" checked={selectedTab() === 'Password'} />
+                <span class="name">Password</span>
+            </label>
+            <label class="radio" onClick={() => setSelectedTab('Contact')}>
+                <input type="radio" name="radio" checked={selectedTab() === 'Contact'} />
+                <span class="name">Contact</span>
+            </label>
+        </div>
 
 
-            <Show when={!isDataFetching()} fallback={<div class={'h:50vh grid place-items:center'}>
-                <div class={'loader'}/>
-            </div>
-            }>
-                <Switch>
-                    <Match when={selectedTab() === 'General'}>
-                        <GeneralSection/>
-                    </Match>
-                    <Match when={selectedTab() === 'Pricing'}>
-                        <CurrentPlan/>
-                        <PricingPlans/>
-                    </Match>
-                    <Match when={selectedTab() === 'Password'}>
-                        <PasswordSection/>
-                    </Match>
-                </Switch>
-            </Show>
-        </>
+        <Show when={!isDataFetching()} fallback={<div class={'h:50vh grid place-items:center'}>
+            <div class={'loader'} />
+        </div>
+        }>
+            <Switch>
+                <Match when={selectedTab() === 'General'}>
+                    <GeneralSection />
+                </Match>
+                <Match when={selectedTab() === 'Pricing'}>
+                    <CurrentPlan />
+                    <PricingPlans />
+                </Match>
+                <Match when={selectedTab() === 'Password'}>
+                    <PasswordSection />
+                </Match>
+                <Match when={selectedTab() === 'Contact'}>
+                    <ContactSection />
+                </Match>
+            </Switch>
+        </Show>
+    </>
     );
 }
 

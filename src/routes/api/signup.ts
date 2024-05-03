@@ -4,7 +4,7 @@ import { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, isIntegerId } from "~/globals/global";
 import { getSession } from "~/pages/auth/_server";
 
-// Port1 : 7687 -> For Driver // TODO : Last Digit 0
+// driverPort : 7687 -> For Driver // TODO : Last Digit 0
 // Port3 : 3000 -> For Memgraph Lab // TODO : Last Digit 2
 
 export async function POST({ request }: APIEvent) {
@@ -32,12 +32,12 @@ export async function POST({ request }: APIEvent) {
 
         const user = createUserResult.records[0].get('u');
 
-        let port1, port2, port3;
+        let driverPort, logsPort, labPort;
         try {
             const portResult = await PortConfigure(tx, username);
-            port1 = portResult.port1;
-            port2 = portResult.port2;
-            port3 = portResult.port3;
+            driverPort = portResult.driverPort;
+            logsPort = portResult.logsPort;
+            labPort = portResult.labPort;
         } catch (error: any) {
             console.error('DB Setup error:', error.message);
             await tx.rollback();
@@ -79,13 +79,13 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     const resultPort = await tx.run(query);
     let portsResult: any;
     if (resultPort.records.length === 0) {
-        const query = `CREATE (n:DBPort {port1: 1150, port2: 1151, port3: 1152}) RETURN n;`;
+        const query = `CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) RETURN n;`;
         const resultPort = await tx.run(query);
         portsResult = resultPort.records[0].get('n').properties
     } else {
         portsResult = resultPort.records[0].get('n').properties
     }
-    let { port1, port2, port3 } = portsResult
+    let { driverPort, logsPort, labPort } = portsResult
 
     const response = await fetch('http://easyformforge.com:5000/docker/createNew', {
         method: 'POST',
@@ -96,7 +96,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
         body: JSON.stringify({
             Image: 'memgraph/memgraph-platform',
             name: username,
-            "portBindings": {[port1]: "7687", [port2]: "7444", [port3]: "3000"},
+            "portBindings": {[driverPort]: "7687", [logsPort]: "7444", [labPort]: "3000"},
         })
     });
 
@@ -114,22 +114,23 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
 
     let userDriver;
     if (!getDriver(username)) {
-        userDriver = getDriver(username, port1);
+        userDriver = getDriver(username, driverPort);
     }
-    const server = await fetch(`http://localhost:3100/loadData/${port1}`)
+    await new Promise(resolve => setTimeout(() => resolve(''), 15000));
+    const server = await fetch(`http://localhost:3100/loadData/${driverPort}`)
     console.log(await server.text());
     
     // TODO : sync initial data to drivers[username]
-    console.log(`http://localhost:3100/loadData/${port3}`);
+    console.log(`http://localhost:3100/loadData/${labPort}`);
 
     if (server.status !== 200) {
         console.error('Server error:', server.error);
         return Promise.reject(new Error(server.error));
     }
-    port1 = port1 + 10;
-    port2 = port2 + 10;
-    port3 = port3 + 10;
-    const updatePort = `MATCH (n:DBPort) SET n.port1 = ${port1}, n.port2 = ${port2}, n.port3 = ${port3} RETURN n;`;
+    driverPort = driverPort + 10;
+    logsPort = logsPort + 10;
+    labPort = labPort + 10;
+    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort}, n.logsPort = ${logsPort}, n.labPort = ${labPort} RETURN n;`;
     await tx.run(updatePort);
-    return {port1, port2, port3}
+    return {driverPort, logsPort, labPort}
 }

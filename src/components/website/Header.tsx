@@ -50,9 +50,12 @@ export default function Header() {
             {/*</div>*/}
           </ul>
         </div>
-        <button class="btn-small-icon-filled flex ai:center" style={{'cursor': 'pointer'}} onClick={()=>navigate("/auth/login")}>
+        <div class="flex">
+        <button class="btn-small-icon-filled flex ai:center" style={{ 'cursor': 'pointer' }} onClick={() => navigate("/auth/login")}>
           Get Started <Icon icon={'fa-solid:chevron-right'} class="fa-solid fa-chevron-right ml:10" />
         </button>
+        </div>
+        
       </section>
   );
 }

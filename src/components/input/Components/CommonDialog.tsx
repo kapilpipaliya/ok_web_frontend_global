@@ -1,7 +1,7 @@
 import '../../css/modal.css'
 import Dismiss from "solid-dismiss";
-import {createSignal} from "solid-js";
-import {Icon} from "@iconify-icon/solid";
+import { Show, createSignal } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
 
 const CustomModal = (props) => {
     const [open, setOpen] = createSignal(false);
@@ -18,12 +18,12 @@ const CustomModal = (props) => {
 
     return (
         <>
-            {props.openButton !== false && (
+            <Show when={props.openButton !== false} fallback={<div class={`cursor:pointer bg:#dfe9f3d1:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} ref={btnEl} aria-disabled={open()}>{props.buttonLabel}</div>}>
                 <Icon ref={btnEl} height={props.iconSize ?? 25} width={props.iconSize ?? 25} color={'grey'} aria-disabled={open()}
-                      class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} onClick={() => setOpen(true)}
-                      icon={props.buttonLabel}>
+                    class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} onClick={() => setOpen(true)}
+                    icon={props.buttonLabel}>
                 </Icon>
-            )}
+            </Show>
             <Dismiss
                 menuButton={btnEl}
                 open={open}
@@ -43,14 +43,14 @@ const CustomModal = (props) => {
                                     title={'Close'}
                                     onClick={onClickOverlay}
                                     class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
-                                    style={{float: "right"}}
+                                    style={{ float: "right" }}
                                 >
                                     ✕
                                 </button>
                             )}
                         </div>
-                        <hr class={'fg:lightgrey'}/>
-                        <div class={'p:3 max-h:50vh overflow:auto'}>
+                        <hr class={'fg:lightgrey'} />
+                        <div class={'p:3 max-h:50vh overflow:auto'} style={props.bodyStyle}>
                             {props.body}
                         </div>
                         <div class={'pt:5'}>

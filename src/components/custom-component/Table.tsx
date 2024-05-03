@@ -178,14 +178,14 @@ export const DataTable = (props: { headers: any, rows: any }) => {
     );
 }
 
-const Table = (props: any) => <table {...props} class={'styled-table w:100%'}>{props.children}</table>
+export const Table = (props: any) => <table {...props} class={'styled-table w:100%'}>{props.children}</table>
 
-const TableHeader = (props: any) => <th {...props}
-                                        class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238)`}>{props.children}</th>
-const TableBody = (props: any) => <tbody {...props} class="r:5|5|5|5 rounded-md ">{props.children}</tbody>
-const TableHead = (props: any) => <thead {...props} class="r:5|5|5|5 ">{props.children}</thead>
-const TableHeadRow = (props: any) => <tr {...props} class="p:10 text:center">{props.children}</tr>
-const TableBodyRow = (props: any) => <tr {...props}
+export const TableHeader = (props: any) => <th {...props}
+                                         class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238)`}>{props.children}</th>
+export const TableBody = (props: any) => <tbody {...props} class="r:5|5|5|5 rounded-md ">{props.children}</tbody>
+export const TableHead = (props: any) => <thead {...props} class="r:5|5|5|5 ">{props.children}</thead>
+export const TableHeadRow = (props: any) => <tr {...props} class="p:10 text:center">{props.children}</tr>
+export const TableBodyRow = (props: any) => <tr {...props}
                                          class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} bg:#3478cc0d:hover`}>{props.children}</tr>
-const TableData = (props: any) => <td {...props} style={{"text-align-last":"center",'padding':'inherit'}} class={'bb:1px|solid|rgb(227,231,236)'}>{props.children}</td>
+export const TableData = (props: any) => <td {...props} style={{"text-align-last":"center",'padding':'inherit'}} class={'bb:1px|solid|rgb(227,231,236)'}>{props.children}</td>
 

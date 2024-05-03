@@ -2,14 +2,15 @@ import '../base.css'
 import { createSignal, Match, Show, Switch, useContext } from "solid-js";
 import { APP_BASE_URL, validateEmail, validatePassword, validateUsername } from "~/lib/Utils";
 import logo from "../../assets/signup/logo.png";
-import { loginOrRegister } from "~/pages/auth/auth";
+import { loginOrRegister, submitContactUsForm } from "~/pages/auth/auth";
 import { A, useNavigate } from "@solidjs/router";
 import { API } from "~/components/DataFetcher";
 import { useToast } from "~/components/custom-component/toast";
 import { toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/globals/global";
-import  sendEmail  from '~/email';
+import sendEmail from '~/email';
+
 export const Login = () => {
 
     const navigate = useNavigate();
@@ -80,12 +81,12 @@ export const Login = () => {
 
 
     return (
-        <div style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
+        <div class="@fade|.5s" style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
             <img src={logo} alt="logo" class="h:70px mb:100px" style={{ 'justify-self': 'center' }} />
-            <form class='w:inherit mb:5rem bg:white jc:center r:10' onSubmit={handleSubmit} style={{ display: 'flex', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+            <form class='m:10px w:inherit mb:5rem bg:white jc:center r:10' onSubmit={handleSubmit} style={{ display: 'flex', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <img src={'../../public/graphics/login_vector.jpg'}
-                    alt="logo" class="w:25vw d:none@<md" />
-                <div class='mt:25 w:50% w:100%@<md grid align-content:center m:0|30@lg'>
+                    alt="logo" class="w:25rem d:none@<md" />
+                <div class='mt:25 w:100%@<md grid align-content:center m:0|30@lg'>
                     <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
                         Log In
                     </div>
@@ -93,7 +94,7 @@ export const Login = () => {
                         You Will be Redirected to Home Page
                     </div>
                     <div style={{ margin: '10px 0' }}>
-                        <label for="username" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Username</label>
+                        <label for="username" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Email Address</label>
                         <input
                             name="email"
                             type="text"
@@ -126,11 +127,11 @@ export const Login = () => {
                         </div>
                     </div>
                     <div style={{ display: 'flex', 'align-items': 'center', 'justify-content': 'space-between', margin: '10px 0' }}>
-                        <label>
+                        <label class="f:14">
                             <input type="checkbox" />
                             &nbsp;Remember me
                         </label>
-                        <a href="/auth/forgotPassword" style={{ color: '#069', 'text-decoration': 'none' }}>Forgot Password?</a>
+                        <a href="/auth/forgotPassword" class="f:14" style={{ color: '#069', 'text-decoration': 'none' }}>Forgot Password?</a>
                     </div>
                     <button type="submit" style={{ width: '100%', padding: '10px', background: 'rgb(226,65,74)', color: 'white', border: 'none', 'border-radius': '4px', cursor: 'pointer' }}>
                         Log In
@@ -232,11 +233,11 @@ export const SignUp = () => {
     };
 
     return (
-        <div style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
+        <div class="@fade|.5s" style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
             <img src={logo} alt="logo" class="h:70px mb:100px" style={{ 'justify-self': 'center' }} />
-            <form class='mb:5rem bg:white jc:center r:10' onSubmit={handleSubmit} style={{ display: 'flex', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+            <form class='m:10px mb:5rem bg:white jc:center r:10' onSubmit={handleSubmit} style={{ display: 'flex', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
                 <img src={'../../public/graphics/register_vector.png'}
-                    alt="logo" class="w:25vw d:none@<md" />
+                    alt="logo" class="w:25rem d:none@<md" />
                 <div class='w:50% w:100%@<md grid align-content:center m:0|30@lg'>
                     <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
                         Sign Up
@@ -304,91 +305,10 @@ export const SignUp = () => {
 
             </form>
         </div>
-
-        // <div class="login rel bg:#FFF1F1 r:5|5|5|5 flex ai:center jc:center" style={{ 'flex-flow': 'column' }}>
-        //     <div class="flex justify-content:center ai:center mt:80px">
-        //         <img src={logo} alt="logo" onClick={() => navigate('/')} class="h:60" />
-        //     </div>
-
-        //     <div class="p:10@md box-shadow:100 shadow:black h:70% flex ai:center jc:center">
-
-        //         <div class={'flex justify-content:center ai:center'}>
-
-        //             <div
-        //                 class="mt:50 b:2 b:#c5daff bg:#f4f8fe sticky z:10 flex jc:center r:10|10|10|10 m:10 w:70vw@<xs w:35vw@md w:40vw@lg w:25vw@>xl">
-        //                 <form onSubmit={handleSubmit} class={'w:full'}>
-        //                     <div class="w:100% flex:col w:fit p:3.25rem">
-        //                         <div class="jc:center mb:10 f:30 font-weight:bold flex z:10">
-        //                             Sign Up
-        //                         </div>
-        //                         <input
-        //                             type="Name"
-        //                             value={formData().username}
-        //                             onChange={(e) => setFormData({ ...formData(), username: e.target.value })}
-        //                             placeholder="Enter Name"
-        //                             required={true}
-        //                             class="my:10 p:10 w:100% r:5|5|5|5"
-        //                         />
-        //                         <input
-        //                             type="Email"
-        //                             value={formData().email}
-        //                             onChange={(e) => setFormData({ ...formData(), email: e.target.value })}
-        //                             placeholder="Enter Email"
-        //                             autocomplete='email'
-        //                             required={true}
-        //                             minLength="4"
-        //                             class="my:10 p:10 w:100% r:5|5|5|5"
-        //                         />
-
-        //                         <div class="rel">
-        //                             <input
-        //                                 type={showPassword() ? 'text' : 'password'}
-        //                                 value={formData().password}
-        //                                 onChange={(e) => setFormData({ ...formData(), password: e.target.value })}
-        //                                 placeholder="Enter Password"
-        //                                 required={true}
-        //                                 autocomplete='password'
-        //                                 class="my:10 p:10 w:100% r:5|5|5|5"
-        //                             />
-        //                             <Icon
-        //                                 onClick={togglePasswordVisibility}
-        //                                 class="abs top:20 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
-        //                                 aria-label="Toggle password visibility"
-        //                                 icon={`${showPassword() ? 'iconamoon:eye-light' : 'iconamoon:eye-off'}`}
-        //                             />
-        //                         </div>
-        //                         <div>
-        //                             <button class="w:100% h:40 r:5|5|5|5 text-fill:white"
-        //                                 style={{ "background-color": "#4A92FD" }}
-        //                                 type="submit">
-        //                                 Sign Up
-        //                             </button>
-        //                         </div>
-
-        //                         <span class="my:10 flex jc:end">
-        //                             <a>
-        //                                 <u class="font:bolder text-fill:black f:15 cursor:pointer">Forgot password ?</u>
-        //                             </a>
-        //                         </span>
-        //                         <span class={'flex jc:center mt:20'}>
-        //                             Already have an account?&nbsp;
-        //                             <a href={`/auth/login`} replace={true}>
-        //                                 <u class="font:bold">Sign In</u>
-        //                             </a>
-        //                         </span>
-        //                     </div>
-        //                 </form>
-        //             </div>
-        //         </div>
-        //         <div class="flex justify-content:center mt:20 f:15">
-
-        //         </div>
-        //     </div>
-        // </div>
     );
 };
 
-function ForgotPasswordForm() {
+export const ForgotPasswordForm = () => {
     const { showErrorToast } = useToast();
     const [username, setUsername] = createSignal('');
     const [otp, setOtp] = createSignal('');
@@ -398,6 +318,7 @@ function ForgotPasswordForm() {
     const [showNewPassword, setNewShowPassword] = createSignal(false);
     const [isLoading, setIsLoading] = createSignal(false);
     const [stage, setStage] = createSignal(0); // 0: Email, 1: OTP, 2: New Passwords
+
     const validatePassword = (password) => {
         // Example validation: Minimum eight characters, at least one letter and one number
         const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{6,16}$/;
@@ -408,15 +329,13 @@ function ForgotPasswordForm() {
         setIsLoading(true);
         const data = await sendEmail(username(), 'Reset Password', 'Reset Password');
         setIsLoading(false);
-        // setStage(1); // Move to OTP stage
+        setStage(1);
     };
 
     const handleOtpSubmit = (event) => {
         event.preventDefault();
         setIsLoading(true);
         console.log('OTP submitted:', otp());
-        // Verify OTP
-        // On success:
         setIsLoading(false);
         setStage(2); // Move to password reset stage
     };
@@ -444,7 +363,7 @@ function ForgotPasswordForm() {
     };
 
     return (
-        <div style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
+        <div class="@fade|.5s" style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
             <img src={logo} alt="logo" class="h:70px mb:100px" style={{ 'justify-self': 'center' }} />
             <Switch>
                 <Match when={isLoading()}>
@@ -454,7 +373,7 @@ function ForgotPasswordForm() {
                 </Match>
                 <Match when={true}>
                     <Show when={stage() === 0}>
-                        <form class='mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl' onSubmit={handleEmailSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+                        <form class='@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl' onSubmit={handleEmailSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
                             <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
                                 Forgot Password
                             </div>
@@ -487,7 +406,7 @@ function ForgotPasswordForm() {
                         </form>
                     </Show>
                     <Show when={stage() === 1}>
-                        <form class='mb:5rem bg:white r:10 w:70vw@<xs w:50vw@<md w:40vw@lg w:28vw@>xl' onSubmit={handleOtpSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+                        <form class='@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw@<md w:40vw@lg w:28vw@>xl' onSubmit={handleOtpSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
                             <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
                                 OTP Verification
                             </div>
@@ -519,7 +438,7 @@ function ForgotPasswordForm() {
                         </form>
                     </Show>
                     <Show when={stage() === 2}>
-                        <form class='mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl' onSubmit={handlePasswordResetSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+                        <form class='@fade|.5s mb:5rem bg:white r:10 w:70vw@<xs w:50vw<@md w:40vw@lg w:28vw@>xl' onSubmit={handlePasswordResetSubmit} style={{ display: 'grid', 'max-width': '600px', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
                             <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
                                 Reset Password
                             </div>
@@ -579,4 +498,136 @@ function ForgotPasswordForm() {
     );
 }
 
-export default ForgotPasswordForm;
+export const ContactUs = () => {
+
+    const navigate = useNavigate();
+    const { showErrorToast } = useToast();
+    const [formData, setFormData] = createSignal({ email: '', name: '', subject: '', message: '' });
+    const [loadingSite, setLoadingSite] = createSignal(false);
+
+    const contactCall = async () => {
+        try {
+            let response = await submitContactUsForm(formData().name, formData().email, formData().subject, formData().message);
+
+            if (response.error) {
+                return Promise.reject(response.error);
+            }
+            return response;
+        } catch (error: any) {
+            return Promise.reject(error.response);
+        }
+    }
+
+    const handleSubmit = async (event: SubmitEvent) => {
+
+        event.preventDefault();
+        const emailError = validateEmail(formData().email);
+        if (emailError) {
+            showErrorToast(emailError); // Show the error message if validation fails
+        } else {
+            setLoadingSite(true);
+            let response: any;
+            await toast.promise(
+                contactCall(),
+                {
+                    loading: 'Sending message...',
+                    success: (val) => {
+                        response = val;
+                        return <span>Message Sent Successfully</span>
+                    },
+                    error: (error) => {
+                        console.log("error => ", error)
+                        return <span>{error}</span>
+                    }
+                }
+            )
+            setLoadingSite(false);
+            if (response!.error) {
+                showErrorToast(response!.error);
+                return;
+            }
+            if (response != null && response.id !== null) {
+                navigate(`/`)
+            }
+        }
+    };
+
+
+    return (
+        <div class="@fade|.5s" style={{ 'background-size': 'cover', 'background-image': "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')", display: 'flex', "background-color": 'rgb(239,235,233)', 'flex-direction': 'column', 'align-items': 'center', 'justify-content': 'center', height: '100vh', }}>
+            <img src={logo} alt="logo" class="h:70px mb:100px" style={{ 'justify-self': 'center' }} />
+            <form class='m:10px w:inherit mb:5rem bg:white jc:center r:10' onSubmit={handleSubmit} style={{ display: 'flex', padding: '20px 30px', 'box-shadow': '0 4px 8px rgba(0,0,0,0.1)' }}>
+                <div class='d:none@<md flex jc:center w:-webkit-fill-available'>
+                    <img src={'../../public/graphics/contact-us.jpg'}
+                        alt="logo" class="w:25rem " />
+                </div>
+                <div class='mt:25 w:-webkit-fill-available w:100%@<md grid align-content:center m:0|30@lg'>
+                    <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
+                        Contact Us
+                    </div>
+                    <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
+                        We are open or any suggestions, please don't hesitate to contact us.
+                    </div>
+                    <div class='grid grid-template-columns:1fr|50%@>md gap:10 '>
+                        <div><label for="fullname" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Full Name</label>
+                            <input
+                                type="text" id="name" name="name"
+                                value={formData().name}
+                                onInput={(e) => setFormData({ ...formData(), name: e.target.value })}
+                                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', 'border-radius': '4px' }}
+                                placeholder="Your name"
+                                required
+                            /></div>
+                        <div>
+
+                            <label for="email" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Email Address</label>
+                            <input
+                                type="email" id="email" name="email"
+                                value={formData().email}
+                                onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+                                style={{ width: '100%', padding: '8px', border: '1px solid #ccc', 'border-radius': '4px' }}
+                                placeholder="Your email"
+                                required
+                            />
+                        </div>
+
+                    </div>
+                    <div style={{ margin: '10px 0' }}>
+                        <label for="subject" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Subject</label>
+                        <input
+                            name="subject"
+                            id='subject'
+                            type="text"
+                            value={formData().subject}
+                            onInput={(e) => setFormData({ ...formData(), subject: e.target.value })}
+                            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', 'border-radius': '4px' }}
+                            placeholder="What's the subject?"
+                            required
+                        />
+                    </div>
+                    <div style={{ 'margin-bottom': '10px 0' }}>
+                        <label for="username" class='f:14' style={{ display: 'block', 'margin-bottom': '5px' }}>Message</label>
+                        <textarea
+                            id="message"
+                            rows="4"
+                            typeof='textarea'
+                            aria-multiline="true"
+                            name="text"
+                            class='max-h:10rem'
+                            value={formData().message}
+                            onInput={(e) => setFormData({ ...formData(), message: e.target.value })}
+                            style={{ width: '100%', padding: '8px', border: '1px solid #ccc', 'border-radius': '4px' }}
+                            placeholder="Write your message.."
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" style={{ width: '100%', padding: '10px', background: 'rgb(226,65,74)', color: 'white', border: 'none', 'border-radius': '4px', cursor: 'pointer' }}>
+                        Send Message
+                    </button>
+
+                </div>
+            </form>
+        </div>
+    );
+};

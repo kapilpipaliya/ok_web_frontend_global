@@ -26,8 +26,8 @@ export type SingleLineTextFieldProps = JSX.InputHTMLAttributes<HTMLInputElement>
     "aria-orientation"?: "horizontal" | "vertical";
     multiline?: false;
     isNumber?: false;
-    labelClass?: '',
-    label: JSX.Element;
+    labelClass?: string,
+    label?: JSX.Element;
     type?: TextFieldType;
     placeholder?: String;
     setValue?: (value: string) => void;
@@ -37,9 +37,9 @@ export type MultiLineTextFieldProps =
     JSX.TextareaHTMLAttributes<HTMLTextAreaElement> & {
     "aria-orientation"?: "horizontal" | "vertical";
     multiline: true;
-    labelClass?: '',
+    labelClass?: string,
     isNumber: false;
-    label: JSX.Element;
+    label?: JSX.Element;
     placeholder?: String;
     setValue?: (value: string) => void;
 };

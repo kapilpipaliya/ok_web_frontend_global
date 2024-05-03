@@ -14,6 +14,7 @@ export default function auth(props: RouteSectionProps) {
     if (user()?.id) {
         navigate(`${APP_BASE_URL}`)
     }
+    
     return (
         <>
             {props.children}

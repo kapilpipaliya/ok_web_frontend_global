@@ -22,13 +22,14 @@ export default function UsersLayout(props: RouteSectionProps) {
         lastSyncedTime: 0,
         member: {},
     });
-    getUser().then(value =>
-    {
-        console.log(value)
-        if (value?.error) {
-            navigate(`/auth/login`)
-        }
-    });
+
+    // getUser().then(value =>
+    // {
+    //     console.log(value)
+    //     if (value?.error) {
+    //         navigate(`/auth/login`)
+    //     }
+    // });
 
 
     return (

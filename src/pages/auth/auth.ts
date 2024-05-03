@@ -1,5 +1,65 @@
-import {getSession, login, logout as logoutSession, register, validatePassword, validateUsername} from "./_server";
-import {getDriver, isIntegerId,} from "~/globals/global";
+import { getSession, login, logout as logoutSession, register, validatePassword, validateUsername } from "./_server";
+import { getDriver, isIntegerId, } from "~/globals/global";
+
+
+
+export const submitContactUsForm = async (name: string, email: string, subject: string, message: string) => {
+    "use server";
+
+    try {
+        const neoSession = getDriver('super').session();
+
+        const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) RETURN n;`;
+        await neoSession.run(query, { name: name, email: email, subject: subject, message: message });
+        return {
+            message: 'Message sent successfully'
+        }
+    } catch (e) {
+        return {
+            error: e.message
+        }
+    }
+
+};
+export const deleteContactTicket = async (name: string) => {
+    "use server";
+
+    try {
+        const neoSession = getDriver('super').session();
+
+        const query = `MATCH(n: Support { name: $name }) DETACH DELETE n;`;
+        await neoSession.run(query, { name: name });
+        return {
+            message: 'Support Ticket deleted successfully'
+        }
+    } catch (e) {
+        return {
+            error: e.message
+        }
+    }
+
+};
+
+export const getContactUsForm = async (email: string) => {
+    "use server";
+
+    try {
+        const neoSession = getDriver('super').session();
+
+        const query = `MATCH (n:Support {email: $email}) RETURN n;`;
+        const result = await neoSession.run(query, { email: email });
+        const data = result.records.map((r) => r.get('n').properties);
+
+        return {
+            contact: data
+        }
+    } catch (e) {
+        return {
+            error: e.message
+        }
+    }
+
+};
 
 export const getPlans = async () => {
     "use server";
@@ -8,7 +68,7 @@ export const getPlans = async () => {
 
     const email = session.data.email;
     if (email === undefined) {
-        return {error: "Not Authorized"};
+        return { error: "Not Authorized" };
     }
 
     const query = `MATCH (n:Pricing) RETURN n;`;
@@ -26,20 +86,20 @@ export const updatePassword = async (currentPassword: string, newPassword: strin
 
     const email = session.data.email;
     if (email === undefined) {
-        return {error: "Not Authorized"};
+        return { error: "Not Authorized" };
     }
 
     const findUserQuery = `MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;`;
-    const findUserResult = await neoSession.run(findUserQuery, {password: currentPassword, username: username});
+    const findUserResult = await neoSession.run(findUserQuery, { password: currentPassword, username: username });
     if (findUserResult.records.length === 0) {
-        return {error: "Current Password is not valid"};
+        return { error: "Current Password is not valid" };
     }
 
 
     const query = `MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;`;
-    const result = await neoSession.run(query, {username: username, password: newPassword});
+    const result = await neoSession.run(query, { username: username, password: newPassword });
     if (result.records.length === 0) {
-        return {error: "Failed to update password"}
+        return { error: "Failed to update password" }
     }
     return {
         message: 'Password updated successfully',
@@ -54,16 +114,16 @@ export const getUser = async () => {
 
     const email = session.data.email;
     if (email === undefined) {
-        return {error: "Not Authorized"};
+        return { error: "Not Authorized" };
     }
     const query = `MATCH (u:User {email: $email}) return u;`;
-    const result = await neoSession.run(query, {email: email});
+    const result = await neoSession.run(query, { email: email });
 
     if (result.records.length === 0) {
-        return {error: "Not Authorized"};
+        return { error: "Not Authorized" };
     }
     const user = result.records[0].get('u');
-    const {password, ...properties} = user.properties;
+    const { password, ...properties } = user.properties;
 
 
     return {
