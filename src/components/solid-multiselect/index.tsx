@@ -402,7 +402,7 @@ export const MultiSelect: Component<IMultiSelectProps> = ( props: IMultiSelectPr
                         <Show when={props.isObject}
                             fallback={ () => ( option || '' ).toString()}
                         >
-                            {option[props.displayValueParent][props.displayValueChild]}
+                            {option[props.displayValueParent]?.[props.displayValueChild]}
                         </Show>
                     </li>}
             </For>

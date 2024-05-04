@@ -19,7 +19,7 @@ let domain = window.location.hostname;
 let port = "";
 if (window.location.hostname == "localhost") {
   // domain = "65.21.181.71"
-  domain = "easyformforge.com"
+  domain = "65.109.174.193"
   port = ":1101";
 
   // port = ":1101";
