@@ -5,6 +5,7 @@ export async function deleteRelationShipMGCall(
   dbConn: DBConnection,
   edgeId: string | number | any,
 ) {
+  'use server';
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
   const transaction = dbConn.session.beginTransaction();
 

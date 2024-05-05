@@ -1,11 +1,7 @@
-import {createAsync, redirect, type RouteDefinition, useNavigate} from "@solidjs/router";
-import {getUser} from "~/pages/auth/auth";
-import {APP_BASE_URL} from "~/lib/Utils";
 import Header from "~/components/website/Header";
 import Footer from "~/components/website/Footer";
 import '../../css/style.css'
 import '../../css/krd.css'
-import {Title} from "@solidjs/meta";
 import SiteTitle from "~/components/website/utils";
 export default function Home() {
     return (

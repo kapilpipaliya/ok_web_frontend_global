@@ -35,9 +35,11 @@ const CustomModal = (props) => {
                     onClick={onClickOverlay}
                     role="presentation"
                 >
-                    <div class="modal r:10" role="dialog" aria-modal="true" tabindex="-1">
+                    <div class={`modal r:10 ${props.dialogClass}`} role="dialog" aria-modal="true" tabindex="-1">
                         <div class={'mb:4 font-weight:bold'}>
+                            <Show when={!props.customTitle} fallback={props.customTitle}>
                             {props.title}
+                            </Show>
                             {props.closeButton !== false && (
                                 <button
                                     title={'Close'}

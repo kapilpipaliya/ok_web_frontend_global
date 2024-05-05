@@ -7,6 +7,7 @@ export async function newVertexDBCall(
   label: string,
   properties?: {[key: string]: any}
 ) {
+  'use server';
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
   const transaction = dbConn.session.beginTransaction();
 

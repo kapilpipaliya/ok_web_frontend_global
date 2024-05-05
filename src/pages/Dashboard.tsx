@@ -1,4 +1,4 @@
-import {A, useLocation, useNavigate} from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
 import {
     createEffect,
@@ -9,22 +9,22 @@ import {
     Show,
     useContext,
 } from "solid-js";
-import {getNewGraphId, GraphContext} from "../lib/graph";
+import { getNewGraphId, GraphContext } from "../lib/graph";
 import Dismiss from "solid-dismiss";
-import {Navbar} from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-import {APP_BASE_URL, PageContext, validateEmail, validatePassword} from "../lib/Utils";
-import {addNewVertex, mergeVertexProperties, newVertex} from "../lib/Vertex";
-import {isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage} from "../signals/common";
+import { Navbar } from "../components/Navbar";
+import { APP_BASE_URL, PageContext, validateEmail, validatePassword } from "../lib/Utils";
+import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
+import { isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage } from "../signals/common";
 import '../components/css/modal.css'
-import {Icon} from "@iconify-icon/solid";
+import { Icon } from "@iconify-icon/solid";
 import '../components/css/modal.css'
-import {getUser, logout} from "~/pages/auth/auth";
-import {createStore} from "solid-js/store";
-import {toast} from "solid-toast";
-import {LoadingContext} from "~/globals/global";
-import {API} from "~/components/DataFetcher";
-import {useToast} from "~/components/custom-component/toast";
+import { getUser, logout } from "~/pages/auth/auth";
+import { createStore } from "solid-js/store";
+import { toast } from "solid-toast";
+import { LoadingContext } from "~/globals/global";
+import { API } from "~/components/DataFetcher";
+import { useToast } from "~/components/custom-component/toast";
+import Sidebar from "~/components/Sidebar";
 
 // const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -62,7 +62,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
     const vertexId = getNewGraphId();
     addNewVertex(
         0,
-        newVertex(vertexId, ["MainNavBarTitle"], {class: `bb:1${border}`}), graph, setGraph
+        newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }), graph, setGraph
     );
 
     const location = useLocation();
@@ -89,63 +89,74 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
         );
 
     });
+    const [isSidebarOpen, setSidebarOpen] = createSignal(true);
+
+    const appStyle = {
+        display: 'flex',
+        height: '100vh'
+    };
+
+    const mainContentStyle = {
+        'flex-grow': 1,
+        overflow: 'auto',
+        display: 'flex',
+        'flex-direction': 'column'
+    };
 
     return (
-        <div class="flex">
+        <div style={appStyle}>
             <Show when={isSideBarOpen() && isShowDrawer()}>
-                <Sidebar isSideBarOpen={isSideBarOpen()}/>
+                <Sidebar isSideBarOpen={isSideBarOpen()} />
             </Show>
-            <div
-                class={`${
-                    isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
-                } flex:1 transition:margin-left|200ms|ease-in-out`}
-            >
-                <div class="flex flex:col flex:1">
-                    <PageContext.Provider
-                        value={{
-                            events: {
-                                setSideBarOpen,
-                                setTitle: (title: string) =>
-                                    mergeVertexProperties(0, vertexId, graph, setGraph, {title}),
-                            },
-                        }}
-                    >
+            <div style={mainContentStyle as any}>
+                <PageContext.Provider
+                    value={{
+                        events: {
+                            setSideBarOpen,
+                            setTitle: (title: string) =>
+                                mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
+                        },
+                    }}
+                >
 
-                        <Show when={!isLoginPage() && !isSignUpPage()}>
-                            <Navbar
-                                showNavBar={isShowDrawer()}
-                                toggleSidebar={() => {
-                                    // set(IS_SIDEBAR_OPEN_KEY, !isSideBarOpen());
-                                    setSideBarOpen((prev) => !prev);
-                                }}
-                                right={
-                                    <>
+                    <Show when={!isLoginPage() && !isSignUpPage()}>
+                        <Navbar
+                            showNavBar={isShowDrawer()}
+                            toggleSidebar={() => {
+                                setSideBarOpen((prev) => !prev);
+                            }}
+                            isSideBarOpen={isSideBarOpen()}
+                            right={<DropdownMenu isLoggedIn={userData?.id}user={userData} />}
+                            meta={graph.vertexes[vertexId]}
+                        />
+                    </Show>
+                    <div class="mt:70">
 
-                                        <div class="container">
+                        <Show when={graph.initialSynced}>{props.children}</Show>
+                    </div>
+                </PageContext.Provider>
 
-                                            <DropdownMenu isLoggedIn={userData?.id} user={userData}/>
-                                        </div>
-                                    </>
-                                }
-                                meta={graph.vertexes[vertexId]}
-                            />
-                        </Show>
-
-                        {/*<AlertDisplay/>*/}
-                        <main class="p:10 bg:white">
-                            <Show when={graph.initialSynced}>{props.children}</Show>
-                        </main>
-                    </PageContext.Provider>
-                </div>
             </div>
         </div>
+        // <div class="flex">
+
+        //     <div
+        //         class={`${
+        //             isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
+        //         } flex:1 transition:margin-left|200ms|ease-in-out`}
+        //     >
+        //         <div class="flex flex:col flex:1">
+
+        //         </div>
+        //     </div>
+        // </div>
     );
 };
 
 const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any } }) => {
     const [loadingSite, setLoadingSite] = useContext(LoadingContext);
     const navigate = useNavigate();
-    const {showErrorToast} = useToast();
+    const { showErrorToast } = useToast();
     const [isOpen, setIsOpen] = createSignal(false);
     let btnEl: any;
     let dropdownContainerEl: any;
@@ -161,7 +172,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
             await fetch(API.logOutUrl, {
                 method: 'POST',
             });
-            return  Promise.resolve('logged out successfully');
+            return Promise.resolve('logged out successfully');
         } catch (error) {
             return Promise.reject(error.response);
         }
@@ -169,8 +180,8 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
 
     createEffect(() => {
         if (isOpen()) {
-            const {bottom, left, width} = btnEl.getBoundingClientRect();
-            const {scrollX, scrollY} = window;
+            const { bottom, left, width } = btnEl.getBoundingClientRect();
+            const { scrollX, scrollY } = window;
 
             dropdownContainerEl.style.position = "absolute";
             dropdownContainerEl.style.top = bottom + scrollY + "px";
@@ -205,14 +216,12 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                 ref={dropdownContainerEl}
             >
                 <div
-                    style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-                        isOpen() ? 1 : 0
-                    }; pointer-events: ${
-                        isOpen() ? "auto" : "none"
-                    }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+                    style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
+                        }; pointer-events: ${isOpen() ? "auto" : "none"
+                        }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
                 >
                     <div style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
-                         onClick={handleClose}></div>
+                        onClick={handleClose}></div>
                     <ul style="list-style-type: none; padding: 0; margin: 0; position:relative;">
                         <li style="margin-bottom: 5px; padding: 10px; " class={'flex p:13'}>
                             <img
@@ -227,7 +236,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                                     class={'text-align:start f:13'}>{!props.isLoggedIn ? 'guest@gmail.com' : props.user.properties?.email ?? 'anonymous@gmail.com'}</div>
                             </div>
                         </li>
-                        <hr class={'color:rgb(223,223,223)'}/>
+                        <hr class={'color:rgb(223,223,223)'} />
                         {!props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
                             <div>
                                 <li style="margin-top: 5px; " class={'m:5|10'}>
@@ -287,7 +296,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                                         Help
                                     </A>
                                 </li>
-                                <hr class={'color:rgb(223,223,223)'}/>
+                                <hr class={'color:rgb(223,223,223)'} />
 
                                 {/*<hr style="color:lightgrey" class={'mt:.5rem'}/>*/}
                                 <li style="margin-top: 5px; " class={'m:5|10'}>
@@ -335,3 +344,5 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
         </>
     );
 };
+
+

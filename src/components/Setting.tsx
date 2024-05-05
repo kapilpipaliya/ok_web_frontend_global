@@ -1,32 +1,38 @@
-import { createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createEffect, createSignal, For, Match, onCleanup, Show, Switch, untrack } from "solid-js";
 import '../base.css'
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
 import PageHeader from "~/components/custom-component/Breadcumb";
-import { deleteContactTicket, getContactUsForm, getPlans, getUser, updatePassword } from "~/pages/auth/auth";
+import { getUser } from "~/pages/auth/auth";
 import './css/tab.css'
 import { createStore } from "solid-js/store";
 import { API } from "~/components/DataFetcher";
 import { useToast } from "~/components/custom-component/toast";
-import { validatePassword } from "~/lib/Utils";
+import { validateEmail, validatePassword } from "~/lib/Utils";
 import { toast } from "solid-toast";
 import { Table, TableBody, TableBodyRow, TableData, TableHead, TableHeader, TableHeadRow } from "./custom-component/Table";
-import StatusChip from "./custom-component/Chip";
+import StatusChip, { ChipDropDown } from "./custom-component/Chip";
 import CustomModal from "./input/Components/CommonDialog";
+import { DeleteDialog } from "./input/Components/deleteDialog";
+import { getDriver } from "~/globals/global";
+import { newRowMGCall } from "~/cypher_api/functions/newRow";
+import { DBConnection } from "~/cypher_api/lib/dbs";
+import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
+import postAPI from "~/pages/auth/PostApi";
 
 
 function Settings() {
-    const { showErrorToast,showSuccessToast } = useToast();
-    const [selectedTab, setSelectedTab] = createSignal('Contact');
+    const { showErrorToast, showSuccessToast } = useToast();
+    const [selectedTab, setSelectedTab] = createSignal('Support');
     const [isDataFetching, setIsDataFetching] = createSignal(false);
     const breadcrumbData = [
         { name: 'Admin', href: '/admin' },
         { name: 'Settings' },
     ];
+
     // detete - deleteNodeMGCall
     // new reply - newRowMGCall(driver, parentVertex.id, 'SupportReply', {text: 'text', timestamp: 'timestamp', personal: 'personal'})
     // to get all reply getChildVertexes(driver, ['SupportReply'], parentVertex)
-
 
     const icons: any = {
         'Basic': 'quill:stack-alt',
@@ -36,7 +42,7 @@ function Settings() {
     }
     const [selectedPlan, setSelectedPlan] = createSignal('');
     const [plans, setPlans] = createSignal([]);
-    const [contactList, setContactList] = createSignal([]);
+    const [contactList, setContactList] = createSignal<any>([]);
     const isSelected = (planName: string) => selectedPlan() === planName;
     const [originalProfileData, setOriginalProfileData] = createStore<{ [key: string]: any }>({}); // Track original data
     const [profileData, setProfileData] = createStore<{ [key: string]: any }>({
@@ -53,7 +59,7 @@ function Settings() {
             id: data.id,
             country: 'United States'
         });
-        loadContactData()
+        loadContactData();
         setOriginalProfileData(profileData); // Set original data
     });
     const sectionStyle = {
@@ -91,34 +97,32 @@ function Settings() {
     };
     const loadContactData = async () => {
         setIsDataFetching(true);
-        console.error('Loading')
         untrack(() => {
-            getContactUsForm(profileData.email).then((value: any) => {
+            postAPI(API.profileUrl, { panel: 'supportTicket', action: 'getTicktes', email: profileData.email }).then((value: any) => {
                 if (value.contact.length > 0) {
                     setContactList(value.contact)
+                } else {
+                    setContactList([])
                 }
                 setIsDataFetching(false);
             });
         });
-
     }
-
     const loadPlans = async () => {
         setIsDataFetching(true);
         untrack(() => {
-            getPlans().then((value: any) => {
-                if (value.plans && value.plans.length > 0) {
+            postAPI(API.profileUrl, {
+                panel: 'pricing',
+            }).then((value: any) => {
+                if (value.plans.length > 0) {
                     setPlans(value.plans)
-                }else{
+                } else {
                     setPlans([])
                 }
                 setIsDataFetching(false);
             });
         });
-
     }
-
-
 
     loadPlans();
 
@@ -137,27 +141,34 @@ function Settings() {
                 }
             }
             try {
-                let response = await fetch(API.profileUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        ...updatedData,
-                        userId: profileData.id
-                    }),
-                });
-                if (response.ok) {
-                    const result = await response.json();
-                    if (result.error) {
-                        return Promise.reject(result.error);
-                    }
-                    return result;
-                } else {
-                    return Promise.reject(response.statusText);
+                const payload = {
+                    ...updatedData,
+                    userId: profileData.id,
+                    panel: 'profile',
+                };
+
+                let response = await postAPI(API.profileUrl, payload);
+                if (response.error) {
+                    return Promise.reject(response.error);
                 }
+                return response;
             } catch (error: any) {
                 return Promise.reject(error.response);
             }
         }
         const onClickSave = async () => {
+            if (!profileData.username.trim()) {
+                showErrorToast("Please enter username");
+                return false;
+            }
+            if (!profileData.email.trim()) {
+                showErrorToast("Please enter email");
+                return false;
+            }
+            if (!validateEmail(profileData.email)) {
+                showErrorToast("Please enter valid email");
+                return false;
+            }
             let response;
             await toast.promise(
                 profileCall(),
@@ -228,7 +239,7 @@ function Settings() {
                     Settings
                 </button>}>
                     <button style={outlineStyle} onClick={() => {
-
+                        setProfileData(originalProfileData);
                         setIsEdit(false)
                     }}>Cancel
                     </button>
@@ -333,7 +344,14 @@ function Settings() {
 
         const updatePasswordCall = async () => {
             try {
-                let response = await updatePassword(passwordData.currentPassword, passwordData.newPassword, profileData.username);
+                const payload = {
+                    panel: 'password',
+                    currentPassword: passwordData.currentPassword,
+                    newPassword: passwordData.newPassword,
+                    username: profileData.username,
+                };
+
+                let response = await postAPI(API.profileUrl, payload);
                 if (response.error) {
                     return Promise.reject(response.error);
                 }
@@ -455,17 +473,33 @@ function Settings() {
         </div>;
     }
 
-    const ContactSection = () => {
-        const [messages, setMessages] = createSignal([]);
+    const SupportTicketSection = () => {
+        const [messages, setMessages] = createSignal<any>([]);
         const [inputMessage, setInputMessage] = createSignal('');
+        
+        
 
-        const sendMessage = () => {
+        const sendMessage = async (parentVertexId: number) => {
             if (inputMessage().trim() !== "") {
                 const newMessage = {
                     text: inputMessage(),
                     timestamp: new Date().toLocaleTimeString(),
                     personal: true
                 };
+                console.log(newMessage, parentVertexId, getDriver('super'));
+                const data = await postAPI(API.profileUrl, {
+                    newMessage: newMessage,
+                    parentVertexId: parentVertexId,
+                    panel: 'supportTicket',
+                    action: 'chat',
+                    subAction: 'send'
+                });
+                
+              
+                
+                if (data.error) {
+                    showErrorToast('Issue in sending message. Please try again later.');
+                }
                 setMessages([...messages()!, newMessage]);
                 setInputMessage('');
                 setTimeout(fakeReply, 1000);
@@ -490,42 +524,63 @@ function Settings() {
             console.log(messages());
         };
 
-        const Chat = () => {
+        const Chat = (props: { id: number }) => {
+            let messageContainer;
+            const getMessages = async () => {
+                const message = await postAPI(API.profileUrl, {
+                    parentVertexId: props.id,
+                    panel: 'supportTicket',
+                    action: 'chat',
+                    subAction: 'get'
+                });
+                setMessages(message.vertexes.map((v: any) => v.properties));
+                scrollToBottom();
+            }
+            const scrollToBottom = () => {
+                if (messageContainer) {
+                    messageContainer.scrollTop = messageContainer.scrollHeight;
+                }
+            };
+                getMessages();
             return (
-                <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
-                    <div class="grid flex-col" style="overflow-y: auto; padding: 10px;">
-                        <For each={messages()} fallback={<div class="text-align:-webkit-center">
-                            <img class="h:30vh" src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826" />
-                            <div style="text-align:center;" class="font-weight:600">No messages yet</div>
-                        </div>}
-                        >
-                            {(msg) => <>
-                                <div class="rel mb:10 @fade|.5s">
-                                    <div style={`color: #fff; float: ${msg.personal ? 'right' : 'left'}; text-align: ${msg.personal ? 'right' : 'left'}; background: ${msg.personal ? 'linear-gradient(120deg, #248A52, #257287)' : 'rgb(29 92 194 / 76%)'}; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}>
-                                        {msg.text}
+                <Show when={messages().length > 0} fallback={<div class="flex ai:center jc:center"><div className="loader" /></div>}>
+                    <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div class="grid flex-col" ref={el => { messageContainer = el; }} style="overflow-y: auto; padding: 10px;">
+                            <For each={messages()} fallback={<div class="text-align:-webkit-center">
+                                <img class="h:30vh" src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826" />
+                                <div style="text-align:center;" class="font-weight:600">No messages yet</div>
+                            </div>}
+                            >
+                                {(msg: any) => <>
+                                    <div class="rel mb:10 mt:10 @fade|.5s">
+                                        <div style={`color: #fff; float: ${msg.personal ? 'right' : 'left'}; text-align: ${msg.personal ? 'right' : 'left'}; background: ${msg.personal ? 'linear-gradient(120deg, #248A52, #257287)' : 'rgb(29 92 194 / 76%)'}; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}>
+                                            {msg.text}
+                                        </div>
+                                        <div class={`abs bottom:-10 ${msg.personal ? 'right:0' : 'left:0'}`} style="font-size: 8px;">
+                                            {msg.timestamp}
+                                        </div>
+                                        <div class={`abs ${msg.personal ? 'right:0 bg:#267e70 h:7px bottom:7px' : 'left:0 bg:#5783d2 h:7px bottom:8px'}`} style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;" />
                                     </div>
-                                    <div class={`abs bottom:-10 ${msg.personal ? 'right:0' : 'left:0'}`} style="font-size: 8px;">
-                                        {msg.timestamp}
-                                    </div>
-                                    <div class={`abs ${msg.personal ? 'right:0 bg:#267e70 h:7px bottom:7px' : 'left:0 bg:#5783d2 h:7px bottom:8px'}`} style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;" />
-                                </div>
 
-                            </>}
-                        </For>
+                                </>}
+                            </For>
+                        </div>
                     </div>
-                </div>
+                    </Show>
+                
             );
         };
 
-        const OpenDialog = () => {
+        const OpenDialog = (props: { id: number }) => {
             return <CustomModal
-                bodyStyle={{'max-height': 'none', 'overflow': 'auto'}}
+                bodyStyle={{ 'max-height': 'none', 'overflow': 'auto' }}
                 openButton={false}
-                buttonLabel={<div class="color:#37c">Reply</div>}
+                buttonLabel={<Icon class="color:#37c" height={22} width={22} icon="bi:chat-text" />}
                 title="Chat With Support"
                 body={
+                    
                     <div>
-                        <Chat />
+                        <Chat id={props.id} />
                     </div>
                 }
                 footer={(toggle: () => void) =>
@@ -538,15 +593,15 @@ function Settings() {
                                 style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
                                 onKeyPress={e => {
                                     console.log(e);
-                                    
+
                                     if (e.key === 'Enter') {
-                                        sendMessage()
+                                        sendMessage(props.id)
                                     }
                                 }}
                                 placeholder="Type message..."
                             />
                             <div
-                                onClick={sendMessage}
+                                onClick={() => sendMessage(props.id)}
                                 class="flex jc:center"
                                 style="position: absolute; top: 5px; right: 10px; color: #fff; border: none; background: #248A52; font-size: 10px; text-transform: uppercase;padding: 4px 6px; border-radius: 10px; cursor: pointer;"
                             >
@@ -559,28 +614,51 @@ function Settings() {
             />
         }
 
-        const deleteContact = async (ticketName: string) => {
-            if (ticketName){
-                const res: any = await deleteContactTicket(ticketName);
-                if (res.error) {
-                    showErrorToast(res.error.message);
-                }
-                showSuccessToast(res.message);
-                const data= contactList().filter((c: any) => c.name != ticketName);
+        const deleteContact = async (id: string) => {
+
+            setIsDataFetching(true);
+            const res: any = await postAPI(API.profileUrl, { panel: 'supportTicket', action: 'delete', id });
+            if (res.error) {
+                showErrorToast(res.error.message);
+            } else {
+                showSuccessToast('Support ticket deleted successfully');
+                const data = contactList().filter((c: any) => c.id != id);
                 setContactList(data);
             }
+            setIsDataFetching(false);
+
         }
 
-        return <div class={'w:full'}>
+        const changeStatus = async (id: string, status: string) => {
+            setIsDataFetching(true);
+            const res: any = await postAPI(API.profileUrl, { panel: 'supportTicket', action: 'updateStatus', id, status });
+            if (res.error) {
+                showErrorToast(res.error.message);
+            } else {
+            showSuccessToast(res.message);
+                const data = contactList().map((c: any) => {
+                    if (c.id == id) {
+                        c.status = status
+                    }
+                    return c;
+                });
+                setContactList(data);
+            }
+            
+            setIsDataFetching(false);
+        }
+
+        return <div class={'w:80%@>md w:100%'}>
+
             <div class={'m:10|20'}>
-                <div class={'font-weight:700'}>Contact Details</div>
+                <div class={'font-weight:700'}>Support Ticket Details</div>
                 <span class={'font-weight:500 color:grey f:14'}>List of all your contacts with our platforms</span>
             </div>
             <div class="m:0|15">
                 <Table>
                     <TableHead>
                         <TableHeadRow>
-                            <For each={['Name', 'Subject', 'Message', 'Status', 'Actions']}>
+                            <For each={['id', 'Name', 'Subject', 'Message', 'Status', 'Actions']}>
                                 {(header) => {
                                     return <TableHeader>{header}</TableHeader>
                                 }}
@@ -589,16 +667,18 @@ function Settings() {
                         </TableHeadRow>
                     </TableHead>
                     <TableBody>
-                        <For each={contactList()}>{(row: any, index) => {
+                        <For fallback={<TableBodyRow><TableData colSpan={6} class={'font-weight:600'}>No Tickets Found</TableData></TableBodyRow>} each={contactList()}>{(row: any, index) => {
                             return <TableBodyRow index={index()}>
+                                <TableData>{row.id}</TableData>
                                 <TableData>{row.name}</TableData>
                                 <TableData>{row.subject}</TableData>
                                 <TableData>{row.message}</TableData>
-                                <TableData><StatusChip status={row.status} /></TableData>
                                 <TableData>
-                                    <div class={'flex jc:center'}>
-                                        <OpenDialog />
-                                        <button class="ml:10 color:rgb(255,0,0)" onClick={() => deleteContact(row.name)}>Delete</button>
+                                    <ChipDropDown selectedItem={row.status} onChanged={(e) => { changeStatus(row.id, e) }} /></TableData>
+                                <TableData>
+                                    <div class={'flex jc:center ai:center'}>
+                                        <OpenDialog id={row.id} />
+                                        <DeleteDialog buttonLabel={<Icon icon='fluent:delete-48-regular' class="color:rgb(255,0,0)" height={22} width={22} />} onConfirm={() => { deleteContact(row.id) }} title={'Delete Support Ticket'} message={'Are you sure you want to delete this ticket?'} />
                                     </div>
                                 </TableData>
                             </TableBodyRow>;
@@ -628,9 +708,9 @@ function Settings() {
                 <input type="radio" name="radio" checked={selectedTab() === 'Password'} />
                 <span class="name">Password</span>
             </label>
-            <label class="radio" onClick={() => setSelectedTab('Contact')}>
-                <input type="radio" name="radio" checked={selectedTab() === 'Contact'} />
-                <span class="name">Contact</span>
+            <label class="radio" onClick={() => setSelectedTab('Support')}>
+                <input type="radio" name="radio" checked={selectedTab() === 'Support'} />
+                <span class="name">Support</span>
             </label>
         </div>
 
@@ -650,8 +730,8 @@ function Settings() {
                 <Match when={selectedTab() === 'Password'}>
                     <PasswordSection />
                 </Match>
-                <Match when={selectedTab() === 'Contact'}>
-                    <ContactSection />
+                <Match when={selectedTab() === 'Support'}>
+                    <SupportTicketSection />
                 </Match>
             </Switch>
         </Show>
@@ -660,3 +740,5 @@ function Settings() {
 }
 
 export default Settings;
+
+

@@ -25,19 +25,25 @@ export function Navbar(
         left?: JSXElement;
         right?: JSXElement;
         showNavBar: boolean;
+        isSideBarOpen: boolean;
         toggleSidebar: () => void;
     }
 ) {
     // let {events} = useContext(PageContext);
     // bg:white box-shadow:1|1|10|#ddd
     const navigate = useNavigate();
-
+    const navbarStyle = ()=>({
+        position: 'fixed',      
+        left: props.isSideBarOpen ? '300px': '0px',                
+        right: 0,        
+        'background-color': 'white',
+        padding: '10px',
+        display: 'flex',
+        'justify-content': 'space-between',
+        'align-items': 'center'
+    });
     return (
-        <nav
-            class={`p:5|10 flex jc:space-between ai:center r:0|0|10|10 ${
-                props.meta?.P.class || ""
-            }`}
-        >
+        <div class="p:5|10 bb:1|solid|rgb(212,219,231) r:0|0|10|10" style={navbarStyle() as any}>
             <Show
                 when={
                     props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition
@@ -53,8 +59,6 @@ export function Navbar(
                             }}
                             title="Back"
                         >
-
-
                             <Icon
                                 icon={"flowbite:caret-left-outline"}
                                 class={'color:black:hover color:lightgrey'}
@@ -104,6 +108,6 @@ export function Navbar(
                     <NavToggleBtn toggleSidebar={props.toggleSidebar}/>
                 </Show>
             </div>
-        </nav>
+        </div>
     );
 }

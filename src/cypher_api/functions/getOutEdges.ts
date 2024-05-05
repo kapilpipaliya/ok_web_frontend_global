@@ -5,6 +5,7 @@ import {DBConnection} from "../lib/dbs";
 export async function getOutEdges(dbConn: DBConnection, fromId: number | string | any, type: string, options: {
   isInward?: boolean
 } = {})  {
+  'use server';
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
 
   try {

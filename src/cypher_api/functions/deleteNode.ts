@@ -5,6 +5,7 @@ export async function deleteNodeMGCall(
   dbConn: DBConnection,
   nodeId: string | number | any,
 ) {
+  'use server';
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
   const transaction = dbConn.session.beginTransaction();
 

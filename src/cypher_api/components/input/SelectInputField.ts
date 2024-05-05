@@ -20,6 +20,7 @@ function vertexOutEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunc
   return false;
 }
 async function vertexOutEdgeContainVertexMGCall(dbConn: DBConnection, vertex: Node, type: string, vertexId: number) {
+  'use server';
   const outEdgesResult = await getOutEdges(dbConn, vertex.id, type);
 
   for (const [relationship, endVertex] of outEdgesResult.pairs || []) {
@@ -41,6 +42,7 @@ function vertexInEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunct
   return false;
 }
 async function vertexInEdgeContainVertexMGCall(dbConn: DBConnection, vertex: Node, type: any, vertexId: number) {
+  'use server';
   const inEdgesResult = await getOutEdges(dbConn, vertex.id, type, {isInward: true});
   for (const [relationship, startVertex] of inEdgesResult.pairs || []) {
     if (compareId(startVertex.id, vertexId)) {
@@ -81,6 +83,7 @@ export function setSelectionValue(graph: Store<IGraph>, setGraph: SetStoreFuncti
   }
 }
 export async function setSelectionValueMGCall(dbConn: DBConnection, vertex: Node, meta: Node, value?: number[] | number) {
+  'use server';
   // delete removed edges:
   const type = getToEdge(meta, vertex);
   if (!type) console.error("edge type cant be empty");
@@ -149,6 +152,7 @@ export function setParentValue(graph: Store<IGraph>, setGraph: SetStoreFunction<
   }
 }
 export async function setParentValueMGCall(dbConn: DBConnection, vertex: Node, meta: Node, value?: number[] | number) {
+  'use server';
   // delete removed edges:
   const type = getInEdge(meta, vertex);
   if (!type) console.error("edge type cant be empty");

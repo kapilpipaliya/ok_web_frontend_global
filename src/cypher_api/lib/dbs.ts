@@ -1,8 +1,8 @@
 import neo4j, {Driver, Session} from 'neo4j-driver';
 
 export interface DBConnection {
-  session?: Session;
   driver: Driver;
+  session?: Session;
 }
 
 // Create an object to store Neo4j driver instances

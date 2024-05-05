@@ -9,6 +9,7 @@ export async function newEdgeMGCall(
   endVertexId: number,
   properties: {[key: string]: any} = {}
 ) {
+  'use server';
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
   const transaction = dbConn.session.beginTransaction();
 

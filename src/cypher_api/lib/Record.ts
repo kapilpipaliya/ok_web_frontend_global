@@ -56,6 +56,7 @@ export interface FormMetaData {
 }
 
 export async function getCompPropsMap(dbConn: DBConnection, comp: Node) {
+  'use server';
  const children = await getChildVertexes(dbConn, ["$0Prop"], [comp]);
  return (children.vertexes || []).reduce((acc, curr) => {
    acc[curr.P.name] = curr;
@@ -64,6 +65,7 @@ export async function getCompPropsMap(dbConn: DBConnection, comp: Node) {
 }
 
 export async function getCompProps(dbConn: DBConnection,comp: Node) {
+  'use server';
  const children = await getChildVertexes(dbConn, ["$0Prop"], [comp]);
  return (children.vertexes || []).reduce((acc, curr) => {
   if (curr.P.name && curr.P.value !== undefined) {
@@ -74,6 +76,7 @@ export async function getCompProps(dbConn: DBConnection,comp: Node) {
 }
 
 export async function getRowProps(dbConn: DBConnection, comp: Node) {
+  'use server';
  const children =  await getChildVertexes(dbConn, ["$0Prop"], [comp]);
  return (children.vertexes || []).reduce((acc, curr) => {
 
@@ -98,6 +101,7 @@ function getComponentProperties(metaRows: Node[]) {
 }
 
 export async function getCollAttrs(dbConn: DBConnection, vertexCollAttr: Node): Promise<{ error: boolean; attr?: FieldAttribute }> {
+  'use server';
  const attr = Object.assign({}, removeUndefinedProperties(vertexCollAttr.P, false, 10));
  attr.metaId = vertexCollAttr.id;
 
@@ -181,6 +185,7 @@ export function setUpdateStatus(value: boolean) {
  isUpdatingInput = value;
 }
 const getCollectionOneLevelAttrs = async (dbConn: DBConnection, collVertex: Node): Promise<{ error: string; attrs?: FieldAttribute[] }> => {
+  'use server';
  const vertexCollAttrResult = await getChildVertexes(dbConn, ["Attr"], [collVertex]);
  if (vertexCollAttrResult.error) {
   return { error: "No Attributes in a Coll" };
@@ -200,6 +205,7 @@ const getCollectionOneLevelAttrs = async (dbConn: DBConnection, collVertex: Node
  return { error: "", attrs };
 };
 export const getFormApiFromForm = async (dbConn: DBConnection, formId: string): Promise<{ error: string; form?: FormMetaData }> => {
+  'use server';
   const collResult = await findVertexMGCall(dbConn, "Coll", IdAttr, formId);
   if (collResult.error) {
    return { error: "coll not found" };
@@ -298,10 +304,12 @@ export function addMeta(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>
 }
 
 export async function getPkForCollection(dbConn: DBConnection, collVertex: Node) {
+  'use server';
  const pks = (await getChildVertexes(dbConn,['$0Pk'], [collVertex])).vertexes || [];
  return pks.map(pk => pk.P.name);
 }
 export async function getNameKeyForCollection(dbConn: DBConnection, collVertex: Node) {
+  'use server';
  const pks = (await getChildVertexes(dbConn, ['$0NameKey'], [collVertex])).vertexes || [];
  return pks.map(pk => pk.P.name);
 }
@@ -312,6 +320,7 @@ export async function deleteRow(
  isRealTime: boolean,
  txnId: number,
 ) {
+  'use server';
   // delete all vertex in edges
   const inEdgesResult = await getOutEdges(dbConn, vertex.id, '', {isInward: true});
   for (const [relationShip, node] of inEdgesResult.pairs || []) {
@@ -777,6 +786,7 @@ export function rowMetaInitialize(graph: Store<IGraph>, setGraph: SetStoreFuncti
 }
 
 export const getFormMetaData = async (dbConn: DBConnection, formId: string) => {
+  'use server';
  let form = AttrsTableData[formId] || (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
  if (!form) {
@@ -798,6 +808,7 @@ export function getStringComponentLocal(graph: Store<IGraph>, setGraph: SetStore
  return getChildVertexLocal(graph, setGraph, ["$0Default"], attrDataTypeVertex).vertex;
 }
 export async function getStringComponent(dbConn: DBConnection, attrDataTypeVertex?: Node) {
+  'use server';
  if (!attrDataTypeVertex) {
   const attrDataTypeVertexResult = await findVertexMGCall(dbConn,"DataType", "name", "String");
   if (attrDataTypeVertexResult.error) {
@@ -817,6 +828,7 @@ export function getCollAttrCompLocal(graph: Store<IGraph>, setGraph: SetStoreFun
 }
 
 export async function getCollAttrComp(dbConn: DBConnection, attrVertex: Node): Promise<Node | undefined> {
+  'use server';
  const attrComp = (await getChildVertex(dbConn, ["$0Comp"], attrVertex)).vertex;
  if (attrComp) return attrComp;
 

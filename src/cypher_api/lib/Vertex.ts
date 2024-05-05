@@ -252,6 +252,7 @@ export function findOrCreateNewVertex(graph: Store<IGraph>, setGraph: SetStoreFu
   return existingVertex;
 }
 export async function findOrCreateNewVertexMGCall(dbConn: DBConnection, label: string, lookupId: string, lookUpUniqueValue: string) {
+  'use server';
   if (!lookUpUniqueValue) {
     console.error("lookup Unique Value must not be empty");
     return;

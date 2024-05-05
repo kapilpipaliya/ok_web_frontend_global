@@ -21,6 +21,7 @@ export function getSelectedVertexValueLocal(graph: Store<IGraph>, setGraph: SetS
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
 export async function getSelectedVertexValue(dbConn: DBConnection, vertex: Node, meta: Node) {
+  'use server';
   if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);
   const vertexResult = await getOutEdges(dbConn, vertex.id, type);
@@ -44,6 +45,7 @@ export function getParentVertexValueLocal(graph: Store<IGraph>, setGraph: SetSto
   return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
 export async function getParentVertexValue(dbConn: DBConnection, vertex: Node, meta: Node): Promise<number[]> {
+  'use server';
   const type = getInEdge(meta, vertex);
   if (!type) {
     return [];
@@ -85,6 +87,7 @@ export function getParentVertexLocal(graph: Store<IGraph>, setGraph: SetStoreFun
   }
 }
 export async function getParentVertex(dbConn: DBConnection,  path: string[], currentVertex: Node): Promise<{ error: boolean; vertex?: Node }> {
+  'use server';
   const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
   const pairsResult = await getOutEdges(dbConn, currentVertex.id, type, {isInward: true});
 
@@ -157,6 +160,7 @@ export function getParentVertexesLocal(graph: Store<IGraph>, setGraph: SetStoreF
   }
 }
 export async function getParentVertexes(dbConn: DBConnection, path: string[], currentVertexes: Node[]): Promise<{ error: boolean; vertexes?: Node[] }> {
+  'use server';
   const stepVertexes = new Map<number, Node>();
   if (path.length == 0) {
     return { error: true };
@@ -240,6 +244,7 @@ export function getChildVertexLocal(graph: Store<IGraph>, setGraph: SetStoreFunc
 }
 
 export async function getChildVertex(dbConn: DBConnection, path: string[], currentVertex: Node): Promise<{ error: boolean; vertex?: Node }> {
+  'use server';
   if (path.length === 0)
     return {
       error: true,
@@ -355,6 +360,7 @@ export async function getChildVertexes(
   currentVertexes: Node[],
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: Node[] }> {
+  'use server';
   const stepVertexes = new Map<number, Node>();
   if (path.length == 0) {
     return { error: true };

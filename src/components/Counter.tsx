@@ -42,7 +42,7 @@ export default function Counter() {
         ]}>
 
             {(link, index) => (
-                <div class={'text:underline'}><A key={index} href={link.href}>{link.text}</A></div>
+                <div class={'text:underline'}><A href={link.href}>{link.text}</A></div>
             )}
         </For>
     </div>

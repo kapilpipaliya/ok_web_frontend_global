@@ -332,6 +332,7 @@ const makeASampleForm = () => {
 
 // @ts-ignore
 export const importAllCSV = async (dbConn: DBConnection, graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>) => {
+  'use server';
   const form = await getFormMetaData(dbConn,'Import');
   if (form.error) return form.error;
   const record = new Record({dbConn, graph, setGraph});
@@ -487,6 +488,7 @@ delete`,
 
 };
 const importMainNavigation = (dbConn: DBConnection, graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>) => {
+  'use server';
   const record = new Record({dbConn, graph, setGraph});
   record.create("Nav", {});
   record.createMeta(AttrsAdminTableData["Nav"])
