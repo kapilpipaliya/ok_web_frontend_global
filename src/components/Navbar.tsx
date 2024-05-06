@@ -32,10 +32,7 @@ export function Navbar(
     // let {events} = useContext(PageContext);
     // bg:white box-shadow:1|1|10|#ddd
     const navigate = useNavigate();
-    const navbarStyle = ()=>({
-        position: 'fixed',      
-        left: props.isSideBarOpen ? '300px': '0px',                
-        right: 0,        
+    const navbarStyle = ()=>({             
         'background-color': 'white',
         padding: '10px',
         display: 'flex',

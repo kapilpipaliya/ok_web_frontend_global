@@ -589,11 +589,9 @@ function Settings() {
                             <input
                                 type="text"
                                 value={inputMessage()}
-                                onChange={e => setInputMessage(e.target.value)}
+                                onInput={e => setInputMessage(e.target.value)}
                                 style="background: none; border: none; outline: none;padding: 0 25px 0px 10px; width: calc(100% - 40px); line-height: 40px;"
                                 onKeyPress={e => {
-                                    console.log(e);
-
                                     if (e.key === 'Enter') {
                                         sendMessage(props.id)
                                     }

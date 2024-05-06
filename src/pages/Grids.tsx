@@ -1,5 +1,5 @@
 // Comment This Lines in web build
-import {A, useLocation, useNavigate, useParams} from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
 import {
     CellContext,
     ColumnDef,
@@ -26,30 +26,30 @@ import {
     transactions, GraphContext, GraphInterface
 } from "~/lib/graph";
 
-import {Icon} from "@iconify-icon/solid";
-import {GenericField} from "~/components/input/Components/GenericFieldComponent";
+import { Icon } from "@iconify-icon/solid";
+import { GenericField } from "~/components/input/Components/GenericFieldComponent";
 import {
     collectionNameDisplayExpr,
     selectedValue
 } from "~/components/input/SelectInputField";
-import {getFormApiFromForm} from "~/lib/Record";
-import {APP_BASE_URL, breadcrumbData, PageContext, Record} from "~/lib/Utils";
-import {getSelectionOptions} from "~/lib/Utils";
-import {getChildVertexes} from "~/lib/Utils";
-import {deleteVertex, findVertexByLabelAndUniqueId} from "~/lib/Vertex";
-import {AttrsTableData} from "~/lib/api";
-import {isNumber} from "~/lib/CommonUtils/isNumber";
-import {capitalizeFirstLetter} from "~/lib/Utils";
-import {WsContext} from "~/utils/ws_events_dispatcher";
-import {AbstractSingleForm} from "~/components/DynamicForm";
+import { getFormApiFromForm } from "~/lib/Record";
+import { APP_BASE_URL, breadcrumbData, PageContext, Record } from "~/lib/Utils";
+import { getSelectionOptions } from "~/lib/Utils";
+import { getChildVertexes } from "~/lib/Utils";
+import { deleteVertex, findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { AttrsTableData } from "~/lib/api";
+import { isNumber } from "~/lib/CommonUtils/isNumber";
+import { capitalizeFirstLetter } from "~/lib/Utils";
+import { WsContext } from "~/utils/ws_events_dispatcher";
+import { AbstractSingleForm } from "~/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/buttons";
-import {AttrsAdminTableData} from "~/lib/apiAdmin";
-import {FieldAttribute, FormMetaData} from "~/lib/Type";
-import {CollapsibleTable} from "~/components/custom-component/Table";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FieldAttribute, FormMetaData } from "~/lib/Type";
+import { CollapsibleTable } from "~/components/custom-component/Table";
 import Dismiss from "solid-dismiss";
-import {SetStoreFunction} from "solid-js/store";
+import { SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom-component/Breadcumb";
-import {renderNavTreeFromGraph} from "~/components/Sidebar";
+import { renderNavTreeFromGraph } from "~/components/Sidebar";
 
 interface AbstractSingleGridProps {
     tableId: string;
@@ -62,8 +62,6 @@ interface DataGridProps {
 const Modal = (p: {
     graph: GraphInterface,
     setGraph: SetStoreFunction<GraphInterface>,
-    rowId: Accessor<any>,
-    setRowId: Setter<any>,
     tableId: any,
     info: any
 }) => {
@@ -72,7 +70,6 @@ const Modal = (p: {
     let btnPopUp;
 
     const closePopUp = () => {
-        console.log(p.rowId())
         setOpen(false);
     };
 
@@ -80,62 +77,61 @@ const Modal = (p: {
         <>
 
             <Icon ref={btnEl} height={22} width={22} color={'grey'} aria-disabled={open()}
-                  class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue`}
-                  onClick={() => {
-                      p.setRowId(p.info.row.original.id);
-
-                      console.log(p.rowId())
-                      setOpen(true)
-                  }}
-                  icon={'fluent:edit-12-regular'}>
+                class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue`}
+                onClick={() => {
+                    setOpen(true)
+                }}
+                icon={'fluent:edit-12-regular'}>
             </Icon>
-            <Show when={p.rowId()}>
-                <Dismiss
-                    closeWhenEscapeKeyIsPressed={true}
-                    menuButton={btnEl}
-                    open={open}
-                    setOpen={setOpen}
-                    menuPopup={btnPopUp}
-                    animation={{name: "fade", appendToElement: "menuPopup"}}
-                    modal
+            <Dismiss
+                closeWhenEscapeKeyIsPressed={true}
+                menuButton={btnEl}
+                open={open}
+                setOpen={setOpen}
+                menuPopup={btnPopUp}
+                animation={{ name: "fade", appendToElement: "menuPopup" }}
+                modal
+            >
+                <div
+                    class="modal-container"
+                    role="presentation"
+                    ref={btnPopUp}
                 >
-                    <div
-                        class="modal-container"
-                        role="presentation"
-                        ref={btnPopUp}
-                    >
-                        <div class="modal min-w:30% r:10px p:0" role="dialog" aria-modal="true" tabindex="-1">
-                            <div class={'mb:4 font-weight:bold'}>
-                                Quick Edit
-                                <button
-                                    title={'Close'}
-                                    onClick={closePopUp}
+                    <div class="modal min-w:30% r:10px p:0" role="dialog" aria-modal="true" tabindex="-1">
+                        <div class={'mb:4 font-weight:bold'}>
+                            Quick Edit
+                            <button
+                                title={'Close'}
+                                onClick={closePopUp}
 
-                                    class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
-                                    style={{float: "right"}}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                            <hr class={'fg:lightgrey'}/>
-                            <div class={'p:3 mt:10 max-h:50vh overflow:auto'}>
-                                <AbstractSingleForm
-                                    formId={p.tableId}
-                                    graph={p.graph}
-                                    id={p.rowId()}
-                                    buttonAlign="end"
-                                    isDialogContext={true}
-                                    // @ts-ignore
-                                    config={{}}
-                                    showMainFieldsOnly={true}
-                                    importExportButtons={false}
-                                    doMount={false}
-                                    setGraph={p.setGraph}/>
-                            </div>
+                                class={'bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5'}
+                                style={{ float: "right" }}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <hr class={'fg:lightgrey'} />
+                        
+                        <div class={'p:3 mt:10 max-h:50vh overflow:auto'}>
+                            
+                            <AbstractSingleForm
+                                formId={p.tableId}
+                                graph={p.graph}
+                                id={p.info.row.original.id}
+                                buttonAlign="end"
+                                isDialogContext={true}
+
+                                // @ts-ignore
+                                config={{}}
+                                showMainFieldsOnly={true}
+                                importExportButtons={false}
+                                doMount={false}
+                                setGraph={p.setGraph} />
                         </div>
                     </div>
-                </Dismiss>
-            </Show>
+                </div>
+            </Dismiss>
+
         </>
     );
 };
@@ -174,7 +170,7 @@ export const DataGrid = (props: DataGridProps) => {
     };
 
     const tableColumns = [] as ColumnDef<any>[];
-    const [rowId, setRowId] = createSignal(null);
+
     const SelectValue = (props: { attribute: FieldAttribute, info: CellContext<any, any> }) => {
 
         const vertex = selectedValue(
@@ -207,7 +203,7 @@ export const DataGrid = (props: DataGridProps) => {
     }
     for (const attribute of formNew!.attributes) {
 
-        const column = {...attribute} as unknown as ColumnDef<any>;
+        const column = { ...attribute } as unknown as ColumnDef<any>;
         if (attribute.component === "Table") continue;
         // if (attribute.props?.skip) continue;
 
@@ -218,11 +214,11 @@ export const DataGrid = (props: DataGridProps) => {
         column.cell = info => {
             return <Switch>
                 <Match when={attribute.component === "SelectBox" && !attribute.props?.items}>
-                    <SelectValue attribute={attribute} info={info}/>
+                    <SelectValue attribute={attribute} info={info} />
                 </Match>
 
                 <Match when={attribute.component === "TagBox" && !attribute.props?.items}>
-                    <TagValue attribute={attribute} info={info}/>
+                    <TagValue attribute={attribute} info={info} />
                 </Match>
 
                 <Match when={attribute.component === "CheckBox"}>
@@ -248,15 +244,15 @@ export const DataGrid = (props: DataGridProps) => {
         footer: '',
         cell: (info) =>
             <Show when={!formNew.isInlineEditable} fallback={
-                <Modal info={info} graph={graph} setGraph={setGraph} rowId={rowId} setRowId={setRowId}
-                       tableId={props.tableId}/>
+                <Modal info={info} graph={graph} setGraph={setGraph}
+                    tableId={props.tableId} />
             }>
                 <A
                     href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
                     class="r:5|5|5|5 p:5"
                 >
                     <CustomButton variant={'custom'}><Icon height={21} width={21} class={'color:#3477CC'}
-                                                           icon="fluent:edit-12-regular"/></CustomButton>
+                        icon="fluent:edit-12-regular" /></CustomButton>
 
                 </A></Show>
 
@@ -267,10 +263,10 @@ export const DataGrid = (props: DataGridProps) => {
         header: '',
         footer: '',
         cell: info => <button onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
-                              class="text-fill:red font:semibold	">
+            class="text-fill:red font:semibold	">
             <CustomButton variant={'custom'} class={'fg:rgb(252,0,0)'}><Icon height={21} width={21}
-                                                                             icon="fluent:delete-12-regular"
-                                                                             class="color:red mr:1rem"/></CustomButton>
+                icon="fluent:delete-12-regular"
+                class="color:red mr:1rem" /></CustomButton>
         </button>
     });
 
@@ -278,8 +274,8 @@ export const DataGrid = (props: DataGridProps) => {
         return <>Incorrect Configuration</>
     }
     // console.log(1, JSON.stringify(props))
-    const {Ws} = useContext(WsContext);
-    let {events} = useContext(PageContext);
+    const { Ws } = useContext(WsContext);
+    let { events } = useContext(PageContext);
     events?.setTitle(formNew.title);
     onCleanup(() => events?.setTitle(''));
 
@@ -304,7 +300,7 @@ export const DataGrid = (props: DataGridProps) => {
 
     return (
         <div class="">
-                <CollapsibleTable headers={tableColumns} rows={data()}/>
+            <CollapsibleTable headers={tableColumns} rows={data()} />
         </div>
     );
 };
@@ -317,13 +313,13 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     const nestedName = createMemo(() => findVertexByLabelAndUniqueId('Coll', IdAttr, props.tableId, graph)?.P?.name);
     console.log(findVertexByLabelAndUniqueId('Coll', IdAttr, props.tableId, graph))
     const navData = createMemo(() => {
-        const nav = findVertexByLabelAndUniqueId("Nav", "name", "main",graph);
+        const nav = findVertexByLabelAndUniqueId("Nav", "name", "main", graph);
         if (!nav) return;
 
-        const record = new Record({ws: undefined});
-        record.load(graph,nav.id);
-        untrack(() => record.createMeta(AttrsAdminTableData["Nav"],graph,setGraph));
-        const navData = renderNavTreeFromGraph( record,true, graph);
+        const record = new Record({ ws: undefined });
+        record.load(graph, nav.id);
+        untrack(() => record.createMeta(AttrsAdminTableData["Nav"], graph, setGraph));
+        const navData = renderNavTreeFromGraph(record, true, graph);
         const navigation = getParentFromNav(navData);
         return navigation;
     });
@@ -342,7 +338,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
         <>
             <PageHeader
                 title={`${navData()?.child || nestedName()}`}
-                breadcrumb={[...breadcrumbData,{name: navData()?.parent}, {name: navData()?.child || nestedName()}]}
+                breadcrumb={[...breadcrumbData, { name: navData()?.parent }, { name: navData()?.child || nestedName() }]}
             />
             <div class="flex justify-content:start p:5">
                 <GenericField
@@ -354,8 +350,8 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                                 props: {
                                     onClick: () => navigate("new"),
                                     variant: "soft",
-                                    style: {"padding":"7px 10px"},
-                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22}/>,
+                                    style: { "padding": "7px 10px" },
+                                    leading: <Icon icon={'lets-icons:add-round'} height={22} width={22} />,
                                     children: "Add New",
                                 },
                             },
@@ -364,14 +360,14 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
                 />
             </div>
             <Show when={tableId()}>
-                <DataGrid tableId={tableId()}/>
+                <DataGrid tableId={tableId()} />
             </Show>
         </>
     );
 };
 
 export function getParentFromNav(navData: any) {
-    const  param = useLocation();
+    const param = useLocation();
     const dats = JSON.parse(JSON.stringify(navData));
     let result = {}; // Initialize an empty object to store the result
     dats.forEach((value: any) => {

@@ -109,7 +109,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     // console.log(await server.text());
     
     // TODO : sync initial data to drivers[username]
-    console.log(`http://localhost:3100/loadData/${labPort}`);
+    // console.log(`http://localhost:3100/loadData/${labPort}`); 
 
     // if (server.status !== 200) {
     //     console.error('Server error:', server.error);

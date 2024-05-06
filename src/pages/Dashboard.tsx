@@ -14,7 +14,6 @@ import Dismiss from "solid-dismiss";
 import { Navbar } from "../components/Navbar";
 import { APP_BASE_URL, PageContext, validateEmail, validatePassword } from "../lib/Utils";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../lib/Vertex";
-import { isLoginPage, isSignUpPage, setIsLoginPage, setSignUpPage } from "../signals/common";
 import '../components/css/modal.css'
 import { Icon } from "@iconify-icon/solid";
 import '../components/css/modal.css'
@@ -65,9 +64,11 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
         0,
         newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }), graph, setGraph
     );
-
+    
     const location = useLocation();
     const [isShowDrawer, setIsShowDrawer] = createSignal(true);
+    const [isLoginPage, setIsLoginPage] = createSignal(location.pathname.includes("/auth/login"));
+    const [signUpPage, setSignUpPage] = createSignal(location.pathname.includes("/auth/signup"));
     const [userData, setUserData] = createStore({});
 
 
@@ -122,7 +123,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                     }}
                 >
 
-                    <Show when={!isLoginPage() && !isSignUpPage()}>
+                    <Show when={!isLoginPage() && !signUpPage()}>
                         <Navbar
                             showNavBar={isShowDrawer()}
                             toggleSidebar={() => {
@@ -133,10 +134,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                             meta={graph.vertexes[vertexId]}
                         />
                     </Show>
-                    <div class="mt:70">
-
-                        <Show when={graph.initialSynced}>{props.children}</Show>
-                    </div>
+                    <Show when={graph.initialSynced}>{props.children}</Show>
                 </PageContext.Provider>
 
             </div>
@@ -300,7 +298,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                                         onclick={async () => {
                                             setIsOpen(false);
                                             setLoadingSite(true);
-                                            let response = {} as {[key: string]: any};
+                                            let response = {} as { [key: string]: any };
                                             await toast.promise(
                                                 onLogOut(),
                                                 {

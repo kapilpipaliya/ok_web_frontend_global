@@ -1,7 +1,6 @@
 import { batch, useContext } from 'solid-js';
 import { getCookie, ServerEventsDispatcher, WsContext } from '~/utils/ws_events_dispatcher';
 
-import { isAdmin } from '~/signals/common';
 import { isObject } from "./Utils";
 import { deleteEdge, updateEdgeId } from './Edge';
 import {
@@ -186,7 +185,7 @@ export const syncEvent = (graph: Store<GraphInterface>, setGraph: SetStoreFuncti
             [
                 ['get', 'sync', 0],
                 {
-                    admin: isAdmin() ? true : undefined,
+                    admin:  true ,
                     from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
                     // subscriptions: this.subscriptions,
                     subscriptions: [],

@@ -267,6 +267,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     const PreviewCode = () => {
         return <pre>{stringify(getExportCode(graph, record))}</pre>;
     };
+    
     const onImportClick = (data: any) => {
         popupConfig = (instance: () => dxPopup) => ({
             contentTemplate: ImportComponent,
