@@ -1,7 +1,8 @@
 import CustomButton from "~/components/solid-blocks/blocks/buttons";
 import CustomModal from "./CommonDialog";
+import { JSX } from "solid-js";
 
-export const DeleteDialog = (props: { onConfirm: () => void, title?: string, message?: string, buttonLabel?: any, onCancel?: () => void}) => {
+export const DeleteDialog = (props: { onConfirm: () => void, title?: string, message?: string, buttonLabel?: JSX.Element, onCancel?: () => void}) => {
 
     const handleConfirm = () => {
         props.onConfirm();
@@ -20,9 +21,9 @@ export const DeleteDialog = (props: { onConfirm: () => void, title?: string, mes
             body={
                 <p class="p:10px|0px">{props.message || "Are you sure you want to delete this item?"}</p>
             }
-            footer={(toggle: () => void) =>
+            footer={(toggle) =>
                 <div class={'flex ai:center jc:end'}>
-                    <CustomButton variant="outlined" class="danger" onClick={() => { handleCancel(); toggle();}}>Cancel</CustomButton>
+                    <CustomButton variant="outlined" class="danger" onClick={() => { handleCancel(); toggle(v=>!v);}}>Cancel</CustomButton>
                     <CustomButton variant="contained" onClick={handleConfirm} style="margin-right: 10px;">Confirm</CustomButton>
                 </div>
             }

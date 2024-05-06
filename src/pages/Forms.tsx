@@ -2,7 +2,7 @@ import '../base.css'
 import { createSignal, Match, Show, Switch, useContext } from "solid-js";
 import { APP_BASE_URL, validateEmail, validatePassword, validateUsername } from "~/lib/Utils";
 import logo from "../../assets/signup/logo.png";
-import { loginOrRegister, submitContactUsForm } from "~/pages/auth/auth";
+import { submitContactUsForm } from "~/pages/auth/auth";
 import { A, useNavigate } from "@solidjs/router";
 import { API } from "~/components/DataFetcher";
 import { useToast } from "~/components/custom-component/toast";
@@ -10,6 +10,7 @@ import { toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/globals/global";
 import sendEmail from '~/email';
+import postAPI from "~/pages/auth/PostApi";
 
 export const Login = () => {
 
@@ -24,23 +25,9 @@ export const Login = () => {
         setShowPassword(!showPassword());
     };
     const loginCall = async () => {
-        try {
-            let response = await fetch(API.loginUrl, {
-                method: 'POST',
-                body: JSON.stringify({ email: formData().email, password: formData().password })
+        return await postAPI(API.loginUrl, {
+                 email: formData().email, password: formData().password
             });
-            if (response.ok) {
-                const result = await response.json();
-                if (result.error) {
-                    return Promise.reject(result.error);
-                }
-                return result;
-            } else {
-                return Promise.reject(response.statusText);
-            }
-        } catch (error: any) {
-            return Promise.reject(error.response);
-        }
     }
     const handleSubmit = async (event: SubmitEvent) => {
 
@@ -64,7 +51,7 @@ export const Login = () => {
                     },
                     error: (error) => {
                         console.log("error => ", error)
-                        return <span>{error}</span>
+                        return <span>{error.message}</span>
                     }
                 }
             )
@@ -168,31 +155,11 @@ export const SignUp = () => {
         setShowPassword(!showPassword());
     };
     const signUpCall = async () => {
-        try {
-            let response = await fetch(API.signUpUrl, {
-                method: 'POST',
-                body: JSON.stringify({
+        return await postAPI(API.signUpUrl, {
                     username: formData().username,
                     email: formData().email,
                     password: formData().password
-                })
-            });
-            if (response.ok) {
-                const result = await response.json();
-                if (result.error) {
-                    return Promise.reject(result.error);
-                }
-                return result;
-            } else {
-                if (response.headers.get('content-type')?.includes('application/json')) {
-                    const result = await response.json();
-                    return Promise.reject(result.error);
-                }
-                return Promise.reject(response.statusText);
-            }
-        } catch (error: any) {
-            return Promise.reject(error.response);
-        }
+                });
     }
 
     const handleSubmit = async (event: SubmitEvent) => {
@@ -218,7 +185,7 @@ export const SignUp = () => {
                         return <span>Registered Successfully</span>
                     },
                     error: (error) => {
-                        return <span>{error}</span>
+                        return <span>{error.message}</span>
                     }
                 }
             )
@@ -319,12 +286,12 @@ export const ForgotPasswordForm = () => {
     const [isLoading, setIsLoading] = createSignal(false);
     const [stage, setStage] = createSignal(0); // 0: Email, 1: OTP, 2: New Passwords
 
-    const validatePassword = (password) => {
+    const validatePassword = (password: string) => {
         // Example validation: Minimum eight characters, at least one letter and one number
         const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{6,16}$/;
         return regex.test(password);
     };
-    const handleEmailSubmit = async (event) => {
+    const handleEmailSubmit = async (event: Event) => {
         event.preventDefault();
         setIsLoading(true);
         const data = await sendEmail(username(), 'Reset Password', 'Reset Password');
@@ -332,7 +299,7 @@ export const ForgotPasswordForm = () => {
         setStage(1);
     };
 
-    const handleOtpSubmit = (event) => {
+    const handleOtpSubmit = (event: Event) => {
         event.preventDefault();
         setIsLoading(true);
         console.log('OTP submitted:', otp());
@@ -341,7 +308,7 @@ export const ForgotPasswordForm = () => {
     };
 
 
-    const handlePasswordResetSubmit = (event) => {
+    const handlePasswordResetSubmit = (event: Event) => {
         event.preventDefault();
         if (newPassword() !== confirmPassword()) {
             showErrorToast('Passwords do not match.');
@@ -510,11 +477,11 @@ export const ContactUs = () => {
             let response = await submitContactUsForm(formData().name, formData().email, formData().subject, formData().message);
 
             if (response.error) {
-                return Promise.reject(response.error);
+                return Promise.reject(new Error(response.error));
             }
             return response;
         } catch (error: any) {
-            return Promise.reject(error.response);
+            return Promise.reject(new Error(error.response));
         }
     }
 
@@ -537,7 +504,7 @@ export const ContactUs = () => {
                     },
                     error: (error) => {
                         console.log("error => ", error)
-                        return <span>{error}</span>
+                        return <span>{error.message}</span>
                     }
                 }
             )

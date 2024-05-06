@@ -11,14 +11,14 @@ export const NestedExpressionBuilder = (props: {
     // Implement the logic for NestedExpressionBuilder here
     return (
         <CustomModal
-            buttonLabel={'carbon:settings-edit'}
+            buttonIcon={'carbon:settings-edit'}
             title="Nested Expression Builder"
             body={
                 <div>
                     {/* Body content */}
                 </div>
             }
-            footer={(toggle: () => void) =>
+            footer={(toggle) =>
                 <div class={'flex ai:center jc:end'}>
                     {/* Footer content */}
                 </div>

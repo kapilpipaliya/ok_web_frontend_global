@@ -4,7 +4,7 @@
  * @param {object} data - The payload for the POST request.
  * @returns {Promise<any>} - The promise that resolves to the response data.
  */
-async function postAPI(url: string, data: object) {
+async function postAPI(url: string, data: object): Promise<{[key: string]: any}> {
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -15,7 +15,12 @@ async function postAPI(url: string, data: object) {
         });
 
         if (!response.ok) {
-            throw new Error('Network response was not ok');
+            if (response.headers.get('content-type')?.includes('application/json')) {
+                const result = await response.json();
+                return Promise.reject(new Error(result.error));
+            }
+
+            throw new Error(`Network response was not ok: ${response.statusText}`);
         }
 
         const responseData = await response.json();
@@ -25,7 +30,7 @@ async function postAPI(url: string, data: object) {
         }
 
         return responseData;
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error making POST request:', error.stack);
         throw error;
     }

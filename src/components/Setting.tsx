@@ -149,11 +149,11 @@ function Settings() {
 
                 let response = await postAPI(API.profileUrl, payload);
                 if (response.error) {
-                    return Promise.reject(response.error);
+                    return Promise.reject(new Error(response.error));
                 }
                 return response;
             } catch (error: any) {
-                return Promise.reject(error.response);
+                return Promise.reject(new Error(error.response));
             }
         }
         const onClickSave = async () => {
@@ -169,7 +169,7 @@ function Settings() {
                 showErrorToast("Please enter valid email");
                 return false;
             }
-            let response;
+            let response = {} as {[key: string]: any};
             await toast.promise(
                 profileCall(),
                 {
@@ -180,7 +180,7 @@ function Settings() {
                     },
                     error: (error) => {
                         console.log("error => ", error)
-                        return <span>{error}</span>
+                        return <span>{error.message}</span>
                     }
                 }
             )
@@ -353,11 +353,11 @@ function Settings() {
 
                 let response = await postAPI(API.profileUrl, payload);
                 if (response.error) {
-                    return Promise.reject(response.error);
+                    return Promise.reject(new Error(response.error));
                 }
                 return response;
             } catch (error: any) {
-                return Promise.reject(error.response);
+                return Promise.reject(new Error(error.response));
             }
         }
         const onClickSave = async () => {
@@ -393,7 +393,7 @@ function Settings() {
                 showErrorToast("New password can't be the same as current password");
                 return false;
             }
-            let response;
+            let response = {} as {[key: string]: any};
             await toast.promise(
                 updatePasswordCall(),
                 {
@@ -405,7 +405,7 @@ function Settings() {
                         return <span>Password Updated Successfully</span>
                     },
                     error: (error) => {
-                        return <span>{error}</span>
+                        return <span>{error.message}</span>
                     }
                 }
             )
@@ -525,7 +525,7 @@ function Settings() {
         };
 
         const Chat = (props: { id: number }) => {
-            let messageContainer;
+            let messageContainer: HTMLDivElement;
             const getMessages = async () => {
                 const message = await postAPI(API.profileUrl, {
                     parentVertexId: props.id,
@@ -543,7 +543,7 @@ function Settings() {
             };
                 getMessages();
             return (
-                <Show when={messages().length > 0} fallback={<div class="flex ai:center jc:center"><div className="loader" /></div>}>
+                <Show when={messages().length > 0} fallback={<div class="flex ai:center jc:center"><div class="loader" /></div>}>
                     <div style="top: 50%; left: 50%; max-height: 500px; z-index: 2; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between;">
                         <div class="grid flex-col" ref={el => { messageContainer = el; }} style="overflow-y: auto; padding: 10px;">
                             <For each={messages()} fallback={<div class="text-align:-webkit-center">
@@ -583,7 +583,7 @@ function Settings() {
                         <Chat id={props.id} />
                     </div>
                 }
-                footer={(toggle: () => void) =>
+                footer={() =>
                     <div class={'flex ai:center jc:center'}>
                         <div class="b:1.5px|solid|lightseagreen r:5" style="width: 100%;position: relative;">
                             <input

@@ -10,11 +10,10 @@ export async function newRowMGCall(
   properties: any = {}
 ) {
   "use server";
-  console.log("{ properties }");
   dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
   const transaction = dbConn.session.beginTransaction();
 
-  // try {
+  try {
     // Cypher query to create a new vertex
     let createVertexQuery = `CREATE (v:${label || edgeType}) SET v = $properties RETURN v`;
     const vertexResult = await transaction.run(createVertexQuery, { properties });
@@ -57,15 +56,15 @@ export async function newRowMGCall(
       vertex: newVertex,
       edge: newEdge
     };
-  // } catch (error) {
-  //   console.error(error);
+  } catch (error) {
+    console.error(error);
 
-  //   // Rollback the transaction in case of an error
-  //   await transaction.rollback();
-  //   return { error: true };
-  // } finally {
-  //   // await session.close();
-  //   // on application exit:
-  //   // await driver.close();
-  // }
+    // Rollback the transaction in case of an error
+    await transaction.rollback();
+    return { error: true };
+  } finally {
+    // await session.close();
+    // on application exit:
+    // await driver.close();
+  }
 }

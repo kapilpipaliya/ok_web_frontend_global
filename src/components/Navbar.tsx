@@ -1,5 +1,5 @@
 import {Icon} from "@iconify-icon/solid";
-import {createSignal, JSXElement, Show} from "solid-js";
+import { createSignal, JSX, JSXElement, Show } from "solid-js";
 import {DisplayComponentProps} from "./ComponentType";
 import {useNavigate} from "@solidjs/router";
 import './css/sideBarSearch.css';
@@ -41,9 +41,9 @@ export function Navbar(
         display: 'flex',
         'justify-content': 'space-between',
         'align-items': 'center'
-    });
+    }) as JSX.CSSProperties;
     return (
-        <div class="p:5|10 bb:1|solid|rgb(212,219,231) r:0|0|10|10" style={navbarStyle() as any}>
+        <div class="p:5|10 bb:1|solid|rgb(212,219,231) r:0|0|10|10" style={navbarStyle()}>
             <Show
                 when={
                     props.meta?.P.menuPosition === "left" || !props.meta?.P.menuPosition

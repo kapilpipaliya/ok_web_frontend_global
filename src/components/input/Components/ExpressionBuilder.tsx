@@ -134,7 +134,7 @@ export const ExpressionBuilder = (props: {
     return (
         <div >
            <CustomModal
-                buttonLabel={'carbon:settings-edit'}
+                buttonIcon={'carbon:settings-edit'}
                 title="Expression Builder"
                 body={
                     <div>
@@ -207,7 +207,7 @@ export const ExpressionBuilder = (props: {
                         </For>
                     </div>
                 }
-                footer={(toggle: any) =>
+                footer={(toggle) =>
                     <div class={'flex ai:center jc:end'}>
                         <CustomButton
                             variant={'soft'}
@@ -229,7 +229,7 @@ export const ExpressionBuilder = (props: {
                             variant="contained"
                             onclick={()=> {
                                 handleSubmit();
-                                toggle()
+                                toggle(v=>!v)
                             }}
                             {...props.meta.P.props}
                         >

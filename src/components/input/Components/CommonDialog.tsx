@@ -1,31 +1,46 @@
 import '../../css/modal.css'
 import Dismiss from "solid-dismiss";
-import { Show, createSignal } from "solid-js";
+import { Show, createSignal, JSX, Setter } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 
-const CustomModal = (props) => {
+interface CustomModalProps {
+    buttonLabel?: JSX.Element;
+    buttonIcon?: string;
+    title?: string | JSX.Element;
+    customTitle?: JSX.Element;
+    body: JSX.Element;
+    footer: (toggle: Setter<boolean>) => JSX.Element;
+    dialogClass: string;
+    bodyStyle?: JSX.CSSProperties;
+    openButton?: boolean;
+    closeButton?: boolean;
+    iconSize?: number;
+    iconClass?: string;
+}
+
+const CustomModal = (props: CustomModalProps) => {
     const [open, setOpen] = createSignal(false);
-    let btnEl;
+    let btnEl: any;
 
     const onClickClose = () => {
         setOpen(false);
     };
 
-    const onClickOverlay = (e) => {
+    const onClickOverlay = (e: MouseEvent) => {
         if (e.target !== e.currentTarget) return;
         setOpen(false);
     };
 
     return (
         <>
-            <Show when={props.openButton !== false} fallback={<div class={`cursor:pointer bg:#dfe9f3d1:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} ref={btnEl} aria-disabled={open()}>{props.buttonLabel}</div>}>
-                <Icon ref={btnEl} height={props.iconSize ?? 25} width={props.iconSize ?? 25} color={'grey'} aria-disabled={open()}
+            <Show when={props.openButton !== false} fallback={<div class={`cursor:pointer bg:#dfe9f3d1:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} ref={btnEl!} aria-disabled={open()}>{props.buttonLabel}</div>}>
+                <Icon ref={btnEl!} height={props.iconSize ?? 25} width={props.iconSize ?? 25} color={'grey'} aria-disabled={open()}
                     class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`} onClick={() => setOpen(true)}
-                    icon={props.buttonLabel}>
+                    icon={props.buttonIcon ?? 'material-symbols:error'}>
                 </Icon>
             </Show>
             <Dismiss
-                menuButton={btnEl}
+                menuButton={btnEl!}
                 open={open}
                 setOpen={setOpen}
                 modal

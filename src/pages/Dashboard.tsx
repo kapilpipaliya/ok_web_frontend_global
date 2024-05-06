@@ -25,6 +25,7 @@ import { LoadingContext } from "~/globals/global";
 import { API } from "~/components/DataFetcher";
 import { useToast } from "~/components/custom-component/toast";
 import Sidebar from "~/components/Sidebar";
+import postAPI from "~/pages/auth/PostApi";
 
 // const IS_SIDEBAR_OPEN_KEY = "isSideBarOpen";
 
@@ -71,7 +72,9 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
 
 
     getUser().then(value => {
-        setUserData(value)
+        if (!value.error) {
+            setUserData(value)
+        }
         console.log(value)
     });
 
@@ -126,7 +129,7 @@ export const FullDashboard = (props: { children?: JSX.Element }) => {
                                 setSideBarOpen((prev) => !prev);
                             }}
                             isSideBarOpen={isSideBarOpen()}
-                            right={<DropdownMenu isLoggedIn={userData?.id}user={userData} />}
+                            right={<DropdownMenu isLoggedIn={userData?.id} user={userData} />}
                             meta={graph.vertexes[vertexId]}
                         />
                     </Show>
@@ -168,14 +171,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
     };
 
     const onLogOut = async () => {
-        try {
-            await fetch(API.logOutUrl, {
-                method: 'POST',
-            });
-            return Promise.resolve('logged out successfully');
-        } catch (error) {
-            return Promise.reject(error.response);
-        }
+        return await postAPI(API.logOutUrl, {});
     }
 
     createEffect(() => {
@@ -304,7 +300,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                                         onclick={async () => {
                                             setIsOpen(false);
                                             setLoadingSite(true);
-                                            let response;
+                                            let response = {} as {[key: string]: any};
                                             await toast.promise(
                                                 onLogOut(),
                                                 {
@@ -314,7 +310,7 @@ const DropdownMenu = (props: { isLoggedIn: boolean, user: { [key: string]: any }
                                                         return <span>Log Out Successfully</span>
                                                     },
                                                     error: (error) => {
-                                                        return <span>{error}</span>
+                                                        return <span>{error.message}</span>
                                                     }
                                                 }
                                             )

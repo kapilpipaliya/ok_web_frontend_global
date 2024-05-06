@@ -1,8 +1,11 @@
 import { APIEvent } from "@solidjs/start/dist/server";
-import { Session } from "neo4j-driver";
+import { Driver, Session } from "neo4j-driver";
 import { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, isIntegerId } from "~/globals/global";
 import { getSession } from "~/pages/auth/_server";
+import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
+import { getGraph } from "~/cypher_api/lib/graph";
+import postAPI from "~/pages/auth/PostApi";
 
 // driverPort : 7687 -> For Driver // TODO : Last Digit 0
 // Port3 : 3000 -> For Memgraph Lab // TODO : Last Digit 2
@@ -87,46 +90,31 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     }
     let { driverPort, logsPort, labPort } = portsResult
 
-    const response = await fetch('http://easyformforge.com:5000/docker/createNew', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        
-        body: JSON.stringify({
+    await postAPI('http://easyformforge.com:5000/docker/createNew', {
             Image: 'memgraph/memgraph-platform',
             name: username,
             "portBindings": {[driverPort]: "7687", [logsPort]: "7444", [labPort]: "3000"},
-        })
-    });
+        });
 
-    if (!response.ok) {
-        const errorMessage = await response.text();
-        return Promise.reject(new Error(errorMessage || response.statusText));
-    }
-
-    const result = await response.json();
-    if (result.error) {
-        return Promise.reject(new Error(result.error));
-    }
-
-   
-
-    let userDriver;
-    if (!getDriver(username)) {
-        userDriver = getDriver(username, driverPort);
-    }
+    // let userDriver: Driver;
+    // if (!getDriver(username)) {
+    let userDriver = getDriver(username, driverPort);
+    // }
     await new Promise(resolve => setTimeout(() => resolve(''), 15000));
-    const server = await fetch(`http://localhost:3100/loadData/${driverPort}`)
-    console.log(await server.text());
+
+    // const server = await fetch(`http://localhost:3100/loadData/${driverPort}`)
+    const [graph, setGraph] = getGraph();
+    await importAllCSV({ driver: userDriver }, graph, setGraph);
+
+    // console.log(await server.text());
     
     // TODO : sync initial data to drivers[username]
     console.log(`http://localhost:3100/loadData/${labPort}`);
 
-    if (server.status !== 200) {
-        console.error('Server error:', server.error);
-        return Promise.reject(new Error(server.error));
-    }
+    // if (server.status !== 200) {
+    //     console.error('Server error:', server.error);
+    //     return Promise.reject(new Error(server.error));
+    // }
     driverPort = driverPort + 10;
     logsPort = logsPort + 10;
     labPort = labPort + 10;
