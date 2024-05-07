@@ -1,5 +1,5 @@
-import {FormMetaData, IFormContext} from "./Record";
-import {findVertexByLabelAndUniqueIdWithSkip} from "./Vertex";
+import { FormMetaData, IFormContext } from "./Record";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
 
 export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   User: {
@@ -74,7 +74,11 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
               collection: "g:'Coll'",
             },
           },
-          { name: "collLabel", displayName: "Lookup Label", component: "TextBox" },
+          {
+            name: "collLabel",
+            displayName: "Lookup Label",
+            component: "TextBox",
+          },
           { name: "inward", component: "CheckBox" },
           {
             name: "collId",
@@ -89,7 +93,8 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
             props: {
               stringValue: true,
               displayExpr: "key",
-              collection: '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
+              collection:
+                '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
             },
           },
           { name: "skip", component: "CheckBox" },
@@ -123,10 +128,16 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options) => {
-                const { record } = options.validator.context || {} as IFormContext;
+                const { record } =
+                  options.validator.context || ({} as IFormContext);
 
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Navigation", "id", val, record.vertex.id);
+                return !findVertexByLabelAndUniqueIdWithSkip(
+                  "Navigation",
+                  "id",
+                  val,
+                  record.vertex.id,
+                );
               },
             },
           ],
@@ -138,7 +149,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
         component: "Table",
         tab: "Attributes",
         props: {
-          type: "NavAttr"
+          type: "NavAttr",
         },
         attributes: [
           {
@@ -159,7 +170,6 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
             name: "func",
             component: "SelectBox",
             props: {
-              
               items: `Table
 Form
 Url`,
@@ -169,7 +179,6 @@ Url`,
             name: "Coll",
             component: "SelectBox",
             props: {
-              
               collection: "g:'Coll'",
             },
           },
@@ -177,7 +186,6 @@ Url`,
             name: "Form",
             component: "SelectBox",
             props: {
-              
               collection: "g:'Form'",
             },
           },
@@ -217,7 +225,7 @@ Url`,
             component: "Table",
             tab: "expand",
             props: {
-              type: "NavAttr"
+              type: "NavAttr",
             },
             attributes: [
               {
@@ -238,7 +246,6 @@ Url`,
                 name: "func",
                 component: "SelectBox",
                 props: {
-                  
                   items: `Table
 Form
 Url`,
@@ -248,7 +255,6 @@ Url`,
                 name: "Coll",
                 component: "SelectBox",
                 props: {
-                  
                   collection: "g:'Coll'",
                 },
               },
@@ -256,7 +262,6 @@ Url`,
                 name: "Form",
                 component: "SelectBox",
                 props: {
-                  
                   collection: "g:'Form'",
                 },
               },
@@ -296,7 +301,7 @@ Url`,
                 component: "Table",
                 tab: "expand",
                 props: {
-                  type: "NavAttr"
+                  type: "NavAttr",
                 },
                 attributes: [
                   {
@@ -317,7 +322,6 @@ Url`,
                     name: "func",
                     component: "SelectBox",
                     props: {
-                      
                       items: `Table
 Form
 Url`,
@@ -327,7 +331,6 @@ Url`,
                     name: "Coll",
                     component: "SelectBox",
                     props: {
-                      
                       collection: "g:'Coll'",
                     },
                   },
@@ -335,7 +338,6 @@ Url`,
                     name: "Form",
                     component: "SelectBox",
                     props: {
-                      
                       collection: "g:'Form'",
                     },
                   },
@@ -375,7 +377,7 @@ Url`,
                     component: "Table",
                     tab: "expand",
                     props: {
-                      type: "NavAttr"
+                      type: "NavAttr",
                     },
                     attributes: [
                       {
@@ -396,7 +398,6 @@ Url`,
                         name: "func",
                         component: "SelectBox",
                         props: {
-                          
                           items: `Table
 Form
 Url`,
@@ -406,7 +407,6 @@ Url`,
                         name: "Coll",
                         component: "SelectBox",
                         props: {
-                          
                           collection: "g:'Coll'",
                         },
                       },
@@ -414,7 +414,6 @@ Url`,
                         name: "Form",
                         component: "SelectBox",
                         props: {
-                          
                           collection: "g:'Form'",
                         },
                       },
@@ -461,7 +460,5 @@ Url`,
   },
   // TODO: Dynamic Filter on Grid: Role->Filter
 };
-
-
 
 // window.a = AttrsTableData;

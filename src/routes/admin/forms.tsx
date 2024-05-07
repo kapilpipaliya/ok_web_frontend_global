@@ -1,7 +1,8 @@
-import {AllForms} from "~/pages/FormsAdmin";
-import {API, DataFetcher} from "~/components/DataFetcher";
-import {AllDashboards} from "~/pages/Grids";
+import { AllForms } from "~/pages/form/FormsAdmin";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function allDashboards() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<AllForms />}/>;
+  return (
+    <DataFetcher fetchData={API.fetchDataUrl} renderContent={<AllForms />} />
+  );
 }

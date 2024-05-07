@@ -1,10 +1,15 @@
-import {batch, createContext } from "solid-js";
-import {createStore, reconcile, SetStoreFunction, Store} from "solid-js/store";
-import {klona} from "klona";
+import { batch, createContext } from "solid-js";
+import {
+  createStore,
+  reconcile,
+  SetStoreFunction,
+  Store,
+} from "solid-js/store";
+import { klona } from "klona";
 // import {get, set} from "idb-keyval";
-import {ServerEventsDispatcher} from "../utils/ws_events_dispatcher";
+import { ServerEventsDispatcher } from "./ws_events_dispatcher";
 import { isNumber } from "./CommonUtils/isNumber";
-import {useNavigate} from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 
 export type Id = number;
 
@@ -14,7 +19,7 @@ export interface Vertex {
   id: Id;
   L: string[];
   P: {
-    [key: string]: any,
+    [key: string]: any;
   };
   IN: { [key: string]: Id[] };
   OUT: { [key: string]: Id[] };
@@ -45,17 +50,17 @@ let uniqueId = -50000;
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {
-  _isPartialSynced: boolean,
-  vertexes: VertexMap,
-  edges: EdgeMap,
-  vertexLabelIdMap: { [key: string]: Id[] },
-  initialSynced: boolean,
-  lastSyncedTime: 0,
-  member?: { [key: string]: any } | null,
+  _isPartialSynced: boolean;
+  vertexes: VertexMap;
+  edges: EdgeMap;
+  vertexLabelIdMap: { [key: string]: Id[] };
+  initialSynced: boolean;
+  lastSyncedTime: 0;
+  member?: { [key: string]: any } | null;
 }
 
-export const GraphContext = createContext<ReturnType<typeof createStore<GraphInterface>>>();
-
+export const GraphContext =
+  createContext<ReturnType<typeof createStore<GraphInterface>>>();
 
 export type Revert = { revert: () => any };
 export type InsertFn = {
@@ -77,11 +82,17 @@ export enum ProcessStatus {
   AckReceived,
   Processed,
 }
-export type TransactionValue = InsertFn & Revert & {data: any};
-export const transactions = new Map<number, { status: ProcessStatus; steps: TransactionValue[] }>();
+export type TransactionValue = InsertFn & Revert & { data: any };
+export const transactions = new Map<
+  number,
+  { status: ProcessStatus; steps: TransactionValue[] }
+>();
 // @ts-ignore
 
-export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
+export const transactionDetailAdd = (
+  txnId: number,
+  txnValue: TransactionValue,
+) => {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
     status: ProcessStatus.Unset,
@@ -131,17 +142,19 @@ export const txnHasSteps = (txnId: number) => {
 
 export const getTransactionData = (txnId: number) => {
   if (!transactions.has(txnId)) return [];
-  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])].map((txnDetail) => ({
-    insert: txnDetail.insert?.(),
-    replace: txnDetail.replace?.(),
-    merge: txnDetail.merge?.(),
-    deleteVertex: txnDetail.deleteVertex?.(),
-    insertEdge: txnDetail.insertEdge?.(),
-    replaceEdge: txnDetail.replaceEdge?.(),
-    replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
-    replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
-    deleteEdge: txnDetail.deleteEdge?.(),
-  }));
+  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])].map(
+    (txnDetail) => ({
+      insert: txnDetail.insert?.(),
+      replace: txnDetail.replace?.(),
+      merge: txnDetail.merge?.(),
+      deleteVertex: txnDetail.deleteVertex?.(),
+      insertEdge: txnDetail.insertEdge?.(),
+      replaceEdge: txnDetail.replaceEdge?.(),
+      replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
+      replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
+      deleteEdge: txnDetail.deleteEdge?.(),
+    }),
+  );
   return existingTxnValue;
 };
 export let vertexOldIdToNewIdMap = new Map<Id, Id>();
@@ -154,7 +167,10 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    } else if (value.status === ProcessStatus.AckReceived || value.status === ProcessStatus.Sent) {
+    } else if (
+      value.status === ProcessStatus.AckReceived ||
+      value.status === ProcessStatus.Sent
+    ) {
       return;
     }
   }
@@ -165,7 +181,14 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
       Ws.trigger([
         [
           ["post", "mutate", 0],
-          [[firstReadyTxn, [...vertexOldIdToNewIdMap], [...edgeOldIdToNewIdMap], existingTxnValue]],
+          [
+            [
+              firstReadyTxn,
+              [...vertexOldIdToNewIdMap],
+              [...edgeOldIdToNewIdMap],
+              existingTxnValue,
+            ],
+          ],
         ],
       ]);
     }
@@ -248,7 +271,10 @@ export function backupToJson(graph: Store<GraphInterface>) {
   return klona(graph);
 }
 
-export function restoreFromJson(json: { [key: string]: any},setGraph: SetStoreFunction<GraphInterface>) {
+export function restoreFromJson(
+  json: { [key: string]: any },
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   resetDatabase(setGraph);
   setGraph(json);
 }
@@ -263,19 +289,22 @@ export async function waitTillAllEventsAreProcessed() {
           edgeOldIdToNewIdMap.clear();
           resolve(true);
         } else {
-          checkAllTxnCompleted()
+          checkAllTxnCompleted();
         }
         clearTimeout(checkTxnCompletedTimeout);
-      }, 120)
-    }
+      }, 120);
+    };
     checkAllTxnCompleted();
-  })
+  });
 }
 
 export function isAllTxnProcessed() {
   let allTxnProcessed = true;
   for (const [_txnId, value] of transactions.entries()) {
-    if (value.status !== ProcessStatus.Processed && value.status !== ProcessStatus.Unset) {
+    if (
+      value.status !== ProcessStatus.Processed &&
+      value.status !== ProcessStatus.Unset
+    ) {
       allTxnProcessed = false;
       break;
     }

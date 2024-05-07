@@ -59,8 +59,14 @@
   white-space: nowrap;
   min-width: 8em;
 }
-.sb-menu [role="menuitemradio"]:focus:not(:active, [aria-disabled], [tabIndex="-1"]),
-.sb-menu [role="menuitemcheckbox"]:focus:not(:active, [aria-disabled], [tabIndex="-1"]) {
+.sb-menu
+  [role="menuitemradio"]:focus:not(:active, [aria-disabled], [tabIndex="-1"]),
+.sb-menu
+  [role="menuitemcheckbox"]:focus:not(
+    :active,
+    [aria-disabled],
+    [tabIndex="-1"]
+  ) {
   background: var(--border-color);
 }
 .sb-menu [role="menuitem"][aria-disabled],
@@ -71,19 +77,19 @@
 }
 .sb-menu [role="menuitemradio"][tabIndex="-1"],
 .sb-menu [role="menuitemcheckbox"][tabIndex="-1"] {
-  cursor: text;  
+  cursor: text;
 }
 .sb-menu [role="menuitemradio"][aria-selected="true"]:before,
 .sb-menu [role="menuitemcheckbox"][aria-selected="true"]:before {
   content: "\2714";
   position: absolute;
   left: 0.25em;
-  color: var(--primary)
+  color: var(--primary);
 }
 .sb-menu [role="menuitemradio"][aria-selected="true"][aria-disabled]:before,
 .sb-menu [role="menuitemcheckbox"][aria-selected="true"][aria-disabled]:before {
   content: "\2714";
   position: absolute;
   left: 0.25em;
-  color: var(--border-color)
+  color: var(--border-color);
 }

@@ -1,5 +1,5 @@
-import {GraphInterface, Id, Vertex} from "./graph";
-import { evaluate } from './jsep'
+import { GraphInterface, Id, Vertex } from "./graph";
+import { evaluate } from "./jsep";
 import jsep from "jsep";
 import {
   getChildVertexes,
@@ -8,10 +8,13 @@ import {
   getValueFromVertexOrKey,
 } from "./Utils";
 import { getToEdge } from "./CommonUtils/getToEdge";
-import {SetStoreFunction, Store} from "solid-js/store";
+import { SetStoreFunction, Store } from "solid-js/store";
 
-
-export function getSelectedVertexValue(graph: Store<GraphInterface>,vertex: Vertex, meta: Vertex) {
+export function getSelectedVertexValue(
+  graph: Store<GraphInterface>,
+  vertex: Vertex,
+  meta: Vertex,
+) {
   if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
@@ -23,10 +26,17 @@ export function getInEdge(meta: Vertex, vertex: Vertex) {
   const parentLabel = getValueFromVertexOrKey(meta.P.props, "parentLabel");
   const childLabel = getValueFromVertexOrKey(meta.P.props, "childLabel");
   if (!parentLabel) return "";
-  return capitalizeFirstLetter(parentLabel) + capitalizeFirstLetter((childLabel || vertex.L[0]));
+  return (
+    capitalizeFirstLetter(parentLabel) +
+    capitalizeFirstLetter(childLabel || vertex.L[0])
+  );
 }
 
-export function getParentVertexValue(graph: Store<GraphInterface>, vertex: Vertex, meta: Vertex): Id[] {
+export function getParentVertexValue(
+  graph: Store<GraphInterface>,
+  vertex: Vertex,
+  meta: Vertex,
+): Id[] {
   const type = getInEdge(meta, vertex);
   if (!type) {
     return [];
@@ -37,7 +47,7 @@ export function getParentVertexValue(graph: Store<GraphInterface>, vertex: Verte
 export function getParentVertexes(
   graph: Store<GraphInterface>,
   path: string[],
-  currentVertexes: Vertex[]
+  currentVertexes: Vertex[],
 ): { error: boolean; vertexes?: Vertex[] } {
   const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
@@ -74,9 +84,10 @@ export function getParentVertexes(
   }
 
   if (path.length > 1) {
-    return getParentVertexes(graph,
+    return getParentVertexes(
+      graph,
       path.slice(0, -1),
-      Array.from(stepVertexes.values())
+      Array.from(stepVertexes.values()),
     );
   } else {
     return {
@@ -98,25 +109,36 @@ export const calculateFilter = (input: string) => {
   } else {
     filterIndex = input.indexOf("(");
     if (filterIndex > 0) {
-      isMultiple = false
+      isMultiple = false;
       filter = input.slice(filterIndex + 1).replace(")", "");
       type = input.slice(0, filterIndex);
     } else {
       type = input;
     }
   }
-  return [type, filter, isMultiple] as const
-}
+  return [type, filter, isMultiple] as const;
+};
 
-
-
-export const getTreeData = (graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>,treeLevels: {[key: string]: any}, vertexes: Vertex[] = [], options?: {nameExpr?: (child: Vertex) => string; addChild?: (child: Vertex) => boolean}) => {
-  const getChildren = (levels: {[key: string]: any}, vertexes: Vertex[]) => {
+export const getTreeData = (
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  treeLevels: { [key: string]: any },
+  vertexes: Vertex[] = [],
+  options?: {
+    nameExpr?: (child: Vertex) => string;
+    addChild?: (child: Vertex) => boolean;
+  },
+) => {
+  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]) => {
     const result = [] as any[];
     if (!levels.collection) return result;
-    const children = evaluate(jsep(levels.collection), {vertexes: vertexes, graph, setGraph});
+    const children = evaluate(jsep(levels.collection), {
+      vertexes: vertexes,
+      graph,
+      setGraph,
+    });
     for (const child of (children || []).sort(
-      (a: any, b: any) => a.P.pos - b.P.pos
+      (a: any, b: any) => a.P.pos - b.P.pos,
     )) {
       const name =
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
@@ -138,8 +160,7 @@ export const getTreeData = (graph: Store<GraphInterface>, setGraph: SetStoreFunc
   };
 
   return getChildren(treeLevels, vertexes);
-
-}
+};
 
 export const deleteNestedLayout = (
   graph: Store<GraphInterface>,
@@ -149,7 +170,7 @@ export const deleteNestedLayout = (
   options?: {
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
-  }
+  },
 ) => {
   const deleteChildren = (vertexes: Vertex[]) => {
     const children = getChildVertexes(graph, ["Attr"], vertexes);
@@ -158,11 +179,11 @@ export const deleteNestedLayout = (
       deleteChildren([child]);
 
       // delete properties:
-      const AttrProps = getChildVertexes(graph,["AttrProp"], vertexes);
+      const AttrProps = getChildVertexes(graph, ["AttrProp"], vertexes);
       if (!AttrProps.error) {
         for (const vertex of AttrProps.vertexes!) {
           // delete in edges and out edges of properties
-          deleteRow(vertex, false,graph,setGraph, txnId, {} as any);
+          deleteRow(vertex, false, graph, setGraph, txnId, {} as any);
           // no commitTxn because, it's not realtime
         }
       }

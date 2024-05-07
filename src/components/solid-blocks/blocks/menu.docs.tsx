@@ -11,12 +11,13 @@ import {
 import { Radio, RadioGroup } from "./radio";
 
 export const MenuDocs = () => {
-  const [align, setAlign] = createSignal('center');
+  const [align, setAlign] = createSignal("center");
   const [events, setEvents] = createSignal("");
   return (
     <>
       <h2 id="menu-docs">
-        Menu / MenuButton / MenuItem / MenuItemGroup / MenuOption / MenuOptionGroup
+        Menu / MenuButton / MenuItem / MenuItemGroup / MenuOption /
+        MenuOptionGroup
       </h2>
       <p>
         The menu component is a versatile menu for pages and web applications.
@@ -60,7 +61,10 @@ MenuOptionsGroupProps {
           it toggles
         </dd>
         <dt>MenuProps.align</dt>
-        <dd>how the menu should be aligned to the button: 'left', 'center' or 'right'. Default is 'left'.</dd>
+        <dd>
+          how the menu should be aligned to the button: 'left', 'center' or
+          'right'. Default is 'left'.
+        </dd>
         <dt>MenuItemGroupProps.title</dt>
         <dd>
           An optional title of the menu item group; plain text will be wrapped
@@ -99,7 +103,7 @@ MenuOptionsGroupProps {
         {events()}
       </pre>
       <div class="example" style={`text-align: ${align()}`}>
-        <Menu align={align() as MenuProps['align']}>
+        <Menu align={align() as MenuProps["align"]}>
           <MenuButton variant="icon">☰</MenuButton>
           <MenuItem>Item outside MenuItemGroup</MenuItem>
           <hr />
@@ -125,7 +129,7 @@ MenuOptionsGroupProps {
             type="checkbox"
             onchange={(value) =>
               setEvents(
-                (e) => `checkbox: onchange([${value.join(", ")}])\n${e}`
+                (e) => `checkbox: onchange([${value.join(", ")}])\n${e}`,
               )
             }
           >

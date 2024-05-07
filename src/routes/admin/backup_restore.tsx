@@ -1,6 +1,11 @@
-import {API, DataFetcher} from "~/components/DataFetcher";
-import BackupRestore from "~/pages/BackupRestore";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
+import BackupRestore from "~/pages/dynamic/BackupRestore";
 
 export default function backuprestore() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<BackupRestore />}/>;
+  return (
+    <DataFetcher
+      fetchData={API.fetchDataUrl}
+      renderContent={<BackupRestore />}
+    />
+  );
 }

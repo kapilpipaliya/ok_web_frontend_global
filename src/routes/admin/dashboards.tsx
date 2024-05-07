@@ -1,7 +1,12 @@
-import {FullDashboard} from "~/pages/Dashboard";
-import {AllDashboards} from "~/pages/Grids";
-import {API, DataFetcher} from "~/components/DataFetcher";
+import { AllDashboards } from "~/pages/dynamic/Grids";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
+import { Dashboard } from "~/pages/dynamic/Dashboard";
 
 export default function allDashboards() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<AllDashboards />}/>;
+  return (
+    <DataFetcher
+      fetchData={API.fetchDataUrl}
+      renderContent={<Dashboard />}
+    />
+  );
 }

@@ -1,16 +1,23 @@
-import neo4j from 'neo4j-driver';
-import {Node, Relationship} from "../lib/graph";
-import {DBConnection} from "../lib/dbs";
+import neo4j from "neo4j-driver";
+import { Node, Relationship } from "../lib/graph";
+import { DBConnection } from "../lib/dbs";
 
-export async function getOutEdges(dbConn: DBConnection, fromId: number | string | any, type: string, options: {
-  isInward?: boolean
-} = {})  {
-  'use server';
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+export async function getOutEdges(
+  dbConn: DBConnection,
+  fromId: number | string | any,
+  type: string,
+  options: {
+    isInward?: boolean;
+  } = {},
+) {
+  "use server";
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
 
   try {
     // Cypher query to create a new vertex
-    const matchVertexQuery = `MATCH (sourceNode)${options.isInward ? '<-': '-'}[relationshipType${type ? `:${type}` : ''}]${options.isInward ? '-' : '->'}(targetNode)
+    const matchVertexQuery = `MATCH (sourceNode)${options.isInward ? "<-" : "-"}[relationshipType${type ? `:${type}` : ""}]${options.isInward ? "-" : "->"}(targetNode)
 WHERE id(sourceNode) = $fromId
 RETURN targetNode, relationshipType
 `;
@@ -18,12 +25,12 @@ RETURN targetNode, relationshipType
 
     const resultNodes = [] as [Relationship, Node][];
     for (const record of vertexResult.records) {
-      const targetNode  = record.get('targetNode') as Node;
+      const targetNode = record.get("targetNode") as Node;
       targetNode.id = targetNode.identity!;
       targetNode.P = targetNode.properties!;
       targetNode.L = targetNode.labels!;
 
-      const targetRelationship = record.get('relationshipType') as Relationship;
+      const targetRelationship = record.get("relationshipType") as Relationship;
       targetRelationship.id = targetRelationship.identity!;
       targetRelationship.P = targetRelationship.properties!;
       targetRelationship.T = targetRelationship.type!;
@@ -38,7 +45,7 @@ RETURN targetNode, relationshipType
   } catch (error) {
     console.error(error);
 
-    return { error: true, message: 'An error occurred' };
+    return { error: true, message: "An error occurred" };
   } finally {
     // await session.close();
     // on application exit:

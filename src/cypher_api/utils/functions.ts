@@ -9,7 +9,11 @@ export function removeUndefinedProperties(obj, mutate = false, recursive = 0) {
     } else {
       let recursiveVal;
       if (recursive > 0 && val !== null && typeof val === "object") {
-        recursiveVal = removeUndefinedProperties(val, mutate, typeof recursive === "number" ? recursive - 1 : true);
+        recursiveVal = removeUndefinedProperties(
+          val,
+          mutate,
+          typeof recursive === "number" ? recursive - 1 : true,
+        );
       }
       if (!mutate) {
         returnObj[key] = recursiveVal || val;
@@ -20,5 +24,5 @@ export function removeUndefinedProperties(obj, mutate = false, recursive = 0) {
 }
 
 export function getLastItem<T>(arr: T[], index = 1): T | undefined {
- return arr[arr.length - index];
+  return arr[arr.length - index];
 }

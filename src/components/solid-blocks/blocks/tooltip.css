@@ -1,7 +1,7 @@
 .sb-tooltip-wrapper [role="tooltip"] {
   position: absolute;
   border-radius: var(--border-radius);
-  background: var(--text);  
+  background: var(--text);
   color: var(--negative-text);
   padding: 0.25em 1em;
   font-size: 0.8em;

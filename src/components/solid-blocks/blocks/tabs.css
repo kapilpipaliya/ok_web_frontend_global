@@ -12,7 +12,9 @@
   align-items: flex-end;
   border-right: 0.025em solid var(--border-color);
 }
-.sb-tabs > [role="tablist"][aria-orientation="vertical"] ~ [role="tabpanel"]:not([hidden]) {
+.sb-tabs
+  > [role="tablist"][aria-orientation="vertical"]
+  ~ [role="tabpanel"]:not([hidden]) {
   display: inline-block;
   vertical-align: top;
   margin-left: 0.5em;
@@ -28,28 +30,26 @@
   color: currentColor;
   font: inherit;
 }
-.sb-tabs
-  > [role="tablist"]:not([aria-orientation="vertical"])
-  > [role="tab"] {
+.sb-tabs > [role="tablist"]:not([aria-orientation="vertical"]) > [role="tab"] {
   border-bottom: 0.125em solid transparent;
 }
-.sb-tabs
-  > [role="tablist"][aria-orientation="vertical"]
-  > [role="tab"] {
+.sb-tabs > [role="tablist"][aria-orientation="vertical"] > [role="tab"] {
   border-right: 0.25em solid transparent;
 }
 
-.sb-tabs > [role="tablist"] > [role="tab"]:hover:not(:active, [aria-selected="true"]),
-.sb-tabs > [role="tablist"] > [role="tab"]:focus:not(:active, [aria-selected="true"]) {
+.sb-tabs
+  > [role="tablist"]
+  > [role="tab"]:hover:not(:active, [aria-selected="true"]),
+.sb-tabs
+  > [role="tablist"]
+  > [role="tab"]:focus:not(:active, [aria-selected="true"]) {
   border-color: var(--border-color);
 }
 .sb-tabs > [role="tablist"] > [role="tab"][aria-selected="true"] {
   font-weight: 700;
   cursor: default;
 }
-.sb-tabs
-  > [role="tablist"]
-  > [role="tab"][aria-selected="true"] {
+.sb-tabs > [role="tablist"] > [role="tab"][aria-selected="true"] {
   border-color: var(--primary);
 }
 .sb-tabs [role="tabpanel"][hidden] {

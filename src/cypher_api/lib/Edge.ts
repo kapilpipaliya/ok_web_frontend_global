@@ -1,12 +1,31 @@
-import {klona} from "klona";
-import {batch} from "solid-js";
-import {reconcile, SetStoreFunction, Store} from "solid-js/store";
-import {pipe} from "@mobily/ts-belt";
-import {Id, IGraph, isValidId, Relationship, transactionDetailAdd, transactions} from "./graph";
+import { klona } from "klona";
+import { batch } from "solid-js";
+import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { pipe } from "@mobily/ts-belt";
+import {
+  Id,
+  IGraph,
+  isValidId,
+  Relationship,
+  transactionDetailAdd,
+  transactions,
+} from "./graph";
 
-export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId: Id, endVertexId: Id): Relationship {
-  !isValidId(startVertexId) && console.error(`edge startId should be string, but received ${startVertexId}`);
-  !isValidId(endVertexId) && console.error(`edge endId and endId should be string, but received ${endVertexId}`);
+export function newEdge(
+  edgeId: Id,
+  type: string,
+  properties: {},
+  startVertexId: Id,
+  endVertexId: Id,
+): Relationship {
+  !isValidId(startVertexId) &&
+    console.error(
+      `edge startId should be string, but received ${startVertexId}`,
+    );
+  !isValidId(endVertexId) &&
+    console.error(
+      `edge endId and endId should be string, but received ${endVertexId}`,
+    );
   return {
     id: edgeId,
     T: type,
@@ -15,18 +34,27 @@ export function newEdge(edgeId: Id, type: string, properties: {}, startVertexId:
     E: endVertexId,
   };
 }
-export function addNewEdgeUnSafe(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, edge: Relationship) {
+export function addNewEdgeUnSafe(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  edge: Relationship,
+) {
   batch(() => {
     setGraph("edges", edge.id, edge);
     setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
-     Array.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
+      Array.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
     );
     setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
-     Array.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
+      Array.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
     );
   });
 }
-export function addNewEdge(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, txnId: number, edge: Relationship): { error: string | boolean; txnDetailIndex?: number } {
+export function addNewEdge(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  txnId: number,
+  edge: Relationship,
+): { error: string | boolean; txnDetailIndex?: number } {
   if (!edge.id) {
     return { error: "Edge ID is not valid" };
   }
@@ -79,7 +107,8 @@ export function addNewEdge(graph: Store<IGraph>, setGraph: SetStoreFunction<IGra
 }
 
 export function replaceEdgeProperties(
-  graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>,
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
   txnId: number,
   edgeId: Id,
   properties: {},
@@ -93,7 +122,8 @@ export function replaceEdgeProperties(
   transactionDetailAdd(txnId, {
     data,
     replaceEdge: () => data,
-    revert: () => replaceEdgeProperties(graph, setGraph,0, edgeId, originalProperties),
+    revert: () =>
+      replaceEdgeProperties(graph, setGraph, 0, edgeId, originalProperties),
   });
   return {
     error: false,
@@ -102,7 +132,8 @@ export function replaceEdgeProperties(
 }
 // private
 export const replaceEdgeStart = (
-  graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>,
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
   txnId: number,
   edgeId: Id,
   newStartVertexId: Id,
@@ -126,13 +157,16 @@ export const replaceEdgeStart = (
           )
         : v,
     );
-    setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v) => (Array.isArray(v) ? [...v, edgeId] : [edgeId]));
+    setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v) =>
+      Array.isArray(v) ? [...v, edgeId] : [edgeId],
+    );
   });
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
     data,
     replaceEdgeStart: () => data,
-    revert: () => replaceEdgeStart(graph, setGraph, 0, edgeId, oldStartVertexId),
+    revert: () =>
+      replaceEdgeStart(graph, setGraph, 0, edgeId, oldStartVertexId),
   });
   return {
     error: false,
@@ -141,7 +175,8 @@ export const replaceEdgeStart = (
 };
 //private
 export const replaceEdgeEnd = (
-  graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>,
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
   txnId: number,
   edgeId: Id,
   newEndVertexId: Id,
@@ -165,7 +200,9 @@ export const replaceEdgeEnd = (
           )
         : v,
     );
-    setGraph("vertexes", newEndVertexId, "IN", edge.T, (v) => (Array.isArray(v) ? [...v, edgeId] : [edgeId]));
+    setGraph("vertexes", newEndVertexId, "IN", edge.T, (v) =>
+      Array.isArray(v) ? [...v, edgeId] : [edgeId],
+    );
   });
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
@@ -179,7 +216,12 @@ export const replaceEdgeEnd = (
   };
 };
 
-export function deleteEdge(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, txnId: number, edgeId: Id): { error: string | boolean; txnDetailIndex?: number } {
+export function deleteEdge(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  txnId: number,
+  edgeId: Id,
+): { error: string | boolean; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -211,14 +253,19 @@ export function deleteEdge(graph: Store<IGraph>, setGraph: SetStoreFunction<IGra
   transactionDetailAdd(txnId, {
     data: edge,
     deleteEdge: () => edge,
-    revert: () => addNewEdge(graph,setGraph,0, edge),
+    revert: () => addNewEdge(graph, setGraph, 0, edge),
   });
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
-export function updateEdgeId(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, oldEdgeId: Id, newEdgeId: Id) {
+export function updateEdgeId(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  oldEdgeId: Id,
+  newEdgeId: Id,
+) {
   if (!graph.edges[oldEdgeId]) {
     return { error: "ID is not valid" };
   }
@@ -229,19 +276,30 @@ export function updateEdgeId(graph: Store<IGraph>, setGraph: SetStoreFunction<IG
     ...klona(graph.edges[oldEdgeId]),
     id: newEdgeId,
   });
-  setGraph("vertexes", graph.edges[oldEdgeId].S, "OUT", graph.edges[oldEdgeId].T, (ids) => [
-    ...ids.filter((id) => id !== oldEdgeId),
-    newEdgeId,
-  ]);
-  setGraph("vertexes", graph.edges[oldEdgeId].E, "IN", graph.edges[oldEdgeId].T, (ids) => [
-    ...ids.filter((id) => id !== oldEdgeId),
-    newEdgeId,
-  ]);
+  setGraph(
+    "vertexes",
+    graph.edges[oldEdgeId].S,
+    "OUT",
+    graph.edges[oldEdgeId].T,
+    (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
+  );
+  setGraph(
+    "vertexes",
+    graph.edges[oldEdgeId].E,
+    "IN",
+    graph.edges[oldEdgeId].T,
+    (ids) => [...ids.filter((id) => id !== oldEdgeId), newEdgeId],
+  );
   // @ts-ignore
   setGraph("edges", oldEdgeId, undefined);
   return { error: "" };
 }
 
-export function getOutEdgeIdsOfType(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, id: Id | string, edgeLabel: string): Id[] {
+export function getOutEdgeIdsOfType(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  id: Id | string,
+  edgeLabel: string,
+): Id[] {
   return graph.vertexes[id].OUT[edgeLabel] || [];
 }

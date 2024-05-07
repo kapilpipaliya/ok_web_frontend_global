@@ -1,10 +1,17 @@
-import neo4j from 'neo4j-driver';
-import {DBConnection} from "../lib/dbs";
-import {Node} from "../lib/graph";
+import neo4j from "neo4j-driver";
+import { DBConnection } from "../lib/dbs";
+import { Node } from "../lib/graph";
 
-export async function findVertexMGCall(dbConn: DBConnection, label: string, attribute: string, value: number | string)  {
-  'use server';
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+export async function findVertexMGCall(
+  dbConn: DBConnection,
+  label: string,
+  attribute: string,
+  value: number | string,
+) {
+  "use server";
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
 
   try {
     // Cypher query to create a new vertex
@@ -13,9 +20,9 @@ export async function findVertexMGCall(dbConn: DBConnection, label: string, attr
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
-      return {error: true, message: 'empty result'}
+      return { error: true, message: "empty result" };
     }
-    const newVertex = vertexResult.records[0].get('v') as Node;
+    const newVertex = vertexResult.records[0].get("v") as Node;
     newVertex.id = newVertex.identity!;
     newVertex.L = newVertex.labels!;
     newVertex.P = newVertex.properties!;
@@ -27,7 +34,7 @@ export async function findVertexMGCall(dbConn: DBConnection, label: string, attr
   } catch (error) {
     console.error(error);
 
-    return { error: true, message: 'An error occurred' };
+    return { error: true, message: "An error occurred" };
   } finally {
     // await session.close();
     // on application exit:
@@ -35,9 +42,11 @@ export async function findVertexMGCall(dbConn: DBConnection, label: string, attr
   }
 }
 
-export async function findVertexByIdMGCall(dbConn: DBConnection, id: number)  {
-  'use server';
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+export async function findVertexByIdMGCall(dbConn: DBConnection, id: number) {
+  "use server";
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
 
   try {
     // Cypher query to create a new vertex
@@ -46,9 +55,9 @@ export async function findVertexByIdMGCall(dbConn: DBConnection, id: number)  {
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
-      return {error: true, message: 'empty result'}
+      return { error: true, message: "empty result" };
     }
-    const newVertex = vertexResult.records[0].get('v') as Node;
+    const newVertex = vertexResult.records[0].get("v") as Node;
     newVertex.id = newVertex.identity!;
     newVertex.L = newVertex.labels!;
     newVertex.P = newVertex.properties!;
@@ -60,7 +69,7 @@ export async function findVertexByIdMGCall(dbConn: DBConnection, id: number)  {
   } catch (error) {
     console.error(error);
 
-    return { error: true, message: 'An error occurred' };
+    return { error: true, message: "An error occurred" };
   } finally {
     // await session.close();
     // on application exit:

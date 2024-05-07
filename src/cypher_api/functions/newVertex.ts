@@ -1,26 +1,30 @@
-import neo4j from 'neo4j-driver';
-import {DBConnection} from "../lib/dbs";
-import {Node} from "../lib/graph";
+import neo4j from "neo4j-driver";
+import { DBConnection } from "../lib/dbs";
+import { Node } from "../lib/graph";
 
 export async function newVertexDBCall(
   dbConn: DBConnection,
   label: string,
-  properties?: {[key: string]: any}
+  properties?: { [key: string]: any },
 ) {
-  'use server';
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+  "use server";
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
   const transaction = dbConn.session.beginTransaction();
 
   try {
     // Cypher query to create a new vertex
     let createVertexQuery = `CREATE (v:${label}) SET v = $properties RETURN v`;
-    const vertexResult = await transaction.run(createVertexQuery, { properties });
+    const vertexResult = await transaction.run(createVertexQuery, {
+      properties,
+    });
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
       throw new Error("Failed to create vertex.");
     }
-    const newVertex = vertexResult.records[0].get('v') as Node;
+    const newVertex = vertexResult.records[0].get("v") as Node;
     newVertex.id = newVertex.identity!;
     newVertex.L = newVertex.labels!;
     newVertex.P = newVertex.properties!;

@@ -1,7 +1,8 @@
-import {API, DataFetcher} from "~/components/DataFetcher";
-import {GraphViewPage} from "~/pages/GraphViewPage";
-import Settings from "~/components/Setting";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
+import Settings from "~/pages/drag-drop/Setting";
 
 export default function setting() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<Settings />}/>;
+  return (
+    <DataFetcher fetchData={API.fetchDataUrl} renderContent={<Settings />} />
+  );
 }

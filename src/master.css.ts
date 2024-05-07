@@ -9,5 +9,5 @@ export const config: Config = {
   animations: {},
   selectors: {},
   functions: {},
-  themeDriver: 'media'
+  themeDriver: "media",
 };

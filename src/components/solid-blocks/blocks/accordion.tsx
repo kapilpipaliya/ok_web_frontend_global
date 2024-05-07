@@ -17,29 +17,32 @@ import "./accordion.css";
 declare module "solid-js" {
   namespace JSX {
     interface Directives {
-      closeAccordion: {}
+      closeAccordion: {};
     }
   }
-};
+}
 
-export type _C = JSX.Directives['closeAccordion'];
+export type _C = JSX.Directives["closeAccordion"];
 
-const accordionContext = createContext<[
-  options: { allowMultiple?: boolean, allowToggle?: boolean },
-  /** get the index of the current accordion */
-  getIndex: () => number,
-  /**
-   * if allowMultiple is false, the index of the currently opened accordion or -1 if none is opened
-   * otherwise the number of opened tabs
-   */
-  opened: () => number,
-  
-  setOpened: (opened: number) => void
-] | []>([]);
+const accordionContext = createContext<
+  | [
+      options: { allowMultiple?: boolean; allowToggle?: boolean },
+      /** get the index of the current accordion */
+      getIndex: () => number,
+      /**
+       * if allowMultiple is false, the index of the currently opened accordion or -1 if none is opened
+       * otherwise the number of opened tabs
+       */
+      opened: () => number,
+
+      setOpened: (opened: number) => void,
+    ]
+  | []
+>([]);
 
 export type AccordionProps = JSX.HTMLAttributes<HTMLDetailsElement> & {
-  open?: boolean,
-  setOpen?: (isOpen: boolean) => void
+  open?: boolean;
+  setOpen?: (isOpen: boolean) => void;
 };
 
 export const Accordion: Component<AccordionProps> = (props) => {
@@ -48,17 +51,25 @@ export const Accordion: Component<AccordionProps> = (props) => {
   closeAccordion;
   const [options, getIndex, opened, setOpened] = useContext(accordionContext);
   const index = getIndex ? getIndex() : 0;
-  
+
   if (options && opened && setOpened) {
     onMount(() => {
-      if (props.open) { setOpened(options.allowMultiple ? opened() + 1 : index); }
+      if (props.open) {
+        setOpened(options.allowMultiple ? opened() + 1 : index);
+      }
     });
 
-    createEffect(on([opened, accordionRef], ([open, ref]) => {
-      if (ref && options.allowMultiple === false && open !== index) {
-        ref.open = false;
-      }
-    }, { defer: true }));
+    createEffect(
+      on(
+        [opened, accordionRef],
+        ([open, ref]) => {
+          if (ref && options.allowMultiple === false && open !== index) {
+            ref.open = false;
+          }
+        },
+        { defer: true },
+      ),
+    );
   }
 
   return (
@@ -66,12 +77,20 @@ export const Accordion: Component<AccordionProps> = (props) => {
       use:closeAccordion
       {...detailsProps}
       classList={mergeProps(props.classList ?? {}, { "sb-accordion": true })}
-      onClick={options && opened ? (ev) => {
-        runEvent(ev, ev.currentTarget);
-        if (accordionRef()?.open && !options.allowToggle && (!options.allowMultiple || opened() === 1)) {
-          ev.preventDefault();
-        }
-      } : props.onClick}
+      onClick={
+        options && opened
+          ? (ev) => {
+              runEvent(ev, ev.currentTarget);
+              if (
+                accordionRef()?.open &&
+                !options.allowToggle &&
+                (!options.allowMultiple || opened() === 1)
+              ) {
+                ev.preventDefault();
+              }
+            }
+          : props.onClick
+      }
       onToggle={(ev) => {
         if (options && opened && setOpened) {
           if (options.allowMultiple === true) {
@@ -110,9 +129,11 @@ export const AccordionGroup: Component<AccordionGroupProps> = (props) => {
   const [local, divProps] = splitProps(props, ["allowMultiple", "allowToggle"]);
   let accordions = -1;
   const [opened, setOpened] = createSignal(0);
-  
+
   return (
-    <accordionContext.Provider value={[local, () => ++accordions, opened, setOpened]}>
+    <accordionContext.Provider
+      value={[local, () => ++accordions, opened, setOpened]}
+    >
       <div
         {...divProps}
         classList={mergeProps(props.classList ?? {}, {

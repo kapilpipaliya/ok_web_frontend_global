@@ -1,8 +1,8 @@
 import { Title } from "@solidjs/meta";
 import Footer from "~/components/website/Footer";
 import Header from "~/components/website/Header";
-import '../../css/style.css'
-import '../../css/krd.css'
+import "../../css/style.css";
+import "../../css/krd.css";
 import SiteTitle from "~/components/website/utils";
 export default function Pricing() {
   return (

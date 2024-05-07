@@ -1,28 +1,32 @@
-import neo4j from 'neo4j-driver';
-import {DBConnection} from "../lib/dbs";
-import {Node, Relationship} from "../lib/graph";
+import neo4j from "neo4j-driver";
+import { DBConnection } from "../lib/dbs";
+import { Node, Relationship } from "../lib/graph";
 
 export async function newRowMGCall(
   dbConn: DBConnection,
   parentVertexId: number,
   label: string,
   edgeType?: string,
-  properties: any = {}
+  properties: any = {},
 ) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
   const transaction = dbConn.session.beginTransaction();
 
   try {
     // Cypher query to create a new vertex
     let createVertexQuery = `CREATE (v:${label || edgeType}) SET v = $properties RETURN v`;
-    const vertexResult = await transaction.run(createVertexQuery, { properties });
+    const vertexResult = await transaction.run(createVertexQuery, {
+      properties,
+    });
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
       throw new Error("Failed to create vertex.");
     }
-    const newVertex = vertexResult.records[0].get('v') as Node;
+    const newVertex = vertexResult.records[0].get("v") as Node;
     newVertex.id = newVertex.identity!;
     newVertex.L = newVertex.labels!;
     newVertex.P = newVertex.properties!;
@@ -34,19 +38,21 @@ export async function newRowMGCall(
       CREATE (startVertex)-[e:${edgeType || label!}]->(endVertex)
       RETURN e
     `;
-    const edgeResult = await transaction.run(createEdgeQuery, {parentVertexId, toId: newVertex.id });
+    const edgeResult = await transaction.run(createEdgeQuery, {
+      parentVertexId,
+      toId: newVertex.id,
+    });
 
     // Extract the new vertex ID from the result
     if (edgeResult.records.length === 0) {
       throw new Error("Failed to create Edge.");
     }
-    const newEdge = edgeResult.records[0].get('e') as Relationship;
+    const newEdge = edgeResult.records[0].get("e") as Relationship;
     newEdge.id = newEdge.identity!;
     newEdge.T = newEdge.type!;
     newEdge.S = newEdge.start!;
     newEdge.E = newEdge.end!;
     newEdge.P = newEdge.properties!;
-
 
     // Commit the transaction
     await transaction.commit();
@@ -54,7 +60,7 @@ export async function newRowMGCall(
     return {
       error: false,
       vertex: newVertex,
-      edge: newEdge
+      edge: newEdge,
     };
   } catch (error) {
     console.error(error);

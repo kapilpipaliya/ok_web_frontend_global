@@ -19,7 +19,7 @@ export const FileUploader: Component<FileUploaderProps> = (props: any) => {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [],
-    ["setValue", "meta", "data", "label"]
+    ["setValue", "meta", "data", "label"],
   );
   const [file, setFile] = createSignal(null);
   const [fullBoxImage, setFullBoxImage] = createSignal("");
@@ -69,7 +69,7 @@ export const FileUploader: Component<FileUploaderProps> = (props: any) => {
       draggable={false}
       style={{
         position: "relative",
-        border: fullBoxImage()==="" ? "2px dashed #ccc" : "",
+        border: fullBoxImage() === "" ? "2px dashed #ccc" : "",
         padding: "20px",
         "border-radius": "10px",
         "text-align": "center",

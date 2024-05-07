@@ -16,16 +16,16 @@ export default defineConfig({
     server: {
       // port: 36075, // Change this to the desired port number for the server
       hmr: {
-        port: 2900 // Change this to the desired port number for HMR
-      }
+        port: 2900, // Change this to the desired port number for HMR
+      },
     },
     plugins: [
       solidStyled({
         filter: {
           include: "src/**/*.tsx",
-          exclude: "node_modules/**/*.{ts,js}"
-        }
-      }) as PluginOption
-    ]
-  }
+          exclude: "node_modules/**/*.{ts,js}",
+        },
+      }) as PluginOption,
+    ],
+  },
 });

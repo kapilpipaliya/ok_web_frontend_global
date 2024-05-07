@@ -65,10 +65,12 @@ export const Menu: Component<MenuProps> = (props) => {
     "align",
   ]);
   const opener = createMemo<HTMLElement | undefined>(
-    () => (getElements(props.children, getFirstMenuButton(open), [open()]) ?? [])[0]
+    () =>
+      (getElements(props.children, getFirstMenuButton(open), [open()]) ??
+        [])[0],
   );
-  const menuItems = createMemo(() =>
-    getElements(props.children, getMenuItems(), [open()]) ?? []
+  const menuItems = createMemo(
+    () => getElements(props.children, getMenuItems(), [open()]) ?? [],
   );
 
   let menuRef!: HTMLDivElement;
@@ -88,7 +90,7 @@ export const Menu: Component<MenuProps> = (props) => {
     if (!ev.defaultPrevented && button) {
       if (ev.target === button) {
         setOpen(
-          (open) => !open && button.getAttribute("aria-disabled") !== "true"
+          (open) => !open && button.getAttribute("aria-disabled") !== "true",
         );
       } else if (
         !button.contains(target) &&
@@ -100,15 +102,21 @@ export const Menu: Component<MenuProps> = (props) => {
     }
   };
 
-  onMount(() => !isServer && document.addEventListener("click", clickHandler, { capture: false }));
-  onCleanup(() => !isServer && document.removeEventListener("click", clickHandler));
+  onMount(
+    () =>
+      !isServer &&
+      document.addEventListener("click", clickHandler, { capture: false }),
+  );
+  onCleanup(
+    () => !isServer && document.removeEventListener("click", clickHandler),
+  );
 
   let focusItem: HTMLElement | undefined;
   const overHandler = (ev: MouseEvent) => {
     const target = ev.target as HTMLElement;
     if (
       ["menuitem", "menuitemradio", "menuitemcheckbox"].includes(
-        target?.getAttribute("role") ?? ''
+        target?.getAttribute("role") ?? "",
       ) &&
       target?.tabIndex !== -1 &&
       target?.getAttribute("aria-disabled") !== "true"
@@ -120,7 +128,7 @@ export const Menu: Component<MenuProps> = (props) => {
 
   const moveFocus = (step: 1 | -1) => {
     const menuItems = menuRef.querySelectorAll<HTMLElement>(
-      '[role^=menuitem]:not([aria-disabled], [tabIndex="-1"])'
+      '[role^=menuitem]:not([aria-disabled], [tabIndex="-1"])',
     );
     const currentPos = focusItem
       ? Array.prototype.findIndex.call(menuItems, (item) => item === focusItem)
@@ -142,13 +150,14 @@ export const Menu: Component<MenuProps> = (props) => {
     const role = target?.getAttribute("role");
     if (
       ev.key === " " &&
-      ["menuitem", "menuitemradio", "menuitemcheckbox"].includes(role ?? '')
+      ["menuitem", "menuitemradio", "menuitemcheckbox"].includes(role ?? "")
     ) {
       target.click();
       if (role === "menuitemradio") {
-        const radios = target.parentNode?.querySelectorAll<HTMLElement>(
-          '[role="menuitemradio"]:not([aria-disabled], [tabIndex="-1"]'
-        ) ?? [];
+        const radios =
+          target.parentNode?.querySelectorAll<HTMLElement>(
+            '[role="menuitemradio"]:not([aria-disabled], [tabIndex="-1"]',
+          ) ?? [];
         const currentPos = Array.prototype.indexOf.call(radios, target);
         const newPos = (radios.length + 1 + currentPos) % radios.length;
         focusItem = radios[newPos];
@@ -213,7 +222,7 @@ export const MenuItemGroup: Component<MenuItemGroupProps> = (props) => {
 export type MenuOptionsContextValue = [
   value: Accessor<string[]>,
   change: (value: string) => void,
-  type?: "checkbox" | "radio"
+  type?: "checkbox" | "radio",
 ];
 
 export const MenuOptionsContext = createContext<MenuOptionsContextValue>([
@@ -234,7 +243,7 @@ export const MenuOption: Component<MenuOptionProps> = (props) => {
   const [value, change, type] = useContext(MenuOptionsContext);
   const selected = createMemo(() => value().includes(props.value));
   const clickHandler = createMemo(
-    () => () => props["aria-disabled"] !== "true" && change(props.value)
+    () => () => props["aria-disabled"] !== "true" && change(props.value),
   );
   const keyHandler = createMemo(() => (ev: KeyboardEvent) => {
     if (ev.key === " ") {
@@ -296,7 +305,7 @@ export const MenuOptionGroup = (props: MenuOptionGroupProps): JSX.Element => {
     {
       equals: (prev, next) =>
         prev.length === next.length && prev[0] === next[0],
-    }
+    },
   );
   const change = createMemo<(value: string) => void>(() =>
     props.type === "checkbox"
@@ -304,9 +313,9 @@ export const MenuOptionGroup = (props: MenuOptionGroupProps): JSX.Element => {
           setValue((prev) =>
             prev.includes(value)
               ? prev.filter((item) => item !== value)
-              : [...prev, value]
+              : [...prev, value],
           )
-      : (value) => setValue((prev) => (prev[0] === value ? prev : [value]))
+      : (value) => setValue((prev) => (prev[0] === value ? prev : [value])),
   );
 
   createEffect((lastVal?: string | string[] | [string]) => {
@@ -315,8 +324,8 @@ export const MenuOptionGroup = (props: MenuOptionGroupProps): JSX.Element => {
         Array.isArray(local.value)
           ? local.value
           : local.value
-          ? [local.value]
-          : []
+            ? [local.value]
+            : [],
       );
     }
     return local.value;

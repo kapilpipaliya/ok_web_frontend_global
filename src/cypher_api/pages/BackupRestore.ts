@@ -1,22 +1,43 @@
-import {batch} from "solid-js";
-import {getNewGraphId, getNewTxnId, Id, IdAttr, IGraph, Node,} from "../lib/graph";
+import { batch } from "solid-js";
+import {
+  getNewGraphId,
+  getNewTxnId,
+  Id,
+  IdAttr,
+  IGraph,
+  Node,
+} from "../lib/graph";
 
-import {addNewVertex, findVertexByLabelAndUniqueId, newVertex, replaceVertexProperties} from "../lib/Vertex";
-import {setSelectionValue} from "../components/input/SelectInputField";
+import {
+  addNewVertex,
+  findVertexByLabelAndUniqueId,
+  newVertex,
+  replaceVertexProperties,
+} from "../lib/Vertex";
+import { setSelectionValue } from "../components/input/SelectInputField";
 
-import {getChildVertex, getParentVertex} from "../lib/Traverse";
-import {FormMetaData, getCompPropsMap, getFormMetaData, getId, newRow, Record} from "../lib/Record";
-import {importRecordWithYAMLSchema, onDataDirectoryImportClick, updateImportRecord} from "../lib/Import";
+import { getChildVertex, getParentVertex } from "../lib/Traverse";
+import {
+  FormMetaData,
+  getCompPropsMap,
+  getFormMetaData,
+  getId,
+  newRow,
+  Record,
+} from "../lib/Record";
+import {
+  importRecordWithYAMLSchema,
+  onDataDirectoryImportClick,
+  updateImportRecord,
+} from "../lib/Import";
 
-import {AttrsAdminTableData} from "../lib/apiAdmin";
-import {NsMetaJson} from "./NSMetaDataType";
-import {SetStoreFunction, Store} from "solid-js/store";
-import {DBConnection} from "../lib/dbs";
-
+import { AttrsAdminTableData } from "../lib/apiAdmin";
+import { NsMetaJson } from "./NSMetaDataType";
+import { SetStoreFunction, Store } from "solid-js/store";
+import { DBConnection } from "../lib/dbs";
 
 let componentPropsInputRef: HTMLInputElement;
 let importNSDataInputRef: HTMLInputElement;
-
 
 const importComponentProps = () => {
   const file = componentPropsInputRef!.files![0];
@@ -34,7 +55,6 @@ const importComponentProps = () => {
       // If we splitTransaction, it's very slow
       const splitTransaction = true;
       for (const componentId in json) {
-
         const component = json[componentId];
         const componentConfiguration = component["Configuration"];
         if (!componentConfiguration) continue;
@@ -45,7 +65,10 @@ const importComponentProps = () => {
           const name = propertyObj["Name"];
           let description = propertyObj["description"] as string;
           if (description) {
-            description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
+            description = description.replaceAll(
+              /<a href.*">([\w ]+)<\/a>/g,
+              "$1",
+            );
           }
           let type = propertyObj["Type"];
           // if(name === 'displayExpr') d.add(componentId);
@@ -69,39 +92,42 @@ const importComponentProps = () => {
               // @ts-ignore
               .filter((t) => !t.includes("function"))
               // @ts-ignore
-              .filter((t) => ![
-                "false",
-                "null",
-                "AnimationConfig",
-                "dxCalendar_Options",
-                "UserDefinedElement",
-                "template",
-                "any",
-                "undefined",
-                "Store",
-                // "DataSource",
-                "DataSource_Options",
-                "dxFilterBuilder_Options",
-                "Format",
-                "DxPromise",
-                "dxSortable_Options",
-                "dxTextBox_Options",
-                "dxPopup_Options",
-                "dxPopover_Options",
-                "PivotGridDataSource",
-                "getter",
-                "Filter expression",
-              ].includes(t));
+              .filter(
+                (t) =>
+                  ![
+                    "false",
+                    "null",
+                    "AnimationConfig",
+                    "dxCalendar_Options",
+                    "UserDefinedElement",
+                    "template",
+                    "any",
+                    "undefined",
+                    "Store",
+                    // "DataSource",
+                    "DataSource_Options",
+                    "dxFilterBuilder_Options",
+                    "Format",
+                    "DxPromise",
+                    "dxSortable_Options",
+                    "dxTextBox_Options",
+                    "dxPopup_Options",
+                    "dxPopover_Options",
+                    "PivotGridDataSource",
+                    "getter",
+                    "Filter expression",
+                  ].includes(t),
+              );
             if (!type.length) continue;
-            let typeJoined = type.join(',');
+            let typeJoined = type.join(",");
             if (typeJoined === "Number,String") {
-              dataType = 'String';
+              dataType = "String";
             } else if (typeJoined === "String,Number") {
-              dataType = 'Float';
+              dataType = "Float";
             } else if (typeJoined === "Date,Number,String") {
-              dataType = 'String';
+              dataType = "String";
             } else if (typeJoined === "String,UserDefinedElement") {
-              dataType = 'String';
+              dataType = "String";
               // @ts-ignore
             } else if (type.some((t) => t.includes("Array"))) {
               dataType = "List";
@@ -129,28 +155,39 @@ const importComponentProps = () => {
               }
             }
             if (dataType) {
-              const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
+              const compVertex = findVertexByLabelAndUniqueId(
+                "Comp",
+                IdAttr,
+                `${componentId}`,
+              );
               if (compVertex) {
                 const rowResult = newRow(txnId, compVertex, "CompProp");
-                replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
+                replaceVertexProperties(txnId, rowResult.vertexId!, {
+                  name,
+                  description: description,
+                });
 
-                const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
+                const dataTypeVertex = findVertexByLabelAndUniqueId(
+                  "DataType",
+                  IdAttr,
+                  dataType,
+                );
                 if (!dataTypeVertex) {
                   console.log("dataType not found", dataType);
                 } else {
                   setSelectionValue(
                     txnId,
                     graph.vertexes[rowResult.vertexId!],
-                    {P: {[IdAttr]: "DataType"}} as unknown as Node,
+                    { P: { [IdAttr]: "DataType" } } as unknown as Node,
                     dataTypeVertex.id,
                   );
                 }
                 // It takes too much time to commit the full transaction.
               } else {
-                console.log('Component Not Found:', name);
+                console.log("Component Not Found:", name);
               }
             } else {
-              console.log('DataType Not Found:', name, type);
+              console.log("DataType Not Found:", name, type);
             }
           }
           // if (splitTransaction) {
@@ -167,14 +204,24 @@ const importComponentProps = () => {
           const name = propertyObj["Name"];
           let description = propertyObj["description"] as string;
           if (description) {
-            description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
+            description = description.replaceAll(
+              /<a href.*">([\w ]+)<\/a>/g,
+              "$1",
+            );
           }
-          const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, `${componentId}`);
+          const compVertex = findVertexByLabelAndUniqueId(
+            "Comp",
+            IdAttr,
+            `${componentId}`,
+          );
           if (compVertex) {
             const rowResult = newRow(txnId, compVertex, "CompEvent");
-            replaceVertexProperties(txnId, rowResult.vertexId!, {name, description: description});
+            replaceVertexProperties(txnId, rowResult.vertexId!, {
+              name,
+              description: description,
+            });
           } else {
-            console.log('Component Not Found:', name);
+            console.log("Component Not Found:", name);
           }
 
           // if (splitTransaction) {
@@ -189,13 +236,15 @@ const importComponentProps = () => {
   }
 };
 
-const insertAttributes = async (txnId: Id, parentVertex: Node, collectionMetaData: FormMetaData) => {
-
+const insertAttributes = async (
+  txnId: Id,
+  parentVertex: Node,
+  collectionMetaData: FormMetaData,
+) => {
   const collectionAttributes = collectionMetaData["attributes"];
   if (!collectionAttributes) return;
 
   for (const attribute of collectionAttributes) {
-
     const name = attribute.name;
     const displayName = attribute.displayName;
     let component = attribute.component;
@@ -203,53 +252,73 @@ const insertAttributes = async (txnId: Id, parentVertex: Node, collectionMetaDat
       component = "TextBox";
     }
     // const description = attribute.description;
-    const rowResult = newRow(txnId, parentVertex, "Attr", "Attr", {name, displayName});
+    const rowResult = newRow(txnId, parentVertex, "Attr", "Attr", {
+      name,
+      displayName,
+    });
 
     const setDataType = (rowVertex: Node, dataType: string) => {
-      const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
+      const dataTypeVertex = findVertexByLabelAndUniqueId(
+        "DataType",
+        IdAttr,
+        dataType,
+      );
       if (!dataTypeVertex) {
         console.log("dataType not found", dataType);
       } else {
         setSelectionValue(
           txnId,
           rowVertex,
-          {P: {[IdAttr]: "DataType"}} as unknown as Node,
+          { P: { [IdAttr]: "DataType" } } as unknown as Node,
           dataTypeVertex.id,
         );
         return dataTypeVertex;
       }
       return;
-    }
+    };
 
     const setComponent = (rowVertex: Node, component: string) => {
-      const compVertex = findVertexByLabelAndUniqueId("Comp", IdAttr, component);
+      const compVertex = findVertexByLabelAndUniqueId(
+        "Comp",
+        IdAttr,
+        component,
+      );
       if (!compVertex) {
         console.log("component not found", component);
       } else {
         setSelectionValue(
           txnId,
           rowVertex,
-          {P: {[IdAttr]: "Comp"}} as unknown as Node,
+          { P: { [IdAttr]: "Comp" } } as unknown as Node,
           compVertex.id,
         );
         return compVertex;
       }
       return;
-    }
+    };
 
     let dataTypeVertex: Node | undefined;
     if (attribute.dataType) {
-      dataTypeVertex = setDataType(graph.vertexes[rowResult.vertexId!], attribute.dataType);
+      dataTypeVertex = setDataType(
+        graph.vertexes[rowResult.vertexId!],
+        attribute.dataType,
+      );
     }
 
     if (component && (component !== "TextBox" || attribute.props)) {
-      const compVertex = setComponent(graph.vertexes[rowResult.vertexId!], component);
+      const compVertex = setComponent(
+        graph.vertexes[rowResult.vertexId!],
+        component,
+      );
       if (compVertex && !dataTypeVertex) {
         const dataTypeDefault = await getChildVertex(["$0Default"], compVertex);
         if (dataTypeDefault.error) {
           console.warn(`Component dataType not configured ${component}`);
         } else {
-          dataTypeVertex = setDataType(graph.vertexes[rowResult.vertexId!], dataTypeDefault.vertex!.P[IdAttr]);
+          dataTypeVertex = setDataType(
+            graph.vertexes[rowResult.vertexId!],
+            dataTypeDefault.vertex!.P[IdAttr],
+          );
         }
       }
 
@@ -257,12 +326,18 @@ const insertAttributes = async (txnId: Id, parentVertex: Node, collectionMetaDat
         for (const property in attribute.props) {
           const props = getCompPropsMap(compVertex);
           if (props[property]) {
-            const rowResult = newRow(txnId, parentVertex, "AttrProp", "AttrProp", {value: attribute.props[property]});
+            const rowResult = newRow(
+              txnId,
+              parentVertex,
+              "AttrProp",
+              "AttrProp",
+              { value: attribute.props[property] },
+            );
             if (!rowResult.error) {
               setSelectionValue(
                 txnId,
                 graph.vertexes[rowResult.vertexId!],
-                {P: {[IdAttr]: "Name"}} as unknown as Node,
+                { P: { [IdAttr]: "Name" } } as unknown as Node,
                 props[property].id,
               );
             }
@@ -270,9 +345,8 @@ const insertAttributes = async (txnId: Id, parentVertex: Node, collectionMetaDat
         }
       }
     }
-
   }
-}
+};
 // @ts-ignore
 const importCollections = () => {
   const file = componentPropsInputRef!.files![0];
@@ -287,7 +361,10 @@ const importCollections = () => {
         const title = collection["title"] as string;
 
         const parentVertexId = getNewGraphId();
-        addNewVertex(txnId, newVertex(parentVertexId, ['Coll'], {name, title}));
+        addNewVertex(
+          txnId,
+          newVertex(parentVertexId, ["Coll"], { name, title }),
+        );
         insertAttributes(txnId, graph.vertexes[parentVertexId], collection);
       }
       // commitTxn(txnId, Ws);
@@ -300,14 +377,33 @@ const makeASampleForm = () => {
   // get all the fields
   const vertexId = getNewGraphId();
   const txnId = getNewTxnId();
-  addNewVertex(txnId, newVertex(vertexId, ["Coll"], {[IdAttr]: "TestForm", title: "Test Form", table: true}));
+  addNewVertex(
+    txnId,
+    newVertex(vertexId, ["Coll"], {
+      [IdAttr]: "TestForm",
+      title: "Test Form",
+      table: true,
+    }),
+  );
   const existingVertex = graph.vertexes[vertexId];
   for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
     const componentVertex = graph.vertexes[compVertexId];
     const componentName = componentVertex.P[IdAttr];
-    if (["DropDownBox", "Bullet", "CircularGauge", "LinearGauge", "ProgressBar"].includes(componentName)) continue;
+    if (
+      [
+        "DropDownBox",
+        "Bullet",
+        "CircularGauge",
+        "LinearGauge",
+        "ProgressBar",
+      ].includes(componentName)
+    )
+      continue;
     const newRow1 = newRow(txnId, existingVertex, "Attr");
-    replaceVertexProperties(txnId, newRow1.vertexId!, {[IdAttr]: getId(componentName), displayName: componentName});
+    replaceVertexProperties(txnId, newRow1.vertexId!, {
+      [IdAttr]: getId(componentName),
+      displayName: componentName,
+    });
     const dataType = getParentVertex(["DataType$0"], componentVertex);
     if (!dataType.error) {
       // set component dataType and component
@@ -315,14 +411,14 @@ const makeASampleForm = () => {
         txnId,
         graph.vertexes[newRow1.vertexId!],
         // @ts-ignore
-        {P: {[IdAttr]: "dataType"}} as Node,
+        { P: { [IdAttr]: "dataType" } } as Node,
         dataType.vertex!.id,
       );
       setSelectionValue(
         txnId,
         graph.vertexes[newRow1.vertexId!],
         // @ts-ignore
-        {P: {[IdAttr]: "comp"}} as Node,
+        { P: { [IdAttr]: "comp" } } as Node,
         compVertexId,
       );
     }
@@ -331,17 +427,20 @@ const makeASampleForm = () => {
 };
 
 // @ts-ignore
-export const importAllCSV = async (dbConn: DBConnection, graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>) => {
-  const form = await getFormMetaData(dbConn,'Import');
+export const importAllCSV = async (
+  dbConn: DBConnection,
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+) => {
+  const form = await getFormMetaData(dbConn, "Import");
   if (form.error) return form.error;
-  const record = new Record({dbConn, graph, setGraph});
+  const record = new Record({ dbConn, graph, setGraph });
   const createResult = record.create(form.form![IdAttr]);
   record.createMeta(form.form!);
   if (createResult.error) return createResult.error;
 
-
   // 1. import dataTypes
-  updateImportRecord('dataType', record, false);
+  updateImportRecord("dataType", record, false);
   record.mergeFieldValues({
     csv: `name
 Null
@@ -360,7 +459,7 @@ LocalDateTime
   });
   await onDataDirectoryImportClick(record);
   // 2. Import components
-  updateImportRecord('component', record, false);
+  updateImportRecord("component", record, false);
   record.mergeFieldValues({
     csv: `name\tdataType\tparent\tcategory\tchild
 ActionSheet\t\t\tAction\tTRUE
@@ -441,7 +540,7 @@ ScrollView\t\t\tView\t`,
   });
   await onDataDirectoryImportClick(record);
   // 3. Import dataTypeDefault
-  updateImportRecord('dataTypeDefault', record, false);
+  updateImportRecord("dataTypeDefault", record, false);
   record.mergeFieldValues({
     csv: `name\tdefault
 String\tTextBox
@@ -459,7 +558,7 @@ LocalDateTime\tDateBox
   });
   await onDataDirectoryImportClick(record);
 
-  updateImportRecord('user', record, false);
+  updateImportRecord("user", record, false);
   record.mergeFieldValues({
     csv: `name\temail\tpass\trole
 Test1\ttest1@test.com\ttest1\tAdmin
@@ -467,7 +566,7 @@ Test2\ttest2@test.com\ttest2\tUser`,
   });
   await onDataDirectoryImportClick(record);
 
-  updateImportRecord('role', record, false);
+  updateImportRecord("role", record, false);
   record.mergeFieldValues({
     csv: `name
 Admin
@@ -475,7 +574,7 @@ User`,
   });
   await onDataDirectoryImportClick(record);
 
-  updateImportRecord('perm', record, false);
+  updateImportRecord("perm", record, false);
   record.mergeFieldValues({
     csv: `name
 insert
@@ -484,14 +583,18 @@ view
 delete`,
   });
   await onDataDirectoryImportClick(record);
-
 };
-const importMainNavigation = (dbConn: DBConnection, graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>) => {
-  'use server';
-  const record = new Record({dbConn, graph, setGraph});
+const importMainNavigation = (
+  dbConn: DBConnection,
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+) => {
+  "use server";
+  const record = new Record({ dbConn, graph, setGraph });
   record.create("Nav", {});
-  record.createMeta(AttrsAdminTableData["Nav"])
-  importRecordWithYAMLSchema(`L: Nav
+  record.createMeta(AttrsAdminTableData["Nav"]);
+  importRecordWithYAMLSchema(
+    `L: Nav
 P:
   title: Main
   name: main
@@ -575,10 +678,12 @@ OUT:
       P:
         name: Dashboards
         url: /admin/dashboards
-`, record);
+`,
+    record,
+  );
   record.commitTxn();
-  console.error("Imported Navigation")
-}
+  console.error("Imported Navigation");
+};
 
 const importNSData = () => {
   const file = importNSDataInputRef!.files![0];
@@ -783,7 +888,7 @@ const importNSData = () => {
   }
 
   function importNsData_(json: { [p: string]: NsMetaJson }) {
-    console.error('importing');
+    console.error("importing");
     // TODO: make import with txnId 0 working.
     let txnId = getNewTxnId();
     const splitTransaction = true;
@@ -795,12 +900,14 @@ const importNSData = () => {
     // we need to increase bolt connection timeout second because from 18 seconds to 180 seconds,?
     // if it closes in 18 seconds backend is not replying, maybe we should give proper error for it.?
 
-
     function fieldsInsert(fields: Field[], collectionVertex: Node) {
       for (const field of fields) {
         let description = field.help;
         if (description) {
-          description = description.replaceAll(/<a href.*">([\w ]+)<\/a>/g, "$1");
+          description = description.replaceAll(
+            /<a href.*">([\w ]+)<\/a>/g,
+            "$1",
+          );
         }
         let type = field.type;
         // s.add(type);
@@ -809,7 +916,11 @@ const importNSData = () => {
 
           if (dataType) {
             if (collectionVertex) {
-              const dataTypeVertex = findVertexByLabelAndUniqueId("DataType", IdAttr, dataType);
+              const dataTypeVertex = findVertexByLabelAndUniqueId(
+                "DataType",
+                IdAttr,
+                dataType,
+              );
               if (!dataTypeVertex) {
                 console.log("dataType not found", dataType);
                 continue;
@@ -820,13 +931,13 @@ const importNSData = () => {
                 name: field.id,
                 displayName: field.label,
                 definition: field.help,
-                required: field.required
+                required: field.required,
               });
               setSelectionValue(
                 txnId,
                 graph.vertexes[rowResult.vertexId!],
-                {P: {[IdAttr]: "DataType"}} as Node,
-                dataTypeVertex.id
+                { P: { [IdAttr]: "DataType" } } as Node,
+                dataTypeVertex.id,
               );
             }
           } else {
@@ -842,16 +953,23 @@ const importNSData = () => {
       if (!fields) continue;
       const label = collection.label;
       const collectionId = collection.id;
-      let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`);
+      let collectionVertex = findVertexByLabelAndUniqueId(
+        "Coll",
+        IdAttr,
+        `${collectionId}`,
+      );
       if (!collectionVertex) {
         const id = getNewGraphId();
-        const newCollVertex = addNewVertex(txnId, newVertex(id, ["Coll"], {
-          name: collectionId,
-          title: label,
-          supportCustomFields: collection.supportCustomFields,
-          searchOnly: collection.searchOnly,
-          supportDeletedRecordSearch: collection.supportDeletedRecordSearch
-        }));
+        const newCollVertex = addNewVertex(
+          txnId,
+          newVertex(id, ["Coll"], {
+            name: collectionId,
+            title: label,
+            supportCustomFields: collection.supportCustomFields,
+            searchOnly: collection.searchOnly,
+            supportDeletedRecordSearch: collection.supportDeletedRecordSearch,
+          }),
+        );
         if (newCollVertex.error) {
           continue;
         } else {
@@ -870,17 +988,28 @@ const importNSData = () => {
       const collectionId = collection.id;
       const sublists = collection["sublists"];
       if (!sublists) continue;
-      let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+      let collectionVertex = findVertexByLabelAndUniqueId(
+        "Coll",
+        IdAttr,
+        `${collectionId}`,
+      )!;
 
       for (const sublist of sublists) {
         const sublistCollName = `${collectionId}${sublist.id}`;
-        let collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, sublistCollName);
+        let collVertex = findVertexByLabelAndUniqueId(
+          "Coll",
+          IdAttr,
+          sublistCollName,
+        );
         if (!collVertex) {
           const id = getNewGraphId();
-          const newCollVertex = addNewVertex(txnId, newVertex(id, ["Coll"], {
-            name: sublistCollName,
-            title: sublist.label
-          }));
+          const newCollVertex = addNewVertex(
+            txnId,
+            newVertex(id, ["Coll"], {
+              name: sublistCollName,
+              title: sublist.label,
+            }),
+          );
           if (newCollVertex.error) {
             continue;
           } else {
@@ -897,16 +1026,14 @@ const importNSData = () => {
         const rowResult = newRow(txnId, collectionVertex, "CollChild");
         replaceVertexProperties(txnId, rowResult.vertexId!, {
           displayName: sublist.label,
-          name: sublist.id
+          name: sublist.id,
         });
         setSelectionValue(
           txnId,
           graph.vertexes[rowResult.vertexId!],
-          {P: {[IdAttr]: "coll"}} as Node,
-          collVertex.id
+          { P: { [IdAttr]: "coll" } } as Node,
+          collVertex.id,
         );
-
-
       }
     }
     if (splitTransaction) commitTxn(txnId, Ws);
@@ -917,13 +1044,17 @@ const importNSData = () => {
       const collectionId = collection.id;
       const tabs = collection["tabs"];
       if (!tabs) continue;
-      let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+      let collectionVertex = findVertexByLabelAndUniqueId(
+        "Coll",
+        IdAttr,
+        `${collectionId}`,
+      )!;
 
       for (const tab of tabs) {
         const rowResult = newRow(txnId, collectionVertex, "CollTab");
         replaceVertexProperties(txnId, rowResult.vertexId!, {
           displayName: tab.label,
-          name: tab.name
+          name: tab.name,
         });
       }
     }
@@ -935,28 +1066,38 @@ const importNSData = () => {
       const collectionId = collection.id;
       const transformTypes = collection["transformTypes"];
       if (!transformTypes) continue;
-      let collectionVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, `${collectionId}`)!;
+      let collectionVertex = findVertexByLabelAndUniqueId(
+        "Coll",
+        IdAttr,
+        `${collectionId}`,
+      )!;
 
       for (const transformType of transformTypes) {
         const rowResult = newRow(txnId, collectionVertex, "CollTransform");
         replaceVertexProperties(txnId, rowResult.vertexId!, {
-          fieldDefaults: transformType.fieldDefaults
+          fieldDefaults: transformType.fieldDefaults,
         });
-        let collVertex = findVertexByLabelAndUniqueId("Coll", IdAttr, transformType.targetRecordType);
+        let collVertex = findVertexByLabelAndUniqueId(
+          "Coll",
+          IdAttr,
+          transformType.targetRecordType,
+        );
         if (!collVertex) {
-          console.log("transform collection not found", transformType.targetRecordType);
+          console.log(
+            "transform collection not found",
+            transformType.targetRecordType,
+          );
           continue;
         }
         setSelectionValue(
           txnId,
           graph.vertexes[rowResult.vertexId!],
-          {P: {[IdAttr]: "coll"}} as Node,
-          collVertex.id
+          { P: { [IdAttr]: "coll" } } as Node,
+          collVertex.id,
         );
       }
     }
     commitTxn(txnId, Ws);
-
 
     /*
      transform collection not found vendorBill
@@ -978,7 +1119,7 @@ const importNSData = () => {
       const json = JSON.parse(jsonText) as { [key: string]: NsMetaJson };
       batch(() => {
         importNsData_(json);
-      })
+      });
       // console.error("inserting ns data finished.");
       console.log("inserting ns data finished.", new Date());
     });

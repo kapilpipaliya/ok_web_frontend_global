@@ -1,9 +1,9 @@
-import {findVertexByLabelAndUniqueIdWithSkip} from "./Vertex";
-import {AttrsAdminTableData} from "./apiAdmin";
-import {FieldAttribute, FormMetaData} from "./Type";
-import {IFormContext} from "./Utils";
-import {useContext} from "solid-js";
-import {GraphContext} from "./graph";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
+import { AttrsAdminTableData } from "./apiAdmin";
+import { FieldAttribute, FormMetaData } from "./Type";
+import { IFormContext } from "./Utils";
+import { useContext } from "solid-js";
+import { GraphContext } from "./graph";
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -11,7 +11,7 @@ export const JSONToCypherMap = (json: object) => {
 };
 */
 
-export const API_BASE_URL = 'https://easyformforge.com/api';
+export const API_BASE_URL = "https://easyformforge.com/api";
 
 const collectionAttr = [
   {
@@ -19,7 +19,7 @@ const collectionAttr = [
     component: "TextBox",
     props: {
       onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-    }
+    },
   },
   {
     name: "name",
@@ -35,7 +35,6 @@ const collectionAttr = [
     name: "dataType",
     component: "SelectBox",
     props: {
-
       collection: "g:'DataType'",
     },
   },
@@ -43,7 +42,6 @@ const collectionAttr = [
     name: "Comp",
     component: "SelectBox",
     props: {
-
       collection: "->$0DataType->$0Comp",
       // smaller version:
       // collection: "g:'Comp'",
@@ -81,7 +79,7 @@ const collectionAttr = [
         name: "value",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
-         "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
       },
     ],
   },
@@ -94,7 +92,6 @@ const collectionAttr = [
         name: "role",
         component: "SelectBox",
         props: {
-
           collection: "g:'Role'",
         },
       },
@@ -106,7 +103,6 @@ const collectionAttr = [
             name: "perm",
             component: "TagBox",
             props: {
-
               collection: "g:'Perm'",
             },
           },
@@ -115,7 +111,7 @@ const collectionAttr = [
             component: "TextBox",
           },
         ],
-      }
+      },
     ],
   },
   {
@@ -123,18 +119,17 @@ const collectionAttr = [
     component: "Table2",
     tab: "expand",
     props: {
-      type: 'Attr',
+      type: "Attr",
       label: "Attr",
     },
-  }
+  },
 ] as FieldAttribute[];
 let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
-for (let i = 0; i <5; i++) {
-  const attributes =  JSON.parse(JSON.stringify(collectionAttr));
-  childAttrs.attributes =  attributes;
+for (let i = 0; i < 5; i++) {
+  const attributes = JSON.parse(JSON.stringify(collectionAttr));
+  childAttrs.attributes = attributes;
   childAttrs = attributes[attributes.length - 1];
 }
-
 
 const pageAttr = [
   {
@@ -186,7 +181,6 @@ const pageAttr = [
     name: "Comp",
     component: "SelectBox",
     props: {
-
       collection: "g:'Comp'",
       // smaller version:
       // collection: "g:'Comp'",
@@ -209,7 +203,7 @@ const pageAttr = [
         name: "value",
         meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
         component:
-            "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
+          "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'||->$0Name->$0DataType->$0Default::'P.name'",
       },
     ],
   },
@@ -221,7 +215,6 @@ const pageAttr = [
         name: "role",
         component: "SelectBox",
         props: {
-
           collection: "g:'Role'",
         },
       },
@@ -233,7 +226,6 @@ const pageAttr = [
             name: "perm",
             component: "SelectBox",
             props: {
-
               collection: "g:'Perm'",
             },
           },
@@ -246,19 +238,26 @@ const pageAttr = [
     component: "Table2",
     tab: "expand",
     props: {
-      type: 'Attr',
+      type: "Attr",
       label: "Attr",
     },
   },
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];
 // Keep max level 10, else the Page navigation is very slow. because revert transaction on record takes so much time.
-for (let i = 0; i <10; i++) {
-  const attributes =  JSON.parse(JSON.stringify(pageAttr));
-  pageChildAttrs.attributes =  attributes;
+for (let i = 0; i < 10; i++) {
+  const attributes = JSON.parse(JSON.stringify(pageAttr));
+  pageChildAttrs.attributes = attributes;
   pageChildAttrs = attributes[attributes.length - 1];
 }
-export const AdminAttrKeys = ["User", "Perm", "Role", "Dashboard", "Import", "Nav"];
+export const AdminAttrKeys = [
+  "User",
+  "Perm",
+  "Role",
+  "Dashboard",
+  "Import",
+  "Nav",
+];
 export const AttrsTableData: { [key: string]: FormMetaData } = {
   DataType: {
     title: "DataType",
@@ -271,7 +270,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Default Component",
         component: "SelectBox",
         props: {
-
           collection: "g:'Comp'",
         },
       },
@@ -295,7 +293,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-
           collection: "g:'CompCategory'",
           parentLabel: "CompCategory",
           inward: true,
@@ -307,7 +304,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Parent Component",
         component: "SelectBox",
         props: {
-
           collection: "g:'Comp'",
           inward: true,
           parentLabel: "Comp",
@@ -319,7 +315,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "DataType",
         component: "TagBox",
         props: {
-
           collection: "g:'DataType'",
           inward: true,
           parentLabel: "DataType",
@@ -336,7 +331,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "CheckBox",
       },
       { name: "description", component: "TextArea" },
-     // TODO: add validation, duplicate row with same name is not allowed.
+      // TODO: add validation, duplicate row with same name is not allowed.
       {
         name: "Prop",
         component: "Table2",
@@ -358,7 +353,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "dataType",
             component: "SelectBox",
             props: {
-
               collection: "g:'DataType'",
               onchange: '["Comp",null]',
             },
@@ -368,7 +362,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             displayName: "Component",
             component: "SelectBox",
             props: {
-
               collection: "->$0DataType->$0Comp",
             },
           },
@@ -415,7 +408,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             props: {
               children: "Reset",
               class: "border-color:#FF0000 color:#FF0000",
-              variant: 'outlined',
+              variant: "outlined",
               // TODO:
               // function: "reset",
               // onchange: '{"new": ["value","clear"], "edit": ["value","clear"]}',
@@ -479,13 +472,23 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } = options.validator.context || {} as IFormContext;
+                const { record } =
+                  options.validator.context || ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
-                if (Object.keys(AttrsTableData).includes(val) || Object.keys(AttrsAdminTableData).includes(val)) {
+                if (
+                  Object.keys(AttrsTableData).includes(val) ||
+                  Object.keys(AttrsAdminTableData).includes(val)
+                ) {
                   return false;
                 } else {
-                  return !findVertexByLabelAndUniqueIdWithSkip("Coll", "id", val, record.vertex.id,graph);
+                  return !findVertexByLabelAndUniqueIdWithSkip(
+                    "Coll",
+                    "id",
+                    val,
+                    record.vertex.id,
+                    graph,
+                  );
                 }
               },
             },
@@ -500,7 +503,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "category",
         component: "SelectBox",
         props: {
-
           collection: "g:'CollCategory'",
           parentLabel: "CollCategory",
           inward: true,
@@ -510,7 +512,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-
           collection: "g:'Dashboard'",
           parentLabel: "Dashboard",
           inward: true,
@@ -518,7 +519,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
       { name: "description", component: "TextArea" },
       { name: "public", component: "CheckBox" },
-      { name: "isInlineEditable", component: "CheckBox", },
+      { name: "isInlineEditable", component: "CheckBox" },
       // { name: "supportCustomFields", component: "CheckBox" },
       // { name: "searchOnly", component: "CheckBox" },
       // { name: "supportDeletedRecordSearch", component: "CheckBox" },
@@ -527,7 +528,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         displayName: "Primary Key",
         component: "TagBox",
         props: {
-
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -538,7 +538,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "nameKey",
         component: "TagBox",
         props: {
-
           collection: "->Attr",
           // TODO: add validation
           // If there is not name attribute,
@@ -551,7 +550,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "Table2",
         tab: "Attribute",
         props: {
-          type: 'Attr',
+          type: "Attr",
           label: "Attr",
         },
         attributes: collectionAttr,
@@ -561,7 +560,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "Table2",
         tab: "Rules",
         props: {
-          type: 'Rules',
+          type: "Rules",
           label: "Rules",
         },
         attributes: [
@@ -575,7 +574,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             component: "Table2",
             tab: "Rule",
             props: {
-              type: 'Rule',
+              type: "Rule",
               label: "Rule",
             },
             attributes: [
@@ -593,14 +592,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 ((
 (((`,
                     },
-                  },{
+                  },
+                  {
                     name: "layout",
                     displayName: "Layout",
                     component: "DropDownBoxTreeView",
                     props: {
                       // collection: "g:'DataType'",
                     },
-                  },{
+                  },
+                  {
                     name: "field",
                     displayName: "Field",
                     component: "SelectBox",
@@ -627,8 +628,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
 ))
 )))`,
                     },
-                  }
-                ]
+                  },
+                ],
               },
               {
                 name: "dataType",
@@ -650,15 +651,14 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "value",
                 displayName: "Value",
                 meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
-                component:
-                 `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
-              }
-            ]
-          }
+                component: `->$0Comp<-CompChild::'P.name'||->$0Comp::'P.name'||->$0DataType->$0Default::'P.name'`,
+              },
+            ],
+          },
         ],
       },
 
-/*      {
+      /*      {
         name: "Child",
         component: "Table2",
         tab: "Child",
@@ -729,7 +729,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             component: "SelectBox",
             props: {
-
               collection: "g:'Coll'",
             },
           },
@@ -757,7 +756,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               {
                 name: "value",
                 meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                component:
+                  "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
               },
             ],
           },
@@ -772,7 +772,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-
               collection: "g:'Role'",
             },
           },
@@ -857,10 +856,17 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } = options.validator.context || {} as IFormContext;
+                const { record } =
+                  options.validator.context || ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Page", "id", val, record.vertex.id,graph);
+                return !findVertexByLabelAndUniqueIdWithSkip(
+                  "Page",
+                  "id",
+                  val,
+                  record.vertex.id,
+                  graph,
+                );
               },
             },
           ],
@@ -871,7 +877,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         name: "dashboard",
         component: "TagBox",
         props: {
-
           collection: "g:'Dashboard'",
           parentLabel: "Dashboard",
           inward: true,
@@ -901,7 +906,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
         component: "Table2",
         tab: "Attribute",
         props: {
-          type: 'Attr',
+          type: "Attr",
           label: "Attr",
         },
         attributes: pageAttr,
@@ -915,7 +920,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
             name: "role",
             component: "SelectBox",
             props: {
-
               collection: "g:'Role'",
             },
           },
@@ -927,7 +931,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 name: "perm",
                 component: "SelectBox",
                 props: {
-
                   collection: "g:'Perm'",
                 },
               },

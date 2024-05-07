@@ -23,13 +23,16 @@ const toastPositions = [
   "bottom-left",
 ] as const;
 
-export type ToastPosition = typeof toastPositions[number];
+export type ToastPosition = (typeof toastPositions)[number];
 
 // load previously created containers
-const toastMountPoints = toastPositions.reduce((nodes, pos) => {
-  nodes[pos] = isServer ? null : document.getElementById(`sb-toast-${pos}`);
-  return nodes;
-}, {} as Partial<Record<ToastPosition, HTMLElement | null>>);
+const toastMountPoints = toastPositions.reduce(
+  (nodes, pos) => {
+    nodes[pos] = isServer ? null : document.getElementById(`sb-toast-${pos}`);
+    return nodes;
+  },
+  {} as Partial<Record<ToastPosition, HTMLElement | null>>,
+);
 
 export type WrappedToastContentProps = {
   update: Setter<JSX.Element | WrappedElement<WrappedToastContentProps>>;
@@ -73,20 +76,20 @@ export const Toast = (props: ToastProps): JSX.Element => {
     () =>
       local.mount ||
       toastMountPoints[local.position || "top-right"] ||
-      addMountPoint(local.position)
+      addMountPoint(local.position),
   );
 
   const [visible, setVisible] = createSignal(true);
   const hide = () => setVisible(false);
   const [newChildren, update] = createSignal<JSX.Element>();
   const [children, setChildren] = createSignal(
-    getElements(local.children, () => true, [{ update, hide }])
+    getElements(local.children, () => true, [{ update, hide }]),
   );
 
   onMount(
     () =>
       props.timeout !== 0 &&
-      setTimeout(() => setVisible(false), props.timeout ?? 5000)
+      setTimeout(() => setVisible(false), props.timeout ?? 5000),
   );
 
   createEffect(() => {

@@ -1,7 +1,10 @@
-import {batch} from "solid-js";
-import {createStore} from "solid-js/store";
-import {isNumber} from "../utils/utils";
-import {Node as Neo4jNode, Relationship as Neo4jRelationship} from 'neo4j-driver';
+import { batch } from "solid-js";
+import { createStore } from "solid-js/store";
+import { isNumber } from "../utils/utils";
+import {
+  Node as Neo4jNode,
+  Relationship as Neo4jRelationship,
+} from "neo4j-driver";
 
 export type Id = number | string | any;
 
@@ -11,7 +14,7 @@ export interface Node extends Partial<Neo4jNode> {
   id: Id;
   L: string[];
   P: {
-    [key: string]: any,
+    [key: string]: any;
   };
   IN: { [key: string]: Id[] };
   OUT: { [key: string]: Id[] };
@@ -24,7 +27,7 @@ export interface NodeUnsafe {
   OUT?: { [key: string]: Id[] };
 }
 
-export interface Relationship extends Partial<Neo4jRelationship>{
+export interface Relationship extends Partial<Neo4jRelationship> {
   id: Id;
   P: { [key: string]: any };
   T: string;
@@ -44,12 +47,13 @@ export interface IGraph {
   member?: { [key: string]: any } | null;
 }
 
-export const getGraph = () => createStore<IGraph>({
-  vertexes: {} as VertexMap,
-  edges: {} as EdgeMap,
-  vertexLabelIdMap: {} as { [key: string]: Id[] },
-  member: {},
-});
+export const getGraph = () =>
+  createStore<IGraph>({
+    vertexes: {} as VertexMap,
+    edges: {} as EdgeMap,
+    vertexLabelIdMap: {} as { [key: string]: Id[] },
+    member: {},
+  });
 export type Revert = { revert: () => any };
 export type InsertFn = {
   [key in
@@ -70,10 +74,16 @@ export enum ProcessStatus {
   AckReceived,
   Processed,
 }
-export type TransactionValue = InsertFn & Revert & {data: any};
-export const transactions = new Map<number, { status: ProcessStatus; steps: TransactionValue[] }>();
+export type TransactionValue = InsertFn & Revert & { data: any };
+export const transactions = new Map<
+  number,
+  { status: ProcessStatus; steps: TransactionValue[] }
+>();
 // @ts-ignore
-export const transactionDetailAdd = (txnId: number, txnValue: TransactionValue) => {
+export const transactionDetailAdd = (
+  txnId: number,
+  txnValue: TransactionValue,
+) => {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
     status: ProcessStatus.Unset,
@@ -108,7 +118,6 @@ export const txnHasSteps = (txnId: number) => {
   return existingTxnValue.length > 0;
 };
 
-
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 export function getNewGraphId(): Id {
   uniqueId = uniqueId + 1;
@@ -122,10 +131,10 @@ export function isValidId(startVertexId: Id) {
 }
 
 export function compareId(id1: any, id2: any) {
-  if (typeof id1 === 'object') {
+  if (typeof id1 === "object") {
     id1 = id1.toString();
   }
-  if (typeof id2 === 'object') {
+  if (typeof id2 === "object") {
     id2 = id2.toString();
   }
   return id1 == id2;

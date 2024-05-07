@@ -1,69 +1,77 @@
 .outlined-button {
-    padding: 0.3rem 1rem;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    margin: 1px;
-    text-decoration: none;
-    align-items: center;
-    transition: background-color 0.3s, color 0.3s;
-    color: #37c;
-    background-color: transparent;
-    border: 1.5px solid #37c;
+  padding: 0.3rem 1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 1px;
+  text-decoration: none;
+  align-items: center;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  color: #37c;
+  background-color: transparent;
+  border: 1.5px solid #37c;
 }
 
 .contained-button {
-    padding: 0.3rem 1rem;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    margin: 1px;
-    text-decoration: none;
-    align-items: center;
-    transition: background-color 0.3s, color 0.3s;
-    color: white;
-    background-color: #37c;
+  padding: 0.3rem 1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 1px;
+  text-decoration: none;
+  align-items: center;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  color: white;
+  background-color: #37c;
 }
 
 .soft-button {
-    padding: 0.3rem 1rem;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    margin: 1px;
-    text-decoration: none;
-    align-items: center;
-    transition: background-color 0.3s, color 0.3s;
-    color: #37c;
-    font-weight: 600;
-    display: flex;
-    text-align: center;
-    background-color: rgb(229, 234, 253);
-    border: none;
+  padding: 0.3rem 1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 1px;
+  text-decoration: none;
+  align-items: center;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  color: #37c;
+  font-weight: 600;
+  display: flex;
+  text-align: center;
+  background-color: rgb(229, 234, 253);
+  border: none;
 }
 .danger {
-    padding: 0.3rem 1rem;
-    border-radius: 0.3rem;
-    cursor: pointer;
-    font-size: 1rem;
-    margin: 1px;
-    text-decoration: none;
-    align-items: center;
-    transition: background-color 0.3s, color 0.3s;
-    color: rgb(255, 2, 2);
-    background-color: transparent;
-    border: 1.5px solid rgb(255, 2, 2);
+  padding: 0.3rem 1rem;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  font-size: 1rem;
+  margin: 1px;
+  text-decoration: none;
+  align-items: center;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  color: rgb(255, 2, 2);
+  background-color: transparent;
+  border: 1.5px solid rgb(255, 2, 2);
 }
 
 .soft-button:hover {
-    background-color: #d4e1f1;
+  background-color: #d4e1f1;
 }
 
 .contained-button:hover {
-    background-color: #1d5091;
+  background-color: #1d5091;
 }
 
 .outlined-button.danger:hover {
-    background-color: rgb(255, 0, 0);
-    color: #fff;
+  background-color: rgb(255, 0, 0);
+  color: #fff;
 }

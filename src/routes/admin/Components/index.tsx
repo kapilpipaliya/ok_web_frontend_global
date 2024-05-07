@@ -1,10 +1,20 @@
-import {useParams} from "@solidjs/router";
-import {AbstractSingleGrid} from "~/pages/Grids";
-import {API, DataFetcher} from "~/components/DataFetcher";
+import { useParams } from "@solidjs/router";
+import { AbstractSingleGrid } from "~/pages/dynamic/Grids";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function Components() {
-    const params = useParams();
-    console.log(params)
+  const params = useParams();
+  console.log(params);
 
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<DataFetcher fetchData={API.fetchDataUrl} renderContent={<AbstractSingleGrid tableId={params.entity}/>}/>}/>;
+  return (
+    <DataFetcher
+      fetchData={API.fetchDataUrl}
+      renderContent={
+        <DataFetcher
+          fetchData={API.fetchDataUrl}
+          renderContent={<AbstractSingleGrid tableId={params.entity} />}
+        />
+      }
+    />
+  );
 }

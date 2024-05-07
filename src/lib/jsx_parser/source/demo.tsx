@@ -1,18 +1,18 @@
 /* eslint-disable no-console */
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from "react";
+import ReactDOM from "react-dom";
 // @ts-expect-error - untyped output file
-import JsxParser from '../dist/umd/react-jsx-parser.min'
+import JsxParser from "../dist/umd/react-jsx-parser.min";
 
 ReactDOM.render(
-	<JsxParser
-		autoCloseVoidElements
-		jsx={`
+  <JsxParser
+    autoCloseVoidElements
+    jsx={`
 			<img src="http://placekitten.com/300/5000">{[1].map(x=>x)}
 			<div className="foo">bar</div>
 		`}
-		onError={console.error}
-		showWarnings
-	/>,
-	document.querySelector('#root'),
-)
+    onError={console.error}
+    showWarnings
+  />,
+  document.querySelector("#root"),
+);

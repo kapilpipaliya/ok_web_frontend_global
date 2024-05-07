@@ -6,7 +6,8 @@
 import { createSignal, JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
 
-interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
+interface Properties
+  extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
   name?: string;
   disabled?: boolean;
   value?: string;
@@ -21,7 +22,13 @@ interface Properties extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "on
 
 /* Work In Progress */
 export const FileField = (props: Properties) => {
-  const [p, customProps] = splitProps(props, ["label", "prefix", "help", "error", "onchange"]);
+  const [p, customProps] = splitProps(props, [
+    "label",
+    "prefix",
+    "help",
+    "error",
+    "onchange",
+  ]);
 
   // using XMLHttpRequest because fetch can't track upload process yet
   // https://javascript.info/xmlhttprequest
@@ -70,7 +77,9 @@ export const FileField = (props: Properties) => {
         units = "M/s";
       }
       const restTime = ((evt.total - evt.loaded) / byteSpeed).toFixed(1);
-      setSpeedText(`,Speed: ${speed.toFixed(1)}${units}, the remaining time: ${restTime}s`);
+      setSpeedText(
+        `,Speed: ${speed.toFixed(1)}${units}, the remaining time: ${restTime}s`,
+      );
       if (byteSpeed === 0) setSpeedText("Upload cancelled");
     }
 
@@ -104,10 +113,19 @@ export const FileField = (props: Properties) => {
 
   return (
     <>
-      <progress value={progressBar.value} max={progressBar.max} style="width: 300px;" />
+      <progress
+        value={progressBar.value}
+        max={progressBar.max}
+        style="width: 300px;"
+      />
       <span>{percentageText()}</span>
       <span>{speedText()}</span>
-      <input name={props.label || ""} type="file" ref={props.dom} {...customProps} />
+      <input
+        name={props.label || ""}
+        type="file"
+        ref={props.dom}
+        {...customProps}
+      />
       <input type="button" onClick={UploadFile} value="Upload" />
       <input type="button" onClick={cancelUploadFile} value="Cancel" />
 

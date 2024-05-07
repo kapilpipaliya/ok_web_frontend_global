@@ -49,19 +49,20 @@ export const Modal = (props: ModalProps): JSX.Element => {
   const [open, setOpen] = createSignal(local.open);
   const toggle = (open?: boolean) =>
     setOpen(typeof open === "boolean" ? open : (o) => !o);
-  const modalContent = createMemo(() =>
-    getElements(
-      local.children,
-      (node) => node.className.indexOf("sb-modal-content") !== -1,
-      [{ open, toggle }]
-    ) ?? []
+  const modalContent = createMemo(
+    () =>
+      getElements(
+        local.children,
+        (node) => node.className.indexOf("sb-modal-content") !== -1,
+        [{ open, toggle }],
+      ) ?? [],
   );
   const otherChildren = createMemo(() =>
     getElements(
       local.children,
       (node) => node.className.indexOf("sb-modal-content") === -1,
-      [{ open, toggle }]
-    )
+      [{ open, toggle }],
+    ),
   );
 
   let modalRef!: HTMLDivElement;
@@ -77,20 +78,20 @@ export const Modal = (props: ModalProps): JSX.Element => {
     if (header) {
       modalRef.setAttribute(
         "aria-labelledby",
-        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))()
+        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))(),
       );
     }
     const body = modalRef.querySelector(".sb-modal-body");
     if (body) {
       modalRef.setAttribute(
         "aria-describedby",
-        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))()
+        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))(),
       );
     }
   });
 
   const divProps = mergeProps(containerProps, {
-    role: "dialog" as JSX.HTMLAttributes<HTMLDivElement>['role'],
+    role: "dialog" as JSX.HTMLAttributes<HTMLDivElement>["role"],
     tabIndex: -1,
     class: props.class ? `sb-modal ${props.class}` : "sb-modal",
     children: modalContent(),
@@ -102,7 +103,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
               toggle(false);
             }
           }
-        : undefined
+        : undefined,
     )(),
     onkeyup: createMemo(() =>
       props.closeOnEsc !== false
@@ -111,7 +112,7 @@ export const Modal = (props: ModalProps): JSX.Element => {
               setOpen(false);
             }
           }
-        : undefined
+        : undefined,
     )(),
   });
 

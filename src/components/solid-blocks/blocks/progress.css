@@ -6,7 +6,7 @@ progress.sb-progress,
   color: var(--primary);
   height: 0.85em;
   width: 8em;
-vertical-align: -0.125em;
+  vertical-align: -0.125em;
 }
 progress.sb-progress::-webkit-progress-bar {
   background: var(--border-color);
@@ -18,5 +18,5 @@ progress.sb-progress[aria-orientation="vertical"],
 [role="progress"].sb-progress[aria-orientation="vertical"] {
   transform: rotate(-90deg);
   transform-origin: 0 0;
-  margin: 8.5em -7.15em -0.75em 0;  
+  margin: 8.5em -7.15em -0.75em 0;
 }

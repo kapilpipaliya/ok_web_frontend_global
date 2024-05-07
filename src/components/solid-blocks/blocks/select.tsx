@@ -16,7 +16,7 @@ export const Select: Component<SelectProps> = (props) => {
     "label",
     "onChange",
     "setValue",
-    "value"
+    "value",
   ]);
   return (
     <label

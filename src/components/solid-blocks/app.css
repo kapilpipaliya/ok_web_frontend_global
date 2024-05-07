@@ -11,7 +11,9 @@ body {
   line-height: 1.5em;
 }
 @media (max-width: 50em) and (max-height: 50em) {
-  body { font-size: 1em; }
+  body {
+    font-size: 1em;
+  }
 }
 .app {
   padding: 1em 1em 3em 1em;
@@ -41,7 +43,9 @@ body {
 .flex-row > * {
   margin-left: 1em;
 }
-dt { font-weight: 700; }
+dt {
+  font-weight: 700;
+}
 pre {
   color: #ccc;
   background: #111;
@@ -90,7 +94,10 @@ pre[data-title]:before {
   color: var(--negative-text);
   font-weight: 700;
 }
-h2, li { word-wrap: wrap-word; }
+h2,
+li {
+  word-wrap: wrap-word;
+}
 .color-example {
   border: var(--hair-line) solid var(--border-color);
   display: inline-block;

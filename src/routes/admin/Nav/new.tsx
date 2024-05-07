@@ -1,6 +1,8 @@
-import {NavDesigner} from "~/pages/FormDesigner";
-import {API, DataFetcher} from "~/components/DataFetcher";
+import { NavDesigner } from "~/pages/form/FormDesigner";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function NavNew() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<NavDesigner/>}/>;
+  return (
+    <DataFetcher fetchData={API.fetchDataUrl} renderContent={<NavDesigner />} />
+  );
 }

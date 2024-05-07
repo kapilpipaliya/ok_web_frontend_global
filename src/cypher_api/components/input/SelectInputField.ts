@@ -1,14 +1,26 @@
 // Comment This Lines in web build
-import {compareId, getNewGraphId, IGraph, isIdArrayIncludesID, Node} from "../../lib/graph";
-import {addNewEdge, deleteEdge, newEdge} from "../../lib/Edge";
-import {getInEdge, getToEdge} from "../../lib/Traverse";
-import {DBConnection} from "../../lib/dbs";
-import {SetStoreFunction, Store} from "solid-js/store";
-import {getOutEdges} from "../../functions/getOutEdges";
-import {deleteRelationShipMGCall} from "../../functions/deleteRelationShip";
-import {newEdgeMGCall} from "../../functions/newEdge";
+import {
+  compareId,
+  getNewGraphId,
+  IGraph,
+  isIdArrayIncludesID,
+  Node,
+} from "../../lib/graph";
+import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
+import { getInEdge, getToEdge } from "../../lib/Traverse";
+import { DBConnection } from "../../lib/dbs";
+import { SetStoreFunction, Store } from "solid-js/store";
+import { getOutEdges } from "../../functions/getOutEdges";
+import { deleteRelationShipMGCall } from "../../functions/deleteRelationShip";
+import { newEdgeMGCall } from "../../functions/newEdge";
 
-function vertexOutEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, vertex: Node, type: string, vertexId: number) {
+function vertexOutEdgeContainVertex(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  vertex: Node,
+  type: string,
+  vertexId: number,
+) {
   const outEdges = vertex.OUT[type] || [];
 
   for (const edgeId of outEdges) {
@@ -19,8 +31,13 @@ function vertexOutEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunc
   }
   return false;
 }
-async function vertexOutEdgeContainVertexMGCall(dbConn: DBConnection, vertex: Node, type: string, vertexId: number) {
-  'use server';
+async function vertexOutEdgeContainVertexMGCall(
+  dbConn: DBConnection,
+  vertex: Node,
+  type: string,
+  vertexId: number,
+) {
+  "use server";
   const outEdgesResult = await getOutEdges(dbConn, vertex.id, type);
 
   for (const [relationship, endVertex] of outEdgesResult.pairs || []) {
@@ -30,7 +47,13 @@ async function vertexOutEdgeContainVertexMGCall(dbConn: DBConnection, vertex: No
   }
   return false;
 }
-function vertexInEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, vertex: Node, type: any, vertexId: number) {
+function vertexInEdgeContainVertex(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  vertex: Node,
+  type: any,
+  vertexId: number,
+) {
   const inEdges = vertex.IN[type] || [];
 
   for (const edgeId of inEdges) {
@@ -41,9 +64,16 @@ function vertexInEdgeContainVertex(graph: Store<IGraph>, setGraph: SetStoreFunct
   }
   return false;
 }
-async function vertexInEdgeContainVertexMGCall(dbConn: DBConnection, vertex: Node, type: any, vertexId: number) {
-  'use server';
-  const inEdgesResult = await getOutEdges(dbConn, vertex.id, type, {isInward: true});
+async function vertexInEdgeContainVertexMGCall(
+  dbConn: DBConnection,
+  vertex: Node,
+  type: any,
+  vertexId: number,
+) {
+  "use server";
+  const inEdgesResult = await getOutEdges(dbConn, vertex.id, type, {
+    isInward: true,
+  });
   for (const [relationship, startVertex] of inEdgesResult.pairs || []) {
     if (compareId(startVertex.id, vertexId)) {
       return true;
@@ -53,7 +83,14 @@ async function vertexInEdgeContainVertexMGCall(dbConn: DBConnection, vertex: Nod
 }
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setSelectionValue(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, txnId: number, vertex: Node, meta: Node, value?: number[] | number) {
+export function setSelectionValue(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  txnId: number,
+  vertex: Node,
+  meta: Node,
+  value?: number[] | number,
+) {
   // delete removed edges:
   const type = getToEdge(meta, vertex);
   const previousEdges = vertex.OUT[type] || [];
@@ -78,12 +115,22 @@ export function setSelectionValue(graph: Store<IGraph>, setGraph: SetStoreFuncti
     if (vertexOutEdgeContainVertex(graph, setGraph, vertex, type, vertexId)) {
       continue;
     }
-    const insertEdgeResult = addNewEdge(graph,setGraph,txnId, newEdge(getNewGraphId(), type, {}, vertex.id, vertexId));
+    const insertEdgeResult = addNewEdge(
+      graph,
+      setGraph,
+      txnId,
+      newEdge(getNewGraphId(), type, {}, vertex.id, vertexId),
+    );
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
-export async function setSelectionValueMGCall(dbConn: DBConnection, vertex: Node, meta: Node, value?: number[] | number) {
-  'use server';
+export async function setSelectionValueMGCall(
+  dbConn: DBConnection,
+  vertex: Node,
+  meta: Node,
+  value?: number[] | number,
+) {
+  "use server";
   // delete removed edges:
   const type = getToEdge(meta, vertex);
   if (!type) console.error("edge type cant be empty");
@@ -107,16 +154,32 @@ export async function setSelectionValueMGCall(dbConn: DBConnection, vertex: Node
 
   // add added edges:
   for (const vertexId of value) {
-    if (isIdArrayIncludesID(previousEdges.map(x=>x[1].id), vertexId)) continue;
-    const insertEdgeResult = await newEdgeMGCall(dbConn, type,  vertex.id, vertexId);
+    if (
+      isIdArrayIncludesID(
+        previousEdges.map((x) => x[1].id),
+        vertexId,
+      )
+    )
+      continue;
+    const insertEdgeResult = await newEdgeMGCall(
+      dbConn,
+      type,
+      vertex.id,
+      vertexId,
+    );
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
 
-
-
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-export function setParentValue(graph: Store<IGraph>, setGraph: SetStoreFunction<IGraph>, txnId: number, vertex: Node, meta: Node, value?: number[] | number) {
+export function setParentValue(
+  graph: Store<IGraph>,
+  setGraph: SetStoreFunction<IGraph>,
+  txnId: number,
+  vertex: Node,
+  meta: Node,
+  value?: number[] | number,
+) {
   // delete removed edges:
   const type = getInEdge(meta, vertex);
   if (!type) console.error("edge type cant be empty");
@@ -147,16 +210,28 @@ export function setParentValue(graph: Store<IGraph>, setGraph: SetStoreFunction<
       continue;
     }
 
-    const insertEdgeResult = addNewEdge(graph, setGraph, txnId, newEdge(getNewGraphId(), type, {}, vertexId, vertex.id));
+    const insertEdgeResult = addNewEdge(
+      graph,
+      setGraph,
+      txnId,
+      newEdge(getNewGraphId(), type, {}, vertexId, vertex.id),
+    );
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
-export async function setParentValueMGCall(dbConn: DBConnection, vertex: Node, meta: Node, value?: number[] | number) {
-  'use server';
+export async function setParentValueMGCall(
+  dbConn: DBConnection,
+  vertex: Node,
+  meta: Node,
+  value?: number[] | number,
+) {
+  "use server";
   // delete removed edges:
   const type = getInEdge(meta, vertex);
   if (!type) console.error("edge type cant be empty");
-  const previousEdgesResult = await getOutEdges(dbConn, vertex.id, type, {isInward: true});
+  const previousEdgesResult = await getOutEdges(dbConn, vertex.id, type, {
+    isInward: true,
+  });
   const previousEdges = previousEdgesResult.pairs! || [];
 
   let valueArray = [] as number[];
@@ -174,18 +249,31 @@ export async function setParentValueMGCall(dbConn: DBConnection, vertex: Node, m
   for (const [relationship, startNode] of previousEdges) {
     // we should not delete edge that start with same vertex
     if (isIdArrayIncludesID(valueArray, startNode.id)) continue;
-    const deleteEdgeResult = await deleteRelationShipMGCall(dbConn, relationship.id);
+    const deleteEdgeResult = await deleteRelationShipMGCall(
+      dbConn,
+      relationship.id,
+    );
     if (deleteEdgeResult?.error) console.error(deleteEdgeResult.error);
   }
 
   // add added edges:
   for (const vertexId of valueArray) {
-    if (isIdArrayIncludesID(previousEdges.map(x=>x[1].id), vertexId)) continue;
-    const insertEdgeResult = await newEdgeMGCall(dbConn, type, vertexId, vertex.id);
+    if (
+      isIdArrayIncludesID(
+        previousEdges.map((x) => x[1].id),
+        vertexId,
+      )
+    )
+      continue;
+    const insertEdgeResult = await newEdgeMGCall(
+      dbConn,
+      type,
+      vertexId,
+      vertex.id,
+    );
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
-
 
 // if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
 // no need to pass displayExpr,
@@ -195,4 +283,3 @@ export async function setParentValueMGCall(dbConn: DBConnection, vertex: Node, m
 export function isSimpleCollection(collection: string) {
   return !/[`!@$%^&*()+=\[\]{};':"\\|,.<>?~]/.test(collection);
 }
-

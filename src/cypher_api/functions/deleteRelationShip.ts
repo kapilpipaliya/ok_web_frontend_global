@@ -1,12 +1,14 @@
-import neo4j from 'neo4j-driver';
-import {DBConnection} from "../lib/dbs";
+import neo4j from "neo4j-driver";
+import { DBConnection } from "../lib/dbs";
 
 export async function deleteRelationShipMGCall(
   dbConn: DBConnection,
   edgeId: string | number | any,
 ) {
-  'use server';
-  dbConn.session ||= dbConn.driver.session({ defaultAccessMode: neo4j.session.WRITE });
+  "use server";
+  dbConn.session ||= dbConn.driver.session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
   const transaction = dbConn.session.beginTransaction();
 
   try {

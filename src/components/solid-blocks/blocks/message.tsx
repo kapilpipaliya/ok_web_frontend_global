@@ -22,9 +22,9 @@ export const Message: Component<MessageProps> = (props) => {
           messageProps.type,
           messageProps.class,
           messageProps.inline && "inline",
-        ].filter(Boolean)
+        ].filter(Boolean),
       ),
-    ].join(" ")
+    ].join(" "),
   );
 
   return (

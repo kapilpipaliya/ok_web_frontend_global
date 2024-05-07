@@ -38,7 +38,7 @@ declare module "solid-js" {
 
 const computeVisible = (
   trigger: TooltipTrigger | undefined,
-  initial?: boolean
+  initial?: boolean,
 ): boolean =>
   trigger === undefined
     ? false
@@ -47,14 +47,14 @@ const computeVisible = (
           typeof trigger === "boolean"
             ? trigger
             : typeof trigger === "function"
-            ? trigger()
-            : visible,
-        initial ?? false
+              ? trigger()
+              : visible,
+        initial ?? false,
       );
 
 const triggerHas = (
   trigger: TooltipProps["trigger"] | undefined,
-  event: "focus" | "hover"
+  event: "focus" | "hover",
 ) =>
   trigger === undefined ||
   trigger === event ||
@@ -65,14 +65,14 @@ const wrapText = (children: JSX.Element): JSX.Element => {
     return wrapText(children());
   }
   if (typeof children === "string") {
-    return (<span tabIndex="0">{children}</span>);
+    return <span tabIndex="0">{children}</span>;
   }
   if (Array.isArray(children)) {
     const result = children.map((child) =>
-      typeof child === "function" ? child() : child
+      typeof child === "function" ? child() : child,
     );
     if (result.every((child) => typeof child === "string")) {
-      return (<span tabIndex="0">{result}</span>);
+      return <span tabIndex="0">{result}</span>;
     }
     return result;
   }
@@ -95,7 +95,7 @@ export const Tooltip: Component<TooltipProps> = (props) => {
   const children = createMemo(() =>
     triggerHas(local.trigger, "focus")
       ? wrapText(local.children)
-      : local.children
+      : local.children,
   );
   const [visible, setVisible] = createSignal(false);
   createEffect(() => setVisible(computeVisible(local.trigger)));
@@ -103,11 +103,14 @@ export const Tooltip: Component<TooltipProps> = (props) => {
   const [positionStyle, setPositionStyle] = createSignal<JSX.CSSProperties>();
 
   const focusHandler = createMemo(
-    () => (ev: FocusEvent) => useFocus() && setVisible(ev.type === "focus")
+    () => (ev: FocusEvent) => useFocus() && setVisible(ev.type === "focus"),
   );
   const hoverHandler = createMemo(
     () => (ev: MouseEvent & { toElement?: HTMLElement }) =>
-      useHover() && setVisible(wrapperRef.contains((ev.toElement ?? ev.target) as Node | null))
+      useHover() &&
+      setVisible(
+        wrapperRef.contains((ev.toElement ?? ev.target) as Node | null),
+      ),
   );
 
   createEffect(() => {
@@ -121,39 +124,39 @@ export const Tooltip: Component<TooltipProps> = (props) => {
             left: `${wrapperRef.offsetLeft}px`,
           }
         : local.position === "n"
-        ? {
-            top: `${wrapperRef.offsetTop}px`,
-            left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
-          }
-        : local.position === "ne"
-        ? {
-            top: `${wrapperRef.offsetTop}px`,
-            left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
-          }
-        : local.position === "e"
-        ? {
-            top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
-            left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
-          }
-        : local.position === "se"
-        ? {
-            top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
-            left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
-          }
-        : local.position === "sw"
-        ? {
-            top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
-            left: `${wrapperRef.offsetLeft}px`,
-          }
-        : local.position === "w"
-        ? {
-            top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
-            left: `${wrapperRef.offsetLeft}px`,
-          }
-        : /* s is default */ {
-            top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
-            left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
-          }
+          ? {
+              top: `${wrapperRef.offsetTop}px`,
+              left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
+            }
+          : local.position === "ne"
+            ? {
+                top: `${wrapperRef.offsetTop}px`,
+                left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
+              }
+            : local.position === "e"
+              ? {
+                  top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
+                  left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
+                }
+              : local.position === "se"
+                ? {
+                    top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
+                    left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
+                  }
+                : local.position === "sw"
+                  ? {
+                      top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
+                      left: `${wrapperRef.offsetLeft}px`,
+                    }
+                  : local.position === "w"
+                    ? {
+                        top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
+                        left: `${wrapperRef.offsetLeft}px`,
+                      }
+                    : /* s is default */ {
+                        top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
+                        left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
+                      },
     );
   });
 

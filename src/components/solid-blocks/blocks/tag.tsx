@@ -16,7 +16,7 @@ export const Tag: Component<TagProps> = (props) => {
       rel: props.target ? "tag noopener" : "tag",
     },
     tagProps,
-    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" }
+    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" },
   );
   return (
     <Show

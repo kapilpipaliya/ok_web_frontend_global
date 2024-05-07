@@ -1,40 +1,41 @@
-import {getChildVertexes, getSelectionOptions} from "../lib/Traverse";
-import {Node} from "../lib/graph";
+import { getChildVertexes, getSelectionOptions } from "../lib/Traverse";
+import { Node } from "../lib/graph";
 
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 // This method read all property vertexes and make an object.
 export const getProps = async (meta: Node) => {
-  const propsResult = await (getChildVertexes(["$0Prop"], [meta]));
-  const props = propsResult.vertexes || []
-  return props.reduce((acc, curr) => {
-    const key = getSelectionOptions([curr], "T:(->$0Key::'P.key')").vertexes;
-    if (key) {
-      acc[key] = curr.P.value;
-    }
-    return acc;
-  }, {} as { [key: string]: any });
+  const propsResult = await getChildVertexes(["$0Prop"], [meta]);
+  const props = propsResult.vertexes || [];
+  return props.reduce(
+    (acc, curr) => {
+      const key = getSelectionOptions([curr], "T:(->$0Key::'P.key')").vertexes;
+      if (key) {
+        acc[key] = curr.P.value;
+      }
+      return acc;
+    },
+    {} as { [key: string]: any },
+  );
 };
 
-export function getValueFromVertexOrKey(obj: {[key: string]: Node} | any, key: string) {
+export function getValueFromVertexOrKey(
+  obj: { [key: string]: Node } | any,
+  key: string,
+) {
   return obj?.[key];
   // return obj[key]?.id ? obj[key].P.value : obj[key];
 }
 
-
-
-
 // ts-belt
-export  function isNumber(i: any) {
+export function isNumber(i: any) {
   if ("number" == typeof i) {
     return !Number.isNaN(i);
   } else {
     return !1;
   }
 }
-
-
 
 export function isObject(i: any) {
   if (i && !Array.isArray(i)) {
@@ -44,7 +45,10 @@ export function isObject(i: any) {
   }
 }
 
-export function groupBy(xs: { [key: string]: any }[], groupFn: (record: { [key: string]: any }) => string) {
+export function groupBy(
+  xs: { [key: string]: any }[],
+  groupFn: (record: { [key: string]: any }) => string,
+) {
   return xs.reduce((acc, element) => {
     const key = groupFn(element);
     const value = acc[key];

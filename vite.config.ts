@@ -147,28 +147,27 @@
 //  },
 // });
 
-import { defineConfig } from 'vite';
+import { defineConfig } from "vite";
 
 export default defineConfig({
-    plugins: [
-        nodePolyfills({
-            include: ["stream"] // Specify the Node modules you need to polyfill
-        })
-    ],
-    resolve: {
-        alias: {
-            'stream': 'stream-browserify'
-        }
+  plugins: [
+    nodePolyfills({
+      include: ["stream"], // Specify the Node modules you need to polyfill
+    }),
+  ],
+  resolve: {
+    alias: {
+      stream: "stream-browserify",
     },
-    build: {
-        rollupOptions: {
-            // additional Rollup options if needed
-        }
-    }
+  },
+  build: {
+    rollupOptions: {
+      // additional Rollup options if needed
+    },
+  },
 });
 function nodePolyfills(arg0: {
-    include: string[]; // Specify the Node modules you need to polyfill
+  include: string[]; // Specify the Node modules you need to polyfill
 }): import("vite").PluginOption {
-    throw new Error('Function not implemented.');
+  throw new Error("Function not implemented.");
 }
-

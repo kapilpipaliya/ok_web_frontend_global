@@ -97,7 +97,7 @@
   + .sb-avatar
   + .sb-avatar
   + .sb-avatar:last-child:before {
-  content: "\80"
+  content: "\80";
 }
 .sb-avatar[role="group"]:not([aria-expanded="true"])[data-plus]:after {
   content: attr(data-plus);

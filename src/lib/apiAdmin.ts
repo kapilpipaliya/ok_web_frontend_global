@@ -1,19 +1,19 @@
-import {findVertexByLabelAndUniqueIdWithSkip} from "./Vertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
 
-import {FormMetaData} from "./Type";
-import {IFormContext} from "./Utils";
-import {GraphContext} from "./graph";
-import {useContext} from "solid-js";
+import { FormMetaData } from "./Type";
+import { IFormContext } from "./Utils";
+import { GraphContext } from "./graph";
+import { useContext } from "solid-js";
 
-export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
+export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   User: {
     title: "User",
     name: "User",
     isInlineEditable: true,
     attributes: [
-      {name: "name", component: "TextBox"},
-      {name: "email", component: "TextBox"},
-      {name: "pass", component: "TextBox"},
+      { name: "name", component: "TextBox" },
+      { name: "email", component: "TextBox" },
+      { name: "pass", component: "TextBox" },
       {
         name: "role",
         component: "TagBox",
@@ -27,21 +27,21 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
     title: "Perm",
     name: "Perm",
     isInlineEditable: true,
-    attributes: [{name: "name", component: "TextBox"}],
+    attributes: [{ name: "name", component: "TextBox" }],
   },
   Role: {
     title: "Role",
     name: "Role",
     isInlineEditable: true,
-    attributes: [{name: "name", component: "TextBox"}],
+    attributes: [{ name: "name", component: "TextBox" }],
   },
   Dashboard: {
     title: "Dashboards",
     name: "Dashboard",
     isInlineEditable: true,
     attributes: [
-      {name: "name", component: "TextBox"},
-      {name: "description", component: "TextArea"},
+      { name: "name", component: "TextBox" },
+      { name: "description", component: "TextArea" },
     ],
   },
   Import: {
@@ -52,18 +52,18 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
       {
         name: "csv",
         component: "TextArea",
-        props: {width: 600, height: 500},
+        props: { width: 600, height: 500 },
       },
-      {name: "label", component: "TextBox"},
-      {name: "dry", component: "CheckBox"},
-      {name: "lookup", component: "TextBox"},
-      {name: "lookupId", component: "TextBox"},
-      {name: "lookupChild", component: "TextBox"},
+      { name: "label", component: "TextBox" },
+      { name: "dry", component: "CheckBox" },
+      { name: "lookup", component: "TextBox" },
+      { name: "lookupId", component: "TextBox" },
+      { name: "lookupChild", component: "TextBox" },
       {
         name: "meta",
         component: "Table2",
         attributes: [
-          {name: "column", component: "TextBox"},
+          { name: "column", component: "TextBox" },
           // {
           //  name: "column",
           //  component: "SelectBox",
@@ -72,7 +72,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
           //   collection: "Update Dynamically on meta based on first row",
           //  },
           // },
-          {name: "attrId", displayName: "Attribute ID", component: "TextBox"},
+          { name: "attrId", displayName: "Attribute ID", component: "TextBox" },
           {
             name: "coll",
             displayName: "Lookup Collection",
@@ -82,14 +82,18 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
               collection: "g:'Coll'",
             },
           },
-          {name: "collLabel", displayName: "Lookup Label", component: "TextBox"},
-          {name: "inward", component: "CheckBox"},
+          {
+            name: "collLabel",
+            displayName: "Lookup Label",
+            component: "TextBox",
+          },
+          { name: "inward", component: "CheckBox" },
           {
             name: "collId",
             displayName: "Lookup Collection ID",
             component: "TextBox",
           },
-          {name: "edge", displayName: "Edge Type", component: "TextBox"},
+          { name: "edge", displayName: "Edge Type", component: "TextBox" },
           {
             name: "func",
             displayName: "Function",
@@ -97,11 +101,12 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
             props: {
               stringValue: true,
               displayExpr: "key",
-              collection: '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
+              collection:
+                '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
             },
           },
-          {name: "skip", component: "CheckBox"},
-          {name: "skipRow", component: "TextArea"},
+          { name: "skip", component: "CheckBox" },
+          { name: "skipRow", component: "TextArea" },
         ],
       },
     ],
@@ -131,23 +136,30 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData; } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const {record} = options.validator.context || {} as IFormContext;
+                const { record } =
+                  options.validator.context || ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
 
                 const val = options.value;
-                return !findVertexByLabelAndUniqueIdWithSkip("Navigation", "id", val, record.vertex.id,graph);
+                return !findVertexByLabelAndUniqueIdWithSkip(
+                  "Navigation",
+                  "id",
+                  val,
+                  record.vertex.id,
+                  graph,
+                );
               },
             },
           ],
         },
       },
-      {name: "description", component: "TextArea"},
+      { name: "description", component: "TextArea" },
       {
         name: "Attr",
         component: "Table2",
         tab: "Attributes",
         props: {
-          type: "NavAttr"
+          type: "NavAttr",
         },
         attributes: [
           {
@@ -223,7 +235,7 @@ Url`,
             component: "Table2",
             tab: "expand",
             props: {
-              type: "NavAttr"
+              type: "NavAttr",
             },
             attributes: [
               {
@@ -299,7 +311,7 @@ Url`,
                 component: "Table2",
                 tab: "expand",
                 props: {
-                  type: "NavAttr"
+                  type: "NavAttr",
                 },
                 attributes: [
                   {
@@ -375,7 +387,7 @@ Url`,
                     component: "Table2",
                     tab: "expand",
                     props: {
-                      type: "NavAttr"
+                      type: "NavAttr",
                     },
                     attributes: [
                       {

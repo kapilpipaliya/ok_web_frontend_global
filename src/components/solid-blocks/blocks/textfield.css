@@ -65,7 +65,6 @@
 
 .textInputWrapper:focus-within:before {
   border-bottom: 1px solid var(--accent-color);
-
 }
 
 .textInputWrapper:before {
@@ -101,7 +100,7 @@
   padding: 12px;
   width: 100%;
   border: 1px solid lightgray;
-  transition: .5s ease;
+  transition: 0.5s ease;
 }
 
 .textInputWrapper .textInput:focus,

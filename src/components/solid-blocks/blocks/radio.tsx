@@ -10,30 +10,33 @@ import {
   Show,
   createContext,
   createEffect,
-  useContext, createUniqueId
+  useContext,
+  createUniqueId,
 } from "solid-js";
 import { runEvent } from "./tools";
 
 import "./base.css";
 import "./radio.css";
 
-export const radioContext = createContext<[Accessor<string>, Setter<string>, (value: string) => boolean, string] | []>([]);
+export const radioContext = createContext<
+  [Accessor<string>, Setter<string>, (value: string) => boolean, string] | []
+>([]);
 
 export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
-    /**
-     * align the checkbox inside its label
-     * can be 'left' or 'right; default is 'left'
-     */
-    align?: "left" | "right";
-    autofocus?: boolean;
-    checked?: boolean;
-    setChecked?: (checked?: boolean) => void;
-    disabled?: boolean;
-    name?: string;
-    onInvalid?: JSX.EventHandler<HTMLInputElement, Event>;
-    required?: boolean;
-    value?: string;
-  };
+  /**
+   * align the checkbox inside its label
+   * can be 'left' or 'right; default is 'left'
+   */
+  align?: "left" | "right";
+  autofocus?: boolean;
+  checked?: boolean;
+  setChecked?: (checked?: boolean) => void;
+  disabled?: boolean;
+  name?: string;
+  onInvalid?: JSX.EventHandler<HTMLInputElement, Event>;
+  required?: boolean;
+  value?: string;
+};
 
 export const Radio: Component<RadioProps> = (props) => {
   const [inputProps, content, labelProps] = splitProps(
@@ -58,17 +61,17 @@ export const Radio: Component<RadioProps> = (props) => {
       "required",
       "value",
     ],
-    ["align", "checked", "onChange", "setChecked", "children"]
+    ["align", "checked", "onChange", "setChecked", "children"],
   );
 
   const [_value, setValue, isValueActive, uniqueId] = useContext(radioContext);
-  
+
   return (
     <label
       class={`${content.align || "left"} sb-radio${
         inputProps.disabled ? " disabled" : ""
       }`}
-      {...labelProps as JSX.HTMLAttributes<HTMLLabelElement>}
+      {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>{content.children}</Show>
       <input
@@ -76,8 +79,14 @@ export const Radio: Component<RadioProps> = (props) => {
         ref={props.ref}
         name={uniqueId}
         {...inputProps}
-        checked={isValueActive ? isValueActive(inputProps.value || "") : content.checked}
-        onChange={(ev: Event & { currentTarget: HTMLInputElement, target: Element }): void => {
+        checked={
+          isValueActive
+            ? isValueActive(inputProps.value || "")
+            : content.checked
+        }
+        onChange={(
+          ev: Event & { currentTarget: HTMLInputElement; target: Element },
+        ): void => {
           runEvent(ev, content.onChange);
           content.setChecked?.(ev.currentTarget.checked);
           if (ev.currentTarget.checked) {
@@ -103,13 +112,21 @@ export const RadioGroup: Component<RadioGroupProps> = (props) => {
     "children",
   ]);
   const uniqueId = createUniqueId();
-  const [value, setValue] = createSignal(typeof props.value === 'function' ? props.value() : "");
+  const [value, setValue] = createSignal(
+    typeof props.value === "function" ? props.value() : "",
+  );
 
-  createEffect(() => setValue(typeof props.value === 'function' ? props.value() : ""));
-  createEffect(on([value], ([value]) => local.setValue?.(value), { defer: true }));
-  
+  createEffect(() =>
+    setValue(typeof props.value === "function" ? props.value() : ""),
+  );
+  createEffect(
+    on([value], ([value]) => local.setValue?.(value), { defer: true }),
+  );
+
   return (
-    <radioContext.Provider value={[value, setValue, createSelector(value), uniqueId]}>
+    <radioContext.Provider
+      value={[value, setValue, createSelector(value), uniqueId]}
+    >
       <div
         role="radiogroup"
         {...divProps}

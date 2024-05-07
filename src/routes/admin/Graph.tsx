@@ -1,6 +1,11 @@
-import {GraphViewPage} from "~/pages/GraphViewPage";
-import {API, DataFetcher} from "~/components/DataFetcher";
+import { API, DataFetcher } from "~/components/api/DataFetcher";
+import { GraphViewPage } from "~/components/custom/GraphViewPage";
 
 export default function logIn() {
-    return <DataFetcher fetchData={API.fetchDataUrl} renderContent={<GraphViewPage />}/>;
+  return (
+    <DataFetcher
+      fetchData={API.fetchDataUrl}
+      renderContent={<GraphViewPage />}
+    />
+  );
 }

@@ -31,7 +31,7 @@ export const Avatar: Component<AvatarProps> = (props) => {
     "fallback",
   ]);
   const initials = createMemo(() =>
-    local.name ? getInitials(local.name) : ""
+    local.name ? getInitials(local.name) : "",
   );
 
   if (local.img) {

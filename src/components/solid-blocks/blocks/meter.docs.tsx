@@ -21,8 +21,8 @@ export const MeterDocs = () => {
         setValue(
           state.current +
             Math.floor(
-              ((state.next - state.current) / state.steps) * state.counter
-            )
+              ((state.next - state.current) / state.steps) * state.counter,
+            ),
         );
       }
     }, 100);
