@@ -16,6 +16,7 @@ export function getDriver(
     port = 1102;
   }
   if (!drivers[port]) {
+    // Check if docker is running and start it if not
     drivers[port] = createDriver(
       `bolt://localhost:${port}`,
       username && password ? auth.basic(username, password) : undefined,

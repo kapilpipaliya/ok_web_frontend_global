@@ -2,19 +2,16 @@
 
 import { useNavigate } from "@solidjs/router";
 import { Icon } from "@iconify-icon/solid";
-import "../../../css/style.css";
-import "../../../css/krd.css";
+import logos from "~/assets/graphics/logo.png";
+import "~/css/style.css";
+import "~/css/krd.css";
 export default function Header() {
   const navigate = useNavigate();
   return (
     <section class="header container">
       <div class="logo">
         <a href="/">
-          <img
-            class="headerLogo"
-            src="../../../assets/signup/logo.png"
-            alt="logo"
-          />
+          <img class="headerLogo" src={logos} alt="logo" />
         </a>
       </div>
 

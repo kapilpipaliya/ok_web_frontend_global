@@ -1,16 +1,19 @@
 import { For, Show, useContext } from "solid-js";
-import { TextField } from "../solid-blocks/blocks";
-import CustomButton from "../solid-blocks/blocks/buttons";
+import { TextField } from "~/components/solid-blocks/blocks";
+import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
-import { GraphContext, Vertex } from "../../lib/graph";
-import MultiSelect from "../solid-multiselect";
-import { binops, unops } from "../../lib/jsep";
+import { GraphContext, Vertex } from "~/lib/graph";
+import MultiSelect from "./MultiSelect";
+import { binops, unops } from "~/lib/jsep";
 import { createStore } from "solid-js/store";
-import { Option } from "../solid-multiselect/Option";
-import { WsContext } from "../../lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 import CustomModal from "./CommonDialog";
-import { setValueGlobal } from "../../lib/Utils";
+import { setValueGlobal } from "~/lib/Utils";
+type Option =
+  | Record<string, string | number | boolean | unknown>
+  | string
+  | number;
 // function expressionFromTree(node) {
 //     if (node.type === "BinaryExpression") {
 //         return (

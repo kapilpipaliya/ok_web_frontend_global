@@ -2,6 +2,7 @@
   "name": "easyformforge-start",
   "type": "module",
   "scripts": {
+    "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host",
     "build": "vinxi build",
     "start": "vinxi start"
@@ -99,6 +100,7 @@
     "node": ">=18"
   },
   "devDependencies": {
-    "@types/nodemailer": "^6.4.14"
+    "@types/nodemailer": "^6.4.14",
+    "prettier": "^3.2.5"
   }
 }

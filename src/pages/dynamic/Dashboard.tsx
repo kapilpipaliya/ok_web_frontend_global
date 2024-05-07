@@ -1,7 +1,8 @@
-import { A, useLocation, useNavigate } from "@solidjs/router";
+import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
 import {
   createEffect,
+  createMemo,
   createSignal,
   For,
   JSX,
@@ -9,7 +10,7 @@ import {
   Show,
   useContext,
 } from "solid-js";
-import { getNewGraphId, GraphContext } from "../../lib/graph";
+import { getNewGraphId, GraphContext } from "~/lib/graph";
 import Dismiss from "solid-dismiss";
 import { Navbar } from "../../components/layout/Navbar";
 import {
@@ -17,20 +18,16 @@ import {
   PageContext,
   validateEmail,
   validatePassword,
-} from "../../lib/Utils";
-import {
-  addNewVertex,
-  mergeVertexProperties,
-  newVertex,
-} from "../../lib/Vertex";
-import "../../css/base.css";
+} from "~/lib/Utils";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/Vertex";
+import "~/css/base.css";
 import { Icon } from "@iconify-icon/solid";
-import "../../css/modal.css";
+import "~/css/modal.css";
 import { getUser, logout } from "~/lib/auth/auth";
 import { createStore } from "solid-js/store";
 import { toast } from "solid-toast";
 import { LoadingContext } from "~/lib/global";
-import { useToast } from "~/components/custom/toast";
+import { useToast } from "~/components/custom/Toast";
 import Sidebar from "~/components/layout/Sidebar";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
@@ -62,7 +59,6 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
     if (!value.error) {
       setUserData(value);
     }
-    console.log(value);
   });
 
   createEffect(() => {
@@ -95,9 +91,12 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
   return (
     <div style={appStyle}>
       <Show when={isSideBarOpen() && isShowDrawer()}>
-        <Sidebar isSideBarOpen={isSideBarOpen()} toggleSidebar={() => {
-          setSideBarOpen((prev) => !prev);
-        }} />
+        <Sidebar
+          isSideBarOpen={isSideBarOpen()}
+          toggleSidebar={() => {
+            setSideBarOpen((prev) => !prev);
+          }}
+        />
       </Show>
       <div style={mainContentStyle as any}>
         <PageContext.Provider
@@ -111,11 +110,10 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
         >
           <Show when={!isLoginPage() && !signUpPage()}>
             <Navbar
-              showNavBar={isShowDrawer()}
+              showCloseDrawerBtn={isShowDrawer()}
               toggleSidebar={() => {
                 setSideBarOpen((prev) => !prev);
               }}
-              isSideBarOpen={isSideBarOpen()}
               right={<DropdownMenu isLoggedIn={userData?.id} user={userData} />}
               meta={graph.vertexes[vertexId]}
             />
@@ -124,18 +122,6 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
         </PageContext.Provider>
       </div>
     </div>
-    // <div class="flex">
-
-    //     <div
-    //         class={`${
-    //             isSideBarOpen() && isShowDrawer() ? "ml:220" : ""
-    //         } flex:1 transition:margin-left|200ms|ease-in-out`}
-    //     >
-    //         <div class="flex flex:col flex:1">
-
-    //         </div>
-    //     </div>
-    // </div>
   );
 };
 

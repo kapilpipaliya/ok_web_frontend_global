@@ -35,11 +35,11 @@ import {
 } from "~/lib/graph";
 
 import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "~/components/input/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
   collectionNameDisplayExpr,
   selectedValue,
-} from "~/components/input/SelectInputField";
+} from "~/components/dynamic/fields/input/SelectInputField";
 import { getFormApiFromForm } from "~/lib/Record";
 import { APP_BASE_URL, breadcrumbData, PageContext, Record } from "~/lib/Utils";
 import { getSelectionOptions } from "~/lib/Utils";
@@ -49,8 +49,8 @@ import { AttrsTableData } from "~/lib/api";
 import { isNumber } from "~/lib/CommonUtils/isNumber";
 import { capitalizeFirstLetter } from "~/lib/Utils";
 import { WsContext } from "~/lib/ws_events_dispatcher";
-import { AbstractSingleForm } from "~/components/dynamic/DynamicForm";
-import CustomButton from "~/components/solid-blocks/blocks/buttons";
+import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { CollapsibleTable } from "~/components/custom/Table";

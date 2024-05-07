@@ -1,5 +1,5 @@
 import neo4j from "neo4j-driver";
-import { DBConnection } from "../lib/dbs";
+import { DBConnection } from "~/cypher_api/lib/dbs";
 
 export async function deleteRelationShipMGCall(
   dbConn: DBConnection,

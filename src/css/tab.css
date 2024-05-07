@@ -32,7 +32,7 @@
   transition: all 0.15s ease-in-out;
 }
 
-.radio-inputs .radio input:checked + .name {
+.radio-inputs .radio input:checked+.name {
   background-color: #fff;
   font-weight: 600;
 }

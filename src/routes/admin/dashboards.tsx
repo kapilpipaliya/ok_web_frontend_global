@@ -6,7 +6,7 @@ export default function allDashboards() {
   return (
     <DataFetcher
       fetchData={API.fetchDataUrl}
-      renderContent={<Dashboard />}
+      renderContent={<AllDashboards />}
     />
   );
 }

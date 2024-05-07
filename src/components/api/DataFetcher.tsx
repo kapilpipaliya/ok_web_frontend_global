@@ -10,7 +10,7 @@ import {
 import { GraphContext } from "~/lib/graph";
 import { setGraphData } from "~/lib/ws_events";
 import { API_BASE_URL } from "~/lib/api";
-import { LoaderNew } from "../custom/LoaderSimple";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export const DataFetcher = (props: {
   fetchData: string;

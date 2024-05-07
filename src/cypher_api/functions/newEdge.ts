@@ -1,6 +1,6 @@
 import neo4j from "neo4j-driver";
-import { DBConnection } from "../lib/dbs";
-import { Relationship } from "../lib/graph";
+import { DBConnection } from "~/cypher_api/lib/dbs";
+import { Relationship } from "~/cypher_api/lib/graph";
 
 export async function newEdgeMGCall(
   dbConn: DBConnection,

@@ -1,6 +1,6 @@
 "use client";
-import "../../../css/style.css";
-import "../../../css/krd.css";
+import "~/css/style.css";
+import "~/css/krd.css";
 export default function Footer() {
   return (
     <section class="footer">

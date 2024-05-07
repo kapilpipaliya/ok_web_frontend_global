@@ -21,8 +21,7 @@ import {
   Switch,
   useContext,
 } from "solid-js";
-import { PageView } from "../../components/input/GenaricField";
-import { GenericField } from "../../components/input/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 
 import { getTreeData } from "~/lib/Traverse";
 
@@ -37,13 +36,13 @@ import {
   transactions,
   Vertex,
 } from "~/lib/graph";
-import { AbstractSingleForm } from "../../components/dynamic/DynamicForm";
-import { SelectInputField } from "../../components/input/SelectInputField";
+import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import { addNewVertex, newVertex } from "~/lib/Vertex";
 import { Portal } from "solid-js/web";
-import { TableInputField } from "../../components/input/TableInputField";
+import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { AttrsTableData } from "~/lib/api";
-import { GenericInputField } from "../../components/input/GenaricInputField";
+import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
 import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { Icon } from "@iconify-icon/solid";
@@ -62,7 +61,7 @@ import {
   setSelectedComponent,
   setSelectedId,
   useDragDrop,
-} from "../../lib/pageStore";
+} from "~/lib/pageStore";
 import {
   ModalBody,
   ModalContent,
@@ -72,11 +71,12 @@ import {
   Tooltip,
 } from "../../components/solid-blocks/blocks";
 import { toTitle } from "case-switcher-js";
-import "../../css/sideBarSearch.css";
-import ShareSection from "./share";
-import PreviewSection from "./preview";
-import ResizableContainer from "../../components/drag-drop/ResizableDivView";
+import "~/css/sideBarSearch.css";
+import ShareSection from "./Share";
+import PreviewSection from "./Preview";
+import ResizableContainer from "../../components/custom/ResizableDivView";
 import { FieldAttribute } from "~/lib/Type";
+import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 
 export const PageDesignerDragAndDrop = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -1181,9 +1181,12 @@ export const PageDesignerDragAndDrop = () => {
   );
 
   const Column = (props: { type: string; index: number; vertex: Vertex }) => {
-    const {
-        deleteLayout
-    } = useDragDrop(graph, setGraph, pageConfig[0].record, props.vertex);
+    const { deleteLayout } = useDragDrop(
+      graph,
+      setGraph,
+      pageConfig[0].record,
+      props.vertex,
+    );
     return (
       <>
         <Show when={props.index > 0} fallback={<div />}>
@@ -1660,7 +1663,7 @@ export const PageDesignerDragAndDrop = () => {
     <>
       <Switch>
         <Match when={selectedStepId() === 1}>
-          <div class="flex">
+          <div class="flex mt:15">
             <div class={"rel"}>
               <div
                 class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? "w:20rem" : "w:1.8rem"} direction:rtl`}
@@ -1715,7 +1718,7 @@ export const PageDesignerDragAndDrop = () => {
             <div class="flex-grow:1 min-w:400 grid ji:center">
               <div
                 class={
-                  "ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between justify-content:center mb:5 p:10 r:7 w:90%"
+                  "ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between mb:5 p:10 r:7 w:90%"
                 }
               >
                 <NavigationBar

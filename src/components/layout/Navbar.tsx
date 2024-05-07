@@ -1,9 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, JSX, JSXElement, Show } from "solid-js";
-import { DisplayComponentProps } from "../../lib/ComponentType";
+import { createSignal, JSX, JSXElement, Show, splitProps } from "solid-js";
+import { DisplayComponentProps } from "~/lib/ComponentType";
 import { useNavigate } from "@solidjs/router";
-import "../../css/sideBarSearch.css";
-import "../../css/table.css";
+import "~/css/sideBarSearch.css";
+import "~/css/table.css";
 import { APP_BASE_URL } from "~/lib/Utils";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
@@ -20,15 +20,21 @@ function NavToggleBtn(props: { toggleSidebar: () => void }) {
 }
 
 export function Navbar(
-  props: DisplayComponentProps & {
+  p: DisplayComponentProps & {
     left?: JSXElement;
     right?: JSXElement;
-    showNavBar: boolean;
-    isSideBarOpen: boolean;
+    showCloseDrawerBtn: boolean;
     toggleSidebar: () => void;
   },
 ) {
-  const { left, right, showNavBar, toggleSidebar, meta, data } = props;
+  const [field, others] = splitProps(p, [
+    "showCloseDrawerBtn",
+    "right",
+    "left",
+    "toggleSidebar",
+    "meta",
+    "data",
+  ]);
   // let {events} = useContext(PageContext);
   // bg:white box-shadow:1|1|10|#ddd
   const navigate = useNavigate();
@@ -45,9 +51,13 @@ export function Navbar(
       class="p:5|10 bb:1|solid|rgb(212,219,231) r:0|0|10|10"
       style={navbarStyle()}
     >
-      <Show when={meta?.P.menuPosition === "left" || !meta?.P.menuPosition}>
+      <Show
+        when={
+          field.meta?.P.menuPosition === "left" || !field.meta?.P.menuPosition
+        }
+      >
         <Show
-          when={showNavBar}
+          when={field.showCloseDrawerBtn}
           fallback={
             <div
               class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
@@ -65,11 +75,11 @@ export function Navbar(
             </div>
           }
         >
-          <NavToggleBtn toggleSidebar={toggleSidebar} />
+          <NavToggleBtn toggleSidebar={field.toggleSidebar} />
         </Show>
       </Show>
 
-      {left}
+      {field.left}
 
       {/*<div class="f:16 font-weight:bold">{meta?.P?.title}</div>*/}
       {/*  Theme Change Button*/}
@@ -98,9 +108,9 @@ export function Navbar(
 
       {/* Actions */}
       <div class="flex ai:center jc:center gap:8">
-        {right}
-        <Show when={meta?.P.menuPosition === "right"}>
-          <NavToggleBtn toggleSidebar={toggleSidebar} />
+        {field.right}
+        <Show when={field.meta?.P.menuPosition === "right"}>
+          <NavToggleBtn toggleSidebar={field.toggleSidebar} />
         </Show>
       </div>
     </div>

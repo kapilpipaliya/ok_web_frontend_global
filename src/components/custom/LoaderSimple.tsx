@@ -1,4 +1,4 @@
-import '../../css/modal.css';
+import "~/css/modal.css";
 
 export function LoaderNew(props: { class?: string }) {
   return (

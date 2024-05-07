@@ -1,4 +1,4 @@
-import "../../css/base.css";
+import "~/css/base.css";
 import { createSignal, Match, Show, Switch, useContext } from "solid-js";
 import {
   APP_BASE_URL,
@@ -7,14 +7,14 @@ import {
   validateUsername,
 } from "~/lib/Utils";
 import { useNavigate, A } from "@solidjs/router";
-import { useToast } from "~/components/custom/toast";
+import { useToast } from "~/components/custom/Toast";
 import { toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/lib/global";
-import sendEmail from "~/components/email/email";
-import logo from "~/assets/logo.png";
+import logo from "~/assets/graphics/logo.png";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
+import sendEmail from "~/lib/email";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -446,11 +446,7 @@ export const ForgotPasswordForm = () => {
   const handleEmailSubmit = async (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-    const data = await sendEmail(
-      username(),
-      "Reset Password",
-      "Reset Password",
-    );
+    const data = await sendEmail(username(), "Reset Password");
     setIsLoading(false);
     setStage(1);
   };
@@ -759,7 +755,7 @@ export const ContactUs = () => {
   const contactCall = async () => {
     try {
       // let response = await submitContactUsForm(formData().name, formData().email, formData().subject, formData().message);
-      let response = {};
+      let response: any = {};
 
       if (response.error) {
         return Promise.reject(new Error(response.error));

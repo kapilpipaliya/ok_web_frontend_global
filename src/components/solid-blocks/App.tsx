@@ -12,27 +12,27 @@ import {
 } from "./blocks";
 
 import "./app.css";
-import { AccordionDocs } from "./blocks/accordion.docs";
-import { AvatarDocs } from "./blocks/avatar.docs";
-import { BarDocs } from "./blocks/bar.docs";
-import { BreadcrumbsDocs } from "./blocks/breadcrumbs.docs";
+import { AccordionDocs } from "./blocks/accordion/accordion.docs";
+import { AvatarDocs } from "./blocks/avatar/avatar.docs";
+import { BarDocs } from "./blocks/bar/bar.docs";
+import { BreadcrumbsDocs } from "./blocks/breadcrumbs/breadcrumbs.docs";
 
-import { CheckboxDocs } from "./blocks/checkbox.docs";
-import { MenuDocs } from "./blocks/menu.docs";
-import { MessageDocs } from "./blocks/message.docs";
-import { MeterDocs } from "./blocks/meter.docs";
-import { ModalDocs } from "./blocks/modal.docs";
-import { ProgressDocs } from "./blocks/progress.docs";
-import { RadioDocs } from "./blocks/radio.docs";
-import { SelectDocs } from "./blocks/select.docs";
-import { SpinnerDocs } from "./blocks/spinner.docs";
-import { TabsDocs } from "./blocks/tabs.docs";
-import { TextfieldDocs } from "./blocks/textfield.docs";
-import { ToastDocs } from "./blocks/toast.docs";
-import { TooltipDocs } from "./blocks/tooltip.docs";
+import { CheckboxDocs } from "./blocks/checkbox/checkbox.docs";
+import { MenuDocs } from "./blocks/menu/menu.docs";
+import { MessageDocs } from "./blocks/message/message.docs";
+import { MeterDocs } from "./blocks/meter/meter.docs";
+import { ModalDocs } from "./blocks/modal/modal.docs";
+import { ProgressDocs } from "./blocks/progress/progress.docs";
+import { RadioDocs } from "./blocks/radio/radio.docs";
+import { SelectDocs } from "./blocks/select/select.docs";
+import { SpinnerDocs } from "./blocks/spinner/spinner.docs";
+import { TabsDocs } from "./blocks/tabs/tabs.docs";
+import { TextfieldDocs } from "./blocks/textfield/textfield.docs";
+import { ToastDocs } from "./blocks/toast/toast.docs";
+import { TooltipDocs } from "./blocks/tooltip/tooltip.docs";
 import { HelpersDocs } from "./blocks/Helpers.docs";
 import { ThemeDocs } from "./blocks/theme.docs";
-import { TagDocs } from "./blocks/tag.docs";
+import { TagDocs } from "./blocks/tag/tag.docs";
 
 const App: Component = () => {
   const [darkMode, setDarkMode] = useDarkMode();

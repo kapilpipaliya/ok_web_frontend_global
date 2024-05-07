@@ -20,7 +20,7 @@ import {
   mergeVertexProperties,
   newVertex,
 } from "./Vertex";
-import { setParentValue } from "../components/input/SelectInputField";
+import { setParentValue } from "../components/dynamic/fields/input/SelectInputField";
 import {
   cloneRowProps,
   getCompProps,
@@ -30,9 +30,9 @@ import {
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { evaluate } from "./jsep";
 import jsep from "jsep";
-import { setSelectionValue } from "../components/input/SelectionUtils";
+import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
 import { deleteNestedLayout } from "./Traverse";
-import { useToast } from "../components/custom/toast";
+import { useToast } from "../components/custom/Toast";
 
 export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
 

@@ -33,12 +33,12 @@ import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,
   setParentValue,
-} from "../components/input/SelectInputField";
+} from "../components/dynamic/fields/input/SelectInputField";
 import { parse } from "yaml";
 import { isObject } from "./Utils";
 import { deleteEdge } from "./Edge";
 import { AttrsTableData } from "./api";
-import { setSelectionValue } from "../components/input/SelectionUtils";
+import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
 import { AttrsAdminTableData } from "./apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
 

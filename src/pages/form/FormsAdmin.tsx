@@ -1,28 +1,20 @@
 // TODO make default component property applied to
-import { GraphContext, IdAttr, Vertex } from "../../lib/graph";
+import { GraphContext, IdAttr, Vertex } from "~/lib/graph";
 import { createMemo, For, Match, Switch, useContext } from "solid-js";
 import { A } from "@solidjs/router";
-import { WsContext } from "../../lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
-import { APP_BASE_URL, Record } from "../../lib/Utils";
-import { SelectInputField } from "../../components/input/SelectInputField";
-import {
-  onDataDirectoryImportClick,
-  updateImportRecord,
-} from "../../lib/Import";
+import { APP_BASE_URL, Record } from "~/lib/Utils";
+import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
+import { onDataDirectoryImportClick, updateImportRecord } from "~/lib/Import";
 import {
   AbstractSingleForm,
   getComponentForCollRow,
-} from "../../components/dynamic/DynamicForm";
-import { DynamicComponent } from "../../components/dynamic/DynamicComponent";
-import { GenericField } from "../../components/input/GenericFieldComponent";
+} from "~/components/dynamic/components/DynamicForm";
+import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { toTitle } from "case-switcher-js";
-import {
-  Tab,
-  TabContainer,
-  TabList,
-} from "../../components/solid-blocks/blocks";
-import { ClassDesignTab } from "../../components/drag-drop/PropertiesTabs";
+import { ClassDesignTab } from "~/components/css-editor/PropertiesTabs";
 
 export const AllForms = () => {
   const [graph, setGraph] = useContext(GraphContext)!;

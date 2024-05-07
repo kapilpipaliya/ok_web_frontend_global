@@ -1,4 +1,4 @@
-import "../../css/modal.css";
+import "~/css/modal.css";
 import Dismiss from "solid-dismiss";
 import { Show, createSignal, JSX, Setter } from "solid-js";
 import { Icon } from "@iconify-icon/solid";

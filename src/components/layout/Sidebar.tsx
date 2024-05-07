@@ -7,20 +7,21 @@ import {
   createSignal,
   createUniqueId,
   untrack,
-  useContext, JSX
+  useContext,
+  JSX,
 } from "solid-js";
-import { getSublistRows, getSublistRowsForType, Record } from "../../lib/Utils";
-import { getChildVertex } from "../../lib/Utils";
-import { findVertexByLabelAndUniqueId } from "../../lib/Vertex";
-import { AttrsAdminTableData } from "../../lib/apiAdmin";
-import { GraphContext, GraphInterface, Vertex } from "../../lib/graph";
-import treeViewFilter from "../../lib/treeViewFilter";
-import { WsContext } from "../../lib/ws_events_dispatcher";
-import { LoaderNew } from "../custom/LoaderSimple";
-import "../../css/sideBarSearch.css";
+import { getSublistRows, getSublistRowsForType, Record } from "~/lib/Utils";
+import { getChildVertex } from "~/lib/Utils";
+import { findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { GraphContext, GraphInterface, Vertex } from "~/lib/graph";
+import treeViewFilter from "~/lib/treeViewFilter";
+import { WsContext } from "~/lib/ws_events_dispatcher";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
+import "~/css/sideBarSearch.css";
 import { Store } from "solid-js/store"; // Import the CSS file
 import { Icon } from "@iconify-icon/solid";
-
+import logo from "~/assets/graphics/sidebarLogo.svg";
 export interface navbarDataI {
   children: navbarDataI[];
   expanded: boolean;
@@ -37,7 +38,7 @@ function getIds(data: navbarDataI[], ids: string[] = []) {
   return ids;
 }
 
-function Sidebar(props: { isSideBarOpen: boolean,toggleSidebar : () => void }) {
+function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { Ws } = useContext(WsContext);
   const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
@@ -135,14 +136,15 @@ function Sidebar(props: { isSideBarOpen: boolean,toggleSidebar : () => void }) {
     return renderNavTreeFromGraph(record, props.isSideBarOpen, graph);
   });
 
-  const sidebarStyle = () => ({
-    width: isCollapsed() ? "70px" : "300px",
-    background: "#f4f4f4",
-    transition: "transform 0.3s ease-in-out",
-    transform: props.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
-    "box-shadow": "-15px 0px 31px rgb(95,156,249)",
-    "border-right": "1px solid lightgray",
-  }) as JSX.CSSProperties;
+  const sidebarStyle = () =>
+    ({
+      width: isCollapsed() ? "70px" : "300px",
+      background: "#f4f4f4",
+      transition: "transform 0.3s ease-in-out",
+      transform: props.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
+      "box-shadow": "-15px 0px 31px rgb(95,156,249)",
+      "border-right": "1px solid lightgray",
+    }) as JSX.CSSProperties;
   return (
     <div class="r:0|10|10|0 rel" style={sidebarStyle()}>
       <Show
@@ -162,11 +164,7 @@ function Sidebar(props: { isSideBarOpen: boolean,toggleSidebar : () => void }) {
               >
                 <nav style="display: flex; margin-top: 1rem; padding-top: .5rem; flex-direction: column; flex: 1 1 0%; align-items: center;">
                   <a href="#">
-                    <img
-                      style="height: 35px; "
-                      src="../../assets/CMYK_logo_favicon.svg"
-                      alt="logo"
-                    />
+                    <img style="height: 35px; " src={logo} alt="logo" />
                   </a>
                   <div class="flex flex:col gap:10 mt:20">
                     <For each={searchData()}>

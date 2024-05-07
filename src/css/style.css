@@ -111,8 +111,7 @@ h2 {
   margin: 0;
 }
 
-h3 {
-}
+h3 {}
 
 h4 {
   color: var(--grey-100, #363636);
@@ -725,7 +724,7 @@ label {
   gap: 70px;
 }
 
-.contactways > div {
+.contactways>div {
   display: flex;
   width: 200px;
   height: 200px;
@@ -860,8 +859,7 @@ label {
   margin-bottom: -10px;
 }
 
-.Gold {
-}
+.Gold {}
 
 .plan button {
   width: -webkit-fill-available;

@@ -1,12 +1,12 @@
 import { createMemo, createSignal, For, Match, Switch } from "solid-js";
 import { Show } from "solid-js";
-import "../../css/table.css";
+import "~/css/table.css";
 import { addNewRow, capitalizeFirstLetter } from "~/lib/Utils";
 import { IdAttr, Vertex } from "~/lib/graph";
 import { ColumnDef } from "@tanstack/solid-table";
 import { toTitle } from "case-switcher-js";
-import { TableRow } from "~/components/solid-blocks/blocks/table";
 import { Icon } from "@iconify-icon/solid";
+import { TableRow } from "~/components/solid-blocks/blocks/table/table";
 
 // Row component for each data entry
 function CollapsibleTableRow(props: {
@@ -64,7 +64,7 @@ function CollapsibleTableRow(props: {
       <Show when={open()}>
         <For each={props.row.children}>
           {(row, index) => (
-            <Row
+            <TableRow
               row={row}
               index={index()}
               bodyCell={props.row.headers.map((header: any) =>

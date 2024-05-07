@@ -37,10 +37,10 @@ import {
   updateImportRecord,
 } from "~/lib/Import";
 import { fileDownloader } from "~/lib/dom_utils";
-import { Field, NsMetaJson } from "../../lib/NSMetaDataType";
-import { setSelectionValue } from "~/components/input/SelectionUtils";
+import { Field, NsMetaJson } from "~/lib/NSMetaDataType";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FormMetaData } from "~/lib/Type";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);

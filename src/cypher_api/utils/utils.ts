@@ -1,5 +1,5 @@
-import { getChildVertexes, getSelectionOptions } from "../lib/Traverse";
 import { Node } from "../lib/graph";
+import { getSelectionOptions, getChildVertexes } from "../lib/Traverse";
 
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

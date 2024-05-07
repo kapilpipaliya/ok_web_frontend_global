@@ -8,14 +8,14 @@ import {
   Switch,
   untrack,
 } from "solid-js";
-import "../../css/base.css";
+import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
 import PageHeader from "~/components/custom/Breadcumb";
 import { getUser } from "~/lib/auth/auth";
-import "../../css/tab.css";
+import "~/css/tab.css";
 import { createStore } from "solid-js/store";
-import { useToast } from "~/components/custom/toast";
+import { useToast } from "~/components/custom/Toast";
 import { validateEmail, validatePassword } from "~/lib/Utils";
 import { toast } from "solid-toast";
 import {
@@ -26,14 +26,11 @@ import {
   TableHead,
   TableHeader,
   TableHeadRow,
-} from "../../components/custom/Table";
-import StatusChip, { ChipDropDown } from "../../components/custom/Chip";
-import CustomModal from "../../components/custom/CommonDialog";
-import { DeleteDialog } from "../../components/custom/deleteDialog";
+} from "~/components/custom/Table";
+import { ChipDropDown } from "~/components/custom/Chip";
+import CustomModal from "~/components/custom/CommonDialog";
+import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDriver } from "~/lib/global";
-import { newRowMGCall } from "~/cypher_api/functions/newRow";
-import { DBConnection } from "~/cypher_api/lib/dbs";
-import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
 

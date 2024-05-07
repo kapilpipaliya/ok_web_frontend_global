@@ -31,7 +31,7 @@
   transition: all 0.15s ease-in-out;
 }
 
-.radio-inputs .radio input:checked + .name {
+.radio-inputs .radio input:checked+.name {
   color: blue;
   border-bottom: 1px solid var(--primary);
 }

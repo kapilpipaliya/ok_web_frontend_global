@@ -22,7 +22,7 @@ import {
 import { evaluate } from "./jsep";
 import jsep from "jsep";
 import { klona } from "klona/json";
-import { setSelectionValue } from "../components/input/SelectionUtils";
+import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
 import { getToEdge } from "./CommonUtils/getToEdge";
 import { AttrsAdminTableData } from "./apiAdmin";
 import { FieldAttribute, FormMetaData } from "./Type";

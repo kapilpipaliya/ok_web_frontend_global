@@ -1,18 +1,17 @@
 // Comment This Lines in web build
 import {
-  compareId,
   getNewGraphId,
   IGraph,
   isIdArrayIncludesID,
   Node,
-} from "../../lib/graph";
-import { addNewEdge, deleteEdge, newEdge } from "../../lib/Edge";
-import { getInEdge, getToEdge } from "../../lib/Traverse";
-import { DBConnection } from "../../lib/dbs";
+} from "~/cypher_api/lib/graph";
+import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api//lib/Edge";
+import { getInEdge, getToEdge } from "~/cypher_api//lib/Traverse";
+import { DBConnection } from "~/cypher_api/lib/dbs";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { getOutEdges } from "../../functions/getOutEdges";
-import { deleteRelationShipMGCall } from "../../functions/deleteRelationShip";
-import { newEdgeMGCall } from "../../functions/newEdge";
+import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
+import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
+import { newEdgeMGCall } from "~/cypher_api/functions/newEdge";
 
 function vertexOutEdgeContainVertex(
   graph: Store<IGraph>,
