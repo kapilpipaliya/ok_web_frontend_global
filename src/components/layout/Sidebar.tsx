@@ -7,7 +7,7 @@ import {
   createSignal,
   createUniqueId,
   untrack,
-  useContext,
+  useContext, JSX
 } from "solid-js";
 import { getSublistRows, getSublistRowsForType, Record } from "../../lib/Utils";
 import { getChildVertex } from "../../lib/Utils";
@@ -142,7 +142,7 @@ function Sidebar(props: { isSideBarOpen: boolean,toggleSidebar : () => void }) {
     transform: props.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
     "box-shadow": "-15px 0px 31px rgb(95,156,249)",
     "border-right": "1px solid lightgray",
-  });
+  }) as JSX.CSSProperties;
   return (
     <div class="r:0|10|10|0 rel" style={sidebarStyle()}>
       <Show

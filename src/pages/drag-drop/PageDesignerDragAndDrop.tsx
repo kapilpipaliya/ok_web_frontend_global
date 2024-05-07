@@ -239,13 +239,13 @@ export const PageDesignerDragAndDrop = () => {
         "justify-content": "space-between",
         height: "35px",
         "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
-      };
+      } as JSX.CSSProperties;
 
       const hoverStyle = {
         "background-color": "#F2EDED",
         cursor: "move",
         boxShadow: "4px 4px 4px",
-      };
+      } as JSX.CSSProperties;
 
       const itemStyle = () =>
         isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
@@ -373,13 +373,13 @@ export const PageDesignerDragAndDrop = () => {
         "justify-content": "space-between",
         height: "35px",
         "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
-      };
+      } as JSX.CSSProperties;
 
       const hoverStyle = {
         "background-color": "#F2EDED",
         cursor: "move",
         boxShadow: "4px 4px 4px",
-      };
+      } as JSX.CSSProperties;
 
       const itemStyle = () =>
         isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
