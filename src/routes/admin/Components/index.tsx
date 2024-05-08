@@ -4,7 +4,6 @@ import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function Components() {
   const params = useParams();
-  console.log(params);
 
   return (
     <DataFetcher

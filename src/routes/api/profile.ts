@@ -143,7 +143,7 @@ const supportTicket = async (data: any) => {
 
   async function getTicket(payload: any) {
     const { email } = payload;
-    console.log(email, payload);
+
     const neoSession = getDriver("super").session();
 
     const query = `MATCH (n:Support {email: $email}) RETURN n;`;

@@ -610,7 +610,7 @@ function Settings() {
           timestamp: new Date().toLocaleTimeString(),
           personal: true,
         };
-        console.log(newMessage, parentVertexId, getDriver("super"));
+        
         const data = await postAPI(API.profileUrl, {
           newMessage: newMessage,
           parentVertexId: parentVertexId,

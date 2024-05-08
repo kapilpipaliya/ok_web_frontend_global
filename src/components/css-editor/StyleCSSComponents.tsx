@@ -644,16 +644,13 @@ export const StyleCSSComponents = () => {
         color = "#000",
         type = "",
       } = css;
-      console.log(css);
+
       setCssState(
         props.name,
         `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,
       );
     }
 
-    createEffect((v) => {
-      console.log("createEffect", cssState[props.name]);
-    });
     const addOption = () => {
       if (props.label.includes("Text Shadow")) {
         let currentOptions = cssState[props.name]
@@ -776,7 +773,6 @@ export const StyleCSSComponents = () => {
           value: () => getValueOfInput(properties.name),
           onChangeInput: (value: any) => {
             setChangedData({ ...changedData(), [properties.name]: value });
-            console.log("changedData()", changedData());
             createCssOption(changedData());
           },
         };

@@ -35,7 +35,6 @@ export default function UsersLayout(props: RouteSectionProps) {
 
   // getUser().then(value =>
   // {
-  //     console.log(value)
   //     if (value?.error) {
   //         navigate(`/auth/login`)
   //     }

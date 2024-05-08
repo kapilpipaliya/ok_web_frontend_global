@@ -98,6 +98,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
   }
   let { driverPort, logsPort, labPort } = portsResult;
 
+  // TODO: use this function in solid start and use it.
   await postAPI("http://easyformforge.com:5000/docker/createNew", {
     Image: "memgraph/memgraph-platform",
     name: username,
@@ -114,19 +115,9 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
   // }
   await new Promise((resolve) => setTimeout(() => resolve(""), 15000));
 
-  // const server = await fetch(`http://localhost:3100/loadData/${driverPort}`)
   const [graph, setGraph] = getGraph();
   await importAllCSV({ driver: userDriver }, graph, setGraph);
 
-  // console.log(await server.text());
-
-  // TODO : sync initial data to drivers[username]
-  // console.log(`http://localhost:3100/loadData/${labPort}`);
-
-  // if (server.status !== 200) {
-  //     console.error('Server error:', server.error);
-  //     return Promise.reject(new Error(server.error));
-  // }
   driverPort = driverPort + 10;
   logsPort = logsPort + 10;
   labPort = labPort + 10;
