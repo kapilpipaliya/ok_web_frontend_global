@@ -7,7 +7,7 @@ import {
   useContext,
 } from "solid-js";
 
-import { GraphContext, IdAttr } from "~/lib/graph";
+import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import { ComponentProps } from "~/lib/ComponentType";
 import {
   Checkbox,
@@ -19,7 +19,7 @@ import {
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
 import { setSelectedId } from "~/lib/pageStore";
 import { setValueGlobal, getTextColumnValue } from "~/lib/Utils";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
 

@@ -1,4 +1,4 @@
-import { Vertex } from "./graph";
+import { Vertex } from "./graph/graph";
 
 export interface ComponentProps {
   meta: Vertex;

@@ -19,15 +19,15 @@ import { toTitle } from "case-switcher-js";
 import {
   findVertexByLabelAndUniqueId,
   replaceVertexProperties,
-} from "~/lib/Vertex";
+} from "~/lib/graph/mutate/Vertex";
 import {
   getNewTxnId,
   GraphContext,
   IdAttr,
   revertTransaction,
   Vertex,
-} from "~/lib/graph";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+} from "~/lib/graph/graph";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import {
@@ -36,7 +36,7 @@ import {
   getCollAttrs,
   getStringComponent,
   rowMetaInitialize,
-} from "~/lib/Record";
+} from "~/lib/graph/mutate/Record";
 import {
   getChildVertex,
   addNewRow,

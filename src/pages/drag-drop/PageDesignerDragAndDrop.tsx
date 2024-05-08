@@ -23,7 +23,7 @@ import {
 } from "solid-js";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 
-import { getTreeData } from "~/lib/Traverse";
+import { getTreeData } from "~/lib/graph/get/sync/Traverse";
 
 import {
   getNewGraphId,
@@ -35,10 +35,10 @@ import {
   revertTransactionUpTo,
   transactions,
   Vertex,
-} from "~/lib/graph";
+} from "~/lib/graph/graph";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
-import { addNewVertex, newVertex } from "~/lib/Vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/Vertex";
 import { Portal } from "solid-js/web";
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { AttrsTableData } from "~/lib/api";

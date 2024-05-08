@@ -1,9 +1,9 @@
-import { findVertexByLabelAndUniqueIdWithSkip } from "./Vertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/mutate/Vertex";
 import { AttrsAdminTableData } from "./apiAdmin";
 import { FieldAttribute, FormMetaData } from "./Type";
 import { IFormContext } from "./Utils";
 import { useContext } from "solid-js";
-import { GraphContext } from "./graph";
+import { GraphContext } from "./graph/graph";
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher

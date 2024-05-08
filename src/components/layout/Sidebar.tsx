@@ -12,11 +12,11 @@ import {
 } from "solid-js";
 import { getSublistRows, getSublistRowsForType, Record } from "~/lib/Utils";
 import { getChildVertex } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { GraphContext, GraphInterface, Vertex } from "~/lib/graph";
+import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 import treeViewFilter from "~/lib/treeViewFilter";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import "~/css/sideBarSearch.css";
 import { Store } from "solid-js/store"; // Import the CSS file

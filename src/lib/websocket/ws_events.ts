@@ -3,10 +3,10 @@ import {
   getCookie,
   ServerEventsDispatcher,
   WsContext,
-} from "~/lib/ws_events_dispatcher";
+} from "~/lib/websocket/ws_events_dispatcher";
 
-import { isObject } from "./Utils";
-import { deleteEdge, updateEdgeId } from "./Edge";
+import { isObject } from "../Utils";
+import { deleteEdge, updateEdgeId } from "../graph/mutate/Edge";
 import {
   commitTransaction,
   EdgeMap,
@@ -18,8 +18,8 @@ import {
   transactions,
   VertexMap,
   vertexOldIdToNewIdMap,
-} from "./graph";
-import { deleteVertex, updateVertexId } from "./Vertex";
+} from "../graph/graph";
+import { deleteVertex, updateVertexId } from "../graph/mutate/Vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 
 export const setGraphData = (

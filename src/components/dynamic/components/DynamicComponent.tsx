@@ -1,5 +1,5 @@
 import { Match, Show, splitProps, Switch } from "solid-js";
-import { Vertex } from "~/lib/graph";
+import { Vertex } from "~/lib/graph/graph";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";

@@ -18,14 +18,14 @@ import {
   GraphInterface,
   IdAttr,
   Vertex,
-} from "~/lib/graph";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/Edge";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+} from "~/lib/graph/graph";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   getInEdge,
   getParentVertexValue,
   getSelectedVertexValue,
-} from "~/lib/Traverse";
+} from "~/lib/graph/get/sync/Traverse";
 import {
   getSelectionOptions,
   getChildVertex,
@@ -34,8 +34,8 @@ import {
   getValueFromVertexOrKey,
   setValueGlobal,
 } from "~/lib/Utils";
-import { getNameKeyForCollection } from "~/lib/Record";
-import { findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { getNameKeyForCollection } from "~/lib/graph/mutate/Record";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/lib/ComponentType";

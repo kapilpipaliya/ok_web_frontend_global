@@ -19,7 +19,7 @@ import {
   IdAttr,
   revertTransaction,
   Vertex,
-} from "~/lib/graph";
+} from "~/lib/graph/graph";
 import {
   Record,
   FormContext,
@@ -30,7 +30,7 @@ import {
   APP_BASE_URL,
 } from "~/lib/Utils";
 import { getLastItem } from "~/lib/functions";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ComponentProps } from "~/lib/ComponentType";
 import {
   Accordion,

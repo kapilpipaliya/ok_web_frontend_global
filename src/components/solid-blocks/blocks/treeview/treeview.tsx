@@ -6,7 +6,7 @@ import {
   Show,
   useContext,
 } from "solid-js";
-import { GraphContext, Id, Vertex } from "~/lib/graph";
+import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { getChildVertexes } from "~/lib/Utils";
 import { Icon } from "@iconify-icon/solid";
 

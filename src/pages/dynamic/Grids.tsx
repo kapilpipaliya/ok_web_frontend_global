@@ -32,7 +32,7 @@ import {
   transactions,
   GraphContext,
   GraphInterface,
-} from "~/lib/graph";
+} from "~/lib/graph/graph";
 
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
@@ -40,15 +40,15 @@ import {
   collectionNameDisplayExpr,
   selectedValue,
 } from "~/components/dynamic/fields/input/SelectInputField";
-import { getFormApiFromForm } from "~/lib/Record";
+import { getFormApiFromForm } from "~/lib/graph/mutate/Record";
 import { APP_BASE_URL, breadcrumbData, PageContext, Record } from "~/lib/Utils";
 import { getSelectionOptions } from "~/lib/Utils";
 import { getChildVertexes } from "~/lib/Utils";
-import { deleteVertex, findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { deleteVertex, findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
 import { AttrsTableData } from "~/lib/api";
 import { isNumber } from "~/lib/CommonUtils/isNumber";
 import { capitalizeFirstLetter } from "~/lib/Utils";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";

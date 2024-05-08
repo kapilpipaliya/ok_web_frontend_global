@@ -7,8 +7,8 @@ import {
   Switch,
   useContext,
 } from "solid-js";
-import { GraphContext } from "~/lib/graph";
-import { setGraphData } from "~/lib/ws_events";
+import { GraphContext } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/websocket/ws_events";
 import { API_BASE_URL } from "~/lib/api";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 

@@ -9,7 +9,7 @@ import {
   isValidId,
   transactionDetailAdd,
   transactions,
-} from "./graph";
+} from "../graph";
 
 export function newEdge(
   edgeId: Id,

@@ -10,7 +10,7 @@ import {
   Show,
   useContext,
 } from "solid-js";
-import { getNewGraphId, GraphContext } from "~/lib/graph";
+import { getNewGraphId, GraphContext } from "~/lib/graph/graph";
 import Dismiss from "solid-dismiss";
 import { Navbar } from "../../components/layout/Navbar";
 import {
@@ -19,7 +19,7 @@ import {
   validateEmail,
   validatePassword,
 } from "~/lib/Utils";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/Vertex";
+import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/Vertex";
 import "~/css/base.css";
 import { Icon } from "@iconify-icon/solid";
 import "~/css/modal.css";

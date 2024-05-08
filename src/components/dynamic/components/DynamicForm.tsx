@@ -30,8 +30,8 @@ import {
   commitTxn,
   revertTransaction,
   txnHasSteps,
-} from "~/lib/graph";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+} from "~/lib/graph/graph";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   BeforeLeaveEventArgs,
   useBeforeLeave,
@@ -43,7 +43,7 @@ import { getPermissions } from "~/lib/auth";
 import { TableTabs } from "~/components/custom/TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
 import { FormMetaData } from "~/lib/Type";
-import { getCollAttrComp, getExportCode, getFormMetaData } from "~/lib/Record";
+import { getCollAttrComp, getExportCode, getFormMetaData } from "~/lib/graph/mutate/Record";
 import { Switch } from "solid-js";
 
 interface AbstractSingleFormProps

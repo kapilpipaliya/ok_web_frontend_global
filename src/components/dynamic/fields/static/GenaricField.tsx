@@ -10,8 +10,8 @@ import {
   useContext,
 } from "solid-js";
 import { toTitle } from "case-switcher-js";
-import { GraphContext, GraphInterface, IdAttr, Vertex } from "~/lib/graph";
-import { getCollAttrComp, getCompProps, getRowProps } from "~/lib/Record";
+import { GraphContext, GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { getCollAttrComp, getCompProps, getRowProps } from "~/lib/graph/mutate/Record";
 import {
   FormContext,
   getChildVertex,

@@ -8,7 +8,7 @@ import {
   transactionDetailAdd,
   transactions,
   Vertex,
-} from "./graph";
+} from "../graph";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "./Edge";
 

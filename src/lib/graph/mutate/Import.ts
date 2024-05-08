@@ -5,8 +5,8 @@ import {
   getSublistRows,
   getSublistRowsForType,
   newRow,
-} from "./Utils";
-import { Record } from "./Utils";
+} from "../../Utils";
+import { Record } from "../../Utils";
 import {
   commitTxn,
   getNewGraphId,
@@ -14,7 +14,7 @@ import {
   GraphInterface,
   IdAttr,
   Vertex,
-} from "./graph";
+} from "../graph";
 import {
   addNewVertex,
   deleteVertex,
@@ -25,21 +25,21 @@ import {
   newVertex,
   replaceVertexProperties,
 } from "./Vertex";
-import { ServerEventsDispatcher } from "./ws_events_dispatcher";
+import { ServerEventsDispatcher } from "../../websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
-import { getToEdge } from "./CommonUtils/getToEdge";
-import { getChildVertex, getChildVertexes } from "./Utils";
+import { getToEdge } from "../../CommonUtils/getToEdge";
+import { getChildVertex, getChildVertexes } from "../../Utils";
 import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,
   setParentValue,
-} from "../components/dynamic/fields/input/SelectInputField";
+} from "../../../components/dynamic/fields/input/SelectInputField";
 import { parse } from "yaml";
-import { isObject } from "./Utils";
+import { isObject } from "../../Utils";
 import { deleteEdge } from "./Edge";
-import { AttrsTableData } from "./api";
-import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
-import { AttrsAdminTableData } from "./apiAdmin";
+import { AttrsTableData } from "../../api";
+import { setSelectionValue } from "../../../components/dynamic/fields/static/SelectionUtils";
+import { AttrsAdminTableData } from "../../apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export const updateImportRecord = (

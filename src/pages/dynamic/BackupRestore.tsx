@@ -12,7 +12,7 @@ import {
   restoreFromIndexDB,
   restoreFromJson,
   Vertex,
-} from "~/lib/graph";
+} from "~/lib/graph/graph";
 import { A } from "@solidjs/router";
 import {
   addNewVertex,
@@ -20,8 +20,8 @@ import {
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
-} from "~/lib/Vertex";
-import { WsContext } from "~/lib/ws_events_dispatcher";
+} from "~/lib/graph/mutate/Vertex";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   getParentVertex,
   getChildVertex,
@@ -30,12 +30,12 @@ import {
   Record,
   APP_BASE_URL,
 } from "~/lib/Utils";
-import { getCompPropsMap, getFormMetaData } from "~/lib/Record";
+import { getCompPropsMap, getFormMetaData } from "~/lib/graph/mutate/Record";
 import {
   importRecordWithYAMLSchema,
   onDataDirectoryImportClick,
   updateImportRecord,
-} from "~/lib/Import";
+} from "~/lib/graph/mutate/Import";
 import { fileDownloader } from "~/lib/dom_utils";
 import { Field, NsMetaJson } from "~/lib/NSMetaDataType";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";

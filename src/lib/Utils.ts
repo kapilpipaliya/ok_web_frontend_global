@@ -1,13 +1,13 @@
 import { batch, createContext, onCleanup, useContext } from "solid-js";
-import { ServerEventsDispatcher } from "./ws_events_dispatcher";
-import { addNewEdge, deleteEdge, newEdge } from "./Edge";
+import { ServerEventsDispatcher } from "./websocket/ws_events_dispatcher";
+import { addNewEdge, deleteEdge, newEdge } from "./graph/mutate/Edge";
 import {
   addNewVertex,
   deleteVertex,
   findVertexByLabelAndUniqueIdWithSkip,
   mergeVertexProperties,
   newVertex,
-} from "./Vertex";
+} from "./graph/mutate/Vertex";
 import {
   commitTxn,
   getNewGraphId,
@@ -18,7 +18,7 @@ import {
   IdAttr,
   revertTransaction,
   Vertex,
-} from "./graph";
+} from "./graph/graph";
 import { evaluate } from "./jsep";
 import jsep from "jsep";
 import { klona } from "klona/json";

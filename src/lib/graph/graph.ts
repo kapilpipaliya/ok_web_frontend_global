@@ -7,8 +7,8 @@ import {
 } from "solid-js/store";
 import { klona } from "klona";
 // import {get, set} from "idb-keyval";
-import { ServerEventsDispatcher } from "./ws_events_dispatcher";
-import { isNumber } from "./CommonUtils/isNumber";
+import { ServerEventsDispatcher } from "../websocket/ws_events_dispatcher";
+import { isNumber } from "../CommonUtils/isNumber";
 import { useNavigate } from "@solidjs/router";
 
 export type Id = number;

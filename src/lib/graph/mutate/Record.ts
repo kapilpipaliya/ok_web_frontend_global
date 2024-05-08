@@ -5,7 +5,7 @@ import {
   Id,
   IdAttr,
   Vertex,
-} from "./graph";
+} from "../graph";
 import { klona } from "klona/json";
 import {
   findVertexByLabelAndUniqueId,
@@ -23,14 +23,14 @@ import {
   addNewRow,
   getSublistRows,
   getSublistRowsForType,
-} from "./Utils";
-import { getToEdge } from "./CommonUtils/getToEdge";
-import { removeUndefinedProperties } from "./functions";
-import { Record } from "./Utils";
-import { newRow } from "./Utils";
-import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
-import { AttrsAdminTableData } from "./apiAdmin";
-import { FieldAttribute, FormMetaData } from "./Type";
+} from "../../Utils";
+import { getToEdge } from "../../CommonUtils/getToEdge";
+import { removeUndefinedProperties } from "../../functions";
+import { Record } from "../../Utils";
+import { newRow } from "../../Utils";
+import { setSelectionValue } from "../../../components/dynamic/fields/static/SelectionUtils";
+import { AttrsAdminTableData } from "../../apiAdmin";
+import { FieldAttribute, FormMetaData } from "../../Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {

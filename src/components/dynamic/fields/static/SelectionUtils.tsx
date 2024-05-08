@@ -1,7 +1,7 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-import { getNewGraphId, GraphInterface, Vertex } from "~/lib/graph";
+import { getNewGraphId, GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getToEdge } from "~/lib/CommonUtils/getToEdge";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/Edge";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export function setSelectionValue(

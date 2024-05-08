@@ -2,7 +2,7 @@ import { APIEvent } from "@solidjs/start/dist/server";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
-import { getChildVertexes } from "~/cypher_api/lib/Traverse";
+import { getChildVertexes } from "~/cypher_api/lib/graph/get/sync/Traverse";
 import { getDriver, isIntegerId } from "~/lib/global";
 import { checkPropertyExists } from "~/lib/functions";
 

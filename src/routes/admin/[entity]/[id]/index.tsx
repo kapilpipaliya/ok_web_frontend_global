@@ -2,7 +2,7 @@ import { useParams } from "@solidjs/router";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { config } from "@master/css";
 import { Show, useContext } from "solid-js";
-import { GraphContext } from "~/lib/graph";
+import { GraphContext } from "~/lib/graph/graph";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function admin() {

@@ -1,13 +1,13 @@
-import { GraphInterface, Id, Vertex } from "./graph";
-import { evaluate } from "./jsep";
+import { GraphInterface, Id, Vertex } from "../../graph";
+import { evaluate } from "../../../jsep";
 import jsep from "jsep";
 import {
   getChildVertexes,
   deleteRow,
   capitalizeFirstLetter,
   getValueFromVertexOrKey,
-} from "./Utils";
-import { getToEdge } from "./CommonUtils/getToEdge";
+} from "../../../Utils";
+import { getToEdge } from "../../../CommonUtils/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export function getSelectedVertexValue(

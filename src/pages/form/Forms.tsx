@@ -14,7 +14,7 @@ import { LoadingContext } from "~/lib/global";
 import logo from "~/assets/graphics/logo.png";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
-import sendEmail from "~/lib/email";
+import sendEmail from "~/lib/server/email";
 
 export const Login = () => {
   const navigate = useNavigate();

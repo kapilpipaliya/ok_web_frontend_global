@@ -10,12 +10,12 @@ import {
   GraphInterface,
   Id,
   VertexMap,
-} from "~/lib/graph";
+} from "~/lib/graph/graph";
 import {
   ServerEventsDispatcher,
   WS_PATH,
   WsContext,
-} from "~/lib/ws_events_dispatcher";
+} from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 import { Dashboard } from "~/pages/dynamic/Dashboard";

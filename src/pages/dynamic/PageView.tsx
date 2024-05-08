@@ -7,12 +7,12 @@ import {
   Show,
   useContext,
 } from "solid-js";
-import { WsContext } from "~/lib/ws_events_dispatcher";
-import { getFormMetaData } from "~/lib/Record";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
+import { getFormMetaData } from "~/lib/graph/mutate/Record";
 import { Record } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
-import { GraphContext, GraphInterface } from "~/lib/graph";
+import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
 
 export const PageView_ = (props: { id: string; count: number }) => {

@@ -1,9 +1,9 @@
 import jsep from "jsep";
 //import { eval as eval1} from 'expression-eval';
-import { IdAttr, Vertex } from "./graph";
+import { IdAttr, Vertex } from "./graph/graph";
 import { path } from "rambda";
-import { calculateFilter, getTextValue } from "./Traverse";
-import { findVertexIdsByLabel } from "./Vertex";
+import { calculateFilter, getTextValue } from "./graph/get/sync/Traverse";
+import { findVertexIdsByLabel } from "./graph/mutate/Vertex";
 import { jsonata } from "./jsonata/jsonata";
 import { isObject } from "./Utils";
 

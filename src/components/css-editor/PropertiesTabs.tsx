@@ -4,7 +4,7 @@ import {
   TabList,
   Tabs,
 } from "~/components/solid-blocks/blocks";
-import { Vertex } from "~/lib/graph";
+import { Vertex } from "~/lib/graph/graph";
 import { StyleCSSComponents } from "./StyleCSSComponents";
 import {
   createEffect,
