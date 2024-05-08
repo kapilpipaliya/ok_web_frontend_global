@@ -1,11 +1,4 @@
-
-// TODO: when profile is updated a username will be changed in navbar. make user store in the graph(Kapil)
-
-
-
-
 // when signup and login convert email to lowercase in the api.
 // make mutate api.
 // convert docker api /root/pm2_and_docker_frontend/pm2-docker-manage-api.js to solid-start API and use it when signup to create a docker.
 // make sure session is properly closed in API.
-

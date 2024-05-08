@@ -53,13 +53,8 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
   const [signUpPage, setSignUpPage] = createSignal(
     location.pathname.includes("/auth/signup"),
   );
-  const [userData, setUserData] = createStore({});
 
-  getUser().then((value) => {
-    if (!value.error) {
-      setUserData(value);
-    }
-  });
+
 
   createEffect(() => {
     const path = location.pathname;
@@ -114,7 +109,7 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
               toggleSidebar={() => {
                 setSideBarOpen((prev) => !prev);
               }}
-              right={<DropdownMenu isLoggedIn={userData?.id} user={userData} />}
+              right={<DropdownMenu />}
               meta={graph.vertexes[vertexId]}
             />
           </Show>
@@ -125,10 +120,8 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
   );
 };
 
-const DropdownMenu = (props: {
-  isLoggedIn: boolean;
-  user: { [key: string]: any };
-}) => {
+const DropdownMenu = () => {
+  const [graph, setGraph] = useContext(GraphContext)!;
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
   const navigate = useNavigate();
   const { showErrorToast } = useToast();
@@ -141,7 +134,10 @@ const DropdownMenu = (props: {
   const handleClose = () => {
     setIsOpen(false);
   };
+  getUser().then((value) => {
+    setGraph('member', value);
 
+  });
   const onLogOut = async () => {
     return await postAPI(API.logOutUrl, {});
   };
@@ -186,11 +182,9 @@ const DropdownMenu = (props: {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-            isOpen() ? 1 : 0
-          }; pointer-events: ${
-            isOpen() ? "auto" : "none"
-          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
+            }; pointer-events: ${isOpen() ? "auto" : "none"
+            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
@@ -205,19 +199,20 @@ const DropdownMenu = (props: {
               />
               <div class={"ml:10 mr:1rem"}>
                 <div class={"text-align:start f:15 font-weight:bold"}>
-                  {!props.isLoggedIn
+                  {!graph.member?.properties.username
                     ? "Guest User"
-                    : props.user.properties?.username ?? "anonymous"}
+                    : graph.member?.properties.username ?? "anonymous"}
                 </div>
                 <div class={"text-align:start f:13"}>
-                  {!props.isLoggedIn
+                  {!graph.member?.properties.email
                     ? "guest@gmail.com"
-                    : props.user.properties?.email ?? "anonymous@gmail.com"}
+                    : graph.member?.properties.email ?? "anonymous@gmail.com"}
                 </div>
               </div>
             </li>
             <hr class={"color:rgb(223,223,223)"} />
-            {!props.isLoggedIn ? ( // Conditionally render "Log Out" link if user is logged in
+
+            {!graph.member?.properties.email ? ( // Conditionally render "Log Out" link if user is logged in
               <div>
                 <li style="margin-top: 5px; " class={"m:5|10"}>
                   <A
@@ -308,6 +303,7 @@ const DropdownMenu = (props: {
                 </li>
               </div>
             )}
+
           </ul>
         </div>
       </Dismiss>

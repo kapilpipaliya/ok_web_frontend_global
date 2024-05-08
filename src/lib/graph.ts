@@ -178,19 +178,20 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     const existingTxnValue = getTransactionData(firstReadyTxn);
     transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
     if (existingTxnValue.length) {
-      Ws.trigger([
-        [
-          ["post", "mutate", 0],
-          [
-            [
-              firstReadyTxn,
-              [...vertexOldIdToNewIdMap],
-              [...edgeOldIdToNewIdMap],
-              existingTxnValue,
-            ],
-          ],
-        ],
-      ]);
+      
+      // Ws.trigger([
+      //   [
+      //     ["post", "mutate", 0],
+      //     [
+      //       [
+      //         firstReadyTxn,
+      //         [...vertexOldIdToNewIdMap],
+      //         [...edgeOldIdToNewIdMap],
+      //         existingTxnValue,
+      //       ],
+      //     ],
+      //   ],
+      // ]);
     }
   }
 };
