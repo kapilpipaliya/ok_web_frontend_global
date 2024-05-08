@@ -1,14 +1,13 @@
 // https://github.com/ujjwalguptaofficial/JsStore/blob/master/src/main/event_bus.ts
 export class EventBus {
-  constructor(ctx?) {
-    this._ctx = ctx;
-  }
-
   private _ctx;
-
   private _events: {
     [key: string]: Function[];
   } = {};
+
+  constructor(ctx?) {
+    this._ctx = ctx;
+  }
 
   on(event: string, cb: Function) {
     if (this._events[event] == null) {

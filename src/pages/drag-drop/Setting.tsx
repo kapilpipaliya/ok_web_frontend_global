@@ -1,13 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  Show,
-  Switch,
-  untrack,
-} from "solid-js";
+import { createSignal, For, Match, Show, Switch, untrack } from "solid-js";
 import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
@@ -30,7 +21,6 @@ import {
 import { ChipDropDown } from "~/components/custom/Chip";
 import CustomModal from "~/components/custom/CommonDialog";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
-import { getDriver } from "~/lib/global";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
 
@@ -610,7 +600,7 @@ function Settings() {
           timestamp: new Date().toLocaleTimeString(),
           personal: true,
         };
-        
+
         const data = await postAPI(API.profileUrl, {
           newMessage: newMessage,
           parentVertexId: parentVertexId,

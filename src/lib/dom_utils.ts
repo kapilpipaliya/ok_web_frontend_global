@@ -9,6 +9,7 @@ export function focusLastInput(tableElement?: HTMLTableElement) {
 
 export interface Atom<T> {
   (): T;
+
   (value: T): T;
 }
 

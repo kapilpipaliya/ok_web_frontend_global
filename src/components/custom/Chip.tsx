@@ -1,4 +1,4 @@
-import { For, createSignal } from "solid-js";
+import { createSignal, For } from "solid-js";
 
 const StatusChip = (props: { status: string }) => {
   const [status] = createSignal(props.status);

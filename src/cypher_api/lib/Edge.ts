@@ -9,7 +9,7 @@ import {
   Relationship,
   transactionDetailAdd,
   transactions,
-} from "./graph";
+} from "~/cypher_api/lib/graph";
 
 export function newEdge(
   edgeId: Id,
@@ -34,6 +34,7 @@ export function newEdge(
     E: endVertexId,
   };
 }
+
 export function addNewEdgeUnSafe(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -49,6 +50,7 @@ export function addNewEdgeUnSafe(
     );
   });
 }
+
 export function addNewEdge(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -130,6 +132,7 @@ export function replaceEdgeProperties(
     txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
+
 // private
 export const replaceEdgeStart = (
   graph: Store<IGraph>,
@@ -260,6 +263,7 @@ export function deleteEdge(
     txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
+
 export function updateEdgeId(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,

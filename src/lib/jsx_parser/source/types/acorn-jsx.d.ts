@@ -183,6 +183,7 @@ declare module "acorn-jsx" {
     allowNamespaces?: boolean;
     autoCloseVoidElements?: boolean;
   }
+
   export default function (options?: PluginOptions): any;
 }
 /* eslint-enable no-use-before-define */

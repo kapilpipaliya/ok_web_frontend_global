@@ -1,10 +1,10 @@
 import { MetaProvider } from "@solidjs/meta";
-import { A, Route, Router, useMatch, useParams } from "@solidjs/router";
+import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { Component, createSignal, Show, Suspense } from "solid-js";
+import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { config } from "~/master.css";
-import { LoadingContext } from "~/lib/global";
+import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/layout/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 

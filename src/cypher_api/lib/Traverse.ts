@@ -1,11 +1,14 @@
-import { IdAttr, IGraph, Node } from "./graph";
-import { capitalizeFirstLetter, getValueFromVertexOrKey } from "../utils/utils";
-import { evaluate } from "./jsep";
+import { IdAttr, IGraph, Node } from "~/cypher_api/lib/graph";
+import {
+  capitalizeFirstLetter,
+  getValueFromVertexOrKey,
+} from "~/cypher_api/utils/utils";
+import { evaluate } from "~/cypher_api/lib/jsep";
 import jsep from "jsep";
-import { deleteRow } from "./Record";
-import { getOutEdges } from "../functions/getOutEdges";
+import { deleteRow } from "~/cypher_api/lib/Record";
+import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "./dbs";
+import { DBConnection } from "~/cypher_api/lib/dbs";
 
 export function getToEdge(meta: Node, vertex: Node): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
@@ -26,6 +29,7 @@ export function getSelectedVertexValueLocal(
   const type = getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
+
 export async function getSelectedVertexValue(
   dbConn: DBConnection,
   vertex: Node,
@@ -61,6 +65,7 @@ export function getParentVertexValueLocal(
   }
   return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
+
 export async function getParentVertexValue(
   dbConn: DBConnection,
   vertex: Node,
@@ -118,6 +123,7 @@ export function getParentVertexLocal(
     }
   }
 }
+
 export async function getParentVertex(
   dbConn: DBConnection,
   path: string[],
@@ -208,6 +214,7 @@ export function getParentVertexesLocal(
     };
   }
 }
+
 export async function getParentVertexes(
   dbConn: DBConnection,
   path: string[],
@@ -430,6 +437,7 @@ export function getChildVertexesLocal(
     };
   }
 }
+
 export async function getChildVertexes(
   dbConn: DBConnection,
   path: string[],
@@ -480,6 +488,7 @@ export async function getChildVertexes(
     };
   }
 }
+
 export const calculateFilter = (input: string) => {
   let isMultiple = true;
   let filterIndex = input.indexOf("[");

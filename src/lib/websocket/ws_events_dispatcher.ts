@@ -5,9 +5,9 @@ Simplified WebSocket events dispatcher
 
 // import { decode } from '@msgpack/msgpack'; import {WSBase} from "./ws_reconnect";
 
-import { WSBase } from "./ws_reconnect";
+import { WSBase } from "~/lib/websocket/ws_reconnect";
 import { createContext } from "solid-js";
-import { commitTransaction } from "../graph/graph";
+import { commitTransaction } from "~/lib/graph/graph";
 
 // automatically set NODE_ENV == 'production' when we build the project.
 export const IS_PRODUCTION = process.env.NODE_ENV == "production";
@@ -157,18 +157,6 @@ export class ServerEventsDispatcher extends WSBase {
     this.trigger([["get", "sync", 0], args]);
   }
 
-  private delay_send() {
-    if (this.firstPayload.length) {
-      if (this.socket) {
-        this.socket.send(JSON.stringify(this.firstPayload));
-        this.firstPayload = [];
-      } else {
-        return;
-      }
-    }
-    this.isFirstTriggers = false;
-  }
-
   // to handle trigger response, needs to bind first
   trigger(payload: Array<[WSEvent, any]>) {
     if (!this.socket) {
@@ -197,6 +185,18 @@ export class ServerEventsDispatcher extends WSBase {
           return;
       }
     }
+  }
+
+  private delay_send() {
+    if (this.firstPayload.length) {
+      if (this.socket) {
+        this.socket.send(JSON.stringify(this.firstPayload));
+        this.firstPayload = [];
+      } else {
+        return;
+      }
+    }
+    this.isFirstTriggers = false;
   }
 
   private stringHandle(data: [[WSEvent, Array<any>]]) {
@@ -256,6 +256,7 @@ export class ServerEventsDispatcher extends WSBase {
     }
   }
 }
+
 //
 // export const Ws = new ServerEventsDispatcher(WS_PATH);
 

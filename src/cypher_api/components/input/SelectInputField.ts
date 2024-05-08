@@ -30,6 +30,7 @@ function vertexOutEdgeContainVertex(
   }
   return false;
 }
+
 async function vertexOutEdgeContainVertexMGCall(
   dbConn: DBConnection,
   vertex: Node,
@@ -46,6 +47,7 @@ async function vertexOutEdgeContainVertexMGCall(
   }
   return false;
 }
+
 function vertexInEdgeContainVertex(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -63,6 +65,7 @@ function vertexInEdgeContainVertex(
   }
   return false;
 }
+
 async function vertexInEdgeContainVertexMGCall(
   dbConn: DBConnection,
   vertex: Node,
@@ -123,6 +126,7 @@ export function setSelectionValue(
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
+
 export async function setSelectionValueMGCall(
   dbConn: DBConnection,
   vertex: Node,
@@ -218,6 +222,7 @@ export function setParentValue(
     if (insertEdgeResult.error) console.error(insertEdgeResult.error);
   }
 }
+
 export async function setParentValueMGCall(
   dbConn: DBConnection,
   vertex: Node,

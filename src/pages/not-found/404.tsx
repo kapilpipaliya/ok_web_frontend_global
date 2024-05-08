@@ -1,4 +1,5 @@
 import "~/css/base.css";
+
 export default function NotFound() {
   return (
     <main class="position:relative  isolation:isolate  height:100vh ">

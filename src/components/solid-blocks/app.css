@@ -2,23 +2,28 @@ html,
 body {
   height: 100%;
 }
+
 #root {
   margin: 0;
   padding: 0;
 }
+
 body {
   font-size: calc(0.5em + 1.5vmin);
   line-height: 1.5em;
 }
+
 @media (max-width: 50em) and (max-height: 50em) {
   body {
     font-size: 1em;
   }
 }
+
 .app {
   padding: 1em 1em 3em 1em;
   height: 100%;
 }
+
 .top.sb-bar:after {
   content: "";
   display: block;
@@ -28,24 +33,30 @@ body {
   height: 1em;
   width: 100%;
 }
+
 .dark-mode .top.sb-bar:after {
   background: linear-gradient(rgba(35, 35, 35, 1), rgba(35, 35, 35, 0));
 }
+
 .top.sb-bar + * {
   margin-top: 1em;
 }
+
 .flex-row.flex-row {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   padding-left: 0em;
 }
+
 .flex-row > * {
   margin-left: 1em;
 }
+
 dt {
   font-weight: 700;
 }
+
 pre {
   color: #ccc;
   background: #111;
@@ -56,11 +67,13 @@ pre {
   position: relative;
   overflow: auto;
 }
+
 pre[data-title]:before {
   content: attr(data-title);
   float: right;
   font-size: 0.75em;
 }
+
 .example {
   border: var(--hair-line) solid var(--border-color);
   border-radius: var(--border-radius);
@@ -68,6 +81,7 @@ pre[data-title]:before {
   margin-bottom: 1em;
   position: relative;
 }
+
 .example:before {
   background: var(--background);
   content: "Example";
@@ -80,12 +94,14 @@ pre[data-title]:before {
   text-align: left;
   top: -0.5em;
 }
+
 .to-top-wrapper {
   position: fixed;
   right: 2.5em;
   bottom: 2em;
   z-index: var(--stack-skip-link);
 }
+
 .to-top[href="#top"][role="button"] {
   display: inline-block;
   text-decoration: none;
@@ -94,10 +110,12 @@ pre[data-title]:before {
   color: var(--negative-text);
   font-weight: 700;
 }
+
 h2,
 li {
   word-wrap: wrap-word;
 }
+
 .color-example {
   border: var(--hair-line) solid var(--border-color);
   display: inline-block;

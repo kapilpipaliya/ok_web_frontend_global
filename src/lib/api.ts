@@ -1,9 +1,9 @@
-import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/mutate/Vertex";
-import { AttrsAdminTableData } from "./apiAdmin";
-import { FieldAttribute, FormMetaData } from "./Type";
-import { IFormContext } from "./Utils";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/mutate/Vertex";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FieldAttribute, FormMetaData } from "~/lib/Type";
+import { IFormContext } from "~/lib/Utils";
 import { useContext } from "solid-js";
-import { GraphContext } from "./graph/graph";
+import { GraphContext } from "~/lib/graph/graph";
 /* use in c++
 export const JSONToCypherMap = (json: object) => {
   // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
@@ -659,67 +659,67 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
 
       /*      {
-        name: "Child",
-        component: "Table2",
-        tab: "Child",
-        attributes: [
-          {
-            name: "coll",
-            component: "SelectBox",
-            props: {
+              name: "Child",
+              component: "Table2",
+              tab: "Child",
+              attributes: [
+                {
+                  name: "coll",
+                  component: "SelectBox",
+                  props: {
 
-              collection: "g:'Coll'",
-            },
-          },
-          {
-            name: "displayName",
-            component: "TextBox",
-            props: {
-              onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-            }
-          },
-          {
-            name: "name",
-            component: "TextBox",
-          },
-          {
-            name: "tab",
-            component: "SelectBox",
-            props: {
-
-              collection: "-CollChild->$0Tab",
-            },
-          },
-          {
-            name: "group",
-            component: "SelectBox",
-            props: {
-              collection: "-CollChild->$0Group",
-
-            },
-          },
-          {
-            name: "Prop",
-            displayName: "Property",
-            component: "Table2",
-            attributes: [
-              {
-                name: "name",
-                component: "SelectBox",
-                props: {
-                  displayExpr: "::'P.name'",
-                  collection: "g:'Comp[Table]'->$0Prop",
+                    collection: "g:'Coll'",
+                  },
                 },
-              },
-              {
-                name: "value",
-                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-              },
-            ],
-          },
-        ],
-      },*/
+                {
+                  name: "displayName",
+                  component: "TextBox",
+                  props: {
+                    onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+                  }
+                },
+                {
+                  name: "name",
+                  component: "TextBox",
+                },
+                {
+                  name: "tab",
+                  component: "SelectBox",
+                  props: {
+
+                    collection: "-CollChild->$0Tab",
+                  },
+                },
+                {
+                  name: "group",
+                  component: "SelectBox",
+                  props: {
+                    collection: "-CollChild->$0Group",
+
+                  },
+                },
+                {
+                  name: "Prop",
+                  displayName: "Property",
+                  component: "Table2",
+                  attributes: [
+                    {
+                      name: "name",
+                      component: "SelectBox",
+                      props: {
+                        displayExpr: "::'P.name'",
+                        collection: "g:'Comp[Table]'->$0Prop",
+                      },
+                    },
+                    {
+                      name: "value",
+                      meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+                      component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                    },
+                  ],
+                },
+              ],
+            },*/
       {
         name: "Transform",
         component: "Table2",

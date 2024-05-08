@@ -5,15 +5,15 @@ import {
   register,
   validatePassword,
   validateUsername,
-} from "./_server";
-import { getDriver, isIntegerId } from "~/lib/global";
+} from "~/lib/auth/_server";
+import { getDriver, isIntegerId } from "~/lib/server/driver";
 
 // use this function in all api to find if user is logged in or not?
 export const getUser = async () => {
   "use server";
   // try {
   const session = await getSession();
-  const neoSession = getDriver("super").session();
+  const neoSession = (await getDriver("super")).session();
 
   const email = session.data.email;
   if (email === undefined) {

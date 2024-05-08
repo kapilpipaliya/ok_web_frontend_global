@@ -1,5 +1,4 @@
 import { useSession } from "vinxi/http";
-import { redirect } from "@solidjs/router";
 
 export function getSession() {
   const config = {
@@ -16,6 +15,7 @@ export function validateUsername(email: any) {
   }
   return undefined; // No error, email is val
 }
+
 export function validatePassword(password: any) {
   const conditions = [
     {
@@ -57,6 +57,7 @@ export async function logout() {
   await session.update((d) => (d.userId = undefined));
   await session.clear();
 }
+
 export async function register(
   username: string,
   password: string,

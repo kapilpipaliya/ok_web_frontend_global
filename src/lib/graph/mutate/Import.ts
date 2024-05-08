@@ -2,11 +2,14 @@ import { getPkForCollection } from "./Record";
 import {
   addNewRow,
   deleteRow,
+  getChildVertex,
+  getChildVertexes,
   getSublistRows,
   getSublistRowsForType,
+  isObject,
   newRow,
+  Record,
 } from "../../Utils";
-import { Record } from "../../Utils";
 import {
   commitTxn,
   getNewGraphId,
@@ -27,15 +30,13 @@ import {
 } from "./Vertex";
 import { ServerEventsDispatcher } from "../../websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
-import { getToEdge } from "../../CommonUtils/getToEdge";
-import { getChildVertex, getChildVertexes } from "../../Utils";
+import { getToEdge } from "../get/sync/getToEdge";
 import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,
   setParentValue,
 } from "../../../components/dynamic/fields/input/SelectInputField";
 import { parse } from "yaml";
-import { isObject } from "../../Utils";
 import { deleteEdge } from "./Edge";
 import { AttrsTableData } from "../../api";
 import { setSelectionValue } from "../../../components/dynamic/fields/static/SelectionUtils";

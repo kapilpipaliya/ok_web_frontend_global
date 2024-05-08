@@ -456,6 +456,7 @@ binops[":-"] = (vertexes1, projection) => {
     return;
   }
 };
+
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
@@ -476,6 +477,7 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   }
   return getTextValue(path(projection, vertex));
 }
+
 binops["::"] = projectedValueBinOps;
 unops["->"] = (collection, context) => {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
@@ -555,6 +557,7 @@ unops["ids:"] = (edgeType: string | number | string[] | Node[]) => {
 unops["T:"] = (value: any) => {
   return getTextValue(value);
 };
+
 function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
@@ -574,6 +577,7 @@ function projectedValueUnOps(projection: any, context: any) {
   }
   return getTextValue(path(projection, vertex));
 }
+
 unops["::"] = projectedValueUnOps;
 
 // const parse_tree = jsep('(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)');

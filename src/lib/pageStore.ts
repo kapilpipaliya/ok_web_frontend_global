@@ -6,7 +6,13 @@ import {
   createSignal,
   untrack,
 } from "solid-js";
-import { getNewGraphId, GraphInterface, Id, IdAttr, Vertex } from "./graph/graph";
+import {
+  getNewGraphId,
+  GraphInterface,
+  Id,
+  IdAttr,
+  Vertex,
+} from "~/lib/graph/graph";
 import {
   addNewRow,
   getChildVertex,
@@ -14,25 +20,25 @@ import {
   getParentVertex,
   getSelectionOptions,
   Record,
-} from "./Utils";
+} from "~/lib/Utils";
 import {
   findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
-} from "./graph/mutate/Vertex";
-import { setParentValue } from "../components/dynamic/fields/input/SelectInputField";
+} from "~/lib/graph/mutate/Vertex";
+import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
 import {
   cloneRowProps,
   getCompProps,
   getRowProps,
   getStringComponent,
-} from "./graph/mutate/Record";
+} from "~/lib/graph/mutate/Record";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
-import { evaluate } from "./jsep";
+import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
-import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
-import { deleteNestedLayout } from "./graph/get/sync/Traverse";
-import { useToast } from "../components/custom/Toast";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import { deleteNestedLayout } from "~/lib/graph/get/sync/Traverse";
+import { useToast } from "~/components/custom/Toast";
 
 export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
 

@@ -1,13 +1,11 @@
-import { Driver, driver as createDriver, auth } from "neo4j-driver";
-import { createContext, createSignal } from "solid-js";
+import { auth, driver as createDriver, Driver } from "neo4j-driver";
+
 export const isIntegerId = true;
 
 const drivers = {} as { [port: string]: Driver };
 
-export const LoadingContext = createContext(createSignal(false));
-
 // Function to get a driver instance based on the database ID
-export function getDriver(
+export async function getDriver(
   port: string | number,
   username?: string,
   password?: string,

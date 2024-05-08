@@ -6,7 +6,10 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { APP_BASE_URL, Record } from "~/lib/Utils";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
-import { onDataDirectoryImportClick, updateImportRecord } from "~/lib/graph/mutate/Import";
+import {
+  onDataDirectoryImportClick,
+  updateImportRecord,
+} from "~/lib/graph/mutate/Import";
 import {
   AbstractSingleForm,
   getComponentForCollRow,
@@ -97,11 +100,10 @@ perm`,
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   vertex: Vertex;
-
-  setValue(meta: Vertex, data: any): Vertex | undefined;
-
   txnId: number;
   selectedLayout: Vertex;
+
+  setValue(meta: Vertex, data: any): Vertex | undefined;
 }
 
 export function FormGroupProperties(props: FormGroupPropertiesProps) {

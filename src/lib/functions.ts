@@ -1,5 +1,3 @@
-import { Session } from "neo4j-driver";
-
 // https://github.com/d4nyll/rundef/blob/master/index.js
 export function removeUndefinedProperties(obj, mutate = false, recursive = 0) {
   const returnObj = {};
@@ -27,15 +25,4 @@ export function removeUndefinedProperties(obj, mutate = false, recursive = 0) {
 
 export function getLastItem<T>(arr: T[], index = 1): T | undefined {
   return arr[arr.length - index];
-}
-
-export async function checkPropertyExists(
-  nodeLabel: string,
-  session: Session,
-  property: string,
-  value: any,
-) {
-  const query = `MATCH (u:${nodeLabel}) WHERE u.${property} = $value RETURN u`;
-  const result = await session.run(query, { value });
-  return result.records.length > 0;
 }

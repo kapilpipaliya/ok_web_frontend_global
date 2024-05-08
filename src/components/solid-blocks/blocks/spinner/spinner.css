@@ -21,12 +21,14 @@ progress.sb-spinner:not([value]):not([aria-orientation]) {
   color: transparent;
   animation: spin 1s linear infinite;
 }
+
 progress.sb-spinner:not([value]):not([aria-orientation])::-webkit-progress-bar,
 progress.sb-spinner:not([value]):not(
     [aria-orientation]
   )::-webkit-progress-value {
   display: none;
 }
+
 progress.sb-spinner:not([value]):not([aria-orientation])::-moz-progress-bar {
   background: transparent;
   color: transparent;

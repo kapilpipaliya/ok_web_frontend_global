@@ -1,6 +1,12 @@
-import { createEffect, createSignal, Show, useContext } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  onCleanup,
+  Show,
+  useContext,
+} from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-import { onCleanup } from "solid-js";
+
 interface GraphViewProps {
   nodes: any[];
   edges: any[];

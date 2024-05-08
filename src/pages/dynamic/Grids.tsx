@@ -4,34 +4,31 @@ import {
   CellContext,
   ColumnDef,
   createSolidTable,
-  flexRender,
   getCoreRowModel,
 } from "@tanstack/solid-table";
 import {
-  For,
-  Show,
   createEffect,
-  createSignal,
-  onCleanup,
-  splitProps,
-  useContext,
-  Switch,
-  Match,
-  Accessor,
-  Setter,
   createMemo,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  Show,
+  splitProps,
+  Switch,
   untrack,
+  useContext,
 } from "solid-js";
 import {
+  commitTransaction,
+  getNewTxnId,
+  GraphContext,
+  GraphInterface,
   Id,
   IdAttr,
   ProcessStatus,
-  Vertex,
-  commitTransaction,
-  getNewTxnId,
   transactions,
-  GraphContext,
-  GraphInterface,
+  Vertex,
 } from "~/lib/graph/graph";
 
 import { Icon } from "@iconify-icon/solid";
@@ -41,13 +38,21 @@ import {
   selectedValue,
 } from "~/components/dynamic/fields/input/SelectInputField";
 import { getFormApiFromForm } from "~/lib/graph/mutate/Record";
-import { APP_BASE_URL, breadcrumbData, PageContext, Record } from "~/lib/Utils";
-import { getSelectionOptions } from "~/lib/Utils";
-import { getChildVertexes } from "~/lib/Utils";
-import { deleteVertex, findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
+import {
+  APP_BASE_URL,
+  breadcrumbData,
+  capitalizeFirstLetter,
+  getChildVertexes,
+  getSelectionOptions,
+  isNumber,
+  PageContext,
+  Record,
+} from "~/lib/Utils";
+import {
+  deleteVertex,
+  findVertexByLabelAndUniqueId,
+} from "~/lib/graph/mutate/Vertex";
 import { AttrsTableData } from "~/lib/api";
-import { isNumber } from "~/lib/CommonUtils/isNumber";
-import { capitalizeFirstLetter } from "~/lib/Utils";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";

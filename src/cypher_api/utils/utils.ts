@@ -4,6 +4,7 @@ import { getSelectionOptions, getChildVertexes } from "../lib/Traverse";
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 // This method read all property vertexes and make an object.
 export const getProps = async (meta: Node) => {
   const propsResult = await getChildVertexes(["$0Prop"], [meta]);

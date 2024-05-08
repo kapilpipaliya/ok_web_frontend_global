@@ -1,7 +1,6 @@
-import { createMemo, createSignal, For, Match, Switch } from "solid-js";
-import { Show } from "solid-js";
+import { createSignal, For, Match, Show, Switch } from "solid-js";
 import "~/css/table.css";
-import { addNewRow, capitalizeFirstLetter } from "~/lib/Utils";
+import { capitalizeFirstLetter } from "~/lib/Utils";
 import { IdAttr, Vertex } from "~/lib/graph/graph";
 import { ColumnDef } from "@tanstack/solid-table";
 import { toTitle } from "case-switcher-js";

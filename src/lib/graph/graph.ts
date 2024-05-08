@@ -7,9 +7,8 @@ import {
 } from "solid-js/store";
 import { klona } from "klona";
 // import {get, set} from "idb-keyval";
-import { ServerEventsDispatcher } from "../websocket/ws_events_dispatcher";
-import { isNumber } from "../CommonUtils/isNumber";
-import { useNavigate } from "@solidjs/router";
+import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import { isNumber } from "~/lib/Utils";
 
 export type Id = number;
 
@@ -24,6 +23,7 @@ export interface Vertex {
   IN: { [key: string]: Id[] };
   OUT: { [key: string]: Id[] };
 }
+
 export interface VertexUnsafe {
   id?: Id;
   L?: string[];
@@ -75,6 +75,7 @@ export type InsertFn = {
     | "replaceEdgeEnd"
     | "deleteEdge"]?: () => any;
 };
+
 export enum ProcessStatus {
   Unset,
   Ready,
@@ -82,6 +83,7 @@ export enum ProcessStatus {
   AckReceived,
   Processed,
 }
+
 export type TransactionValue = InsertFn & Revert & { data: any };
 export const transactions = new Map<
   number,
@@ -178,7 +180,6 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     const existingTxnValue = getTransactionData(firstReadyTxn);
     transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
     if (existingTxnValue.length) {
-      
       // Ws.trigger([
       //   [
       //     ["post", "mutate", 0],
@@ -202,6 +203,7 @@ export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
     commitTransaction(Ws);
   }
 };
+
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 export function getNewGraphId(): Id {
   uniqueId = uniqueId + 1;
@@ -222,6 +224,7 @@ export function resetDatabase(setGraph: SetStoreFunction<GraphInterface>) {
     }),
   );
 }
+
 export function resetDatabaseLogin(setGraph: SetStoreFunction<GraphInterface>) {
   setGraph(
     reconcile({
@@ -238,6 +241,7 @@ export function resetDatabaseLogin(setGraph: SetStoreFunction<GraphInterface>) {
 export function isValidId(startVertexId: Id) {
   return isNumber(startVertexId);
 }
+
 // @ts-ignore
 
 /*

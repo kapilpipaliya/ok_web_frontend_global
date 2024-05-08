@@ -14,20 +14,20 @@ import {
 } from "./Vertex";
 import { batch, onCleanup, untrack } from "solid-js";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getSelectionOptions,
+  addNewRow,
   AdminAttrKeys,
   AttrsTableData,
+  getChildVertex,
+  getChildVertexes,
   getParentVertex,
-  addNewRow,
+  getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
+  newRow,
+  Record,
 } from "../../Utils";
-import { getToEdge } from "../../CommonUtils/getToEdge";
+import { getToEdge } from "../get/sync/getToEdge";
 import { removeUndefinedProperties } from "../../functions";
-import { Record } from "../../Utils";
-import { newRow } from "../../Utils";
 import { setSelectionValue } from "../../../components/dynamic/fields/static/SelectionUtils";
 import { AttrsAdminTableData } from "../../apiAdmin";
 import { FieldAttribute, FormMetaData } from "../../Type";

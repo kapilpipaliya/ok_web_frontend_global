@@ -2,9 +2,9 @@ import { APIEvent } from "@solidjs/start/dist/server";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
-import { getChildVertexes } from "~/cypher_api/lib/graph/get/sync/Traverse";
-import { getDriver, isIntegerId } from "~/lib/global";
-import { checkPropertyExists } from "~/lib/functions";
+import { getChildVertexes } from "~/cypher_api/lib/Traverse";
+import { getDriver } from "~/lib/server/driver";
+import { checkPropertyExists } from "~/lib/server/functions";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -48,7 +48,7 @@ export async function POST({ request }: APIEvent) {
 const profile = async (payload: any) => {
   const { userId, username, email } = payload;
 
-  const session = getDriver("super").session();
+  const session = (await getDriver("super")).session();
   // Ensure user exists
   const userExists = await session.run(
     `MATCH (u:User) WHERE id(u) = $userId RETURN u;`,
@@ -83,7 +83,7 @@ const profile = async (payload: any) => {
 const password = async (payload: any) => {
   const { currentPassword, username, newPassword } = payload;
 
-  const neoSession = getDriver("super").session();
+  const neoSession = (await getDriver("super")).session();
 
   const findUserQuery = `MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;`;
   const findUserResult = await neoSession.run(findUserQuery, {
@@ -108,7 +108,7 @@ const password = async (payload: any) => {
 };
 
 const pricing = async () => {
-  const neoSession = getDriver("super").session();
+  const neoSession = (await getDriver("super")).session();
 
   const query = `MATCH (n:Pricing) RETURN n;`;
   const result = await neoSession.run(query);
@@ -144,7 +144,7 @@ const supportTicket = async (data: any) => {
   async function getTicket(payload: any) {
     const { email } = payload;
 
-    const neoSession = getDriver("super").session();
+    const neoSession = (await getDriver("super")).session();
 
     const query = `MATCH (n:Support {email: $email}) RETURN n;`;
     const result = await neoSession.run(query, { email });
@@ -163,7 +163,7 @@ const supportTicket = async (data: any) => {
   async function createTicket(payload: any) {
     const { name, email, subject, message } = payload;
 
-    const neoSession = getDriver("super").session();
+    const neoSession = (await getDriver("super")).session();
 
     const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) RETURN n;`;
     await neoSession.run(query, {
@@ -179,7 +179,7 @@ const supportTicket = async (data: any) => {
 
   async function updateStatus(payload: any) {
     const { id, status } = payload;
-    const neoSession = getDriver("super").session();
+    const neoSession = (await getDriver("super")).session();
 
     const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status RETURN n;`;
     await neoSession.run(query, { id: id, status: status });
@@ -190,11 +190,11 @@ const supportTicket = async (data: any) => {
 
   async function chat(payload: any) {
     const { subAction, parentVertexId, newMessage } = payload;
-    const neoSession = getDriver("super").session();
+    const neoSession = (await getDriver("super")).session();
     switch (subAction) {
       case "send":
         const data = await newRowMGCall(
-          { driver: getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: neoSession },
           parentVertexId,
           "SupportUser",
           "",
@@ -203,11 +203,11 @@ const supportTicket = async (data: any) => {
         return data;
       case "get":
         const result = await findVertexByIdMGCall(
-          { driver: getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: neoSession },
           parentVertexId,
         );
         const message = await getChildVertexes(
-          { driver: getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: neoSession },
           ["SupportUser"],
           [result.vertex!],
         );
@@ -217,9 +217,9 @@ const supportTicket = async (data: any) => {
 
   async function deleteTicket(payload: any) {
     const { id } = payload;
-    const neoSession = getDriver("super").session();
+    const neoSession = (await getDriver("super")).session();
     await deleteNodeMGCall(
-      { driver: getDriver("super"), session: neoSession },
+      { driver: await getDriver("super"), session: neoSession },
       id,
     );
     return {

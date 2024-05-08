@@ -8,12 +8,12 @@ import {
   Node,
   transactionDetailAdd,
   transactions,
-} from "./graph";
+} from "~/cypher_api/lib/graph";
 import { pipe } from "@mobily/ts-belt";
-import { deleteEdge } from "./Edge";
-import { DBConnection } from "./dbs";
-import { findVertexMGCall } from "../functions/findVertex";
-import { newVertexDBCall } from "../functions/newVertex";
+import { deleteEdge } from "~/cypher_api/lib/Edge";
+import { DBConnection } from "~/cypher_api/lib/dbs";
+import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
+import { newVertexDBCall } from "~/cypher_api/functions/newVertex";
 
 // return a new Vertex
 export function newVertex(
@@ -36,6 +36,7 @@ export function addNewNodeUnsafe(
     ),
   );
 }
+
 // add a new vertex to the graph
 export function addNewVertex(
   graph: Store<IGraph>,
@@ -208,6 +209,7 @@ export function deleteVertex(
     txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
+
 // update vertex id when we receive new id from api response
 export function updateVertexId(
   graph: Store<IGraph>,
@@ -249,6 +251,7 @@ export function updateVertexId(
   );
   return { error: "" };
 }
+
 // helper function to find all the vertex ids of the label
 export function findVertexIdsByLabel(
   graph: Store<IGraph>,
@@ -257,6 +260,7 @@ export function findVertexIdsByLabel(
 ): Id[] {
   return graph.vertexLabelIdMap[label] || [];
 }
+
 export function findVertexByLabelAndUniqueId(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -270,6 +274,7 @@ export function findVertexByLabelAndUniqueId(
   );
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
+
 export function findVertexByLabelAndPks(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -287,6 +292,7 @@ export function findVertexByLabelAndPks(
   });
   return vertexId ? graph.vertexes[vertexId] : undefined;
 }
+
 export function findVertexByLabelAndUniqueIdWithSkip(
   graph: Store<IGraph>,
   setGraph: SetStoreFunction<IGraph>,
@@ -338,6 +344,7 @@ export function findOrCreateNewVertex(
   }
   return existingVertex;
 }
+
 export async function findOrCreateNewVertexMGCall(
   dbConn: DBConnection,
   label: string,

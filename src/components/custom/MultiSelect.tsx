@@ -1,17 +1,16 @@
 import {
+  Component,
   createEffect,
   createSignal,
-  mergeProps,
-  splitProps,
-  onMount,
-  Component,
-  Show,
   For,
   JSX,
+  mergeProps,
+  onMount,
+  Show,
+  splitProps,
 } from "solid-js";
 import "~/css/MultiSelect.css";
 // import { isArray, isInteger, isObject } from 'lodash';
-import { Icon } from "@iconify-icon/solid";
 
 // const DownArrow = 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Angle_down_font_awesome.svg/1200px-Angle_down_font_awesome.svg.png';
 const DownArrow =

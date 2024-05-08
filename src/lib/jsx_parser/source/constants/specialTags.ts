@@ -24,6 +24,7 @@ export default VOID_ELEMENTS;
 export function canHaveChildren(tagName: string): boolean {
   return VOID_ELEMENTS.indexOf(tagName.toLowerCase()) === -1;
 }
+
 export function canHaveWhitespace(tagName: string): boolean {
   return NO_WHITESPACE.indexOf(tagName.toLowerCase()) !== -1;
 }

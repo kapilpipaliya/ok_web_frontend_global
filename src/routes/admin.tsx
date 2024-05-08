@@ -1,9 +1,4 @@
-import {
-  createAsync,
-  redirect,
-  RouteSectionProps,
-  useNavigate,
-} from "@solidjs/router";
+import { RouteSectionProps, useNavigate } from "@solidjs/router";
 import {
   EdgeMap,
   GraphContext,

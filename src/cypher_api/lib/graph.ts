@@ -1,6 +1,6 @@
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { isNumber } from "../utils/utils";
+import { isNumber } from "~/cypher_api/utils/utils";
 import {
   Node as Neo4jNode,
   Relationship as Neo4jRelationship,
@@ -19,6 +19,7 @@ export interface Node extends Partial<Neo4jNode> {
   IN: { [key: string]: Id[] };
   OUT: { [key: string]: Id[] };
 }
+
 export interface NodeUnsafe {
   id?: Id;
   L?: string[];
@@ -67,6 +68,7 @@ export type InsertFn = {
     | "replaceEdgeEnd"
     | "deleteEdge"]?: () => any;
 };
+
 export enum ProcessStatus {
   Unset,
   Ready,
@@ -74,6 +76,7 @@ export enum ProcessStatus {
   AckReceived,
   Processed,
 }
+
 export type TransactionValue = InsertFn & Revert & { data: any };
 export const transactions = new Map<
   number,
@@ -139,6 +142,7 @@ export function compareId(id1: any, id2: any) {
   }
   return id1 == id2;
 }
+
 export function isIdArrayIncludesID(value: Array<any>, id: any) {
   for (const element of value) {
     if (compareId(element, id)) {

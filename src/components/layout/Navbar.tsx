@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, JSX, JSXElement, Show, splitProps } from "solid-js";
+import { JSX, JSXElement, Show, splitProps } from "solid-js";
 import { DisplayComponentProps } from "~/lib/ComponentType";
 import { useNavigate } from "@solidjs/router";
 import "~/css/sideBarSearch.css";

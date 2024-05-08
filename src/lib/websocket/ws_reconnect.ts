@@ -1,12 +1,11 @@
 import { WebSocket } from "isows";
-import { IS_PRODUCTION } from "./ws_events_dispatcher";
-import atom from "../dom_utils";
+import atom from "~/lib/dom_utils";
 
 export class WSBase {
-  private id_ = 0;
-  private readonly path: string;
   socket?: WebSocket | null;
   state = atom<number>(WebSocket.CLOSED);
+  private id_ = 0;
+  private readonly path: string;
   // https://developer.mozilla.org/en-US/docs/Web/API/NavigatorOnLine/onLine
   // private isOnline = window.navigator.onLine;
   private onOpen_: (() => void) | undefined;
@@ -57,13 +56,13 @@ export class WSBase {
     }
     // Temporary we dont use websocket.
     /* this.socket = new WebSocket(this.path, []);
-    // this.socket.onopen = this.onopen;
-    this.socket.addEventListener("open", this.onopen);
-    this.socket.onmessage = this.onMessage_;
-    this.socket.onclose = this.onclose;
-    this.socket.onerror = (e) => {
-      console.log(e);
-    };*/
+        // this.socket.onopen = this.onopen;
+        this.socket.addEventListener("open", this.onopen);
+        this.socket.onmessage = this.onMessage_;
+        this.socket.onclose = this.onclose;
+        this.socket.onerror = (e) => {
+          console.log(e);
+        };*/
     return this.socket;
   }
 
@@ -81,13 +80,17 @@ export class WSBase {
     }
   }
 
+  setOnOpen(onOpen: () => void) {
+    this.onOpen_ = onOpen;
+  }
+
+  setOnClose(onClose: () => void) {
+    this.onClose_ = onClose;
+  }
+
   private onopen(evt: Event) {
     this.state(WebSocket.OPEN);
     this.onOpen_?.();
-  }
-
-  setOnOpen(onOpen: () => void) {
-    this.onOpen_ = onOpen;
   }
 
   private onclose(ev: CloseEvent) {
@@ -103,10 +106,6 @@ export class WSBase {
         this.setupConnection();
       }
     }, waitMs);
-  }
-
-  setOnClose(onClose: () => void) {
-    this.onClose_ = onClose;
   }
 
   private onerror(event: Event) {

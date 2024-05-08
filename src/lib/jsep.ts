@@ -1,11 +1,11 @@
 import jsep from "jsep";
 //import { eval as eval1} from 'expression-eval';
-import { IdAttr, Vertex } from "./graph/graph";
+import { IdAttr, Vertex } from "~/lib/graph/graph";
 import { path } from "rambda";
-import { calculateFilter, getTextValue } from "./graph/get/sync/Traverse";
-import { findVertexIdsByLabel } from "./graph/mutate/Vertex";
-import { jsonata } from "./jsonata/jsonata";
-import { isObject } from "./Utils";
+import { calculateFilter, getTextValue } from "~/lib/graph/get/sync/Traverse";
+import { findVertexIdsByLabel } from "~/lib/graph/mutate/Vertex";
+import { jsonata } from "~/lib/jsonata/jsonata";
+import { isObject } from "~/lib/Utils";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -457,6 +457,7 @@ binops[":-"] = (vertexes1, projection, context) => {
     return;
   }
 };
+
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
@@ -477,6 +478,7 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   }
   return getTextValue(path(projection, vertex));
 }
+
 binops["::"] = projectedValueBinOps;
 unops["->"] = (collection, context) => {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
@@ -559,6 +561,7 @@ unops["ids:"] = (edgeType: string | number | string[] | Vertex[], context) => {
 unops["T:"] = (value: any) => {
   return getTextValue(value);
 };
+
 function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
@@ -578,6 +581,7 @@ function projectedValueUnOps(projection: any, context: any) {
   }
   return getTextValue(path(projection, vertex));
 }
+
 unops["::"] = projectedValueUnOps;
 
 // const parse_tree = jsep('(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)');

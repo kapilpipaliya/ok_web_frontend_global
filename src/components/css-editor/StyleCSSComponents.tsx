@@ -19,6 +19,7 @@ import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssC
 import { CustomTooltip } from "~/components/custom/Tooltip";
 import { CssEditorContext, sizeTypes } from "./cssEditorContext";
 import "~/css/componentUtilCSS.css";
+
 export const StyleCSSComponents = () => {
   const AllSVGIcon = () => (
     <svg

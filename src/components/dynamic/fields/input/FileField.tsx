@@ -55,6 +55,7 @@ export const FileField = (props: Properties) => {
         setState({ error: `Upload failed: ${xhr.statusText}` });
       }
     }
+
     function progressFunction(evt: ProgressEvent<EventTarget>) {
       if (evt.lengthComputable) {
         setProgressBar({ max: evt.total, value: evt.loaded });

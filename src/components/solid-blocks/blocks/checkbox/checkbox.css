@@ -59,14 +59,14 @@
   cursor: pointer;
 }
 
-.checkbox-wrapper input[type="checkbox"]:checked+svg .background {
+.checkbox-wrapper input[type="checkbox"]:checked + svg .background {
   fill: rgb(51, 119, 204);
 }
 
-.checkbox-wrapper input[type="checkbox"]:checked+svg .stroke {
+.checkbox-wrapper input[type="checkbox"]:checked + svg .stroke {
   stroke-dashoffset: 0;
 }
 
-.checkbox-wrapper input[type="checkbox"]:checked+svg .check {
+.checkbox-wrapper input[type="checkbox"]:checked + svg .check {
   stroke-dashoffset: 0;
 }

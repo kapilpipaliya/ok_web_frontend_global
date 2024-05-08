@@ -6,11 +6,11 @@ import {
   validatePassword,
   validateUsername,
 } from "~/lib/Utils";
-import { useNavigate, A } from "@solidjs/router";
+import { A, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
-import { LoadingContext } from "~/lib/global";
+import { LoadingContext } from "~/lib/contexts";
 import logo from "~/assets/graphics/logo.png";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";

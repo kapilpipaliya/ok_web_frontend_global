@@ -3,14 +3,17 @@
 *:after {
   box-sizing: border-box;
 }
+
 input,
 textarea,
 select {
   font: inherit;
 }
+
 a {
   color: var(--text);
 }
+
 p,
 h1,
 h2,

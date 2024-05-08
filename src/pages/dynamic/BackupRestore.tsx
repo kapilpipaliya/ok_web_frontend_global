@@ -23,12 +23,12 @@ import {
 } from "~/lib/graph/mutate/Vertex";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
-  getParentVertex,
+  APP_BASE_URL,
   getChildVertex,
   getId,
+  getParentVertex,
   newRow,
   Record,
-  APP_BASE_URL,
 } from "~/lib/Utils";
 import { getCompPropsMap, getFormMetaData } from "~/lib/graph/mutate/Record";
 import {
@@ -999,15 +999,15 @@ OUT:
       commitTxn(txnId, Ws);
 
       /*
-             transform collection not found vendorBill
-             transform collection not found vendorCredit
-             transform collection not found vendorPayment
-             transform collection not found cashRefund
-             transform collection not found cashSale
-             transform collection not found creditMemo
-             transform collection not found customSale
-             2 transform collection not found customPurchase
-            */
+                   transform collection not found vendorBill
+                   transform collection not found vendorCredit
+                   transform collection not found vendorPayment
+                   transform collection not found cashRefund
+                   transform collection not found cashSale
+                   transform collection not found creditMemo
+                   transform collection not found customSale
+                   2 transform collection not found customPurchase
+                  */
 
       // because multiple transactions not working splitting it
       // commitTxn(txnId, Ws);

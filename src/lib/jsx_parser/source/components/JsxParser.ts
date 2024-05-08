@@ -58,6 +58,7 @@ export default class JsxParser {
     renderInWrapper: true,
     renderUnrecognized: () => null,
   };
+  private ParsedChildren: ParsedTree = null;
 
   constructor(props) {
     const newProps = Object.assign({}, JsxParser.defaultProps, props);
@@ -67,7 +68,22 @@ export default class JsxParser {
     }
   }
 
-  private ParsedChildren: ParsedTree = null;
+  render = (
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
+  ): JSX.Element => {
+    const jsx = (this.props.jsx || "").trim().replace(/<!DOCTYPE([^>]*)>/g, "");
+    this.ParsedChildren = this.#parseJSX(graph, setGraph, jsx, {
+      parent: this.props.parent,
+    });
+    const className = [
+      ...new Set(["jsx-parser", ...String(this.props.className).split(" ")]),
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return this.ParsedChildren;
+  };
 
   #parseJSX = (
     graph: Store<GraphInterface>,
@@ -697,23 +713,6 @@ export default class JsxParser {
     } else {
       console.log("not handled", children);
     }
-  };
-
-  render = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-  ): JSX.Element => {
-    const jsx = (this.props.jsx || "").trim().replace(/<!DOCTYPE([^>]*)>/g, "");
-    this.ParsedChildren = this.#parseJSX(graph, setGraph, jsx, {
-      parent: this.props.parent,
-    });
-    const className = [
-      ...new Set(["jsx-parser", ...String(this.props.className).split(" ")]),
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    return this.ParsedChildren;
   };
 }
 /* eslint-enable consistent-return */

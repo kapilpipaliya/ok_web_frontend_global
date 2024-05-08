@@ -1,32 +1,20 @@
-import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
+import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
-import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  JSX,
-  lazy,
-  Show,
-  useContext,
-} from "solid-js";
+import { createEffect, createSignal, JSX, Show, useContext } from "solid-js";
 import { getNewGraphId, GraphContext } from "~/lib/graph/graph";
 import Dismiss from "solid-dismiss";
 import { Navbar } from "../../components/layout/Navbar";
+import { APP_BASE_URL, PageContext } from "~/lib/Utils";
 import {
-  APP_BASE_URL,
-  PageContext,
-  validateEmail,
-  validatePassword,
-} from "~/lib/Utils";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/Vertex";
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/Vertex";
 import "~/css/base.css";
-import { Icon } from "@iconify-icon/solid";
 import "~/css/modal.css";
-import { getUser, logout } from "~/lib/auth/auth";
-import { createStore } from "solid-js/store";
+import { getUser } from "~/lib/auth/auth";
 import { toast } from "solid-toast";
-import { LoadingContext } from "~/lib/global";
+import { LoadingContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
 import Sidebar from "~/components/layout/Sidebar";
 import postAPI from "~/lib/auth/PostApi";
@@ -53,8 +41,6 @@ export const Dashboard = (props: { children?: JSX.Element }) => {
   const [signUpPage, setSignUpPage] = createSignal(
     location.pathname.includes("/auth/signup"),
   );
-
-
 
   createEffect(() => {
     const path = location.pathname;
@@ -135,8 +121,7 @@ const DropdownMenu = () => {
     setIsOpen(false);
   };
   getUser().then((value) => {
-    setGraph('member', value);
-
+    setGraph("member", value);
   });
   const onLogOut = async () => {
     return await postAPI(API.logOutUrl, {});
@@ -182,9 +167,11 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
-            }; pointer-events: ${isOpen() ? "auto" : "none"
-            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
+            isOpen() ? 1 : 0
+          }; pointer-events: ${
+            isOpen() ? "auto" : "none"
+          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
@@ -303,7 +290,6 @@ const DropdownMenu = () => {
                 </li>
               </div>
             )}
-
           </ul>
         </div>
       </Dismiss>

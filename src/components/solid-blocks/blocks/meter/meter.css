@@ -8,6 +8,7 @@
   position: relative;
   vertical-align: -0.125em;
 }
+
 [role="meter"].sb-meter > svg {
   fill: var(--primary);
   height: 100%;

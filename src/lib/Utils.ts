@@ -1,13 +1,13 @@
 import { batch, createContext, onCleanup, useContext } from "solid-js";
-import { ServerEventsDispatcher } from "./websocket/ws_events_dispatcher";
-import { addNewEdge, deleteEdge, newEdge } from "./graph/mutate/Edge";
+import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
 import {
   addNewVertex,
   deleteVertex,
   findVertexByLabelAndUniqueIdWithSkip,
   mergeVertexProperties,
   newVertex,
-} from "./graph/mutate/Vertex";
+} from "~/lib/graph/mutate/Vertex";
 import {
   commitTxn,
   getNewGraphId,
@@ -18,14 +18,14 @@ import {
   IdAttr,
   revertTransaction,
   Vertex,
-} from "./graph/graph";
-import { evaluate } from "./jsep";
+} from "~/lib/graph/graph";
+import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { klona } from "klona/json";
-import { setSelectionValue } from "../components/dynamic/fields/static/SelectionUtils";
-import { getToEdge } from "./CommonUtils/getToEdge";
-import { AttrsAdminTableData } from "./apiAdmin";
-import { FieldAttribute, FormMetaData } from "./Type";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export const APP_BASE_URL = "/admin";
@@ -83,6 +83,7 @@ export const getTextColumnValue = (value: any) => {
     // Check if the value is not null and its type is 'object'
     return value !== null && typeof value === "object";
   }
+
   if (value === true) {
     return "True";
   } else if (value === false) {
@@ -144,6 +145,7 @@ export function validatePassword(password: string) {
 
   return undefined; // No errors, password is valid
 }
+
 export function replaceExpressionToLabel(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -847,67 +849,67 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
 
       /*      {
-              name: "Child",
-              component: "Table2",
-              tab: "Child",
-              attributes: [
-                {
-                  name: "coll",
-                  component: "SelectBox",
-                  props: {
+                    name: "Child",
+                    component: "Table2",
+                    tab: "Child",
+                    attributes: [
+                      {
+                        name: "coll",
+                        component: "SelectBox",
+                        props: {
 
-                    collection: "g:'Coll'",
-                  },
-                },
-                {
-                  name: "displayName",
-                  component: "TextBox",
-                  props: {
-                    onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-                  }
-                },
-                {
-                  name: "name",
-                  component: "TextBox",
-                },
-                {
-                  name: "tab",
-                  component: "SelectBox",
-                  props: {
-
-                    collection: "-CollChild->$0Tab",
-                  },
-                },
-                {
-                  name: "group",
-                  component: "SelectBox",
-                  props: {
-                    collection: "-CollChild->$0Group",
-
-                  },
-                },
-                {
-                  name: "Prop",
-                  displayName: "Property",
-                  component: "Table2",
-                  attributes: [
-                    {
-                      name: "name",
-                      component: "SelectBox",
-                      props: {
-                        displayExpr: "::'P.name'",
-                        collection: "g:'Comp[Table]'->$0Prop",
+                          collection: "g:'Coll'",
+                        },
                       },
-                    },
-                    {
-                      name: "value",
-                      meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                      component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-                    },
-                  ],
-                },
-              ],
-            },*/
+                      {
+                        name: "displayName",
+                        component: "TextBox",
+                        props: {
+                          onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+                        }
+                      },
+                      {
+                        name: "name",
+                        component: "TextBox",
+                      },
+                      {
+                        name: "tab",
+                        component: "SelectBox",
+                        props: {
+
+                          collection: "-CollChild->$0Tab",
+                        },
+                      },
+                      {
+                        name: "group",
+                        component: "SelectBox",
+                        props: {
+                          collection: "-CollChild->$0Group",
+
+                        },
+                      },
+                      {
+                        name: "Prop",
+                        displayName: "Property",
+                        component: "Table2",
+                        attributes: [
+                          {
+                            name: "name",
+                            component: "SelectBox",
+                            props: {
+                              displayExpr: "::'P.name'",
+                              collection: "g:'Comp[Table]'->$0Prop",
+                            },
+                          },
+                          {
+                            name: "value",
+                            meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+                            component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                          },
+                        ],
+                      },
+                    ],
+                  },*/
       {
         name: "Transform",
         component: "Table2",
@@ -1758,4 +1760,11 @@ export function getId(input: string) {
   input = input.toLowerCase();
   // TODO: letter make pascalCase letter
   return input;
+} // ts-belt
+export function isNumber(i: any) {
+  if ("number" == typeof i) {
+    return !Number.isNaN(i);
+  } else {
+    return !1;
+  }
 }

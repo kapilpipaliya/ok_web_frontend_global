@@ -5,6 +5,7 @@ import { Icon } from "@iconify-icon/solid";
 import logos from "~/assets/graphics/logo.png";
 import "~/css/style.css";
 import "~/css/krd.css";
+
 export default function Header() {
   const navigate = useNavigate();
   return (

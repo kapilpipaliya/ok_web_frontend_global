@@ -1,6 +1,6 @@
-import { getValueFromVertexOrKey, capitalizeFirstLetter } from "../Utils";
+import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
 
-import { Vertex, IdAttr } from "../graph/graph";
+import { IdAttr, Vertex } from "~/lib/graph/graph";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");

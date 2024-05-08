@@ -1,9 +1,11 @@
 .sb-radio {
   cursor: pointer;
 }
+
 .sb-radio.disabled {
   color: var(--border-color);
 }
+
 .sb-radio input[type="radio"] {
   appearance: none;
   cursor: pointer;
@@ -15,6 +17,7 @@
   line-height: 1.125em;
   position: relative;
 }
+
 .sb-radio input[type="radio"]:before {
   content: " ";
   position: absolute;
@@ -24,21 +27,27 @@
   transform: translate(-50%, -50%);
   color: var(--primary);
 }
+
 .sb-radio input[type="radio"]:checked:before {
   content: "\25cf";
 }
+
 .sb-radio input[type="radio"]:disabled {
   background: var(--border-color);
 }
+
 .sb-radio input[type="radio"][aria-invalid] {
   border-color: var(--error-text);
 }
+
 .sb-radio input[type="radio"][aria-invalid]:before {
   color: var(--error-text);
 }
+
 .sb-radio:has(input[type="radio"][aria-invalid]) {
   color: var(--error-text);
 }
+
 .sb-radiogroup[role="radiogroup"] {
   display: inline-block;
 }

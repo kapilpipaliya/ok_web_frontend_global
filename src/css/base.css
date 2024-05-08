@@ -497,7 +497,7 @@ Make elements with the HTML hidden attribute stay hidden by default.
   opacity: 0.1;
 }
 
-.fade-modal-enter>div {
+.fade-modal-enter > div {
   transform: translateX(50px);
 }
 
@@ -505,7 +505,7 @@ Make elements with the HTML hidden attribute stay hidden by default.
   opacity: 1;
 }
 
-.fade-modal-enter-to>div {
+.fade-modal-enter-to > div {
   transform: translateX(0);
 }
 
@@ -513,7 +513,7 @@ Make elements with the HTML hidden attribute stay hidden by default.
   opacity: 1;
 }
 
-.fade-modal-exit>div {
+.fade-modal-exit > div {
   transform: translateX(0);
 }
 
@@ -521,7 +521,7 @@ Make elements with the HTML hidden attribute stay hidden by default.
   opacity: 0;
 }
 
-.fade-modal-exit-to>div {
+.fade-modal-exit-to > div {
   transform: translateX(50px);
 }
 
@@ -531,8 +531,8 @@ Make elements with the HTML hidden attribute stay hidden by default.
   transition: opacity 200ms;
 }
 
-.fade-modal-enter-to>div,
-.fade-modal-exit>div,
-.fade-modal-exit-to>div {
+.fade-modal-enter-to > div,
+.fade-modal-exit > div,
+.fade-modal-exit-to > div {
   transition: transform 200ms;
 }

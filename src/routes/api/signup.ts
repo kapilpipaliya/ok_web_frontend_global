@@ -1,7 +1,6 @@
 import { APIEvent } from "@solidjs/start/dist/server";
-import { Driver, Session } from "neo4j-driver";
 import { TransactionPromise } from "neo4j-driver-core";
-import { getDriver, isIntegerId } from "~/lib/global";
+import { getDriver, isIntegerId } from "~/lib/server/driver";
 import { getSession } from "~/lib/auth/_server";
 import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { getGraph } from "~/cypher_api/lib/graph";
@@ -12,7 +11,7 @@ import postAPI from "~/lib/auth/PostApi";
 
 export async function POST({ request }: APIEvent) {
   const { username, email, password } = await request.json();
-  const session = getDriver("super").session();
+  const session = (await getDriver("super")).session();
   const tx = session.beginTransaction();
 
   try {
@@ -111,7 +110,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
 
   // let userDriver: Driver;
   // if (!getDriver(username)) {
-  let userDriver = getDriver(driverPort);
+  let userDriver = await getDriver(driverPort);
   // }
   await new Promise((resolve) => setTimeout(() => resolve(""), 15000));
 

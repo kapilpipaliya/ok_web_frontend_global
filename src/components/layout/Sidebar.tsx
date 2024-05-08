@@ -1,27 +1,32 @@
 import { useLocation } from "@solidjs/router";
 import {
-  For,
-  Show,
   createEffect,
   createMemo,
   createSignal,
   createUniqueId,
+  For,
+  JSX,
+  Show,
   untrack,
   useContext,
-  JSX,
 } from "solid-js";
-import { getSublistRows, getSublistRowsForType, Record } from "~/lib/Utils";
-import { getChildVertex } from "~/lib/Utils";
+import {
+  getChildVertex,
+  getSublistRows,
+  getSublistRowsForType,
+  Record,
+} from "~/lib/Utils";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
-import treeViewFilter from "~/lib/treeViewFilter";
+
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import "~/css/sideBarSearch.css";
 import { Store } from "solid-js/store"; // Import the CSS file
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/sidebarLogo.svg";
+
 export interface navbarDataI {
   children: navbarDataI[];
   expanded: boolean;
@@ -36,6 +41,19 @@ function getIds(data: navbarDataI[], ids: string[] = []) {
     getIds(e.children, ids);
   }
   return ids;
+}
+
+function treeViewFilter(
+  nodes: navbarDataI[],
+  cb: (node: navbarDataI) => boolean,
+): any {
+  return nodes
+    .map((node) => {
+      if (cb(node)) return node;
+      const children = treeViewFilter(node.children || [], cb);
+      return children.length && { ...node, children };
+    })
+    .filter(Boolean);
 }
 
 function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
@@ -79,6 +97,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   });
   const activeLinks = () =>
     searchData().find((link) => link.name === activeSection() && link.children);
+
   function handleSearch(input: string) {
     setSearchTerm(input);
 

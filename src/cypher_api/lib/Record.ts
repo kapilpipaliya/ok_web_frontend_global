@@ -6,7 +6,7 @@ import {
   IGraph,
   Node,
   revertTransaction,
-} from "./graph";
+} from "~/cypher_api/lib/graph";
 import { klona } from "klona/json";
 import {
   addNewVertex,
@@ -15,7 +15,7 @@ import {
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
-} from "./Vertex";
+} from "~/cypher_api/lib/Vertex";
 import { batch, createContext, onCleanup, untrack } from "solid-js";
 import {
   getChildVertex,
@@ -25,24 +25,24 @@ import {
   getParentVertex,
   getSelectionOptions,
   getToEdge,
-} from "./Traverse";
-import { removeUndefinedProperties } from "../utils/functions";
-import { addNewEdge, deleteEdge, newEdge } from "./Edge";
-import { setSelectionValue } from "../components/input/SelectInputField";
+} from "~/cypher_api/lib/Traverse";
+import { removeUndefinedProperties } from "~/cypher_api/utils/functions";
+import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/Edge";
+import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 import {
   capitalizeFirstLetter,
   getValueFromVertexOrKey,
   groupBy,
   isObject,
-} from "../utils/utils";
-import { AdminAttrKeys, AttrsTableData } from "./api";
-import { AttrsAdminTableData } from "./apiAdmin";
+} from "~/cypher_api/utils/utils";
+import { AdminAttrKeys, AttrsTableData } from "~/cypher_api/lib/api";
+import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "./dbs";
-import { findVertexMGCall } from "../functions/findVertex";
-import { getOutEdges } from "../functions/getOutEdges";
-import { deleteRelationShipMGCall } from "../functions/deleteRelationShip";
-import { deleteNodeMGCall } from "../functions/deleteNode";
+import { DBConnection } from "~/cypher_api/lib/dbs";
+import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
+import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
+import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
+import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 
 export interface FieldAttribute {
   name: string;
@@ -259,10 +259,13 @@ export async function getCollAttrs(
   attr.props = collProps;
   return { error: false, attr };
 }
+
 export let isUpdatingInput = false;
+
 export function setUpdateStatus(value: boolean) {
   isUpdatingInput = value;
 }
+
 const getCollectionOneLevelAttrs = async (
   dbConn: DBConnection,
   collVertex: Node,
@@ -417,6 +420,7 @@ export async function getPkForCollection(
     (await getChildVertexes(dbConn, ["$0Pk"], [collVertex])).vertexes || [];
   return pks.map((pk) => pk.P.name);
 }
+
 export async function getNameKeyForCollection(
   dbConn: DBConnection,
   collVertex: Node,
@@ -1158,6 +1162,7 @@ export function getStringComponentLocal(
   return getChildVertexLocal(graph, setGraph, ["$0Default"], attrDataTypeVertex)
     .vertex;
 }
+
 export async function getStringComponent(
   dbConn: DBConnection,
   attrDataTypeVertex?: Node,

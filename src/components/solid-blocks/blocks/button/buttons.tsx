@@ -1,5 +1,6 @@
 import { createSignal, splitProps } from "solid-js";
 import "./button.css";
+
 const CustomButton = (props) => {
   const [local, field] = splitProps(props, ["class"]);
   const [variant] = createSignal(props.variant || "contained");

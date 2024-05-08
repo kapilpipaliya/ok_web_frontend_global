@@ -8,6 +8,7 @@
   margin: 0;
   padding: 0;
 }
+
 .sb-modal[role="dialog"]:not(.without-overlay):before {
   content: "";
   position: absolute;
@@ -16,6 +17,7 @@
   opacity: 0.25;
   z-index: var(--stack-overlay);
 }
+
 .sb-modal[role="dialog"] .sb-modal-content {
   background: var(--background);
   border-radius: var(--border-radius);
@@ -23,11 +25,13 @@
   padding: 0.5em;
   z-index: var(--stack-modal);
 }
+
 .sb-modal[role="dialog"] .sb-modal-header {
   display: flex;
   justify-content: space-between;
   font-weight: 700;
 }
+
 .sb-modal[role="dialog"] .sb-modal-footer {
   display: flex;
   justify-content: flex-end;

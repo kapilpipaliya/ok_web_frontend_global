@@ -4,6 +4,7 @@ summary.sb-accordion-header {
   cursor: pointer;
   list-style: none;
 }
+
 summary.sb-accordion-header:before {
   box-sizing: content-box;
   content: var(--accordion-icon);
@@ -16,6 +17,7 @@ summary.sb-accordion-header:before {
   transition: transform 0.25s linear;
   width: 0.75em;
 }
+
 details.sb-accordion[open] > summary.sb-accordion-header:before {
   transform: rotateX(0deg);
 }

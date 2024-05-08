@@ -536,9 +536,11 @@ describe("JsxParser Component", () => {
           componentDidUpdate() {
             updates();
           }
+
           componentWillUnmount() {
             unmounts();
           }
+
           render() {
             return "Custom element!";
           }
@@ -702,9 +704,9 @@ describe("JsxParser Component", () => {
         <JsxParser
           jsx={
             '\
-						<h1>Title</h1>\
-						<div class="foo">Bar</div>\
-					'
+                                    <h1>Title</h1>\
+                                    <div class="foo">Bar</div>\
+                                '
           }
         />,
       );

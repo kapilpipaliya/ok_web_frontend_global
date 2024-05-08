@@ -1,8 +1,8 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 import { getNewGraphId, GraphInterface, Vertex } from "~/lib/graph/graph";
-import { getToEdge } from "~/lib/CommonUtils/getToEdge";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
 import { SetStoreFunction, Store } from "solid-js/store";
+import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 
 export function setSelectionValue(
   txnId: number,
@@ -45,6 +45,7 @@ export function setSelectionValue(
     if (insertEdgeResult.error) alert(insertEdgeResult.error);
   }
 }
+
 function vertexOutEdgeContainVertex(
   vertex: Vertex,
   type: string,

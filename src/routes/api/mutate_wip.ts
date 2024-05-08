@@ -1,4 +1,4 @@
-import neo4j from "neo4j-driver";
+import { Session } from "neo4j-driver";
 
 interface Json {
   [key: string]: any;
@@ -207,8 +207,6 @@ function addFailure(response: any, event: WsEvent, message: string): any {
   response.errors.push({ event, message });
   return response;
 }
-
-import { Session } from "neo4j-driver";
 
 interface WsEvent {
   // Define based on usage

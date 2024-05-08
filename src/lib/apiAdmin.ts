@@ -1,8 +1,8 @@
-import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/mutate/Vertex";
 
-import { FormMetaData } from "./Type";
-import { IFormContext } from "./Utils";
-import { GraphContext } from "./graph/graph";
+import { FormMetaData } from "~/lib/Type";
+import { IFormContext } from "~/lib/Utils";
+import { GraphContext } from "~/lib/graph/graph";
 import { useContext } from "solid-js";
 
 export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
