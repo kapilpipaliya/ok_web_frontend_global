@@ -1,19 +1,19 @@
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
-import ATTRIBUTES from "../constants/attributeNames";
 import {
   canHaveChildren,
   canHaveWhitespace,
   containerTags,
-} from "../constants/specialTags";
-import { randomHash } from "../helpers/hash";
-import { parseStyle } from "../helpers/parseStyle";
-import { resolvePath } from "../helpers/resolvePath";
+} from "~/lib/jsx_parser/source/constants/specialTags";
+import { randomHash } from "~/lib/jsx_parser/source/helpers/hash";
+import { parseStyle } from "~/lib/jsx_parser/source/helpers/parseStyle";
+import { resolvePath } from "~/lib/jsx_parser/source/helpers/resolvePath";
 import { JSX } from "solid-js";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
-import { GraphInterface, Vertex } from "../../../graph/graph";
-import { componentDrag, setPropertyValueGlobal } from "../../../pageStore";
+import { componentDrag, setPropertyValueGlobal } from "~/lib/pageStore";
+import { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { SetStoreFunction, Store } from "solid-js/store";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import attributeNames from "~/lib/jsx_parser/source/constants/attributeNames";
 
 type ParsedJSX = JSX.Element | boolean | string;
 type ParsedTree = ParsedJSX | ParsedJSX[] | null;
@@ -534,7 +534,7 @@ export default class JsxParser {
       ) => {
         if (expr.type === "JSXAttribute") {
           const rawName = expr.name.name;
-          const attributeName = ATTRIBUTES[rawName] || rawName;
+          const attributeName = attributeNames[rawName] || rawName;
           // if the value is null, this is an implicitly "true" prop, such as readOnly
           let value = this.#parseExpression(graph, setGraph, expr, {
             ...scope,

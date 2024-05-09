@@ -6,17 +6,17 @@ import {
   IdAttr,
   IGraph,
   Node,
-} from "../lib/graph";
+} from "~/cypher_api/lib/graph";
 
 import {
   addNewVertex,
   findVertexByLabelAndUniqueId,
   newVertex,
   replaceVertexProperties,
-} from "../lib/Vertex";
-import { setSelectionValue } from "../components/input/SelectInputField";
+} from "~/cypher_api/lib/vertex";
+import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 
-import { getChildVertex, getParentVertex } from "../lib/Traverse";
+import { getChildVertex, getParentVertex } from "~/cypher_api/lib/traverse";
 import {
   FormMetaData,
   getCompPropsMap,
@@ -24,17 +24,17 @@ import {
   getId,
   newRow,
   Record,
-} from "../lib/Record";
+} from "~/cypher_api/lib/record";
 import {
   importRecordWithYAMLSchema,
   onDataDirectoryImportClick,
   updateImportRecord,
-} from "../lib/Import";
+} from "~/cypher_api/lib/Import";
 
-import { AttrsAdminTableData } from "../lib/apiAdmin";
-import { NsMetaJson } from "./NSMetaDataType";
+import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
+import { NsMetaJson } from "~/cypher_api/pages/NSMetaDataType";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "../lib/dbs";
+import { DBConnection } from "~/cypher_api/lib/dbs";
 
 let componentPropsInputRef: HTMLInputElement;
 let importNSDataInputRef: HTMLInputElement;
@@ -1100,15 +1100,15 @@ const importNSData = () => {
     commitTxn(txnId, Ws);
 
     /*
-         transform collection not found vendorBill
-         transform collection not found vendorCredit
-         transform collection not found vendorPayment
-         transform collection not found cashRefund
-         transform collection not found cashSale
-         transform collection not found creditMemo
-         transform collection not found customSale
-         2 transform collection not found customPurchase
-        */
+             transform collection not found vendorBill
+             transform collection not found vendorCredit
+             transform collection not found vendorPayment
+             transform collection not found cashRefund
+             transform collection not found cashSale
+             transform collection not found creditMemo
+             transform collection not found customSale
+             2 transform collection not found customPurchase
+            */
 
     // because multiple transactions not working splitting it
     // commitTxn(txnId, Ws);

@@ -1,4 +1,12 @@
-import { createSignal, For, Match, Show, Switch, untrack, useContext } from "solid-js";
+import {
+  createSignal,
+  For,
+  Match,
+  Show,
+  Switch,
+  untrack,
+  useContext,
+} from "solid-js";
 import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
@@ -8,7 +16,6 @@ import "~/css/tab.css";
 import { createStore } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 import { validateEmail, validatePassword } from "~/lib/Utils";
-import { toast } from "solid-toast";
 import {
   Table,
   TableBody,
@@ -25,7 +32,12 @@ import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
 import { GraphContext } from "~/lib/graph/graph";
 import { equals } from "rambda";
-import { deleteSupportTicketCall, getChatsSupportCall, resetPasswordCall, sendChatsSupportCall } from "~/components/api/api_functions";
+import {
+  deleteSupportTicketCall,
+  getChatsSupportCall,
+  resetPasswordCall,
+  sendChatsSupportCall,
+} from "~/components/api/api_functions";
 
 function Settings() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -155,13 +167,16 @@ function Settings() {
           updatedData[key] = profileData[key];
         }
       }
-      const payload = { panel: 'profile', userId: profileData.id, ...updatedData }
+      const payload = {
+        panel: "profile",
+        userId: profileData.id,
+        ...updatedData,
+      };
       return await postAPI(API.profileUrl, payload);
     };
 
-
     const onClickSave = async () => {
-      if(equals(profileData,originalProfileData)){
+      if (equals(profileData, originalProfileData)) {
         showErrorToast("No changes to save");
         return false;
       }
@@ -192,11 +207,11 @@ function Settings() {
               });
               loadContactData();
               setOriginalProfileData(profileData); // Set original data
-              setGraph('member', data)
+              setGraph("member", data);
             });
           }
         },
-        onError: (error) => console.error("API call failed:", error)
+        onError: (error) => console.error("API call failed:", error),
       });
     };
     return (
@@ -434,7 +449,6 @@ function Settings() {
       }));
     };
 
-   
     const onClickSave = async () => {
       const { currentPassword, newPassword, confirmPassword } = passwordData;
       if (!currentPassword.trim()) {
@@ -469,7 +483,7 @@ function Settings() {
         return false;
       }
       await showLoadingToast({
-        promise: resetPasswordCall(passwordData,profileData),
+        promise: resetPasswordCall(passwordData, profileData),
         loadMessage: "Updating Password...",
         successMessage: "Password reset successfully",
         onSuccess: (value) => {
@@ -578,14 +592,15 @@ function Settings() {
           personal: true,
         };
 
-        await sendChatsSupportCall(parentVertexId,newMessage).then((e)=>{
-          setMessages([...messages()!, newMessage]);
-          setInputMessage("");
-          setTimeout(fakeReply, 1000);
-        }).catch((e)=>{
-          showErrorToast('Issue in sending message. Please try again later')
-        });
-        
+        await sendChatsSupportCall(parentVertexId, newMessage)
+          .then((e) => {
+            setMessages([...messages()!, newMessage]);
+            setInputMessage("");
+            setTimeout(fakeReply, 1000);
+          })
+          .catch((e) => {
+            showErrorToast("Issue in sending message. Please try again later");
+          });
       }
     };
 
@@ -611,7 +626,11 @@ function Settings() {
 
       const getMessages = async () => {
         const message = await getChatsSupportCall(props.id);
-        setMessages(message.vertexes.length > 0 ? message.vertexes.map((v: any) => v.properties) : []);
+        setMessages(
+          message.vertexes.length > 0
+            ? message.vertexes.map((v: any) => v.properties)
+            : [],
+        );
         scrollToBottom();
       };
 
@@ -646,10 +665,7 @@ function Settings() {
               }}
               style="overflow-y: auto; padding: 10px;"
             >
-              <For
-                each={messages()}
-
-              >
+              <For each={messages()}>
                 {(msg: any) => (
                   <>
                     <div class="rel mb:10 mt:10 @fade|.5s">
@@ -740,7 +756,7 @@ function Settings() {
           const data = contactList().filter((c: any) => c.id != id);
           setContactList(data);
         },
-      })
+      });
       setIsDataFetching(false);
     };
 

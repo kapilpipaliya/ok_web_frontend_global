@@ -298,12 +298,3 @@ export function updateEdgeId(
   setGraph("edges", oldEdgeId, undefined);
   return { error: "" };
 }
-
-export function getOutEdgeIdsOfType(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
-  id: Id | string,
-  edgeLabel: string,
-): Id[] {
-  return graph.vertexes[id].OUT[edgeLabel] || [];
-}

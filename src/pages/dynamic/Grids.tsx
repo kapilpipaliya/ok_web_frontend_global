@@ -37,7 +37,6 @@ import {
   collectionNameDisplayExpr,
   selectedValue,
 } from "~/components/dynamic/fields/input/SelectInputField";
-import { getFormApiFromForm } from "~/lib/graph/mutate/Record";
 import {
   APP_BASE_URL,
   breadcrumbData,
@@ -48,10 +47,7 @@ import {
   PageContext,
   Record,
 } from "~/lib/Utils";
-import {
-  deleteVertex,
-} from "~/lib/graph/mutate/Vertex";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
+import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
@@ -63,6 +59,8 @@ import Dismiss from "solid-dismiss";
 import { SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
 import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
+import { getFormApiFromForm } from "~/lib/graph/get/sync/graph_functions";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 interface AbstractSingleGridProps {
   tableId: string;
@@ -401,7 +399,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     findVertexByLabelAndUniqueId("Coll", IdAttr, props.tableId, graph),
   );
   const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId("Nav", "name", "main", graph);
+    const nav = findVertexByLabelAndUniqueId("Nav", "name", "Navigation", graph);
     if (!nav) return;
 
     const record = new Record({ ws: undefined });
@@ -427,7 +425,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   return (
     <>
       <PageHeader
-        title={`${navData()?.child || nestedName()}`}
+        title={`${navData()?.child || nestedName()||''}`}
         breadcrumb={[
           ...breadcrumbData,
           { name: navData()?.parent },
@@ -475,7 +473,7 @@ export function getParentFromNav(navData: any) {
     let childName = null;
     if (value.children) {
       value.children.forEach((child) => {
-        if (child.href === param.pathname) {
+        if (child.href && child.href === param.pathname) {
           data = child;
           childName = child.name;
         }
@@ -489,6 +487,27 @@ export function getParentFromNav(navData: any) {
   });
 
   return result;
+}
+
+function enrichNavigationData(data, parent = null) {
+  return data.map((node) => {
+    // Construct the list of child names
+    let childrenList = node.children.map(child => child.name);
+
+    // Add parent name and childrenList to each node
+    const enrichedNode = {
+      ...node,
+      parent: parent ? parent.name : "None", // If no parent, say "None"
+      childrenList: childrenList.length > 0 ? childrenList : "No children" // If no children, say "No children"
+    };
+
+    // Recursively enrich children if they exist
+    if (node.children.length > 0) {
+      enrichedNode.children = enrichNavigationData(node.children, node);
+    }
+
+    return enrichedNode;
+  });
 }
 
 export const TableDashboard = () => {

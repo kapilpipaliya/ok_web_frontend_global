@@ -3,8 +3,9 @@ import { Session } from "neo4j-driver";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
-import { getChildVertexes } from "~/cypher_api/lib/Traverse";
+import { getChildVertexes } from "~/cypher_api/lib/traverse";
 import { getHttpsSession } from "~/lib/auth/_server";
+import { getSubDomain } from "~/lib/server/domain_utils";
 import { getDriver } from "~/lib/server/driver";
 import { checkPropertyExists } from "~/lib/server/functions";
 
@@ -14,9 +15,9 @@ import { checkPropertyExists } from "~/lib/server/functions";
  * @param {object} [params] - The parameters to pass to the function, optional.
  * @returns {Promise<object>} - A standard response object.
  */
-async function handleRequest(func: Function, params = {}, session: Session) {
+async function handleRequest(func: Function, params = {}, session: Session, subdomain: string) {
   try {
-    return await func(params, session);
+    return await func(params, session, subdomain);
   } catch (error: any) {
     console.error("Error :", error);
     return new Response(error.message, { status: 500 });
@@ -27,8 +28,8 @@ async function handleRequest(func: Function, params = {}, session: Session) {
 
 export async function POST({ request }: APIEvent) {
   const { panel, ...payload } = await request.json();
-  const session = (await getDriver("super")).session();
-
+  const subdomain = getSubDomain(request.headers.get("host")!);
+  const session = (await getDriver(subdomain)).session();
   if (!panel) {
     return { error: "Missing panel" };
   }
@@ -36,15 +37,15 @@ export async function POST({ request }: APIEvent) {
   switch (panel) {
     case "profile":
       // payload: { panel: 'profile',userId, username, email }
-      return handleRequest(profile, payload, session);
+      return handleRequest(profile, payload, session, subdomain);
     case "password":
       // payload: { panel: 'password',currentPassword, username, newPassword  }
-      return handleRequest(password, payload, session);
+      return handleRequest(password, payload, session, subdomain);
     case "pricing":
       // payload: { panel: 'pricing' }
-      return handleRequest(pricing, payload, session);
+      return handleRequest(pricing, payload, session, subdomain);
     case "supportTicket":
-      return handleRequest(supportTicket, payload, session);
+      return handleRequest(supportTicket, payload, session, subdomain);
     default:
       return { error: "Invalid action" };
   }
@@ -130,7 +131,7 @@ const pricing = async (payload: any, session: Session) => {
   };
 };
 
-const supportTicket = async (data: any, session: Session) => {
+const supportTicket = async (data: any, session: Session, subdomain: string) => {
   const { action, ...payload } = data;
 
   switch (action) {
@@ -145,10 +146,10 @@ const supportTicket = async (data: any, session: Session) => {
       return await updateStatus(payload, session);
     case "chat":
       // payload: { panel: 'supportTicket',action: 'chat',name, email, subject, message }
-      return await chat(payload, session);
+      return await chat(payload, session, subdomain);
     case "delete":
       // payload: { panel: 'supportTicket',action: 'delete',id }
-      return await deleteTicket(payload, session);
+      return await deleteTicket(payload, session, subdomain);
     default:
       return { status: 400, error: "Invalid support ticket action" };
   }
@@ -195,12 +196,12 @@ const supportTicket = async (data: any, session: Session) => {
     };
   }
 
-  async function chat(payload: any, session: Session) {
+  async function chat(payload: any, session: Session, subdomain: string) {
     const { subAction, parentVertexId, newMessage } = payload;
     switch (subAction) {
       case "send":
         const data = await newRowMGCall(
-          { driver: await getDriver("super"), session: session },
+          { driver: await getDriver(subdomain), session: session },
           parentVertexId,
           "SupportUser",
           "",
@@ -209,11 +210,11 @@ const supportTicket = async (data: any, session: Session) => {
         return data;
       case "get":
         const result = await findVertexByIdMGCall(
-          { driver: await getDriver("super"), session: session },
+          { driver: await getDriver(subdomain), session: session },
           parentVertexId,
         );
         const message = await getChildVertexes(
-          { driver: await getDriver("super"), session: session },
+          { driver: await getDriver(subdomain), session: session },
           ["SupportUser"],
           [result.vertex!],
         );
@@ -221,10 +222,10 @@ const supportTicket = async (data: any, session: Session) => {
     }
   }
 
-  async function deleteTicket(payload: any, session: Session) {
+  async function deleteTicket(payload: any, session: Session, subdomain: string) {
     const { id } = payload;
     await deleteNodeMGCall(
-      { driver: await getDriver("super"), session: session },
+      { driver: await getDriver(subdomain), session: session },
       id,
     );
     return {

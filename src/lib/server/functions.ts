@@ -1,8 +1,10 @@
 import { Session } from "neo4j-driver";
+import { TransactionPromise } from "neo4j-driver-core";
+
 
 export async function checkPropertyExists(
   nodeLabel: string,
-  session: Session,
+  session: Session | TransactionPromise,
   property: string,
   value: any,
 ) {

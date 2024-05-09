@@ -90,14 +90,24 @@ export const useToast = () => {
   }: LoadingToastParams<T>) {
     await toast.promise(promise, {
       loading: loadMessage,
-      success: successJSXFn ?? ((val: T) => {
-        onSuccess?.(val);
-        return <span>{successMessage ?? val.message ?? "Successfully completed"}</span>;
-      }),
+      success:
+        successJSXFn ??
+        ((val: T) => {
+          onSuccess?.(val);
+          return (
+            <span>
+              {successMessage ?? val.message ?? "Successfully completed"}
+            </span>
+          );
+        }),
       error: (e: any) => {
         onError?.(e);
-        return <span>{errorMessage ?? e.message ?? "Oops! Something went wrong"}</span>;
-      }
+        return (
+          <span>
+            {errorMessage ?? e.message ?? "Oops! Something went wrong"}
+          </span>
+        );
+      },
     });
   }
 

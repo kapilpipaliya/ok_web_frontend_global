@@ -1,5 +1,5 @@
-import { FormMetaData, IFormContext } from "~/cypher_api/lib/Record";
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/cypher_api/lib/Vertex";
+import { FormMetaData, IFormContext } from "~/cypher_api/lib/record";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/cypher_api/lib/vertex";
 
 export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   User: {

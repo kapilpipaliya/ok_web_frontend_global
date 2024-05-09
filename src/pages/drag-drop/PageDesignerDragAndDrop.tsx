@@ -23,7 +23,7 @@ import {
 } from "solid-js";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 
-import { getTreeData } from "~/lib/graph/get/sync/Traverse";
+import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
 import {
   getNewGraphId,
@@ -38,7 +38,7 @@ import {
 } from "~/lib/graph/graph";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
-import { addNewVertex, newVertex } from "~/lib/graph/mutate/Vertex";
+import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { Portal } from "solid-js/web";
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { AttrsTableData } from "~/lib/api";
@@ -69,12 +69,12 @@ import {
   ModalHeader,
   TextField,
   Tooltip,
-} from "../../components/solid-blocks/blocks";
+} from "~/components/solid-blocks/blocks";
 import { toTitle } from "case-switcher-js";
 import "~/css/sideBarSearch.css";
 import ShareSection from "./Share";
 import PreviewSection from "./Preview";
-import ResizableContainer from "../../components/custom/ResizableDivView";
+import ResizableContainer from "~/components/custom/ResizableDivView";
 import { FieldAttribute } from "~/lib/Type";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 

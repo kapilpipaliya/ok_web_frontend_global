@@ -132,13 +132,13 @@ export function GenericField(
 
     const onSubmit = async () => {
       await showLoadingToast({
-        promise: submitDataCall('data', record.txnId),
+        promise: submitDataCall("data", record.txnId),
         loadMessage: "Submitting Data...",
         successMessage: "Data submitted successfully",
         onSuccess: (value) => {
           setTimeout(() => navigate(-1), 0);
         },
-      })
+      });
       // todo fix validations
       // const result = validationGroup.validate();
       // if (result.isValid) {

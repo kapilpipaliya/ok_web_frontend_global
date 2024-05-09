@@ -8,10 +8,10 @@ import {
   transactionDetailAdd,
   transactions,
   Vertex,
-} from "../graph";
+} from "~/lib/graph/graph";
 import { pipe } from "@mobily/ts-belt";
-import { deleteEdge } from "./Edge";
-import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
+import { deleteEdge } from "~/lib/graph/mutate/edge";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 // return a new Vertex
 export function newVertex(

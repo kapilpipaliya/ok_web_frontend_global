@@ -8,12 +8,12 @@ import {
   useContext,
 } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { getFormMetaData } from "~/lib/graph/mutate/Record";
 import { Record } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
+import { getFormMetaData } from "~/lib/graph/get/sync/graph_functions";
 
 export const PageView_ = (props: { id: string; count: number }) => {
   const { Ws } = useContext(WsContext);

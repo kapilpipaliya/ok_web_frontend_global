@@ -17,7 +17,10 @@ import {
 import { TextField } from "~/components/solid-blocks/blocks";
 import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { CustomTooltip } from "~/components/custom/Tooltip";
-import { CssEditorContext, sizeTypes } from "./cssEditorContext";
+import {
+  CssEditorContext,
+  sizeTypes,
+} from "~/components/css-editor/cssEditorContext";
 import "~/css/componentUtilCSS.css";
 
 export const StyleCSSComponents = () => {

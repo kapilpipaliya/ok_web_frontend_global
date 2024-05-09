@@ -5,8 +5,8 @@ import {
   WsContext,
 } from "~/lib/websocket/ws_events_dispatcher";
 
-import { isObject } from "../Utils";
-import { deleteEdge, updateEdgeId } from "../graph/mutate/Edge";
+import { isObject } from "~/lib/Utils";
+import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
 import {
   commitTransaction,
   EdgeMap,
@@ -18,8 +18,8 @@ import {
   transactions,
   VertexMap,
   vertexOldIdToNewIdMap,
-} from "../graph/graph";
-import { deleteVertex, updateVertexId } from "../graph/mutate/Vertex";
+} from "~/lib/graph/graph";
+import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 
 export const setGraphData = (

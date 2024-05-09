@@ -6,7 +6,7 @@ import {
   deleteVertex,
   newVertex,
   replaceVertexProperties,
-} from "../Vertex";
+} from "../vertex";
 
 describe("addNewVertex", () => {
   beforeEach(() => {

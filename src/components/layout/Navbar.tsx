@@ -43,7 +43,7 @@ export function Navbar(
       "background-color": "white",
       padding: "6px",
       display: "flex",
-      width: '-webkit-fill-available',
+      width: "-webkit-fill-available",
       "justify-content": "space-between",
       "align-items": "center",
     }) as JSX.CSSProperties;

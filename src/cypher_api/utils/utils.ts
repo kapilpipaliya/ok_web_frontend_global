@@ -1,5 +1,8 @@
-import { Node } from "../lib/graph";
-import { getSelectionOptions, getChildVertexes } from "../lib/Traverse";
+import { Node } from "~/cypher_api/lib/graph";
+import {
+  getSelectionOptions,
+  getChildVertexes,
+} from "~/cypher_api/lib/traverse";
 
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);

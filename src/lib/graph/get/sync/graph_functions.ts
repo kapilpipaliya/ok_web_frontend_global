@@ -1,20 +1,6 @@
-import {
-  getNewGraphId,
-  getNewTxnId,
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex,
-} from "../graph";
+import { IdAttr } from "~/cypher_api/lib/graph";
 import { klona } from "klona/json";
 import {
-  mergeVertexProperties,
-  newVertex,
-} from "./Vertex";
-import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
-import { batch, onCleanup, untrack } from "solid-js";
-import {
-  addNewRow,
   AdminAttrKeys,
   AttrsTableData,
   getChildVertex,
@@ -23,15 +9,15 @@ import {
   getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
-  newRow,
   Record,
-} from "../../Utils";
-import { getToEdge } from "../get/sync/getToEdge";
-import { removeUndefinedProperties } from "../../functions";
-import { setSelectionValue } from "../../../components/dynamic/fields/static/SelectionUtils";
-import { AttrsAdminTableData } from "../../apiAdmin";
-import { FieldAttribute, FormMetaData } from "../../Type";
+} from "~/lib/Utils";
+import { removeUndefinedProperties } from "~/lib/functions";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
+import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { findVertexByLabelAndUniqueId } from "~/cypher_api/lib/vertex";
+import { getToEdge } from "~/cypher_api/lib/traverse";
 
 export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
@@ -76,50 +62,6 @@ export function getRowProps(
     },
     {} as { [key: string]: any },
   );
-}
-
-export function cloneRowProps(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number,
-  fromVertex: Vertex,
-  toVertex: Vertex,
-) {
-  const propRows =
-    getChildVertexes(graph, ["$0Prop"], [fromVertex]).vertexes || [];
-
-  const attrPropMetaVertex = newVertex(getNewGraphId(), [], {
-    name: "Prop",
-  });
-  const attrNameVertex = newVertex(getNewGraphId(), [], {
-    name: "Name",
-    component: "SelectBox",
-  });
-
-  for (const propRow of propRows) {
-    const nameVertex = getChildVertex(graph, ["$0Name"], propRow);
-    if (nameVertex.vertex) {
-      const rowResult = addNewRow(
-        txnId,
-        attrPropMetaVertex,
-        graph,
-        setGraph,
-        toVertex,
-        klona(propRow.P),
-        false,
-        {} as any,
-      );
-      const rowVertex = graph.vertexes[rowResult.vertexId!];
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrNameVertex,
-        nameVertex.vertex.id,
-      );
-    }
-  }
 }
 
 function getComponentProperties(
@@ -353,30 +295,6 @@ export function componentProps(
   );
 }
 
-// add meta from vertex value:
-export function addMeta(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  metaVertex: Vertex,
-  data: Vertex,
-) {
-  if (metaVertex.P.meta) {
-    const metaData = componentProps(graph, setGraph, metaVertex, data);
-    const metaDataVal = removeUndefinedProperties(metaData, false, 10);
-    untrack(() => {
-      const newMetaData = Object.assign(
-        {},
-        // when component is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
-        graph.vertexes[metaVertex.P.templateId]?.P?.props || {},
-        metaDataVal,
-      );
-      mergeVertexProperties(getNewTxnId(), metaVertex.id, graph, setGraph, {
-        props: newMetaData,
-      });
-    });
-  }
-}
-
 export function getPkForCollection(
   graph: Store<GraphInterface>,
   collVertex: Vertex,
@@ -395,135 +313,6 @@ export function getNameKeyForCollection(
 }
 
 // 'type' or 'label' can be overwritten in the meta.
-
-export function rowMetaInitialize(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  joinVertex: Vertex,
-  meta: Vertex,
-  tableColumnsTemplate: Vertex[],
-) {
-  const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
-  if (rowMetaAttrInst.error) {
-    const rows = {} as { [key: Id]: Id };
-    const metaTxnId = getNewTxnId();
-    batch(() => {
-      const metaInstanceResult = newRow(
-        graph,
-        setGraph,
-        metaTxnId,
-        joinVertex,
-        "AttrInst",
-      );
-      if (metaInstanceResult.error) {
-        alert("Error creating a row for attribute instance");
-      }
-      mergeVertexProperties(
-        metaTxnId,
-        metaInstanceResult.vertexId!,
-        graph,
-        setGraph,
-        {
-          templateId: meta.id,
-        },
-      );
-
-      for (const attrColumn of tableColumnsTemplate) {
-        const AttrRowResult = newRow(
-          graph,
-          setGraph,
-          metaTxnId,
-          graph.vertexes[metaInstanceResult.vertexId!],
-          "MetaAttr",
-        );
-        if (AttrRowResult.error) {
-          alert(AttrRowResult.error);
-        }
-        const P = klona(attrColumn.P);
-        P.templateId = attrColumn.id;
-
-        if (!P.component) {
-          const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
-          if (component) P.component = component;
-        }
-        mergeVertexProperties(
-          metaTxnId,
-          AttrRowResult.vertexId!,
-          graph,
-          setGraph,
-          P,
-        );
-        rows[attrColumn.id] = AttrRowResult.vertexId!;
-      }
-      mergeVertexProperties(
-        metaTxnId,
-        metaInstanceResult.vertexId!,
-        graph,
-        setGraph,
-        {
-          rows,
-          metaTxnId,
-        },
-      );
-    });
-    onCleanup(() => {
-      // remove all AttrInst vertex.
-      // TODO: This is breaking when new row is added, its interesting to fix this.
-      // console.log('called', metaTxnId)
-      // revertTransaction(metaTxnId);
-    });
-    return metaTxnId;
-  } else {
-    const rows = klona(rowMetaAttrInst.vertex!.P.rows);
-    const metaTxnId = rowMetaAttrInst.vertex!.P.metaTxnId;
-    batch(() => {
-      for (const attrColumn of tableColumnsTemplate) {
-        if (rows[attrColumn.id]) {
-          continue;
-        }
-        const AttrRowResult = newRow(
-          graph,
-          setGraph,
-          metaTxnId,
-          graph.vertexes[rowMetaAttrInst.vertex!.id],
-          "MetaAttr",
-        );
-        if (AttrRowResult.error) {
-          alert(AttrRowResult.error);
-        }
-        const P = klona(attrColumn.P);
-        P.templateId = attrColumn.id;
-
-        if (!P.component) {
-          const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
-          if (component) P.component = component;
-        }
-        mergeVertexProperties(
-          metaTxnId,
-          AttrRowResult.vertexId!,
-          graph,
-          setGraph,
-          P,
-        );
-        rows[attrColumn.id] = AttrRowResult.vertexId!;
-      }
-      mergeVertexProperties(
-        metaTxnId,
-        rowMetaAttrInst.vertex!.id,
-        graph,
-        setGraph,
-        { rows },
-      );
-    });
-    onCleanup(() => {
-      // remove all AttrInst vertex.
-      // TODO: This is breaking when new row is added, its interesting to fix this.
-      // console.log('called', metaTxnId)
-      // revertTransaction(metaTxnId);
-    });
-    return metaTxnId;
-  }
-}
 
 export const getFormMetaData = (
   graph: Store<GraphInterface>,

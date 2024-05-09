@@ -8,14 +8,15 @@ import {
 } from "~/lib/Utils";
 import { A, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
-import { toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/lib/contexts";
 import logo from "~/assets/graphics/logo.png";
-import postAPI from "~/lib/auth/PostApi";
-import { API } from "~/components/api/DataFetcher";
 import sendEmail from "~/lib/server/email";
-import { registerUserCall, contactUsCall, signInCall } from "~/components/api/api_functions";
+import {
+  contactUsCall,
+  registerUserCall,
+  signInCall,
+} from "~/components/api/api_functions";
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -208,7 +209,7 @@ export const SignUp = () => {
 
   const [formData, setFormData] = createSignal({
     username: "",
-    subdomain: '',
+    subdomain: "",
     email: "",
     password: "",
     loginType: "signup",
@@ -218,7 +219,6 @@ export const SignUp = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword());
   };
-
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -243,7 +243,7 @@ export const SignUp = () => {
             navigate(`${APP_BASE_URL}/Page`);
           }
         },
-      })
+      });
       setLoadingSite(false);
     }
   };
@@ -290,31 +290,33 @@ export const SignUp = () => {
           <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
             Let's Bright up your future!
           </div>
-          <div class='grid-template-columns:1fr|50% grid gap:0|10'> <div class="m:10|0|0|0">
-            <label
-              for="subdomain"
-              class="f:14"
-              style={{ display: "block", "margin-bottom": "5px" }}
-            >
-              Sub Domain
-            </label>
-            <input
-              name="subdomain"
-              type="text"
-              value={formData().subdomain}
-              onInput={(e) =>
-                setFormData({ ...formData(), subdomain: e.target.value })
-              }
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-              }}
-              placeholder="Enter SubDomain"
-              required
-            />
-          </div>
+          <div class="grid-template-columns:1fr|50% grid gap:0|10">
+            {" "}
+            <div class="m:10|0|0|0">
+              <label
+                for="subdomain"
+                class="f:14"
+                style={{ display: "block", "margin-bottom": "5px" }}
+              >
+                Sub Domain
+              </label>
+              <input
+                name="subdomain"
+                type="text"
+                value={formData().subdomain}
+                onInput={(e) =>
+                  setFormData({ ...formData(), subdomain: e.target.value })
+                }
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                }}
+                placeholder="Enter SubDomain"
+                required
+              />
+            </div>
             <div class="m:10|0|0|0">
               <label
                 for="username"
@@ -398,8 +400,6 @@ export const SignUp = () => {
                 />
               </div>
             </div>
-
-
           </div>
 
           <button

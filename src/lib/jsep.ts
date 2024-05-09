@@ -2,10 +2,10 @@ import jsep from "jsep";
 //import { eval as eval1} from 'expression-eval';
 import { IdAttr, Vertex } from "~/lib/graph/graph";
 import { path } from "rambda";
-import { calculateFilter, getTextValue } from "~/lib/graph/get/sync/Traverse";
-import { findVertexIdsByLabel } from "./graph/get/sync/findVertex";
+import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/Utils";
+import { calculateFilter, getTextValue } from "~/cypher_api/lib/traverse";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

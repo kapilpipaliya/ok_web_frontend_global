@@ -1,14 +1,14 @@
 import { useParams } from "@solidjs/router";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { config } from "@master/css";
-import { createComponent, lazy, useContext } from "solid-js";
+import { useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function admin() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
-  
+
   return (
     <DataFetcher
       fetchData={API.getFormDataUrl}

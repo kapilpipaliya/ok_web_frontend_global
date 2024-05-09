@@ -32,7 +32,7 @@ export default function PageHeader(props: PageHeaderProps) {
         ...(props.className && { className: props.className }),
       }}
     >
-      <div >
+      <div>
         <SiteTitle>{props.title}</SiteTitle>
         <h2 style={titleStyle}>{props.title}</h2>
 

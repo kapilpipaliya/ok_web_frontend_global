@@ -15,7 +15,7 @@ import {
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
-} from "~/cypher_api/lib/Vertex";
+} from "~/cypher_api/lib/vertex";
 import { batch, createContext, onCleanup, untrack } from "solid-js";
 import {
   getChildVertex,
@@ -25,9 +25,9 @@ import {
   getParentVertex,
   getSelectionOptions,
   getToEdge,
-} from "~/cypher_api/lib/Traverse";
+} from "~/cypher_api/lib/traverse";
 import { removeUndefinedProperties } from "~/cypher_api/utils/functions";
-import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/Edge";
+import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/edge";
 import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 import {
   capitalizeFirstLetter,

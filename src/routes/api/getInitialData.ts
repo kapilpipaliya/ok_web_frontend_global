@@ -5,19 +5,21 @@ import {
   RecordShape,
   Relationship,
   Session,
-  types
+  types,
 } from "neo4j-driver";
 import { NumberOrInteger } from "neo4j-driver-core/types/graph-types";
 
 // Example function to initiate data processing based on some condition
 
-export async function getInitialData(args: {}): Promise<{ [key: string]: any; }> {
+export async function getInitialData(args: {
+  subdomain: string;
+}): Promise<{ [key: string]: any }> {
   const nodes: JsonNode[] = [];
   const relationships: JsonRelationship[] = [];
   const vertexLabelIdMap: VertexLabelIdMap = new Map();
   const nodeObj: JsonData = {};
   const relationshipObj: JsonData = {};
-  const session = (await getDriver("super")).session();
+  const session = (await getDriver(args.subdomain)).session();
   // 1. get all coll nodes.
   // 2. if no memberKey send all public nodes and relationships.
   // 3. if memberKey, send data that user is allowed to see.
@@ -31,7 +33,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
       {},
       nodes,
       relationships,
-      vertexLabelIdMap
+      vertexLabelIdMap,
     );
     await fetchFromMGAndSaveToArray(
       session,
@@ -39,10 +41,9 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
       {},
       nodes,
       relationships,
-      vertexLabelIdMap
+      vertexLabelIdMap,
     );
   }
-
 
   // disable auth temparary
   // else if (memberKey != -1)
@@ -69,7 +70,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         { labels: labelVec },
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       await fetchFromMGAndSaveToArray(
         session,
@@ -77,7 +78,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         { types: typeVec },
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       // send View Components:
       // get view compnents
@@ -89,7 +90,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       await fetchFromMGAndSaveToArray(
         session,
@@ -97,7 +98,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       await fetchFromMGAndSaveToArray(
         session,
@@ -105,7 +106,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       await fetchFromMGAndSaveToArray(
         session,
@@ -113,7 +114,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
     } else {
       await fetchFromMGAndSaveToArray(
@@ -122,7 +123,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
       await fetchFromMGAndSaveToArray(
         session,
@@ -130,7 +131,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
         {},
         nodes,
         relationships,
-        vertexLabelIdMap
+        vertexLabelIdMap,
       );
     }
   } else {
@@ -169,7 +170,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
       { labels: labelVec },
       nodes,
       relationships,
-      vertexLabelIdMap
+      vertexLabelIdMap,
     );
     await fetchFromMGAndSaveToArray(
       session,
@@ -180,7 +181,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
       { labels: labelVec },
       nodes,
       relationships,
-      vertexLabelIdMap
+      vertexLabelIdMap,
     );
   }
 
@@ -189,7 +190,7 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
     relationships,
     vertexLabelIdMap,
     nodeObj,
-    relationshipObj
+    relationshipObj,
   );
   await session.close();
   return {
@@ -198,14 +199,14 @@ export async function getInitialData(args: {}): Promise<{ [key: string]: any; }>
     vertexLabelIdMap: convertMapToObject(vertexLabelIdMap),
     edges: relationshipObj,
   };
-}// Manipulates the provided node and relationship data into specific JSON objects and maps
+} // Manipulates the provided node and relationship data into specific JSON objects and maps
 
 export function getNodeAndEdgeObj(
   nodes: JsonNode[],
   relationships: JsonRelationship[],
   vertexLabelIdMap: VertexLabelIdMap,
   nodeObj: JsonData,
-  relationshipObj: JsonData
+  relationshipObj: JsonData,
 ): void {
   for (const node of nodes) {
     nodeObj[node.id] = node;
@@ -223,6 +224,7 @@ export function getNodeAndEdgeObj(
     relationshipObj[relationship.id] = relationship;
   }
 }
+
 export interface JsonNode {
   id: NumberOrInteger;
   L: string[];
@@ -241,6 +243,7 @@ export interface JsonRelationship {
 
 export type VertexLabelIdMap = Map<string, Set<number>>;
 export type JsonData = Record<string, any>;
+
 // Functions to handle database values and convert them to JSON
 function convertNodeToJson(node: Node): JsonNode {
   return {
@@ -251,8 +254,9 @@ function convertNodeToJson(node: Node): JsonNode {
     IN: {},
   };
 }
+
 function convertRelationshipToJson(
-  relationship: Relationship
+  relationship: Relationship,
 ): JsonRelationship {
   return {
     id: !isIntegerId ? relationship.identity.toNumber() : relationship.identity,
@@ -264,8 +268,9 @@ function convertRelationshipToJson(
     P: relationship.properties,
   };
 }
+
 function getJsonFromPart(
-  matchPart: Node | Relationship | Array<Node | Relationship>
+  matchPart: Node | Relationship | Array<Node | Relationship>,
 ): JsonNode | JsonRelationship | (JsonNode | JsonRelationship)[] | {} {
   if (matchPart instanceof types.Node) {
     return convertNodeToJson(matchPart);
@@ -291,7 +296,7 @@ export async function fetchFromMGAndSaveToArray(
   params: Record<string, any>,
   nodes: JsonNode[],
   relationships: JsonRelationship[],
-  vertexLabelIdMap: VertexLabelIdMap
+  vertexLabelIdMap: VertexLabelIdMap,
 ): Promise<{
   nodes: JsonNode[];
   relationships: JsonRelationship[];
@@ -338,6 +343,7 @@ export async function fetchFromMGAndSaveToArray(
     throw error;
   }
 }
+
 // async function reconnect(): Promise<void> {
 //   await getDriver('super').close();
 //   session = getDriver('super').session();
@@ -346,7 +352,7 @@ export async function fetchFromMGAndSaveToArray(
 // Function to extract names from the graph database response
 
 export function getNamesFromMGResponse(
-  response: QueryResult<RecordShape<PropertyKey, any>>
+  response: QueryResult<RecordShape<PropertyKey, any>>,
 ): string[] {
   const collections: string[] = [];
 
@@ -366,9 +372,12 @@ export function getNamesFromMGResponse(
 
   return collections;
 }
+
 // Function to convert a Map<string, Set<number>> to an object with array values
 
-export function convertMapToObject(map: VertexLabelIdMap): Record<string, number[]> {
+export function convertMapToObject(
+  map: VertexLabelIdMap,
+): Record<string, number[]> {
   const result: Record<string, number[]> = {};
 
   map.forEach((value, key) => {
@@ -377,4 +386,3 @@ export function convertMapToObject(map: VertexLabelIdMap): Record<string, number
 
   return result;
 }
-

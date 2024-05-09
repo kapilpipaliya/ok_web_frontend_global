@@ -1,12 +1,12 @@
 import { batch, createContext, onCleanup, useContext } from "solid-js";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
   newVertex,
-} from "~/lib/graph/mutate/Vertex";
+} from "~/lib/graph/mutate/vertex";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
 import {
   commitTxn,
@@ -849,67 +849,67 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
 
       /*      {
-                    name: "Child",
-                    component: "Table2",
-                    tab: "Child",
-                    attributes: [
-                      {
-                        name: "coll",
-                        component: "SelectBox",
-                        props: {
+                          name: "Child",
+                          component: "Table2",
+                          tab: "Child",
+                          attributes: [
+                            {
+                              name: "coll",
+                              component: "SelectBox",
+                              props: {
 
-                          collection: "g:'Coll'",
-                        },
-                      },
-                      {
-                        name: "displayName",
-                        component: "TextBox",
-                        props: {
-                          onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-                        }
-                      },
-                      {
-                        name: "name",
-                        component: "TextBox",
-                      },
-                      {
-                        name: "tab",
-                        component: "SelectBox",
-                        props: {
-
-                          collection: "-CollChild->$0Tab",
-                        },
-                      },
-                      {
-                        name: "group",
-                        component: "SelectBox",
-                        props: {
-                          collection: "-CollChild->$0Group",
-
-                        },
-                      },
-                      {
-                        name: "Prop",
-                        displayName: "Property",
-                        component: "Table2",
-                        attributes: [
-                          {
-                            name: "name",
-                            component: "SelectBox",
-                            props: {
-                              displayExpr: "::'P.name'",
-                              collection: "g:'Comp[Table]'->$0Prop",
+                                collection: "g:'Coll'",
+                              },
                             },
-                          },
-                          {
-                            name: "value",
-                            meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
-                            component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
-                          },
-                        ],
-                      },
-                    ],
-                  },*/
+                            {
+                              name: "displayName",
+                              component: "TextBox",
+                              props: {
+                                onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
+                              }
+                            },
+                            {
+                              name: "name",
+                              component: "TextBox",
+                            },
+                            {
+                              name: "tab",
+                              component: "SelectBox",
+                              props: {
+
+                                collection: "-CollChild->$0Tab",
+                              },
+                            },
+                            {
+                              name: "group",
+                              component: "SelectBox",
+                              props: {
+                                collection: "-CollChild->$0Group",
+
+                              },
+                            },
+                            {
+                              name: "Prop",
+                              displayName: "Property",
+                              component: "Table2",
+                              attributes: [
+                                {
+                                  name: "name",
+                                  component: "SelectBox",
+                                  props: {
+                                    displayExpr: "::'P.name'",
+                                    collection: "g:'Comp[Table]'->$0Prop",
+                                  },
+                                },
+                                {
+                                  name: "value",
+                                  meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop++->$0Name->$0ValueProp",
+                                  component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
+                                },
+                              ],
+                            },
+                          ],
+                        },*/
       {
         name: "Transform",
         component: "Table2",

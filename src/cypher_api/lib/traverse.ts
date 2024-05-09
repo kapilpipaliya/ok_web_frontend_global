@@ -5,7 +5,7 @@ import {
 } from "~/cypher_api/utils/utils";
 import { evaluate } from "~/cypher_api/lib/jsep";
 import jsep from "jsep";
-import { deleteRow } from "~/cypher_api/lib/Record";
+import { deleteRow } from "~/cypher_api/lib/record";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";

@@ -4,14 +4,28 @@ export const isIntegerId = true;
 
 const drivers = {} as { [port: string]: Driver };
 
+const getSuperSession = async () => {
+  if (!drivers[1102]) {
+    return createDriver(`bolt://localhost:1102`).session();
+  }else{
+    return drivers[1102].session();
+  }
+}
 // Function to get a driver instance based on the database ID
 export async function getDriver(
-  port: string | number,
+  subdomain: string,
   username?: string,
   password?: string,
 ) {
-  if (port === "super") {
+  let port;
+  const session = await getSuperSession();
+  if (subdomain === "super") {
     port = 1102;
+  } else {
+    const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;
+    const res = await session.run(query, { subdomain });
+    port = res.records[0].get('n')?.properties.driverPort;
+    session.close()
   }
   if (!drivers[port]) {
     // Check if docker is running and start it if not

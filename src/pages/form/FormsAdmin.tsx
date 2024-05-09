@@ -9,7 +9,7 @@ import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputF
 import {
   onDataDirectoryImportClick,
   updateImportRecord,
-} from "~/lib/graph/mutate/Import";
+} from "~/lib/graph/mutate/import";
 import {
   AbstractSingleForm,
   getComponentForCollRow,

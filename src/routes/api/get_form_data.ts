@@ -1,23 +1,19 @@
-import { getDriver, isIntegerId } from "~/lib/server/driver";
-import { getHttpsSession } from "~/lib/auth/_server";
+import { getDriver } from "~/lib/server/driver";
 
-import { APIEvent } from '@solidjs/start/dist/server';
+import { APIEvent } from "@solidjs/start/dist/server";
 import { getInitialData } from "./getInitialData";
-
+import { getSubDomain } from "~/lib/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {
-    // const { formName, formId } = await request.json();
+  // const { formName, formId } = await request.json();
+  const subdomain = getSubDomain(request.headers.get("host")!);
 
-    const session = (await getDriver("super")).session();
-    try {
+  try {
+    const pageList = await getInitialData({ subdomain });
 
-        const pageList = await getInitialData({});
-
-        return pageList;
-    } catch (error) {
-        console.error("Server error Failed to login:", error);
-        return new Response("Internal Server Error", { status: 500 });
-    } finally {
-        await session.close();
-    }
+    return pageList;
+  } catch (error) {
+    console.error("Server error Failed to login:", error);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }

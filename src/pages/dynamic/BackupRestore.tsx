@@ -19,8 +19,8 @@ import {
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
-} from "~/lib/graph/mutate/Vertex";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
+} from "~/lib/graph/mutate/vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   APP_BASE_URL,
@@ -30,17 +30,17 @@ import {
   newRow,
   Record,
 } from "~/lib/Utils";
-import { getCompPropsMap, getFormMetaData } from "~/lib/graph/mutate/Record";
 import {
   importRecordWithYAMLSchema,
   onDataDirectoryImportClick,
   updateImportRecord,
-} from "~/lib/graph/mutate/Import";
+} from "~/lib/graph/mutate/import";
 import { fileDownloader } from "~/lib/dom_utils";
-import { Field, NsMetaJson } from "~/lib/NSMetaDataType";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FormMetaData } from "~/lib/Type";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import { getCompPropsMap, getFormMetaData } from "~/lib/graph/get/sync/graph_functions";
+import { Field, NsMetaJson } from "~/cypher_api/pages/NSMetaDataType";
 
 export const BackupRestore = () => {
   const { Ws } = useContext(WsContext);
@@ -999,15 +999,15 @@ OUT:
       commitTxn(txnId, Ws);
 
       /*
-                   transform collection not found vendorBill
-                   transform collection not found vendorCredit
-                   transform collection not found vendorPayment
-                   transform collection not found cashRefund
-                   transform collection not found cashSale
-                   transform collection not found creditMemo
-                   transform collection not found customSale
-                   2 transform collection not found customPurchase
-                  */
+                         transform collection not found vendorBill
+                         transform collection not found vendorCredit
+                         transform collection not found vendorPayment
+                         transform collection not found cashRefund
+                         transform collection not found cashSale
+                         transform collection not found creditMemo
+                         transform collection not found customSale
+                         2 transform collection not found customPurchase
+                        */
 
       // because multiple transactions not working splitting it
       // commitTxn(txnId, Ws);

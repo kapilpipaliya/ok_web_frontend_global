@@ -16,7 +16,6 @@ import {
   getSublistRowsForType,
   Record,
 } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 
@@ -26,6 +25,7 @@ import "~/css/sideBarSearch.css";
 import { Store } from "solid-js/store"; // Import the CSS file
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/sidebarLogo.svg";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -247,6 +247,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                     <Show when={activeLinks()}>
                       <For each={activeLinks()?.children}>
                         {(nav) => {
+                         
                           return (
                             <div
                               class="cursor:pointer"
@@ -285,8 +286,10 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                               </div>
                               <Show when={!expandedSections().get(nav.name)}>
                                 <For each={nav.children}>
-                                  {(child) => (
-                                    <a
+                                  {(child) => {
+                                    console.log('active sec', activeSection(), nav.name, child.name)
+
+                                    return <a
                                       class={`${location.pathname === child.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
                                       href={child.href}
                                     >
@@ -300,7 +303,9 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                                         {child.name}
                                       </span>
                                     </a>
-                                  )}
+                                  }
+                                    
+                                  }
                                 </For>
                               </Show>
                             </div>

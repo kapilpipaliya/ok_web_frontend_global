@@ -1,5 +1,5 @@
 import { graph, Id, Node } from "~/cypher_api/lib/graph";
-import { getChildVertexes } from "~/cypher_api/lib/Traverse";
+import { getChildVertexes } from "~/cypher_api/lib/traverse";
 
 export async function getPermissions(meta: Node) {
   const permissionResult = [] as [Id[], string][];

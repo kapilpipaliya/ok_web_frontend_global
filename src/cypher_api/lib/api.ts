@@ -2,8 +2,8 @@ import {
   FieldAttribute,
   FormMetaData,
   IFormContext,
-} from "~/cypher_api/lib/Record";
-import { findVertexByLabelAndUniqueIdWithSkip } from "~/cypher_api/lib/Vertex";
+} from "~/cypher_api/lib/record";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/cypher_api/lib/vertex";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 
 /* use in c++

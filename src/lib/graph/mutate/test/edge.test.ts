@@ -8,8 +8,8 @@ import {
   replaceEdgeEnd,
   replaceEdgeProperties,
   replaceEdgeStart,
-} from "../Edge";
-import { addNewVertex, newVertex } from "../Vertex";
+} from "../edge";
+import { addNewVertex, newVertex } from "../vertex";
 
 describe("addNewEdge", () => {
   beforeEach(() => {

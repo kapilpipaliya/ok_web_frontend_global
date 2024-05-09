@@ -19,13 +19,13 @@ import {
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   getInEdge,
   getParentVertexValue,
   getSelectedVertexValue,
-} from "~/lib/graph/get/sync/Traverse";
+} from "~/lib/graph/get/sync/traverse";
 import {
   getSelectionOptions,
   getChildVertex,
@@ -34,13 +34,13 @@ import {
   getValueFromVertexOrKey,
   setValueGlobal,
 } from "~/lib/Utils";
-import { getNameKeyForCollection } from "~/lib/graph/mutate/Record";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/lib/ComponentType";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { SetStoreFunction, Store } from "solid-js/store";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,

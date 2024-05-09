@@ -21,23 +21,16 @@ import {
   getSelectionOptions,
   Record,
 } from "~/lib/Utils";
-import {
-  mergeVertexProperties,
-  newVertex,
-} from "~/lib/graph/mutate/Vertex";
-import { findVertexByLabelAndUniqueId } from "./graph/get/sync/findVertex";
+import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import {
-  cloneRowProps,
-  getCompProps,
-  getRowProps,
-  getStringComponent,
-} from "~/lib/graph/mutate/Record";
+import { getCompProps, getRowProps, getStringComponent } from "~/lib/graph/get/sync/graph_functions";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { cloneRowProps } from "./graph/mutate/form_functions";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
-import { deleteNestedLayout } from "~/lib/graph/get/sync/Traverse";
+import { deleteNestedLayout } from "~/lib/graph/get/sync/traverse";
 import { useToast } from "~/components/custom/Toast";
 
 export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });

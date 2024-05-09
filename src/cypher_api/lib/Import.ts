@@ -1,18 +1,13 @@
-import { getPkForCollection, Record } from "~/cypher_api/lib/Record";
+import { getPkForCollection, Record } from "~/cypher_api/lib/record";
 import { getNewTxnId, IdAttr, Node } from "~/cypher_api/lib/graph";
 import {
   deleteVertex,
   findOrCreateNewVertex,
   findOrCreateNewVertexMGCall,
   findVertexByLabelAndPks,
-  findVertexByLabelAndUniqueId,
-} from "~/cypher_api/lib/Vertex";
+} from "~/cypher_api/lib/vertex";
 import csvtojson from "csvtojson";
-import {
-  getChildVertexesLocal,
-  getChildVertexLocal,
-  getToEdge,
-} from "~/cypher_api/lib/Traverse";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,
@@ -22,12 +17,14 @@ import {
 } from "~/cypher_api/components/input/SelectInputField";
 import { parse } from "yaml";
 import { isObject } from "~/cypher_api/utils/utils";
-import { deleteEdge } from "~/cypher_api/lib/Edge";
+import { deleteEdge } from "~/cypher_api/lib/edge";
 import { AttrsTableData } from "~/cypher_api/lib/api";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { newVertexDBCall } from "~/cypher_api/functions/newVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
+import { getChildVertexesLocal, getChildVertexLocal } from "./traverse";
+import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 
 export const updateImportRecord = (
   type: string,

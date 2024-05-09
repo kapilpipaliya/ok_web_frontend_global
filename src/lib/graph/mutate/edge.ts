@@ -9,7 +9,7 @@ import {
   isValidId,
   transactionDetailAdd,
   transactions,
-} from "../graph";
+} from "~/lib/graph/graph";
 
 export function newEdge(
   edgeId: Id,
@@ -302,12 +302,4 @@ export function updateEdgeId(
   // @ts-ignore
   setGraph("edges", oldEdgeId, undefined);
   return { error: "" };
-}
-
-export function getOutEdgeIdsOfType(
-  id: Id | string,
-  edgeLabel: string,
-  graph: Store<GraphInterface>,
-): Id[] {
-  return graph.vertexes[id].OUT[edgeLabel] || [];
 }

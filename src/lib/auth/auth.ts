@@ -12,16 +12,21 @@ import { getDriver, isIntegerId } from "~/lib/server/driver";
 export const getUser = async () => {
   "use server";
   // try {
-  const session = await getHttpsSession();
-  const neoSession = (await getDriver("super")).session();
+  
+  const httpSession = await getHttpsSession();
+  console.log(httpSession.data);
+  if (httpSession.data?.subdomain === undefined) {
+    return { error: "Not Authorized" };
+  }
+  const neo4jSession = (await getDriver(httpSession.data?.subdomain)).session();
 
   // session only works with https
-  const email = session.data.email;
+  const email = httpSession.data.email;
   if (email === undefined) {
     return { error: "Not Authorized" };
   }
   const query = `MATCH (u:User {email: $email}) return u;`;
-  const result = await neoSession.run(query, { email: email });
+  const result = await neo4jSession.run(query, { email: email });
 
   if (result.records.length === 0) {
     return { error: "Not Authorized" };

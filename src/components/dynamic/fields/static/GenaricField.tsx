@@ -17,11 +17,6 @@ import {
   Vertex,
 } from "~/lib/graph/graph";
 import {
-  getCollAttrComp,
-  getCompProps,
-  getRowProps,
-} from "~/lib/graph/mutate/Record";
-import {
   FormContext,
   getChildVertex,
   getChildVertexes,
@@ -44,6 +39,11 @@ import {
 import { Icon } from "@iconify-icon/solid";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
+import {
+  getCollAttrComp,
+  getCompProps,
+  getRowProps,
+} from "~/lib/graph/get/sync/graph_functions";
 
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.

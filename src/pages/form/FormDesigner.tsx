@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { createSignal, createUniqueId, Show, useContext } from "solid-js";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
-import { getExportCode } from "~/lib/graph/mutate/Record";
+
 import {
   getChildVertex,
   getSublistRows,
@@ -14,9 +14,10 @@ import { Navigator } from "@solidjs/router/dist/types";
 import { createStore } from "solid-js/store";
 import { stringify } from "yaml";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
-import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/Import";
+import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/import";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
+import { getExportCode } from "~/lib/graph/get/sync/graph_functions";
 
 /*
   Tasks:

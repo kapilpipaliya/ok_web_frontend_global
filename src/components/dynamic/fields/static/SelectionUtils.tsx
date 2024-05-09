@@ -1,6 +1,6 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 import { getNewGraphId, GraphInterface, Vertex } from "~/lib/graph/graph";
-import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 

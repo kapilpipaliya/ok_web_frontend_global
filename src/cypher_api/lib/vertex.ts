@@ -10,7 +10,7 @@ import {
   transactions,
 } from "~/cypher_api/lib/graph";
 import { pipe } from "@mobily/ts-belt";
-import { deleteEdge } from "~/cypher_api/lib/Edge";
+import { deleteEdge } from "~/cypher_api/lib/edge";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { newVertexDBCall } from "~/cypher_api/functions/newVertex";

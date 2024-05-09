@@ -1,11 +1,11 @@
 import jsep from "jsep";
 //import { eval as eval1} from 'expression-eval';
-import { IdAttr, Node } from "./graph";
+import { IdAttr, Node } from "~/cypher_api/lib/graph";
 import { path } from "rambda";
-import { calculateFilter, getTextValue } from "./Traverse";
-import { findVertexIdsByLabel } from "./Vertex";
-import { jsonata } from "./jsonata/jsonata";
-import { isObject } from "../utils/utils";
+import { calculateFilter, getTextValue } from "~/cypher_api/lib/traverse";
+import { findVertexIdsByLabel } from "~/cypher_api/lib/vertex";
+import { jsonata } from "~/cypher_api/lib/jsonata/jsonata";
+import { isObject } from "~/cypher_api/utils/utils";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

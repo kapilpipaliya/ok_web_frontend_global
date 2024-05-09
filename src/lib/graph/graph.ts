@@ -59,8 +59,9 @@ export interface GraphInterface {
   member?: { [key: string]: any } | null;
 }
 
-export const GraphContext =
-  createContext<ReturnType<typeof createStore<GraphInterface>>>([] as any);
+export const GraphContext = createContext<
+  ReturnType<typeof createStore<GraphInterface>>
+>([] as any);
 
 export type Revert = { revert: () => any };
 export type InsertFn = {
