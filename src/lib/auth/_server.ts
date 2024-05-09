@@ -1,6 +1,6 @@
 import { useSession } from "vinxi/http";
 
-export function getSession() {
+export function getHttpsSession() {
   const config = {
     password: "asdfgargabaewt124333415342erwbwetvfvgaqwt",
     // Other configuration options if required
@@ -53,7 +53,7 @@ export async function login(username: string, password: string) {
 }
 
 export async function logout() {
-  const session = await getSession();
+  const session = await getHttpsSession();
   await session.update((d) => (d.userId = undefined));
   await session.clear();
 }

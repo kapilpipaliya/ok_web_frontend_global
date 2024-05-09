@@ -52,6 +52,8 @@ import {
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import TreeView from "~/components/solid-blocks/blocks/treeview/treeview";
 import { Collapsible } from "~/components/solid-blocks/blocks/collapsible/collapsible";
+import { useToast } from "~/components/custom/Toast";
+import { submitDataCall } from "~/components/api/api_functions";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -95,6 +97,7 @@ export function GenericField(
 
   const Form = () => {
     const { Ws } = useContext(WsContext);
+    const { showLoadingToast } = useToast();
     const navigate = useNavigate();
 
     const record = new Record({ ws: Ws });
@@ -127,7 +130,15 @@ export function GenericField(
         revertTransaction(rowMetaTxnId);
     });
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
+      await showLoadingToast({
+        promise: submitDataCall('data', record.txnId),
+        loadMessage: "Submitting Data...",
+        successMessage: "Data submitted successfully",
+        onSuccess: (value) => {
+          setTimeout(() => navigate(-1), 0);
+        },
+      })
       // todo fix validations
       // const result = validationGroup.validate();
       // if (result.isValid) {

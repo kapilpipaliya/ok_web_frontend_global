@@ -1,4 +1,4 @@
-import { createSignal, For, Match, Show, Switch, untrack } from "solid-js";
+import { createSignal, For, Match, Show, Switch, untrack, useContext } from "solid-js";
 import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
@@ -23,10 +23,14 @@ import CustomModal from "~/components/custom/CommonDialog";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
+import { GraphContext } from "~/lib/graph/graph";
+import { equals } from "rambda";
+import { deleteSupportTicketCall, getChatsSupportCall, resetPasswordCall, sendChatsSupportCall } from "~/components/api/api_functions";
 
 function Settings() {
-  const { showErrorToast, showSuccessToast } = useToast();
-  const [selectedTab, setSelectedTab] = createSignal("Support");
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
+  const [selectedTab, setSelectedTab] = createSignal("General");
   const [isDataFetching, setIsDataFetching] = createSignal(false);
   const breadcrumbData = [
     { name: "Admin", href: "/admin" },
@@ -139,7 +143,7 @@ function Settings() {
   const GeneralSection = () => {
     const handleInputChange = (e: any) => {
       const { name, value } = e.target;
-      setProfileData({ ...profileData, [name]: value });
+      setProfileData({ ...profileData, [name]: value.toLowerCase() });
     };
 
     const profileCall = async () => {
@@ -151,23 +155,16 @@ function Settings() {
           updatedData[key] = profileData[key];
         }
       }
-      try {
-        const payload = {
-          ...updatedData,
-          userId: profileData.id,
-          panel: "profile",
-        };
-
-        let response = await postAPI(API.profileUrl, payload);
-        if (response.error) {
-          return Promise.reject(new Error(response.error));
-        }
-        return response;
-      } catch (error: any) {
-        return Promise.reject(new Error(error.response));
-      }
+      const payload = { panel: 'profile', userId: profileData.id, ...updatedData }
+      return await postAPI(API.profileUrl, payload);
     };
+
+
     const onClickSave = async () => {
+      if(equals(profileData,originalProfileData)){
+        showErrorToast("No changes to save");
+        return false;
+      }
       if (!profileData.username.trim()) {
         showErrorToast("Please enter username");
         return false;
@@ -176,26 +173,31 @@ function Settings() {
         showErrorToast("Please enter email");
         return false;
       }
-      if (!validateEmail(profileData.email)) {
+      if (validateEmail(profileData.email)) {
         showErrorToast("Please enter valid email");
         return false;
       }
-      let response = {} as { [key: string]: any };
-      await toast.promise(profileCall(), {
-        loading: "Saving Changes...",
-        success: (val) => {
-          response = val;
-          return <span>{val.message}</span>;
+      await showLoadingToast({
+        promise: profileCall(), // This should return a promise
+        loadMessage: "Saving Changes...",
+        onSuccess: (data) => {
+          if (data.user) {
+            getUser().then((data) => {
+              setIsEdit(false);
+              setProfileData({
+                username: data.properties.username.toLowerCase(),
+                email: data.properties.email.toLowerCase(),
+                id: data.id,
+                country: "United States",
+              });
+              loadContactData();
+              setOriginalProfileData(profileData); // Set original data
+              setGraph('member', data)
+            });
+          }
         },
-        error: (error) => {
-          console.log("error => ", error);
-          return <span>{error.message}</span>;
-        },
+        onError: (error) => console.error("API call failed:", error)
       });
-      if (response!.error) {
-        showErrorToast(response!.error);
-        return;
-      }
     };
     return (
       <div style={sectionStyle}>
@@ -432,24 +434,7 @@ function Settings() {
       }));
     };
 
-    const updatePasswordCall = async () => {
-      try {
-        const payload = {
-          panel: "password",
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword,
-          username: profileData.username,
-        };
-
-        let response = await postAPI(API.profileUrl, payload);
-        if (response.error) {
-          return Promise.reject(new Error(response.error));
-        }
-        return response;
-      } catch (error: any) {
-        return Promise.reject(new Error(error.response));
-      }
-    };
+   
     const onClickSave = async () => {
       const { currentPassword, newPassword, confirmPassword } = passwordData;
       if (!currentPassword.trim()) {
@@ -483,11 +468,11 @@ function Settings() {
         showErrorToast("New password can't be the same as current password");
         return false;
       }
-      let response = {} as { [key: string]: any };
-      await toast.promise(updatePasswordCall(), {
-        loading: "Updating Password...",
-        success: (val) => {
-          response = val;
+      await showLoadingToast({
+        promise: resetPasswordCall(passwordData,profileData),
+        loadMessage: "Updating Password...",
+        successMessage: "Password reset successfully",
+        onSuccess: (value) => {
           setPasswordData({
             currentPassword: "",
             newPassword: "",
@@ -498,16 +483,8 @@ function Settings() {
             newPassword: false,
             confirmPassword: false,
           });
-          return <span>Password Updated Successfully</span>;
-        },
-        error: (error) => {
-          return <span>{error.message}</span>;
         },
       });
-      if (response!.error) {
-        showErrorToast(response!.error);
-        return;
-      }
     };
     return (
       <div style={sectionStyle}>
@@ -601,20 +578,14 @@ function Settings() {
           personal: true,
         };
 
-        const data = await postAPI(API.profileUrl, {
-          newMessage: newMessage,
-          parentVertexId: parentVertexId,
-          panel: "supportTicket",
-          action: "chat",
-          subAction: "send",
+        await sendChatsSupportCall(parentVertexId,newMessage).then((e)=>{
+          setMessages([...messages()!, newMessage]);
+          setInputMessage("");
+          setTimeout(fakeReply, 1000);
+        }).catch((e)=>{
+          showErrorToast('Issue in sending message. Please try again later')
         });
-
-        if (data.error) {
-          showErrorToast("Issue in sending message. Please try again later.");
-        }
-        setMessages([...messages()!, newMessage]);
-        setInputMessage("");
-        setTimeout(fakeReply, 1000);
+        
       }
     };
 
@@ -633,33 +604,37 @@ function Settings() {
         personal: false,
       };
       setMessages([...messages()!, reply]);
-      console.log(messages());
     };
 
     const Chat = (props: { id: number }) => {
       let messageContainer: HTMLDivElement;
+
       const getMessages = async () => {
-        const message = await postAPI(API.profileUrl, {
-          parentVertexId: props.id,
-          panel: "supportTicket",
-          action: "chat",
-          subAction: "get",
-        });
-        setMessages(message.vertexes.map((v: any) => v.properties));
+        const message = await getChatsSupportCall(props.id);
+        setMessages(message.vertexes.length > 0 ? message.vertexes.map((v: any) => v.properties) : []);
         scrollToBottom();
       };
+
       const scrollToBottom = () => {
         if (messageContainer) {
           messageContainer.scrollTop = messageContainer.scrollHeight;
         }
       };
+
       getMessages();
+
       return (
         <Show
           when={messages().length > 0}
           fallback={
-            <div class="flex ai:center jc:center">
-              <div class="loader" />
+            <div class="text-align:-webkit-center">
+              <img
+                class="h:30vh"
+                src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
+              />
+              <div style="text-align:center;" class="font-weight:600">
+                No messages yet
+              </div>
             </div>
           }
         >
@@ -673,17 +648,7 @@ function Settings() {
             >
               <For
                 each={messages()}
-                fallback={
-                  <div class="text-align:-webkit-center">
-                    <img
-                      class="h:30vh"
-                      src="https://img.freepik.com/free-vector/messaging-concept-illustration_114360-1008.jpg?t=st=1714712810~exp=1714716410~hmac=7374a2e9362db971e16f802634bd6a0ee53d66e92611274c2d60403b73baf49d&w=826"
-                    />
-                    <div style="text-align:center;" class="font-weight:600">
-                      No messages yet
-                    </div>
-                  </div>
-                }
+
               >
                 {(msg: any) => (
                   <>
@@ -767,18 +732,15 @@ function Settings() {
 
     const deleteContact = async (id: string) => {
       setIsDataFetching(true);
-      const res: any = await postAPI(API.profileUrl, {
-        panel: "supportTicket",
-        action: "delete",
-        id,
-      });
-      if (res.error) {
-        showErrorToast(res.error.message);
-      } else {
-        showSuccessToast("Support ticket deleted successfully");
-        const data = contactList().filter((c: any) => c.id != id);
-        setContactList(data);
-      }
+      await showLoadingToast({
+        promise: deleteSupportTicketCall(id),
+        loadMessage: "Deleting Ticket...",
+        successMessage: "Support ticket deleted successfully",
+        onSuccess: (value) => {
+          const data = contactList().filter((c: any) => c.id != id);
+          setContactList(data);
+        },
+      })
       setIsDataFetching(false);
     };
 

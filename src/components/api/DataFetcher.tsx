@@ -58,4 +58,7 @@ export const API = {
   signUpUrl: `${API_BASE_URL}/signup`,
   profileUrl: `${API_BASE_URL}/profile`,
   logOutUrl: `${API_BASE_URL}/logout`,
+  getFormDataUrl: `${API_BASE_URL}/get_form_data`,
+  SubmitDataUrl: `${API_BASE_URL}/submit_data`,
+  getPagesDataUrl: `${API_BASE_URL}/get_pages_data`,
 };

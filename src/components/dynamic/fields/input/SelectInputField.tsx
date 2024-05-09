@@ -35,7 +35,7 @@ import {
   setValueGlobal,
 } from "~/lib/Utils";
 import { getNameKeyForCollection } from "~/lib/graph/mutate/Record";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/lib/ComponentType";

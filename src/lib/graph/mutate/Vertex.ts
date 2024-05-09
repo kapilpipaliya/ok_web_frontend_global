@@ -11,6 +11,7 @@ import {
 } from "../graph";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "./Edge";
+import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 
 // return a new Vertex
 export function newVertex(
@@ -250,64 +251,6 @@ export function updateVertexId(
     },
   );
   return { error: "" };
-}
-
-// helper function to find all the vertex ids of the label
-export function findVertexIdsByLabel(
-  graph: Store<GraphInterface>,
-  label: string,
-): Id[] {
-  return graph.vertexLabelIdMap[label] || [];
-}
-
-export function findVertexByLabelAndUniqueId(
-  label: string,
-  attribute: string,
-  value: number | string,
-  graph: Store<GraphInterface>,
-) {
-  if (!value) return undefined;
-  const vertexId = (graph.vertexLabelIdMap[label] || []).find(
-    (vertexId) => value === graph.vertexes[vertexId].P[attribute],
-  );
-  return vertexId ? graph.vertexes[vertexId] : undefined;
-}
-
-export function findVertexByLabelAndPks(
-  label: string,
-  value: {
-    [key: string]: number | string | boolean;
-  },
-  graph: Store<GraphInterface>,
-) {
-  if (!value) return undefined;
-  const vertexId = (graph.vertexLabelIdMap[label] || []).find((vertexId) => {
-    for (const valueKey in value) {
-      if (value[valueKey] !== graph.vertexes[vertexId].P[valueKey]) {
-        return false;
-      }
-    }
-    return true;
-  });
-  return vertexId ? graph.vertexes[vertexId] : undefined;
-}
-
-export function findVertexByLabelAndUniqueIdWithSkip(
-  label: string,
-  attribute: string,
-  value: any,
-  skipId: number,
-  graph: Store<GraphInterface>,
-) {
-  let vertexIds = graph.vertexLabelIdMap[label] || [];
-  if (skipId != undefined) {
-    vertexIds = vertexIds.filter((value) => value !== skipId);
-  }
-  const vertexId = vertexIds.find(
-    (vertexId) => value === graph.vertexes[vertexId].P[attribute],
-  );
-
-  return vertexId ? graph.vertexes[vertexId] : undefined;
 }
 
 export function findOrCreateNewVertex(

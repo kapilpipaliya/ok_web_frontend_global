@@ -39,7 +39,6 @@ import {
   useNavigate,
 } from "@solidjs/router";
 import { stringify } from "yaml";
-import { getPermissions } from "~/lib/auth";
 import { TableTabs } from "~/components/custom/TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
 import { FormMetaData } from "~/lib/Type";
@@ -49,6 +48,9 @@ import {
   getFormMetaData,
 } from "~/lib/graph/mutate/Record";
 import { Switch } from "solid-js";
+import { getPermissions } from "~/lib/graph/get/sync/auth";
+import { submitDataCall } from "~/components/api/api_functions";
+import { useToast } from "~/components/custom/Toast";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -115,6 +117,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const location = useLocation();
+  const {showLoadingToast} = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
 
   const record = new Record({ ws: Ws });
@@ -182,21 +185,30 @@ export const DynamicForm = (props: DynamicFormProps) => {
       revertTransaction(rowMetaTxnId);
   });
   let submit: boolean;
-  const onSubmit = () => {
+  const onSubmit = async () => {
+    await showLoadingToast({
+      promise: submitDataCall('data', record.txnId),
+      loadMessage: "Submitting Data...",
+      successMessage: "Data submitted successfully",
+      onSuccess: (value) => {
+        setTimeout(() => navigate(-1), 0);
+      },
+    })
+    
     // const valid = record.submitForm();
     // const result = validationGroup.validate();
-    const isValid = true; // result.isValid;
-    if (isValid) {
-      // !!!TODO!!! Handle Error Received From server when commit
-      if (!record.isRealTime) {
-        commitTxn(record.txnId, Ws);
-      }
-      submit = true;
-      // currently we are navigating back.
-      setTimeout(() => navigate(-1), 0);
-    } else {
-      alert("please fix all errors");
-    }
+    // const isValid = true; // result.isValid;
+    // if (isValid) {
+    //   // !!!TODO!!! Handle Error Received From server when commit
+    //   if (!record.isRealTime) {
+    //     commitTxn(record.txnId, Ws);
+    //   }
+    //   submit = true;
+    //   // currently we are navigating back.
+    //   setTimeout(() => navigate(-1), 0);
+    // } else {
+    //   alert("please fix all errors");
+    // }
   };
 
   const onCancel = () => {
@@ -535,9 +547,9 @@ export function FormGroup(props: FormGroupProps) {
           <>
             {toTitle(
               metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
+              metaVertex.P[IdAttr] ||
+              metaVertex.P.key ||
+              "",
             )}
           </>
         );
@@ -547,9 +559,9 @@ export function FormGroup(props: FormGroupProps) {
             meta={metaVertex}
             title={toTitle(
               metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
+              metaVertex.P[IdAttr] ||
+              metaVertex.P.key ||
+              "",
             )}
             data={props.vertex}
             // setValue={props.setValue}

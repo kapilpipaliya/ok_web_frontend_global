@@ -16,11 +16,11 @@ import {
 import { A } from "@solidjs/router";
 import {
   addNewVertex,
-  findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   APP_BASE_URL,

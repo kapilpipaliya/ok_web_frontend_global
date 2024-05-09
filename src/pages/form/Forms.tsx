@@ -15,10 +15,11 @@ import logo from "~/assets/graphics/logo.png";
 import postAPI from "~/lib/auth/PostApi";
 import { API } from "~/components/api/DataFetcher";
 import sendEmail from "~/lib/server/email";
+import { registerUserCall, contactUsCall, signInCall } from "~/components/api/api_functions";
 
 export const Login = () => {
   const navigate = useNavigate();
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast } = useToast();
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
 
   const [formData, setFormData] = createSignal({
@@ -31,12 +32,7 @@ export const Login = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword());
   };
-  const loginCall = async () => {
-    return await postAPI(API.loginUrl, {
-      email: formData().email,
-      password: formData().password,
-    });
-  };
+
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     const emailError = validateEmail(formData().email);
@@ -47,26 +43,17 @@ export const Login = () => {
       showErrorToast(passwordError); // Show the error message if validation fails
     } else {
       setLoadingSite(true);
-      let response: any;
-      await toast.promise(loginCall(), {
-        loading: "Logging In...",
-        success: (val) => {
-          response = val;
-          return <span>Login Successfully</span>;
-        },
-        error: (error) => {
-          console.log("error => ", error);
-          return <span>{error.message}</span>;
+      await showLoadingToast({
+        promise: signInCall(formData),
+        loadMessage: "Logging In...",
+        successMessage: "Logged In Successfully",
+        onSuccess: (value) => {
+          if (value != null && value.id !== null) {
+            navigate(`${APP_BASE_URL}/Page`);
+          }
         },
       });
       setLoadingSite(false);
-      if (response!.error) {
-        showErrorToast(response!.error);
-        return;
-      }
-      if (response != null && response.id !== null) {
-        navigate(`${APP_BASE_URL}/Page`);
-      }
     }
   };
 
@@ -110,20 +97,43 @@ export const Login = () => {
           <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
             You Will be Redirected to Home Page
           </div>
-          <div style={{ margin: "10px 0" }}>
-            <label
-              for="username"
-              class="f:14"
-              style={{ display: "block", "margin-bottom": "5px" }}
-            >
-              Email Address
-            </label>
+          <label
+            for="username"
+            class="f:14"
+            style={{ display: "block", "margin-bottom": "5px" }}
+          >
+            Email Address
+          </label>
+          <input
+            name="email"
+            type="text"
+            value={formData().email}
+            onInput={(e) =>
+              setFormData({ ...formData(), email: e.target.value })
+            }
+            style={{
+              width: "100%",
+              padding: "8px",
+              border: "1px solid #ccc",
+              "border-radius": "4px",
+            }}
+            placeholder="Your email"
+            required
+          />
+          <label
+            for="password"
+            class="f:14 mt:5"
+            style={{ display: "block", "margin-bottom": "5px" }}
+          >
+            Password
+          </label>
+          <div class="rel">
             <input
-              name="email"
-              type="text"
-              value={formData().email}
+              name="password"
+              type={`${showPassword() ? "text" : "password"}`}
+              value={formData().password}
               onInput={(e) =>
-                setFormData({ ...formData(), email: e.target.value })
+                setFormData({ ...formData(), password: e.target.value })
               }
               style={{
                 width: "100%",
@@ -131,42 +141,15 @@ export const Login = () => {
                 border: "1px solid #ccc",
                 "border-radius": "4px",
               }}
-              placeholder="Your email"
+              placeholder="Your Password"
               required
             />
-          </div>
-          <div style={{ margin: "10px 0" }}>
-            <label
-              for="password"
-              class="f:14"
-              style={{ display: "block", "margin-bottom": "5px" }}
-            >
-              Password
-            </label>
-            <div class="rel">
-              <input
-                name="password"
-                type={`${showPassword() ? "text" : "password"}`}
-                value={formData().password}
-                onInput={(e) =>
-                  setFormData({ ...formData(), password: e.target.value })
-                }
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  border: "1px solid #ccc",
-                  "border-radius": "4px",
-                }}
-                placeholder="Your Password"
-                required
-              />
-              <Icon
-                onClick={togglePasswordVisibility}
-                class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
-                aria-label="Toggle password visibility"
-                icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-              />
-            </div>
+            <Icon
+              onClick={togglePasswordVisibility}
+              class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+              aria-label="Toggle password visibility"
+              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            />
           </div>
           <div
             style={{
@@ -220,10 +203,12 @@ export const SignUp = () => {
   // const {setAlert} = useContext(AlertMessageContext);
   // const {Ws} = useContext(WsContext);
   const navigate = useNavigate();
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast } = useToast();
+  const [loadingSite, setLoadingSite] = createSignal(false);
 
   const [formData, setFormData] = createSignal({
     username: "",
+    subdomain: '',
     email: "",
     password: "",
     loginType: "signup",
@@ -233,13 +218,7 @@ export const SignUp = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword());
   };
-  const signUpCall = async () => {
-    return await postAPI(API.signUpUrl, {
-      username: formData().username,
-      email: formData().email,
-      password: formData().password,
-    });
-  };
+
 
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
@@ -254,24 +233,18 @@ export const SignUp = () => {
     } else if (passwordError) {
       showErrorToast(passwordError); // Show the error message if validation fails
     } else {
-      let response: any;
-      await toast.promise(signUpCall(), {
-        loading: "Registering User...",
-        success: (val) => {
-          response = val;
-          return <span>Registered Successfully</span>;
+      setLoadingSite(true);
+      await showLoadingToast({
+        promise: registerUserCall(formData),
+        loadMessage: "Registering User...",
+        successMessage: "Registered Successfully",
+        onSuccess: (value) => {
+          if (value != null && value.id !== null) {
+            navigate(`${APP_BASE_URL}/Page`);
+          }
         },
-        error: (error) => {
-          return <span>{error.message}</span>;
-        },
-      });
-      if (response!.error) {
-        showErrorToast(response!.error);
-        return;
-      }
-      if (response != null && response.id !== null) {
-        navigate(`${APP_BASE_URL}/Page`);
-      }
+      })
+      setLoadingSite(false);
     }
   };
 
@@ -317,20 +290,20 @@ export const SignUp = () => {
           <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
             Let's Bright up your future!
           </div>
-          <div class="m:10|0|0|0">
+          <div class='grid-template-columns:1fr|50% grid gap:0|10'> <div class="m:10|0|0|0">
             <label
-              for="username"
+              for="subdomain"
               class="f:14"
               style={{ display: "block", "margin-bottom": "5px" }}
             >
-              Username
+              Sub Domain
             </label>
             <input
-              name="username"
+              name="subdomain"
               type="text"
-              value={formData().username}
+              value={formData().subdomain}
               onInput={(e) =>
-                setFormData({ ...formData(), username: e.target.value })
+                setFormData({ ...formData(), subdomain: e.target.value })
               }
               style={{
                 width: "100%",
@@ -338,50 +311,24 @@ export const SignUp = () => {
                 border: "1px solid #ccc",
                 "border-radius": "4px",
               }}
-              placeholder="Enter Name"
+              placeholder="Enter SubDomain"
               required
             />
           </div>
-          <div class="m:10|0|0|0">
-            <label
-              for="username"
-              class="f:14"
-              style={{ display: "block", "margin-bottom": "5px" }}
-            >
-              Email Address
-            </label>
-            <input
-              name="email"
-              type="text"
-              value={formData().email}
-              onInput={(e) =>
-                setFormData({ ...formData(), email: e.target.value })
-              }
-              style={{
-                width: "100%",
-                padding: "8px",
-                border: "1px solid #ccc",
-                "border-radius": "4px",
-              }}
-              placeholder="Enter Email"
-              required
-            />
-          </div>
-          <div class="m:10|0|10|0">
-            <label
-              for="password"
-              class="f:14"
-              style={{ display: "block", "margin-bottom": "5px" }}
-            >
-              Password
-            </label>
-            <div class="rel">
+            <div class="m:10|0|0|0">
+              <label
+                for="username"
+                class="f:14"
+                style={{ display: "block", "margin-bottom": "5px" }}
+              >
+                Username
+              </label>
               <input
-                name="password"
-                type={`${showPassword() ? "text" : "password"}`}
-                value={formData().password}
+                name="username"
+                type="text"
+                value={formData().username}
                 onInput={(e) =>
-                  setFormData({ ...formData(), password: e.target.value })
+                  setFormData({ ...formData(), username: e.target.value })
                 }
                 style={{
                   width: "100%",
@@ -389,16 +336,70 @@ export const SignUp = () => {
                   border: "1px solid #ccc",
                   "border-radius": "4px",
                 }}
-                placeholder="Enter Password"
+                placeholder="Enter Name"
                 required
               />
-              <Icon
-                onClick={togglePasswordVisibility}
-                class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
-                aria-label="Toggle password visibility"
-                icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            </div>
+            <div class="m:10|0|0|0">
+              <label
+                for="username"
+                class="f:14"
+                style={{ display: "block", "margin-bottom": "5px" }}
+              >
+                Email Address
+              </label>
+              <input
+                name="email"
+                type="text"
+                value={formData().email}
+                onInput={(e) =>
+                  setFormData({ ...formData(), email: e.target.value })
+                }
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  border: "1px solid #ccc",
+                  "border-radius": "4px",
+                }}
+                placeholder="Enter Email"
+                required
               />
             </div>
+            <div class="m:10|0|10|0">
+              <label
+                for="password"
+                class="f:14"
+                style={{ display: "block", "margin-bottom": "5px" }}
+              >
+                Password
+              </label>
+              <div class="rel">
+                <input
+                  name="password"
+                  type={`${showPassword() ? "text" : "password"}`}
+                  value={formData().password}
+                  onInput={(e) =>
+                    setFormData({ ...formData(), password: e.target.value })
+                  }
+                  style={{
+                    width: "100%",
+                    padding: "8px",
+                    border: "1px solid #ccc",
+                    "border-radius": "4px",
+                  }}
+                  placeholder="Enter Password"
+                  required
+                />
+                <Icon
+                  onClick={togglePasswordVisibility}
+                  class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
+                  aria-label="Toggle password visibility"
+                  icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+                />
+              </div>
+            </div>
+
+
           </div>
 
           <button
@@ -428,7 +429,7 @@ export const SignUp = () => {
 };
 
 export const ForgotPasswordForm = () => {
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
   const [otp, setOtp] = createSignal("");
   const [newPassword, setNewPassword] = createSignal("");
@@ -743,7 +744,7 @@ export const ForgotPasswordForm = () => {
 
 export const ContactUs = () => {
   const navigate = useNavigate();
-  const { showErrorToast } = useToast();
+  const { showErrorToast, showLoadingToast } = useToast();
   const [formData, setFormData] = createSignal({
     email: "",
     name: "",
@@ -752,20 +753,6 @@ export const ContactUs = () => {
   });
   const [loadingSite, setLoadingSite] = createSignal(false);
 
-  const contactCall = async () => {
-    try {
-      // let response = await submitContactUsForm(formData().name, formData().email, formData().subject, formData().message);
-      let response: any = {};
-
-      if (response.error) {
-        return Promise.reject(new Error(response.error));
-      }
-      return response;
-    } catch (error: any) {
-      return Promise.reject(new Error(error.response));
-    }
-  };
-
   const handleSubmit = async (event: SubmitEvent) => {
     event.preventDefault();
     const emailError = validateEmail(formData().email);
@@ -773,26 +760,15 @@ export const ContactUs = () => {
       showErrorToast(emailError); // Show the error message if validation fails
     } else {
       setLoadingSite(true);
-      let response: any;
-      await toast.promise(contactCall(), {
-        loading: "Sending message...",
-        success: (val) => {
-          response = val;
-          return <span>Message Sent Successfully</span>;
-        },
-        error: (error) => {
-          console.log("error => ", error);
-          return <span>{error.message}</span>;
+      await showLoadingToast({
+        promise: contactUsCall(formData),
+        loadMessage: "Sending message...",
+        successMessage: "Message Sent Successfully",
+        onSuccess: (value) => {
+          navigate(`/`);
         },
       });
       setLoadingSite(false);
-      if (response!.error) {
-        showErrorToast(response!.error);
-        return;
-      }
-      if (response != null && response.id !== null) {
-        navigate(`/`);
-      }
     }
   };
 

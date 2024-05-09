@@ -11,7 +11,7 @@ export default function tableDashboard() {
         breadcrumb={[...breadcrumbData, { name: "Dashboard" }]}
       />
       <DataFetcher
-        fetchData={API.fetchDataUrl}
+        fetchData={API.getPagesDataUrl}
         renderContent={<TableDashboard />}
       />
     </>

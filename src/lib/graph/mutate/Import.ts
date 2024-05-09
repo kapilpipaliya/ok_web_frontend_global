@@ -22,12 +22,14 @@ import {
   addNewVertex,
   deleteVertex,
   findOrCreateNewVertex,
-  findVertexByLabelAndPks,
-  findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
   replaceVertexProperties,
 } from "./Vertex";
+import {
+  findVertexByLabelAndPks,
+  findVertexByLabelAndUniqueId
+} from "../get/sync/findVertex";
 import { ServerEventsDispatcher } from "../../websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
 import { getToEdge } from "../get/sync/getToEdge";

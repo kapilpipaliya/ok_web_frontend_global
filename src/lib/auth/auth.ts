@@ -1,5 +1,5 @@
 import {
-  getSession,
+  getHttpsSession,
   login,
   logout as logoutSession,
   register,
@@ -12,9 +12,10 @@ import { getDriver, isIntegerId } from "~/lib/server/driver";
 export const getUser = async () => {
   "use server";
   // try {
-  const session = await getSession();
+  const session = await getHttpsSession();
   const neoSession = (await getDriver("super")).session();
 
+  // session only works with https
   const email = session.data.email;
   if (email === undefined) {
     return { error: "Not Authorized" };
@@ -56,7 +57,7 @@ export const loginOrRegister = async (props: {
     const user = await (loginType !== "login"
       ? register(username, password, email)
       : login(username, password));
-    const session = await getSession();
+    const session = await getHttpsSession();
     await session.update((oldData) => ({
       ...oldData,
       userId: user.id,

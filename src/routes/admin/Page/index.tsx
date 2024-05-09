@@ -5,7 +5,7 @@ export default function page() {
   return (
     <>
       <DataFetcher
-        fetchData={API.fetchDataUrl}
+        fetchData={API.getPagesDataUrl}
         renderContent={<AbstractSingleGrid tableId={"Page"} />}
       />
     </>

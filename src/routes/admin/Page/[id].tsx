@@ -4,7 +4,7 @@ import { API, DataFetcher } from "~/components/api/DataFetcher";
 export default function Page() {
   return (
     <DataFetcher
-      fetchData={API.fetchDataUrl}
+      fetchData={API.getFormDataUrl}
       renderContent={<PageDesignerDragAndDrop />}
     ></DataFetcher>
   );

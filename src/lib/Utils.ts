@@ -4,10 +4,10 @@ import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/Edge";
 import {
   addNewVertex,
   deleteVertex,
-  findVertexByLabelAndUniqueIdWithSkip,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
 import {
   commitTxn,
   getNewGraphId,

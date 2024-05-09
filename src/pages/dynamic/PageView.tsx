@@ -10,7 +10,7 @@ import {
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { getFormMetaData } from "~/lib/graph/mutate/Record";
 import { Record } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";

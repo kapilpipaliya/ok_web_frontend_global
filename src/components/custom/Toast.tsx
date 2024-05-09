@@ -1,5 +1,5 @@
 import { Component, Show } from "solid-js";
-import { toast } from "solid-toast";
+import { Renderable, toast, ValueOrFunction } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 
 const DismissButton: Component<{
@@ -26,6 +26,20 @@ const DismissButton: Component<{
     </button>
   );
 };
+
+type ValueOrFunction<T, Args> = T | ((args: Args) => T);
+
+interface LoadingToastParams<T extends { [key: string]: any }> {
+  promise: Promise<T>;
+  loadMessage?: string;
+  successMessage?: string;
+  errorMessage?: string;
+  successJSXFn?: ValueOrFunction<Renderable, T>;
+  errorJSXFn?: ValueOrFunction<Renderable, any>;
+  onSuccess?: (value: T) => void;
+  onError?: (error: any) => void;
+}
+
 export const useToast = () => {
   function showCustomToast(message: string, showDismiss: boolean) {
     toast.custom(
@@ -64,16 +78,26 @@ export const useToast = () => {
     toast.success(message, { duration: 2000 });
   }
 
-  function showLoadingToast(
-    promise: Promise<string>,
-    loadMessage: string,
-    successMessage: string,
-    errorMessage: string,
-  ) {
-    toast.promise(promise, {
-      loading: loadMessage ?? "Processing...", // Loading message displayed while promise is resolving
-      success: (val) => <span>{successMessage ?? val ?? "Successfully"}</span>, // Success message displayed on successful resolution
-      error: <span>{errorMessage ?? "Oops! Something went wrong."}</span>, // Error message displayed if promise is rejected
+  async function showLoadingToast<T extends { [key: string]: any }>({
+    promise,
+    loadMessage = "Processing...",
+    successMessage,
+    errorMessage,
+    successJSXFn,
+    errorJSXFn,
+    onSuccess,
+    onError,
+  }: LoadingToastParams<T>) {
+    await toast.promise(promise, {
+      loading: loadMessage,
+      success: successJSXFn ?? ((val: T) => {
+        onSuccess?.(val);
+        return <span>{successMessage ?? val.message ?? "Successfully completed"}</span>;
+      }),
+      error: (e: any) => {
+        onError?.(e);
+        return <span>{errorMessage ?? e.message ?? "Oops! Something went wrong"}</span>;
+      }
     });
   }
 

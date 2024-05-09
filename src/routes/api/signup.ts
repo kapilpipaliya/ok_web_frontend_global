@@ -1,16 +1,18 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, isIntegerId } from "~/lib/server/driver";
-import { getSession } from "~/lib/auth/_server";
+import { getHttpsSession } from "~/lib/auth/_server";
 import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { getGraph } from "~/cypher_api/lib/graph";
 import postAPI from "~/lib/auth/PostApi";
+import { checkPropertyExists } from "~/lib/server/functions";
+import { createDockerContainer } from "~/lib/server/docker_functions";
 
 // driverPort : 7687 -> For Driver // TODO : Last Digit 0
 // Port3 : 3000 -> For Memgraph Lab // TODO : Last Digit 2
 
 export async function POST({ request }: APIEvent) {
-  const { username, email, password } = await request.json();
+  const { username, email, password, subdomain } = await request.json();
   const session = (await getDriver("super")).session();
   const tx = session.beginTransaction();
 
@@ -25,24 +27,19 @@ export async function POST({ request }: APIEvent) {
       return { error: "Username already exists" };
     }
 
-    const checkResult = await tx.run(
-      `MATCH (u:User) WHERE u.email = $email RETURN u;`,
-      { email: email },
-    );
-    if (checkResult.records.length > 0) {
+    if (email && (await checkPropertyExists("User", tx, "email", email))) {
       await tx.rollback();
       await session.close();
       return { error: "Email address already exists" };
     }
 
-    const createUserQuery = `CREATE (u:User {username: $username, email: $email, password: $password}) RETURN u;`;
-    const createUserResult = await tx.run(createUserQuery, {
-      username,
-      email,
-      password,
-    });
+    if (subdomain && (await checkPropertyExists("User", tx, "subdomain", subdomain))) {
+      await tx.rollback();
+      await session.close();
+      return { error: "Sub Domain already exists" };
+    }
 
-    const user = createUserResult.records[0].get("u");
+    
 
     let driverPort, logsPort, labPort;
     try {
@@ -59,11 +56,30 @@ export async function POST({ request }: APIEvent) {
         headers: { "Content-Type": "application/json" },
       });
     }
+    const createUserQuery = `CREATE (u:User {
+      username: $username,
+      email: $email,
+      password: $password,
+      subdomain: $subdomain,
+      driverPort: $driverPort,
+      logsPort: $logsPort,
+      labPort: $labPort
+    }) RETURN u;`;
+    const createUserResult = await tx.run(createUserQuery, {
+      username,
+      email,
+      password,
+      subdomain,
+      driverPort,
+      logsPort,
+      labPort
+    });
 
+    const user = createUserResult.records[0].get("u");
     await tx.commit();
     await session.close();
 
-    const http_session = await getSession();
+    const http_session = await getHttpsSession();
     await http_session.update((oldData) => ({
       ...oldData,
       // userId: user.id,
@@ -98,15 +114,11 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
   let { driverPort, logsPort, labPort } = portsResult;
 
   // TODO: use this function in solid start and use it.
-  await postAPI("http://easyformforge.com:5000/docker/createNew", {
-    Image: "memgraph/memgraph-platform",
-    name: username,
-    portBindings: {
-      [driverPort]: "7687",
-      [logsPort]: "7444",
-      [labPort]: "3000",
-    },
-  });
+  await createDockerContainer("memgraph/memgraph-platform", username, {
+    [driverPort]: "7687",
+    [logsPort]: "7444",
+    [labPort]: "3000",
+  },)
 
   // let userDriver: Driver;
   // if (!getDriver(username)) {
@@ -116,11 +128,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
 
   const [graph, setGraph] = getGraph();
   await importAllCSV({ driver: userDriver }, graph, setGraph);
-
-  driverPort = driverPort + 10;
-  logsPort = logsPort + 10;
-  labPort = labPort + 10;
-  const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort}, n.logsPort = ${logsPort}, n.labPort = ${labPort} RETURN n;`;
+  const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} RETURN n;`;
   await tx.run(updatePort);
   return { driverPort, logsPort, labPort };
 }

@@ -8,10 +8,10 @@ import {
 } from "../graph";
 import { klona } from "klona/json";
 import {
-  findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
 } from "./Vertex";
+import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 import { batch, onCleanup, untrack } from "solid-js";
 import {
   addNewRow,

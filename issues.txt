@@ -1,4 +1,12 @@
-// when signup and login convert email to lowercase in the api.
-// make mutate api.
-// convert docker api /root/pm2_and_docker_frontend/pm2-docker-manage-api.js to solid-start API and use it when signup to create a docker.
-// make sure session is properly closed in API.
+
+✅ 1. when signup and login convert email to lowercase in the api.
+   2. make mutate api.(kapil)
+   3. convert docker api /root/pm2_and_docker_frontend/pm2-docker-manage-api.js to solid-start API and use it when signup to create a docker.
+✅ 4. make sure session is properly closed in API.
+✅ 5. make user validation when update profile.
+  6. add a subdmoin field in signup. if not unique give error message
+
+  ✅ 1. make a api for pages load.
+ ✅  2. make a api for edit form data get.
+  3. make a api for submit form.(Kapil)
+  4. 

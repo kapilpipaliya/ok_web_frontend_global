@@ -60,7 +60,7 @@ export interface GraphInterface {
 }
 
 export const GraphContext =
-  createContext<ReturnType<typeof createStore<GraphInterface>>>();
+  createContext<ReturnType<typeof createStore<GraphInterface>>>([] as any);
 
 export type Revert = { revert: () => any };
 export type InsertFn = {

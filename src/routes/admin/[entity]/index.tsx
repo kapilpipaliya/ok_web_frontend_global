@@ -7,7 +7,7 @@ export default function admin() {
   return (
     <DataFetcher
       renderContent={<AbstractSingleGrid tableId={params.entity} />}
-      fetchData={API.fetchDataUrl}
+      fetchData={API.getPagesDataUrl}
     />
   );
 }

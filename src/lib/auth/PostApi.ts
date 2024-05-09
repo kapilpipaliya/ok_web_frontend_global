@@ -8,7 +8,6 @@ async function postAPI(
   url: string,
   data: object,
 ): Promise<{ [key: string]: any }> {
-  try {
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -17,26 +16,26 @@ async function postAPI(
       body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
-      if (response.headers.get("content-type")?.includes("application/json")) {
-        const result = await response.json();
-        return Promise.reject(new Error(result.error));
-      }
+    const contentType = response.headers.get("content-type");
 
-      throw new Error(`Network response was not ok: ${response.statusText}`);
+    if (!response.ok) {
+      // Attempt to parse error message from JSON or default to status text
+      const errorMessage = contentType?.includes("application/json")
+        ? (await response.json()).error
+        : response.statusText;
+
+      // Throw an error with status code and message
+      throw new Error(`Error ${response.status}: ${errorMessage}`);
     }
 
     const responseData = await response.json();
 
+    // Optional: Check if responseData contains an error field
     if (responseData.error) {
       throw new Error(responseData.error);
     }
 
     return responseData;
-  } catch (error: any) {
-    console.error("Error making POST request:", error.stack);
-    throw error;
-  }
 }
 
 export default postAPI;

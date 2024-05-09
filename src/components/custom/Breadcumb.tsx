@@ -11,11 +11,11 @@ export type PageHeaderProps = {
 export default function PageHeader(props: PageHeaderProps) {
   const headerStyle = {
     margin: "10px",
-    "margin-bottom": "3rem",
+    "margin-bottom": "1rem",
   };
 
   const titleStyle = {
-    "margin-bottom": "0.8rem",
+    "margin-bottom": "0.3rem",
     "font-size": "22px",
     "font-weight": "bold",
     fontFamily: '"Public Sans", sans-serif',
@@ -32,7 +32,7 @@ export default function PageHeader(props: PageHeaderProps) {
         ...(props.className && { className: props.className }),
       }}
     >
-      <div>
+      <div >
         <SiteTitle>{props.title}</SiteTitle>
         <h2 style={titleStyle}>{props.title}</h2>
 

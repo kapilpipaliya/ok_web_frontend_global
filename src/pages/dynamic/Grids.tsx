@@ -50,8 +50,8 @@ import {
 } from "~/lib/Utils";
 import {
   deleteVertex,
-  findVertexByLabelAndUniqueId,
 } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";

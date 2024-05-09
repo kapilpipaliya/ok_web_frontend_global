@@ -1,5 +1,6 @@
-import { getSubDomain } from "~/lib/domain_utils";
+
 import type { APIEvent } from "@solidjs/start/server";
+import { getSubDomain } from "~/lib/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {
   const host = request.headers.get("host");

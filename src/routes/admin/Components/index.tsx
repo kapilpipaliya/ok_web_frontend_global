@@ -10,7 +10,7 @@ export default function Components() {
       fetchData={API.fetchDataUrl}
       renderContent={
         <DataFetcher
-          fetchData={API.fetchDataUrl}
+          fetchData={API.getPagesDataUrl}
           renderContent={<AbstractSingleGrid tableId={params.entity} />}
         />
       }

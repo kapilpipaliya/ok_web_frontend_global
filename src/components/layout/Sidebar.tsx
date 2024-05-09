@@ -16,7 +16,7 @@ import {
   getSublistRowsForType,
   Record,
 } from "~/lib/Utils";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 
@@ -134,7 +134,6 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   };
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed());
-    props.toggleSidebar();
   };
 
   const navData = createMemo(() => {
@@ -169,8 +168,8 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       <Show
         when={navData()}
         fallback={
-          <div class="flex jc:center ai:center h:70%">
-            <LoaderNew class="h:30 w:30 align-self:center" />
+          <div class="flex jc:center ai:center">
+            <LoaderNew />
           </div>
         }
       >
@@ -178,7 +177,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
           <div>
             <aside class="flex">
               <div
-                class="rel bg:#EFF0FB r:0|15|15|0"
+                class="rel bg:#E5EAFE r:0|15|15|0"
                 style={`display: flex; padding-bottom: 2rem; flex-direction: column; align-items: center; width: 4rem; height: 100vh`}
               >
                 <nav style="display: flex; margin-top: 1rem; padding-top: .5rem; flex-direction: column; flex: 1 1 0%; align-items: center;">
@@ -190,7 +189,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                       {(link) => (
                         <Show when={link.href !== "undefined"}>
                           <a
-                            class={`${activeSection() === link.name ? "bg:white" : ""} gap:10 `}
+                            class={`${activeSection() === link.name ? "bg:white color:#37c" : ""} gap:10 `}
                             href={link.href}
                             style={`display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; `}
                             onClick={() => setActiveSection(link.name)}
@@ -225,7 +224,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
               </div>
 
               <Show when={!isCollapsed()}>
-                <div class={`p:20|10 bg:ghostwhite r:0|0|15|0`}>
+                <div class={`p:20|10 bg:ghostwhite r:0|0|15|0 @fade|.3s`}>
                   <nav class="flex 0px 0px 10px 10px">
                     <div class="group">
                       <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">

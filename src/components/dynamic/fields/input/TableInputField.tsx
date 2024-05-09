@@ -17,9 +17,9 @@ import {
 import "~/css/table.css";
 import { toTitle } from "case-switcher-js";
 import {
-  findVertexByLabelAndUniqueId,
   replaceVertexProperties,
 } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import {
   getNewTxnId,
   GraphContext,

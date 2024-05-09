@@ -1,8 +1,10 @@
 import { APIEvent } from "@solidjs/start/dist/server";
+import { Session } from "neo4j-driver";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
 import { getChildVertexes } from "~/cypher_api/lib/Traverse";
+import { getHttpsSession } from "~/lib/auth/_server";
 import { getDriver } from "~/lib/server/driver";
 import { checkPropertyExists } from "~/lib/server/functions";
 
@@ -12,17 +14,20 @@ import { checkPropertyExists } from "~/lib/server/functions";
  * @param {object} [params] - The parameters to pass to the function, optional.
  * @returns {Promise<object>} - A standard response object.
  */
-async function handleRequest(func: Function, params = {}) {
+async function handleRequest(func: Function, params = {}, session: Session) {
   try {
-    return await func(params);
+    return await func(params, session);
   } catch (error: any) {
     console.error("Error :", error);
     return new Response(error.message, { status: 500 });
+  } finally {
+    await session.close();
   }
 }
 
 export async function POST({ request }: APIEvent) {
   const { panel, ...payload } = await request.json();
+  const session = (await getDriver("super")).session();
 
   if (!panel) {
     return { error: "Missing panel" };
@@ -31,24 +36,23 @@ export async function POST({ request }: APIEvent) {
   switch (panel) {
     case "profile":
       // payload: { panel: 'profile',userId, username, email }
-      return handleRequest(profile, payload);
+      return handleRequest(profile, payload, session);
     case "password":
       // payload: { panel: 'password',currentPassword, username, newPassword  }
-      return handleRequest(password, payload);
+      return handleRequest(password, payload, session);
     case "pricing":
       // payload: { panel: 'pricing' }
-      return handleRequest(pricing);
+      return handleRequest(pricing, payload, session);
     case "supportTicket":
-      return handleRequest(supportTicket, payload);
+      return handleRequest(supportTicket, payload, session);
     default:
       return { error: "Invalid action" };
   }
 }
 
-const profile = async (payload: any) => {
+const profile = async (payload: any, session: Session) => {
   const { userId, username, email } = payload;
 
-  const session = (await getDriver("super")).session();
   // Ensure user exists
   const userExists = await session.run(
     `MATCH (u:User) WHERE id(u) = $userId RETURN u;`,
@@ -77,16 +81,26 @@ const profile = async (payload: any) => {
 
   const result = await session.run(query, { userId, email, username });
   const user = result.records[0]?.get("u");
+
+  if (email) {
+    const http_session = await getHttpsSession();
+    await http_session.update((oldData) => ({
+      ...oldData,
+      // userId: user.id,
+      // username: user.username,
+      // password: user.password,
+      email: user.properties.email,
+    }));
+  }
+
   return { message: "Profile updated successfully", user: user.properties };
 };
 
-const password = async (payload: any) => {
+const password = async (payload: any, session: Session) => {
   const { currentPassword, username, newPassword } = payload;
 
-  const neoSession = (await getDriver("super")).session();
-
   const findUserQuery = `MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;`;
-  const findUserResult = await neoSession.run(findUserQuery, {
+  const findUserResult = await session.run(findUserQuery, {
     password: currentPassword,
     username: username,
   });
@@ -95,7 +109,7 @@ const password = async (payload: any) => {
   }
 
   const query = `MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;`;
-  const result = await neoSession.run(query, {
+  const result = await session.run(query, {
     username: username,
     password: newPassword,
   });
@@ -107,47 +121,43 @@ const password = async (payload: any) => {
   };
 };
 
-const pricing = async () => {
-  const neoSession = (await getDriver("super")).session();
-
+const pricing = async (payload: any, session: Session) => {
   const query = `MATCH (n:Pricing) RETURN n;`;
-  const result = await neoSession.run(query);
+  const result = await session.run(query);
   const plans = result.records.map((r) => r.get("n").properties);
   return {
     plans: plans,
   };
 };
 
-const supportTicket = async (data: any) => {
+const supportTicket = async (data: any, session: Session) => {
   const { action, ...payload } = data;
 
   switch (action) {
     case "getTicktes":
       // payload: { panel: 'supportTicket',action: 'getTicktes', email}
-      return await getTicket(payload);
+      return await getTicket(payload, session);
     case "create":
       // payload: { panel: 'supportTicket',action: 'create',name, email, subject, message }
-      return await createTicket(payload);
+      return await createTicket(payload, session);
     case "updateStatus":
       // payload: { panel: 'supportTicket',action: 'updateStatus',id, status }
-      return await updateStatus(payload);
+      return await updateStatus(payload, session);
     case "chat":
       // payload: { panel: 'supportTicket',action: 'chat',name, email, subject, message }
-      return await chat(payload);
+      return await chat(payload, session);
     case "delete":
       // payload: { panel: 'supportTicket',action: 'delete',id }
-      return await deleteTicket(payload);
+      return await deleteTicket(payload, session);
     default:
       return { status: 400, error: "Invalid support ticket action" };
   }
 
-  async function getTicket(payload: any) {
+  async function getTicket(payload: any, session: Session) {
     const { email } = payload;
 
-    const neoSession = (await getDriver("super")).session();
-
     const query = `MATCH (n:Support {email: $email}) RETURN n;`;
-    const result = await neoSession.run(query, { email });
+    const result = await session.run(query, { email });
 
     const data = result.records.map((r) => {
       const data = r.get("n").properties;
@@ -160,13 +170,11 @@ const supportTicket = async (data: any) => {
     };
   }
 
-  async function createTicket(payload: any) {
+  async function createTicket(payload: any, session: Session) {
     const { name, email, subject, message } = payload;
 
-    const neoSession = (await getDriver("super")).session();
-
     const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) RETURN n;`;
-    await neoSession.run(query, {
+    await session.run(query, {
       name: name,
       email: email,
       subject: subject,
@@ -177,24 +185,22 @@ const supportTicket = async (data: any) => {
     };
   }
 
-  async function updateStatus(payload: any) {
+  async function updateStatus(payload: any, session: Session) {
     const { id, status } = payload;
-    const neoSession = (await getDriver("super")).session();
 
     const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status RETURN n;`;
-    await neoSession.run(query, { id: id, status: status });
+    await session.run(query, { id: id, status: status });
     return {
       message: "Status updated successfully",
     };
   }
 
-  async function chat(payload: any) {
+  async function chat(payload: any, session: Session) {
     const { subAction, parentVertexId, newMessage } = payload;
-    const neoSession = (await getDriver("super")).session();
     switch (subAction) {
       case "send":
         const data = await newRowMGCall(
-          { driver: await getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: session },
           parentVertexId,
           "SupportUser",
           "",
@@ -203,11 +209,11 @@ const supportTicket = async (data: any) => {
         return data;
       case "get":
         const result = await findVertexByIdMGCall(
-          { driver: await getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: session },
           parentVertexId,
         );
         const message = await getChildVertexes(
-          { driver: await getDriver("super"), session: neoSession },
+          { driver: await getDriver("super"), session: session },
           ["SupportUser"],
           [result.vertex!],
         );
@@ -215,11 +221,10 @@ const supportTicket = async (data: any) => {
     }
   }
 
-  async function deleteTicket(payload: any) {
+  async function deleteTicket(payload: any, session: Session) {
     const { id } = payload;
-    const neoSession = (await getDriver("super")).session();
     await deleteNodeMGCall(
-      { driver: await getDriver("super"), session: neoSession },
+      { driver: await getDriver("super"), session: session },
       id,
     );
     return {

@@ -10,7 +10,7 @@ import { randomHash } from "../helpers/hash";
 import { parseStyle } from "../helpers/parseStyle";
 import { resolvePath } from "../helpers/resolvePath";
 import { JSX } from "solid-js";
-import { findVertexByLabelAndUniqueId } from "../../../graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/mutate/findVertexByLabelAndUniqueId";
 import { GraphInterface, Vertex } from "../../../graph/graph";
 import { componentDrag, setPropertyValueGlobal } from "../../../pageStore";
 import { SetStoreFunction, Store } from "solid-js/store";

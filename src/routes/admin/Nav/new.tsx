@@ -3,6 +3,6 @@ import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function NavNew() {
   return (
-    <DataFetcher fetchData={API.fetchDataUrl} renderContent={<NavDesigner />} />
+    <DataFetcher fetchData={API.getPagesDataUrl} renderContent={<NavDesigner />} />
   );
 }

@@ -41,8 +41,9 @@ export function Navbar(
   const navbarStyle = () =>
     ({
       "background-color": "white",
-      padding: "10px",
+      padding: "6px",
       display: "flex",
+      width: '-webkit-fill-available',
       "justify-content": "space-between",
       "align-items": "center",
     }) as JSX.CSSProperties;

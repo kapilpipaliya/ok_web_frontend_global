@@ -22,10 +22,10 @@ import {
   Record,
 } from "~/lib/Utils";
 import {
-  findVertexByLabelAndUniqueId,
   mergeVertexProperties,
   newVertex,
 } from "~/lib/graph/mutate/Vertex";
+import { findVertexByLabelAndUniqueId } from "./graph/get/sync/findVertex";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
 import {
   cloneRowProps,
