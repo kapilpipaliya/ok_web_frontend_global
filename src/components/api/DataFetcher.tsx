@@ -9,7 +9,7 @@ import {
 } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { API_BASE_URL } from "~/lib/api";
+
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export const DataFetcher = (props: {
@@ -53,12 +53,12 @@ export const DataFetcher = (props: {
 };
 
 export const API = {
-  fetchDataUrl: `${API_BASE_URL}/get_data`,
-  loginUrl: `${API_BASE_URL}/login`,
-  signUpUrl: `${API_BASE_URL}/signup`,
-  profileUrl: `${API_BASE_URL}/profile`,
-  logOutUrl: `${API_BASE_URL}/logout`,
-  getFormDataUrl: `${API_BASE_URL}/get_form_data`,
-  SubmitDataUrl: `${API_BASE_URL}/submit_data`,
-  getPagesDataUrl: `${API_BASE_URL}/get_pages_data`,
+  fetchDataUrl: `/api/get_data`,
+  loginUrl: `/api/login`,
+  signUpUrl: `/api/signup`,
+  profileUrl: `/api/profile`,
+  logOutUrl: `/api/logout`,
+  getFormDataUrl: `/api/get_form_data`,
+  SubmitDataUrl: `/api/submit_data`,
+  getPagesDataUrl: `/api/get_pages_data`,
 };

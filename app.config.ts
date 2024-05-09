@@ -13,9 +13,15 @@ export default defineConfig({
     //     port: 1100
     //   }
     // },
+    // },
     server: {
+      https: {
+        cert: '/etc/letsencrypt/live/easyformforge.com/fullchain.pem',
+        key: '/etc/letsencrypt/live/easyformforge.com/privkey.pem',
+      },
       // port: 36075, // Change this to the desired port number for the server
       hmr: {
+        protocol: 'wss',
         port: 2900, // Change this to the desired port number for HMR
       },
     },

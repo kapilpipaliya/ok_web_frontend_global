@@ -18,7 +18,7 @@ export default function App() {
             <LoadingContext.Provider value={loadingSite}>
               <MetaProvider>
                 <div id="popup-root" />
-                <Suspense>
+                <Suspense fallback={<LoaderNew />}>
                   {props.children}
                   <Show when={loadingSite[0]()}>
                     <LoaderNew />

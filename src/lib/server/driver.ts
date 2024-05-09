@@ -19,7 +19,7 @@ export async function getDriver(
 ) {
   let port;
   const session = await getSuperSession();
-  if (subdomain === "super") {
+  if (subdomain === "super" || subdomain === "www") {
     port = 1102;
   } else {
     const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;

@@ -11,7 +11,6 @@ export const JSONToCypherMap = (json: object) => {
 };
 */
 
-export const API_BASE_URL = "https://easyformforge.com/api";
 
 const collectionAttr = [
   {

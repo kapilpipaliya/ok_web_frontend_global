@@ -6,6 +6,7 @@ import { getSubDomain } from "~/lib/server/domain_utils";
 export async function POST({ request }: APIEvent) {
   const { email, password } = await request.json();
   const subdomain = getSubDomain(request.headers.get("host")!);
+  console.log('host, ', request.headers.get("host"), getSubDomain(request.headers.get("host")!) )
   const session = (await getDriver(subdomain)).session();
   try {
     const query = `MATCH (u:User {email: $email, password: $password}) return u;`;
@@ -25,10 +26,11 @@ export async function POST({ request }: APIEvent) {
     const http_session = await getHttpsSession();
     await http_session.update((oldData) => ({
       ...oldData,
-      subdomain: user.properties.subdomain,
+      subdomain:subdomain,
       email: user.properties.email,
     }));
     const { password: _, ...properties } = user.properties;
+    console.log('login', http_session.id)
     return {
       id: !isIntegerId ? user.identity.toNumber() : user.identity,
       properties,

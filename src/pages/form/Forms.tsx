@@ -118,6 +118,7 @@ export const Login = () => {
               border: "1px solid #ccc",
               "border-radius": "4px",
             }}
+            autocomplete="email"
             placeholder="Your email"
             required
           />
@@ -142,6 +143,7 @@ export const Login = () => {
                 border: "1px solid #ccc",
                 "border-radius": "4px",
               }}
+              autocomplete="password"
               placeholder="Your Password"
               required
             />
