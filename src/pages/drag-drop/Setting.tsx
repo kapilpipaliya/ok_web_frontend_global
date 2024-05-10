@@ -87,6 +87,7 @@ function Settings() {
   const sectionStyle = {
     "background-color": "#f5f7fa",
     padding: "20px",
+    width: '80%',
     margin: "20px",
     "border-radius": "8px",
     "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
@@ -214,104 +215,173 @@ function Settings() {
         onError: (error) => console.error("API call failed:", error),
       });
     };
+    const [selectedImage, setSelectedImage] = createSignal(null);
+    const [imageUrl, setImageUrl] = createSignal('https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png'); // Default image
+    
+    const handleImageChange = async (e) => {
+      setSelectedImage(e.target.files[0]);
+      const file = e.target.files[0]; // Get the first selected file
+
+      const formData = new FormData();
+
+      formData.append(profileData.username, file);
+
+      try {
+        await fetch(`/api/uploadImage`, {
+          method: 'POST',
+          body: formData
+        }).then((res) => {
+          console.log(res);
+        }
+        );
+      } catch (error) {
+        console.error('Error uploading image:', error);
+      }
+    };
+    
+
+    const handleAvatarClick = () => {
+      const fileInput = document.getElementById('fileInput');
+      fileInput?.click();
+    };
+
+    const handleSubmit = async () => {
+      // formData.append('avatar', selectedImage);
+
+      // try {
+      //   const response = await axios.post('/upload', formData, {
+      //     headers: {
+      //       'Content-Type': 'multipart/form-data'
+      //     }
+      //   });
+
+      //   // Assuming backend responds with the public URL of the uploaded image
+      //   setImageUrl(response.data.imageUrl);
+      // } catch (error) {
+      //   console.error('Error uploading image:', error);
+      // }
+    };
     return (
       <div style={sectionStyle}>
-        <div>
-          <div class={"font-weight:700"}>Personal Info</div>
-          <div class={"font-weight:400 mb:30"}>
-            Update personal details here
-          </div>
-          <div
-            class={
-              "flex ai:center jc:space-between p:20|20|0|20 m:10|0|5|0 bt:1px|solid|lightgrey"
-            }
-          >
-            <span class={"font-weight:600"}>User Id</span>
-            <TextField
-              labelClass={"w:40%"}
-              name={"id"}
-              label={"Id"}
-              disabled={true}
-              value={profileData.id}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div
-            class={
-              "flex ai:center jc:space-between p:20 m:10|0 bt:1px|dashed|lightgrey bb:1px|dashed|lightgrey"
-            }
-          >
-            <span class={"font-weight:600"}>UserName</span>
-            <TextField
-              name={"username"}
-              disabled={!isEdit()}
-              labelClass={"w:40%"}
-              label={"Username"}
-              value={profileData.username}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div
-            class={
-              "flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|dashed|lightgrey"
-            }
-          >
-            <span class={"font-weight:600"}>Email Address</span>
-            <TextField
-              name={"email"}
-              disabled={!isEdit()}
-              labelClass={"w:40%"}
-              label={"Email Address"}
-              value={profileData.email}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div
-            class={
-              "flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|solid|lightgrey"
-            }
-          >
-            <span class={"font-weight:600"}>Country</span>
-            <select
-              name={"country"}
-              disabled={!isEdit()}
-              style={inputStyle}
-              value={profileData.country}
-              onChange={handleInputChange}
+        <div class={"font-weight:700"}>Personal Info</div>
+        <div class={"font-weight:400"}>
+          Update personal details here
+          <div class="p:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">
+            <div class="r:20 flex ai:center jc:center text-align:-webkit-center p:15px m:25 bg:#ffffff justify-self:center max-w:400px@>lg" >
+              <div class="p:0|20">    
+                  <div style={`display: flex; flex-direction: column; align-items: center; gap: 10px;`}>
+                  <input type="file" accept="image/png, image/jpg, image/jpeg" id="fileInput" onChange={handleImageChange} style={{ display: 'none' }} />
+                  <div class="circle-avatar" onClick={handleAvatarClick}>
+                    <img src={imageUrl()} alt="Avatar" style={{ width: '100px', height: '100px', 'border-radius': '50%', cursor: 'pointer' }} />
+                  </div>
+                  <div style={`font-size: 24px; font-weight: bold;`}>{profileData.username}</div>
+                    <div style={`font-size: 18px; margin-bottom: 10px;`}>Product Design</div>
+                  </div>
+                  <div style={`text-align: center; font-size: 14px;`}>
+                    I choose the product design track because I love solving visual problems using UI/UX designs.
+                  </div>
+                  <div style={`display: flex; justify-content: center; gap: 10px;`} class="mt:10">
+                  <img style={`width: 24px; height: 24px;`} src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661504218208_684135/email-template-icon-instagram" alt="Instagram" />
+                  <img style={`width: 24px; height: 24px;`} src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661503043040_372004/email-template-icon-twitter" alt="Twitter" />
+                  <img style={`width: 24px; height: 24px;`} src="https://archisketch-resources.s3.ap-northeast-2.amazonaws.com/vrstyler/1661502815169_682499/email-template-icon-facebook" alt="Facebook" />
+                  </div>
+              </div>
+            </div>
+            <div>
+            <div
+              class={
+                "flex ai:center jc:space-between p:20|20|10|20 m:10|0|5|0 bt:1px|solid|lightgrey"
+              }
             >
-              <option>United States</option>
-              <option>Canada</option>
-              <option>United Kingdom</option>
-            </select>
-          </div>
-        </div>
-        <div class={"flex jc:end"}>
-          <Show
-            when={isEdit()}
-            fallback={
-              <button
-                style={buttonStyle}
-                onClick={() => {
-                  setIsEdit(true);
-                }}
+              <span class={"font-weight:600"}>User Id</span>
+              <TextField
+                labelClass={"w:40%"}
+                name={"id"}
+                label={"Id"}
+                disabled={true}
+                value={profileData.id}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div
+              class={
+                "flex ai:center jc:space-between p:20 m:10|0 bt:1px|dashed|lightgrey bb:1px|dashed|lightgrey"
+              }
+            >
+              <span class={"font-weight:600"}>UserName</span>
+              <TextField
+                name={"username"}
+                disabled={!isEdit()}
+                labelClass={"w:40%"}
+                label={"Username"}
+                value={profileData.username}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div
+              class={
+                "flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|dashed|lightgrey"
+              }
+            >
+              <span class={"font-weight:600"}>Email Address</span>
+              <TextField
+                name={"email"}
+                disabled={!isEdit()}
+                labelClass={"w:40%"}
+                label={"Email Address"}
+                value={profileData.email}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div
+              class={
+                "flex ai:center jc:space-between p:5|20|20|20 mb:10 bb:1px|solid|lightgrey"
+              }
+            >
+              <span class={"font-weight:600"}>Country</span>
+              <select
+                name={"country"}
+                disabled={!isEdit()}
+                style={inputStyle}
+                value={profileData.country}
+                onChange={handleInputChange}
               >
-                Edit Settings
-              </button>
-            }
-          >
-            <button
-              style={outlineStyle}
-              onClick={() => {
-                setProfileData(originalProfileData);
-                setIsEdit(false);
-              }}
-            >
-              Cancel
-            </button>
-            <button style={buttonStyle} onClick={onClickSave}>
-              Save Changes
-            </button>
-          </Show>
+                <option>United States</option>
+                <option>Canada</option>
+                <option>United Kingdom</option>
+              </select>
+            </div>
+              <div class={"flex jc:end"}>
+                <Show
+                  when={isEdit()}
+                  fallback={
+                    <button
+                      style={buttonStyle}
+                      onClick={() => {
+                        setIsEdit(true);
+                      }}
+                    >
+                      Edit Settings
+                    </button>
+                  }
+                >
+                  <button
+                    style={outlineStyle}
+                    onClick={() => {
+                      setProfileData(originalProfileData);
+                      setIsEdit(false);
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button style={buttonStyle} onClick={onClickSave}>
+                    Save Changes
+                  </button>
+                </Show>
+              </div>
+          </div>
+         
+          </div>
         </div>
       </div>
     );

@@ -36,7 +36,7 @@ export async function POST({ request }: APIEvent) {
 
   switch (panel) {
     case "profile":
-      // payload: { panel: 'profile',userId, username, email }
+      // payload: { panel: 'profile',userId, username, email, profileImage }
       return handleRequest(profile, payload, session, subdomain);
     case "password":
       // payload: { panel: 'password',currentPassword, username, newPassword  }
@@ -52,7 +52,7 @@ export async function POST({ request }: APIEvent) {
 }
 
 const profile = async (payload: any, session: Session) => {
-  const { userId, username, email } = payload;
+  const { userId, username, email, profileImage } = payload;
 
   // Ensure user exists
   const userExists = await session.run(
@@ -73,11 +73,13 @@ const profile = async (payload: any, session: Session) => {
   ) {
     return { status: 500, error: "Username already exists" };
   }
+  
   // Update user profile
   let query = `MATCH (u:User) WHERE id(u) = $userId SET `;
   const updates = [];
   if (email) updates.push(`u.email = $email`);
   if (username) updates.push(`u.username = $username`);
+  if (profileImage) updates.push(`u.profileImage = $profileImage`);
   query += updates.join(", ") + " RETURN u;";
 
   const result = await session.run(query, { userId, email, username });

@@ -4,12 +4,23 @@ export const isIntegerId = true;
 
 const drivers = {} as { [port: string]: Driver };
 
-const getSuperSession = async () => {
-  if (!drivers[1102]) {
-    return createDriver(`bolt://localhost:1102`).session();
-  }else{
-    return drivers[1102].session();
+export async function getDriverWithPort(
+  port: string | number,
+  username?: string,
+  password?: string,
+) {
+  if (!drivers[port]) {
+    drivers[port] = createDriver(
+      `bolt://localhost:${port}`,
+      username && password ? auth.basic(username, password) : undefined,
+      isIntegerId ? { disableLosslessIntegers: true } : undefined,
+    );
   }
+  return drivers[port];
+}
+
+const getSuperSession = async () => {
+  return getDriverWithPort(1102);
 }
 // Function to get a driver instance based on the database ID
 export async function getDriver(
@@ -18,22 +29,19 @@ export async function getDriver(
   password?: string,
 ) {
   let port;
-  const session = await getSuperSession();
   if (subdomain === "super" || subdomain === "www") {
     port = 1102;
   } else {
+    const session = await getSuperSession();
     const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;
     const res = await session.run(query, { subdomain });
-    port = res.records[0].get('n')?.properties.driverPort;
+    if(res.records.length > 0){
+      port = res.records[0].get('n')?.properties.driverPort;
+    }else{
+      throw new Error('Subdomain Not Found!')
+    }
     session.close()
   }
-  if (!drivers[port]) {
-    // Check if docker is running and start it if not
-    drivers[port] = createDriver(
-      `bolt://localhost:${port}`,
-      username && password ? auth.basic(username, password) : undefined,
-      isIntegerId ? { disableLosslessIntegers: true } : undefined,
-    );
-  }
-  return drivers[port];
+
+  return getDriverWithPort(port, username, password);
 }

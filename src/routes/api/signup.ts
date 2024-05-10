@@ -45,12 +45,12 @@ export async function POST({ request }: APIEvent) {
 
     let driverPort, logsPort, labPort;
     try {
-      const portResult = await PortConfigure(tx, username);
+      const portResult = await PortConfigure(tx, username, subdomainFromUrl);
       driverPort = portResult.driverPort;
       logsPort = portResult.logsPort;
       labPort = portResult.labPort;
     } catch (error: any) {
-      console.error("DB Setup error:", error.message);
+      console.error("DB Setup error:", error.stack);
       await tx.rollback();
       await session.close();
       return new Response(JSON.stringify({ error: error.message }), {
@@ -65,7 +65,8 @@ export async function POST({ request }: APIEvent) {
       subdomain: $subdomain,
       driverPort: $driverPort,
       logsPort: $logsPort,
-      labPort: $labPort
+      labPort: $labPort,
+      profileImage: null
     }) RETURN u;`;
     const createUserResult = await tx.run(createUserQuery, {
       username,
@@ -78,6 +79,14 @@ export async function POST({ request }: APIEvent) {
     });
 
     const user = createUserResult.records[0].get("u");
+    // let userDriver: Driver;
+    // if (!getDriver(username)) {
+    let userDriver = await getDriver(subdomainFromUrl);
+    // }
+    await new Promise((resolve) => setTimeout(() => resolve(""), 15000));
+
+    const [graph, setGraph] = getGraph();
+    await importAllCSV({ driver: userDriver }, graph, setGraph);
     await tx.commit();
     await session.close();
 
@@ -100,7 +109,7 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-async function PortConfigure(tx: TransactionPromise, username: string) {
+async function PortConfigure(tx: TransactionPromise, username: string, subdomainFromUrl: string) {
   const query = `MATCH (n:DBPort) RETURN n;`;
   const resultPort = await tx.run(query);
   let portsResult: any;
@@ -112,7 +121,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     portsResult = resultPort.records[0].get("n").properties;
   }
   let { driverPort, logsPort, labPort } = portsResult;
-
+  console.log(driverPort, logsPort, labPort);
   // TODO: use this function in solid start and use it.
   await createDockerContainer("memgraph/memgraph-platform", username, {
     [driverPort]: "7687",
@@ -120,14 +129,7 @@ async function PortConfigure(tx: TransactionPromise, username: string) {
     [labPort]: "3000",
   });
 
-  // let userDriver: Driver;
-  // if (!getDriver(username)) {
-  let userDriver = await getDriver(driverPort);
-  // }
-  await new Promise((resolve) => setTimeout(() => resolve(""), 15000));
-
-  const [graph, setGraph] = getGraph();
-  await importAllCSV({ driver: userDriver }, graph, setGraph);
+ 
   const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} RETURN n;`;
   await tx.run(updatePort);
   return { driverPort, logsPort, labPort };
