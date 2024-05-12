@@ -48,6 +48,7 @@ import {
   PageContext,
 } from "~/lib/Utils";
 import {
+  createMeta,
   getChildVertexes,
   getSelectionOptions, Record
 } from "~/lib/graph/get/sync/graph_fns";
@@ -297,11 +298,13 @@ export const DataGrid = (props: DataGridProps) => {
       // @ts-ignore
       column.header = (info) =>
         capitalizeFirstLetter(
+          // @ts-ignore
           info.column.columnDef.displayName || info.column.columnDef.name,
         );
       // @ts-ignore
       column.footer = (info) =>
         capitalizeFirstLetter(
+          // @ts-ignore
           info.column.columnDef.displayName || info.column.columnDef.name,
         );
 
@@ -385,7 +388,6 @@ export const DataGrid = (props: DataGridProps) => {
 
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
-      await new Promise((resolve, reject) => setTimeout(resolve, 3000))
       await getTableData();
     } catch (e: any) {
       console.error(e);
@@ -430,14 +432,23 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   );
   const navData = createMemo(() => {
     const nav = findVertexByLabelAndUniqueId(graph, "Nav", "name", "Navigation");
-    if (!nav) return;
+    if (!nav) return [];
 
-    const record = new Record({ ws: undefined });
-    record.load(graph, nav.id);
-    untrack(() =>
-      record.createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
-    );
-    const navData = renderNavTreeFromGraph(record, true, graph);
+    if (!graph.vertexes[nav.id]) {
+      return;
+    }
+
+    const vertex = graph.vertexes[nav.id];
+
+    const metaVertexResult = untrack(() => createMeta(AttrsAdminTableData["Nav"], graph, setGraph));
+
+    if (metaVertexResult.error) {
+      console.error(metaVertexResult.error);
+      return;
+    }
+    const metaVertex = metaVertexResult.vertex!;
+
+    const navData = renderNavTreeFromGraph(metaVertex, vertex, true, graph);
     const navigation = getParentFromNav(navData);
     return navigation;
   });
@@ -455,10 +466,13 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   return (
     <>
       <PageHeader
+        // @ts-ignore
         title={`${navData()?.child || nestedName() || ''}`}
         breadcrumb={[
           ...breadcrumbData,
+          // @ts-ignore
           { name: navData()?.parent },
+          // @ts-ignore
           { name: navData()?.child || nestedName() },
         ]}
       />
@@ -502,6 +516,7 @@ export function getParentFromNav(navData: any) {
     let data = {};
     let childName = null;
     if (value.children) {
+      // @ts-ignore
       value.children.forEach((child) => {
         if (child.href && child.href === param.pathname) {
           data = child;
@@ -509,7 +524,9 @@ export function getParentFromNav(navData: any) {
         }
       });
       if (Object.entries(data).length > 0) {
+        // @ts-ignore
         data["child"] = childName;
+        // @ts-ignore
         data["parent"] = value.name;
         result = data; // Store the result in the object
       }
@@ -519,26 +536,6 @@ export function getParentFromNav(navData: any) {
   return result;
 }
 
-function enrichNavigationData(data, parent = null) {
-  return data.map((node) => {
-    // Construct the list of child names
-    let childrenList = node.children.map(child => child.name);
-
-    // Add parent name and childrenList to each node
-    const enrichedNode = {
-      ...node,
-      parent: parent ? parent.name : "None", // If no parent, say "None"
-      childrenList: childrenList.length > 0 ? childrenList : "No children" // If no children, say "No children"
-    };
-
-    // Recursively enrich children if they exist
-    if (node.children.length > 0) {
-      enrichedNode.children = enrichNavigationData(node.children, node);
-    }
-
-    return enrichedNode;
-  });
-}
 
 export const TableDashboard = () => {
   const params = useParams();

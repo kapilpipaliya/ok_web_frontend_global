@@ -11,6 +11,7 @@ import {
   useContext,
 } from "solid-js";
 import {
+  createMeta,
   getChildVertex,
   getSublistRows,
   getSublistRowsForType,
@@ -144,14 +145,19 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   
     );
     if (!nav) return;
+    if (!graph.vertexes[nav.id]) {
+      return;
+    }
+    const vertex = graph.vertexes[nav.id];
+    const metaVertexResult = untrack(() => createMeta(AttrsAdminTableData["Nav"], graph, setGraph));
 
-    const record = new Record({ ws: Ws });
-    record.load(graph, nav.id);
-    untrack(() =>
-      record.createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
-    );
+    if (metaVertexResult.error) {
+      console.error(metaVertexResult.error);
+      return;
+    }
+    const metaVertex = metaVertexResult.vertex!;
 
-    return renderNavTreeFromGraph(record, props.isSideBarOpen, graph);
+    return renderNavTreeFromGraph(metaVertex, vertex, props.isSideBarOpen, graph);
   });
 
   const sidebarStyle = () =>
@@ -328,7 +334,8 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
 export default Sidebar;
 
 export const renderNavTreeFromGraph = (
-  record: Record,
+  meta: Vertex,
+  data: Vertex,
   showNav: boolean,
   graph: Store<GraphInterface>,
 ) => {
@@ -389,8 +396,8 @@ export const renderNavTreeFromGraph = (
   };
 
   const navigation: navbarDataI[] = getChildren(
-    record.metaVertex,
-    record.vertex,
+    meta,
+    data,
   );
 
   return navigation;

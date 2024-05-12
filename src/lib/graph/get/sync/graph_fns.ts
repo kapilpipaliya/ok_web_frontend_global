@@ -274,6 +274,41 @@ export const getProps = (
   {} as { [key: string]: any; }
 );
 
+export function createMeta(
+  form: FormMetaData,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>
+): {error: boolean, vertex?: Vertex} {
+  const { attributes, ...custom } = form;
+
+  // save attributes to vertexes
+  const metaTxnId = getNewTxnId();
+
+    const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
+    const { error } = addNewVertex(
+      metaTxnId,
+      metaMainVertex,
+      graph,
+      setGraph
+    );
+    if (error) {
+      console.error(error);
+      return {error: true};
+    }
+    const metaVertex = graph.vertexes[metaMainVertex.id];
+  
+
+  addMetaVertexes(graph, setGraph, metaTxnId, metaVertex, attributes);
+  onCleanup(() => {
+    revertTransaction(metaTxnId);
+  });
+  onCleanup(() => {
+    // TODO: Remove all the meta
+  });
+
+  return { error: false, vertex: metaVertex };
+};
+
 
 export class Record {
   txnId: number;
@@ -366,7 +401,10 @@ export class Record {
         alert(error);
         return;
       }
-      this.metaVertex = graph.vertexes[metaMainVertex.id];
+      const metaVertexResult = createMeta(form, graph, setGraph);
+      if (!metaVertexResult.error) {
+        this.metaVertex = metaVertexResult.vertex!;
+      }
     }
 
     addMetaVertexes(graph, setGraph, metaTxnId, this.metaVertex, attributes);

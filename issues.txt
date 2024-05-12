@@ -11,8 +11,9 @@
   make a api for submit form.(Kapil)
   load full page data with all joins when the page loads.
   write separate api for navbar.
+  when we navigate from 'Components' to 'User', 'Roles`, 'Permission' new data is not loaded.
+  instead of alert() use toast()
   
-
 
 
 

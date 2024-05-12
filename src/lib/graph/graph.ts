@@ -21,14 +21,6 @@ export interface Vertex {
   OUT: { [key: string]: Id[] };
 }
 
-export interface VertexUnsafe {
-  id?: Id;
-  L?: string[];
-  P: { [key: string]: any };
-  IN?: { [key: string]: Id[] };
-  OUT?: { [key: string]: Id[] };
-}
-
 export interface Edge {
   id: Id;
   P: { [key: string]: any };

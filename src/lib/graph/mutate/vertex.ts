@@ -46,6 +46,7 @@ export function addNewVertex(
   txnDetailIndex?: number;
 } {
   if (graph.vertexes[vertex.id]) {
+    debugger
     return { error: "Vertex ID Already exist" };
   }
   const existedVertexes = vertex.L.filter(
