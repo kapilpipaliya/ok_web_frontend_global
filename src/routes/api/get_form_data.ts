@@ -1,8 +1,8 @@
-import { getDriver } from "~/lib/server/driver";
+import { getDriver } from "~/cypher_api/server/driver";
 
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getInitialData } from "./getInitialData";
-import { getSubDomain } from "~/lib/server/domain_utils";
+import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {
   // const { formName, formId } = await request.json();

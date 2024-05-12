@@ -1,12 +1,10 @@
-"use client";
-
 import { useNavigate } from "@solidjs/router";
 import { Icon } from "@iconify-icon/solid";
 import logos from "~/assets/graphics/logo.png";
 import "~/css/style.css";
 import "~/css/krd.css";
 
-export default function Header() {
+export function Header() {
   const navigate = useNavigate();
   return (
     <section class="header container">

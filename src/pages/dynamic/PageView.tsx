@@ -8,7 +8,7 @@ import {
   useContext,
 } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { Record } from "~/lib/Utils";
+import { Record } from "~/lib/graph/get/sync/graph_fns";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { GraphContext, GraphInterface } from "~/lib/graph/graph";
@@ -20,7 +20,7 @@ export const PageView_ = (props: { id: string; count: number }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   if (!props.id) return "Page ID not specified.";
   const record = new Record({ ws: Ws });
-  const result = findVertexByLabelAndUniqueId("Page", "name", props.id, graph);
+  const result = findVertexByLabelAndUniqueId(graph, "Page", "name", props.id);
   if (!result) return "No Page Found";
   const loadResult = record.load(graph, result.id);
   if (loadResult.error) return loadResult.error;

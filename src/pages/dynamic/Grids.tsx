@@ -7,8 +7,10 @@ import {
   getCoreRowModel,
 } from "@tanstack/solid-table";
 import {
+  Accessor,
   createEffect,
   createMemo,
+  createResource,
   createSignal,
   For,
   Match,
@@ -20,16 +22,17 @@ import {
   useContext,
 } from "solid-js";
 import {
-  commitTransaction,
-  getNewTxnId,
   GraphContext,
   GraphInterface,
   Id,
   IdAttr,
-  ProcessStatus,
-  transactions,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  commitTransaction,
+  getNewTxnId, ProcessStatus,
+  transactions
+} from "~/lib/graph/transaction";
 
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
@@ -41,12 +44,13 @@ import {
   APP_BASE_URL,
   breadcrumbData,
   capitalizeFirstLetter,
-  getChildVertexes,
-  getSelectionOptions,
   isNumber,
   PageContext,
-  Record,
 } from "~/lib/Utils";
+import {
+  getChildVertexes,
+  getSelectionOptions, Record
+} from "~/lib/graph/get/sync/graph_fns";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -56,10 +60,10 @@ import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { CollapsibleTable } from "~/components/custom/Table";
 import Dismiss from "solid-dismiss";
-import { SetStoreFunction } from "solid-js/store";
+import { SetStoreFunction, createStore } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
 import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
-import { getFormApiFromForm } from "~/lib/graph/get/sync/graph_functions";
+import { getFormApiFromForm } from "~/lib/graph/get/async/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 interface AbstractSingleGridProps {
@@ -151,39 +155,12 @@ const Modal = (p: {
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 export const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const form = getFormApiFromForm(graph, setGraph, props.tableId);
-  let formNew: FormMetaData;
-  let collection: string;
+  const { Ws } = useContext(WsContext);
+  let { events } = useContext(PageContext);
+  const [tableStore, setTableStore] = createStore({} as { tableColumns: ColumnDef<any>[], data: Accessor<Vertex[]> });
 
-  if (form.error) {
-    if (AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId]) {
-      formNew =
-        AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId];
-      collection = props.tableId;
-    } else {
-      return form.error;
-    }
-  } else {
-    formNew = form.form!;
-    // @ts-ignore
-    collection = form.form.collection as string;
-  }
 
-  const deleteObject = (id: Id) => {
-    if (confirm("Are you sure you want to delete this item?")) {
-      const txnId = getNewTxnId();
-      const deleteResult = deleteVertex(txnId, id, graph, setGraph);
-      // @ts-ignore
-      if (deleteResult?.error) {
-        alert(data);
-        return;
-      }
-      transactions.get(txnId)!.status = ProcessStatus.Ready;
-      commitTransaction(Ws);
-    }
-  };
 
-  const tableColumns = [] as ColumnDef<any>[];
 
   const SelectValue = (props: {
     attribute: FieldAttribute;
@@ -202,12 +179,13 @@ export const DataGrid = (props: DataGridProps) => {
         setGraph,
         [graph.vertexes[vertex[0]]],
         props.attribute.props?.displayExpr ||
-          collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
-          `::'P.${IdAttr}'`,
+        collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
+        `::'P.${IdAttr}'`,
       ).vertexes;
     }
     return "";
   };
+
   const TagValue = (props: {
     attribute: FieldAttribute;
     info: CellContext<any, any>;
@@ -234,148 +212,203 @@ export const DataGrid = (props: DataGridProps) => {
     }
     return "";
   };
-  for (const attribute of formNew!.attributes) {
-    const column = { ...attribute } as unknown as ColumnDef<any>;
-    if (attribute.component === "Table") continue;
-    // if (attribute.props?.skip) continue;
 
-    // @ts-ignore
-    column.accessorKey = `P.${attribute.name}`;
-    // column.accessorFn = row => row.lastName;
-    column.id = attribute.name;
-    column.cell = (info) => {
-      return (
-        <Switch>
-          <Match
-            when={
-              attribute.component === "SelectBox" && !attribute.props?.items
-            }
-          >
-            <SelectValue attribute={attribute} info={info} />
-          </Match>
+  async function getTableData() {
+    const form = await getFormApiFromForm(graph, setGraph, props.tableId);
 
-          <Match
-            when={attribute.component === "TagBox" && !attribute.props?.items}
-          >
-            <TagValue attribute={attribute} info={info} />
-          </Match>
+    let formNew: FormMetaData;
+    let collection: string;
 
-          <Match when={attribute.component === "CheckBox"}>
-            <span>
-              {info.getValue() === true
-                ? "true"
-                : info.getValue() === false
-                  ? "false"
-                  : ""}
-            </span>
-          </Match>
+    if (form.error) {
+      if (AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId]) {
+        formNew =
+          AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId];
+        collection = props.tableId;
+      } else {
+        return form.error;
+      }
+    } else {
+      formNew = form.form!;
+      // @ts-ignore
+      collection = form.form.collection as string;
+    }
+    if (!collection) {
+      return <>Incorrect Configuration</>;
+    }
+    events?.setTitle(formNew.title);
 
-          <Match when={true}>{info.getValue<string>()}</Match>
-        </Switch>
-      );
-    };
-    // @ts-ignore
-    column.header = (info) =>
-      capitalizeFirstLetter(
-        info.column.columnDef.displayName || info.column.columnDef.name,
-      );
-    // @ts-ignore
-    column.footer = (info) =>
-      capitalizeFirstLetter(
-        info.column.columnDef.displayName || info.column.columnDef.name,
-      );
-
-    // @ts-ignore
-    tableColumns.push(column);
-  }
-  tableColumns.push({
-    accessorKey: "Edit",
-    header: "",
-    footer: "",
-    cell: (info) => (
-      <Show
-        when={!formNew.isInlineEditable}
-        fallback={
-          <Modal
-            info={info}
-            graph={graph}
-            setGraph={setGraph}
-            tableId={props.tableId}
-          />
+    const deleteObject = (id: Id) => {
+      if (confirm("Are you sure you want to delete this item?")) {
+        const txnId = getNewTxnId();
+        const deleteResult = deleteVertex(txnId, id, graph, setGraph);
+        // @ts-ignore
+        if (deleteResult?.error) {
+          alert(data);
+          return;
         }
-      >
-        <A
-          href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
-          class="r:5|5|5|5 p:5"
+        transactions.get(txnId)!.status = ProcessStatus.Ready;
+        commitTransaction(Ws);
+      }
+    };
+
+    const tableColumns = [] as ColumnDef<any>[];
+
+
+    for (const attribute of formNew!.attributes) {
+      const column = { ...attribute } as unknown as ColumnDef<any>;
+      if (attribute.component === "Table") continue;
+      // if (attribute.props?.skip) continue;
+
+      // @ts-ignore
+      column.accessorKey = `P.${attribute.name}`;
+      // column.accessorFn = row => row.lastName;
+      column.id = attribute.name;
+      column.cell = (info) => {
+        return (
+          <Switch>
+            <Match
+              when={
+                attribute.component === "SelectBox" && !attribute.props?.items
+              }
+            >
+              <SelectValue attribute={attribute} info={info} />
+            </Match>
+
+            <Match
+              when={attribute.component === "TagBox" && !attribute.props?.items}
+            >
+              <TagValue attribute={attribute} info={info} />
+            </Match>
+
+            <Match when={attribute.component === "CheckBox"}>
+              <span>
+                {info.getValue() === true
+                  ? "true"
+                  : info.getValue() === false
+                    ? "false"
+                    : ""}
+              </span>
+            </Match>
+
+            <Match when={true}>{info.getValue<string>()}</Match>
+          </Switch>
+        );
+      };
+      // @ts-ignore
+      column.header = (info) =>
+        capitalizeFirstLetter(
+          info.column.columnDef.displayName || info.column.columnDef.name,
+        );
+      // @ts-ignore
+      column.footer = (info) =>
+        capitalizeFirstLetter(
+          info.column.columnDef.displayName || info.column.columnDef.name,
+        );
+
+      // @ts-ignore
+      tableColumns.push(column);
+    }
+    tableColumns.push({
+      accessorKey: "Edit",
+      header: "",
+      footer: "",
+      cell: (info) => (
+        <Show
+          when={!formNew.isInlineEditable}
+          fallback={
+            <Modal
+              info={info}
+              graph={graph}
+              setGraph={setGraph}
+              tableId={props.tableId}
+            />
+          }
         >
-          <CustomButton variant={"custom"}>
+          <A
+            href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
+            class="r:5|5|5|5 p:5"
+          >
+            <CustomButton variant={"custom"}>
+              <Icon
+                height={21}
+                width={21}
+                class={"color:#3477CC"}
+                icon="fluent:edit-12-regular"
+              />
+            </CustomButton>
+          </A>
+        </Show>
+      ),
+    });
+    tableColumns.push({
+      accessorKey: "Delete",
+      header: "",
+      footer: "",
+      cell: (info) => (
+        <button
+          onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
+          class="text-fill:red font:semibold	"
+        >
+          <CustomButton variant={"custom"} class={"fg:rgb(252,0,0)"}>
             <Icon
               height={21}
               width={21}
-              class={"color:#3477CC"}
-              icon="fluent:edit-12-regular"
+              icon="fluent:delete-12-regular"
+              class="color:red mr:1rem"
             />
           </CustomButton>
-        </A>
-      </Show>
-    ),
-  });
-  tableColumns.push({
-    accessorKey: "Delete",
-    header: "",
-    footer: "",
-    cell: (info) => (
-      <button
-        onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
-        class="text-fill:red font:semibold	"
-      >
-        <CustomButton variant={"custom"} class={"fg:rgb(252,0,0)"}>
-          <Icon
-            height={21}
-            width={21}
-            icon="fluent:delete-12-regular"
-            class="color:red mr:1rem"
-          />
-        </CustomButton>
-      </button>
-    ),
-  });
+        </button>
+      ),
+    });
 
-  if (!collection) {
-    return <>Incorrect Configuration</>;
+    const coll = isNumber(collection)
+      ? graph.vertexes[collection].P[IdAttr]
+      : collection;
+    // if(!graph.vertexLabelIdMap[coll]) {
+    //  alert(`collection not found ${coll}`)
+    //  return;
+    // }
+
+
+
+
+
+    const [data] = createSignal(
+      (graph.vertexLabelIdMap[coll] || []).map(
+        (vertexId: any) => graph.vertexes[vertexId],
+      ),
+    );
+
+    setTableStore({ tableColumns, data });
   }
-  // console.log(1, JSON.stringify(props))
-  const { Ws } = useContext(WsContext);
-  let { events } = useContext(PageContext);
-  events?.setTitle(formNew.title);
-  onCleanup(() => events?.setTitle(""));
 
-  const coll = isNumber(collection)
-    ? graph.vertexes[collection].P[IdAttr]
-    : collection;
-  // if(!graph.vertexLabelIdMap[coll]) {
-  //  alert(`collection not found ${coll}`)
-  //  return;
-  // }
-  const [_] = splitProps(props, ["tableId"]);
 
-  const [data] = createSignal(
-    (graph.vertexLabelIdMap[coll] || []).map(
-      (vertexId: any) => graph.vertexes[vertexId],
-    ),
-  );
-
-  const table = createSolidTable({
-    get data() {
-      return data();
-    },
-    columns: tableColumns,
-    getCoreRowModel: getCoreRowModel(),
+  const [data, { mutate, refetch }] = createResource(async () => {
+    try {
+      await new Promise((resolve, reject) => setTimeout(resolve, 3000))
+      await getTableData();
+    } catch (e: any) {
+      console.error(e);
+    }
   });
+
+  onCleanup(() => events?.setTitle(""));
 
   return (
     <div class="">
-      <CollapsibleTable headers={tableColumns} rows={data()} />
+      <Switch>
+        <Match when={data.loading}>
+          Loading
+        </Match>
+
+        <Match when={data.error}>
+          Error
+        </Match>
+
+        <Match when={true}>
+          <CollapsibleTable headers={tableStore.tableColumns} rows={tableStore.data()} />
+        </Match>
+      </Switch>
     </div>
   );
 };
@@ -384,22 +417,19 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const data = findVertexByLabelAndUniqueId(
-    "Coll",
+    graph, "Coll",
     IdAttr,
     props.tableId,
-    graph,
+
   );
 
   const nestedName = createMemo(
     () =>
-      findVertexByLabelAndUniqueId("Coll", IdAttr, props.tableId, graph)?.P
+      findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
         ?.name,
   );
-  console.log(
-    findVertexByLabelAndUniqueId("Coll", IdAttr, props.tableId, graph),
-  );
   const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId("Nav", "name", "Navigation", graph);
+    const nav = findVertexByLabelAndUniqueId(graph, "Nav", "name", "Navigation");
     if (!nav) return;
 
     const record = new Record({ ws: undefined });
@@ -425,7 +455,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   return (
     <>
       <PageHeader
-        title={`${navData()?.child || nestedName()||''}`}
+        title={`${navData()?.child || nestedName() || ''}`}
         breadcrumb={[
           ...breadcrumbData,
           { name: navData()?.parent },
@@ -514,10 +544,9 @@ export const TableDashboard = () => {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const dashboard = findVertexByLabelAndUniqueId(
-    "Dashboard",
+    graph, "Dashboard",
     IdAttr,
     params.name,
-    graph,
   );
   if (!dashboard) {
     return "No Dashboard Found";

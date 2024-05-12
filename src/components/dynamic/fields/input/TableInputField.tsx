@@ -18,25 +18,25 @@ import "~/css/table.css";
 import {toTitle} from "case-switcher-js";
 import {replaceVertexProperties} from "~/lib/graph/mutate/vertex";
 import {
-    getNewTxnId,
     GraphContext,
     IdAttr,
-    revertTransaction,
     Vertex,
 } from "~/lib/graph/graph";
+import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
 import {klona} from "klona";
 import {DynamicComponent} from "~/components/dynamic/components/DynamicComponent";
 import {
-    getChildVertex,
-    addNewRow,
-    getSublistRows,
-    addMetaVertexes,
     FormContext,
-    deleteRow,
-    getSelectionOptions,
-    getChildVertexes,
 } from "~/lib/Utils";
+import {
+  getChildVertex,
+  addNewRow,
+  getSublistRows,
+  addMetaVertexes, deleteRow,
+  getSelectionOptions,
+  getChildVertexes
+} from "~/lib/graph/get/sync/graph_fns";
 import {ComponentProps} from "~/lib/ComponentType";
 import {Icon} from "@iconify-icon/solid";
 import {
@@ -107,10 +107,10 @@ export function TableInputField(
         if (metaData.collection) {
             // add metadata from separate collection.
             const collVertex = findVertexByLabelAndUniqueId(
-                "Coll",
+                graph, "Coll",
                 IdAttr,
                 metaData.collection,
-                graph,
+            
             );
             if (collVertex) {
                 const vertexCollAttrResult = getChildVertexes(

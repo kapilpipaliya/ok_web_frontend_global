@@ -1,4 +1,4 @@
-import { getDriver, isIntegerId } from "~/lib/server/driver";
+import { getDriver, isIntegerId } from "~/cypher_api/server/driver";
 import {
   Node,
   QueryResult,

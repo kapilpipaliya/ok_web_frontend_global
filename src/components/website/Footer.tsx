@@ -1,8 +1,7 @@
-"use client";
 import "~/css/style.css";
 import "~/css/krd.css";
 
-export default function Footer() {
+export function Footer() {
   return (
     <section class="footer">
       <div class="row container d-flex pb-3">

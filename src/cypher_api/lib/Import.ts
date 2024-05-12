@@ -690,7 +690,7 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
             }
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              "Coll",
+              graph, "Coll",
               "name",
               vertex.L[0],
             );

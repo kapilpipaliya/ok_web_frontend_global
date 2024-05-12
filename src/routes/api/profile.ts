@@ -4,10 +4,10 @@ import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
 import { getChildVertexes } from "~/cypher_api/lib/traverse";
-import { getHttpsSession } from "~/lib/auth/_server";
-import { getSubDomain } from "~/lib/server/domain_utils";
-import { getDriver } from "~/lib/server/driver";
-import { checkPropertyExists } from "~/lib/server/functions";
+import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
+import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
+import {checkPropertyExists} from "~/cypher_api/functions/db_functions";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -82,8 +82,13 @@ const profile = async (payload: any, session: Session) => {
   if (profileImage) updates.push(`u.profileImage = $profileImage`);
   query += updates.join(", ") + " RETURN u;";
 
-  const result = await session.run(query, { userId, email, username });
+  const result = await session.run(query, { userId, email, username, profileImage });
   const user = result.records[0]?.get("u");
+  
+  const session2 = (await getDriverWithPort(user.properties.driverPort)).session();
+  const result2 = await session2.run(query, { userId, email, username, profileImage });
+  const user2 = result2.records[0]?.get("u");
+  console.log(user2);
 
   if (email) {
     const http_session = await getHttpsSession();

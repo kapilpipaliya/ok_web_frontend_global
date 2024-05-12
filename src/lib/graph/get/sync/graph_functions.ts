@@ -3,14 +3,16 @@ import { klona } from "klona/json";
 import {
   AdminAttrKeys,
   AttrsTableData,
+} from "~/lib/Utils";
+import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
   getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
-  Record,
-} from "~/lib/Utils";
+  Record
+} from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
@@ -110,10 +112,10 @@ export function getCollAttrs(
         "taking string dataType",
       );
       const dataTypeVertex = findVertexByLabelAndUniqueId(
-        "DataType",
+        graph, "DataType",
         "name",
         "String",
-        graph,
+        
       );
       if (!dataTypeVertex) {
         console.warn("String data Type not found");
@@ -250,7 +252,7 @@ export const getFormApiFromForm = (
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
 ): { error: string; form?: FormMetaData } => {
-  const coll = findVertexByLabelAndUniqueId("Coll", IdAttr, formId, graph);
+  const coll = findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, formId);
   if (!coll) {
     return { error: "coll not found" };
   }
@@ -375,10 +377,10 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
             // getChildren(metaVertex, v, pksResult);
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              "Coll",
+              graph, "Coll",
               "name",
               label,
-              graph,
+              
             );
             if (!collVertex) {
               alert(`Collection not defined: ${label}`);
@@ -458,10 +460,10 @@ export function getStringComponent(
 ) {
   if (!attrDataTypeVertex) {
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
-      "DataType",
+      graph, "DataType",
       "name",
       "String",
-      graph,
+     
     );
     if (!attrDataTypeVertex) {
       return;

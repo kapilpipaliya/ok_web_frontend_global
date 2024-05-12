@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { getNewGraphId, graph, transactions } from "../../graph";
+import { graph } from "../../graph";
+import { getNewGraphId, transactions } from "../../transaction";
 import { klona } from "klona";
 import {
   addNewEdge,

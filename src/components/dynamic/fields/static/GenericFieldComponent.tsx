@@ -14,21 +14,18 @@ import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 import {
-  commitTxn,
   GraphContext,
   IdAttr,
-  revertTransaction,
   Vertex,
 } from "~/lib/graph/graph";
+import { commitTxn, revertTransaction } from "~/lib/graph/transaction";
 import {
-  Record,
   FormContext,
-  getSelectionOptions,
   getTextColumnValue,
   getValueFromVertexOrKey,
-  getChildVertexes,
   APP_BASE_URL,
 } from "~/lib/Utils";
+import { Record, getSelectionOptions, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ComponentProps } from "~/lib/ComponentType";

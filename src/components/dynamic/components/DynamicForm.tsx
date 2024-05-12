@@ -9,44 +9,45 @@ import {
     Show,
     For,
     Match,
+    createResource,
 } from "solid-js";
-import {SetStoreFunction, Store} from "solid-js/store";
-import {toTitle} from "case-switcher-js";
+import { SetStoreFunction, Store, createStore } from "solid-js/store";
+import { toTitle } from "case-switcher-js";
 import {
-    Record,
     FormContext,
-    getChildVertexes,
     groupBy,
-    getSelectionOptions,
 } from "~/lib/Utils";
-import {RepeaterContext} from "~/components/dynamic/fields/static/GenaricField";
-import {GenericField} from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { Record, getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/graph_fns";
+import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
     GraphContext,
     GraphInterface,
     Id,
     IdAttr,
     Vertex,
+} from "~/lib/graph/graph";
+import {
     commitTxn,
     revertTransaction,
-    txnHasSteps,
-} from "~/lib/graph/graph";
-import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
+    txnHasSteps
+} from "~/lib/graph/transaction";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
     BeforeLeaveEventArgs,
     useBeforeLeave,
     useLocation,
     useNavigate,
 } from "@solidjs/router";
-import {stringify} from "yaml";
-import {TableTabs} from "~/components/custom/TableTabs";
-import {DynamicComponent} from "./DynamicComponent";
-import {FormMetaData} from "~/lib/Type";
-import {Switch} from "solid-js";
-import {getPermissions} from "~/lib/graph/get/sync/auth";
-import {submitDataCall} from "~/components/api/api_functions";
-import {useToast} from "~/components/custom/Toast";
-import { getCollAttrComp, getExportCode, getFormMetaData } from "~/lib/graph/get/sync/graph_functions";
+import { stringify } from "yaml";
+import { TableTabs } from "~/components/custom/TableTabs";
+import { DynamicComponent } from "./DynamicComponent";
+import { FormMetaData } from "~/lib/Type";
+import { Switch } from "solid-js";
+import { getPermissions } from "~/lib/graph/get/sync/auth";
+import { submitDataCall } from "~/components/api/api_functions";
+import { useToast } from "~/components/custom/Toast";
+import { getCollAttrComp, getExportCode, getFormMetaData } from "~/lib/graph/get/async/graph_functions";
 
 interface AbstractSingleFormProps
     extends Omit<DynamicFormProps, "form" | "id"> {
@@ -87,44 +88,118 @@ export interface DynamicFormProps {
 }
 
 export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
+    const [formData, setFormData] = createStore({} as {
+        id: Id, form: any,props: any
+    });
     // TODO: add validation on form that AttrsTableData keys should not available.
+    const [data, { mutate, refetch }] = createResource(async () => {
+        try {
+            const form = getFormMetaData(props.graph, props.setGraph, props.formId);
+            if ((await form).error) return (await form).error;
 
-    const form = getFormMetaData(props.graph, props.setGraph, props.formId);
-    if (form.error) return form.error;
+            const [p, customProps] = splitProps(props, ["formId", "id"]);
 
-    const [p, customProps] = splitProps(props, ["formId", "id"]);
-
-    const id = createMemo(() =>
-        p.id === "new" ? undefined : parseInt(p.id as string),
-    );
+            const id = createMemo(() =>
+                p.id === "new" ? undefined : parseInt(p.id as string),
+            );
+            setFormData({form,id:id(),props:p})
+        } catch (e: any) {
+            console.error(e);
+        }
+    });
+    
     return (
-        <DynamicForm
-            form={form.form!}
-            id={id() as Id}
-            isDialogContext={props.isDialogContext}
-            {...customProps}
-            buttonAlign={props.buttonAlign}
-            config={props.config || []}
-        />
+        <Switch>
+        <Match when={data.loading}>
+          Loading
+        </Match>
+
+        <Match when={data.error}>
+          Error
+        </Match>
+
+        <Match when={true}>
+                <DynamicForm
+                    form={formData.form!}
+                    id={formData.id}
+                    isDialogContext={props.isDialogContext}
+                    {...formData.props}
+                    buttonAlign={props.buttonAlign}
+                    config={props.config || []}
+                />
+        </Match>
+      </Switch>
+        
     );
 };
 
 export const DynamicForm = (props: DynamicFormProps) => {
-    const {Ws} = useContext(WsContext);
+    const { Ws } = useContext(WsContext);
     const navigate = useNavigate();
     const location = useLocation();
-    const {showLoadingToast} = useToast();
+    const { showLoadingToast } = useToast();
     const [graph, setGraph] = useContext(GraphContext)!;
+    const [formData, setFormData] = createStore({} as {
+        record: Record, tabs: string[], groupByTabsAndGroup: {
+            [tab: string]: {
+                [group: string]: Vertex[];
+            };
+        }
+    });
+    const [activeTab, setActiveTab] = createSignal();
 
-    const record = new Record({ws: Ws});
-    if (!props.id) {
-        const createResult = record.create(graph, setGraph, props.form[IdAttr]);
-        if (createResult.error) return createResult.error;
-    } else {
-        const loadResult = record.load(graph, props.id);
-        if (loadResult.error) return loadResult.error;
-    }
-    record.createMeta(props.form, graph, setGraph);
+    const [data, { mutate, refetch }] = createResource(async () => {
+        try {
+            await new Promise((resolve, reject) => setTimeout(resolve, 3000))
+            const record = new Record({ ws: Ws });
+            if (!props.id) {
+                const createResult = record.create(graph, setGraph, props.form[IdAttr]);
+                if (createResult.error) return createResult.error;
+            } else {
+                const loadResult = record.load(graph, props.id);
+                if (loadResult.error) return loadResult.error;
+            }
+            record.createMeta(props.form, graph, setGraph);
+            props.config[1]?.("record", record);
+            const groupByTabsAndGroupFn = () => {
+                const mainAttributes = getChildVertexes(
+                    graph,
+                    ["MetaAttr"],
+                    [record.metaVertex],
+                ); //.sort((a, b) => a.P.pos - b.P.pos);
+
+                const groupByTabs = groupBy(
+                    mainAttributes.vertexes!,
+                    (item) => item.P.tab!,
+                ) as unknown as {
+                    [tab: string]: Vertex[];
+                };
+
+                const groupByTabsAndGroup = {} as {
+                    [tab: string]: { [group: string]: Vertex[] };
+                };
+                for (const tab in groupByTabs) {
+                    groupByTabsAndGroup[tab] = groupBy(
+                        groupByTabs[tab]!,
+                        (item) => item.P.group!,
+                    ) as unknown as {
+                        [group: string]: Vertex[];
+                    };
+                }
+                return groupByTabsAndGroup;
+            };
+            // For new Form component, user will define layout, not a fixed layout;
+            // We may use this component for render from the json.
+            const groupByTabsAndGroup = groupByTabsAndGroupFn();
+            // TODO: Fix Tabs are not reactive
+            const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
+            setActiveTab(tabs[0])
+            setFormData({ record, tabs, groupByTabsAndGroup })
+        } catch (e: any) {
+            console.error(e);
+        }
+    });
+
 
     // focus first input
     const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -135,44 +210,12 @@ export const DynamicForm = (props: DynamicFormProps) => {
     });
 
     // let validationGroup: dxValidationGroup;
-    props.config[1]?.("record", record);
     onCleanup(() => {
         props.config[1]?.("record", undefined);
     });
 
-    const groupByTabsAndGroupFn = () => {
-        const mainAttributes = getChildVertexes(
-            graph,
-            ["MetaAttr"],
-            [record.metaVertex],
-        ); //.sort((a, b) => a.P.pos - b.P.pos);
 
-        const groupByTabs = groupBy(
-            mainAttributes.vertexes!,
-            (item) => item.P.tab!,
-        ) as unknown as {
-            [tab: string]: Vertex[];
-        };
 
-        const groupByTabsAndGroup = {} as {
-            [tab: string]: { [group: string]: Vertex[] };
-        };
-        for (const tab in groupByTabs) {
-            groupByTabsAndGroup[tab] = groupBy(
-                groupByTabs[tab]!,
-                (item) => item.P.group!,
-            ) as unknown as {
-                [group: string]: Vertex[];
-            };
-        }
-        return groupByTabsAndGroup;
-    };
-
-    // For new Form component, user will define layout, not a fixed layout;
-    // We may use this component for render from the json.
-    const groupByTabsAndGroup = groupByTabsAndGroupFn();
-    // TODO: Fix Tabs are not reactive
-    const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
 
     const cleanUpConfig = {} as { [key: string]: any };
 
@@ -180,10 +223,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
         for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
             revertTransaction(rowMetaTxnId);
     });
+
     let submit: boolean;
     const onSubmit = async () => {
         await showLoadingToast({
-            promise: submitDataCall("data", record.txnId),
+            promise: submitDataCall("data", formData.record.txnId),
             loadMessage: "Submitting Data...",
             successMessage: "Data submitted successfully",
             onSuccess: (value) => {
@@ -191,7 +235,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
             },
         });
 
-        // const valid = record.submitForm();
+        // const valid = formData.record.submitForm();
         // const result = validationGroup.validate();
         // const isValid = true; // result.isValid;
         // if (isValid) {
@@ -208,7 +252,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     };
 
     const onCancel = () => {
-        revertTransaction(record.txnId);
+        revertTransaction(formData.record.txnId);
         if (props.isDialogContext) {
         } else {
             setTimeout(() => {
@@ -220,7 +264,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     const [popup, setPopup] = createSignal(false);
     const [importCode, setImportCode] = createSignal("");
     const importCodeFn = () => {
-        // importNavigation(importCode(), record);
+        // importNavigation(importCode(), formData.record);
     };
     let popupConfig: any;
 
@@ -234,7 +278,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         );
     };
     const PreviewCode = () => {
-        return <pre>{stringify(getExportCode(graph, record))}</pre>;
+        return <pre>{stringify(getExportCode(graph, formData.record))}</pre>;
     };
 
     const onImportClick = (data: any) => {
@@ -299,7 +343,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
     // https://github.com/solidjs/solid-router
     useBeforeLeave((e: BeforeLeaveEventArgs) => {
-        if (submit || !txnHasSteps(record.txnId)) {
+        if (submit || !txnHasSteps(formData.record.txnId)) {
             return;
         }
         // if (form.isDirty && !e.defaultPrevented) {
@@ -307,7 +351,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         e.preventDefault();
         setTimeout(() => {
             if (window.confirm("Discard unsaved changes - are you sure?")) {
-                revertTransaction(record.txnId);
+                revertTransaction(formData.record.txnId);
                 // user wants to proceed anyway so retry with force=true
                 e.retry(true);
             }
@@ -360,99 +404,108 @@ export const DynamicForm = (props: DynamicFormProps) => {
             </Show>
         </div>
     );
-    const [activeTab, setActiveTab] = createSignal(tabs[0]);
 
     return (
-        <RepeaterContext.Provider
-            value={[record.vertex, ...useContext(RepeaterContext)]}
-        >
-            <div
-                ref={(el) => {
-                    setDivRef(el);
-                    // validationGroup = new dxValidationGroup(divRef()!);
-                }}
-            >
-                <Show when={props.showSubmitButtonOnTop ?? false}>
-                    <SubmitButton/>
-                </Show>
+        <Switch>
+            <Match when={data.loading}>
+                Loading
+            </Match>
 
-                <Show when={divRef()}>
-                    <FormContext.Provider
-                        value={{
-                            record,
-                            cleanUpConfig,
-                            // validationGroup: validationGroup!,
+            <Match when={data.error}>
+                Error
+            </Match>
+
+            <Match when={true}>
+                <RepeaterContext.Provider
+                    value={[formData.record.vertex, ...useContext(RepeaterContext)]}
+                >
+                    <div
+                        ref={(el) => {
+                            setDivRef(el);
+                            // validationGroup = new dxValidationGroup(divRef()!);
                         }}
                     >
-                        {/* Main Tab is displayed as top level fields */}
-                        <Show when={groupByTabsAndGroup["main"]}>
-                            <For each={Object.keys(groupByTabsAndGroup["main"])}>
-                                {(group) => (
-                                    <>
-                                        <div class="dx-fieldset" style={{"max-width": "100%"}}>
-                                            <Show when={props.importExportButtons ?? true}>
-                                                <div
-                                                    style={{
-                                                        "justify-content": "end",
-                                                        "margin-bottom": "10px",
-                                                        display: "flex",
-                                                    }}
-                                                >
-                                                    <GenericField
-                                                        meta={
-                                                            {
-                                                                P: {
-                                                                    component: "Button",
-                                                                    props: {
-                                                                        children: "Import",
-                                                                        variant: "outlined",
-                                                                        onClick: () => onImportClick,
-                                                                    },
-                                                                },
-                                                            } as any
-                                                        }
-                                                    />
-                                                    <GenericField
-                                                        meta={
-                                                            {
-                                                                P: {
-                                                                    component: "Button",
-                                                                    props: {
-                                                                        children: "Export",
-                                                                        onClick: () => onExportClick,
-                                                                        class: " b:blue",
-                                                                    },
-                                                                },
-                                                            } as any
-                                                        }
-                                                    />
-                                                </div>
-                                            </Show>
-
-                                            <div
-                                                class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
-                                                <div class="p:5|15|15|15 w:full">
-                                                    <FormGroup
-                                                        graph={graph}
-                                                        setGraph={setGraph}
-                                                        metaAttributes={groupByTabsAndGroup["main"][group]}
-                                                        labelPrefix={"Form"}
-                                                        vertex={record.vertex}
-                                                        txnId={record.txnId}
-                                                    />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </>
-                                )}
-                            </For>
+                        <Show when={props.showSubmitButtonOnTop ?? false}>
+                            <SubmitButton />
                         </Show>
 
-                        <Show
-                            when={tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}
-                        >
-                            {/* old code for tabs */}
-                            {/* <div
+                        <Show when={divRef()}>
+                            <FormContext.Provider
+                                value={{
+                                    record: formData.record,
+                                    cleanUpConfig,
+                                    // validationGroup: validationGroup!,
+                                }}
+                            >
+                                {/* Main Tab is displayed as top level fields */}
+                                <Show when={formData.groupByTabsAndGroup["main"]}>
+                                    <For each={Object.keys(formData.groupByTabsAndGroup["main"])}>
+                                        {(group) => (
+                                            <>
+                                                <div class="dx-fieldset" style={{ "max-width": "100%" }}>
+                                                    <Show when={props.importExportButtons ?? true}>
+                                                        <div
+                                                            style={{
+                                                                "justify-content": "end",
+                                                                "margin-bottom": "10px",
+                                                                display: "flex",
+                                                            }}
+                                                        >
+                                                            <GenericField
+                                                                meta={
+                                                                    {
+                                                                        P: {
+                                                                            component: "Button",
+                                                                            props: {
+                                                                                children: "Import",
+                                                                                variant: "outlined",
+                                                                                onClick: () => onImportClick,
+                                                                            },
+                                                                        },
+                                                                    } as any
+                                                                }
+                                                            />
+                                                            <GenericField
+                                                                meta={
+                                                                    {
+                                                                        P: {
+                                                                            component: "Button",
+                                                                            props: {
+                                                                                children: "Export",
+                                                                                onClick: () => onExportClick,
+                                                                                class: " b:blue",
+                                                                            },
+                                                                        },
+                                                                    } as any
+                                                                }
+                                                            />
+                                                        </div>
+                                                    </Show>
+
+                                                    <div
+                                                        class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
+                                                        <div class="p:5|15|15|15 w:full">
+                                                            <FormGroup
+                                                                graph={graph}
+                                                                setGraph={setGraph}
+                                                                metaAttributes={formData.groupByTabsAndGroup["main"][group]}
+                                                                labelPrefix={"Form"}
+                                                                vertex={formData.record.vertex}
+                                                                txnId={formData.record.txnId}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </For>
+                                </Show>
+
+                                <Show
+                                    when={formData.tabs.length > 0 && !(props.showMainFieldsOnly ?? false)}
+                                >
+                                    {/* old code for tabs */}
+                                    {/* <div
               ref={(el) => {
                 const tabsInstance = new Tabs(el, {
                   dataSource: tabs,
@@ -469,60 +522,63 @@ export const DynamicForm = (props: DynamicFormProps) => {
               }}
               
             /> */}
-                            <TableTabs tabs={tabs} setActiveTab={setActiveTab}/>
-                            <br/>
-                            <For each={Object.keys(groupByTabsAndGroup[activeTab()])}>
-                                {(group) => {
-                                    return (
-                                        <div
-                                            class="dx-fieldset"
-                                            style={{
-                                                "max-width": getTabsWidth(
-                                                    groupByTabsAndGroup[activeTab()][group],
-                                                ),
-                                            }}
-                                        >
-                                            <Show when={group !== "main"}>
-                                                <div class="dx-fieldset-header">{group}</div>
-                                            </Show>
-                                            <FormGroup
-                                                graph={graph}
-                                                setGraph={setGraph}
-                                                metaAttributes={groupByTabsAndGroup[activeTab()][group]}
-                                                labelPrefix={""}
-                                                vertex={record.vertex}
-                                                txnId={record.txnId}
-                                            />
-                                        </div>
-                                    );
-                                }}
-                            </For>
-                        </Show>
-                        {/* @ts-ignore */}
-                        <br/>
-                        <div
-                            // ref={(el) =>
-                            // new dxValidationSummary(el, {
-                            //   validationGroup: validationGroup!,
-                            // })
-                            // }
-                        />
+                                    <TableTabs tabs={formData.tabs} setActiveTab={setActiveTab} />
+                                    <br />
+                                    <For each={Object.keys(formData.groupByTabsAndGroup[activeTab()])}>
+                                        {(group) => {
+                                            return (
+                                                <div
+                                                    class="dx-fieldset"
+                                                    style={{
+                                                        "max-width": getTabsWidth(
+                                                            formData.groupByTabsAndGroup[activeTab()][group],
+                                                        ),
+                                                    }}
+                                                >
+                                                    <Show when={group !== "main"}>
+                                                        <div class="dx-fieldset-header">{group}</div>
+                                                    </Show>
+                                                    <FormGroup
+                                                        graph={graph}
+                                                        setGraph={setGraph}
+                                                        metaAttributes={formData.groupByTabsAndGroup[activeTab()][group]}
+                                                        labelPrefix={""}
+                                                        vertex={formData.record.vertex}
+                                                        txnId={formData.record.txnId}
+                                                    />
+                                                </div>
+                                            );
+                                        }}
+                                    </For>
+                                </Show>
+                                {/* @ts-ignore */}
+                                <br />
+                                <div
+                                // ref={(el) =>
+                                // new dxValidationSummary(el, {
+                                //   validationGroup: validationGroup!,
+                                // })
+                                // }
+                                />
 
-                        <Show
-                            when={
-                                !(props.showSubmitButtonOnTop ?? false) &&
-                                !props.isLoginRegister
-                            }
-                        >
-                            <SubmitButton/>
+                                <Show
+                                    when={
+                                        !(props.showSubmitButtonOnTop ?? false) &&
+                                        !props.isLoginRegister
+                                    }
+                                >
+                                    <SubmitButton />
+                                </Show>
+                            </FormContext.Provider>
                         </Show>
-                    </FormContext.Provider>
-                </Show>
-                <Show when={popup()}>
-                    <PopOver/>
-                </Show>
-            </div>
-        </RepeaterContext.Provider>
+                        <Show when={popup()}>
+                            <PopOver />
+                        </Show>
+                    </div>
+                </RepeaterContext.Provider>
+            </Match>
+        </Switch>
+
     );
 };
 
@@ -575,21 +631,21 @@ export function FormGroup(props: FormGroupProps) {
                     <Switch>
                         <Match when={component() === "Table"}>
                             {/* <h3><Label/></h3> */}
-                            <Content/>
+                            <Content />
                         </Match>
 
                         <Match when={component() === "CollectionOption"}>
-                            <Content/>
+                            <Content />
                         </Match>
 
                         <Match when={true}>
-                            <div class="grid-cols:2 " style={{"padding-top": "5px"}}>
+                            <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
                                 <div id={id}>
-                                    {props.labelPrefix as string} <Label/>
+                                    {props.labelPrefix as string} <Label />
                                 </div>
                             </div>
                             <div>
-                                <Content/>
+                                <Content />
                             </div>
                         </Match>
                     </Switch>

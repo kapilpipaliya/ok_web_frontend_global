@@ -1,15 +1,11 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { getInitialData } from "./getInitialData";
-import { getSubDomain } from "~/lib/server/domain_utils";
-import { getDriver } from "~/lib/server/driver";
-import { getHttpsSession } from "~/lib/auth/_server";
+import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { getDriver } from "~/cypher_api/server/driver";
+import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 
 export async function GET({ request }: APIEvent) {
   const subdomain = getSubDomain(request.headers.get("host")!);
-  const httpSession = await getHttpsSession();
-  console.log(httpSession.data);
-  
-
   let data = {};
   try {
     data = getInitialData({ subdomain });

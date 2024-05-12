@@ -1150,7 +1150,6 @@ export function getStringComponentLocal(
   if (!attrDataTypeVertex) {
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
       graph,
-      setGraph,
       "DataType",
       "name",
       "String",

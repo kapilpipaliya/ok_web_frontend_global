@@ -18,7 +18,8 @@ import {
 } from "~/components/solid-blocks/blocks";
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
 import { setSelectedId } from "~/lib/pageStore";
-import { setValueGlobal, getTextColumnValue } from "~/lib/Utils";
+import { getTextColumnValue } from "~/lib/Utils";
+import { setValueGlobal } from "~/lib/graph/get/sync/graph_fns";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";

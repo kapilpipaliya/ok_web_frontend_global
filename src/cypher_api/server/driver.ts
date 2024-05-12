@@ -16,6 +16,8 @@ export async function getDriverWithPort(
       isIntegerId ? { disableLosslessIntegers: true } : undefined,
     );
   }
+ 
+  
   return drivers[port];
 }
 
@@ -32,7 +34,7 @@ export async function getDriver(
   if (subdomain === "super" || subdomain === "www") {
     port = 1102;
   } else {
-    const session = await getSuperSession();
+    const session = (await getSuperSession()).session();
     const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;
     const res = await session.run(query, { subdomain });
     if(res.records.length > 0){

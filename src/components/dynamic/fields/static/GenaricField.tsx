@@ -18,13 +18,15 @@ import {
 } from "~/lib/graph/graph";
 import {
   FormContext,
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions,
   iconMap,
   PageContext,
 } from "~/lib/Utils";
+import {
+  getChildVertex,
+  getChildVertexes,
+  getParentVertex,
+  getSelectionOptions
+} from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import {

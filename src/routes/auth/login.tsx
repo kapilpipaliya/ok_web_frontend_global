@@ -1,4 +1,4 @@
-import { Login } from "~/pages/form/Forms";
+import { Login } from "~/pages/form/Login";
 import SiteTitle from "~/components/website/utils";
 
 export default function logIn() {

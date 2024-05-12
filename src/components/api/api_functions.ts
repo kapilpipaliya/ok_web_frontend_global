@@ -1,4 +1,4 @@
-import postAPI from "~/lib/auth/PostApi";
+import { postAPI } from "~/components/api/postApi";
 import { API } from "~/components/api/DataFetcher";
 
 // General function to make API calls with a payload
@@ -86,3 +86,5 @@ export const deleteSupportTicketCall = async (ticketId: any) =>
     action: "delete",
     id: ticketId,
   });
+
+  

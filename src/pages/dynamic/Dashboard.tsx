@@ -1,7 +1,8 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
 import { createEffect, createSignal, JSX, Show, useContext } from "solid-js";
-import { getNewGraphId, GraphContext } from "~/lib/graph/graph";
+import { GraphContext } from "~/lib/graph/graph";
+import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
 import { Navbar } from "~/components/layout/Navbar";
 import { APP_BASE_URL, PageContext } from "~/lib/Utils";
@@ -12,11 +13,12 @@ import {
 } from "~/lib/graph/mutate/vertex";
 import "~/css/base.css";
 import "~/css/modal.css";
-import { getUser } from "~/lib/auth/auth";
+import { getUser } from "~/cypher_api/server/auth/auth";
 import { LoadingContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
 import Sidebar from "~/components/layout/Sidebar";
 import { signOutCall } from "~/components/api/api_functions";
+import { createStore } from "solid-js/store";
 
 const border = "|solid|rgb(212,219,231)";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
@@ -145,15 +147,10 @@ const DropdownMenu = () => {
         ref={btnEl}
         onClick={handleOpen}
         class={
-          "flex ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
+          "flex width:40px height:40px ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
         }
-        style="border: none; cursor: pointer;background-color:rgb(237,237,255)"
+        style={`background-size:contain;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${graph.member?.properties?.profileImage ?? 'https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png'})`}
       >
-        <img
-          src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-          alt="profile"
-          style="width: 40px; height: 40px;"
-        />
       </button>
       <Dismiss
         menuButton={btnEl}
@@ -165,11 +162,9 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-            isOpen() ? 1 : 0
-          }; pointer-events: ${
-            isOpen() ? "auto" : "none"
-          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
+            }; pointer-events: ${isOpen() ? "auto" : "none"
+            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
@@ -180,10 +175,10 @@ const DropdownMenu = () => {
             style="list-style-type: none; padding: 0; margin: 0; position:relative;"
           >
             <li style="margin-bottom: 5px; padding: 10px; " class={"flex p:13"}>
-              <img
-                src="https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
-                alt="profile"
-                style="height: 45px;"
+              <div
+                // alt="profile"
+                class="h:45 w:45 r:50%"
+                style={`background-size:contain;background-image: url(${graph.member?.properties?.profileImage ?? 'https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png'})`}
               />
               <div class={"ml:10 mr:1rem"}>
                 <div class={"text-align:start f:15 font-weight:bold"}>

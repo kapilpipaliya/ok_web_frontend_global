@@ -4,7 +4,8 @@ import { createMemo, For, Match, Switch, useContext } from "solid-js";
 import { A } from "@solidjs/router";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
-import { APP_BASE_URL, Record } from "~/lib/Utils";
+import { APP_BASE_URL } from "~/lib/Utils";
+import { Record } from "~/lib/graph/get/sync/graph_fns";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import {
   onDataDirectoryImportClick,

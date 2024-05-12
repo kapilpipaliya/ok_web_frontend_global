@@ -11,10 +11,11 @@ export function findVertexIdsByLabel(
 }
 
 export function findVertexByLabelAndUniqueId(
+  graph: Store<GraphInterface>,
   label: string,
   attribute: string,
   value: number | string,
-  graph: Store<GraphInterface>,
+  
 ) {
   if (!value) return undefined;
   const vertexId = (graph.vertexLabelIdMap[label] || []).find(

@@ -1,4 +1,4 @@
-import { SignUp } from "~/pages/form/Forms";
+import { SignUp } from "~/pages/form/SignUp";
 import SiteTitle from "~/components/website/utils";
 
 export default function signUp() {

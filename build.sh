@@ -2,7 +2,7 @@
 set -e
 
 # Save the project directory to a variable
-project_dir="$HOME/portal"
+project_dir="$HOME/ok_web_frontend_global"
 
 # Clone or pull the vcpkg repository
 if [ -d "$project_dir" ]; then
@@ -39,11 +39,6 @@ else
     cd $project_dir
 fi
 
-# Install dependencies
 npm install
 
-# Build the admin interface
-npm run buildadmin
-
-# Build the web interface
-npm run buildweb
+npm run build

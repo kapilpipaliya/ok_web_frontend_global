@@ -6,10 +6,12 @@ import {
   Edge,
   GraphInterface,
   Id,
+} from "~/lib/graph/graph";
+import {
   isValidId,
   transactionDetailAdd,
-  transactions,
-} from "~/lib/graph/graph";
+  transactions
+} from "../transaction";
 
 export function newEdge(
   edgeId: Id,

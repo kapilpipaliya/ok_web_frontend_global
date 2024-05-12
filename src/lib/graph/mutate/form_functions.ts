@@ -1,11 +1,13 @@
 import {
-  getNewGraphId,
-  getNewTxnId,
   GraphInterface,
   Id,
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  getNewGraphId,
+  getNewTxnId
+} from "../transaction";
 import { klona } from "klona/json";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { batch, onCleanup, untrack } from "solid-js";
@@ -13,8 +15,8 @@ import {
   addNewRow,
   getChildVertex,
   getChildVertexes,
-  newRow,
-} from "~/lib/Utils";
+  newRow
+} from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { SetStoreFunction, Store } from "solid-js/store";

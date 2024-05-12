@@ -11,14 +11,16 @@ import {
 
 // Comment This Lines in web build
 import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
   GraphContext,
   GraphInterface,
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId
+} from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
@@ -27,13 +29,14 @@ import {
   getSelectedVertexValue,
 } from "~/lib/graph/get/sync/traverse";
 import {
-  getSelectionOptions,
-  getChildVertex,
-  onChangeHandler,
   FormContext,
   getValueFromVertexOrKey,
-  setValueGlobal,
 } from "~/lib/Utils";
+import {
+  getSelectionOptions,
+  getChildVertex,
+  onChangeHandler, setValueGlobal
+} from "~/lib/graph/get/sync/graph_fns";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/lib/ComponentType";
@@ -158,10 +161,10 @@ export function collectionNameDisplayExpr(
     return;
   }
   const collectionVertex = findVertexByLabelAndUniqueId(
+    graph,
     "Coll",
     "name",
     collection,
-    graph,
   );
   if (collectionVertex) {
     const nameKeys = getNameKeyForCollection(graph, collectionVertex);

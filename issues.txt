@@ -1,12 +1,30 @@
 
-✅ 1. when signup and login convert email to lowercase in the api.
+
    2. make mutate api.(kapil)
    3. convert docker api /root/pm2_and_docker_frontend/pm2-docker-manage-api.js to solid-start API and use it when signup to create a docker.
 ✅ 4. make sure session is properly closed in API.
 ✅ 5. make user validation when update profile.
   6. add a subdmoin field in signup. if not unique give error message
 
-  ✅ 1. make a api for pages load.
- ✅  2. make a api for edit form data get.
-  3. make a api for submit form.(Kapil)
-  4. 
+
+
+  make a api for submit form.(Kapil)
+  load full page data with all joins when the page loads.
+  write separate api for navbar.
+  
+
+
+
+
+
+
+
+
+  Letter: Sorting, Filtering support on the table
+  When file is uploaded, it should be in its own subdomain folder.
+  Load table data from server with pagination when form have many rows
+
+
+  we are using two libraries:
+  jsep (for +,-) => jsonata(filter, projection)
+  

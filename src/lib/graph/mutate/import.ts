@@ -1,22 +1,25 @@
 import {
+  isObject,
+} from "~/lib/Utils";
+import {
   addNewRow,
   deleteRow,
   getChildVertex,
   getChildVertexes,
   getSublistRows,
-  getSublistRowsForType,
-  isObject,
-  newRow,
-  Record,
-} from "~/lib/Utils";
+  getSublistRowsForType, newRow,
+  Record
+} from "~/lib/graph/get/sync/graph_fns";
 import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
   GraphInterface,
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId
+} from "../transaction";
 import {
   addNewVertex,
   deleteVertex,
@@ -412,10 +415,10 @@ export const onDataDirectoryImportClick = (
         if (value === "undefined") return;
         // find and if not exist then only add new vertex
         let existingVertex = findVertexByLabelAndUniqueId(
-          meta.collLabel,
+          graph, meta.collLabel,
           meta.collId,
           value,
-          graph,
+          
         );
 
         if (!existingVertex) {
@@ -474,10 +477,10 @@ export const onDataDirectoryImportClick = (
         // when importing component it has self join, so it's inserting duplicate rows
         // TODO: allow customizing primary key for the collection when doing import instead of rowObj[IdAttr]
         const existingVertex = findVertexByLabelAndUniqueId(
-          labelName,
+          graph, labelName,
           IdAttr,
           rowObj[IdAttr],
-          graph,
+          
         );
         if (existingVertex) {
           rowVertexId = existingVertex.id;
@@ -498,19 +501,19 @@ export const onDataDirectoryImportClick = (
 
         const v = () =>
           findVertexByLabelAndUniqueId(
-            selectMeta.collLabel,
+            graph, selectMeta.collLabel,
             selectMeta.collId,
             value,
-            graph,
+            
           );
         if (selectMeta.func) {
           if (selectMeta.func === "component") {
             const componentString = resoDataTypeToComponents(value, row);
             const componentVertex = findVertexByLabelAndUniqueId(
-              selectMeta.collLabel,
+              graph, selectMeta.collLabel,
               selectMeta.collId,
               componentString,
-              graph,
+              
             );
             if (!componentVertex) {
               console.warn(`component is not found ${componentString}`);
@@ -529,10 +532,10 @@ export const onDataDirectoryImportClick = (
             );
           } else if (selectMeta.func === "lookup") {
             const lookup = findVertexByLabelAndUniqueId(
-              selectMeta.collLabel,
+              graph, selectMeta.collLabel,
               selectMeta.collId,
               value,
-              graph,
+             
             );
             if (lookup) {
               // edge and child vertex has same label
@@ -783,10 +786,10 @@ export function importRecordWithYAMLSchema(
             }
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              "Coll",
+              graph, "Coll",
               "name",
               vertex.L[0],
-              graph,
+              
             );
             if (!collVertex) {
               alert(`Collection not defined: ${label[0]}`);

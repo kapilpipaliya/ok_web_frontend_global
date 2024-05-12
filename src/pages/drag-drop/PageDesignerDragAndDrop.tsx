@@ -1,14 +1,14 @@
 import { useParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
 import {
-  addMetaVertexes,
   FormContext,
-  getChildVertex,
-  getChildVertexes,
   iconMap,
   nameExpr,
-  Record,
 } from "~/lib/Utils";
+import {
+  addMetaVertexes, getChildVertex,
+  getChildVertexes, Record
+} from "~/lib/graph/get/sync/graph_fns";
 import {
   batch,
   createSelector,
@@ -26,16 +26,17 @@ import { GenericField } from "~/components/dynamic/fields/static/GenericFieldCom
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
 import {
-  getNewGraphId,
-  getNewTxnId,
   GraphContext,
   Id,
   IdAttr,
-  revertTransaction,
-  revertTransactionUpTo,
-  transactions,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  getNewGraphId,
+  getNewTxnId, revertTransaction,
+  revertTransactionUpTo,
+  transactions
+} from "~/lib/graph/transaction";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

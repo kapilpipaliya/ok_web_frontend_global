@@ -1,15 +1,12 @@
 import {
   createEffect,
-  createResource,
   JSX,
-  Match,
+  onMount,
   Show,
-  Switch,
   useContext,
 } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
-
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export const DataFetcher = (props: {
@@ -18,7 +15,8 @@ export const DataFetcher = (props: {
   errorMessage?: string;
 }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [WsData, { refetch }] = createResource(async () => {
+  
+  const getdata = async () => {
     try {
       const response = await fetch(props.fetchData);
       const data = await response.json();
@@ -27,28 +25,13 @@ export const DataFetcher = (props: {
     } catch (error) {
       throw error;
     }
-  });
-
-  createEffect(() => {
-    if (WsData() === undefined) {
-      refetch();
-    } else {
-      setGraphData(graph, setGraph, WsData());
-    }
+  }
+  onMount(() => {
+    getdata();
   });
 
   return (
-    <Switch>
-      <Match when={WsData.error}>
-        <div>Error: {props.errorMessage ?? WsData.error}</div>
-      </Match>
-      <Match when={WsData.loading}>
-        <LoaderNew />
-      </Match>
-      <Match when={true}>
-        <Show when={graph.initialSynced}>{props.renderContent}</Show>
-      </Match>
-    </Switch>
+    <Show when={graph.initialSynced} fallback={<LoaderNew />}>{props.renderContent}</Show>
   );
 };
 

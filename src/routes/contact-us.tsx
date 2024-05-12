@@ -1,5 +1,5 @@
-import { ContactUs } from "~/pages/form/Forms";
+import { SupportTicket } from "~/pages/form/SupportTicket";
 
 export default function Contact() {
-  return <ContactUs />;
+  return <SupportTicket />;
 }

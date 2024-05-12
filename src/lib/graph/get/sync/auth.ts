@@ -1,5 +1,5 @@
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
-import { getChildVertexes } from "~/lib/Utils";
+import { getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
 import { useContext } from "solid-js";
 
 export function getPermissions(meta: Vertex) {

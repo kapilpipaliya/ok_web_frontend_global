@@ -263,7 +263,6 @@ export function findVertexIdsByLabel(
 
 export function findVertexByLabelAndUniqueId(
   graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
   label: string,
   attribute: string,
   value: number | string,
@@ -326,7 +325,6 @@ export function findOrCreateNewVertex(
   }
   let existingVertex = findVertexByLabelAndUniqueId(
     graph,
-    setGraph,
     label,
     lookupId,
     lookUpUniqueValue,

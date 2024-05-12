@@ -14,8 +14,8 @@ import {
   getChildVertex,
   getSublistRows,
   getSublistRowsForType,
-  Record,
-} from "~/lib/Utils";
+  Record
+} from "~/lib/graph/get/sync/graph_fns";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 
@@ -137,11 +137,11 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   };
 
   const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(
+    const nav = findVertexByLabelAndUniqueId(graph,
       "Nav",
       "name",
       "Navigation",
-      graph,
+  
     );
     if (!nav) return;
 
@@ -232,15 +232,18 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                           <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
                         </g>
                       </svg>
+                      <form autocomplete="off" method="post" action="">
                       <input
                         placeholder="Search..."
                         type="search"
+                        autocomplete="none"
                         class="inputSearch f:14"
                         value={searchTerm()}
                         onInput={(e) => {
                           handleSearch(e.target.value);
                         }}
                       />
+                      </form>
                     </div>
                   </nav>
                   <nav class="mt:16 ml:-12 mr:-12 overflow:auto">
@@ -287,8 +290,6 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                               <Show when={!expandedSections().get(nav.name)}>
                                 <For each={nav.children}>
                                   {(child) => {
-                                    console.log('active sec', activeSection(), nav.name, child.name)
-
                                     return <a
                                       class={`${location.pathname === child.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
                                       href={child.href}

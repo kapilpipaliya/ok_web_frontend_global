@@ -3,12 +3,13 @@ import { createSignal, createUniqueId, Show, useContext } from "solid-js";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
 
 import {
+  PageContext,
+} from "~/lib/Utils";
+import {
   getChildVertex,
   getSublistRows,
-  getSublistRowsForType,
-  PageContext,
-  Record,
-} from "~/lib/Utils";
+  getSublistRowsForType, Record
+} from "~/lib/graph/get/sync/graph_fns";
 // Comment This Lines in web build
 import { Navigator } from "@solidjs/router/dist/types";
 import { createStore } from "solid-js/store";

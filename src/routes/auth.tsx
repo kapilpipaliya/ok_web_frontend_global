@@ -1,5 +1,5 @@
 import { createAsync, RouteSectionProps, useNavigate } from "@solidjs/router";
-import { getUser } from "~/lib/auth/auth";
+import { getUser } from "~/cypher_api/server/auth/auth";
 import { APP_BASE_URL } from "~/lib/Utils";
 
 export default function auth(props: RouteSectionProps) {

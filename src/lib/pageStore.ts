@@ -7,20 +7,20 @@ import {
   untrack,
 } from "solid-js";
 import {
-  getNewGraphId,
   GraphInterface,
   Id,
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
+import { getNewGraphId } from "./graph/transaction";
 import {
   addNewRow,
   getChildVertex,
   getChildVertexes,
   getParentVertex,
   getSelectionOptions,
-  Record,
-} from "~/lib/Utils";
+  Record
+} from "./graph/get/sync/graph_fns";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
 import { getCompProps, getRowProps, getStringComponent } from "~/lib/graph/get/sync/graph_functions";
@@ -192,10 +192,10 @@ export const componentDrag = (
           fromVertex.id,
         );
         const formVertex = findVertexByLabelAndUniqueId(
-          "Comp",
+          graph, "Comp",
           IdAttr,
           "Form",
-          graph,
+      
         );
         if (!formVertex) {
           alert("cant find form");
@@ -289,7 +289,7 @@ const getComponentFromLayoutRow = (
   }
   const collVertex = getChildVertex(graph, ["$0Coll"], currentVertex);
   if (collVertex.vertex?.P.name === "Form") {
-    return findVertexByLabelAndUniqueId("Comp", IdAttr, "Form", graph);
+    return findVertexByLabelAndUniqueId(graph, "Comp", IdAttr, "Form");
   }
 
   return getStringComponent(graph);

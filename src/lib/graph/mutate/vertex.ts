@@ -2,13 +2,14 @@ import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import {
-  getNewGraphId,
   GraphInterface,
   Id,
-  transactionDetailAdd,
-  transactions,
   Vertex,
 } from "~/lib/graph/graph";
+import {
+  getNewGraphId, transactionDetailAdd,
+  transactions
+} from "../transaction";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
@@ -266,10 +267,10 @@ export function findOrCreateNewVertex(
     return;
   }
   let existingVertex = findVertexByLabelAndUniqueId(
-    label,
+    graph, label,
     lookupId,
     lookUpUniqueValue,
-    graph,
+   
   );
 
   if (!existingVertex) {

@@ -3,23 +3,26 @@ import { klona } from "klona/json";
 import {
   AdminAttrKeys,
   AttrsTableData,
+} from "~/lib/Utils";
+import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
   getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
-  Record,
-} from "~/lib/Utils";
+  Record
+} from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { findVertexByLabelAndUniqueId } from "~/cypher_api/lib/vertex";
-import { getToEdge } from "~/cypher_api/lib/traverse";
+import { findVertexByLabelAndUniqueId } from "./findVertex";
+import { getToEdge } from "./getToEdge";
 
-export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
+
+export async function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
     (acc, curr) => {
       acc[curr.P.name] = curr;
@@ -29,7 +32,7 @@ export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   );
 }
 
-export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
+export async function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
     (acc, curr) => {
       if (curr.P.name && curr.P.value !== undefined) {
@@ -41,7 +44,7 @@ export function getCompProps(graph: Store<GraphInterface>, comp: Vertex) {
   );
 }
 
-export function getRowProps(
+export async function getRowProps(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   comp: Vertex,
@@ -87,11 +90,11 @@ function getComponentProperties(
   return metaData;
 }
 
-export function getCollAttrs(
+export async function getCollAttrs(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   vertexCollAttr: Vertex,
-): { error: boolean; attr?: FieldAttribute } {
+): Promise<{ error: boolean; attr?: FieldAttribute }> {
   const attr = Object.assign(
     {},
     removeUndefinedProperties(vertexCollAttr.P, false, 10),
@@ -109,11 +112,12 @@ export function getCollAttrs(
         vertexCollAttr.P.name,
         "taking string dataType",
       );
-      const dataTypeVertex = findVertexByLabelAndUniqueId(
+      const dataTypeVertex = await findVertexByLabelAndUniqueId(
+        graph,
         "DataType",
         "name",
         "String",
-        graph,
+       
       );
       if (!dataTypeVertex) {
         console.warn("String data Type not found");
@@ -216,11 +220,11 @@ export function getCollAttrs(
   return { error: false, attr };
 }
 
-const getCollectionOneLevelAttrs = (
+const getCollectionOneLevelAttrs = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   collVertex: Vertex,
-): { error: string; attrs?: FieldAttribute[] } => {
+): Promise<{ error: string; attrs?: FieldAttribute[] }> => {
   const vertexCollAttrResult = getChildVertexes(graph, ["Attr"], [collVertex]);
   if (vertexCollAttrResult.error) {
     return { error: "No Attributes in a Coll" };
@@ -231,9 +235,9 @@ const getCollectionOneLevelAttrs = (
   let attrs: FieldAttribute[] = [];
 
   for (const vertexCollAttr of collAttrs) {
-    const addPropsResult = getCollAttrs(graph, setGraph, vertexCollAttr);
+    const addPropsResult = await getCollAttrs(graph, setGraph, vertexCollAttr);
     if (addPropsResult.error) continue;
-    const attributes = getCollectionOneLevelAttrs(
+    const attributes = await getCollectionOneLevelAttrs(
       graph,
       setGraph,
       vertexCollAttr,
@@ -245,16 +249,16 @@ const getCollectionOneLevelAttrs = (
   }
   return { error: "", attrs };
 };
-export const getFormApiFromForm = (
+export const getFormApiFromForm = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
-): { error: string; form?: FormMetaData } => {
-  const coll = findVertexByLabelAndUniqueId("Coll", IdAttr, formId, graph);
+): Promise<{ error: string; form?: FormMetaData }> => {
+  const coll = await findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, formId);
   if (!coll) {
     return { error: "coll not found" };
   }
-  const attrsResult = getCollectionOneLevelAttrs(graph, setGraph, coll);
+  const attrsResult = await getCollectionOneLevelAttrs(graph, setGraph, coll);
   if (attrsResult.error) {
     return { error: attrsResult.error };
   }
@@ -272,7 +276,7 @@ export const getFormApiFromForm = (
 };
 
 // TODO: when meta changed realtime its not updating.
-export function componentProps(
+export async function componentProps(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   metaVertex: Vertex,
@@ -295,7 +299,7 @@ export function componentProps(
   );
 }
 
-export function getPkForCollection(
+export async function getPkForCollection(
   graph: Store<GraphInterface>,
   collVertex: Vertex,
 ) {
@@ -303,7 +307,7 @@ export function getPkForCollection(
   return pks.map((pk) => pk.P.name);
 }
 
-export function getNameKeyForCollection(
+export async function getNameKeyForCollection(
   graph: Store<GraphInterface>,
   collVertex: Vertex,
 ) {
@@ -314,7 +318,7 @@ export function getNameKeyForCollection(
 
 // 'type' or 'label' can be overwritten in the meta.
 
-export const getFormMetaData = (
+export  const getFormMetaData = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
@@ -324,15 +328,15 @@ export const getFormMetaData = (
     (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
   if (!form) {
-    const formResult = getFormApiFromForm(graph, setGraph, formId);
+    const formResult = await getFormApiFromForm(graph, setGraph, formId);
     if (formResult.error) return formResult;
     form = formResult.form!;
   }
   return { error: false, form };
 };
 
-export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
-  const getChildren = (
+export const getExportCode = async (graph: Store<GraphInterface>, record: Record) => {
+  const getChildren = async (
     meta: Vertex,
     vertex: Vertex,
     result: {
@@ -355,7 +359,7 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
       if (metaProps.inward) {
         // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
       } else {
-        const type = getToEdge(metaVertex, vertex);
+        const type = await getToEdge(metaVertex, vertex);
         // also can use selectedValue function;
         const childVertexes = getSublistRows(graph, metaVertex, vertex);
 
@@ -374,17 +378,17 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
             result["OUT"][type] = [pksResult];
             // getChildren(metaVertex, v, pksResult);
           } else {
-            const collVertex = findVertexByLabelAndUniqueId(
+            const collVertex = await findVertexByLabelAndUniqueId(
+              graph,
               "Coll",
               "name",
-              label,
-              graph,
+              label
             );
             if (!collVertex) {
               alert(`Collection not defined: ${label}`);
               continue;
             }
-            const pks = getPkForCollection(graph, collVertex);
+            const pks = await getPkForCollection(graph, collVertex);
 
             const pksResult = {} as { [primaryKey: string]: any };
             for (const pk of pks) {
@@ -416,7 +420,7 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
       if (metaProps.inward) {
         // not possible now
       } else {
-        const type = getToEdge(metaVertex, vertex);
+        const type = await getToEdge(metaVertex, vertex);
         const childVertexes = getSublistRows(graph, metaVertex, vertex);
 
         const out = childVertexes.map((v) =>
@@ -452,16 +456,16 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
   });
 };
 
-export function getStringComponent(
+export async function getStringComponent(
   graph: Store<GraphInterface>,
   attrDataTypeVertex?: Vertex,
 ) {
   if (!attrDataTypeVertex) {
-    attrDataTypeVertex = findVertexByLabelAndUniqueId(
+    attrDataTypeVertex = await findVertexByLabelAndUniqueId(
+      graph,
       "DataType",
       "name",
       "String",
-      graph,
     );
     if (!attrDataTypeVertex) {
       return;
@@ -470,10 +474,10 @@ export function getStringComponent(
   return getChildVertex(graph, ["$0Default"], attrDataTypeVertex).vertex;
 }
 
-export function getCollAttrComp(
+export async function getCollAttrComp(
   attrVertex: Vertex,
   graph: Store<GraphInterface>,
-): Vertex | undefined {
+): Promise<Vertex | undefined> {
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
   if (attrComp) return attrComp;
 

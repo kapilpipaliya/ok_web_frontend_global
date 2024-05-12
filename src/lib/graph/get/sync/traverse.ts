@@ -3,10 +3,12 @@ import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import {
   capitalizeFirstLetter,
-  deleteRow,
-  getChildVertexes,
   getValueFromVertexOrKey,
 } from "~/lib/Utils";
+import {
+  deleteRow,
+  getChildVertexes
+} from "~/lib/graph/get/sync/graph_fns";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
 

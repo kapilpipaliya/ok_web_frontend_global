@@ -2,6 +2,7 @@ import { API, DataFetcher } from "~/components/api/DataFetcher";
 import { PageView_ } from "~/pages/dynamic/PageView";
 
 export default function admin() {
+  
   return (
     <DataFetcher
       fetchData={API.fetchDataUrl}

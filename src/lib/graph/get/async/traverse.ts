@@ -3,24 +3,27 @@ import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import {
   capitalizeFirstLetter,
-  deleteRow,
-  getChildVertexes,
   getValueFromVertexOrKey,
 } from "~/lib/Utils";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
-import { SetStoreFunction, Store } from "solid-js/store";
+import {
+  deleteRow,
+  getChildVertexes
+} from "~/lib/graph/get/sync/graph_fns";
 
-export function getSelectedVertexValue(
+import { SetStoreFunction, Store } from "solid-js/store";
+import { getToEdge } from "./getToEdge";
+
+export async function getSelectedVertexValue(
   graph: Store<GraphInterface>,
   vertex: Vertex,
   meta: Vertex,
 ) {
   if (!vertex?.L) return [];
-  const type = getToEdge(meta, vertex);
+  const type = await getToEdge(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
 
-export function getInEdge(meta: Vertex, vertex: Vertex) {
+export async function getInEdge(meta: Vertex, vertex: Vertex) {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
   const parentLabel = getValueFromVertexOrKey(meta.P.props, "parentLabel");
@@ -32,23 +35,23 @@ export function getInEdge(meta: Vertex, vertex: Vertex) {
   );
 }
 
-export function getParentVertexValue(
+export async function getParentVertexValue(
   graph: Store<GraphInterface>,
   vertex: Vertex,
   meta: Vertex,
-): Id[] {
-  const type = getInEdge(meta, vertex);
+): Promise<Id[]> {
+  const type = await getInEdge(meta, vertex);
   if (!type) {
     return [];
   }
   return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
 
-export function getParentVertexes(
+export async function getParentVertexes(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
-): { error: boolean; vertexes?: Vertex[] } {
+): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
@@ -97,7 +100,7 @@ export function getParentVertexes(
   }
 }
 
-export const calculateFilter = (input: string) => {
+export const calculateFilter = async (input: string) => {
   let isMultiple = true;
   let filterIndex = input.indexOf("[");
   let filter = "";
@@ -119,7 +122,7 @@ export const calculateFilter = (input: string) => {
   return [type, filter, isMultiple] as const;
 };
 
-export const getTreeData = (
+export  const getTreeData = async(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   treeLevels: { [key: string]: any },
@@ -129,7 +132,7 @@ export const getTreeData = (
     addChild?: (child: Vertex) => boolean;
   },
 ) => {
-  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]) => {
+  const getChildren = async (levels: { [key: string]: any }, vertexes: Vertex[]) => {
     const result = [] as any[];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
@@ -162,7 +165,7 @@ export const getTreeData = (
   return getChildren(treeLevels, vertexes);
 };
 
-export const deleteNestedLayout = (
+export  const deleteNestedLayout = async(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -172,14 +175,14 @@ export const deleteNestedLayout = (
     addChild?: (child: Vertex) => boolean;
   },
 ) => {
-  const deleteChildren = (vertexes: Vertex[]) => {
-    const children = getChildVertexes(graph, ["Attr"], vertexes);
+  const deleteChildren = async (vertexes: Vertex[]) => {
+    const children = await getChildVertexes(graph, ["Attr"], vertexes);
     for (const child of children.vertexes || []) {
       // delete children
-      deleteChildren([child]);
+      await deleteChildren([child]);
 
       // delete properties:
-      const AttrProps = getChildVertexes(graph, ["AttrProp"], vertexes);
+      const AttrProps = await getChildVertexes(graph, ["AttrProp"], vertexes);
       if (!AttrProps.error) {
         for (const vertex of AttrProps.vertexes!) {
           // delete in edges and out edges of properties
@@ -199,7 +202,7 @@ export const deleteNestedLayout = (
   }
 };
 
-export const getTextValue = (value: any) => {
+export const getTextValue = async (value: any) => {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
   } else if (typeof value === "object") {
