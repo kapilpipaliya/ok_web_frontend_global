@@ -32,7 +32,7 @@ import {
   getSelectionOptions,
   getChildVertexes,
 } from "~/lib/graph/get/sync/graph_fns";
-import { ComponentProps } from "~/lib/ComponentType";
+import { ComponentProps } from "~/components/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {
   PageRenderContext,

@@ -29,7 +29,6 @@ import {
   getId,
 } from "../../../Utils";
 import { useToast } from "~/components/custom/Toast";
-import { NewTxnIdContext } from "~/lib/contexts";
 
 export function getSelectionOptions(
   graph: Store<GraphInterface>,

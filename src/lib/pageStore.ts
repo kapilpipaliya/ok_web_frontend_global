@@ -419,6 +419,7 @@ export const useDragDrop = (
       }
     }
 
+    console.log('drag over complete')
     // This is necessary to allow the drop action to proceed
     e.preventDefault();
   };
@@ -432,6 +433,7 @@ export const useDragDrop = (
   };
 
   const handleDrop = (e: DragEvent) => {
+    console.log('drop')
     e.stopPropagation();
 
     let fromVertex = draggedVertex();
@@ -454,6 +456,11 @@ export const useDragDrop = (
       position === "center"
         ? toVertex
         : getParentVertex(["Attr"], toVertex, graph).vertex;
+
+      if (!toParentVertex) {
+        // Dont allow drag before and after first element
+        return;
+      }
 
     // const fromIndex = fromVertex.P.pos as number;
     // const toIndex = toVertex.P.pos as number;

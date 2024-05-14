@@ -61,12 +61,16 @@ export const Login = () => {
         loadMessage: "Logging In...",
         successMessage: "Logged In Successfully",
         onSuccess: (value) => {
+          setLoadingSite(false);
+
           if (value != null && value.id !== null) {
             navigate(`${APP_BASE_URL}/Page`);
           }
+        }, onError(error) {
+          setLoadingSite(false);
+
         },
       });
-      setLoadingSite(false);
     }
   };
 
@@ -93,7 +97,7 @@ export const Login = () => {
             src={logo}
             alt="logo"
             class="@fade|.5s"
-            style={{ "justify-self": "center" ,height:'70px' }}
+            style={{ "justify-self": "center", height: '70px' }}
           />
         }
       >
@@ -123,7 +127,7 @@ export const Login = () => {
       >
         <img
           src={"../../public/graphics/login_vector.jpg"}
-          style={{ width:'25rem'}}
+          style={{ width: '25rem' }}
           alt="logo"
           class="d:none@<md"
         />

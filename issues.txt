@@ -1,7 +1,25 @@
-✅ 
+✅ 🌟 📝
 
+🌟 Project Fetures 🌟-----------------------------------------------------------------------------------------
 
-load full page data with all joins when the page loads.
+1. on click add element at last 
+2. open properties when click element using drawer
+3. seperate form design drawer
+4. form page setting section
+5. built in component group like address, name, choice option
+
+👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
+
+1. make mutate api working
+
+📝 Todo 📝------------------------------------------------------------------------------------------
+
+1. When we drag and drop from page builder its not working(KAPIL)
+2. Fix Delete not working(Kapil)
+
+------------------------------------------------------------------------------------------
+
+  load full page data with all joins when the page loads.
   write separate api for navbar.
   use createResource in FormGroup, PageView_, GenericField(Form)
 
@@ -12,21 +30,3 @@ load full page data with all joins when the page loads.
 
   we are using two libraries:
   jsep (for +,-) => jsonata(filter, projection)
-
-
-  Todo:
-  When we drag and drop from page builder its not working(KAPIL)
-  Fix Delete not working(Kapil)
-  
-
-Tasks:
-  make mutate api working
-  ✅ Fix Error in PageDesignerDragAndDrop file.
-  ✅ Remove all the signal in this file: ok_web_frontend_global/src/lib/pageStore.ts to context
-
-
-
-  How to use context guide:
-  1. export const CssEditorContext = createContext(); in a separate file.
-  2. Wrap a component with <CssEditorContext.provider value={store}>...</CssEditorContext.provider>
-  3. to use context: const store = useContext(CssEditorContext);

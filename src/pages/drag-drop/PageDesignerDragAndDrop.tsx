@@ -62,6 +62,8 @@ import { FieldAttribute } from "~/lib/Type";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { Accessor } from "solid-js";
 import { DraggedVertexContext, HiddenNodesContext, HoverIdContext, IndicatorPositionContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
+import Drawer from "../../components/custom/drawer";
+import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 
 export const PageDesignerDragAndDrop = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -160,7 +162,7 @@ export const PageDesignerDragAndDrop = () => {
     const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
 
     const titleStyle: JSX.CSSProperties = {
-      "font-size": "15px",
+      "font-size": "17px",
       "font-weight": "bolder",
       "margin-bottom": "8px",
       "margin-top": "8px",
@@ -168,12 +170,10 @@ export const PageDesignerDragAndDrop = () => {
 
     const listStyle: JSX.CSSProperties = {
       "list-style-type": "none",
-      padding: "0",
     };
 
     const listBoxStyle: JSX.CSSProperties = {
       display: "grid",
-      "grid-template-columns": "repeat(2, 1fr)",
       gap: "10px",
     };
 
@@ -225,13 +225,14 @@ export const PageDesignerDragAndDrop = () => {
         "margin-right": "3px",
         transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
         padding: "10px",
+        "justify-content":"space-between",
         "background-color": "white",
         display: "flex",
         "flex-direction": "row",
         "align-items": "center",
-        "justify-content": "space-between",
+        gap:"10px",
         height: "35px",
-        "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
+        "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
       } as JSX.CSSProperties;
 
       const hoverStyle = {
@@ -254,7 +255,7 @@ export const PageDesignerDragAndDrop = () => {
             setDraggedVertex(graph.vertexes[props.child.id]);
           }}
         >
-          <div class="pt:5px">
+          <div class="pt:5px flex gap:10px ai:center">
             <Icon
               icon={
                 iconMap[props.child?.P.name] ??
@@ -263,8 +264,8 @@ export const PageDesignerDragAndDrop = () => {
               width={20}
               height={20}
             />
+          <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
           </div>
-          <div style={{ "font-size": "14px" }}>{props.child?.P.name}</div>
 
           <Show when={isHovered()}>
             <Tooltip content={"Double click to Edit"}>
@@ -308,7 +309,7 @@ export const PageDesignerDragAndDrop = () => {
             />
           </div>
         </nav>
-        <div class="p:10">
+        <div>
           <For
             each={filteredData()}
             fallback={
@@ -316,7 +317,7 @@ export const PageDesignerDragAndDrop = () => {
             }
           >
             {(item) => (
-              <div>
+              <div class="m:20px|0px">
                 <div style={titleStyle}>{item.name}</div>
                 <ul style={{ ...listBoxStyle, ...listStyle }}>
                   <For each={item.children}>
@@ -467,8 +468,8 @@ export const PageDesignerDragAndDrop = () => {
             draggable={true}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
-            // onDragEnter={handleDragEnter}
-            // onDragLeave={handleDragLeave}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             class={`${isSelectedLayoutId(props.vertex.id)
               ? "bg:rgb(197,221,255)"
@@ -1674,61 +1675,11 @@ export const PageDesignerDragAndDrop = () => {
 
   return (
     <>
+
       <Switch>
         <Match when={selectedStepId() === 1}>
-          <div class="flex mt:15">
-            <div class={"rel"}>
-              <div
-                class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isLeftOpen() ? "w:20rem" : "w:1.8rem"} direction:rtl`}
-                style={{
-                  "max-height": "calc(100vh - 100px)",
-                  "scrollbar-width": "thin",
-                  "scrollbar-color": "lightgrey",
-                }}
-              >
-                <Show when={isLeftOpen()}>
-                  <For each={leftColumns()}>
-                    {(column, index) => (
-                      <Column
-                        type={column.id}
-                        index={index()}
-                        vertex={pageConfig[0].formData?.formMeta}
-                      />
-                    )}
-                  </For>
-                </Show>
-              </div>
-              <div class={`abs z-index:1 top:40vh right:1.2rem`}>
-                <button
-                  onClick={toggleIsLeftOpen}
-                  type="button"
-                  title={`${isLeftOpen() ? "Close" : "Open"}`}
-                  class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                  style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;${isLeftOpen() ? "margin-left: 20%" : "margin-left: 1%"};`}
-                >
-                  <Show
-                    when={isLeftOpen()}
-                    fallback={
-                      <Icon
-                        icon={"line-md:chevron-right-circle"}
-                        height={30}
-                        width={30}
-                        style={{ color: "#c1c1c1" }}
-                      />
-                    }
-                  >
-                    <Icon
-                      icon={"line-md:chevron-left-circle"}
-                      height={30}
-                      width={30}
-                      style={{ color: "#c1c1c1" }}
-                    />
-                  </Show>
-                </button>
-              </div>
-            </div>
-
-            <div class="flex-grow:1 min-w:400 grid ji:center">
+          <div style={{ display: 'grid', 'grid-template-areas': `'menu header callToAction' 'menu content callToAction'`, 'grid-auto-rows': 'auto 1fr auto', 'grid-template-columns': `${isLeftOpen() ? '15%' : '30px'} 1fr ${isRightOpen() ? '21%' : '30px'}`, height: '90vh' }}>
+            <header style={{ 'grid-area': 'header' }}><div class="flex-grow:1 min-w:400 grid ji:center">
               <div
                 class={
                   "ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between mb:5 p:10 r:7 w:90%"
@@ -1762,6 +1713,61 @@ export const PageDesignerDragAndDrop = () => {
                   </Tooltip>
                 </div>
               </div>
+            </div>
+            </header>
+            <nav style={{ 'grid-area': 'menu', }}>
+              <div class={"rel"}>
+                <div
+                  class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl`}
+                  style={{
+                    "max-height": "calc(100vh - 100px)",
+                    "scrollbar-width": "thin",
+                    "scrollbar-color": "lightgrey",
+                  }}
+                >
+                  <Show when={isLeftOpen()}>
+                    <For each={leftColumns()}>
+                      {(column, index) => (
+                        <Column
+                          type={column.id}
+                          index={index()}
+                          vertex={pageConfig[0].formData?.formMeta}
+                        />
+                      )}
+                    </For>
+                  </Show>
+                </div>
+                <div class={`abs z-index:1 top:40vh right:17px`}>
+                  <button
+                    onClick={toggleIsLeftOpen}
+                    type="button"
+                    title={`${isLeftOpen() ? "Close" : "Open"}`}
+                    class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                    style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;`}
+                  >
+                    <Show
+                      when={isLeftOpen()}
+                      fallback={
+                        <Icon
+                          icon={"line-md:chevron-right-circle"}
+                          height={30}
+                          width={30}
+                          style={{ color: "#c1c1c1" }}
+                        />
+                      }
+                    >
+                      <Icon
+                        icon={"line-md:chevron-left-circle"}
+                        height={30}
+                        width={30}
+                        style={{ color: "#c1c1c1" }}
+                      />
+                    </Show>
+                  </button>
+                </div>
+              </div>
+              </nav>
+            <div class='ai:center jc:center' style={{ 'grid-area': 'content', display: 'flex', 'flex-direction': 'column' }}>
               <ResizableContainer>
                 <FormContext.Provider value={pageConfig[0].formData}>
                   <PageView
@@ -1769,56 +1775,65 @@ export const PageDesignerDragAndDrop = () => {
                     vertex={pageConfig[0].formData?.formMeta}
                   />
                 </FormContext.Provider>
+                <Drawer
+                  customButton={(props) => <CustomButton {...props}>Open Drawer</CustomButton>}
+                  title="First Drawer"
+                  width="450px"
+                >
+                  <p>This is the first drawer's content.</p>
+                </Drawer>
               </ResizableContainer>
             </div>
-            <div class="rel mt:40vh mr:10px">
-              <button
-                onClick={toggleIsRightOpen}
-                type="button"
-                title={`${isRightOpen() ? "Close" : "Open"}`}
-                class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-                style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;${isRightOpen() ? "margin-left: 76.4%" : "margin-left: 96.3%"};`}
-              >
-                <Show
-                  when={isRightOpen()}
-                  fallback={
+            <aside style={{ 'grid-area': 'callToAction' }}>
+              <div class="rel z-index:1 top:40vh right:10px mr:10px">
+                <button
+                  onClick={toggleIsRightOpen}
+                  type="button"
+                  title={`${isRightOpen() ? "Close" : "Open"}`}
+                  class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
+                  style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;`}
+                >
+                  <Show
+                    when={isRightOpen()}
+                    fallback={
+                      <Icon
+                        icon={"line-md:chevron-left-circle"}
+                        height={30}
+                        width={30}
+                        style={{ color: "#c1c1c1" }}
+                      />
+                    }
+                  >
                     <Icon
-                      icon={"line-md:chevron-left-circle"}
+                      icon={"line-md:chevron-right-circle"}
                       height={30}
                       width={30}
                       style={{ color: "#c1c1c1" }}
                     />
-                  }
-                >
-                  <Icon
-                    icon={"line-md:chevron-right-circle"}
-                    height={30}
-                    width={30}
-                    style={{ color: "#c1c1c1" }}
-                  />
+                  </Show>
+                </button>
+              </div>
+              <div
+                class={`h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5`}
+                style={{
+                  "max-height": "calc(100vh - 100px)",
+                  "scrollbar-width": "thin",
+                  "scrollbar-color": "lightgrey",
+                }}
+              >
+                <Show when={isRightOpen()}>
+                  <For each={rightColumns()}>
+                    {(column, index) => (
+                      <Column
+                        type={column.id}
+                        index={index()}
+                        vertex={pageConfig[0].formData.formData}
+                      />
+                    )}
+                  </For>
                 </Show>
-              </button>
-            </div>
-            <div
-              class={`flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5 ${isRightOpen() ? "w:24rem" : "w:1.8rem"}`}
-              style={{
-                "max-height": "calc(100vh - 100px)",
-                "scrollbar-width": "thin",
-                "scrollbar-color": "lightgrey",
-              }}
-            >
-              <Show when={isRightOpen()}>
-                <For each={rightColumns()}>
-                  {(column, index) => (
-                    <Column
-                      type={column.id}
-                      index={index()}
-                      vertex={pageConfig[0].formData.formData}
-                    />
-                  )}
-                </For>
-              </Show>
-            </div>
+              </div>
+            </aside>
           </div>
         </Match>
         <Match when={selectedStepId() === 2}>
