@@ -1,22 +1,18 @@
-import { batch, onCleanup } from "solid-js";
+import { batch, onCleanup, useContext } from "solid-js";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import {
   addNewVertex,
   deleteVertex,
   mergeVertexProperties,
-  newVertex
+  newVertex,
 } from "~/lib/graph/mutate/vertex";
-import {
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex
-} from "~/lib/graph/graph";
+import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
   commitTxn,
   getNewGraphId,
-  getNewTxnId, revertTransaction
+  getNewTxnId,
+  revertTransaction,
 } from "../../transaction";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
@@ -25,16 +21,23 @@ import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionU
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { replaceExpressionToLabel, getValueFromVertexOrKey, isObject, getLabel, getId } from "../../../Utils";
-
+import {
+  replaceExpressionToLabel,
+  getValueFromVertexOrKey,
+  isObject,
+  getLabel,
+  getId,
+} from "../../../Utils";
+import { useToast } from "~/components/custom/Toast";
+import { NewTxnIdContext } from "~/lib/contexts";
 
 export function getSelectionOptions(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],
   collection: string,
-  strict?: boolean
-): { error: boolean; vertexes?: any; } {
+  strict?: boolean,
+): { error: boolean; vertexes?: any } {
   collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
   try {
     const value = evaluate(jsep(collection), {
@@ -59,18 +62,21 @@ export function deleteRow(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  Ws: ServerEventsDispatcher
+  Ws: ServerEventsDispatcher,
 ) {
+  const { showErrorToast } = useToast();
+
   batch(() => {
     if (isRealTime) {
-      txnId = getNewTxnId();
+      txnId = getNewTxnId(graph, setGraph);
     }
     // delete all vertex in edges
     const inEdges = vertex.IN;
     for (const type in inEdges) {
       for (const edgeId of inEdges[type]) {
         const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        if (deleteEdgeResult?.error)
+          showErrorToast(deleteEdgeResult.error.toString());
       }
     }
     // delete all outEdges of vertex
@@ -78,13 +84,14 @@ export function deleteRow(
     for (const type in outEdge) {
       for (const edgeId of outEdge[type]) {
         const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-        if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+        if (deleteEdgeResult?.error)
+          showErrorToast(deleteEdgeResult.error.toString());
       }
     }
 
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id, graph, setGraph);
-    if (deleteResult.error) alert(deleteResult.error);
+    if (deleteResult.error) showErrorToast(deleteResult.error.toString());
     if (isRealTime) commitTxn(txnId, Ws);
   });
 }
@@ -92,7 +99,7 @@ export function deleteRow(
 export function getChildVertex(
   graph: Store<GraphInterface>,
   path: string[],
-  currentVertex: Vertex
+  currentVertex: Vertex,
 ): {
   error: boolean;
   vertex?: Vertex;
@@ -119,7 +126,7 @@ export function getChildVertex(
     type = type.replace("$0", currentVertex.L[0]);
   }
   let vertexes = (currentVertex.OUT[type] || []).map(
-    (edgeId) => graph.vertexes[graph.edges[edgeId].E]
+    (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 
   if (filter) {
@@ -152,7 +159,7 @@ export function getChildVertex(
 export function getParentVertex(
   path: string[],
   currentVertex: Vertex,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): {
   error: boolean;
   vertex?: Vertex;
@@ -193,8 +200,8 @@ export function getChildVertexes(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
-  strict?: boolean
-): { error: boolean; vertexes?: Vertex[]; } {
+  strict?: boolean,
+): { error: boolean; vertexes?: Vertex[] } {
   const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
@@ -241,7 +248,7 @@ export function getChildVertexes(
       graph,
       path.slice(1),
       Array.from(stepVertexes.values()),
-      strict
+      strict,
     );
   } else {
     return {
@@ -252,51 +259,44 @@ export function getChildVertexes(
 }
 // This method read all property vertexes and make an object.
 
-
-
 export const getProps = (
   meta: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-) => (getChildVertexes(graph, ["$0Prop"], [meta]).vertexes || []).reduce(
-  (acc, curr) => {
-    const key = getSelectionOptions(
-      graph,
-      setGraph,
-      [curr],
-      "T:(->$0Key::'P.key')"
-    ).vertexes;
-    if (key) {
-      acc[key] = curr.P.value;
-    }
-    return acc;
-  },
-  {} as { [key: string]: any; }
-);
+  setGraph: SetStoreFunction<GraphInterface>,
+) =>
+  (getChildVertexes(graph, ["$0Prop"], [meta]).vertexes || []).reduce(
+    (acc, curr) => {
+      const key = getSelectionOptions(
+        graph,
+        setGraph,
+        [curr],
+        "T:(->$0Key::'P.key')",
+      ).vertexes;
+      if (key) {
+        acc[key] = curr.P.value;
+      }
+      return acc;
+    },
+    {} as { [key: string]: any },
+  );
 
 export function createMeta(
   form: FormMetaData,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-): {error: boolean, vertex?: Vertex} {
+  setGraph: SetStoreFunction<GraphInterface>,
+): { error: boolean; vertex?: Vertex } {
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
-  const metaTxnId = getNewTxnId();
+  const metaTxnId = getNewTxnId(graph, setGraph);
 
-    const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
-    const { error } = addNewVertex(
-      metaTxnId,
-      metaMainVertex,
-      graph,
-      setGraph
-    );
-    if (error) {
-      console.error(error);
-      return {error: true};
-    }
-    const metaVertex = graph.vertexes[metaMainVertex.id];
-  
+  const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
+  const { error } = addNewVertex(metaTxnId, metaMainVertex, graph, setGraph);
+  if (error) {
+    console.error(error);
+    return { error: true };
+  }
+  const metaVertex = graph.vertexes[metaMainVertex.id];
 
   addMetaVertexes(graph, setGraph, metaTxnId, metaVertex, attributes);
   onCleanup(() => {
@@ -307,136 +307,54 @@ export function createMeta(
   });
 
   return { error: false, vertex: metaVertex };
-};
+}
 
-
-export class Record {
-  txnId: number;
-  readonly isRealTime: boolean;
-  vertex: Vertex;
-  ws: ServerEventsDispatcher;
-  meta?: Vertex;
-  metaVertex: Vertex;
-
-  constructor({ ws, meta }: { ws: ServerEventsDispatcher; meta?: Vertex; }) {
-    this.txnId = getNewTxnId();
-    this.isRealTime = false;
-    this.ws = ws;
-    this.meta = meta;
+export function createForm(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: Id,
+  ws: ServerEventsDispatcher,
+  label: string,
+  properties?: {
+    [key: string]: any;
+  },
+): {
+  error: string | boolean;
+  vertex?: Vertex;
+} {
+  if (!label) {
+    return { error: "Label not found" };
   }
 
-  // create
-  create = (
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>,
-    label: string,
-    properties?: {
-      [key: string]: any;
-    }
-  ): {
-    error: string | boolean;
-    vertex?: Vertex;
-  } => {
-    if (!label) {
-      // if (!form[IdAttr]) {
-      return { error: "Label not found" };
-    }
-    if (this.isRealTime) {
-      this.txnId = getNewTxnId();
-    }
-    const newVertexObj = newVertex(getNewGraphId(), [label], properties || {});
-    // TODO: Do Create Transformation for the vertex
-    const addNewVertexResult = addNewVertex(
-      this.txnId,
-      newVertexObj,
-      graph,
-      setGraph
-    );
-    if (addNewVertexResult.error) {
-      return addNewVertexResult;
-    }
-    if (this.isRealTime) commitTxn(this.txnId, this.ws);
-    this.vertex = graph.vertexes[newVertexObj.id];
-    return {
-      error: false,
-      vertex: this.vertex,
-    };
+  const isRealTime = false;
+  if (isRealTime) {
+    txnId = getNewTxnId(graph, setGraph);
+  }
+  const newVertexObj = newVertex(getNewGraphId(), [label], properties || {});
+  // TODO: Do Create Transformation for the vertex
+  const addNewVertexResult = addNewVertex(txnId, newVertexObj, graph, setGraph);
+  if (addNewVertexResult.error) {
+    return addNewVertexResult;
+  }
+  if (isRealTime) commitTxn(txnId, ws);
+  const vertex = graph.vertexes[newVertexObj.id];
+  return {
+    error: false,
+    vertex: vertex,
   };
+}
+export function loadForm(
+  graph: Store<GraphInterface>,
+  id: number,
+): { error: string | boolean; vertex?: Vertex } {
+  if (!graph.vertexes[id]) {
+    return { error: "vertex not found" };
+  }
+  const vertex = graph.vertexes[id];
 
-  load = (
-    graph: Store<GraphInterface>,
-    id: number
-  ): { error: string | boolean; vertex?: Vertex; } => {
-    if (!graph.vertexes[id]) {
-      return { error: "vertex not found" };
-    }
-    this.vertex = graph.vertexes[id];
-
-    return {
-      error: false,
-      vertex: this.vertex,
-    };
-  };
-
-  createMeta = (
-    form: FormMetaData,
-    graph: Store<GraphInterface>,
-    setGraph: SetStoreFunction<GraphInterface>
-  ) => {
-    const { attributes, ...custom } = form;
-
-    // save attributes to vertexes
-    const metaTxnId = getNewTxnId();
-    if (this.meta) {
-      this.metaVertex = this.meta;
-    } else {
-      const metaMainVertex = newVertex(getNewGraphId(), ["Temp"], custom);
-      const { error } = addNewVertex(
-        metaTxnId,
-        metaMainVertex,
-        graph,
-        setGraph
-      );
-      if (error) {
-        alert(error);
-        return;
-      }
-      const metaVertexResult = createMeta(form, graph, setGraph);
-      if (!metaVertexResult.error) {
-        this.metaVertex = metaVertexResult.vertex!;
-      }
-    }
-
-    addMetaVertexes(graph, setGraph, metaTxnId, this.metaVertex, attributes);
-    onCleanup(() => {
-      revertTransaction(metaTxnId);
-    });
-    onCleanup(() => {
-      if (!this.meta) {
-        // TODO: Remove all the meta
-      }
-    });
-  };
-
-  commitTxn = () => {
-    // TODO: currently we can only run this function once.
-    // we need to set seperate txnId once commited. Fix this.
-    commitTxn(this.txnId, this.ws);
-  };
-
-  submitForm = () => {
-    // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
-    // const result = validationGroup.validate();
-    const isValid = true; // result.isValid;
-    if (isValid) {
-      // !!!TODO!!! Handle Error Received From server when commit
-      if (!this.isRealTime) {
-        commitTxn(this.txnId, this.ws);
-      }
-    } else {
-      alert("please fix all errors");
-    }
-    return isValid;
+  return {
+    error: false,
+    vertex: vertex,
   };
 }
 
@@ -445,8 +363,10 @@ export const addMetaVertexes = (
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Vertex,
-  attributes: FieldAttribute[]
+  attributes: FieldAttribute[],
 ) => {
+  const { showErrorToast } = useToast();
+
   for (const attribute of attributes) {
     // if (attribute?.props?.skip) {
     //   continue;
@@ -462,10 +382,10 @@ export const addMetaVertexes = (
       vertex,
       "MetaAttr",
       "MetaAttr",
-      attr
+      attr,
     );
     if (addAttributeResult.error) {
-      alert(addAttributeResult.error);
+      showErrorToast(addAttributeResult.error.toString());
     }
     // todo discard transaction
     // if (attribute.component === "Table2" && attribute.attributes) {
@@ -475,7 +395,7 @@ export const addMetaVertexes = (
         setGraph,
         txnId,
         graph.vertexes[addAttributeResult.vertexId!],
-        attribute.attributes
+        attribute.attributes,
       );
     }
     // todo discard transaction
@@ -490,7 +410,7 @@ export function setValueGlobal(
   vertex: Vertex,
   data: any,
   ws: ServerEventsDispatcher,
-  isRealTime: boolean
+  isRealTime: boolean,
 ) {
   if (!vertex) {
     return;
@@ -498,7 +418,7 @@ export function setValueGlobal(
 
   // after commit, we can not use same txnId();
   if (isRealTime) {
-    txnId = getNewTxnId();
+    txnId = getNewTxnId(graph, setGraph);
   }
 
   mergeVertexProperties(txnId, vertex.id, graph, setGraph, {
@@ -517,23 +437,23 @@ export function setValueGlobal(
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
   type: string,
-  vertex: Vertex
+  vertex: Vertex,
 ) {
   return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
+    (a, b) => a.P.pos - b.P.pos,
   );
 }
 
 export function getSublistRows(
   graph: Store<GraphInterface>,
   meta: Vertex,
-  vertex?: Vertex
+  vertex?: Vertex,
 ) {
   if (!vertex) return [];
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
+    (a, b) => a.P.pos - b.P.pos,
   );
 }
 
@@ -544,17 +464,19 @@ export function newRow(
   parentVertex: Vertex,
   label: string,
   edgeType?: string,
-  properties?: { [key: string]: any; }
-): { error: boolean; vertexId?: Id; edgeId?: Id; } {
+  properties?: { [key: string]: any },
+): { error: boolean; vertexId?: Id; edgeId?: Id } {
+  const { showErrorToast } = useToast();
+
   return batch(() => {
     const vertexNew = newVertex(
       getNewGraphId(),
       [label || edgeType!],
-      properties
+      properties,
     );
     const insertVertex = addNewVertex(txnId, vertexNew, graph, setGraph);
     if (insertVertex.error) {
-      alert(insertVertex.error);
+      showErrorToast(insertVertex.error.toString());
       return {
         error: true,
       };
@@ -565,11 +487,11 @@ export function newRow(
       edgeType || label!,
       {},
       parentVertex.id,
-      vertexNew.id
+      vertexNew.id,
     );
     const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
     if (insertEdgeResult.error) {
-      alert(insertEdgeResult.error);
+      showErrorToast(insertEdgeResult.error.toString());
       return {
         error: true,
         vertexId: vertexNew.id,
@@ -589,12 +511,12 @@ export const addNewRow = (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   parentVertex: Vertex,
-  properties: { [key: string]: any; },
+  properties: { [key: string]: any },
   isRealTime: boolean,
-  Ws: ServerEventsDispatcher
+  Ws: ServerEventsDispatcher,
 ) => {
   if (isRealTime) {
-    txnId = getNewTxnId();
+    txnId = getNewTxnId(graph, setGraph);
   }
   const type = getToEdge(meta, parentVertex);
   const label = getValueFromVertexOrKey(meta.P.props || {}, "label");
@@ -606,7 +528,7 @@ export const addNewRow = (
     parentVertex,
     label,
     type,
-    properties
+    properties,
   );
   if (isRealTime) commitTxn(txnId, Ws);
   return newRowResult;
@@ -618,7 +540,7 @@ export function onChangeHandler(
   vertex: Vertex,
   changedFieldAttribute: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!changedFieldAttribute.P.props?.onchange) return;
   const isNew = formVertex.id < 0;
@@ -642,7 +564,7 @@ export function onChangeHandler(
         graph,
         setGraph,
         [changedFieldAttribute],
-        "-MetaAttr->MetaAttr"
+        "-MetaAttr->MetaAttr",
       ).vertexes || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
     if (!attribute) {

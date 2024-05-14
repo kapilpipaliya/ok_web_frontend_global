@@ -15,7 +15,6 @@ import {
   getChildVertex,
   getSublistRows,
   getSublistRowsForType,
-  Record
 } from "~/lib/graph/get/sync/graph_fns";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
@@ -138,18 +137,20 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   };
 
   const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(graph,
+    const nav = findVertexByLabelAndUniqueId(
+      graph,
       "Nav",
       "name",
       "Navigation",
-  
     );
     if (!nav) return;
     if (!graph.vertexes[nav.id]) {
       return;
     }
     const vertex = graph.vertexes[nav.id];
-    const metaVertexResult = untrack(() => createMeta(AttrsAdminTableData["Nav"], graph, setGraph));
+    const metaVertexResult = untrack(() =>
+      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
+    );
 
     if (metaVertexResult.error) {
       console.error(metaVertexResult.error);
@@ -157,7 +158,12 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     }
     const metaVertex = metaVertexResult.vertex!;
 
-    return renderNavTreeFromGraph(metaVertex, vertex, props.isSideBarOpen, graph);
+    return renderNavTreeFromGraph(
+      metaVertex,
+      vertex,
+      props.isSideBarOpen,
+      graph,
+    );
   });
 
   const sidebarStyle = () =>
@@ -230,8 +236,8 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
               </div>
 
               <Show when={!isCollapsed()}>
-                <div class={`p:20|10 bg:ghostwhite r:0|0|15|0 @fade|.3s`}>
-                  <nav class="flex 0px 0px 10px 10px">
+                <div class={`bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20`}>
+                  <nav class="flex 0px 0px 10px 10px pt:13">
                     <div class="group">
                       <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
                         <g>
@@ -239,24 +245,29 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                         </g>
                       </svg>
                       <form autocomplete="off" method="post" action="">
-                      <input
-                        placeholder="Search..."
-                        type="search"
-                        autocomplete="none"
-                        class="inputSearch f:14"
-                        value={searchTerm()}
-                        onInput={(e) => {
-                          handleSearch(e.target.value);
-                        }}
-                      />
+                        <input
+                          placeholder="Search..."
+                          type="search"
+                          autocomplete="none"
+                          class="inputSearch f:14"
+                          value={searchTerm()}
+                          onInput={(e) => {
+                            handleSearch(e.target.value);
+                          }}
+                        />
                       </form>
                     </div>
                   </nav>
-                  <nav class="mt:16 ml:-12 mr:-12 overflow:auto">
+                  <nav
+                    class="mt:10 ml:-12 mr:-12 overflow:auto scrollbar-width:thin"
+                    style={{
+                      "max-height": "calc(100vh - 5rem)",
+                      "overflow-y": "auto",
+                    }}
+                  >
                     <Show when={activeLinks()}>
                       <For each={activeLinks()?.children}>
                         {(nav) => {
-                         
                           return (
                             <div
                               class="cursor:pointer"
@@ -296,23 +307,23 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                               <Show when={!expandedSections().get(nav.name)}>
                                 <For each={nav.children}>
                                   {(child) => {
-                                    return <a
-                                      class={`${location.pathname === child.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
-                                      href={child.href}
-                                    >
-                                      <Icon
-                                        color={`${activeSection() === child.name ? "#3B82F6" : "#4B5563"}`}
-                                        icon={mainIcon[child.href]}
-                                        height={24}
-                                        width={24}
-                                      />
-                                      <span class="ml:8 color:#4B5563 ">
-                                        {child.name}
-                                      </span>
-                                    </a>
-                                  }
-                                    
-                                  }
+                                    return (
+                                      <a
+                                        class={`${location.pathname === child.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
+                                        href={child.href}
+                                      >
+                                        <Icon
+                                          color={`${activeSection() === child.name ? "#3B82F6" : "#4B5563"}`}
+                                          icon={mainIcon[child.href]}
+                                          height={24}
+                                          width={24}
+                                        />
+                                        <span class="ml:8 color:#4B5563 ">
+                                          {child.name}
+                                        </span>
+                                      </a>
+                                    );
+                                  }}
                                 </For>
                               </Show>
                             </div>
@@ -395,10 +406,7 @@ export const renderNavTreeFromGraph = (
     return result;
   };
 
-  const navigation: navbarDataI[] = getChildren(
-    meta,
-    data,
-  );
+  const navigation: navbarDataI[] = getChildren(meta, data);
 
   return navigation;
 };

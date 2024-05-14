@@ -5,7 +5,7 @@ import { path } from "rambda";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/Utils";
-import { calculateFilter, getTextValue } from "~/cypher_api/lib/traverse";
+import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

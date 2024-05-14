@@ -1,4 +1,4 @@
-import { graph, Id, Node } from "~/cypher_api/lib/graph";
+import { Id, Node } from "~/cypher_api/lib/graph";
 import { getChildVertexes } from "~/cypher_api/lib/traverse";
 
 export async function getPermissions(meta: Node) {

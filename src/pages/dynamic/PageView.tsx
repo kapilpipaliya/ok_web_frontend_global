@@ -8,28 +8,38 @@ import {
   useContext,
 } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { Record } from "~/lib/graph/get/sync/graph_fns";
+import { createMeta, loadForm, Record } from "~/lib/graph/get/sync/graph_fns";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
 import { getFormMetaData } from "~/lib/graph/get/sync/graph_functions";
+import { untrack } from "solid-js";
 
 export const PageView_ = (props: { id: string; count: number }) => {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   if (!props.id) return "Page ID not specified.";
-  const record = new Record({ ws: Ws });
   const result = findVertexByLabelAndUniqueId(graph, "Page", "name", props.id);
   if (!result) return "No Page Found";
-  const loadResult = record.load(graph, result.id);
+
+  const loadResult = loadForm(graph, result.id);
   if (loadResult.error) return loadResult.error;
+  const dataVertex = loadResult.vertex!;
 
   const form = getFormMetaData(graph, setGraph, "Page");
   if (form.error) return form.error;
-  record.createMeta(form.form!, graph, setGraph);
 
-  return <PageView number={props.count} vertex={record?.vertex} />;
+  const metaVertexResult = untrack(() =>
+    createMeta(form.form!, graph, setGraph),
+  );
+
+  if (metaVertexResult.error) {
+    console.error(metaVertexResult.error);
+    return metaVertexResult.error;
+  }
+
+  return <PageView number={props.count} vertex={dataVertex} />;
 };
 
 export const PagePreview = (props: {}) => {

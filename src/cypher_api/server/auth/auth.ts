@@ -1,4 +1,4 @@
-import {getDriver, isIntegerId} from "~/cypher_api/server/driver";
+import { getDriver, isIntegerId } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "./getHttpsSession";
 
 // Dont export not 'use server' functions.
@@ -7,7 +7,7 @@ import { getHttpsSession } from "./getHttpsSession";
 export const getUser = async () => {
   "use server";
   // try {
-  
+
   const httpSession = await getHttpsSession();
   if (httpSession.data?.subdomain === undefined) {
     return { error: "Not Authorized Domain" };

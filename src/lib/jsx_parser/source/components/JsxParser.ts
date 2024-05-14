@@ -451,49 +451,49 @@ export default class JsxParser {
     // if comp is undefined it means a fragment and handle it properly by rendering a div
     if (containerTags.includes(comp) || !comp) {
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "Box",
-        
       )!;
       if (comp !== "div") {
         isText = true;
       }
     } else if (comp === "img") {
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "Image",
-        
       )!;
     } else if (comp === "a") {
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "A",
-       
       )!;
     } else if (comp === "Repeater") {
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "Repeater",
-      
       )!;
     } else if (comp === "svg") {
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "Icon",
-       
       )!;
     } else {
       isText = true;
       componentVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         "name",
         "Text",
-       
       )!;
     }
     const rowId = componentDrag(
@@ -641,10 +641,10 @@ export default class JsxParser {
           // Remove empty nodes from import code
           if (value.trim() === "") return;
           const componentVertex = findVertexByLabelAndUniqueId(
-            graph, "Comp",
+            graph,
+            "Comp",
             "name",
             "Text",
-           
           )!;
           const rowId = componentDrag(
             this.props.txnId,

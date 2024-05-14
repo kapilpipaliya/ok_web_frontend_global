@@ -1,14 +1,8 @@
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
-import {
-  capitalizeFirstLetter,
-  getValueFromVertexOrKey,
-} from "~/lib/Utils";
-import {
-  deleteRow,
-  getChildVertexes
-} from "~/lib/graph/get/sync/graph_fns";
+import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
+import { deleteRow, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
 
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdge } from "./getToEdge";
@@ -122,7 +116,7 @@ export const calculateFilter = async (input: string) => {
   return [type, filter, isMultiple] as const;
 };
 
-export  const getTreeData = async(
+export const getTreeData = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   treeLevels: { [key: string]: any },
@@ -132,7 +126,10 @@ export  const getTreeData = async(
     addChild?: (child: Vertex) => boolean;
   },
 ) => {
-  const getChildren = async (levels: { [key: string]: any }, vertexes: Vertex[]) => {
+  const getChildren = async (
+    levels: { [key: string]: any },
+    vertexes: Vertex[],
+  ) => {
     const result = [] as any[];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
@@ -165,7 +162,7 @@ export  const getTreeData = async(
   return getChildren(treeLevels, vertexes);
 };
 
-export  const deleteNestedLayout = async(
+export const deleteNestedLayout = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,

@@ -1,25 +1,15 @@
-import {
-  isObject,
-} from "~/lib/Utils";
+import { isObject } from "~/lib/Utils";
 import {
   addNewRow,
   deleteRow,
   getChildVertex,
   getChildVertexes,
   getSublistRows,
-  getSublistRowsForType, newRow,
-  Record
+  getSublistRowsForType,
+  newRow,
 } from "~/lib/graph/get/sync/graph_fns";
-import {
-  GraphInterface,
-  IdAttr,
-  Vertex,
-} from "~/lib/graph/graph";
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId
-} from "../transaction";
+import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { commitTxn, getNewGraphId, getNewTxnId } from "../transaction";
 import {
   addNewVertex,
   deleteVertex,
@@ -47,34 +37,33 @@ import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionU
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
+import { useToast } from "~/components/custom/Toast";
+import { NewTxnIdContext } from "~/lib/contexts";
+import { useContext } from "solid-js";
 
 export const updateImportRecord = (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
   type: string,
-  record: Record,
+  vertex: Vertex,
+  isRealTime: boolean,
+  ws: ServerEventsDispatcher,
   dry = true,
 ) => {
   // TODO: Is this method valid? does it delete nested Rows set by this form?, check code written in NavDesigner component to clear the form.
   const deleteAllRows = (edgeType: string) => {
     const vertexes =
-      getChildVertexes(graph, [edgeType], [record.vertex]).vertexes || [];
+      getChildVertexes(graph, [edgeType], [vertex]).vertexes || [];
     for (const row of vertexes) {
-      deleteRow(
-        row,
-        record.isRealTime,
-        graph,
-        setGraph,
-        record.txnId,
-        record.ws,
-      );
+      deleteRow(row, isRealTime, graph, setGraph, txnId, ws);
     }
   };
   deleteAllRows("ImportMeta");
 
   switch (type) {
     case "component": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "Comp",
         dry,
       });
@@ -100,28 +89,20 @@ export const updateImportRecord = (
         },
       ];
       for (const row of rows) {
-        newRow(
-          graph,
-          setGraph,
-          record.txnId,
-          record.vertex,
-          "ImportMeta",
-          "ImportMeta",
-          row,
-        );
+        newRow(graph, setGraph, txnId, vertex, "ImportMeta", "ImportMeta", row);
       }
 
       break;
     }
     case "dataType": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "DataType",
         dry,
       });
       break;
     }
     case "dataTypeDefault": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "DataType",
         dry,
       });
@@ -134,20 +115,12 @@ export const updateImportRecord = (
         },
       ];
       for (const row of rows) {
-        newRow(
-          graph,
-          setGraph,
-          record.txnId,
-          record.vertex,
-          "ImportMeta",
-          "ImportMeta",
-          row,
-        );
+        newRow(graph, setGraph, txnId, vertex, "ImportMeta", "ImportMeta", row);
       }
       break;
     }
     case "lookup": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "Coll",
         lookup: "LookupName",
         lookupId: IdAttr,
@@ -164,20 +137,12 @@ export const updateImportRecord = (
         },
       ];
       for (const row of rows) {
-        newRow(
-          graph,
-          setGraph,
-          record.txnId,
-          record.vertex,
-          "ImportMeta",
-          "ImportMeta",
-          row,
-        );
+        newRow(graph, setGraph, txnId, vertex, "ImportMeta", "ImportMeta", row);
       }
       break;
     }
     case "attribute": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "Coll",
         lookup: "ResourceName",
         lookupChild: "Attr",
@@ -217,20 +182,12 @@ export const updateImportRecord = (
         // }
       ];
       for (const row of rows) {
-        newRow(
-          graph,
-          setGraph,
-          record.txnId,
-          record.vertex,
-          "ImportMeta",
-          "ImportMeta",
-          row,
-        );
+        newRow(graph, setGraph, txnId, vertex, "ImportMeta", "ImportMeta", row);
       }
       break;
     }
     case "user": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "User",
         lookup: "",
         lookupChild: "",
@@ -245,20 +202,12 @@ export const updateImportRecord = (
         },
       ];
       for (const row of rows) {
-        newRow(
-          graph,
-          setGraph,
-          record.txnId,
-          record.vertex,
-          "ImportMeta",
-          "ImportMeta",
-          row,
-        );
+        newRow(graph, setGraph, txnId, vertex, "ImportMeta", "ImportMeta", row);
       }
       break;
     }
     case "role": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "Role",
         lookup: "",
         lookupChild: "",
@@ -268,7 +217,7 @@ export const updateImportRecord = (
       break;
     }
     case "perm": {
-      replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {
+      replaceVertexProperties(txnId, vertex.id, graph, setGraph, {
         label: "Perm",
         lookup: "",
         lookupChild: "",
@@ -317,23 +266,25 @@ const resoDataTypeToComponents = (
   }
 };
 export const onDataDirectoryImportClick = (
-  record: Record,
+  vertex: Vertex,
   Ws: ServerEventsDispatcher,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) => {
-  const csvResult = record.vertex.P.csv as string;
-  const label = record.vertex.P.label as string;
-  const dry = record.vertex.P.dry as boolean;
-  const lookup = record.vertex.P.lookup as string;
-  const lookupId = record.vertex.P.lookupId as string;
-  const lookupChild = record.vertex.P.lookupChild as string;
+  const { showErrorToast } = useToast();
+
+  const csvResult = vertex.P.csv as string;
+  const label = vertex.P.label as string;
+  const dry = vertex.P.dry as boolean;
+  const lookup = vertex.P.lookup as string;
+  const lookupId = vertex.P.lookupId as string;
+  const lookupChild = vertex.P.lookupChild as string;
   if (!label) {
-    alert("label cant be blank");
+    showErrorToast("label cant be blank");
     return;
   }
 
-  const txnId = getNewTxnId();
+  const txnId = getNewTxnId(graph, setGraph);
 
   const converter = csvtojson({
     trim: true,
@@ -342,7 +293,7 @@ export const onDataDirectoryImportClick = (
     delimiter: [",", "\t"],
   });
 
-  const metaData = getChildVertexes(graph, ["$0Meta"], [record.vertex]);
+  const metaData = getChildVertexes(graph, ["$0Meta"], [vertex]);
   if (metaData.error) {
     return;
   }
@@ -375,7 +326,7 @@ export const onDataDirectoryImportClick = (
     let collLabel = metaVertex.P.collLabel;
 
     if (!attrId && !collLabel && !metaVertex.P.skip) {
-      alert("attrId or collLabel is required");
+      showErrorToast("attrId or collLabel is required");
     }
     const collVertex = getChildVertex(graph, ["$0Coll"], metaVertex);
     if (!collVertex.error) {
@@ -415,10 +366,10 @@ export const onDataDirectoryImportClick = (
         if (value === "undefined") return;
         // find and if not exist then only add new vertex
         let existingVertex = findVertexByLabelAndUniqueId(
-          graph, meta.collLabel,
+          graph,
+          meta.collLabel,
           meta.collId,
           value,
-          
         );
 
         if (!existingVertex) {
@@ -477,10 +428,10 @@ export const onDataDirectoryImportClick = (
         // when importing component it has self join, so it's inserting duplicate rows
         // TODO: allow customizing primary key for the collection when doing import instead of rowObj[IdAttr]
         const existingVertex = findVertexByLabelAndUniqueId(
-          graph, labelName,
+          graph,
+          labelName,
           IdAttr,
           rowObj[IdAttr],
-          
         );
         if (existingVertex) {
           rowVertexId = existingVertex.id;
@@ -501,19 +452,19 @@ export const onDataDirectoryImportClick = (
 
         const v = () =>
           findVertexByLabelAndUniqueId(
-            graph, selectMeta.collLabel,
+            graph,
+            selectMeta.collLabel,
             selectMeta.collId,
             value,
-            
           );
         if (selectMeta.func) {
           if (selectMeta.func === "component") {
             const componentString = resoDataTypeToComponents(value, row);
             const componentVertex = findVertexByLabelAndUniqueId(
-              graph, selectMeta.collLabel,
+              graph,
+              selectMeta.collLabel,
               selectMeta.collId,
               componentString,
-              
             );
             if (!componentVertex) {
               console.warn(`component is not found ${componentString}`);
@@ -532,10 +483,10 @@ export const onDataDirectoryImportClick = (
             );
           } else if (selectMeta.func === "lookup") {
             const lookup = findVertexByLabelAndUniqueId(
-              graph, selectMeta.collLabel,
+              graph,
+              selectMeta.collLabel,
               selectMeta.collId,
               value,
-             
             );
             if (lookup) {
               // edge and child vertex has same label
@@ -637,30 +588,29 @@ export const onDataDirectoryImportClick = (
       }
 
       if (!dry) commitTxn(txnId, Ws);
-      alert("finished import");
+      showErrorToast("finished import");
     });
 };
 
 export function importRecordWithYAMLSchema(
+  txnId: number,
+  meta: Vertex,
+  vertex: Vertex,
   yamlInput: any,
-  record: Record,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  ws: ServerEventsDispatcher,
 ) {
   const input = parse(yamlInput);
   if (!isObject(input)) {
     return;
   }
 
-  replaceVertexProperties(record.txnId, record.vertex.id, graph, setGraph, {});
+  replaceVertexProperties(txnId, vertex.id, graph, setGraph, {});
 
   const clearChildren = (meta: Vertex, vertex: Vertex) => {
     // 2. loop through meta and set all the data.
-    const metaVertexes = getSublistRowsForType(
-      graph,
-      "MetaAttr",
-      record.metaVertex,
-    );
+    const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
 
     const selectMetaVertexes = metaVertexes.filter((meta) =>
       ["SelectBox", "TagBox"].includes(meta.P.component),
@@ -676,7 +626,7 @@ export function importRecordWithYAMLSchema(
         // Todo
       } else {
         setSelectionValue(
-          record.txnId,
+          txnId,
           vertex,
           graph,
           setGraph,
@@ -703,24 +653,24 @@ export function importRecordWithYAMLSchema(
           // without confirmation, this is not good.
           // some form may depend on it.
           // unsafely delete:
-          // deleteRow(v, record.isRealTime, record.txnId, record.ws);
+          // deleteRow(v, isRealTime, txnId, ws);
 
           // safe delete:
           const edgeToDelete = outEdges.find(
             (edgeId) => graph.edges[edgeId].E === v.id,
           );
           if (edgeToDelete) {
-            deleteEdge(record.txnId, edgeToDelete, graph, setGraph);
+            deleteEdge(txnId, edgeToDelete, graph, setGraph);
           }
 
-          deleteVertex(record.txnId, v.id, graph, setGraph);
+          deleteVertex(txnId, v.id, graph, setGraph);
         }
       }
     }
   };
 
-  // after finalizing move this code to record.
-  clearChildren(record.metaVertex, record.vertex);
+  // after finalizing move this code to
+  clearChildren(meta, vertex);
 
   const insertChildren = (
     meta: Vertex,
@@ -729,6 +679,8 @@ export function importRecordWithYAMLSchema(
       [key: string]: any;
     },
   ) => {
+    const { showErrorToast } = useToast();
+
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P.props || {};
 
@@ -751,7 +703,7 @@ export function importRecordWithYAMLSchema(
           continue;
         }
         if (!metaVertex.P.props?.collection) {
-          alert("collection is not defined in the meta");
+          showErrorToast("collection is not defined in the meta");
           continue;
         }
 
@@ -760,7 +712,7 @@ export function importRecordWithYAMLSchema(
           ? metaVertex.P.props.collection
           : metaVertex.P.props.label;
         if (!metaVertex.P.props?.collection) {
-          alert("collection label is not defined in the meta");
+          showErrorToast("collection label is not defined in the meta");
           continue;
         }
 
@@ -768,7 +720,7 @@ export function importRecordWithYAMLSchema(
           if (AttrsTableData[label] || AttrsAdminTableData[label]) {
             if (v["name"]) {
               const selectedVertex = findOrCreateNewVertex(
-                record.txnId,
+                txnId,
                 label,
                 "name",
                 v["name"],
@@ -776,7 +728,7 @@ export function importRecordWithYAMLSchema(
                 setGraph,
               );
               setSelectionValue(
-                record.txnId,
+                txnId,
                 vertex,
                 graph,
                 setGraph,
@@ -786,13 +738,13 @@ export function importRecordWithYAMLSchema(
             }
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              graph, "Coll",
+              graph,
+              "Coll",
               "name",
               vertex.L[0],
-              
             );
             if (!collVertex) {
-              alert(`Collection not defined: ${label[0]}`);
+              showErrorToast(`Collection not defined: ${label[0]}`);
               continue;
             }
             const pks = getPkForCollection(graph, collVertex);
@@ -810,7 +762,7 @@ export function importRecordWithYAMLSchema(
               graph,
             );
             setSelectionValue(
-              record.txnId,
+              txnId,
               vertex,
               graph,
               setGraph,
@@ -832,13 +784,14 @@ export function importRecordWithYAMLSchema(
 
         for (const v of childVertexes) {
           const newRowResult = addNewRow(
-            record.txnId,
+            txnId,
             metaVertex,
             graph,
+            setGraph,
             vertex,
             v.P || {},
-            record.isRealTime,
-            record.ws,
+            false,
+            ws,
           );
           if (!newRowResult.error) {
             insertChildren(
@@ -854,12 +807,6 @@ export function importRecordWithYAMLSchema(
     return input;
   };
 
-  replaceVertexProperties(
-    record.txnId,
-    record.vertex.id,
-    graph,
-    setGraph,
-    input.P || {},
-  );
-  insertChildren(record.metaVertex, record.vertex, input);
+  replaceVertexProperties(txnId, vertex.id, graph, setGraph, input.P || {});
+  insertChildren(meta, vertex, input);
 }

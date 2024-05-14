@@ -1,9 +1,5 @@
-import { IdAttr } from "~/cypher_api/lib/graph";
 import { klona } from "klona/json";
-import {
-  AdminAttrKeys,
-  AttrsTableData,
-} from "~/lib/Utils";
+import { AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
@@ -11,18 +7,20 @@ import {
   getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
-  Record
 } from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "./findVertex";
 import { getToEdge } from "./getToEdge";
+import { useToast } from "~/components/custom/Toast";
 
-
-export async function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
+export async function getCompPropsMap(
+  graph: Store<GraphInterface>,
+  comp: Vertex,
+) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
     (acc, curr) => {
       acc[curr.P.name] = curr;
@@ -117,7 +115,6 @@ export async function getCollAttrs(
         "DataType",
         "name",
         "String",
-       
       );
       if (!dataTypeVertex) {
         console.warn("String data Type not found");
@@ -254,7 +251,12 @@ export const getFormApiFromForm = async (
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
 ): Promise<{ error: string; form?: FormMetaData }> => {
-  const coll = await findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, formId);
+  const coll = await findVertexByLabelAndUniqueId(
+    graph,
+    "Coll",
+    IdAttr,
+    formId,
+  );
   if (!coll) {
     return { error: "coll not found" };
   }
@@ -318,7 +320,7 @@ export async function getNameKeyForCollection(
 
 // 'type' or 'label' can be overwritten in the meta.
 
-export  const getFormMetaData = async (
+export const getFormMetaData = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
@@ -332,10 +334,14 @@ export  const getFormMetaData = async (
     if (formResult.error) return formResult;
     form = formResult.form!;
   }
-  return { error: false, form };
+  return { error: "", form };
 };
 
-export const getExportCode = async (graph: Store<GraphInterface>, record: Record) => {
+export const getExportCode = async (
+  graph: Store<GraphInterface>,
+  meta: Vertex,
+  data: Vertex,
+) => {
   const getChildren = async (
     meta: Vertex,
     vertex: Vertex,
@@ -343,6 +349,8 @@ export const getExportCode = async (graph: Store<GraphInterface>, record: Record
       [key: string]: any;
     },
   ) => {
+    const { showErrorToast } = useToast();
+
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P.props || {};
 
@@ -382,10 +390,10 @@ export const getExportCode = async (graph: Store<GraphInterface>, record: Record
               graph,
               "Coll",
               "name",
-              label
+              label,
             );
             if (!collVertex) {
-              alert(`Collection not defined: ${label}`);
+              showErrorToast(`Collection not defined: ${label}`);
               continue;
             }
             const pks = await getPkForCollection(graph, collVertex);
@@ -446,9 +454,9 @@ export const getExportCode = async (graph: Store<GraphInterface>, record: Record
     return result;
   };
 
-  return getChildren(record.metaVertex, record.vertex, {
-    ...klona(record.vertex),
-    L: record.vertex.L[0],
+  return getChildren(meta, data, {
+    ...klona(data),
+    L: data.L[0],
     IN: undefined,
     OUT: undefined,
     id: undefined,

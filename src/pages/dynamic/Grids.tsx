@@ -30,8 +30,9 @@ import {
 } from "~/lib/graph/graph";
 import {
   commitTransaction,
-  getNewTxnId, ProcessStatus,
-  transactions
+  getNewTxnId,
+  ProcessStatus,
+  transactions,
 } from "~/lib/graph/transaction";
 
 import { Icon } from "@iconify-icon/solid";
@@ -50,7 +51,7 @@ import {
 import {
   createMeta,
   getChildVertexes,
-  getSelectionOptions, Record
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/graph_fns";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
@@ -66,6 +67,10 @@ import PageHeader from "~/components/custom/Breadcumb";
 import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
 import { getFormApiFromForm } from "~/lib/graph/get/async/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { useToast } from "~/components/custom/Toast";
+import { NewTxnIdContext } from "~/lib/contexts";
+import { DeleteDialog } from "~/components/custom/DeleteDialog";
+import { submitDataCall } from "~/components/api/api_functions";
 
 interface AbstractSingleGridProps {
   tableId: string;
@@ -82,6 +87,7 @@ const Modal = (p: {
   info: any;
 }) => {
   const [open, setOpen] = createSignal(false);
+  const config = createStore({} as { formData: IFormContext });
   let btnEl;
   let btnPopUp;
 
@@ -139,8 +145,7 @@ const Modal = (p: {
                 id={p.info.row.original.id}
                 buttonAlign="end"
                 isDialogContext={true}
-                // @ts-ignore
-                config={{}}
+                config={config}
                 showMainFieldsOnly={true}
                 importExportButtons={false}
                 doMount={false}
@@ -157,11 +162,13 @@ const Modal = (p: {
 export const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { Ws } = useContext(WsContext);
+  const navigate = useNavigate( )
+  const { showErrorToast, showLoadingToast } = useToast();
   let { events } = useContext(PageContext);
-  const [tableStore, setTableStore] = createStore({} as { tableColumns: ColumnDef<any>[], data: Accessor<Vertex[]> });
 
-
-
+  const [tableStore, setTableStore] = createStore(
+    {} as { tableColumns: ColumnDef<any>[]; data: Accessor<Vertex[]> },
+  );
 
   const SelectValue = (props: {
     attribute: FieldAttribute;
@@ -238,22 +245,31 @@ export const DataGrid = (props: DataGridProps) => {
     }
     events?.setTitle(formNew.title);
 
-    const deleteObject = (id: Id) => {
-      if (confirm("Are you sure you want to delete this item?")) {
-        const txnId = getNewTxnId();
-        const deleteResult = deleteVertex(txnId, id, graph, setGraph);
-        // @ts-ignore
-        if (deleteResult?.error) {
-          alert(data);
-          return;
-        }
-        transactions.get(txnId)!.status = ProcessStatus.Ready;
-        commitTransaction(Ws);
+    const deleteObject = async (id: Id) => {
+      const txnId = getNewTxnId(graph, setGraph);
+      const deleteResult = deleteVertex(txnId, id, graph, setGraph);
+      // @ts-ignore
+      if (deleteResult?.error) {
+        showErrorToast(deleteResult?.error.toString());
+        return;
       }
+      transactions.get(txnId)!.status = ProcessStatus.Ready;
+      const data = commitTransaction(Ws);
+      if (!data) {
+        return;
+      }
+      await showLoadingToast({
+        promise: submitDataCall(data),
+        loadMessage: "Submitting Data...",
+        successMessage: "Data submitted successfully",
+        onSuccess: (value) => {
+          // currently we are navigating back.
+          setTimeout(() => navigate(-1), 0);
+        },
+      });
     };
 
     const tableColumns = [] as ColumnDef<any>[];
-
 
     for (const attribute of formNew!.attributes) {
       const column = { ...attribute } as unknown as ColumnDef<any>;
@@ -348,22 +364,25 @@ export const DataGrid = (props: DataGridProps) => {
       header: "",
       footer: "",
       cell: (info) => (
-        <button
-          onClick={/*@once*/ () => deleteObject(info.row.original.id as any)}
-          class="text-fill:red font:semibold	"
-        >
-          <CustomButton variant={"custom"} class={"fg:rgb(252,0,0)"}>
+        <DeleteDialog
+          buttonLabel={
             <Icon
-              height={21}
-              width={21}
               icon="fluent:delete-12-regular"
-              class="color:red mr:1rem"
+              class="color:rgb(255,0,0)"
+              height={22}
+              width={22}
             />
-          </CustomButton>
-        </button>
+          }
+          onConfirm={() => {
+            deleteObject(info.row.original.id as any)
+          }}
+          title={"Delete Support Ticket"}
+          message={
+            "Are you sure you want to delete this item?"
+          }
+        />
       ),
     });
-
     const coll = isNumber(collection)
       ? graph.vertexes[collection].P[IdAttr]
       : collection;
@@ -371,10 +390,6 @@ export const DataGrid = (props: DataGridProps) => {
     //  alert(`collection not found ${coll}`)
     //  return;
     // }
-
-
-
-
 
     const [data] = createSignal(
       (graph.vertexLabelIdMap[coll] || []).map(
@@ -384,7 +399,6 @@ export const DataGrid = (props: DataGridProps) => {
 
     setTableStore({ tableColumns, data });
   }
-
 
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
@@ -399,16 +413,15 @@ export const DataGrid = (props: DataGridProps) => {
   return (
     <div class="">
       <Switch>
-        <Match when={data.loading}>
-          Loading
-        </Match>
+        <Match when={data.loading}>Loading</Match>
 
-        <Match when={data.error}>
-          Error
-        </Match>
+        <Match when={data.error}>Error</Match>
 
         <Match when={true}>
-          <CollapsibleTable headers={tableStore.tableColumns} rows={tableStore.data()} />
+          <CollapsibleTable
+            headers={tableStore.tableColumns}
+            rows={tableStore.data()}
+          />
         </Match>
       </Switch>
     </div>
@@ -419,10 +432,10 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const data = findVertexByLabelAndUniqueId(
-    graph, "Coll",
+    graph,
+    "Coll",
     IdAttr,
     props.tableId,
-
   );
 
   const nestedName = createMemo(
@@ -431,7 +444,12 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
         ?.name,
   );
   const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(graph, "Nav", "name", "Navigation");
+    const nav = findVertexByLabelAndUniqueId(
+      graph,
+      "Nav",
+      "name",
+      "Navigation",
+    );
     if (!nav) return [];
 
     if (!graph.vertexes[nav.id]) {
@@ -440,7 +458,9 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
 
     const vertex = graph.vertexes[nav.id];
 
-    const metaVertexResult = untrack(() => createMeta(AttrsAdminTableData["Nav"], graph, setGraph));
+    const metaVertexResult = untrack(() =>
+      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
+    );
 
     if (metaVertexResult.error) {
       console.error(metaVertexResult.error);
@@ -467,7 +487,7 @@ export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
     <>
       <PageHeader
         // @ts-ignore
-        title={`${navData()?.child || nestedName() || ''}`}
+        title={`${navData()?.child || nestedName() || ""}`}
         breadcrumb={[
           ...breadcrumbData,
           // @ts-ignore
@@ -536,12 +556,12 @@ export function getParentFromNav(navData: any) {
   return result;
 }
 
-
 export const TableDashboard = () => {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const dashboard = findVertexByLabelAndUniqueId(
-    graph, "Dashboard",
+    graph,
+    "Dashboard",
     IdAttr,
     params.name,
   );

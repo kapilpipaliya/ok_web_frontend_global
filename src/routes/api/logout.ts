@@ -15,7 +15,7 @@ export async function POST({ request }: APIEvent) {
       message: "Logout successfully",
     };
   } catch (error) {
-    console.log('Error : ',error);
+    console.log("Error : ", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

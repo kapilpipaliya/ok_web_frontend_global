@@ -1,14 +1,18 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import { createSignal, createUniqueId, Show, useContext } from "solid-js";
+import {
+  createContext,
+  createSignal,
+  createUniqueId,
+  Show,
+  useContext,
+} from "solid-js";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
 
-import {
-  PageContext,
-} from "~/lib/Utils";
+import { IFormContext, PageContext } from "~/lib/Utils";
 import {
   getChildVertex,
   getSublistRows,
-  getSublistRowsForType, Record
+  getSublistRowsForType,
 } from "~/lib/graph/get/sync/graph_fns";
 // Comment This Lines in web build
 import { Navigator } from "@solidjs/router/dist/types";
@@ -19,49 +23,7 @@ import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/import";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { getExportCode } from "~/lib/graph/get/sync/graph_functions";
-
-/*
-  Tasks:
-  Check if this component support custom components.
-  Check if we can directly use the the vertexes, or can use some proxies so we not need intermediate transformations
-  https://js.devexpress.com/Demos/WidgetsGallery/Demo/TreeView/DragAndDropHierarchicalDataStructure/jQuery/Light/
-*/
-export const PageDesigner = () => {
-  const params = useParams();
-  const config = createStore({} as { record: Record });
-  const [count, setCount] = createSignal(1);
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const rerender = () => {
-    setCount((prev) => prev + 1);
-  };
-  const Preview = () => {
-    return <PageItemRender metaVertex={config[0].record.vertex} />;
-  };
-  return (
-    <div class="flex">
-      <div class="border:1|solid|blue-60 p:10 m:5">
-        <AbstractSingleForm
-          formId={"Page"}
-          graph={graph}
-          id={params.id}
-          config={config}
-          // TODO: add dry option
-        />
-      </div>
-
-      <div class="border:1|solid|blue-60 p:10 m:5 min-w:400">
-        <div class={"text:center mb:12"} onClick={rerender}>
-          Preview
-        </div>
-        <PageContext.Provider value={{ events: {} }}>
-          <Show when={count() && config[0].record?.vertex && count()} keyed>
-            <Preview />
-          </Show>
-        </PageContext.Provider>
-      </div>
-    </div>
-  );
-};
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 
 /*
 TODO:
@@ -70,21 +32,40 @@ Instead of this use Page Builder
 export const NavDesigner = () => {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const config = createStore({} as { record: Record });
+  const config = createStore({} as { formData: IFormContext });
   const [count, setCount] = createSignal(1);
   const [previewCode, setPreviewCode] = createSignal(false);
+  const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const rerender = () => {
     setCount((prev) => prev + 1);
   };
   const PreviewCode = () => {
-    return <pre>{stringify(getExportCode(graph, config[0].record))}</pre>;
+    return (
+      <pre>
+        {stringify(
+          getExportCode(
+            graph,
+            config[0].formData.formMeta,
+            config[0].formData.formData,
+          ),
+        )}
+      </pre>
+    );
   };
 
   const [importCode, setImportCode] = createSignal("");
 
   const importCodeFn = () => {
-    importRecordWithYAMLSchema(importCode(), config[0].record, graph, setGraph);
+    importRecordWithYAMLSchema(
+      config[0].formData.txnId,
+      config[0].formData.formMeta,
+      config[0].formData.formData,
+      importCode(),
+      graph,
+      setGraph,
+      Ws,
+    );
   };
   return (
     <div class="flex">
@@ -120,7 +101,7 @@ export const NavDesigner = () => {
         <Show when={previewCode()}>
           <PreviewCode />
         </Show>
-        <Show when={count() && config[0].record?.vertex && count()} keyed>
+        <Show when={count() && config[0].formData.formData && count()} keyed>
           <div
           // ref={(el) => renderNavTreeFromGraph(el, config[0].record, navigate)}
           ></div>
@@ -128,84 +109,4 @@ export const NavDesigner = () => {
       </div>
     </div>
   );
-};
-
-export const renderNavTreeFromGraph = (
-  el: HTMLDivElement,
-  record: Record,
-  navigate: Navigator,
-  graph: any,
-) => {
-  // !!!TODO!!!: This code can we written in the code itself
-  const getChildren = (meta: Vertex, vertex: Vertex) => {
-    const result = [];
-
-    const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
-    const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
-
-    if (!attrMeta) return result;
-
-    const children = getSublistRows(graph, attrMeta, vertex);
-
-    for (const child of children) {
-      const name = child.P.name;
-      const func = child.P.func;
-      const expanded = child.P.expanded;
-      const navItem = {};
-
-      if (func === "Table") {
-        const collVertex = getChildVertex(graph, ["$0Coll"], child).vertex;
-        // TODO: Check Permission
-        if (collVertex) {
-          // TODO: Check Permission
-          // add to result if its allowed
-          navItem.name = name;
-          navItem.href = "" + `/admin/${collVertex.P.name}`;
-        } else {
-          const formVertex = getChildVertex(graph, ["$0Form"], child).vertex;
-          if (formVertex) {
-            // TODO: Check Permission
-            // add to result if its allowed
-            navItem.name = name;
-            navItem.href = `${""}/admin/${formVertex.P.name}`;
-          } else {
-            const url = "" + child.P.url;
-            navItem.name = name;
-            navItem.href = url;
-          }
-        }
-      } else {
-        const url = "" + child.P.url;
-        navItem.name = name;
-        navItem.href = url;
-      }
-      navItem.expanded = expanded;
-      navItem.id = createUniqueId();
-
-      navItem.children = getChildren(attrMeta!, child);
-
-      result.push(navItem);
-    }
-    return result;
-  };
-
-  const navigation = getChildren(record.metaVertex, record.vertex);
-
-  console.log(navigation);
-
-  // const instance = new TreeView(el, {
-  //   dataSource: navigation,
-  //   dataStructure: "tree",
-  //   keyExpr: "id",
-  //   displayExpr: "name",
-  //   itemsExpr: "children",
-  //   width: 200,
-  //   searchEnabled: true,
-  //   onItemClick(e) {
-  //     if (e.itemData?.href) navigate(e.itemData.href, { resolve: false });
-  //   },
-  // });
-
-  // onCleanup(() => instance.dispose());
-  // return instance;
 };

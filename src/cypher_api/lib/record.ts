@@ -1,6 +1,5 @@
 import {
   getNewGraphId,
-  getNewTxnId,
   Id,
   IdAttr,
   IGraph,
@@ -16,7 +15,7 @@ import {
   newVertex,
   replaceVertexProperties,
 } from "~/cypher_api/lib/vertex";
-import { batch, createContext, onCleanup, untrack } from "solid-js";
+import { batch, createContext, onCleanup, untrack, useContext } from "solid-js";
 import {
   getChildVertex,
   getChildVertexes,
@@ -43,6 +42,9 @@ import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
+import { NewTxnIdContext } from "~/lib/contexts";
+import { getNewTxnId } from "~/lib/graph/transaction";
+import { GraphInterface } from "~/lib/graph/graph";
 
 export interface FieldAttribute {
   name: string;
@@ -323,8 +325,8 @@ export const getFormApiFromForm = async (
 };
 
 export function newRow(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   parentVertex: Node,
   label: string,
@@ -390,8 +392,8 @@ export function componentProps(metaVertex: Node, data: Node) {
 // add meta from vertex value:
 // TODO
 export function addMeta(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   metaVertex: Node,
   data: Node,
 ) {
@@ -405,9 +407,15 @@ export function addMeta(
         graph.vertexes[metaVertex.P.templateId]?.P?.props || {},
         metaDataVal,
       );
-      mergeVertexProperties(graph, setGraph, getNewTxnId(), metaVertex.id, {
-        props: newMetaData,
-      });
+      mergeVertexProperties(
+        graph,
+        setGraph,
+        useContext(NewTxnIdContext),
+        metaVertex.id,
+        {
+          props: newMetaData,
+        },
+      );
     });
   }
 }
@@ -464,8 +472,8 @@ export async function deleteRow(
 }
 
 export function deleteRowLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Node,
 ) {
@@ -494,8 +502,8 @@ export function deleteRowLocal(
 }
 
 export const addMetaVertexes = (
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Node,
   attributes: FieldAttribute[],
@@ -556,8 +564,8 @@ export function getId(input: string) {
 }
 
 export function onChangeHandler(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   formVertex: Node,
   vertex: Node,
@@ -606,8 +614,8 @@ export function onChangeHandler(
 }
 
 export function getSublistRows(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   meta: Node,
   vertex?: Node,
 ) {
@@ -620,8 +628,8 @@ export function getSublistRows(
 }
 
 export function getSublistRowsForType(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   type: string,
   vertex: Node,
 ) {
@@ -631,8 +639,8 @@ export function getSublistRowsForType(
 }
 
 export function setValueGlobal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   attribute: Node,
   vertex: Node,
@@ -655,8 +663,8 @@ export function setValueGlobal(
 
 export class Record {
   dbConn: DBConnection;
-  graph: Store<IGraph>;
-  setGraph: SetStoreFunction<IGraph>;
+  graph: Store<GraphInterface>;
+  setGraph: SetStoreFunction<GraphInterface>;
   txnId: number;
   readonly isRealTime: boolean;
   vertex: Node;
@@ -670,11 +678,11 @@ export class Record {
     meta,
   }: {
     dbConn: DBConnection;
-    graph: Store<IGraph>;
-    setGraph: SetStoreFunction<IGraph>;
+    graph: Store<GraphInterface>;
+    setGraph: SetStoreFunction<GraphInterface>;
     meta?: Node;
   }) {
-    this.txnId = getNewTxnId();
+    this.txnId = getNewTxnId(graph, setGraph);
     this.isRealTime = false;
     this.dbConn = dbConn;
     this.graph = graph;
@@ -692,7 +700,7 @@ export class Record {
       return { error: "Label not found" };
     }
     if (this.isRealTime) {
-      this.txnId = getNewTxnId();
+      this.txnId = getNewTxnId(this.graph, this.setGraph);
     }
     const newVertexObj = newVertex(getNewGraphId(), [label], properties || {});
     // TODO: Do Create Transformation for the vertex
@@ -729,7 +737,7 @@ export class Record {
     const { attributes, ...custom } = form;
 
     // save attributes to vertexes
-    const metaTxnId = getNewTxnId();
+    const metaTxnId = getNewTxnId(this.graph, this.setGraph);
     if (this.meta) {
       this.metaVertex = this.meta;
     } else {
@@ -787,8 +795,8 @@ export class Record {
     revertTransaction(this.txnId);
   };
   setValue = (
-    graph: Store<IGraph>,
-    setGraph: SetStoreFunction<IGraph>,
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
     attribute: Node,
     vertex: Node,
     data: any,
@@ -907,16 +915,16 @@ export class Record {
   };
 
   getSublistRowsForType = (
-    graph: Store<IGraph>,
-    setGraph: SetStoreFunction<IGraph>,
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
     type: string,
     vertex: Node,
   ) => {
     return getSublistRowsForType(graph, setGraph, type, vertex);
   };
   getSublistRows = (
-    graph: Store<IGraph>,
-    setGraph: SetStoreFunction<IGraph>,
+    graph: Store<GraphInterface>,
+    setGraph: SetStoreFunction<GraphInterface>,
     meta: Node,
     vertex: Node,
   ) => {
@@ -959,8 +967,8 @@ export class Record {
 
 // 'type' or 'label' can be overwritten in the meta.
 export const addNewRow = (
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   meta: Node,
   parentVertex: Node,
@@ -996,8 +1004,8 @@ export const FormContext = createContext({} as IFormContext);
 export const PageContext = createContext({} as { [key: string]: any });
 
 export function rowMetaInitialize(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   joinVertex: Node,
   meta: Node,
   tableColumnsTemplate: Node[],
@@ -1010,7 +1018,7 @@ export function rowMetaInitialize(
   );
   if (rowMetaAttrInst.error) {
     const rows = {} as { [key: Id]: Id };
-    const metaTxnId = getNewTxnId();
+    const metaTxnId = getNewTxnId(graph, setGraph);
     batch(() => {
       const metaInstanceResult = newRow(
         graph,
@@ -1143,8 +1151,8 @@ export const getFormMetaData = async (dbConn: DBConnection, formId: string) => {
 };
 
 export function getStringComponentLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   attrDataTypeVertex?: Node,
 ) {
   if (!attrDataTypeVertex) {
@@ -1183,8 +1191,8 @@ export async function getStringComponent(
 }
 
 export function getCollAttrCompLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   attrVertex: Node,
 ): Node | undefined {
   const attrComp = getChildVertexLocal(

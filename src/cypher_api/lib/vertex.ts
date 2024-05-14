@@ -14,6 +14,7 @@ import { deleteEdge } from "~/cypher_api/lib/edge";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { newVertexDBCall } from "~/cypher_api/functions/newVertex";
+import { GraphInterface } from "~/lib/graph/graph";
 
 // return a new Vertex
 export function newVertex(
@@ -25,8 +26,8 @@ export function newVertex(
 }
 
 export function addNewNodeUnsafe(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   vertex: Node,
 ) {
   setGraph("vertexes", vertex.id, vertex);
@@ -39,8 +40,8 @@ export function addNewNodeUnsafe(
 
 // add a new vertex to the graph
 export function addNewVertex(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Node,
 ): { error: string | boolean; txnDetailIndex?: number } {
@@ -75,8 +76,8 @@ export function addNewVertex(
 
 // replace a vertex properties
 export function replaceVertexProperties(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexId: Id,
   properties: {},
@@ -101,8 +102,8 @@ export function replaceVertexProperties(
 
 // mergeVertexProperties(0, vertexId, {props: { title }}) } }} will replace props.
 export function mergeVertexProperties(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexId: Id,
   properties: { [key: string]: any },
@@ -132,8 +133,8 @@ export function mergeVertexProperties(
 
 // delete a vertex
 export function deleteVertex(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexId: Id,
 ): { error: string | boolean; txnDetailIndex?: number } {
@@ -212,8 +213,8 @@ export function deleteVertex(
 
 // update vertex id when we receive new id from api response
 export function updateVertexId(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   oldVertexId: Id,
   newVertexId: Id,
 ) {
@@ -254,15 +255,15 @@ export function updateVertexId(
 
 // helper function to find all the vertex ids of the label
 export function findVertexIdsByLabel(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   label: string,
 ): Id[] {
   return graph.vertexLabelIdMap[label] || [];
 }
 
 export function findVertexByLabelAndUniqueId(
-  graph: Store<IGraph>,
+  graph: Store<GraphInterface>,
   label: string,
   attribute: string,
   value: number | string,
@@ -275,8 +276,8 @@ export function findVertexByLabelAndUniqueId(
 }
 
 export function findVertexByLabelAndPks(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   label: string,
   value: { [key: string]: number | string | boolean },
 ) {
@@ -293,8 +294,8 @@ export function findVertexByLabelAndPks(
 }
 
 export function findVertexByLabelAndUniqueIdWithSkip(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   label: string,
   attribute: string,
   value: any,
@@ -312,8 +313,8 @@ export function findVertexByLabelAndUniqueIdWithSkip(
 }
 
 export function findOrCreateNewVertex(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   label: string,
   lookupId: string,

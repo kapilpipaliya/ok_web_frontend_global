@@ -4,6 +4,7 @@ import { getNewGraphId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { useToast } from "~/components/custom/Toast";
 
 export function setSelectionValue(
   txnId: number,
@@ -13,6 +14,8 @@ export function setSelectionValue(
   meta: Vertex,
   value?: number[] | number,
 ) {
+  const { showErrorToast } = useToast();
+
   // delete removed edges:
   const type = getToEdge(meta, vertex);
   const previousEdges = vertex.OUT[type] || [];
@@ -29,7 +32,8 @@ export function setSelectionValue(
     // we should not delete edge that end to same vertex
     if (value.includes(graph.edges[edgeId].E)) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+    if (deleteEdgeResult?.error)
+      showErrorToast(deleteEdgeResult.error.toString());
   }
 
   // add added edges:
@@ -43,7 +47,8 @@ export function setSelectionValue(
       graph,
       setGraph,
     );
-    if (insertEdgeResult.error) alert(insertEdgeResult.error);
+    if (insertEdgeResult.error)
+      showErrorToast(insertEdgeResult.error.toString());
   }
 }
 

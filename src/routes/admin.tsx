@@ -26,6 +26,7 @@ export default function UsersLayout(props: RouteSectionProps) {
     initialSynced: false, // TODO: Display initialSynced status to the UI
     lastSyncedTime: 0,
     member: {},
+    txnId: 0
   });
 
   // getUser().then(value =>

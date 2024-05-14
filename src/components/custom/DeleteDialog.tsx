@@ -24,7 +24,7 @@ export const DeleteDialog = (props: {
         props.buttonLabel || <div class="color:rgb(255,0,0)">Delete</div>
       }
       customTitle={
-        <span class="color:rgb(255,2,2)">
+        <span>
           {props.title || "Delete Confirmation"}
         </span>
       }
@@ -47,7 +47,10 @@ export const DeleteDialog = (props: {
           </CustomButton>
           <CustomButton
             variant="contained"
-            onClick={handleConfirm}
+            onClick={()=>{
+              handleConfirm();
+              toggle((v) => !v);
+            }}
             style="margin-right: 10px;"
           >
             Confirm

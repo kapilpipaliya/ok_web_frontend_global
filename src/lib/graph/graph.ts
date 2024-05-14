@@ -44,6 +44,7 @@ export interface GraphInterface {
   initialSynced: boolean;
   lastSyncedTime: 0;
   member?: { [key: string]: any } | null;
+  txnId: number;
 }
 
 export const GraphContext = createContext<
@@ -59,6 +60,7 @@ export function resetDatabase(setGraph: SetStoreFunction<GraphInterface>) {
       vertexLabelIdMap: {} as { [key: string]: Id[] },
       initialSynced: true,
       lastSyncedTime: 0,
+      txnId: 0,
     }),
   );
 }

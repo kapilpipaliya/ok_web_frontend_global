@@ -1,18 +1,16 @@
 import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import {
-  GraphInterface,
-  Id,
-  Vertex,
-} from "~/lib/graph/graph";
-import {
-  getNewGraphId, transactionDetailAdd,
-  transactions
+  getNewGraphId,
+  transactionDetailAdd,
+  transactions,
 } from "../transaction";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { useToast } from "~/components/custom/Toast";
 
 // return a new Vertex
 export function newVertex(
@@ -46,7 +44,6 @@ export function addNewVertex(
   txnDetailIndex?: number;
 } {
   if (graph.vertexes[vertex.id]) {
-    debugger
     return { error: "Vertex ID Already exist" };
   }
   const existedVertexes = vertex.L.filter(
@@ -140,6 +137,8 @@ export function deleteVertex(
   error: string | boolean;
   txnDetailIndex?: number;
 } {
+  const { showErrorToast } = useToast();
+
   if (!graph.vertexes[vertexId]) {
     return { error: "Vertex ID is not valid" };
   }
@@ -152,7 +151,7 @@ export function deleteVertex(
   if (
     Object.keys(vertex.OUT).filter((label) => label !== "AttrInst").length > 0
   ) {
-    alert(
+    showErrorToast(
       `there are multiple children exist when deleting ${vertex.L[0]} (${vertex.id})`,
     );
     return { error: "Vertex Children Exist When deleting vertex" };
@@ -180,7 +179,7 @@ export function deleteVertex(
   }
 
   if (Object.keys(vertex.IN).length > 0) {
-    alert(
+    showErrorToast(
       `there are multiple Parent exist when deleting ${vertex.L[0]} (${vertex.id})`,
     );
     return { error: "Vertex Children Exist When deleting vertex" };
@@ -263,15 +262,17 @@ export function findOrCreateNewVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
+  const { showErrorToast } = useToast();
+
   if (!lookUpUniqueValue) {
-    alert("lookup Unique Value must not be empty");
+    showErrorToast("lookup Unique Value must not be empty");
     return;
   }
   let existingVertex = findVertexByLabelAndUniqueId(
-    graph, label,
+    graph,
+    label,
     lookupId,
     lookUpUniqueValue,
-   
   );
 
   if (!existingVertex) {

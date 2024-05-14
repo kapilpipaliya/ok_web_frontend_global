@@ -6,12 +6,7 @@ import {
   createSignal,
   untrack,
 } from "solid-js";
-import {
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex,
-} from "~/lib/graph/graph";
+import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import { getNewGraphId } from "./graph/transaction";
 import {
   addNewRow,
@@ -19,11 +14,14 @@ import {
   getChildVertexes,
   getParentVertex,
   getSelectionOptions,
-  Record
 } from "./graph/get/sync/graph_fns";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import { getCompProps, getRowProps, getStringComponent } from "~/lib/graph/get/sync/graph_functions";
+import {
+  getCompProps,
+  getRowProps,
+  getStringComponent,
+} from "~/lib/graph/get/sync/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { cloneRowProps } from "./graph/mutate/form_functions";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
@@ -88,6 +86,8 @@ export const componentDrag = (
   setGraph: SetStoreFunction<GraphInterface>,
   toIndex?: number,
 ) => {
+  const { showErrorToast } = useToast();
+
   // handle (toNode === null) case.
   if (fromVertex) {
     const attrMetaVertex = newVertex(getNewGraphId(), [], {
@@ -192,13 +192,13 @@ export const componentDrag = (
           fromVertex.id,
         );
         const formVertex = findVertexByLabelAndUniqueId(
-          graph, "Comp",
+          graph,
+          "Comp",
           IdAttr,
           "Form",
-      
         );
         if (!formVertex) {
-          alert("cant find form");
+          showErrorToast("cant find form");
         } else {
           setSelectionValue(
             txnId,
@@ -336,12 +336,13 @@ function getChildrenAttrs(
 export const useDragDrop = (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  record: Record,
+  txnId: number,
+  formData: Vertex,
   vertex: Vertex,
   collapsedKeys?: Accessor<Id[]>,
   isPreview?: boolean,
 ) => {
-  const { showSuccessToast } = useToast();
+  const { showErrorToast, showSuccessToast } = useToast();
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, vertex));
 
   const activeItemChanged = createSelector<any, Vertex>(
@@ -357,7 +358,7 @@ export const useDragDrop = (
   };
 
   const handleDragOverBase = (e: DragEvent) => {
-    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement);
+    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "before" | "after" | "center" | null;
     if (!position) {
       setIndicatorPosition({ activeItem: null, position: null });
       setTargetId(-1);
@@ -368,7 +369,7 @@ export const useDragDrop = (
     if (position === "before") {
       activeItem = vertex.id;
     } else if (position === "after") {
-      if (isPreview || collapsedKeys().includes(vertex.id)) {
+      if (isPreview || (collapsedKeys && collapsedKeys().includes(vertex.id))) {
         // collapsed state
         activeItem = vertex.id;
       } else {
@@ -406,7 +407,11 @@ export const useDragDrop = (
     }
     const fromVertexLabel = fromVertex.L[0];
     const position = indicatorPosition().position;
-
+    if (!position) {
+      // Don't allow drag and drop
+      showErrorToast("Position not found when dropping");
+      return;
+    }
     // Don't allow parent to move inside children.
     let parentVertex = graph.vertexes[toVertexId];
     while (true) {
@@ -448,12 +453,16 @@ export const useDragDrop = (
     const toVertexId = indicatorPosition().activeItem!;
     const toVertex = graph.vertexes[toVertexId]; // vertex;
     if (!fromVertex) {
-      alert("from vertex not found");
+      showErrorToast("from vertex not found");
       return;
     }
     const fromVertexLabel = fromVertex.L[0];
-    const txnId = record.txnId;
+
     const position = indicatorPosition().position;
+    if (!position) {
+      showErrorToast("Position not found when dropping");
+      return;
+    }
 
     const fromParentVertex = getParentVertex(["Attr"], fromVertex, graph);
     const toParentVertex =
@@ -522,9 +531,9 @@ export const useDragDrop = (
           : toVertex;
 
       const rowId = componentDrag(
-        record.txnId,
+        txnId,
         fromVertex,
-        parentVertex || record.vertex,
+        parentVertex || formData,
         graph,
         setGraph,
       );
@@ -551,9 +560,9 @@ export const useDragDrop = (
           : toVertex;
 
       const rowId = componentDrag(
-        record.txnId,
+        txnId,
         fromVertex,
-        parentVertex || record.vertex,
+        parentVertex || formData,
         graph,
         setGraph,
       );
@@ -584,7 +593,7 @@ export const useDragDrop = (
 
       // remove previous incoming edge if present.
       if (fromParentVertex.vertex) {
-        setParentValue(graph, setGraph, record.txnId, fromVertex, {
+        setParentValue(graph, setGraph, txnId, fromVertex, {
           P: { props: { type: "Attr" } },
         } as unknown as Vertex);
       }
@@ -593,7 +602,7 @@ export const useDragDrop = (
         setParentValue(
           graph,
           setGraph,
-          record.txnId,
+          txnId,
           fromVertex,
           { P: { props: { type: "Attr" } } } as unknown as Vertex,
           toVertexId,
@@ -605,7 +614,7 @@ export const useDragDrop = (
         setParentValue(
           graph,
           setGraph,
-          record.txnId,
+          txnId,
           fromVertex,
           { P: { props: { type: "Attr" } } } as unknown as Vertex,
           toParentVertex!.id,
@@ -630,7 +639,6 @@ export const useDragDrop = (
     let fromVertex = vertex;
     const toVertex = vertex;
 
-    const txnId = record.txnId;
     const position = "after";
 
     const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
@@ -660,9 +668,9 @@ export const useDragDrop = (
     }
 
     const rowId = componentDrag(
-      record.txnId,
+      txnId,
       fromVertex,
-      toParentVertex || record.vertex,
+      toParentVertex || formData,
       graph,
       setGraph,
     );
@@ -716,7 +724,7 @@ export const useDragDrop = (
     });
   };
 
-  const deleteLayout = (name) => {
+  const deleteLayout = (name: string) => {
     batch(() => {
       if (selectedId() === vertex.id) {
         setSelectedId(-1);
@@ -728,7 +736,7 @@ export const useDragDrop = (
       }
     });
 
-    deleteNestedLayout(graph, setGraph, record.txnId, [vertex]);
+    deleteNestedLayout(graph, setGraph, txnId, [vertex]);
 
     showSuccessToast(`${name} deleted Successfully`);
   };

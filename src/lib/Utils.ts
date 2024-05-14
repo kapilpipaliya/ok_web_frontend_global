@@ -1,14 +1,13 @@
 import { createContext, useContext } from "solid-js";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
-import {
-  GraphContext,
-  GraphInterface,
-  Vertex,
-} from "~/lib/graph/graph";
+import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { getChildVertex, getSelectionOptions, Record } from "./graph/get/sync/graph_fns";
+import {
+  getChildVertex,
+  getSelectionOptions,
+} from "./graph/get/sync/graph_fns";
 
 export const APP_BASE_URL = "/admin";
 export const APP_BASE_URL_NAME = "Admin";
@@ -158,7 +157,6 @@ export const AdminAttrKeys = [
   "Import",
   "Nav",
 ];
-
 
 const collectionAttr = [
   {
@@ -399,9 +397,11 @@ for (let i = 0; i < 10; i++) {
 }
 
 export interface IFormContext {
-  cleanUpConfig: { [key: string]: any };
-  validationGroup: {};
-  record: Record;
+  cleanUpConfig: () => { [key: string]: any };
+  validationGroup?: {};
+  txnId: number;
+  formMeta: Vertex;
+  formData: Vertex;
 }
 
 export const AttrsTableData: { [key: string]: FormMetaData } = {
@@ -619,8 +619,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } =
-                  options.validator.context || ({} as IFormContext);
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
 
                 const val = options.value;
@@ -634,7 +635,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     "Coll",
                     "id",
                     val,
-                    record.vertex.id,
+                    formData.id,
                     graph,
                   );
                 }
@@ -1004,15 +1005,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } =
-                  options.validator.context || ({} as IFormContext);
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
                 return !findVertexByLabelAndUniqueIdWithSkip(
                   "Page",
                   "id",
                   val,
-                  record.vertex.id,
+                  formData.id,
                   graph,
                 );
               },
@@ -1110,7 +1112,6 @@ export function isObject(i: any) {
     return !1;
   }
 }
-
 
 export function groupBy(
   xs: { [key: string]: any }[],

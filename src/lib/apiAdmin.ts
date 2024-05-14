@@ -136,8 +136,9 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } =
-                  options.validator.context || ({} as IFormContext);
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
 
                 const val = options.value;
@@ -145,7 +146,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
                   "Navigation",
                   "id",
                   val,
-                  record.vertex.id,
+                  formData.id,
                   graph,
                 );
               },

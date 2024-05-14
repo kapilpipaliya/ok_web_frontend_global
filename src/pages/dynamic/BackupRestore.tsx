@@ -32,7 +32,7 @@ export const BackupRestore = () => {
                 >
                   Go to Simple Import
                 </A>
-         
+
                 <A class="b:2|solid|blue-40" href={`${APP_BASE_URL}/Nav`}>
                   Configure Navigation
                 </A>
@@ -44,4 +44,3 @@ export const BackupRestore = () => {
     </>
   );
 };
-

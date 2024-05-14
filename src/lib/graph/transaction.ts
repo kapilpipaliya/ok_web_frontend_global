@@ -1,25 +1,27 @@
 import { batch } from "solid-js";
-import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import {
+  ServerEventsDispatcher,
+  WSEvent,
+} from "~/lib/websocket/ws_events_dispatcher";
 import { isNumber } from "~/lib/Utils";
-import { Id } from "./graph";
-
-
-
+import { GraphInterface, Id } from "./graph";
+import { SetStoreFunction, Store } from "solid-js/store";
 
 // temporary we start from 500000 because newId should not conflict with existing Ids
 export let uniqueId = -50000;
 
-export type Revert = { revert: () => any; };
+export type Revert = { revert: () => any };
 export type InsertFn = {
-  [key in "insert" |
-  "replace" |
-  "merge" |
-  "deleteVertex" |
-  "insertEdge" |
-  "replaceEdge" |
-  "replaceEdgeStart" |
-  "replaceEdgeEnd" |
-  "deleteEdge"]?: () => any;
+  [key in
+  | "insert"
+  | "replace"
+  | "merge"
+  | "deleteVertex"
+  | "insertEdge"
+  | "replaceEdge"
+  | "replaceEdgeStart"
+  | "replaceEdgeEnd"
+  | "deleteEdge"]?: () => any;
 };
 
 export enum ProcessStatus {
@@ -27,18 +29,18 @@ export enum ProcessStatus {
   Ready,
   Sent,
   AckReceived,
-  Processed
+  Processed,
 }
 
-export type TransactionValue = InsertFn & Revert & { data: any; };
+export type TransactionValue = InsertFn & Revert & { data: any };
 export const transactions = new Map<
   number,
-  { status: ProcessStatus; steps: TransactionValue[]; }
+  { status: ProcessStatus; steps: TransactionValue[] }
 >();
 // @ts-ignore
 export const transactionDetailAdd = (
   txnId: number,
-  txnValue: TransactionValue
+  txnValue: TransactionValue,
 ) => {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
@@ -48,13 +50,20 @@ export const transactionDetailAdd = (
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
   transactions.set(txnId, existingTxnValue);
 };
-let txnNo = 1;
-export const getNewTxnId = () => ++txnNo;
 
-export const getExistingOrDefaultTxnValue = (txnId: number) => transactions.get(txnId) || {
-  status: ProcessStatus.Unset,
-  steps: [],
+export const getNewTxnId = (
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+) => {
+  setGraph("txnId", (v) => (v ?? 0) + 1);
+  return graph.txnId;
 };
+
+export const getExistingOrDefaultTxnValue = (txnId: number) =>
+  transactions.get(txnId) || {
+    status: ProcessStatus.Unset,
+    steps: [],
+  };
 
 export const revertOneTransactionUnSafe = (txnId: number, txnIndex: number) => {
   if (!txnId || !transactions.has(txnId)) return;
@@ -99,7 +108,7 @@ export const getTransactionData = (txnId: number) => {
       replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
       replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
       deleteEdge: txnDetail.deleteEdge?.(),
-    })
+    }),
   );
   return existingTxnValue;
 };
@@ -113,8 +122,10 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    } else if (value.status === ProcessStatus.AckReceived ||
-      value.status === ProcessStatus.Sent) {
+    } else if (
+      value.status === ProcessStatus.AckReceived ||
+      value.status === ProcessStatus.Sent
+    ) {
       return;
     }
   }
@@ -122,27 +133,35 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
     const existingTxnValue = getTransactionData(firstReadyTxn);
     transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
     if (existingTxnValue.length) {
+      const data = [
+        [
+          firstReadyTxn,
+          [...vertexOldIdToNewIdMap],
+          [...edgeOldIdToNewIdMap],
+          existingTxnValue,
+        ],
+      ];
+      const event = ["post", "mutate", 0] as WSEvent;
       // Ws.trigger([
       //   [
-      //     ["post", "mutate", 0],
-      //     [
-      //       [
-      //         firstReadyTxn,
-      //         [...vertexOldIdToNewIdMap],
-      //         [...edgeOldIdToNewIdMap],
-      //         existingTxnValue,
-      //       ],
-      //     ],
+      //     event,
+      //     data,
       //   ],
       // ]);
+      return { event, data };
     }
   }
 };
 // Bug: if commitTxn is called many times it is sending event many times.
+// TODO: currently we can only run this function once.
+// we need to set seperate txnId once commited. Fix this.
 export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
+  console.log("In commitTxn");
+
   if (transactions.has(txnId)) {
+    console.log("In transactions commitTxn");
     transactions.get(txnId)!.status = ProcessStatus.Ready;
-    commitTransaction(Ws);
+    return commitTransaction(Ws);
   }
 };
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
@@ -153,9 +172,6 @@ export function getNewGraphId(): Id {
   // Muration Actor Exception Error : Integer overflow -
   // return `${new Date().getTime()}`;
 }
-
-
-
 
 export async function waitTillAllEventsAreProcessed() {
   if (isAllTxnProcessed()) return true;
@@ -179,8 +195,10 @@ export async function waitTillAllEventsAreProcessed() {
 export function isAllTxnProcessed() {
   let allTxnProcessed = true;
   for (const [_txnId, value] of transactions.entries()) {
-    if (value.status !== ProcessStatus.Processed &&
-      value.status !== ProcessStatus.Unset) {
+    if (
+      value.status !== ProcessStatus.Processed &&
+      value.status !== ProcessStatus.Unset
+    ) {
       allTxnProcessed = false;
       break;
     }
@@ -191,4 +209,3 @@ export function isAllTxnProcessed() {
 export function isValidId(startVertexId: Id) {
   return isNumber(startVertexId);
 }
-

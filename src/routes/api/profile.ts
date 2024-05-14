@@ -7,7 +7,7 @@ import { getChildVertexes } from "~/cypher_api/lib/traverse";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import {checkPropertyExists} from "~/cypher_api/functions/db_functions";
+import { checkPropertyExists } from "~/cypher_api/functions/db_functions";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -15,7 +15,12 @@ import {checkPropertyExists} from "~/cypher_api/functions/db_functions";
  * @param {object} [params] - The parameters to pass to the function, optional.
  * @returns {Promise<object>} - A standard response object.
  */
-async function handleRequest(func: Function, params = {}, session: Session, subdomain: string) {
+async function handleRequest(
+  func: Function,
+  params = {},
+  session: Session,
+  subdomain: string,
+) {
   try {
     return await func(params, session, subdomain);
   } catch (error: any) {
@@ -51,7 +56,7 @@ export async function POST({ request }: APIEvent) {
   }
 }
 
-const profile = async (payload: any, session: Session) => {
+const profile = async (payload: any, session: Session, subdomain: string) => {
   const { userId, username, email, profileImage } = payload;
 
   // Ensure user exists
@@ -73,7 +78,7 @@ const profile = async (payload: any, session: Session) => {
   ) {
     return { status: 500, error: "Username already exists" };
   }
-  
+
   // Update user profile
   let query = `MATCH (u:User) WHERE id(u) = $userId SET `;
   const updates = [];
@@ -82,21 +87,31 @@ const profile = async (payload: any, session: Session) => {
   if (profileImage) updates.push(`u.profileImage = $profileImage`);
   query += updates.join(", ") + " RETURN u;";
 
-  const result = await session.run(query, { userId, email, username, profileImage });
+  const result = await session.run(query, {
+    userId,
+    email,
+    username,
+    profileImage,
+  });
   const user = result.records[0]?.get("u");
-  
-  const session2 = (await getDriverWithPort(user.properties.driverPort)).session();
-  const result2 = await session2.run(query, { userId, email, username, profileImage });
-  const user2 = result2.records[0]?.get("u");
-  console.log(user2);
+
+  if (subdomain !== "super") {
+    const session2 = (
+      await getDriverWithPort(user.properties.driverPort)
+    ).session();
+    const result2 = await session2.run(query, {
+      userId,
+      email,
+      username,
+      profileImage,
+    });
+    const user2 = result2.records[0]?.get("u");
+  }
 
   if (email) {
     const http_session = await getHttpsSession();
     await http_session.update((oldData) => ({
       ...oldData,
-      // userId: user.id,
-      // username: user.username,
-      // password: user.password,
       email: user.properties.email,
     }));
   }
@@ -138,7 +153,11 @@ const pricing = async (payload: any, session: Session) => {
   };
 };
 
-const supportTicket = async (data: any, session: Session, subdomain: string) => {
+const supportTicket = async (
+  data: any,
+  session: Session,
+  subdomain: string,
+) => {
   const { action, ...payload } = data;
 
   switch (action) {
@@ -229,7 +248,11 @@ const supportTicket = async (data: any, session: Session, subdomain: string) => 
     }
   }
 
-  async function deleteTicket(payload: any, session: Session, subdomain: string) {
+  async function deleteTicket(
+    payload: any,
+    session: Session,
+    subdomain: string,
+  ) {
     const { id } = payload;
     await deleteNodeMGCall(
       { driver: await getDriver(subdomain), session: session },

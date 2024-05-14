@@ -1,34 +1,38 @@
-import fs from 'fs';
+import fs from "fs";
 import { APIEvent } from "@solidjs/start/dist/server";
-import { IncomingForm } from 'formidable';
-import path from 'path';
-import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { fileURLToPath } from "url";
-import { HTTPEvent, eventHandler, getQuery, readMultipartFormData } from "vinxi/http";
+import path from "path";
+import { HTTPEvent, getQuery, readMultipartFormData } from "vinxi/http";
+import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
-export async function POST(event: HTTPEvent) {
-    const query = getQuery(event); 
-    const fileId = query['name'];    
-    const data = await readMultipartFormData(event);
-    
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-    const profileImagesDir = path.resolve(__dirname, '~/assets/profile_images');
+export async function POST({ request }: APIEvent, event: HTTPEvent) {
+  const subdomain = getSubDomain(request.headers.get("host")!);
+  const query = getQuery(event);
+  const fileId = query["name"];
+  const username = query["username"];
+  const data = await readMultipartFormData(event);
+  const baseProfileImagesDir =
+    "/root/ok_web_frontend_global/public/profile_images";
+  const subdomainProfileImagesDir = path.join(baseProfileImagesDir, subdomain);
 
-    try {
-        // Check if the directory exists, create it if not
-        if (!fs.existsSync(profileImagesDir)) {
-            fs.mkdirSync(profileImagesDir, { recursive: true });
-        }
-        const { ext,name } = path.parse(data![0].filename!);
-        const newFilename = `${fileId}_${name}${ext}`;
-        const htmlTemplatePath = path.resolve(profileImagesDir, newFilename);
-        fs.writeFileSync(htmlTemplatePath, data![0].data);
-
-        return { 
-            message: 'File saved successfully', newFilename: `~/assets/profile_images/${newFilename}` };
-    } catch (error) {
-        console.error('Error saving file:', error);
-        throw error;
+  try {
+    // Check if the subdomain-specific directory exists, create it if not
+    if (!fs.existsSync(subdomainProfileImagesDir)) {
+      fs.mkdirSync(subdomainProfileImagesDir, { recursive: true });
     }
+    if (data && data[0] && data[0].filename) {
+      const { ext, name } = path.parse(data[0].filename);
+      const newFilename = `${fileId}_${username}_${new Date().toISOString()}${ext}`;
+      const imagePath = path.join(subdomainProfileImagesDir, newFilename);
+      fs.writeFileSync(imagePath, data[0].data);
+      return {
+        message: "File saved successfully",
+        newFilename: `/public/profile_images/${subdomain}/${newFilename}`,
+      };
+    } else {
+      return { error: "No file data available" };
+    }
+  } catch (error) {
+    console.error("Error saving file:", error);
+    throw error; // Rethrow or handle as necessary
+  }
 }

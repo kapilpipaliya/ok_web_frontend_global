@@ -9,7 +9,7 @@ import { deleteRow } from "~/cypher_api/lib/record";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";
-
+import { GraphInterface } from "~/lib/graph/graph";
 export function getToEdge(meta: Node, vertex: Node): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
@@ -20,8 +20,8 @@ export function getToEdge(meta: Node, vertex: Node): string {
 }
 
 export function getSelectedVertexValueLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   vertex: Node,
   meta: Node,
 ) {
@@ -54,8 +54,8 @@ export function getInEdge(meta: Node, vertex: Node) {
 }
 
 export function getParentVertexValueLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   vertex: Node,
   meta: Node,
 ): number[] {
@@ -82,8 +82,8 @@ export async function getParentVertexValue(
 }
 
 export function getParentVertexLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   path: string[],
   currentVertex: Node,
 ): { error: boolean; vertex?: Node } {
@@ -161,8 +161,8 @@ export async function getParentVertex(
 }
 
 export function getParentVertexesLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   path: string[],
   currentVertexes: Node[],
 ): { error: boolean; vertexes?: Node[] } {
@@ -258,8 +258,8 @@ export async function getParentVertexes(
 }
 
 export function getChildVertexLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   path: string[],
   currentVertex: Node,
 ): { error: boolean; vertex?: Node } {
@@ -375,8 +375,8 @@ export async function getChildVertex(
 }
 
 export function getChildVertexesLocal(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   path: string[],
   currentVertexes: Node[],
   strict?: boolean,
@@ -613,8 +613,8 @@ export const getTreeData = (
   return getChildren(treeLevels, vertexes);
 };
 export const deleteNestedLayout = (
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexes: Node[] = [],
   options?: {

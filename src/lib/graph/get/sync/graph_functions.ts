@@ -1,9 +1,5 @@
-import { IdAttr } from "~/cypher_api/lib/graph";
 import { klona } from "klona/json";
-import {
-  AdminAttrKeys,
-  AttrsTableData,
-} from "~/lib/Utils";
+import { AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
@@ -11,15 +7,15 @@ import {
   getSelectionOptions,
   getSublistRows,
   getSublistRowsForType,
-  Record
 } from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { findVertexByLabelAndUniqueId } from "~/cypher_api/lib/vertex";
-import { getToEdge } from "~/cypher_api/lib/traverse";
+import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { useToast } from "~/components/custom/Toast";
 
 export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
@@ -112,10 +108,10 @@ export function getCollAttrs(
         "taking string dataType",
       );
       const dataTypeVertex = findVertexByLabelAndUniqueId(
-        graph, "DataType",
+        graph,
+        "DataType",
         "name",
         "String",
-        
       );
       if (!dataTypeVertex) {
         console.warn("String data Type not found");
@@ -333,7 +329,11 @@ export const getFormMetaData = (
   return { error: false, form };
 };
 
-export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
+export const getExportCode = (
+  graph: Store<GraphInterface>,
+  meta: Vertex,
+  data: Vertex,
+) => {
   const getChildren = (
     meta: Vertex,
     vertex: Vertex,
@@ -341,6 +341,8 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
       [key: string]: any;
     },
   ) => {
+    const { showErrorToast } = useToast();
+
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P.props || {};
 
@@ -377,13 +379,13 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
             // getChildren(metaVertex, v, pksResult);
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              graph, "Coll",
+              graph,
+              "Coll",
               "name",
               label,
-              
             );
             if (!collVertex) {
-              alert(`Collection not defined: ${label}`);
+              showErrorToast(`Collection not defined: ${label}`);
               continue;
             }
             const pks = getPkForCollection(graph, collVertex);
@@ -444,9 +446,9 @@ export const getExportCode = (graph: Store<GraphInterface>, record: Record) => {
     return result;
   };
 
-  return getChildren(record.metaVertex, record.vertex, {
-    ...klona(record.vertex),
-    L: record.vertex.L[0],
+  return getChildren(meta, data, {
+    ...klona(data),
+    L: data.L[0],
     IN: undefined,
     OUT: undefined,
     id: undefined,
@@ -460,10 +462,10 @@ export function getStringComponent(
 ) {
   if (!attrDataTypeVertex) {
     attrDataTypeVertex = findVertexByLabelAndUniqueId(
-      graph, "DataType",
+      graph,
+      "DataType",
       "name",
       "String",
-     
     );
     if (!attrDataTypeVertex) {
       return;

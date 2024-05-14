@@ -11,7 +11,6 @@ export const JSONToCypherMap = (json: object) => {
 };
 */
 
-
 const collectionAttr = [
   {
     name: "displayName",
@@ -471,8 +470,9 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } =
-                  options.validator.context || ({} as IFormContext);
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
                 if (
@@ -485,7 +485,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     "Coll",
                     "id",
                     val,
-                    record.vertex.id,
+                    formData.id,
                     graph,
                   );
                 }
@@ -855,15 +855,16 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
               ignoreEmptyValue: true,
               message: "This ID is already taken",
               validationCallback: (options: any) => {
-                const { record } =
-                  options.validator.context || ({} as IFormContext);
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
                 return !findVertexByLabelAndUniqueIdWithSkip(
                   "Page",
                   "id",
                   val,
-                  record.vertex.id,
+                  formData.id,
                   graph,
                 );
               },

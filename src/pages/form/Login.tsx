@@ -1,18 +1,19 @@
-import { Show, createEffect, createSignal, onMount, useContext } from "solid-js";
 import {
-  APP_BASE_URL,
-  validateEmail,
-  validatePassword
-} from "~/lib/Utils";
+  Show,
+  createEffect,
+  createSignal,
+  onMount,
+  useContext,
+} from "solid-js";
+import { APP_BASE_URL, validateEmail, validatePassword } from "~/lib/Utils";
 import { A, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/lib/contexts";
 import logo from "~/assets/graphics/logo.png";
 import { signInCall } from "~/components/api/api_functions";
-import '~/css/base.css';
+import "~/css/base.css";
 import postAPI from "~/components/api/postApi";
-
 
 export const Login = () => {
   const navigate = useNavigate();
@@ -22,18 +23,22 @@ export const Login = () => {
     email: "",
     password: "",
     profileImage: "",
-    username:"",
+    username: "",
     loginType: "login",
   });
 
   const getAll = async () => {
-    const data = await postAPI('/api/get_subdomain_Info', {});
-    setFormData({ ...formData(), profileImage: data.profileImage, username: data.username })    
+    const data = await postAPI("/api/get_subdomain_Info", {});
+    setFormData({
+      ...formData(),
+      profileImage: data.profileImage,
+      username: data.username,
+    });
   };
 
   onMount(() => {
     getAll();
-  })
+  });
 
   const [showPassword, setShowPassword] = createSignal(false);
 
@@ -70,37 +75,43 @@ export const Login = () => {
       class="@fade|.5s"
       style={{
         "background-size": "cover",
-        "background-image": "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-image":
+          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
         display: "flex",
         "background-color": "rgb(239,235,233)",
         "flex-direction": "column",
         "align-items": "center",
         "justify-content": "center",
-        'grid-row-gap':'50px',
+        "grid-row-gap": "50px",
         height: "100vh",
       }}
     >
-      <Show when={formData().profileImage} fallback={<img
-        src={logo}
-        alt="logo"
-        class="h:70px @fade|.5s"
-        style={{ "justify-self": "center" }} />}>
+      <Show
+        when={formData().profileImage}
+        fallback={
+          <img
+            src={logo}
+            alt="logo"
+            class="h:70px @fade|.5s"
+            style={{ "justify-self": "center" }}
+          />
+        }
+      >
         <div class="text-align:-webkit-center">
           <img
             src={formData().profileImage}
             alt="logo"
             class="h:130px r:10 @fade|.5s bg:white p:2"
-            style={{ "justify-self": "center" }} />
+            style={{ "justify-self": "center" }}
+          />
           <div class="m:10">
-            <span>
-              Welcome Back,          
-            </span>
+            <span>Welcome Back,</span>
             <span class="color:rgb(226,65,75) font-weight:bold font:19">
-              {formData().username}     
+              {formData().username}
             </span>
           </div>
         </div>
-        </Show>
+      </Show>
       <form
         class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
         onSubmit={handleSubmit}
@@ -113,7 +124,8 @@ export const Login = () => {
         <img
           src={"../../public/graphics/login_vector.jpg"}
           alt="logo"
-          class="w:25rem d:none@<md" />
+          class="w:25rem d:none@<md"
+        />
         <div class="mt:25 w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">Log In</div>
           <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
@@ -130,7 +142,9 @@ export const Login = () => {
             name="email"
             type="text"
             value={formData().email}
-            onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+            onInput={(e) =>
+              setFormData({ ...formData(), email: e.target.value })
+            }
             style={{
               width: "100%",
               padding: "8px",
@@ -139,7 +153,8 @@ export const Login = () => {
             }}
             autocomplete="email"
             placeholder="Your email"
-            required />
+            required
+          />
           <label
             for="password"
             class="f:14 mt:5"
@@ -152,7 +167,9 @@ export const Login = () => {
               name="password"
               type={`${showPassword() ? "text" : "password"}`}
               value={formData().password}
-              onInput={(e) => setFormData({ ...formData(), password: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), password: e.target.value })
+              }
               style={{
                 width: "100%",
                 padding: "8px",
@@ -161,12 +178,14 @@ export const Login = () => {
               }}
               autocomplete="password"
               placeholder="Your Password"
-              required />
+              required
+            />
             <Icon
               onClick={togglePasswordVisibility}
               class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
               aria-label="Toggle password visibility"
-              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`} />
+              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            />
           </div>
           <div
             style={{

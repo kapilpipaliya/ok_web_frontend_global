@@ -16,14 +16,13 @@ export async function getDriverWithPort(
       isIntegerId ? { disableLosslessIntegers: true } : undefined,
     );
   }
- 
-  
+
   return drivers[port];
 }
 
 const getSuperSession = async () => {
   return getDriverWithPort(1102);
-}
+};
 // Function to get a driver instance based on the database ID
 export async function getDriver(
   subdomain: string,
@@ -37,12 +36,12 @@ export async function getDriver(
     const session = (await getSuperSession()).session();
     const query = `MATCH (n:User {subdomain: '${subdomain}'}) RETURN n;`;
     const res = await session.run(query, { subdomain });
-    if(res.records.length > 0){
-      port = res.records[0].get('n')?.properties.driverPort;
-    }else{
-      throw new Error('Subdomain Not Found!')
+    if (res.records.length > 0) {
+      port = res.records[0].get("n")?.properties.driverPort;
+    } else {
+      throw new Error("Subdomain Not Found!");
     }
-    session.close()
+    session.close();
   }
 
   return getDriverWithPort(port, username, password);

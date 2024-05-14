@@ -1,21 +1,13 @@
-import {
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex,
-} from "~/lib/graph/graph";
-import {
-  getNewGraphId,
-  getNewTxnId
-} from "../transaction";
+import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { getNewGraphId, getNewTxnId } from "../transaction";
 import { klona } from "klona/json";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { batch, onCleanup, untrack } from "solid-js";
+import { batch, onCleanup, untrack, useContext } from "solid-js";
 import {
   addNewRow,
   getChildVertex,
   getChildVertexes,
-  newRow
+  newRow,
 } from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
@@ -24,6 +16,8 @@ import {
   componentProps,
   getCollAttrComp,
 } from "~/lib/graph/get/sync/graph_functions";
+import { useToast } from "~/components/custom/Toast";
+import { NewTxnIdContext } from "~/lib/contexts";
 
 export function cloneRowProps(
   graph: Store<GraphInterface>,
@@ -86,9 +80,15 @@ export function addMeta(
         graph.vertexes[metaVertex.P.templateId]?.P?.props || {},
         metaDataVal,
       );
-      mergeVertexProperties(getNewTxnId(), metaVertex.id, graph, setGraph, {
-        props: newMetaData,
-      });
+      mergeVertexProperties(
+        useContext(NewTxnIdContext),
+        metaVertex.id,
+        graph,
+        setGraph,
+        {
+          props: newMetaData,
+        },
+      );
     });
   }
 }
@@ -100,10 +100,12 @@ export function rowMetaInitialize(
   meta: Vertex,
   tableColumnsTemplate: Vertex[],
 ) {
+  const { showErrorToast } = useToast();
+
   const rowMetaAttrInst = getChildVertex(graph, ["AttrInst"], joinVertex);
   if (rowMetaAttrInst.error) {
     const rows = {} as { [key: Id]: Id };
-    const metaTxnId = getNewTxnId();
+    const metaTxnId = getNewTxnId(graph, setGraph);
     batch(() => {
       const metaInstanceResult = newRow(
         graph,
@@ -113,7 +115,7 @@ export function rowMetaInitialize(
         "AttrInst",
       );
       if (metaInstanceResult.error) {
-        alert("Error creating a row for attribute instance");
+        showErrorToast("Error creating a row for attribute instance");
       }
       mergeVertexProperties(
         metaTxnId,
@@ -134,7 +136,7 @@ export function rowMetaInitialize(
           "MetaAttr",
         );
         if (AttrRowResult.error) {
-          alert(AttrRowResult.error);
+          showErrorToast(AttrRowResult.error.toString());
         }
         const P = klona(attrColumn.P);
         P.templateId = attrColumn.id;
@@ -186,7 +188,7 @@ export function rowMetaInitialize(
           "MetaAttr",
         );
         if (AttrRowResult.error) {
-          alert(AttrRowResult.error);
+          showErrorToast(AttrRowResult.error.toString());
         }
         const P = klona(attrColumn.P);
         P.templateId = attrColumn.id;

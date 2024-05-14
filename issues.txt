@@ -1,31 +1,27 @@
+✅ 
 
 
-   2. make mutate api.(kapil)
-   3. convert docker api /root/pm2_and_docker_frontend/pm2-docker-manage-api.js to solid-start API and use it when signup to create a docker.
-✅ 4. make sure session is properly closed in API.
-✅ 5. make user validation when update profile.
-  6. add a subdmoin field in signup. if not unique give error message
-
-
-
-  make a api for submit form.(Kapil)
-  load full page data with all joins when the page loads.
+load full page data with all joins when the page loads.
   write separate api for navbar.
-  when we navigate from 'Components' to 'User', 'Roles`, 'Permission' new data is not loaded.
-  instead of alert() use toast()
-  
+  use createResource in FormGroup, PageView_, GenericField(Form)
 
-
-
-
-
-
-
-  Letter: Sorting, Filtering support on the table
-  When file is uploaded, it should be in its own subdomain folder.
+  Letter:
+  Sorting, Filtering support on the table
   Load table data from server with pagination when form have many rows
-
+  fix import export button on the form
 
   we are using two libraries:
   jsep (for +,-) => jsonata(filter, projection)
+
+
+  Todo:
+  When we drag and drop from page builder its not working(KAPIL)
+  Fix Delete not working(Kapil)
   
+
+Tasks:
+  ✅ instead of alert() use toast()
+  ✅ getNewTxnId set to context and use it
+  make mutate api working
+  ✅ when file uploaded add new Date().toISOString()
+  ✅ When file is uploaded, it should be in its own subdomain folder.

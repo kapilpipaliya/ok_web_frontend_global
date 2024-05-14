@@ -31,39 +31,34 @@ const CustomSVGIcon = () => (
 
 const Icons = {
   visibility: {
-    yes: <IconifyIcon icon={"solar:eye-broken"} />,
-    no: <IconifyIcon icon={"ant-design:eye-invisible-outlined"} />,
+    yes: "solar:eye-broken",
+    no: "ant-design:eye-invisible-outlined",
   },
   flex: {
-    auto: <IconifyIcon icon="mi:close" />,
-    expand: <IconifyIcon icon="gravity-ui:chevrons-expand-horizontal" />,
-    collapse: <IconifyIcon icon="gravity-ui:chevrons-collapse-horizontal" />,
+    auto: "mi:close",
+    expand: "gravity-ui:chevrons-expand-horizontal",
+    collapse: "gravity-ui:chevrons-collapse-horizontal",
   },
   direction: {
-    horizontal: <IconifyIcon icon="majesticons:arrow-right-line" />,
-    horizontalReverse: <IconifyIcon icon="majesticons:arrow-left-line" />,
-    vertical: <IconifyIcon icon="majesticons:arrow-down-line" />,
-    verticalReverse: <IconifyIcon icon="majesticons:arrow-up-line" />,
+    horizontal: "majesticons:arrow-right-line",
+    horizontalReverse: "majesticons:arrow-left-line",
+    vertical: "majesticons:arrow-down-line",
+    verticalReverse: "majesticons:arrow-up-line",
   },
   justify: {
-    start: <IconifyIcon icon="solar:align-left-outline" />,
-    center: <IconifyIcon icon="solar:align-horizontal-center-outline" />,
-    end: <IconifyIcon icon="solar:align-right-outline" />,
-    spaceBetween: <IconifyIcon icon="material-symbols:align-space-between" />,
-    spaceAround: (
-      <IconifyIcon icon="material-symbols:align-space-around-rounded" />
-    ),
-    spaceEvenly: (
-      <IconifyIcon icon="material-symbols:align-justify-space-even-rounded" />
-    ),
+    start: "solar:align-left-outline",
+    center: "solar:align-horizontal-center-outline",
+    end: "solar:align-right-outline",
+    spaceBetween: "material-symbols:align-space-between",
+    spaceAround: "material-symbols:align-space-around-rounded",
+
+    spaceEvenly: "material-symbols:align-justify-space-even-rounded",
   },
   align: {
-    stretch: (
-      <IconifyIcon icon="material-symbols:align-items-stretch-rounded" />
-    ),
-    start: <IconifyIcon icon="material-symbols:align-start-rounded" />,
-    center: <IconifyIcon icon="material-symbols:align-center-rounded" />,
-    end: <IconifyIcon icon="material-symbols:align-end-rounded" />,
+    stretch: "material-symbols:align-items-stretch-rounded",
+    start: "material-symbols:align-start-rounded",
+    center: "material-symbols:align-center-rounded",
+    end: "material-symbols:align-end-rounded",
   },
 };
 
@@ -119,21 +114,19 @@ const LayoutSection = {
     isLabelOnTop: true,
     options: [
       {
-        key: <IconifyIcon icon="material-symbols:align-start-rounded" />,
+        key: "material-symbols:align-start-rounded",
         value: "flex-start",
       },
       {
-        key: <IconifyIcon icon="material-symbols:align-center-rounded" />,
+        key: "material-symbols:align-center-rounded",
         value: "center",
       },
       {
-        key: <IconifyIcon icon="material-symbols:align-end-rounded" />,
+        key: "material-symbols:align-end-rounded",
         value: "flex-end",
       },
       {
-        key: (
-          <IconifyIcon icon="material-symbols:align-items-stretch-rounded" />
-        ),
+        key: "material-symbols:align-items-stretch-rounded",
         value: "stretch",
       },
     ],
@@ -173,7 +166,7 @@ const LayoutSection = {
     isLabelOnTop: true,
     options: [
       {
-        key: <IconifyIcon icon="mi:close" />,
+        key: "mi:close",
         value: "0 0 auto",
         tooltip: "auto",
       },

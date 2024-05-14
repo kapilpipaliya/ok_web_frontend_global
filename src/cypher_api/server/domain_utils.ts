@@ -11,7 +11,7 @@ export function getSubDomain(host: string) {
     subdomain = "super"; // Default to 'super' if no subdomain is found
   }
   if (subdomain === "www") {
-    return "super"
+    return "super";
   }
 
   return subdomain;

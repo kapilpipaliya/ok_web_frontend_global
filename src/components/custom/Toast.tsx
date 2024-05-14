@@ -1,4 +1,10 @@
-import { Component, Show } from "solid-js";
+import {
+  Component,
+  Show,
+  createEffect,
+  createSignal,
+  onCleanup,
+} from "solid-js";
 import { Renderable, toast, ValueOrFunction } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 
@@ -128,11 +134,73 @@ export const useToast = () => {
     });
   }
 
+  function showTimerToast(title: string, subtitle?: string, timer?: number) {
+    const duration = timer ?? 5000;
+    toast.custom(
+      (t) => {
+        // Start with 100% life
+        const [life, setLife] = createSignal(100);
+        const startTime = Date.now();
+        createEffect(() => {
+          if (t.paused) return;
+          const interval = setInterval(() => {
+            const diff = Date.now() - startTime - t.pauseDuration;
+            setLife(100 - (diff / duration) * 100);
+          });
+
+          onCleanup(() => clearInterval(interval));
+        });
+
+        return (
+          <div style="animation: ${t.visible ? 'enterAnimation 1s forwards' : 'leaveAnimation 1s forwards'}; background-color: #0891b2; padding: 12px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); min-width: 350px;">
+            <div style="display: flex; gap: 8px;">
+              <div style="display: flex; flex: 1; flex-direction: column;">
+                <div class="font-weight:medium color:white">{title}</div>
+                <div style="font-size: 13px; color: #ecfeff;">{subtitle}</div>
+              </div>
+              <div class="flex items-center">
+                <button
+                  style="padding: 14px; height: 80%; letter-spacing: 0.025em; font-weight: 500; border-radius: 6px; font-size: 13px; color: white; background-color: #0e7490;"
+                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.7)'"
+                  onMouseOut="this.style.backgroundColor='#0e7490'"
+                  onClick={() => toast.dismiss(t.id)}
+                >
+                  CANCEL
+                </button>
+              </div>
+              <div class="flex items-center">
+                <button
+                  style="padding: 10px; display: flex; align-items: center; position: relative; height: 80%; letter-spacing: 0.025em; border-radius: 6px; font-size: 24px; color: white; background-color: rgba(14, 116, 144, 0.4);"
+                  onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.2)'"
+                  onMouseOut="this.style.backgroundColor='rgba(14, 116, 144, 0.4)'"
+                  onClick={() => toast.dismiss(t.id)}
+                >
+                  x
+                </button>
+              </div>
+            </div>
+            <div style="position: relative; padding-top: 16px;">
+              <div style="width: 100%; height: 4px; border-radius: 9999px; background-color: #164e63;"></div>
+              <div
+                style="height: 4px; position: absolute; top: 16px; border-radius: 9999px; background-color: #ecfeff;"
+                style={{ width: `${life()}%` }}
+              ></div>
+            </div>
+          </div>
+        );
+      },
+      {
+        duration: duration,
+      },
+    );
+  }
+
   return {
     showCustomToast,
     showLoadingToast,
     showErrorToast,
     showSuccessToast,
     showWarningToast,
+    showTimerToast,
   };
 };

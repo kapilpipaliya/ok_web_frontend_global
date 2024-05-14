@@ -1,4 +1,8 @@
-import { getDriver, getDriverWithPort, isIntegerId } from "~/cypher_api/server/driver";
+import {
+  getDriver,
+  getDriverWithPort,
+  isIntegerId,
+} from "~/cypher_api/server/driver";
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
@@ -23,15 +27,18 @@ export async function POST({ request }: APIEvent) {
       id: !isIntegerId ? user.identity.toNumber() : user.identity,
       properties,
     };
-  } catch (error:any) {
+  } catch (error: any) {
     console.error("Server error Failed to login:", error);
-    return new Response(error.message, {status: 500} );
+    return new Response(error.message, { status: 500 });
   }
 }
 
-
 // Function to authenticate user credentials
-async function authenticateUser(email: string, password: string, subdomain: string) {
+async function authenticateUser(
+  email: string,
+  password: string,
+  subdomain: string,
+) {
   const session = (await getDriver(subdomain)).session();
 
   try {
@@ -45,7 +52,7 @@ async function authenticateUser(email: string, password: string, subdomain: stri
     const user = result.records[0].get("u");
 
     if (subdomain === "super") {
-      return await authenticateSuperUser(user,email, password);
+      return await authenticateSuperUser(user, email, password);
     } else {
       return authenticateRegularUser(user, password);
     }
@@ -55,7 +62,10 @@ async function authenticateUser(email: string, password: string, subdomain: stri
 }
 
 // Function to authenticate regular user
-function authenticateRegularUser(user: { [key: string]: any }, password: string) {
+function authenticateRegularUser(
+  user: { [key: string]: any },
+  password: string,
+) {
   if (user.properties.password !== password) {
     throw new Error("Not Authorized Email!");
   }
@@ -64,13 +74,19 @@ function authenticateRegularUser(user: { [key: string]: any }, password: string)
 }
 
 // Function to authenticate super user
-async function authenticateSuperUser(user: { [key: string]: any }, email: string, password: string) {
-  const session = (await getDriverWithPort(user.properties.driverPort)).session();
+async function authenticateSuperUser(
+  user: { [key: string]: any },
+  email: string,
+  password: string,
+) {
+  const session = (
+    await getDriverWithPort(user.properties.driverPort)
+  ).session();
 
   try {
     const query = `MATCH (u:User {email: $email}) RETURN u`;
     const result = await session.run(query, { email });
-    const res = result.records[0].get("u")
+    const res = result.records[0].get("u");
 
     if (result.records.length === 0) {
       throw new Error("Not Authorized Email!");

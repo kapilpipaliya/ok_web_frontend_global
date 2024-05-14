@@ -11,8 +11,8 @@ export const getPagesDataCall = async (pageName: string) =>
   await makeAPICall(API.getPagesDataUrl, { pageName });
 
 // Submit generic data to the server
-export const submitDataCall = async (data: string, id: number) =>
-  await makeAPICall(API.SubmitDataUrl, { data, id });
+export const submitDataCall = async (data: any) =>
+  await makeAPICall(API.SubmitDataUrl, data);
 
 // Fetch form data by form name and ID
 export const getFormData = async (formName: string, formId: number) =>
@@ -86,5 +86,3 @@ export const deleteSupportTicketCall = async (ticketId: any) =>
     action: "delete",
     id: ticketId,
   });
-
-  

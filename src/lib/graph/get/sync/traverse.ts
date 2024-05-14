@@ -1,14 +1,8 @@
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
-import {
-  capitalizeFirstLetter,
-  getValueFromVertexOrKey,
-} from "~/lib/Utils";
-import {
-  deleteRow,
-  getChildVertexes
-} from "~/lib/graph/get/sync/graph_fns";
+import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
+import { deleteRow, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
 

@@ -1,13 +1,10 @@
 import { useParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
+import { FormContext, IFormContext, iconMap, nameExpr } from "~/lib/Utils";
 import {
-  FormContext,
-  iconMap,
-  nameExpr,
-} from "~/lib/Utils";
-import {
-  addMetaVertexes, getChildVertex,
-  getChildVertexes, Record
+  addMetaVertexes,
+  getChildVertex,
+  getChildVertexes,
 } from "~/lib/graph/get/sync/graph_fns";
 import {
   batch,
@@ -25,17 +22,13 @@ import { GenericField } from "~/components/dynamic/fields/static/GenericFieldCom
 
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
-import {
-  GraphContext,
-  Id,
-  IdAttr,
-  Vertex,
-} from "~/lib/graph/graph";
+import { GraphContext, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
   getNewGraphId,
-  getNewTxnId, revertTransaction,
+  getNewTxnId,
+  revertTransaction,
   revertTransactionUpTo,
-  transactions
+  transactions,
 } from "~/lib/graph/transaction";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
@@ -78,11 +71,13 @@ import PreviewSection from "./Preview";
 import ResizableContainer from "~/components/custom/ResizableDivView";
 import { FieldAttribute } from "~/lib/Type";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
+import { Accessor } from "solid-js";
+import { NewTxnIdContext } from "~/lib/contexts";
 
 export const PageDesignerDragAndDrop = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const params = useParams();
-  const pageConfig = createStore({} as { record: Record });
+  const pageConfig = createStore({} as { formData: IFormContext });
   const [count] = createSignal(1);
 
   const [steps, setSteps] = createSignal([
@@ -114,14 +109,13 @@ export const PageDesignerDragAndDrop = () => {
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
   const [isFormExpanded, toggleFormExpansion] = useExpansion();
 
-  // @ts-ignore
   const [leftColumns, setLeftColumns] = createSignal(
     ["components", "pages", "collection"].map((column) => ({
       id: column,
       name: column,
     })),
   );
-  // @ts-ignore
+
   const [rightColumns, setRightColumns] = createSignal(
     ["layout", "properties", "form"].map((column) => ({
       id: column,
@@ -461,7 +455,8 @@ export const PageDesignerDragAndDrop = () => {
       } = useDragDrop(
         graph,
         setGraph,
-        pageConfig[0].record,
+        pageConfig[0].formData.txnId,
+        pageConfig[0].formData.formData,
         props.vertex,
         collapsedKeys,
       );
@@ -474,8 +469,8 @@ export const PageDesignerDragAndDrop = () => {
             draggable={true}
             onDragStart={handleDragStart}
             onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onDragLeave={handleDragLeave}
+            // onDragEnter={handleDragEnter}
+            // onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             class={`${
               isSelectedLayoutId(props.vertex.id)
@@ -656,7 +651,11 @@ export const PageDesignerDragAndDrop = () => {
           >
             <ul class="pl:8 pt:3 pb:5">
               <For each={children()}>
-                {(vertex) => <TreeView vertex={vertex} />}
+                {(vertex) => (
+                  <Show when={pageConfig[0].formData}>
+                    <TreeView vertex={vertex} />
+                  </Show>
+                )}
               </For>
             </ul>
           </Show>
@@ -665,11 +664,17 @@ export const PageDesignerDragAndDrop = () => {
     };
 
     const rootVertexes = () =>
-      pageConfig[0].record?.vertex ? [pageConfig[0].record.vertex] : []; // Starting point(s)
+      pageConfig[0].formData?.formMeta ? [pageConfig[0].formData.formMeta] : []; // Starting point(s)
 
     return (
       <>
-        <For each={rootVertexes()}>{(item) => <TreeView vertex={item} />}</For>
+        <For each={rootVertexes()}>
+          {(item) => (
+            <Show when={pageConfig[0].formData}>
+              <TreeView vertex={item} />
+            </Show>
+          )}
+        </For>
       </>
     );
   };
@@ -695,7 +700,7 @@ export const PageDesignerDragAndDrop = () => {
         return setPropertyValueGlobal(
           graph,
           setGraph,
-          pageConfig[0].record.txnId,
+          pageConfig[0].formData.txnId,
           meta,
           graph.vertexes[selectedId()],
           graph.vertexes[selectedComponent().vertexId],
@@ -726,7 +731,7 @@ export const PageDesignerDragAndDrop = () => {
     };
     const onRulesCancel = () => {
       if (prevTxnIndex !== -1)
-        revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
+        revertTransactionUpTo(pageConfig[0].formData.txnId, prevTxnIndex);
       toggleRulesModal();
     };
     const onImportsSubmit = () => {
@@ -740,7 +745,7 @@ export const PageDesignerDragAndDrop = () => {
     };
     const onImportsCancel = () => {
       if (prevTxnIndex !== -1)
-        revertTransactionUpTo(pageConfig[0].record.txnId, prevTxnIndex);
+        revertTransactionUpTo(pageConfig[0].formData.txnId, prevTxnIndex);
       // reset layout
       // layoutTreeViewInstance.option("items", getLayoutTreeData());
       toggleImportsModal();
@@ -748,10 +753,10 @@ export const PageDesignerDragAndDrop = () => {
 
     const RulesModalBody = () => {
       prevTxnIndex =
-        transactions.get(pageConfig[0].record.txnId)?.steps?.length || 0;
+        transactions.get(pageConfig[0].formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
-      const txnId = getNewTxnId();
+      const txnId = getNewTxnId(graph, setGraph);
       const metaAttributes = AttrsTableData.Coll.attributes.find(
         (x) => x.name === "Rules",
       );
@@ -791,8 +796,8 @@ export const PageDesignerDragAndDrop = () => {
                         },
                       },
                     },
-                    pageConfig[0].record?.vertex
-                      ? [pageConfig[0].record.vertex]
+                    pageConfig[0].formData?.formMeta
+                      ? [pageConfig[0].formData.formMeta]
                       : [],
                     {
                       nameExpr: (v: Vertex) => {
@@ -846,14 +851,14 @@ export const PageDesignerDragAndDrop = () => {
         <TableInputField
           meta={graph.vertexes[metaVertexId]}
           data={graph.vertexes[selectedId()!]}
-          txnId={pageConfig[0].record.txnId}
+          txnId={pageConfig[0].formData.txnId}
           isRealTime={false}
         />
       );
     };
     const ImportModalBody = () => {
       prevTxnIndex =
-        transactions.get(pageConfig[0].record.txnId)?.steps?.length || 0;
+        transactions.get(pageConfig[0].formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
       const dataVertexId = getNewGraphId();
@@ -881,7 +886,7 @@ export const PageDesignerDragAndDrop = () => {
                 onClick: () => {
                   const jsxParser = new JsxParser({
                     showWarnings: true,
-                    txnId: pageConfig[0].record.txnId,
+                    txnId: pageConfig[0].formData.txnId,
                     jsx: graph.vertexes[dataVertexId].P.jsx || "",
                     parent: graph.vertexes[selectedId()],
                   });
@@ -968,7 +973,7 @@ export const PageDesignerDragAndDrop = () => {
 
     const CollAndData = () => {
       const metaVertexId = getNewGraphId();
-      const txnId = getNewTxnId();
+      const txnId = getNewTxnId(graph, setGraph);
 
       addNewVertex(
         txnId,
@@ -1031,7 +1036,7 @@ export const PageDesignerDragAndDrop = () => {
             disabled={false}
             title={"Collection:"}
             component={"SelectBox"}
-            txnId={pageConfig[0].record.txnId}
+            txnId={pageConfig[0].formData.txnId}
             isRealTime={false}
           />
           {/*<span>Data:</span>*/}
@@ -1041,7 +1046,7 @@ export const PageDesignerDragAndDrop = () => {
             disabled={false}
             title={"Data:"}
             component={"SelectBox"}
-            txnId={pageConfig[0].record.txnId}
+            txnId={pageConfig[0].formData.txnId}
             // passed setValue when we have a string value in select field
             isRealTime={false}
           />
@@ -1091,7 +1096,7 @@ export const PageDesignerDragAndDrop = () => {
           />
           <CollAndData />
           <FormGroupProperties
-            txnId={pageConfig[0].record.txnId}
+            txnId={pageConfig[0].formData.txnId}
             metaAttributes={selectedComponentProperties().vertexes || []}
             vertex={graph.vertexes[propertiesVertexId]}
             setValue={setPropertyValue}
@@ -1126,7 +1131,8 @@ export const PageDesignerDragAndDrop = () => {
                           P: {
                             component: "Button",
                             props: {
-                              children: "Submit",
+                              children:
+                                "Submithttps://coindcx.com/futures/B-BTC_USDT",
                               onClick: () => onRulesSubmit,
                             },
                           },
@@ -1182,12 +1188,93 @@ export const PageDesignerDragAndDrop = () => {
   );
 
   const Column = (props: { type: string; index: number; vertex: Vertex }) => {
-    const { deleteLayout } = useDragDrop(
-      graph,
-      setGraph,
-      pageConfig[0].record,
-      props.vertex,
-    );
+    const Propertis = () => {
+      const { deleteLayout } = useDragDrop(
+        graph,
+        setGraph,
+        pageConfig[0].formData.txnId,
+        pageConfig[0].formData.formData,
+        props.vertex,
+      );
+      return (
+        <Show
+          when={isPropertiesExpanded()}
+          fallback={
+            <div
+              class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+              style="transition: opacity 0.3s ease-in-out;"
+              onClick={togglePropertiesExpansion}
+              title="Properties"
+            >
+              <Icon icon={"mingcute:settings-6-line"} height={25} width={25} />
+            </div>
+          }
+        >
+          <div class="ml:5 mr:5">
+            <div
+              onClick={toggleIsPropertiesOpen}
+              style={{
+                display: "flex",
+                "justify-content": "space-between",
+                "align-items": "center",
+                cursor: "pointer",
+              }}
+            >
+              <div
+                class="mb:2px ml:5px p:3|0"
+                style="flex-grow: 1; font-weight: bold"
+              >
+                Properties
+              </div>
+              <Tooltip content={"Delete"} nowrap>
+                <GenericField
+                  meta={
+                    {
+                      P: {
+                        component: "Icon",
+                        props: {
+                          style: { color: "red" },
+                          onClick: () =>
+                            deleteLayout(
+                              getChildVertex(graph, ["$0Comp"], props.vertex)
+                                .vertex?.P.name,
+                            ),
+                          width: 18,
+                          height: 18,
+                          class: "cursor:pointer  mr:5px",
+                          icon: "mage:trash",
+                        },
+                      },
+                    } as any
+                  }
+                />
+              </Tooltip>
+              <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
+                <Icon
+                  icon={"mdi:chevron-up"}
+                  style={{
+                    "font-size": "24px",
+                    "border-radius": "50%",
+                    "margin-left": "5px",
+                    transition: "transform 0.2s linear",
+                    transform: `${
+                      isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                    }`,
+                  }}
+                  class="flex-1"
+                />
+              </div>
+            </div>
+            <Show when={isPropertiesOpen()}>
+              <Show when={selectedId() !== -1}>
+                <hr class={"color:lightgrey m:.4rem|0"} />
+              </Show>
+              {propertiesPart}
+            </Show>
+          </div>
+        </Show>
+      );
+    };
     return (
       <>
         <Show when={props.index > 0} fallback={<div />}>
@@ -1430,92 +1517,14 @@ export const PageDesignerDragAndDrop = () => {
                 </div>
               </Show>
             </Match>
-            <Match when={props.type === "properties" && selectedId() !== -1}>
-              <Show
-                when={isPropertiesExpanded()}
-                fallback={
-                  <div
-                    class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                    style="transition: opacity 0.3s ease-in-out;"
-                    onClick={togglePropertiesExpansion}
-                    title="Properties"
-                  >
-                    <Icon
-                      icon={"mingcute:settings-6-line"}
-                      height={25}
-                      width={25}
-                    />
-                  </div>
-                }
-              >
-                <div class="ml:5 mr:5">
-                  <div
-                    onClick={toggleIsPropertiesOpen}
-                    style={{
-                      display: "flex",
-                      "justify-content": "space-between",
-                      "align-items": "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <div
-                      class="mb:2px ml:5px p:3|0"
-                      style="flex-grow: 1; font-weight: bold"
-                    >
-                      Properties
-                    </div>
-                    <Tooltip content={"Delete"} nowrap>
-                      <GenericField
-                        meta={
-                          {
-                            P: {
-                              component: "Icon",
-                              props: {
-                                style: { color: "red" },
-                                onClick: () =>
-                                  deleteLayout(
-                                    getChildVertex(
-                                      graph,
-                                      ["$0Comp"],
-                                      props.vertex,
-                                    ).vertex?.P.name,
-                                  ),
-                                width: 18,
-                                height: 18,
-                                class: "cursor:pointer  mr:5px",
-                                icon: "mage:trash",
-                              },
-                            },
-                          } as any
-                        }
-                      />
-                    </Tooltip>
-                    <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                      <Icon
-                        icon={"mdi:chevron-up"}
-                        style={{
-                          "font-size": "24px",
-                          "border-radius": "50%",
-                          "margin-left": "5px",
-                          transition: "transform 0.2s linear",
-                          transform: `${
-                            isPropertiesOpen()
-                              ? "rotate(0deg)"
-                              : "rotate(180deg)"
-                          }`,
-                        }}
-                        class="flex-1"
-                      />
-                    </div>
-                  </div>
-                  <Show when={isPropertiesOpen()}>
-                    <Show when={selectedId() !== -1}>
-                      <hr class={"color:lightgrey m:.4rem|0"} />
-                    </Show>
-                    {propertiesPart}
-                  </Show>
-                </div>
-              </Show>
+            <Match
+              when={
+                props.type === "properties" &&
+                selectedId() !== -1 &&
+                pageConfig[0].formData
+              }
+            >
+              <Propertis />
             </Match>
             <Match when={props.type === "form"}>
               <Show
@@ -1602,8 +1611,24 @@ export const PageDesignerDragAndDrop = () => {
       .map((step) => (step.active ? step.id : null))
       .find((id) => id !== null);
   };
-  // @ts-ignore
-  const NavigationBar = ({ steps, getStepId, onChangeStep }) => (
+
+  const NavigationBar = ({
+    steps,
+    getStepId,
+    onChangeStep,
+  }: {
+    steps: Accessor<
+      {
+        id: number;
+        name: string;
+        href: string;
+        status: string;
+        active: boolean;
+      }[]
+    >;
+    getStepId: () => number | null | undefined;
+    onChangeStep: (selectedStepId: number) => void;
+  }) => (
     <nav aria-label="Progress">
       <ol role="list" class="flex align-items:center">
         <For each={steps()}>
@@ -1680,7 +1705,7 @@ export const PageDesignerDragAndDrop = () => {
                       <Column
                         type={column.id}
                         index={index()}
-                        vertex={pageConfig[0].record?.vertex}
+                        vertex={pageConfig[0].formData?.formMeta}
                       />
                     )}
                   </For>
@@ -1751,10 +1776,10 @@ export const PageDesignerDragAndDrop = () => {
                 </div>
               </div>
               <ResizableContainer>
-                <FormContext.Provider value={{ record: pageConfig[0].record }}>
+                <FormContext.Provider value={pageConfig[0].formData}>
                   <PageView
                     number={count()}
-                    vertex={pageConfig[0].record?.vertex}
+                    vertex={pageConfig[0].formData?.formMeta}
                   />
                 </FormContext.Provider>
               </ResizableContainer>
@@ -1801,7 +1826,7 @@ export const PageDesignerDragAndDrop = () => {
                     <Column
                       type={column.id}
                       index={index()}
-                      vertex={pageConfig[0].record?.vertex}
+                      vertex={pageConfig[0].formData.formData}
                     />
                   )}
                 </For>

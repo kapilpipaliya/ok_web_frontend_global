@@ -15,7 +15,6 @@ export function findVertexByLabelAndUniqueId(
   label: string,
   attribute: string,
   value: number | string,
-  
 ) {
   if (!value) return undefined;
   const vertexId = (graph.vertexLabelIdMap[label] || []).find(

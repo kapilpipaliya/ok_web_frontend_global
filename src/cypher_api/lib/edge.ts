@@ -10,7 +10,7 @@ import {
   transactionDetailAdd,
   transactions,
 } from "~/cypher_api/lib/graph";
-
+import { GraphInterface } from "~/lib/graph/graph";
 export function newEdge(
   edgeId: Id,
   type: string,
@@ -36,8 +36,8 @@ export function newEdge(
 }
 
 export function addNewEdgeUnSafe(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   edge: Relationship,
 ) {
   batch(() => {
@@ -52,8 +52,8 @@ export function addNewEdgeUnSafe(
 }
 
 export function addNewEdge(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   edge: Relationship,
 ): { error: string | boolean; txnDetailIndex?: number } {
@@ -109,8 +109,8 @@ export function addNewEdge(
 }
 
 export function replaceEdgeProperties(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   edgeId: Id,
   properties: {},
@@ -135,8 +135,8 @@ export function replaceEdgeProperties(
 
 // private
 export const replaceEdgeStart = (
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   edgeId: Id,
   newStartVertexId: Id,
@@ -178,8 +178,8 @@ export const replaceEdgeStart = (
 };
 //private
 export const replaceEdgeEnd = (
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   edgeId: Id,
   newEndVertexId: Id,
@@ -220,8 +220,8 @@ export const replaceEdgeEnd = (
 };
 
 export function deleteEdge(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   edgeId: Id,
 ): { error: string | boolean; txnDetailIndex?: number } {
@@ -265,8 +265,8 @@ export function deleteEdge(
 }
 
 export function updateEdgeId(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   oldEdgeId: Id,
   newEdgeId: Id,
 ) {

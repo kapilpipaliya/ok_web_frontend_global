@@ -1,10 +1,4 @@
-import {
-  createEffect,
-  JSX,
-  onMount,
-  Show,
-  useContext,
-} from "solid-js";
+import { createEffect, JSX, onMount, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
@@ -15,7 +9,7 @@ export const DataFetcher = (props: {
   errorMessage?: string;
 }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
-  
+
   const getdata = async () => {
     try {
       const response = await fetch(props.fetchData);
@@ -25,13 +19,15 @@ export const DataFetcher = (props: {
     } catch (error) {
       throw error;
     }
-  }
+  };
   onMount(() => {
     getdata();
   });
 
   return (
-    <Show when={graph.initialSynced} fallback={<LoaderNew />}>{props.renderContent}</Show>
+    <Show when={graph.initialSynced} fallback={<LoaderNew />}>
+      {props.renderContent}
+    </Show>
   );
 };
 

@@ -16,16 +16,12 @@ import {
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
-import {
-  FormContext,
-  iconMap,
-  PageContext,
-} from "~/lib/Utils";
+import { FormContext, iconMap, PageContext } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
@@ -93,8 +89,8 @@ export const PageItemRender = (props: {
 }) => {
   const parentItems = useContext(PageRenderContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  // @ts-ignore
-  let { record, cleanUpConfig } = useContext(FormContext);
+
+  let { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
@@ -119,7 +115,7 @@ export const PageItemRender = (props: {
           onLayoutItemClick,
           clone,
           deleteLayout,
-        } = useDragDrop(graph, setGraph, record, item, () => [], true);
+        } = useDragDrop(graph, setGraph, txnId, formData, item, () => [], true);
 
         // createComputed is hard to debug
         createComputed(() => {

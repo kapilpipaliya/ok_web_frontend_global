@@ -4,9 +4,10 @@ import { FileRoutes } from "@solidjs/start/router";
 import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { config } from "~/master.css";
-import { LoadingContext } from "~/lib/contexts";
+import { LoadingContext, NewTxnIdContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/layout/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
+import { getNewTxnId } from "./lib/graph/transaction";
 
 export default function App() {
   const loadingSite = createSignal(false);

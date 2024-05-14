@@ -1,5 +1,5 @@
 import { getPkForCollection, Record } from "~/cypher_api/lib/record";
-import { getNewTxnId, IdAttr, Node } from "~/cypher_api/lib/graph";
+import { IdAttr, Node } from "~/cypher_api/lib/graph";
 import {
   deleteVertex,
   findOrCreateNewVertex,
@@ -249,8 +249,6 @@ export const onDataDirectoryImportClick = async (record: Record) => {
     console.error("label cant be blank");
     return;
   }
-
-  const txnId = getNewTxnId();
 
   const converter = csvtojson({
     trim: true,
@@ -690,7 +688,8 @@ export function importRecordWithYAMLSchema(yamlInput: any, record: Record) {
             }
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
-              graph, "Coll",
+              graph,
+              "Coll",
               "name",
               vertex.L[0],
             );

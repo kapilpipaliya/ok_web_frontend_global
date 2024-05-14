@@ -7,19 +7,18 @@ import {
 
 import { isObject } from "~/lib/Utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
+import { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {
-  EdgeMap,
-  GraphInterface,
-  Id,
-  VertexMap,
-} from "~/lib/graph/graph";
-import {
-  commitTransaction, edgeOldIdToNewIdMap, isAllTxnProcessed,
+  commitTransaction,
+  edgeOldIdToNewIdMap,
+  isAllTxnProcessed,
   ProcessStatus,
-  transactions, vertexOldIdToNewIdMap
+  transactions,
+  vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { useToast } from "~/components/custom/Toast";
 
 export const setGraphData = (
   graph: GraphInterface,
@@ -100,6 +99,8 @@ export const onMutatDataGet = (
     }[],
   ][],
 ) => {
+  const { showErrorToast } = useToast();
+
   if (isObject(d) && d.ack) {
     if (Array.isArray(d.txnIds)) {
       for (const txnId of d.txnIds as number[]) {
@@ -145,7 +146,7 @@ export const onMutatDataGet = (
           }
           if (txnObject.deleteVertex) {
             if (txnObject.deleteVertex.error) {
-              alert(txnObject.deleteVertex.message);
+              showErrorToast(txnObject.deleteVertex.message);
             }
             // TODO: handle on backend
             // deleteVertex(0, txnObject.insert[0]);

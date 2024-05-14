@@ -1,7 +1,6 @@
-import { batch } from "solid-js";
+import { batch, useContext } from "solid-js";
 import {
   getNewGraphId,
-  getNewTxnId,
   Id,
   IdAttr,
   IGraph,
@@ -35,6 +34,9 @@ import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 
 import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";
+import { NewTxnIdContext } from "~/lib/contexts";
+import { GraphInterface } from "~/lib/graph/graph";
+import { getNewTxnId } from "~/lib/graph/transaction";
 
 let componentPropsInputRef: HTMLInputElement;
 
@@ -61,7 +63,8 @@ const insertAttributes = async (
 
     const setDataType = (rowVertex: Node, dataType: string) => {
       const dataTypeVertex = findVertexByLabelAndUniqueId(
-        graph, "DataType",
+        graph,
+        "DataType",
         IdAttr,
         dataType,
       );
@@ -81,7 +84,8 @@ const insertAttributes = async (
 
     const setComponent = (rowVertex: Node, component: string) => {
       const compVertex = findVertexByLabelAndUniqueId(
-        graph, "Comp",
+        graph,
+        "Comp",
         IdAttr,
         component,
       );
@@ -156,7 +160,7 @@ const importCollections = () => {
   if (file) {
     file.text().then(async (jsonText) => {
       const json = JSON.parse(jsonText);
-      let txnId = getNewTxnId(); // Note txnId 0 not working
+      let txnId = getNewTxnId(graph, setGraph); // Note txnId 0 not working
       for (const collectionId in json) {
         const collection = json[collectionId];
         const name = collection["name"] as string;
@@ -178,7 +182,7 @@ const importCollections = () => {
 const makeASampleForm = () => {
   // get all the fields
   const vertexId = getNewGraphId();
-  const txnId = getNewTxnId();
+  const txnId = getNewTxnId(graph, setGraph);
   addNewVertex(
     txnId,
     newVertex(vertexId, ["Coll"], {
@@ -231,8 +235,8 @@ const makeASampleForm = () => {
 // @ts-ignore
 export const importAllCSV = async (
   dbConn: DBConnection,
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
 ) => {
   const form = await getFormMetaData(dbConn, "Import");
   if (form.error) return form.error;
@@ -388,8 +392,8 @@ delete`,
 };
 const importMainNavigation = (
   dbConn: DBConnection,
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
 ) => {
   const record = new Record({ dbConn, graph, setGraph });
   record.create("Nav", {});

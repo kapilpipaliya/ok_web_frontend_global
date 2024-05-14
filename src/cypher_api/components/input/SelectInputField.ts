@@ -1,5 +1,6 @@
 // Comment This Lines in web build
 import {
+  compareId,
   getNewGraphId,
   IGraph,
   isIdArrayIncludesID,
@@ -12,10 +13,11 @@ import { SetStoreFunction, Store } from "solid-js/store";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
 import { newEdgeMGCall } from "~/cypher_api/functions/newEdge";
+import { GraphInterface } from "~/lib/graph/graph";
 
 function vertexOutEdgeContainVertex(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   vertex: Node,
   type: string,
   vertexId: number,
@@ -49,8 +51,8 @@ async function vertexOutEdgeContainVertexMGCall(
 }
 
 function vertexInEdgeContainVertex(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   vertex: Node,
   type: any,
   vertexId: number,
@@ -86,8 +88,8 @@ async function vertexInEdgeContainVertexMGCall(
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Node,
   meta: Node,
@@ -176,8 +178,8 @@ export async function setSelectionValueMGCall(
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(
-  graph: Store<IGraph>,
-  setGraph: SetStoreFunction<IGraph>,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Node,
   meta: Node,

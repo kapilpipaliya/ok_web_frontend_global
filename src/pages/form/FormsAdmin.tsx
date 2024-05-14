@@ -3,9 +3,9 @@ import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import { createMemo, For, Match, Switch, useContext } from "solid-js";
 import { A } from "@solidjs/router";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { createStore } from "solid-js/store";
-import { APP_BASE_URL } from "~/lib/Utils";
-import { Record } from "~/lib/graph/get/sync/graph_fns";
+import { createStore, Store } from "solid-js/store";
+import { APP_BASE_URL, IFormContext } from "~/lib/Utils";
+
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import {
   onDataDirectoryImportClick,
@@ -38,7 +38,7 @@ export const AllForms = () => {
 };
 export const SimpleImport = (props: {}) => {
   const { Ws } = useContext(WsContext);
-  const config = createStore({} as { record: Record });
+  const config = createStore({} as { formData: Store<IFormContext> });
   const [graph, setGraph] = useContext(GraphContext)!;
   return (
     <>
@@ -65,7 +65,15 @@ perm`,
         }
         // @ts-ignore
         setValue={(attr, vertex, data) =>
-          updateImportRecord(graph, setGraph, data, config[0].record)
+          updateImportRecord(
+            graph,
+            setGraph,
+            config[0].formData.txnId,
+            data,
+            config[0].formData.formData,
+            false,
+            Ws,
+          )
         }
       />
       <AbstractSingleForm
@@ -73,6 +81,7 @@ perm`,
         formId={"Import"}
         config={config}
         graph={graph}
+        setGraph={setGraph}
       />
 
       <GenericField
@@ -85,7 +94,7 @@ perm`,
                 children: "Import",
                 onClick: () =>
                   onDataDirectoryImportClick(
-                    config[0].record,
+                    config[0].formData.formData,
                     Ws,
                     graph,
                     setGraph,

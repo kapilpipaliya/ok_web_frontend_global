@@ -5,6 +5,7 @@
  */
 import { createSignal, JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
+import { useToast } from "~/components/custom/Toast";
 
 interface Properties
   extends Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "onchange"> {
@@ -38,6 +39,7 @@ export const FileField = (props: Properties) => {
   const [state, setState] = createStore({ error: "" });
   const [speedText, setSpeedText] = createSignal("");
   const [percentageText, setPercentageText] = createSignal("");
+  const { showSuccessToast } = useToast();
   const [progressBar, setProgressBar] = createStore({ max: 100, value: 0 });
 
   // FileField uploading method
@@ -46,7 +48,7 @@ export const FileField = (props: Properties) => {
       if (xhr.responseText) {
         const data = JSON.parse(xhr.responseText);
         if (!data.error) {
-          alert("Uploaded successfully!");
+          showSuccessToast("Uploaded successfully!");
           if (p.onchange) p.onchange(data.media);
         } else {
           setState({ error: `Upload failed! ${data.description}` });

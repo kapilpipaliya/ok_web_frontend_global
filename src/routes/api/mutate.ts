@@ -1,4 +1,5 @@
 import { Session } from "neo4j-driver";
+import { isIntegerId } from "~/cypher_api/server/driver";
 import { isObject } from "~/lib/Utils";
 import { Edge, Vertex } from "~/lib/graph/graph";
 
@@ -9,7 +10,7 @@ const transactions = 3;
 
 function isProperNodeFormat(node: Partial<Vertex>): string | null {
   if (typeof node !== "object" || node === null || Array.isArray(node)) {
-    "Node must be an object";
+    ("Node must be an object");
   }
   if (!("L" in node) || !Array.isArray(node.L) || node.L.length < 1) {
     return "Node must contain L (labels) which must be an array with at least one item";
@@ -20,7 +21,12 @@ function isProperNodeFormat(node: Partial<Vertex>): string | null {
   if (node.L.some((label: any) => typeof label !== "string")) {
     return "Each label in node L must be a string";
   }
-  if (!("P" in node) || typeof node.P !== "object" || node === null || Array.isArray(node.P)) {
+  if (
+    !("P" in node) ||
+    typeof node.P !== "object" ||
+    node === null ||
+    Array.isArray(node.P)
+  ) {
     return "Node must have P (properties) which must be an object";
   }
   if (!("id" in node)) {
@@ -168,8 +174,7 @@ function addFailure(response: any[], event: WsEvent, message: string) {
   response.push([event, { error: true, description: message }]);
 }
 
-
-async function mutateData(
+export async function mutateData(
   event: WsEvent,
   args: any[],
   session: Session,
@@ -204,10 +209,11 @@ async function mutateData(
         const query = `CREATE (n${labels} $properties) RETURN n`;
 
         try {
-          const result = await tx.run(query, { properties: mutationObject.insert.P });
+          const result = await tx.run(query, {
+            properties: mutationObject.insert.P,
+          });
           if (result.records.length > 0) {
-
-            const id = result.records[0].get("n").identity.toInt();
+            const id = !isIntegerId ? result.records[0].get("n").identity.toNumber() : result.records[0].get("n").identity;
             const oldId = mutationObject.insert.id;
             clientToServerVertexIdMap.set(oldId, id);
             txnResult.push({ insert: [oldId, id] });
@@ -228,9 +234,11 @@ async function mutateData(
 
         const query = `MATCH (n) WHERE ID(n) = $id SET n = $properties RETURN n`;
         try {
-          const result = await tx.run(query, { id: id, properties: mutationObject.replace.P });
+          const result = await tx.run(query, {
+            id: id,
+            properties: mutationObject.replace.P,
+          });
           if (result.records.length > 0) {
-
             txnResult.push({ replace: { id, error: false } });
           }
         } catch (error: any) {
@@ -249,9 +257,11 @@ async function mutateData(
 
         const query = `MATCH (n) WHERE ID(n) = $id SET n += $properties RETURN n`;
         try {
-          const result = await tx.run(query, { id: id, properties: mutationObject.merge.P });
+          const result = await tx.run(query, {
+            id: id,
+            properties: mutationObject.merge.P,
+          });
           if (result.records.length > 0) {
-
             txnResult.push({ merge: { id, error: false } });
           }
         } catch (error: any) {
@@ -293,27 +303,33 @@ async function mutateData(
         const type = mutationObject.insertEdge.T;
         const query = `match (n1) where id(n1)=$startId
               match (n2) where id(n2)=$endId
-              merge (n1)-[r:${type} $properties]->(n2) return r`;
+              merge (n1)-[r:${type}]->(n2)
+              SET r += $properties
+              return r`;
 
         try {
-          const result = await tx.run(query, { startId, endId, properties: mutationObject.insertEdge.P });
+          console.log(query)
+          const result = await tx.run(query, {
+            startId,
+            endId,
+            properties: mutationObject.insertEdge.P,
+          });
           if (result.records.length > 0) {
-
+            console.log('result', result)
             const oldId = mutationObject.insertEdge.id;
-            const edgeId = result.records[0].get("r").identity.toInt();
+            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ insertEdge: [oldId, edgeId] });
           }
-
         } catch (error) {
+          tx.rollback();
           console.error("Failed to execute insert edge query:", error);
           throw new Error(
             `Can't insert edge due to an internal server error: ${error}`,
           );
         }
       }
-
 
       if (mutationObject.replaceEdge) {
         const id =
@@ -335,15 +351,19 @@ async function mutateData(
               return r`;
 
         try {
-          const result = await tx.run(query, { id, startId, endId, properties: mutationObject.replaceEdge.P });
+          const result = await tx.run(query, {
+            id,
+            startId,
+            endId,
+            properties: mutationObject.replaceEdge.P,
+          });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdge.id;
-            const edgeId = result.records[0].get("r").identity.toInt();
+            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdge: [oldId, edgeId] });
           }
-
         } catch (error: any) {
           tx.rollback();
           console.error("Failed to execute replac edge query:", error);
@@ -352,7 +372,6 @@ async function mutateData(
           );
         }
       }
-
 
       if (mutationObject.replaceEdgeStart) {
         const id =
@@ -379,12 +398,11 @@ async function mutateData(
           const result = await tx.run(query, { edgeId: id, newstart: startId });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeStart.id;
-            const edgeId = result.records[0].get("r").identity.toInt();
+            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeStart: { error: false } });
           }
-
         } catch (error) {
           tx.rollback();
           console.error("Failed to execute replac edge start query:", error);
@@ -393,7 +411,6 @@ async function mutateData(
           );
         }
       }
-
 
       if (mutationObject.replaceEdgeEnd) {
         const id =
@@ -419,14 +436,12 @@ async function mutateData(
         try {
           const result = await tx.run(query, { edgeId: id, newend: endId });
           if (result.records.length > 0) {
-
             const oldId = mutationObject.replaceEdgeEnd.id;
-            const edgeId = result.records[0].get("r").identity.toInt();
+            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeEnd: { error: false } });
           }
-
         } catch (error) {
           tx.rollback();
           console.error("Failed to execute replac edge end query:", error);
@@ -435,7 +450,6 @@ async function mutateData(
           );
         }
       }
-
 
       if (mutationObject.deleteEdge) {
         const id =
@@ -457,12 +471,11 @@ async function mutateData(
           const result = await tx.run(query, { id, startId, endId });
           if (result.records.length > 0) {
             const oldId = mutationObject.deleteEdge.id;
-            const edgeId = result.records[0].get("r").identity.toInt();
+            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ deleteEdge: { error: false } });
           }
-
         } catch (error) {
           tx.rollback();
           console.error("Failed to execute replac edge delete query:", error);
@@ -476,8 +489,8 @@ async function mutateData(
     tx.commit();
   }
 
-  await tx.close();
-  await session.close();
-  responseResult.push([event, resultTxn])
+  // Transaction close will close session too.
+  // await tx.close();
+  responseResult.push([event, resultTxn]);
   return responseResult;
 }

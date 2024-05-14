@@ -71,19 +71,21 @@ function Settings() {
     username: "",
     email: "",
     id: "",
-    profileImage: '',
+    profileImage: "",
     country: "United States",
   });
   const [isEdit, setIsEdit] = createSignal(false);
   getUser().then((data: { [key: string]: any }) => {
-
     setProfileData({
       username: data.properties.username,
       email: data.properties.email,
       id: data.id,
-      profileImage: data.properties.profileImage ?? 'https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png',
+      profileImage:
+        data.properties.profileImage ??
+        "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
       country: "United States",
     });
+    console.log(profileData.profileImage);
 
     loadContactData();
     setOriginalProfileData(profileData); // Set original data
@@ -91,7 +93,7 @@ function Settings() {
   const sectionStyle = {
     "background-color": "#f5f7fa",
     padding: "20px",
-    width: '80%',
+    width: "80%",
     margin: "20px",
     "border-radius": "8px",
     "box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
@@ -162,7 +164,6 @@ function Settings() {
     };
 
     const profileCall = async () => {
-      const data = selectedImage();
       let updatedData: { [key: string]: any } = {};
       for (const key in profileData) {
         if (profileData[key] !== originalProfileData[key]) {
@@ -171,20 +172,21 @@ function Settings() {
         }
       }
 
-
-      if (data) {
-
+      if (selectedImage() !== null) {
         const formData = new FormData();
-        formData.append(data.name, data);
-        const res = await fetch(`/api/uploadImage?name=${profileData.id}`, {
-          method: 'POST',
-          body: formData
-        });
+        formData.append(selectedImage()?.name, selectedImage()!);
+        const res = await fetch(
+          `/api/uploadImage?name=profile&username=${profileData.username}`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
         const result = await res.json();
 
         if (result.message) {
-          showSuccessToast(result.message)
-          updatedData.profileImage = result.newFilename
+          showSuccessToast(result.message);
+          updatedData.profileImage = result.newFilename;
         }
       }
       const payload = {
@@ -217,13 +219,16 @@ function Settings() {
         loadMessage: "Saving Changes...",
         onSuccess: async (data) => {
           if (data.user) {
+            setSelectedImage(null);
             await getUser().then((data: { [key: string]: any }) => {
               setIsEdit(false);
               setProfileData({
                 username: data.properties.username.toLowerCase(),
                 email: data.properties.email.toLowerCase(),
                 id: data.id,
-                profileImage: data.properties.profileImage ?? 'https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png',
+                profileImage:
+                  data.properties.profileImage ??
+                  "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
                 country: "United States",
               });
               loadContactData();
@@ -232,66 +237,66 @@ function Settings() {
             });
           }
         },
-        onError: (error) => console.error("API call failed:", error),
+        onError: (error) => {
+          setSelectedImage(null);
+          console.error("API call failed:", error);
+        },
       });
     };
     const [selectedImage, setSelectedImage] = createSignal(null);
     const handleImageChange = async (e: any) => {
       setSelectedImage(e.target.files[0]);
-
-      // try {
-      //   await showLoadingToast({
-      //     promise: profileCall(file),
-      //     loadMessage: 'Uploading Image...',
-      //     successMessage: 'Profile Picture Updated Successfully'
-      //   })
-      // } catch (error) {
-      //   console.error('Error uploading image:', error);
-      // }
     };
-
 
     const handleAvatarClick = () => {
       if (isEdit()) {
-        const fileInput = document.getElementById('fileInput');
+        const fileInput = document.getElementById("fileInput");
         fileInput?.click();
       }
-    };
-
-    const handleSubmit = async () => {
-      // formData.append('avatar', selectedImage);
-
-      // try {
-      //   const response = await axios.post('/upload', formData, {
-      //     headers: {
-      //       'Content-Type': 'multipart/form-data'
-      //     }
-      //   });
-
-      //   // Assuming backend responds with the public URL of the uploaded image
-      //   setImageUrl(response.data.imageUrl);
-      // } catch (error) {
-      //   console.error('Error uploading image:', error);
-      // }
     };
     return (
       <div class=" max-w:70%@>lg" style={sectionStyle}>
         <div class={"font-weight:700"}>Personal Info</div>
         <div class={"font-weight:400"}>
           Update personal details here
-          <div class="flex m:10|0" >
+          <div class="flex m:10|0">
+            <input
+              name="profileImage"
+              type="file"
+              accept="image/png, image/jpg, image/jpeg"
+              id="fileInput"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+
             <div class="circle-avatar" onClick={handleAvatarClick}>
-              <img src={profileData.profileImage} class="bg:grey" alt="Avatar" style={{ width: '60px', height: '60px', 'border-radius': '50%', cursor: 'pointer' }} />
+              <img
+                src={
+                  profileData.profileImage ||
+                  "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
+                }
+                alt="Avatar"
+                style={{
+                  "object-fit": "cover",
+                  width: "60px",
+                  height: "60px",
+                  "border-radius": "50%",
+                  cursor: "pointer",
+                }}
+              />
             </div>
             <div class="ml:10">
-              <div style={`font-size: 22px; font-weight: 600;`}>{profileData.username}</div>
+              <div style={`font-size: 22px; font-weight: 600;`}>
+                {profileData.username}
+              </div>
               <div style={`font-size: 18px;`}>{profileData.email}</div>
             </div>
           </div>
           <div class="p:10 gap:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">
-            <div
-            >
-              <span class={"font-weight:500 font:15 color:dimgrey"}>User Id</span>
+            <div>
+              <span class={"font-weight:500 font:15 color:dimgrey"}>
+                User Id
+              </span>
               <TextField
                 labelClass={"w:40%"}
                 name={"id"}
@@ -301,9 +306,10 @@ function Settings() {
                 onChange={handleInputChange}
               />
             </div>
-            <div
-            >
-              <span class={"font-weight:500 font:15 color:dimgrey"}>UserName</span>
+            <div>
+              <span class={"font-weight:500 font:15 color:dimgrey"}>
+                UserName
+              </span>
               <TextField
                 name={"username"}
                 disabled={!isEdit()}
@@ -313,9 +319,10 @@ function Settings() {
                 onChange={handleInputChange}
               />
             </div>
-            <div
-            >
-              <span class={"font-weight:500 font:15 color:dimgrey"}>Email Address</span>
+            <div>
+              <span class={"font-weight:500 font:15 color:dimgrey"}>
+                Email Address
+              </span>
               <TextField
                 name={"email"}
                 disabled={!isEdit()}
@@ -325,10 +332,10 @@ function Settings() {
                 onChange={handleInputChange}
               />
             </div>
-            <div
-            class="d:grid"
-            >
-              <span class={"font-weight:500 font:15 color:dimgrey"}>Country</span>
+            <div class="d:grid">
+              <span class={"font-weight:500 font:15 color:dimgrey"}>
+                Country
+              </span>
               <select
                 name={"country"}
                 disabled={!isEdit()}
@@ -341,7 +348,6 @@ function Settings() {
                 <option>United Kingdom</option>
               </select>
             </div>
-
           </div>
           <div class={"flex jc:end"}>
             <Show
@@ -432,7 +438,6 @@ function Settings() {
             </div> 
 
           </div> */}
-
         </div>
       </div>
     );
@@ -668,9 +673,7 @@ function Settings() {
             />
           </div>
           <div
-            class={
-              "flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"
-            }
+            class={"flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"}
           >
             <span class={"font-weight:600"}>New Password</span>
             <TextField

@@ -8,24 +8,31 @@ import {
   Show,
   splitProps,
   Switch,
+  untrack,
   useContext,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
+import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
-  GraphContext,
-  IdAttr,
-  Vertex,
-} from "~/lib/graph/graph";
-import { commitTxn, revertTransaction } from "~/lib/graph/transaction";
+  commitTxn,
+  getNewTxnId,
+  revertTransaction,
+} from "~/lib/graph/transaction";
 import {
   FormContext,
   getTextColumnValue,
   getValueFromVertexOrKey,
   APP_BASE_URL,
 } from "~/lib/Utils";
-import { Record, getSelectionOptions, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
+import {
+  getSelectionOptions,
+  getChildVertexes,
+  createForm,
+  loadForm,
+  createMeta,
+} from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ComponentProps } from "~/lib/ComponentType";
@@ -51,6 +58,8 @@ import TreeView from "~/components/solid-blocks/blocks/treeview/treeview";
 import { Collapsible } from "~/components/solid-blocks/blocks/collapsible/collapsible";
 import { useToast } from "~/components/custom/Toast";
 import { submitDataCall } from "~/components/api/api_functions";
+import { createStore } from "solid-js/store";
+import { NewTxnIdContext } from "~/lib/contexts";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -97,30 +106,61 @@ export function GenericField(
     const { showLoadingToast } = useToast();
     const navigate = useNavigate();
 
-    const record = new Record({ ws: Ws });
+    const cleanUpConfig = {} as { [key: string]: any };
+    const txnId = getNewTxnId(graph, setGraph);
+    const [formData, setFormData] = createStore({
+      txnId,
+      cleanUpConfig: () => cleanUpConfig,
+    } as {
+      cleanUpConfig: () => { [key: string]: any };
+      txnId: number;
+      formMeta: Vertex;
+      formData: Vertex;
+      tabs: string[];
+      groupByTabsAndGroup: {
+        [tab: string]: {
+          [group: string]: Vertex[];
+        };
+      };
+    });
     const collectionVertex = createMemo(() => {
       return PageRenderUtils.getCollection(graph, getLastItem(parentItems, 1));
     });
     if (!collectionVertex()) return "No Collection Found";
-    // const dataVertex =
+
+    let dataVertex: Vertex;
     if (!field.data?.id) {
-      // create new vertex from Collection vertex
-      const createResult = record.create(graph, setGraph, collectionVertex()!);
+      const createResult = createForm(
+        graph,
+        setGraph,
+        txnId,
+        Ws,
+        props.form[IdAttr],
+      );
       if (createResult.error) return createResult.error;
+      dataVertex = createResult.vertex!;
     } else {
-      // load data vertex
-      const loadResult = record.load(graph, field.data.id);
+      const loadResult = loadForm(graph, props.id);
       if (loadResult.error) return loadResult.error;
+      dataVertex = loadResult.vertex!;
     }
+
+    const metaVertexResult = untrack(() =>
+      createMeta(props.form, graph, setGraph),
+    );
+
+    if (metaVertexResult.error) {
+      console.error(metaVertexResult.error);
+      return metaVertexResult.error;
+    }
+
+    // props.config[1]?.("record", record);
 
     const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
     // let validationGroup: dxValidationGroup;
     // letter if we need a record, write a solution.
     // but we should not need to access record,
-    // everything will be configured from json.
-    // props.config["record"] = record;
-    const cleanUpConfig = {} as { [key: string]: any };
 
     onCleanup(() => {
       for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
@@ -128,8 +168,11 @@ export function GenericField(
     });
 
     const onSubmit = async () => {
+      const data = commitTxn(txnId, Ws);
+      console.log("ads");
+
       await showLoadingToast({
-        promise: submitDataCall("data", record.txnId),
+        promise: submitDataCall(data, Ws),
         loadMessage: "Submitting Data...",
         successMessage: "Data submitted successfully",
         onSuccess: (value) => {
@@ -141,8 +184,8 @@ export function GenericField(
       // if (result.isValid) {
       //     console.log("valid");
       //     // !!!TODO!!! Handle Error Received From server when commit
-      //     if (!record.isRealTime) {
-      //         commitTxn(record.txnId, Ws);
+      //     if (!isRealTime) {
+      //         commitTxn(txnId, Ws);
       //     }
       //     // currently we are navigating back.
       //     navigate(-1);
@@ -152,7 +195,7 @@ export function GenericField(
     };
 
     const onCancel = () => {
-      revertTransaction(record.txnId);
+      revertTransaction(txnId);
       setTimeout(() => navigate(-1));
     };
 
@@ -164,7 +207,7 @@ export function GenericField(
         }}
       >
         <Show when={divRef()}>
-          <FormContext.Provider value={{ record, cleanUpConfig } as any}>
+          <FormContext.Provider value={formData}>
             <PageItemRender metaVertex={field.meta} />
             {/* @ts-ignore */}
             <div />

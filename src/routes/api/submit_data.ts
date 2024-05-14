@@ -1,28 +1,21 @@
 import { getDriver } from "~/cypher_api/server/driver";
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { mutateData } from "./mutate";
 
 export async function POST({ request }: APIEvent) {
-  const { data, id } = await request.json();
+  const { event, data } = await request.json();
+  console.log(data);
 
   const subdomain = getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
-    try {
-    const query = `MATCH (u:Coll {email: $email, password: $password}) return u;`;
-    const result = await session.run(query, {
-      data: data,
-      id: id,
-    });
-
-    const newData = result.records[0].get("u");
-
-    return {
-      data: newData,
-    };
+  try {
+    const result = await mutateData(event, data, session);
+    // await session.close();
+    return { message: "Saved Successfully", result };
   } catch (error) {
+    // await session.close();
     console.error("Server error Failed to login:", error);
     return new Response("Internal Server Error", { status: 500 });
-  } finally {
-    await session.close();
   }
 }

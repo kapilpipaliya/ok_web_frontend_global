@@ -16,11 +16,7 @@ import {
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
-import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId
-} from "~/lib/graph/transaction";
+import { commitTxn, getNewGraphId, getNewTxnId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
@@ -28,22 +24,22 @@ import {
   getParentVertexValue,
   getSelectedVertexValue,
 } from "~/lib/graph/get/sync/traverse";
-import {
-  FormContext,
-  getValueFromVertexOrKey,
-} from "~/lib/Utils";
+import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
 import {
   getSelectionOptions,
   getChildVertex,
-  onChangeHandler, setValueGlobal
+  onChangeHandler,
+  setValueGlobal,
 } from "~/lib/graph/get/sync/graph_fns";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
-import { ComponentProps } from "~/lib/ComponentType";
+import { ComponentProps } from "~/components/ComponentType";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
+import { useToast } from "~/components/custom/Toast";
+import { NewTxnIdContext } from "~/lib/contexts";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,
@@ -72,9 +68,12 @@ export function setParentValue(
   meta: Vertex,
   value?: number[] | number,
 ) {
+  const { showWarningToast, showErrorToast } = useToast();
+  console.log(vertex);
+
   // delete removed edges:
   const type = getInEdge(meta, vertex);
-  if (!type) alert("edge type cant be empty");
+  if (!type) showWarningToast("edge type cant be empty");
   const previousEdges = vertex.IN[type] || [];
 
   let valueArray = [] as number[];
@@ -93,7 +92,8 @@ export function setParentValue(
     // we should not delete edge that start with same vertex
     if (valueArray.includes(graph.edges[edgeId].S)) continue;
     const deleteEdgeResult = deleteEdge(txnId, edgeId, graph, setGraph);
-    if (deleteEdgeResult?.error) alert(deleteEdgeResult.error);
+    if (deleteEdgeResult?.error)
+      showErrorToast(deleteEdgeResult.error.toString());
   }
 
   // add added edges:
@@ -108,7 +108,8 @@ export function setParentValue(
       graph,
       setGraph,
     );
-    if (insertEdgeResult.error) alert(insertEdgeResult.error);
+    if (insertEdgeResult.error)
+      showErrorToast(insertEdgeResult.error.toString());
   }
 }
 
@@ -188,9 +189,10 @@ export function SelectInputField(
 ) {
   let { component, title, txnId, isRealTime, disabled, meta, data, setValue } =
     props;
+
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  let { record } = useContext(FormContext);
+  const formData = useContext(FormContext);
 
   // @ts-ignore
   const [selectOptions, { refetch }] = createResource(
@@ -238,15 +240,12 @@ export function SelectInputField(
   }
 
   const onChangeSelect = (e: any, isRemove: any) => {
-    let data;
-    let optionId: number | number[] | undefined;
+    let data: number[] | number;
     let optionvalue: any;
     if (isRemove && e.length > 0) {
       data = [];
     } else {
-      data = e[0];
-      optionId = data!.id;
-      optionvalue = data!.P.name;
+      data = e[0]['id'];
     }
     runWithOwner(outerOwner, () => {
       batch(() => {
@@ -267,7 +266,7 @@ export function SelectInputField(
           return;
         }
         if (isRealTime) {
-          txnId = getNewTxnId();
+          txnId = getNewTxnId(graph, setGraph);
         }
         if (getValueFromVertexOrKey(meta.P.props, "stringValue")) {
           setValue
@@ -277,7 +276,7 @@ export function SelectInputField(
                 setGraph,
                 txnId!,
                 meta,
-                data,
+                props.data!,
                 data,
                 Ws,
                 false,
@@ -290,20 +289,20 @@ export function SelectInputField(
                 setGraph,
                 txnId!,
                 meta,
-                data,
+                props.data!,
                 data,
                 Ws,
                 false,
               );
         } else if (getValueFromVertexOrKey(meta.P.props, "inward")) {
-          setParentValue(graph, setGraph, txnId || 0, data, meta, optionId);
+          setParentValue(graph, setGraph, txnId || 0, props.data!, meta, data);
         } else {
-          setSelectionValue(txnId || 0, data, graph, setGraph, meta, optionId);
+          setSelectionValue(txnId || 0, props.data!, graph, setGraph, meta, data);
         }
         onChangeHandler(
           txnId || 0,
-          record?.vertex,
-          data,
+          formData?.formData,
+          props.data!,
           meta,
           graph,
           setGraph,

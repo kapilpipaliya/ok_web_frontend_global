@@ -3,18 +3,16 @@ import {
   APP_BASE_URL,
   validateEmail,
   validatePassword,
-  validateUsername
+  validateUsername,
 } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
-import '~/css/base.css';
+import "~/css/base.css";
 import { registerUserCall } from "~/components/api/api_functions";
 
-
 export const SignUp = () => {
-  // const {setAlert} = useContext(AlertMessageContext);
   // const {Ws} = useContext(WsContext);
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -67,7 +65,8 @@ export const SignUp = () => {
       class="@fade|.5s"
       style={{
         "background-size": "cover",
-        "background-image": "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-image":
+          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
         display: "flex",
         "background-color": "rgb(239,235,233)",
         "flex-direction": "column",
@@ -80,7 +79,8 @@ export const SignUp = () => {
         src={logo}
         alt="logo"
         class="h:70px mb:100px"
-        style={{ "justify-self": "center" }} />
+        style={{ "justify-self": "center" }}
+      />
       <form
         class="m:10px mb:5rem bg:white jc:center r:10"
         onSubmit={handleSubmit}
@@ -93,7 +93,8 @@ export const SignUp = () => {
         <img
           src={"../../public/graphics/register_vector.png"}
           alt="logo"
-          class="w:25rem d:none@<md" />
+          class="w:25rem d:none@<md"
+        />
         <div class="w:50% w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
             Sign Up
@@ -115,7 +116,9 @@ export const SignUp = () => {
                 name="subdomain"
                 type="text"
                 value={formData().subdomain}
-                onInput={(e) => setFormData({ ...formData(), subdomain: e.target.value })}
+                onInput={(e) =>
+                  setFormData({ ...formData(), subdomain: e.target.value })
+                }
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -123,7 +126,8 @@ export const SignUp = () => {
                   "border-radius": "4px",
                 }}
                 placeholder="Enter SubDomain"
-                required />
+                required
+              />
             </div>
             <div class="m:10|0|0|0">
               <label
@@ -137,7 +141,9 @@ export const SignUp = () => {
                 name="username"
                 type="text"
                 value={formData().username}
-                onInput={(e) => setFormData({ ...formData(), username: e.target.value })}
+                onInput={(e) =>
+                  setFormData({ ...formData(), username: e.target.value })
+                }
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -145,7 +151,8 @@ export const SignUp = () => {
                   "border-radius": "4px",
                 }}
                 placeholder="Enter Name"
-                required />
+                required
+              />
             </div>
             <div class="m:10|0|0|0">
               <label
@@ -159,7 +166,9 @@ export const SignUp = () => {
                 name="email"
                 type="text"
                 value={formData().email}
-                onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+                onInput={(e) =>
+                  setFormData({ ...formData(), email: e.target.value })
+                }
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -167,7 +176,8 @@ export const SignUp = () => {
                   "border-radius": "4px",
                 }}
                 placeholder="Enter Email"
-                required />
+                required
+              />
             </div>
             <div class="m:10|0|10|0">
               <label
@@ -182,7 +192,9 @@ export const SignUp = () => {
                   name="password"
                   type={`${showPassword() ? "text" : "password"}`}
                   value={formData().password}
-                  onInput={(e) => setFormData({ ...formData(), password: e.target.value })}
+                  onInput={(e) =>
+                    setFormData({ ...formData(), password: e.target.value })
+                  }
                   style={{
                     width: "100%",
                     padding: "8px",
@@ -190,12 +202,14 @@ export const SignUp = () => {
                     "border-radius": "4px",
                   }}
                   placeholder="Enter Password"
-                  required />
+                  required
+                />
                 <Icon
                   onClick={togglePasswordVisibility}
                   class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`} />
+                  icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+                />
               </div>
             </div>
           </div>

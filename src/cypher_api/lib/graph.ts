@@ -95,8 +95,6 @@ export const transactionDetailAdd = (
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
   transactions.set(txnId, existingTxnValue);
 };
-let txnNo = 1;
-export const getNewTxnId = () => ++txnNo;
 
 export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
   if (!txnId || !transactions.has(txnId)) return;
