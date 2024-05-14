@@ -1,14 +1,14 @@
-import {
-  createContext,
-  createEffect,
-  createSignal,
-  mergeProps,
-  on,
-  onMount,
-  splitProps,
-  useContext,
-} from "solid-js";
 import type { Component, JSX } from "solid-js";
+import {
+ createContext,
+ createEffect,
+ createSignal,
+ mergeProps,
+ on,
+ onMount,
+ splitProps,
+ useContext
+} from "solid-js";
 import { runEvent } from "../tools";
 
 import "../base.css";

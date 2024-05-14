@@ -1,4 +1,4 @@
-import { createEffect, JSX, onMount, Show, useContext } from "solid-js";
+import { JSX, onMount, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { LoaderNew } from "~/components/custom/LoaderSimple";

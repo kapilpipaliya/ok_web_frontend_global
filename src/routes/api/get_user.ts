@@ -1,7 +1,4 @@
-import {
-    getDriver,
-    isIntegerId,
-} from "~/cypher_api/server/driver";
+import { getDriver, isIntegerId } from "~/cypher_api/server/driver";
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";

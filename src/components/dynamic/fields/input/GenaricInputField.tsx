@@ -1,26 +1,23 @@
-import {
-  createMemo,
-  Match,
-  Show,
-  splitProps,
-  Switch,
-  useContext,
-} from "solid-js";
+import { Match, Show, splitProps, Switch, useContext } from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import {
-  Checkbox,
-  Progress,
-  Radio,
-  RadioGroup,
-  TextField,
+ Checkbox,
+ Progress,
+ Radio,
+ RadioGroup,
+ TextField
 } from "~/components/solid-blocks/blocks";
-import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
+import {
+ FileUploader
+} from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
 import { getTextColumnValue } from "~/lib/Utils";
 import { setValueGlobal } from "~/lib/graph/get/sync/graph_fns";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
-import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
+import {
+ PageItemRender
+} from "~/components/dynamic/fields/static/GenaricField";
 import { ComponentProps } from "~/components/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
 

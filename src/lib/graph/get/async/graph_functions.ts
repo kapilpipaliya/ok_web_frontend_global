@@ -1,12 +1,12 @@
 import { klona } from "klona/json";
 import { AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions,
-  getSublistRows,
-  getSublistRowsForType,
+ getChildVertex,
+ getChildVertexes,
+ getParentVertex,
+ getSelectionOptions,
+ getSublistRows,
+ getSublistRowsForType
 } from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";

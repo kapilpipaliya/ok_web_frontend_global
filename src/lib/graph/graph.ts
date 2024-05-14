@@ -1,11 +1,5 @@
 import { createContext } from "solid-js";
-import {
-  createStore,
-  reconcile,
-  SetStoreFunction,
-  Store,
-} from "solid-js/store";
-import { klona } from "klona";
+import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
 
 export type Id = number;
 

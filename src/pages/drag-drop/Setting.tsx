@@ -1,11 +1,11 @@
 import {
-  createSignal,
-  For,
-  Match,
-  Show,
-  Switch,
-  untrack,
-  useContext,
+ createSignal,
+ For,
+ Match,
+ Show,
+ Switch,
+ untrack,
+ useContext
 } from "solid-js";
 import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
@@ -16,13 +16,13 @@ import { createStore } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 import { validateEmail, validatePassword } from "~/lib/Utils";
 import {
-  Table,
-  TableBody,
-  TableBodyRow,
-  TableData,
-  TableHead,
-  TableHeader,
-  TableHeadRow,
+ Table,
+ TableBody,
+ TableBodyRow,
+ TableData,
+ TableHead,
+ TableHeader,
+ TableHeadRow
 } from "~/components/custom/Table";
 import { ChipDropDown } from "~/components/custom/Chip";
 import CustomModal from "~/components/custom/CommonDialog";
@@ -32,10 +32,10 @@ import { API } from "~/components/api/DataFetcher";
 import { GraphContext } from "~/lib/graph/graph";
 import { equals } from "rambda";
 import {
-  deleteSupportTicketCall,
-  getChatsSupportCall,
-  resetPasswordCall,
-  sendChatsSupportCall,
+ deleteSupportTicketCall,
+ getChatsSupportCall,
+ resetPasswordCall,
+ sendChatsSupportCall
 } from "~/components/api/api_functions";
 import getAPI from "~/components/api/getApi";
 

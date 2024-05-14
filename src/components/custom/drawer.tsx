@@ -1,4 +1,4 @@
-import { JSX, createSignal } from "solid-js";
+import { createSignal, JSX } from "solid-js";
 
 function Drawer(props: {
     customButton: (props: { onClick: () => void; isOpen: boolean }) => JSX.Element;

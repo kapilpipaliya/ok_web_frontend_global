@@ -1,25 +1,27 @@
 import { Icon, IconifyIconProps } from "@iconify-icon/solid";
 import {
-  Accessor,
-  createEffect,
-  createSignal,
-  For,
-  JSX,
-  JSXElement,
-  Match,
-  onCleanup,
-  Setter,
-  Show,
-  splitProps,
-  Switch,
-  useContext,
+ Accessor,
+ createEffect,
+ createSignal,
+ For,
+ JSX,
+ JSXElement,
+ Match,
+ onCleanup,
+ Setter,
+ Show,
+ splitProps,
+ Switch,
+ useContext
 } from "solid-js";
 import { TextField } from "~/components/solid-blocks/blocks";
-import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
+import {
+ DynamicCSSComponent
+} from "~/components/dynamic/components/DynamicCssComponent";
 import { CustomTooltip } from "~/components/custom/Tooltip";
 import {
-  CssEditorContext,
-  sizeTypes,
+ CssEditorContext,
+ sizeTypes
 } from "~/components/css-editor/cssEditorContext";
 import "~/css/componentUtilCSS.css";
 

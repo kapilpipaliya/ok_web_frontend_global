@@ -3,9 +3,9 @@ import { klona } from "klona";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import {
-  getNewGraphId,
-  transactionDetailAdd,
-  transactions,
+ getNewGraphId,
+ transactionDetailAdd,
+ transactions
 } from "../transaction";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";

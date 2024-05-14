@@ -1,9 +1,9 @@
 import * as Acorn from "acorn";
 import AcornJSX from "acorn-jsx";
 import {
-  canHaveChildren,
-  canHaveWhitespace,
-  containerTags,
+ canHaveChildren,
+ canHaveWhitespace,
+ containerTags
 } from "~/lib/jsx_parser/source/constants/specialTags";
 import { randomHash } from "~/lib/jsx_parser/source/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/source/helpers/parseStyle";

@@ -1,35 +1,36 @@
-import { batch, onCleanup, useContext } from "solid-js";
+import { batch, onCleanup } from "solid-js";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import {
-  addNewVertex,
-  deleteVertex,
-  mergeVertexProperties,
-  newVertex,
+ addNewVertex,
+ deleteVertex,
+ mergeVertexProperties,
+ newVertex
 } from "~/lib/graph/mutate/vertex";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
-  commitTxn,
-  getNewGraphId,
-  getNewTxnId,
-  revertTransaction,
+ commitTxn,
+ getNewGraphId,
+ getNewTxnId,
+ revertTransaction
 } from "../../transaction";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { klona } from "klona/json";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import {
+ setSelectionValue
+} from "~/components/dynamic/fields/static/SelectionUtils";
 import { getToEdge } from "./getToEdge";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import {
-  replaceExpressionToLabel,
-  getValueFromVertexOrKey,
-  isObject,
-  getLabel,
-  getId,
+ getId,
+ getLabel,
+ getValueFromVertexOrKey,
+ isObject,
+ replaceExpressionToLabel
 } from "../../../Utils";
 import { useToast } from "~/components/custom/Toast";
-import { NewTxnIdContext } from "~/lib/contexts";
 
 export async function getSelectionOptions(
   graph: Store<GraphInterface>,

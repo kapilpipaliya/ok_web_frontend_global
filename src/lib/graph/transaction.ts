@@ -1,7 +1,7 @@
 import { batch } from "solid-js";
 import {
-  ServerEventsDispatcher,
-  WSEvent,
+ ServerEventsDispatcher,
+ WSEvent
 } from "~/lib/websocket/ws_events_dispatcher";
 import { isNumber } from "~/lib/Utils";
 import { GraphInterface, Id } from "./graph";

@@ -1,40 +1,34 @@
-import { batch, useContext } from "solid-js";
-import {
-  getNewGraphId,
-  Id,
-  IdAttr,
-  IGraph,
-  Node,
-} from "~/cypher_api/lib/graph";
+import { getNewGraphId, Id, IdAttr, Node } from "~/cypher_api/lib/graph";
 
 import {
-  addNewVertex,
-  findVertexByLabelAndUniqueId,
-  newVertex,
-  replaceVertexProperties,
+ addNewVertex,
+ findVertexByLabelAndUniqueId,
+ newVertex,
+ replaceVertexProperties
 } from "~/cypher_api/lib/vertex";
-import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
+import {
+ setSelectionValue
+} from "~/cypher_api/components/input/SelectInputField";
 
 import { getChildVertex, getParentVertex } from "~/cypher_api/lib/traverse";
 import {
-  FormMetaData,
-  getCompPropsMap,
-  getFormMetaData,
-  getId,
-  newRow,
-  Record,
+ FormMetaData,
+ getCompPropsMap,
+ getFormMetaData,
+ getId,
+ newRow,
+ Record
 } from "~/cypher_api/lib/record";
 import {
-  importRecordWithYAMLSchema,
-  onDataDirectoryImportClick,
-  updateImportRecord,
+ importRecordWithYAMLSchema,
+ onDataDirectoryImportClick,
+ updateImportRecord
 } from "~/cypher_api/lib/Import";
 
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 
 import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";
-import { NewTxnIdContext } from "~/lib/contexts";
 import { GraphInterface } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 

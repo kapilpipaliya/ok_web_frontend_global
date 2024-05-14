@@ -1,26 +1,15 @@
 import { useNavigate, useParams } from "@solidjs/router";
-import {
-  createContext,
-  createSignal,
-  createUniqueId,
-  Show,
-  useContext,
-} from "solid-js";
-import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
+import { createSignal, Show, useContext } from "solid-js";
 
-import { IFormContext, PageContext } from "~/lib/Utils";
-import {
-  getChildVertex,
-  getSublistRows,
-  getSublistRowsForType,
-} from "~/lib/graph/get/sync/graph_fns";
+import { IFormContext } from "~/lib/Utils";
 // Comment This Lines in web build
-import { Navigator } from "@solidjs/router/dist/types";
 import { createStore } from "solid-js/store";
 import { stringify } from "yaml";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import {
+ AbstractSingleForm
+} from "~/components/dynamic/components/DynamicForm";
 import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/import";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext } from "~/lib/graph/graph";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { getExportCode } from "~/lib/graph/get/sync/graph_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";

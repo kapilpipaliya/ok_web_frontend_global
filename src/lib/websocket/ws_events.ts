@@ -1,20 +1,20 @@
 import { batch, useContext } from "solid-js";
 import {
-  getCookie,
-  ServerEventsDispatcher,
-  WsContext,
+ getCookie,
+ ServerEventsDispatcher,
+ WsContext
 } from "~/lib/websocket/ws_events_dispatcher";
 
 import { isObject } from "~/lib/Utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
 import { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {
-  commitTransaction,
-  edgeOldIdToNewIdMap,
-  isAllTxnProcessed,
-  ProcessStatus,
-  transactions,
-  vertexOldIdToNewIdMap,
+ commitTransaction,
+ edgeOldIdToNewIdMap,
+ isAllTxnProcessed,
+ ProcessStatus,
+ transactions,
+ vertexOldIdToNewIdMap
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";

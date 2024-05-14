@@ -1,4 +1,4 @@
-import MasterCSS, { Config } from "@master/css";
+import { Config } from "@master/css";
 
 export const config: Config = {
   styles: {},

@@ -1,7 +1,7 @@
-import { IdAttr, IGraph, Node } from "~/cypher_api/lib/graph";
+import { IdAttr, Node } from "~/cypher_api/lib/graph";
 import {
-  capitalizeFirstLetter,
-  getValueFromVertexOrKey,
+ capitalizeFirstLetter,
+ getValueFromVertexOrKey
 } from "~/cypher_api/utils/utils";
 import { evaluate } from "~/cypher_api/lib/jsep";
 import jsep from "jsep";
@@ -10,6 +10,7 @@ import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 import { GraphInterface } from "~/lib/graph/graph";
+
 export function getToEdge(meta: Node, vertex: Node): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 

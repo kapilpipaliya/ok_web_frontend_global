@@ -1,9 +1,9 @@
 import {
-  Component,
-  JSX,
-  createEffect,
-  createSignal,
-  splitProps,
+ Component,
+ createEffect,
+ createSignal,
+ JSX,
+ splitProps
 } from "solid-js";
 import { runEvent } from "../tools";
 

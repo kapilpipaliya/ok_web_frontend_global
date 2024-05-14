@@ -1,18 +1,18 @@
 import {
-  createComputed,
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  Show,
-  Switch,
-  useContext,
-  on,
-  getOwner,
-  runWithOwner,
-  splitProps,
+ createComputed,
+ createEffect,
+ createMemo,
+ createSignal,
+ For,
+ getOwner,
+ Match,
+ on,
+ onCleanup,
+ runWithOwner,
+ Show,
+ splitProps,
+ Switch,
+ useContext
 } from "solid-js";
 import "~/css/table.css";
 import { toTitle } from "case-switcher-js";
@@ -21,32 +21,36 @@ import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { klona } from "klona";
-import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
+import {
+ DynamicComponent
+} from "~/components/dynamic/components/DynamicComponent";
 import { FormContext } from "~/lib/Utils";
 import {
-  getChildVertex,
-  addNewRow,
-  getSublistRows,
-  addMetaVertexes,
-  deleteRow,
-  getSelectionOptions,
-  getChildVertexes,
+ addMetaVertexes,
+ addNewRow,
+ deleteRow,
+ getChildVertex,
+ getChildVertexes,
+ getSelectionOptions,
+ getSublistRows
 } from "~/lib/graph/get/sync/graph_fns";
 import { ComponentProps } from "~/components/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {
-  PageRenderContext,
-  PageRenderUtils,
-  RepeaterContext,
+ PageRenderContext,
+ PageRenderUtils,
+ RepeaterContext
 } from "~/components/dynamic/fields/static/GenaricField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import {
+ GenericField
+} from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { getLastItem } from "~/lib/functions";
 import { FieldAttribute } from "~/lib/Type";
 import "~/css/base.css";
 import {
-  componentProps,
-  getCollAttrs,
-  getStringComponent,
+ componentProps,
+ getCollAttrs,
+ getStringComponent
 } from "~/lib/graph/get/sync/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { addMeta, rowMetaInitialize } from "~/lib/graph/mutate/form_functions";

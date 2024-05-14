@@ -1,7 +1,7 @@
 import { Node } from "~/cypher_api/lib/graph";
 import {
-  getSelectionOptions,
-  getChildVertexes,
+ getChildVertexes,
+ getSelectionOptions
 } from "~/cypher_api/lib/traverse";
 
 export function capitalizeFirstLetter(string: string) {

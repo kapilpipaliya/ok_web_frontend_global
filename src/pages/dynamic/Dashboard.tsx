@@ -7,9 +7,9 @@ import Dismiss from "solid-dismiss";
 import { Navbar } from "~/components/layout/Navbar";
 import { APP_BASE_URL, PageContext } from "~/lib/Utils";
 import {
-  addNewVertex,
-  mergeVertexProperties,
-  newVertex,
+ addNewVertex,
+ mergeVertexProperties,
+ newVertex
 } from "~/lib/graph/mutate/vertex";
 import "~/css/base.css";
 import "~/css/modal.css";
@@ -17,7 +17,6 @@ import { LoadingContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
 import Sidebar from "~/components/layout/Sidebar";
 import { signOutCall } from "~/components/api/api_functions";
-import { createStore } from "solid-js/store";
 import getAPI from "~/components/api/getApi";
 import { API } from "~/components/api/DataFetcher";
 

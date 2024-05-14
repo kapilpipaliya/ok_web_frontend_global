@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { Show, createEffect, createSignal, on } from "solid-js";
+import { createEffect, createSignal, on, Show } from "solid-js";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 import { AbstractSingleGrid } from "~/pages/dynamic/Grids";
 

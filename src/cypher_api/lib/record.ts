@@ -1,38 +1,39 @@
 import {
-  getNewGraphId,
-  Id,
-  IdAttr,
-  IGraph,
-  Node,
-  revertTransaction,
+ getNewGraphId,
+ Id,
+ IdAttr,
+ Node,
+ revertTransaction
 } from "~/cypher_api/lib/graph";
 import { klona } from "klona/json";
 import {
-  addNewVertex,
-  deleteVertex,
-  findVertexByLabelAndUniqueId,
-  mergeVertexProperties,
-  newVertex,
-  replaceVertexProperties,
+ addNewVertex,
+ deleteVertex,
+ findVertexByLabelAndUniqueId,
+ mergeVertexProperties,
+ newVertex,
+ replaceVertexProperties
 } from "~/cypher_api/lib/vertex";
 import { batch, createContext, onCleanup, untrack, useContext } from "solid-js";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getChildVertexesLocal,
-  getChildVertexLocal,
-  getParentVertex,
-  getSelectionOptions,
-  getToEdge,
+ getChildVertex,
+ getChildVertexes,
+ getChildVertexesLocal,
+ getChildVertexLocal,
+ getParentVertex,
+ getSelectionOptions,
+ getToEdge
 } from "~/cypher_api/lib/traverse";
 import { removeUndefinedProperties } from "~/cypher_api/utils/functions";
 import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/edge";
-import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 import {
-  capitalizeFirstLetter,
-  getValueFromVertexOrKey,
-  groupBy,
-  isObject,
+ setSelectionValue
+} from "~/cypher_api/components/input/SelectInputField";
+import {
+ capitalizeFirstLetter,
+ getValueFromVertexOrKey,
+ groupBy,
+ isObject
 } from "~/cypher_api/utils/utils";
 import { AdminAttrKeys, AttrsTableData } from "~/cypher_api/lib/api";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
@@ -40,7 +41,9 @@ import { SetStoreFunction, Store } from "solid-js/store";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
-import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
+import {
+ deleteRelationShipMGCall
+} from "~/cypher_api/functions/deleteRelationShip";
 import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { NewTxnIdContext } from "~/lib/contexts";
 import { getNewTxnId } from "~/lib/graph/transaction";

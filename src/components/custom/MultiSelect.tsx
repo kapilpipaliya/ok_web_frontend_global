@@ -1,13 +1,13 @@
 import {
-  Component,
-  createEffect,
-  createSignal,
-  For,
-  JSX,
-  mergeProps,
-  onMount,
-  Show,
-  splitProps,
+ Component,
+ createEffect,
+ createSignal,
+ For,
+ JSX,
+ mergeProps,
+ onMount,
+ Show,
+ splitProps
 } from "solid-js";
 import "~/css/MultiSelect.css";
 // import { isArray, isInteger, isObject } from 'lodash';

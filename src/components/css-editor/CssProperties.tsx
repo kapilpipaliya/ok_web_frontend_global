@@ -2,8 +2,8 @@ import { createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { StyleCSSComponents } from "~/components/css-editor/StyleCSSComponents";
 import {
-  sizeTypes,
-  timesTypes,
+ sizeTypes,
+ timesTypes
 } from "~/components/css-editor/cssEditorContext";
 
 const { IconifyIcon } = StyleCSSComponents();

@@ -1,12 +1,13 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense, useContext } from "solid-js";
+import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { config } from "~/master.css";
-import { LoadingContext, NewTxnIdContext } from "~/lib/contexts";
+import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/layout/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
+
 export default function App() {
   const loadingSite = createSignal(false);
   return (

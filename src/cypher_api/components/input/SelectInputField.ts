@@ -1,17 +1,18 @@
 // Comment This Lines in web build
 import {
-  compareId,
-  getNewGraphId,
-  IGraph,
-  isIdArrayIncludesID,
-  Node,
+ compareId,
+ getNewGraphId,
+ isIdArrayIncludesID,
+ Node
 } from "~/cypher_api/lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/edge";
 import { getInEdge, getToEdge } from "~/cypher_api/lib/traverse";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
-import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
+import {
+ deleteRelationShipMGCall
+} from "~/cypher_api/functions/deleteRelationShip";
 import { newEdgeMGCall } from "~/cypher_api/functions/newEdge";
 import { GraphInterface } from "~/lib/graph/graph";
 

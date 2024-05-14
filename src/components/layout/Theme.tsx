@@ -1,5 +1,4 @@
 import ThemeMode from "theme-mode";
-import { createSignal } from "solid-js";
 
 export const themeMode = new ThemeMode({ preference: "system" }).init();
 

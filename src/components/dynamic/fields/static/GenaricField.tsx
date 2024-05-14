@@ -1,42 +1,47 @@
 import {
-  createComputed,
-  createContext,
-  createMemo,
-  createSelector,
-  For,
-  Match,
-  Show,
-  Switch,
-  useContext,
+ createComputed,
+ createContext,
+ createMemo,
+ createSelector,
+ For,
+ Match,
+ Show,
+ Switch,
+ useContext
 } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import {
-  GraphContext,
-  GraphInterface,
-  IdAttr,
-  Vertex,
+ GraphContext,
+ GraphInterface,
+ IdAttr,
+ Vertex
 } from "~/lib/graph/graph";
 import { FormContext, iconMap, PageContext } from "~/lib/Utils";
 import {
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions,
+ getChildVertex,
+ getChildVertexes,
+ getParentVertex,
+ getSelectionOptions
 } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
-import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import {
-  useDragDrop,
-} from "~/lib/pageStore";
+ DynamicComponent
+} from "~/components/dynamic/components/DynamicComponent";
+import { useDragDrop } from "~/lib/pageStore";
 import { Icon } from "@iconify-icon/solid";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
 import {
-  getCollAttrComp,
-  getCompProps,
-  getRowProps,
+ getCollAttrComp,
+ getCompProps,
+ getRowProps
 } from "~/lib/graph/get/sync/graph_functions";
-import { HoverIdContext, IndicatorPositionContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
+import {
+ HoverIdContext,
+ IndicatorPositionContext,
+ SelectedIdContext,
+ TargetIdContext
+} from "~/lib/contexts";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 

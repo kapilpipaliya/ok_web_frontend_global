@@ -1,12 +1,13 @@
 import { useParams } from "@solidjs/router";
 import { createStore } from "solid-js/store";
-import { FormContext, IFormContext, iconMap, nameExpr } from "~/lib/Utils";
+import { FormContext, iconMap, IFormContext, nameExpr } from "~/lib/Utils";
 import {
   addMetaVertexes,
   getChildVertex,
-  getChildVertexes,
+  getChildVertexes
 } from "~/lib/graph/get/sync/graph_fns";
 import {
+  Accessor,
   batch,
   createSelector,
   createSignal,
@@ -16,9 +17,11 @@ import {
   onCleanup,
   Show,
   Switch,
-  useContext,
+  useContext
 } from "solid-js";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import {
+  GenericField
+} from "~/components/dynamic/fields/static/GenericFieldComponent";
 
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
@@ -28,22 +31,30 @@ import {
   getNewTxnId,
   revertTransaction,
   revertTransactionUpTo,
-  transactions,
+  transactions
 } from "~/lib/graph/transaction";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
-import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
+import {
+  AbstractSingleForm
+} from "~/components/dynamic/components/DynamicForm";
+import {
+  SelectInputField
+} from "~/components/dynamic/fields/input/SelectInputField";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { Portal } from "solid-js/web";
-import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
+import {
+  TableInputField
+} from "~/components/dynamic/fields/input/TableInputField";
 import { AttrsTableData } from "~/lib/api";
-import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
+import {
+  GenericInputField
+} from "~/components/dynamic/fields/input/GenaricInputField";
 import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { Icon } from "@iconify-icon/solid";
 import {
   propertiesVertexId,
   setPropertyValueGlobal,
-  useDragDrop,
+  useDragDrop
 } from "~/lib/pageStore";
 import {
   ModalBody,
@@ -51,7 +62,7 @@ import {
   ModalFooter,
   ModalHeader,
   TextField,
-  Tooltip,
+  Tooltip
 } from "~/components/solid-blocks/blocks";
 import { toTitle } from "case-switcher-js";
 import "~/css/sideBarSearch.css";
@@ -60,8 +71,16 @@ import PreviewSection from "./Preview";
 import ResizableContainer from "~/components/custom/ResizableDivView";
 import { FieldAttribute } from "~/lib/Type";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
-import { Accessor } from "solid-js";
-import { DraggedVertexContext, HiddenNodesContext, HoverIdContext, IndicatorPositionContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
+import {
+  DraggedVertexContext,
+  HiddenNodesContext,
+  HoverIdContext,
+  IndicatorPositionContext,
+  SelectedCollContext,
+  SelectedComponentContext,
+  SelectedIdContext,
+  TargetIdContext
+} from "~/lib/contexts";
 import Drawer from "../../components/custom/drawer";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 
@@ -659,7 +678,7 @@ export const PageDesignerDragAndDrop = () => {
     };
 
     const rootVertexes = () =>
-      pageConfig[0].formData?.formMeta ? [pageConfig[0].formData.formMeta] : []; // Starting point(s)
+      pageConfig[0].formData?.formData ? [pageConfig[0].formData.formData] : []; // Starting point(s)
 
     return (
       <>
@@ -791,8 +810,8 @@ export const PageDesignerDragAndDrop = () => {
                         },
                       },
                     },
-                    pageConfig[0].formData?.formMeta
-                      ? [pageConfig[0].formData.formMeta]
+                    pageConfig[0].formData?.formData
+                      ? [pageConfig[0].formData.formData]
                       : [],
                     {
                       nameExpr: (v: Vertex) => {
@@ -1731,7 +1750,7 @@ export const PageDesignerDragAndDrop = () => {
                         <Column
                           type={column.id}
                           index={index()}
-                          vertex={pageConfig[0].formData?.formMeta}
+                          vertex={pageConfig[0].formData?.formData}
                         />
                       )}
                     </For>
@@ -1772,7 +1791,7 @@ export const PageDesignerDragAndDrop = () => {
                 <FormContext.Provider value={pageConfig[0].formData}>
                   <PageView
                     number={count()}
-                    vertex={pageConfig[0].formData?.formMeta}
+                    vertex={pageConfig[0].formData?.formData}
                   />
                 </FormContext.Provider>
                 <Drawer

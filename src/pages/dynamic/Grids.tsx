@@ -1,74 +1,71 @@
 // Comment This Lines in web build
 import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
+import { CellContext, ColumnDef } from "@tanstack/solid-table";
 import {
-  CellContext,
-  ColumnDef,
-  createSolidTable,
-  getCoreRowModel,
-} from "@tanstack/solid-table";
-import {
-  Accessor,
-  createEffect,
-  createMemo,
-  createResource,
-  createSignal,
-  For,
-  Match,
-  onCleanup,
-  Show,
-  splitProps,
-  Switch,
-  untrack,
-  useContext,
+ Accessor,
+ createEffect,
+ createMemo,
+ createResource,
+ createSignal,
+ For,
+ Match,
+ onCleanup,
+ Show,
+ Switch,
+ untrack,
+ useContext
 } from "solid-js";
 import {
-  GraphContext,
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex,
+ GraphContext,
+ GraphInterface,
+ Id,
+ IdAttr,
+ Vertex
 } from "~/lib/graph/graph";
 import {
-  commitTransaction,
-  getNewTxnId,
-  ProcessStatus,
-  transactions,
+ commitTransaction,
+ getNewTxnId,
+ ProcessStatus,
+ transactions
 } from "~/lib/graph/transaction";
 
 import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
-  collectionNameDisplayExpr,
-  selectedValue,
+ GenericField
+} from "~/components/dynamic/fields/static/GenericFieldComponent";
+import {
+ collectionNameDisplayExpr,
+ selectedValue
 } from "~/components/dynamic/fields/input/SelectInputField";
 import {
-  APP_BASE_URL,
-  breadcrumbData,
-  capitalizeFirstLetter,
-  isNumber,
-  PageContext,
+ APP_BASE_URL,
+ breadcrumbData,
+ capitalizeFirstLetter,
+ isNumber,
+ PageContext
 } from "~/lib/Utils";
 import {
-  createMeta,
-  getChildVertexes,
-  getSelectionOptions,
+ createMeta,
+ getChildVertexes,
+ getSelectionOptions
 } from "~/lib/graph/get/sync/graph_fns";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import {
+ AbstractSingleForm
+} from "~/components/dynamic/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { CollapsibleTable } from "~/components/custom/Table";
 import Dismiss from "solid-dismiss";
-import { SetStoreFunction, createStore } from "solid-js/store";
+import { createStore, SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
 import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
 import { getFormApiFromForm } from "~/lib/graph/get/async/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useToast } from "~/components/custom/Toast";
-import { NewTxnIdContext } from "~/lib/contexts";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { submitDataCall } from "~/components/api/api_functions";
 

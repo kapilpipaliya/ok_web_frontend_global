@@ -1,20 +1,20 @@
 import { useLocation } from "@solidjs/router";
 import {
-  createEffect,
-  createMemo,
-  createSignal,
-  createUniqueId,
-  For,
-  JSX,
-  Show,
-  untrack,
-  useContext,
+ createEffect,
+ createMemo,
+ createSignal,
+ createUniqueId,
+ For,
+ JSX,
+ Show,
+ untrack,
+ useContext
 } from "solid-js";
 import {
-  createMeta,
-  getChildVertex,
-  getSublistRows,
-  getSublistRowsForType,
+ createMeta,
+ getChildVertex,
+ getSublistRows,
+ getSublistRowsForType
 } from "~/lib/graph/get/sync/graph_fns";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";

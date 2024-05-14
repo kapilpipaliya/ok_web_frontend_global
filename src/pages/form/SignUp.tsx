@@ -1,9 +1,9 @@
-import { createEffect, createSignal, onCleanup, useContext } from "solid-js";
+import { createSignal, useContext } from "solid-js";
 import {
-  APP_BASE_URL,
-  validateEmail,
-  validatePassword,
-  validateUsername,
+ APP_BASE_URL,
+ validateEmail,
+ validatePassword,
+ validateUsername
 } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
@@ -12,7 +12,6 @@ import logo from "~/assets/graphics/logo.png";
 import "~/css/base.css";
 import { registerUserCall } from "~/components/api/api_functions";
 import { LoadingContext } from "~/lib/contexts";
-import toast from "solid-toast";
 
 export const SignUp = () => {
   // const {Ws} = useContext(WsContext);

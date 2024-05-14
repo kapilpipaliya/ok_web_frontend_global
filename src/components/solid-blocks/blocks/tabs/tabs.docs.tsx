@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { Checkbox } from "../checkbox/checkbox";
-import { Tab, TabList, TabContainer, Tabs } from "./tabs";
+import { Tab, TabContainer, TabList, Tabs } from "./tabs";
 
 export const TabsDocs = () => {
   const [events, setEvents] = createSignal("");

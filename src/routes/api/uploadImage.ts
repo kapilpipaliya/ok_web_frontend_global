@@ -1,7 +1,7 @@
 import fs from "fs";
 import { APIEvent } from "@solidjs/start/dist/server";
 import path from "path";
-import { HTTPEvent, getQuery, readMultipartFormData } from "vinxi/http";
+import { getQuery, HTTPEvent, readMultipartFormData } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {

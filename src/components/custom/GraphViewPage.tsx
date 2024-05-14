@@ -1,9 +1,9 @@
 import {
-  createEffect,
-  createSignal,
-  onCleanup,
-  Show,
-  useContext,
+ createEffect,
+ createSignal,
+ onCleanup,
+ Show,
+ useContext
 } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 

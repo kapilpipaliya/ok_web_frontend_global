@@ -1,14 +1,14 @@
 import {
-  Component,
-  JSX,
-  createContext,
-  createEffect,
-  createSignal,
-  createSelector,
-  createUniqueId,
-  mergeProps,
-  on,
-  useContext,
+ Component,
+ createContext,
+ createEffect,
+ createSelector,
+ createSignal,
+ createUniqueId,
+ JSX,
+ mergeProps,
+ on,
+ useContext
 } from "solid-js";
 
 import "../base.css";

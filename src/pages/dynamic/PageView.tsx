@@ -1,20 +1,20 @@
 import { useParams } from "@solidjs/router";
 import {
-  createEffect,
-  createSignal,
-  For,
-  on,
-  Show,
-  useContext,
+ createEffect,
+ createSignal,
+ For,
+ on,
+ Show,
+ untrack,
+ useContext
 } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { createMeta, loadForm, Record } from "~/lib/graph/get/sync/graph_fns";
+import { createMeta, loadForm } from "~/lib/graph/get/sync/graph_fns";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
 import { getFormMetaData } from "~/lib/graph/get/sync/graph_functions";
-import { untrack } from "solid-js";
 
 export const PageView_ = (props: { id: string; count: number }) => {
   const { Ws } = useContext(WsContext);

@@ -1,7 +1,4 @@
-import { createAsync, RouteSectionProps, useNavigate } from "@solidjs/router";
-import { API } from "~/components/api/DataFetcher";
-import getAPI from "~/components/api/getApi";
-import { APP_BASE_URL } from "~/lib/Utils";
+import { RouteSectionProps, useNavigate } from "@solidjs/router";
 // todo: when user come to login page, if already login redirect to dashboard.
 export default function auth(props: RouteSectionProps) {
   const navigate = useNavigate();

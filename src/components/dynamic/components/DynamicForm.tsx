@@ -1,64 +1,67 @@
 import {
-  createMemo,
-  createSignal,
-  useContext,
-  onCleanup,
-  onMount,
-  JSXElement,
-  splitProps,
-  Show,
-  For,
-  Match,
-  createResource,
-  untrack,
-  batch,
+ batch,
+ createMemo,
+ createResource,
+ createSignal,
+ For,
+ JSXElement,
+ Match,
+ onCleanup,
+ onMount,
+ Show,
+ splitProps,
+ Switch,
+ untrack,
+ useContext
 } from "solid-js";
-import { SetStoreFunction, Store, createStore } from "solid-js/store";
+import { createStore, SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
 import { FormContext, groupBy } from "~/lib/Utils";
 import {
-  createForm,
-  createMeta,
-  getChildVertexes,
-  getSelectionOptions,
-  loadForm,
+ createForm,
+ createMeta,
+ getChildVertexes,
+ getSelectionOptions,
+ loadForm
 } from "~/lib/graph/get/sync/graph_fns";
-import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
-  GraphContext,
-  GraphInterface,
-  Id,
-  IdAttr,
-  Vertex,
+ RepeaterContext
+} from "~/components/dynamic/fields/static/GenaricField";
+import {
+ GenericField
+} from "~/components/dynamic/fields/static/GenericFieldComponent";
+import {
+ GraphContext,
+ GraphInterface,
+ Id,
+ IdAttr,
+ Vertex
 } from "~/lib/graph/graph";
 import {
-  commitTxn,
-  getNewTxnId,
-  revertTransaction,
-  txnHasSteps,
+ commitTxn,
+ getNewTxnId,
+ revertTransaction,
+ txnHasSteps
 } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
-  BeforeLeaveEventArgs,
-  useBeforeLeave,
-  useLocation,
-  useNavigate,
+ BeforeLeaveEventArgs,
+ useBeforeLeave,
+ useLocation,
+ useNavigate
 } from "@solidjs/router";
 import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
 import { FormMetaData } from "~/lib/Type";
-import { Switch } from "solid-js";
 import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import {
-  getExportCode,
-  getFormMetaData,
+ getExportCode,
+ getFormMetaData
 } from "~/lib/graph/get/async/graph_functions";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
-import { NewTxnIdContext } from "~/lib/contexts";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {

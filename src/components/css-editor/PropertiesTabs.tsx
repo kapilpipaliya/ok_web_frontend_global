@@ -1,23 +1,24 @@
 import {
-  Tab,
-  TabContainer,
-  TabList,
-  Tabs,
+ Tab,
+ TabContainer,
+ TabList,
+ Tabs
 } from "~/components/solid-blocks/blocks";
 import { Vertex } from "~/lib/graph/graph";
 import { StyleCSSComponents } from "./StyleCSSComponents";
 import {
-  createEffect,
-  createMemo,
-  createSignal,
-  For,
-  on,
-  onCleanup,
-  Show,
+ createEffect,
+ createMemo,
+ createSignal,
+ For,
+ on,
+ Show
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { CssEditorContext, sizeTypes } from "./cssEditorContext";
-import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
+import { CssEditorContext } from "./cssEditorContext";
+import {
+ DynamicCSSComponent
+} from "~/components/dynamic/components/DynamicCssComponent";
 import { Icon } from "@iconify-icon/solid";
 import JSONSchema from "./CssProperties";
 

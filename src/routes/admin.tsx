@@ -1,15 +1,15 @@
 import { RouteSectionProps, useNavigate } from "@solidjs/router";
 import {
-  EdgeMap,
-  GraphContext,
-  GraphInterface,
-  Id,
-  VertexMap,
+ EdgeMap,
+ GraphContext,
+ GraphInterface,
+ Id,
+ VertexMap
 } from "~/lib/graph/graph";
 import {
-  ServerEventsDispatcher,
-  WS_PATH,
-  WsContext,
+ ServerEventsDispatcher,
+ WS_PATH,
+ WsContext
 } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";

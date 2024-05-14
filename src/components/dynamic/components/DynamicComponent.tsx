@@ -1,10 +1,17 @@
-import { Match, Show, splitProps, Switch } from "solid-js";
+import { Match, Show, splitProps, Switch, useContext } from "solid-js";
 import { Vertex } from "~/lib/graph/graph";
-import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
-import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
-import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
-import { useContext } from "solid-js";
+import {
+ SelectInputField
+} from "~/components/dynamic/fields/input/SelectInputField";
+import {
+ TableInputField
+} from "~/components/dynamic/fields/input/TableInputField";
+import {
+ GenericInputField
+} from "~/components/dynamic/fields/input/GenaricInputField";
+import {
+ GenericField
+} from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { HiddenNodesContext } from "~/lib/contexts";
 
 export const genericInputComponents = [

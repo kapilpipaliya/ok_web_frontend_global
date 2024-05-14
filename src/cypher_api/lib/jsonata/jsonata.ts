@@ -11,17 +11,17 @@
 import * as datetime from "./datetime.js";
 import * as fn from "./functions.js";
 import {
-  createSequence,
-  getFunctionArity,
-  isArrayOfNumbers,
-  isArrayOfStrings,
-  isDeepEqual,
-  isFunction,
-  isIterable,
-  isLambda,
-  isNumeric,
-  isPromise,
-  isSequence,
+ createSequence,
+ getFunctionArity,
+ isArrayOfNumbers,
+ isArrayOfStrings,
+ isDeepEqual,
+ isFunction,
+ isIterable,
+ isLambda,
+ isNumeric,
+ isPromise,
+ isSequence
 } from "./utils";
 import { parser } from "./parser";
 import { parseSignature } from "./signature";

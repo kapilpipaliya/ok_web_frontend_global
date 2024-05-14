@@ -1,22 +1,34 @@
 import jsep from "jsep";
 import {
-  Accessor,
-  batch,
-  createMemo,
-  createSelector,
-  untrack,
-  useContext
+ Accessor,
+ batch,
+ createMemo,
+ createSelector,
+ untrack,
+ useContext
 } from "solid-js";
-import { SetStoreFunction, Store, reconcile } from "solid-js/store";
+import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
-import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
-import { DraggedVertexContext, HoverIdContext, IndicatorPositionContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
+import {
+ setParentValue
+} from "~/components/dynamic/fields/input/SelectInputField";
+import {
+ setSelectionValue
+} from "~/components/dynamic/fields/static/SelectionUtils";
+import {
+ DraggedVertexContext,
+ HoverIdContext,
+ IndicatorPositionContext,
+ SelectedCollContext,
+ SelectedComponentContext,
+ SelectedIdContext,
+ TargetIdContext
+} from "~/lib/contexts";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
-  getCompProps,
-  getRowProps,
-  getStringComponent,
+ getCompProps,
+ getRowProps,
+ getStringComponent
 } from "~/lib/graph/get/sync/graph_functions";
 import { deleteNestedLayout } from "~/lib/graph/get/sync/traverse";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
@@ -25,7 +37,13 @@ import { evaluate } from "~/lib/jsep";
 
 import { cloneRowProps } from "./graph/mutate/form_functions";
 import { getNewGraphId } from "./graph/transaction";
-import { getChildVertexes, addNewRow, getSelectionOptions, getChildVertex, getParentVertex } from "./graph/get/sync/graph_fns";
+import {
+ addNewRow,
+ getChildVertex,
+ getChildVertexes,
+ getParentVertex,
+ getSelectionOptions
+} from "./graph/get/sync/graph_fns";
 
 export const propertiesVertexId = getNewGraphId();
 

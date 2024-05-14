@@ -1,5 +1,3 @@
-import { getDriver } from "~/cypher_api/server/driver";
-
 import { getInitialData } from "./getInitialData";
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
