@@ -57,12 +57,13 @@ export async function POST({ request }: APIEvent) {
 }
 
 const profile = async (payload: any, session: Session, subdomain: string) => {
-  const { userId, username, email, profileImage } = payload;
+  const { userId, username, email, profileImage, uId } = payload;
+
 
   // Ensure user exists
   const userExists = await session.run(
-    `MATCH (u:User) WHERE id(u) = $userId RETURN u;`,
-    { userId },
+    `MATCH (u:User) WHERE u.uId = $uId RETURN u;`,
+    { uId },
   );
   if (userExists.records.length === 0) {
     return { status: 404, error: "User not exists" };
@@ -80,7 +81,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   }
 
   // Update user profile
-  let query = `MATCH (u:User) WHERE id(u) = $userId SET `;
+  let query = `MATCH (u:User) WHERE u.uId = $uId SET `;
   const updates = [];
   if (email) updates.push(`u.email = $email`);
   if (username) updates.push(`u.username = $username`);
@@ -90,23 +91,22 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   const result = await session.run(query, {
     userId,
     email,
+    uId,
     username,
     profileImage,
   });
   const user = result.records[0]?.get("u");
 
-  if (subdomain !== "super") {
-    const session2 = (
-      await getDriverWithPort(user.properties.driverPort)
-    ).session();
-    const result2 = await session2.run(query, {
-      userId,
-      email,
-      username,
-      profileImage,
-    });
-    const user2 = result2.records[0]?.get("u");
-  }
+  const session2 = (await getDriverWithPort(user.properties.driverPort)).session();
+  await session2.run(query, {
+    userId,
+    email,
+    uId,
+    username,
+    profileImage,
+  });
+  console.log(query);
+  
 
   if (email) {
     const http_session = await getHttpsSession();

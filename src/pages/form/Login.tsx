@@ -92,8 +92,8 @@ export const Login = () => {
           <img
             src={logo}
             alt="logo"
-            class="h:70px @fade|.5s"
-            style={{ "justify-self": "center" }}
+            class="@fade|.5s"
+            style={{ "justify-self": "center" ,height:'70px' }}
           />
         }
       >
@@ -101,8 +101,8 @@ export const Login = () => {
           <img
             src={formData().profileImage}
             alt="logo"
-            class="h:130px r:10 @fade|.5s bg:white p:2"
-            style={{ "justify-self": "center" }}
+            class="r:10 @fade|.5s bg:white p:2"
+            style={{ "justify-self": "center", height: '130px' }}
           />
           <div class="m:10">
             <span>Welcome Back,</span>
@@ -123,8 +123,9 @@ export const Login = () => {
       >
         <img
           src={"../../public/graphics/login_vector.jpg"}
+          style={{ width:'25rem'}}
           alt="logo"
-          class="w:25rem d:none@<md"
+          class="d:none@<md"
         />
         <div class="mt:25 w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">Log In</div>

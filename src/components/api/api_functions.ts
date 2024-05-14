@@ -42,6 +42,7 @@ export const contactUsCall = async (formData: any) =>
   await makeAPICall(API.profileUrl, {
     panel: "supportTicket",
     action: "create",
+    uId: formData().uId,
     name: formData().name,
     email: formData().email.toLowerCase(),
     subject: formData().subject,

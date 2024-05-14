@@ -26,7 +26,7 @@ export async function POST({ request }: APIEvent, event: HTTPEvent) {
       fs.writeFileSync(imagePath, data[0].data);
       return {
         message: "File saved successfully",
-        newFilename: `/public/profile_images/${subdomain}/${newFilename}`,
+        newFilename: `/profile_images/${subdomain}/${newFilename}`,
       };
     } else {
       return { error: "No file data available" };

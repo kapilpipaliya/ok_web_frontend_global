@@ -20,8 +20,13 @@ load full page data with all joins when the page loads.
   
 
 Tasks:
-  ✅ instead of alert() use toast()
-  ✅ getNewTxnId set to context and use it
   make mutate api working
-  ✅ when file uploaded add new Date().toISOString()
-  ✅ When file is uploaded, it should be in its own subdomain folder.
+  ✅ Fix Error in PageDesignerDragAndDrop file.
+  ✅ Remove all the signal in this file: ok_web_frontend_global/src/lib/pageStore.ts to context
+
+
+
+  How to use context guide:
+  1. export const CssEditorContext = createContext(); in a separate file.
+  2. Wrap a component with <CssEditorContext.provider value={store}>...</CssEditorContext.provider>
+  3. to use context: const store = useContext(CssEditorContext);

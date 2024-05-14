@@ -26,12 +26,6 @@ import {
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import {
-  hoverId,
-  indicatorPosition,
-  selectedId,
-  setHoverId,
-  setSelectedId,
-  targetId,
   useDragDrop,
 } from "~/lib/pageStore";
 import { Icon } from "@iconify-icon/solid";
@@ -42,7 +36,7 @@ import {
   getCompProps,
   getRowProps,
 } from "~/lib/graph/get/sync/graph_functions";
-
+import { HoverIdContext, IndicatorPositionContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -89,7 +83,10 @@ export const PageItemRender = (props: {
 }) => {
   const parentItems = useContext(PageRenderContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-
+  const [hoverId, setHoverId] = useContext(HoverIdContext);
+  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
+  const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [indicatorPosition, setIndicatorPosition] = useContext(IndicatorPositionContext);
   let { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
@@ -275,7 +272,7 @@ export const PageItemRender = (props: {
                     </Tooltip>
                     <Tooltip content={"Delete"}>
                       <Icon
-                        onclick={deleteLayout}
+                        onClick={() => deleteLayout}
                         icon={"fluent:delete-20-regular"}
                         height={20}
                         width={20}

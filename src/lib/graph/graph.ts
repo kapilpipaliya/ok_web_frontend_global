@@ -61,6 +61,7 @@ export function resetDatabase(setGraph: SetStoreFunction<GraphInterface>) {
       initialSynced: true,
       lastSyncedTime: 0,
       txnId: 0,
+      member: {}
     }),
   );
 }

@@ -11,7 +11,6 @@ import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { Icon } from "@iconify-icon/solid";
 import PageHeader from "~/components/custom/Breadcumb";
-import { getUser } from "~/cypher_api/server/auth/auth";
 import "~/css/tab.css";
 import { createStore } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
@@ -38,6 +37,7 @@ import {
   resetPasswordCall,
   sendChatsSupportCall,
 } from "~/components/api/api_functions";
+import getAPI from "~/components/api/getApi";
 
 function Settings() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -71,15 +71,17 @@ function Settings() {
     username: "",
     email: "",
     id: "",
+    uId: "",
     profileImage: "",
     country: "United States",
   });
   const [isEdit, setIsEdit] = createSignal(false);
-  getUser().then((data: { [key: string]: any }) => {
+  getAPI(API.getUserUrl).then((data: { [key: string]: any }) => {
     setProfileData({
       username: data.properties.username,
       email: data.properties.email,
       id: data.id,
+      uId: data.properties.uId,
       profileImage:
         data.properties.profileImage ??
         "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
@@ -192,6 +194,7 @@ function Settings() {
       const payload = {
         panel: "profile",
         userId: profileData.id,
+        uId: profileData.uId,
         ...updatedData,
       };
       return await postAPI(API.profileUrl, payload);
@@ -220,12 +223,13 @@ function Settings() {
         onSuccess: async (data) => {
           if (data.user) {
             setSelectedImage(null);
-            await getUser().then((data: { [key: string]: any }) => {
+            await getAPI(API.getUserUrl).then((data: { [key: string]: any }) => {
               setIsEdit(false);
               setProfileData({
                 username: data.properties.username.toLowerCase(),
                 email: data.properties.email.toLowerCase(),
                 id: data.id,
+                uId: data.properties.uId,
                 profileImage:
                   data.properties.profileImage ??
                   "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",

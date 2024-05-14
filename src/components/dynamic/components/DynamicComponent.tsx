@@ -4,7 +4,8 @@ import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputF
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
-import { hiddenNodes } from "~/lib/pageStore";
+import { useContext } from "solid-js";
+import { HiddenNodesContext } from "~/lib/contexts";
 
 export const genericInputComponents = [
   "Autocomplete",
@@ -61,6 +62,8 @@ export const DynamicComponent = (props: {
   isRealTime?: boolean;
   txnId?: number;
 }) => {
+  const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
+
   const [field, others] = splitProps(props, [
     "isRealTime",
     "meta",

@@ -1,14 +1,12 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense } from "solid-js";
+import { createSignal, Show, Suspense, useContext } from "solid-js";
 import { Toaster } from "solid-toast";
 import { config } from "~/master.css";
 import { LoadingContext, NewTxnIdContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/layout/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
-import { getNewTxnId } from "./lib/graph/transaction";
-
 export default function App() {
   const loadingSite = createSignal(false);
   return (
@@ -21,14 +19,29 @@ export default function App() {
                 <div id="popup-root" />
                 <Suspense fallback={<LoaderNew />}>
                   {props.children}
-                  <Show when={loadingSite[0]()}>
-                    <LoaderNew />
-                  </Show>
+                  
                 </Suspense>
-                <Toaster />
+                <Show when={loadingSite[0]()} fallback={<Toaster />}>
+                  <div
+                    style={{
+                      position: "fixed",
+                      top: "0",
+                      left: "0",
+                      width: "100%",
+                      height: "100%",
+                      background: "rgba(0, 0, 0, 0.5)",
+                      display: "flex",
+                      'justify-content': "center",
+                      'align-items': "center",
+                      'z-index': "9999",
+                    }}
+                  >
+                    <Toaster />
+                  </div>
+                </Show>
               </MetaProvider>
             </LoadingContext.Provider>
-          </CSSRuntimeProvider>
+     </CSSRuntimeProvider>
         );
       }}
     >

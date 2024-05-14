@@ -7,11 +7,12 @@ import {
   isIntegerId,
 } from "~/cypher_api/server/driver";
 import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
-import { getGraph } from "~/cypher_api/lib/graph";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { checkPropertyExists } from "~/cypher_api/functions/db_functions";
+import { getGraph } from "~/cypher_api/lib/graph";
+import { v4 as uuidv4 } from 'uuid';
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
@@ -101,10 +102,12 @@ async function createUserInDB(
   logsPort: any,
   labPort: any,
 ) {
+  const uId = uuidv4();
   let user;
   // Create user in a Main database without password
   const createUserQuery = `CREATE (u:User {
             username: $username,
+            uId:$uId,
             email: $email,
             password: $password,
             subdomain: $subdomain,
@@ -115,6 +118,7 @@ async function createUserInDB(
         }) RETURN u;`;
   const createUserResult = await tx.run(createUserQuery, {
     username,
+    uId,
     email,
     password: subdomainFromUrl === "super" ? null : password,
     subdomain,
@@ -130,6 +134,7 @@ async function createUserInDB(
     const session2 = (await getDriverWithPort(driverPort)).session();
     const createUserQuery2 = `CREATE (u:User {
                 username: $username,
+                uId:$uId,
                 email: $email,
                 password: $password,
                 subdomain: $subdomain,
@@ -140,6 +145,7 @@ async function createUserInDB(
             }) RETURN u;`;
     await session2.run(createUserQuery2, {
       username,
+      uId,
       email,
       password,
       subdomain,
@@ -183,6 +189,8 @@ async function PortConfigure(
       [logsPort]: "7444",
       [labPort]: "3000",
     });
+
+    await new Promise((resolve, reject) => setTimeout(resolve,5000))
 
     // Update port configuration in the database
     const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} RETURN n;`;

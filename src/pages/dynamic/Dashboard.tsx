@@ -13,12 +13,13 @@ import {
 } from "~/lib/graph/mutate/vertex";
 import "~/css/base.css";
 import "~/css/modal.css";
-import { getUser } from "~/cypher_api/server/auth/auth";
 import { LoadingContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
 import Sidebar from "~/components/layout/Sidebar";
 import { signOutCall } from "~/components/api/api_functions";
 import { createStore } from "solid-js/store";
+import getAPI from "~/components/api/getApi";
+import { API } from "~/components/api/DataFetcher";
 
 const border = "|solid|rgb(212,219,231)";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
@@ -123,7 +124,7 @@ const DropdownMenu = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-  getUser().then((value) => {
+  getAPI(API.getUserUrl).then((value) => {
     setGraph("member", value);
   });
 

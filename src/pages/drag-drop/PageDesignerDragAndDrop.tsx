@@ -41,19 +41,8 @@ import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { Icon } from "@iconify-icon/solid";
 import {
-  hiddenNodes,
-  hoverId,
-  indicatorPosition,
   propertiesVertexId,
-  selectedComponent,
-  selectedId,
-  setDraggedVertex,
-  setHiddenNodes,
-  setHoverId,
   setPropertyValueGlobal,
-  setSelectedColl,
-  setSelectedComponent,
-  setSelectedId,
   useDragDrop,
 } from "~/lib/pageStore";
 import {
@@ -72,10 +61,19 @@ import ResizableContainer from "~/components/custom/ResizableDivView";
 import { FieldAttribute } from "~/lib/Type";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { Accessor } from "solid-js";
-import { NewTxnIdContext } from "~/lib/contexts";
+import { DraggedVertexContext, HiddenNodesContext, HoverIdContext, IndicatorPositionContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
 
 export const PageDesignerDragAndDrop = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [hoverId, setHoverId] = useContext(HoverIdContext);
+  const [selectedColl, setSelectedColl] = useContext(SelectedCollContext);
+  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
+  const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
+  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  const [indicatorPosition, setIndicatorPosition] = useContext(IndicatorPositionContext);
+
   const params = useParams();
   const pageConfig = createStore({} as { formData: IFormContext });
   const [count] = createSignal(1);
@@ -472,15 +470,13 @@ export const PageDesignerDragAndDrop = () => {
             // onDragEnter={handleDragEnter}
             // onDragLeave={handleDragLeave}
             onDrop={handleDrop}
-            class={`${
-              isSelectedLayoutId(props.vertex.id)
-                ? "bg:rgb(197,221,255)"
-                : isSelectedHoverId(props.vertex.id)
-                  ? "bg:#F2EDED"
-                  : ""
-            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${
-              children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
-            }`}
+            class={`${isSelectedLayoutId(props.vertex.id)
+              ? "bg:rgb(197,221,255)"
+              : isSelectedHoverId(props.vertex.id)
+                ? "bg:#F2EDED"
+                : ""
+              } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+              }`}
             classList={{
               "b:1px":
                 isActiveItem() && indicatorPosition().position === "center",
@@ -498,7 +494,7 @@ export const PageDesignerDragAndDrop = () => {
               "font-weight": children().length ? "bold" : "normal",
               "margin-bottom":
                 children().length ||
-                !(isActiveItem() && indicatorPosition().position === "after")
+                  !(isActiveItem() && indicatorPosition().position === "after")
                   ? "0px"
                   : "10px",
               "box-shadow": children().length
@@ -539,11 +535,10 @@ export const PageDesignerDragAndDrop = () => {
                     style={{
                       transition: "transform 0.2s linear",
                       "margin-top": "7px",
-                      transform: `${
-                        collapsedKeys().includes(props.vertex.id)
-                          ? "rotate(0deg)"
-                          : "rotate(180deg)"
-                      }`,
+                      transform: `${collapsedKeys().includes(props.vertex.id)
+                        ? "rotate(0deg)"
+                        : "rotate(180deg)"
+                        }`,
                     }}
                   />
                 </button>
@@ -606,9 +601,8 @@ export const PageDesignerDragAndDrop = () => {
                 }
               >
                 <Tooltip
-                  content={`${
-                    !hiddenNodes().includes(props.vertex.id) ? "Hide" : "Show"
-                  }`}
+                  content={`${!hiddenNodes().includes(props.vertex.id) ? "Hide" : "Show"
+                    }`}
                   nowrap
                 >
                   <button
@@ -803,9 +797,8 @@ export const PageDesignerDragAndDrop = () => {
                       nameExpr: (v: Vertex) => {
                         const component = getChildVertex(graph, ["$0Comp"], v)
                           .vertex?.P.name;
-                        return `${v.P.name}${
-                          component ? ` (${component})` : ""
-                        }`;
+                        return `${v.P.name}${component ? ` (${component})` : ""
+                          }`;
                       },
                     },
                   );
@@ -1257,9 +1250,8 @@ export const PageDesignerDragAndDrop = () => {
                     "border-radius": "50%",
                     "margin-left": "5px",
                     transition: "transform 0.2s linear",
-                    transform: `${
-                      isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                    }`,
+                    transform: `${isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                      }`,
                   }}
                   class="flex-1"
                 />
@@ -1321,11 +1313,10 @@ export const PageDesignerDragAndDrop = () => {
                           "border-radius": "50%",
                           "margin-left": "5px",
                           transition: "transform 0.2s linear",
-                          transform: `${
-                            isComponentOpen()
-                              ? "rotate(0deg)"
-                              : "rotate(180deg)"
-                          }`,
+                          transform: `${isComponentOpen()
+                            ? "rotate(0deg)"
+                            : "rotate(180deg)"
+                            }`,
                         }}
                         class="flex-1"
                       />
@@ -1393,9 +1384,8 @@ export const PageDesignerDragAndDrop = () => {
                           "border-radius": "50%",
                           "margin-left": "5px",
                           transition: "transform 0.2s linear",
-                          transform: `${
-                            isPagesOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                          }`,
+                          transform: `${isPagesOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                            }`,
                         }}
                         class="flex-1"
                       />
@@ -1446,11 +1436,10 @@ export const PageDesignerDragAndDrop = () => {
                           "border-radius": "50%",
                           "margin-left": "5px",
                           transition: "transform 0.2s linear",
-                          transform: `${
-                            isCollFieldsOpen()
-                              ? "rotate(0deg)"
-                              : "rotate(180deg)"
-                          }`,
+                          transform: `${isCollFieldsOpen()
+                            ? "rotate(0deg)"
+                            : "rotate(180deg)"
+                            }`,
                         }}
                         class="flex-1"
                       />
@@ -1501,9 +1490,8 @@ export const PageDesignerDragAndDrop = () => {
                           "border-radius": "50%",
                           "margin-left": "5px",
                           transition: "transform 0.2s linear",
-                          transform: `${
-                            isLayoutOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                          }`,
+                          transform: `${isLayoutOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                            }`,
                         }}
                         class="flex-1"
                       />
@@ -1569,9 +1557,8 @@ export const PageDesignerDragAndDrop = () => {
                           "border-radius": "50%",
                           "margin-left": "5px",
                           transition: "transform 0.2s linear",
-                          transform: `${
-                            isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                          }`,
+                          transform: `${isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
+                            }`,
                         }}
                         class="flex-1"
                       />
@@ -1609,7 +1596,7 @@ export const PageDesignerDragAndDrop = () => {
   const getStepId = () => {
     return steps()
       .map((step) => (step.active ? step.id : null))
-      .find((id) => id !== null);
+      .find((id) => id !== null)!;
   };
 
   const NavigationBar = ({
@@ -1626,7 +1613,7 @@ export const PageDesignerDragAndDrop = () => {
         active: boolean;
       }[]
     >;
-    getStepId: () => number | null | undefined;
+    getStepId: () => number;
     onChangeStep: (selectedStepId: number) => void;
   }) => (
     <nav aria-label="Progress">
@@ -1643,7 +1630,7 @@ export const PageDesignerDragAndDrop = () => {
               >
                 <Show when={step.id !== 3}>
                   <div
-                    class={`h:0.125rem width:100% bg:${step.id < getStepId() ? "rgb(79,70,229)" : "rgb(229,231,235)"}`}
+                    class={`h:0.125rem width:100% bg:${step.id < getStepId()! ? "rgb(79,70,229)" : "rgb(229,231,235)"}`}
                   />
                 </Show>
               </div>
@@ -1670,7 +1657,7 @@ export const PageDesignerDragAndDrop = () => {
                           ? "solar:eye-broken"
                           : "grommet-icons:share-rounded"
                     }
-                    style={{ color: step.id < getStepId() ? "white" : "black" }}
+                    style={{ color: step.id < getStepId()! ? "white" : "black" }}
                   />
                   <span class="sr-only">Step {step.id}</span>
                 </a>

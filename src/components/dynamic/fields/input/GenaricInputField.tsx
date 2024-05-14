@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
-import { ComponentProps } from "~/lib/ComponentType";
 import {
   Checkbox,
   Progress,
@@ -17,12 +16,13 @@ import {
   TextField,
 } from "~/components/solid-blocks/blocks";
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
-import { setSelectedId } from "~/lib/pageStore";
 import { getTextColumnValue } from "~/lib/Utils";
 import { setValueGlobal } from "~/lib/graph/get/sync/graph_fns";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
+import { ComponentProps } from "~/components/ComponentType";
+import { SelectedIdContext } from "~/lib/contexts";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -42,7 +42,7 @@ export function GenericInputField(
     "title",
     "txnId",
   ]);
-
+const [selectedId,setSelectedId] = useContext(SelectedIdContext);
   const component = () => field.component;
   return (
     <div

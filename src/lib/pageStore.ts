@@ -1,54 +1,32 @@
+import jsep from "jsep";
 import {
   Accessor,
   batch,
   createMemo,
   createSelector,
-  createSignal,
   untrack,
+  useContext
 } from "solid-js";
-import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
-import { getNewGraphId } from "./graph/transaction";
-import {
-  addNewRow,
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions,
-} from "./graph/get/sync/graph_fns";
-import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { SetStoreFunction, Store, reconcile } from "solid-js/store";
+import { useToast } from "~/components/custom/Toast";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import { DraggedVertexContext, HoverIdContext, IndicatorPositionContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext, TargetIdContext } from "~/lib/contexts";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   getCompProps,
   getRowProps,
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { cloneRowProps } from "./graph/mutate/form_functions";
-import { reconcile, SetStoreFunction, Store } from "solid-js/store";
-import { evaluate } from "~/lib/jsep";
-import jsep from "jsep";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { deleteNestedLayout } from "~/lib/graph/get/sync/traverse";
-import { useToast } from "~/components/custom/Toast";
+import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { evaluate } from "~/lib/jsep";
 
-export const [selectedColl, setSelectedColl] = createSignal({ vertexId: -1 });
+import { cloneRowProps } from "./graph/mutate/form_functions";
+import { getNewGraphId } from "./graph/transaction";
+import { getChildVertexes, addNewRow, getSelectionOptions, getChildVertex, getParentVertex } from "./graph/get/sync/graph_fns";
 
-export const [hoverId, setHoverId] = createSignal<Id>(-1);
-export const [selectedId, setSelectedId] = createSignal<Id>(-1);
-export const [targetId, setTargetId] = createSignal<Id>(-1);
-export const [hiddenNodes, setHiddenNodes] = createSignal([] as Id[]);
-
-export const [selectedComponent, setSelectedComponent] = createSignal({
-  vertexId: -1,
-});
-export const [draggedVertex, setDraggedVertex] = createSignal<Vertex | null>(
-  null,
-);
-
-export const [indicatorPosition, setIndicatorPosition] = createSignal({
-  activeItem: null as null | Id,
-  position: null as "before" | "after" | "center" | null,
-});
 export const propertiesVertexId = getNewGraphId();
 
 const addPropsToLayoutRow = (
@@ -342,6 +320,13 @@ export const useDragDrop = (
   collapsedKeys?: Accessor<Id[]>,
   isPreview?: boolean,
 ) => {
+  const [hoverId, setHoverId] = useContext(HoverIdContext);
+  const [selectedColl, setSelectedColl] = useContext(SelectedCollContext);
+  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
+  const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  const [indicatorPosition, setIndicatorPosition] = useContext(IndicatorPositionContext);
   const { showErrorToast, showSuccessToast } = useToast();
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, vertex));
 
@@ -631,8 +616,9 @@ export const useDragDrop = (
     setDraggedVertex(null);
 
     // Handle drop action here
-    setIndicatorPosition({});
-    setTargetId(undefined);
+
+    setIndicatorPosition({ activeItem: null, position: null });
+    setTargetId(-1);
   };
 
   const clone = () => {

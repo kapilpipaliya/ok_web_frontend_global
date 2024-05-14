@@ -5,6 +5,7 @@ import {
   Node as Neo4jNode,
   Relationship as Neo4jRelationship,
 } from "neo4j-driver";
+import { Edge, GraphInterface, Vertex } from "~/lib/graph/graph";
 
 export type Id = number | string | any;
 
@@ -41,19 +42,23 @@ export type EdgeMap = { [key: string]: Relationship };
 // temporary we start from 500000 because newId should not conflict with existing Ids
 let uniqueId = -50000;
 
-export interface IGraph {
-  vertexes: VertexMap;
-  edges: EdgeMap;
-  vertexLabelIdMap: { [key: string]: Id[] };
-  member?: { [key: string]: any } | null;
-}
+// export interface GraphInterface {
+//   vertexes: VertexMap;
+//   edges: EdgeMap;
+//   vertexLabelIdMap: { [key: string]: Id[] };
+//   member?: { [key: string]: any } | null;
+// }
 
 export const getGraph = () =>
-  createStore<IGraph>({
-    vertexes: {} as VertexMap,
-    edges: {} as EdgeMap,
+  createStore<GraphInterface>({
+    _isPartialSynced: true,
+    vertexes: {} as { [key: string]: Vertex },
+    edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },
+    initialSynced: true,
+    lastSyncedTime: 0,
     member: {},
+    txnId: 0,
   });
 export type Revert = { revert: () => any };
 export type InsertFn = {

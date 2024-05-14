@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import { createEffect, createSignal, onCleanup, useContext } from "solid-js";
 import {
   APP_BASE_URL,
   validateEmail,
@@ -11,12 +11,14 @@ import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import "~/css/base.css";
 import { registerUserCall } from "~/components/api/api_functions";
+import { LoadingContext } from "~/lib/contexts";
+import toast from "solid-toast";
 
 export const SignUp = () => {
   // const {Ws} = useContext(WsContext);
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
-  const [loadingSite, setLoadingSite] = createSignal(false);
+  const [loadingSite, setLoadingSite] = useContext(LoadingContext);
 
   const [formData, setFormData] = createSignal({
     username: "",
@@ -51,12 +53,15 @@ export const SignUp = () => {
         loadMessage: "Registering User...",
         successMessage: "Registered Successfully",
         onSuccess: (value) => {
+          setLoadingSite(false);
           if (value != null && value.id !== null) {
             navigate(`${APP_BASE_URL}/Page`);
           }
         },
+        onError:(v)=>{
+          setLoadingSite(false);
+        }
       });
-      setLoadingSite(false);
     }
   };
 

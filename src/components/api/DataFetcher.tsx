@@ -40,4 +40,5 @@ export const API = {
   getFormDataUrl: `/api/get_form_data`,
   SubmitDataUrl: `/api/submit_data`,
   getPagesDataUrl: `/api/get_pages_data`,
+  getUserUrl: `/api/get_user`,
 };
