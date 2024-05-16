@@ -24,14 +24,15 @@ import { klona } from "klona";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { FormContext } from "~/lib/Utils";
 import {
-  addMetaVertexes,
-  addNewRow,
-  deleteRow,
   getChildVertex,
   getChildVertexes,
-  getSelectionOptions,
-  getSublistRows,
-} from "~/lib/graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
+import {
+  addMetaVertexes,
+  addNewRow, getSublistRows
+} from "~/lib/graph/mutate/form_functions";
+import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { ComponentProps } from "~/components/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {

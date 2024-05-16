@@ -36,7 +36,7 @@ import {
 import { AdminAttrKeys, AttrsTableData } from "~/cypher_api/lib/api";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "~/cypher_api/lib/dbs";
+import { DBConnection } from "~/cypher_api/functions/dbs";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";

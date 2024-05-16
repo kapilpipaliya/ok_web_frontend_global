@@ -21,10 +21,10 @@ import {
   PropertiesVertexIdContext,
 } from "~/lib/contexts";
 import {
-  addMetaVertexes,
   getChildVertex,
-  getChildVertexes,
-} from "~/lib/graph/get/sync/graph_fns";
+  getChildVertexes
+} from "~/lib/graph/get/sync/traverse";
+import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
 import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
   revertTransactionUpTo,

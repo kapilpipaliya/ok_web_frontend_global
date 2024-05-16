@@ -7,7 +7,7 @@ import {
   useContext,
 } from "solid-js";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
-import { getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
+import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 
 export const treeContext = createContext<null | [Accessor<Id[]>, Setter<Id[]>]>(

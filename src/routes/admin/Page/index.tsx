@@ -1,4 +1,4 @@
-import { AbstractSingleGrid } from "~/pages/dynamic/Grids";
+import { DataGrid } from "~/pages/dynamic/GridData";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function page() {
@@ -6,7 +6,7 @@ export default function page() {
     <>
       <DataFetcher
         fetchData={API.getPagesDataUrl}
-        renderContent={<AbstractSingleGrid tableId={"Page"} />}
+        renderContent={<DataGrid tableId={"Page"} />}
       />
     </>
   );

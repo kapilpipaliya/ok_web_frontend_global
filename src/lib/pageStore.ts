@@ -27,7 +27,7 @@ import {
   getRowProps,
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
-import { deleteNestedLayout } from "~/lib/graph/get/sync/traverse";
+import { deleteNestedLayout } from "./graph/mutate/deleteNestedLayout";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { evaluate } from "~/lib/jsep";
@@ -35,12 +35,12 @@ import { evaluate } from "~/lib/jsep";
 import { cloneRowProps } from "./graph/mutate/form_functions";
 import { getNewGraphId } from "./graph/transaction";
 import {
-  addNewRow,
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions,
-} from "./graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "./graph/get/sync/traverse";
+import { addNewRow } from "./graph/mutate/form_functions";
 
 const addPropsToLayoutRow = (
   graph: Store<GraphInterface>,

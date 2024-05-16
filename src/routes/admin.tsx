@@ -13,7 +13,7 @@ import {
 } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
-import { MainDashboard } from "~/pages/dynamic/MainDashboard";
+import { MainDashboard } from "~/pages/dashboard/MainDashboard";
 
 export default function UsersLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);

@@ -8,28 +8,10 @@ import jsep from "jsep";
 import { deleteRow } from "~/cypher_api/lib/record";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "~/cypher_api/lib/dbs";
+import { DBConnection } from "~/cypher_api/functions/dbs";
 import { GraphInterface } from "~/lib/graph/graph";
 
-export function getToEdge(meta: Node, vertex: Node): string {
-  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
-  const attributeId = meta.P[IdAttr];
-  return (
-    capitalizeFirstLetter(vertex.L[0]) + capitalizeFirstLetter(attributeId)
-  );
-}
-
-export function getSelectedVertexValueLocal(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  vertex: Node,
-  meta: Node,
-) {
-  if (!vertex?.L) return [];
-  const type = getToEdge(meta, vertex);
-  return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
-}
 
 export async function getSelectedVertexValue(
   dbConn: DBConnection,

@@ -21,8 +21,8 @@ import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { useDragDrop } from "~/lib/pageStore";

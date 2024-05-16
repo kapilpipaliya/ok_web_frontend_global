@@ -27,10 +27,12 @@ import {
 import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
 import {
   getChildVertex,
-  getSelectionOptions,
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
+import {
   onChangeHandler,
-  setValueGlobal,
-} from "~/lib/graph/get/sync/graph_fns";
+  setValueGlobal
+} from "~/lib/graph/mutate/form_functions";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/components/ComponentType";

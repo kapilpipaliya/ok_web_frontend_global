@@ -1,21 +1,14 @@
-import { klona } from "klona/json";
-import { AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions,
-  getSublistRows,
-  getSublistRowsForType,
-} from "~/lib/graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "./traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
-import { useToast } from "~/components/custom/Toast";
 
 export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
@@ -310,152 +303,6 @@ export function getNameKeyForCollection(
   return pks.map((pk) => pk.P.name);
 }
 
-// 'type' or 'label' can be overwritten in the meta.
-
-export const getFormMetaData = (
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  formId: string,
-) => {
-  let form =
-    AttrsTableData[formId] ||
-    (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
-
-  if (!form) {
-    const formResult = getFormApiFromForm(graph, setGraph, formId);
-    if (formResult.error) return formResult;
-    form = formResult.form!;
-  }
-  return { error: false, form };
-};
-
-export const getExportCode = (
-  graph: Store<GraphInterface>,
-  meta: Vertex,
-  data: Vertex,
-) => {
-  const getChildren = (
-    meta: Vertex,
-    vertex: Vertex,
-    result: {
-      [key: string]: any;
-    },
-  ) => {
-    const { showErrorToast } = useToast();
-
-    const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
-    // const props = meta.P.props || {};
-
-    const selectMetaVertexes = metaVertexes.filter((meta) =>
-      ["SelectBox", "TagBox"].includes(meta.P.component),
-    );
-    const tableMetaVertexes = metaVertexes.filter((meta) =>
-      ["Table"].includes(meta.P.component),
-    );
-
-    for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
-      } else {
-        const type = getToEdge(metaVertex, vertex);
-        // also can use selectedValue function;
-        const childVertexes = getSublistRows(graph, metaVertex, vertex);
-
-        for (const v of childVertexes) {
-          // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
-          // so get Primary Key from Vertex itself.
-          const label = v.L[0];
-          if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
-            const pksResult = {} as { [primaryKey: string]: any };
-            pksResult["name"] = v.P["name"];
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any }[];
-              };
-            }
-            result["OUT"][type] = [pksResult];
-            // getChildren(metaVertex, v, pksResult);
-          } else {
-            const collVertex = findVertexByLabelAndUniqueId(
-              graph,
-              "Coll",
-              "name",
-              label,
-            );
-            if (!collVertex) {
-              showErrorToast(`Collection not defined: ${label}`);
-              continue;
-            }
-            const pks = getPkForCollection(graph, collVertex);
-
-            const pksResult = {} as { [primaryKey: string]: any };
-            for (const pk of pks) {
-              pksResult[pk] = v.P[pk];
-            }
-            if (pks.length === 0) {
-              pksResult["name"] = v.P["name"];
-            }
-
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any }[];
-              };
-            }
-
-            if (!result["OUT"][type]) {
-              result["OUT"][type] = [pksResult];
-            } else {
-              result["OUT"][type].push(pksResult);
-            }
-            // getChildren(metaVertex, v, pksResult);
-          }
-        }
-      }
-    }
-    for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
-
-      if (metaProps.inward) {
-        // not possible now
-      } else {
-        const type = getToEdge(metaVertex, vertex);
-        const childVertexes = getSublistRows(graph, metaVertex, vertex);
-
-        const out = childVertexes.map((v) =>
-          getChildren(metaVertex, v, {
-            ...klona(v),
-            L: v.L[0],
-            IN: undefined,
-            OUT: undefined,
-            id: undefined,
-            D: undefined,
-          }),
-        );
-        if (out.length > 0) {
-          if (!result["OUT"]) {
-            result["OUT"] = { [type]: out } as {
-              [EdgeType: string]: { [primaryKey: string]: any }[];
-            };
-          } else result["OUT"][type] = out;
-        }
-      }
-    }
-
-    return result;
-  };
-
-  return getChildren(meta, data, {
-    ...klona(data),
-    L: data.L[0],
-    IN: undefined,
-    OUT: undefined,
-    id: undefined,
-    D: undefined,
-  });
-};
-
 export function getStringComponent(
   graph: Store<GraphInterface>,
   attrDataTypeVertex?: Vertex,
@@ -487,4 +334,25 @@ export function getCollAttrComp(
     attrVertex,
   ).vertex;
   return getStringComponent(graph, attrDataTypeVertex);
-}
+}// This method read all property vertexes and make an object.
+
+export const getProps = (
+  meta: Vertex,
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>
+) => (getChildVertexes(graph, ["$0Prop"], [meta]).vertexes || []).reduce(
+  (acc, curr) => {
+    const key = getSelectionOptions(
+      graph,
+      setGraph,
+      [curr],
+      "T:(->$0Key::'P.key')"
+    ).vertexes;
+    if (key) {
+      acc[key] = curr.P.value;
+    }
+    return acc;
+  },
+  {} as { [key: string]: any; }
+);
+

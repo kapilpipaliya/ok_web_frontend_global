@@ -9,7 +9,7 @@ import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm"
 import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/import";
 import { GraphContext } from "~/lib/graph/graph";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
-import { getExportCode } from "~/lib/graph/get/sync/graph_functions";
+import { getExportCode } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 
 /*

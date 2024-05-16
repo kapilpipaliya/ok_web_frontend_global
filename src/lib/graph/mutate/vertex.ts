@@ -85,7 +85,9 @@ export function replaceVertexProperties(
   }
   const originalProperties = klona(graph.vertexes[vertexId].P);
   setGraph("vertexes", vertexId, "P", reconcile(klona(properties)));
+  const data = klona(graph.vertexes[vertexId]);
   transactionDetailAdd(txnId, {
+    data,
     replace: () => klona(graph.vertexes[vertexId]),
     revert: () =>
       replaceVertexProperties(0, vertexId, graph, setGraph, originalProperties),
@@ -186,8 +188,8 @@ export function deleteVertex(
   }
 
   batch(() => {
-    // @ts-ignore
     graph.vertexes[vertexId].L.forEach((label) =>
+      // @ts-ignore
       setGraph("vertexLabelIdMap", label, (vertexIds) =>
         Array.isArray(vertexIds) && vertexIds.includes(vertexId)
           ? pipe(

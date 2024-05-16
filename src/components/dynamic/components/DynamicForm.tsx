@@ -18,12 +18,13 @@ import { createStore, SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
 import { FormContext, groupBy } from "~/lib/Utils";
 import {
-  createForm,
-  createMeta,
   getChildVertexes,
-  getSelectionOptions,
-  loadForm,
-} from "~/lib/graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
+import {
+  createForm,
+  createMeta, loadForm
+} from "~/lib/graph/mutate/form_functions";
 import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {

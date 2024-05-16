@@ -26,7 +26,7 @@ import {
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "~/cypher_api/lib/dbs";
+import { DBConnection } from "~/cypher_api/functions/dbs";
 import { GraphInterface } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 

@@ -1,15 +1,15 @@
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
-import { getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
+import { getChildVertexesAsync } from "./traverse";
 import { useContext } from "solid-js";
 
 export async function getPermissionsAsync(meta: Vertex) {
   const permissionResult = [] as [Id[], string][];
   const [graph, setGraph] = useContext(GraphContext)!;
 
-  const roleRows = getChildVertexes(graph, ["$0Role"], [meta]);
+  const roleRows = await getChildVertexesAsync(graph, ["$0Role"], [meta]);
   if (!roleRows.error) {
     for (const roleRow of roleRows.vertexes!) {
-      const roles = getChildVertexes(graph, ["$0Role"], [roleRow]);
+      const roles = await getChildVertexesAsync(graph, ["$0Role"], [roleRow]);
       if (!roles.error) {
         const allowedRoleIds = new Set<number>();
         for (const role of roles.vertexes!) {
@@ -18,10 +18,10 @@ export async function getPermissionsAsync(meta: Vertex) {
           }
         }
         if (allowedRoleIds.size > 0) {
-          const permissionRows = getChildVertexes(graph, ["$0Perm"], [roleRow]);
+          const permissionRows = await getChildVertexesAsync(graph, ["$0Perm"], [roleRow]);
           if (!permissionRows.error) {
             for (const permissionRow of permissionRows.vertexes!) {
-              const permissions = getChildVertexes(
+              const permissions = await getChildVertexesAsync(
                 graph,
                 ["$0Perm"],
                 [permissionRow],

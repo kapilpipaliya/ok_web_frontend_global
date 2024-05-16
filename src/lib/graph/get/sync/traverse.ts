@@ -1,10 +1,11 @@
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
-import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
-import { deleteRow, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
+import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
+import jsep from "jsep";
+import { replaceExpressionToLabel } from "../../../Utils";
 
 export function getSelectedVertexValue(
   graph: Store<GraphInterface>,
@@ -158,43 +159,6 @@ export const getTreeData = (
   return getChildren(treeLevels, vertexes);
 };
 
-export const deleteNestedLayout = (
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number,
-  vertexes: Vertex[] = [],
-  options?: {
-    nameExpr?: (child: Vertex) => string;
-    addChild?: (child: Vertex) => boolean;
-  },
-) => {
-  const deleteChildren = (vertexes: Vertex[]) => {
-    const children = getChildVertexes(graph, ["Attr"], vertexes);
-    for (const child of children.vertexes || []) {
-      // delete children
-      deleteChildren([child]);
-
-      // delete properties:
-      const AttrProps = getChildVertexes(graph, ["AttrProp"], vertexes);
-      if (!AttrProps.error) {
-        for (const vertex of AttrProps.vertexes!) {
-          // delete in edges and out edges of properties
-          deleteRow(vertex, false, graph, setGraph, txnId, {} as any);
-          // no commitTxn because, it's not realtime
-        }
-      }
-
-      // delete in edges and out edges and attr
-      deleteRow(child, false, graph, setGraph, txnId, {} as any);
-    }
-  };
-
-  deleteChildren(vertexes);
-  for (const child of vertexes) {
-    deleteRow(child, false, graph, setGraph, txnId, {} as any);
-  }
-};
-
 export const getTextValue = (value: any) => {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
@@ -202,4 +166,190 @@ export const getTextValue = (value: any) => {
     return JSON.stringify(value);
   }
   return value;
-};
+};export function getSelectionOptions(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  vertex: Vertex[],
+  collection: string,
+  strict?: boolean
+): { error: boolean; vertexes?: any; } {
+  collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
+  try {
+    const value = evaluate(jsep(collection), {
+      vertexes: vertex,
+      graph,
+      setGraph,
+    });
+    if (value) {
+      return { error: false, vertexes: value };
+    } else {
+      return { error: true };
+    }
+  } catch (e) {
+    console.error(e, vertex, collection);
+    return { error: true };
+  }
+}
+
+export function getChildVertex(
+  graph: Store<GraphInterface>,
+  path: string[],
+  currentVertex: Vertex
+): {
+  error: boolean;
+  vertex?: Vertex;
+} {
+  if (path.length === 0)
+    return {
+      error: true,
+    };
+
+  let type = path[0];
+  let filter = "";
+
+  const filterIndex = type.indexOf("[");
+  if (filterIndex > -1) {
+    filter = type.slice(filterIndex);
+    // modify the variable itself
+    type = type.slice(0, filterIndex);
+  }
+  if (type.includes("$0")) {
+    if (!currentVertex.L)
+      return {
+        error: true,
+      };
+    type = type.replace("$0", currentVertex.L[0]);
+  }
+  let vertexes = (currentVertex.OUT[type] || []).map(
+    (edgeId) => graph.vertexes[graph.edges[edgeId].E]
+  );
+
+  if (filter) {
+    // TODO:
+    // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'component')
+  }
+  if (vertexes.length != 1) {
+    return {
+      error: true,
+    };
+  } else {
+    const newVertex = vertexes[0];
+    if (newVertex) {
+      if (path.length > 1) {
+        return getChildVertex(graph, path.slice(1), newVertex);
+      } else {
+        return {
+          error: false,
+          vertex: newVertex,
+        };
+      }
+    } else {
+      return {
+        error: true,
+      };
+    }
+  }
+}
+
+export function getParentVertex(
+  path: string[],
+  currentVertex: Vertex,
+  graph: Store<GraphInterface>
+): {
+  error: boolean;
+  vertex?: Vertex;
+} {
+  const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
+  const edges = currentVertex.IN[type];
+  if (!edges || (edges && edges.length != 1)) {
+    return {
+      error: true,
+    };
+  } else {
+    const edge = graph.edges[edges[0]];
+    if (edge) {
+      const newVertex = graph.vertexes[edge.S];
+      if (newVertex) {
+        if (path.length > 1) {
+          return getParentVertex(path.slice(0, -1), newVertex, graph);
+        } else {
+          return {
+            error: false,
+            vertex: newVertex,
+          };
+        }
+      } else {
+        return {
+          error: true,
+        };
+      }
+    } else {
+      return {
+        error: true,
+      };
+    }
+  }
+}
+
+export function getChildVertexes(
+  graph: Store<GraphInterface>,
+  path: string[],
+  currentVertexes: Vertex[],
+  strict?: boolean
+): { error: boolean; vertexes?: Vertex[]; } {
+  const stepVertexes = new Map<number, Vertex>();
+  if (path.length == 0) {
+    return { error: true };
+  }
+  let type = path[0];
+  for (const currentVertex of currentVertexes) {
+    if (type.includes("$0")) {
+      if (!currentVertex.L) continue;
+      type = type.replace("$0", currentVertex.L[0]);
+    }
+    const edgeIds = currentVertex.OUT?.[type] || [];
+    if (edgeIds.length == 0) {
+      // we only return error if its in middle of path
+      if (strict && path.length > 1) {
+        return {
+          error: true,
+        };
+      } else {
+        continue;
+      }
+    }
+
+    for (const edgeId of edgeIds) {
+      const edge = graph.edges[edgeId];
+      if (edge) {
+        const newVertex = graph.vertexes[edge.E];
+        if (newVertex) {
+          stepVertexes.set(newVertex.id, newVertex);
+        } else {
+          return {
+            error: true,
+          };
+        }
+      } else {
+        return {
+          error: true,
+        };
+      }
+    }
+  }
+
+  if (path.length > 1) {
+    return getChildVertexes(
+      graph,
+      path.slice(1),
+      Array.from(stepVertexes.values()),
+      strict
+    );
+  } else {
+    return {
+      error: false,
+      vertexes: Array.from(stepVertexes.values()),
+    };
+  }
+}
+

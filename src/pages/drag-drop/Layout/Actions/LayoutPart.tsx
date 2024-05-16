@@ -10,7 +10,7 @@ import {
   SelectedIdContext,
   IndicatorPositionContext,
 } from "~/lib/contexts";
-import { getChildVertex } from "~/lib/graph/get/sync/graph_fns";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/pageStore";
 

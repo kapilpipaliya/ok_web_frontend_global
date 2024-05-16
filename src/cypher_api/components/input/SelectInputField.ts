@@ -7,7 +7,7 @@ import {
 } from "~/cypher_api/lib/graph";
 import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/edge";
 import { getInEdge, getToEdge } from "~/cypher_api/lib/traverse";
-import { DBConnection } from "~/cypher_api/lib/dbs";
+import { DBConnection } from "~/cypher_api/functions/dbs";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";

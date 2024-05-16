@@ -42,10 +42,8 @@ import {
   isNumber,
   PageContext,
 } from "~/lib/Utils";
-import {
-  createMeta,
-  getSelectionOptions,
-} from "~/lib/graph/get/sync/graph_fns";
+import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { createMeta } from "~/lib/graph/mutate/form_functions";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -248,7 +246,7 @@ export const AbstractGrid = (props: AbstractGridProps) => {
   );
 };
 
-const DataGrid = (props: DataGridProps) => {
+export const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   let { events } = useContext(PageContext);
   const { Ws } = useContext(WsContext);

@@ -6,8 +6,8 @@ import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import {
   getChildVertex,
-  getSelectionOptions,
-} from "./graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "./graph/get/sync/traverse";
 
 export const APP_BASE_URL = "/admin";
 export const APP_BASE_URL_NAME = "Admin";

@@ -6,12 +6,11 @@ import {
   getDriverWithPort,
   isIntegerId,
 } from "~/cypher_api/server/driver";
-import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
+// import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
-import { getGraph } from "~/cypher_api/lib/graph";
 import { v4 as uuidv4 } from "uuid";
 
 // Define the POST function to handle user registration
@@ -83,12 +82,12 @@ async function updateSession(createUserResult: { [key: string]: any }) {
 }
 
 async function FetchCSVData(driverPort: any) {
-  const [graph, setGraph] = getGraph();
-  await importAllCSV(
-    { driver: await getDriverWithPort(driverPort) },
-    graph,
-    setGraph,
-  );
+  // const [graph, setGraph] = getGraph();
+  // await importAllCSV(
+  //   { driver: await getDriverWithPort(driverPort) },
+  //   graph,
+  //   setGraph,
+  // );
 }
 
 async function createUserInDB(

@@ -10,7 +10,7 @@ import {
 } from "~/components/solid-blocks/blocks";
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
 import { getTextColumnValue } from "~/lib/Utils";
-import { setValueGlobal } from "~/lib/graph/get/sync/graph_fns";
+import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";

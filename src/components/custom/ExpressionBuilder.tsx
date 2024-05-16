@@ -9,7 +9,7 @@ import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 import CustomModal from "./CommonDialog";
-import { setValueGlobal } from "~/lib/graph/get/sync/graph_fns";
+import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
 
 type Option =
   | Record<string, string | number | boolean | unknown>

@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { AbstractSingleGrid } from "~/pages/dynamic/Grids";
+import { DataGrid } from "~/pages/dynamic/GridData";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function Components() {
@@ -11,7 +11,7 @@ export default function Components() {
       renderContent={
         <DataFetcher
           fetchData={API.getPagesDataUrl}
-          renderContent={<AbstractSingleGrid tableId={params.entity} />}
+          renderContent={<DataGrid tableId={params.entity} />}
         />
       }
     />

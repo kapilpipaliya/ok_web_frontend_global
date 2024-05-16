@@ -10,12 +10,11 @@ import {
   untrack,
   useContext,
 } from "solid-js";
+import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import {
-  createMeta,
-  getChildVertex,
-  getSublistRows,
-  getSublistRowsForType,
-} from "~/lib/graph/get/sync/graph_fns";
+  createMeta, getSublistRows,
+  getSublistRowsForType
+} from "~/lib/graph/mutate/form_functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 

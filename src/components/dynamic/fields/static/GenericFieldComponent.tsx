@@ -27,12 +27,13 @@ import {
   getValueFromVertexOrKey,
 } from "~/lib/Utils";
 import {
-  createForm,
-  createMeta,
   getChildVertexes,
-  getSelectionOptions,
-  loadForm,
-} from "~/lib/graph/get/sync/graph_fns";
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
+import {
+  createForm,
+  createMeta, loadForm
+} from "~/lib/graph/mutate/form_functions";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ComponentProps } from "~/components/ComponentType";

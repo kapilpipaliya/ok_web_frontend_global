@@ -1,13 +1,14 @@
 import { isObject } from "~/lib/Utils";
 import {
-  addNewRow,
-  deleteRow,
   getChildVertex,
-  getChildVertexes,
-  getSublistRows,
+  getChildVertexes
+} from "../get/sync/traverse";
+import {
+  addNewRow, getSublistRows,
   getSublistRowsForType,
-  newRow,
-} from "~/lib/graph/get/sync/graph_fns";
+  newRow
+} from "./form_functions";
+import { deleteRow } from "./deleteRow";
 import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "../transaction";
 import {
