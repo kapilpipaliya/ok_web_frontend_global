@@ -31,12 +31,10 @@ export type EdgeMap = { [key: string]: Edge };
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {
-  _isPartialSynced: boolean;
   vertexes: VertexMap;
   edges: EdgeMap;
   vertexLabelIdMap: { [key: string]: Id[] };
   initialSynced: boolean;
-  lastSyncedTime: 0;
   member?: { [key: string]: any } | null;
   txnId: number;
 }
@@ -44,18 +42,3 @@ export interface GraphInterface {
 export const GraphContext = createContext<
   ReturnType<typeof createStore<GraphInterface>>
 >([] as any);
-
-export function resetDatabase(setGraph: SetStoreFunction<GraphInterface>) {
-  setGraph(
-    reconcile({
-      _isPartialSynced: true,
-      vertexes: {} as { [key: string]: Vertex },
-      edges: {} as { [key: string]: Edge },
-      vertexLabelIdMap: {} as { [key: string]: Id[] },
-      initialSynced: true,
-      lastSyncedTime: 0,
-      txnId: 0,
-      member: {}
-    }),
-  );
-}

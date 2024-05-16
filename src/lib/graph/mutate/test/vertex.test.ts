@@ -3,10 +3,10 @@ import { graph } from "../../graph";
 import { getNewGraphId, transactions } from "../../transaction";
 import { klona } from "klona";
 import {
- addNewVertex,
- deleteVertex,
- newVertex,
- replaceVertexProperties
+  addNewVertex,
+  deleteVertex,
+  newVertex,
+  replaceVertexProperties,
 } from "../vertex";
 
 describe("addNewVertex", () => {

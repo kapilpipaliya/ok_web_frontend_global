@@ -2,11 +2,11 @@ import { batch } from "solid-js";
 import { klona } from "klona";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import {
- getNewGraphId,
- Id,
- Node,
- transactionDetailAdd,
- transactions
+  getNewGraphId,
+  Id,
+  Node,
+  transactionDetailAdd,
+  transactions,
 } from "~/cypher_api/lib/graph";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/cypher_api/lib/edge";

@@ -1,69 +1,63 @@
 import { Icon, IconifyIconProps } from "@iconify-icon/solid";
 import {
- Accessor,
- createEffect,
- createSignal,
- For,
- JSX,
- JSXElement,
- Match,
- onCleanup,
- Setter,
- Show,
- splitProps,
- Switch,
- useContext
+  Accessor,
+  createEffect,
+  createSignal,
+  For,
+  JSX,
+  JSXElement,
+  Match,
+  onCleanup,
+  Setter,
+  Show,
+  splitProps,
+  Switch,
+  useContext,
 } from "solid-js";
 import { TextField } from "~/components/solid-blocks/blocks";
-import {
- DynamicCSSComponent
-} from "~/components/dynamic/components/DynamicCssComponent";
+import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { CustomTooltip } from "~/components/custom/Tooltip";
 import {
- CssEditorContext,
- sizeTypes
+  CssEditorContext,
+  sizeTypes,
 } from "~/components/css-editor/cssEditorContext";
 import "~/css/componentUtilCSS.css";
 
 export const StyleCSSComponents = () => {
-  const AllSVGIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      role="presentation"
-      style="width: 20px; height: 20px;"
-    >
-      <path
-        d="M3,21V3H21V21H3M5,5V19H19V5H5Z"
-        style="fill: currentcolor;"
-      ></path>
-    </svg>
-  );
-  const CustomSVGIcon = () => (
-    <svg
-      viewBox="0 0 24 24"
-      role="presentation"
-      style="width: 20px; height: 20px;"
-    >
-      <path
-        d="M15,21H17V19H15M19,21H21V19H19M7,21H9V19H7M11,21H13V19H11M19,17H21V15H19M19,13H21V11H19M3,3V21H5V5H21V3M19,9H21V7H19"
-        style="fill: currentcolor;"
-      ></path>
-    </svg>
-  );
   const IconifyIcon = (props: IconifyIconProps) => {
     const [selected, restProps] = splitProps(props, [
       "icon",
       "height",
       "width",
     ]);
-    return (
-      <Icon
-        icon={selected.icon}
-        height={selected.height ?? 23}
-        width={selected.width ?? 23}
-        {...restProps}
-      />
-    );
+    if (selected.icon === "allCustom") {
+      return (
+        <Icon
+          icon={"radix-icons:box"}
+          height={selected.height ?? 23}
+          width={selected.width ?? 23}
+          {...restProps}
+        />
+      );
+    } else if (selected.icon === "customIcon") {
+      return (
+        <Icon
+          icon={"lucide:box-select"}
+          height={selected.height ?? 23}
+          width={selected.width ?? 23}
+          {...restProps}
+        />
+      );
+    } else {
+      return (
+        <Icon
+          icon={selected.icon}
+          height={selected.height ?? 23}
+          width={selected.width ?? 23}
+          {...restProps}
+        />
+      );
+    }
   };
 
   const ContainerLabel = (props: {
@@ -274,7 +268,12 @@ export const StyleCSSComponents = () => {
   };
 
   const ButtonGroups = (props: {
-    options: { key: JSX.Element; value: string; tooltip?: string }[];
+    options: {
+      key: JSX.Element;
+      value: string;
+      tooltip?: string;
+      icon?: boolean;
+    }[];
     name: string;
     label: any;
     isLabelOnTop: boolean;
@@ -308,7 +307,13 @@ export const StyleCSSComponents = () => {
                     checked={selected() === option.value}
                     onChange={(e) => handleChange(e, option)}
                   />
-                  <span class={`name`}>{option.key}</span>
+                  <span class={`name`}>
+                    {option.icon ? (
+                      <IconifyIcon icon={option.key} />
+                    ) : (
+                      option.key
+                    )}
+                  </span>
                 </CustomTooltip>
               </label>
             );
@@ -538,7 +543,7 @@ export const StyleCSSComponents = () => {
   };
 
   const ToggleButton = (props: {
-    options: { key: JSX.Element; value: string }[];
+    options: { key: JSX.Element; value: string; icon?: string }[];
     label: JSXElement;
     onChangeInput: any;
     isAddToClass: boolean;
@@ -577,7 +582,7 @@ export const StyleCSSComponents = () => {
                                              : "0"
                                        }`}
               >
-                {option.key}
+                {option.icon ? <IconifyIcon icon={option.key} /> : option.key}
               </div>
             );
           }}
@@ -1019,14 +1024,16 @@ export const StyleCSSComponents = () => {
             }}
             options={[
               {
-                key: <AllSVGIcon />,
+                key: "allCustom",
                 value: "all",
                 tooltip: "All",
+                icon: true,
               },
               {
-                key: <CustomSVGIcon />,
+                key: "customIcon",
                 value: "custom",
                 tooltip: "Custom",
+                icon: true,
               },
             ]}
           />

@@ -1,20 +1,20 @@
 import { batch, useContext } from "solid-js";
 import {
- getCookie,
- ServerEventsDispatcher,
- WsContext
+  getCookie,
+  ServerEventsDispatcher,
+  WsContext,
 } from "~/lib/websocket/ws_events_dispatcher";
 
 import { isObject } from "~/lib/Utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
 import { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {
- commitTransaction,
- edgeOldIdToNewIdMap,
- isAllTxnProcessed,
- ProcessStatus,
- transactions,
- vertexOldIdToNewIdMap
+  commitTransaction,
+  edgeOldIdToNewIdMap,
+  isAllTxnProcessed,
+  ProcessStatus,
+  transactions,
+  vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
@@ -33,10 +33,6 @@ export const setGraphData = (
   },
 ) => {
   batch(() => {
-    if (args.timestamp) {
-      setGraph("lastSyncedTime", args.timestamp);
-    }
-
     for (const vertexId in args.vertexes) {
       setGraph("vertexes", vertexId, args.vertexes[vertexId]);
     }
@@ -173,58 +169,5 @@ export const onMutatDataGet = (
       vertexOldIdToNewIdMap.clear();
       edgeOldIdToNewIdMap.clear();
     } else commitTransaction(Ws);
-  });
-};
-export const syncEvent = (
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) => {
-  const { Ws } = useContext(WsContext);
-  Ws.bind(["post", "mutate", 0], onMutatDataGet);
-
-  Ws.bind(["get", "sync", 0], setGraphData);
-  Ws.bind(["post", "loginJwt", 0], (d) => {
-    if (!d?.error) {
-      setGraph("member", d);
-    }
-    Ws.trigger([
-      [
-        ["get", "sync", 0],
-        {
-          admin: true,
-          from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
-          // subscriptions: this.subscriptions,
-          subscriptions: [],
-        },
-      ],
-    ]);
-  });
-
-  Ws.bind(["get", "member", 0], (d) => {
-    setGraph("member", d);
-    // we sync after member is received.
-    // TODO: We dont need fresh sync but from last timestamp sync
-    if (!d) {
-      Ws.trigger([
-        [
-          ["post", "loginJwt", 0],
-          {
-            jwt: getCookie("jwt"),
-          },
-        ],
-      ]);
-    } else {
-      Ws.trigger([
-        [
-          ["get", "sync", 0],
-          {
-            admin: isAdmin() ? true : undefined,
-            from: graph.lastSyncedTime && graph.lastSyncedTime - 4000, // TODO fix time
-            // subscriptions: this.subscriptions,
-            subscriptions: [],
-          },
-        ],
-      ]);
-    }
   });
 };

@@ -1,6 +1,4 @@
-import {
- findVertexByLabelAndUniqueIdWithSkip
-} from "~/lib/graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { IFormContext } from "~/lib/Utils";

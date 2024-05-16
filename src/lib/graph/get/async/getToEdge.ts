@@ -2,7 +2,10 @@ import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
 
 import { IdAttr, Vertex } from "~/lib/graph/graph";
 
-export async function getToEdge(meta: Vertex, vertex: Vertex): Promise<string> {
+export async function getToEdgeAsync(
+  meta: Vertex,
+  vertex: Vertex,
+): Promise<string> {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
   const attributeId = meta.P[IdAttr];

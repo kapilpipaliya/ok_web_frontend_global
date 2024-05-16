@@ -59,7 +59,6 @@ export async function POST({ request }: APIEvent) {
 const profile = async (payload: any, session: Session, subdomain: string) => {
   const { userId, username, email, profileImage, uId } = payload;
 
-
   // Ensure user exists
   const userExists = await session.run(
     `MATCH (u:User) WHERE u.uId = $uId RETURN u;`,
@@ -97,7 +96,9 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   });
   const user = result.records[0]?.get("u");
 
-  const session2 = (await getDriverWithPort(user.properties.driverPort)).session();
+  const session2 = (
+    await getDriverWithPort(user.properties.driverPort)
+  ).session();
   await session2.run(query, {
     userId,
     email,
@@ -106,7 +107,6 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
     profileImage,
   });
   console.log(query);
-  
 
   if (email) {
     const http_session = await getHttpsSession();

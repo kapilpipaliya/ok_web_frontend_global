@@ -1,34 +1,31 @@
 import jsep from "jsep";
 import {
- Accessor,
- batch,
- createMemo,
- createSelector,
- untrack,
- useContext
+  Accessor,
+  batch,
+  createMemo,
+  createSelector,
+  untrack,
+  useContext,
 } from "solid-js";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
+import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import {
- setParentValue
-} from "~/components/dynamic/fields/input/SelectInputField";
-import {
- setSelectionValue
-} from "~/components/dynamic/fields/static/SelectionUtils";
-import {
- DraggedVertexContext,
- HoverIdContext,
- IndicatorPositionContext,
- SelectedCollContext,
- SelectedComponentContext,
- SelectedIdContext,
- TargetIdContext
+  DraggedVertexContext,
+  HoverIdContext,
+  IndicatorPositionContext,
+  PropertiesVertexIdContext,
+  SelectedCollContext,
+  SelectedComponentContext,
+  SelectedIdContext,
+  TargetIdContext,
 } from "~/lib/contexts";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
- getCompProps,
- getRowProps,
- getStringComponent
+  getCompProps,
+  getRowProps,
+  getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
 import { deleteNestedLayout } from "~/lib/graph/get/sync/traverse";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
@@ -38,14 +35,12 @@ import { evaluate } from "~/lib/jsep";
 import { cloneRowProps } from "./graph/mutate/form_functions";
 import { getNewGraphId } from "./graph/transaction";
 import {
- addNewRow,
- getChildVertex,
- getChildVertexes,
- getParentVertex,
- getSelectionOptions
+  addNewRow,
+  getChildVertex,
+  getChildVertexes,
+  getParentVertex,
+  getSelectionOptions,
 } from "./graph/get/sync/graph_fns";
-
-export const propertiesVertexId = getNewGraphId();
 
 const addPropsToLayoutRow = (
   graph: Store<GraphInterface>,
@@ -342,10 +337,16 @@ export const useDragDrop = (
   const [selectedColl, setSelectedColl] = useContext(SelectedCollContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
-  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const [selectedComponent, setSelectedComponent] = useContext(
+    SelectedComponentContext,
+  );
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-  const [indicatorPosition, setIndicatorPosition] = useContext(IndicatorPositionContext);
+  const [indicatorPosition, setIndicatorPosition] = useContext(
+    IndicatorPositionContext,
+  );
   const { showErrorToast, showSuccessToast } = useToast();
+  const propertiesVertexId = useContext(PropertiesVertexIdContext);
+
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, vertex));
 
   const activeItemChanged = createSelector<any, Vertex>(
@@ -361,7 +362,11 @@ export const useDragDrop = (
   };
 
   const handleDragOverBase = (e: DragEvent) => {
-    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "before" | "after" | "center" | null;
+    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
+      | "before"
+      | "after"
+      | "center"
+      | null;
     if (!position) {
       setIndicatorPosition({ activeItem: null, position: null });
       setTargetId(-1);
@@ -430,14 +435,23 @@ export const useDragDrop = (
     }
 
     if (position === "center") {
-      const compVertex = getComponentFromLayoutRow(toVertexId, graph, setGraph);
-      if (!compVertex?.P.child) {
-        // Don't allow drag and drop
-        return;
+      // is Top Layer:
+      if (toVertexId === formData.id) {
+        // Allow drag over it
+      } else {
+        const compVertex = getComponentFromLayoutRow(
+          toVertexId,
+          graph,
+          setGraph,
+        );
+        if (!compVertex?.P.child) {
+          // Don't allow drag and drop
+          return;
+        }
       }
     }
 
-    console.log('drag over complete')
+    console.log("drag over complete");
     // This is necessary to allow the drop action to proceed
     e.preventDefault();
   };
@@ -451,7 +465,6 @@ export const useDragDrop = (
   };
 
   const handleDrop = (e: DragEvent) => {
-    console.log('drop')
     e.stopPropagation();
 
     let fromVertex = draggedVertex();
@@ -475,10 +488,13 @@ export const useDragDrop = (
         ? toVertex
         : getParentVertex(["Attr"], toVertex, graph).vertex;
 
-      if (!toParentVertex) {
-        // Dont allow drag before and after first element
-        return;
-      }
+    // is Top Layer:
+    if (position === "center" && toVertexId === formData.id) {
+      // Allow drag over it
+    } else if (!toParentVertex) {
+      // Dont allow drag before and after first element
+      return;
+    }
 
     // const fromIndex = fromVertex.P.pos as number;
     // const toIndex = toVertex.P.pos as number;
@@ -523,8 +539,11 @@ export const useDragDrop = (
       }
     }
 
-    if (fromVertexLabel === "Comp") {
-      if (position === "center") {
+    if (position === "center") {
+      // is Top Layer:
+      if (toVertexId === formData.id) {
+        // Allow drag over it
+      } else {
         const compVertex = getComponentFromLayoutRow(
           toVertexId,
           graph,
@@ -534,16 +553,13 @@ export const useDragDrop = (
           return;
         }
       }
+    }
 
-      const parentVertex =
-        position !== "center"
-          ? getParentVertex(["Attr"], toVertex, graph).vertex!
-          : toVertex;
-
+    if (fromVertexLabel === "Comp") {
       const rowId = componentDrag(
         txnId,
         fromVertex,
-        parentVertex || formData,
+        toParentVertex || formData,
         graph,
         setGraph,
       );
@@ -553,26 +569,10 @@ export const useDragDrop = (
 
       sortChildren();
     } else if (fromVertexLabel === "Page") {
-      if (position === "center") {
-        const compVertex = getComponentFromLayoutRow(
-          toVertexId,
-          graph,
-          setGraph,
-        );
-        if (!compVertex?.P.child) {
-          return;
-        }
-      }
-
-      const parentVertex =
-        position !== "center"
-          ? getParentVertex(["Attr"], toVertex, graph).vertex!
-          : toVertex;
-
       const rowId = componentDrag(
         txnId,
         fromVertex,
-        parentVertex || formData,
+        toParentVertex || formData,
         graph,
         setGraph,
       );
@@ -590,17 +590,7 @@ export const useDragDrop = (
 
       ///sortChildren(childrenItems, record.txnId);
     } else {
-      if (position === "center") {
-        const compVertex = getComponentFromLayoutRow(
-          toVertexId,
-          graph,
-          setGraph,
-        );
-        if (!compVertex?.P.child) {
-          return;
-        }
-      }
-
+      console.log("when this case is run?");
       // remove previous incoming edge if present.
       if (fromParentVertex.vertex) {
         setParentValue(graph, setGraph, txnId, fromVertex, {
@@ -728,9 +718,17 @@ export const useDragDrop = (
         );
         const layoutPropRow = Object.assign(componentProps, layoutPropRows);
         // set existing layout props
-        setGraph("vertexes", propertiesVertexId, "P", reconcile(layoutPropRow));
+        setGraph(
+          "vertexes",
+          propertiesVertexId,
+          reconcile({ P: layoutPropRow } as Vertex),
+        );
       } else {
-        setGraph("vertexes", propertiesVertexId, "P", reconcile({}));
+        setGraph(
+          "vertexes",
+          propertiesVertexId,
+          reconcile({ P: {} } as Vertex),
+        );
       }
     });
   };

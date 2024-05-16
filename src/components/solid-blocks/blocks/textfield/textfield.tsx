@@ -1,10 +1,10 @@
 import {
- Component,
- JSX,
- Match,
- mergeProps,
- splitProps,
- Switch
+  Component,
+  JSX,
+  Match,
+  mergeProps,
+  splitProps,
+  Switch,
 } from "solid-js";
 import { runEvent } from "../tools";
 

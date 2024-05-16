@@ -1,19 +1,19 @@
 import { getPkForCollection, Record } from "~/cypher_api/lib/record";
 import { IdAttr, Node } from "~/cypher_api/lib/graph";
 import {
- deleteVertex,
- findOrCreateNewVertex,
- findOrCreateNewVertexMGCall,
- findVertexByLabelAndPks
+  deleteVertex,
+  findOrCreateNewVertex,
+  findOrCreateNewVertexMGCall,
+  findVertexByLabelAndPks,
 } from "~/cypher_api/lib/vertex";
 import csvtojson from "csvtojson";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { A, D } from "@mobily/ts-belt";
 import {
- isSimpleCollection,
- setParentValueMGCall,
- setSelectionValue,
- setSelectionValueMGCall
+  isSimpleCollection,
+  setParentValueMGCall,
+  setSelectionValue,
+  setSelectionValueMGCall,
 } from "~/cypher_api/components/input/SelectInputField";
 import { parse } from "yaml";
 import { isObject } from "~/cypher_api/utils/utils";

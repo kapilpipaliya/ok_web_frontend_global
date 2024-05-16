@@ -1,7 +1,7 @@
 import { batch } from "solid-js";
 import {
- ServerEventsDispatcher,
- WSEvent
+  ServerEventsDispatcher,
+  WSEvent,
 } from "~/lib/websocket/ws_events_dispatcher";
 import { isNumber } from "~/lib/Utils";
 import { GraphInterface, Id } from "./graph";
@@ -13,15 +13,15 @@ export let uniqueId = -50000;
 export type Revert = { revert: () => any };
 export type InsertFn = {
   [key in
-  | "insert"
-  | "replace"
-  | "merge"
-  | "deleteVertex"
-  | "insertEdge"
-  | "replaceEdge"
-  | "replaceEdgeStart"
-  | "replaceEdgeEnd"
-  | "deleteEdge"]?: () => any;
+    | "insert"
+    | "replace"
+    | "merge"
+    | "deleteVertex"
+    | "insertEdge"
+    | "replaceEdge"
+    | "replaceEdgeStart"
+    | "replaceEdgeEnd"
+    | "deleteEdge"]?: () => any;
 };
 
 export enum ProcessStatus {

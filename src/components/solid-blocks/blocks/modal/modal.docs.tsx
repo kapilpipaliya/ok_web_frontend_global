@@ -1,9 +1,9 @@
 import {
- Modal,
- ModalBody,
- ModalContent,
- ModalFooter,
- ModalHeader
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
 } from "./modal";
 
 export const ModalDocs = () => {

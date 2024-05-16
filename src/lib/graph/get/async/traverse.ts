@@ -5,19 +5,19 @@ import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
 import { deleteRow, getChildVertexes } from "~/lib/graph/get/sync/graph_fns";
 
 import { SetStoreFunction, Store } from "solid-js/store";
-import { getToEdge } from "./getToEdge";
+import { getToEdgeAsync } from "./getToEdge";
 
-export async function getSelectedVertexValue(
+export async function getSelectedVertexValueAsync(
   graph: Store<GraphInterface>,
   vertex: Vertex,
   meta: Vertex,
 ) {
   if (!vertex?.L) return [];
-  const type = await getToEdge(meta, vertex);
+  const type = await getToEdgeAsync(meta, vertex);
   return (vertex.OUT[type] || []).map((edgeId) => graph.edges[edgeId].E);
 }
 
-export async function getInEdge(meta: Vertex, vertex: Vertex) {
+export async function getInEdgeAsync(meta: Vertex, vertex: Vertex) {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
 
   const parentLabel = getValueFromVertexOrKey(meta.P.props, "parentLabel");
@@ -29,19 +29,19 @@ export async function getInEdge(meta: Vertex, vertex: Vertex) {
   );
 }
 
-export async function getParentVertexValue(
+export async function getParentVertexValueAsync(
   graph: Store<GraphInterface>,
   vertex: Vertex,
   meta: Vertex,
 ): Promise<Id[]> {
-  const type = await getInEdge(meta, vertex);
+  const type = await getInEdgeAsync(meta, vertex);
   if (!type) {
     return [];
   }
   return (vertex.IN[type] || []).map((edgeId) => graph.edges[edgeId].S);
 }
 
-export async function getParentVertexes(
+export async function getParentVertexesAsync(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
@@ -81,7 +81,7 @@ export async function getParentVertexes(
   }
 
   if (path.length > 1) {
-    return getParentVertexes(
+    return getParentVertexesAsync(
       graph,
       path.slice(0, -1),
       Array.from(stepVertexes.values()),
@@ -94,7 +94,7 @@ export async function getParentVertexes(
   }
 }
 
-export const calculateFilter = async (input: string) => {
+export const calculateFilterAsync = async (input: string) => {
   let isMultiple = true;
   let filterIndex = input.indexOf("[");
   let filter = "";
@@ -116,7 +116,7 @@ export const calculateFilter = async (input: string) => {
   return [type, filter, isMultiple] as const;
 };
 
-export const getTreeData = async (
+export const getTreeDataAsync = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   treeLevels: { [key: string]: any },
@@ -162,7 +162,7 @@ export const getTreeData = async (
   return getChildren(treeLevels, vertexes);
 };
 
-export const deleteNestedLayout = async (
+export const deleteNestedLayoutAsync = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -199,7 +199,7 @@ export const deleteNestedLayout = async (
   }
 };
 
-export const getTextValue = async (value: any) => {
+export const getTextValueAsync = async (value: any) => {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
   } else if (typeof value === "object") {

@@ -1,15 +1,15 @@
 import { RouteSectionProps, useNavigate } from "@solidjs/router";
 import {
- EdgeMap,
- GraphContext,
- GraphInterface,
- Id,
- VertexMap
+  EdgeMap,
+  GraphContext,
+  GraphInterface,
+  Id,
+  VertexMap,
 } from "~/lib/graph/graph";
 import {
- ServerEventsDispatcher,
- WS_PATH,
- WsContext
+  ServerEventsDispatcher,
+  WS_PATH,
+  WsContext,
 } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
@@ -19,14 +19,12 @@ export default function UsersLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);
   const navigate = useNavigate();
   const graph = createStore<GraphInterface>({
-    _isPartialSynced: false,
     vertexes: {} as VertexMap,
     edges: {} as EdgeMap,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
     initialSynced: false, // TODO: Display initialSynced status to the UI
-    lastSyncedTime: 0,
     member: {},
-    txnId: 0
+    txnId: 0,
   });
 
   // getUser().then(value =>

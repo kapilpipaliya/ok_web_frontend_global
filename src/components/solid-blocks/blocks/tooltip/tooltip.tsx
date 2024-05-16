@@ -1,11 +1,11 @@
 import type { JSX } from "solid-js";
 import {
- Accessor,
- Component,
- createEffect,
- createMemo,
- createSignal,
- splitProps
+  Accessor,
+  Component,
+  createEffect,
+  createMemo,
+  createSignal,
+  splitProps,
 } from "solid-js";
 import "../base.css";
 import "./tooltip.css";

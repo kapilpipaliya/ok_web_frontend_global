@@ -1,63 +1,61 @@
 import {
- createMemo,
- createSignal,
- For,
- JSXElement,
- Match,
- onCleanup,
- Show,
- splitProps,
- Switch,
- untrack,
- useContext
+  createMemo,
+  createSignal,
+  For,
+  JSXElement,
+  Match,
+  onCleanup,
+  Show,
+  splitProps,
+  Switch,
+  untrack,
+  useContext,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
 import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
- commitTxn,
- getNewTxnId,
- revertTransaction
+  commitTxn,
+  getNewTxnId,
+  revertTransaction,
 } from "~/lib/graph/transaction";
 import {
- APP_BASE_URL,
- FormContext,
- getTextColumnValue,
- getValueFromVertexOrKey
+  APP_BASE_URL,
+  FormContext,
+  getTextColumnValue,
+  getValueFromVertexOrKey,
 } from "~/lib/Utils";
 import {
- createForm,
- createMeta,
- getChildVertexes,
- getSelectionOptions,
- loadForm
+  createForm,
+  createMeta,
+  getChildVertexes,
+  getSelectionOptions,
+  loadForm,
 } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ComponentProps } from "~/lib/ComponentType";
 import {
- Accordion,
- Avatar,
- Breadcrumbs,
- Progress,
- Spinner,
- Tabs
+  Accordion,
+  Avatar,
+  Breadcrumbs,
+  Progress,
+  Spinner,
+  Tabs,
 } from "~/components/solid-blocks/blocks";
 import {
- getText,
- getUrl,
- PageItemRender,
- PageRenderContext,
- PageRenderUtils,
- PageView,
- RepeaterContext
+  getText,
+  getUrl,
+  PageItemRender,
+  PageRenderContext,
+  PageRenderUtils,
+  PageView,
+  RepeaterContext,
 } from "./GenaricField";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import TreeView from "~/components/solid-blocks/blocks/treeview/treeview";
-import {
- Collapsible
-} from "~/components/solid-blocks/blocks/collapsible/collapsible";
+import { Collapsible } from "~/components/solid-blocks/blocks/collapsible/collapsible";
 import { useToast } from "~/components/custom/Toast";
 import { submitDataCall } from "~/components/api/api_functions";
 import { createStore } from "solid-js/store";

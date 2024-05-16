@@ -3,7 +3,6 @@ import { RouteSectionProps, useNavigate } from "@solidjs/router";
 export default function auth(props: RouteSectionProps) {
   const navigate = useNavigate();
 
-  
   // getAPI(API.getUserUrl).then((user) => {
   //   if (user?.id) {
   //     navigate(`${APP_BASE_URL}`);

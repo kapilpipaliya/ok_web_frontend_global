@@ -1,54 +1,50 @@
 import {
- batch,
- createMemo,
- createResource,
- createSignal,
- For,
- JSXElement,
- Match,
- onCleanup,
- onMount,
- Show,
- splitProps,
- Switch,
- untrack,
- useContext
+  batch,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  JSXElement,
+  Match,
+  onCleanup,
+  onMount,
+  Show,
+  splitProps,
+  Switch,
+  untrack,
+  useContext,
 } from "solid-js";
 import { createStore, SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
 import { FormContext, groupBy } from "~/lib/Utils";
 import {
- createForm,
- createMeta,
- getChildVertexes,
- getSelectionOptions,
- loadForm
+  createForm,
+  createMeta,
+  getChildVertexes,
+  getSelectionOptions,
+  loadForm,
 } from "~/lib/graph/get/sync/graph_fns";
+import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
- RepeaterContext
-} from "~/components/dynamic/fields/static/GenaricField";
-import {
- GenericField
-} from "~/components/dynamic/fields/static/GenericFieldComponent";
-import {
- GraphContext,
- GraphInterface,
- Id,
- IdAttr,
- Vertex
+  GraphContext,
+  GraphInterface,
+  Id,
+  IdAttr,
+  Vertex,
 } from "~/lib/graph/graph";
 import {
- commitTxn,
- getNewTxnId,
- revertTransaction,
- txnHasSteps
+  commitTxn,
+  getNewTxnId,
+  revertTransaction,
+  txnHasSteps,
 } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
- BeforeLeaveEventArgs,
- useBeforeLeave,
- useLocation,
- useNavigate
+  BeforeLeaveEventArgs,
+  useBeforeLeave,
+  useLocation,
+  useNavigate,
 } from "@solidjs/router";
 import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
@@ -58,10 +54,11 @@ import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import {
- getExportCode,
- getFormMetaData
+  getExportCodeAsync,
+  getFormMetaDataAsync,
 } from "~/lib/graph/get/async/graph_functions";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
+import { DeleteDialog } from "~/components/custom/DeleteDialog";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -115,14 +112,14 @@ export const AbstractSingleForm = (props: AbstractSingleFormProps) => {
   // TODO: add validation on form that AttrsTableData keys should not available.
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
-      const form = await getFormMetaData(
+      const form = await getFormMetaDataAsync(
         props.graph,
         props.setGraph,
         props.formId,
       );
       if (form.error) return form;
 
-      setFormData({ form: form.form, id: id });
+      setFormData({ form: form.form });
     } catch (e: any) {
       console.error(e);
     }
@@ -179,6 +176,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     try {
       let dataVertex: Vertex;
       if (!props.id) {
+        // TODO: Load Form Meta from API
         const createResult = createForm(
           graph,
           setGraph,
@@ -189,6 +187,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         if (createResult.error) return createResult.error;
         dataVertex = createResult.vertex!;
       } else {
+        // TODO: Load Form Meta and Data from API
         const loadResult = loadForm(graph, props.id);
         if (loadResult.error) return loadResult.error;
         dataVertex = loadResult.vertex!;
@@ -251,6 +250,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
       });
     } catch (e: any) {
       console.error(e);
+      return { error: `Error When Loading Form: ${e.message}` };
     }
   });
 
@@ -288,7 +288,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
           showWarningToast("Internal Server Error");
           return;
         }
-        
+
         await showLoadingToast({
           promise: submitDataCall(data),
           loadMessage: "Submitting Data...",
@@ -307,7 +307,6 @@ export const DynamicForm = (props: DynamicFormProps) => {
       setTimeout(() => navigate(-1), 0);
       return;
     }
-    console.log("sdads");
 
     return isValid;
   };
@@ -323,6 +322,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
   };
 
   const [popup, setPopup] = createSignal(false);
+  const [discradPopup, setDiscradPopup] = createSignal(false);
   const [importCode, setImportCode] = createSignal("");
   const importCodeFn = () => {
     // importNavigation(importCode(), formData);
@@ -341,7 +341,9 @@ export const DynamicForm = (props: DynamicFormProps) => {
   const PreviewCode = () => {
     return (
       <pre>
-        {stringify(getExportCode(graph, formData.formMeta, formData.formData))}
+        {stringify(
+          getExportCodeAsync(graph, formData.formMeta, formData.formData),
+        )}
       </pre>
     );
   };
@@ -364,11 +366,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
     // preventDefault to block immediately and prompt user async
     e.preventDefault();
     setTimeout(() => {
-      if (window.confirm("Discard unsaved changes - are you sure?")) {
-        revertTransaction(formData.txnId);
-        // user wants to proceed anyway so retry with force=true
-        e.retry(true);
-      }
+      setDiscradPopup(true);
     }, 100);
   });
 
@@ -572,6 +570,17 @@ export const DynamicForm = (props: DynamicFormProps) => {
               </FormContext.Provider>
             </Show>
             <Show when={popup()}>PopOver</Show>
+            <Show when={discradPopup()}>
+              <DeleteDialog
+                open={discradPopup()}
+                onConfirm={() => {
+                  revertTransaction(formData.txnId);
+                  setDiscradPopup(false);
+                }}
+                title="Discard changes"
+                message="Discard unsaved changes - are you sure?"
+              />
+            </Show>
           </div>
         </RepeaterContext.Provider>
       </Match>

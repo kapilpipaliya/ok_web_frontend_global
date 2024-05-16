@@ -18,10 +18,7 @@ export default function App() {
             <LoadingContext.Provider value={loadingSite}>
               <MetaProvider>
                 <div id="popup-root" />
-                <Suspense fallback={<LoaderNew />}>
-                  {props.children}
-                  
-                </Suspense>
+                <Suspense fallback={<LoaderNew />}>{props.children}</Suspense>
                 <Show when={loadingSite[0]()} fallback={<Toaster />}>
                   <div
                     style={{
@@ -32,9 +29,9 @@ export default function App() {
                       height: "100%",
                       background: "rgba(0, 0, 0, 0.5)",
                       display: "flex",
-                      'justify-content': "center",
-                      'align-items': "center",
-                      'z-index': "9999",
+                      "justify-content": "center",
+                      "align-items": "center",
+                      "z-index": "9999",
                     }}
                   >
                     <Toaster />
@@ -42,7 +39,7 @@ export default function App() {
                 </Show>
               </MetaProvider>
             </LoadingContext.Provider>
-     </CSSRuntimeProvider>
+          </CSSRuntimeProvider>
         );
       }}
     >

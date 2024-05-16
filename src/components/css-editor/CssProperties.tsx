@@ -2,32 +2,11 @@ import { createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { StyleCSSComponents } from "~/components/css-editor/StyleCSSComponents";
 import {
- sizeTypes,
- timesTypes
+  sizeTypes,
+  timesTypes,
 } from "~/components/css-editor/cssEditorContext";
 
 const { IconifyIcon } = StyleCSSComponents();
-const AllSVGIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    role="presentation"
-    style="width: 20px; height: 20px;"
-  >
-    <path d="M3,21V3H21V21H3M5,5V19H19V5H5Z" style="fill: currentcolor;"></path>
-  </svg>
-);
-const CustomSVGIcon = () => (
-  <svg
-    viewBox="0 0 24 24"
-    role="presentation"
-    style="width: 20px; height: 20px;"
-  >
-    <path
-      d="M15,21H17V19H15M19,21H21V19H19M7,21H9V19H7M11,21H13V19H11M19,17H21V15H19M19,13H21V11H19M3,3V21H5V5H21V3M19,9H21V7H19"
-      style="fill: currentcolor;"
-    ></path>
-  </svg>
-);
 
 const Icons = {
   visibility: {
@@ -68,8 +47,8 @@ const GeneralSection = {
     label: "Visibility",
     name: "visibility",
     options: [
-      { key: Icons.visibility.yes, value: "visible" },
-      { key: Icons.visibility.no, value: "hidden" },
+      { key: Icons.visibility.yes, value: "visible", icon: true },
+      { key: Icons.visibility.no, value: "hidden", icon: true },
     ],
   },
 };
@@ -86,11 +65,20 @@ const LayoutSection = {
     label: "Direction",
     component: "buttonGroups",
     isLabelOnTop: true,
+
     options: [
-      { key: Icons.direction.horizontal, value: "row" },
-      { key: Icons.direction.horizontalReverse, value: "row-reverse" },
-      { key: Icons.direction.vertical, value: "column" },
-      { key: Icons.direction.verticalReverse, value: "column-reverse" },
+      { key: Icons.direction.horizontal, value: "row", icon: true },
+      {
+        key: Icons.direction.horizontalReverse,
+        value: "row-reverse",
+        icon: true,
+      },
+      { key: Icons.direction.vertical, value: "column", icon: true },
+      {
+        key: Icons.direction.verticalReverse,
+        value: "column-reverse",
+        icon: true,
+      },
     ],
   },
   justify: {
@@ -99,12 +87,12 @@ const LayoutSection = {
     component: "buttonGroups",
     isLabelOnTop: true,
     options: [
-      { key: Icons.justify.start, value: "start" },
-      { key: Icons.justify.center, value: "center" },
-      { key: Icons.justify.end, value: "end" },
-      { key: Icons.justify.spaceAround, value: "space-around" },
-      { key: Icons.justify.spaceBetween, value: "space-between" },
-      { key: Icons.justify.spaceEvenly, value: "space-evenly" },
+      { key: Icons.justify.start, value: "start", icon: true },
+      { key: Icons.justify.center, value: "center", icon: true },
+      { key: Icons.justify.end, value: "end", icon: true },
+      { key: Icons.justify.spaceAround, value: "space-around", icon: true },
+      { key: Icons.justify.spaceBetween, value: "space-between", icon: true },
+      { key: Icons.justify.spaceEvenly, value: "space-evenly", icon: true },
     ],
   },
   alignFlex: {
@@ -116,18 +104,22 @@ const LayoutSection = {
       {
         key: "material-symbols:align-start-rounded",
         value: "flex-start",
+        icon: true,
       },
       {
         key: "material-symbols:align-center-rounded",
         value: "center",
+        icon: true,
       },
       {
         key: "material-symbols:align-end-rounded",
         value: "flex-end",
+        icon: true,
       },
       {
         key: "material-symbols:align-items-stretch-rounded",
         value: "stretch",
+        icon: true,
       },
     ],
   },
@@ -166,13 +158,24 @@ const LayoutSection = {
     isLabelOnTop: true,
     options: [
       {
-        key: "mi:close",
+        key: "mdi:close",
         value: "0 0 auto",
         tooltip: "auto",
+        icon: true,
       },
-      { key: Icons.flex.expand, value: "1 1 0%", tooltip: "expand" },
-      { key: Icons.flex.collapse, value: "0 1 auto", tooltip: "collapse" },
-      { key: <CustomSVGIcon />, value: "custom", tooltip: "custom" },
+      {
+        key: Icons.flex.expand,
+        value: "1 1 0%",
+        tooltip: "expand",
+        icon: true,
+      },
+      {
+        key: Icons.flex.collapse,
+        value: "0 1 auto",
+        tooltip: "collapse",
+        icon: true,
+      },
+      { key: "customIcon", value: "custom", tooltip: "Custom", icon: true },
     ],
   },
   alignSelf: {
@@ -181,11 +184,11 @@ const LayoutSection = {
     component: "buttonGroups",
     isLabelOnTop: true,
     options: [
-      { key: Icons.flex.auto, value: "auto" },
-      { key: Icons.align.start, value: "flex-start" },
-      { key: Icons.align.center, value: "center" },
-      { key: Icons.align.end, value: "flex-end" },
-      { key: Icons.align.stretch, value: "stretch" },
+      { key: Icons.flex.auto, value: "auto", icon: true },
+      { key: Icons.align.start, value: "flex-start", icon: true },
+      { key: Icons.align.center, value: "center", icon: true },
+      { key: Icons.align.end, value: "flex-end", icon: true },
+      { key: Icons.align.stretch, value: "stretch", icon: true },
     ],
   },
   order: {
@@ -193,13 +196,6 @@ const LayoutSection = {
     label: "Order",
     type: "number",
     component: "textFieldOptions",
-    leftIcon: (
-      <button
-        style={{ border: "none", background: "transparent", cursor: "pointer" }}
-      >
-        <Icon icon="gg:scroll-v" style={{ color: "grey" }} />
-      </button>
-    ),
   },
 };
 
@@ -980,57 +976,39 @@ const EffectsSection = {
     component: "divider",
   },
   transformOrigin: {
-    name: "size Grid",
+    name: "transform-origin",
     padding: "5px",
     gap: "5px 10px",
     align: "end",
-    component: "grid",
+    type: "number",
     "grid-template-columns": "1fr 25%",
-    children: [
-      {
-        name: "transform-origin",
-        type: "number",
-        isLabelOnTop: true,
-        label: "Transform Origin",
-        component: "textFieldOptions",
-        options: sizeTypes,
-      },
-      {
-        name: "transformOriginType",
-        label: false,
-        component: "buttonGroups",
-        options: [
-          { key: <AllSVGIcon />, value: "all" },
-          { key: <CustomSVGIcon />, value: "custom" },
-        ],
-      },
+    isLabelOnTop: true,
+    label: "Transform Origin",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Left", name: "transform-origin" },
+      { label: "Top", name: "transform-origin" },
     ],
+    options: sizeTypes,
+    mainFieldType: "textFieldOptions",
+    component: "fieldWithCustomProperty",
   },
   overflow: {
-    name: "size Grid",
+    name: "overflow",
     padding: "5px",
     gap: "5px 10px",
     align: "end",
-    component: "grid",
     "grid-template-columns": "1fr 25%",
-    children: [
-      {
-        name: "overflow",
-        label: "Overflow",
-        isLabelOnTop: true,
-        component: "select",
-        options: ["visible", "hidden", "scroll", "auto"],
-      },
-      {
-        name: "overflowType",
-        label: false,
-        component: "buttonGroups",
-        options: [
-          { key: <AllSVGIcon />, value: "all" },
-          { key: <CustomSVGIcon />, value: "custom" },
-        ],
-      },
+    isLabelOnTop: true,
+    label: "Overflow",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "X", name: "overflow-x" },
+      { label: "Y", name: "overflow-y" },
     ],
+    options: ["visible", "hidden", "scroll", "auto"],
+    mainFieldType: "select",
+    component: "fieldWithCustomProperty",
   },
   backface: {
     component: "toggleButton",
@@ -1070,33 +1048,6 @@ const EffectsSection = {
         options: [
           { key: "2D", value: "flat", tooltip: "2D" },
           { key: "3D", value: "preserve-3d", tooltip: "3D" },
-        ],
-      },
-    ],
-  },
-  perspectiveOrigin: {
-    name: "size Grid",
-    padding: "5px",
-    gap: "5px 10px",
-    align: "end",
-    component: "grid",
-    "grid-template-columns": "1fr 25%",
-    children: [
-      {
-        name: "perspective-origin",
-        type: "number",
-        isLabelOnTop: true,
-        label: "Perspective origin",
-        component: "textFieldOptions",
-        options: sizeTypes,
-      },
-      {
-        name: "perspectiveOriginType",
-        label: false,
-        component: "buttonGroups",
-        options: [
-          { key: <AllSVGIcon />, value: "all" },
-          { key: <CustomSVGIcon />, value: "custom" },
         ],
       },
     ],

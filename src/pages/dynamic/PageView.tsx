@@ -1,12 +1,12 @@
 import { useParams } from "@solidjs/router";
 import {
- createEffect,
- createSignal,
- For,
- on,
- Show,
- untrack,
- useContext
+  createEffect,
+  createSignal,
+  For,
+  on,
+  Show,
+  untrack,
+  useContext,
 } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createMeta, loadForm } from "~/lib/graph/get/sync/graph_fns";

@@ -2,37 +2,35 @@ import { batch, onCleanup } from "solid-js";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import {
- addNewVertex,
- deleteVertex,
- mergeVertexProperties,
- newVertex
+  addNewVertex,
+  deleteVertex,
+  mergeVertexProperties,
+  newVertex,
 } from "~/lib/graph/mutate/vertex";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
- commitTxn,
- getNewGraphId,
- getNewTxnId,
- revertTransaction
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  revertTransaction,
 } from "../../transaction";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { klona } from "klona/json";
-import {
- setSelectionValue
-} from "~/components/dynamic/fields/static/SelectionUtils";
-import { getToEdge } from "./getToEdge";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import { getToEdgeAsync } from "./getToEdge";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import {
- getId,
- getLabel,
- getValueFromVertexOrKey,
- isObject,
- replaceExpressionToLabel
+  getId,
+  getLabel,
+  getValueFromVertexOrKey,
+  isObject,
+  replaceExpressionToLabel,
 } from "../../../Utils";
 import { useToast } from "~/components/custom/Toast";
 
-export async function getSelectionOptions(
+export async function getSelectionOptionsAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],
@@ -57,7 +55,7 @@ export async function getSelectionOptions(
   }
 }
 
-export async function deleteRow(
+export async function deleteRowAsync(
   vertex: Vertex,
   isRealTime: boolean,
   graph: Store<GraphInterface>,
@@ -97,7 +95,7 @@ export async function deleteRow(
   });
 }
 
-export async function getChildVertex(
+export async function getChildVertexAsync(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertex: Vertex,
@@ -142,7 +140,7 @@ export async function getChildVertex(
     const newVertex = vertexes[0];
     if (newVertex) {
       if (path.length > 1) {
-        return getChildVertex(graph, path.slice(1), newVertex);
+        return getChildVertexAsync(graph, path.slice(1), newVertex);
       } else {
         return {
           error: false,
@@ -157,7 +155,7 @@ export async function getChildVertex(
   }
 }
 
-export async function getParentVertex(
+export async function getParentVertexAsync(
   path: string[],
   currentVertex: Vertex,
   graph: Store<GraphInterface>,
@@ -177,7 +175,7 @@ export async function getParentVertex(
       const newVertex = graph.vertexes[edge.S];
       if (newVertex) {
         if (path.length > 1) {
-          return getParentVertex(path.slice(0, -1), newVertex, graph);
+          return getParentVertexAsync(path.slice(0, -1), newVertex, graph);
         } else {
           return {
             error: false,
@@ -197,7 +195,7 @@ export async function getParentVertex(
   }
 }
 
-export async function getChildVertexes(
+export async function getChildVertexesAsync(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
@@ -245,7 +243,7 @@ export async function getChildVertexes(
   }
 
   if (path.length > 1) {
-    return getChildVertexes(
+    return getChildVertexesAsync(
       graph,
       path.slice(1),
       Array.from(stepVertexes.values()),
@@ -267,11 +265,11 @@ export const getProps = async (
 ) => {
   const props = {} as { [key: string]: any };
   const vertexes =
-    (await getChildVertexes(graph, ["$0Prop"], [meta])).vertexes || [];
+    (await getChildVertexesAsync(graph, ["$0Prop"], [meta])).vertexes || [];
 
   for (const vertex of vertexes) {
     const keyVertexes = (
-      await getSelectionOptions(
+      await getSelectionOptionsAsync(
         graph,
         setGraph,
         [vertex],
@@ -290,7 +288,7 @@ export const getProps = async (
   return props;
 };
 
-export async function createMeta(
+export async function createMetaAsync(
   form: FormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -308,7 +306,7 @@ export async function createMeta(
   }
   const metaVertex = graph.vertexes[metaMainVertex.id];
 
-  addMetaVertexes(graph, setGraph, metaTxnId, metaVertex, attributes);
+  addMetaVertexesAsync(graph, setGraph, metaTxnId, metaVertex, attributes);
   onCleanup(() => {
     revertTransaction(metaTxnId);
   });
@@ -319,7 +317,7 @@ export async function createMeta(
   return { error: false, vertex: metaVertex };
 }
 
-export async function createForm(
+export async function createFormAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: Id,
@@ -353,7 +351,7 @@ export async function createForm(
     vertex: vertex,
   };
 }
-export async function loadForm(
+export async function loadFormAsync(
   graph: Store<GraphInterface>,
   id: number,
 ): Promise<{ error: string | boolean; vertex?: Vertex }> {
@@ -368,7 +366,7 @@ export async function loadForm(
   };
 }
 
-export const addMetaVertexes = async (
+export const addMetaVertexesAsync = async (
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -385,7 +383,7 @@ export const addMetaVertexes = async (
     if (!attr.tab) attr.tab = "main";
     if (!attr.group) attr.group = "main";
     // if(attribute.component === "Table2") attribute.group = attribute.id;
-    const addAttributeResult = newRow(
+    const addAttributeResult = newRowAsync(
       graph,
       setGraph,
       txnId,
@@ -394,17 +392,17 @@ export const addMetaVertexes = async (
       "MetaAttr",
       attr,
     );
-    if (addAttributeResult.error) {
-      showErrorToast(addAttributeResult.error.toString());
+    if ((await addAttributeResult).error) {
+      showErrorToast((await addAttributeResult).error.toString());
     }
     // todo discard transaction
     // if (attribute.component === "Table2" && attribute.attributes) {
     if (attribute.attributes) {
-      addMetaVertexes(
+      addMetaVertexesAsync(
         graph,
         setGraph,
         txnId,
-        graph.vertexes[addAttributeResult.vertexId!],
+        graph.vertexes[(await addAttributeResult).vertexId!],
         attribute.attributes,
       );
     }
@@ -412,7 +410,7 @@ export const addMetaVertexes = async (
   }
 };
 
-export async function setValueGlobal(
+export async function setValueGlobalAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -440,34 +438,34 @@ export async function setValueGlobal(
     [attribute.P[IdAttr]]: attribute.P["dataType"],
   });
 
-  onChangeHandler(txnId, vertex, vertex, attribute, graph, setGraph);
+  onChangeHandlerAsync(txnId, vertex, vertex, attribute, graph, setGraph);
   if (isRealTime) commitTxn(txnId, ws);
 }
 
-export async function getSublistRowsForType(
+export async function getSublistRowsForTypeAsync(
   graph: Store<GraphInterface>,
   type: string,
   vertex: Vertex,
 ) {
   return (
-    (await getChildVertexes(graph, [`${type}`], [vertex])).vertexes || []
+    (await getChildVertexesAsync(graph, [`${type}`], [vertex])).vertexes || []
   ).sort((a, b) => a.P.pos - b.P.pos);
 }
 
-export async function getSublistRows(
+export async function getSublistRowsAsync(
   graph: Store<GraphInterface>,
   meta: Vertex,
   vertex?: Vertex,
 ) {
   if (!vertex) return [];
   // This should check for inward edges too
-  const type = getToEdge(meta, vertex);
+  const type = getToEdgeAsync(meta, vertex);
   return (
-    (await getChildVertexes(graph, [`${type}`], [vertex])).vertexes || []
+    (await getChildVertexesAsync(graph, [`${type}`], [vertex])).vertexes || []
   ).sort((a, b) => a.P.pos - b.P.pos);
 }
 
-export async function newRow(
+export async function newRowAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
@@ -476,6 +474,7 @@ export async function newRow(
   edgeType?: string,
   properties?: { [key: string]: any },
 ): Promise<{ error: boolean; vertexId?: Id; edgeId?: Id }> {
+  const { showErrorToast } = useToast();
   return batch(() => {
     const vertexNew = newVertex(
       getNewGraphId(),
@@ -513,7 +512,7 @@ export async function newRow(
   });
 }
 
-export const addNewRow = async (
+export const addNewRowAsync = async (
   txnId: number,
   meta: Vertex,
   graph: Store<GraphInterface>,
@@ -526,10 +525,10 @@ export const addNewRow = async (
   if (isRealTime) {
     txnId = getNewTxnId(graph, setGraph);
   }
-  const type = getToEdge(meta, parentVertex);
+  const type = await getToEdgeAsync(meta, parentVertex);
   const label = getValueFromVertexOrKey(meta.P.props || {}, "label");
 
-  const newRowResult = newRow(
+  const newRowResult = newRowAsync(
     graph,
     setGraph,
     txnId,
@@ -542,7 +541,7 @@ export const addNewRow = async (
   return newRowResult;
 };
 // Select On Change Handler
-export async function onChangeHandler(
+export async function onChangeHandlerAsync(
   txnId: number,
   formVertex: Vertex,
   vertex: Vertex,
@@ -569,7 +568,7 @@ export async function onChangeHandler(
 
     const attribute = (
       (
-        await getSelectionOptions(
+        await getSelectionOptionsAsync(
           graph,
           setGraph,
           [changedFieldAttribute],

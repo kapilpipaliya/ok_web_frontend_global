@@ -1,16 +1,16 @@
 import {
- Accessor,
- Component,
- createContext,
- createEffect,
- createMemo,
- createSignal,
- JSX,
- onCleanup,
- onMount,
- Show,
- splitProps,
- useContext
+  Accessor,
+  Component,
+  createContext,
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  onCleanup,
+  onMount,
+  Show,
+  splitProps,
+  useContext,
 } from "solid-js";
 
 import { getElements } from "../tools";

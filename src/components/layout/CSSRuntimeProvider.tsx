@@ -1,12 +1,12 @@
 import type { Config } from "@master/css";
 import { RuntimeCSS } from "@master/css-runtime";
 import {
- createContext,
- createEffect,
- createSignal,
- JSX,
- onCleanup,
- useContext
+  createContext,
+  createEffect,
+  createSignal,
+  JSX,
+  onCleanup,
+  useContext,
 } from "solid-js";
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();

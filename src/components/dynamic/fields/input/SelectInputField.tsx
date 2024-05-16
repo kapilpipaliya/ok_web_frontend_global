@@ -1,42 +1,40 @@
 import {
- batch,
- createResource,
- For,
- getOwner,
- runWithOwner,
- Show,
- untrack,
- useContext
+  batch,
+  createResource,
+  For,
+  getOwner,
+  runWithOwner,
+  Show,
+  untrack,
+  useContext,
 } from "solid-js";
 
 // Comment This Lines in web build
 import {
- GraphContext,
- GraphInterface,
- IdAttr,
- Vertex
+  GraphContext,
+  GraphInterface,
+  IdAttr,
+  Vertex,
 } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
- getInEdge,
- getParentVertexValue,
- getSelectedVertexValue
+  getInEdge,
+  getParentVertexValue,
+  getSelectedVertexValue,
 } from "~/lib/graph/get/sync/traverse";
 import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
 import {
- getChildVertex,
- getSelectionOptions,
- onChangeHandler,
- setValueGlobal
+  getChildVertex,
+  getSelectionOptions,
+  onChangeHandler,
+  setValueGlobal,
 } from "~/lib/graph/get/sync/graph_fns";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
 import { ComponentProps } from "~/components/ComponentType";
-import {
- setSelectionValue
-} from "~/components/dynamic/fields/static/SelectionUtils";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
@@ -246,7 +244,7 @@ export function SelectInputField(
     if (isRemove && e.length > 0) {
       data = [];
     } else {
-      data = e[0]['id'];
+      data = e[0]["id"];
     }
     runWithOwner(outerOwner, () => {
       batch(() => {
@@ -298,7 +296,14 @@ export function SelectInputField(
         } else if (getValueFromVertexOrKey(meta.P.props, "inward")) {
           setParentValue(graph, setGraph, txnId || 0, props.data!, meta, data);
         } else {
-          setSelectionValue(txnId || 0, props.data!, graph, setGraph, meta, data);
+          setSelectionValue(
+            txnId || 0,
+            props.data!,
+            graph,
+            setGraph,
+            meta,
+            data,
+          );
         }
         onChangeHandler(
           txnId || 0,

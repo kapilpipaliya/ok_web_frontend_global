@@ -3,11 +3,11 @@ import { batch } from "solid-js";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { pipe } from "@mobily/ts-belt";
 import {
- Id,
- isValidId,
- Relationship,
- transactionDetailAdd,
- transactions
+  Id,
+  isValidId,
+  Relationship,
+  transactionDetailAdd,
+  transactions,
 } from "~/cypher_api/lib/graph";
 import { GraphInterface } from "~/lib/graph/graph";
 

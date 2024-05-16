@@ -1,14 +1,14 @@
 import {
- Accessor,
- Component,
- createEffect,
- createMemo,
- createSignal,
- JSX,
- Match,
- mergeProps,
- splitProps,
- Switch
+  Accessor,
+  Component,
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  Match,
+  mergeProps,
+  splitProps,
+  Switch,
 } from "solid-js";
 import { Portal } from "solid-js/web";
 

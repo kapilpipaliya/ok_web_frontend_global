@@ -4,19 +4,17 @@ import { klona } from "klona/json";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { batch, onCleanup, untrack, useContext } from "solid-js";
 import {
- addNewRow,
- getChildVertex,
- getChildVertexes,
- newRow
+  addNewRow,
+  getChildVertex,
+  getChildVertexes,
+  newRow,
 } from "~/lib/graph/get/sync/graph_fns";
 import { removeUndefinedProperties } from "~/lib/functions";
-import {
- setSelectionValue
-} from "~/components/dynamic/fields/static/SelectionUtils";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { SetStoreFunction, Store } from "solid-js/store";
 import {
- componentProps,
- getCollAttrComp
+  componentProps,
+  getCollAttrComp,
 } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";

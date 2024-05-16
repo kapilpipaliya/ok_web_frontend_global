@@ -1,9 +1,9 @@
 import { createSignal, useContext } from "solid-js";
 import {
- APP_BASE_URL,
- validateEmail,
- validatePassword,
- validateUsername
+  APP_BASE_URL,
+  validateEmail,
+  validatePassword,
+  validateUsername,
 } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
@@ -57,9 +57,9 @@ export const SignUp = () => {
             navigate(`${APP_BASE_URL}/Page`);
           }
         },
-        onError:(v)=>{
+        onError: (v) => {
           setLoadingSite(false);
-        }
+        },
       });
     }
   };

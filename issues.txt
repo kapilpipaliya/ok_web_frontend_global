@@ -1,8 +1,8 @@
-✅ 🌟 📝
+✅ 🌟 📝 ⌛
 
 🌟 Project Fetures 🌟-----------------------------------------------------------------------------------------
 
-1. on click add element at last 
+1. on click add element at last (Kapil)
 2. open properties when click element using drawer
 3. seperate form design drawer
 4. form page setting section
@@ -10,23 +10,43 @@
 
 👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
 
-1. make mutate api working
-
 📝 Todo 📝------------------------------------------------------------------------------------------
+Savan:
+Refactor Page Builder component. ✅
+Add Pagination To Components page. ✅
+Fix CSS Editor Icons. I modified CssProperties.tsx file. ✅
+Use a Modal to display confirmation : if (window.confirm("Discard unsaved changes - are you sure?")) { in DynamicForm.tsx file ✅
+In the async api function, add Async Prefix to every function. ✅
+make a file upload component in page builder.
 
-1. When we drag and drop from page builder its not working(KAPIL)
-2. Fix Delete not working(Kapil)
+
+Kapil:
+When Editing a component and editing a component it gives error, maybe because transaction is not acknowledged.
+Make API to fetch nav bar data
+Make API to fetch Page data
+Make API to fetch form data
+Make API to fetch page editor full data
+Make Page working with some async data too.
+Make Working Forms using Page Designer.
+Make Page Preview and Page Share working.
+Refactor duplicate code between cyper api and lib folder.
+Make two copies working .com will always run and .in will be used for development. Both copy should work together with samee files.
+When user upload a file, also save entry in the database.
+make automatic backup for all the users everyday
+Fix Inline Editing Modal not close in list page.
+Use async everywhere, it will load data from server. Only few places use sync API.
+Fix NavBar yaml Import file Issue.
+
 
 ------------------------------------------------------------------------------------------
+load full page data with all joins when the page loads.
+use createResource in FormGroup, PageView_, GenericField(Form)
 
-  load full page data with all joins when the page loads.
-  write separate api for navbar.
-  use createResource in FormGroup, PageView_, GenericField(Form)
+Letter:
+Sorting, Filtering support on the table
+Load table data from server with pagination when form have many rows
+fix import export button on the form
 
-  Letter:
-  Sorting, Filtering support on the table
-  Load table data from server with pagination when form have many rows
-  fix import export button on the form
-
-  we are using two libraries:
-  jsep (for +,-) => jsonata(filter, projection)
+Notes:
+we are using two libraries:
+jsep (for +,-) => jsonata(filter, projection)

@@ -2,59 +2,56 @@
 import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
 import { CellContext, ColumnDef } from "@tanstack/solid-table";
 import {
- Accessor,
- createEffect,
- createMemo,
- createResource,
- createSignal,
- For,
- Match,
- onCleanup,
- Show,
- Switch,
- untrack,
- useContext
+  Accessor,
+  createEffect,
+  createMemo,
+  createResource,
+  createSignal,
+  For,
+  Match,
+  onCleanup,
+  Show,
+  Switch,
+  untrack,
+  useContext,
 } from "solid-js";
 import {
- GraphContext,
- GraphInterface,
- Id,
- IdAttr,
- Vertex
+  GraphContext,
+  GraphInterface,
+  Id,
+  IdAttr,
+  Vertex,
 } from "~/lib/graph/graph";
 import {
- commitTransaction,
- getNewTxnId,
- ProcessStatus,
- transactions
+  commitTransaction,
+  getNewTxnId,
+  ProcessStatus,
+  transactions,
 } from "~/lib/graph/transaction";
 
 import { Icon } from "@iconify-icon/solid";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
- GenericField
-} from "~/components/dynamic/fields/static/GenericFieldComponent";
-import {
- collectionNameDisplayExpr,
- selectedValue
+  collectionNameDisplayExpr,
+  selectedValue,
 } from "~/components/dynamic/fields/input/SelectInputField";
 import {
- APP_BASE_URL,
- breadcrumbData,
- capitalizeFirstLetter,
- isNumber,
- PageContext
+  APP_BASE_URL,
+  breadcrumbData,
+  capitalizeFirstLetter,
+  IFormContext,
+  isNumber,
+  PageContext,
 } from "~/lib/Utils";
 import {
- createMeta,
- getChildVertexes,
- getSelectionOptions
+  createMeta,
+  getChildVertexes,
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/graph_fns";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import {
- AbstractSingleForm
-} from "~/components/dynamic/components/DynamicForm";
+import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
@@ -63,7 +60,7 @@ import Dismiss from "solid-dismiss";
 import { createStore, SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
 import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
-import { getFormApiFromForm } from "~/lib/graph/get/async/graph_functions";
+import { getFormApiFromFormAsync } from "~/lib/graph/get/async/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useToast } from "~/components/custom/Toast";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
@@ -77,7 +74,7 @@ interface DataGridProps {
   tableId: string;
 }
 
-const Modal = (p: {
+const QuickEditModal = (p: {
   graph: GraphInterface;
   setGraph: SetStoreFunction<GraphInterface>;
   tableId: any;
@@ -93,7 +90,7 @@ const Modal = (p: {
   };
 
   return (
-    <>
+    <Show when={p.tableId}>
       <Icon
         ref={btnEl}
         height={22}
@@ -152,6 +149,93 @@ const Modal = (p: {
           </div>
         </div>
       </Dismiss>
+    </Show>
+  );
+};
+
+const ActionModal = (p: {
+  btnEl: any;
+  openActionModal: any;
+  setOpenActionModal: any;
+  setDeleteRowId: any;
+  info: any;
+  tableId: any;
+}) => {
+  return (
+    <>
+      <button ref={p.btnEl} class="focus:outline-none">
+        {" "}
+        {/* Button without outline on focus */}
+        <Icon icon="ic:twotone-more-vert" height={20} width={20} />
+      </button>
+
+      <div class="abs right:.1rem pt:10">
+        <Dismiss
+          menuButton={p.btnEl}
+          open={p.openActionModal}
+          setOpen={p.setOpenActionModal}
+          animation={{ name: "fade" }}
+        >
+          <div class="popup bg:white p:5 r:5 box-shadow:0rem|0rem|.5rem|0px|#25257596">
+            {" "}
+            {/* Improved styling */}
+            <div class="py:0.25rem" role="none">
+              <A
+                href={`${APP_BASE_URL}/${p.tableId}/${p.info.row.original.id}`}
+                class="m:1px|6px  p:0px|10px flex ai:center bg:#e8e5f3:hover r:7"
+              >
+                <Icon
+                  height={21}
+                  width={21}
+                  class={"color:#3477CC"}
+                  icon="fluent:edit-12-regular"
+                />
+                <div
+                  class="color:rgb(55,65,81)  px:1rem py:0.5rem f:0.875rem lh:1.25rem"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="menu-item-0"
+                >
+                  Edit
+                </div>
+              </A>
+              <div
+                onclick={() => {
+                  p.setOpenActionModal(false);
+                  p.setDeleteRowId(p.info.row.original.id);
+                }}
+                class="m:1px|6px p:0px|10px flex ai:center bg:#e8e5f3:hover r:7"
+              >
+                <Icon
+                  icon="fluent:delete-12-regular"
+                  class="color:rgb(255,0,0)"
+                  height={22}
+                  width={22}
+                />
+                <div
+                  class="color:rgb(55,65,81)  px:1rem py:0.5rem f:0.875rem lh:1.25rem"
+                  role="menuitem"
+                  tabindex="-1"
+                  id="menu-item-1"
+                >
+                  Delete
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            style={` position: absolute;
+    top: 0px;
+    left: 50%;
+    content: "";
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 20px solid rgb(255,255,255);`}
+          ></div>{" "}
+        </Dismiss>
+      </div>
     </>
   );
 };
@@ -159,9 +243,10 @@ const Modal = (p: {
 export const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { Ws } = useContext(WsContext);
-  const navigate = useNavigate( )
+  const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   let { events } = useContext(PageContext);
+  const [deleteRowId, setDeleteRowId] = createSignal(null);
 
   const [tableStore, setTableStore] = createStore(
     {} as { tableColumns: ColumnDef<any>[]; data: Accessor<Vertex[]> },
@@ -184,8 +269,8 @@ export const DataGrid = (props: DataGridProps) => {
         setGraph,
         [graph.vertexes[vertex[0]]],
         props.attribute.props?.displayExpr ||
-        collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
-        `::'P.${IdAttr}'`,
+          collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
+          `::'P.${IdAttr}'`,
       ).vertexes;
     }
     return "";
@@ -219,7 +304,7 @@ export const DataGrid = (props: DataGridProps) => {
   };
 
   async function getTableData() {
-    const form = await getFormApiFromForm(graph, setGraph, props.tableId);
+    const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
 
     let formNew: FormMetaData;
     let collection: string;
@@ -241,30 +326,6 @@ export const DataGrid = (props: DataGridProps) => {
       return <>Incorrect Configuration</>;
     }
     events?.setTitle(formNew.title);
-
-    const deleteObject = async (id: Id) => {
-      const txnId = getNewTxnId(graph, setGraph);
-      const deleteResult = deleteVertex(txnId, id, graph, setGraph);
-      // @ts-ignore
-      if (deleteResult?.error) {
-        showErrorToast(deleteResult?.error.toString());
-        return;
-      }
-      transactions.get(txnId)!.status = ProcessStatus.Ready;
-      const data = commitTransaction(Ws);
-      if (!data) {
-        return;
-      }
-      await showLoadingToast({
-        promise: submitDataCall(data),
-        loadMessage: "Submitting Data...",
-        successMessage: "Data submitted successfully",
-        onSuccess: (value) => {
-          // currently we are navigating back.
-          setTimeout(() => navigate(-1), 0);
-        },
-      });
-    };
 
     const tableColumns = [] as ColumnDef<any>[];
 
@@ -325,60 +386,61 @@ export const DataGrid = (props: DataGridProps) => {
       tableColumns.push(column);
     }
     tableColumns.push({
-      accessorKey: "Edit",
-      header: "",
+      accessorKey: "Actions",
+      header: "Actions",
       footer: "",
-      cell: (info) => (
-        <Show
-          when={!formNew.isInlineEditable}
-          fallback={
-            <Modal
-              info={info}
-              graph={graph}
-              setGraph={setGraph}
-              tableId={props.tableId}
-            />
-          }
-        >
-          <A
-            href={`${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`}
-            class="r:5|5|5|5 p:5"
-          >
-            <CustomButton variant={"custom"}>
-              <Icon
-                height={21}
-                width={21}
-                class={"color:#3477CC"}
-                icon="fluent:edit-12-regular"
-              />
-            </CustomButton>
-          </A>
-        </Show>
-      ),
-    });
-    tableColumns.push({
-      accessorKey: "Delete",
-      header: "",
-      footer: "",
-      cell: (info) => (
-        <DeleteDialog
-          buttonLabel={
-            <Icon
-              icon="fluent:delete-12-regular"
-              class="color:rgb(255,0,0)"
-              height={22}
-              width={22}
-            />
-          }
-          onConfirm={() => {
-            deleteObject(info.row.original.id as any)
-          }}
-          title={"Delete Support Ticket"}
-          message={
-            "Are you sure you want to delete this item?"
-          }
-        />
-      ),
+      cell: (info) => {
+        return (
+          <Switch>
+            <Match when={formNew.isInlineEditable}>
+              <div class="flex gap:10px ai:center  jc:center cursor:pointer">
+                <QuickEditModal
+                  info={info}
+                  graph={graph}
+                  setGraph={setGraph}
+                  tableId={props.tableId}
+                />
+                <Icon
+                  onclick={() => {
+                    setDeleteRowId(info.row.original.id);
+                  }}
+                  icon="fluent:delete-12-regular"
+                  class="color:rgb(255,0,0)"
+                  height={22}
+                  width={22}
+                />
+              </div>
+            </Match>
+
+            <Match when={!formNew.isInlineEditable}>
+              <div class="py:0.25rem">
+                <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
+                  <Icon
+                    onClick={() =>
+                      navigate(
+                        `${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`,
+                      )
+                    }
+                    height={21}
+                    width={21}
+                    class={"color:#3477CC"}
+                    icon="fluent:edit-12-regular"
+                  />
+                  <Icon
+                    onclick={() => {
+                      setDeleteRowId(info.row.original.id);
+                    }}
+                    icon="fluent:delete-12-regular"
+                    class="color:rgb(255,0,0)"
+                    height={22}
+                    width={22}
+                  />
+                </div>
+              </div>
+            </Match>
+          </Switch>
+        );
+      },
     });
     const coll = isNumber(collection)
       ? graph.vertexes[collection].P[IdAttr]
@@ -397,6 +459,29 @@ export const DataGrid = (props: DataGridProps) => {
     setTableStore({ tableColumns, data });
   }
 
+  const deleteObject = async (id: Id) => {
+    const txnId = getNewTxnId(graph, setGraph);
+    const deleteResult = deleteVertex(txnId, id, graph, setGraph);
+    // @ts-ignore
+    if (deleteResult?.error) {
+      showErrorToast(deleteResult?.error.toString());
+      return;
+    }
+    transactions.get(txnId)!.status = ProcessStatus.Ready;
+    const data = commitTransaction(Ws);
+    if (!data) {
+      return;
+    }
+    await showLoadingToast({
+      promise: submitDataCall(data),
+      loadMessage: "Submitting Data...",
+      successMessage: "Data submitted successfully",
+      onSuccess: (value) => {
+        // currently we are navigating back.
+        setTimeout(() => navigate(-1), 0);
+      },
+    });
+  };
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
       await getTableData();
@@ -419,6 +504,16 @@ export const DataGrid = (props: DataGridProps) => {
             headers={tableStore.tableColumns}
             rows={tableStore.data()}
           />
+          <Show when={deleteRowId()}>
+            <DeleteDialog
+              open={true}
+              onConfirm={() => {
+                deleteObject(deleteRowId()!);
+              }}
+              title={"Delete Item"}
+              message={"Are you sure you want to delete this item?"}
+            />
+          </Show>
         </Match>
       </Switch>
     </div>

@@ -1,28 +1,26 @@
 import { getNewGraphId, Id, IdAttr, Node } from "~/cypher_api/lib/graph";
 
 import {
- addNewVertex,
- findVertexByLabelAndUniqueId,
- newVertex,
- replaceVertexProperties
+  addNewVertex,
+  findVertexByLabelAndUniqueId,
+  newVertex,
+  replaceVertexProperties,
 } from "~/cypher_api/lib/vertex";
-import {
- setSelectionValue
-} from "~/cypher_api/components/input/SelectInputField";
+import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 
 import { getChildVertex, getParentVertex } from "~/cypher_api/lib/traverse";
 import {
- FormMetaData,
- getCompPropsMap,
- getFormMetaData,
- getId,
- newRow,
- Record
+  FormMetaData,
+  getCompPropsMap,
+  getFormMetaData,
+  getId,
+  newRow,
+  Record,
 } from "~/cypher_api/lib/record";
 import {
- importRecordWithYAMLSchema,
- onDataDirectoryImportClick,
- updateImportRecord
+  importRecordWithYAMLSchema,
+  onDataDirectoryImportClick,
+  updateImportRecord,
 } from "~/cypher_api/lib/Import";
 
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
@@ -173,7 +171,7 @@ const importCollections = () => {
   }
 };
 
-const makeASampleForm = () => {
+const makeASampleForm = async () => {
   // get all the fields
   const vertexId = getNewGraphId();
   const txnId = getNewTxnId(graph, setGraph);
@@ -204,7 +202,7 @@ const makeASampleForm = () => {
       [IdAttr]: getId(componentName),
       displayName: componentName,
     });
-    const dataType = getParentVertex(["DataType$0"], componentVertex);
+    const dataType = await getParentVertex(["DataType$0"], componentVertex);
     if (!dataType.error) {
       // set component dataType and component
       setSelectionValue(
@@ -358,11 +356,12 @@ LocalDateTime\tDateBox
   });
   await onDataDirectoryImportClick(record);
 
+  //
   updateImportRecord("user", record, false);
   record.mergeFieldValues({
     csv: `name\temail\tpass\trole
-Test1\ttest1@test.com\ttest1\tAdmin
-Test2\ttest2@test.com\ttest2\tUser`,
+Test1\ttest1@test.com\tTest@123\tAdmin
+Test2\ttest2@test.com\tTest@123\tUser`,
   });
   await onDataDirectoryImportClick(record);
 

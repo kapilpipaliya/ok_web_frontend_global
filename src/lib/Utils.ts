@@ -1,14 +1,12 @@
 import { createContext, useContext } from "solid-js";
-import {
- findVertexByLabelAndUniqueIdWithSkip
-} from "./graph/get/sync/findVertex";
+import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { SetStoreFunction, Store } from "solid-js/store";
 import {
- getChildVertex,
- getSelectionOptions
+  getChildVertex,
+  getSelectionOptions,
 } from "./graph/get/sync/graph_fns";
 
 export const APP_BASE_URL = "/admin";

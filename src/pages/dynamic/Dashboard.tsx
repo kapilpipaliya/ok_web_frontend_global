@@ -7,9 +7,9 @@ import Dismiss from "solid-dismiss";
 import { Navbar } from "~/components/layout/Navbar";
 import { APP_BASE_URL, PageContext } from "~/lib/Utils";
 import {
- addNewVertex,
- mergeVertexProperties,
- newVertex
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
 } from "~/lib/graph/mutate/vertex";
 import "~/css/base.css";
 import "~/css/modal.css";

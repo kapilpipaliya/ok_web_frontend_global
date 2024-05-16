@@ -1,8 +1,11 @@
-import { createMemo, createSignal } from "solid-js";
+import { createMemo, createSignal, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { PageView } from "~/components/dynamic/fields/static/GenaricField";
+import { PageConfigContext } from "~/lib/contexts";
 
 const PreviewSection = () => {
   const [selectedView, setSelectedView] = createSignal("Mobile"); // Initially set to the first step
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
 
   const dynamicStyle = createMemo(() => {
     switch (selectedView()) {
@@ -45,9 +48,11 @@ const PreviewSection = () => {
         }
       >
         <div
-          class="b:1px|solid|rgb(37,99,253,0.5) bg:rgb(224,230,255,0.3) p:5 pl:1rem pr:1rem r:5|5|5|5"
+          class="b:1px|solid|rgb(37,99,253,0.5) bg:rgb(224,230,255,0.3) r:5|5|5|5 overflow:auto"
           style={dynamicStyle()}
-        ></div>
+        >
+          <PageView vertex={pageConfig.formData?.formData} />
+        </div>
       </div>
     </div>
   );

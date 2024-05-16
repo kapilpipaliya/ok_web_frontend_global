@@ -1,11 +1,11 @@
 import {
- Accessor,
- createEffect,
- createMemo,
- createSignal,
- JSX,
- onCleanup,
- Setter
+  Accessor,
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  onCleanup,
+  Setter,
 } from "solid-js";
 
 export type WrappedElement<P> = (props: P) => JSX.Element;

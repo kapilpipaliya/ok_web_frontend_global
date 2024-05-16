@@ -1,13 +1,13 @@
 import { Component, Show } from "solid-js";
 import {
- Bar,
- Checkbox,
- Tab,
- TabContainer,
- TabList,
- Tabs,
- Tooltip,
- useDarkMode
+  Bar,
+  Checkbox,
+  Tab,
+  TabContainer,
+  TabList,
+  Tabs,
+  Tooltip,
+  useDarkMode,
 } from "./blocks";
 
 import "./app.css";

@@ -2,8 +2,8 @@ import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
 import { isNumber } from "~/cypher_api/utils/utils";
 import {
- Node as Neo4jNode,
- Relationship as Neo4jRelationship
+  Node as Neo4jNode,
+  Relationship as Neo4jRelationship,
 } from "neo4j-driver";
 import { Edge, GraphInterface, Vertex } from "~/lib/graph/graph";
 
@@ -51,12 +51,10 @@ let uniqueId = -50000;
 
 export const getGraph = () =>
   createStore<GraphInterface>({
-    _isPartialSynced: true,
     vertexes: {} as { [key: string]: Vertex },
     edges: {} as { [key: string]: Edge },
     vertexLabelIdMap: {} as { [key: string]: Id[] },
     initialSynced: true,
-    lastSyncedTime: 0,
     member: {},
     txnId: 0,
   });

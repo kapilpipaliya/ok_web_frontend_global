@@ -213,7 +213,9 @@ export async function mutateData(
             properties: mutationObject.insert.P,
           });
           if (result.records.length > 0) {
-            const id = !isIntegerId ? result.records[0].get("n").identity.toNumber() : result.records[0].get("n").identity;
+            const id = !isIntegerId
+              ? result.records[0].get("n").identity.toNumber()
+              : result.records[0].get("n").identity;
             const oldId = mutationObject.insert.id;
             clientToServerVertexIdMap.set(oldId, id);
             txnResult.push({ insert: [oldId, id] });
@@ -308,16 +310,18 @@ export async function mutateData(
               return r`;
 
         try {
-          console.log(query)
+          console.log(query);
           const result = await tx.run(query, {
             startId,
             endId,
             properties: mutationObject.insertEdge.P,
           });
           if (result.records.length > 0) {
-            console.log('result', result)
+            console.log("result", result);
             const oldId = mutationObject.insertEdge.id;
-            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
+            const edgeId = !isIntegerId
+              ? result.records[0].get("r").identity.toNumber()
+              : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ insertEdge: [oldId, edgeId] });
@@ -359,7 +363,9 @@ export async function mutateData(
           });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdge.id;
-            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
+            const edgeId = !isIntegerId
+              ? result.records[0].get("r").identity.toNumber()
+              : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdge: [oldId, edgeId] });
@@ -398,7 +404,9 @@ export async function mutateData(
           const result = await tx.run(query, { edgeId: id, newstart: startId });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeStart.id;
-            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
+            const edgeId = !isIntegerId
+              ? result.records[0].get("r").identity.toNumber()
+              : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeStart: { error: false } });
@@ -437,7 +445,9 @@ export async function mutateData(
           const result = await tx.run(query, { edgeId: id, newend: endId });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeEnd.id;
-            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
+            const edgeId = !isIntegerId
+              ? result.records[0].get("r").identity.toNumber()
+              : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeEnd: { error: false } });
@@ -471,7 +481,9 @@ export async function mutateData(
           const result = await tx.run(query, { id, startId, endId });
           if (result.records.length > 0) {
             const oldId = mutationObject.deleteEdge.id;
-            const edgeId = !isIntegerId ? result.records[0].get("r").identity.toNumber() : result.records[0].get("r").identity;
+            const edgeId = !isIntegerId
+              ? result.records[0].get("r").identity.toNumber()
+              : result.records[0].get("r").identity;
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ deleteEdge: { error: false } });

@@ -8,6 +8,8 @@ export const DeleteDialog = (props: {
   message?: string;
   buttonLabel?: JSX.Element;
   onCancel?: () => void;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }) => {
   const handleConfirm = () => {
     props.onConfirm();
@@ -20,14 +22,10 @@ export const DeleteDialog = (props: {
     <CustomModal
       bodyStyle={{ "max-height": "none", overflow: "auto" }}
       openButton={false}
-      buttonLabel={
-        props.buttonLabel || <div class="color:rgb(255,0,0)">Delete</div>
-      }
-      customTitle={
-        <span>
-          {props.title || "Delete Confirmation"}
-        </span>
-      }
+      open={props.open}
+      setOpen={props.setOpen}
+      buttonLabel={props.buttonLabel}
+      customTitle={<span>{props.title || "Delete Confirmation"}</span>}
       body={
         <p class="p:10px|0px">
           {props.message || "Are you sure you want to delete this item?"}
@@ -47,7 +45,7 @@ export const DeleteDialog = (props: {
           </CustomButton>
           <CustomButton
             variant="contained"
-            onClick={()=>{
+            onClick={() => {
               handleConfirm();
               toggle((v) => !v);
             }}

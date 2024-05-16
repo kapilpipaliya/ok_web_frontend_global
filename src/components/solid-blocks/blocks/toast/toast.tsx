@@ -1,12 +1,12 @@
 import {
- createEffect,
- createMemo,
- createSignal,
- JSX,
- onMount,
- Setter,
- Show,
- splitProps
+  createEffect,
+  createMemo,
+  createSignal,
+  JSX,
+  onMount,
+  Setter,
+  Show,
+  splitProps,
 } from "solid-js";
 import { isServer, Portal } from "solid-js/web";
 import { getElements, WrappedElement } from "../tools";

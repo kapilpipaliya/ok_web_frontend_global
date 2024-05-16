@@ -1,10 +1,10 @@
 import {
- Accessor,
- createContext,
- createSignal,
- Setter,
- Show,
- useContext
+  Accessor,
+  createContext,
+  createSignal,
+  Setter,
+  Show,
+  useContext,
 } from "solid-js";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { getChildVertexes } from "~/lib/graph/get/sync/graph_fns";

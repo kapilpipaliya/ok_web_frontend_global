@@ -60,9 +60,9 @@ export const Login = () => {
           if (value != null && value.id !== null) {
             navigate(`${APP_BASE_URL}/Page`);
           }
-        }, onError(error) {
+        },
+        onError(error) {
           setLoadingSite(false);
-
         },
       });
     }
@@ -91,7 +91,7 @@ export const Login = () => {
             src={logo}
             alt="logo"
             class="@fade|.5s"
-            style={{ "justify-self": "center", height: '70px' }}
+            style={{ "justify-self": "center", height: "70px" }}
           />
         }
       >
@@ -100,7 +100,7 @@ export const Login = () => {
             src={formData().profileImage}
             alt="logo"
             class="r:10 @fade|.5s bg:white p:2"
-            style={{ "justify-self": "center", height: '130px' }}
+            style={{ "justify-self": "center", height: "130px" }}
           />
           <div class="m:10">
             <span>Welcome Back,</span>
@@ -121,7 +121,7 @@ export const Login = () => {
       >
         <img
           src={"../../public/graphics/login_vector.jpg"}
-          style={{ width: '25rem' }}
+          style={{ width: "25rem" }}
           alt="logo"
           class="d:none@<md"
         />

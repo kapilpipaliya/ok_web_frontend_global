@@ -1,6 +1,5 @@
 .styled-table {
   border-collapse: collapse;
-  margin: 5px 5px;
   font-size: 0.9em;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
@@ -21,7 +20,6 @@
 
 .styled-table th,
 .styled-table td {
-  padding: 5px 3px;
   align-content: center;
 }
 

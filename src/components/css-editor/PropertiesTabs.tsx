@@ -1,24 +1,22 @@
 import {
- Tab,
- TabContainer,
- TabList,
- Tabs
+  Tab,
+  TabContainer,
+  TabList,
+  Tabs,
 } from "~/components/solid-blocks/blocks";
 import { Vertex } from "~/lib/graph/graph";
 import { StyleCSSComponents } from "./StyleCSSComponents";
 import {
- createEffect,
- createMemo,
- createSignal,
- For,
- on,
- Show
+  createEffect,
+  createMemo,
+  createSignal,
+  For,
+  on,
+  Show,
 } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { CssEditorContext } from "./cssEditorContext";
-import {
- DynamicCSSComponent
-} from "~/components/dynamic/components/DynamicCssComponent";
+import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { Icon } from "@iconify-icon/solid";
 import JSONSchema from "./CssProperties";
 
@@ -98,7 +96,7 @@ export const ClassDesignTab = (props: {
   };
 
   const StyleEditor = () => {
-    const filterSections = (query) => {
+    const filterSections = (query: string) => {
       const filteredSections = Object.entries(JSONSchema)
         .map(([sectionName, properties]) => {
           const isOpen = !!query; // Set isOpen to true if there's a query
@@ -117,7 +115,7 @@ export const ClassDesignTab = (props: {
                 property.children.length > 0
               ) {
                 const matchingChildren = property.children.filter(
-                  (child) =>
+                  (child: { label: string }) =>
                     child.label &&
                     child.label.toLowerCase().includes(query.toLowerCase()),
                 );
@@ -203,7 +201,7 @@ export const ClassDesignTab = (props: {
     };
 
     // Function to handle search input
-    const handleSearch = (value) => {
+    const handleSearch = (value: string) => {
       setSearch(value);
       setFilteredSections(filterSections(value));
     };
@@ -216,11 +214,11 @@ export const ClassDesignTab = (props: {
         >
           <nav class="bg:white 0px 0px 10px 10px w:full p:5|0">
             <div class="group">
-              <svg class="icon" aria-hidden="true" viewBox="0 0 24 24">
-                <g>
-                  <path d="M21.53 20.47l-3.66-3.66C19.195 15.24 20 13.214 20 11c0-4.97-4.03-9-9-9s-9 4.03-9 9 4.03 9 9 9c2.215 0 4.24-.804 5.808-2.13l3.66 3.66c.147.146.34.22.53.22s.385-.073.53-.22c.295-.293.295-.767.002-1.06zM3.5 11c0-4.135 3.365-7.5 7.5-7.5s7.5 3.365 7.5 7.5-3.365 7.5-7.5 7.5-7.5-3.365-7.5-7.5z"></path>
-                </g>
-              </svg>
+              <Icon
+                class="icon"
+                icon="iconamoon:search"
+                style={{ color: "#9e9ea7" }}
+              />
               <input
                 placeholder="Search Style..."
                 type="search"

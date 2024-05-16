@@ -6,23 +6,17 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore, Store } from "solid-js/store";
 import { APP_BASE_URL, IFormContext } from "~/lib/Utils";
 
+import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import {
- SelectInputField
-} from "~/components/dynamic/fields/input/SelectInputField";
-import {
- onDataDirectoryImportClick,
- updateImportRecord
+  onDataDirectoryImportClick,
+  updateImportRecord,
 } from "~/lib/graph/mutate/import";
 import {
- AbstractSingleForm,
- getComponentForCollRow
+  AbstractSingleForm,
+  getComponentForCollRow,
 } from "~/components/dynamic/components/DynamicForm";
-import {
- DynamicComponent
-} from "~/components/dynamic/components/DynamicComponent";
-import {
- GenericField
-} from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { toTitle } from "case-switcher-js";
 import { ClassDesignTab } from "~/components/css-editor/PropertiesTabs";
 

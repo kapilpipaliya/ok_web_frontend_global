@@ -1,17 +1,17 @@
 import {
- Accessor,
- Component,
- createContext,
- createEffect,
- createSelector,
- createSignal,
- createUniqueId,
- JSX,
- on,
- Setter,
- Show,
- splitProps,
- useContext
+  Accessor,
+  Component,
+  createContext,
+  createEffect,
+  createSelector,
+  createSignal,
+  createUniqueId,
+  JSX,
+  on,
+  Setter,
+  Show,
+  splitProps,
+  useContext,
 } from "solid-js";
 import { runEvent } from "../tools";
 

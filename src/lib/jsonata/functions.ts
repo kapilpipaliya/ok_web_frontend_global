@@ -5,16 +5,16 @@
  */
 // @ts-nocheck
 import {
- createSequence,
- getFunctionArity,
- isArrayOfNumbers,
- isArrayOfStrings,
- isDeepEqual as deepEquals,
- isFunction,
- isLambda,
- isNumeric,
- isSequence,
- stringToArray
+  createSequence,
+  getFunctionArity,
+  isArrayOfNumbers,
+  isArrayOfStrings,
+  isDeepEqual as deepEquals,
+  isFunction,
+  isLambda,
+  isNumeric,
+  isSequence,
+  stringToArray,
 } from "./utils";
 
 /**

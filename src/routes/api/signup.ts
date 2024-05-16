@@ -2,9 +2,9 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { TransactionPromise } from "neo4j-driver-core";
 import {
- getDriver,
- getDriverWithPort,
- isIntegerId
+  getDriver,
+  getDriverWithPort,
+  isIntegerId,
 } from "~/cypher_api/server/driver";
 import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
@@ -190,7 +190,7 @@ async function PortConfigure(
       [labPort]: "3000",
     });
 
-    await new Promise((resolve, reject) => setTimeout(resolve,5000))
+    await new Promise((resolve, reject) => setTimeout(resolve, 5000));
 
     // Update port configuration in the database
     const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} RETURN n;`;

@@ -4,33 +4,33 @@
  * @returns {Promise<any>} - The promise that resolves to the response data.
  */
 export async function getAPI(url: string): Promise<{ [key: string]: any }> {
-    const response = await fetch(url, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    });
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 
-    const contentType = response.headers.get("content-type");
+  const contentType = response.headers.get("content-type");
 
-    if (!response.ok) {
-        // Attempt to parse error message from JSON or default to status text
-        const errorMessage = contentType?.includes("application/json")
-            ? (await response.json()).error
-            : contentType?.includes("text/plain")
-                ? await response.text()
-                : response.statusText;
+  if (!response.ok) {
+    // Attempt to parse error message from JSON or default to status text
+    const errorMessage = contentType?.includes("application/json")
+      ? (await response.json()).error
+      : contentType?.includes("text/plain")
+        ? await response.text()
+        : response.statusText;
 
-        // Throw an error with status code and message
-        throw new Error(errorMessage);
-    }
+    // Throw an error with status code and message
+    throw new Error(errorMessage);
+  }
 
-    const responseData = await response.json();
-    if (responseData.error) {
-        throw new Error(responseData.error);
-    }
+  const responseData = await response.json();
+  if (responseData.error) {
+    throw new Error(responseData.error);
+  }
 
-    return responseData;
+  return responseData;
 }
 
 export default getAPI;

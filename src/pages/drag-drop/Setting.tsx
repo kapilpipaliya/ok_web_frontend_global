@@ -1,11 +1,11 @@
 import {
- createSignal,
- For,
- Match,
- Show,
- Switch,
- untrack,
- useContext
+  createSignal,
+  For,
+  Match,
+  Show,
+  Switch,
+  untrack,
+  useContext,
 } from "solid-js";
 import "~/css/base.css";
 import { TextField } from "~/components/solid-blocks/blocks";
@@ -16,13 +16,13 @@ import { createStore } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 import { validateEmail, validatePassword } from "~/lib/Utils";
 import {
- Table,
- TableBody,
- TableBodyRow,
- TableData,
- TableHead,
- TableHeader,
- TableHeadRow
+  Table,
+  TableBody,
+  TableBodyRow,
+  TableData,
+  TableHead,
+  TableHeader,
+  TableHeadRow,
 } from "~/components/custom/Table";
 import { ChipDropDown } from "~/components/custom/Chip";
 import CustomModal from "~/components/custom/CommonDialog";
@@ -32,10 +32,10 @@ import { API } from "~/components/api/DataFetcher";
 import { GraphContext } from "~/lib/graph/graph";
 import { equals } from "rambda";
 import {
- deleteSupportTicketCall,
- getChatsSupportCall,
- resetPasswordCall,
- sendChatsSupportCall
+  deleteSupportTicketCall,
+  getChatsSupportCall,
+  resetPasswordCall,
+  sendChatsSupportCall,
 } from "~/components/api/api_functions";
 import getAPI from "~/components/api/getApi";
 
@@ -223,22 +223,24 @@ function Settings() {
         onSuccess: async (data) => {
           if (data.user) {
             setSelectedImage(null);
-            await getAPI(API.getUserUrl).then((data: { [key: string]: any }) => {
-              setIsEdit(false);
-              setProfileData({
-                username: data.properties.username.toLowerCase(),
-                email: data.properties.email.toLowerCase(),
-                id: data.id,
-                uId: data.properties.uId,
-                profileImage:
-                  data.properties.profileImage ??
-                  "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
-                country: "United States",
-              });
-              loadContactData();
-              setOriginalProfileData(profileData); // Set original data
-              setGraph("member", data);
-            });
+            await getAPI(API.getUserUrl).then(
+              (data: { [key: string]: any }) => {
+                setIsEdit(false);
+                setProfileData({
+                  username: data.properties.username.toLowerCase(),
+                  email: data.properties.email.toLowerCase(),
+                  id: data.id,
+                  uId: data.properties.uId,
+                  profileImage:
+                    data.properties.profileImage ??
+                    "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
+                  country: "United States",
+                });
+                loadContactData();
+                setOriginalProfileData(profileData); // Set original data
+                setGraph("member", data);
+              },
+            );
           }
         },
         onError: (error) => {

@@ -1,46 +1,44 @@
 import {
- createComputed,
- createContext,
- createMemo,
- createSelector,
- For,
- Match,
- Show,
- Switch,
- useContext
+  createComputed,
+  createContext,
+  createMemo,
+  createSelector,
+  For,
+  Match,
+  Show,
+  Switch,
+  useContext,
 } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import {
- GraphContext,
- GraphInterface,
- IdAttr,
- Vertex
+  GraphContext,
+  GraphInterface,
+  IdAttr,
+  Vertex,
 } from "~/lib/graph/graph";
 import { FormContext, iconMap, PageContext } from "~/lib/Utils";
 import {
- getChildVertex,
- getChildVertexes,
- getParentVertex,
- getSelectionOptions
+  getChildVertex,
+  getChildVertexes,
+  getParentVertex,
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
-import {
- DynamicComponent
-} from "~/components/dynamic/components/DynamicComponent";
+import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { useDragDrop } from "~/lib/pageStore";
 import { Icon } from "@iconify-icon/solid";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
 import {
- getCollAttrComp,
- getCompProps,
- getRowProps
+  getCollAttrComp,
+  getCompProps,
+  getRowProps,
 } from "~/lib/graph/get/sync/graph_functions";
 import {
- HoverIdContext,
- IndicatorPositionContext,
- SelectedIdContext,
- TargetIdContext
+  HoverIdContext,
+  IndicatorPositionContext,
+  SelectedIdContext,
+  TargetIdContext,
 } from "~/lib/contexts";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
@@ -91,7 +89,9 @@ export const PageItemRender = (props: {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
-  const [indicatorPosition, setIndicatorPosition] = useContext(IndicatorPositionContext);
+  const [indicatorPosition, setIndicatorPosition] = useContext(
+    IndicatorPositionContext,
+  );
   let { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
@@ -277,7 +277,7 @@ export const PageItemRender = (props: {
                     </Tooltip>
                     <Tooltip content={"Delete"}>
                       <Icon
-                        onClick={() => deleteLayout}
+                        onClick={() => deleteLayout(getComponent())}
                         icon={"fluent:delete-20-regular"}
                         height={20}
                         width={20}
@@ -398,7 +398,7 @@ export function getUrl(
   return url;
 }
 
-export function PageView(props: { number: number; vertex?: Vertex }) {
+export function PageView(props: { vertex?: Vertex }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const collection = createMemo(() =>
     PageRenderUtils.getCollection(graph, props.vertex),
@@ -409,7 +409,7 @@ export function PageView(props: { number: number; vertex?: Vertex }) {
 
   return (
     <PageContext.Provider value={{ events: {} }}>
-      <Show when={props.number && props.vertex && props.number} keyed>
+      <Show when={props.vertex} keyed>
         <Switch>
           <Match when={collection() && !dataVertex()}>
             <For

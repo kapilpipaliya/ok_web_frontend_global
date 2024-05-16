@@ -1,7 +1,7 @@
 import { IdAttr, Node } from "~/cypher_api/lib/graph";
 import {
- capitalizeFirstLetter,
- getValueFromVertexOrKey
+  capitalizeFirstLetter,
+  getValueFromVertexOrKey,
 } from "~/cypher_api/utils/utils";
 import { evaluate } from "~/cypher_api/lib/jsep";
 import jsep from "jsep";

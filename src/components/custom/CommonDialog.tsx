@@ -16,10 +16,12 @@ interface CustomModalProps {
   closeButton?: boolean;
   iconSize?: number;
   iconClass?: string;
+  open?: boolean;
+  setOpen?: (open: boolean) => void;
 }
 
 const CustomModal = (props: CustomModalProps) => {
-  const [open, setOpen] = createSignal(false);
+  const [open, setOpen] = createSignal(props.open ?? false);
   let btnEl: any;
 
   const onClickClose = () => {

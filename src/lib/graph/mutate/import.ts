@@ -1,41 +1,39 @@
 import { isObject } from "~/lib/Utils";
 import {
- addNewRow,
- deleteRow,
- getChildVertex,
- getChildVertexes,
- getSublistRows,
- getSublistRowsForType,
- newRow
+  addNewRow,
+  deleteRow,
+  getChildVertex,
+  getChildVertexes,
+  getSublistRows,
+  getSublistRowsForType,
+  newRow,
 } from "~/lib/graph/get/sync/graph_fns";
 import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "../transaction";
 import {
- addNewVertex,
- deleteVertex,
- findOrCreateNewVertex,
- mergeVertexProperties,
- newVertex,
- replaceVertexProperties
+  addNewVertex,
+  deleteVertex,
+  findOrCreateNewVertex,
+  mergeVertexProperties,
+  newVertex,
+  replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import {
- findVertexByLabelAndPks,
- findVertexByLabelAndUniqueId
+  findVertexByLabelAndPks,
+  findVertexByLabelAndUniqueId,
 } from "~/lib/graph/get/sync/findVertex";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { A, D } from "@mobily/ts-belt";
 import {
- isSimpleCollection,
- setParentValue
+  isSimpleCollection,
+  setParentValue,
 } from "~/components/dynamic/fields/input/SelectInputField";
 import { parse } from "yaml";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { AttrsTableData } from "~/lib/api";
-import {
- setSelectionValue
-} from "~/components/dynamic/fields/static/SelectionUtils";
+import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";

@@ -3,12 +3,12 @@ import { graph } from "../../graph";
 import { getNewGraphId, transactions } from "../../transaction";
 import { klona } from "klona";
 import {
- addNewEdge,
- deleteEdge,
- newEdge,
- replaceEdgeEnd,
- replaceEdgeProperties,
- replaceEdgeStart
+  addNewEdge,
+  deleteEdge,
+  newEdge,
+  replaceEdgeEnd,
+  replaceEdgeProperties,
+  replaceEdgeStart,
 } from "../edge";
 import { addNewVertex, newVertex } from "../vertex";
 
