@@ -10,6 +10,11 @@
 
 👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
 
+1. GenericField modified
+2. DynamicCssComponent modified
+3. propertiesTabs modified
+4. generic field component
+
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 Refactor Page Builder component. ✅

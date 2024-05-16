@@ -5,7 +5,7 @@ import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { config } from "~/master.css";
 import { LoadingContext } from "~/lib/contexts";
-import { CSSRuntimeProvider } from "./components/layout/CSSRuntimeProvider";
+import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 
 export default function App() {

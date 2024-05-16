@@ -13,7 +13,7 @@ import {
 } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
-import { Dashboard } from "~/pages/dynamic/Dashboard";
+import { MainDashboard } from "~/pages/dynamic/MainDashboard";
 
 export default function UsersLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);
@@ -41,7 +41,7 @@ export default function UsersLayout(props: RouteSectionProps) {
         {/* In DataFetch fetch only side bar data*/}
         <DataFetcher
           fetchData={API.fetchDataUrl}
-          renderContent={<Dashboard children={props.children} />}
+          renderContent={<MainDashboard children={props.children} />}
         />
         {/*{props.children}*/}
       </WsContext.Provider>

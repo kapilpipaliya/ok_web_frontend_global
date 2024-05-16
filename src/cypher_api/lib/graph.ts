@@ -1,6 +1,6 @@
 import { batch } from "solid-js";
 import { createStore } from "solid-js/store";
-import { isNumber } from "~/cypher_api/utils/utils";
+import { isNumber } from "~/lib/Utils";;
 import {
   Node as Neo4jNode,
   Relationship as Neo4jRelationship,

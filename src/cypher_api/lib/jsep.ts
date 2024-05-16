@@ -5,7 +5,7 @@ import { path } from "rambda";
 import { calculateFilter, getTextValue } from "~/cypher_api/lib/traverse";
 import { findVertexIdsByLabel } from "~/cypher_api/lib/vertex";
 import { jsonata } from "~/cypher_api/lib/jsonata/jsonata";
-import { isObject } from "~/cypher_api/utils/utils";
+import { isObject } from "~/lib/Utils";;
 
 /**
  * Evaluation code from JSEP project, under MIT License.

@@ -1,11 +1,11 @@
-import { AllDashboards } from "~/pages/dynamic/Grids";
+import { UserDashboards } from "~/pages/dynamic/UserDashboards";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 
 export default function allDashboards() {
   return (
     <DataFetcher
       fetchData={API.fetchDataUrl}
-      renderContent={<AllDashboards />}
+      renderContent={<UserDashboards />}
     />
   );
 }

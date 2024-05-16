@@ -4,7 +4,7 @@ import { createEffect, createSignal, JSX, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
-import { Navbar } from "~/components/layout/Navbar";
+import { Navbar } from "~/pages/dashboard/Navbar";
 import { APP_BASE_URL, PageContext } from "~/lib/Utils";
 import {
   addNewVertex,
@@ -15,15 +15,15 @@ import "~/css/base.css";
 import "~/css/modal.css";
 import { LoadingContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
-import Sidebar from "~/components/layout/Sidebar";
 import { signOutCall } from "~/components/api/api_functions";
 import getAPI from "~/components/api/getApi";
 import { API } from "~/components/api/DataFetcher";
+import Sidebar from "./Sidebar";
 
 const border = "|solid|rgb(212,219,231)";
 const [isSideBarOpen, setSideBarOpen] = createSignal(true);
 
-export const Dashboard = (props: { children?: JSX.Element }) => {
+export const MainDashboard = (props: { children?: JSX.Element }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const vertexId = getNewGraphId();
   addNewVertex(

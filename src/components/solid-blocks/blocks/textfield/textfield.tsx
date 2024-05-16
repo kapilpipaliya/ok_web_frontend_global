@@ -32,7 +32,7 @@ export type SingleLineTextFieldProps =
   JSX.InputHTMLAttributes<HTMLInputElement> & {
     "aria-orientation"?: "horizontal" | "vertical";
     multiline?: false;
-    isNumber?: false;
+    isNumber?: boolean;
     labelClass?: string;
     label?: JSX.Element;
     type?: string;

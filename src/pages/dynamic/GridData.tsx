@@ -1,5 +1,5 @@
 // Comment This Lines in web build
-import { A, useLocation, useNavigate, useParams } from "@solidjs/router";
+import { useLocation, useNavigate, useParams } from "@solidjs/router";
 import { CellContext, ColumnDef } from "@tanstack/solid-table";
 import {
   Accessor,
@@ -7,7 +7,6 @@ import {
   createMemo,
   createResource,
   createSignal,
-  For,
   Match,
   onCleanup,
   Show,
@@ -45,28 +44,26 @@ import {
 } from "~/lib/Utils";
 import {
   createMeta,
-  getChildVertexes,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/graph_fns";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { AttrsTableData } from "~/lib/api";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
-import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { CollapsibleTable } from "~/components/custom/Table";
 import Dismiss from "solid-dismiss";
 import { createStore, SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
-import { renderNavTreeFromGraph } from "~/components/layout/Sidebar";
 import { getFormApiFromFormAsync } from "~/lib/graph/get/async/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { useToast } from "~/components/custom/Toast";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { submitDataCall } from "~/components/api/api_functions";
+import { renderNavTreeFromGraph } from "../dashboard/Sidebar";
 
-interface AbstractSingleGridProps {
+interface AbstractGridProps {
   tableId: string;
 }
 
@@ -153,101 +150,111 @@ const QuickEditModal = (p: {
   );
 };
 
-const ActionModal = (p: {
-  btnEl: any;
-  openActionModal: any;
-  setOpenActionModal: any;
-  setDeleteRowId: any;
-  info: any;
-  tableId: any;
-}) => {
+// TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
+
+export const AbstractGrid = (props: AbstractGridProps) => {
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const data = findVertexByLabelAndUniqueId(
+    graph,
+    "Coll",
+    IdAttr,
+    props.tableId,
+  );
+
+  const nestedName = createMemo(
+    () =>
+      findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
+        ?.name,
+  );
+  const navData: any = createMemo(() => {
+    const nav = findVertexByLabelAndUniqueId(
+      graph,
+      "Nav",
+      "name",
+      "Navigation",
+    );
+    if (!nav) return [];
+
+    if (!graph.vertexes[nav.id]) {
+      return;
+    }
+
+    const vertex = graph.vertexes[nav.id];
+
+    const metaVertexResult = untrack(() =>
+      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
+    );
+
+    if (metaVertexResult.error) {
+      console.error(metaVertexResult.error);
+      return;
+    }
+    const metaVertex = metaVertexResult.vertex!;
+
+    const navData = renderNavTreeFromGraph(metaVertex, vertex, true, graph);
+    const navigation = getParentFromNav(navData);
+    return navigation;
+  });
+
+  const navigate = useNavigate();
+  // used to refresh table:
+  const [tableId, setTableId] = createSignal("");
+  createEffect(() => {
+    // clear the state when routes parameter changes.
+    setTableId("");
+    props.tableId;
+    setTimeout(() => setTableId(props.tableId));
+  });
+
   return (
     <>
-      <button ref={p.btnEl} class="focus:outline-none">
-        {" "}
-        {/* Button without outline on focus */}
-        <Icon icon="ic:twotone-more-vert" height={20} width={20} />
-      </button>
-
-      <div class="abs right:.1rem pt:10">
-        <Dismiss
-          menuButton={p.btnEl}
-          open={p.openActionModal}
-          setOpen={p.setOpenActionModal}
-          animation={{ name: "fade" }}
-        >
-          <div class="popup bg:white p:5 r:5 box-shadow:0rem|0rem|.5rem|0px|#25257596">
-            {" "}
-            {/* Improved styling */}
-            <div class="py:0.25rem" role="none">
-              <A
-                href={`${APP_BASE_URL}/${p.tableId}/${p.info.row.original.id}`}
-                class="m:1px|6px  p:0px|10px flex ai:center bg:#e8e5f3:hover r:7"
-              >
-                <Icon
-                  height={21}
-                  width={21}
-                  class={"color:#3477CC"}
-                  icon="fluent:edit-12-regular"
-                />
-                <div
-                  class="color:rgb(55,65,81)  px:1rem py:0.5rem f:0.875rem lh:1.25rem"
-                  role="menuitem"
-                  tabindex="-1"
-                  id="menu-item-0"
-                >
-                  Edit
-                </div>
-              </A>
-              <div
-                onclick={() => {
-                  p.setOpenActionModal(false);
-                  p.setDeleteRowId(p.info.row.original.id);
-                }}
-                class="m:1px|6px p:0px|10px flex ai:center bg:#e8e5f3:hover r:7"
-              >
-                <Icon
-                  icon="fluent:delete-12-regular"
-                  class="color:rgb(255,0,0)"
-                  height={22}
-                  width={22}
-                />
-                <div
-                  class="color:rgb(55,65,81)  px:1rem py:0.5rem f:0.875rem lh:1.25rem"
-                  role="menuitem"
-                  tabindex="-1"
-                  id="menu-item-1"
-                >
-                  Delete
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            style={` position: absolute;
-    top: 0px;
-    left: 50%;
-    content: "";
-    width: 0;
-    height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 20px solid rgb(255,255,255);`}
-          ></div>{" "}
-        </Dismiss>
+      <PageHeader
+        title={`${navData()?.child || nestedName() || ""}`}
+        breadcrumb={[
+          ...breadcrumbData,
+          { name: navData()?.parent },
+          { name: navData()?.child || nestedName() },
+        ]}
+      />
+      <div class="flex justify-content:start p:5">
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
+                [IdAttr]: "meta",
+                props: {
+                  onClick: () => navigate("new"),
+                  variant: "soft",
+                  style: { padding: "7px 10px" },
+                  leading: (
+                    <Icon
+                      icon={"lets-icons:add-round"}
+                      height={22}
+                      width={22}
+                    />
+                  ),
+                  children: "Add New",
+                },
+              },
+            } as unknown as Vertex
+          }
+        />
       </div>
+      <Show when={tableId()}>
+        <DataGrid tableId={tableId()} />
+      </Show>
     </>
   );
 };
-// TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
-export const DataGrid = (props: DataGridProps) => {
+
+const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
+  let { events } = useContext(PageContext);
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
-  let { events } = useContext(PageContext);
   const [deleteRowId, setDeleteRowId] = createSignal(null);
-
   const [tableStore, setTableStore] = createStore(
     {} as { tableColumns: ColumnDef<any>[]; data: Accessor<Vertex[]> },
   );
@@ -269,8 +276,8 @@ export const DataGrid = (props: DataGridProps) => {
         setGraph,
         [graph.vertexes[vertex[0]]],
         props.attribute.props?.displayExpr ||
-          collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
-          `::'P.${IdAttr}'`,
+        collectionNameDisplayExpr(graph, props.attribute.props?.collection) ||
+        `::'P.${IdAttr}'`,
       ).vertexes;
     }
     return "";
@@ -482,6 +489,7 @@ export const DataGrid = (props: DataGridProps) => {
       },
     });
   };
+
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
       await getTableData();
@@ -520,107 +528,7 @@ export const DataGrid = (props: DataGridProps) => {
   );
 };
 
-export const AbstractSingleGrid = (props: AbstractSingleGridProps) => {
-  const params = useParams();
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const data = findVertexByLabelAndUniqueId(
-    graph,
-    "Coll",
-    IdAttr,
-    props.tableId,
-  );
-
-  const nestedName = createMemo(
-    () =>
-      findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
-        ?.name,
-  );
-  const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(
-      graph,
-      "Nav",
-      "name",
-      "Navigation",
-    );
-    if (!nav) return [];
-
-    if (!graph.vertexes[nav.id]) {
-      return;
-    }
-
-    const vertex = graph.vertexes[nav.id];
-
-    const metaVertexResult = untrack(() =>
-      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
-    );
-
-    if (metaVertexResult.error) {
-      console.error(metaVertexResult.error);
-      return;
-    }
-    const metaVertex = metaVertexResult.vertex!;
-
-    const navData = renderNavTreeFromGraph(metaVertex, vertex, true, graph);
-    const navigation = getParentFromNav(navData);
-    return navigation;
-  });
-
-  const navigate = useNavigate();
-  // used to refresh table:
-  const [tableId, setTableId] = createSignal("");
-  createEffect(() => {
-    // clear the state when routes parameter changes.
-    setTableId("");
-    props.tableId;
-    setTimeout(() => setTableId(props.tableId));
-  });
-
-  return (
-    <>
-      <PageHeader
-        // @ts-ignore
-        title={`${navData()?.child || nestedName() || ""}`}
-        breadcrumb={[
-          ...breadcrumbData,
-          // @ts-ignore
-          { name: navData()?.parent },
-          // @ts-ignore
-          { name: navData()?.child || nestedName() },
-        ]}
-      />
-      <div class="flex justify-content:start p:5">
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-                [IdAttr]: "meta",
-                props: {
-                  onClick: () => navigate("new"),
-                  variant: "soft",
-                  style: { padding: "7px 10px" },
-                  leading: (
-                    <Icon
-                      icon={"lets-icons:add-round"}
-                      height={22}
-                      width={22}
-                    />
-                  ),
-                  children: "Add New",
-                },
-              },
-            } as unknown as Vertex
-          }
-        />
-      </div>
-      <Show when={tableId()}>
-        <DataGrid tableId={tableId()} />
-      </Show>
-    </>
-  );
-};
-
-export function getParentFromNav(navData: any) {
+function getParentFromNav(navData: any) {
   const param = useLocation();
   const dats = JSON.parse(JSON.stringify(navData));
   let result = {}; // Initialize an empty object to store the result
@@ -648,58 +556,4 @@ export function getParentFromNav(navData: any) {
   return result;
 }
 
-export const TableDashboard = () => {
-  const params = useParams();
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const dashboard = findVertexByLabelAndUniqueId(
-    graph,
-    "Dashboard",
-    IdAttr,
-    params.name,
-  );
-  if (!dashboard) {
-    return "No Dashboard Found";
-  }
-  const allFormTableLayouts =
-    getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
-  const allCollTableLayouts =
-    getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
 
-  const allTableLayouts = () => [
-    ...new Set([...allCollTableLayouts, ...allFormTableLayouts]),
-  ];
-  return (
-    <div class="grid-cols:2 grid-cols:3@xs grid-cols:4@sm grid-cols:5@md gap:15 gap:20@sm">
-      <For each={allTableLayouts()}>
-        {(tableLayout) => (
-          <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
-            <h3 class="f:18@md font:semibold"></h3>
-            <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
-              <A href={`${APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
-                {tableLayout.P.title || tableLayout.P[IdAttr]}
-              </A>
-            </p>
-          </div>
-        )}
-      </For>
-    </div>
-  );
-};
-
-export const AllDashboards = () => {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const vertexes = () => graph.vertexLabelIdMap["Dashboard"] || [];
-  return (
-    <div class="">
-      <For each={vertexes()}>
-        {(vertexId) => (
-          <A
-            href={`${APP_BASE_URL}/grid/${graph.vertexes[vertexId].P[IdAttr]}`}
-          >
-            {graph.vertexes[vertexId].P[IdAttr]}
-          </A>
-        )}
-      </For>
-    </div>
-  );
-};

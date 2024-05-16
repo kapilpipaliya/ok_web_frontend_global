@@ -24,7 +24,7 @@ import {
   getSelectionOptions,
   getToEdge,
 } from "~/cypher_api/lib/traverse";
-import { removeUndefinedProperties } from "~/cypher_api/utils/functions";
+
 import { addNewEdge, deleteEdge, newEdge } from "~/cypher_api/lib/edge";
 import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 import {
@@ -32,7 +32,7 @@ import {
   getValueFromVertexOrKey,
   groupBy,
   isObject,
-} from "~/cypher_api/utils/utils";
+} from "~/lib/Utils";;
 import { AdminAttrKeys, AttrsTableData } from "~/cypher_api/lib/api";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
 import { SetStoreFunction, Store } from "solid-js/store";
@@ -44,6 +44,7 @@ import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
 import { NewTxnIdContext } from "~/lib/contexts";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { GraphInterface } from "~/lib/graph/graph";
+import { removeUndefinedProperties } from "~/lib/functions";
 
 export interface FieldAttribute {
   name: string;

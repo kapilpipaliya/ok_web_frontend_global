@@ -35,12 +35,13 @@ import {
 } from "~/lib/graph/get/sync/graph_fns";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { ComponentProps } from "~/lib/ComponentType";
+import { ComponentProps } from "~/components/ComponentType";
 import {
   Accordion,
   Avatar,
   Breadcrumbs,
   Progress,
+  Select,
   Spinner,
   Tabs,
 } from "~/components/solid-blocks/blocks";
@@ -88,12 +89,11 @@ export function GenericField(
     "setValue",
   ]);
 
-  // @ts-ignore
-  const formContext = useContext(FormContext);
+
   const [graph, setGraph] = useContext(GraphContext)!;
   const parentItems = useContext(PageRenderContext);
   const component = createMemo(() => field.component || field.meta.P.component);
-  // @ts-ignore
+
   const parentComponent = createMemo(() => {
     return PageRenderUtils.getComponent(graph, getLastItem(parentItems, 2))?.P[
       IdAttr
@@ -171,7 +171,7 @@ export function GenericField(
       console.log("ads");
 
       await showLoadingToast({
-        promise: submitDataCall(data, Ws),
+        promise: submitDataCall(data),
         loadMessage: "Submitting Data...",
         successMessage: "Data submitted successfully",
         onSuccess: (value) => {
@@ -463,11 +463,11 @@ export function GenericField(
             {field.data?.P[field.meta.P[IdAttr]] ?? field.meta.P.children}
           </Avatar>
         </Match>
-        {/* <Match when={component() === "Select"}>
+        <Match when={component() === "Select"}>
               <Select {...props.field.meta.P.props}>
                 {props.field.data?.P[props.field.meta.P[IdAttr]] ?? props.field.meta.P.props.children}
               </Select>
-            </Match> */}
+            </Match>
         <Match when={component() === "LoadIndicator"}>
           <Spinner {...field.meta?.P.props}>{field.meta.P.children}</Spinner>
         </Match>

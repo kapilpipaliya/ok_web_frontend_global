@@ -16,7 +16,7 @@ import {
   setSelectionValueMGCall,
 } from "~/cypher_api/components/input/SelectInputField";
 import { parse } from "yaml";
-import { isObject } from "~/cypher_api/utils/utils";
+import { isObject } from "~/lib/Utils";;
 import { deleteEdge } from "~/cypher_api/lib/edge";
 import { AttrsTableData } from "~/cypher_api/lib/api";
 import { AttrsAdminTableData } from "~/cypher_api/lib/apiAdmin";
