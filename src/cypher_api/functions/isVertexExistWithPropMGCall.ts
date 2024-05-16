@@ -1,7 +1,7 @@
 import { Session } from "neo4j-driver";
 import { TransactionPromise } from "neo4j-driver-core";
 
-export async function checkPropertyExists(
+export async function isVertexExistWithPropMGCall(
   nodeLabel: string,
   session: Session | TransactionPromise,
   property: string,

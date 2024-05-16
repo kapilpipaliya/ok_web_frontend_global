@@ -40,7 +40,7 @@ import { DBConnection } from "~/cypher_api/lib/dbs";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
-import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
+import { deleteVertexMGCall } from "~/cypher_api/functions/deleteVertex";
 import { NewTxnIdContext } from "~/lib/contexts";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { GraphInterface } from "~/lib/graph/graph";
@@ -467,7 +467,7 @@ export async function deleteRow(
   }
 
   // delete vertex:
-  const deleteResult = await deleteNodeMGCall(dbConn, vertex.id);
+  const deleteResult = await deleteVertexMGCall(dbConn, vertex.id);
   if (deleteResult.error) console.error(deleteResult.error);
 }
 

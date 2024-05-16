@@ -1,7 +1,7 @@
 import neo4j from "neo4j-driver";
 import { DBConnection } from "~/cypher_api/lib/dbs";
 
-export async function deleteNodeMGCall(
+export async function deleteVertexMGCall(
   dbConn: DBConnection,
   nodeId: string | number | any,
 ) {

@@ -10,7 +10,7 @@ import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { checkPropertyExists } from "~/cypher_api/functions/db_functions";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
 import { getGraph } from "~/cypher_api/lib/graph";
 import { v4 as uuidv4 } from "uuid";
 
@@ -213,7 +213,7 @@ async function checkExistance(
   // Check if the subdomain already exists
   if (
     subdomain &&
-    (await checkPropertyExists("User", tx, "subdomain", subdomain))
+    (await isVertexExistWithPropMGCall("User", tx, "subdomain", subdomain))
   ) {
     throw new Error("Sub Domain already exists");
   }
@@ -221,13 +221,13 @@ async function checkExistance(
   // Check if the username already exists
   if (
     username &&
-    (await checkPropertyExists("User", tx, "username", username))
+    (await isVertexExistWithPropMGCall("User", tx, "username", username))
   ) {
     throw new Error("Username already exists");
   }
 
   // Check if the email already exists
-  if (email && (await checkPropertyExists("User", tx, "email", email))) {
+  if (email && (await isVertexExistWithPropMGCall("User", tx, "email", email))) {
     throw new Error("Email address already exists");
   }
 }

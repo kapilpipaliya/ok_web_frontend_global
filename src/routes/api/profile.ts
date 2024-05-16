@@ -1,13 +1,13 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { Session } from "neo4j-driver";
-import { deleteNodeMGCall } from "~/cypher_api/functions/deleteNode";
+import { deleteVertexMGCall } from "~/cypher_api/functions/deleteVertex";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
 import { getChildVertexes } from "~/cypher_api/lib/traverse";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { checkPropertyExists } from "~/cypher_api/functions/db_functions";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -69,12 +69,12 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   }
 
   // Check if email and username already exists
-  if (email && (await checkPropertyExists("User", session, "email", email))) {
+  if (email && (await isVertexExistWithPropMGCall("User", session, "email", email))) {
     return { status: 500, error: "Email address already exists" };
   }
   if (
     username &&
-    (await checkPropertyExists("User", session, "username", username))
+    (await isVertexExistWithPropMGCall("User", session, "username", username))
   ) {
     return { status: 500, error: "Username already exists" };
   }
@@ -254,7 +254,7 @@ const supportTicket = async (
     subdomain: string,
   ) {
     const { id } = payload;
-    await deleteNodeMGCall(
+    await deleteVertexMGCall(
       { driver: await getDriver(subdomain), session: session },
       id,
     );
