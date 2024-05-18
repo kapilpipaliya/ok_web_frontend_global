@@ -20,7 +20,7 @@ import { NewTxnIdContext } from "~/lib/contexts";
 import { FormMetaData, FieldAttribute } from "~/lib/Type";
 import { getValueFromVertexOrKey, isObject, getLabel, getId, AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
-import { getToEdge } from "../get/sync/getToEdge";
+import { getToEdge } from "../get/sync/traverse";
 import { newEdge, addNewEdge } from "./edge";
 import { getFormApiFromForm, getPkForCollection } from "../get/sync/graph_functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";

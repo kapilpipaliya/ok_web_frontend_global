@@ -1,9 +1,17 @@
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
+
+export function getToEdge(meta: Vertex, vertex: Vertex): string {
+  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
+
+  const attributeId = meta.P[IdAttr];
+  return (
+    capitalizeFirstLetter(vertex.L[0]) + capitalizeFirstLetter(attributeId)
+  );
+}
 
 export function getSelectedVertexValue(
   graph: Store<GraphInterface>,
@@ -350,4 +358,3 @@ export function getChildVertexes(
     };
   }
 }
-

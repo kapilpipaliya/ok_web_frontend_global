@@ -25,7 +25,7 @@ import {
 } from "~/lib/graph/get/sync/findVertex";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "../get/sync/traverse";
 import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,

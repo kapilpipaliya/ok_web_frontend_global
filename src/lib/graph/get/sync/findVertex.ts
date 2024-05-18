@@ -2,7 +2,6 @@ import { Store } from "solid-js/store";
 import { GraphInterface, Id } from "~/lib/graph/graph";
 
 // helper function to find all the vertex ids of the label
-
 export function findVertexIdsByLabel(
   graph: Store<GraphInterface>,
   label: string,

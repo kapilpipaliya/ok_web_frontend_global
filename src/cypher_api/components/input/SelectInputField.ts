@@ -8,7 +8,7 @@ import { GraphInterface } from "~/lib/graph/graph";
 import { compareId, isIdArrayIncludesID } from "~/lib/graph/get/sync/graph_functions";
 import { Node } from "~/cypher_api/functions/Type";
 import { getInEdge } from "~/lib/graph/get/sync/traverse";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "~/lib/graph/get/sync/traverse";
 
 async function vertexOutEdgeContainVertexMGCall(
   dbConn: DBConnection,

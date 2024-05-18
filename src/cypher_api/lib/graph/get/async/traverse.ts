@@ -3,7 +3,7 @@ import jsep from "jsep";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { Node } from "~/cypher_api/functions/Type";
-import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
+import { getToEdge } from "~/lib/graph/get/sync/traverse";
 import { getInEdge } from "~/lib/graph/get/sync/traverse";
 
 export async function getSelectedVertexValueMGCall(
