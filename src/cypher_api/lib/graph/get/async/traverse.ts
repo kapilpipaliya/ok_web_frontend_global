@@ -3,8 +3,7 @@ import jsep from "jsep";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { Node } from "~/cypher_api/functions/Type";
-import { getToEdge } from "~/lib/graph/get/sync/traverse";
-import { getInEdge } from "~/lib/graph/get/sync/traverse";
+import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 
 export async function getSelectedVertexValueMGCall(
   dbConn: DBConnection,
@@ -140,24 +139,16 @@ export const getTreeDataMGCall = (
   return getChildren(treeLevels, vertexes);
 };
 
-export const getTextValueMGCall = (value: any) => {
-  if (typeof value === "boolean") {
-    return value ? "true" : "false";
-  } else if (typeof value === "object") {
-    return JSON.stringify(value);
-  }
-  return value;
-};
 // TODO:
 //  if possible, use Name Keys, if not found use "name"
 //  key else Primary Keys will be used.
 // TODO:
-export function getSelectionOptionsMGCall(
+export async function getSelectionOptionsMGCall(
   vertex: Node[],
   collection: string,
   strict?: boolean,
-): { error: boolean; vertexes?: any } {
-  collection = replaceExpressionToLabel(collection, vertex[0]);
+): Promise<{ error: boolean; vertexes?: any }> {
+  collection = await replaceExpressionToLabel(collection, vertex[0]);
   try {
     const value = evaluate(jsep(collection), { vertexes: vertex });
     if (value) {
@@ -318,13 +309,13 @@ export async function getChildVertexesMGCall(
   }
 }
 
-export function replaceExpressionToLabel(collection: string, vertex: Node) {
+export async function replaceExpressionToLabel(collection: string, vertex: Node) {
   if (!collection) return "";
   // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression
   if (collection.includes("{{") && collection.includes("}}")) {
     collection = collection.replace(
       /{{.*}}/,
-      getSelectionOptionsMGCall([vertex], collection.match(/{{(.*)}}/)![1]! || "")
+      (await getSelectionOptionsMGCall([vertex], collection.match(/{{(.*)}}/)![1]! || ""))
         .vertexes || "",
     );
   }
