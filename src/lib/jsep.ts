@@ -1,4 +1,6 @@
+// JavaScript Expression Parser
 import jsep from "jsep";
+// https://github.com/donmccurdy/expression-eval
 //import { eval as eval1} from 'expression-eval';
 import { IdAttr, Vertex } from "~/lib/graph/graph";
 import { path } from "rambda";
@@ -101,7 +103,7 @@ export const binops = {
   ">>>": function (a, b) {
     return a >>> b;
   },
-} as { [key: string]: (v1: any, v2: any) => any };
+} as { [key: string]: (v1: any, v2: any, context?: object) => any };
 
 export const unops = {
   "-": function (a) {
@@ -118,29 +120,17 @@ export const unops = {
   },
 } as { [key: string]: (v: any, context: any) => any };
 
-declare type operand = number | string;
-declare type unaryCallback = (a: operand) => operand;
-declare type binaryCallback = (a: operand, b: operand) => operand;
+declare type operand = number | string | any;
+declare type unaryCallback = (a: operand, context: object) => operand;
+declare type binaryCallback = (a: operand, b: operand, context: object) => operand;
 
-type AnyExpression =
-  | jsep.ArrayExpression
-  | jsep.BinaryExpression
-  | jsep.MemberExpression
-  | jsep.CallExpression
-  | jsep.ConditionalExpression
-  | jsep.Identifier
-  | jsep.Literal
-  | jsep.LogicalExpression
-  | jsep.ThisExpression
-  | jsep.UnaryExpression;
-
-function evaluateArray(list, context) {
+function evaluateArray(list: jsep.Expression[], context: object) {
   return list.map(function (v) {
     return evaluate(v, context);
   });
 }
 
-async function evaluateArrayAsync(list, context) {
+async function evaluateArrayAsync(list: jsep.Expression[], context: object) {
   const res = await Promise.all(list.map((v) => evalAsync(v, context)));
   return res;
 }
@@ -163,7 +153,7 @@ async function evaluateMemberAsync(
   node: jsep.MemberExpression,
   context: object,
 ) {
-  const object = await evalAsync(node.object, context);
+  const object: any = await evalAsync(node.object, context);
   let key: string;
   if (node.computed) {
     key = await evalAsync(node.property, context);
@@ -176,14 +166,19 @@ async function evaluateMemberAsync(
   return [object, object[key]];
 }
 
-export function evaluate(_node: jsep.Expression, context: object) {
-  const node = _node as AnyExpression;
+export function evaluate(_node: jsep.Expression, context: object): any {
+  const node = _node as jsep.CoreExpression;
 
   switch (node.type) {
     case "ArrayExpression":
       return evaluateArray(node.elements, context);
 
     case "BinaryExpression":
+      if (node.operator === "||") {
+        return evaluate(node.left, context) || evaluate(node.right, context);
+      } else if (node.operator === "&&") {
+        return evaluate(node.left, context) && evaluate(node.right, context);
+      }
       return binops[node.operator](
         evaluate(node.left, context),
         evaluate(node.right, context),
@@ -216,18 +211,6 @@ export function evaluate(_node: jsep.Expression, context: object) {
     case "Literal":
       return node.value;
 
-    case "LogicalExpression":
-      if (node.operator === "||") {
-        return evaluate(node.left, context) || evaluate(node.right, context);
-      } else if (node.operator === "&&") {
-        return evaluate(node.left, context) && evaluate(node.right, context);
-      }
-      return binops[node.operator](
-        evaluate(node.left, context),
-        evaluate(node.right, context),
-        context,
-      );
-
     case "MemberExpression":
       return evaluateMember(node, context)[1];
 
@@ -242,8 +225,8 @@ export function evaluate(_node: jsep.Expression, context: object) {
   }
 }
 
-export async function evalAsync(_node: jsep.Expression, context: object) {
-  const node = _node as AnyExpression;
+export async function evalAsync(_node: jsep.Expression, context: object): Promise<any> {
+  const node = _node as jsep.CoreExpression;
 
   // Brackets used for some case blocks here, to avoid edge cases related to variable hoisting.
   // See: https://stackoverflow.com/questions/57759348/const-and-let-variable-shadowing-in-a-switch-statement
@@ -252,6 +235,17 @@ export async function evalAsync(_node: jsep.Expression, context: object) {
       return await evaluateArrayAsync(node.elements, context);
 
     case "BinaryExpression": {
+      if (node.operator === "||") {
+        return (
+          (await evalAsync(node.left, context)) ||
+          (await evalAsync(node.right, context))
+        );
+      } else if (node.operator === "&&") {
+        return (
+          (await evalAsync(node.left, context)) &&
+          (await evalAsync(node.right, context))
+        );
+      }
       const [left, right] = await Promise.all([
         evalAsync(node.left, context),
         evalAsync(node.right, context),
@@ -286,31 +280,11 @@ export async function evalAsync(_node: jsep.Expression, context: object) {
         : await evalAsync(node.alternate, context);
 
     case "Identifier":
-      return context[node.name];
+      // return context[node.name];
+      return node.name;
 
     case "Literal":
       return node.value;
-
-    case "LogicalExpression": {
-      if (node.operator === "||") {
-        return (
-          (await evalAsync(node.left, context)) ||
-          (await evalAsync(node.right, context))
-        );
-      } else if (node.operator === "&&") {
-        return (
-          (await evalAsync(node.left, context)) &&
-          (await evalAsync(node.right, context))
-        );
-      }
-
-      const [left, right] = await Promise.all([
-        evalAsync(node.left, context),
-        evalAsync(node.right, context),
-      ]);
-
-      return binops[node.operator](left, right, context);
-    }
 
     case "MemberExpression":
       return (await evaluateMemberAsync(node, context))[1];
@@ -319,7 +293,7 @@ export async function evalAsync(_node: jsep.Expression, context: object) {
       return context;
 
     case "UnaryExpression":
-      return unops[node.operator](await evalAsync(node.argument, context));
+      return unops[node.operator](await evalAsync(node.argument, context), context);
 
     default:
       return undefined;
@@ -345,39 +319,42 @@ export function addUnaryOp(operator: string, _function: unaryCallback): void {
 }
 
 // Added functions to inject Custom Binary Operators (and override existing ones)
+// modified function for simple to use
 export function addBinaryOp(
   operator: string,
-  precedence_or_fn: number | binaryCallback,
+  precedence: number,
+  rightToLeft: boolean,
   _function: binaryCallback,
 ): void {
-  if (_function) {
-    jsep.addBinaryOp(operator, precedence_or_fn as number);
+    jsep.addBinaryOp(operator, precedence, rightToLeft);
     binops[operator] = _function;
-  } else {
-    jsep.addBinaryOp(operator, DEFAULT_PRECEDENCE[operator] || 1);
-    binops[operator] = precedence_or_fn;
-  }
 }
 
 // https://github.com/EricSmekens/jsep/blob/29049a0704b4a4e5d52b479ed72615c04adf81ec/src/jsep.js#L934
 
-jsep.addUnaryOp("->");
+addUnaryOp("->", (collection, context) => {
+  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
+    const numericValue = parseInt(collection.slice(1));
+    const vertex = context.vertexes[numericValue - 1];
+    if (vertex) return [vertex];
+    return [];
+  }
+  return binops["->"](context.vertexes, collection, context);
+});
 // Projection Operator
-jsep.addBinaryOp("::", 11, false);
+addBinaryOp("::", 11, false, projectedValueBinOps);
 // Filter Operator
-jsep.addBinaryOp(":-", 11, false);
-jsep.addBinaryOp("->", 12, false);
-jsep.addUnaryOp("<-");
-jsep.addBinaryOp("<-", 12, false);
-jsep.addBinaryOp("++", 13, true);
-jsep.addUnaryOp("json:");
-jsep.addUnaryOp("g:");
-jsep.addUnaryOp("ids:");
-// use like T:(A->B->C)
-jsep.addUnaryOp("T:");
-jsep.addUnaryOp("::");
-
-binops["->"] = (vertexes, edgeType, context) => {
+addBinaryOp(":-", 11, false, (vertexes1, projection, context) => {
+  if (!vertexes1) {
+    return;
+  }
+  try {
+    return jsonata(projection).evaluate(vertexes1, context);
+  } catch (e) {
+    return;
+  }
+});
+addBinaryOp("->", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;
   const stepVertexes = new Map<number, Vertex>();
 
@@ -409,8 +386,17 @@ binops["->"] = (vertexes, edgeType, context) => {
     }
   }
   return Array.from(stepVertexes.values());
-};
-binops["<-"] = (vertexes, edgeType, context) => {
+});
+addUnaryOp("<-", (collection, context) => {
+  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
+    const numericValue = parseInt(collection.slice(1));
+    const vertex = context.vertexes[numericValue - 1];
+    if (vertex) return [vertex];
+    return [];
+  }
+  return binops["<-"](context.vertexes, collection, context);
+});
+addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;
   const stepVertexes = new Map<number, Vertex>();
 
@@ -439,24 +425,63 @@ binops["<-"] = (vertexes, edgeType, context) => {
     }
   }
   return Array.from(stepVertexes.values());
-};
-binops["++"] = (vertexes1, vertexes2) => {
+});
+addBinaryOp("++", 13, true, (vertexes1, vertexes2) => {
   return [
     ...(Array.isArray(vertexes1) ? vertexes1 : []),
     ...(Array.isArray(vertexes2) ? vertexes2 : []),
   ];
-};
-// Filter Operator
-binops[":-"] = (vertexes1, projection, context) => {
-  if (!vertexes1) {
-    return;
-  }
+});
+addUnaryOp("json:", (string) => {
   try {
-    return jsonata(projection).evaluate(vertexes1, context);
+    return JSON.parse(string);
   } catch (e) {
+    console.warn(e);
     return;
   }
-};
+});
+addUnaryOp("g:", (edgeType, context) => {
+  const [type, filter, isMultiple] = calculateFilter(edgeType);
+  if (filter) {
+    const vertexIds = findVertexIdsByLabel(context.graph, type);
+    const filteredVertexes = [];
+    for (const vertexId of vertexIds) {
+      if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
+        filteredVertexes.push(context.graph.vertexes[vertexId]);
+      }
+    }
+    return filteredVertexes;
+  } else {
+    return findVertexIdsByLabel(context.graph, edgeType).map(
+      (id) => context.graph.vertexes[id],
+    );
+  }
+});
+addUnaryOp("ids:", (edgeType: string | number | string[] | Vertex[], context) => {
+  if (typeof edgeType === "number") {
+    return context.graph.vertexes[edgeType];
+  } else if (typeof edgeType === "string") {
+    return edgeType
+      .split(",")
+      .map((id) => context.graph.vertexes[id])
+      .filter((x) => x);
+  } else if (Array.isArray(edgeType)) {
+    if (edgeType.length === 0) {
+      return [];
+    } else if (
+      typeof edgeType[0] === "string" ||
+      typeof edgeType[0] === "number"
+    ) {
+      return edgeType.map((id) => context.graph.vertexes[id]).filter((x) => x);
+    }
+  }
+});
+// use like T:(A->B->C)
+addUnaryOp("T:", (value: any) => {
+  return getTextValue(value);
+});
+addUnaryOp("::", projectedValueUnOps);
+
 
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
@@ -479,33 +504,8 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   return getTextValue(path(projection, vertex));
 }
 
-binops["::"] = projectedValueBinOps;
-unops["->"] = (collection, context) => {
-  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
-    const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
-    return [];
-  }
-  return binops["->"](context.vertexes, collection, context);
-};
-unops["<-"] = (collection, context) => {
-  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
-    const vertex = context.vertexes[numericValue - 1];
-    if (vertex) return [vertex];
-    return [];
-  }
-  return binops["<-"](context.vertexes, collection, context);
-};
-unops["json:"] = (string) => {
-  try {
-    return JSON.parse(string);
-  } catch (e) {
-    console.warn(e);
-    return;
-  }
-};
+
+
 //
 // unops['id:'] = (id, context) => {
 //
@@ -521,46 +521,7 @@ unops["json:"] = (string) => {
 //     return idValue;
 // }
 
-unops["g:"] = (edgeType, context) => {
-  const [type, filter, isMultiple] = calculateFilter(edgeType);
-  if (filter) {
-    const vertexIds = findVertexIdsByLabel(context.graph, type);
-    const filteredVertexes = [];
-    for (const vertexId of vertexIds) {
-      if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
-        filteredVertexes.push(context.graph.vertexes[vertexId]);
-      }
-    }
-    return filteredVertexes;
-  } else {
-    return findVertexIdsByLabel(context.graph, edgeType).map(
-      (id) => context.graph.vertexes[id],
-    );
-  }
-};
 
-unops["ids:"] = (edgeType: string | number | string[] | Vertex[], context) => {
-  if (typeof edgeType === "number") {
-    return context.graph.vertexes[edgeType];
-  } else if (typeof edgeType === "string") {
-    return edgeType
-      .split(",")
-      .map((id) => context.graph.vertexes[id])
-      .filter((x) => x);
-  } else if (Array.isArray(edgeType)) {
-    if (edgeType.length === 0) {
-      return [];
-    } else if (
-      typeof edgeType[0] === "string" ||
-      typeof edgeType[0] === "number"
-    ) {
-      return edgeType.map((id) => context.graph.vertexes[id]).filter((x) => x);
-    }
-  }
-};
-unops["T:"] = (value: any) => {
-  return getTextValue(value);
-};
 
 function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
@@ -581,8 +542,6 @@ function projectedValueUnOps(projection: any, context: any) {
   }
   return getTextValue(path(projection, vertex));
 }
-
-unops["::"] = projectedValueUnOps;
 
 // const parse_tree = jsep('(->$0Name->$0Comp<-CompChild->$0Prop)++(->$0Name->$0Comp->$0Prop)++(->$0Name->$0ValueProp)');
 
