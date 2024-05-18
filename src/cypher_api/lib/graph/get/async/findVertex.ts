@@ -3,14 +3,16 @@ import { GraphInterface, Id } from "~/lib/graph/graph";
 
 // helper function to find all the vertex ids of the label
 
-// export async function findVertexIdsByLabelAsync(
-//   graph: Store<GraphInterface>,
-//   label: string,
-// ): Promise<Id[]> {
+export async function findVertexIdsByLabelMGCall(
+  graph: Store<GraphInterface>,
+  label: string,
+): Promise<Id[]> {
+    // TODO
 //   return graph.vertexLabelIdMap[label] || [];
-// }
 
-// export async function findVertexByLabelAndUniqueIdAsync(
+}
+
+// export async function findVertexByLabelAndUniqueIdMGCall(
 //   graph: Store<GraphInterface>,
 //   label: string,
 //   attribute: string,
@@ -23,7 +25,7 @@ import { GraphInterface, Id } from "~/lib/graph/graph";
 //   return vertexId ? graph.vertexes[vertexId] : undefined;
 // }
 
-// export async function findVertexByLabelAndPksAsync(
+// export async function findVertexByLabelAndPksMGCall(
 //   label: string,
 //   value: {
 //     [key: string]: number | string | boolean;
@@ -42,7 +44,7 @@ import { GraphInterface, Id } from "~/lib/graph/graph";
 //   return vertexId ? graph.vertexes[vertexId] : undefined;
 // }
 
-// export async function findVertexByLabelAndUniqueIdWithSkipAsync(
+// export async function findVertexByLabelAndUniqueIdWithSkipMGCall(
 //   label: string,
 //   attribute: string,
 //   value: any,

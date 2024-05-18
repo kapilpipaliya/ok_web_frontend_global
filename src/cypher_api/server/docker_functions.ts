@@ -107,7 +107,7 @@ export async function stopDockerContainer(containerId: string): Promise<{ error:
   };
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
+    const data: any = await response.json();
 
     if (!response.ok) {
       return {
@@ -196,7 +196,7 @@ export async function createDockerContainer(
   };
   try {
     const response = await fetch(url, options);
-    const data = await response.json();
+    const data: any = await response.json();
 
     if (!response.ok) {
       return Error(data.message || "Failed to create container");

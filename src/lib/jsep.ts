@@ -8,6 +8,7 @@ import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/Utils";
 import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
+import { evalGetChildren, evalGetParents, evalGlobalColl } from "./jsep_async_fns";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -313,7 +314,7 @@ export function compileAsync(
 }
 
 // Added functions to inject Custom Unary Operators (and override existing ones)
-export function addUnaryOp(operator: string, _function: unaryCallback): void {
+export function addUnaryOp(operator: string, _function: unaryCallback, _asyncFunction?: binaryCallback,): void {
   jsep.addUnaryOp(operator);
   unops[operator] = _function;
 }
@@ -325,6 +326,7 @@ export function addBinaryOp(
   precedence: number,
   rightToLeft: boolean,
   _function: binaryCallback,
+  _asyncFunction?: binaryCallback,
 ): void {
     jsep.addBinaryOp(operator, precedence, rightToLeft);
     binops[operator] = _function;
@@ -354,6 +356,7 @@ addBinaryOp(":-", 11, false, (vertexes1, projection, context) => {
     return;
   }
 });
+
 addBinaryOp("->", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;
   const stepVertexes = new Map<number, Vertex>();
@@ -386,7 +389,7 @@ addBinaryOp("->", 12, false, (vertexes, edgeType, context) => {
     }
   }
   return Array.from(stepVertexes.values());
-});
+}, evalGetChildren);
 addUnaryOp("<-", (collection, context) => {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = parseInt(collection.slice(1));
@@ -396,6 +399,7 @@ addUnaryOp("<-", (collection, context) => {
   }
   return binops["<-"](context.vertexes, collection, context);
 });
+
 addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;
   const stepVertexes = new Map<number, Vertex>();
@@ -425,7 +429,7 @@ addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
     }
   }
   return Array.from(stepVertexes.values());
-});
+}, evalGetParents);
 addBinaryOp("++", 13, true, (vertexes1, vertexes2) => {
   return [
     ...(Array.isArray(vertexes1) ? vertexes1 : []),
@@ -440,6 +444,7 @@ addUnaryOp("json:", (string) => {
     return;
   }
 });
+
 addUnaryOp("g:", (edgeType, context) => {
   const [type, filter, isMultiple] = calculateFilter(edgeType);
   if (filter) {
@@ -456,8 +461,9 @@ addUnaryOp("g:", (edgeType, context) => {
       (id) => context.graph.vertexes[id],
     );
   }
-});
-addUnaryOp("ids:", (edgeType: string | number | string[] | Vertex[], context) => {
+}, evalGlobalColl);
+
+/*addUnaryOp("ids:", (edgeType: string | number | string[] | Vertex[], context) => {
   if (typeof edgeType === "number") {
     return context.graph.vertexes[edgeType];
   } else if (typeof edgeType === "string") {
@@ -475,7 +481,7 @@ addUnaryOp("ids:", (edgeType: string | number | string[] | Vertex[], context) =>
       return edgeType.map((id) => context.graph.vertexes[id]).filter((x) => x);
     }
   }
-});
+});*/
 // use like T:(A->B->C)
 addUnaryOp("T:", (value: any) => {
   return getTextValue(value);
