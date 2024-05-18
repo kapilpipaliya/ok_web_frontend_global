@@ -1,8 +1,9 @@
 import neo4j, { Session } from 'neo4j-driver';
 
 // Main function to initiate the migration process.
-export async function transferNodes(args: any) {
+export async function syncNodesMGCall(args: any) {
     "use server";
+    
     const nodesToTransfer = args.nodesToTransfer;
     const userport = args.userport;
     // Creating Neo4j driver instances for admin and user sessions.
@@ -37,7 +38,7 @@ export async function transferNodes(args: any) {
 async function transferNodeTypes(sessionSource: Session, sessionTarget: Session, nodesToTransfer: string[]) {
     for (const nodeType of nodesToTransfer) {
         const readResult = await sessionSource.run(`MATCH (n:${nodeType}) RETURN n;`);
-        console.log(`Retrieved ${readResult.records.length} ${nodeType} nodes from admin database.`);
+        // console.log(`Retrieved ${readResult.records.length} ${nodeType} nodes from admin database.`);
 
         for (const record of readResult.records) {
             await transferNode(sessionSource, sessionTarget, record, nodeType);
@@ -53,7 +54,7 @@ async function transferNode(sessionSource: any, sessionTarget: any, record: { ge
 
     let createdNode;
     if (existingNode) {
-        console.log(`Node ${properties.name} already exists in target database.`);
+        // console.log(`Node ${properties.name} already exists in target database.`);
         createdNode = await updateNodeProperties(sessionTarget, existingNode, properties);
     } else {
         createdNode = await createNode(sessionTarget, nodeType, properties);
@@ -61,7 +62,7 @@ async function transferNode(sessionSource: any, sessionTarget: any, record: { ge
 
     await addNodeEdges(sessionSource, sessionTarget, nodeType, node, createdNode);
 
-    console.log("Node successfully transferd or updated.");
+    // console.log("Node successfully transferd or updated.");
 }
 
 // Function to update properties of an existing node.

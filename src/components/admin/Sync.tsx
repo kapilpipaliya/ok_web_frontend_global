@@ -5,12 +5,16 @@ import { Icon } from "@iconify-icon/solid";
 import { getUsers } from "./adminFunctions";
 import MultiSelect from "../custom/NewMultiSelect";
 import { Node } from "~/cypher_api/functions/Type";
+import { syncNodesMGCall } from "~/cypher_api/functions/sync";
+import { useToast } from "../custom/Toast";
 const transferNodes = [
    {key: 'Component',value: 'Comp'},
    {key: 'Data Type',value: 'DataType'},
 ];
 
+
 export const SyncComopnent = () => {
+    const {showLoadingToast}= useToast();
     const [users, setUsers] = createSignal([]);
     const [searchQuery, setSearchQuery] = createSignal('');
     const [selectedUsers, setSelectedUsers] = createSignal([]);
@@ -18,6 +22,26 @@ export const SyncComopnent = () => {
     getUsers().then((res: any) => {
         setUsers(res.vertexes || []);
     })
+
+    async function migrateNodes(element: Node, node: any) {
+            const result = await syncNodesMGCall({ userport: element.P.driverPort, nodesToTransfer: node });
+            return result; // Ensure result has the expected structure
+        
+    }
+
+    const onClickTransfer = (node: any) => {
+        selectedUsers().forEach(async (element: Node) => {
+            await showLoadingToast({
+                promise: migrateNodes(element, node),
+                loadMessage: 'Transfering nodes...',
+                successMessage: 'Transfer completed successfully for ' + element.P.username,
+                errorMessage: 'Error Transfering nodes for ' + element.P.username,
+                onSuccess: (value) => {
+                    setSelectedUsers([]);
+                }
+            });
+        });
+    }
 
     return (<>
         <PageHeader title="Sync" breadcrumb={[{ name: "Admin", icon: "clarity:administrator-line", href: "/admin" }, { name: "Sync" }]} />
@@ -213,10 +237,15 @@ export const SyncComopnent = () => {
         return <Show when={selectedUsers().length > 0}>
             <div class="p:10">
                 <h3 class="bg:#f4f4f4 r:5 p:3|6 mb:10 font-weight:500 color:rgb(17,24,39)">Transfer nodes</h3>
+                <button onClick={() => {
+                    onClickTransfer(transferNodes.map((node) => node.value))
+                }} type="button" style={'background-color: lavender'}
+                    class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">All Nodes
+                </button>
                 <For each={transferNodes}>
                     {(node) => (
                         <button onClick={() => {
-                            console.log(node.value);
+                            onClickTransfer([node.value])
                         }} type="button" style={'background-color: lavender'}
                             class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">{node.key}
                         </button>

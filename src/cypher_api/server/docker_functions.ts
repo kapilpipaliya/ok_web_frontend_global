@@ -96,39 +96,67 @@ function pullImageFromRegistry(imageName: string, callback: Callback<string>) {
   }
 }
 
-function stopDockerContainer(containerId: string, callback: Callback<string>) {
-  exec(
-    `curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/${containerId}/stop`,
-    (err, stdout, stderr) => {
-      if (err) {
-        return callback(err);
-      } else {
-        return callback(
-          null,
-          `Docker container ${containerId} stopped successfully`,
-        );
-      }
-    },
-  );
+export async function stopDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
+
+  const url = `http://localhost/containers/${containerId}/stop`;
+  const options = {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ containerId: containerId }),
+    agent,
+  };
+  try {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        error: false,
+        message: data.message || "Failed to create container"
+      };
+    }
+
+    return {
+      error: false,
+      message: `Docker container ${containerId} stopped successfully`
+    };
+  } catch (error: any) {
+    return {
+      error: false,
+      message: `Failed to stop Docker container ${containerId}: ${error.message}`
+    };
+  } 
 }
 
-function removeDockerContainer(
-  containerId: string,
-  callback: Callback<string>,
-) {
-  exec(
-    `curl --unix-socket /var/run/docker.sock -X DELETE http://localhost/containers/${containerId}`,
-    (err, stdout, stderr) => {
-      if (err) {
-        return callback(err);
-      } else {
-        return callback(
-          null,
-          `Docker container ${containerId} removed successfully`,
-        );
-      }
-    },
-  );
+export async function removeDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
+
+  const url = `http://localhost/containers/${containerId}`;
+  const options = {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    agent,
+  };
+  try {   
+    const response = await fetch(url, options);
+    const data: any = await response.json();
+
+    if (!response.ok) {
+      return {
+        error: false,
+        message: data.message || "Failed to remove container"
+      };
+    }
+    return {
+      error: false,
+      message: `Docker container ${containerId} removed successfully`
+    };
+
+  } catch (error: any) {
+    return {
+      error: false,
+      message: `Failed to remove Docker container ${containerId}: ${error.message}`
+    };
+  }
 }
 
 interface PortBindings {
@@ -188,88 +216,3 @@ export async function createDockerContainer(
     throw Error(error.message, {});
   }
 }
-
-/*
-app.get('/docker/list', authorize, (req, res) => {
-    listDockerContainers((err, containerList) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json(containerList);
-        }
-    });
-});
-
-app.post('/docker/start/:containerId', authorize, (req, res) => {
-    const { containerId } = req.params;
-
-    if (!containerId) {
-        return res.status(400).json({ error: 'Invalid request. Missing containerId.' });
-    }
-
-    startDockerContainer(containerId, (err, message) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json({ message });
-        }
-    });
-});
-
-app.post('/docker/createNew', authorize, async (req, res) => {
-   
-});
-
-app.post('/docker/pull', authorize, (req, res) => {
-    const { imageName } = req.body;
-
-    if (!imageName) {
-        return res.status(400).json({ error: 'Invalid request. Missing imageName.' });
-    }
-
-    pullImageFromRegistry(imageName, (err, message) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json({ message });
-        }
-    });
-});
-
-app.post('/docker/stop/:containerId', authorize, (req, res) => {
-    const { containerId } = req.params;
-
-    if (!containerId) {
-        return res.status(400).json({ error: 'Invalid request. Missing containerId.' });
-    }
-
-    stopDockerContainer(containerId, (err, message) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json({ message });
-        }
-    });
-});
-
-app.delete('/docker/remove/:containerId', authorize, (req, res) => {
-    const { containerId } = req.params;
-
-    if (!containerId) {
-        return res.status(400).json({ error: 'Invalid request. Missing containerId.' });
-    }
-
-    removeDockerContainer(containerId, (err, message) => {
-        if (err) {
-            console.error(err);
-            res.status(500).json({ error: 'Internal Server Error' });
-        } else {
-            res.json({ message });
-        }
-    });
-});
-*/
