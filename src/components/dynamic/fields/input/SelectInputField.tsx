@@ -70,7 +70,6 @@ export function setParentValue(
   value?: number[] | number,
 ) {
   const { showWarningToast, showErrorToast } = useToast();
-  console.log(vertex);
 
   // delete removed edges:
   const type = getInEdge(meta, vertex);

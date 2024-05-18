@@ -4,8 +4,6 @@ import jsep from "jsep";
 import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
 import { getToEdge } from "~/lib/graph/get/sync/getToEdge";
 import { SetStoreFunction, Store } from "solid-js/store";
-import jsep from "jsep";
-import { replaceExpressionToLabel } from "../../../Utils";
 
 export function getSelectedVertexValue(
   graph: Store<GraphInterface>,

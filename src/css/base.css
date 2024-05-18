@@ -536,3 +536,10 @@ Make elements with the HTML hidden attribute stay hidden by default.
 .fade-modal-exit-to > div {
   transition: transform 200ms;
 }
+
+[popover] {
+  margin: 0;
+  background-color: transparent;
+  padding: 0;
+  border: none;
+}

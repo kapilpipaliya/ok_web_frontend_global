@@ -11,7 +11,7 @@ import {
 
 export const APP_BASE_URL = "/admin";
 export const APP_BASE_URL_NAME = "Admin";
-export const breadcrumbData = [{ name: "Home", href: `${APP_BASE_URL}` }];
+export const breadcrumbData = [{ name: "Home", href: `${APP_BASE_URL}`,icon: "ic:baseline-home" }];
 export const nameExpr = (v: Vertex, graph: Store<GraphInterface>) => {
   const component = getChildVertex(graph, ["$0Comp"], v).vertex?.P.name;
   return `${v.P.name}${component ? ` (${component})` : ""}`;

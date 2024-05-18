@@ -350,6 +350,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
       setInputValue("");
       return;
     }
+
     if (isSelectedValue(item)) {
       onRemoveSelectedItem(item);
       return;
@@ -407,7 +408,10 @@ export const MultiSelect: Component<IMultiSelectProps> = (
               when={props.isObject}
               fallback={() => (option || "").toString()}
             >
-              {option[props.displayValueParent]?.[props.displayValueChild]}
+              <Show when={props.isObject && !props.singleSelect} fallback={ option[props.displayValueParent]?.[props.displayValueChild] }>
+                {option[props.displayValue]}
+              </Show>
+              
             </Show>
           </li>
         )}
@@ -472,7 +476,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     } else {
       newOptions = filteredOptions().filter((option) =>
         matchValues(
-          option[props.displayValueParent][props.displayValueChild].toString(),
+          option[props.displayValue].toString(),
           inputValue(),
         ),
       );
@@ -663,3 +667,22 @@ export const MultiSelect: Component<IMultiSelectProps> = (
 };
 
 export default MultiSelect;
+
+
+// <div class="max-w:60%">
+//   <h1>Multi-Select Dropdown</h1>
+//   <MultiSelect
+//     placeholder="Select options"
+//     disable={false}
+//     options={options}
+//     selectedValues={[{ value: "option1", label: "Option 1" }]}
+//     onSelect={(selected: any) => console.log("Selected:", selected)}
+//     onRemove={(selected: any) => console.log("Removed:", selected)}
+//     renderLabel={(option) => (
+//       <>
+//         <Icon icon="mdi:checkbox-marked-circle-outline" width={16} height={16} />
+//         <span>{option.label}</span>
+//       </>
+//     )}
+//   />
+// </div>

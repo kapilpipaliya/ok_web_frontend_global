@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import { createEffect, createSignal, on, Show } from "solid-js";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
-import { DataGrid } from "~/pages/dynamic/GridData";
+import { AbstractGrid } from "~/pages/dynamic/GridData";
 
 export default function admin() {
   const params = useParams();
@@ -23,7 +23,7 @@ export default function admin() {
   return (
     <Show when={count()} keyed>
       <DataFetcher
-        renderContent={<DataGrid tableId={params.entity} />}
+        renderContent={<AbstractGrid tableId={params.entity} />}
         fetchData={API.getPagesDataUrl}
       />
     </Show>

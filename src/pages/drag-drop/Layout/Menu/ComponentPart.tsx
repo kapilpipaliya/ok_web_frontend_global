@@ -9,6 +9,7 @@ import { GraphContext, Vertex } from "~/lib/graph/graph";
 export const ComponentPart = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  
   const data = getTreeData(graph, setGraph, {
     collection: "g:'CompCategory'",
     // TODO: Dont display "Form" Component

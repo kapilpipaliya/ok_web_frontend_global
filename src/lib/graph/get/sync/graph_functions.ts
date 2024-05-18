@@ -10,6 +10,26 @@ import { SetStoreFunction, Store } from "solid-js/store";
 import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
+export function compareId(id1: any, id2: any) {
+  if (typeof id1 === "object") {
+    id1 = id1.toString();
+  }
+  if (typeof id2 === "object") {
+    id2 = id2.toString();
+  }
+  return id1 == id2;
+}
+
+export function isIdArrayIncludesID(value: Array<any>, id: any) {
+  for (const element of value) {
+    if (compareId(element, id)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function getCompPropsMap(graph: Store<GraphInterface>, comp: Vertex) {
   return (getChildVertexes(graph, ["$0Prop"], [comp]).vertexes || []).reduce(
     (acc, curr) => {

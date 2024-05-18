@@ -1,5 +1,5 @@
 import neo4j from "neo4j-driver";
-import { Node, Relationship } from "~/cypher_api/graph";
+import { Node, Relationship } from "~/cypher_api/functions/Type";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 
 export async function getOutEdges(

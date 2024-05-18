@@ -5,8 +5,6 @@ import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabe
 
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdgeAsync } from "./getToEdge";
-import jsep from "jsep";
-import { replaceExpressionToLabel } from "../../../Utils";
 
 export async function getSelectedVertexValueAsync(
   graph: Store<GraphInterface>,

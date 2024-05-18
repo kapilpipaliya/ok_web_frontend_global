@@ -60,7 +60,7 @@ import { useToast } from "~/components/custom/Toast";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { submitDataCall } from "~/components/api/api_functions";
 import { renderNavTreeFromGraph } from "../dashboard/Sidebar";
-
+import {Popover} from 'solid-simple-popover'
 interface AbstractGridProps {
   tableId: string;
 }
@@ -246,7 +246,7 @@ export const AbstractGrid = (props: AbstractGridProps) => {
   );
 };
 
-export const DataGrid = (props: DataGridProps) => {
+const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   let { events } = useContext(PageContext);
   const { Ws } = useContext(WsContext);
@@ -395,6 +395,7 @@ export const DataGrid = (props: DataGridProps) => {
       header: "Actions",
       footer: "",
       cell: (info) => {
+        const [open, setOpen] = createSignal(false);
         return (
           <Switch>
             <Match when={formNew.isInlineEditable}>
@@ -418,6 +419,30 @@ export const DataGrid = (props: DataGridProps) => {
             </Match>
 
             <Match when={!formNew.isInlineEditable}>
+              {/* <button id="dropdownMenuIconButton" style="display: inline-flex; align-items: center; padding: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; text-align: center; color: rgb(17, 24, 39); background-color: rgb(255, 255, 255); border-radius: 0.5rem; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.5) focus; outline: 2px solid transparent; outline-offset: 2px; color: rgb(255, 255, 255) @dark; background-color: rgb(31, 41, 55) @dark; background-color: rgb(55, 65, 81) hover @dark;" onclick={() => setOpen(!open())}
+                type="button">
+                <svg className="w:1.25rem h:1.25rem" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                  viewBox="0 0 4 15">
+                  <path
+                    d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+                </svg>
+              </button>
+              <div id="dropdownDots"  style="position: absolute; top: 100%; left: 0; z-index: 1000; background-color: rgb(255, 255, 255); border-top: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.1); border-left: 1px solid rgba(0, 0, 0, 0.1); border-right: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); width: 11rem;" class={`bg-white dark:bg-gray-800 ${open() ? "d:contents " : "d:hidden"}`}>
+
+                <ul class="py:0.5rem f:0.875rem lh:1.25rem color:rgb(55,65,81)  color:rgb(229,231,235)@dark" aria-labelledby="dropdownMenuIconButton">
+                  <li>
+                    <a href="#"
+                      class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover bg:rgb(75,85,99):hover@dark color:rgb(255,255,255):hover@dark">Edit</a>
+                  </li>
+                  <li>
+                    <a href="#"
+                      class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover bg:rgb(75,85,99):hover@dark color:rgb(255,255,255):hover@dark">Delete</a>
+                  </li>
+                </ul>
+              </div> */}
+              <button type="button"
+                class="outline:2px|solid|transparent outline-offset:2px:focus color:rgb(255,255,255)  bg:rgb(185,28,28)  bg:rgb(153,27,27):hover box-shadow:0|0|0|4px|rgba(0,0,0,0.5):focus --ring-color:rgb(252,165,165):focus font-weight:500  border-radius:0.5rem  f:0.875rem lh:1.25rem px:1.25rem py:0.625rem me-2 mb:0.5rem bg:rgb(220,38,38)@dark bg:rgb(185,28,28):hover@dark --ring-color:rgb(127,29,29):focus@dark">Red
+              </button>
               <div class="py:0.25rem">
                 <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
                   <Icon

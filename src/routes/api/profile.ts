@@ -3,11 +3,11 @@ import { Session } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher_api/functions/deleteVertex";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
-import { getChildVertexes } from "~/cypher_api/lib/traverse";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
+import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -239,7 +239,7 @@ const supportTicket = async (
           { driver: await getDriver(subdomain), session: session },
           parentVertexId,
         );
-        const message = await getChildVertexes(
+        const message = await getChildVertexesMGCall(
           { driver: await getDriver(subdomain), session: session },
           ["SupportUser"],
           [result.vertex!],
