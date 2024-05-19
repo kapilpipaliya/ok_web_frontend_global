@@ -85,7 +85,9 @@ async function createNode(session: { run: (arg0: string, arg1: { props: any; }) 
 
 // Function to add edges between nodes based on certain conditions.
 async function addNodeEdges(sessionSource: Session, sessionTarget: Session, nodeType: string, node: any, createdNode: any) {
-    if (nodeType === 'Comp') {
+    if (nodeType === 'CompCategory') {
+        
+    } else if (nodeType === 'Comp') {
         const superChildrenVertexes = await getChildrenVertex(sessionSource, node.identity, 'CompProp');
         const userChildrenVertexes = await getChildrenVertex(sessionTarget, createdNode.identity, 'CompProp');
 

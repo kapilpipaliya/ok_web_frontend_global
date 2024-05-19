@@ -291,7 +291,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         }
 
         await showLoadingToast({
-          promise: submitDataCall(data),
+          promise: submitDataCall(data, txnId),
           loadMessage: "Submitting Data...",
           successMessage: "Data submitted successfully",
           onSuccess: (value) => {

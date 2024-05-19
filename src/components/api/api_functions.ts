@@ -1,5 +1,6 @@
 import { postAPI } from "~/components/api/postApi";
 import { API } from "~/components/api/DataFetcher";
+import { ProcessStatus, transactions } from "~/lib/graph/transaction";
 
 // General function to make API calls with a payload
 async function makeAPICall(url: string, payload: object) {
@@ -11,8 +12,13 @@ export const getPagesDataCall = async (pageName: string) =>
   await makeAPICall(API.getPagesDataUrl, { pageName });
 
 // Submit generic data to the server
-export const submitDataCall = async (data: any) =>
-  await makeAPICall(API.SubmitDataUrl, data);
+export const submitDataCall = async (data: any, txnId: number) => {
+    const result = await makeAPICall(API.SubmitDataUrl, data);
+    if (transactions.has(txnId))
+      transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+    return result;
+  };
+
 
 // Fetch form data by form name and ID
 export const getFormData = async (formName: string, formId: number) =>

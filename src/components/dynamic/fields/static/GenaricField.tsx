@@ -37,6 +37,7 @@ import {
 import {
   HoverIdContext,
   IndicatorPositionContext,
+  IsPreviewContext,
   SelectedIdContext,
   TargetIdContext,
 } from "~/lib/contexts";
@@ -89,6 +90,7 @@ export const PageItemRender = (props: {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [isPreview, setIsPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
@@ -134,6 +136,7 @@ export const PageItemRender = (props: {
           const rowProps = getRowProps(graph, setGraph, item);
           const compProps = Object.assign(componentProps, rowProps);
 
+         if (!isPreview()) {
           if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
             if (compProps.class) {
               compProps.class += ` b:#3996E1|1.5px|solid r:5`;
@@ -164,6 +167,7 @@ export const PageItemRender = (props: {
               }
             }
           }
+         }
 
           // supported deleted properties.
           // mergeProperties only merge top level properties. so props will be replaced.
@@ -198,10 +202,31 @@ export const PageItemRender = (props: {
         const getComponent = () =>
           getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
 
+        const Content = () => <DynamicComponent
+        meta={item}
+        // NOTE: For repeater we cant use parentData
+        // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+        data={
+          props.data ||
+          getSelectionOptions(
+            graph,
+            setGraph,
+            [...useContext(RepeaterContext)],
+            item.P.data,
+          ).vertexes ||
+          PageRenderUtils.getDataVertex(graph, item)
+        }
+        title={toTitle(PageRenderUtils.getId(graph, item) || "")}
+        // setValue={props.setValue}
+        disabled={false}
+        component={component()}
+      />
+
         const PageComponent = () => (
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
+            <Show when={!isPreview()} fallback={<Content/>}>
             <span
               class="contents "
               onMouseOver={(e) => {
@@ -309,26 +334,10 @@ export const PageItemRender = (props: {
                 </span>
               </Show>
 
-              <DynamicComponent
-                meta={item}
-                // NOTE: For repeater we cant use parentData
-                // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-                data={
-                  props.data ||
-                  getSelectionOptions(
-                    graph,
-                    setGraph,
-                    [...useContext(RepeaterContext)],
-                    item.P.data,
-                  ).vertexes ||
-                  PageRenderUtils.getDataVertex(graph, item)
-                }
-                title={toTitle(PageRenderUtils.getId(graph, item) || "")}
-                // setValue={props.setValue}
-                disabled={false}
-                component={component()}
-              />
+              <Content/>
             </span>
+            </Show>
+          
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
@@ -398,7 +407,7 @@ export function getUrl(
   return url;
 }
 
-export function PageView(props: { vertex?: Vertex }) {
+export function PageView(props: { vertex?: Vertex, isPreview?: boolean }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const collection = createMemo(() =>
     PageRenderUtils.getCollection(graph, props.vertex),

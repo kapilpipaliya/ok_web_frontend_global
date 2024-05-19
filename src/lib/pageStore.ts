@@ -30,7 +30,7 @@ import {
 import { deleteNestedLayout } from "./graph/mutate/deleteNestedLayout";
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { evaluate } from "~/lib/expression-eval";
+import { evaluate } from "~/lib/expression_eval";
 
 import { cloneRowProps } from "./graph/mutate/form_functions";
 import { getNewGraphId } from "./graph/transaction";

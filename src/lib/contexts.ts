@@ -5,7 +5,7 @@ import { createStore } from "solid-js/store";
 import { getNewGraphId } from "./graph/transaction";
 
 export const LoadingContext = createContext(createSignal(false));
-
+export const IsPreviewContext = createContext(createSignal(false));
 export const NewTxnIdContext = createContext(1);
 
 export const HoverIdContext = createContext(createSignal<Id>(-1));
