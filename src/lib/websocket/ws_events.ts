@@ -35,8 +35,16 @@ export const setGraphData = (
   batch(() => {
     for (const vertexId in args.vertexes) {
       setGraph("vertexes", vertexId, args.vertexes[vertexId]);
+      for (const label in args.vertexes[vertexId]["L"]) {
+        setGraph("vertexLabelIdMap", label, (vertexIds) => {
+          return Array.isArray(vertexIds)
+            ? [...new Set([...vertexIds, args.vertexes[vertexId].id])]
+            : [args.vertexes[vertexId].id];
+        });
+      }
     }
 
+    // todo: remove this for loop
     for (const label in args.vertexLabelIdMap) {
       setGraph("vertexLabelIdMap", label, (vertexIds) => {
         return Array.isArray(vertexIds)
@@ -52,17 +60,21 @@ export const setGraphData = (
     for (const edgeId in args.edges) {
       const edge = args.edges[edgeId];
 
-      setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
-        Array.isArray(out_edges)
-          ? [...new Set([...out_edges, edge.id])]
-          : [edge.id],
-      );
-
-      setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
-        Array.isArray(in_edges)
-          ? [...new Set([...in_edges, edge.id])]
-          : [edge.id],
-      );
+      if (graph.vertexes[edge.S]) {
+        setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
+          Array.isArray(out_edges)
+            ? [...new Set([...out_edges, edge.id])]
+            : [edge.id],
+        );
+      }
+      
+      if(graph.vertexes[edge.E]) {
+        setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
+          Array.isArray(in_edges)
+            ? [...new Set([...in_edges, edge.id])]
+            : [edge.id],
+        );
+      }
     }
     // timeTaken = Date.now() - start;
     // console.log("Total time taken : " + timeTaken + " milliseconds");

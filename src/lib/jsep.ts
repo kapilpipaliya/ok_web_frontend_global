@@ -104,7 +104,7 @@ export const binops = {
   ">>>": function (a, b) {
     return a >>> b;
   },
-} as { [key: string]: (v1: any, v2: any, context?: object) => any };
+} as { [key: string]: (v1: any, v2: any, context: object) => any };
 
 export const unops = {
   "-": function (a) {
@@ -251,6 +251,11 @@ export async function evalAsync(_node: jsep.Expression, context: object): Promis
         evalAsync(node.left, context),
         evalAsync(node.right, context),
       ]);
+   
+      if (binops[node.operator + '_async']) {
+        return binops[node.operator + '_async'](left, right, context);
+      }
+
       return binops[node.operator](left, right, context);
     }
 
@@ -294,6 +299,9 @@ export async function evalAsync(_node: jsep.Expression, context: object): Promis
       return context;
 
     case "UnaryExpression":
+      if(unops[node.operator + '_async']) {
+        return unops[node.operator + '_async'](await evalAsync(node.argument, context), context);
+      }
       return unops[node.operator](await evalAsync(node.argument, context), context);
 
     default:
@@ -314,9 +322,12 @@ export function compileAsync(
 }
 
 // Added functions to inject Custom Unary Operators (and override existing ones)
-export function addUnaryOp(operator: string, _function: unaryCallback, _asyncFunction?: binaryCallback,): void {
+export function addUnaryOp(operator: string, _function: unaryCallback, _asyncFunction?: unaryCallback,): void {
   jsep.addUnaryOp(operator);
   unops[operator] = _function;
+  if (_asyncFunction) {
+    unops[operator + "_async"] = _asyncFunction;
+  }
 }
 
 // Added functions to inject Custom Binary Operators (and override existing ones)
@@ -330,11 +341,13 @@ export function addBinaryOp(
 ): void {
     jsep.addBinaryOp(operator, precedence, rightToLeft);
     binops[operator] = _function;
+    if(_asyncFunction) {
+      binops[operator + "_async"] = _asyncFunction;
+    }
 }
 
 // https://github.com/EricSmekens/jsep/blob/29049a0704b4a4e5d52b479ed72615c04adf81ec/src/jsep.js#L934
-
-addUnaryOp("->", (collection, context) => {
+export function getChildrenUnaray(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
@@ -342,7 +355,18 @@ addUnaryOp("->", (collection, context) => {
     return [];
   }
   return binops["->"](context.vertexes, collection, context);
-});
+}
+export function getChildrenUnarayAsync(collection: string, context: object) {
+  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
+    const numericValue = parseInt(collection.slice(1));
+    const vertex = context.vertexes[numericValue - 1];
+    if (vertex) return [vertex];
+    return [];
+  }
+  return binops["->_async"](context.vertexes, collection, context);
+}
+
+addUnaryOp("->", getChildrenUnaray, getChildrenUnarayAsync);
 // Projection Operator
 addBinaryOp("::", 11, false, projectedValueBinOps);
 // Filter Operator
@@ -390,7 +414,8 @@ addBinaryOp("->", 12, false, (vertexes, edgeType, context) => {
   }
   return Array.from(stepVertexes.values());
 }, evalGetChildren);
-addUnaryOp("<-", (collection, context) => {
+
+export async function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
     const numericValue = parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
@@ -398,7 +423,18 @@ addUnaryOp("<-", (collection, context) => {
     return [];
   }
   return binops["<-"](context.vertexes, collection, context);
-});
+}
+
+export async function getPraentsAsync(collection: string, context: object) {
+  if (/^\$[1-9]+[0-9]*$/.test(collection)) {
+    const numericValue = parseInt(collection.slice(1));
+    const vertex = context.vertexes[numericValue - 1];
+    if (vertex) return [vertex];
+    return [];
+  }
+  return binops["<-_async"](context.vertexes, collection, context);
+}
+addUnaryOp("<-", getPraents, getPraentsAsync);
 
 addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;

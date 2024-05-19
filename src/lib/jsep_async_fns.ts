@@ -1,169 +1,112 @@
-import { Vertex } from "./graph/graph";
+import { Edge, GraphInterface, IdAttr, Vertex } from "./graph/graph";
 import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
-import { findVertexIdsByLabelMGCall } from "~/cypher_api/lib/graph/get/async/findVertex";
-import { getDriverWithPort } from "~/cypher_api/server/driver";
+import { getDriverWithPort, isIntegerId } from "~/cypher_api/server/driver";
+import { Session } from "neo4j-driver";
+import { SetStoreFunction, Store } from "solid-js/store";
+import { convertNodeToJson, convertRelationshipToJson } from "./convertNodeToJson";
 // ->
-export async function evalGetChildren(vertexes: any, edgeType: string, context: object) {
-    if (!vertexes) return;
-    const stepVertexes = new Map<number, Vertex>();
-  
-    for (const currentVertex of vertexes) {
-      const type = edgeType.replace("$0", currentVertex.L[0]);
-
-
-      // (currentVertex)->[r:Type]->(m)
-  
-      const edgeIds = currentVertex.OUT[type] || [];
-      if (edgeIds.length == 0) {
-        const strict = true;
-        // we only return error if its in middle of path
-        if (strict && path.length > 1) {
-          return;
-        } else {
-          continue;
-        }
-      }
-      for (const edgeId of edgeIds) {
-        const edge = context.graph.edges[edgeId];
-        if (edge) {
-          const newVertex = context.graph.vertexes[edge.E];
-          if (newVertex) {
-            stepVertexes.set(newVertex.id, newVertex);
-          } else {
-            return;
-          }
-        } else {
-          return;
-        }
-      }
-    }
-    return Array.from(stepVertexes.values());
-  }
-
-export async function evalGetChildrenMGCall(vertexes: Vertex[], edgeType: string) {
+export async function evalGetChildren(vertexes: Vertex[], edgeType: string, {nodes, relationships}: {
+  nodes?: {[key: string]: Vertex},
+  relationships?: {[key: string]: Edge}
+} = {}) {
   "use server";
-  if (!vertexes) return;
-
-  const stepVertexes = new Map<number, Vertex>();
-
+  
+  if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriverWithPort(1102)).session();
-
-  for (const currentVertex of vertexes) {
-    const type = edgeType.replace("$0", currentVertex.L[0]);
-
-    const query = `
-      MATCH (parent)-[:${type}]->(child)
-      WHERE ID(parent) = $parentId
-      RETURN child
-    `;
-
-    try {
-      const result = await session.run(query, { parentId: currentVertex.id });
-
-      for (const record of result.records) {
-        const childNode = record.get('child');
-        const newVertex = {
-          id: childNode.identity.toInt(),
-          L: childNode.labels,
-          ...childNode.properties,
-        };
-        stepVertexes.set(newVertex.id, newVertex);
+  const type = edgeType.replace("$0", vertexes[0].L[0]);
+  const query = `
+    MATCH (parent)-[r:${type}]->(child)
+    WHERE id(parent) IN $parentIds
+    RETURN r, child
+  `;
+  try {
+    const result = await session.run(query, { parentIds: vertexes.map(v => v.id) });
+    return result.records.map(record => {
+      const vertex = convertNodeToJson(record.get('child'));
+      if (nodes) {
+        nodes[vertex.id] = vertex;
       }
-    } catch (error) {
-      console.error(`Error fetching children for vertex ${currentVertex.id}:`, error);
-      return;
-    }
+      if (relationships) {
+        const relationship = convertRelationshipToJson(record.get('r'));
+        relationships[relationship.id] = relationship;
+      }
+      return vertex;
+    });
+  } catch (error) {
+    console.error(`Error fetching children for vertex ${vertexes.map(v => v.id).join(',')}:`, error);
+    return;
   }
-
-  return Array.from(stepVertexes.values());
 }
 
 
-  // <-
-  export async function evalGetParents(vertexes: any, edgeType: string, context: object) {
-    if (!vertexes) return;
-    const stepVertexes = new Map<number, Vertex>();
-  
-    for (const currentVertex of vertexes) {
-      const [type, filter, isMultiple] = calculateFilter(
-        edgeType.replace("$0", currentVertex.L[0]),
-      );
-  
-      // // (p)<-[r:type]-(m)
-      const edgeIds = currentVertex.IN[type];
-      if (!edgeIds) {
-        continue;
-      }
-  
-      for (const edgeId of edgeIds) {
-        const edge = context.graph.edges[edgeId];
-        if (edge) {
-          const newVertex = context.graph.vertexes[edge.S];
-          if (newVertex) {
-            stepVertexes.set(newVertex.id, newVertex);
-          } else {
-            return;
-          }
-        } else {
-          return;
-        }
-      }
-    }
-    return Array.from(stepVertexes.values());
-  }
-
-export async function evalGetParentsMGCall(vertexes: Vertex[], edgeType: string) {
+// <-
+export async function evalGetParents(vertexes: Vertex[], edgeType: string, {nodes, relationships}: {
+  nodes?: {[key: string]: Vertex},
+  relationships?: {[key: string]: Edge}
+} = {}) {
   "use server";
-  if (!vertexes) return;
-
-  const stepVertexes = new Map<number, Vertex>();
+  if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriverWithPort(1102)).session();
+  const type = edgeType.replace("$0", vertexes[0].L[0]);
 
-  for (const currentVertex of vertexes) {
-    const type = edgeType.replace("$0", currentVertex.L[0]);
+  // Cypher query to get parents
+  const query = `
+  MATCH (parent)-[r:${type}]->(child)
+  WHERE id(child) IN $childIds
+  RETURN r, parent
+`;
 
-    // Cypher query to get parents
-    const query = `
-      MATCH (parent)-[:${type}]->(child)
-      WHERE ID(child) = $childId
-      RETURN parent
-    `;
-
-    try {
-      const result = await session.run(query, { childId: currentVertex.id });
-
-      for (const record of result.records) {
-        const parentNode = record.get('parent');
-        const newVertex = {
-          id: parentNode.identity.toInt(),
-          L: parentNode.labels,
-          ...parentNode.properties,
-        };
-        stepVertexes.set(newVertex.id, newVertex);
+  try {
+    const result = await session.run(query, { childIds: vertexes.map(v => v.id) });
+    return result.records.map(record => {
+      const vertex = convertNodeToJson(record.get('parent'));
+      if (nodes) {
+        nodes[vertex.id] = vertex;
       }
-    } catch (error) {
-      console.error(`Error fetching parents for vertex ${currentVertex.id}:`, error);
-      return;
-    }
+      if (relationships) {
+        const relationship = convertRelationshipToJson(record.get('r'));
+        relationships[relationship.id] = relationship;
+      }
+      return vertex;
+    });
+  } catch (error) {
+    console.error(`Error fetching parents for vertex ${vertexes.map(v => v.id).join(', ')}:`, error);
+    return;
   }
-
-  return Array.from(stepVertexes.values());
 }
 
-export async function evalGlobalColl(edgeType: string, context: object) {
-    const [type, filter, isMultiple] = calculateFilter(edgeType);
+async function findVertexsMGCall(session: Session, label: string, {nodes, relationships}: {
+  nodes?: {[key: string]: Vertex},
+  relationships?: {[key: string]: Edge}
+} = {}) {
+  const query = `MATCH (n:${label}) RETURN n`;
+  const result = await session.run(query);
+  return result.records.map((record) => {
+    const vertex = convertNodeToJson(record.get('n'));
+    if (nodes) {
+      nodes[vertex.id] = vertex;
+    }
+    return vertex;
+  });
+}
+
+export async function evalGlobalColl(edgeType: string, context: {
+  nodes?: {[key: string]: Vertex},
+  relationships?: {[key: string]: Edge}
+} = {}) {
+  const [type, filter, isMultiple] = calculateFilter(edgeType);
+  const session = (await getDriverWithPort(1102)).session();
+
+  try {
     if (filter) {
-      const vertexIds = findVertexIdsByLabelMGCall(context.graph, type);
-      const filteredVertexes = [];
-      for (const vertexId of vertexIds) {
-        if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
-          filteredVertexes.push(context.graph.vertexes[vertexId]);
-        }
-      }
+      const vertexes = await findVertexsMGCall(session, type, context);
+      const filteredVertexes = vertexes.filter(vertex => vertex.P[IdAttr] === filter);
       return filteredVertexes;
     } else {
-      return findVertexIdsByLabelMGCall(context.graph, edgeType).map(
-        (id) => context.graph.vertexes[id],
-      );
+      return await findVertexsMGCall(session, edgeType, context);
     }
+  } catch (error) {
+    console.error('Error querying Memgraph:', error);
+    return [];
   }
+}

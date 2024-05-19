@@ -8,14 +8,16 @@ import {
   types,
 } from "neo4j-driver";
 import { NumberOrInteger } from "neo4j-driver-core/types/graph-types";
+import { Vertex, Edge } from "~/lib/graph/graph";
+import { convertNodeToJson, convertRelationshipToJson } from "../../lib/convertNodeToJson";
 
 // Example function to initiate data processing based on some condition
 
 export async function getInitialData(args: {
   subdomain: string;
 }): Promise<{ [key: string]: any }> {
-  const nodes: JsonNode[] = [];
-  const relationships: JsonRelationship[] = [];
+  const nodes: Vertex[] = [];
+  const relationships: Edge[] = [];
   const vertexLabelIdMap: VertexLabelIdMap = new Map();
   const nodeObj: JsonData = {};
   const relationshipObj: JsonData = {};
@@ -202,8 +204,8 @@ export async function getInitialData(args: {
 } // Manipulates the provided node and relationship data into specific JSON objects and maps
 
 export function getNodeAndEdgeObj(
-  nodes: JsonNode[],
-  relationships: JsonRelationship[],
+  nodes: Vertex[],
+  relationships: Edge[],
   vertexLabelIdMap: VertexLabelIdMap,
   nodeObj: JsonData,
   relationshipObj: JsonData,
@@ -225,59 +227,18 @@ export function getNodeAndEdgeObj(
   }
 }
 
-export interface JsonNode {
-  id: NumberOrInteger;
-  L: string[];
-  P: Record<string, any>;
-  OUT: Record<string, any>;
-  IN: Record<string, any>;
-}
-
-export interface JsonRelationship {
-  id: NumberOrInteger;
-  T: string;
-  S: NumberOrInteger;
-  E: NumberOrInteger;
-  P: Record<string, any>;
-}
-
 export type VertexLabelIdMap = Map<string, Set<number>>;
 export type JsonData = Record<string, any>;
 
-// Functions to handle database values and convert them to JSON
-function convertNodeToJson(node: Node): JsonNode {
-  return {
-    id: !isIntegerId ? node.identity.toNumber() : node.identity,
-    L: node.labels,
-    P: node.properties,
-    OUT: {},
-    IN: {},
-  };
-}
-
-function convertRelationshipToJson(
-  relationship: Relationship,
-): JsonRelationship {
-  return {
-    id: !isIntegerId ? relationship.identity.toNumber() : relationship.identity,
-    T: relationship.type,
-    S: !isIntegerId ? relationship.start.toNumber() : relationship.start,
-    E: !isIntegerId ? relationship.end.toNumber() : relationship.end,
-    // when disableLosslessIntegers is false, we get object in number property.
-    // Todo: data is not handled as properly, object is returned from server
-    P: relationship.properties,
-  };
-}
-
 function getJsonFromPart(
   matchPart: Node | Relationship | Array<Node | Relationship>,
-): JsonNode | JsonRelationship | (JsonNode | JsonRelationship)[] | {} {
+): Vertex | Edge | (Vertex | Edge)[] | {} {
   if (matchPart instanceof types.Node) {
     return convertNodeToJson(matchPart);
   } else if (matchPart instanceof types.Relationship) {
     return convertRelationshipToJson(matchPart);
   } else if (Array.isArray(matchPart)) {
-    const list: (JsonNode | JsonRelationship)[] = [];
+    const list: (Vertex | Edge)[] = [];
     for (const item of matchPart) {
       if (item instanceof types.Node) {
         list.push(convertNodeToJson(item));
@@ -294,12 +255,12 @@ export async function fetchFromMGAndSaveToArray(
   session: Session,
   query: string,
   params: Record<string, any>,
-  nodes: JsonNode[],
-  relationships: JsonRelationship[],
+  nodes: Vertex[],
+  relationships: Edge[],
   vertexLabelIdMap: VertexLabelIdMap,
 ): Promise<{
-  nodes: JsonNode[];
-  relationships: JsonRelationship[];
+  nodes: Vertex[];
+  relationships: Edge[];
   labelIdMap: VertexLabelIdMap;
 }> {
   try {

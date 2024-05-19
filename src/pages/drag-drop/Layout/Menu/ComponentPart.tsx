@@ -1,6 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, For, createSignal, useContext } from "solid-js";
 import { Tooltip } from "~/components/solid-blocks/blocks";
+import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { iconMap } from "~/lib/Utils";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
@@ -15,6 +16,14 @@ export const ComponentPart = () => {
     // TODO: Dont display "Form" Component
     child: { collection: "->CompCategoryComp" },
   });
+  
+  const data2 = getTreeDataMGCall({
+    collection: "g:'CompCategory'",
+    // TODO: Dont display "Form" Component
+    child: { collection: "->CompCategoryComp" },
+  });
+  data2.then((data) => console.log(data));
+
 
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon

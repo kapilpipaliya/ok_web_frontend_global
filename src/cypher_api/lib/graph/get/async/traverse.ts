@@ -1,9 +1,10 @@
-import { evaluate } from "~/lib/jsep";
+import { evalAsync, evaluate } from "~/lib/jsep";
 import jsep from "jsep";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { Node } from "~/cypher_api/functions/Type";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
+import { Edge, Vertex } from "~/lib/graph/graph";
 
 export async function getSelectedVertexValueMGCall(
   dbConn: DBConnection,
@@ -97,19 +98,22 @@ export const calculateFilterMGCall = (input: string) => {
 };
 
 
-export const getTreeDataMGCall = (
+export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },
   vertexes: Node[] = [],
   options?: {
     nameExpr?: (child: Node) => string;
     addChild?: (child: Node) => boolean;
   },
-) => {
-  const getChildren = (levels: { [key: string]: any }, vertexes: Node[]) => {
+) {
+  'use server';
+  const nodes: { [key: string]: Vertex } = {};
+  const relationships: { [key: string]: Edge } = {};
+  const getChildren = async (levels: { [key: string]: any }, vertexes: Node[]) => {
     const result: {}[] = [];
     if (!levels.collection) return result;
 
-    const children = evaluate(jsep(levels.collection), { vertexes: vertexes });
+    const children = await evalAsync(jsep(levels.collection), { vertexes: vertexes, nodes, relationships });
     // @ts-ignore
     for (const child of (children || []).sort((a, b) => a.P.pos - b.P.pos)) {
       const name =
@@ -128,7 +132,7 @@ export const getTreeDataMGCall = (
         ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
       ) {
         // @ts-ignore
-        navItem.children = getChildren(levels.child, [child]);
+        navItem.children = await getChildren(levels.child, [child]);
       }
 
       result.push(navItem);
@@ -136,7 +140,15 @@ export const getTreeDataMGCall = (
     return result;
   };
 
-  return getChildren(treeLevels, vertexes);
+
+  const children = await getChildren(treeLevels, vertexes);
+  return {
+    children,
+    graph: {
+      nodes,
+      relationships,
+    }
+  }
 };
 
 // TODO:
