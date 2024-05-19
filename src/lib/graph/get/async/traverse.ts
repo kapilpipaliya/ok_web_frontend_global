@@ -1,5 +1,5 @@
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import { evaluate } from "~/lib/jsep";
+import { evalAsync } from "~/lib/expression-eval";
 import jsep from "jsep";
 import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
 
@@ -131,7 +131,7 @@ export const getTreeDataAsync = async (
   ) => {
     const result = [] as any[];
     if (!levels.collection) return result;
-    const children = evaluate(jsep(levels.collection), {
+    const children = await evalAsync(jsep(levels.collection), {
       vertexes: vertexes,
       graph,
       setGraph,
@@ -178,7 +178,7 @@ export const getTextValueAsync = async (value: any) => {
 ): Promise<{ error: boolean; vertexes?: any; }> {
   collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
   try {
-    const value = evaluate(jsep(collection), {
+    const value = await evalAsync(jsep(collection), {
       vertexes: vertex,
       graph,
       setGraph,

@@ -1,4 +1,4 @@
-import { evalAsync, evaluate } from "~/lib/jsep";
+import { evalAsync } from "~/lib/expression-eval";
 import jsep from "jsep";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
@@ -162,7 +162,7 @@ export async function getSelectionOptionsMGCall(
 ): Promise<{ error: boolean; vertexes?: any }> {
   collection = await replaceExpressionToLabel(collection, vertex[0]);
   try {
-    const value = evaluate(jsep(collection), { vertexes: vertex });
+    const value = await evalAsync(jsep(collection), { vertexes: vertex });
     if (value) {
       return { error: false, vertexes: value };
     } else {

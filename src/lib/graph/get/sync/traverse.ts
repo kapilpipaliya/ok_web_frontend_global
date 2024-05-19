@@ -1,5 +1,5 @@
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
-import { evaluate } from "~/lib/jsep";
+import { evaluate } from "~/lib/expression-eval";
 import jsep from "jsep";
 import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
 import { SetStoreFunction, Store } from "solid-js/store";
@@ -172,7 +172,8 @@ export const getTextValue = (value: any) => {
     return JSON.stringify(value);
   }
   return value;
-};export function getSelectionOptions(
+};
+export function getSelectionOptions(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],

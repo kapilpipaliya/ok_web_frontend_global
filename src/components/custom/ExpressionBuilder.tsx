@@ -4,7 +4,7 @@ import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import MultiSelect from "./MultiSelect";
-import { binops, unops } from "~/lib/jsep";
+import { binops, unops } from "~/lib/expression-eval";
 import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";

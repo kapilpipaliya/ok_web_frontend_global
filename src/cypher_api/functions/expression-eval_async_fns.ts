@@ -1,9 +1,9 @@
-import { Edge, GraphInterface, IdAttr, Vertex } from "./graph/graph";
-import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
+import { Edge, GraphInterface, IdAttr, Vertex } from "../../lib/graph/graph";
+import { calculateFilter, getTextValue } from "../../lib/graph/get/sync/traverse";
 import { getDriverWithPort, isIntegerId } from "~/cypher_api/server/driver";
 import { Session } from "neo4j-driver";
 import { SetStoreFunction, Store } from "solid-js/store";
-import { convertNodeToJson, convertRelationshipToJson } from "./convertNodeToJson";
+import { convertNodeToJson, convertRelationshipToJson } from "../../lib/convertNodeToJson";
 // ->
 export async function evalGetChildren(vertexes: Vertex[], edgeType: string, {nodes, relationships}: {
   nodes?: {[key: string]: Vertex},
