@@ -668,21 +668,3 @@ export const MultiSelect: Component<IMultiSelectProps> = (
 
 export default MultiSelect;
 
-
-// <div class="max-w:60%">
-//   <h1>Multi-Select Dropdown</h1>
-//   <MultiSelect
-//     placeholder="Select options"
-//     disable={false}
-//     options={options}
-//     selectedValues={[{ value: "option1", label: "Option 1" }]}
-//     onSelect={(selected: any) => console.log("Selected:", selected)}
-//     onRemove={(selected: any) => console.log("Removed:", selected)}
-//     renderLabel={(option) => (
-//       <>
-//         <Icon icon="mdi:checkbox-marked-circle-outline" width={16} height={16} />
-//         <span>{option.label}</span>
-//       </>
-//     )}
-//   />
-// </div>

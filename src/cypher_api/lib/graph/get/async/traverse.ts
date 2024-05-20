@@ -145,8 +145,8 @@ export async function getTreeDataMGCall(
   return {
     children,
     graph: {
-      nodes,
-      relationships,
+      vertexes: nodes,
+      edges: relationships,
     }
   }
 };
@@ -159,12 +159,21 @@ export async function getSelectionOptionsMGCall(
   vertex: Node[],
   collection: string,
   strict?: boolean,
-): Promise<{ error: boolean; vertexes?: any }> {
+): Promise<{ error: boolean; vertexes?: any; graph?: any }> {
+  'use server';
+  const nodes: { [key: string]: Vertex } = {};
+  const relationships: { [key: string]: Edge } = {};
   collection = await replaceExpressionToLabel(collection, vertex[0]);
   try {
-    const value = await evalAsync(jsep(collection), { vertexes: vertex });
+    const value = await evalAsync(jsep(collection), { vertexes: vertex, nodes, relationships });
+    
     if (value) {
-      return { error: false, vertexes: value };
+      return {
+        error: false, vertexes: value, graph: {
+          vertexes: nodes,
+          edges: relationships,
+        }
+      };
     } else {
       return { error: true };
     }
@@ -334,28 +343,37 @@ export async function replaceExpressionToLabel(collection: string, vertex: Node)
   return collection;
 }
 
-export async function getDataMGCall(expression: string, incomingExpression: string[], outgoingExpression: string[]) {
-  'use server';
-  const nodes: { [key: string]: Vertex } = {};
-  const relationships: { [key: string]: Edge } = {};  
- 
-  const mainResult = await evalAsync(jsep(expression), { nodes, relationships });
+export interface Expression {
+  expression: string;
+  incoming?: Expression[];
+  outgoing?: Expression[];
+}
 
-  if (incomingExpression) {
-    for(const exp of incomingExpression){
-      await evalAsync(jsep(exp), {vertexes: [...mainResult], nodes, relationships });
+export async function getDataMGCall(expression: Expression, context = {
+  nodes: {} as { [key: string]: any },
+  relationships: {} as { [key: string]: any },
+  vertexes: undefined as any
+}): Promise<any> {
+  'use server';
+  const mainResult = await evalAsync(jsep(expression.expression), context);
+
+  if (expression.incoming && (mainResult && mainResult.length > 0)) {
+    for (const exp of expression.incoming) {
+      context.vertexes = [...mainResult];
+      await getDataMGCall(exp, context);
+    }
+  }
+  if (expression.outgoing && (mainResult && mainResult.length > 0)) { 
+    for (const exp of expression.outgoing) {
+      context.vertexes = [...mainResult];
+      await getDataMGCall(exp, context);
     }
   }
   
-  if (outgoingExpression) {
-    for(const exp of outgoingExpression){
-      await evalAsync(jsep(exp), {vertexes: [...mainResult], nodes, relationships });
-    }
-  }
   return {
     graph: {
-      vertexes: nodes,
-      edges: relationships,
+      vertexes: context.nodes,
+      edges: context.relationships,
     }
   }
 }

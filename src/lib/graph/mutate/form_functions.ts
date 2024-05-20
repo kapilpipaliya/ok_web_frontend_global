@@ -229,7 +229,8 @@ export function rowMetaInitialize(
     });
     return metaTxnId;
   }
-}export function createMeta(
+}
+export function createMeta(
   form: FormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>

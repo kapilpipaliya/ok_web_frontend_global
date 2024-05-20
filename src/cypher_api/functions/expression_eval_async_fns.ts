@@ -13,7 +13,13 @@ export async function evalGetChildren(vertexes: Vertex[], edgeType: string, { no
 
   if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriverWithPort(1102)).session();
-  const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
+  let type;
+  if (edgeType.includes('$0')) {
+    type = edgeType.replaceAll("$0", vertexes[0].L[0]);
+  }else{
+    type = edgeType
+  }
+  
   let query, params;
   if (type.includes('|')) {
     query = `
@@ -30,7 +36,7 @@ export async function evalGetChildren(vertexes: Vertex[], edgeType: string, { no
 `;
     params = { parentIds: vertexes.map(v => v.id) }
   }
-  console.log(query);
+
   try {
     const result = await session.run(query, params);
     return result.records.map(record => {
@@ -49,7 +55,6 @@ export async function evalGetChildren(vertexes: Vertex[], edgeType: string, { no
     return;
   }
 }
-
 
 // <-
 export async function evalGetParents(vertexes: Vertex[], edgeType: string, { nodes, relationships }: {
@@ -77,7 +82,7 @@ export async function evalGetParents(vertexes: Vertex[], edgeType: string, { nod
 `;
     params = { childIds: vertexes.map(v => v.id) }
   }
-  console.log(query);
+
   try {
     const result = await session.run(query, params);
     return result.records.map(record => {
@@ -97,12 +102,17 @@ export async function evalGetParents(vertexes: Vertex[], edgeType: string, { nod
   }
 }
 
-async function findVertexsMGCall(session: Session, label: string, { nodes, relationships }: {
+async function findVertexsMGCallId(session: Session, {id, label}: {id?: string, label?: string}, { nodes, relationships }: {
   nodes?: { [key: string]: Vertex },
   relationships?: { [key: string]: Edge }
 } = {}) {
-  const query = `MATCH (n:${label}) RETURN n`;
-  const result = await session.run(query);
+  let query;
+  if(id) {
+    query = `MATCH (n) where id(n) = ${id} RETURN n`;
+  }else if(label) {
+    query = `MATCH (n:${label}) RETURN n`;
+  }
+  const result = await session.run(query!);
   return result.records.map((record) => {
     const vertex = convertNodeToJson(record.get('n'));
     if (nodes) {
@@ -116,19 +126,35 @@ export async function evalGlobalColl(edgeType: string, context: {
   nodes?: { [key: string]: Vertex },
   relationships?: { [key: string]: Edge }
 } = {}) {
+  "use server";
   const [type, filter, isMultiple] = calculateFilter(edgeType);
   const session = (await getDriverWithPort(1102)).session();
 
   try {
     if (filter) {
-      const vertexes = await findVertexsMGCall(session, type, context);
+      const vertexes = await findVertexsMGCallId(session, {label: type}, context);
       const filteredVertexes = vertexes.filter(vertex => vertex.P[IdAttr] === filter);
       return filteredVertexes;
     } else {
-      return await findVertexsMGCall(session, edgeType, context);
+      return await findVertexsMGCallId(session, {label: edgeType}, context);
     }
   } catch (error) {
     console.error('Error querying Memgraph:', error);
     return [];
   }
 }
+
+export async function evalVertexById(id: string, context: {
+  nodes?: { [key: string]: Vertex },
+  relationships?: { [key: string]: Edge }
+} = {}) {
+  "use server";
+  const session = (await getDriverWithPort(1102)).session();
+  try {
+    return await findVertexsMGCallId(session, {id}, context);
+  } catch (error) {
+    console.error('Error querying Memgraph:', error);
+    return [];
+  }
+}
+

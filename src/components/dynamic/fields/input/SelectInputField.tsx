@@ -1,10 +1,12 @@
 import {
   batch,
+  createEffect,
   createResource,
   For,
   getOwner,
   runWithOwner,
   Show,
+  splitProps,
   untrack,
   useContext,
 } from "solid-js";
@@ -41,6 +43,10 @@ import { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
+import { getSelectionOptionsAsync } from "~/lib/graph/get/async/traverse";
+import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
+import MultiSelectField from "~/components/custom/NewMultiSelect";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,
@@ -187,17 +193,24 @@ export function SelectInputField(
     isRealTime?: boolean;
   },
 ) {
-  let { component, title, txnId, isRealTime, disabled, meta, data, setValue } =
-    props;
+  const [field, others] = splitProps(props, [
+    "component",
+    "title",
+    "txnId",
+    "isRealTime",
+    "disabled",
+    "meta",
+    "data",
+    "setValue",
+  ])
 
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const formData = useContext(FormContext);
 
-  // @ts-ignore
-  const [selectOptions, { refetch }] = createResource(
-    () => {
-      let value = getValueFromVertexOrKey(meta.P.props, "items");
+  const [selectOptions] = createResource(
+    async () => {
+      let value = getValueFromVertexOrKey(field.meta.P.props, "items");
       if (value) {
         if (typeof value === "string") {
           return value.split("\n");
@@ -208,44 +221,51 @@ export function SelectInputField(
         }
       } else {
         // this is not working when row is enabled, select field options is not updated
-        // if (disabled) {
-        //   return selectedValue(meta, data).map((vertexId) => graph.vertexes[vertexId]);
-        // }
+        if (field.disabled) {
+          return selectedValue(field.meta, field.data as Vertex,graph).map((vertexId) => graph.vertexes[vertexId]);
+        }
 
         const collection =
-          getChildVertex(graph, ["$0Coll"], meta).vertex?.["P"]?.["name"] ||
-          getValueFromVertexOrKey(meta.P.props, "collection");
+          getChildVertex(graph, ["$0Coll"], field.meta).vertex?.["P"]?.["name"] ||
+          getValueFromVertexOrKey(field.meta.P.props, "collection");
         if (!collection) {
           return [];
         }
-        return (
-          getSelectionOptions(graph, setGraph, [data as Vertex], collection)
-            .vertexes || []
-        );
+
+        const res = (await getSelectionOptionsMGCall([field.data as Vertex], collection));
+
+        if (!res.error) {
+          setGraphData(graph, setGraph, res.graph);
+          return getSelectionOptions(graph, setGraph, [field.data as Vertex], collection)
+              .vertexes || []
+          
+        } else {
+          return [];
+        }
       }
     },
-    (data) => data,
   );
 
   function getComponent() {
-    let direction = meta.P.dir;
-    if (!component && direction) {
+    let direction = field.meta.P.dir;
+    if (!field.component && direction) {
       if (direction === "->") {
-        component = "SelectBox";
+        field.component = "SelectBox";
       } else {
-        component = "TagBox";
+        field.component = "TagBox";
       }
     }
-    return component;
+    return field.component;
   }
 
   const onChangeSelect = (e: any, isRemove: any) => {
-    let data: number[] | number;
+    // TODO: ensure this working for multiselect
+    let data: number[] | number;    
     let optionvalue: any;
-    if (isRemove && e.length > 0) {
+    if (isRemove) {
       data = [];
     } else {
-      data = e[0]["id"];
+      data = e[0].id;
     }
     runWithOwner(outerOwner, () => {
       batch(() => {
@@ -265,56 +285,56 @@ export function SelectInputField(
         if (!data) {
           return;
         }
-        if (isRealTime) {
-          txnId = getNewTxnId(graph, setGraph);
+        if (field.isRealTime) {
+          field.txnId = getNewTxnId(graph, setGraph);
         }
-        if (getValueFromVertexOrKey(meta.P.props, "stringValue")) {
-          setValue
-            ? setValue(optionvalue)
+        if (getValueFromVertexOrKey(field.meta.P.props, "stringValue")) {
+          field.setValue
+            ? field.setValue(optionvalue)
             : setValueGlobal(
-                graph,
-                setGraph,
-                txnId!,
-                meta,
-                props.data!,
-                data,
-                Ws,
-                false,
-              );
-        } else if (getValueFromVertexOrKey(meta.P.props, "items")) {
-          setValue
-            ? setValue(optionvalue)
+              graph,
+              setGraph,
+              field.txnId!,
+              field.meta,
+              props.data!,
+              data,
+              Ws,
+              false,
+            );
+        } else if (getValueFromVertexOrKey(field.meta.P.props, "items")) {
+          field.setValue
+            ? field.setValue(optionvalue)
             : setValueGlobal(
-                graph,
-                setGraph,
-                txnId!,
-                meta,
-                props.data!,
-                data,
-                Ws,
-                false,
-              );
-        } else if (getValueFromVertexOrKey(meta.P.props, "inward")) {
-          setParentValue(graph, setGraph, txnId || 0, props.data!, meta, data);
+              graph,
+              setGraph,
+              field.txnId!,
+              field.meta,
+              props.data!,
+              data,
+              Ws,
+              false,
+            );
+        } else if (getValueFromVertexOrKey(field.meta.P.props, "inward")) {
+          setParentValue(graph, setGraph, field.txnId || 0, props.data!, field.meta, data);
         } else {
           setSelectionValue(
-            txnId || 0,
+            field.txnId || 0,
             props.data!,
             graph,
             setGraph,
-            meta,
+            field.meta,
             data,
           );
         }
         onChangeHandler(
-          txnId || 0,
+          field. txnId || 0,
           formData?.formData,
           props.data!,
-          meta,
+          field.meta,
           graph,
           setGraph,
         );
-        if (isRealTime) commitTxn(txnId || 0, Ws);
+        if (field.isRealTime) commitTxn(field.txnId || 0, Ws);
       });
     });
   };
@@ -322,9 +342,9 @@ export function SelectInputField(
   return (
     <div aria-labeledby={props["aria-labeledby"]}>
       <Show
-        when={!disabled}
+        when={!field.disabled}
         fallback={
-          <For each={selectedValue(meta, data as Vertex, graph)}>
+          <For each={selectedValue(field.meta, field.data as Vertex, graph)}>
             {(vertexId) => (
               <>
                 {
@@ -332,8 +352,8 @@ export function SelectInputField(
                     graph,
                     setGraph,
                     [graph.vertexes[vertexId]],
-                    getValueFromVertexOrKey(meta.P.props, "displayExpr") ||
-                      `::'P.${IdAttr}'`,
+                    getValueFromVertexOrKey(field.meta.P.props, "displayExpr") ||
+                    `::'P.${IdAttr}'`,
                   ).vertexes
                 }
               </>
@@ -341,26 +361,20 @@ export function SelectInputField(
           </For>
         }
       >
-        <MultiSelect
-          isObject
+        <MultiSelectField
+          selectionLimit={getComponent() === 'SelectBox' ? 1 : undefined}
+          displayValueChild="displayName"
           displayValueParent="P"
-          disable={disabled!}
-          displayValueChild="name"
+          selectedValues={selectedValue(field.meta, field.data as Vertex, graph).map((id) => {
+            return graph.vertexes[id];
+          })}
+          disable={field.disabled!}
           options={selectOptions()}
-          avoidHighlightFirstOption
-          placeholder={`${title}`}
-          onSelect={(e) => onChangeSelect(e, false)}
           onRemove={(e) => onChangeSelect(e, true)}
-          customCloseIcon={<Icon icon={"ic:round-close"} />}
-          selectionLimit={getComponent() == "SelectBox" ? 1 : 1000}
-          selectedValues={
-            selectedValue(meta, data as Vertex, graph).map((id) => {
-              return graph.vertexes[id];
-            }) as any
-          }
-        />
-      </Show>
+          onSelect={(e) => onChangeSelect(e, false)}
+          placeholder={`${field.title}`} />
 
+      </Show>
       {/* Todo: think about validations */}
     </div>
   );

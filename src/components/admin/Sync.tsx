@@ -3,7 +3,7 @@ import PageHeader from "../custom/Breadcumb";
 import { createStore } from "solid-js/store";
 import { Icon } from "@iconify-icon/solid";
 import { getUsers } from "./adminFunctions";
-import MultiSelect from "../custom/NewMultiSelect";
+import MultiSelectField from "../custom/NewMultiSelect";
 import { Node } from "~/cypher_api/functions/Type";
 import { syncNodesMGCall } from "~/cypher_api/functions/sync";
 import { useToast } from "../custom/Toast";

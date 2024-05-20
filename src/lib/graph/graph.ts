@@ -34,7 +34,6 @@ export interface GraphInterface {
   vertexes: VertexMap;
   edges: EdgeMap;
   vertexLabelIdMap: { [key: string]: Id[] };
-  initialSynced: boolean;
   member?: { [key: string]: any } | null;
   txnId: number;
 }

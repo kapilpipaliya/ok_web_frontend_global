@@ -1,9 +1,12 @@
+import { useToast } from "../custom/Toast";
+
 /**
  * Common function to make GET requests to a specified URL.
  * @param {string} url - The URL to which the GET request is sent.
  * @returns {Promise<any>} - The promise that resolves to the response data.
  */
 export async function getAPI(url: string): Promise<{ [key: string]: any }> {
+  const {showErrorToast} = useToast()
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -27,7 +30,8 @@ export async function getAPI(url: string): Promise<{ [key: string]: any }> {
 
   const responseData = await response.json();
   if (responseData.error) {
-    // throw new Error(responseData.error);
+    showErrorToast(responseData.error);
+    throw new Error(responseData.error);
   }
 
   return responseData;

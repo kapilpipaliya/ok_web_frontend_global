@@ -24,11 +24,7 @@ export const DataFetcher = (props: {
     getdata();
   });
 
-  return (
-    <Show when={graph.initialSynced} fallback={<LoaderNew />}>
-      {props.renderContent}
-    </Show>
-  );
+  return props.renderContent
 };
 
 export const API = {

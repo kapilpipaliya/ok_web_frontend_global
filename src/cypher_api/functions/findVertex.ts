@@ -1,7 +1,8 @@
 import neo4j from "neo4j-driver";
 import { DBConnection } from "~/cypher_api/functions/dbs";
 import { Node } from "~/cypher_api/functions/Type";
-
+import { getDriverWithPort } from "../server/driver";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 export async function findVertexMGCall(
   dbConn: DBConnection,
   label: string,
@@ -9,14 +10,12 @@ export async function findVertexMGCall(
   value: number | string,
 ) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.READ,
-  });
+  const session = await (await getDriverWithPort(1102)).session();
 
   try {
     // Cypher query to create a new vertex
     let createVertexQuery = `MATCH (v:${label} {${attribute}: $value}) RETURN v`;
-    const vertexResult = await dbConn.session.run(createVertexQuery, { value });
+    const vertexResult = await session.run(createVertexQuery, { value });
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
@@ -42,26 +41,21 @@ export async function findVertexMGCall(
   }
 }
 
-export async function findVertexByIdMGCall(dbConn: DBConnection, id: number) {
+export async function findVertexByIdMGCall(id: number) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.READ,
-  });
+  const session = await (await getDriverWithPort(1102)).session();
 
   try {
     // Cypher query to create a new vertex
     let createVertexQuery = `MATCH (v) WHERE id(v) = $id RETURN v`;
-    const vertexResult = await dbConn.session.run(createVertexQuery, { id });
+    const vertexResult = await session.run(createVertexQuery, { id });
 
     // Extract the new vertex ID from the result
     if (vertexResult.records.length === 0) {
       return { error: true, message: "empty result" };
     }
-    const newVertex = vertexResult.records[0].get("v") as Node;
-    newVertex.id = newVertex.identity!;
-    newVertex.L = newVertex.labels!;
-    newVertex.P = newVertex.properties!;
-
+    
+    const newVertex = convertNodeToJson(vertexResult.records[0].get("v"));
     return {
       error: false,
       vertex: newVertex,

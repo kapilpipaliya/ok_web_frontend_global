@@ -32,7 +32,6 @@ export async function GET({ request }: APIEvent) {
       properties,
     };
   } catch (error: any) {
-    console.error("Server error Failed to login:", error);
     return new Response(error.message, { status: 500 });
   }
 }

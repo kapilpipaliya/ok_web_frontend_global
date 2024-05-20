@@ -22,7 +22,7 @@ export default function UsersLayout(props: RouteSectionProps) {
     vertexes: {} as VertexMap,
     edges: {} as EdgeMap,
     vertexLabelIdMap: {} as { [key: string]: Id[] },
-    initialSynced: false, // TODO: Display initialSynced status to the UI
+
     member: {},
     txnId: 0,
   });

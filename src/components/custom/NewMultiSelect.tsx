@@ -1,7 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { JSX, createSignal, For } from "solid-js";
+import { JSX, createSignal, For, mergeProps, createEffect, onMount, createMemo } from "solid-js";
+import { useToast } from "./Toast";
 
-const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (arg0: any, arg1: any) => void; onSelect: (arg0: any, arg1: any) => void; placeholder: string | undefined; disable: boolean | undefined; renderLabel: ((arg0: any) => JSX.Element) | undefined; }) => {
+const MultiSelectField = (props: { selectedValues: any; options: any[]; onRemove: (arg0: any, arg1: any) => void; onSelect: (arg0: any, arg1: any) => void; placeholder: string | undefined; disable: boolean | undefined; displayValueParent?: string | undefined; displayValueChild?: string | undefined; selectionLimit?: number | undefined; renderLabel?: ((arg0: any) => JSX.Element) | undefined; }) => {
     const defaultProps = {
         options: [],
         selectedValues: [],
@@ -10,38 +11,54 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
         placeholder: "Select options",
         disable: false,
         renderLabel: null,
-
+        selectionLimit: undefined,
+        displayValueParent: "",
+        displayValueChild: "",
     };
+    const { showErrorToast } = useToast()
 
     // Merge props with default properties
-    props = { ...defaultProps, ...props };
+    props = mergeProps(defaultProps, props)
 
     // Define signals for managing state
-    const [selected, setSelected] = createSignal(props.selectedValues);
+    const [selected, setSelected] = createSignal([]);
+    createEffect(() => {
+        setSelected(props.selectedValues);
+    });
     const [inputValue, setInputValue] = createSignal("");
     const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
     // Helper function to get value and label
-    const getOptionValue = (option: { value: any; }) => (typeof option === 'object' ? option.value : option);
-    const getOptionLabel = (option: { label: any; }) => (typeof option === 'object' ? option.label : option);
-
+    const getOptionValue = (option: { [x: string]: { [x: string]: any; }; value: any; }) => {
+        if (props.displayValueParent && props.displayValueChild) {
+            return option[props.displayValueParent]?.[props.displayValueChild] || option[props.displayValueParent]?.['name'];
+        }
+        return (typeof option === 'object' ? option.value : option)
+    };
+    const getOptionLabel = (option: { [x: string]: { [x: string]: any; }; label: any; }) => {
+        if (props.displayValueParent && props.displayValueChild) {
+            return option[props.displayValueParent]?.[props.displayValueChild] || option[props.displayValueParent]?.['name'];
+        }
+        return (typeof option === 'object' ? option.label : option);
+    };
     // Handle changes in selection
     const handleSelectChange = (value: any) => {
         let newSelected;
         if (selected().some((item: any) => getOptionValue(item) === value)) {
             newSelected = selected().filter((item: any) => getOptionValue(item) !== value);
-        } else {
-            const selectedOption = props.options.find((option: any) => getOptionValue(option) === value);
-            newSelected = [...selected(), selectedOption];
-        }
-        setSelected(newSelected);
-        if (selected().some((item: any) => getOptionValue(item) === value)) {
+            setSelected(newSelected);
             props.onRemove(newSelected, value);
         } else {
+            if (props.selectionLimit && selected().length >= props.selectionLimit) {
+                showErrorToast("Selection limit reached");
+                return; // Exit if selection limit is reached
+            }
+            const selectedOption = props.options.find((option: any) => getOptionValue(option) === value);
+            newSelected = [...selected(), selectedOption];
+            setSelected(newSelected);
             props.onSelect(newSelected, value);
         }
     };
-
     // Remove tag from selected values
     const handleRemoveTag = (value: any) => {
         const newSelected = selected().filter((item: any) => getOptionValue(item) !== value);
@@ -50,11 +67,11 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
     };
 
     // Inline styles
-    const containerStyle = "position: relative; display: inline-block; width: 100%; padding: 5px; border: 1px solid #ccc; border-radius: 4px; background: white;";
+    const containerStyle = "position: relative; display: inline-block; width: 100%; padding: 0px 3px; border: 1px solid #ccc; border-radius: 4px; background: white;";
     const inputContainerStyle = "display: flex; flex-wrap: wrap; align-items: center; gap: 5px; width: 100%;";
-    const tagStyle = "background: #3377cc;color: #fff; padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
+    const tagStyle = "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
     const closeButtonStyle = "cursor: pointer; display: flex;";
-    const inputStyle = "flex: 1; min-width: 100px; padding: 5px; border: none; outline: none;";
+    const inputStyle = ("flex: 1; min-width: 100px; padding: 5px; border: none; outline: none;");
     const dropdownStyle: any = () => ({
         position: 'absolute',
         top: '100%',
@@ -62,9 +79,10 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
         width: '100%',
         border: '1px solid #ccc',
         background: 'white',
-        maxHeight: '200px',
-        overflowY: 'auto',
-        zIndex: 1000,
+        'max-height': '200px',
+        'overflow-y': 'auto',
+        'z-index': 1,
+        'box-shadow': 'darkgrey 1px 2px 3px 0px',
         display: dropdownVisible() ? 'block' : 'none',
     });
     const optionStyle = "padding: 8px; cursor: pointer;";
@@ -81,27 +99,26 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
     };
 
     // Filter options based on input value
-    const filteredOptions = () =>
-        props.options.filter((option: any) =>
+    const filteredOptions = createMemo(() => {
+        return props.options.filter((option) =>
             getOptionLabel(option).toLowerCase().includes(inputValue().toLowerCase())
         );
-
+    });
     return (
-        <div style={containerStyle}>
+        <div style={containerStyle} class="grid text-align:left">
             <div style={inputContainerStyle}>
                 <For each={selected()}>
                     {(tag) => (
-                        <div style={tagStyle} class='f:14'>
+                        <div style={tagStyle} class="f:14">
                             {props.renderLabel ? props.renderLabel(tag) : getOptionLabel(tag)}
                             <span style={closeButtonStyle} onClick={() => handleRemoveTag(getOptionValue(tag))}>
-                                <Icon icon="lets-icons:close-round" height={21} width={21} />
+                                <Icon icon="ic:round-close" height={21} width={21} />
                             </span>
                         </div>
                     )}
                 </For>
                 <input
                     type="text"
-                    class='f:14'
                     style={inputStyle}
                     value={inputValue()}
                     onInput={(e) => setInputValue(e.target.value)}
@@ -111,11 +128,11 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
                     disabled={props.disable}
                 />
             </div>
-            <div style={dropdownStyle()} class="r:0|0|10|10">
-                <For each={filteredOptions()}>
+            <div style={dropdownStyle()} class="r:5">
+                <For each={filteredOptions()} fallback={<div style={optionStyle}>No item found </div>}>
                     {(option, index) => (
                         <div
-                            class={`${index() == filteredOptions().length - 1 ? "r:0|0|10|10" : ""} f:15`}
+                            class={`bg:#f4f4f4:hover ${index() == filteredOptions().length - 1 ? "r:0|0|5|5" : ""} f:14 m:3 r:5`}
                             style={`${optionStyle} ${selected().some((item: { value: any; }) => getOptionValue(item) === getOptionValue(option)) ? optionSelectedStyle : ""}`}
                             onMouseDown={() => handleSelectChange(getOptionValue(option))}
                         >
@@ -128,4 +145,6 @@ const MultiSelect = (props: { selectedValues: any; options: any[]; onRemove: (ar
     );
 };
 
-export default MultiSelect;
+export default MultiSelectField;
+
+

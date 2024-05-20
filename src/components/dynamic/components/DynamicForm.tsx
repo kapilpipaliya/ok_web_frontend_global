@@ -16,7 +16,7 @@ import {
 } from "solid-js";
 import { createStore, SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
-import { FormContext, groupBy } from "~/lib/Utils";
+import { capitalizeFirstLetter, FormContext, groupBy } from "~/lib/Utils";
 import {
   getChildVertexes,
   getSelectionOptions
@@ -60,6 +60,9 @@ import {
 } from "~/lib/graph/get/async/graph_functions";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
+import { Expression, getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
+import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -175,6 +178,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
 
   const [data, { mutate, refetch }] = createResource(async () => {
     try {
+
       let dataVertex: Vertex;
       if (!props.id) {
         // TODO: Load Form Meta from API
@@ -188,12 +192,23 @@ export const DynamicForm = (props: DynamicFormProps) => {
         if (createResult.error) return createResult.error;
         dataVertex = createResult.vertex!;
       } else {
-        // TODO: Load Form Meta and Data from API
-        const loadResult = loadForm(graph, props.id);
+        // TODO: Load vertex from server
+        const loadResult = await findVertexByIdMGCall(props.id);
         if (loadResult.error) return loadResult.error;
-        dataVertex = loadResult.vertex!;
+
+        const { incoming, outgoing } = processRowsAttr(props.form.attributes);
+        console.log('incoming', incoming, 'outgoing', outgoing);
+        
+        // const allExpression = fn(props.form.attributes);
+        const result = await getDataMGCall({ expression: `id:'${props.id}'`, incoming, outgoing });
+        console.log('getDataMGCall', result);
+        setGraphData(graph, setGraph, result.graph);
+
+        dataVertex = graph.vertexes[props.id];
+
       }
 
+      // TODO: Load Form Meta and Data from API
       const metaVertexResult = untrack(() =>
         createMeta(props.form, graph, setGraph),
       );
@@ -222,6 +237,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         const groupByTabsAndGroup = {} as {
           [tab: string]: { [group: string]: Vertex[] };
         };
+
         for (const tab in groupByTabs) {
           groupByTabsAndGroup[tab] = groupBy(
             groupByTabs[tab]!,
@@ -232,6 +248,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
         }
         return groupByTabsAndGroup;
       };
+
       // For new Form component, user will define layout, not a fixed layout;
       // We may use this component for render from the json.
       const groupByTabsAndGroup = groupByTabsAndGroupFn();
@@ -249,6 +266,7 @@ export const DynamicForm = (props: DynamicFormProps) => {
           groupByTabsAndGroup,
         });
       });
+
     } catch (e: any) {
       console.error(e);
       return { error: `Error When Loading Form: ${e.message}` };
@@ -296,8 +314,11 @@ export const DynamicForm = (props: DynamicFormProps) => {
           successMessage: "Data submitted successfully",
           onSuccess: (value) => {
             // currently we are navigating back.
-            setTimeout(() => navigate(-1), 0);
+            setTimeout(() => navigate(-1), 500);
           },
+          onError: (error) => {
+        
+          }
         });
       }
       submit = true;
@@ -588,6 +609,35 @@ export const DynamicForm = (props: DynamicFormProps) => {
     </Switch>
   );
 };
+function processRowsAttr(attrs: any): { incoming: Expression[], outgoing: Expression[] } {
+  const outgoing = [] as Expression[];
+  const incoming = [] as Expression[];
+
+  for (const attribute of attrs) {
+    const capitalizedName = capitalizeFirstLetter(attribute.name);
+
+    if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
+      if (attribute.props?.inward) {
+        incoming.push({ expression: `<-${capitalizedName}$0` });
+      } else {
+        outgoing.push({ expression: `->$0${capitalizedName}` });
+      }
+    } else if (attribute.component === 'Table' || attribute.component === 'Table2') {
+      const expression = { expression: `->$0${capitalizedName}` };
+      
+
+      if (attribute.attributes) {
+        const nested = processRowsAttr(attribute.attributes);
+        
+        expression.incoming = nested.incoming;
+        expression.outgoing = nested.outgoing;
+      }
+      outgoing.push(expression);
+    }
+  }
+  
+  return { incoming, outgoing };
+}
 
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
@@ -607,9 +657,9 @@ export function FormGroup(props: FormGroupProps) {
           <>
             {toTitle(
               metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
+              metaVertex.P[IdAttr] ||
+              metaVertex.P.key ||
+              "",
             )}
           </>
         );
@@ -619,9 +669,9 @@ export function FormGroup(props: FormGroupProps) {
             meta={metaVertex}
             title={toTitle(
               metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
+              metaVertex.P[IdAttr] ||
+              metaVertex.P.key ||
+              "",
             )}
             data={props.vertex}
             // setValue={props.setValue}

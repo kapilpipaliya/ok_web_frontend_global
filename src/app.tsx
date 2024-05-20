@@ -8,6 +8,7 @@ import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 
+// Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
   const loadingSite = createSignal(false);
   return (

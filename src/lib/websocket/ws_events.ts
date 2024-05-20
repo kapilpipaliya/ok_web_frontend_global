@@ -34,7 +34,17 @@ export const setGraphData = (
 ) => {
   batch(() => {
     for (const vertexId in args.vertexes) {
-      setGraph("vertexes", vertexId, args.vertexes[vertexId]);
+      setGraph("vertexes", vertexId, prev => {
+        if (prev) {
+          const IN = {...prev.IN, ...args.vertexes[vertexId].IN};
+          const OUT = {...prev.OUT, ...args.vertexes[vertexId].OUT};
+          return { ...args.vertexes[vertexId], IN, OUT };
+        } else {
+          return args.vertexes[vertexId];
+        }
+     } )        ;
+
+
       for (const label of args.vertexes[vertexId]["L"]) {
         setGraph("vertexLabelIdMap", label, (vertexIds) => {
           return Array.isArray(vertexIds)
@@ -87,7 +97,6 @@ export const setGraphData = (
     for (const vertexId of args.deleted_vertexes || []) {
       deleteVertex(0, parseInt(vertexId), graph, setGraph);
     }
-    setGraph("initialSynced", reconcile(true));
   });
 };
 export const onMutatDataGet = (

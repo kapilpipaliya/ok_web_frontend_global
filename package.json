@@ -6,7 +6,7 @@
     "pretty": "prettier --write \"./**/*.{js,jsx,css,ts,tsx,json}\"",
     "dev": "vinxi dev --host",
     "build": "vinxi build",
-    "start": "vinxi start"
+    "start": "vinxi start --port 3001"
   },
   "dependencies": {
     "@bedrock-layout/solid": "^1.7.0",

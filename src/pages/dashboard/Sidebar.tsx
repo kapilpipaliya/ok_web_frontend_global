@@ -2,6 +2,7 @@ import { useLocation } from "@solidjs/router";
 import {
   createEffect,
   createMemo,
+  createResource,
   createSignal,
   createUniqueId,
   For,
@@ -10,7 +11,7 @@ import {
   untrack,
   useContext,
 } from "solid-js";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex, getTreeData } from "~/lib/graph/get/sync/traverse";
 import {
   createMeta, getSublistRows,
   getSublistRowsForType
@@ -25,6 +26,8 @@ import { Store } from "solid-js/store"; // Import the CSS file
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { getTreeDataAsync } from "~/lib/graph/get/async/traverse";
+import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -50,7 +53,7 @@ function treeViewFilter(
 function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const { Ws } = useContext(WsContext);
-  const [searchData, setSearchData] = createSignal<navbarDataI[]>([]);
+  const [searchData, setSearchData] = createSignal<any>([]);
   const location = useLocation();
   const [activeSection, setActiveSection] = createSignal("Home");
   const [searchTerm, setSearchTerm] = createSignal("");
@@ -70,24 +73,8 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     });
   };
 
-  createEffect(() => {
-    const res = navData();
-    if (!res) return;
-
-    if (isSearchMode()) {
-      const ids = res
-        .map((e) => {
-          if (e.expanded !== undefined) return e.id;
-          return null;
-        })
-        .filter((e) => e) as string[];
-      return;
-    } else {
-      setSearchData(res);
-    }
-  });
   const activeLinks = () =>
-    searchData().find((link) => link.name === activeSection() && link.children);
+    searchData().find((navData: any) => navData.P.name === activeSection() && navData.children);
 
   function handleSearch(input: string) {
     setSearchTerm(input);
@@ -95,16 +82,31 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     const searchName = input.trim().toLowerCase();
     setIsSearchMode(searchName.length > 0);
 
-    if (searchName.length === 0) return;
-
-    const res = searchData();
-    if (!res) return;
-    const result: navbarDataI[] = treeViewFilter(res, (node: navbarDataI) =>
-      node.name.toLowerCase().includes(searchName),
-    );
-
-    setSearchData(result);
+    if (searchName.length > 0) {
+      const filteredData = filterNavData(navData(), searchName);
+      setSearchData(filteredData);
+    } else {
+      setSearchData(navData());
+    }
   }
+
+  const filterNavData = (data: any, searchTerm: any) => {
+    const searchLower = searchTerm.toLowerCase();
+    return data
+      .map((item: any) => {
+        if (item.name.toLowerCase().includes(searchLower)) {
+          return item;
+        }
+        if (item.children) {
+          const filteredChildren = filterNavData(item.children, searchTerm);
+          if (filteredChildren.length > 0) {
+            return { ...item, children: filteredChildren };
+          }
+        }
+        return null;
+      })
+      .filter((item: any) => item !== null);
+  };
 
   const mainIcon: any = {
     "/admin/dashboards/": "akar-icons:dashboard",
@@ -123,38 +125,24 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
   };
+
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed());
   };
 
-  const navData = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(
-      graph,
-      "Nav",
-      "name",
-      "Navigation",
-    );
-    if (!nav) return;
-    if (!graph.vertexes[nav.id]) {
-      return;
-    }
-    const vertex = graph.vertexes[nav.id];
-    const metaVertexResult = untrack(() =>
-      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
-    );
+  async function getNavData() {
+    const data: any = await await getTreeDataMGCall({
+      collection: "g:'Nav[Navigation]'",
+      // TODO: Dont display "Form" Component
+      child: { collection: "->NavAttr", child: { collection: "->NavAttr", child: { collection: "->NavAttr" } } },
+    });
+    return data.children[0].children;
+  }
 
-    if (metaVertexResult.error) {
-      console.error(metaVertexResult.error);
-      return;
-    }
-    const metaVertex = metaVertexResult.vertex!;
-
-    return renderNavTreeFromGraph(
-      metaVertex,
-      vertex,
-      props.isSideBarOpen,
-      graph,
-    );
+  const [navData] = createResource(async () => {
+    const data = await getNavData();
+    setSearchData(data);
+    return data;
   });
 
   const sidebarStyle = () =>
@@ -198,7 +186,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
           }}
         >
           <Show when={activeLinks()}>
-            <For each={activeLinks()?.children}>
+            <For each={activeLinks().children}>
               {(nav) => {
                 return (
                   <div
@@ -206,10 +194,10 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                     style="padding-top: 12px; padding-bottom: 12px;"
                   >
                     <div
-                      class={`flex ai:center jc:space-between ${!expandedSections().get(nav.name) ? "color:#37c" : ""} ${location.pathname === nav.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} pl:12 f:15 pr:12 capitalize`}
+                      class={`flex ai:center jc:space-between ${!expandedSections().get(nav.P.name) ? "color:#37c" : ""} ${location.pathname === nav.P.url ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} pl:12 f:15 pr:12 capitalize`}
                     >
-                      <div onClick={() => toggleSection(nav.name)}>
-                        {nav.name}
+                      <div onClick={() => toggleSection(nav.P.name)}>
+                        {nav.P.name}
                       </div>
                       <div>
                         <button
@@ -217,7 +205,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                           onClick={(e) => {
                             e.stopPropagation();
 
-                            toggleSection(nav.name);
+                            toggleSection(nav.P.name);
                           }}
                         >
                           <Icon
@@ -226,28 +214,28 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
                             style={{
                               transition: "transform 0.2s linear",
                               "margin-top": "7px",
-                              transform: `${!expandedSections().get(nav.name)
+                              transform: `${!expandedSections().get(nav.P.name)
                                 ? "rotate(0deg)"
                                 : "rotate(180deg)"}`,
                             }} />
                         </button>
                       </div>
                     </div>
-                    <Show when={!expandedSections().get(nav.name)}>
+                    <Show when={!expandedSections().get(nav.P.name)}>
                       <For each={nav.children}>
                         {(child) => {
                           return (
                             <a
-                              class={`${location.pathname === child.href ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
-                              href={child.href}
+                              class={`${location.pathname === child.P.url ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
+                              href={child.P.url}
                             >
                               <Icon
-                                color={`${activeSection() === child.name ? "#3B82F6" : "#4B5563"}`}
-                                icon={mainIcon[child.href]}
+                                color={`${activeSection() === child.P.name ? "#3B82F6" : "#4B5563"}`}
+                                icon={mainIcon[child.P.url]}
                                 height={24}
                                 width={24} />
                               <span class="ml:8 color:#4B5563 ">
-                                {child.name}
+                                {child.P.name}
                               </span>
                             </a>
                           );
@@ -274,18 +262,18 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
           <img style="height: 35px; " src={logo} alt="logo" />
         </a>
         <div class="flex flex:col gap:10 mt:20">
-          <For each={searchData()}>
-            {(link) => (
-              <Show when={link.href !== "undefined"}>
+          <For each={navData()}>
+            {(navData) => (
+              <Show when={navData.P.url !== "undefined"}>
                 <a
-                  class={`${activeSection() === link.name ? "bg:white color:#37c" : ""} gap:10 `}
-                  href={link.href}
+                  class={`${activeSection() === navData.P.name ? "bg:white color:#37c" : ""} gap:10 `}
+                  href={navData.P.url}
                   style={`display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; `}
-                  onClick={() => setActiveSection(link.name)}
+                  onClick={() => setActiveSection(navData.P.name)}
                 >
                   <Icon
-                    color={`${activeSection() === link.name ? "#3B82F6" : "#4B5563"}`}
-                    icon={mainIcon[link.href]}
+                    color={`${activeSection() === navData.P.name ? "#3B82F6" : "#4B5563"}`}
+                    icon={mainIcon[navData.P.url]}
                     height={24}
                     width={24} />
                 </a>
@@ -308,7 +296,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       </nav>
     </div>;
   }
-    return (
+  return (
     <div class="r:0|10|10|0 rel" style={sidebarStyle()}>
       <Show
         when={navData()}
@@ -322,7 +310,6 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
           <div>
             <aside class="flex">
               <MainSideBar />
-
               <SubSideBar />
             </aside>
           </div>

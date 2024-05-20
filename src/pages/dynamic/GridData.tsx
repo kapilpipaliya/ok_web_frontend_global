@@ -1,4 +1,3 @@
-// Comment This Lines in web build
 import { useLocation, useNavigate, useParams } from "@solidjs/router";
 import { CellContext, ColumnDef } from "@tanstack/solid-table";
 import {
@@ -9,6 +8,7 @@ import {
   createSignal,
   Match,
   onCleanup,
+  onMount,
   Show,
   Switch,
   untrack,
@@ -60,10 +60,12 @@ import { useToast } from "~/components/custom/Toast";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { submitDataCall } from "~/components/api/api_functions";
 import { renderNavTreeFromGraph } from "../dashboard/Sidebar";
-import {Popover} from 'solid-simple-popover'
+import { Popover } from 'solid-simple-popover'
 import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
-import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { Expression, getDataMGCall, getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import MultiSelectField from "~/components/custom/NewMultiSelect";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 interface AbstractGridProps {
   tableId: string;
 }
@@ -155,49 +157,29 @@ const QuickEditModal = (p: {
 
 export const AbstractGrid = (props: AbstractGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [locationData, setLocationData] = createSignal([]);
   const data = findVertexByLabelAndUniqueId(
     graph,
     "Coll",
     IdAttr,
     props.tableId,
   );
+  const param = useLocation();
 
   const nestedName = createMemo(
     () =>
       findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
         ?.name,
   );
-  const navData: any = createMemo(() => {
-    const nav = findVertexByLabelAndUniqueId(
-      graph,
-      "Nav",
-      "name",
-      "Navigation",
-    );
-    if (!nav) return [];
+  async function getNavData() {
+    const data: any = await await getTreeDataMGCall({
+      collection: "g:'Nav[Navigation]'",
+      // TODO: Dont display "Form" Component
+      child: { collection: "->NavAttr", child: { collection: "->NavAttr", child: { collection: "->NavAttr" } } },
+    });
+    return data.children[0].children;
+  }
 
-    if (!graph.vertexes[nav.id]) {
-      return;
-    }
-
-    const vertex = graph.vertexes[nav.id];
-
-    const metaVertexResult = untrack(() =>
-      createMeta(AttrsAdminTableData["Nav"], graph, setGraph),
-    );
-
-    if (metaVertexResult.error) {
-      console.error(metaVertexResult.error);
-      return;
-    }
-    const metaVertex = metaVertexResult.vertex!;
-
-    const navData = renderNavTreeFromGraph(metaVertex, vertex, true, graph);
-    const navigation = getParentFromNav(navData);
-    return navigation;
-  });
-
-  const navigate = useNavigate();
   // used to refresh table:
   const [tableId, setTableId] = createSignal("");
   createEffect(() => {
@@ -206,17 +188,42 @@ export const AbstractGrid = (props: AbstractGridProps) => {
     props.tableId;
     setTimeout(() => setTableId(props.tableId));
   });
+  const getCurrentLocation: any = (data: any, path = []) => {
+    for (const item of data) {
+      if (item.P.url === param.pathname) {
+        return [...path, item.name];
+      }
+      if (item.children) {
+        const result = getCurrentLocation(item.children, [...path, item.name]);
+        if (result.length > 0) {
+          return result;
+        }
+      }
+    }
+    return [];
+  };
+  const params = useParams();
+  const [nav] = createResource(tableId, async ()=>{
+    const navData = await getNavData();
+    const filtered = getCurrentLocation(navData);
+    setLocationData(filtered);
+    return filtered
+  });
+
+  const navigate = useNavigate();
 
   return (
     <>
-      <PageHeader
-        title={`${navData()?.child || nestedName() || ""}`}
-        breadcrumb={[
-          ...breadcrumbData,
-          { name: navData()?.parent },
-          { name: navData()?.child || nestedName() },
-        ]}
-      />
+     <Show when={locationData()}>
+        <PageHeader
+          title={`${locationData()[0]}`}
+          breadcrumb={[
+            ...breadcrumbData,
+            { name: `${locationData()[1]}` },
+            { name: locationData()[2] },
+          ]}
+        />
+     </Show>
       <div class="flex justify-content:start p:5">
         <GenericField
           meta={
@@ -314,7 +321,6 @@ const DataGrid = (props: DataGridProps) => {
   async function getTableData() {
     //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
     const form = await getFormApiFromFormMGCall(props.tableId);
-
     let formNew: FormMetaData;
     let collection: string;
 
@@ -423,30 +429,6 @@ const DataGrid = (props: DataGridProps) => {
             </Match>
 
             <Match when={!formNew.isInlineEditable}>
-              {/* <button id="dropdownMenuIconButton" style="display: inline-flex; align-items: center; padding: 0.5rem; font-size: 0.875rem; line-height: 1.25rem; font-weight: 500; text-align: center; color: rgb(17, 24, 39); background-color: rgb(255, 255, 255); border-radius: 0.5rem; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.5) focus; outline: 2px solid transparent; outline-offset: 2px; color: rgb(255, 255, 255) @dark; background-color: rgb(31, 41, 55) @dark; background-color: rgb(55, 65, 81) hover @dark;" onclick={() => setOpen(!open())}
-                type="button">
-                <svg className="w:1.25rem h:1.25rem" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                  viewBox="0 0 4 15">
-                  <path
-                    d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-                </svg>
-              </button>
-              <div id="dropdownDots"  style="position: absolute; top: 100%; left: 0; z-index: 1000; background-color: rgb(255, 255, 255); border-top: 0; border-bottom: 1px solid rgba(0, 0, 0, 0.1); border-left: 1px solid rgba(0, 0, 0, 0.1); border-right: 1px solid rgba(0, 0, 0, 0.1); border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06); width: 11rem;" class={`bg-white dark:bg-gray-800 ${open() ? "d:contents " : "d:hidden"}`}>
-
-                <ul class="py:0.5rem f:0.875rem lh:1.25rem color:rgb(55,65,81)  color:rgb(229,231,235)@dark" aria-labelledby="dropdownMenuIconButton">
-                  <li>
-                    <a href="#"
-                      class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover bg:rgb(75,85,99):hover@dark color:rgb(255,255,255):hover@dark">Edit</a>
-                  </li>
-                  <li>
-                    <a href="#"
-                      class="display:block  px:1rem py:0.5rem bg:rgb(243,244,246):hover bg:rgb(75,85,99):hover@dark color:rgb(255,255,255):hover@dark">Delete</a>
-                  </li>
-                </ul>
-              </div> */}
-              <button type="button"
-                class="outline:2px|solid|transparent outline-offset:2px:focus color:rgb(255,255,255)  bg:rgb(185,28,28)  bg:rgb(153,27,27):hover box-shadow:0|0|0|4px|rgba(0,0,0,0.5):focus --ring-color:rgb(252,165,165):focus font-weight:500  border-radius:0.5rem  f:0.875rem lh:1.25rem px:1.25rem py:0.625rem me-2 mb:0.5rem bg:rgb(220,38,38)@dark bg:rgb(185,28,28):hover@dark --ring-color:rgb(127,29,29):focus@dark">Red
-              </button>
               <div class="py:0.25rem">
                 <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
                   <Icon
@@ -485,20 +467,20 @@ const DataGrid = (props: DataGridProps) => {
     //  alert(`collection not found ${coll}`)
     //  return;
     // }
-    
-    const outGoing = [] as string[];
-    const incoming = [] as string[];
+
+    const outgoing = [] as Expression[];
+    const incomming = [] as Expression[];
     for (const attribute of formNew.attributes) {
       if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
-          if (attribute.props?.inward) {
-              incoming.push(`<-${capitalizeFirstLetter(attribute.name)}$0`)
-          } else {
-              outGoing.push(`->$0${capitalizeFirstLetter(attribute.name)}`)
-          }
+        if (attribute.props?.inward) {
+          incomming.push({ expression: `<-${capitalizeFirstLetter(attribute.name)}$0` });
+        } else {
+          outgoing.push({ expression: `->$0${capitalizeFirstLetter(attribute.name)}` });
+        }
       }
     }
-    const result = await getDataMGCall(`g:'${coll}'`, incoming, outGoing);
-    
+    const result = await getDataMGCall({ expression: `g:'${coll}'`, incoming: incomming, outgoing });
+
     setGraphData(graph, setGraph, result.graph);
 
 
@@ -548,7 +530,9 @@ const DataGrid = (props: DataGridProps) => {
   return (
     <div class="">
       <Switch>
-        <Match when={data.loading}>Loading</Match>
+        <Match when={data.loading}>
+          <LoaderNew />
+        </Match>
 
         <Match when={data.error}>Error</Match>
 
@@ -571,34 +555,7 @@ const DataGrid = (props: DataGridProps) => {
       </Switch>
     </div>
   );
+  
 };
-
-function getParentFromNav(navData: any) {
-  const param = useLocation();
-  const dats = JSON.parse(JSON.stringify(navData));
-  let result = {}; // Initialize an empty object to store the result
-  dats.forEach((value: any) => {
-    let data = {};
-    let childName = null;
-    if (value.children) {
-      // @ts-ignore
-      value.children.forEach((child) => {
-        if (child.href && child.href === param.pathname) {
-          data = child;
-          childName = child.name;
-        }
-      });
-      if (Object.entries(data).length > 0) {
-        // @ts-ignore
-        data["child"] = childName;
-        // @ts-ignore
-        data["parent"] = value.name;
-        result = data; // Store the result in the object
-      }
-    }
-  });
-
-  return result;
-}
 
 

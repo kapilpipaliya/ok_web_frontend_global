@@ -5,27 +5,10 @@ import { AbstractGrid } from "~/pages/dynamic/GridData";
 
 export default function admin() {
   const params = useParams();
-
-  // fix for when pages changed, data was not refetched
-  const [count, setCount] = createSignal(1);
-  createEffect(
-    on(
-      () => params.entity,
-      (v) => {
-        if (v) {
-          setCount((v) => v + 1);
-        }
-      },
-      { defer: true },
-    ),
-  );
-
   return (
-    <Show when={count()} keyed>
       <DataFetcher
         renderContent={<AbstractGrid tableId={params.entity} />}
         fetchData={API.getPagesDataUrl}
       />
-    </Show>
   );
 }

@@ -169,7 +169,9 @@ export const getTextValueAsync = async (value: any) => {
     return JSON.stringify(value);
   }
   return value;
-};export async function getSelectionOptionsAsync(
+};
+
+export async function getSelectionOptionsAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],

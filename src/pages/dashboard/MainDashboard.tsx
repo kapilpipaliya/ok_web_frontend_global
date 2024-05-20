@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
-import { createEffect, createSignal, JSX, Show, useContext } from "solid-js";
+import { createEffect, createResource, createSignal, JSX, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
@@ -20,10 +20,12 @@ import getAPI from "~/components/api/getApi";
 import { API } from "~/components/api/DataFetcher";
 import Sidebar from "./Sidebar";
 
-const border = "|solid|rgb(212,219,231)";
-const [isSideBarOpen, setSideBarOpen] = createSignal(true);
+
+
 
 export const MainDashboard = (props: { children?: JSX.Element }) => {
+  const border = "|solid|rgb(212,219,231)";
+  const [isSideBarOpen, setSideBarOpen] = createSignal(true);
   const [graph, setGraph] = useContext(GraphContext)!;
   const vertexId = getNewGraphId();
   addNewVertex(
@@ -100,9 +102,9 @@ export const MainDashboard = (props: { children?: JSX.Element }) => {
               meta={graph.vertexes[vertexId]}
             />
           </Show>
-          <Show when={graph.initialSynced}>
+
             <div class="p:10">{props.children}</div>
-          </Show>
+
         </PageContext.Provider>
       </div>
     </div>
@@ -113,7 +115,7 @@ const DropdownMenu = () => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
   const navigate = useNavigate();
-  const { showLoadingToast } = useToast();
+  const { showLoadingToast, showErrorToast } = useToast();
   const [isOpen, setIsOpen] = createSignal(false);
   let btnEl: any;
   let dropdownContainerEl: any;
@@ -123,9 +125,16 @@ const DropdownMenu = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-  getAPI(API.getUserUrl).then((value) => {
-    setGraph("member", value);
-  });
+  getAPI(API.getUserUrl).then((data) => {
+    if (data) {
+      setGraph("member", data);
+    }
+  }).catch((err) => {
+    if (err.message) {
+      navigate("/auth/login");
+    }
+  })
+
 
   createEffect(() => {
     if (isOpen()) {
@@ -161,11 +170,9 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-            isOpen() ? 1 : 0
-          }; pointer-events: ${
-            isOpen() ? "auto" : "none"
-          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
+            }; pointer-events: ${isOpen() ? "auto" : "none"
+            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"

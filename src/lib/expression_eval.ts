@@ -8,7 +8,8 @@ import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/Utils";
 import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
-import { evalGetChildren, evalGetParents, evalGlobalColl } from "../cypher_api/functions/expression_eval_async_fns";
+import { evalGetChildren, evalGetParents, evalGlobalColl, evalVertexById } from "../cypher_api/functions/expression_eval_async_fns";
+import { graph } from "neo4j-driver";
 
 /**
  * Evaluation code from JSEP project, under MIT License.
@@ -435,6 +436,9 @@ export async function getPraentsAsync(collection: string, context: object) {
   return binops["<-_async"](context.vertexes, collection, context);
 }
 addUnaryOp("<-", getPraents, getPraentsAsync);
+addUnaryOp("id:", (id: string, context: object) => {
+  return context.graph.vertexes[id];
+}, evalVertexById);
 
 addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
   if (!vertexes) return;

@@ -6,8 +6,8 @@ import { newRowMGCall } from "~/cypher_api/functions/newRow";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
 import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithProp";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -236,7 +236,6 @@ const supportTicket = async (
         return data;
       case "get":
         const result = await findVertexByIdMGCall(
-          { driver: await getDriver(subdomain), session: session },
           parentVertexId,
         );
         const message = await getChildVertexesMGCall(

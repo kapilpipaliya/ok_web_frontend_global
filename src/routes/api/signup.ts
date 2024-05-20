@@ -10,8 +10,8 @@ import {
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithPropMGCall";
 import { v4 as uuidv4 } from "uuid";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithProp";
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
@@ -127,8 +127,6 @@ async function createUserInDB(
   });
 
   if (subdomainFromUrl === "super") {
-    console.log("super", createUserResult);
-
     // Add user in a User database with password
     const session2 = (await getDriverWithPort(driverPort)).session();
     const createUserQuery2 = `CREATE (u:User {
@@ -154,7 +152,7 @@ async function createUserInDB(
     });
     session2.close();
   }
-
+  
   return createUserResult;
 }
 

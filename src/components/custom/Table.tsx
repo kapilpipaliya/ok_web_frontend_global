@@ -336,7 +336,7 @@ export const DataTable = (props: { headers: any; rows: any }) => {
 };
 
 export const Table = (props: any) => (
-  <div class="overflow:auto r:10" style={{ "scrollbar-width": "thin" }}>
+  <div class="overflow:visible rel r:10" style={{ "scrollbar-width": "thin" }}>
     <table {...props} class={"styled-table w:100%"}>
       {props.children}
     </table>
