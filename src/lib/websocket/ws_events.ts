@@ -24,18 +24,18 @@ export const setGraphData = (
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   args: {
-    timestamp: number;
+    timestamp?: number;
     vertexes: VertexMap;
-    vertexLabelIdMap: { [key: string]: Id[] };
+    vertexLabelIdMap?: { [key: string]: Id[] };
     edges: EdgeMap;
-    deleted_vertexes: string[];
-    deleted_edges: string[];
+    deleted_vertexes?: string[];
+    deleted_edges?: string[];
   },
 ) => {
   batch(() => {
     for (const vertexId in args.vertexes) {
       setGraph("vertexes", vertexId, args.vertexes[vertexId]);
-      for (const label in args.vertexes[vertexId]["L"]) {
+      for (const label of args.vertexes[vertexId]["L"]) {
         setGraph("vertexLabelIdMap", label, (vertexIds) => {
           return Array.isArray(vertexIds)
             ? [...new Set([...vertexIds, args.vertexes[vertexId].id])]
@@ -45,12 +45,14 @@ export const setGraphData = (
     }
 
     // todo: remove this for loop
-    for (const label in args.vertexLabelIdMap) {
-      setGraph("vertexLabelIdMap", label, (vertexIds) => {
-        return Array.isArray(vertexIds)
-          ? [...new Set([...vertexIds, ...args.vertexLabelIdMap[label]])]
-          : args.vertexLabelIdMap[label];
-      });
+    if (args.vertexLabelIdMap) {
+      for (const label in args.vertexLabelIdMap) {
+        setGraph("vertexLabelIdMap", label, (vertexIds) => {
+          return Array.isArray(vertexIds)
+            ? [...new Set([...vertexIds, ...args.vertexLabelIdMap![label]])]
+            : args.vertexLabelIdMap![label];
+        });
+      }
     }
 
     for (const edgeId in args.edges) {

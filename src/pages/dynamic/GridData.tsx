@@ -61,6 +61,9 @@ import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { submitDataCall } from "~/components/api/api_functions";
 import { renderNavTreeFromGraph } from "../dashboard/Sidebar";
 import {Popover} from 'solid-simple-popover'
+import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
+import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
 interface AbstractGridProps {
   tableId: string;
 }
@@ -309,7 +312,8 @@ const DataGrid = (props: DataGridProps) => {
   };
 
   async function getTableData() {
-    const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
+    //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
+    const form = await getFormApiFromFormMGCall(props.tableId);
 
     let formNew: FormMetaData;
     let collection: string;
@@ -472,6 +476,8 @@ const DataGrid = (props: DataGridProps) => {
         );
       },
     });
+
+    // TODO: If collection is number fetch vertex from the API
     const coll = isNumber(collection)
       ? graph.vertexes[collection].P[IdAttr]
       : collection;
@@ -479,6 +485,22 @@ const DataGrid = (props: DataGridProps) => {
     //  alert(`collection not found ${coll}`)
     //  return;
     // }
+    
+    const outGoing = [] as string[];
+    const incoming = [] as string[];
+    for (const attribute of formNew.attributes) {
+      if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
+          if (attribute.props?.inward) {
+              incoming.push(`<-${capitalizeFirstLetter(attribute.name)}$0`)
+          } else {
+              outGoing.push(`->$0${capitalizeFirstLetter(attribute.name)}`)
+          }
+      }
+    }
+    const result = await getDataMGCall(`g:'${coll}'`, incoming, outGoing);
+    
+    setGraphData(graph, setGraph, result.graph);
+
 
     const [data] = createSignal(
       (graph.vertexLabelIdMap[coll] || []).map(
@@ -503,7 +525,7 @@ const DataGrid = (props: DataGridProps) => {
       return;
     }
     await showLoadingToast({
-      promise: submitDataCall(data),
+      promise: submitDataCall(data, txnId),
       loadMessage: "Submitting Data...",
       successMessage: "Data submitted successfully",
       onSuccess: (value) => {
@@ -530,7 +552,7 @@ const DataGrid = (props: DataGridProps) => {
 
         <Match when={data.error}>Error</Match>
 
-        <Match when={true}>
+        <Match when={tableStore.data?.()}>
           <CollapsibleTable
             headers={tableStore.tableColumns}
             rows={tableStore.data()}

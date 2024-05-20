@@ -6,6 +6,7 @@ import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getChildVertexMGCall, getChildVertexesMGCall, getParentVertexMGCall, getSelectionOptionsMGCall } from "./traverse";
 import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
+import { getDriverWithPort } from "~/cypher_api/server/driver";
 
 export async function getCompPropsMapMGCall(dbConn: DBConnection, comp: Node) {
   const children = await getChildVertexesMGCall(dbConn, ["$0Prop"], [comp]);
@@ -228,16 +229,18 @@ const getCollectionOneLevelAttrsMGCall = async (
   }
   return { error: "", attrs };
 };
-export const getFormApiFromFormMGCall = async (
-  dbConn: DBConnection,
-  formId: string,
-): Promise<{ error: string; form?: FormMetaData }> => {
-  const collResult = await findVertexMGCall(dbConn, "Coll", IdAttr, formId);
+export async function getFormApiFromFormMGCall(
+  // dbConn: DBConnection,
+  formId: string): Promise<{ error: string; form?: FormMetaData; }> {
+  'use server';
+  const driver = (await getDriverWithPort(1102));
+  const session = driver.session();
+  const collResult = await findVertexMGCall({ driver, session }, "Coll", IdAttr, formId);
   if (collResult.error) {
     return { error: "coll not found" };
   }
   const coll = collResult.vertex!;
-  const attrsResult = await getCollectionOneLevelAttrsMGCall(dbConn, coll);
+  const attrsResult = await getCollectionOneLevelAttrsMGCall({ driver, session }, coll);
   if (attrsResult.error) {
     return { error: attrsResult.error };
   }
@@ -254,7 +257,7 @@ export const getFormApiFromFormMGCall = async (
       collection: coll.P[IdAttr],
     },
   };
-};
+}
 
 // TODO: when meta changed realtime its not updating.
 export function componentPropsMGCall(metaVertex: Node, data: Node) {

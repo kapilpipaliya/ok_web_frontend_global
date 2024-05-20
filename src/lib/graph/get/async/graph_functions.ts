@@ -14,6 +14,7 @@ import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueIdAsync } from "./findVertex";
 import { getToEdgeAsync } from "./getToEdge";
 import { useToast } from "~/components/custom/Toast";
+import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
 
 export async function getCompPropsMapAsync(
   graph: Store<GraphInterface>,
@@ -329,17 +330,18 @@ export async function getNameKeyForCollectionAsync(
 
 // 'type' or 'label' can be overwritten in the meta.
 
-export const getFormMetaDataAsync = async (
+export async function getFormMetaDataAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
-) => {
+) {
   let form =
     AttrsTableData[formId] ||
     (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
   if (!form) {
-    const formResult = await getFormApiFromFormAsync(graph, setGraph, formId);
+    // const formResult = await getFormApiFromFormAsync(graph, setGraph, formId);
+    const formResult = await getFormApiFromFormMGCall(formId);
     if (formResult.error) return formResult;
     form = formResult.form!;
   }

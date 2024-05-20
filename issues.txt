@@ -2,46 +2,41 @@
 
 🌟 Project Fetures 🌟-----------------------------------------------------------------------------------------
 
-1. on click add element at last (Kapil)
-2. open properties when click element using drawer
-3. seperate form design drawer
-4. form page setting section
-5. built in component group like address, name, choice option
+1. open properties when click element using drawer
+2. seperate form design drawer
+3. form page setting section
+4. built in component group like address, name, choice option
 
 👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
 
-1. GenericField modified
-2. DynamicCssComponent modified
-3. propertiesTabs modified
-4. generic field component
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-Refactor Page Builder component. ✅
-Add Pagination To Components page. ✅
-Fix CSS Editor Icons. I modified CssProperties.tsx file. ✅
-Use a Modal to display confirmation : if (window.confirm("Discard unsaved changes - are you sure?")) { in DynamicForm.tsx file ✅
-In the async api function, add Async Prefix to every function. ✅
-make a file upload component in page builder.
-
+In the 'use server' functions, Instead of using  const driver = (await getDriverWithPort(1102)); use the subdomain port.
+In the 'use server' function, if no user logged in return error.
+Fix /api/get_user API gives error in console when user is not logged.
+Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29
+Make Select Input load async data.
+instead of dbConn  use session in cypher_api functions
 
 Kapil:
-When Editing a component and editing a component it gives error, maybe because transaction is not acknowledged.
+on click add element at last (Kapil)
 Make API to fetch nav bar data
 Make API to fetch Page data
 Make API to fetch form data
 Make API to fetch page editor full data
 Make Page working with some async data too.
 Make Working Forms using Page Designer.
-Make Page Preview and Page Share working.
+Make Page Share working.
 Refactor duplicate code between cyper api and lib folder.
-Make two copies working .com will always run and .in will be used for development. Both copy should work together with samee files.
+Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with samee files.
 When user upload a file, also save entry in the database.
 make automatic backup for all the users everyday
 Fix Inline Editing Modal not close in list page.
 Use async everywhere, it will load data from server. Only few places use sync API.
 Fix NavBar yaml Import file Issue.
-
+make a file upload component in page builder.
+Make Permissions working in DynamicForm component.
 
 ------------------------------------------------------------------------------------------
 load full page data with all joins when the page loads.

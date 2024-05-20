@@ -1,6 +1,6 @@
 import { getDriver } from "~/cypher_api/server/driver";
 
-export const getUsers = async () => {
+export async function getUsers() {
     "use server";
     try {
         const driver = (await getDriver('www')).session();
@@ -8,22 +8,22 @@ export const getUsers = async () => {
 
         if (res.records.length > 0) {
             const records = res.records.map((record) => {
-                const vertex = record.get("u")
+                const vertex = record.get("u");
                 return {
                     id: vertex.identity,
                     L: vertex.labels,
                     P: vertex.properties,
-                }
+                };
             });
 
             return {
                 error: false,
                 vertexes: records
-            }
+            };
         } else {
             return [];
         }
-        
+
 
     } catch (e) {
         console.log(e);

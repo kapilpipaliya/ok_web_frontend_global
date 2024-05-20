@@ -10,7 +10,7 @@ export async function findVertexMGCall(
 ) {
   "use server";
   dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.WRITE,
+    defaultAccessMode: neo4j.session.READ,
   });
 
   try {
@@ -45,7 +45,7 @@ export async function findVertexMGCall(
 export async function findVertexByIdMGCall(dbConn: DBConnection, id: number) {
   "use server";
   dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.WRITE,
+    defaultAccessMode: neo4j.session.READ,
   });
 
   try {
@@ -84,7 +84,7 @@ export async function findVertexesMGCall2(
 ) {
   "use server";
   dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.WRITE,
+    defaultAccessMode: neo4j.session.READ,
   });
 
   try {

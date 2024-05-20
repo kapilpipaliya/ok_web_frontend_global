@@ -5,22 +5,34 @@ import { Session } from "neo4j-driver";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { convertNodeToJson, convertRelationshipToJson } from "../../lib/convertNodeToJson";
 // ->
-export async function evalGetChildren(vertexes: Vertex[], edgeType: string, {nodes, relationships}: {
-  nodes?: {[key: string]: Vertex},
-  relationships?: {[key: string]: Edge}
+export async function evalGetChildren(vertexes: Vertex[], edgeType: string, { nodes, relationships }: {
+  nodes?: { [key: string]: Vertex },
+  relationships?: { [key: string]: Edge }
 } = {}) {
   "use server";
-  
+
   if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriverWithPort(1102)).session();
-  const type = edgeType.replace("$0", vertexes[0].L[0]);
-  const query = `
-    MATCH (parent)-[r:${type}]->(child)
-    WHERE id(parent) IN $parentIds
-    RETURN r, child
-  `;
+  const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
+  let query, params;
+  if (type.includes('|')) {
+    query = `
+  MATCH (parent)-[r]->(child)
+  WHERE id(parent) IN $parentIds AND type(r) IN $types
+  RETURN r, child
+`;
+    params = { parentIds: vertexes.map(v => v.id), types: type.split('|') }
+  } else {
+    query = `
+  MATCH (parent)-[r:${type}]->(child)
+  WHERE id(parent) IN $parentIds
+  RETURN r, child
+`;
+    params = { parentIds: vertexes.map(v => v.id) }
+  }
+  console.log(query);
   try {
-    const result = await session.run(query, { parentIds: vertexes.map(v => v.id) });
+    const result = await session.run(query, params);
     return result.records.map(record => {
       const vertex = convertNodeToJson(record.get('child'));
       if (nodes) {
@@ -40,24 +52,34 @@ export async function evalGetChildren(vertexes: Vertex[], edgeType: string, {nod
 
 
 // <-
-export async function evalGetParents(vertexes: Vertex[], edgeType: string, {nodes, relationships}: {
-  nodes?: {[key: string]: Vertex},
-  relationships?: {[key: string]: Edge}
+export async function evalGetParents(vertexes: Vertex[], edgeType: string, { nodes, relationships }: {
+  nodes?: { [key: string]: Vertex },
+  relationships?: { [key: string]: Edge }
 } = {}) {
   "use server";
   if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriverWithPort(1102)).session();
-  const type = edgeType.replace("$0", vertexes[0].L[0]);
-
-  // Cypher query to get parents
-  const query = `
+  const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
+  let query, params;
+  if (type.includes('|')) {
+    // Cypher query to get parents
+    query = `
+  MATCH (parent)-[r]->(child)
+  WHERE id(child) IN $childIds AND type(r) IN $types
+  RETURN r, parent
+`;
+    params = { childIds: vertexes.map(v => v.id), types: type.split('|') }
+  } else {
+    query = `
   MATCH (parent)-[r:${type}]->(child)
   WHERE id(child) IN $childIds
   RETURN r, parent
 `;
-
+    params = { childIds: vertexes.map(v => v.id) }
+  }
+  console.log(query);
   try {
-    const result = await session.run(query, { childIds: vertexes.map(v => v.id) });
+    const result = await session.run(query, params);
     return result.records.map(record => {
       const vertex = convertNodeToJson(record.get('parent'));
       if (nodes) {
@@ -75,9 +97,9 @@ export async function evalGetParents(vertexes: Vertex[], edgeType: string, {node
   }
 }
 
-async function findVertexsMGCall(session: Session, label: string, {nodes, relationships}: {
-  nodes?: {[key: string]: Vertex},
-  relationships?: {[key: string]: Edge}
+async function findVertexsMGCall(session: Session, label: string, { nodes, relationships }: {
+  nodes?: { [key: string]: Vertex },
+  relationships?: { [key: string]: Edge }
 } = {}) {
   const query = `MATCH (n:${label}) RETURN n`;
   const result = await session.run(query);
@@ -91,8 +113,8 @@ async function findVertexsMGCall(session: Session, label: string, {nodes, relati
 }
 
 export async function evalGlobalColl(edgeType: string, context: {
-  nodes?: {[key: string]: Vertex},
-  relationships?: {[key: string]: Edge}
+  nodes?: { [key: string]: Vertex },
+  relationships?: { [key: string]: Edge }
 } = {}) {
   const [type, filter, isMultiple] = calculateFilter(edgeType);
   const session = (await getDriverWithPort(1102)).session();

@@ -203,11 +203,9 @@ const makeASampleForm = async () => {
 };
 
 // @ts-ignore
-export const importAllCSV = async (
-  dbConn: DBConnection,
+export async function importAllCSV(dbConn: DBConnection,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) => {
+  setGraph: SetStoreFunction<GraphInterface>) {
   const form = await getFormMetaData(dbConn, "Import");
   if (form.error) return form.error;
   const record = new Record({ dbConn, graph, setGraph });
@@ -360,7 +358,7 @@ view
 delete`,
   });
   await onDataDirectoryImportClick(record);
-};
+}
 const importMainNavigation = (
   dbConn: DBConnection,
   graph: Store<GraphInterface>,

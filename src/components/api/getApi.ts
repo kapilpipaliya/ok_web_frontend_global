@@ -27,7 +27,7 @@ export async function getAPI(url: string): Promise<{ [key: string]: any }> {
 
   const responseData = await response.json();
   if (responseData.error) {
-    throw new Error(responseData.error);
+    // throw new Error(responseData.error);
   }
 
   return responseData;

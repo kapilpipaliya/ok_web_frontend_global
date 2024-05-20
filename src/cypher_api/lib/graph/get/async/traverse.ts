@@ -75,7 +75,7 @@ export async function getParentVertexesMGCall(
   }
 }
 
-export const calculateFilterMGCall = (input: string) => {
+export function calculateFilterMGCall(input: string) {
   let isMultiple = true;
   let filterIndex = input.indexOf("[");
   let filter = "";
@@ -95,7 +95,7 @@ export const calculateFilterMGCall = (input: string) => {
     }
   }
   return [type, filter, isMultiple] as const;
-};
+}
 
 
 export async function getTreeDataMGCall(
@@ -332,4 +332,30 @@ export async function replaceExpressionToLabel(collection: string, vertex: Node)
     );
   }
   return collection;
+}
+
+export async function getDataMGCall(expression: string, incomingExpression: string[], outgoingExpression: string[]) {
+  'use server';
+  const nodes: { [key: string]: Vertex } = {};
+  const relationships: { [key: string]: Edge } = {};  
+ 
+  const mainResult = await evalAsync(jsep(expression), { nodes, relationships });
+
+  if (incomingExpression) {
+    for(const exp of incomingExpression){
+      await evalAsync(jsep(exp), {vertexes: [...mainResult], nodes, relationships });
+    }
+  }
+  
+  if (outgoingExpression) {
+    for(const exp of outgoingExpression){
+      await evalAsync(jsep(exp), {vertexes: [...mainResult], nodes, relationships });
+    }
+  }
+  return {
+    graph: {
+      vertexes: nodes,
+      edges: relationships,
+    }
+  }
 }

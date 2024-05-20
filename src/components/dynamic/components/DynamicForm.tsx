@@ -630,9 +630,10 @@ export function FormGroup(props: FormGroupProps) {
             isRealTime={false}
           />
         );
-        const permissions = metaVertex.P.metaId
-          ? getPermissions(props.graph.vertexes[metaVertex.P.metaId])
-          : getPermissions(metaVertex);
+        // TODO: Make permissions working.
+        // const permissions = metaVertex.P.metaId
+        //   ? getPermissions(props.graph.vertexes[metaVertex.P.metaId])
+        //   : getPermissions(metaVertex);
 
         return (
           <Switch>
