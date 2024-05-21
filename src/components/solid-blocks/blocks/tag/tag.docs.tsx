@@ -1,6 +1,6 @@
 import { Tag, TagGroup } from "./tag";
 
-export const TagDocs = () => {
+export function TagDocs() {
   return (
     <>
       <h2 id="tag-docs">Tag / TagGroup</h2>
@@ -56,4 +56,4 @@ TagProps {
       <hr />
     </>
   );
-};
+}

@@ -6,7 +6,7 @@ import {
   ModalHeader,
 } from "./modal";
 
-export const ModalDocs = () => {
+export function ModalDocs() {
   return (
     <>
       <h2 id="modal-docs">
@@ -128,4 +128,4 @@ ModalProps {
       <hr />
     </>
   );
-};
+}

@@ -30,7 +30,7 @@ export const tabsContext = createContext<
   | []
 >([]);
 
-export const Tabs: Component<TabsProps> = (props) => {
+export function Tabs(props: TabsProps) {
   const [index, setIndex] = createSignal(props.index || 0);
   const isActive = createSelector(index);
   const indices = { tabs: -1, container: -1 };
@@ -40,12 +40,11 @@ export const Tabs: Component<TabsProps> = (props) => {
     <tabsContext.Provider
       value={[
         index,
-        (index: number) =>
-          index > indices.tabs
-            ? setIndex(indices.tabs)
-            : index >= 0
-              ? setIndex(index)
-              : setIndex(0),
+        (index: number) => index > indices.tabs
+          ? setIndex(indices.tabs)
+          : index >= 0
+            ? setIndex(index)
+            : setIndex(0),
         isActive,
         (isContainer) => (isContainer ? ++indices.container : ++indices.tabs),
         id,
@@ -56,19 +55,21 @@ export const Tabs: Component<TabsProps> = (props) => {
       </div>
     </tabsContext.Provider>
   );
-};
+}
 
 export type TabListProps = JSX.HTMLAttributes<HTMLDivElement>;
 
 export const tabListContext = createContext("");
 
-export const TabList: Component<TabListProps> = (props) => (
-  <div role="tablist" {...props} aria-orientation={props["aria-orientation"]} />
-);
+export function TabList(props: TabListProps) {
+  return (
+    <div role="tablist" {...props} aria-orientation={props["aria-orientation"]} />
+  );
+}
 
 export type TabProps = JSX.HTMLAttributes<HTMLButtonElement>;
 
-export const Tab: Component<TabProps> = (props) => {
+export function Tab(props: TabProps) {
   const [_index, setIndex, isActive, getIndex, id] = useContext(tabsContext);
   const [ref, setRef] = createSignal<HTMLButtonElement>();
   const index = getIndex ? getIndex(false) : -1;
@@ -77,8 +78,8 @@ export const Tab: Component<TabProps> = (props) => {
     on(
       () => isActive && isActive(index),
       (active) => active && ref()?.focus(),
-      { defer: true },
-    ),
+      { defer: true }
+    )
   );
   return (
     <button
@@ -90,32 +91,28 @@ export const Tab: Component<TabProps> = (props) => {
       aria-controls={`${id}-container${index}`}
       id={`${id}-tab${index}`}
       onClick={setIndex && [(index) => setIndex(index), index]}
-      onKeyDown={
-        setIndex && [
-          (index, ev) =>
-            ev.key === "Home"
-              ? (ev.preventDefault(), ev.stopPropagation(), setIndex(0))
-              : ev.key === "End"
-                ? (ev.preventDefault(),
-                  ev.stopPropagation(),
-                  setIndex(Infinity))
-                : ev.key === "ArrowLeft"
-                  ? setIndex(index - 1)
-                  : ev.key === "ArrowRight"
-                    ? setIndex(index + 1)
-                    : 0,
-          index,
-        ]
-      }
+      onKeyDown={setIndex && [
+        (index, ev) => ev.key === "Home"
+          ? (ev.preventDefault(), ev.stopPropagation(), setIndex(0))
+          : ev.key === "End"
+            ? (ev.preventDefault(),
+              ev.stopPropagation(),
+              setIndex(Infinity))
+            : ev.key === "ArrowLeft"
+              ? setIndex(index - 1)
+              : ev.key === "ArrowRight"
+                ? setIndex(index + 1)
+                : 0,
+        index,
+      ]}
       {...(active() ? {} : { tabIndex: -1 })}
-      {...props}
-    />
+      {...props} />
   );
-};
+}
 
 export type TabContainerProps = JSX.HTMLAttributes<HTMLDivElement>;
 
-export const TabContainer: Component<TabContainerProps> = (props) => {
+export function TabContainer(props: TabContainerProps) {
   const [_index, _setIndex, isActive, getIndex, id] = useContext(tabsContext);
   const index = getIndex ? getIndex(true) : -1;
   return (
@@ -125,7 +122,6 @@ export const TabContainer: Component<TabContainerProps> = (props) => {
       aria-labelledby={`${id}-tab${index}`}
       tabIndex={isActive && isActive(index) ? 0 : undefined}
       hidden={!isActive || isActive(index) ? undefined : true}
-      {...props}
-    />
+      {...props} />
   );
-};
+}

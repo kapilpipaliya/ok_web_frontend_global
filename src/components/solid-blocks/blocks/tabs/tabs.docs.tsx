@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { Checkbox } from "../checkbox/checkbox";
 import { Tab, TabContainer, TabList, Tabs } from "./tabs";
 
-export const TabsDocs = () => {
+export function TabsDocs() {
   const [events, setEvents] = createSignal("");
   const [vertical, setVertical] = createSignal(false);
   return (
@@ -67,4 +67,4 @@ TabsListProps {
       <hr />
     </>
   );
-};
+}

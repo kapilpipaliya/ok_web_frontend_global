@@ -14,7 +14,7 @@ interface ActionsProps {
   toggleIsLeftOpen: Accessor<boolean>;
   toggleIsRightOpen: Accessor<boolean>;
 }
-export const ActionsDragAndDrops = (props: ActionsProps) => {
+export function ActionsDragAndDrops(props: ActionsProps) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
 
   return (
@@ -29,21 +29,17 @@ export const ActionsDragAndDrops = (props: ActionsProps) => {
         >
           <Show
             when={props.isRightOpen()}
-            fallback={
-              <Icon
-                icon={"line-md:chevron-left-circle"}
-                height={30}
-                width={30}
-                style={{ color: "#c1c1c1" }}
-              />
-            }
+            fallback={<Icon
+              icon={"line-md:chevron-left-circle"}
+              height={30}
+              width={30}
+              style={{ color: "#c1c1c1" }} />}
           >
             <Icon
               icon={"line-md:chevron-right-circle"}
               height={30}
               width={30}
-              style={{ color: "#c1c1c1" }}
-            />
+              style={{ color: "#c1c1c1" }} />
           </Show>
         </button>
       </div>
@@ -61,15 +57,14 @@ export const ActionsDragAndDrops = (props: ActionsProps) => {
               <Column
                 type={column.id}
                 index={index()}
-                vertex={pageConfig.formData.formData}
-              />
+                vertex={pageConfig.formData.formData} />
             )}
           </For>
         </Show>
       </div>
     </aside>
   );
-};
+}
 
 const Column = (props: { type: string; index: number; vertex: Vertex }) => {
   const [isFormOpen, toggleIsFormOpen] = useExpansion(true);

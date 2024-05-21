@@ -155,21 +155,20 @@ const QuickEditModal = (p: {
 
 // TODO: add filter like: https://js.devexpress.com/Demos/WidgetsGallery/Demo/FilterBuilder/WithDataGrid/jQuery/Light/
 
-export const AbstractGrid = (props: AbstractGridProps) => {
+export function AbstractGrid(props: AbstractGridProps) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [locationData, setLocationData] = createSignal([]);
   const data = findVertexByLabelAndUniqueId(
     graph,
     "Coll",
     IdAttr,
-    props.tableId,
+    props.tableId
   );
   const param = useLocation();
 
   const nestedName = createMemo(
-    () =>
-      findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
-        ?.name,
+    () => findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, props.tableId)?.P
+      ?.name
   );
   async function getNavData() {
     const data: any = await await getTreeDataMGCall({
@@ -203,58 +202,53 @@ export const AbstractGrid = (props: AbstractGridProps) => {
     return [];
   };
   const params = useParams();
-  const [nav] = createResource(tableId, async ()=>{
+  const [nav] = createResource(tableId, async () => {
     const navData = await getNavData();
     const filtered = getCurrentLocation(navData);
     setLocationData(filtered);
-    return filtered
+    return filtered;
   });
 
   const navigate = useNavigate();
 
   return (
     <>
-     <Show when={locationData()}>
+      <Show when={locationData()}>
         <PageHeader
           title={`${locationData()[0]}`}
           breadcrumb={[
             ...breadcrumbData,
             { name: `${locationData()[1]}` },
             { name: locationData()[2] },
-          ]}
-        />
-     </Show>
+          ]} />
+      </Show>
       <div class="flex justify-content:start p:5">
         <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-                [IdAttr]: "meta",
-                props: {
-                  onClick: () => navigate("new"),
-                  variant: "soft",
-                  style: { padding: "7px 10px" },
-                  leading: (
-                    <Icon
-                      icon={"lets-icons:add-round"}
-                      height={22}
-                      width={22}
-                    />
-                  ),
-                  children: "Add New",
-                },
+          meta={{
+            P: {
+              component: "Button",
+              [IdAttr]: "meta",
+              props: {
+                onClick: () => navigate("new"),
+                variant: "soft",
+                style: { padding: "7px 10px" },
+                leading: (
+                  <Icon
+                    icon={"lets-icons:add-round"}
+                    height={22}
+                    width={22} />
+                ),
+                children: "Add New",
               },
-            } as unknown as Vertex
-          }
-        />
+            },
+          } as unknown as Vertex} />
       </div>
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>
     </>
   );
-};
+}
 
 const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;

@@ -4,12 +4,6 @@ import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { IFormContext } from "~/lib/Utils";
 import { useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-/* use in c++
-export const JSONToCypherMap = (json: object) => {
-  // https://stackoverflow.com/questions/20841571/how-to-solve-the-dilemma-while-handle-json-in-neo4j-cypher
-  return jju.stringify(json, { quote: "'" }).replace(/"/g, "\\x22");
-};
-*/
 
 const collectionAttr = [
   {

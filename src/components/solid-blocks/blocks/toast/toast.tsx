@@ -64,7 +64,7 @@ const addMountPoint = (position: ToastPosition = "top-right") => {
   return mountPoint;
 };
 
-export const Toast = (props: ToastProps): JSX.Element => {
+export function Toast(props: ToastProps): JSX.Element {
   const [local, divProps] = splitProps(props, [
     "timeout",
     "position",
@@ -73,23 +73,21 @@ export const Toast = (props: ToastProps): JSX.Element => {
     "onhide",
   ]);
   const mountPoint = createMemo(
-    () =>
-      local.mount ||
+    () => local.mount ||
       toastMountPoints[local.position || "top-right"] ||
-      addMountPoint(local.position),
+      addMountPoint(local.position)
   );
 
   const [visible, setVisible] = createSignal(true);
   const hide = () => setVisible(false);
   const [newChildren, update] = createSignal<JSX.Element>();
   const [children, setChildren] = createSignal(
-    getElements(local.children, () => true, [{ update, hide }]),
+    getElements(local.children, () => true, [{ update, hide }])
   );
 
   onMount(
-    () =>
-      props.timeout !== 0 &&
-      setTimeout(() => setVisible(false), props.timeout ?? 5000),
+    () => props.timeout !== 0 &&
+      setTimeout(() => setVisible(false), props.timeout ?? 5000)
   );
 
   createEffect(() => {
@@ -123,4 +121,4 @@ export const Toast = (props: ToastProps): JSX.Element => {
       </Portal>
     </Show>
   );
-};
+}

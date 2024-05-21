@@ -252,16 +252,14 @@ const getCollectionOneLevelAttrsAsync = async (
   }
   return { error: "", attrs };
 };
-export const getFormApiFromFormAsync = async (
-  graph: Store<GraphInterface>,
+export async function getFormApiFromFormAsync(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  formId: string,
-): Promise<{ error: string; form?: FormMetaData }> => {
+  formId: string): Promise<{ error: string; form?: FormMetaData; }> {
   const coll = await findVertexByLabelAndUniqueIdAsync(
     graph,
     "Coll",
     IdAttr,
-    formId,
+    formId
   );
   if (!coll) {
     return { error: "coll not found" };
@@ -269,7 +267,7 @@ export const getFormApiFromFormAsync = async (
   const attrsResult = await getCollectionOneLevelAttrsAsync(
     graph,
     setGraph,
-    coll,
+    coll
   );
   if (attrsResult.error) {
     return { error: attrsResult.error };
@@ -285,7 +283,7 @@ export const getFormApiFromFormAsync = async (
       collection: coll.P[IdAttr],
     },
   };
-};
+}
 
 // TODO: when meta changed realtime its not updating.
 export async function componentPropsAsync(
@@ -348,28 +346,23 @@ export async function getFormMetaDataAsync(
   return { error: "", form };
 };
 
-export const getExportCodeAsync = async (
-  graph: Store<GraphInterface>,
+export async function getExportCodeAsync(graph: Store<GraphInterface>,
   meta: Vertex,
-  data: Vertex,
-) => {
+  data: Vertex) {
   const getChildren = async (
     meta: Vertex,
     vertex: Vertex,
     result: {
       [key: string]: any;
-    },
+    }
   ) => {
     const { showErrorToast } = useToast();
 
     const metaVertexes = await getSublistRowsForTypeAsync(graph, "MetaAttr", meta);
     // const props = meta.P.props || {};
-
-    const selectMetaVertexes = metaVertexes.filter((meta) =>
-      ["SelectBox", "TagBox"].includes(meta.P.component),
+    const selectMetaVertexes = metaVertexes.filter((meta) => ["SelectBox", "TagBox"].includes(meta.P.component)
     );
-    const tableMetaVertexes = metaVertexes.filter((meta) =>
-      ["Table"].includes(meta.P.component),
+    const tableMetaVertexes = metaVertexes.filter((meta) => ["Table"].includes(meta.P.component)
     );
 
     for (const metaVertex of selectMetaVertexes) {
@@ -387,11 +380,11 @@ export const getExportCodeAsync = async (
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
           if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
-            const pksResult = {} as { [primaryKey: string]: any };
+            const pksResult = {} as { [primaryKey: string]: any; };
             pksResult["name"] = v.P["name"];
             if (!result["OUT"]) {
               result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any }[];
+                [EdgeType: string]: { [primaryKey: string]: any; }[];
               };
             }
             result["OUT"][type] = [pksResult];
@@ -401,7 +394,7 @@ export const getExportCodeAsync = async (
               graph,
               "Coll",
               "name",
-              label,
+              label
             );
             if (!collVertex) {
               showErrorToast(`Collection not defined: ${label}`);
@@ -409,7 +402,7 @@ export const getExportCodeAsync = async (
             }
             const pks = await getPkForCollectionAsync(graph, collVertex);
 
-            const pksResult = {} as { [primaryKey: string]: any };
+            const pksResult = {} as { [primaryKey: string]: any; };
             for (const pk of pks) {
               pksResult[pk] = v.P[pk];
             }
@@ -419,7 +412,7 @@ export const getExportCodeAsync = async (
 
             if (!result["OUT"]) {
               result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any }[];
+                [EdgeType: string]: { [primaryKey: string]: any; }[];
               };
             }
 
@@ -442,20 +435,19 @@ export const getExportCodeAsync = async (
         const type = await getToEdgeAsync(metaVertex, vertex);
         const childVertexes = await getSublistRowsAsync(graph, metaVertex, vertex);
 
-        const out = childVertexes.map((v) =>
-          getChildren(metaVertex, v, {
-            ...klona(v),
-            L: v.L[0],
-            IN: undefined,
-            OUT: undefined,
-            id: undefined,
-            D: undefined,
-          }),
+        const out = childVertexes.map((v) => getChildren(metaVertex, v, {
+          ...klona(v),
+          L: v.L[0],
+          IN: undefined,
+          OUT: undefined,
+          id: undefined,
+          D: undefined,
+        })
         );
         if (out.length > 0) {
           if (!result["OUT"]) {
             result["OUT"] = { [type]: out } as {
-              [EdgeType: string]: { [primaryKey: string]: any }[];
+              [EdgeType: string]: { [primaryKey: string]: any; }[];
             };
           } else result["OUT"][type] = out;
         }
@@ -473,7 +465,7 @@ export const getExportCodeAsync = async (
     id: undefined,
     D: undefined,
   });
-};
+}
 
 export async function getStringComponentAsync(
   graph: Store<GraphInterface>,
@@ -508,11 +500,9 @@ export async function getCollAttrCompAsync(
   return getStringComponentAsync(graph, attrDataTypeVertex);
 }// This method read all property vertexes and make an object.
 
-export const getProps = async (
-  meta: Vertex,
+export async function getProps(meta: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-) => {
+  setGraph: SetStoreFunction<GraphInterface>) {
   const props = {} as { [key: string]: any; };
   const vertexes = (await getChildVertexesAsync(graph, ["$0Prop"], [meta])).vertexes || [];
 
@@ -535,7 +525,7 @@ export const getProps = async (
   }
 
   return props;
-};
+}
 
 
 export async function getSublistRowsForTypeAsync(

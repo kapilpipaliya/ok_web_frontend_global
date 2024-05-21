@@ -4,7 +4,7 @@ import { PageConfigContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { useParams } from "@solidjs/router";
 
-export const FormConfig = () => {
+export function FormConfig() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   return (
@@ -16,7 +16,6 @@ export const FormConfig = () => {
       config={useContext(PageConfigContext)}
       showMainFieldsOnly={true}
       importExportButtons={false}
-      setGraph={setGraph}
-    />
+      setGraph={setGraph} />
   );
-};
+}

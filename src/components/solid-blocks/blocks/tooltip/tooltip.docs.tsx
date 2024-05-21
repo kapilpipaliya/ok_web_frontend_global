@@ -4,7 +4,7 @@ import { Radio, RadioGroup } from "../radio/radio";
 import { Select } from "../select/select";
 import { Tooltip, TooltipPosition, TooltipTrigger } from "./tooltip";
 
-export const TooltipDocs = () => {
+export function TooltipDocs() {
   const [arrow, setArrow] = createSignal(true);
   const [nowrap, setNowrap] = createSignal(false);
   const [pos, setPos] = createSignal("s");
@@ -132,4 +132,4 @@ trigger?: SingularOrArray<TooltipTrigger>;
       <hr />
     </>
   );
-};
+}

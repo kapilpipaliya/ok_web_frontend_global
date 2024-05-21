@@ -40,29 +40,26 @@ export type ModalProps = Omit<
 
 let modalCount = 0;
 
-export const Modal = (props: ModalProps): JSX.Element => {
+export function Modal(props: ModalProps): JSX.Element {
   const [local, containerProps] = splitProps(props, [
     "open",
     "noPortal",
     "children",
   ]);
   const [open, setOpen] = createSignal(local.open);
-  const toggle = (open?: boolean) =>
-    setOpen(typeof open === "boolean" ? open : (o) => !o);
+  const toggle = (open?: boolean) => setOpen(typeof open === "boolean" ? open : (o) => !o);
   const modalContent = createMemo(
-    () =>
-      getElements(
-        local.children,
-        (node) => node.className.indexOf("sb-modal-content") !== -1,
-        [{ open, toggle }],
-      ) ?? [],
-  );
-  const otherChildren = createMemo(() =>
-    getElements(
+    () => getElements(
       local.children,
-      (node) => node.className.indexOf("sb-modal-content") === -1,
-      [{ open, toggle }],
-    ),
+      (node) => node.className.indexOf("sb-modal-content") !== -1,
+      [{ open, toggle }]
+    ) ?? []
+  );
+  const otherChildren = createMemo(() => getElements(
+    local.children,
+    (node) => node.className.indexOf("sb-modal-content") === -1,
+    [{ open, toggle }]
+  )
   );
 
   let modalRef!: HTMLDivElement;
@@ -78,14 +75,14 @@ export const Modal = (props: ModalProps): JSX.Element => {
     if (header) {
       modalRef.setAttribute(
         "aria-labelledby",
-        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))(),
+        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))()
       );
     }
     const body = modalRef.querySelector(".sb-modal-body");
     if (body) {
       modalRef.setAttribute(
         "aria-describedby",
-        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))(),
+        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))()
       );
     }
   });
@@ -95,24 +92,22 @@ export const Modal = (props: ModalProps): JSX.Element => {
     tabIndex: -1,
     class: props.class ? `sb-modal ${props.class}` : "sb-modal",
     children: modalContent(),
-    onClick: createMemo(() =>
-      props.closeOnClickOutside
-        ? (ev: MouseEvent) => {
-            const target = ev.target as HTMLElement;
-            if (!modalContent().some((content) => content?.contains(target))) {
-              toggle(false);
-            }
-          }
-        : undefined,
+    onClick: createMemo(() => props.closeOnClickOutside
+      ? (ev: MouseEvent) => {
+        const target = ev.target as HTMLElement;
+        if (!modalContent().some((content) => content?.contains(target))) {
+          toggle(false);
+        }
+      }
+      : undefined
     )(),
-    onkeyup: createMemo(() =>
-      props.closeOnEsc !== false
-        ? (ev: KeyboardEvent) => {
-            if (ev.key === "Escape" && !ev.defaultPrevented) {
-              setOpen(false);
-            }
-          }
-        : undefined,
+    onkeyup: createMemo(() => props.closeOnEsc !== false
+      ? (ev: KeyboardEvent) => {
+        if (ev.key === "Escape" && !ev.defaultPrevented) {
+          setOpen(false);
+        }
+      }
+      : undefined
     )(),
   });
 
@@ -135,40 +130,44 @@ export const Modal = (props: ModalProps): JSX.Element => {
       </Match>
     </Switch>
   );
-};
+}
 
 export type ModalContentProps = JSX.HTMLAttributes<HTMLDivElement>;
 
-export const ModalContent: Component<ModalContentProps> = (props) => (
-  <div
-    {...props}
-    class={props.class ? `sb-modal-content ${props.class}` : "sb-modal-content"}
-  />
-);
+export function ModalContent(props: ModalContentProps) {
+  return (
+    <div
+      {...props}
+      class={props.class ? `sb-modal-content ${props.class}` : "sb-modal-content"} />
+  );
+}
 
 export type ModalHeaderProps = JSX.HTMLAttributes<HTMLElement>;
 
-export const ModalHeader: Component<ModalHeaderProps> = (props) => (
-  <header
-    {...props}
-    class={props.class ? `sb-modal-header ${props.class}` : "sb-modal-header"}
-  />
-);
+export function ModalHeader(props: ModalHeaderProps) {
+  return (
+    <header
+      {...props}
+      class={props.class ? `sb-modal-header ${props.class}` : "sb-modal-header"} />
+  );
+}
 
 export type ModalBodyProps = JSX.HTMLAttributes<HTMLElement>;
 
-export const ModalBody: Component<ModalBodyProps> = (props) => (
-  <main
-    {...props}
-    class={props.class ? `sb-modal-body ${props.class}` : "sb-modal-body"}
-  />
-);
+export function ModalBody(props: ModalBodyProps) {
+  return (
+    <main
+      {...props}
+      class={props.class ? `sb-modal-body ${props.class}` : "sb-modal-body"} />
+  );
+}
 
 export type ModalFooterProps = JSX.HTMLAttributes<HTMLElement>;
 
-export const ModalFooter: Component<ModalFooterProps> = (props) => (
-  <footer
-    {...props}
-    class={props.class ? `sb-modal-footer ${props.class}` : "sb-modal-footer"}
-  />
-);
+export function ModalFooter(props: ModalFooterProps) {
+  return (
+    <footer
+      {...props}
+      class={props.class ? `sb-modal-footer ${props.class}` : "sb-modal-footer"} />
+  );
+}

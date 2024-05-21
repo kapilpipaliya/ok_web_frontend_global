@@ -15,11 +15,11 @@ export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {
   image?: File;
 };
 
-export const FileUploader: Component<FileUploaderProps> = (props: any) => {
+export function FileUploader(props: FileUploaderProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [],
-    ["setValue", "meta", "data", "label"],
+    ["setValue", "meta", "data", "label"]
   );
   const [file, setFile] = createSignal(null);
   const [fullBoxImage, setFullBoxImage] = createSignal("");
@@ -85,8 +85,7 @@ export const FileUploader: Component<FileUploaderProps> = (props: any) => {
           {...inputProps}
           onChange={(event) => {
             runEvent(event, handleInputChange);
-          }}
-        />
+          } } />
         {file() !== null ? (
           <>
             <img
@@ -96,8 +95,7 @@ export const FileUploader: Component<FileUploaderProps> = (props: any) => {
                 "max-width": "100%",
                 "max-height": "100%",
                 "border-radius": "10px",
-              }}
-            />
+              }} />
           </>
         ) : (
           <span>{props.label || "Click to select an image"}</span>
@@ -105,4 +103,4 @@ export const FileUploader: Component<FileUploaderProps> = (props: any) => {
       </label>
     </div>
   );
-};
+}

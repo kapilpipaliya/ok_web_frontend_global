@@ -25,10 +25,10 @@ const StatusChip = (props: { status: string }) => {
   );
 };
 
-export const ChipDropDown = (props: {
+export function ChipDropDown(props: {
   selectedItem: string;
   onChanged: (value: string) => void;
-}) => {
+}) {
   const options = ["pending", "completed", "cancelled"];
 
   const [status, setStatus] = createSignal(props.selectedItem);
@@ -53,7 +53,7 @@ export const ChipDropDown = (props: {
         const newValue = event.currentTarget.value;
         setStatus(newValue); // Update the signal
         props.onChanged(newValue); // Callback to parent component
-      }}
+      } }
       style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles(status())}`}
     >
       <For each={options}>
@@ -65,6 +65,6 @@ export const ChipDropDown = (props: {
       </For>
     </select>
   );
-};
+}
 
 export default StatusChip;

@@ -6,7 +6,7 @@ import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 
-export const UserDashBoardGrid = () => {
+export function UserDashBoardGrid() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const dashboard = findVertexByLabelAndUniqueId(
@@ -40,4 +40,4 @@ export const UserDashBoardGrid = () => {
       </For>
     </div>
   );
-};
+}

@@ -10,7 +10,7 @@ import {
 
 export type WrappedElement<P> = (props: P) => JSX.Element;
 
-export const toStyleObject = (style: string | JSX.CSSProperties) => {
+export function toStyleObject(style: string | JSX.CSSProperties) {
   if (typeof style === "object") {
     return style;
   }
@@ -20,15 +20,14 @@ export const toStyleObject = (style: string | JSX.CSSProperties) => {
     return "";
   });
   return styleObject;
-};
+}
 
-export const composeStyles = (...styles: (JSX.CSSProperties | string)[]) =>
-  Object.assign({}, ...styles.map(toStyleObject));
+export function composeStyles(...styles: (JSX.CSSProperties | string)[]) {
+  return Object.assign({}, ...styles.map(toStyleObject));
+}
 
-export const getNearestNode = (
-  target: EventTarget | null | undefined,
-  name: string,
-): Node | null | undefined => {
+export function getNearestNode(target: EventTarget | null | undefined,
+  name: string): Node | null | undefined {
   if (!target) {
     return;
   }
@@ -37,16 +36,15 @@ export const getNearestNode = (
     nearest = nearest.parentNode;
   }
   return nearest;
-};
+}
 
 export const maxRandom = 8;
 let lastItem = 0;
-export const getRandom = () => {
-  const nextItem =
-    1 + Math.floor(Math.random() * (maxRandom - (lastItem ? 1 : 0)));
+export function getRandom() {
+  const nextItem = 1 + Math.floor(Math.random() * (maxRandom - (lastItem ? 1 : 0)));
   lastItem = lastItem ? nextItem + (nextItem === lastItem ? 1 : 0) : nextItem;
   return lastItem;
-};
+}
 
 export type MediaQueryItem =
   | "all"
@@ -72,7 +70,7 @@ export type MediaQueryString =
   | MediaQueryItem
   | `${MediaQueryItem}${MediaQueryOperator}${MediaQueryItem}`;
 
-export const useMediaQuery = (query: MediaQueryString): Accessor<boolean> => {
+export function useMediaQuery(query: MediaQueryString): Accessor<boolean> {
   const matcher = window.matchMedia(query);
   const [matches, setMatches] = createSignal(matcher.matches);
 
@@ -81,19 +79,19 @@ export const useMediaQuery = (query: MediaQueryString): Accessor<boolean> => {
   onCleanup(() => matcher.removeEventListener("change", changeHandler));
 
   return matches;
-};
+}
 
-const parseStorage = <T extends any | string>(
-  data: string | null | undefined,
-  useJson: boolean,
-): T | undefined =>
-  useJson ? (data ? JSON.parse(data) : undefined) : data ?? undefined;
+function parseStorage<T extends any | string>(data: string | null | undefined,
+  useJson: boolean): T | undefined {
+  return useJson ? (data ? JSON.parse(data) : undefined) : data ?? undefined;
+}
 
-const putStorage = <T extends any | string>(key: string, data: T): void =>
-  localStorage.setItem(
+function putStorage<T extends any | string>(key: string, data: T): void {
+  return localStorage.setItem(
     key,
-    typeof data === "string" ? data : JSON.stringify(data),
+    typeof data === "string" ? data : JSON.stringify(data)
   );
+}
 
 export function createLocalStorageSignal<T extends any | string>(
   key: string,
@@ -116,12 +114,11 @@ export function createLocalStorageSignal<T extends any | string>(
   return [value, setValue];
 }
 
-export const useDarkMode = (localStorageKey = "COLOR_SCHEME") => {
+export function useDarkMode(localStorageKey = "COLOR_SCHEME") {
   const mediaQueryPrefersDark = useMediaQuery("(prefers-color-scheme: dark)");
-  const [storedPrefersDark, setStoredPrefersDark] =
-    createLocalStorageSignal<boolean>(localStorageKey, undefined, true);
+  const [storedPrefersDark, setStoredPrefersDark] = createLocalStorageSignal<boolean>(localStorageKey, undefined, true);
   const darkMode = createMemo(
-    () => storedPrefersDark() ?? mediaQueryPrefersDark(),
+    () => storedPrefersDark() ?? mediaQueryPrefersDark()
   );
 
   createEffect(() => {
@@ -129,18 +126,16 @@ export const useDarkMode = (localStorageKey = "COLOR_SCHEME") => {
   });
 
   return [darkMode, setStoredPrefersDark];
-};
+}
 
 export type NodeName = string;
 
-export const getElements = (
-  children: JSX.Element | ((...args: any[]) => JSX.Element),
+export function getElements(children: JSX.Element | ((...args: any[]) => JSX.Element),
   filter?: NodeName | ((node: HTMLElement) => boolean),
   /** if the children contains a callback, you may add an array of props */
   props: any = [],
   /** you can add prepended results if you want */
-  result = [],
-): HTMLElement[] | undefined => {
+  result = []): HTMLElement[] | undefined {
   if (!children) {
     return;
   }
@@ -150,29 +145,23 @@ export const getElements = (
     getElements(children.apply(null, props), filter, props, result);
   } else {
     const node = children as HTMLElement;
-    if (
-      !filter ||
-      (typeof filter === "function" ? filter(node) : node.nodeName === filter)
-    ) {
+    if (!filter ||
+      (typeof filter === "function" ? filter(node) : node.nodeName === filter)) {
       (result as HTMLElement[]).push(node);
     }
   }
   return result;
-};
+}
 
 // TODO: types
-export const runEvent = <
-  E extends Event,
+export function runEvent<E extends Event,
   T extends HTMLElement,
-  EV = E & { currentTarget: T; target: Element },
-  EU = JSX.EventHandlerUnion<T, E>,
->(
-  ev: EV,
-  handler?: EU,
-): void => {
+  EV = E & { currentTarget: T; target: Element; },
+  EU = JSX.EventHandlerUnion<T, E>>(ev: EV,
+    handler?: EU): void {
   if (Array.isArray(handler)) {
     handler[1](handler[0], ev);
   } else if (typeof handler === "function") {
     handler(ev);
   }
-};
+}

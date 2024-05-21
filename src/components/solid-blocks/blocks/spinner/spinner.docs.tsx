@@ -1,6 +1,6 @@
 import { Spinner } from "./spinner";
 
-export const SpinnerDocs = () => {
+export function SpinnerDocs() {
   return (
     <>
       <h2 id="spinner-docs">Spinner</h2>
@@ -12,4 +12,4 @@ export const SpinnerDocs = () => {
       <hr />
     </>
   );
-};
+}

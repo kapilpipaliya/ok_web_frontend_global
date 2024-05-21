@@ -1,6 +1,6 @@
 import { Breadcrumbs } from "./breadcrumbs";
 
-export const BreadcrumbsDocs = () => {
+export function BreadcrumbsDocs() {
   return (
     <>
       <h2 id="breadcrumbs-docs">Breadcrumbs</h2>
@@ -28,4 +28,4 @@ export const BreadcrumbsDocs = () => {
       <hr />
     </>
   );
-};
+}

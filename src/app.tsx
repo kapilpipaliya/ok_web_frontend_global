@@ -3,13 +3,22 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
-import { config } from "~/master.css";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
+import { Config } from "@master/css";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
+  const config: Config = {
+    styles: {},
+    rules: {},
+    variables: {},
+    animations: {},
+    selectors: {},
+    functions: {},
+  };
+  
   const loadingSite = createSignal(false);
   return (
     <Router

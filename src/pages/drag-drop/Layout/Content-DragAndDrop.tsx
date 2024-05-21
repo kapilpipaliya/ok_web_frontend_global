@@ -6,7 +6,7 @@ import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { FormContext } from "~/lib/Utils";
 import { PageConfigContext } from "~/lib/contexts";
 
-export const ContentDragAndDrop = () => {
+export function ContentDragAndDrop() {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
 
   return (
@@ -29,4 +29,4 @@ export const ContentDragAndDrop = () => {
       </div>
     </Show>
   );
-};
+}

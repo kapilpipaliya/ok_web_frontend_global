@@ -9,24 +9,24 @@ export type TableCellProps = JSX.HTMLAttributes<HTMLTableCellElement> & {
   disabled?: boolean;
 };
 
-export const TableHeader: Component<TableCellProps> = (props) => {
+export function TableHeader(props: TableCellProps) {
   const [] = useContext(tableContext);
 
   return <th {...props} />;
-};
+}
 
-export const TableRow: Component<TableCellProps> = (props) => {
+export function TableRow(props: TableCellProps) {
   const [] = useContext(tableContext);
 
   return <td {...props} />;
-};
+}
 
 export type TableProps = JSX.HTMLAttributes<HTMLTableElement> & {};
 
-export const TableGroup: Component<TableProps> = (props) => {
+export function TableGroup(props: TableProps) {
   return (
     <tableContext.Provider value={[]}>
       <table {...props} />
     </tableContext.Provider>
   );
-};
+}

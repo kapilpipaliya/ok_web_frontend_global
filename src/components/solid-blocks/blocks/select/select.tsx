@@ -10,7 +10,7 @@ export type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {
   setValue?: (value: string) => void;
 };
 
-export const Select: Component<SelectProps> = (props) => {
+export function Select(props: SelectProps) {
   const [local, fieldProps] = splitProps(props, [
     "aria-orientation",
     "label",
@@ -29,8 +29,7 @@ export const Select: Component<SelectProps> = (props) => {
         onChange={(ev): void => {
           runEvent(ev, local.onChange);
           local.setValue?.(ev.currentTarget.value);
-        }}
-      />
+        } } />
     </label>
   );
-};
+}

@@ -16,10 +16,10 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 TODO:
 Instead of this use Page Builder
  */
-export const NavDesigner = () => {
+export function NavDesigner() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const config = createStore({} as { formData: IFormContext });
+  const config = createStore({} as { formData: IFormContext; });
   const [count, setCount] = createSignal(1);
   const [previewCode, setPreviewCode] = createSignal(false);
   const { Ws } = useContext(WsContext);
@@ -34,8 +34,8 @@ export const NavDesigner = () => {
           getExportCode(
             graph,
             config[0].formData.formMeta,
-            config[0].formData.formData,
-          ),
+            config[0].formData.formData
+          )
         )}
       </pre>
     );
@@ -51,7 +51,7 @@ export const NavDesigner = () => {
       importCode(),
       graph,
       setGraph,
-      Ws,
+      Ws
     );
   };
   return (
@@ -62,13 +62,10 @@ export const NavDesigner = () => {
           graph={graph}
           setGraph={setGraph}
           id={params.id}
-          config={config}
-          // TODO: add dry option
-        />
+          config={config} />
         <textarea
           value={importCode()}
-          onChange={(e) => setImportCode(e.target.value)}
-        />
+          onChange={(e) => setImportCode(e.target.value)} />
         <CustomButton variant="contained" onClick={importCodeFn}>
           Import Code
         </CustomButton>
@@ -90,10 +87,9 @@ export const NavDesigner = () => {
         </Show>
         <Show when={count() && config[0].formData.formData && count()} keyed>
           <div
-          // ref={(el) => renderNavTreeFromGraph(el, config[0].record, navigate)}
           ></div>
         </Show>
       </div>
     </div>
   );
-};
+}

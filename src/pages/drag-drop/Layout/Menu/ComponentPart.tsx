@@ -7,16 +7,16 @@ import { DraggedVertexContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 
-export const ComponentPart = () => {
+export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-  
+
   const data = getTreeData(graph, setGraph, {
     collection: "g:'CompCategory'",
     // TODO: Dont display "Form" Component
     child: { collection: "->CompCategoryComp" },
   });
-  
+
   const data2 = getTreeDataMGCall({
     collection: "g:'CompCategory'",
     // TODO: Dont display "Form" Component
@@ -78,7 +78,7 @@ export const ComponentPart = () => {
     }
   };
 
-  function ListItemComponent(props: { child: Vertex }) {
+  function ListItemComponent(props: { child: Vertex; }) {
     const [isHovered, setIsHovered] = createSignal(false);
 
     const baseStyle = {
@@ -103,8 +103,7 @@ export const ComponentPart = () => {
       boxShadow: "4px 4px 4px",
     };
 
-    const itemStyle: any = () =>
-      isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+    const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
     return (
       <div
@@ -115,17 +114,14 @@ export const ComponentPart = () => {
         onDragStart={(e) => {
           e.stopPropagation();
           setDraggedVertex(graph.vertexes[props.child.id]);
-        }}
+        } }
       >
         <div class="pt:5px flex gap:10px ai:center">
           <Icon
-            icon={
-              iconMap[props.child?.P.name] ??
-              "material-symbols:widgets-outline-rounded"
-            }
+            icon={iconMap[props.child?.P.name] ??
+              "material-symbols:widgets-outline-rounded"}
             width={20}
-            height={20}
-          />
+            height={20} />
           <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
         </div>
 
@@ -135,15 +131,13 @@ export const ComponentPart = () => {
             <Icon
               ondblclick={() => {
                 const currentURL = window.location.href;
-                const navigateUrl =
-                  currentURL.split("/").slice(0, -2).join("/") +
+                const navigateUrl = currentURL.split("/").slice(0, -2).join("/") +
                   "/Comp/" +
                   props.child.id;
                 window.open(navigateUrl, "_blank");
-              }}
+              } }
               class={"cursor:pointer"}
-              icon={"solar:settings-linear"}
-            />
+              icon={"solar:settings-linear"} />
           </Tooltip>
         </Show>
       </div>
@@ -157,8 +151,7 @@ export const ComponentPart = () => {
           <Icon
             class="icon"
             icon="iconamoon:search"
-            style={{ color: "#9e9ea7" }}
-          />
+            style={{ color: "#9e9ea7" }} />
           <input
             placeholder="Search Component..."
             type="search"
@@ -167,16 +160,13 @@ export const ComponentPart = () => {
             onInput={(e) => {
               setSearchQuery(e.target.value);
               updateFilteredData(); // Update filteredData when searchQuery changes
-            }}
-          />
+            } } />
         </div>
       </nav>
       <div>
         <For
           each={filteredData()}
-          fallback={
-            <div class="p:3 font-weight:bold">No Component Found !</div>
-          }
+          fallback={<div class="p:3 font-weight:bold">No Component Found !</div>}
         >
           {(item) => (
             <div class="m:20px|0px">
@@ -192,4 +182,4 @@ export const ComponentPart = () => {
       </div>
     </div>
   );
-};
+}

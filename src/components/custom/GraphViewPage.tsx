@@ -12,12 +12,11 @@ interface GraphViewProps {
   edges: any[];
 }
 
-export const GraphViewPage = () => {
+export function GraphViewPage() {
   const GraphView = (props: GraphViewProps) => {
     const [json, setJson] = createSignal({});
     const mount = (container: HTMLDivElement) => {
       // TODO: Dynamically import library only when required.
-
       // const nodes = [
       //   { id: 1, label: "Orb" },
       //   { id: 2, label: "Graph" },
@@ -27,16 +26,13 @@ export const GraphViewPage = () => {
       //   { id: 1, start: 1, end: 2, label: "DRAWS" },
       //   { id: 2, start: 2, end: 3, label: "ON" },
       // ];
-
       // First `Orb` is just a namespace of the JS package
-
       // @ts-ignore
       const orb = new Orb.Orb(container);
 
       // Initialize nodes and edges
       orb.data.setup({ nodes: props.nodes, edges: props.edges });
       // orb.data.setup({ nodes, edges });
-
       // Render and recenter the view
       orb.view.render(() => {
         orb.view.recenter();
@@ -61,7 +57,7 @@ export const GraphViewPage = () => {
             onCleanup(() => {
               el.replaceChildren();
             });
-          }}
+          } }
         ></div>
         <pre>{JSON.stringify(json())}</pre>
       </>
@@ -93,8 +89,7 @@ export const GraphViewPage = () => {
           .map(([key, value]) => ({
             ...value,
             label: value.L[0],
-          }))}
-      />
+          }))} />
     </Show>
   );
-};
+}

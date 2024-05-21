@@ -22,7 +22,7 @@ export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {
   value?: string;
 };
 
-export const Checkbox: Component<CheckboxProps> = (props) => {
+export function Checkbox(props: CheckboxProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [
@@ -43,14 +43,12 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
       "required",
       "value",
     ],
-    ["align", "children", "onChange", "setChecked", "switch"],
+    ["align", "children", "onChange", "setChecked", "switch"]
   );
 
   return (
     <label
-      class={`${content.align || "left"} ${
-        content.switch ? " switch" : ""
-      } ${inputProps.class || ""}`}
+      class={`${content.align || "left"} ${content.switch ? " switch" : ""} ${inputProps.class || ""}`}
       {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>
@@ -68,8 +66,7 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
           onChange={(ev): void => {
             runEvent(ev, content.onChange);
             content.setChecked?.(ev.currentTarget.checked);
-          }}
-        />
+          } } />
         <svg viewBox="0 0 35.6 35.6">
           <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
           <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
@@ -100,10 +97,9 @@ export const Checkbox: Component<CheckboxProps> = (props) => {
     //                 content.setChecked?.(ev.currentTarget.checked);
     //             }}
     //         />
-
     //     </div>
     //
     //     <Show when={content.align !== "right"}><span class={'ml:5px'}> {props.text}{content.children}</span></Show>
     // </div>
   );
-};
+}

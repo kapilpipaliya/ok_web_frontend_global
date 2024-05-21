@@ -23,7 +23,7 @@ import Sidebar from "./Sidebar";
 
 
 
-export const MainDashboard = (props: { children?: JSX.Element }) => {
+export function MainDashboard(props: { children?: JSX.Element; }) {
   const border = "|solid|rgb(212,219,231)";
   const [isSideBarOpen, setSideBarOpen] = createSignal(true);
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -32,16 +32,16 @@ export const MainDashboard = (props: { children?: JSX.Element }) => {
     0,
     newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }),
     graph,
-    setGraph,
+    setGraph
   );
 
   const location = useLocation();
   const [isShowDrawer, setIsShowDrawer] = createSignal(true);
   const [isLoginPage, setIsLoginPage] = createSignal(
-    location.pathname.includes("/auth/login"),
+    location.pathname.includes("/auth/login")
   );
   const [signUpPage, setSignUpPage] = createSignal(
-    location.pathname.includes("/auth/signup"),
+    location.pathname.includes("/auth/signup")
   );
 
   createEffect(() => {
@@ -54,7 +54,7 @@ export const MainDashboard = (props: { children?: JSX.Element }) => {
         path.includes("/auth/login") ||
         path.includes("/auth/signup") ||
         path.includes("/admin/Page/")
-      ),
+      )
     );
   });
   const [isSidebarOpen, setSidebarOpen] = createSignal(true);
@@ -79,16 +79,14 @@ export const MainDashboard = (props: { children?: JSX.Element }) => {
           isSideBarOpen={isSideBarOpen()}
           toggleSidebar={() => {
             setSideBarOpen((prev) => !prev);
-          }}
-        />
+          } } />
       </Show>
       <div style={mainContentStyle as any}>
         <PageContext.Provider
           value={{
             events: {
               setSideBarOpen,
-              setTitle: (title: string) =>
-                mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
+              setTitle: (title: string) => mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
             },
           }}
         >
@@ -97,19 +95,18 @@ export const MainDashboard = (props: { children?: JSX.Element }) => {
               showCloseDrawerBtn={isShowDrawer()}
               toggleSidebar={() => {
                 setSideBarOpen((prev) => !prev);
-              }}
+              } }
               right={<DropdownMenu />}
-              meta={graph.vertexes[vertexId]}
-            />
+              meta={graph.vertexes[vertexId]} />
           </Show>
 
-            <div class="p:10">{props.children}</div>
+          <div class="p:10">{props.children}</div>
 
         </PageContext.Provider>
       </div>
     </div>
   );
-};
+}
 
 const DropdownMenu = () => {
   const [graph, setGraph] = useContext(GraphContext)!;

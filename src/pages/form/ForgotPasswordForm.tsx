@@ -5,7 +5,7 @@ import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import sendEmail from "~/cypher_api/server/email";
 
-export const ForgotPasswordForm = () => {
+export function ForgotPasswordForm() {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
   const [otp, setOtp] = createSignal("");
@@ -47,7 +47,7 @@ export const ForgotPasswordForm = () => {
     // Validate the new password
     if (!validatePassword(newPassword())) {
       showErrorToast(
-        "Password must be at least 6 characters long and include at least one letter and one number and one uppercase.",
+        "Password must be at least 6 characters long and include at least one letter and one number and one uppercase."
       );
       return; // Stop the form submission
     }
@@ -65,8 +65,7 @@ export const ForgotPasswordForm = () => {
       class="@fade|.5s"
       style={{
         "background-size": "cover",
-        "background-image":
-          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-image": "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
         display: "flex",
         "background-color": "rgb(239,235,233)",
         "flex-direction": "column",
@@ -79,8 +78,7 @@ export const ForgotPasswordForm = () => {
         src={logo}
         alt="logo"
         class="h:70px mb:100px"
-        style={{ "justify-self": "center" }}
-      />
+        style={{ "justify-self": "center" }} />
       <Switch>
         <Match when={isLoading()}>
           <div class="p:5rem bg:white r:10">
@@ -126,8 +124,7 @@ export const ForgotPasswordForm = () => {
                     "border-radius": "4px",
                   }}
                   placeholder="Your email"
-                  required
-                />
+                  required />
               </div>
               <button
                 type="submit"
@@ -190,8 +187,7 @@ export const ForgotPasswordForm = () => {
                     "border-radius": "4px",
                   }}
                   placeholder="Enter 6 digit code"
-                  required
-                />
+                  required />
               </div>
               <button
                 type="submit"
@@ -253,14 +249,12 @@ export const ForgotPasswordForm = () => {
                     "border-radius": "4px",
                   }}
                   placeholder="New Password"
-                  required
-                />
+                  required />
                 <Icon
                   onClick={() => setNewShowPassword(!showNewPassword())}
                   class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showNewPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-                />
+                  icon={`${showNewPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`} />
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>
                 <label
@@ -281,14 +275,12 @@ export const ForgotPasswordForm = () => {
                     "border-radius": "4px",
                   }}
                   placeholder="Confirm Password"
-                  required
-                />
+                  required />
                 <Icon
                   onClick={() => setConfirmShowPassword(!showConfirmPassword())}
                   class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showConfirmPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-                />
+                  icon={`${showConfirmPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`} />
               </div>
 
               <button
@@ -317,4 +309,4 @@ export const ForgotPasswordForm = () => {
       </Switch>
     </div>
   );
-};
+}

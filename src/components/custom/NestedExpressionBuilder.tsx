@@ -1,13 +1,13 @@
 import CustomModal from "./CommonDialog";
 
-export const NestedExpressionBuilder = (props: {
+export function NestedExpressionBuilder(props: {
   content: string;
   meta: any; // Adjust type as per your requirement
   setValue: (value: any) => void;
   txnId?: number;
   data?: any;
   onClose: () => void;
-}) => {
+}) {
   // Implement the logic for NestedExpressionBuilder here
   return (
     <CustomModal
@@ -17,7 +17,6 @@ export const NestedExpressionBuilder = (props: {
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>{/* Footer content */}</div>
       )}
-      dialogClass="min-w:30% r:10px p:0"
-    />
+      dialogClass="min-w:30% r:10px p:0" />
   );
-};
+}

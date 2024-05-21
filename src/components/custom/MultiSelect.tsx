@@ -72,9 +72,7 @@ const closeIconTypes = {
   // cancel: CloseLine
 };
 
-export const MultiSelect: Component<IMultiSelectProps> = (
-  props: IMultiSelectProps,
-) => {
+export function MultiSelect(props: IMultiSelectProps) {
   props = mergeProps(defaultProps, props);
   const [local] = splitProps(props, [
     "placeholder",
@@ -87,44 +85,36 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     "avoidHighlightFirstOption",
   ]);
   const {
-    placeholder,
-    style,
-    singleSelect,
-    id,
-    hidePlaceholder,
-    disable,
-    showArrow,
-    avoidHighlightFirstOption,
+    placeholder, style, singleSelect, id, hidePlaceholder, disable, showArrow, avoidHighlightFirstOption,
   } = local;
 
   const [toggleOptionsList, setToggleOptionsList] = createSignal(false);
   const [highlightOption, setHighlightOption] = createSignal(
-    avoidHighlightFirstOption ? -1 : 0,
+    avoidHighlightFirstOption ? -1 : 0
   );
   const [inputValue, setInputValue] = createSignal("");
   const [options, setOptions] = createSignal<Option[]>(props.options);
   const [filteredOptions, setFilteredOptions] = createSignal(props.options);
   const [unfilteredOptions, setUnfilteredOptions] = createSignal(props.options);
   const [selectedValues, setSelectedValues] = createSignal<Option[]>(
-    Object.assign([], props.selectedValues),
+    Object.assign([], props.selectedValues)
   );
   const [preSelectedValues, setPreSelectedValues] = createSignal(
-    Object.assign([], props.selectedValues),
+    Object.assign([], props.selectedValues)
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [keepSearchTerm, setKeepSearchTerm] = createSignal(
-    props.keepSearchTerm,
+    props.keepSearchTerm
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [closeIconType, setCloseIconType] = createSignal(
-    closeIconTypes[props.closeIcon] || closeIconTypes["circle"],
+    closeIconTypes[props.closeIcon] || closeIconTypes["circle"]
   );
   const [groupedObject, setGroupedObject] = createSignal([]);
 
   let optionTimeout: number;
   let searchBox: HTMLInputElement;
-  const searchWrapper = (el: HTMLDivElement) =>
-    el.addEventListener("click", listenerCallback);
+  const searchWrapper = (el: HTMLDivElement) => el.addEventListener("click", listenerCallback);
 
   function renderGroupByOptions() {
     const isObject = props.isObject || false;
@@ -150,8 +140,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
                     style={style["option"]}
                     class="groupChildEle option"
                     classList={{
-                      disableSelection:
-                        fadeOutSelection(option) ||
+                      disableSelection: fadeOutSelection(option) ||
                         isDisablePreSelectedValues(option),
                     }}
                     onClick={onSelectItem(option)}
@@ -161,8 +150,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
                         type="checkbox"
                         class="checkbox"
                         readOnly
-                        checked={isSelectedValue(option)}
-                      />
+                        checked={isSelectedValue(option)} />
                     </Show>
 
                     {isObject
@@ -170,7 +158,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
                       : (option || "").toString()}
                   </li>
                 );
-              }}
+              } }
             </For>
           </>
         )}
@@ -182,9 +170,8 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     if (props.isObject) {
       return (
         selectedValues().filter(
-          (i: Option) =>
-            i[props.displayValueParent][props.displayValueChild] ===
-            item[props.displayValueParent][props.displayValueChild],
+          (i: Option) => i[props.displayValueParent][props.displayValueChild] ===
+            item[props.displayValueParent][props.displayValueChild]
         ).length > 0
       );
     }
@@ -220,9 +207,8 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     if (props.isObject) {
       return (
         preSelectedValues().filter(
-          (i) =>
-            i[props.displayValueParent][props.displayValueChild] ===
-            value[props.displayValueParent][props.displayValueChild],
+          (i) => i[props.displayValueParent][props.displayValueChild] ===
+            value[props.displayValueParent][props.displayValueChild]
         ).length > 0
       );
     }
@@ -239,9 +225,8 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     if (props.isObject) {
       const optionList = unfilteredOptions().filter((item) => {
         return selectedValues().findIndex(
-          (v) =>
-            v[props.displayValueParent][props.displayValueChild] ===
-            item[props.displayValueParent][props.displayValueChild],
+          (v) => v[props.displayValueParent][props.displayValueChild] ===
+            item[props.displayValueParent][props.displayValueChild]
         ) === -1
           ? true
           : false;
@@ -258,7 +243,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
       return;
     }
     const optionList = unfilteredOptions().filter(
-      (item) => selectedValues().indexOf(item) === -1,
+      (item) => selectedValues().indexOf(item) === -1
     );
 
     setOptions(optionList);
@@ -293,10 +278,8 @@ export const MultiSelect: Component<IMultiSelectProps> = (
   }, props.options);
 
   createEffect((prevSelectedValues) => {
-    if (
-      JSON.stringify(prevSelectedValues) !==
-      JSON.stringify(props.selectedValues)
-    ) {
+    if (JSON.stringify(prevSelectedValues) !==
+      JSON.stringify(props.selectedValues)) {
       setSelectedValues(Object.assign([], props.selectedValues));
       setPreSelectedValues(Object.assign([], props.selectedValues));
       // TODO: Fix wait
@@ -322,9 +305,8 @@ export const MultiSelect: Component<IMultiSelectProps> = (
 
     if (props.isObject) {
       index = newSelectedValues.findIndex(
-        (i) =>
-          i[props.displayValueParent][props.displayValueChild] ===
-          item[props.displayValueParent][props.displayValueChild],
+        (i) => i[props.displayValueParent][props.displayValueChild] ===
+          item[props.displayValueParent][props.displayValueChild]
       );
     } else {
       index = newSelectedValues.indexOf(item);
@@ -380,11 +362,9 @@ export const MultiSelect: Component<IMultiSelectProps> = (
     return (
       <For
         each={options()}
-        fallback={
-          <span style={props.style["notFound"]} class="notFound">
-            {props.emptyRecordMsg ?? "No Options Available"}
-          </span>
-        }
+        fallback={<span style={props.style["notFound"]} class="notFound">
+          {props.emptyRecordMsg ?? "No Options Available"}
+        </span>}
       >
         {(option, index) => (
           <li
@@ -401,17 +381,16 @@ export const MultiSelect: Component<IMultiSelectProps> = (
                 type="checkbox"
                 readOnly
                 class="checkbox"
-                checked={isSelectedValue(option)}
-              />
+                checked={isSelectedValue(option)} />
             </Show>
             <Show
               when={props.isObject}
               fallback={() => (option || "").toString()}
             >
-              <Show when={props.isObject && !props.singleSelect} fallback={ option[props.displayValueParent]?.[props.displayValueChild] }>
+              <Show when={props.isObject && !props.singleSelect} fallback={option[props.displayValueParent]?.[props.displayValueChild]}>
                 {option[props.displayValue]}
               </Show>
-              
+
             </Show>
           </li>
         )}
@@ -467,18 +446,16 @@ export const MultiSelect: Component<IMultiSelectProps> = (
   const filterOptionsByInput = () => {
     let newOptions: Option[];
     if (props.isObject) {
-      newOptions = filteredOptions().filter((option) =>
-        matchValues(
-          option[props.displayValueParent][props.displayValueChild],
-          inputValue(),
-        ),
+      newOptions = filteredOptions().filter((option) => matchValues(
+        option[props.displayValueParent][props.displayValueChild],
+        inputValue()
+      )
       );
     } else {
-      newOptions = filteredOptions().filter((option) =>
-        matchValues(
-          option[props.displayValue].toString(),
-          inputValue(),
-        ),
+      newOptions = filteredOptions().filter((option) => matchValues(
+        option[props.displayValue].toString(),
+        inputValue()
+      )
       );
     }
     groupByOptions(newOptions);
@@ -533,12 +510,10 @@ export const MultiSelect: Component<IMultiSelectProps> = (
   };
 
   const onArrowKeyNavigation = (e) => {
-    if (
-      e.keyCode === 8 &&
+    if (e.keyCode === 8 &&
       !inputValue() &&
       !props.disablePreSelectedValues &&
-      selectedValues().length
-    ) {
+      selectedValues().length) {
       onRemoveSelectedItem(selectedValues().length - 1);
     }
     if (!options().length) {
@@ -582,35 +557,32 @@ export const MultiSelect: Component<IMultiSelectProps> = (
               <Show when={!isDisablePreSelectedValues(value)}>
                 <Show
                   when={!props.customCloseIcon}
-                  fallback={
-                    <i
-                      class="custom-close"
-                      onClick={() => {
-                        //   if (selectedValues().length === 1) {
-                        //     setSelectedValues([]);
-                        //   } else {
-                        onRemoveSelectedItem(value);
-                        //   }
-                      }}
-                      style={{
-                        "margin-left": ".3rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {props.customCloseIcon}
-                    </i>
-                  }
+                  fallback={<i
+                    class="custom-close"
+                    onClick={() => {
+                      //   if (selectedValues().length === 1) {
+                      //     setSelectedValues([]);
+                      //   } else {
+                      onRemoveSelectedItem(value);
+                      //   }
+                    } }
+                    style={{
+                      "margin-left": ".3rem",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {props.customCloseIcon}
+                  </i>}
                 >
                   <img
                     class="icon_cancel closeIcon"
                     src={closeIconType()}
-                    onClick={() => onRemoveSelectedItem(value)}
-                  />
+                    onClick={() => onRemoveSelectedItem(value)} />
                 </Show>
               </Show>
             </span>
           );
-        }}
+        } }
       </For>
     );
   }
@@ -644,8 +616,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
             onKeyDown={onArrowKeyNavigation}
             style={style["inputField"]}
             autocomplete="off"
-            disabled={disable}
-          />
+            disabled={disable} />
           <Show when={showArrow}>
             <img class="icon_cancel icon_down_dir" src={DownArrow} />
           </Show>
@@ -664,7 +635,7 @@ export const MultiSelect: Component<IMultiSelectProps> = (
   }
 
   return renderMultiSelectContainer();
-};
+}
 
 export default MultiSelect;
 

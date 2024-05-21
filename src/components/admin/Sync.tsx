@@ -13,20 +13,20 @@ const transferNodes = [
 ];
 
 
-export const SyncComopnent = () => {
-    const {showLoadingToast}= useToast();
+export function SyncComopnent() {
+    const { showLoadingToast } = useToast();
     const [users, setUsers] = createSignal([]);
     const [searchQuery, setSearchQuery] = createSignal('');
     const [selectedUsers, setSelectedUsers] = createSignal([]);
 
     getUsers().then((res: any) => {
         setUsers(res.vertexes || []);
-    })
+    });
 
     async function migrateNodes(element: Node, node: any) {
-            const result = await syncNodesMGCall({ userport: element.P.driverPort, nodesToTransfer: node });
-            return result; // Ensure result has the expected structure
-        
+        const result = await syncNodesMGCall({ userport: element.P.driverPort, nodesToTransfer: node });
+        return result; // Ensure result has the expected structure
+
     }
 
     const onClickTransfer = (node: any) => {
@@ -41,7 +41,7 @@ export const SyncComopnent = () => {
                 }
             });
         });
-    }
+    };
 
     return (<>
         <PageHeader title="Sync" breadcrumb={[{ name: "Admin", icon: "clarity:administrator-line", href: "/admin" }, { name: "Sync" }]} />
@@ -63,8 +63,7 @@ export const SyncComopnent = () => {
                 return users();
             }
             const query = searchQuery().toLowerCase();
-            return users().filter((user) =>
-                user.P.username.toLowerCase().includes(query) || user.P.email.toLowerCase().includes(query)
+            return users().filter((user) => user.P.username.toLowerCase().includes(query) || user.P.email.toLowerCase().includes(query)
             );
         };
         const handleCheckboxChange = (userId: any) => {
@@ -76,7 +75,7 @@ export const SyncComopnent = () => {
                 }
             });
             console.log(selectedUsers());
-            
+
         };
 
         const handleSelectAll = () => {
@@ -119,8 +118,7 @@ export const SyncComopnent = () => {
                                     class="w:1rem h:1rem color:rgb(37,99,235) bg:rgb(243,244,246) border-color:rgb(209,213,219) r:0.25rem"
 
                                     checked={displayedUsers().every((user) => selectedUsers().includes(user))}
-                                    onChange={handleSelectAll}
-                                />
+                                    onChange={handleSelectAll} />
                                 <label for="checkbox-all-search" class="sr-only">
                                     checkbox
                                 </label>
@@ -147,8 +145,7 @@ export const SyncComopnent = () => {
                                             type="checkbox"
                                             class="w:1rem h:1rem color:rgb(37,99,235) bg:rgb(243,244,246) border-color:rgb(209,213,219) r:0.25rem"
                                             checked={selectedUsers().includes(user)}
-                                            onChange={() => handleCheckboxChange(user)}
-                                        />
+                                            onChange={() => handleCheckboxChange(user)} />
 
                                         <label for={`checkbox-table-search-${user.id}`} class="sr-only">
                                             checkbox
@@ -163,8 +160,7 @@ export const SyncComopnent = () => {
                                                     <img
                                                         class="object-fit:cover w:2.5rem h:2.5rem r:9999px"
                                                         src={user.P.profileImage || 'https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png'}
-                                                        alt={`image`}
-                                                    />
+                                                        alt={`image`} />
                                                     <div class="ml:13">
                                                         <div class="f:1rem lh:1.5rem font-weight:600">{user.P.username}</div>
                                                         <div class="font-weight:400 color:rgb(107,114,128)">{user.P.email}</div>
@@ -226,27 +222,27 @@ export const SyncComopnent = () => {
                     </li>
                 </ul>
             </nav>
-                
-        </>
-        )
 
-       
+        </>
+        );
+
+
     }
-    
+
     function transferPart() {
         return <Show when={selectedUsers().length > 0}>
             <div class="p:10">
                 <h3 class="bg:#f4f4f4 r:5 p:3|6 mb:10 font-weight:500 color:rgb(17,24,39)">Transfer nodes</h3>
                 <button onClick={() => {
-                    onClickTransfer(transferNodes.map((node) => node.value))
-                }} type="button" style={'background-color: lavender'}
+                    onClickTransfer(transferNodes.map((node) => node.value));
+                } } type="button" style={'background-color: lavender'}
                     class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">All Nodes
                 </button>
                 <For each={transferNodes}>
                     {(node) => (
                         <button onClick={() => {
-                            onClickTransfer([node.value])
-                        }} type="button" style={'background-color: lavender'}
+                            onClickTransfer([node.value]);
+                        } } type="button" style={'background-color: lavender'}
                             class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">{node.key}
                         </button>
                     )}
@@ -320,12 +316,11 @@ export const SyncComopnent = () => {
                     value={searchQuery()}
                     onInput={(e) => setSearchQuery(e.target.value)}
                     class="display:block p:5 f:0.875rem lh:1.25rem color:rgb(17,24,39)  border-width:1px  border-color:rgb(209,213,219)  r:0.5rem  w:20rem bg:rgb(249,250,251) border-color:rgb(59,130,246):focus outline:none"
-                    placeholder="Search by username or email"
- />
+                    placeholder="Search by username or email" />
             </div>
         </div>;
     }
-};
+}
 
 
 

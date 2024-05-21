@@ -322,12 +322,10 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
 
 export default Sidebar;
 
-export const renderNavTreeFromGraph = (
-  meta: Vertex,
+export function renderNavTreeFromGraph(meta: Vertex,
   data: Vertex,
   showNav: boolean,
-  graph: Store<GraphInterface>,
-) => {
+  graph: Store<GraphInterface>) {
   // !!!TODO!!!: This code can we written in the code itself
   const getChildren = (meta: Vertex, vertex: Vertex) => {
     // rome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -387,4 +385,4 @@ export const renderNavTreeFromGraph = (
   const navigation: navbarDataI[] = getChildren(meta, data);
 
   return navigation;
-};
+}

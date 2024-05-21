@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
 import { Progress } from "./progress";
 
-export const ProgressDocs = () => {
+export function ProgressDocs() {
   const [value, setValue] = createSignal(0);
   let interval: number;
   onMount(() => {
@@ -43,4 +43,4 @@ ProgressProps {
       <hr />
     </>
   );
-};
+}

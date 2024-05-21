@@ -100,7 +100,7 @@ export function getParentVertexes(
   }
 }
 
-export const calculateFilter = (input: string) => {
+export function calculateFilter(input: string) {
   let isMultiple = true;
   let filterIndex = input.indexOf("[");
   let filter = "";
@@ -120,19 +120,17 @@ export const calculateFilter = (input: string) => {
     }
   }
   return [type, filter, isMultiple] as const;
-};
+}
 
-export const getTreeData = (
-  graph: Store<GraphInterface>,
+export function getTreeData(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  treeLevels: { [key: string]: any },
+  treeLevels: { [key: string]: any; },
   vertexes: Vertex[] = [],
   options?: {
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
-  },
-) => {
-  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]) => {
+  }) {
+  const getChildren = (levels: { [key: string]: any; }, vertexes: Vertex[]) => {
     const result = [] as any[];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
@@ -141,19 +139,16 @@ export const getTreeData = (
       setGraph,
     });
     for (const child of (children || []).sort(
-      (a: any, b: any) => a.P.pos - b.P.pos,
+      (a: any, b: any) => a.P.pos - b.P.pos
     )) {
-      const name =
-        levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
+      const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as any;
       navItem.name = name;
       navItem.expanded = true;
       navItem.id = child.id;
       navItem.P = child.P;
-      if (
-        levels.child &&
-        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
-      ) {
+      if (levels.child &&
+        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)) {
         navItem.children = getChildren(levels.child, [child]);
       }
 
@@ -163,16 +158,16 @@ export const getTreeData = (
   };
 
   return getChildren(treeLevels, vertexes);
-};
+}
 
-export const getTextValue = (value: any) => {
+export function getTextValue(value: any) {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
   } else if (typeof value === "object") {
     return JSON.stringify(value);
   }
   return value;
-};
+}
 export function getSelectionOptions(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,

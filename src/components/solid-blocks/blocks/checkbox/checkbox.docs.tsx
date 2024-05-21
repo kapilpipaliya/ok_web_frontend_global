@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { Checkbox } from "./checkbox";
 
-export const CheckboxDocs = () => {
+export function CheckboxDocs() {
   const [alignRight, setAlignRight] = createSignal(false);
   const [asSwitch, setAsSwitch] = createSignal(false);
   const [checked, setChecked] = createSignal(false);
@@ -71,9 +71,7 @@ CheckboxProps {
           checked={checked()}
           disabled={disabled()}
           aria-invalid={invalid() || undefined}
-          setChecked={(checked) =>
-            setEvents((e) => `setChecked(${checked})\n${e}`)
-          }
+          setChecked={(checked) => setEvents((e) => `setChecked(${checked})\n${e}`)}
         >
           {" "}
           Example Checkbox{" "}
@@ -82,4 +80,4 @@ CheckboxProps {
       <hr />
     </>
   );
-};
+}

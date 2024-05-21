@@ -60,7 +60,7 @@ export type MultiLineTextFieldProps =
 
 export type TextFieldProps = SingleLineTextFieldProps | MultiLineTextFieldProps;
 
-export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
+export function TextField(props: TextFieldProps) {
   const [local, fieldProps] = splitProps(props, [
     "aria-orientation",
     "labelClass",
@@ -78,7 +78,7 @@ export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
   ]);
   const mergedClassList = mergeProps(
     { textfield: true },
-    local.classList ?? {},
+    local.classList ?? {}
   );
 
   return (
@@ -100,8 +100,7 @@ export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
               onInput={(ev) => {
                 runEvent(ev, local.onInput);
                 local.setValue?.(ev.currentTarget.value);
-              }}
-            />
+              } } />
           </div>
         </Match>
         <Match when={local.multiline}>
@@ -117,8 +116,7 @@ export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
-            }}
-          />
+            } } />
         </Match>
         <Match when={!local.multiline}>
           <div
@@ -134,8 +132,7 @@ export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
                 onInput={(ev) => {
                   runEvent(ev, local.onInput);
                   local.setValue?.(ev.currentTarget.value);
-                }}
-              />
+                } } />
             </div>
             {local.trailing}
           </div>
@@ -144,4 +141,4 @@ export const TextField: Component<TextFieldProps> = (props: TextFieldProps) => {
       {local.children}
     </label>
   );
-};
+}

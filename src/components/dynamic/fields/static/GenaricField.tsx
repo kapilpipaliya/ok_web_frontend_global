@@ -81,10 +81,10 @@ export const PageRenderUtils = {
     item && getChildVertex(graph, ["$0Data"], item).vertex,
 };
 
-export const PageItemRender = (props: {
+export function PageItemRender(props: {
   metaVertex: Vertex;
   data?: Vertex;
-}) => {
+}) {
   const parentItems = useContext(PageRenderContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -92,7 +92,7 @@ export const PageItemRender = (props: {
   const [targetId, setTargetId] = useContext(TargetIdContext);
   const [isPreview, setIsPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
-    IndicatorPositionContext,
+    IndicatorPositionContext
   );
   let { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
@@ -104,21 +104,12 @@ export const PageItemRender = (props: {
       each={getChildVertexes(
         graph,
         ["Attr"],
-        [props.metaVertex],
+        [props.metaVertex]
       ).vertexes?.sort((a, b) => a.P.pos - b.P.pos)}
     >
       {(item, index) => {
         const {
-          children,
-          isActiveItem,
-          handleDragStart,
-          handleDragEnter,
-          handleDragOver,
-          handleDragLeave,
-          handleDrop,
-          onLayoutItemClick,
-          clone,
-          deleteLayout,
+          children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout,
         } = useDragDrop(graph, setGraph, txnId, formData, item, () => [], true);
 
         // createComputed is hard to debug
@@ -126,7 +117,6 @@ export const PageItemRender = (props: {
           // @Note:(Question)
           // We may need to link vertex with meta,
           // so each vertex can identify its meta.
-
           // 1. this will re-render when Props length changes.
           // 2. when Prop Key changes.
           const componentVertex = PageRenderUtils.getComponent(graph, item);
@@ -136,38 +126,38 @@ export const PageItemRender = (props: {
           const rowProps = getRowProps(graph, setGraph, item);
           const compProps = Object.assign(componentProps, rowProps);
 
-         if (!isPreview()) {
-          if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
-            if (compProps.class) {
-              compProps.class += ` b:#3996E1|1.5px|solid r:5`;
-            } else {
-              compProps.class = `b:#3996E1|1px|solid r:5`;
+          if (!isPreview()) {
+            if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
+              if (compProps.class) {
+                compProps.class += ` b:#3996E1|1.5px|solid r:5`;
+              } else {
+                compProps.class = `b:#3996E1|1px|solid r:5`;
+              }
             }
-          }
-          if (isSelectedHoverId(item.id)) {
-            if (compProps.class) {
-              compProps.class += ` b:#3996E1|1.5px|dashed r:5`;
-            } else {
-              compProps.class = `b:#3996E1|1px|dashed r:5`;
+            if (isSelectedHoverId(item.id)) {
+              if (compProps.class) {
+                compProps.class += ` b:#3996E1|1.5px|dashed r:5`;
+              } else {
+                compProps.class = `b:#3996E1|1px|dashed r:5`;
+              }
             }
-          }
 
-          if (isActiveItem()) {
-            if (indicatorPosition().position === "before") {
-              if (compProps.class) {
-                compProps.class += ` bt:rgb(0,0,255)|1px|solid`;
-              } else {
-                compProps.class = `bt:rgb(0,0,255)|1px|solid`;
-              }
-            } else if (indicatorPosition().position === "after") {
-              if (compProps.class) {
-                compProps.class += ` bb:rgb(0,0,255)|2px|solid`;
-              } else {
-                compProps.class = `bb:rgb(0,0,255)|2px|solid`;
+            if (isActiveItem()) {
+              if (indicatorPosition().position === "before") {
+                if (compProps.class) {
+                  compProps.class += ` bt:rgb(0,0,255)|1px|solid`;
+                } else {
+                  compProps.class = `bt:rgb(0,0,255)|1px|solid`;
+                }
+              } else if (indicatorPosition().position === "after") {
+                if (compProps.class) {
+                  compProps.class += ` bb:rgb(0,0,255)|2px|solid`;
+                } else {
+                  compProps.class = `bb:rgb(0,0,255)|2px|solid`;
+                }
               }
             }
           }
-         }
 
           // supported deleted properties.
           // mergeProperties only merge top level properties. so props will be replaced.
@@ -179,14 +169,13 @@ export const PageItemRender = (props: {
         });
 
         const component = createMemo(
-          () =>
-            item.P.component ||
-            PageRenderUtils.getComponent(graph, item)?.P[IdAttr],
+          () => item.P.component ||
+            PageRenderUtils.getComponent(graph, item)?.P[IdAttr]
         );
         const parentComponent = createMemo(() => {
           return PageRenderUtils.getComponent(
             graph,
-            getLastItem(parentItems, 1),
+            getLastItem(parentItems, 1)
           )?.P[IdAttr];
         });
         // TODO: Is This Parent Vertex is ok?
@@ -195,153 +184,135 @@ export const PageItemRender = (props: {
         const parentData = () => {
           return PageRenderUtils.getDataVertex(
             graph,
-            getLastItem(parentItems, 1),
+            getLastItem(parentItems, 1)
           );
         };
 
-        const getComponent = () =>
-          getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
+        const getComponent = () => getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
 
         const Content = () => <DynamicComponent
-        meta={item}
-        // NOTE: For repeater we cant use parentData
-        // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-        data={
-          props.data ||
-          getSelectionOptions(
-            graph,
-            setGraph,
-            [...useContext(RepeaterContext)],
-            item.P.data,
-          ).vertexes ||
-          PageRenderUtils.getDataVertex(graph, item)
-        }
-        title={toTitle(PageRenderUtils.getId(graph, item) || "")}
-        // setValue={props.setValue}
-        disabled={false}
-        component={component()}
-      />
+          meta={item}
+          // NOTE: For repeater we cant use parentData
+          // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+          data={props.data ||
+            getSelectionOptions(
+              graph,
+              setGraph,
+              [...useContext(RepeaterContext)],
+              item.P.data
+            ).vertexes ||
+            PageRenderUtils.getDataVertex(graph, item)}
+          title={toTitle(PageRenderUtils.getId(graph, item) || "")}
+          // setValue={props.setValue}
+          disabled={false}
+          component={component()} />;
 
         const PageComponent = () => (
           <PageRenderContext.Provider
             value={[...useContext(PageRenderContext), item]}
           >
-            <Show when={!isPreview()} fallback={<Content/>}>
-            <span
-              class="contents "
-              onMouseOver={(e) => {
-                e.stopPropagation();
-                setHoverId(item.id);
-              }}
-              onClick={(e) => {
-                e.stopPropagation();
-                onLayoutItemClick();
-              }}
-              onDragOver={handleDragOver}
-              onDragEnter={handleDragEnter}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <Show when={isSelectedLayoutId(item.id)}>
-                <span class="position:relative flex jc:end">
-                  <div class="abs bottom:100% display:flex bg:rgb(38,128,235) r:5 z:9999 m:2|0">
-                    <Tooltip content={"Name"} nowrap>
-                      <div class={"m:4px mr:10px fg:#ffffff f:14"}>
-                        {getComponent()}
-                      </div>
-                    </Tooltip>
-                    <Tooltip content={"Move"} nowrap>
-                      <Icon
-                        draggable={true}
-                        onDragStart={handleDragStart}
-                        icon={"material-symbols-light:drag-pan-rounded"}
-                        height={20}
-                        width={20}
-                        color={"white"}
-                        class={
-                          "cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"
-                        }
-                        style={{ color: "white" }}
-                      />
-                    </Tooltip>
-                    <Tooltip content={"Parent"} nowrap>
-                      <Icon
-                        icon={"mdi:arrow-up"}
-                        height={20}
-                        width={20}
-                        color={"white"}
-                        class={
-                          "cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"
-                        }
-                        style={{ color: "white" }}
-                        onclick={(e) => {
-                          const parentResult = getParentVertex(
-                            ["Attr"],
-                            item,
-                            graph,
-                          );
-                          if (parentResult.error) {
-                            return;
-                          }
-                          setSelectedId(parentResult.vertex!.id);
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip content={"Duplicate"}>
-                      <Icon
-                        icon={"mage:copy"}
-                        height={20}
-                        width={20}
-                        color={"white"}
-                        class={
-                          "cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"
-                        }
-                        style={{ color: "white" }}
-                        onclick={clone}
-                      />
-                    </Tooltip>
-                    <Tooltip content={"Delete"}>
-                      <Icon
-                        onClick={() => deleteLayout(getComponent())}
-                        icon={"fluent:delete-20-regular"}
-                        height={20}
-                        width={20}
-                        color={"white"}
-                        class={
-                          "cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"
-                        }
-                        style={{ color: "white" }}
-                      />
-                    </Tooltip>
-                  </div>
-                </span>
-              </Show>
-              <Show
-                when={item.id !== selectedId() && isSelectedHoverId(item.id)}
+            <Show when={!isPreview()} fallback={<Content />}>
+              <span
+                class="contents "
+                onMouseOver={(e) => {
+                  e.stopPropagation();
+                  setHoverId(item.id);
+                } }
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLayoutItemClick();
+                } }
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
-                <span class="position:relative">
-                  <div class="abs bottom:100% flex bg:rgb(38,128,235) r:5 z:9999 p:0|5 ai:center m:2|0">
-                    <Icon
-                      icon={iconMap[getComponent()]}
-                      style={{ color: "white" }}
-                    />
-                    <Tooltip content={"Name"} nowrap>
-                      <div class={"m:4px mr:10px fg:#ffffff f:14"}>
-                        {getComponent()}
-                      </div>
-                    </Tooltip>
-                  </div>
-                </span>
-              </Show>
+                <Show when={isSelectedLayoutId(item.id)}>
+                  <span class="position:relative flex jc:end">
+                    <div class="abs bottom:100% display:flex bg:rgb(38,128,235) r:5 z:9999 m:2|0">
+                      <Tooltip content={"Name"} nowrap>
+                        <div class={"m:4px mr:10px fg:#ffffff f:14"}>
+                          {getComponent()}
+                        </div>
+                      </Tooltip>
+                      <Tooltip content={"Move"} nowrap>
+                        <Icon
+                          draggable={true}
+                          onDragStart={handleDragStart}
+                          icon={"material-symbols-light:drag-pan-rounded"}
+                          height={20}
+                          width={20}
+                          color={"white"}
+                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
+                          style={{ color: "white" }} />
+                      </Tooltip>
+                      <Tooltip content={"Parent"} nowrap>
+                        <Icon
+                          icon={"mdi:arrow-up"}
+                          height={20}
+                          width={20}
+                          color={"white"}
+                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
+                          style={{ color: "white" }}
+                          onclick={(e) => {
+                            const parentResult = getParentVertex(
+                              ["Attr"],
+                              item,
+                              graph
+                            );
+                            if (parentResult.error) {
+                              return;
+                            }
+                            setSelectedId(parentResult.vertex!.id);
+                          } } />
+                      </Tooltip>
+                      <Tooltip content={"Duplicate"}>
+                        <Icon
+                          icon={"mage:copy"}
+                          height={20}
+                          width={20}
+                          color={"white"}
+                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
+                          style={{ color: "white" }}
+                          onclick={clone} />
+                      </Tooltip>
+                      <Tooltip content={"Delete"}>
+                        <Icon
+                          onClick={() => deleteLayout(getComponent())}
+                          icon={"fluent:delete-20-regular"}
+                          height={20}
+                          width={20}
+                          color={"white"}
+                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
+                          style={{ color: "white" }} />
+                      </Tooltip>
+                    </div>
+                  </span>
+                </Show>
+                <Show
+                  when={item.id !== selectedId() && isSelectedHoverId(item.id)}
+                >
+                  <span class="position:relative">
+                    <div class="abs bottom:100% flex bg:rgb(38,128,235) r:5 z:9999 p:0|5 ai:center m:2|0">
+                      <Icon
+                        icon={iconMap[getComponent()]}
+                        style={{ color: "white" }} />
+                      <Tooltip content={"Name"} nowrap>
+                        <div class={"m:4px mr:10px fg:#ffffff f:14"}>
+                          {getComponent()}
+                        </div>
+                      </Tooltip>
+                    </div>
+                  </span>
+                </Show>
 
-              <Content/>
-            </span>
+                <Content />
+              </span>
             </Show>
-          
+
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
-
         return (
           <Switch>
             <Match when={parentComponent() === "TabList"}>
@@ -375,10 +346,10 @@ export const PageItemRender = (props: {
             </Match>
           </Switch>
         );
-      }}
+      } }
     </For>
   );
-};
+}
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource, but we are using items for simplicity.
 // Components that don't have children.

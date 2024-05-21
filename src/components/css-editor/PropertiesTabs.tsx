@@ -20,7 +20,7 @@ import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssC
 import { Icon } from "@iconify-icon/solid";
 import JSONSchema from "./CssProperties";
 
-export const ClassDesignTab = (props: {
+export function ClassDesignTab(props: {
   component: string;
   meta: Vertex;
   title?: string;
@@ -29,14 +29,14 @@ export const ClassDesignTab = (props: {
   disabled?: boolean;
   isRealTime?: boolean;
   txnId?: number;
-}) => {
+}) {
   const { Container, ButtonGroups } = StyleCSSComponents();
 
-  const [cssState, setCssState] = createStore({} as { [key: string]: any });
+  const [cssState, setCssState] = createStore({} as { [key: string]: any; });
 
   // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
   const parseAndApplyCssRules = (valueString: string) => {
-    const cssRules = {} as { [key: string]: string };
+    const cssRules = {} as { [key: string]: string; };
 
     for (const [key, value] of valueString
       .split(/[\s\n]+/)
@@ -50,8 +50,8 @@ export const ClassDesignTab = (props: {
   createEffect(
     on(
       () => (props.data?.P[props.meta.P.name] as string) ?? "",
-      parseAndApplyCssRules,
-    ),
+      parseAndApplyCssRules
+    )
   );
 
   function getCssValue() {
@@ -81,7 +81,7 @@ export const ClassDesignTab = (props: {
               </TabContainer>
               <TabContainer>
                 <Container>
-                  <TextEditor getCssValue={getCssValue} parseAndApplyCssRules={parseAndApplyCssRules}/>
+                  <TextEditor getCssValue={getCssValue} parseAndApplyCssRules={parseAndApplyCssRules} />
                 </Container>
               </TabContainer>
             </Tabs>
@@ -90,7 +90,7 @@ export const ClassDesignTab = (props: {
       </tr>
     </CssEditorContext.Provider>
   );
-};
+}
 
 const TextEditor = (props: { getCssValue: any, parseAndApplyCssRules: (valueString: string) => void }) => {
   const [text, setText] = createSignal(props.getCssValue);

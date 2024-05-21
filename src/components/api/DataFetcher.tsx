@@ -3,11 +3,11 @@ import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 
-export const DataFetcher = (props: {
+export function DataFetcher(props: {
   fetchData: string;
   renderContent: JSX.Element;
   errorMessage?: string;
-}) => {
+}) {
   const [graph, setGraph] = useContext(GraphContext)!;
 
   const getdata = async () => {
@@ -24,8 +24,8 @@ export const DataFetcher = (props: {
     getdata();
   });
 
-  return props.renderContent
-};
+  return props.renderContent;
+}
 
 export const API = {
   fetchDataUrl: `/api/get_data`,

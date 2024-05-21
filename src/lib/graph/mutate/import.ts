@@ -40,20 +40,17 @@ import { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
 
-export const updateImportRecord = (
-  graph: Store<GraphInterface>,
+export function updateImportRecord(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   type: string,
   vertex: Vertex,
   isRealTime: boolean,
   ws: ServerEventsDispatcher,
-  dry = true,
-) => {
+  dry = true) {
   // TODO: Is this method valid? does it delete nested Rows set by this form?, check code written in NavDesigner component to clear the form.
   const deleteAllRows = (edgeType: string) => {
-    const vertexes =
-      getChildVertexes(graph, [edgeType], [vertex]).vertexes || [];
+    const vertexes = getChildVertexes(graph, [edgeType], [vertex]).vertexes || [];
     for (const row of vertexes) {
       deleteRow(row, isRealTime, graph, setGraph, txnId, ws);
     }
@@ -228,7 +225,7 @@ export const updateImportRecord = (
     default: {
     }
   }
-};
+}
 const isEmpty = (object: { [key: string]: any }) =>
   !Object.values(object).some((x) => x !== null && x !== "");
 
@@ -264,12 +261,10 @@ const resoDataTypeToComponents = (
       return "";
   }
 };
-export const onDataDirectoryImportClick = (
-  vertex: Vertex,
+export function onDataDirectoryImportClick(vertex: Vertex,
   Ws: ServerEventsDispatcher,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) => {
+  setGraph: SetStoreFunction<GraphInterface>) {
   const { showErrorToast } = useToast();
 
   const csvResult = vertex.P.csv as string;
@@ -350,7 +345,7 @@ export const onDataDirectoryImportClick = (
       [key: string]: any;
     }[],
     labelName: string,
-    mainVertex?: Vertex,
+    mainVertex?: Vertex
   ) => {
     const selectMetas = normalizeMeta.filter((meta) => meta.collLabel);
     const nonSelectMetas = normalizeMeta.filter((meta) => !meta.collLabel);
@@ -368,7 +363,7 @@ export const onDataDirectoryImportClick = (
           graph,
           meta.collLabel,
           meta.collId,
-          value,
+          value
         );
 
         if (!existingVertex) {
@@ -378,7 +373,7 @@ export const onDataDirectoryImportClick = (
               [meta.collId]: value,
             }),
             graph,
-            setGraph,
+            setGraph
           );
         }
       });
@@ -394,7 +389,7 @@ export const onDataDirectoryImportClick = (
         if (meta.skipRow.includes(rowObj[meta.column])) {
           skipRow = true;
           console.log(
-            `skipping row with ${meta.column} value ${rowObj[meta.column]}`,
+            `skipping row with ${meta.column} value ${rowObj[meta.column]}`
           );
           break;
         }
@@ -418,7 +413,7 @@ export const onDataDirectoryImportClick = (
       if (mainVertex) {
         const type = getToEdge(
           { P: { [IdAttr]: labelName } } as any,
-          mainVertex,
+          mainVertex
         );
         const newRow1 = newRow(graph, setGraph, txnId, mainVertex, type);
         rowVertexId = newRow1.vertexId!;
@@ -430,7 +425,7 @@ export const onDataDirectoryImportClick = (
           graph,
           labelName,
           IdAttr,
-          rowObj[IdAttr],
+          rowObj[IdAttr]
         );
         if (existingVertex) {
           rowVertexId = existingVertex.id;
@@ -439,7 +434,7 @@ export const onDataDirectoryImportClick = (
             txnId,
             newVertex(rowVertexId, [labelName], rowObj),
             graph,
-            setGraph,
+            setGraph
           );
         }
       }
@@ -449,13 +444,12 @@ export const onDataDirectoryImportClick = (
         if (!value) continue;
         const vertex = graph.vertexes[rowVertexId];
 
-        const v = () =>
-          findVertexByLabelAndUniqueId(
-            graph,
-            selectMeta.collLabel,
-            selectMeta.collId,
-            value,
-          );
+        const v = () => findVertexByLabelAndUniqueId(
+          graph,
+          selectMeta.collLabel,
+          selectMeta.collId,
+          value
+        );
         if (selectMeta.func) {
           if (selectMeta.func === "component") {
             const componentString = resoDataTypeToComponents(value, row);
@@ -463,7 +457,7 @@ export const onDataDirectoryImportClick = (
               graph,
               selectMeta.collLabel,
               selectMeta.collId,
-              componentString,
+              componentString
             );
             if (!componentVertex) {
               console.warn(`component is not found ${componentString}`);
@@ -478,14 +472,14 @@ export const onDataDirectoryImportClick = (
               {
                 P: { [IdAttr]: selectMeta.collLabel },
               } as unknown as Vertex,
-              componentVertex.id,
+              componentVertex.id
             );
           } else if (selectMeta.func === "lookup") {
             const lookup = findVertexByLabelAndUniqueId(
               graph,
               selectMeta.collLabel,
               selectMeta.collId,
-              value,
+              value
             );
             if (lookup) {
               // edge and child vertex has same label
@@ -494,7 +488,7 @@ export const onDataDirectoryImportClick = (
                 setGraph,
                 txnId,
                 graph.vertexes[rowVertexId],
-                selectMeta.collLabel,
+                selectMeta.collLabel
               );
               const rowVertex = graph.vertexes[lookupChild.vertexId!];
               setSelectionValue(
@@ -505,7 +499,7 @@ export const onDataDirectoryImportClick = (
                 {
                   P: { [IdAttr]: selectMeta.collLabel },
                 } as unknown as Vertex,
-                lookup.id,
+                lookup.id
               );
             }
           }
@@ -523,7 +517,7 @@ export const onDataDirectoryImportClick = (
                 },
               },
             } as unknown as Vertex,
-            v()!.id,
+            v()!.id
           );
         } else {
           setSelectionValue(
@@ -534,14 +528,14 @@ export const onDataDirectoryImportClick = (
             {
               P: { [IdAttr]: selectMeta.edge || selectMeta.collLabel },
             } as unknown as Vertex,
-            v()!.id,
+            v()!.id
           );
         }
       }
     }
   };
 
-  const rows = [] as { [key: string]: any }[];
+  const rows = [] as { [key: string]: any; }[];
 
   converter
     .fromString(csvResult as string)
@@ -569,7 +563,7 @@ export const onDataDirectoryImportClick = (
             lookupId,
             lookUpUniqueValue,
             graph,
-            setGraph,
+            setGraph
           );
 
           const rows = uniqueValues[lookUpUniqueValue]!;
@@ -589,7 +583,7 @@ export const onDataDirectoryImportClick = (
       if (!dry) commitTxn(txnId, Ws);
       showErrorToast("finished import");
     });
-};
+}
 
 export function importRecordWithYAMLSchema(
   txnId: number,

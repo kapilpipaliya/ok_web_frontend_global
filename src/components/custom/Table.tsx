@@ -77,10 +77,10 @@ function CollapsibleTableRow(props: {
 }
 
 // Main component that renders the table
-export const CollapsibleTable = (props: {
+export function CollapsibleTable(props: {
   headers: ColumnDef<any>[];
   rows: Vertex[];
-}) => {
+}) {
   const [currentPage, setCurrentPage] = createSignal(0);
   const [rowsPerPage, setRowsPerPage] = createSignal(10);
 
@@ -125,30 +125,27 @@ export const CollapsibleTable = (props: {
                     {capitalizeFirstLetter(header.name || "")}
                   </TableHeader>
                 );
-              }}
+              } }
             </For>
           </TableHeadRow>
         </TableHead>
         <TableBody>
           <For
             each={displayedRows()}
-            fallback={
-              <tr>
-                <td
-                  colspan={props.headers.length + 1}
-                  style="text-align: center; padding: 1rem;"
-                >
-                  No records to display
-                </td>
-              </tr>
-            }
+            fallback={<tr>
+              <td
+                colspan={props.headers.length + 1}
+                style="text-align: center; padding: 1rem;"
+              >
+                No records to display
+              </td>
+            </tr>}
           >
             {(row, index) => (
               <CollapsibleTableRow
                 row={row}
                 index={index()}
-                headers={props.headers}
-              />
+                headers={props.headers} />
             )}
           </For>
         </TableBody>
@@ -172,7 +169,7 @@ export const CollapsibleTable = (props: {
           <div style="margin-right: 1rem;" class="font-weight:500">
             <span>{`${currentPage() * rowsPerPage() + 1}-${Math.min(
               (currentPage() + 1) * rowsPerPage(),
-              props.rows.length,
+              props.rows.length
             )} of ${props.rows.length}`}</span>
           </div>
           <div class="flex gap:10px">
@@ -186,8 +183,7 @@ export const CollapsibleTable = (props: {
                 <Icon
                   height={22}
                   width={22}
-                  icon={"icon-park-outline:go-start"}
-                />
+                  icon={"icon-park-outline:go-start"} />
               </button>
             </Tooltip>
             <Tooltip content="Previous">
@@ -205,8 +201,7 @@ export const CollapsibleTable = (props: {
                 onClick={handleNextPage}
                 disabled={currentPage() === totalPages() - 1}
                 style={{
-                  color:
-                    currentPage() === totalPages() - 1 ? "lightgrey" : "black",
+                  color: currentPage() === totalPages() - 1 ? "lightgrey" : "black",
                 }}
                 class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               >
@@ -218,16 +213,14 @@ export const CollapsibleTable = (props: {
                 onClick={handleLastPage}
                 disabled={currentPage() === totalPages() - 1}
                 style={{
-                  color:
-                    currentPage() === totalPages() - 1 ? "lightgrey" : "black",
+                  color: currentPage() === totalPages() - 1 ? "lightgrey" : "black",
                 }}
                 class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
               >
                 <Icon
                   height={22}
                   width={22}
-                  icon={"icon-park-outline:go-end"}
-                />
+                  icon={"icon-park-outline:go-end"} />
               </button>
             </Tooltip>
           </div>
@@ -235,7 +228,7 @@ export const CollapsibleTable = (props: {
       </Show>
     </div>
   );
-};
+}
 
 function DataTableRow(props: { index: any; vertex: any }) {
   const [open, setOpen] = createSignal(false);
@@ -279,7 +272,7 @@ function DataTableRow(props: { index: any; vertex: any }) {
   );
 }
 
-export const DataTable = (props: { headers: any; rows: any }) => {
+export function DataTable(props: { headers: any; rows: any; }) {
   return (
     <div class={"w:80vw overflow:auto"}>
       <Table>
@@ -306,8 +299,8 @@ export const DataTable = (props: { headers: any; rows: any }) => {
                         >
                           {toTitle(
                             attribute.P.displayName ||
-                              attribute.P[IdAttr] ||
-                              "",
+                            attribute.P[IdAttr] ||
+                            ""
                           )}
                         </TableHeader>
                       </Match>
@@ -317,7 +310,7 @@ export const DataTable = (props: { headers: any; rows: any }) => {
                       </Match>
                     </Switch>
                   );
-                }}
+                } }
               </For>
             </TableHeadRow>
           </TableHead>
@@ -333,53 +326,67 @@ export const DataTable = (props: { headers: any; rows: any }) => {
       </Table>
     </div>
   );
-};
+}
 
-export const Table = (props: any) => (
-  <div class="overflow:visible rel r:10" style={{ "scrollbar-width": "thin" }}>
-    <table {...props} class={"styled-table w:100%"}>
+export function Table(props: any) {
+  return (
+    <div class="overflow:visible rel r:10" style={{ "scrollbar-width": "thin" }}>
+      <table {...props} class={"styled-table w:100%"}>
+        {props.children}
+      </table>
+    </div>
+  );
+}
+
+export function TableHeader(props: any) {
+  return (
+    <th
+      {...props}
+      class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238) @fade|.4s`}
+    >
       {props.children}
-    </table>
-  </div>
-);
-
-export const TableHeader = (props: any) => (
-  <th
-    {...props}
-    class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238) @fade|.4s`}
-  >
-    {props.children}
-  </th>
-);
-export const TableBody = (props: any) => (
-  <tbody {...props} class="r:5|5|5|5 rounded-md ">
-    {props.children}
-  </tbody>
-);
-export const TableHead = (props: any) => (
-  <thead {...props} class="r:5|5|5|5 ">
-    {props.children}
-  </thead>
-);
-export const TableHeadRow = (props: any) => (
-  <tr {...props} class="p:10 text:center @fade|.4s">
-    {props.children}
-  </tr>
-);
-export const TableBodyRow = (props: any) => (
-  <tr
-    {...props}
-    class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} bg:#3478cc0d:hover @fade|.4s`}
-  >
-    {props.children}
-  </tr>
-);
-export const TableData = (props: any) => (
-  <td
-    {...props}
-    style={{ "text-align-last": "center", padding: "7px" }}
-    class={"bb:1px|solid|rgb(227,231,236)"}
-  >
-    {props.children}
-  </td>
-);
+    </th>
+  );
+}
+export function TableBody(props: any) {
+  return (
+    <tbody {...props} class="r:5|5|5|5 rounded-md ">
+      {props.children}
+    </tbody>
+  );
+}
+export function TableHead(props: any) {
+  return (
+    <thead {...props} class="r:5|5|5|5 ">
+      {props.children}
+    </thead>
+  );
+}
+export function TableHeadRow(props: any) {
+  return (
+    <tr {...props} class="p:10 text:center @fade|.4s">
+      {props.children}
+    </tr>
+  );
+}
+export function TableBodyRow(props: any) {
+  return (
+    <tr
+      {...props}
+      class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} bg:#3478cc0d:hover @fade|.4s`}
+    >
+      {props.children}
+    </tr>
+  );
+}
+export function TableData(props: any) {
+  return (
+    <td
+      {...props}
+      style={{ "text-align-last": "center", padding: "7px" }}
+      class={"bb:1px|solid|rgb(227,231,236)"}
+    >
+      {props.children}
+    </td>
+  );
+}

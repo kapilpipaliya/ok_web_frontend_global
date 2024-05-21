@@ -20,7 +20,7 @@ import { GenericField } from "~/components/dynamic/fields/static/GenericFieldCom
 import { toTitle } from "case-switcher-js";
 import { ClassDesignTab } from "~/components/css-editor/PropertiesTabs";
 
-export const AllForms = () => {
+export function AllForms() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const allForms = () => graph.vertexLabelIdMap["Form"] || [];
 
@@ -35,23 +35,22 @@ export const AllForms = () => {
       </For>
     </div>
   );
-};
-export const SimpleImport = (props: {}) => {
+}
+export function SimpleImport(props: {}) {
   const { Ws } = useContext(WsContext);
-  const config = createStore({} as { formData: Store<IFormContext> });
+  const config = createStore({} as { formData: Store<IFormContext>; });
   const [graph, setGraph] = useContext(GraphContext)!;
   return (
     <>
       <SelectInputField
         component={"SelectBox"}
         data={{ P: {} } as Vertex}
-        meta={
-          {
-            P: {
-              [IdAttr]: "import",
-              props: {
-                stringValue: true,
-                items: `dataType
+        meta={{
+          P: {
+            [IdAttr]: "import",
+            props: {
+              stringValue: true,
+              items: `dataType
 component
 dataTypeDefault
 lookup
@@ -59,54 +58,45 @@ attribute
 user
 role
 perm`,
-              },
             },
-          } as unknown as Vertex
-        }
+          },
+        } as unknown as Vertex}
         // @ts-ignore
-        setValue={(attr, vertex, data) =>
-          updateImportRecord(
-            graph,
-            setGraph,
-            config[0].formData.txnId,
-            data,
-            config[0].formData.formData,
-            false,
-            Ws,
-          )
-        }
-      />
+        setValue={(attr, vertex, data) => updateImportRecord(
+          graph,
+          setGraph,
+          config[0].formData.txnId,
+          data,
+          config[0].formData.formData,
+          false,
+          Ws
+        )} />
       <AbstractSingleForm
         id={"new"}
         formId={"Import"}
         config={config}
         graph={graph}
-        setGraph={setGraph}
-      />
+        setGraph={setGraph} />
 
       <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              [IdAttr]: "meta",
-              props: {
-                children: "Import",
-                onClick: () =>
-                  onDataDirectoryImportClick(
-                    config[0].formData.formData,
-                    Ws,
-                    graph,
-                    setGraph,
-                  ),
-              },
+        meta={{
+          P: {
+            component: "Button",
+            [IdAttr]: "meta",
+            props: {
+              children: "Import",
+              onClick: () => onDataDirectoryImportClick(
+                config[0].formData.formData,
+                Ws,
+                graph,
+                setGraph
+              ),
             },
-          } as unknown as Vertex
-        }
-      />
+          },
+        } as unknown as Vertex} />
     </>
   );
-}; // group of the fields
+} // group of the fields
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
   vertex: Vertex;

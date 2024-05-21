@@ -9,7 +9,7 @@ import { signInCall } from "~/components/api/api_functions";
 import "~/css/base.css";
 import postAPI from "~/components/api/postApi";
 
-export const Login = () => {
+export function Login() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [loadingSite, setLoadingSite] = useContext(LoadingContext);
@@ -73,8 +73,7 @@ export const Login = () => {
       class="@fade|.5s"
       style={{
         "background-size": "cover",
-        "background-image":
-          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-image": "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
         display: "flex",
         "background-color": "rgb(239,235,233)",
         "flex-direction": "column",
@@ -86,22 +85,18 @@ export const Login = () => {
     >
       <Show
         when={formData().profileImage}
-        fallback={
-          <img
-            src={logo}
-            alt="logo"
-            class="@fade|.5s"
-            style={{ "justify-self": "center", height: "70px" }}
-          />
-        }
+        fallback={<img
+          src={logo}
+          alt="logo"
+          class="@fade|.5s"
+          style={{ "justify-self": "center", height: "70px" }} />}
       >
         <div class="text-align:-webkit-center">
           <img
             src={formData().profileImage}
             alt="logo"
             class="r:10 @fade|.5s bg:white p:2"
-            style={{ "justify-self": "center", height: "130px" }}
-          />
+            style={{ "justify-self": "center", height: "130px" }} />
           <div class="m:10">
             <span>Welcome Back,</span>
             <span class="color:rgb(226,65,75) font-weight:bold font:19">
@@ -123,8 +118,7 @@ export const Login = () => {
           src={"../../public/graphics/login_vector.jpg"}
           style={{ width: "25rem" }}
           alt="logo"
-          class="d:none@<md"
-        />
+          class="d:none@<md" />
         <div class="mt:25 w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">Log In</div>
           <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
@@ -141,9 +135,7 @@ export const Login = () => {
             name="email"
             type="text"
             value={formData().email}
-            onInput={(e) =>
-              setFormData({ ...formData(), email: e.target.value })
-            }
+            onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
             style={{
               width: "100%",
               padding: "8px",
@@ -152,8 +144,7 @@ export const Login = () => {
             }}
             autocomplete="email"
             placeholder="Your email"
-            required
-          />
+            required />
           <label
             for="password"
             class="f:14 mt:5"
@@ -166,9 +157,7 @@ export const Login = () => {
               name="password"
               type={`${showPassword() ? "text" : "password"}`}
               value={formData().password}
-              onInput={(e) =>
-                setFormData({ ...formData(), password: e.target.value })
-              }
+              onInput={(e) => setFormData({ ...formData(), password: e.target.value })}
               style={{
                 width: "100%",
                 padding: "8px",
@@ -177,14 +166,12 @@ export const Login = () => {
               }}
               autocomplete="password"
               placeholder="Your Password"
-              required
-            />
+              required />
             <Icon
               onClick={togglePasswordVisibility}
               class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
               aria-label="Toggle password visibility"
-              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
-            />
+              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`} />
           </div>
           <div
             style={{
@@ -232,4 +219,4 @@ export const Login = () => {
       </form>
     </div>
   );
-};
+}

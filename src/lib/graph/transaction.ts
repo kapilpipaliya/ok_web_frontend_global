@@ -38,10 +38,8 @@ export const transactions = new Map<
   { status: ProcessStatus; steps: TransactionValue[] }
 >();
 // @ts-ignore
-export const transactionDetailAdd = (
-  txnId: number,
-  txnValue: TransactionValue,
-) => {
+export function transactionDetailAdd(txnId: number,
+  txnValue: TransactionValue) {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
     status: ProcessStatus.Unset,
@@ -49,30 +47,29 @@ export const transactionDetailAdd = (
   };
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
   transactions.set(txnId, existingTxnValue);
-};
+}
 
-export const getNewTxnId = (
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) => {
+export function getNewTxnId(graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>) {
   setGraph("txnId", (v) => (v ?? 0) + 1);
   return graph.txnId;
-};
+}
 
-export const getExistingOrDefaultTxnValue = (txnId: number) =>
-  transactions.get(txnId) || {
+export function getExistingOrDefaultTxnValue(txnId: number) {
+  return transactions.get(txnId) || {
     status: ProcessStatus.Unset,
     steps: [],
   };
+}
 
-export const revertOneTransactionUnSafe = (txnId: number, txnIndex: number) => {
+export function revertOneTransactionUnSafe(txnId: number, txnIndex: number) {
   if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
   // todo dont use splice
   const newTxnValue = existingTxnValue.steps.splice(txnIndex, 1);
   newTxnValue[0]?.revert();
-};
-export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
+}
+export function revertTransactionUpTo(txnId: number, txnIndex: number) {
   if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = transactions.get(txnId) || {
     status: ProcessStatus.Unset,
@@ -80,22 +77,22 @@ export const revertTransactionUpTo = (txnId: number, txnIndex: number) => {
   };
   const newTxnValue = existingTxnValue.steps.splice(txnIndex);
   newTxnValue.reverse().forEach((x) => x.revert());
-};
-export const revertTransaction = (txnId: number) => {
+}
+export function revertTransaction(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = [...(transactions.get(txnId)!.steps || [])];
   batch(() => {
     existingTxnValue.reverse().forEach((txn) => txn.revert());
   });
   transactions.delete(txnId);
-};
-export const txnHasSteps = (txnId: number) => {
+}
+export function txnHasSteps(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return false;
   const existingTxnValue = transactions.get(txnId)!.steps || [];
   return existingTxnValue.length > 0;
-};
+}
 
-export const getTransactionData = (txnId: number) => {
+export function getTransactionData(txnId: number) {
   if (!transactions.has(txnId)) return [];
   const existingTxnValue = [...(transactions.get(txnId)!.steps || [])].map(
     (txnDetail) => ({
@@ -108,24 +105,22 @@ export const getTransactionData = (txnId: number) => {
       replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
       replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
       deleteEdge: txnDetail.deleteEdge?.(),
-    }),
+    })
   );
   return existingTxnValue;
-};
+}
 export let vertexOldIdToNewIdMap = new Map<Id, Id>();
 export let edgeOldIdToNewIdMap = new Map<Id, Id>();
 
-export const commitTransaction = (Ws: ServerEventsDispatcher) => {
+export function commitTransaction(Ws: ServerEventsDispatcher) {
   let firstReadyTxn = 0;
   // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
   for (const [txnId, value] of transactions.entries()) {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    } else if (
-      value.status === ProcessStatus.AckReceived ||
-      value.status === ProcessStatus.Sent
-    ) {
+    } else if (value.status === ProcessStatus.AckReceived ||
+      value.status === ProcessStatus.Sent) {
       return;
     }
   }
@@ -151,11 +146,11 @@ export const commitTransaction = (Ws: ServerEventsDispatcher) => {
       return { event, data };
     }
   }
-};
+}
 // Bug: if commitTxn is called many times it is sending event many times.
 // TODO: currently we can only run this function once.
 // we need to set seperate txnId once commited. Fix this.
-export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
+export function commitTxn(txnId: number, Ws: ServerEventsDispatcher) {
   console.log("In commitTxn");
 
   if (transactions.has(txnId)) {
@@ -163,7 +158,7 @@ export const commitTxn = (txnId: number, Ws: ServerEventsDispatcher) => {
     transactions.get(txnId)!.status = ProcessStatus.Ready;
     return commitTransaction(Ws);
   }
-};
+}
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 
 export function getNewGraphId(): Id {

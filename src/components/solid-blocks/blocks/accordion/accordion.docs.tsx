@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { Accordion, AccordionGroup, AccordionHeader } from "./accordion";
 import { Checkbox } from "../checkbox/checkbox";
 
-export const AccordionDocs = () => {
+export function AccordionDocs() {
   const [exampleOpen, setExampleOpen] = createSignal(false);
   const [events, setEvents] = createSignal("");
   const [allowMultiple, setAllowMultiple] = createSignal(false);
@@ -60,9 +60,7 @@ AccordionProps {
       <div class="example" style={{ "min-height": "6em" }}>
         <Accordion
           open={exampleOpen()}
-          setOpen={(open: boolean) =>
-            setEvents((e) => `setOpen(${open})\n${e}`)
-          }
+          setOpen={(open: boolean) => setEvents((e) => `setOpen(${open})\n${e}`)}
         >
           <AccordionHeader>Static header</AccordionHeader>
           <p>static content</p>
@@ -135,4 +133,4 @@ AccordionGroupProps {
       <hr />
     </>
   );
-};
+}

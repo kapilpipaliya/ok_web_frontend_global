@@ -13,12 +13,12 @@ export const collapsibleContext = createContext<
 >(null);
 
 // Parent component for the collapsible section
-export const Collapsible = (props: {
+export function Collapsible(props: {
   isOpen: boolean;
   handleToggle: () => void;
   title: any;
   children: any;
-}) => {
+}) {
   return (
     // Provide the unique ID value to the collapsible context
     <collapsibleContext.Provider value={createSignal(createUniqueId())}>
@@ -47,8 +47,7 @@ export const Collapsible = (props: {
             float: "right",
             "margin-left": "5px",
           }}
-          icon={props.isOpen ? "mdi:minus" : "mdi:plus"}
-        />
+          icon={props.isOpen ? "mdi:minus" : "mdi:plus"} />
       </button>
       <div
         class="content"
@@ -64,4 +63,4 @@ export const Collapsible = (props: {
       </div>
     </collapsibleContext.Provider>
   );
-};
+}

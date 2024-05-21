@@ -8,10 +8,10 @@ export async function GET({ request }: APIEvent) {
   );
 }
 
-export const Subdomain = () => {
+export function Subdomain() {
   return (
     <div>
       <h1>Subdomain</h1>
     </div>
   );
-};
+}

@@ -2,7 +2,7 @@ import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import CustomModal from "./CommonDialog";
 import { JSX } from "solid-js";
 
-export const DeleteDialog = (props: {
+export function DeleteDialog(props: {
   onConfirm: () => void;
   title?: string;
   message?: string;
@@ -10,13 +10,13 @@ export const DeleteDialog = (props: {
   onCancel?: () => void;
   open?: boolean;
   setOpen?: (open: boolean) => void;
-}) => {
+}) {
   const handleConfirm = () => {
     props.onConfirm();
   };
 
   const handleCancel = () => {
-    props.onCancel ? props.onCancel() : () => {};
+    props.onCancel ? props.onCancel() : () => { };
   };
   return (
     <CustomModal
@@ -26,11 +26,9 @@ export const DeleteDialog = (props: {
       setOpen={props.setOpen}
       buttonLabel={props.buttonLabel}
       customTitle={<span>{props.title || "Delete Confirmation"}</span>}
-      body={
-        <p class="p:10px|0px">
-          {props.message || "Are you sure you want to delete this item?"}
-        </p>
-      }
+      body={<p class="p:10px|0px">
+        {props.message || "Are you sure you want to delete this item?"}
+      </p>}
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <CustomButton
@@ -39,7 +37,7 @@ export const DeleteDialog = (props: {
             onClick={() => {
               handleCancel();
               toggle((v) => !v);
-            }}
+            } }
           >
             Cancel
           </CustomButton>
@@ -48,14 +46,13 @@ export const DeleteDialog = (props: {
             onClick={() => {
               handleConfirm();
               toggle((v) => !v);
-            }}
+            } }
             style="margin-right: 10px;"
           >
             Confirm
           </CustomButton>
         </div>
       )}
-      dialogClass="min-w:20% r:10px p:0"
-    />
+      dialogClass="min-w:20% r:10px p:0" />
   );
-};
+}

@@ -11,7 +11,7 @@ export type BarProps = JSX.HTMLAttributes<HTMLDivElement> & {
   portal?: boolean;
 };
 
-export const Bar: Component<BarProps> = (props) => {
+export function Bar(props: BarProps) {
   const [local, rest] = splitProps(props, [
     "placement",
     "position",
@@ -19,9 +19,7 @@ export const Bar: Component<BarProps> = (props) => {
     "portal",
   ]);
   const divProps = mergeProps(rest, {
-    class: `${local.placement}${
-      local.position ? " " + local.position : ""
-    } sb-bar ${props.class ? " " + props.class : ""}`,
+    class: `${local.placement}${local.position ? " " + local.position : ""} sb-bar ${props.class ? " " + props.class : ""}`,
   });
   return local.portal === false ? (
     <div {...divProps} />
@@ -30,4 +28,4 @@ export const Bar: Component<BarProps> = (props) => {
       <div {...divProps} />
     </Portal>
   );
-};
+}

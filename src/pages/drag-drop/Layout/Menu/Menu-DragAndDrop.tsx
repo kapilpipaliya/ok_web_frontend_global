@@ -16,7 +16,7 @@ interface MenuProps {
   toggleIsRightOpen: Accessor<boolean>;
 }
 
-export const MenuDragAndDrop = (props: MenuProps) => {
+export function MenuDragAndDrop(props: MenuProps) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   return (
     <nav style={{ "grid-area": "menu" }}>
@@ -35,8 +35,7 @@ export const MenuDragAndDrop = (props: MenuProps) => {
                 <Column
                   type={column.id}
                   index={index()}
-                  vertex={pageConfig.formData?.formData}
-                />
+                  vertex={pageConfig.formData?.formData} />
               )}
             </For>
           </Show>
@@ -51,28 +50,24 @@ export const MenuDragAndDrop = (props: MenuProps) => {
           >
             <Show
               when={props.isLeftOpen()}
-              fallback={
-                <Icon
-                  icon={"line-md:chevron-right-circle"}
-                  height={30}
-                  width={30}
-                  style={{ color: "#c1c1c1" }}
-                />
-              }
+              fallback={<Icon
+                icon={"line-md:chevron-right-circle"}
+                height={30}
+                width={30}
+                style={{ color: "#c1c1c1" }} />}
             >
               <Icon
                 icon={"line-md:chevron-left-circle"}
                 height={30}
                 width={30}
-                style={{ color: "#c1c1c1" }}
-              />
+                style={{ color: "#c1c1c1" }} />
             </Show>
           </button>
         </div>
       </div>
     </nav>
   );
-};
+}
 
 const Column = (props: { type: string; index: number; vertex: Vertex }) => {
   const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();

@@ -308,13 +308,11 @@ export function loadForm(
   };
 }
 
-export const addMetaVertexes = (
-  graph: Store<GraphInterface>,
+export function addMetaVertexes(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Vertex,
-  attributes: FieldAttribute[]
-) => {
+  attributes: FieldAttribute[]) {
   const { showErrorToast } = useToast();
 
   for (const attribute of attributes) {
@@ -351,7 +349,7 @@ export const addMetaVertexes = (
     }
     // todo discard transaction
   }
-};
+}
 
 export function setValueGlobal(
   graph: Store<GraphInterface>,
@@ -543,11 +541,9 @@ export function onChangeHandler(
 }
 // 'type' or 'label' can be overwritten in the meta.
 
-export const getFormMetaData = (
-  graph: Store<GraphInterface>,
+export function getFormMetaData(graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  formId: string
-) => {
+  formId: string) {
   let form = AttrsTableData[formId] ||
     (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
@@ -557,13 +553,11 @@ export const getFormMetaData = (
     form = formResult.form!;
   }
   return { error: false, form };
-};
+}
 
-export const getExportCode = (
-  graph: Store<GraphInterface>,
+export function getExportCode(graph: Store<GraphInterface>,
   meta: Vertex,
-  data: Vertex
-) => {
+  data: Vertex) {
   const getChildren = (
     meta: Vertex,
     vertex: Vertex,
@@ -680,5 +674,5 @@ export const getExportCode = (
     id: undefined,
     D: undefined,
   });
-};
+}
 

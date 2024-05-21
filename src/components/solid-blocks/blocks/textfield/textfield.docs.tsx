@@ -3,7 +3,7 @@ import { Checkbox } from "../checkbox/checkbox";
 import { Select } from "../select/select";
 import { TextField, TextFieldType } from "./textfield";
 
-export const TextfieldDocs = () => {
+export function TextfieldDocs() {
   const [vertical, setVertical] = createSignal(false);
   const [multiline, setMultiline] = createSignal(false);
   const [value, setValue] = createSignal("");
@@ -99,11 +99,10 @@ TextfieldProps {
           setValue={(v) => {
             setValue(v);
             setEvents((e) => `setValue("${v}")\n${e}`);
-          }}
-          value={value()}
-        />
+          } }
+          value={value()} />
       </div>
       <hr />
     </>
   );
-};
+}

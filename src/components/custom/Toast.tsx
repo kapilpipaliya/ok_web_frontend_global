@@ -46,7 +46,7 @@ interface LoadingToastParams<T extends { [key: string]: any }> {
   onError?: (error: any) => void;
 }
 
-export const useToast = () => {
+export function useToast() {
   function showCustomToast(message: string, showDismiss: boolean) {
     toast.custom(
       (t) => (
@@ -55,8 +55,7 @@ export const useToast = () => {
             padding: "0.75rem 3rem 0.75rem 1.5rem", // px-6 py-3 pr-12
             "background-color": "white", // bg-white
             "border-radius": "10px", // rounded-full
-            "box-shadow":
-              "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // shadow-md
+            "box-shadow": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // shadow-md
             "font-weight": "500", // font-medium
             position: "relative", // relative
           }}
@@ -67,8 +66,7 @@ export const useToast = () => {
               <DismissButton
                 onDismiss={() => {
                   toast.dismiss(t.id);
-                }}
-              />
+                } } />
             </Show>
           </div>
         </div>
@@ -76,7 +74,7 @@ export const useToast = () => {
       {
         duration: 5000000,
         unmountDelay: 0,
-      },
+      }
     );
   }
 
@@ -84,20 +82,12 @@ export const useToast = () => {
     toast.success(message, { duration: 2000 });
   }
 
-  async function showLoadingToast<T extends { [key: string]: any }>({
-    promise,
-    loadMessage = "Processing...",
-    successMessage,
-    errorMessage,
-    successJSXFn,
-    errorJSXFn,
-    onSuccess,
-    onError,
+  async function showLoadingToast<T extends { [key: string]: any; }>({
+    promise, loadMessage = "Processing...", successMessage, errorMessage, successJSXFn, errorJSXFn, onSuccess, onError,
   }: LoadingToastParams<T>) {
     await toast.promise(promise, {
       loading: loadMessage,
-      success:
-        successJSXFn ??
+      success: successJSXFn ??
         ((val: T) => {
           onSuccess?.(val);
           return (
@@ -128,8 +118,7 @@ export const useToast = () => {
           icon={"mingcute:warning-line"}
           height={27}
           width={27}
-          style={{ color: "#009cfa" }}
-        />
+          style={{ color: "#009cfa" }} />
       ),
     });
   }
@@ -191,7 +180,7 @@ export const useToast = () => {
       },
       {
         duration: duration,
-      },
+      }
     );
   }
 
@@ -203,4 +192,4 @@ export const useToast = () => {
     showWarningToast,
     showTimerToast,
   };
-};
+}

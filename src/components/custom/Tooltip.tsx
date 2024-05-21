@@ -1,10 +1,10 @@
 import { createEffect, createSignal, createUniqueId, Show } from "solid-js";
 
-export const CustomTooltip = (props: {
+export function CustomTooltip(props: {
   message: string;
   children: any;
   title?: string;
-}) => {
+}) {
   const [isHovered, setIsHovered] = createSignal(false);
   const id = createUniqueId();
 
@@ -34,9 +34,7 @@ export const CustomTooltip = (props: {
       </div>
       <div
         id={id}
-        class={
-          "center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
-        }
+        class={"center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"}
       >
         <Show when={props.title}>
           <div class={"font-weight:500 f:14"}>{props.title}</div>
@@ -45,4 +43,4 @@ export const CustomTooltip = (props: {
       </div>
     </div>
   );
-};
+}

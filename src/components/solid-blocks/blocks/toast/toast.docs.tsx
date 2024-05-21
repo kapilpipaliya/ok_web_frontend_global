@@ -4,7 +4,7 @@ import { Select } from "../select/select";
 import { TextField } from "../textfield/textfield";
 import { Toast, ToastPosition } from "./toast";
 
-export const ToastDocs = () => {
+export function ToastDocs() {
   const [shown, setShown] = createSignal(false);
   const [pos, setPos] = createSignal("bottom-left");
   const [timeout, setTimeout] = createSignal(0);
@@ -70,8 +70,7 @@ ToastProps {
         min="0"
         label="timeout"
         onchange={(t) => setTimeout(Number(t))}
-        value={timeout()}
-      />{" "}
+        value={timeout()} />{" "}
       <TextField label="content" onchange={setContent} value={content()} />
       <br />
       <br />
@@ -112,4 +111,4 @@ ToastProps {
       <hr />
     </>
   );
-};
+}

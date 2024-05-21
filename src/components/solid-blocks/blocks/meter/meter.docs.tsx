@@ -1,7 +1,7 @@
 import { createSignal, onCleanup, onMount } from "solid-js";
 import { Meter } from "./meter";
 
-export const MeterDocs = () => {
+export function MeterDocs() {
   const [value, setValue] = createSignal(0);
   const state = {
     interval: 0,
@@ -20,9 +20,9 @@ export const MeterDocs = () => {
       } else {
         setValue(
           state.current +
-            Math.floor(
-              ((state.next - state.current) / state.steps) * state.counter,
-            ),
+          Math.floor(
+            ((state.next - state.current) / state.steps) * state.counter
+          )
         );
       }
     }, 100);
@@ -53,4 +53,4 @@ MeterProps {
       <hr />
     </>
   );
-};
+}

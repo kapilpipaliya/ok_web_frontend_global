@@ -8,7 +8,7 @@ import "./tag.css";
 export type TagProps = (JSX.HTMLAttributes<HTMLSpanElement> &
   Partial<JSX.AnchorHTMLAttributes<HTMLAnchorElement>>) & { plain?: boolean };
 
-export const Tag: Component<TagProps> = (props) => {
+export function Tag(props: TagProps) {
   const [local, tagProps] = splitProps(props, ["plain"]);
   const mergedProps = mergeProps(
     {
@@ -16,7 +16,7 @@ export const Tag: Component<TagProps> = (props) => {
       rel: props.target ? "tag noopener" : "tag",
     },
     tagProps,
-    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" },
+    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" }
   );
   return (
     <Show
@@ -26,15 +26,14 @@ export const Tag: Component<TagProps> = (props) => {
       <a {...mergedProps} />
     </Show>
   );
-};
+}
 
 export type TagGroupProps = JSX.HTMLAttributes<HTMLDivElement>;
 
-export const TagGroup: Component<TagGroupProps> = (props) => {
+export function TagGroup(props: TagGroupProps) {
   return (
     <div
       {...props}
-      class={props.class ? `sb-tag-group ${props.class}` : "sb-tag-group"}
-    />
+      class={props.class ? `sb-tag-group ${props.class}` : "sb-tag-group"} />
   );
-};
+}

@@ -119,22 +119,18 @@ export function setParentValue(
   }
 }
 
-export const ensureArray = (value: any) => {
+export function ensureArray(value: any) {
   if (Array.isArray(value)) {
     return value;
   } else {
     return value ? [value] : [];
   }
-};
-export const selectedValue = (
-  meta: Vertex,
+}
+export function selectedValue(meta: Vertex,
   data: Vertex,
-  graph: Store<GraphInterface>,
-): number[] => {
-  if (
-    getValueFromVertexOrKey(meta.P.props, "stringValue") ||
-    getValueFromVertexOrKey(meta.P.props, "items")
-  ) {
+  graph: Store<GraphInterface>): number[] {
+  if (getValueFromVertexOrKey(meta.P.props, "stringValue") ||
+    getValueFromVertexOrKey(meta.P.props, "items")) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
       return ensureArray(data.P[meta.P[IdAttr]]);
@@ -148,7 +144,7 @@ export const selectedValue = (
   } catch (e) {
     return [];
   }
-};
+}
 
 // if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
 // no need to pass displayExpr,

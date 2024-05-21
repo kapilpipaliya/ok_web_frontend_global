@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { Checkbox } from "../checkbox/checkbox";
 import { Select } from "./select";
 
-export const SelectDocs = () => {
+export function SelectDocs() {
   const [vertical, setVertical] = createSignal(false);
   const [invalid, setInvalid] = createSignal(false);
   const [events, setEvents] = createSignal("");
@@ -60,4 +60,4 @@ SelectProps {
       <hr />
     </>
   );
-};
+}

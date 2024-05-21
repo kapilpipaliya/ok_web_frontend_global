@@ -1,4 +1,4 @@
-export const BarDocs = () => {
+export function BarDocs() {
   return (
     <>
       <h2 id="bar-docs">Bar</h2>
@@ -49,4 +49,4 @@ BarProps {
       <hr />
     </>
   );
-};
+}

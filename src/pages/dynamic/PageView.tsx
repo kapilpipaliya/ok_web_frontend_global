@@ -16,7 +16,7 @@ import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
 import { getFormMetaData } from "~/lib/graph/mutate/form_functions";
 
-export const PageView_ = (props: { id: string; count: number }) => {
+export function PageView_(props: { id: string; count: number; }) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   if (!props.id) return "Page ID not specified.";
@@ -30,8 +30,7 @@ export const PageView_ = (props: { id: string; count: number }) => {
   const form = getFormMetaData(graph, setGraph, "Page");
   if (form.error) return form.error;
 
-  const metaVertexResult = untrack(() =>
-    createMeta(form.form!, graph, setGraph),
+  const metaVertexResult = untrack(() => createMeta(form.form!, graph, setGraph)
   );
 
   if (metaVertexResult.error) {
@@ -40,9 +39,9 @@ export const PageView_ = (props: { id: string; count: number }) => {
   }
 
   return <PageView number={props.count} vertex={dataVertex} />;
-};
+}
 
-export const PagePreview = (props: {}) => {
+export function PagePreview(props: {}) {
   const params = useParams();
   const [count, setCount] = createSignal(1);
 
@@ -50,8 +49,8 @@ export const PagePreview = (props: {}) => {
     on(
       () => params.id,
       (v) => setCount((v) => v + 1),
-      { defer: true },
-    ),
+      { defer: true }
+    )
   );
 
   return (
@@ -59,19 +58,19 @@ export const PagePreview = (props: {}) => {
       <PageView_ id={params.id} count={count()} />
     </Show>
   );
-};
-export const RobotsTxt = (props: {}) => {
+}
+export function RobotsTxt(props: {}) {
   return (
     <>
       User-agent: * Allow: / Sitemap: {window.location.origin + "/sitemap.txt"}
     </>
   );
-};
-export const SiteMap = (props: {}, graph: Store<GraphInterface>) => {
+}
+export function SiteMap(props: {}, graph: Store<GraphInterface>) {
   return (
     <For
       each={graph.vertexLabelIdMap["Page"]?.filter(
-        (vertex) => graph.vertexes[vertex].P.public,
+        (vertex) => graph.vertexes[vertex].P.public
       )}
     >
       {(vertex) => (
@@ -79,4 +78,4 @@ export const SiteMap = (props: {}, graph: Store<GraphInterface>) => {
       )}
     </For>
   );
-};
+}

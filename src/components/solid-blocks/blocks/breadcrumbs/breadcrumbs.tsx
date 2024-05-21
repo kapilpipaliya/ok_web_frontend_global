@@ -7,14 +7,16 @@ export type BreadcrumbsProps = JSX.HTMLAttributes<HTMLOListElement> & {
   children: JSX.Element | JSX.Element[];
 };
 
-export const Breadcrumbs: Component<BreadcrumbsProps> = (props) => (
-  <nav class="sb-breadcrumbs">
-    <ol {...props}>
-      {/* <For each={Array.isArray(props.children) ? props.children : [props.children]}
-      >
-        {(item) => <li>{item}</li>}
-      </For> */}
-      {props.children}
-    </ol>
-  </nav>
-);
+export function Breadcrumbs(props: BreadcrumbsProps) {
+  return (
+    <nav class="sb-breadcrumbs">
+      <ol {...props}>
+        {/* <For each={Array.isArray(props.children) ? props.children : [props.children]}
+            >
+              {(item) => <li>{item}</li>}
+            </For> */}
+        {props.children}
+      </ol>
+    </nav>
+  );
+}

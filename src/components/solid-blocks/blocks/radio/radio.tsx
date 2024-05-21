@@ -38,7 +38,7 @@ export type RadioProps = JSX.HTMLAttributes<HTMLInputElement> & {
   value?: string;
 };
 
-export const Radio: Component<RadioProps> = (props) => {
+export function Radio(props: RadioProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [
@@ -61,16 +61,14 @@ export const Radio: Component<RadioProps> = (props) => {
       "required",
       "value",
     ],
-    ["align", "checked", "onChange", "setChecked", "children"],
+    ["align", "checked", "onChange", "setChecked", "children"]
   );
 
   const [_value, setValue, isValueActive, uniqueId] = useContext(radioContext);
 
   return (
     <label
-      class={`${content.align || "left"} sb-radio${
-        inputProps.disabled ? " disabled" : ""
-      }`}
+      class={`${content.align || "left"} sb-radio${inputProps.disabled ? " disabled" : ""}`}
       {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>{content.children}</Show>
@@ -79,25 +77,22 @@ export const Radio: Component<RadioProps> = (props) => {
         ref={props.ref}
         name={uniqueId}
         {...inputProps}
-        checked={
-          isValueActive
-            ? isValueActive(inputProps.value || "")
-            : content.checked
-        }
+        checked={isValueActive
+          ? isValueActive(inputProps.value || "")
+          : content.checked}
         onChange={(
-          ev: Event & { currentTarget: HTMLInputElement; target: Element },
+          ev: Event & { currentTarget: HTMLInputElement; target: Element; }
         ): void => {
           runEvent(ev, content.onChange);
           content.setChecked?.(ev.currentTarget.checked);
           if (ev.currentTarget.checked) {
             setValue?.(props.value || "");
           }
-        }}
-      />
+        } } />
       <Show when={content.align !== "right"}>{content.children}</Show>
     </label>
   );
-};
+}
 
 export type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
   setValue?: (value: string) => void;
@@ -105,7 +100,7 @@ export type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & {
 };
 
 // This is just a wrapper that run setValue when value is changed.
-export const RadioGroup: Component<RadioGroupProps> = (props) => {
+export function RadioGroup(props: RadioGroupProps) {
   const [local, divProps] = splitProps(props, [
     "setValue",
     "value",
@@ -113,14 +108,13 @@ export const RadioGroup: Component<RadioGroupProps> = (props) => {
   ]);
   const uniqueId = createUniqueId();
   const [value, setValue] = createSignal(
-    typeof props.value === "function" ? props.value() : "",
+    typeof props.value === "function" ? props.value() : ""
   );
 
-  createEffect(() =>
-    setValue(typeof props.value === "function" ? props.value() : ""),
+  createEffect(() => setValue(typeof props.value === "function" ? props.value() : "")
   );
   createEffect(
-    on([value], ([value]) => local.setValue?.(value), { defer: true }),
+    on([value], ([value]) => local.setValue?.(value), { defer: true })
   );
 
   return (
@@ -130,12 +124,10 @@ export const RadioGroup: Component<RadioGroupProps> = (props) => {
       <div
         role="radiogroup"
         {...divProps}
-        class={
-          divProps.class ? `sb-radiogroup ${divProps.class}` : "sb-radiogroup"
-        }
+        class={divProps.class ? `sb-radiogroup ${divProps.class}` : "sb-radiogroup"}
       >
         {local.children}
       </div>
     </radioContext.Provider>
   );
-};
+}

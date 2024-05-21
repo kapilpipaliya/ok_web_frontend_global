@@ -2,7 +2,7 @@ import { JSX } from "solid-js";
 import { A } from "@solidjs/router";
 import { APP_BASE_URL } from "~/lib/Utils";
 
-export const BackupRestore = () => {
+export function BackupRestore() {
   const C = (props: {
     title: string;
     subtitle: string;
@@ -43,4 +43,4 @@ export const BackupRestore = () => {
       </div>
     </>
   );
-};
+}

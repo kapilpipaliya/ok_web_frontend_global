@@ -1,6 +1,6 @@
 import { Message } from "./message";
 
-export const MessageDocs = () => {
+export function MessageDocs() {
   return (
     <>
       <h2 id="message-docs">Message</h2>
@@ -31,4 +31,4 @@ MessageProps {
       <hr />
     </>
   );
-};
+}

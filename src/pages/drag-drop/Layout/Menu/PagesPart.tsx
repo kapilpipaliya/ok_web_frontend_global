@@ -8,10 +8,10 @@ import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 
-export const PagesPart = () => {
+export function PagesPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-  
+
   let originalData: any[] = [];
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as ICon
@@ -31,7 +31,7 @@ export const PagesPart = () => {
       console.error("Error fetching data:", error);
     }
   }
-  const [data] = createResource(() => fetchData())
+  const [data] = createResource(() => fetchData());
   const updateFilteredData = () => {
     if (!searchQuery()) {
       setFilteredData(originalData);
@@ -43,7 +43,7 @@ export const PagesPart = () => {
     }
   };
 
-  function ListItemComponent(props: { child: any }) {
+  function ListItemComponent(props: { child: any; }) {
     const [isHovered, setIsHovered] = createSignal(false);
 
     const baseStyle = {
@@ -66,8 +66,7 @@ export const PagesPart = () => {
       boxShadow: "4px 4px 4px",
     };
 
-    const itemStyle: any = () =>
-      isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+    const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
     return (
       <Show when={props.child.name}>
@@ -79,11 +78,11 @@ export const PagesPart = () => {
           onDragStart={(e) => {
             e.stopPropagation();
             setDraggedVertex(graph.vertexes[props.child.id]);
-          }}
+          } }
         >
           <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
         </div>
-      </Show> 
+      </Show>
     );
   }
 
@@ -103,8 +102,7 @@ export const PagesPart = () => {
             onInput={(e) => {
               setSearchQuery(e.target.value);
               updateFilteredData(); // Update filteredData when searchQuery changes
-            }}
-          />
+            } } />
           <div
             class="overflow-y:auto overflow-x:auto m:6px"
             style={{ display: "grid", "grid-template-columns": "repeat(2, 1fr)" }}
@@ -117,7 +115,7 @@ export const PagesPart = () => {
             </For>
           </div>
         </div>
-        </Match>
+      </Match>
     </Switch>
   );
-};
+}
