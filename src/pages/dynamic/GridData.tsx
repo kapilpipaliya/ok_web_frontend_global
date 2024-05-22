@@ -66,6 +66,7 @@ import { Expression, getDataMGCall, getTreeDataMGCall } from "~/cypher_api/lib/g
 import { setGraphData } from "~/lib/websocket/ws_events";
 import MultiSelectField from "~/components/custom/NewMultiSelect";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
+
 interface AbstractGridProps {
   tableId: string;
 }
@@ -233,7 +234,8 @@ export function AbstractGrid(props: AbstractGridProps) {
                 variant: "soft",
                 style: { padding: "7px 10px" },
                 leading: (
-                  <Icon
+                  // TO solve Hydration error passed a function
+                  ()=><Icon
                     icon={"lets-icons:add-round"}
                     height={22}
                     width={22} />
@@ -428,7 +430,7 @@ const DataGrid = (props: DataGridProps) => {
                   <Icon
                     onClick={() =>
                       navigate(
-                        `${APP_BASE_URL}/${props.tableId}/${info.row.original.id}`,
+                        `./${info.row.original.id}`,
                       )
                     }
                     height={21}

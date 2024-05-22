@@ -73,8 +73,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     });
   };
 
-  const activeLinks = () =>
-    searchData().find((navData: any) => navData.P.name === activeSection() && navData.children);
+  const activeLinks = () => searchData().find((navData: any) => navData.P.name === activeSection() && navData.children);
 
   function handleSearch(input: string) {
     setSearchTerm(input);
@@ -139,11 +138,18 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     return data.children[0].children;
   }
 
+  // When loading from server side, the client side will not run createResource function again.
+  // so setState inside it will not be triggered.
   const [navData] = createResource(async () => {
     const data = await getNavData();
-    setSearchData(data);
+    
     return data;
   });
+  createEffect(() => {
+    if (navData()) {
+      setSearchData(navData());
+    }
+  })
 
   const sidebarStyle = () =>
     ({
@@ -263,17 +269,17 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
         </a>
         <div class="flex flex:col gap:10 mt:20">
           <For each={navData()}>
-            {(navData) => (
-              <Show when={navData.P.url !== "undefined"}>
+            {(navNode) => (
+              <Show when={navNode.P.url !== "undefined"}>
                 <a
-                  class={`${activeSection() === navData.P.name ? "bg:white color:#37c" : ""} gap:10 `}
-                  href={navData.P.url}
+                  class={`${activeSection() === navNode.P.name ? "bg:white color:#37c" : ""} gap:10 `}
+                  href={navNode.P.url}
                   style={`display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; `}
-                  onClick={() => setActiveSection(navData.P.name)}
+                  onClick={() => setActiveSection(navNode.P.name)}
                 >
                   <Icon
-                    color={`${activeSection() === navData.P.name ? "#3B82F6" : "#4B5563"}`}
-                    icon={mainIcon[navData.P.url]}
+                    color={`${activeSection() === navNode.P.name ? "#3B82F6" : "#4B5563"}`}
+                    icon={mainIcon[navNode.P.url]}
                     height={24}
                     width={24} />
                 </a>
