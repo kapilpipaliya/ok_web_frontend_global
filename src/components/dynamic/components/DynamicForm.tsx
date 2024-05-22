@@ -19,7 +19,9 @@ import { toTitle } from "case-switcher-js";
 import { capitalizeFirstLetter, FormContext, groupBy } from "~/lib/Utils";
 import {
   getChildVertexes,
-  getSelectionOptions
+  getInEdge,
+  getSelectionOptions,
+  getToEdge
 } from "~/lib/graph/get/sync/traverse";
 import {
   createForm,
@@ -63,6 +65,7 @@ import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { Expression, getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
+import { PageConfigContext } from "~/lib/contexts";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -90,10 +93,6 @@ export interface DynamicFormProps {
   id?: Id;
   isDialogContext?: boolean;
   buttonAlign?: string;
-  config: [
-    Store<{ [key: string]: any }>,
-    SetStoreFunction<{ [key: string]: any }>,
-  ];
   submitButton?: JSXElement;
   importExportButtons?: boolean;
   showMainFieldsOnly?: boolean;
@@ -141,8 +140,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
           id={id() as Id}
           isDialogContext={props.isDialogContext}
           {...customProps}
-          buttonAlign={props.buttonAlign}
-          config={props.config || []} />
+          buttonAlign={props.buttonAlign} />
       </Match>
     </Switch>
   );
@@ -156,6 +154,7 @@ export function DynamicForm(props: DynamicFormProps) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any; };
   const txnId = getNewTxnId(graph, setGraph);
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
 
   const [formData, setFormData] = createStore({
     txnId,
@@ -215,8 +214,6 @@ export function DynamicForm(props: DynamicFormProps) {
         return metaVertexResult;
       }
 
-      props.config[1]?.("formData", formData);
-
       const groupByTabsAndGroupFn = () => {
         const mainAttributes = getChildVertexes(
           graph,
@@ -253,6 +250,7 @@ export function DynamicForm(props: DynamicFormProps) {
       const tabs = Object.keys(groupByTabsAndGroup).filter(
         (tab) => tab !== "main"
       );
+   
       batch(() => {
         setActiveTab(tabs[0]);
         setFormData({
@@ -263,6 +261,7 @@ export function DynamicForm(props: DynamicFormProps) {
           groupByTabsAndGroup,
         });
       });
+      setPageConfig?.("formData", formData);
 
     } catch (e: any) {
       console.error(e);
@@ -280,7 +279,8 @@ export function DynamicForm(props: DynamicFormProps) {
 
   // let validationGroup: dxValidationGroup;
   onCleanup(() => {
-    props.config[1]?.("formData", undefined);
+    // @ts-ignore
+    setPageConfig?.("formData", undefined);
   });
 
   onCleanup(() => {
@@ -578,17 +578,14 @@ function processRowsAttr(attrs: any): { incoming: Expression[], outgoing: Expres
   const incoming = [] as Expression[];
 
   for (const attribute of attrs) {
-    const capitalizedName = capitalizeFirstLetter(attribute.name);
-
     if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
       if (attribute.props?.inward) {
-        incoming.push({ expression: `<-${capitalizedName}$0` });
+        incoming.push({ expression: `<-${getInEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`}); // `<-${capitalizedName}$0`
       } else {
-        outgoing.push({ expression: `->$0${capitalizedName}` });
+        outgoing.push({ expression: `->${getToEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`}); // `->$0${capitalizedName}`
       }
     } else if (attribute.component === 'Table' || attribute.component === 'Table2') {
-      const expression = { expression: `->$0${capitalizedName}` };
-      
+      const expression: Expression = { expression: `->${getToEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`};
 
       if (attribute.attributes) {
         const nested = processRowsAttr(attribute.attributes);

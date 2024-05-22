@@ -310,14 +310,12 @@ export async function mutateData(
               return r`;
 
         try {
-          console.log(query);
           const result = await tx.run(query, {
             startId,
             endId,
             properties: mutationObject.insertEdge.P,
           });
           if (result.records.length > 0) {
-            console.log("result", result);
             const oldId = mutationObject.insertEdge.id;
             const edgeId = !isIntegerId
               ? result.records[0].get("r").identity.toNumber()

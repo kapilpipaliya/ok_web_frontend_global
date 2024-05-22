@@ -1,6 +1,6 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
-import { createEffect, createResource, createSignal, JSX, Show, useContext } from "solid-js";
+import { createEffect, createResource, createSignal, JSX, onMount, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
@@ -122,15 +122,22 @@ const DropdownMenu = () => {
   const handleClose = () => {
     setIsOpen(false);
   };
-  getAPI(API.getUserUrl).then((data) => {
-    if (data) {
-      setGraph("member", data);
-    }
-  }).catch((err) => {
-    if (err.message) {
-      navigate("/auth/login");
-    }
+  onMount(() => {
+    // if we not use onMount, when we refresh the page,
+    // on server side we get error: TypeError: Failed to parse URL from /api/get_user
+    // and server redirect to login page.
+    getAPI(API.getUserUrl).then((data) => {
+      if (data) {
+        setGraph("member", data);
+      }
+    }).catch((err: any) => {
+      console.error(err)
+      if (err.message) {
+        navigate("/auth/login");
+      }
+    })
   })
+
 
 
   createEffect(() => {

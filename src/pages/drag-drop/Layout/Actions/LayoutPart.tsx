@@ -14,7 +14,7 @@ import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/pageStore";
 
-export function LayoutPart(props: { vertex: Vertex; }) {
+export function LayoutPart(props: { }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -27,18 +27,18 @@ export function LayoutPart(props: { vertex: Vertex; }) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
 
-  const toggleExpand = (itemId: number) => {
+  function toggleExpand(itemId: number) {
     setCollapsedKeys((prev) => prev.includes(itemId)
       ? prev.filter((item) => item !== itemId)
       : [...prev, itemId]
     );
-  };
-  const toggleHidden = (itemId: number) => {
+  }
+  function toggleHidden(itemId: number) {
     setHiddenNodes((prev) => prev.includes(itemId)
       ? prev.filter((item) => item !== itemId)
       : [...prev, itemId]
     );
-  };
+  }
   const TreeView = (props: { vertex: Vertex; }) => {
     const {
       children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout,

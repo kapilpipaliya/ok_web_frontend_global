@@ -13,7 +13,6 @@ export function FormConfig() {
       formId={"Page"}
       id={params.id}
       graph={graph}
-      config={useContext(PageConfigContext)}
       showMainFieldsOnly={true}
       importExportButtons={false}
       setGraph={setGraph} />

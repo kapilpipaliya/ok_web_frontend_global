@@ -33,7 +33,7 @@ export function SignUp() {
     setShowPassword(!showPassword());
   };
 
-  const handleSubmit = async (event: SubmitEvent) => {
+  const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
 
     const usernameError = validateUsername(formData().username);
@@ -85,7 +85,6 @@ export function SignUp() {
         style={{ "justify-self": "center" }} />
       <form
         class="m:10px mb:5rem bg:white jc:center r:10"
-        onSubmit={handleSubmit}
         style={{
           display: "flex",
           padding: "20px 30px",
@@ -203,7 +202,8 @@ export function SignUp() {
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onclick={handleSubmit}
             style={{
               width: "100%",
               padding: "8px",

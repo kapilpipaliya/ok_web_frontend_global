@@ -17,12 +17,13 @@ export function ComponentPart() {
     child: { collection: "->CompCategoryComp" },
   });
 
+  /* Code to get menu data from server
   const data2 = getTreeDataMGCall({
     collection: "g:'CompCategory'",
     // TODO: Dont display "Form" Component
     child: { collection: "->CompCategoryComp" },
   });
-  data2.then((data) => console.log(data));
+  data2.then((data) => console.log(data));*/
 
 
   const [searchQuery, setSearchQuery] = createSignal("");

@@ -57,7 +57,7 @@ export function ActionsDragAndDrops(props: ActionsProps) {
               <Column
                 type={column.id}
                 index={index()}
-                vertex={pageConfig.formData.formData} />
+               />
             )}
           </For>
         </Show>
@@ -66,7 +66,7 @@ export function ActionsDragAndDrops(props: ActionsProps) {
   );
 }
 
-const Column = (props: { type: string; index: number; vertex: Vertex }) => {
+const Column = (props: { type: string; index: number; }) => {
   const [isFormOpen, toggleIsFormOpen] = useExpansion(true);
   const [isLayoutOpen, toggleIsLayoutOpen] = useExpansion(true);
   const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
@@ -136,7 +136,7 @@ const Column = (props: { type: string; index: number; vertex: Vertex }) => {
 
                 <Show when={isLayoutOpen()}>
                   <hr class={"color:lightgrey m:.4rem|0"} />
-                  <LayoutPart vertex={props.vertex} />
+                  <LayoutPart />
                 </Show>
               </div>
             </Show>
@@ -148,7 +148,7 @@ const Column = (props: { type: string; index: number; vertex: Vertex }) => {
               pageConfig.formData
             }
           >
-            <Properties vertex={props.vertex} />
+            <Properties />
           </Match>
           <Match when={props.type === "form"}>
             <Show

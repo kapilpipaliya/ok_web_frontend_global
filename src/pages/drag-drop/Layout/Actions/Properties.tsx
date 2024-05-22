@@ -40,7 +40,7 @@ import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
-export function Properties(props: { vertex: Vertex; }) {
+export function Properties(props: { }) {
   const [isPropertiesOpen, toggleIsPropertiesOpen] = useExpansion(true);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -50,14 +50,13 @@ export function Properties(props: { vertex: Vertex; }) {
     SelectedComponentContext
   );
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
-  console.log(pageConfig.formData);
 
   const { deleteLayout } = useDragDrop(
     graph,
     setGraph,
     pageConfig.formData.txnId,
     pageConfig.formData.formData,
-    props.vertex
+    pageConfig.formData.formData
   );
 
   const PropertiesPart = () => {
@@ -559,7 +558,7 @@ export function Properties(props: { vertex: Vertex; }) {
                   props: {
                     style: { color: "red" },
                     onClick: () => deleteLayout(
-                      getChildVertex(graph, ["$0Comp"], props.vertex).vertex
+                      getChildVertex(graph, ["$0Comp"], pageConfig.formData.formData).vertex
                         ?.P.name
                     ),
                     width: 18,

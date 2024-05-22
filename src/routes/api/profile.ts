@@ -106,7 +106,6 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
     username,
     profileImage,
   });
-  console.log(query);
 
   if (email) {
     const http_session = await getHttpsSession();

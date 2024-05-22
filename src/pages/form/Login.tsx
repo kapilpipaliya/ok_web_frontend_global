@@ -40,7 +40,7 @@ export function Login() {
     setShowPassword(!showPassword());
   };
 
-  const handleSubmit = async (event: SubmitEvent) => {
+  const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
     const emailError = validateEmail(formData().email);
     const passwordError = validatePassword(formData().password);
@@ -107,7 +107,6 @@ export function Login() {
       </Show>
       <form
         class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
-        onSubmit={handleSubmit}
         style={{
           display: "flex",
           padding: "20px 30px",
@@ -194,7 +193,8 @@ export function Login() {
             </a>
           </div>
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             style={{
               width: "100%",
               padding: "10px",
