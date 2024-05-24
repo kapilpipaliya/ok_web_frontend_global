@@ -1,8 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Accessor, Match, Switch, useContext, createSignal } from "solid-js";
+import { For, Accessor, Match, Switch, useContext, createSignal, Show } from "solid-js";
 import { PageConfigContext } from "~/lib/contexts";
 import { Vertex } from "~/lib/graph/graph";
-import { Hide, useExpansion } from "../CommonCompUtils";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
 import { CollectionPart } from "./CollectionPart";
@@ -30,14 +29,14 @@ export function MenuDragAndDrop(props: MenuProps) {
           }}
         >
 
-          <Hide when={props.isLeftOpen()}>
+          <Show when={props.isLeftOpen()}>
 
             <Column
               datas={props.leftColumns()}
               toggleLeftOpen={props.toggleIsLeftOpen}
               vertex={pageConfig.formData?.formData} />
 
-          </Hide>
+          </Show>
         </div>
        
       </div>

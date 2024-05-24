@@ -1,4 +1,4 @@
-import { createMemo, createSignal, useContext } from "solid-js";
+import { For, createMemo, createSignal, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { IsPreviewContext, PageConfigContext } from "~/lib/contexts";
@@ -15,7 +15,7 @@ export const PageSetting = () => {
 const Sidebar = () => {
     const [selected, setSelected] = createSignal("form-settings");
 
-    const menuItems = [
+    const menuItems: any = [
         { id: "form-settings", label: "Form Settings", icon: "⚙️" },
         { id: "emails", label: "Emails", icon: "📧" },
         { id: "conditions", label: "Conditions", icon: "🔄" },
@@ -36,8 +36,10 @@ const Sidebar = () => {
                 "border-radius": "5px",
                 height: "80vh"
             }}>
-                {menuItems.map(item => (
-                    <div
+                <For each={menuItems}>
+
+                {(item) => (
+    <div
                         onClick={() => setSelected(item.id)}
                         style={{
                             padding: "10px 20px",
@@ -52,10 +54,11 @@ const Sidebar = () => {
                         <span style={{ 'margin-right': "10px" }}>{item.icon}</span>
                         <span>{item.label}</span>
                     </div>
-                ))}
+                )}
+                </For>
             </div>
             <div style={{ flex: 1, padding: "20px", 'background-color': "#f8f9fa" }}>
-                <h2>{menuItems.find(item => item.id === selected()).label}</h2>
+                <h2>{menuItems.find((item: any) => item.id === selected()).label}</h2>
                 <p>Customize form status and properties</p>
                 {/* Add the content for the selected menu item here */}
             </div>

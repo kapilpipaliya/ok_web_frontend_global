@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, For, onCleanup } from "solid-js";
+import { useContext, createSignal, For, onCleanup, Show } from "solid-js";
 import { Portal } from "solid-js/web";
 import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
@@ -36,7 +36,7 @@ import {
 import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
 import { setPropertyValueGlobal, useDragDrop } from "~/lib/pageStore";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
-import { Hide, useExpansion } from "../CommonCompUtils";
+import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
@@ -434,7 +434,7 @@ export function Properties(props: { }) {
 
     return (
       <>
-        <Hide when={selectedId() !== -1}>
+        <Show when={selectedId() !== -1}>
           <GenericField
             meta={{
               P: {
@@ -464,8 +464,8 @@ export function Properties(props: { }) {
             vertex={graph.vertexes[propertiesVertexId]}
             setValue={setPropertyValue}
             selectedLayout={graph.vertexes[selectedId()]} />
-        </Hide>
-        <Hide when={isRulesModalOpen()}>
+        </Show>
+        <Show when={isRulesModalOpen()}>
           <Portal>
             <div role="dialog" tabIndex={-1} class="sb-modal">
               <ModalContent>
@@ -515,15 +515,15 @@ export function Properties(props: { }) {
               </ModalContent>
             </div>
           </Portal>
-        </Hide>
-        <Hide when={isImportModalOpen()}>
+        </Show>
+        <Show when={isImportModalOpen()}>
           <ImportModalBody />
-        </Hide>
+        </Show>
       </>
     );
   };
   return (
-    <Hide
+    <Show
       when={isPropertiesExpanded()}
       fallback={<div
         class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
@@ -582,13 +582,13 @@ export function Properties(props: { }) {
               class="flex-1" />
           </div>
         </div>
-        <Hide when={isPropertiesOpen()}>
-          <Hide when={selectedId() !== -1}>
+        <Show when={isPropertiesOpen()}>
+          <Show when={selectedId() !== -1}>
             <hr class={"color:lightgrey m:.4rem|0"} />
-          </Hide>
+          </Show>
           <PropertiesPart />
-        </Hide>
+        </Show>
       </div>
-    </Hide>
+    </Show>
   );
 }

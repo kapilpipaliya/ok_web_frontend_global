@@ -38,7 +38,7 @@ export function PageView_(props: { id: string; count: number; }) {
     return metaVertexResult.error;
   }
 
-  return <PageView number={props.count} vertex={dataVertex} />;
+  return <PageView vertex={dataVertex} />;
 }
 
 export function PagePreview(props: {}) {

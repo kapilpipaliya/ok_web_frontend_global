@@ -7,8 +7,8 @@ const MultiSelectField = (props: { selectedValues: any; options: any[]; onRemove
     const { showErrorToast } = useToast();
     let isClickFromOption = false;
     let containerRef: HTMLDivElement | undefined;
-    let btnEl;
-    let dropdownEl;
+    let btnEl: any;
+    let dropdownEl: any;
     // Define signals for managing state
     const selected = createMemo(() => props.selectedValues || [] as any[]);
 

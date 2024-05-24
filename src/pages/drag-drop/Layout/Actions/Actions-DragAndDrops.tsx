@@ -2,7 +2,6 @@ import { Icon } from "@iconify-icon/solid";
 import { useContext, For, Accessor, Match, Switch, createSignal } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { Vertex } from "~/lib/graph/graph";
-import { Hide, useExpansion } from "../CommonCompUtils";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
 import { Properties } from "./Properties";

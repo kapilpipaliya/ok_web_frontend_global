@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For } from "solid-js";
+import { useContext, createSignal, createSelector, For, Show } from "solid-js";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { iconMap, nameExpr } from "~/lib/Utils";
@@ -13,7 +13,6 @@ import {
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/pageStore";
-import { Hide } from "../CommonCompUtils";
 
 export function LayoutPart(props: { }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
@@ -108,7 +107,7 @@ export function LayoutPart(props: { }) {
             <div style="display: flex;align-items: center;">
               &nbsp;
               
-              <Hide when={children().length}>
+              <Show when={children().length}>
                 <button
                   class="cursor: pointer;"
                   onClick={(e) => {
@@ -128,7 +127,7 @@ export function LayoutPart(props: { }) {
                         : "rotate(180deg)"}`,
                     }} />
                 </button>
-              </Hide>
+              </Show>
 
               &nbsp;
               <Icon
@@ -139,9 +138,9 @@ export function LayoutPart(props: { }) {
               &nbsp;&nbsp;
               {nameExpr(props.vertex, graph) || props.vertex.P.name}
             </div>
-          <Hide when={pageConfig.formData.formData.id !== props.vertex.id}>
+          <Show when={pageConfig.formData.formData.id !== props.vertex.id}>
             <div>
-              <Hide
+              <Show
                 when={isSelectedLayoutId(props.vertex.id) ||
                   isSelectedHoverId(props.vertex.id)}
               >
@@ -170,14 +169,14 @@ export function LayoutPart(props: { }) {
                       },
                     } as any} />
                 </Tooltip>
-              </Hide>
-              <Hide
+              </Show>
+              <Show
                 when={isSelectedLayoutId(props.vertex.id) ||
                   isSelectedHoverId(props.vertex.id) ||
                   hiddenNodes().includes(props.vertex.id)}
               >
                 <Tooltip
-                  content={`${!hiddenNodes().includes(props.vertex.id) ? "Hide" : "Hide"}`}
+                  content={`${!hiddenNodes().includes(props.vertex.id) ? "Show" : "Show"}`}
                   nowrap
                 >
                   <button
@@ -187,7 +186,7 @@ export function LayoutPart(props: { }) {
                       toggleHidden(props.vertex.id);
                     }}
                   >
-                    <Hide
+                    <Show
                       when={!hiddenNodes().includes(props.vertex.id)}
                       fallback={<Icon
                         height={18}
@@ -200,29 +199,29 @@ export function LayoutPart(props: { }) {
                         width={18}
                         icon="mdi:eye-outline"
                         class="transition: 0.5s ease-in-out;" />
-                    </Hide>
+                    </Show>
                   </button>
                 </Tooltip>
                 &nbsp;
-              </Hide>
+              </Show>
             </div>
-            </Hide>
+            </Show>
           </div>
 
         
-        <Hide
+        <Show
           when={!collapsedKeys().includes(props.vertex.id) && children().length > 0}
         >
           <ul class="pl:8 pt:3 pb:5">
             <For each={children()}>
               {(vertex) => (
-                <Hide when={pageConfig.formData}>
+                <Show when={pageConfig.formData}>
                   <TreeView vertex={vertex} />
-                </Hide>
+                </Show>
               )}
             </For>
           </ul>
-        </Hide>
+        </Show>
       </div>
     );
   };
@@ -233,9 +232,9 @@ export function LayoutPart(props: { }) {
     <>
       <For each={rootVertexes()}>
         {(item) => (
-          <Hide when={pageConfig.formData}>
+          <Show when={pageConfig.formData}>
             <TreeView vertex={item} />
-          </Hide>
+          </Show>
         )}
       </For>
     </>

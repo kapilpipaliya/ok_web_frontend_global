@@ -1,12 +1,11 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, createEffect, createSignal, useContext } from "solid-js";
+import { For, Show, createEffect, createSignal, useContext } from "solid-js";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { iconMap } from "~/lib/Utils";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
-import { Hide } from "../CommonCompUtils";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -133,7 +132,7 @@ export function ComponentPart() {
           <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
         </div>
 
-        <Hide when={isHovered()}>
+        <Show when={isHovered()}>
           <Tooltip content={"Double click to Edit"}>
             {" "}
             <Icon
@@ -147,7 +146,7 @@ export function ComponentPart() {
               class={"cursor:pointer"}
               icon={"solar:settings-linear"} />
           </Tooltip>
-        </Hide>
+        </Show>
       </div>
     );
   }

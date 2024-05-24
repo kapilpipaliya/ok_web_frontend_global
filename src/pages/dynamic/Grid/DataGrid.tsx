@@ -1,0 +1,251 @@
+import { useContext, createSignal, createResource, Show, Switch, Match } from "solid-js";
+import { useNavigate } from "@solidjs/router";
+import { useToast } from "~/components/custom/Toast";
+import { commitTransaction, getNewTxnId, ProcessStatus, transactions } from "~/lib/graph/transaction";
+import { deleteVertex } from "~/lib/graph/mutate/vertex";
+import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
+import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
+import { CommonTable } from "~/components/custom/Table";
+import { Icon } from "@iconify-icon/solid";
+import { createStore } from "solid-js/store";
+import { submitDataCall } from "~/components/api/api_functions";
+import { DeleteDialog } from "~/components/custom/DeleteDialog";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { AttrsTableData, PageContext, capitalizeFirstLetter, getEdgesFromRowsAttr, isNumber } from "~/lib/Utils";
+import { QuickEditModal, SelectValue, TagValue } from "./GridUtils";
+import { ColumnDef } from "@tanstack/solid-table";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
+import { FormMetaData } from "~/lib/Type";
+import { AttrsAdminTableData } from "~/lib/apiAdmin";
+interface DataGridProps {
+    tableId: string;
+}
+
+const DataGrid = (props: DataGridProps) => {
+    const [graph, setGraph] = useContext(GraphContext)!;
+    const navigate = useNavigate();
+    let { events } = useContext(PageContext);
+    const { showErrorToast, showLoadingToast } = useToast();
+    const [deleteRowId, setDeleteRowId] = createSignal(null);
+    const [tableStore, setTableStore] = createStore({ data: [], tableColumns: [] } as { data: any[]; tableColumns: ColumnDef<any>[] });
+    const [totalItems, setTotalItems] = createSignal(0);
+    const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
+    const { Ws } = useContext(WsContext);
+    const deleteObject = async (id: any) => {
+        const txnId = getNewTxnId(graph, setGraph);
+        const deleteResult = deleteVertex(txnId, id, graph, setGraph);
+        if (deleteResult?.error) {
+            showErrorToast(deleteResult?.error.toString());
+            return;
+        }
+        // @ts-ignore
+        transactions.get(txnId).status = ProcessStatus.Ready;
+        const data = commitTransaction(Ws);
+        if (!data) {
+            return;
+        }
+        await showLoadingToast({
+            promise: submitDataCall(data, txnId),
+            loadMessage: "Submitting Data...",
+            successMessage: "Data submitted successfully",
+            onSuccess: () => setTimeout(() => navigate(-1), 0),
+        });
+    };
+
+    const [data] = createResource(async () => await getTableData());
+
+    return (
+        <Switch>
+            <Match when={data.loading}>
+                <LoaderNew loaderHeight="55vh" />
+            </Match>
+            <Match when={data.error}>Error {data.error}</Match>
+            <Match when={tableStore.data}>
+                <CommonTable
+                    headers={tableStore.tableColumns}
+                    data={tableStore.data}
+                    isShowLoadMore={isShowLoadMore()}
+                    rowsPerPageOptions={[5, 10, 15]}
+                    defaultRowsPerPage={10}
+                    onLoadMore={getTableData}
+                    totalItems={totalItems()}
+                />
+                <Show when={deleteRowId()}>
+                    <DeleteDialog
+                        open={true}
+                        onConfirm={() => deleteObject(deleteRowId())}
+                        title="Delete Item"
+                        message="Are you sure you want to delete this item?"
+                    />
+                </Show>
+            </Match>
+        </Switch>
+    );
+    
+
+    async function getTableData(skip?: number, limit?: number) {
+
+        //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
+        const form = await getFormApiFromFormMGCall(props.tableId);
+        let formNew: FormMetaData;
+        let collection: string;
+
+        if (form.error) {
+            if (AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId]) {
+                formNew =
+                    AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId];
+                collection = props.tableId;
+            } else {
+                return form.error;
+            }
+        } else {
+            formNew = form.form!;
+            // @ts-ignore
+            collection = form.form.collection as string;
+        }
+        if (!collection) {
+            return <>Incorrect Configuration</>;
+        }
+        events?.setTitle(formNew.title);
+
+        const tableColumns = setGridHeaders(formNew);
+
+        // TODO: If collection is number fetch vertex from the API
+        const coll = isNumber(collection)
+            ? graph.vertexes[collection].P[IdAttr]
+            : collection;
+            
+        // if(!graph.vertexLabelIdMap[coll]) {
+        //  alert(`collection not found ${coll}`)
+        //  return;
+        // }
+
+        const { incoming, outgoing }: { incoming: any; outgoing: any; } = getEdgesFromRowsAttr(formNew.attributes);
+        const result = await getDataMGCall({
+            expression: `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`, incoming, outgoing
+        });
+
+        const vertexCount = Object.keys(result.graph.vertexes).length;
+        if (vertexCount < (limit ?? 10)! || vertexCount === 0) {
+            setIsShowLoadMore(false);
+        } else {
+            setIsShowLoadMore(true);
+        }
+        setGraphData(graph, setGraph, result.graph);
+        const resultData = Object.values(result.graph.vertexes);
+        const nodes = tableStore.data ? [...tableStore.data, ...resultData] : resultData;
+        setTotalItems(nodes.length);
+        setTableStore({ data: nodes, tableColumns });
+    }
+
+    function setGridHeaders(formNew: FormMetaData) {
+        const tableColumns = [] as ColumnDef<any>[];
+
+        for (const attribute of formNew!.attributes) {
+            const column = { ...attribute } as unknown as ColumnDef<any>;
+            if (attribute.component === "Table") continue;
+            // if (attribute.props?.skip) continue;
+            // @ts-ignore
+            column.accessorKey = `P.${attribute.name}`;
+            // column.accessorFn = row => row.lastName;
+            column.id = attribute.name;
+            column.cell = (info) => {
+                return (
+                    <Switch>
+                        <Match
+                            when={attribute.component === "SelectBox" && !attribute.props?.items}
+                        >
+                            <SelectValue attribute={attribute} info={info} graph={graph} setGraph={setGraph} />
+                        </Match>
+
+                        <Match
+                            when={attribute.component === "TagBox" && !attribute.props?.items}
+                        >
+                            <TagValue attribute={attribute} info={info} graph={graph} setGraph={setGraph} />
+                        </Match>
+
+                        <Match when={attribute.component === "CheckBox"}>
+                            <span>
+                                {info.getValue() === true
+                                    ? "Yes"
+                                    : info.getValue() === false
+                                        ? "No"
+                                        : ""}
+                            </span>
+                        </Match>
+
+                        <Match when={true}>{info.getValue<string>()}</Match>
+                    </Switch>
+                );
+            };
+            column.header = (info) => capitalizeFirstLetter(
+                // @ts-ignore
+                info.column.columnDef.displayName || info.column.columnDef.name
+            );
+            column.footer = (info) => capitalizeFirstLetter(
+                // @ts-ignore
+                info.column.columnDef.displayName || info.column.columnDef.name
+            );
+            tableColumns.push(column);
+        }
+        tableColumns.push({
+            accessorKey: "Actions",
+            header: "Actions",
+            footer: "",
+            cell: (info) => {
+                const [open, setOpen] = createSignal(false);
+                return (
+                    <Switch>
+                        <Match when={formNew.isInlineEditable}>
+                            <div class="flex gap:10px ai:center  jc:center cursor:pointer">
+                                <QuickEditModal
+                                    info={info}
+                                    graph={graph}
+                                    setGraph={setGraph}
+                                    tableId={props.tableId} />
+                                <Icon
+                                    onclick={() => {
+                                        setDeleteRowId(info.row.original.id);
+                                    }}
+                                    icon="fluent:delete-12-regular"
+                                    class="color:rgb(255,0,0)"
+                                    height={22}
+                                    width={22} />
+                            </div>
+                        </Match>
+
+                        <Match when={!formNew.isInlineEditable}>
+                            <div class="py:0.25rem">
+                                <div class="flex gap:10px ai:center  jc:center r:7 cursor:pointer">
+                                    <Icon
+                                        onClick={() => navigate(
+                                            `./${info.row.original.id}`
+                                        )}
+                                        height={21}
+                                        width={21}
+                                        class={"color:#3477CC"}
+                                        icon="fluent:edit-12-regular" />
+                                    <Icon
+                                        onclick={() => {
+                                            setDeleteRowId(info.row.original.id);
+                                        }}
+                                        icon="fluent:delete-12-regular"
+                                        class="color:rgb(255,0,0)"
+                                        height={22}
+                                        width={22} />
+                                </div>
+                            </div>
+                        </Match>
+                    </Switch>
+                );
+            },
+        });
+        return tableColumns;
+    }
+};
+
+export default DataGrid;
+
+

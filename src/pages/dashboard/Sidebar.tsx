@@ -268,7 +268,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
         <a href="#">
           <img style="height: 35px; " src={logo} alt="logo" />
         </a>
-        <div class="flex flex:col gap:10 mt:20">
+        <div class="flex flex-direction:column gap:10 mt:20">
           <For each={navData()}>
             {(navNode) => (
               <Show when={navNode.P.url !== "undefined"}>

@@ -22,6 +22,7 @@ import { ActionsDragAndDrops } from "./Actions/Actions-DragAndDrops";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import {PageSetting} from "../PageSetting";
+import { useExpansion } from "./CommonCompUtils";
 
 const LayoutDragAndDrop = (): JSX.Element => {
   const [isLeftOpen, toggleIsLeftOpen] = useExpansion(true);
@@ -74,11 +75,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
       .find((id) => id !== null)!;
   };
 
-  function useExpansion(defaultValue = true) {
-    const [expanded, setExpanded] = createSignal(defaultValue);
-    const toggleExpansion = () => setExpanded(!expanded());
-    return [expanded, toggleExpansion];
-  }
 
   const gridArea = () => ({
     display: "grid",

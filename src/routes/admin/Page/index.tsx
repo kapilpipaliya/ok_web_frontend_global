@@ -1,5 +1,5 @@
-import { AbstractGrid } from "~/pages/dynamic/GridData";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
+import { AbstractGrid } from "~/pages/dynamic/Grid/AbstractGrid";
 
 export default function page() {
   

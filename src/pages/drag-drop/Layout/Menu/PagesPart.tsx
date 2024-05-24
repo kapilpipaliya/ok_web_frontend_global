@@ -1,12 +1,11 @@
 import { toTitle } from "case-switcher-js";
-import { Match, createEffect, createResource, createSignal, useContext, For, Switch } from "solid-js";
+import { Match, createEffect, createResource, createSignal, useContext, For, Switch, Show } from "solid-js";
 import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { Hide } from "../CommonCompUtils";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 
@@ -92,7 +91,7 @@ export function PagesPart() {
     const itemStyle: any = () => (isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle);
 
     return (
-      <Hide when={props.child.name}>
+      <Show when={props.child.name}>
         <div
           style={itemStyle()}
           onMouseEnter={() => setIsHovered(true)}
@@ -105,7 +104,7 @@ export function PagesPart() {
         >
           <Icon icon={'iconoir:multiple-pages'} height={22} width={22}/><div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
         </div>
-      </Hide>
+      </Show>
     );
   }
 
