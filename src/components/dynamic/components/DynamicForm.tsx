@@ -1,11 +1,13 @@
 import {
   batch,
+  createEffect,
   createMemo,
   createResource,
   createSignal,
   For,
   JSXElement,
   Match,
+  on,
   onCleanup,
   onMount,
   Show,
@@ -16,7 +18,7 @@ import {
 } from "solid-js";
 import { createStore, SetStoreFunction, Store } from "solid-js/store";
 import { toTitle } from "case-switcher-js";
-import { capitalizeFirstLetter, FormContext, groupBy } from "~/lib/Utils";
+import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
 import {
   getChildVertexes,
   getInEdge,
@@ -25,7 +27,7 @@ import {
 } from "~/lib/graph/get/sync/traverse";
 import {
   createForm,
-  createMeta, loadForm
+  createMeta
 } from "~/lib/graph/mutate/form_functions";
 import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
@@ -53,7 +55,7 @@ import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
 import { DynamicComponent } from "./DynamicComponent";
 import { FormMetaData } from "~/lib/Type";
-import { getPermissions } from "~/lib/graph/get/sync/auth";
+// import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import {
@@ -109,23 +111,31 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   );
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
-  const id = createMemo(() => p.id === "new" ? undefined : parseInt(p.id as string)
-  );
+  const id = createMemo(() => p.id === "new" ? undefined : parseInt(p.id as string));
   // TODO: add validation on form that AttrsTableData keys should not available.
+  // Note: When the page is loaded server side, the client side will not run this again,
+  // so set state inside it will not set when page is reloaded.
   const [data, { mutate, refetch }] = createResource(async () => {
-    try {
-      const form = await getFormMetaDataAsync(
-        props.graph,
-        props.setGraph,
-        props.formId
-      );
-      if (form.error) return form;
 
-      setFormData({ form: form.form });
-    } catch (e: any) {
-      console.error(e);
-    }
+    const form = await getFormMetaDataAsync(
+      props.graph,
+      props.setGraph,
+      props.formId
+    );
+    if (form.error) return 'Error';
+
+    return { formData: JSON.stringify(form) };
+
   });
+  createEffect(() => {
+    if (data() && data() !== 'Error') {
+      const result = JSON.parse(data().formData);
+      if (result && !(result as { error: string }).error) {
+        setFormData({ form: result.form as FormMetaData });
+      }
+    }
+
+  })
 
   return (
     <Switch>
@@ -134,6 +144,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
       <Match when={data.error}>Error</Match>
 
       <Match when={data()?.error}>Error</Match>
+
       <Match when={true}>
         <DynamicForm
           form={formData.form!}
@@ -173,99 +184,100 @@ export function DynamicForm(props: DynamicFormProps) {
   });
   const [activeTab, setActiveTab] = createSignal("main");
 
-  const [data, { mutate, refetch }] = createResource(async () => {
+  const fetchData = async () => {
     try {
-
-      let dataVertex: Vertex;
       if (!props.id) {
-        // TODO: Load Form Meta from API
-        const createResult = createForm(
-          graph,
-          setGraph,
-          txnId,
-          Ws,
-          props.form[IdAttr]
-        );
-        if (createResult.error) return createResult.error;
-        dataVertex = createResult.vertex!;
-      } else {
-        // TODO: Load vertex from server
-        const loadResult = await findVertexByIdMGCall(props.id);
-        if (loadResult.error) return loadResult.error;
+        // Load Form Meta from API
+        const createResult = createForm(graph, setGraph, txnId, Ws, props.form[IdAttr]);
 
-        const { incoming, outgoing } = processRowsAttr(props.form.attributes);
-        console.log('incoming', incoming, 'outgoing', outgoing);
-
-        // const allExpression = fn(props.form.attributes);
-        const result = await getDataMGCall({ expression: `id:'${props.id}'`, incoming, outgoing });
-        console.log('getDataMGCall', result);
-        setGraphData(graph, setGraph, result.graph);
-
-        dataVertex = graph.vertexes[props.id];
-
-      }
-
-      // TODO: Load Form Meta and Data from API
-      const metaVertexResult = untrack(() => createMeta(props.form, graph, setGraph)
-      );
-
-      if (metaVertexResult.error) {
-        console.error(metaVertexResult.error);
-        return metaVertexResult;
-      }
-
-      const groupByTabsAndGroupFn = () => {
-        const mainAttributes = getChildVertexes(
-          graph,
-          ["MetaAttr"],
-          [metaVertexResult.vertex!]
-        ); //.sort((a, b) => a.P.pos - b.P.pos);
-
-        const groupByTabs = groupBy(
-          mainAttributes.vertexes!,
-          (item) => item.P.tab!
-        ) as unknown as {
-          [tab: string]: Vertex[];
-        };
-
-        const groupByTabsAndGroup = {} as {
-          [tab: string]: { [group: string]: Vertex[]; };
-        };
-
-        for (const tab in groupByTabs) {
-          groupByTabsAndGroup[tab] = groupBy(
-            groupByTabs[tab]!,
-            (item) => item.P.group!
-          ) as unknown as {
-            [group: string]: Vertex[];
-          };
+        if (createResult.error) {
+          return { error: createResult.error };
         }
-        return groupByTabsAndGroup;
-      };
 
-      // For new Form component, user will define layout, not a fixed layout;
-      // We may use this component for render from the json.
-      const groupByTabsAndGroup = groupByTabsAndGroupFn();
-      // TODO: Fix Tabs are not reactive
-      const tabs = Object.keys(groupByTabsAndGroup).filter(
-        (tab) => tab !== "main"
-      );
-   
-      batch(() => {
+        return { vertex: createResult.vertex };
+      } else {
+        // Load vertex from server
+        const loadResult = await findVertexByIdMGCall(props.id);
+
+        if (loadResult.error) {
+          return { error: loadResult.error };
+        }
+
+        const { incoming, outgoing }: { incoming: any; outgoing: any; } = getEdgesFromRowsAttr(props.form.attributes);
+        const result = await getDataMGCall({ expression: `id:'${props.id}'`, incoming, outgoing });
+
+        if (result.error) {
+          return { error: result.error };
+        }
+
+        return { graph: result.graph }
+      }
+    } catch (e: any) {
+      return { error: `Error When Loading Form: ${e.message}` };
+    }
+  };
+
+  const [data, { refetch }] = createResource(fetchData);
+
+
+  createEffect(() => {
+    if (data()) {
+      const result = data();
+      if (result && !(result as { error?: string }).error) {
+        if ((result as { graph?: GraphInterface }).graph) {
+          setGraphData(graph, setGraph, (result as { graph: GraphInterface }).graph);
+        }
+        // Load Form Meta and Data from API
+        const metaVertexResult = untrack(() => createMeta(props.form, graph, setGraph));
+
+        if (metaVertexResult.error) {
+          console.error('Meta Vertex Error:', metaVertexResult.error);
+          return;
+        }
+        const groupByTabsAndGroupFn = () => {
+          const mainAttributes = getChildVertexes(
+            graph,
+            ["MetaAttr"],
+            [metaVertexResult.vertex!]
+          ); //.sort((a, b) => a.P.pos - b.P.pos);
+
+          const groupByTabs = groupBy(
+            mainAttributes.vertexes!,
+            (item) => item.P.tab!
+          ) as unknown as {
+            [tab: string]: Vertex[];
+          };
+
+          const groupByTabsAndGroup = {} as {
+            [tab: string]: { [group: string]: Vertex[]; };
+          };
+
+          for (const tab in groupByTabs) {
+            groupByTabsAndGroup[tab] = groupBy(
+              groupByTabs[tab]!,
+              (item) => item.P.group!
+            ) as unknown as {
+              [group: string]: Vertex[];
+            };
+          }
+          return groupByTabsAndGroup;
+        };
+        const groupByTabsAndGroup = groupByTabsAndGroupFn();
+        const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
+
+
         setActiveTab(tabs[0]);
         setFormData({
           txnId,
           formMeta: metaVertexResult.vertex!,
-          formData: dataVertex,
+          formData: graph.vertexes[props.id!],
           tabs,
           groupByTabsAndGroup,
         });
-      });
-      setPageConfig?.("formData", formData);
 
-    } catch (e: any) {
-      console.error(e);
-      return { error: `Error When Loading Form: ${e.message}` };
+        setPageConfig?.("formData", formData);
+      }
+    
     }
   });
 
@@ -434,6 +446,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <Match when={data()?.error}>Error</Match>
 
       <Match when={true}>
+
         <RepeaterContext.Provider
           value={[formData.formData, ...useContext(RepeaterContext)]}
         >
@@ -441,7 +454,7 @@ export function DynamicForm(props: DynamicFormProps) {
             ref={(el) => {
               setDivRef(el);
               // validationGroup = new dxValidationGroup(divRef()!);
-            } }
+            }}
           >
             <Show when={props.showSubmitButtonOnTop ?? false}>
               <SubmitButton />
@@ -449,8 +462,8 @@ export function DynamicForm(props: DynamicFormProps) {
 
             <Show when={divRef()}>
               <FormContext.Provider value={formData}>
-                {/* Main Tab is displayed as top level fields */}
-                <Show when={formData.groupByTabsAndGroup["main"]}>
+                <Show when={formData.groupByTabsAndGroup !== undefined}>
+                  {/* Main Tab is displayed as top level fields */}
                   <For each={Object.keys(formData.groupByTabsAndGroup["main"])}>
                     {(group) => (
                       <>
@@ -507,7 +520,6 @@ export function DynamicForm(props: DynamicFormProps) {
                     )}
                   </For>
                 </Show>
-
                 <Show
                   when={formData.tabs?.length > 0 &&
                     !(props.showMainFieldsOnly ?? false)}
@@ -541,7 +553,7 @@ export function DynamicForm(props: DynamicFormProps) {
                             txnId={formData.txnId} />
                         </div>
                       );
-                    } }
+                    }}
                   </For>
                 </Show>
                 {/* @ts-ignore */}
@@ -563,7 +575,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 onConfirm={() => {
                   revertTransaction(formData.txnId);
                   setDiscradPopup(false);
-                } }
+                }}
                 title="Discard changes"
                 message="Discard unsaved changes - are you sure?" />
             </Show>
@@ -573,39 +585,15 @@ export function DynamicForm(props: DynamicFormProps) {
     </Switch>
   );
 }
-function processRowsAttr(attrs: any): { incoming: Expression[], outgoing: Expression[] } {
-  const outgoing = [] as Expression[];
-  const incoming = [] as Expression[];
 
-  for (const attribute of attrs) {
-    if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
-      if (attribute.props?.inward) {
-        incoming.push({ expression: `<-${getInEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`}); // `<-${capitalizedName}$0`
-      } else {
-        outgoing.push({ expression: `->${getToEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`}); // `->$0${capitalizedName}`
-      }
-    } else if (attribute.component === 'Table' || attribute.component === 'Table2') {
-      const expression: Expression = { expression: `->${getToEdge({P: attribute} as Vertex, {L: ['$0']} as Vertex) }`};
-
-      if (attribute.attributes) {
-        const nested = processRowsAttr(attribute.attributes);
-        
-        expression.incoming = nested.incoming;
-        expression.outgoing = nested.outgoing;
-      }
-      outgoing.push(expression);
-    }
-  }
-  
-  return { incoming, outgoing };
-}
 
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
   return (
     <For each={props.metaAttributes}>
       {(metaVertex) => {
-        const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
+
+        const id = `${props.vertex.id + metaVertex.P[IdAttr] + "Label"}`;
         const component = createMemo(() =>
           getComponentForCollRow(
             metaVertex,

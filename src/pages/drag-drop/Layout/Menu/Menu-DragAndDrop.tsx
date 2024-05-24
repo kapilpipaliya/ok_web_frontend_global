@@ -1,25 +1,25 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, For, Accessor, Match, Switch, useContext } from "solid-js";
+import { For, Accessor, Match, Switch, useContext, createSignal } from "solid-js";
 import { PageConfigContext } from "~/lib/contexts";
 import { Vertex } from "~/lib/graph/graph";
-import { useExpansion } from "../CommonCompUtils";
+import { Hide, useExpansion } from "../CommonCompUtils";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
 import { CollectionPart } from "./CollectionPart";
+import { capitalizeFirstLetter } from "~/lib/Utils";
 
 interface MenuProps {
   leftColumns: any;
   rightColumns: any;
   isLeftOpen: Accessor<boolean>;
-  isRightOpen: Accessor<boolean>;
   toggleIsLeftOpen: Accessor<boolean>;
-  toggleIsRightOpen: Accessor<boolean>;
 }
 
 export function MenuDragAndDrop(props: MenuProps) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   return (
-    <nav style={{ "grid-area": "menu" }}>
+    <nav style={{ "grid-area": "menu", 'min-width': '318px' }}>
+      
       <div class={"rel"}>
         <div
           class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl`}
@@ -29,229 +29,62 @@ export function MenuDragAndDrop(props: MenuProps) {
             "scrollbar-color": "lightgrey",
           }}
         >
-          <Show when={props.isLeftOpen()}>
-            <For each={props.leftColumns()}>
-              {(column, index) => (
-                <Column
-                  type={column.id}
-                  index={index()}
-                  vertex={pageConfig.formData?.formData} />
-              )}
-            </For>
-          </Show>
+
+          <Hide when={props.isLeftOpen()}>
+
+            <Column
+              datas={props.leftColumns()}
+              toggleLeftOpen={props.toggleIsLeftOpen}
+              vertex={pageConfig.formData?.formData} />
+
+          </Hide>
         </div>
-        <div class={`abs z-index:1 top:40vh right:17px`}>
-          <button
-            onClick={props.toggleIsLeftOpen}
-            type="button"
-            title={`${props.isLeftOpen() ? "Close" : "Open"}`}
-            class="top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-            style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;`}
-          >
-            <Show
-              when={props.isLeftOpen()}
-              fallback={<Icon
-                icon={"line-md:chevron-right-circle"}
-                height={30}
-                width={30}
-                style={{ color: "#c1c1c1" }} />}
-            >
-              <Icon
-                icon={"line-md:chevron-left-circle"}
-                height={30}
-                width={30}
-                style={{ color: "#c1c1c1" }} />
-            </Show>
-          </button>
-        </div>
+       
       </div>
     </nav>
   );
 }
 
-const Column = (props: { type: string; index: number; vertex: Vertex }) => {
-  const [isComponentsExpanded, toggleComponentsExpansion] = useExpansion();
-  const [isPagesExpanded, togglePagesExpansion] = useExpansion();
-  const [isCollectionExpanded, toggleCollectionExpansion] = useExpansion();
-  const [isComponentOpen, toggleComponentOpen] = useExpansion(true);
-  const [isPagesOpen, togglePagesOpen] = useExpansion(true);
-  const [isCollFieldsOpen, toggleCollFieldsOpen] = useExpansion(true);
+const Column = (props: { datas: any; vertex: Vertex;toggleLeftOpen: Accessor<boolean> }) => {
+  const [selectedTab, setSelectedTab] = createSignal('components');
 
   return (
     <>
-      <div class={"p:5 direction:ltr"}>
+      <div class={"p:5 direction:ltr "}>
+        <div class="position:sticky top:0 z:15 p:4 bg:white">
+          <div class="p:5|10 flex ai:center jc:space-between bg:#f4f4f4 f:0.875rem r:5">
+            <div class="font-weight:600">
+              Form Elements
+            </div>
+            <Icon class="cursor:pointer bg:white:hover r:50%" onClick={props.toggleLeftOpen} icon={"iconamoon:close-duotone"} height={30} width={30} style={{ color: "#c1c1c1" }} />
+          </div>
+          <div
+            class="f:0.875rem mb:10 lh:1rem font-weight:500  text-align:center  color:rgb(107,114,128)  border-bottom-width:1px  border-color:rgb(229,231,235) ">
+            <ul class="jc:space-around  flex flex-wrap:wrap  margin-bottom:-1px ">
+              <For each={props.datas}>
+                {(data) => (
+                  <li class="me-2 cursor:pointer">
+                    <a onclick={() => setSelectedTab(data.id)}
+                      class={`${selectedTab() === data.id ? "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)" : "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover"} display:inline-block  p:10px border-bottom-width:2.5px  border-color:transparent  rounded-t-lg`}>{capitalizeFirstLetter(data.name)}</a>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </div>
+        </div>
         <Switch>
-          <Match when={props.type === "components"}>
-            <Show
-              when={isComponentsExpanded()}
-              fallback={
-                <div
-                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                  style="transition: opacity 0.3s ease-in-out;"
-                  onClick={toggleComponentsExpansion}
-                  title="Components"
-                >
-                  <Icon icon={"mynaui:components"} height={25} width={25} />
-                </div>
-              }
-            >
-              <div class="m:5">
-                <div
-                  class="mb:10px"
-                  onClick={toggleComponentOpen}
-                  style={{
-                    display: "flex",
-                    "justify-content": "space-between",
-                    "align-items": "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div style="font-weight: bold">Components</div>
-                  <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                    <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isComponentOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
-                    />
-                  </div>
-                  {/*<div class="bg:rgb(255,253,253) bg:rgb(232,229,229):hover r:5|5|5|5 h:26px"
-                                             title="Close Components">
-                                            {isComponentsExpanded() && (
-                                                <div
-                                                    onClick={toggleComponentsExpansion}
-                                                    class="cursor:pointer"
-                                                >
-                                                    <Icon
-                                                        icon={"mingcute:left-line"}
-                                                        height={25}
-                                                        width={25}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>*/}
-                </div>
+          <Match when={selectedTab() === "components"}>
 
-                <Show when={isComponentOpen()}>
-                  <hr class={"color:lightgrey m:.4rem|0"} />
-                  <ComponentPart />
-                </Show>
-              </div>
-            </Show>
+            <ComponentPart />
           </Match>
-          <Match when={props.type === "pages"}>
-            <Show
-              when={isPagesExpanded()}
-              fallback={
-                <div
-                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px p:5px w:2rem bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                  style="transition: opacity 0.3s ease-in-out;"
-                  onClick={togglePagesExpansion}
-                  title="Pages"
-                >
-                  <Icon
-                    icon={"iconoir:multiple-pages"}
-                    height={25}
-                    width={25}
-                  />
-                </div>
-              }
-            >
-              <div class="m:5 ">
-                <div
-                  class="mb:10px"
-                  onClick={togglePagesOpen}
-                  style={{
-                    display: "flex",
-                    "justify-content": "space-between",
-                    "align-items": "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div style="font-weight: bold">Pages</div>
+          <Match when={selectedTab() === "pages"}>
 
-                  <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                    <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isPagesOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
-                    />
-                  </div>
-                </div>
-                <Show when={isPagesOpen()}>
-                  <hr class={"color:lightgrey m:.4rem|0"} />
-                  <PagesPart />
-                </Show>
-              </div>
-            </Show>
+            <PagesPart />
+
           </Match>
-          <Match when={props.type === "collection"}>
-            <Show
-              when={isCollectionExpanded()}
-              fallback={
-                <div
-                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                  style="transition: opacity 0.3s ease-in-out;"
-                  onClick={toggleCollectionExpansion}
-                  title="Collection"
-                >
-                  <Icon
-                    icon={"fluent:collections-24-regular"}
-                    height={25}
-                    width={25}
-                  />
-                </div>
-              }
-            >
-              <div class="m:5">
-                <div
-                  class="mb:10px"
-                  onClick={toggleCollFieldsOpen}
-                  style={{
-                    display: "flex",
-                    "justify-content": "space-between",
-                    "align-items": "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div style="font-weight: bold">Collection Fields</div>
-                  <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                    <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isCollFieldsOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
-                    />
-                  </div>
-                </div>
-                <Show when={isCollFieldsOpen()}>
-                  <hr class={"color:lightgrey m:.4rem|0"} />
-                  <CollectionPart />
-                </Show>
-              </div>
-            </Show>
+          <Match when={selectedTab() === "collection"}>
+
+            <CollectionPart />
           </Match>
         </Switch>
       </div>

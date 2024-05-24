@@ -3,7 +3,6 @@ import { TextField } from "~/components/solid-blocks/blocks";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
-import MultiSelect from "./MultiSelect";
 import { binops, unops } from "~/lib/expression_eval";
 import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -176,7 +175,7 @@ export function ExpressionBuilder(props: {
                 </div>
                 <div class={"flex ai:center jc:space-between"}>
                   <div class={"flex"}>
-                    <MultiSelect
+                    {/* <MultiSelect
                       isObject
                       displayValueParent="P"
                       displayValueChild="name"
@@ -190,7 +189,7 @@ export function ExpressionBuilder(props: {
                       onRemove={(e) => onUnaryOperatorChange(index())}
                       customCloseIcon={<Icon icon={"ic:round-close"} />}
                       selectionLimit={1}
-                      singleSelect />
+                      singleSelect /> */}
                   </div>
                   <TextField
                     labelClass={"w:100% mr:.5rem ml:.5rem"}
@@ -209,7 +208,7 @@ export function ExpressionBuilder(props: {
                       setValue={props.setValue}
                       onClose={handleCancel} />} />
                   <div class={"flex"}>
-                    <MultiSelect
+                    {/* <MultiSelect
                       isObject
                       displayValueParent="P"
                       displayValueChild="name"
@@ -223,7 +222,7 @@ export function ExpressionBuilder(props: {
                       onRemove={(e) => onBinaryOperatorChange(index())}
                       customCloseIcon={<Icon icon={"ic:round-close"} />}
                       selectionLimit={1}
-                      singleSelect />
+                      singleSelect /> */}
                   </div>
                 </div>
               </div>

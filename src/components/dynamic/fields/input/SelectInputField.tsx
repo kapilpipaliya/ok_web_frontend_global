@@ -46,7 +46,7 @@ import { useToast } from "~/components/custom/Toast";
 import { getSelectionOptionsAsync } from "~/lib/graph/get/async/traverse";
 import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import MultiSelectField from "~/components/custom/NewMultiSelect";
+import MultiSelectField from "~/components/custom/MultiSelect";
 
 function vertexInEdgeContainVertex(
   vertex: Vertex,

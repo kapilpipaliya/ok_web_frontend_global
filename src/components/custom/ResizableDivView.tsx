@@ -34,7 +34,7 @@ const ResizableContainer = (props: any) => {
   return (
     <div
       class="resizable-container r:10|10|10|10 min-h:80% min-w:30%"
-      style={`width: ${width()}px; height: ${height()}px;max-width:55vw;max-height:80vh; resize: both; border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
+      style={`width: ${width()}px; height: ${height()}px;max-height:80vh; resize: both; border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
     >
       {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}

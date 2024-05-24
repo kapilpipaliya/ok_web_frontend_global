@@ -41,6 +41,9 @@ import {
   SelectedIdContext,
   TargetIdContext,
 } from "~/lib/contexts";
+import Drawer from "~/components/custom/drawer";
+import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
+import { Properties } from "~/pages/drag-drop/Layout/Actions/Properties";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -98,6 +101,20 @@ export function PageItemRender(props: {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
+
+  const PropertiesDrawer = (props: { itemId : any}) => {
+    return <div classList={{ 'display:none': isSelectedLayoutId(props.itemId) }}>
+      <Drawer
+        customButton={(props) => (
+          <Icon icon={'mingcute:settings-5-line'} {...props} height={22} width={22} class="cursor:pointer" />
+        )}
+        title="First Drawer"
+        width="450px"
+      >
+        <Properties />
+      </Drawer>
+    </div>
+  };
 
   return (
     <For
@@ -213,99 +230,89 @@ export function PageItemRender(props: {
           >
             <Show when={!isPreview()} fallback={<Content />}>
               <span
-                class="contents "
+                class="display:contents "
                 onMouseOver={(e) => {
                   e.stopPropagation();
                   setHoverId(item.id);
-                } }
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   onLayoutItemClick();
-                } }
+                }}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
                 <Show when={isSelectedLayoutId(item.id)}>
-                  <span class="position:relative flex jc:end">
-                    <div class="abs bottom:100% display:flex bg:rgb(38,128,235) r:5 z:9999 m:2|0">
-                      <Tooltip content={"Name"} nowrap>
-                        <div class={"m:4px mr:10px fg:#ffffff f:14"}>
-                          {getComponent()}
+                  <span class="position:relative  flex justify-content:flex-end ">
+                    <div class="position:absolute  bottom:100% z:50 ">
+                      <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50 m:0.5rem">
+                        <Tooltip content={"Name"} nowrap>
+                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">{getComponent()}</div>
+                        </Tooltip>
+                        <Tooltip content={"Move"} nowrap>
+                          <Icon
+                            draggable={true}
+                            onDragStart={handleDragStart}
+                            icon={"material-symbols-light:drag-pan-rounded"}
+                            height={20}
+                            width={20}
+                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                          />
+                        </Tooltip>
+                        <Tooltip content={"Parent"} nowrap>
+                          <Icon
+                            icon={"mdi:arrow-up"}
+                            height={20}
+                            width={20}
+                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                            onClick={(e) => {
+                              const parentResult = getParentVertex(["Attr"], item, graph);
+                              if (parentResult.error) {
+                                return;
+                              }
+                              setSelectedId(parentResult.vertex!.id);
+                            }}
+                          />
+                        </Tooltip>
+                        <Tooltip content={"Duplicate"}>
+                          <Icon
+                            icon={"mage:copy"}
+                            height={20}
+                            width={20}
+                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                            onClick={clone}
+                          />
+                        </Tooltip>
+                        <Tooltip content={"Delete"}>
+                          <Icon
+                            onClick={() => deleteLayout(getComponent())}
+                            icon={"fluent:delete-20-regular"}
+                            height={20}
+                            width={20}
+                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                          />
+                        </Tooltip>
+                          <div class="flex flex-direction:column p:5 bg:rgb(37,99,235) color:white r:24 position:absolute  right:-30px top:10px ">
+                          {PropertiesDrawer(item.id)}
                         </div>
-                      </Tooltip>
-                      <Tooltip content={"Move"} nowrap>
-                        <Icon
-                          draggable={true}
-                          onDragStart={handleDragStart}
-                          icon={"material-symbols-light:drag-pan-rounded"}
-                          height={20}
-                          width={20}
-                          color={"white"}
-                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
-                          style={{ color: "white" }} />
-                      </Tooltip>
-                      <Tooltip content={"Parent"} nowrap>
-                        <Icon
-                          icon={"mdi:arrow-up"}
-                          height={20}
-                          width={20}
-                          color={"white"}
-                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
-                          style={{ color: "white" }}
-                          onclick={(e) => {
-                            const parentResult = getParentVertex(
-                              ["Attr"],
-                              item,
-                              graph
-                            );
-                            if (parentResult.error) {
-                              return;
-                            }
-                            setSelectedId(parentResult.vertex!.id);
-                          } } />
-                      </Tooltip>
-                      <Tooltip content={"Duplicate"}>
-                        <Icon
-                          icon={"mage:copy"}
-                          height={20}
-                          width={20}
-                          color={"white"}
-                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
-                          style={{ color: "white" }}
-                          onclick={clone} />
-                      </Tooltip>
-                      <Tooltip content={"Delete"}>
-                        <Icon
-                          onClick={() => deleteLayout(getComponent())}
-                          icon={"fluent:delete-20-regular"}
-                          height={20}
-                          width={20}
-                          color={"white"}
-                          class={"cursor:pointer mt:5px mb:2px ml:2px mr:2px c:#ffffff"}
-                          style={{ color: "white" }} />
+                      </div>
+                      
+                   </div>
+                  </span>
+                  
+                </Show>
+                <Show when={!isSelectedLayoutId(item.id) && isSelectedHoverId(item.id)}>
+                  <span class="position:relative ">
+                    <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
+                      <Icon icon={iconMap[getComponent()]} class="color:rgb(255,255,255) " />
+                      <Tooltip content={"Name"} nowrap>
+                        <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">{getComponent()}</div>
                       </Tooltip>
                     </div>
                   </span>
                 </Show>
-                <Show
-                  when={item.id !== selectedId() && isSelectedHoverId(item.id)}
-                >
-                  <span class="position:relative">
-                    <div class="abs bottom:100% flex bg:rgb(38,128,235) r:5 z:9999 p:0|5 ai:center m:2|0">
-                      <Icon
-                        icon={iconMap[getComponent()]}
-                        style={{ color: "white" }} />
-                      <Tooltip content={"Name"} nowrap>
-                        <div class={"m:4px mr:10px fg:#ffffff f:14"}>
-                          {getComponent()}
-                        </div>
-                      </Tooltip>
-                    </div>
-                  </span>
-                </Show>
-
                 <Content />
               </span>
             </Show>
@@ -346,7 +353,7 @@ export function PageItemRender(props: {
             </Match>
           </Switch>
         );
-      } }
+      }}
     </For>
   );
 }
@@ -391,8 +398,8 @@ export function PageView(props: { vertex?: Vertex, isPreview?: boolean }) {
     <PageContext.Provider value={{ events: {} }}>
       <Show when={props.vertex} keyed>
         <Switch>
-          <Match when={collection() && !dataVertex()}>
-            <For
+          {/* <Match when={collection() && !dataVertex()}> */}
+          {/* <For
               each={
                 getSelectionOptions(
                   graph,
@@ -407,11 +414,11 @@ export function PageView(props: { vertex?: Vertex, isPreview?: boolean }) {
                   <PageItemRender metaVertex={props.vertex!} data={vertex} />
                 </PageRenderContext.Provider>
               )}
-            </For>
-          </Match>
-          <Match when={collection() && dataVertex()}>
+            </For> */}
+          {/* </Match> */}
+          {/* <Match when={collection() && dataVertex()}>
             <PageItemRender metaVertex={props.vertex!} />
-          </Match>
+          </Match> */}
           <Match when={true}>
             <PageItemRender metaVertex={props.vertex!} />
           </Match>

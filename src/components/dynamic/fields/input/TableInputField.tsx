@@ -439,7 +439,7 @@ export function TableInputField(
         {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
         <Show when={expandVertex()}>
           <tr>
-            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 1}>
+            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
                 component={"Table2"}
                 // When we have a Table we pass original Table Meta Vertex
@@ -511,8 +511,8 @@ export function TableInputField(
 
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <Show when={sortedVertexes().length}>
-          <div class={" w:80vw overflow:auto scroll-bar:thin"}>
-            <table class="styled-table mt:3">
+          <div class={" w:80vw overflow:auto b:1px|solid|#37c r:10 m:2"} style={{ 'scrollbar-width':'thin'}}>
+            <table class="styled-table b:none">
               <thead>
                 <tr
                   style={{
@@ -535,7 +535,7 @@ export function TableInputField(
                             }
                           >
                             <th
-                              class={"font-weight:medium"}
+                              class={"font-weight:medium p:0px|10px"}
                               style={{
                                 "justify-content": "center",
                               }}

@@ -8,7 +8,7 @@ export function HeaderDragAndDrop(props: {
   onChangeStep: any;
 }) {
   return (
-    <header style={{ "grid-area": "header" }}>
+    <header class="h:50px" style={{ "grid-area": "header" }}>
       <div class="flex-grow:1 min-w:400 grid ji:center">
         <div
           class={

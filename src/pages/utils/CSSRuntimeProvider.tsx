@@ -6,8 +6,10 @@ import {
   createSignal,
   JSX,
   onCleanup,
+  Show,
   useContext,
 } from "solid-js";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
 
@@ -24,6 +26,8 @@ export function CSSRuntimeProvider(props: {
   const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(
     undefined,
   );
+  const [loadingCss, setLoadingCss] = createSignal(true);
+
   let identifier = 0;
   let initializing = false;
   let newRuntimeCSS: RuntimeCSS | undefined = undefined;
@@ -54,8 +58,8 @@ export function CSSRuntimeProvider(props: {
         configModule?.config || configModule?.default || configModule;
 
       const init = async () => {
+        setLoadingCss(true)
         initializing = true;
-
         const currentRoot = props.root ?? document;
         const existingCSSRuntime = (globalThis as any).runtimeCSSs.find(
           (eachCSS: RuntimeCSS) => eachCSS.root === currentRoot,
@@ -72,7 +76,7 @@ export function CSSRuntimeProvider(props: {
           );
           isExternalRuntimeCSS = false;
         }
-
+        setLoadingCss(false)
         initializing = false;
       };
 
@@ -86,6 +90,7 @@ export function CSSRuntimeProvider(props: {
         await init();
       } else {
         newRuntimeCSS.refresh(resolvedConfig);
+        setLoadingCss(false)
       }
     })();
   });
@@ -104,8 +109,10 @@ export function CSSRuntimeProvider(props: {
   });
 
   return (
-    <RuntimeCSSContext.Provider value={runtimeCSS()}>
-      {props.children}
-    </RuntimeCSSContext.Provider>
+    <Show when={!loadingCss()} fallback={<LoaderNew />}>
+      <RuntimeCSSContext.Provider value={runtimeCSS()}>
+        {props.children}
+      </RuntimeCSSContext.Provider>
+    </Show>
   );
 }

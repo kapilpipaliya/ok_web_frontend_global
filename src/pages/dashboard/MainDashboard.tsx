@@ -81,7 +81,8 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
             setSideBarOpen((prev) => !prev);
           } } />
       </Show>
-      <div style={mainContentStyle as any}>
+      {/* Disable Scroll when Select dropdown is open */}
+      <div id="main-content" style={mainContentStyle as any}>
         <PageContext.Provider
           value={{
             events: {

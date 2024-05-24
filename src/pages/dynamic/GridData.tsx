@@ -50,7 +50,6 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
-import { CollapsibleTable } from "~/components/custom/Table";
 import Dismiss from "solid-dismiss";
 import { createStore, SetStoreFunction } from "solid-js/store";
 import PageHeader from "~/components/custom/Breadcumb";
@@ -64,9 +63,8 @@ import { Popover } from 'solid-simple-popover'
 import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
 import { Expression, getDataMGCall, getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import MultiSelectField from "~/components/custom/NewMultiSelect";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
-
+import { CommonTable } from "~/components/custom/Table";
 interface AbstractGridProps {
   tableId: string;
 }
@@ -140,7 +138,6 @@ const QuickEditModal = (p: {
                 id={p.info.row.original.id}
                 buttonAlign="end"
                 isDialogContext={true}
-                config={config}
                 showMainFieldsOnly={true}
                 importExportButtons={false}
                 doMount={false}
@@ -214,7 +211,7 @@ export function AbstractGrid(props: AbstractGridProps) {
 
   return (
     <>
-      <Show when={locationData()}>
+      <Show when={locationData()[0] !== undefined}>
         <PageHeader
           title={`${locationData()[0]}`}
           breadcrumb={[
@@ -235,7 +232,7 @@ export function AbstractGrid(props: AbstractGridProps) {
                 style: { padding: "7px 10px" },
                 leading: (
                   // TO solve Hydration error passed a function
-                  ()=><Icon
+                  () => <Icon
                     icon={"lets-icons:add-round"}
                     height={22}
                     width={22} />
@@ -260,8 +257,10 @@ const DataGrid = (props: DataGridProps) => {
   const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal(null);
   const [tableStore, setTableStore] = createStore(
-    {} as { tableColumns: ColumnDef<any>[]; data: Accessor<Vertex[]> },
+    {} as { tableColumns: ColumnDef<any>[]; data: any[] },
   );
+  const [totalItems, setTotalItems] = createSignal(0);
+  const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
 
   const SelectValue = (props: {
     attribute: FieldAttribute;
@@ -314,7 +313,8 @@ const DataGrid = (props: DataGridProps) => {
     return "";
   };
 
-  async function getTableData() {
+  async function getTableData(skip?: number, limit?: number) {
+    
     //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
     const form = await getFormApiFromFormMGCall(props.tableId);
     let formNew: FormMetaData;
@@ -369,9 +369,9 @@ const DataGrid = (props: DataGridProps) => {
             <Match when={attribute.component === "CheckBox"}>
               <span>
                 {info.getValue() === true
-                  ? "true"
+                  ? "Yes"
                   : info.getValue() === false
-                    ? "false"
+                    ? "No"
                     : ""}
               </span>
             </Match>
@@ -475,19 +475,22 @@ const DataGrid = (props: DataGridProps) => {
         }
       }
     }
-    const result = await getDataMGCall({ expression: `g:'${coll}'`, incoming: incomming, outgoing });
-
+    const result = await getDataMGCall({
+      expression: `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`, incoming: incomming, outgoing
+    });
+    
+    const vertexCount = Object.keys(result.graph.vertexes).length;
+    if (vertexCount < (limit ?? 10)! || vertexCount === 0) {
+      setIsShowLoadMore(false);
+    } else {
+      setIsShowLoadMore(true);
+    }
     setGraphData(graph, setGraph, result.graph);
-
-
-    const [data] = createSignal(
-      (graph.vertexLabelIdMap[coll] || []).map(
-        (vertexId: any) => graph.vertexes[vertexId],
-      ),
-    );
-
-    setTableStore({ tableColumns, data });
-  }
+    const resultData = Object.values(result.graph.vertexes);
+    const nodes = tableStore.data ? [...tableStore.data, ...resultData] : resultData;
+    setTotalItems(nodes.length);
+    setTableStore({ data: nodes, tableColumns });
+}
 
   const deleteObject = async (id: Id) => {
     const txnId = getNewTxnId(graph, setGraph);
@@ -514,28 +517,28 @@ const DataGrid = (props: DataGridProps) => {
   };
 
   const [data, { mutate, refetch }] = createResource(async () => {
-    try {
-      await getTableData();
-    } catch (e: any) {
-      console.error(e);
-    }
+    await getTableData();
   });
 
   onCleanup(() => events?.setTitle(""));
 
   return (
-    <div class="">
       <Switch>
         <Match when={data.loading}>
-          <LoaderNew />
+          <LoaderNew loaderHeight="55vh"/>
         </Match>
 
-        <Match when={data.error}>Error</Match>
+        <Match when={data.error}>Error {data.error}</Match>
 
-        <Match when={tableStore.data?.()}>
-          <CollapsibleTable
+        <Match when={tableStore.data}>
+          <CommonTable
             headers={tableStore.tableColumns}
-            rows={tableStore.data()}
+            data={tableStore.data}
+            isShowLoadMore={isShowLoadMore()}
+            rowsPerPageOptions={[5, 10, 15]}
+            defaultRowsPerPage={10}
+            onLoadMore={getTableData}
+            totalItems={totalItems()}
           />
           <Show when={deleteRowId()}>
             <DeleteDialog
@@ -549,9 +552,8 @@ const DataGrid = (props: DataGridProps) => {
           </Show>
         </Match>
       </Switch>
-    </div>
   );
-  
+
 };
 
 

@@ -46,11 +46,7 @@ export default function PageHeader(props: PageHeaderProps) {
                     when={item.href}
                     fallback={
                       <div class="flex align-items:center ">
-                        <svg class="rtl:rotate-180 w:0.75rem h:0.75rem color:rgb(156,163,175)  mx:0.25rem" aria-hidden="true"
-                          xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="m1 9 4-4-4-4" />
-                        </svg>
+                        <Icon icon={'octicon:chevron-right-12'} style={{ color: "rgb(156,163,175)" }} />
                         <span
                           class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(107,114,128)  md:ms-2 color:rgb(156,163,175)@dark">{item.name}</span>
                       </div>

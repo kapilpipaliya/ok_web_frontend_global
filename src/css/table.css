@@ -32,12 +32,8 @@
   background-color: #f3f3f4;
 }
 
-.styled-table tbody tr:last-of-type {
-  border-bottom: 2px solid #37c;
-}
 
 .styled-table {
   border-radius: 0.4rem;
-  overflow: hidden;
   /* Ensure contents stay within the circular border */
 }

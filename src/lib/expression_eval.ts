@@ -486,7 +486,7 @@ addUnaryOp("json:", (string) => {
 });
 
 addUnaryOp("g:", (edgeType, context) => {
-  const [type, filter, isMultiple] = calculateFilter(edgeType);
+  const {type, filter, isMultiple} = calculateFilter(edgeType);
   if (filter) {
     const vertexIds = findVertexIdsByLabel(context.graph, type);
     const filteredVertexes = [];

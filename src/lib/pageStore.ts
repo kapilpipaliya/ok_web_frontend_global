@@ -41,6 +41,10 @@ import {
   getSelectionOptions
 } from "./graph/get/sync/traverse";
 import { addNewRow } from "./graph/mutate/form_functions";
+import { getFormMetaDataAsync } from "./graph/get/async/graph_functions";
+import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "./websocket/ws_events";
+import { getEdgesFromRowsAttr } from "./Utils";
 
 const addPropsToLayoutRow = (
   graph: Store<GraphInterface>,
@@ -458,10 +462,11 @@ export function useDragDrop(graph: Store<GraphInterface>,
     // setDraggedVertex(null);
   };
 
-  const handleDrop = (e: DragEvent) => {
+  const handleDrop = async (e: DragEvent) => {
     e.stopPropagation();
 
     let fromVertex = draggedVertex();
+
     const toVertexId = indicatorPosition().activeItem!;
     const toVertex = graph.vertexes[toVertexId]; // vertex;
     if (!fromVertex) {
@@ -469,6 +474,29 @@ export function useDragDrop(graph: Store<GraphInterface>,
       return;
     }
     const fromVertexLabel = fromVertex.L[0];
+
+    // When Page is dropped, fetch its layout and add to the current place
+    if (fromVertexLabel === "Page") {
+      const form: any = await getFormMetaDataAsync(
+        graph,
+        setGraph,
+        fromVertexLabel,
+      );
+      if (form.error) {
+        showErrorToast(form.error);
+        return;
+      };
+      const { incoming, outgoing }: {incoming: any; outgoing: any;} = getEdgesFromRowsAttr(form.form.attributes);
+      const result = await getDataMGCall({ expression: `id:'${fromVertex.id}'`, incoming, outgoing });
+      
+
+      if (result.error) {
+        showErrorToast(result.error);
+        return;
+      }
+
+      setGraphData(graph, setGraph, result.graph);
+    }
 
     const position = indicatorPosition().position;
     if (!position) {

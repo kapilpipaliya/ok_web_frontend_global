@@ -1,49 +1,72 @@
 import { toTitle } from "case-switcher-js";
-import { Match, Show, createEffect } from "solid-js";
-import { For, Switch, createResource, createSignal, useContext } from "solid-js";
+import { Match, createEffect, createResource, createSignal, useContext, For, Switch } from "solid-js";
+import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { DraggedVertexContext } from "~/lib/contexts";
-import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import { Hide } from "../CommonCompUtils";
+import { getTreeData } from "~/lib/graph/get/sync/traverse";
+import { Icon } from "@iconify-icon/solid";
 
 export function PagesPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-
+  const { showErrorToast } = useToast();
   let originalData: any[] = [];
+  const [isFetchingData, setIsFetchingData] = createSignal(true);
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as ICon
-  async function fetchData() {
-    try {
-      const data = await getTreeDataMGCall({
-        collection: "g:'Page'",
-      });
+  const [filteredData, setFilteredData] = createSignal<any[]>([]);
 
-      setGraphData(graph, setGraph, data.graph);
-      const data2 = getTreeData(graph, setGraph, {
-        collection: "g:'Page'",
-      });
-      originalData = data2;
-      setFilteredData(data2);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+  // Fetch data function
+  async function fetchData(): Promise<{ graph?: any; data?: any; error?: string }> {
+    try {
+      const data = await getTreeDataMGCall({ collection: "g:'Page'" });
+      return { graph: data.graph, data: data };
+    } catch (error: any) {
+      return { error: error.message };
     }
   }
-  const [data] = createResource(() => fetchData());
+
+  // Create a resource for data fetching
+  const [data] = createResource(fetchData);
+
+  // Create effect to handle data changes
+  createEffect(() => {
+    setIsFetchingData(true);
+    if (data()) {
+      const result = data();
+      if (result?.error) {
+        showErrorToast(result.error);
+      } else {
+        if (result?.graph) {
+          setGraphData(graph, setGraph, result.graph);
+
+        const data2 = getTreeData(graph, setGraph, {
+          collection: "g:'Page'",
+        });
+        originalData = data2;
+        setFilteredData(data2);
+        setIsFetchingData(false);
+        }
+      }
+    }
+  });
+
+  // Update filtered data based on search query
   const updateFilteredData = () => {
     if (!searchQuery()) {
       setFilteredData(originalData);
     } else {
-      const filteredData = originalData.filter((item) => {
-        return item.name && item.name.toLowerCase().includes(searchQuery().toLowerCase());
-      });
-      setFilteredData(filteredData);
+      const filtered = originalData.filter((item) =>
+        item.name && item.name.toLowerCase().includes(searchQuery().toLowerCase())
+      );
+      setFilteredData(filtered);
     }
   };
 
-  function ListItemComponent(props: { child: any; }) {
+  function ListItemComponent(props: { child: any }) {
     const [isHovered, setIsHovered] = createSignal(false);
 
     const baseStyle = {
@@ -55,9 +78,9 @@ export function PagesPart() {
       display: "flex",
       "flex-direction": "row",
       "align-items": "center",
-      "justify-content": "space-between",
+      gap: "10px",
       height: "35px",
-      "box-shadow": "rgba(0, 0, 0, 0.2) 1px 1px 1px 1px",
+      "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
     };
 
     const hoverStyle = {
@@ -66,10 +89,10 @@ export function PagesPart() {
       boxShadow: "4px 4px 4px",
     };
 
-    const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+    const itemStyle: any = () => (isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle);
 
     return (
-      <Show when={props.child.name}>
+      <Hide when={props.child.name}>
         <div
           style={itemStyle()}
           onMouseEnter={() => setIsHovered(true)}
@@ -78,43 +101,45 @@ export function PagesPart() {
           onDragStart={(e) => {
             e.stopPropagation();
             setDraggedVertex(graph.vertexes[props.child.id]);
-          } }
+          }}
         >
-          <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+          <Icon icon={'iconoir:multiple-pages'} height={22} width={22}/><div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
         </div>
-      </Show>
+      </Hide>
     );
   }
 
   return (
-    <Switch>
-      <Match when={data.loading}>Loading</Match>
-
-      <Match when={data.error}>Error</Match>
-      <Match when={true}>
-        <div>
-          <TextField
-            label="Name"
-            class="b:1|solid|blue-30 r:5|5|5|5 p:4"
-            type="text"
-            placeholder="Search Page..."
-            value={searchQuery()}
-            onInput={(e) => {
-              setSearchQuery(e.target.value);
-              updateFilteredData(); // Update filteredData when searchQuery changes
-            } } />
-          <div
-            class="overflow-y:auto overflow-x:auto m:6px"
-            style={{ display: "grid", "grid-template-columns": "repeat(2, 1fr)" }}
-          >
-            <For
-              each={filteredData()}
-              fallback={<div class="p:3 font-weight:bold">No Page Found !</div>}
-            >
+    <Switch fallback={<div>Loading...</div>}>
+      <Match when={data.error}>Error: {data.error}</Match>
+      <Match when={!isFetchingData()}>
+        <>
+          <nav class="bg:white p:5 position:sticky abs z:10">
+            <div class="group">
+              <Icon
+                class="icon"
+                icon="iconamoon:search"
+                style={{ color: "#9e9ea7" }} />
+              <input
+                placeholder="Search Page..."
+                type="search"
+                class="inputSearch f:14"
+                value={searchQuery()}
+                onInput={(e) => {
+                  setSearchQuery(e.target.value);
+                  updateFilteredData(); // Update filteredData when searchQuery changes
+                }} />
+            </div>
+          </nav>
+          <div class="overflow:auto h:full" style={{
+            "scrollbar-width": "thin",
+            "scrollbar-color": "lightgrey"
+          }}>
+            <For each={filteredData()} fallback={<div class="p:3 m:20px|0px font-weight:bold text-align:center">No Page Found!</div>}>
               {(item, index) => <ListItemComponent child={item} />}
             </For>
           </div>
-        </div>
+        </>
       </Match>
     </Switch>
   );

@@ -1,392 +1,230 @@
-import { createEffect, createSignal, For, Match, Show, Switch } from "solid-js";
-import "~/css/table.css";
-import { capitalizeFirstLetter } from "~/lib/Utils";
-import { IdAttr, Vertex } from "~/lib/graph/graph";
-import { ColumnDef } from "@tanstack/solid-table";
-import { toTitle } from "case-switcher-js";
+import { createSignal, For, Show, createEffect, onMount, Switch, Match, Accessor } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import { TableRow } from "../solid-blocks/blocks/table/table";
 import { Tooltip } from "../solid-blocks/blocks";
+import CustomButton from "../solid-blocks/blocks/button/buttons";
+import { ColumnDef } from "@tanstack/solid-table";
+import { capitalizeFirstLetter } from "~/lib/Utils";
 
-// Row component for each data entry
-function CollapsibleTableRow(props: {
-  row: Vertex;
-  index: number;
-  headers: ColumnDef<any>[];
-}) {
-  const [open, setOpen] = createSignal(false);
-  const getValue = (header: ColumnDef<any>) => {
-    const keys = header.accessorKey.split("."); // Split accessorKey by '.'
-    let value = props.row;
-    for (const key of keys) {
-      value = value[key];
-    }
-    return value;
-  };
-  return (
-    <>
-      <TableBodyRow index={props.index} id={`grid${props.row.id}   `}>
-        <For each={props.headers}>
-          {(header: any, columnIndex) => {
-            return (
-              <TableData>
-                <Switch>
-                  <Match when={header === "Edit"}>
-                    {header.cell?.({
-                      row: { original: props.row },
-                      getValue: () => getValue(header),
-                    })}
-                  </Match>
-                  <Match when={true}>
-                    {header.cell?.({
-                      row: { original: props.row },
-                      getValue: () => getValue(header),
-                    })}
-                  </Match>
-                </Switch>
-              </TableData>
-            );
-          }}
-        </For>
-        <Show when={props.row.children}>
-          <TableData>
-            <button onClick={() => setOpen(!open())}>
-              {open() ? "↑" : "↓"}
-            </button>
-          </TableData>
-        </Show>
-      </TableBodyRow>
-      <Show when={open()}>
-        <For each={props.row.children}>
-          {(row, index) => (
-            <TableBodyRow
-              row={row}
-              index={index()}
-              bodyCell={props.row.headers.map((header: any) =>
-                header.cell(row.id),
-              )}
-              headerAccessorKey={props.row.headers.map(
-                (header: any) => header.accessorKey,
-              )}
-            />
-          )}
-        </For>
-      </Show>
-    </>
-  );
-}
+type TableProps<T> = {
+    headers: any[];
+    data: T[];
+    rowsPerPageOptions?: number[];
+    defaultRowsPerPage?: number;
+    onLoadMore: (skip: number, limit: number) => void;
+    totalItems: number;
+    isShowLoadMore?: boolean;
+};
 
-// Main component that renders the table
-export function CollapsibleTable(props: {
-  headers: ColumnDef<any>[];
-  rows: Vertex[];
-}) {
-  const [currentPage, setCurrentPage] = createSignal(0);
-  const [rowsPerPage, setRowsPerPage] = createSignal(10);
+export function CommonTable<T>(props: TableProps<T>) {
+    const [currentPage, setCurrentPage] = createSignal(0);
+    const [rowsPerPage, setRowsPerPage] = createSignal(props.defaultRowsPerPage || 10);
 
-  const totalPages = () => Math.ceil(props.rows.length / rowsPerPage());
+    const totalPages = () => Math.ceil(props.totalItems / rowsPerPage());
 
-  const displayedRows = () => {
-    const startIndex = currentPage() * rowsPerPage();
-    return props.rows.slice(startIndex, startIndex + rowsPerPage());
-  };
+    const handleNextPage = () => {
+        // handlePageChange(Math.min(currentPage() + 1, totalPages() - 1));
+        setCurrentPage(Math.min(currentPage() + 1));
+    };
 
-  const handleNextPage = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages() - 1));
-  };
+    const handlePreviousPage = () => {
+        // handlePageChange(Math.max(currentPage() - 1, 0));
+        setCurrentPage(Math.min(currentPage() - 1));
 
-  const handlePreviousPage = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 0));
-  };
-  const handleFirstPage = () => {
-    setCurrentPage(0);
-  };
+    };
 
-  const handleLastPage = () => {
-    setCurrentPage(totalPages() - 1);
-  };
-  const handleRowsPerPageChange = (e: Event) => {
-    const target = e.target as HTMLSelectElement;
-    setRowsPerPage(Number(target.value));
-    setCurrentPage(0); // Reset to the first page when rows per page changes
-  };
-  return (
-    <div
-      style={{ "box-shadow": "0 0 20px rgba(0, 0, 0, 0.15)", width: "100%" }}
-      class="r:10px"
-    >
-      <Table>
-        <TableHead>
-          <TableHeadRow>
-            <For each={props.headers}>
-              {(header) => {
-                return (
-                  <TableHeader>
-                    {capitalizeFirstLetter(header.name || "")}
-                  </TableHeader>
-                );
-              } }
-            </For>
-          </TableHeadRow>
-        </TableHead>
-        <TableBody>
-          <For
-            each={displayedRows()}
-            fallback={<tr>
-              <td
-                colspan={props.headers.length + 1}
-                style="text-align: center; padding: 1rem;"
-              >
-                No records to display
-              </td>
-            </tr>}
-          >
-            {(row, index) => (
-              <CollapsibleTableRow
-                row={row}
-                index={index()}
-                headers={props.headers} />
-            )}
-          </For>
-        </TableBody>
-      </Table>
-      <Show when={displayedRows().length > 0}>
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem;">
-          <div style="margin-right: 1rem;">
-            <label for="rowsPerPage">Rows per page:</label>
-            <select
-              name="page"
-              id="page"
-              onChange={handleRowsPerPageChange}
-              value={rowsPerPage()}
-              style="margin-left: 0.5rem;"
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="15">15</option>
-            </select>
-          </div>
-          <div style="margin-right: 1rem;" class="font-weight:500">
-            <span>{`${currentPage() * rowsPerPage() + 1}-${Math.min(
-              (currentPage() + 1) * rowsPerPage(),
-              props.rows.length
-            )} of ${props.rows.length}`}</span>
-          </div>
-          <div class="flex gap:10px">
-            <Tooltip content="Move first">
-              <button
-                onClick={handleFirstPage}
-                disabled={currentPage() === 0}
-                style={{ color: currentPage() === 0 ? "lightgrey" : "black" }}
-                class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
-              >
-                <Icon
-                  height={22}
-                  width={22}
-                  icon={"icon-park-outline:go-start"} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Previous">
-              <button
-                onClick={handlePreviousPage}
-                disabled={currentPage() === 0}
-                style={{ color: currentPage() === 0 ? "lightgrey" : "black" }}
-                class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
-              >
-                <Icon height={22} width={22} icon={"icon-park-outline:left"} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Next">
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage() === totalPages() - 1}
-                style={{
-                  color: currentPage() === totalPages() - 1 ? "lightgrey" : "black",
-                }}
-                class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
-              >
-                <Icon height={22} width={22} icon={"icon-park-outline:right"} />
-              </button>
-            </Tooltip>
-            <Tooltip content="Move last">
-              <button
-                onClick={handleLastPage}
-                disabled={currentPage() === totalPages() - 1}
-                style={{
-                  color: currentPage() === totalPages() - 1 ? "lightgrey" : "black",
-                }}
-                class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
-              >
-                <Icon
-                  height={22}
-                  width={22}
-                  icon={"icon-park-outline:go-end"} />
-              </button>
-            </Tooltip>
-          </div>
+    const handleFirstPage = () => {
+        setCurrentPage(0);
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages() - 1);
+    };
+
+    const displayedRows = () => {
+        const startIndex = currentPage() * rowsPerPage();
+        const endIndex = startIndex + rowsPerPage();
+        return props.data.slice(startIndex, endIndex);
+    };
+
+
+    const handleRowsPerPageChange = (e: Event) => {
+        const target = e.target as HTMLSelectElement;
+        const newRowsPerPage = Number(target.value);
+        setRowsPerPage(newRowsPerPage);
+        setCurrentPage(0);
+    };
+
+    const getValue = (header: any, row: any) => {
+        const keys = header.accessorKey.split("."); // Split accessorKey by '.'
+        let value = row;
+        for (const key of keys) {
+            value = value[key];
+        }
+        return value;
+    };
+
+
+    return (
+        <div style="box-shadow: 0 0 20px rgba(0, 0, 0, 0.15); width: 100%; border-radius: 10px;">
+            <Table headers={props.headers.length}>
+                <For each={props.headers}>
+                    {(header) => (
+                        <TableHeadCell>
+                            {capitalizeFirstLetter(header.name || "Actions")}
+                        </TableHeadCell>
+                    )}
+                </For>
+                <For
+                    each={displayedRows()}
+                    fallback={<div class={`grid-column-span:${props.headers.length}`} style="display: flex; justify-content: center; padding: 1rem; ">
+                        No records to display
+                    </div>}
+                >
+                    {(row, index) => (
+                        <For each={props.headers}>
+                            {(header: any) => {
+                                return (
+                                    <TableBodyCell index={index()}>
+                                        <Switch>
+                                            <Match when={header === "Edit"}>
+                                                {header.cell?.({
+                                                    row: { original: row },
+                                                    getValue: () => getValue(header, row),
+                                                })}
+                                            </Match>
+                                            <Match when={true}>
+                                                {header.cell?.({
+                                                    row: { original: row },
+                                                    getValue: () => getValue(header, row),
+                                                })}
+                                            </Match>
+                                        </Switch>
+                                    </TableBodyCell>
+                                );
+                            }}
+                        </For>
+                    )}
+                </For>
+            </Table>
+            <TableActions totalPages={totalPages} currentPage={currentPage} displayedRows={displayedRows} handleRowsPerPageChange={handleRowsPerPageChange} handleFirstPage={handleFirstPage} handlePreviousPage={handlePreviousPage} handleNextPage={handleNextPage} handleLastPage={handleLastPage} data={props.data} rowsPerPage={rowsPerPage} />
+            <Show when={(currentPage() === totalPages() - 1 || (currentPage() === 0 && props.data.length < props.totalItems)) && props.isShowLoadMore}>
+                <div style="display: flex; justify-content: end; padding: 5px 10px;">
+                    <CustomButton variant="soft"
+                        onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
+                    >
+                        Load More
+                    </CustomButton>
+                </div>
+            </Show>
+
         </div>
-      </Show>
-    </div>
-  );
+    );
 }
 
-function DataTableRow(props: { index: any; vertex: any }) {
-  const [open, setOpen] = createSignal(false);
+const TableActions = (props: { data: any; displayedRows: Accessor<any[]>; currentPage: Accessor<number>; rowsPerPage: Accessor<number>; handleRowsPerPageChange: (e: Event) => void; handleFirstPage: () => void, handlePreviousPage: () => void, handleNextPage: () => void, handleLastPage: () => void, totalPages: Accessor<number> }) => {
+    return <Show when={props.displayedRows().length > 0}>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem;">
+            <div style="margin-right: 1rem;">
+                <label for="rowsPerPage">Rows per page:</label>
+                <select
+                    name="page"
+                    id="page"
+                    onChange={props.handleRowsPerPageChange}
+                    value={props.rowsPerPage()}
+                    style="margin-left: 0.5rem;"
+                >
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+            </div>
+            <div style="margin-right: 1rem;" class="font-weight:500">
+                <span>{`${props.currentPage() * props.rowsPerPage() + 1}-${Math.min(
+                    (props.currentPage() + 1) * props.rowsPerPage(),
+                    props.data.length
+                )} of ${props.data.length}`}</span>
+            </div>
+            <div class="flex gap:10px">
+                <Tooltip content="Move first">
+                    <button
+                        onClick={props.handleFirstPage}
+                        disabled={props.currentPage() === 0}
+                        style={{ color: props.currentPage() === 0 ? "lightgrey" : "black" }}
+                        class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+                    >
+                        <Icon
+                            height={22}
+                            width={22}
+                            icon={"icon-park-outline:go-start"} />
+                    </button>
+                </Tooltip>
+                <Tooltip content="Previous">
+                    <button
+                        onClick={props.handlePreviousPage}
+                        disabled={props.currentPage() === 0}
+                        style={{ color: props.currentPage() === 0 ? "lightgrey" : "black" }}
+                        class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+                    >
+                        <Icon height={22} width={22} icon={"icon-park-outline:left"} />
+                    </button>
+                </Tooltip>
+                <Tooltip content="Next">
+                    <button
+                        onClick={props.handleNextPage}
+                        disabled={props.currentPage() === props.totalPages() - 1}
+                        style={{
+                            color: props.currentPage() === props.totalPages() - 1 ? "lightgrey" : "black",
+                        }}
+                        class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+                    >
+                        <Icon height={22} width={22} icon={"icon-park-outline:right"} />
+                    </button>
+                </Tooltip>
+                <Tooltip content="Move last">
+                    <button
+                        onClick={props.handleLastPage}
+                        disabled={props.currentPage() === props.totalPages() - 1}
+                        style={{
+                            color: props.currentPage() === props.totalPages() - 1 ? "lightgrey" : "black",
+                        }}
+                        class="bg:#d3d3d345:hover r:50% flex ai:center jc:center p:4"
+                    >
+                        <Icon
+                            height={22}
+                            width={22}
+                            icon={"icon-park-outline:go-end"} />
+                    </button>
+                </Tooltip>
+            </div>
+        </div>
+    </Show>
 
-  return (
-    <>
-      <TableBodyRow index={props.index}>
-        <TableData>
-          <button onClick={() => setOpen(!open())}>{open() ? "↑" : "↓"}</button>
-        </TableData>
-        <TableData>
-          <div class={"flex ai:center jc:center"}>
-            <Icon
-              height={20}
-              width={20}
-              icon="mingcute:delete-line"
-              class="cursor:pointer m:5px"
-              style={{ color: "red" }}
-            />
-            <Icon
-              height={20}
-              width={20}
-              icon="icon-park-outline:plus"
-              class="cursor:pointer "
-              style={{ color: "green" }}
-            />
-          </div>
-        </TableData>
-        <For each={["asd", "asd"]}>
-          {(header, columnIndex) => {
-            return <TableData>{header}</TableData>;
-          }}
-        </For>
-      </TableBodyRow>
-      <Show when={open()}>
-        <TableBodyRow>
-          <TableData colSpan={12}>asd</TableData>
-        </TableBodyRow>
-      </Show>
-    </>
-  );
-}
-
-export function DataTable(props: { headers: any; rows: any; }) {
-  return (
-    <div class={"w:80vw overflow:auto"}>
-      <Table>
-        <Show when={props.rows.length > 0}>
-          <TableHead>
-            <TableHeadRow>
-              <TableHeader />
-              <TableHeader>Actions</TableHeader>
-              <For each={props.headers}>
-                {(attribute) => {
-                  return (
-                    <Switch>
-                      <Match when={attribute.P.tab === "expand"}>
-                        <span></span>
-                      </Match>
-                      <Match
-                        when={!attribute.P.hidden || attribute.P.defaultValue}
-                      >
-                        <TableHeader
-                          class={"font-weight:medium"}
-                          style={{
-                            "justify-content": "center",
-                          }}
-                        >
-                          {toTitle(
-                            attribute.P.displayName ||
-                            attribute.P[IdAttr] ||
-                            ""
-                          )}
-                        </TableHeader>
-                      </Match>
-
-                      <Match when={true}>
-                        <TableHeader></TableHeader>
-                      </Match>
-                    </Switch>
-                  );
-                } }
-              </For>
-            </TableHeadRow>
-          </TableHead>
-
-          <TableBody>
-            <For each={props.rows}>
-              {(vertex, index) => (
-                <DataTableRow vertex={vertex} index={index()} />
-              )}
-            </For>
-          </TableBody>
-        </Show>
-      </Table>
-    </div>
-  );
 }
 
 export function Table(props: any) {
-  return (
-    <div class="overflow:visible rel r:10" style={{ "scrollbar-width": "thin" }}>
-      <table {...props} class={"styled-table w:100%"}>
-        {props.children}
-      </table>
-    </div>
-  );
+    return (
+        <div class="overflow:visible rel r:10" style={{ "scrollbar-width": "thin" }}>
+
+            <div class="grid bb:2px|solid|#37c" style={`grid-template-columns: repeat(${props.headers}, 1fr);width: 100%; border-radius: 10px;overflow: auto;scrollbar-width: thin;font-size: 0.9em;`}>
+                {props.children}
+            </div>
+        </div>
+    );
 }
 
-export function TableHeader(props: any) {
-  return (
-    <th
-      {...props}
-      class={`font-weight:medium h:45 p:10px bb:1px|solid|rgb(190,211,238) @fade|.4s`}
-    >
-      {props.children}
-    </th>
-  );
+export function TableHeadCell(props: any) {
+    return (
+        <div class="font-weight:600 bg:#37c color:white p:10 border:1px|solid|#347fdd;" style="padding: 10px; text-align: center;">
+            {props.children}
+        </div>
+    );
 }
-export function TableBody(props: any) {
-  return (
-    <tbody {...props} class="r:5|5|5|5 rounded-md ">
-      {props.children}
-    </tbody>
-  );
-}
-export function TableHead(props: any) {
-  return (
-    <thead {...props} class="r:5|5|5|5 ">
-      {props.children}
-    </thead>
-  );
-}
-export function TableHeadRow(props: any) {
-  return (
-    <tr {...props} class="p:10 text:center @fade|.4s">
-      {props.children}
-    </tr>
-  );
-}
-export function TableBodyRow(props: any) {
-  return (
-    <tr
-      {...props}
-      class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} bg:#3478cc0d:hover @fade|.4s`}
-    >
-      {props.children}
-    </tr>
-  );
-}
-export function TableData(props: any) {
-  return (
-    <td
-      {...props}
-      style={{ "text-align-last": "center", padding: "7px" }}
-      class={"bb:1px|solid|rgb(227,231,236)"}
-    >
-      {props.children}
-    </td>
-  );
+
+
+export function TableBodyCell(props: any) {
+    return (
+        <div style="padding: 7px; align-content: center;" class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} @fade|.4s ${props.class}`}>
+            {props.children}
+        </div>
+    );
 }

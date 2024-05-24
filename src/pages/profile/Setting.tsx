@@ -17,12 +17,8 @@ import { useToast } from "~/components/custom/Toast";
 import { validateEmail, validatePassword } from "~/lib/Utils";
 import {
   Table,
-  TableBody,
-  TableBodyRow,
-  TableData,
-  TableHead,
-  TableHeader,
-  TableHeadRow,
+  TableBodyCell,
+  TableHeadCell,
 } from "~/components/custom/Table";
 import { ChipDropDown } from "~/components/custom/Chip";
 import CustomModal from "~/components/custom/CommonDialog";
@@ -87,7 +83,6 @@ function Settings() {
         "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png",
       country: "United States",
     });
-    console.log(profileData.profileImage);
 
     loadContactData();
     setOriginalProfileData(profileData); // Set original data
@@ -448,6 +443,7 @@ function Settings() {
       </div>
     );
   };
+
   const PricingPlans = () => {
     return (
       <>
@@ -940,53 +936,47 @@ function Settings() {
           </span>
         </div>
         <div class="m:0|15">
-          <Table>
-            <TableHead>
-              <TableHeadRow>
-                <For
-                  each={[
-                    "id",
-                    "Name",
-                    "Subject",
-                    "Message",
-                    "Status",
-                    "Actions",
-                  ]}
-                >
-                  {(header) => {
-                    return <TableHeader>{header}</TableHeader>;
-                  }}
-                </For>
-                <TableHeader />
-              </TableHeadRow>
-            </TableHead>
-            <TableBody>
+          <Table headers={6}>
+
+            <For
+              each={[
+                "id",
+                "Name",
+                "Subject",
+                "Message",
+                "Status",
+                "Actions",
+              ]}
+            >
+              {(header) => {
+                return <TableHeadCell >{header}</TableHeadCell>;
+              }}
+            </For>
+            
               <For
                 fallback={
-                  <TableBodyRow>
-                    <TableData colSpan={6} class={"font-weight:600"}>
-                      No Tickets Found
-                    </TableData>
-                  </TableBodyRow>
+                  <div class={`grid-column-span:6`} style="display: flex; justify-content: center; padding: 1rem; ">
+                    No Tickets Found
+                  </div>
                 }
                 each={contactList()}
               >
                 {(row: any, index) => {
                   return (
-                    <TableBodyRow index={index()}>
-                      <TableData>{row.id}</TableData>
-                      <TableData>{row.name}</TableData>
-                      <TableData>{row.subject}</TableData>
-                      <TableData>{row.message}</TableData>
-                      <TableData>
+                    <div>
+                      <TableBodyCell>{row.id}</TableBodyCell>
+                      <TableBodyCell>{row.name}</TableBodyCell>
+                      <TableBodyCell>{row.subject}</TableBodyCell>
+                      <TableBodyCell>{row.message}</TableBodyCell>
+                      <TableBodyCell>
                         <ChipDropDown
                           selectedItem={row.status}
                           onChanged={(e) => {
                             changeStatus(row.id, e);
                           }}
                         />
-                      </TableData>
-                      <TableData>
+                      </TableBodyCell>
+                      <TableBodyCell>
                         <div class={"flex jc:center ai:center"}>
                           <OpenDialog id={row.id} />
                           <DeleteDialog
@@ -1007,12 +997,12 @@ function Settings() {
                             }
                           />
                         </div>
-                      </TableData>
-                    </TableBodyRow>
+                      </TableBodyCell>
+                    </div>
                   );
                 }}
               </For>
-            </TableBody>
+            
           </Table>
         </div>
       </div>

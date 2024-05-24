@@ -1,4 +1,5 @@
 import {
+  createEffect,
   createMemo,
   createSignal,
   For,
@@ -61,6 +62,7 @@ import { Collapsible } from "~/components/solid-blocks/blocks/collapsible/collap
 import { useToast } from "~/components/custom/Toast";
 import { submitDataCall } from "~/components/api/api_functions";
 import { createStore } from "solid-js/store";
+import { Repeater } from "~/components/solid-blocks/blocks/repeater/Repeater";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -169,10 +171,8 @@ export function GenericField(
 
     const onSubmit = async () => {
       const data = commitTxn(txnId, Ws);
-      console.log("ads");
-
       await showLoadingToast({
-        promise: submitDataCall(data),
+        promise: submitDataCall(data,txnId),
         loadMessage: "Submitting Data...",
         successMessage: "Data submitted successfully",
         onSuccess: (value) => {
@@ -266,29 +266,7 @@ export function GenericField(
     >
       <Switch>
         <Match when={component() === "Repeater"}>
-          <For
-            each={
-              field.data ||
-              getSelectionOptions(
-                graph,
-                setGraph,
-                [field.meta],
-                `g:'${PageRenderUtils.getCollection(graph, field.meta)!}'`,
-              ).vertexes
-            }
-          >
-            {(vertex) => (
-              <RepeaterContext.Provider
-                value={[vertex, ...useContext(RepeaterContext)]}
-              >
-                <PageRenderContext.Provider
-                  value={[...useContext(PageRenderContext), field.meta]}
-                >
-                  <PageItemRender metaVertex={field.meta} data={vertex} />
-                </PageRenderContext.Provider>
-              </RepeaterContext.Provider>
-            )}
-          </For>
+          <Repeater meta={field.meta} data={field.data } />
         </Match>
         <Match when={component() === "Text"}>
           <Show

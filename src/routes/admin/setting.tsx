@@ -1,5 +1,5 @@
 import { API, DataFetcher } from "~/components/api/DataFetcher";
-import Settings from "~/pages/drag-drop/Setting";
+import Settings from "~/pages/profile/Setting";
 
 export default function setting() {
   return (

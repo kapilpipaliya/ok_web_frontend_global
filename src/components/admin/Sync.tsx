@@ -1,17 +1,13 @@
 import { For, JSX, Show, createEffect, createResource, createSignal, onCleanup } from "solid-js";
 import PageHeader from "../custom/Breadcumb";
-import { createStore } from "solid-js/store";
-import { Icon } from "@iconify-icon/solid";
 import { getUsers } from "./adminFunctions";
-import MultiSelectField from "../custom/NewMultiSelect";
 import { Node } from "~/cypher_api/functions/Type";
 import { syncNodesMGCall } from "~/cypher_api/functions/sync";
 import { useToast } from "../custom/Toast";
 const transferNodes = [
-   {key: 'Component',value: 'Comp'},
-   {key: 'Data Type',value: 'DataType'},
+    { key: 'Component', value: 'Comp' },
+    { key: 'Data Type', value: 'DataType' },
 ];
-
 
 export function SyncComopnent() {
     const { showLoadingToast } = useToast();
@@ -26,7 +22,6 @@ export function SyncComopnent() {
     async function migrateNodes(element: Node, node: any) {
         const result = await syncNodesMGCall({ userport: element.P.driverPort, nodesToTransfer: node });
         return result; // Ensure result has the expected structure
-
     }
 
     const onClickTransfer = (node: any) => {
@@ -43,15 +38,16 @@ export function SyncComopnent() {
         });
     };
 
-    return (<>
-        <PageHeader title="Sync" breadcrumb={[{ name: "Admin", icon: "clarity:administrator-line", href: "/admin" }, { name: "Sync" }]} />
+    return (
+        <>
+            <PageHeader title="Sync" breadcrumb={[{ name: "Admin", icon: "clarity:administrator-line", href: "/admin" }, { name: "Sync" }]} />
 
-        <div class="position:relative  overflow-x:auto  box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06)  r:0.5rem@sm">
-            {TableActions()}
-            {Table()}
-            {transferPart()}
-        </div>
-    </>);
+            <div class="position:relative  overflow-x:auto  box-shadow:0|4px|6px|-1px|rgba(0,0,0,0.1),0|2px|4px|-1px|rgba(0,0,0,0.06)  r:0.5rem@sm">
+                {TableActions()}
+                {Table()}
+                {transferPart()}
+            </div>
+        </>);
 
     function Table() {
         const [currentPage, setCurrentPage] = createSignal(1);
@@ -63,19 +59,17 @@ export function SyncComopnent() {
                 return users();
             }
             const query = searchQuery().toLowerCase();
-            return users().filter((user) => user.P.username.toLowerCase().includes(query) || user.P.email.toLowerCase().includes(query)
+            return users().filter((user: Node) => user.P.username.toLowerCase().includes(query) || user.P.email.toLowerCase().includes(query)
             );
         };
         const handleCheckboxChange = (userId: any) => {
-            setSelectedUsers((prev) => {
+            setSelectedUsers((prev: any) => {
                 if (prev.includes(userId)) {
-                    return prev.filter((id) => id !== userId);
+                    return prev.filter((id: any) => id !== userId);
                 } else {
                     return [...prev, userId];
                 }
             });
-            console.log(selectedUsers());
-
         };
 
         const handleSelectAll = () => {
@@ -235,14 +229,14 @@ export function SyncComopnent() {
                 <h3 class="bg:#f4f4f4 r:5 p:3|6 mb:10 font-weight:500 color:rgb(17,24,39)">Transfer nodes</h3>
                 <button onClick={() => {
                     onClickTransfer(transferNodes.map((node) => node.value));
-                } } type="button" style={'background-color: lavender'}
+                }} type="button" style={'background-color: lavender'}
                     class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">All Nodes
                 </button>
                 <For each={transferNodes}>
                     {(node) => (
                         <button onClick={() => {
                             onClickTransfer([node.value]);
-                        } } type="button" style={'background-color: lavender'}
+                        }} type="button" style={'background-color: lavender'}
                             class="bg:#37c font-weight:500 r:0.5rem  f:0.875rem p:10 m:2">{node.key}
                         </button>
                     )}
@@ -321,6 +315,3 @@ export function SyncComopnent() {
         </div>;
     }
 }
-
-
-

@@ -101,25 +101,51 @@ export function getParentVertexes(
 }
 
 export function calculateFilter(input: string) {
-  let isMultiple = true;
-  let filterIndex = input.indexOf("[");
+  let type = ""; // baseString
   let filter = "";
-  let type = "";
-  if (filterIndex > 0) {
-    isMultiple = true;
-    filter = input.slice(filterIndex + 1).replace("]", "");
-    type = input.slice(0, filterIndex);
-  } else {
-    filterIndex = input.indexOf("(");
-    if (filterIndex > 0) {
-      isMultiple = false;
-      filter = input.slice(filterIndex + 1).replace(")", "");
-      type = input.slice(0, filterIndex);
-    } else {
-      type = input;
+  let skip = 0;
+  let limit = 0;
+  let isMultiple = true;
+
+  const parseSkipLimit = (filter: string) => {
+    let skip = 0;
+    let limit = 0;
+    const skipMatch = filter.match(/skip\s*=\s*(\d+)/i);
+    const limitMatch = filter.match(/limit\s*=\s*(\d+)/i);
+    if (skipMatch) {
+      skip = parseInt(skipMatch[1], 10);
     }
+    if (limitMatch) {
+      limit = parseInt(limitMatch[1], 10);
+    }
+    return { skip, limit };
+  };
+
+  const parseFilter = (input: string, startChar: string, endChar: string) => {
+    let filterStart = input.indexOf(startChar);
+    if (filterStart > 0) {
+      type = input.slice(0, filterStart);
+      let filterEnd = input.indexOf(endChar, filterStart);
+      if (filterEnd > filterStart) {
+        filter = input.slice(filterStart + 1, filterEnd);
+        const { skip: s, limit: l } = parseSkipLimit(filter);
+        skip = s;
+        limit = l;
+        filter = filter.replace(/skip\s*=\s*\d+/i, "").replace(/limit\s*=\s*\d+/i, "").trim();
+      }
+    }
+  };
+
+  if (input.includes("[")) {
+    parseFilter(input, "[", "]");
+  } else if (input.includes("(")) {
+    isMultiple = false;
+    parseFilter(input, "(", ")");
+  } else {
+    type = input;
   }
-  return [type, filter, isMultiple] as const;
+
+  return { type, filter, skip, limit, isMultiple };
 }
 
 export function getTreeData(graph: Store<GraphInterface>,

@@ -135,7 +135,8 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       // TODO: Dont display "Form" Component
       child: { collection: "->NavAttr", child: { collection: "->NavAttr", child: { collection: "->NavAttr" } } },
     });
-    return data.children[0].children;
+
+    return data.children.length ? data.children[0].children : [];
   }
 
   // When loading from server side, the client side will not run createResource function again.

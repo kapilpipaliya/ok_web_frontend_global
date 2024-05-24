@@ -1,48 +1,24 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, Show, For, Accessor, Match, Switch } from "solid-js";
+import { useContext, For, Accessor, Match, Switch, createSignal } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { Vertex } from "~/lib/graph/graph";
-import { useExpansion } from "../CommonCompUtils";
+import { Hide, useExpansion } from "../CommonCompUtils";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
 import { Properties } from "./Properties";
+import { capitalizeFirstLetter } from "~/lib/Utils";
 interface ActionsProps {
   leftColumns: any;
   rightColumns: any;
-  isLeftOpen: Accessor<boolean>;
   isRightOpen: Accessor<boolean>;
-  toggleIsLeftOpen: Accessor<boolean>;
   toggleIsRightOpen: Accessor<boolean>;
 }
 export function ActionsDragAndDrops(props: ActionsProps) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
 
   return (
-    <aside style={{ "grid-area": "callToAction" }}>
-      <div class="rel z-index:1 top:40vh right:10px mr:10px">
-        <button
-          onClick={props.toggleIsRightOpen}
-          type="button"
-          title={`${props.isRightOpen() ? "Close" : "Open"}`}
-          class="absolute top-1/2 right-1/2 transform translate-x-50 -translate-y-50 h:29 bg:white border-radius:9999px"
-          style={`background-color:white;style=z-index: 1;position: absolute;margin-top: 20%;`}
-        >
-          <Show
-            when={props.isRightOpen()}
-            fallback={<Icon
-              icon={"line-md:chevron-left-circle"}
-              height={30}
-              width={30}
-              style={{ color: "#c1c1c1" }} />}
-          >
-            <Icon
-              icon={"line-md:chevron-right-circle"}
-              height={30}
-              width={30}
-              style={{ color: "#c1c1c1" }} />
-          </Show>
-        </button>
-      </div>
+    <aside style={{ "grid-area": "callToAction", 'min-width': '350px'}} classList={{ 'display:none': !props.isRightOpen() }}>
+      
       <div
         class={`h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5`}
         style={{
@@ -51,164 +27,52 @@ export function ActionsDragAndDrops(props: ActionsProps) {
           "scrollbar-color": "lightgrey",
         }}
       >
-        <Show when={props.isRightOpen()}>
-          <For each={props.rightColumns()}>
-            {(column, index) => (
-              <Column
-                type={column.id}
-                index={index()}
-               />
-            )}
-          </For>
-        </Show>
+
+        <Column
+          toggleIsRightOpen={props.toggleIsRightOpen}
+          datas={props.rightColumns}
+        />
       </div>
     </aside>
   );
 }
 
-const Column = (props: { type: string; index: number; }) => {
-  const [isFormOpen, toggleIsFormOpen] = useExpansion(true);
-  const [isLayoutOpen, toggleIsLayoutOpen] = useExpansion(true);
-  const [isLayoutExpanded, toggleLayoutExpansion] = useExpansion();
-  const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
-  const [isFormExpanded, toggleFormExpansion] = useExpansion();
+const Column = (props: { datas: any; toggleIsRightOpen: any }) => {
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+  const [selectedTab, setSelectedTab] = createSignal('layout');
 
   return (
     <>
-      <Show when={props.index > 0} fallback={<div />}>
-        <Show
-          when={props.type === "properties" && selectedId() === -1}
-          fallback={<hr class="color:#ccc mt:5 mb:5" />}
-        >
-          <div />
-        </Show>
-      </Show>
       <div class={"p:5 direction:ltr"}>
-        <Switch>
-          <Match when={props.type === "layout"}>
-            <Show
-              when={isLayoutExpanded()}
-              fallback={
-                <div
-                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                  style="transition: opacity 0.3s ease-in-out;"
-                  onClick={toggleLayoutExpansion}
-                  title="Layout"
-                >
-                  <Icon icon={"tabler:layout"} height={25} width={25} />
-                </div>
-              }
-            >
-              <div class="m:5">
-                <div
-                  onClick={toggleIsLayoutOpen}
-                  style={{
-                    display: "flex",
-                    "justify-content": "space-between",
-                    "align-items": "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    class="mb:2px ml:5px"
-                    style="flex-grow: 1; font-weight: bold"
-                  >
-                    Layers
-                  </div>
-                  <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                    <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isLayoutOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
-                    />
-                  </div>
-                </div>
-
-                <Show when={isLayoutOpen()}>
-                  <hr class={"color:lightgrey m:.4rem|0"} />
-                  <LayoutPart />
-                </Show>
-              </div>
-            </Show>
-          </Match>
-          <Match
-            when={
-              props.type === "properties" &&
-              selectedId() !== -1 &&
-              pageConfig.formData
-            }
-          >
-            <Properties />
-          </Match>
-          <Match when={props.type === "form"}>
-            <Show
-              when={isFormExpanded()}
-              fallback={
-                <div
-                  class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-                  style="transition: opacity 0.3s ease-in-out;"
-                  onClick={toggleFormExpansion}
-                  title="Form"
-                >
-                  <Icon
-                    icon={"fluent:form-multiple-24-regular"}
-                    height={25}
-                    width={25}
-                  />
-                </div>
-              }
-            >
-              <div class="m:5">
-                <div
-                  class={`mb:${isFormOpen() ? "10px" : "0px"}`}
-                  onClick={toggleIsFormOpen}
-                  style={{
-                    display: "flex",
-                    "justify-content": "space-between",
-                    "align-items": "center",
-                    cursor: "pointer",
-                  }}
-                >
-                  <div
-                    class="mb:2px ml:5px"
-                    style="flex-grow: 1; font-weight: bold"
-                  >
-                    Form Configuration
-                  </div>
-                  <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-                    <Icon
-                      icon={"mdi:chevron-up"}
-                      style={{
-                        "font-size": "24px",
-                        "border-radius": "50%",
-                        "margin-left": "5px",
-                        transition: "transform 0.2s linear",
-                        transform: `${
-                          isFormOpen() ? "rotate(0deg)" : "rotate(180deg)"
-                        }`,
-                      }}
-                      class="flex-1"
-                    />
-                  </div>
-                </div>
-                <Show when={isFormOpen()}>
-                  <hr class={"color:lightgrey m:.4rem|0"} />
-                  <FormConfig />
-                </Show>
-              </div>
-            </Show>
-          </Match>
-        </Switch>
+        <div class="position:sticky top:0 z:10 bg:white">
+          <div class="p:5|10 flex ai:center jc:space-between bg:#f4f4f4 f:0.875rem r:5">
+            <div class="font-weight:600">
+              Form Layout
+            </div>
+            <Icon class="cursor:pointer bg:white:hover r:50%" onClick={props.toggleIsRightOpen} icon={"iconamoon:close-duotone"} height={30} width={30} style={{ color: "#c1c1c1" }} />
+          </div>
+          <div
+            class="f:0.875rem mb:10 lh:1rem font-weight:500  text-align:center  color:rgb(107,114,128)  border-bottom-width:1px  border-color:rgb(229,231,235) ">
+            <ul class="jc:space-around  flex flex-wrap:wrap  margin-bottom:-1px ">
+              <For each={props.datas()}>
+                {(data) => (
+                  <li class="me-2 cursor:pointer">
+                    <a onclick={() => setSelectedTab(data.id)}
+                      class={`${selectedTab() === data.id ? "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)" : "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover"} display:inline-block  p:10px border-bottom-width:2.5px  border-color:transparent  rounded-t-lg`}>{capitalizeFirstLetter(data.name)}</a>
+                  </li>
+                )}
+              </For>
+            </ul>
+          </div>
+        </div>
+        
+          <div classList={{ 'display:none': selectedTab() !== 'layout' }}>
+            <LayoutPart />
+          </div>
+          <div classList={{ 'display:none': selectedTab() !== 'form' }} class="p:5">
+            <FormConfig />
+          </div>
       </div>
     </>
   );

@@ -1,17 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
-import { Show, For, createSignal, useContext } from "solid-js";
+import { For, createEffect, createSignal, useContext } from "solid-js";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { iconMap } from "~/lib/Utils";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { Hide } from "../CommonCompUtils";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
 
-  const data = getTreeData(graph, setGraph, {
+  const data = () => getTreeData(graph, setGraph, {
     collection: "g:'CompCategory'",
     // TODO: Dont display "Form" Component
     child: { collection: "->CompCategoryComp" },
@@ -27,8 +28,14 @@ export function ComponentPart() {
 
 
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal(data); // Initialize filteredData with the same type as ICon
+  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as ICon
 
+  createEffect(() => {
+    if (data().length) {
+      setFilteredData(data());
+    }
+
+  })
   const titleStyle = {
     "font-size": "17px",
     "font-weight": "bolder",
@@ -50,10 +57,10 @@ export function ComponentPart() {
     if (!searchQuery()) {
       setFilteredData(data);
     } else {
-      const filteredData = data
+      const filteredData = data()
         .map((item) => {
           // Filter the children of each item based on the searchQuery
-          const category = data.find((i) => i.name === item.name);
+          const category = data().find((i) => i.name === item.name);
 
           if (category) {
             // Create a copy of the category's children array
@@ -115,7 +122,7 @@ export function ComponentPart() {
         onDragStart={(e) => {
           e.stopPropagation();
           setDraggedVertex(graph.vertexes[props.child.id]);
-        } }
+        }}
       >
         <div class="pt:5px flex gap:10px ai:center">
           <Icon
@@ -126,7 +133,7 @@ export function ComponentPart() {
           <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
         </div>
 
-        <Show when={isHovered()}>
+        <Hide when={isHovered()}>
           <Tooltip content={"Double click to Edit"}>
             {" "}
             <Icon
@@ -136,18 +143,18 @@ export function ComponentPart() {
                   "/Comp/" +
                   props.child.id;
                 window.open(navigateUrl, "_blank");
-              } }
+              }}
               class={"cursor:pointer"}
               icon={"solar:settings-linear"} />
           </Tooltip>
-        </Show>
+        </Hide>
       </div>
     );
   }
 
   return (
-    <div>
-      <nav class="bg:white 0px 0px 10px 10px w:full">
+    <>
+      <nav class="bg:white p:5 position:sticky abs z:10">
         <div class="group">
           <Icon
             class="icon"
@@ -161,13 +168,16 @@ export function ComponentPart() {
             onInput={(e) => {
               setSearchQuery(e.target.value);
               updateFilteredData(); // Update filteredData when searchQuery changes
-            } } />
+            }} />
         </div>
       </nav>
-      <div>
+      <div class="overflow:auto h:full" style={{
+        "scrollbar-width": "thin",
+        "scrollbar-color": "lightgrey"
+      }}>
         <For
           each={filteredData()}
-          fallback={<div class="p:3 font-weight:bold">No Component Found !</div>}
+          fallback={<div class="p:3 font-weight:bold m:20px|0px text-align:center">No Component Found !</div>}
         >
           {(item) => (
             <div class="m:20px|0px">
@@ -181,6 +191,6 @@ export function ComponentPart() {
           )}
         </For>
       </div>
-    </div>
+    </>
   );
 }

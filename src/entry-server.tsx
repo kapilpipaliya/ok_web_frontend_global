@@ -1,6 +1,7 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
-
+import '~/css/modal.css'
+import { LoaderNew } from "./components/custom/LoaderSimple";
 export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => (
@@ -29,10 +30,28 @@ export default createHandler(() => (
           <meta name="msapplication-TileColor" content="#da532c" />
 
           {assets}
+          <style>
+            {`
+              /* Hide the loader after the page has loaded */
+              body.loaded #loader {
+                display: none;
+              }
+            `}
+          </style>
         </head>
         <body>
+          <div id="loader" class="h:10 w:10">
+            <LoaderNew />
+          </div>
           <div id="app">{children}</div>
           {scripts}
+          <script>
+            {`
+              window.addEventListener('load', () => {
+                document.body.classList.add('loaded');
+              });
+            `}
+          </script>
         </body>
       </html>
     )}

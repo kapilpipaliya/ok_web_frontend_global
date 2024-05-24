@@ -102,17 +102,25 @@ export async function evalGetParents(vertexes: Vertex[], edgeType: string, { nod
   }
 }
 
-async function findVertexsMGCallId(session: Session, {id, label}: {id?: string, label?: string}, { nodes, relationships }: {
-  nodes?: { [key: string]: Vertex },
-  relationships?: { [key: string]: Edge }
-} = {}) {
-  let query;
-  if(id) {
-    query = `MATCH (n) where id(n) = ${id} RETURN n`;
-  }else if(label) {
+async function findVertexsMGCallId(
+  session: Session,
+  { id, label,skip,limit }: { id?: string; label?: string,skip?:number,limit?:number },
+  { nodes, relationships }: { nodes?: { [key: string]: Vertex }; relationships?: { [key: string]: Edge } } = {}
+) {
+  let query: string | undefined;
+
+  if (id) {
+    query = `MATCH (n) WHERE id(n) = ${id} RETURN n`;
+  } else if (label) {
     query = `MATCH (n:${label}) RETURN n`;
   }
-  const result = await session.run(query!);
+  if(skip || limit){
+    query += ` SKIP ${skip} LIMIT ${limit}`
+  }
+  if (!query) {
+    throw new Error("Either 'id' or 'label' must be provided.");
+  }
+  const result = await session.run(query);
   return result.records.map((record) => {
     const vertex = convertNodeToJson(record.get('n'));
     if (nodes) {
@@ -122,39 +130,41 @@ async function findVertexsMGCallId(session: Session, {id, label}: {id?: string, 
   });
 }
 
-export async function evalGlobalColl(edgeType: string, context: {
-  nodes?: { [key: string]: Vertex },
-  relationships?: { [key: string]: Edge }
-} = {}) {
+export async function evalGlobalColl(
+  edgeType: string,
+  context: { nodes?: { [key: string]: Vertex }; relationships?: { [key: string]: Edge } } = {}
+) {
   "use server";
-  const [type, filter, isMultiple] = calculateFilter(edgeType);
+  const {type, filter, isMultiple,skip,limit} = calculateFilter(edgeType);
   const session = (await getDriverWithPort(1102)).session();
 
   try {
     if (filter) {
-      const vertexes = await findVertexsMGCallId(session, {label: type}, context);
-      const filteredVertexes = vertexes.filter(vertex => vertex.P[IdAttr] === filter);
+      const vertexes = await findVertexsMGCallId(session, { label: type,skip,limit }, context);
+      const filteredVertexes = vertexes.filter((vertex) => vertex.P[IdAttr] === filter);
       return filteredVertexes;
     } else {
-      return await findVertexsMGCallId(session, {label: edgeType}, context);
+      return await findVertexsMGCallId(session, { label: edgeType, skip, limit }, context);
     }
-  } catch (error) {
-    console.error('Error querying Memgraph:', error);
-    return [];
+  } catch (error: any) {
+    throw new Response(error.message, { status: 500 });
+  } finally {
+    await session.close();
   }
 }
 
-export async function evalVertexById(id: string, context: {
-  nodes?: { [key: string]: Vertex },
-  relationships?: { [key: string]: Edge }
-} = {}) {
+export async function evalVertexById(
+  id: string,
+  context: { nodes?: { [key: string]: Vertex }; relationships?: { [key: string]: Edge } } = {}
+) {
   "use server";
   const session = (await getDriverWithPort(1102)).session();
-  try {
-    return await findVertexsMGCallId(session, {id}, context);
-  } catch (error) {
-    console.error('Error querying Memgraph:', error);
-    return [];
+  try {    
+    return await findVertexsMGCallId(session, { id }, context);
+  } catch (error: any) {
+    throw new Response(error.message, { status: 500 });
+
+  } finally {
+    await session.close();
   }
 }
-
