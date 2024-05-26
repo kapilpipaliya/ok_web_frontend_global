@@ -1,6 +1,6 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
-import '~/css/modal.css'
+import "~/css/modal.css";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 export default createHandler(() => (
   <StartServer

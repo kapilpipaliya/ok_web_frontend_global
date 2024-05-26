@@ -3,15 +3,16 @@ import { getChildVertexes } from "../get/sync/traverse";
 import { deleteRow } from "./deleteRow";
 import { SetStoreFunction, Store } from "solid-js/store";
 
-
-export function deleteNestedLayout(graph: Store<GraphInterface>,
+export function deleteNestedLayout(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertexes: Vertex[] = [],
   options?: {
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
-  }) {
+  },
+) {
   const deleteChildren = (vertexes: Vertex[]) => {
     const children = getChildVertexes(graph, ["Attr"], vertexes);
     for (const child of children.vertexes || []) {
@@ -38,6 +39,3 @@ export function deleteNestedLayout(graph: Store<GraphInterface>,
     deleteRow(child, false, graph, setGraph, txnId, {} as any);
   }
 }
-
-
-

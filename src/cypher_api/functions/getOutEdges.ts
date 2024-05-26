@@ -1,9 +1,10 @@
 import neo4j from "neo4j-driver";
 import { Node, Relationship } from "~/cypher_api/functions/Type";
-import { DBConnection } from "~/cypher_api/functions/dbs";
+import { getDriver } from "../server/driver";
+import { getRequestURL } from "vinxi/http";
+import { getSubDomain } from "../server/domain_utils";
 
 export async function getOutEdges(
-  dbConn: DBConnection,
   fromId: number | string | any,
   type: string,
   options: {
@@ -11,9 +12,10 @@ export async function getOutEdges(
   } = {},
 ) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.WRITE,
-  });
+  const host = getRequestURL().hostname;
+  const subDomain = await getSubDomain(host);
+  const driver = getDriver(subDomain);
+  const transaction = (await driver).session();
 
   try {
     // Cypher query to create a new vertex
@@ -21,7 +23,7 @@ export async function getOutEdges(
 WHERE id(sourceNode) = $fromId
 RETURN targetNode, relationshipType
 `;
-    const vertexResult = await dbConn.session.run(matchVertexQuery, { fromId });
+    const vertexResult = await transaction.run(matchVertexQuery, { fromId });
 
     const resultNodes = [] as [Relationship, Node][];
     for (const record of vertexResult.records) {

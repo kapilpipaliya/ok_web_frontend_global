@@ -47,19 +47,22 @@ export function Modal(props: ModalProps): JSX.Element {
     "children",
   ]);
   const [open, setOpen] = createSignal(local.open);
-  const toggle = (open?: boolean) => setOpen(typeof open === "boolean" ? open : (o) => !o);
+  const toggle = (open?: boolean) =>
+    setOpen(typeof open === "boolean" ? open : (o) => !o);
   const modalContent = createMemo(
-    () => getElements(
-      local.children,
-      (node) => node.className.indexOf("sb-modal-content") !== -1,
-      [{ open, toggle }]
-    ) ?? []
+    () =>
+      getElements(
+        local.children,
+        (node) => node.className.indexOf("sb-modal-content") !== -1,
+        [{ open, toggle }],
+      ) ?? [],
   );
-  const otherChildren = createMemo(() => getElements(
-    local.children,
-    (node) => node.className.indexOf("sb-modal-content") === -1,
-    [{ open, toggle }]
-  )
+  const otherChildren = createMemo(() =>
+    getElements(
+      local.children,
+      (node) => node.className.indexOf("sb-modal-content") === -1,
+      [{ open, toggle }],
+    ),
   );
 
   let modalRef!: HTMLDivElement;
@@ -75,14 +78,14 @@ export function Modal(props: ModalProps): JSX.Element {
     if (header) {
       modalRef.setAttribute(
         "aria-labelledby",
-        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))()
+        header.id || (() => (header.id = `sb-modal-header-${modalCount}`))(),
       );
     }
     const body = modalRef.querySelector(".sb-modal-body");
     if (body) {
       modalRef.setAttribute(
         "aria-describedby",
-        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))()
+        body.id || (() => (body.id = `sb-modal-body-${modalCount}`))(),
       );
     }
   });
@@ -92,22 +95,24 @@ export function Modal(props: ModalProps): JSX.Element {
     tabIndex: -1,
     class: props.class ? `sb-modal ${props.class}` : "sb-modal",
     children: modalContent(),
-    onClick: createMemo(() => props.closeOnClickOutside
-      ? (ev: MouseEvent) => {
-        const target = ev.target as HTMLElement;
-        if (!modalContent().some((content) => content?.contains(target))) {
-          toggle(false);
-        }
-      }
-      : undefined
+    onClick: createMemo(() =>
+      props.closeOnClickOutside
+        ? (ev: MouseEvent) => {
+            const target = ev.target as HTMLElement;
+            if (!modalContent().some((content) => content?.contains(target))) {
+              toggle(false);
+            }
+          }
+        : undefined,
     )(),
-    onkeyup: createMemo(() => props.closeOnEsc !== false
-      ? (ev: KeyboardEvent) => {
-        if (ev.key === "Escape" && !ev.defaultPrevented) {
-          setOpen(false);
-        }
-      }
-      : undefined
+    onkeyup: createMemo(() =>
+      props.closeOnEsc !== false
+        ? (ev: KeyboardEvent) => {
+            if (ev.key === "Escape" && !ev.defaultPrevented) {
+              setOpen(false);
+            }
+          }
+        : undefined,
     )(),
   });
 
@@ -138,7 +143,10 @@ export function ModalContent(props: ModalContentProps) {
   return (
     <div
       {...props}
-      class={props.class ? `sb-modal-content ${props.class}` : "sb-modal-content"} />
+      class={
+        props.class ? `sb-modal-content ${props.class}` : "sb-modal-content"
+      }
+    />
   );
 }
 
@@ -148,7 +156,8 @@ export function ModalHeader(props: ModalHeaderProps) {
   return (
     <header
       {...props}
-      class={props.class ? `sb-modal-header ${props.class}` : "sb-modal-header"} />
+      class={props.class ? `sb-modal-header ${props.class}` : "sb-modal-header"}
+    />
   );
 }
 
@@ -158,7 +167,8 @@ export function ModalBody(props: ModalBodyProps) {
   return (
     <main
       {...props}
-      class={props.class ? `sb-modal-body ${props.class}` : "sb-modal-body"} />
+      class={props.class ? `sb-modal-body ${props.class}` : "sb-modal-body"}
+    />
   );
 }
 
@@ -168,6 +178,7 @@ export function ModalFooter(props: ModalFooterProps) {
   return (
     <footer
       {...props}
-      class={props.class ? `sb-modal-footer ${props.class}` : "sb-modal-footer"} />
+      class={props.class ? `sb-modal-footer ${props.class}` : "sb-modal-footer"}
+    />
   );
 }

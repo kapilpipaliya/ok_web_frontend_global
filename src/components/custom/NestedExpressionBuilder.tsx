@@ -17,6 +17,7 @@ export function NestedExpressionBuilder(props: {
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>{/* Footer content */}</div>
       )}
-      dialogClass="min-w:30% r:10px p:0" />
+      dialogClass="min-w:30% r:10px p:0"
+    />
   );
 }

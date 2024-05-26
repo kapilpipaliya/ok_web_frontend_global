@@ -13,9 +13,7 @@ export function convertNodeToJson(node: Node): Vertex {
     IN: {},
   };
 }
-export function convertRelationshipToJson(
-  relationship: Relationship
-): Edge {
+export function convertRelationshipToJson(relationship: Relationship): Edge {
   return {
     // @ts-ignore
     id: !isIntegerId ? relationship.identity.toNumber() : relationship.identity,

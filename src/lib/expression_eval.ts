@@ -8,7 +8,12 @@ import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/Utils";
 import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
-import { evalGetChildren, evalGetParents, evalGlobalColl, evalVertexById } from "../cypher_api/functions/expression_eval_async_fns";
+import {
+  evalGetChildren,
+  evalGetParents,
+  evalGlobalColl,
+  evalVertexById,
+} from "../cypher_api/functions/expression_eval_async_fns";
 import { graph } from "neo4j-driver";
 
 /**
@@ -124,7 +129,11 @@ export const unops = {
 
 declare type operand = number | string | any;
 declare type unaryCallback = (a: operand, context: object) => operand;
-declare type binaryCallback = (a: operand, b: operand, context: object) => operand;
+declare type binaryCallback = (
+  a: operand,
+  b: operand,
+  context: object,
+) => operand;
 
 function evaluateArray(list: jsep.Expression[], context: object) {
   return list.map(function (v) {
@@ -227,7 +236,10 @@ export function evaluate(_node: jsep.Expression, context: object): any {
   }
 }
 
-export async function evalAsync(_node: jsep.Expression, context: object): Promise<any> {
+export async function evalAsync(
+  _node: jsep.Expression,
+  context: object,
+): Promise<any> {
   const node = _node as jsep.CoreExpression;
 
   // Brackets used for some case blocks here, to avoid edge cases related to variable hoisting.
@@ -252,9 +264,9 @@ export async function evalAsync(_node: jsep.Expression, context: object): Promis
         evalAsync(node.left, context),
         evalAsync(node.right, context),
       ]);
-   
-      if (binops[node.operator + '_async']) {
-        return binops[node.operator + '_async'](left, right, context);
+
+      if (binops[node.operator + "_async"]) {
+        return binops[node.operator + "_async"](left, right, context);
       }
 
       return binops[node.operator](left, right, context);
@@ -300,10 +312,16 @@ export async function evalAsync(_node: jsep.Expression, context: object): Promis
       return context;
 
     case "UnaryExpression":
-      if(unops[node.operator + '_async']) {
-        return unops[node.operator + '_async'](await evalAsync(node.argument, context), context);
+      if (unops[node.operator + "_async"]) {
+        return unops[node.operator + "_async"](
+          await evalAsync(node.argument, context),
+          context,
+        );
       }
-      return unops[node.operator](await evalAsync(node.argument, context), context);
+      return unops[node.operator](
+        await evalAsync(node.argument, context),
+        context,
+      );
 
     default:
       return undefined;
@@ -323,7 +341,11 @@ export function compileAsync(
 }
 
 // Added functions to inject Custom Unary Operators (and override existing ones)
-export function addUnaryOp(operator: string, _function: unaryCallback, _asyncFunction?: unaryCallback,): void {
+export function addUnaryOp(
+  operator: string,
+  _function: unaryCallback,
+  _asyncFunction?: unaryCallback,
+): void {
   jsep.addUnaryOp(operator);
   unops[operator] = _function;
   if (_asyncFunction) {
@@ -340,11 +362,11 @@ export function addBinaryOp(
   _function: binaryCallback,
   _asyncFunction?: binaryCallback,
 ): void {
-    jsep.addBinaryOp(operator, precedence, rightToLeft);
-    binops[operator] = _function;
-    if(_asyncFunction) {
-      binops[operator + "_async"] = _asyncFunction;
-    }
+  jsep.addBinaryOp(operator, precedence, rightToLeft);
+  binops[operator] = _function;
+  if (_asyncFunction) {
+    binops[operator + "_async"] = _asyncFunction;
+  }
 }
 
 // https://github.com/EricSmekens/jsep/blob/29049a0704b4a4e5d52b479ed72615c04adf81ec/src/jsep.js#L934
@@ -382,39 +404,45 @@ addBinaryOp(":-", 11, false, (vertexes1, projection, context) => {
   }
 });
 
-addBinaryOp("->", 12, false, (vertexes, edgeType, context) => {
-  if (!vertexes) return;
-  const stepVertexes = new Map<number, Vertex>();
+addBinaryOp(
+  "->",
+  12,
+  false,
+  (vertexes, edgeType, context) => {
+    if (!vertexes) return;
+    const stepVertexes = new Map<number, Vertex>();
 
-  for (const currentVertex of vertexes) {
-    const type = edgeType.replace("$0", currentVertex.L[0]);
+    for (const currentVertex of vertexes) {
+      const type = edgeType.replace("$0", currentVertex.L[0]);
 
-    const edgeIds = currentVertex.OUT[type] || [];
-    if (edgeIds.length == 0) {
-      const strict = true;
-      // we only return error if its in middle of path
-      if (strict && path.length > 1) {
-        return;
-      } else {
-        continue;
+      const edgeIds = currentVertex.OUT[type] || [];
+      if (edgeIds.length == 0) {
+        const strict = true;
+        // we only return error if its in middle of path
+        if (strict && path.length > 1) {
+          return;
+        } else {
+          continue;
+        }
       }
-    }
-    for (const edgeId of edgeIds) {
-      const edge = context.graph.edges[edgeId];
-      if (edge) {
-        const newVertex = context.graph.vertexes[edge.E];
-        if (newVertex) {
-          stepVertexes.set(newVertex.id, newVertex);
+      for (const edgeId of edgeIds) {
+        const edge = context.graph.edges[edgeId];
+        if (edge) {
+          const newVertex = context.graph.vertexes[edge.E];
+          if (newVertex) {
+            stepVertexes.set(newVertex.id, newVertex);
+          } else {
+            return;
+          }
         } else {
           return;
         }
-      } else {
-        return;
       }
     }
-  }
-  return Array.from(stepVertexes.values());
-}, evalGetChildren);
+    return Array.from(stepVertexes.values());
+  },
+  evalGetChildren,
+);
 
 export async function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
@@ -436,40 +464,50 @@ export async function getPraentsAsync(collection: string, context: object) {
   return binops["<-_async"](context.vertexes, collection, context);
 }
 addUnaryOp("<-", getPraents, getPraentsAsync);
-addUnaryOp("id:", (id: string, context: object) => {
-  return context.graph.vertexes[id];
-}, evalVertexById);
+addUnaryOp(
+  "id:",
+  (id: string, context: object) => {
+    return context.graph.vertexes[id];
+  },
+  evalVertexById,
+);
 
-addBinaryOp("<-", 12, false, (vertexes, edgeType, context) => {
-  if (!vertexes) return;
-  const stepVertexes = new Map<number, Vertex>();
+addBinaryOp(
+  "<-",
+  12,
+  false,
+  (vertexes, edgeType, context) => {
+    if (!vertexes) return;
+    const stepVertexes = new Map<number, Vertex>();
 
-  for (const currentVertex of vertexes) {
-    const [type, filter, isMultiple] = calculateFilter(
-      edgeType.replace("$0", currentVertex.L[0]),
-    );
+    for (const currentVertex of vertexes) {
+      const { type, filter, isMultiple } = calculateFilter(
+        edgeType.replace("$0", currentVertex.L[0]),
+      );
 
-    const edgeIds = currentVertex.IN[type];
-    if (!edgeIds) {
-      continue;
-    }
+      const edgeIds = currentVertex.IN[type];
+      if (!edgeIds) {
+        continue;
+      }
 
-    for (const edgeId of edgeIds) {
-      const edge = context.graph.edges[edgeId];
-      if (edge) {
-        const newVertex = context.graph.vertexes[edge.S];
-        if (newVertex) {
-          stepVertexes.set(newVertex.id, newVertex);
+      for (const edgeId of edgeIds) {
+        const edge = context.graph.edges[edgeId];
+        if (edge) {
+          const newVertex = context.graph.vertexes[edge.S];
+          if (newVertex) {
+            stepVertexes.set(newVertex.id, newVertex);
+          } else {
+            return;
+          }
         } else {
           return;
         }
-      } else {
-        return;
       }
     }
-  }
-  return Array.from(stepVertexes.values());
-}, evalGetParents);
+    return Array.from(stepVertexes.values());
+  },
+  evalGetParents,
+);
 addBinaryOp("++", 13, true, (vertexes1, vertexes2) => {
   return [
     ...(Array.isArray(vertexes1) ? vertexes1 : []),
@@ -485,23 +523,28 @@ addUnaryOp("json:", (string) => {
   }
 });
 
-addUnaryOp("g:", (edgeType, context) => {
-  const {type, filter, isMultiple} = calculateFilter(edgeType);
-  if (filter) {
-    const vertexIds = findVertexIdsByLabel(context.graph, type);
-    const filteredVertexes = [];
-    for (const vertexId of vertexIds) {
-      if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
-        filteredVertexes.push(context.graph.vertexes[vertexId]);
+addUnaryOp(
+  "g:",
+  (edgeType, context) => {
+    const { type, filter, isMultiple } = calculateFilter(edgeType);
+
+    if (filter) {
+      const vertexIds = findVertexIdsByLabel(context.graph, type);
+      const filteredVertexes = [];
+      for (const vertexId of vertexIds) {
+        if (context.graph.vertexes[vertexId].P[IdAttr] === filter) {
+          filteredVertexes.push(context.graph.vertexes[vertexId]);
+        }
       }
+      return filteredVertexes;
+    } else {
+      return findVertexIdsByLabel(context.graph, edgeType).map(
+        (id) => context.graph.vertexes[id],
+      );
     }
-    return filteredVertexes;
-  } else {
-    return findVertexIdsByLabel(context.graph, edgeType).map(
-      (id) => context.graph.vertexes[id],
-    );
-  }
-}, evalGlobalColl);
+  },
+  evalGlobalColl,
+);
 
 /*addUnaryOp("ids:", (edgeType: string | number | string[] | Vertex[], context) => {
   if (typeof edgeType === "number") {
@@ -528,7 +571,6 @@ addUnaryOp("T:", (value: any) => {
 });
 addUnaryOp("::", projectedValueUnOps);
 
-
 function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
@@ -550,8 +592,6 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   return getTextValue(path(projection, vertex));
 }
 
-
-
 //
 // unops['id:'] = (id, context) => {
 //
@@ -566,8 +606,6 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
 //
 //     return idValue;
 // }
-
-
 
 function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {

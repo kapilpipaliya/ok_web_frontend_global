@@ -81,7 +81,7 @@ export function FileField(props: Properties) {
       }
       const restTime = ((evt.total - evt.loaded) / byteSpeed).toFixed(1);
       setSpeedText(
-        `,Speed: ${speed.toFixed(1)}${units}, the remaining time: ${restTime}s`
+        `,Speed: ${speed.toFixed(1)}${units}, the remaining time: ${restTime}s`,
       );
       if (byteSpeed === 0) setSpeedText("Upload cancelled");
     }
@@ -119,14 +119,16 @@ export function FileField(props: Properties) {
       <progress
         value={progressBar.value}
         max={progressBar.max}
-        style="width: 300px;" />
+        style="width: 300px;"
+      />
       <span>{percentageText()}</span>
       <span>{speedText()}</span>
       <input
         name={props.label || ""}
         type="file"
         ref={props.dom}
-        {...customProps} />
+        {...customProps}
+      />
       <input type="button" onClick={UploadFile} value="Upload" />
       <input type="button" onClick={cancelUploadFile} value="Cancel" />
 

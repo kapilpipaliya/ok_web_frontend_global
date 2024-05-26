@@ -19,7 +19,7 @@ export function FileUploader(props: FileUploaderProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [],
-    ["setValue", "meta", "data", "label"]
+    ["setValue", "meta", "data", "label"],
   );
   const [file, setFile] = createSignal(null);
   const [fullBoxImage, setFullBoxImage] = createSignal("");
@@ -85,7 +85,8 @@ export function FileUploader(props: FileUploaderProps) {
           {...inputProps}
           onChange={(event) => {
             runEvent(event, handleInputChange);
-          } } />
+          }}
+        />
         {file() !== null ? (
           <>
             <img
@@ -95,7 +96,8 @@ export function FileUploader(props: FileUploaderProps) {
                 "max-width": "100%",
                 "max-height": "100%",
                 "border-radius": "10px",
-              }} />
+              }}
+            />
           </>
         ) : (
           <span>{props.label || "Click to select an image"}</span>

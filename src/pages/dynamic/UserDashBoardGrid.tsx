@@ -5,7 +5,6 @@ import { APP_BASE_URL } from "~/lib/Utils";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
-
 export function UserDashBoardGrid() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -13,13 +12,15 @@ export function UserDashBoardGrid() {
     graph,
     "Dashboard",
     IdAttr,
-    params.name
+    params.name,
   );
   if (!dashboard) {
     return "No Dashboard Found";
   }
-  const allFormTableLayouts = getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
-  const allCollTableLayouts = getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
+  const allFormTableLayouts =
+    getChildVertexes(graph, ["$0Form"], [dashboard]).vertexes || [];
+  const allCollTableLayouts =
+    getChildVertexes(graph, ["$0Coll"], [dashboard]).vertexes || [];
 
   const allTableLayouts = () => [
     ...new Set([...allCollTableLayouts, ...allFormTableLayouts]),

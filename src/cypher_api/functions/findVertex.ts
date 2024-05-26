@@ -1,17 +1,18 @@
-import neo4j from "neo4j-driver";
-import { DBConnection } from "~/cypher_api/functions/dbs";
 import { Node } from "~/cypher_api/functions/Type";
-import { getDriverWithPort } from "../server/driver";
+import { getDriver } from "../server/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import { getRequestURL } from "vinxi/http";
+import { getSubDomain } from "../server/domain_utils";
 export async function findVertexMGCall(
-  dbConn: DBConnection,
   label: string,
   attribute: string,
   value: number | string,
 ) {
   "use server";
-  const session = await (await getDriverWithPort(1102)).session();
-
+  const host = getRequestURL().hostname;
+  const subDomain = await getSubDomain(host);
+  const session = await (await getDriver(subDomain)).session();
+  ``;
   try {
     // Cypher query to create a new vertex
     let createVertexQuery = `MATCH (v:${label} {${attribute}: $value}) RETURN v`;
@@ -43,7 +44,11 @@ export async function findVertexMGCall(
 
 export async function findVertexByIdMGCall(id: number) {
   "use server";
-  const session = await (await getDriverWithPort(1102)).session();
+  const host = getRequestURL().hostname;
+  const subDomain = await getSubDomain(host);
+  console.log(subDomain);
+
+  const session = await (await getDriver(subDomain)).session();
 
   try {
     // Cypher query to create a new vertex
@@ -54,8 +59,9 @@ export async function findVertexByIdMGCall(id: number) {
     if (vertexResult.records.length === 0) {
       return { error: true, message: "empty result" };
     }
-    
+
     const newVertex = convertNodeToJson(vertexResult.records[0].get("v"));
+
     return {
       error: false,
       vertex: newVertex,
@@ -72,14 +78,16 @@ export async function findVertexByIdMGCall(id: number) {
 }
 
 // TODO: Now use this function
-export async function findVertexesMGCall2(
-  dbConn: DBConnection,
-  options: { label?: string; attribute?: string; value?: number | string; id?: number }
-) {
+export async function findVertexesMGCall2(options: {
+  label?: string;
+  attribute?: string;
+  value?: number | string;
+  id?: number;
+}) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.READ,
-  });
+  const host = getRequestURL().hostname;
+  const subDomain = await getSubDomain(host);
+  const driver = await (await getDriver(subDomain)).session();
 
   try {
     let query;
@@ -88,25 +96,33 @@ export async function findVertexesMGCall2(
     if (options.id !== undefined) {
       query = `MATCH (v) WHERE id(v) = $id RETURN v`;
       params = { id: options.id };
-    } else if (options.label && options.attribute && options.value !== undefined) {
+    } else if (
+      options.label &&
+      options.attribute &&
+      options.value !== undefined
+    ) {
       query = `MATCH (v:${options.label} {${options.attribute}: $value}) RETURN v`;
       params = { value: options.value };
-    } else if (options.label && options.attribute && options.value !== undefined) {
+    } else if (
+      options.label &&
+      options.attribute &&
+      options.value !== undefined
+    ) {
       query = `MATCH (v:${options.label}}) RETURN v`;
       params = { value: options.value };
     } else {
       return { error: true, message: "Invalid parameters" };
     }
 
-    const vertexResult = await dbConn.session.run(query, params);
+    const vertexResult = await driver.run(query, params);
 
     const vertexes = vertexResult.records[0].map((v) => {
       const vertex = v.get("v");
       return {
         id: vertex.identity!,
-        L : vertex.labels!,
-        P: vertex.properties!
-      }
+        L: vertex.labels!,
+        P: vertex.properties!,
+      };
     });
 
     return {

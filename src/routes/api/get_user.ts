@@ -6,7 +6,7 @@ import { Node } from "neo4j-driver";
 
 // Main POST function
 export async function GET({ request }: APIEvent) {
-  const subdomainFromUrl = getSubDomain(request.headers.get("host")!);
+  const subdomainFromUrl = await getSubDomain(request.headers.get("host")!);
   const neo4jSession = (await getDriver(subdomainFromUrl)).session();
   try {
     const httpSession = await getHttpsSession();

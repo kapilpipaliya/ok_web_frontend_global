@@ -10,6 +10,7 @@ export function Spinner(props: SpinnerProps) {
     <progress
       class={props.class ? `sb-spinner ${props.class}` : "sb-spinner"}
       aria-busy="true"
-      aria-live="polite" />
+      aria-live="polite"
+    />
   );
 }

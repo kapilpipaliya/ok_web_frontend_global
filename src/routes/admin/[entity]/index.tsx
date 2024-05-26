@@ -6,9 +6,9 @@ import { AbstractGrid } from "~/pages/dynamic/Grid/AbstractGrid";
 export default function admin() {
   const params = useParams();
   return (
-      <DataFetcher
-        renderContent={<AbstractGrid tableId={params.entity} />}
-        fetchData={API.getPagesDataUrl}
-      />
+    <DataFetcher
+      renderContent={<AbstractGrid tableId={params.entity} />}
+      fetchData={API.getPagesDataUrl}
+    />
   );
 }

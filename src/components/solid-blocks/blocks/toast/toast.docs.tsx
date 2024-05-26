@@ -70,7 +70,8 @@ ToastProps {
         min="0"
         label="timeout"
         onchange={(t) => setTimeout(Number(t))}
-        value={timeout()} />{" "}
+        value={timeout()}
+      />{" "}
       <TextField label="content" onchange={setContent} value={content()} />
       <br />
       <br />

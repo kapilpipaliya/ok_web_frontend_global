@@ -99,8 +99,9 @@ TextfieldProps {
           setValue={(v) => {
             setValue(v);
             setEvents((e) => `setValue("${v}")\n${e}`);
-          } }
-          value={value()} />
+          }}
+          value={value()}
+        />
       </div>
       <hr />
     </>

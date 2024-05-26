@@ -15,6 +15,7 @@ export function FormConfig() {
       graph={graph}
       showMainFieldsOnly={true}
       importExportButtons={false}
-      setGraph={setGraph} />
+      setGraph={setGraph}
+    />
   );
 }

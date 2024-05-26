@@ -7,14 +7,13 @@ import { commitTxn, getNewTxnId } from "../transaction";
 import { SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
-
 export function deleteRow(
   vertex: Vertex,
   isRealTime: boolean,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  Ws: ServerEventsDispatcher
+  Ws: ServerEventsDispatcher,
 ) {
   const { showErrorToast } = useToast();
 

@@ -33,7 +33,7 @@ async function handleRequest(
 
 export async function POST({ request }: APIEvent) {
   const { panel, ...payload } = await request.json();
-  const subdomain = getSubDomain(request.headers.get("host")!);
+  const subdomain = await getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
   if (!panel) {
     return { error: "Missing panel" };
@@ -69,7 +69,10 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   }
 
   // Check if email and username already exists
-  if (email && (await isVertexExistWithPropMGCall("User", session, "email", email))) {
+  if (
+    email &&
+    (await isVertexExistWithPropMGCall("User", session, "email", email))
+  ) {
     return { status: 500, error: "Email address already exists" };
   }
   if (
@@ -226,7 +229,6 @@ const supportTicket = async (
     switch (subAction) {
       case "send":
         const data = await newRowMGCall(
-          { driver: await getDriver(subdomain), session: session },
           parentVertexId,
           "SupportUser",
           "",
@@ -234,11 +236,8 @@ const supportTicket = async (
         );
         return data;
       case "get":
-        const result = await findVertexByIdMGCall(
-          parentVertexId,
-        );
+        const result = await findVertexByIdMGCall(parentVertexId);
         const message = await getChildVertexesMGCall(
-          { driver: await getDriver(subdomain), session: session },
           ["SupportUser"],
           [result.vertex!],
         );
@@ -252,10 +251,7 @@ const supportTicket = async (
     subdomain: string,
   ) {
     const { id } = payload;
-    await deleteVertexMGCall(
-      { driver: await getDriver(subdomain), session: session },
-      id,
-    );
+    await deleteVertexMGCall(id);
     return {
       message: "Support Ticket deleted successfully",
     };

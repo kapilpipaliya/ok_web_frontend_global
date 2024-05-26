@@ -11,7 +11,7 @@ import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 export async function POST({ request }: APIEvent) {
   const { email, password } = await request.json();
   try {
-    const subdomain = getSubDomain(request.headers.get("host")!);
+    const subdomain = await getSubDomain(request.headers.get("host")!, false);
 
     const user = await authenticateUser(email, password, subdomain);
 

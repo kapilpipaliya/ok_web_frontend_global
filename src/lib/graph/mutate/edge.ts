@@ -130,11 +130,13 @@ export function replaceEdgeProperties(
 }
 
 // private
-export function replaceEdgeStart(txnId: number,
+export function replaceEdgeStart(
+  txnId: number,
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  newStartVertexId: Id): { error: string | boolean; txnDetailIndex?: number; } {
+  newStartVertexId: Id,
+): { error: string | boolean; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -146,21 +148,24 @@ export function replaceEdgeStart(txnId: number,
   batch(() => {
     setGraph("edges", edgeId, "S", newStartVertexId);
     // @ts-ignore
-    setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) => Array.isArray(v)
-      ? pipe(
-        v.filter((e) => e !== edgeId),
-        (f) => (f.length ? f : undefined)
-      )
-      : v
+    setGraph("vertexes", oldStartVertexId, "OUT", edge.T, (v) =>
+      Array.isArray(v)
+        ? pipe(
+            v.filter((e) => e !== edgeId),
+            (f) => (f.length ? f : undefined),
+          )
+        : v,
     );
-    setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v: any) => Array.isArray(v) ? [...v, edgeId] : [edgeId]
+    setGraph("vertexes", newStartVertexId, "OUT", edge.T, (v: any) =>
+      Array.isArray(v) ? [...v, edgeId] : [edgeId],
     );
   });
   const data = klona(graph.edges[edgeId]);
   transactionDetailAdd(txnId, {
     data,
     replaceEdgeStart: () => data,
-    revert: () => replaceEdgeStart(0, edgeId, graph, setGraph, oldStartVertexId),
+    revert: () =>
+      replaceEdgeStart(0, edgeId, graph, setGraph, oldStartVertexId),
   });
   return {
     error: false,
@@ -168,11 +173,13 @@ export function replaceEdgeStart(txnId: number,
   };
 }
 //private
-export function replaceEdgeEnd(txnId: number,
+export function replaceEdgeEnd(
+  txnId: number,
   edgeId: Id,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  newEndVertexId: Id): { error: string | boolean; txnDetailIndex?: number; } {
+  newEndVertexId: Id,
+): { error: string | boolean; txnDetailIndex?: number } {
   if (!graph.edges[edgeId]) {
     return { error: "Edge ID is not valid" };
   }
@@ -184,14 +191,16 @@ export function replaceEdgeEnd(txnId: number,
   batch(() => {
     setGraph("edges", edgeId, "E", newEndVertexId);
     // @ts-ignore
-    setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) => Array.isArray(v)
-      ? pipe(
-        v.filter((e) => e !== edgeId),
-        (f) => (f.length ? f : undefined)
-      )
-      : v
+    setGraph("vertexes", oldEndVertexId, "IN", edge.T, (v) =>
+      Array.isArray(v)
+        ? pipe(
+            v.filter((e) => e !== edgeId),
+            (f) => (f.length ? f : undefined),
+          )
+        : v,
     );
-    setGraph("vertexes", newEndVertexId, "IN", edge.T, (v: any) => Array.isArray(v) ? [...v, edgeId] : [edgeId]
+    setGraph("vertexes", newEndVertexId, "IN", edge.T, (v: any) =>
+      Array.isArray(v) ? [...v, edgeId] : [edgeId],
     );
   });
   const data = klona(graph.edges[edgeId]);

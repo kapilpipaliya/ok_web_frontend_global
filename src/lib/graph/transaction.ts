@@ -38,8 +38,10 @@ export const transactions = new Map<
   { status: ProcessStatus; steps: TransactionValue[] }
 >();
 // @ts-ignore
-export function transactionDetailAdd(txnId: number,
-  txnValue: TransactionValue) {
+export function transactionDetailAdd(
+  txnId: number,
+  txnValue: TransactionValue,
+) {
   if (!txnId) return;
   const existingTxnValue = transactions.get(txnId) || {
     status: ProcessStatus.Unset,
@@ -49,17 +51,21 @@ export function transactionDetailAdd(txnId: number,
   transactions.set(txnId, existingTxnValue);
 }
 
-export function getNewTxnId(graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>) {
+export function getNewTxnId(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   setGraph("txnId", (v) => (v ?? 0) + 1);
   return graph.txnId;
 }
 
 export function getExistingOrDefaultTxnValue(txnId: number) {
-  return transactions.get(txnId) || {
-    status: ProcessStatus.Unset,
-    steps: [],
-  };
+  return (
+    transactions.get(txnId) || {
+      status: ProcessStatus.Unset,
+      steps: [],
+    }
+  );
 }
 
 export function revertOneTransactionUnSafe(txnId: number, txnIndex: number) {
@@ -105,7 +111,7 @@ export function getTransactionData(txnId: number) {
       replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
       replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
       deleteEdge: txnDetail.deleteEdge?.(),
-    })
+    }),
   );
   return existingTxnValue;
 }
@@ -119,8 +125,10 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    } else if (value.status === ProcessStatus.AckReceived ||
-      value.status === ProcessStatus.Sent) {
+    } else if (
+      value.status === ProcessStatus.AckReceived ||
+      value.status === ProcessStatus.Sent
+    ) {
       return;
     }
   }

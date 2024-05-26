@@ -52,9 +52,8 @@ const PreviewSection = () => {
           style={dynamicStyle()}
         >
           <IsPreviewContext.Provider value={createSignal(true)}>
-            <PageView vertex={pageConfig.formData?.formData} isPreview={true}/>
+            <PageView vertex={pageConfig.formData?.formData} isPreview={true} />
           </IsPreviewContext.Provider>
-      
         </div>
       </div>
     </div>

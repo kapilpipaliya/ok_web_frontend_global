@@ -11,14 +11,13 @@ export function ContentDragAndDrop() {
 
   return (
     <div class="flex ai:center jc:center grid-area:content">
-    <Show when={pageConfig.formData}>
+      <Show when={pageConfig.formData}>
         <ResizableContainer>
           <FormContext.Provider value={pageConfig.formData}>
             <PageView vertex={pageConfig.formData?.formData} />
           </FormContext.Provider>
-          
         </ResizableContainer>
-    </Show>
-      </div>
+      </Show>
+    </div>
   );
 }

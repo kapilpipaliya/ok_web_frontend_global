@@ -29,7 +29,8 @@ export function Select(props: SelectProps) {
         onChange={(ev): void => {
           runEvent(ev, local.onChange);
           local.setValue?.(ev.currentTarget.value);
-        } } />
+        }}
+      />
     </label>
   );
 }

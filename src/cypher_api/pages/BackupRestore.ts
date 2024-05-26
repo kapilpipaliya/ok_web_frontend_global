@@ -1,10 +1,11 @@
 import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
 
-import { getChildVertexMGCall, getParentVertexMGCall } from "~/cypher_api/lib/data/traverse";
-
+import {
+  getChildVertexMGCall,
+  getParentVertexMGCall,
+} from "~/cypher_api/lib/data/traverse";
 
 import { SetStoreFunction, Store } from "solid-js/store";
-import { DBConnection } from "~/cypher_api/functions/dbs";
 import { GraphInterface } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 
@@ -87,7 +88,10 @@ const insertAttributes = async (
         component,
       );
       if (compVertex && !dataTypeVertex) {
-        const dataTypeDefault = await getChildVertexMGCall(["$0Default"], compVertex);
+        const dataTypeDefault = await getChildVertexMGCall(
+          ["$0Default"],
+          compVertex,
+        );
         if (dataTypeDefault.error) {
           console.warn(`Component dataType not configured ${component}`);
         } else {
@@ -180,7 +184,10 @@ const makeASampleForm = async () => {
       [IdAttr]: getId(componentName),
       displayName: componentName,
     });
-    const dataType = await getParentVertexMGCall(["DataType$0"], componentVertex);
+    const dataType = await getParentVertexMGCall(
+      ["DataType$0"],
+      componentVertex,
+    );
     if (!dataType.error) {
       // set component dataType and component
       setSelectionValue(
@@ -203,9 +210,11 @@ const makeASampleForm = async () => {
 };
 
 // @ts-ignore
-export async function importAllCSV(dbConn: DBConnection,
+export async function importAllCSV(
+  ,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>) {
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   const form = await getFormMetaData(dbConn, "Import");
   if (form.error) return form.error;
   const record = new Record({ dbConn, graph, setGraph });
@@ -360,7 +369,7 @@ delete`,
   await onDataDirectoryImportClick(record);
 }
 const importMainNavigation = (
-  dbConn: DBConnection,
+  ,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) => {

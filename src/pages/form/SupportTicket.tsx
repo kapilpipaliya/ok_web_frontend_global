@@ -40,7 +40,8 @@ export function SupportTicket() {
       class="@fade|.5s"
       style={{
         "background-size": "cover",
-        "background-image": "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
+        "background-image":
+          "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
         display: "flex",
         "background-color": "rgb(239,235,233)",
         "flex-direction": "column",
@@ -53,7 +54,8 @@ export function SupportTicket() {
         src={logo}
         alt="logo"
         class="h:70px mb:100px"
-        style={{ "justify-self": "center" }} />
+        style={{ "justify-self": "center" }}
+      />
       <form
         class="m:10px w:inherit mb:5rem bg:white jc:center r:10"
         onSubmit={handleSubmit}
@@ -67,7 +69,8 @@ export function SupportTicket() {
           <img
             src={"../../public/graphics/contact-us.jpg"}
             alt="logo"
-            class="w:25rem " />
+            class="w:25rem "
+          />
         </div>
         <div class="mt:25 w:-webkit-fill-available w:100%@<md grid align-content:center m:0|30@lg">
           <div class="mb:5 f:20 font-weight:bold flex jc:left z:10">
@@ -90,7 +93,9 @@ export function SupportTicket() {
                 id="name"
                 name="name"
                 value={formData().name}
-                onInput={(e) => setFormData({ ...formData(), name: e.target.value })}
+                onInput={(e) =>
+                  setFormData({ ...formData(), name: e.target.value })
+                }
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -98,7 +103,8 @@ export function SupportTicket() {
                   "border-radius": "4px",
                 }}
                 placeholder="Your name"
-                required />
+                required
+              />
             </div>
             <div>
               <label
@@ -113,7 +119,9 @@ export function SupportTicket() {
                 id="email"
                 name="email"
                 value={formData().email}
-                onInput={(e) => setFormData({ ...formData(), email: e.target.value })}
+                onInput={(e) =>
+                  setFormData({ ...formData(), email: e.target.value })
+                }
                 style={{
                   width: "100%",
                   padding: "8px",
@@ -121,7 +129,8 @@ export function SupportTicket() {
                   "border-radius": "4px",
                 }}
                 placeholder="Your email"
-                required />
+                required
+              />
             </div>
           </div>
           <div style={{ margin: "10px 0" }}>
@@ -137,7 +146,9 @@ export function SupportTicket() {
               id="subject"
               type="text"
               value={formData().subject}
-              onInput={(e) => setFormData({ ...formData(), subject: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), subject: e.target.value })
+              }
               style={{
                 width: "100%",
                 padding: "8px",
@@ -145,7 +156,8 @@ export function SupportTicket() {
                 "border-radius": "4px",
               }}
               placeholder="What's the subject?"
-              required />
+              required
+            />
           </div>
           <div style={{ "margin-bottom": "10px 0" }}>
             <label
@@ -163,7 +175,9 @@ export function SupportTicket() {
               name="text"
               class="max-h:10rem"
               value={formData().message}
-              onInput={(e) => setFormData({ ...formData(), message: e.target.value })}
+              onInput={(e) =>
+                setFormData({ ...formData(), message: e.target.value })
+              }
               style={{
                 width: "100%",
                 padding: "8px",
@@ -171,7 +185,8 @@ export function SupportTicket() {
                 "border-radius": "4px",
               }}
               placeholder="Write your message.."
-              required />
+              required
+            />
           </div>
 
           <button

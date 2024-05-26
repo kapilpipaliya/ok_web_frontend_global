@@ -1,5 +1,14 @@
 import { toTitle } from "case-switcher-js";
-import { Match, createEffect, createResource, createSignal, useContext, For, Switch, Show } from "solid-js";
+import {
+  Match,
+  createEffect,
+  createResource,
+  createSignal,
+  useContext,
+  For,
+  Switch,
+  Show,
+} from "solid-js";
 import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
@@ -8,6 +17,7 @@ import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
+import { expressionString } from "~/lib/Utils";
 
 export function PagesPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -19,9 +29,15 @@ export function PagesPart() {
   const [filteredData, setFilteredData] = createSignal<any[]>([]);
 
   // Fetch data function
-  async function fetchData(): Promise<{ graph?: any; data?: any; error?: string }> {
+  async function fetchData(): Promise<{
+    graph?: any;
+    data?: any;
+    error?: string;
+  }> {
     try {
-      const data = await getTreeDataMGCall({ collection: "g:'Page'" });
+      const data = await getTreeDataMGCall({
+        collection: expressionString({ coll: "Page" }),
+      });
       return { graph: data.graph, data: data };
     } catch (error: any) {
       return { error: error.message };
@@ -42,12 +58,12 @@ export function PagesPart() {
         if (result?.graph) {
           setGraphData(graph, setGraph, result.graph);
 
-        const data2 = getTreeData(graph, setGraph, {
-          collection: "g:'Page'",
-        });
-        originalData = data2;
-        setFilteredData(data2);
-        setIsFetchingData(false);
+          const data2 = getTreeData(graph, setGraph, {
+            collection: expressionString({ coll: "Page" }),
+          });
+          originalData = data2;
+          setFilteredData(data2);
+          setIsFetchingData(false);
         }
       }
     }
@@ -58,8 +74,10 @@ export function PagesPart() {
     if (!searchQuery()) {
       setFilteredData(originalData);
     } else {
-      const filtered = originalData.filter((item) =>
-        item.name && item.name.toLowerCase().includes(searchQuery().toLowerCase())
+      const filtered = originalData.filter(
+        (item) =>
+          item.name &&
+          item.name.toLowerCase().includes(searchQuery().toLowerCase()),
       );
       setFilteredData(filtered);
     }
@@ -88,7 +106,8 @@ export function PagesPart() {
       boxShadow: "4px 4px 4px",
     };
 
-    const itemStyle: any = () => (isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle);
+    const itemStyle: any = () =>
+      isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
     return (
       <Show when={props.child.name}>
@@ -102,7 +121,8 @@ export function PagesPart() {
             setDraggedVertex(graph.vertexes[props.child.id]);
           }}
         >
-          <Icon icon={'iconoir:multiple-pages'} height={22} width={22}/><div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+          <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
+          <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
         </div>
       </Show>
     );
@@ -118,7 +138,8 @@ export function PagesPart() {
               <Icon
                 class="icon"
                 icon="iconamoon:search"
-                style={{ color: "#9e9ea7" }} />
+                style={{ color: "#9e9ea7" }}
+              />
               <input
                 placeholder="Search Page..."
                 type="search"
@@ -127,14 +148,25 @@ export function PagesPart() {
                 onInput={(e) => {
                   setSearchQuery(e.target.value);
                   updateFilteredData(); // Update filteredData when searchQuery changes
-                }} />
+                }}
+              />
             </div>
           </nav>
-          <div class="overflow:auto h:full" style={{
-            "scrollbar-width": "thin",
-            "scrollbar-color": "lightgrey"
-          }}>
-            <For each={filteredData()} fallback={<div class="p:3 m:20px|0px font-weight:bold text-align:center">No Page Found!</div>}>
+          <div
+            class="overflow:auto h:full"
+            style={{
+              "scrollbar-width": "thin",
+              "scrollbar-color": "lightgrey",
+            }}
+          >
+            <For
+              each={filteredData()}
+              fallback={
+                <div class="p:3 m:20px|0px font-weight:bold text-align:center">
+                  No Page Found!
+                </div>
+              }
+            >
               {(item, index) => <ListItemComponent child={item} />}
             </For>
           </div>

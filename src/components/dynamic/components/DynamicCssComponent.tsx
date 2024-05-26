@@ -1,9 +1,15 @@
 import { For, Match, Show, Switch } from "solid-js";
 import { StyleCSSComponents } from "~/components/css-editor/StyleCSSComponents";
 
-export function DynamicCSSComponent(props: { value: any; }) {
+export function DynamicCSSComponent(props: { value: any }) {
   const {
-    DisplaySelector, ButtonGroups, DataEditor, ColorPickerInput, ToggleButton, FieldWithCustomProperty, TextFieldWithSelectOption,
+    DisplaySelector,
+    ButtonGroups,
+    DataEditor,
+    ColorPickerInput,
+    ToggleButton,
+    FieldWithCustomProperty,
+    TextFieldWithSelectOption,
   } = StyleCSSComponents();
   return (
     <Switch>
@@ -13,14 +19,16 @@ export function DynamicCSSComponent(props: { value: any; }) {
           onChangeInput={props.value.onChangeInput}
           isAddToClass={props.value.isAddToClass ?? true}
           label={props.value.label}
-          isLabelOnTop={props.value.isLabelOnTop} />
+          isLabelOnTop={props.value.isLabelOnTop}
+        />
       </Match>
       <Match when={props.value.component === "select"}>
         <DisplaySelector
           name={props.value.name}
           label={props.value.label}
           isLabelOnTop={props.value.isLabelOnTop}
-          options={props.value.options} />
+          options={props.value.options}
+        />
       </Match>
       <Match when={props.value.component === "toggleButton"}>
         <ToggleButton
@@ -29,7 +37,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           isLabelOnTop={props.value.isLabelOnTop}
           label={props.value.label}
           name={props.value.name}
-          options={props.value.options} />
+          options={props.value.options}
+        />
       </Match>
       <Match when={props.value.component === "textField"}>
         <TextFieldWithSelectOption
@@ -43,7 +52,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           leftIcon={props.value.leftIcon}
           options={props.value.options}
           showInside={props.value.showInside}
-          inputType={props.value.type} />
+          inputType={props.value.type}
+        />
       </Match>
       <Match when={props.value.component === "textFieldOptions"}>
         <TextFieldWithSelectOption
@@ -57,7 +67,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           label={props.value.label}
           placeholder={props.value.placeholder}
           inputType={props.value.type}
-          options={props.value.options} />
+          options={props.value.options}
+        />
       </Match>
       <Match when={props.value.component === "grid"}>
         <div
@@ -72,7 +83,7 @@ export function DynamicCSSComponent(props: { value: any; }) {
           <For each={props.value.children}>
             {(item) => {
               return <DynamicCSSComponent value={item} />;
-            } }
+            }}
           </For>
         </div>
       </Match>
@@ -83,7 +94,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           onChangeInput={props.value.onChangeInput}
           isAddToClass={props.value.isAddToClass ?? true}
           label={props.value.label}
-          options={props.value.options} />
+          options={props.value.options}
+        />
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
         <FieldWithCustomProperty
@@ -95,7 +107,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           inputType={props.value.inputType}
           label={props.value.label}
           mainFieldType={props.value.mainFieldType}
-          options={props.value.options} />
+          options={props.value.options}
+        />
       </Match>
       <Match when={props.value.component === "dataEditor"}>
         <DataEditor
@@ -106,7 +119,8 @@ export function DynamicCSSComponent(props: { value: any; }) {
           children={props.value.children}
           openMenu={props.value.openMenu[0]}
           setOpenMenu={props.value.openMenu[1]}
-          label={props.value.label} />
+          label={props.value.label}
+        />
       </Match>
       <Match when={props.value.component === "divider"}>
         <hr class={"w:full color:lightgrey m:5|0"} />

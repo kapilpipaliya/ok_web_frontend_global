@@ -1,5 +1,4 @@
 import {
-  batch,
   createEffect,
   createMemo,
   createResource,
@@ -7,7 +6,6 @@ import {
   For,
   JSXElement,
   Match,
-  on,
   onCleanup,
   onMount,
   Show,
@@ -21,14 +19,9 @@ import { toTitle } from "case-switcher-js";
 import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
 import {
   getChildVertexes,
-  getInEdge,
   getSelectionOptions,
-  getToEdge
 } from "~/lib/graph/get/sync/traverse";
-import {
-  createForm,
-  createMeta
-} from "~/lib/graph/mutate/form_functions";
+import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
 import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
@@ -64,7 +57,7 @@ import {
 } from "~/lib/graph/get/async/graph_functions";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
-import { Expression, getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { PageConfigContext } from "~/lib/contexts";
@@ -107,35 +100,34 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   const [formData, setFormData] = createStore(
     {} as {
       form: FormMetaData;
-    }
+    },
   );
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
-  const id = createMemo(() => p.id === "new" ? undefined : parseInt(p.id as string));
+  const id = createMemo(() =>
+    p.id === "new" ? undefined : parseInt(p.id as string),
+  );
   // TODO: add validation on form that AttrsTableData keys should not available.
   // Note: When the page is loaded server side, the client side will not run this again,
   // so set state inside it will not set when page is reloaded.
   const [data, { mutate, refetch }] = createResource(async () => {
-
     const form = await getFormMetaDataAsync(
       props.graph,
       props.setGraph,
-      props.formId
+      props.formId,
     );
-    if (form.error) return 'Error';
+    if (form.error) return "Error";
 
     return { formData: JSON.stringify(form) };
-
   });
   createEffect(() => {
-    if (data() && data() !== 'Error') {
+    if (data() && data() !== "Error") {
       const result = JSON.parse(data().formData);
       if (result && !(result as { error: string }).error) {
         setFormData({ form: result.form as FormMetaData });
       }
     }
-
-  })
+  });
 
   return (
     <Switch>
@@ -151,7 +143,8 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
           id={id() as Id}
           isDialogContext={props.isDialogContext}
           {...customProps}
-          buttonAlign={props.buttonAlign} />
+          buttonAlign={props.buttonAlign}
+        />
       </Match>
     </Switch>
   );
@@ -163,7 +156,7 @@ export function DynamicForm(props: DynamicFormProps) {
   const location = useLocation();
   const { showLoadingToast, showWarningToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const cleanUpConfig = {} as { [key: string]: any; };
+  const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
 
@@ -171,7 +164,7 @@ export function DynamicForm(props: DynamicFormProps) {
     txnId,
     cleanUpConfig: () => cleanUpConfig,
   } as {
-    cleanUpConfig: () => { [key: string]: any; };
+    cleanUpConfig: () => { [key: string]: any };
     txnId: number;
     formMeta: Vertex;
     formData: Vertex;
@@ -188,7 +181,13 @@ export function DynamicForm(props: DynamicFormProps) {
     try {
       if (!props.id) {
         // Load Form Meta from API
-        const createResult = createForm(graph, setGraph, txnId, Ws, props.form[IdAttr]);
+        const createResult = createForm(
+          graph,
+          setGraph,
+          txnId,
+          Ws,
+          props.form[IdAttr],
+        );
 
         if (createResult.error) {
           return { error: createResult.error };
@@ -203,14 +202,19 @@ export function DynamicForm(props: DynamicFormProps) {
           return { error: loadResult.error };
         }
 
-        const { incoming, outgoing }: { incoming: any; outgoing: any; } = getEdgesFromRowsAttr(props.form.attributes);
-        const result = await getDataMGCall({ expression: `id:'${props.id}'`, incoming, outgoing });
+        const { incoming, outgoing }: { incoming: any; outgoing: any } =
+          getEdgesFromRowsAttr(props.form.attributes);
+        const result = await getDataMGCall({
+          expression: `id:'${props.id}'`,
+          incoming,
+          outgoing,
+        });
 
         if (result.error) {
           return { error: result.error };
         }
 
-        return { graph: result.graph }
+        return { graph: result.graph };
       }
     } catch (e: any) {
       return { error: `Error When Loading Form: ${e.message}` };
@@ -219,43 +223,48 @@ export function DynamicForm(props: DynamicFormProps) {
 
   const [data, { refetch }] = createResource(fetchData);
 
-
   createEffect(() => {
     if (data()) {
       const result = data();
       if (result && !(result as { error?: string }).error) {
         if ((result as { graph?: GraphInterface }).graph) {
-          setGraphData(graph, setGraph, (result as { graph: GraphInterface }).graph);
+          setGraphData(
+            graph,
+            setGraph,
+            (result as { graph: GraphInterface }).graph,
+          );
         }
         // Load Form Meta and Data from API
-        const metaVertexResult = untrack(() => createMeta(props.form, graph, setGraph));
+        const metaVertexResult = untrack(() =>
+          createMeta(props.form, graph, setGraph),
+        );
 
         if (metaVertexResult.error) {
-          console.error('Meta Vertex Error:', metaVertexResult.error);
+          console.error("Meta Vertex Error:", metaVertexResult.error);
           return;
         }
         const groupByTabsAndGroupFn = () => {
           const mainAttributes = getChildVertexes(
             graph,
             ["MetaAttr"],
-            [metaVertexResult.vertex!]
+            [metaVertexResult.vertex!],
           ); //.sort((a, b) => a.P.pos - b.P.pos);
 
           const groupByTabs = groupBy(
             mainAttributes.vertexes!,
-            (item) => item.P.tab!
+            (item) => item.P.tab!,
           ) as unknown as {
             [tab: string]: Vertex[];
           };
 
           const groupByTabsAndGroup = {} as {
-            [tab: string]: { [group: string]: Vertex[]; };
+            [tab: string]: { [group: string]: Vertex[] };
           };
 
           for (const tab in groupByTabs) {
             groupByTabsAndGroup[tab] = groupBy(
               groupByTabs[tab]!,
-              (item) => item.P.group!
+              (item) => item.P.group!,
             ) as unknown as {
               [group: string]: Vertex[];
             };
@@ -263,8 +272,9 @@ export function DynamicForm(props: DynamicFormProps) {
           return groupByTabsAndGroup;
         };
         const groupByTabsAndGroup = groupByTabsAndGroupFn();
-        const tabs = Object.keys(groupByTabsAndGroup).filter((tab) => tab !== "main");
-
+        const tabs = Object.keys(groupByTabsAndGroup).filter(
+          (tab) => tab !== "main",
+        );
 
         setActiveTab(tabs[0]);
         setFormData({
@@ -277,7 +287,6 @@ export function DynamicForm(props: DynamicFormProps) {
 
         setPageConfig?.("formData", formData);
       }
-    
     }
   });
 
@@ -325,8 +334,7 @@ export function DynamicForm(props: DynamicFormProps) {
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => {
-          }
+          onError: (error) => {},
         });
       }
       submit = true;
@@ -364,14 +372,15 @@ export function DynamicForm(props: DynamicFormProps) {
       <textarea
         class="h:95% w:100%"
         value={importCode()}
-        onchange={(e) => setImportCode(e.target.value)} />
+        onchange={(e) => setImportCode(e.target.value)}
+      />
     );
   };
   const PreviewCode = () => {
     return (
       <pre>
         {stringify(
-          getExportCodeAsync(graph, formData.formMeta, formData.formData)
+          getExportCodeAsync(graph, formData.formMeta, formData.formData),
         )}
       </pre>
     );
@@ -407,31 +416,39 @@ export function DynamicForm(props: DynamicFormProps) {
       }}
     >
       <GenericField
-        meta={{
-          P: {
-            component: "Button",
-            props: {
-              variant: "outlined",
-              class: "border-color:#FF0000 color:#FF0000 danger",
-              children: "Cancel",
-              onClick: () => onCancel(),
-            },
-          },
-        } as any} />
-      <Show
-        when={props.submitButton}
-        fallback={<GenericField
-          // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-          meta={{
+        meta={
+          {
             P: {
               component: "Button",
               props: {
-                type: "primary",
-                children: "Submit",
-                onClick: () => onSubmit(),
+                variant: "outlined",
+                class: "border-color:#FF0000 color:#FF0000 danger",
+                children: "Cancel",
+                onClick: () => onCancel(),
               },
             },
-          } as any} />}
+          } as any
+        }
+      />
+      <Show
+        when={props.submitButton}
+        fallback={
+          <GenericField
+            // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
+            meta={
+              {
+                P: {
+                  component: "Button",
+                  props: {
+                    type: "primary",
+                    children: "Submit",
+                    onClick: () => onSubmit(),
+                  },
+                },
+              } as any
+            }
+          />
+        }
       >
         {props.submitButton}
       </Show>
@@ -446,7 +463,6 @@ export function DynamicForm(props: DynamicFormProps) {
       <Match when={data()?.error}>Error</Match>
 
       <Match when={true}>
-
         <RepeaterContext.Provider
           value={[formData.formData, ...useContext(RepeaterContext)]}
         >
@@ -480,27 +496,33 @@ export function DynamicForm(props: DynamicFormProps) {
                               }}
                             >
                               <GenericField
-                                meta={{
-                                  P: {
-                                    component: "Button",
-                                    props: {
-                                      children: "Import",
-                                      variant: "outlined",
-                                      onClick: () => onImportClick,
+                                meta={
+                                  {
+                                    P: {
+                                      component: "Button",
+                                      props: {
+                                        children: "Import",
+                                        variant: "outlined",
+                                        onClick: () => onImportClick,
+                                      },
                                     },
-                                  },
-                                } as any} />
+                                  } as any
+                                }
+                              />
                               <GenericField
-                                meta={{
-                                  P: {
-                                    component: "Button",
-                                    props: {
-                                      children: "Export",
-                                      onClick: () => onExportClick,
-                                      class: " b:blue",
+                                meta={
+                                  {
+                                    P: {
+                                      component: "Button",
+                                      props: {
+                                        children: "Export",
+                                        onClick: () => onExportClick,
+                                        class: " b:blue",
+                                      },
                                     },
-                                  },
-                                } as any} />
+                                  } as any
+                                }
+                              />
                             </div>
                           </Show>
 
@@ -509,10 +531,13 @@ export function DynamicForm(props: DynamicFormProps) {
                               <FormGroup
                                 graph={graph}
                                 setGraph={setGraph}
-                                metaAttributes={formData.groupByTabsAndGroup["main"][group]}
+                                metaAttributes={
+                                  formData.groupByTabsAndGroup["main"][group]
+                                }
                                 labelPrefix={"Form"}
                                 vertex={formData.formData}
-                                txnId={formData.txnId} />
+                                txnId={formData.txnId}
+                              />
                             </div>
                           </div>
                         </div>
@@ -521,14 +546,16 @@ export function DynamicForm(props: DynamicFormProps) {
                   </For>
                 </Show>
                 <Show
-                  when={formData.tabs?.length > 0 &&
-                    !(props.showMainFieldsOnly ?? false)}
+                  when={
+                    formData.tabs?.length > 0 &&
+                    !(props.showMainFieldsOnly ?? false)
+                  }
                 >
                   <TableTabs tabs={formData.tabs} setActiveTab={setActiveTab} />
                   <br />
                   <For
                     each={Object.keys(
-                      formData.groupByTabsAndGroup[activeTab()]
+                      formData.groupByTabsAndGroup[activeTab()],
                     )}
                   >
                     {(group) => {
@@ -537,7 +564,7 @@ export function DynamicForm(props: DynamicFormProps) {
                           class="dx-fieldset"
                           style={{
                             "max-width": getTabsWidth(
-                              formData.groupByTabsAndGroup[activeTab()][group]
+                              formData.groupByTabsAndGroup[activeTab()][group],
                             ),
                           }}
                         >
@@ -547,10 +574,13 @@ export function DynamicForm(props: DynamicFormProps) {
                           <FormGroup
                             graph={graph}
                             setGraph={setGraph}
-                            metaAttributes={formData.groupByTabsAndGroup[activeTab()][group]}
+                            metaAttributes={
+                              formData.groupByTabsAndGroup[activeTab()][group]
+                            }
                             labelPrefix={""}
                             vertex={formData.formData}
-                            txnId={formData.txnId} />
+                            txnId={formData.txnId}
+                          />
                         </div>
                       );
                     }}
@@ -561,8 +591,10 @@ export function DynamicForm(props: DynamicFormProps) {
                 <div />
 
                 <Show
-                  when={!(props.showSubmitButtonOnTop ?? false) &&
-                    !props.isLoginRegister}
+                  when={
+                    !(props.showSubmitButtonOnTop ?? false) &&
+                    !props.isLoginRegister
+                  }
                 >
                   <SubmitButton />
                 </Show>
@@ -577,7 +609,8 @@ export function DynamicForm(props: DynamicFormProps) {
                   setDiscradPopup(false);
                 }}
                 title="Discard changes"
-                message="Discard unsaved changes - are you sure?" />
+                message="Discard unsaved changes - are you sure?"
+              />
             </Show>
           </div>
         </RepeaterContext.Provider>
@@ -586,13 +619,11 @@ export function DynamicForm(props: DynamicFormProps) {
   );
 }
 
-
 // group of the fields
 export function FormGroup(props: FormGroupProps) {
   return (
     <For each={props.metaAttributes}>
       {(metaVertex) => {
-
         const id = `${props.vertex.id + metaVertex.P[IdAttr] + "Label"}`;
         const component = createMemo(() =>
           getComponentForCollRow(
@@ -606,9 +637,9 @@ export function FormGroup(props: FormGroupProps) {
           <>
             {toTitle(
               metaVertex.P.displayName ||
-              metaVertex.P[IdAttr] ||
-              metaVertex.P.key ||
-              "",
+                metaVertex.P[IdAttr] ||
+                metaVertex.P.key ||
+                "",
             )}
           </>
         );
@@ -618,9 +649,9 @@ export function FormGroup(props: FormGroupProps) {
             meta={metaVertex}
             title={toTitle(
               metaVertex.P.displayName ||
-              metaVertex.P[IdAttr] ||
-              metaVertex.P.key ||
-              "",
+                metaVertex.P[IdAttr] ||
+                metaVertex.P.key ||
+                "",
             )}
             data={props.vertex}
             // setValue={props.setValue}

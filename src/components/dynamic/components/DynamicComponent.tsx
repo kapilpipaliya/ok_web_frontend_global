@@ -92,7 +92,8 @@ export function DynamicComponent(props: {
             disabled={field.disabled!}
             component={field.component}
             txnId={field.txnId}
-            isRealTime={field.isRealTime} />
+            isRealTime={field.isRealTime}
+          />
         </Show>
       </Match>
       <Match when={field.component === "Table2"}>
@@ -105,12 +106,15 @@ export function DynamicComponent(props: {
               disabled={field.disabled!}
               txnId={field.txnId}
               setValue={field.setValue}
-              isRealTime={field.isRealTime} />
+              isRealTime={field.isRealTime}
+            />
           </Show>
         </Show>
       </Match>
       <Match
-        when={genericInputComponents.includes(field.component) && field.component}
+        when={
+          genericInputComponents.includes(field.component) && field.component
+        }
         keyed
       >
         <Show when={!hiddenNodes().includes(field.meta?.id)}>
@@ -121,7 +125,8 @@ export function DynamicComponent(props: {
             txnId={field.txnId!}
             component={field.component}
             setValue={field.setValue}
-            disabled={field.disabled!} />
+            disabled={field.disabled!}
+          />
         </Show>
       </Match>
       <Match
@@ -135,7 +140,8 @@ export function DynamicComponent(props: {
             txnId={field.txnId}
             component={field.component}
             setValue={field.setValue}
-            disabled={field.disabled!} />
+            disabled={field.disabled!}
+          />
         </Show>
       </Match>
     </Switch>

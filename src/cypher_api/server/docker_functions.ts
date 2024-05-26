@@ -96,8 +96,9 @@ function pullImageFromRegistry(imageName: string, callback: Callback<string>) {
   }
 }
 
-export async function stopDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
-
+export async function stopDockerContainer(
+  containerId: string,
+): Promise<{ error: boolean; message: string }> {
   const url = `http://localhost/containers/${containerId}/stop`;
   const options = {
     method: "POST",
@@ -112,49 +113,49 @@ export async function stopDockerContainer(containerId: string): Promise<{ error:
     if (!response.ok) {
       return {
         error: false,
-        message: data.message || "Failed to create container"
+        message: data.message || "Failed to create container",
       };
     }
 
     return {
       error: false,
-      message: `Docker container ${containerId} stopped successfully`
+      message: `Docker container ${containerId} stopped successfully`,
     };
   } catch (error: any) {
     return {
       error: false,
-      message: `Failed to stop Docker container ${containerId}: ${error.message}`
+      message: `Failed to stop Docker container ${containerId}: ${error.message}`,
     };
-  } 
+  }
 }
 
-export async function removeDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
-
+export async function removeDockerContainer(
+  containerId: string,
+): Promise<{ error: boolean; message: string }> {
   const url = `http://localhost/containers/${containerId}`;
   const options = {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     agent,
   };
-  try {   
+  try {
     const response = await fetch(url, options);
     const data: any = await response.json();
 
     if (!response.ok) {
       return {
         error: false,
-        message: data.message || "Failed to remove container"
+        message: data.message || "Failed to remove container",
       };
     }
     return {
       error: false,
-      message: `Docker container ${containerId} removed successfully`
+      message: `Docker container ${containerId} removed successfully`,
     };
-
   } catch (error: any) {
     return {
       error: false,
-      message: `Failed to remove Docker container ${containerId}: ${error.message}`
+      message: `Failed to remove Docker container ${containerId}: ${error.message}`,
     };
   }
 }

@@ -4,7 +4,7 @@ import SiteTitle from "~/components/website/utils";
 
 export type PageHeaderProps = {
   title: string;
-  breadcrumb: { name: string; href?: string, icon?: string }[];
+  breadcrumb: { name: string; href?: string; icon?: string }[];
   className?: string;
   children?: JSX.Element;
 };
@@ -46,17 +46,30 @@ export default function PageHeader(props: PageHeaderProps) {
                     when={item.href}
                     fallback={
                       <div class="flex align-items:center ">
-                        <Icon icon={'octicon:chevron-right-12'} style={{ color: "rgb(156,163,175)" }} />
-                        <span
-                          class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(107,114,128)  md:ms-2 color:rgb(156,163,175)@dark">{item.name}</span>
+                        <Icon
+                          icon={"octicon:chevron-right-12"}
+                          style={{ color: "rgb(156,163,175)" }}
+                        />
+                        <span class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(107,114,128)  md:ms-2 color:rgb(156,163,175)@dark">
+                          {item.name}
+                        </span>
                       </div>
                     }
                   >
                     <li>
                       <div class="flex align-items:center text:underline">
-                        <Icon icon={item.icon} class="color:rgb(156,163,175) mr:5" height={20} width={20} />
-                        <a href={item.href}
-                          class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(55,65,81)  color:rgb(37,99,235):hover md:ms-2 color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark">{item.name}</a>
+                        <Icon
+                          icon={item.icon}
+                          class="color:rgb(156,163,175) mr:5"
+                          height={20}
+                          width={20}
+                        />
+                        <a
+                          href={item.href}
+                          class="ms-1 f:0.875rem lh:1.25rem font-weight:500  color:rgb(55,65,81)  color:rgb(37,99,235):hover md:ms-2 color:rgb(156,163,175)@dark color:rgb(255,255,255):hover@dark"
+                        >
+                          {item.name}
+                        </a>
                       </div>
                     </li>
                   </Show>

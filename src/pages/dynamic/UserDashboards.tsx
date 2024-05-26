@@ -3,7 +3,6 @@ import { For, useContext } from "solid-js";
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import { APP_BASE_URL } from "~/lib/Utils";
 
-
 export function UserDashboards() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const vertexes = () => graph.vertexLabelIdMap["Dashboard"] || [];

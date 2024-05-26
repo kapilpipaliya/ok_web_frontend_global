@@ -21,7 +21,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
@@ -84,10 +84,7 @@ export const PageRenderUtils = {
     item && getChildVertex(graph, ["$0Data"], item).vertex,
 };
 
-export function PageItemRender(props: {
-  metaVertex: Vertex;
-  data?: Vertex;
-}) {
+export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -95,25 +92,33 @@ export function PageItemRender(props: {
   const [targetId, setTargetId] = useContext(TargetIdContext);
   const [isPreview, setIsPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
-    IndicatorPositionContext
+    IndicatorPositionContext,
   );
   let { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
 
-  const PropertiesDrawer = (props: { itemId : any}) => {
-    return <div classList={{ 'display:none': isSelectedLayoutId(props.itemId) }}>
-      <Drawer
-        customButton={(props) => (
-          <Icon icon={'mingcute:settings-5-line'} {...props} height={22} width={22} class="cursor:pointer" />
-        )}
-        title="First Drawer"
-        width="450px"
-      >
-        <Properties />
-      </Drawer>
-    </div>
+  const PropertiesDrawer = (props: { itemId: any }) => {
+    return (
+      <div classList={{ "display:none": isSelectedLayoutId(props.itemId) }}>
+        <Drawer
+          customButton={(props) => (
+            <Icon
+              icon={"mingcute:settings-5-line"}
+              {...props}
+              height={22}
+              width={22}
+              class="cursor:pointer"
+            />
+          )}
+          title="First Drawer"
+          width="450px"
+        >
+          <Properties />
+        </Drawer>
+      </div>
+    );
   };
 
   return (
@@ -121,12 +126,21 @@ export function PageItemRender(props: {
       each={getChildVertexes(
         graph,
         ["Attr"],
-        [props.metaVertex]
+        [props.metaVertex],
       ).vertexes?.sort((a, b) => a.P.pos - b.P.pos)}
     >
       {(item, index) => {
         const {
-          children, isActiveItem, handleDragStart, handleDragEnter, handleDragOver, handleDragLeave, handleDrop, onLayoutItemClick, clone, deleteLayout,
+          children,
+          isActiveItem,
+          handleDragStart,
+          handleDragEnter,
+          handleDragOver,
+          handleDragLeave,
+          handleDrop,
+          onLayoutItemClick,
+          clone,
+          deleteLayout,
         } = useDragDrop(graph, setGraph, txnId, formData, item, () => [], true);
 
         // createComputed is hard to debug
@@ -186,13 +200,14 @@ export function PageItemRender(props: {
         });
 
         const component = createMemo(
-          () => item.P.component ||
-            PageRenderUtils.getComponent(graph, item)?.P[IdAttr]
+          () =>
+            item.P.component ||
+            PageRenderUtils.getComponent(graph, item)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
           return PageRenderUtils.getComponent(
             graph,
-            getLastItem(parentItems, 1)
+            getLastItem(parentItems, 1),
           )?.P[IdAttr];
         });
         // TODO: Is This Parent Vertex is ok?
@@ -201,28 +216,34 @@ export function PageItemRender(props: {
         const parentData = () => {
           return PageRenderUtils.getDataVertex(
             graph,
-            getLastItem(parentItems, 1)
+            getLastItem(parentItems, 1),
           );
         };
 
-        const getComponent = () => getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
+        const getComponent = () =>
+          getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
 
-        const Content = () => <DynamicComponent
-          meta={item}
-          // NOTE: For repeater we cant use parentData
-          // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
-          data={props.data ||
-            getSelectionOptions(
-              graph,
-              setGraph,
-              [...useContext(RepeaterContext)],
-              item.P.data
-            ).vertexes ||
-            PageRenderUtils.getDataVertex(graph, item)}
-          title={toTitle(PageRenderUtils.getId(graph, item) || "")}
-          // setValue={props.setValue}
-          disabled={false}
-          component={component()} />;
+        const Content = () => (
+          <DynamicComponent
+            meta={item}
+            // NOTE: For repeater we cant use parentData
+            // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+            data={
+              props.data ||
+              getSelectionOptions(
+                graph,
+                setGraph,
+                [...useContext(RepeaterContext)],
+                item.P.data,
+              ).vertexes ||
+              PageRenderUtils.getDataVertex(graph, item)
+            }
+            title={toTitle(PageRenderUtils.getId(graph, item) || "")}
+            // setValue={props.setValue}
+            disabled={false}
+            component={component()}
+          />
+        );
 
         const PageComponent = () => (
           <PageRenderContext.Provider
@@ -249,7 +270,9 @@ export function PageItemRender(props: {
                     <div class="position:absolute  bottom:100% z:50 ">
                       <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50 m:0.5rem">
                         <Tooltip content={"Name"} nowrap>
-                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">{getComponent()}</div>
+                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                            {getComponent()}
+                          </div>
                         </Tooltip>
                         <Tooltip content={"Move"} nowrap>
                           <Icon
@@ -268,7 +291,11 @@ export function PageItemRender(props: {
                             width={20}
                             class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
                             onClick={(e) => {
-                              const parentResult = getParentVertex(["Attr"], item, graph);
+                              const parentResult = getParentVertex(
+                                ["Attr"],
+                                item,
+                                graph,
+                              );
                               if (parentResult.error) {
                                 return;
                               }
@@ -294,21 +321,28 @@ export function PageItemRender(props: {
                             class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
                           />
                         </Tooltip>
-                          <div class="flex flex-direction:column p:5 bg:rgb(37,99,235) color:white r:24 position:absolute  right:-30px top:10px ">
+                        <div class="flex flex-direction:column p:5 bg:rgb(37,99,235) color:white r:24 position:absolute  right:-30px top:10px ">
                           {PropertiesDrawer(item.id)}
                         </div>
                       </div>
-                      
-                   </div>
+                    </div>
                   </span>
-                  
                 </Show>
-                <Show when={!isSelectedLayoutId(item.id) && isSelectedHoverId(item.id)}>
+                <Show
+                  when={
+                    !isSelectedLayoutId(item.id) && isSelectedHoverId(item.id)
+                  }
+                >
                   <span class="position:relative ">
                     <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
-                      <Icon icon={iconMap[getComponent()]} class="color:rgb(255,255,255) " />
+                      <Icon
+                        icon={iconMap[getComponent()]}
+                        class="color:rgb(255,255,255) "
+                      />
                       <Tooltip content={"Name"} nowrap>
-                        <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">{getComponent()}</div>
+                        <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                          {getComponent()}
+                        </div>
                       </Tooltip>
                     </div>
                   </span>
@@ -316,7 +350,6 @@ export function PageItemRender(props: {
                 <Content />
               </span>
             </Show>
-
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
@@ -385,7 +418,7 @@ export function getUrl(
   return url;
 }
 
-export function PageView(props: { vertex?: Vertex, isPreview?: boolean }) {
+export function PageView(props: { vertex?: Vertex; isPreview?: boolean }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const collection = createMemo(() =>
     PageRenderUtils.getCollection(graph, props.vertex),

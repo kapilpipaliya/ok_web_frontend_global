@@ -47,7 +47,8 @@ export function Collapsible(props: {
             float: "right",
             "margin-left": "5px",
           }}
-          icon={props.isOpen ? "mdi:minus" : "mdi:plus"} />
+          icon={props.isOpen ? "mdi:minus" : "mdi:plus"}
+        />
       </button>
       <div
         class="content"

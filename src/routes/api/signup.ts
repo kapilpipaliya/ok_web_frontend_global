@@ -18,7 +18,7 @@ export async function POST({ request }: APIEvent) {
   const { username, email, password, subdomain } = await request.json();
 
   // Get subdomain from the request URL
-  const subdomainFromUrl = getSubDomain(request.headers.get("host")!);
+  const subdomainFromUrl = await getSubDomain(request.headers.get("host")!, false);
   const session = (await getDriver(subdomainFromUrl)).session();
   const tx = session.beginTransaction();
 
@@ -152,7 +152,7 @@ async function createUserInDB(
     });
     session2.close();
   }
-  
+
   return createUserResult;
 }
 
@@ -224,7 +224,10 @@ async function checkExistance(
   }
 
   // Check if the email already exists
-  if (email && (await isVertexExistWithPropMGCall("User", tx, "email", email))) {
+  if (
+    email &&
+    (await isVertexExistWithPropMGCall("User", tx, "email", email))
+  ) {
     throw new Error("Email address already exists");
   }
 }

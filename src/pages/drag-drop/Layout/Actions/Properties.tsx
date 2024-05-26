@@ -22,7 +22,7 @@ import {
 } from "~/lib/contexts";
 import {
   getChildVertex,
-  getChildVertexes
+  getChildVertexes,
 } from "~/lib/graph/get/sync/traverse";
 import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
 import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
@@ -40,14 +40,14 @@ import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
-export function Properties(props: { }) {
+export function Properties(props: {}) {
   const [isPropertiesOpen, toggleIsPropertiesOpen] = useExpansion(true);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const propertiesVertexId = useContext(PropertiesVertexIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
-    SelectedComponentContext
+    SelectedComponentContext,
   );
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
 
@@ -56,7 +56,7 @@ export function Properties(props: { }) {
     setGraph,
     pageConfig.formData.txnId,
     pageConfig.formData.formData,
-    pageConfig.formData.formData
+    pageConfig.formData.formData,
   );
 
   const PropertiesPart = () => {
@@ -68,7 +68,7 @@ export function Properties(props: { }) {
         0,
         newVertex(propertiesVertexId, ["PropsJson"], { sample: true }),
         graph,
-        setGraph
+        setGraph,
       );
       if (addNewVertexResult.error) {
         console.warn("error while inserting");
@@ -84,7 +84,7 @@ export function Properties(props: { }) {
           meta,
           graph.vertexes[selectedId()],
           graph.vertexes[selectedComponent().vertexId],
-          value
+          value,
         );
       }
       return;
@@ -104,7 +104,8 @@ export function Properties(props: { }) {
     let prevTxnIndex = -1;
     const onRulesSubmit = () => {
       // hack to refresh the select fields. no option is refereshing the label.
-      setGraph("vertexes", selectedId(), "OUT", "Rules", (v) => v ? [...v] : v
+      setGraph("vertexes", selectedId(), "OUT", "Rules", (v) =>
+        v ? [...v] : v,
       );
       toggleRulesModal();
     };
@@ -117,7 +118,8 @@ export function Properties(props: { }) {
       // reset layout
       // layoutTreeViewInstance.option("items", getLayoutTreeData());
       // hack to refresh the select fields. no option is refereshing the label.
-      setGraph("vertexes", selectedId(), "OUT", "Rules", (v) => v ? [...v] : v
+      setGraph("vertexes", selectedId(), "OUT", "Rules", (v) =>
+        v ? [...v] : v,
       );
       toggleImportsModal();
     };
@@ -136,7 +138,7 @@ export function Properties(props: { }) {
       const metaVertexId = getNewGraphId();
       const txnId = getNewTxnId(graph, setGraph);
       const metaAttributes = AttrsTableData.Coll.attributes.find(
-        (x) => x.name === "Rules"
+        (x) => x.name === "Rules",
       );
 
       addNewVertex(
@@ -146,10 +148,10 @@ export function Properties(props: { }) {
           props: metaAttributes?.props,
         }),
         graph,
-        setGraph
+        setGraph,
       );
       const attributes: FieldAttribute[] = JSON.parse(
-        JSON.stringify(metaAttributes!.attributes!)
+        JSON.stringify(metaAttributes!.attributes!),
       );
 
       for (const attribute of attributes) {
@@ -183,7 +185,7 @@ export function Properties(props: { }) {
                           .vertex?.P.name;
                         return `${v.P.name}${component ? ` (${component})` : ""}`;
                       },
-                    }
+                    },
                   );
 
                   condAttribute!.props = {
@@ -217,7 +219,7 @@ export function Properties(props: { }) {
         setGraph,
         txnId,
         graph.vertexes[metaVertexId],
-        attributes
+        attributes,
       );
       onCleanup(() => {
         revertTransaction(txnId);
@@ -228,7 +230,8 @@ export function Properties(props: { }) {
           meta={graph.vertexes[metaVertexId]}
           data={graph.vertexes[selectedId()!]}
           txnId={pageConfig.formData.txnId}
-          isRealTime={false} />
+          isRealTime={false}
+        />
       );
     };
     const ImportModalBody = () => {
@@ -319,8 +322,11 @@ export function Properties(props: { }) {
                     component="TextArea"
                     meta={graph.vertexes[metaVertexId]}
                     data={graph.vertexes[dataVertexId]}
-                    setValue={(data: any) => setGraph("vertexes", dataVertexId, "P", { jsx: data })}
-                    disabled={false} />
+                    setValue={(data: any) =>
+                      setGraph("vertexes", dataVertexId, "P", { jsx: data })
+                    }
+                    disabled={false}
+                  />
                 </ModalBody>
                 <ModalFooter>
                   <div
@@ -357,7 +363,7 @@ export function Properties(props: { }) {
           },
         }),
         graph,
-        setGraph
+        setGraph,
       );
       const attributes: FieldAttribute[] = [
         {
@@ -386,7 +392,7 @@ export function Properties(props: { }) {
         setGraph,
         txnId,
         graph.vertexes[metaVertexId],
-        attributes
+        attributes,
       );
       onCleanup(() => {
         revertTransaction(txnId);
@@ -395,7 +401,7 @@ export function Properties(props: { }) {
       const collMetaVertex = getChildVertexes(
         graph,
         ["MetaAttr"],
-        [metaVertex]
+        [metaVertex],
       );
 
       return (
@@ -409,7 +415,8 @@ export function Properties(props: { }) {
             title={"Collection:"}
             component={"SelectBox"}
             txnId={pageConfig.formData.txnId}
-            isRealTime={false} />
+            isRealTime={false}
+          />
           {/*<span>Data:</span>*/}
           <SelectInputField
             data={graph.vertexes[selectedId()!]}
@@ -419,7 +426,8 @@ export function Properties(props: { }) {
             component={"SelectBox"}
             txnId={pageConfig.formData.txnId}
             // passed setValue when we have a string value in select field
-            isRealTime={false} />
+            isRealTime={false}
+          />
           <span>Expression:</span>
           <GenericInputField
             txnId={txnId}
@@ -427,7 +435,8 @@ export function Properties(props: { }) {
             data={graph.vertexes[selectedId()!]}
             meta={collMetaVertex.vertexes![2]!}
             disabled={false}
-            component={"TextBox"} />
+            component={"TextBox"}
+          />
         </>
       );
     };
@@ -436,34 +445,41 @@ export function Properties(props: { }) {
       <>
         <Show when={selectedId() !== -1}>
           <GenericField
-            meta={{
-              P: {
-                component: "Button",
-                props: {
-                  children: "Rules",
-                  class: "mb:5",
-                  onClick: toggleRulesModal,
+            meta={
+              {
+                P: {
+                  component: "Button",
+                  props: {
+                    children: "Rules",
+                    class: "mb:5",
+                    onClick: toggleRulesModal,
+                  },
                 },
-              },
-            } as any} />
+              } as any
+            }
+          />
           &nbsp;&nbsp;
           <GenericField
-            meta={{
-              P: {
-                component: "Button",
-                props: {
-                  children: "Import",
-                  onClick: toggleImportsModal,
+            meta={
+              {
+                P: {
+                  component: "Button",
+                  props: {
+                    children: "Import",
+                    onClick: toggleImportsModal,
+                  },
                 },
-              },
-            } as any} />
+              } as any
+            }
+          />
           <CollAndData />
           <FormGroupProperties
             txnId={pageConfig.formData.txnId}
             metaAttributes={selectedComponentProperties().vertexes || []}
             vertex={graph.vertexes[propertiesVertexId]}
             setValue={setPropertyValue}
-            selectedLayout={graph.vertexes[selectedId()]} />
+            selectedLayout={graph.vertexes[selectedId()]}
+          />
         </Show>
         <Show when={isRulesModalOpen()}>
           <Portal>
@@ -488,28 +504,35 @@ export function Properties(props: { }) {
                     }}
                   >
                     <GenericField
-                      meta={{
-                        P: {
-                          component: "Button",
-                          props: {
-                            children: "Submithttps://coindcx.com/futures/B-BTC_USDT",
-                            onClick: () => onRulesSubmit,
+                      meta={
+                        {
+                          P: {
+                            component: "Button",
+                            props: {
+                              children:
+                                "Submithttps://coindcx.com/futures/B-BTC_USDT",
+                              onClick: () => onRulesSubmit,
+                            },
                           },
-                        },
-                      } as any} />
+                        } as any
+                      }
+                    />
 
                     <GenericField
-                      meta={{
-                        P: {
-                          component: "Button",
-                          props: {
-                            variant: "outlined",
-                            class: "border-color:#FF0000 color:#FF0000",
-                            children: "Cancel",
-                            onClick: () => onRulesCancel,
+                      meta={
+                        {
+                          P: {
+                            component: "Button",
+                            props: {
+                              variant: "outlined",
+                              class: "border-color:#FF0000 color:#FF0000",
+                              children: "Cancel",
+                              onClick: () => onRulesCancel,
+                            },
                           },
-                        },
-                      } as any} />
+                        } as any
+                      }
+                    />
                   </div>
                 </ModalFooter>
               </ModalContent>
@@ -525,14 +548,16 @@ export function Properties(props: { }) {
   return (
     <Show
       when={isPropertiesExpanded()}
-      fallback={<div
-        class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-        style="transition: opacity 0.3s ease-in-out;"
-        onClick={togglePropertiesExpansion}
-        title="Properties"
-      >
-        <Icon icon={"mingcute:settings-6-line"} height={25} width={25} />
-      </div>}
+      fallback={
+        <div
+          class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
+          style="transition: opacity 0.3s ease-in-out;"
+          onClick={togglePropertiesExpansion}
+          title="Properties"
+        >
+          <Icon icon={"mingcute:settings-6-line"} height={25} width={25} />
+        </div>
+      }
     >
       <div class="ml:5 mr:5">
         <div
@@ -552,22 +577,29 @@ export function Properties(props: { }) {
           </div>
           <Tooltip content={"Delete"} nowrap>
             <GenericField
-              meta={{
-                P: {
-                  component: "Icon",
-                  props: {
-                    style: { color: "red" },
-                    onClick: () => deleteLayout(
-                      getChildVertex(graph, ["$0Comp"], pageConfig.formData.formData).vertex
-                        ?.P.name
-                    ),
-                    width: 18,
-                    height: 18,
-                    class: "cursor:pointer  mr:5px",
-                    icon: "mage:trash",
+              meta={
+                {
+                  P: {
+                    component: "Icon",
+                    props: {
+                      style: { color: "red" },
+                      onClick: () =>
+                        deleteLayout(
+                          getChildVertex(
+                            graph,
+                            ["$0Comp"],
+                            pageConfig.formData.formData,
+                          ).vertex?.P.name,
+                        ),
+                      width: 18,
+                      height: 18,
+                      class: "cursor:pointer  mr:5px",
+                      icon: "mage:trash",
+                    },
                   },
-                },
-              } as any} />
+                } as any
+              }
+            />
           </Tooltip>
           <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
             <Icon
@@ -579,7 +611,8 @@ export function Properties(props: { }) {
                 transition: "transform 0.2s linear",
                 transform: `${isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
               }}
-              class="flex-1" />
+              class="flex-1"
+            />
           </div>
         </div>
         <Show when={isPropertiesOpen()}>

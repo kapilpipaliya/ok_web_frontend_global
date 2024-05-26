@@ -56,12 +56,13 @@ export function ExpressionBuilder(props: {
   data?: any;
 }) {
   let state = props.content.split("+").map(
-    (value) => ({ value }) as {
-      unAryOperator?: Option;
-      value: string;
-      binAryOperator?: Option;
-      error: boolean;
-    }
+    (value) =>
+      ({ value }) as {
+        unAryOperator?: Option;
+        value: string;
+        binAryOperator?: Option;
+        error: boolean;
+      },
   );
   // const fetchData = (content) => {
   //     const operator = content.operator;
@@ -140,7 +141,7 @@ export function ExpressionBuilder(props: {
         props.data!,
         finalExpression,
         Ws,
-        false
+        false,
       );
     }
   };
@@ -155,27 +156,29 @@ export function ExpressionBuilder(props: {
       <CustomModal
         buttonIcon={"carbon:settings-edit"}
         title="Expression Builder"
-        body={<div>
-          <For each={contentList}>
-            {(item, index) => (
-              <div class={"p:2"}>
-                <div class={"flex ai:center jc:space-between mt:4 mb:2"}>
-                  <span class={"font-weight:medium f:14"}>
-                    Expression : {index() + 1}
-                  </span>
-                  <Show when={index() > 0}>
-                    <Icon
-                      icon={"fluent:delete-28-regular"}
-                      height={20}
-                      width={20}
-                      class={"cursor:pointer"}
-                      style={{ color: "red" }}
-                      onclick={() => handleDelete(index())} />
-                  </Show>
-                </div>
-                <div class={"flex ai:center jc:space-between"}>
-                  <div class={"flex"}>
-                    {/* <MultiSelect
+        body={
+          <div>
+            <For each={contentList}>
+              {(item, index) => (
+                <div class={"p:2"}>
+                  <div class={"flex ai:center jc:space-between mt:4 mb:2"}>
+                    <span class={"font-weight:medium f:14"}>
+                      Expression : {index() + 1}
+                    </span>
+                    <Show when={index() > 0}>
+                      <Icon
+                        icon={"fluent:delete-28-regular"}
+                        height={20}
+                        width={20}
+                        class={"cursor:pointer"}
+                        style={{ color: "red" }}
+                        onclick={() => handleDelete(index())}
+                      />
+                    </Show>
+                  </div>
+                  <div class={"flex ai:center jc:space-between"}>
+                    <div class={"flex"}>
+                      {/* <MultiSelect
                       isObject
                       displayValueParent="P"
                       displayValueChild="name"
@@ -190,25 +193,29 @@ export function ExpressionBuilder(props: {
                       customCloseIcon={<Icon icon={"ic:round-close"} />}
                       selectionLimit={1}
                       singleSelect /> */}
-                  </div>
-                  <TextField
-                    labelClass={"w:100% mr:.5rem ml:.5rem"}
-                    style={`border: ${item.error ? "1px solid red " : ""}`}
-                    class={"global-style flex-col"}
-                    {...props.meta?.P.props}
-                    placeholder={"Write Expression..."}
-                    onchange={(e: any) => handleChange(index(), e)}
-                    value={item.value}
-                    title={item.error ? "Please fill in this field" : ""}
-                    trailing={<NestedExpressionBuilder
-                      content={item.value}
-                      meta={props.meta}
-                      data={props.data}
-                      txnId={props.txnId}
-                      setValue={props.setValue}
-                      onClose={handleCancel} />} />
-                  <div class={"flex"}>
-                    {/* <MultiSelect
+                    </div>
+                    <TextField
+                      labelClass={"w:100% mr:.5rem ml:.5rem"}
+                      style={`border: ${item.error ? "1px solid red " : ""}`}
+                      class={"global-style flex-col"}
+                      {...props.meta?.P.props}
+                      placeholder={"Write Expression..."}
+                      onchange={(e: any) => handleChange(index(), e)}
+                      value={item.value}
+                      title={item.error ? "Please fill in this field" : ""}
+                      trailing={
+                        <NestedExpressionBuilder
+                          content={item.value}
+                          meta={props.meta}
+                          data={props.data}
+                          txnId={props.txnId}
+                          setValue={props.setValue}
+                          onClose={handleCancel}
+                        />
+                      }
+                    />
+                    <div class={"flex"}>
+                      {/* <MultiSelect
                       isObject
                       displayValueParent="P"
                       displayValueChild="name"
@@ -223,12 +230,13 @@ export function ExpressionBuilder(props: {
                       customCloseIcon={<Icon icon={"ic:round-close"} />}
                       selectionLimit={1}
                       singleSelect /> */}
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </For>
-        </div>}
+              )}
+            </For>
+          </div>
+        }
         footer={(toggle) => (
           <div class={"flex ai:center jc:end"}>
             <CustomButton
@@ -252,14 +260,15 @@ export function ExpressionBuilder(props: {
               onclick={() => {
                 handleSubmit();
                 toggle((v) => !v);
-              } }
+              }}
               {...props.meta.P.props}
             >
               Submit
             </CustomButton>
           </div>
         )}
-        dialogClass="min-w:30% r:10px p:0" />
+        dialogClass="min-w:30% r:10px p:0"
+      />
     </div>
   );
 }

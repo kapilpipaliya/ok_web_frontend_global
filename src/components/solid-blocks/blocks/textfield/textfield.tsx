@@ -78,7 +78,7 @@ export function TextField(props: TextFieldProps) {
   ]);
   const mergedClassList = mergeProps(
     { textfield: true },
-    local.classList ?? {}
+    local.classList ?? {},
   );
 
   return (
@@ -100,7 +100,8 @@ export function TextField(props: TextFieldProps) {
               onInput={(ev) => {
                 runEvent(ev, local.onInput);
                 local.setValue?.(ev.currentTarget.value);
-              } } />
+              }}
+            />
           </div>
         </Match>
         <Match when={local.multiline}>
@@ -116,7 +117,8 @@ export function TextField(props: TextFieldProps) {
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
-            } } />
+            }}
+          />
         </Match>
         <Match when={!local.multiline}>
           <div
@@ -132,7 +134,8 @@ export function TextField(props: TextFieldProps) {
                 onInput={(ev) => {
                   runEvent(ev, local.onInput);
                   local.setValue?.(ev.currentTarget.value);
-                } } />
+                }}
+              />
             </div>
             {local.trailing}
           </div>

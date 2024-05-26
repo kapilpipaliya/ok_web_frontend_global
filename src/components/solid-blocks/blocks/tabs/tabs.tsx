@@ -40,11 +40,12 @@ export function Tabs(props: TabsProps) {
     <tabsContext.Provider
       value={[
         index,
-        (index: number) => index > indices.tabs
-          ? setIndex(indices.tabs)
-          : index >= 0
-            ? setIndex(index)
-            : setIndex(0),
+        (index: number) =>
+          index > indices.tabs
+            ? setIndex(indices.tabs)
+            : index >= 0
+              ? setIndex(index)
+              : setIndex(0),
         isActive,
         (isContainer) => (isContainer ? ++indices.container : ++indices.tabs),
         id,
@@ -63,7 +64,11 @@ export const tabListContext = createContext("");
 
 export function TabList(props: TabListProps) {
   return (
-    <div role="tablist" {...props} aria-orientation={props["aria-orientation"]} />
+    <div
+      role="tablist"
+      {...props}
+      aria-orientation={props["aria-orientation"]}
+    />
   );
 }
 
@@ -78,8 +83,8 @@ export function Tab(props: TabProps) {
     on(
       () => isActive && isActive(index),
       (active) => active && ref()?.focus(),
-      { defer: true }
-    )
+      { defer: true },
+    ),
   );
   return (
     <button
@@ -91,22 +96,26 @@ export function Tab(props: TabProps) {
       aria-controls={`${id}-container${index}`}
       id={`${id}-tab${index}`}
       onClick={setIndex && [(index) => setIndex(index), index]}
-      onKeyDown={setIndex && [
-        (index, ev) => ev.key === "Home"
-          ? (ev.preventDefault(), ev.stopPropagation(), setIndex(0))
-          : ev.key === "End"
-            ? (ev.preventDefault(),
-              ev.stopPropagation(),
-              setIndex(Infinity))
-            : ev.key === "ArrowLeft"
-              ? setIndex(index - 1)
-              : ev.key === "ArrowRight"
-                ? setIndex(index + 1)
-                : 0,
-        index,
-      ]}
+      onKeyDown={
+        setIndex && [
+          (index, ev) =>
+            ev.key === "Home"
+              ? (ev.preventDefault(), ev.stopPropagation(), setIndex(0))
+              : ev.key === "End"
+                ? (ev.preventDefault(),
+                  ev.stopPropagation(),
+                  setIndex(Infinity))
+                : ev.key === "ArrowLeft"
+                  ? setIndex(index - 1)
+                  : ev.key === "ArrowRight"
+                    ? setIndex(index + 1)
+                    : 0,
+          index,
+        ]
+      }
       {...(active() ? {} : { tabIndex: -1 })}
-      {...props} />
+      {...props}
+    />
   );
 }
 
@@ -122,6 +131,7 @@ export function TabContainer(props: TabContainerProps) {
       aria-labelledby={`${id}-tab${index}`}
       tabIndex={isActive && isActive(index) ? 0 : undefined}
       hidden={!isActive || isActive(index) ? undefined : true}
-      {...props} />
+      {...props}
+    />
   );
 }

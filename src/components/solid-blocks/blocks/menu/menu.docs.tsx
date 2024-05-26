@@ -117,7 +117,9 @@ MenuOptionsGroupProps {
           </MenuItemGroup>
           <MenuOptionGroup
             title="MenuOptionGroup type=radio"
-            onchange={(value) => setEvents((e) => `radio: onchange(${value})\n${e}`)}
+            onchange={(value) =>
+              setEvents((e) => `radio: onchange(${value})\n${e}`)
+            }
           >
             <MenuOption value="first">First radio option</MenuOption>
             <MenuOption value="second">Second radio option</MenuOption>
@@ -125,9 +127,11 @@ MenuOptionsGroupProps {
           <MenuOptionGroup
             title="MenuOptionGroup type=checkbox"
             type="checkbox"
-            onchange={(value) => setEvents(
-              (e) => `checkbox: onchange([${value.join(", ")}])\n${e}`
-            )}
+            onchange={(value) =>
+              setEvents(
+                (e) => `checkbox: onchange([${value.join(", ")}])\n${e}`,
+              )
+            }
           >
             <MenuOption value="first">First checkbox option</MenuOption>
             <MenuOption value="second">Second checkbox option</MenuOption>

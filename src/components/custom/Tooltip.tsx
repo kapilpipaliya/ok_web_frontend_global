@@ -34,7 +34,9 @@ export function CustomTooltip(props: {
       </div>
       <div
         id={id}
-        class={"center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"}
+        class={
+          "center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
+        }
       >
         <Show when={props.title}>
           <div class={"font-weight:500 f:14"}>{props.title}</div>

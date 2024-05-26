@@ -1,4 +1,12 @@
-export function getSubDomain(host: string) {
+import { getRequestURL } from "vinxi/http";
+import { getHttpsSession } from "./auth/getHttpsSession";
+
+export async function getSubDomain(host: string, isAuthCheck: boolean = true) {
+  const httpSession = await getHttpsSession();
+  if (isAuthCheck && !httpSession.data?.email) {
+    throw new Response("Not Authorized", { status: 404 });
+  }
+  
   // Assuming the URL is something like `subdomain.example.com`
   // Split the host by '.' and check the length
   const parts = host.split(".");

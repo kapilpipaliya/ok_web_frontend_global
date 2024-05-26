@@ -20,7 +20,6 @@ export async function submitDataCall(data: any, txnId: number) {
   return result;
 }
 
-
 // Fetch form data by form name and ID
 export async function getFormData(formName: string, formId: number) {
   return await makeAPICall(API.getFormDataUrl, { formName, formId });
@@ -83,8 +82,10 @@ export async function getChatsSupportCall(parentVertexId: any) {
 }
 
 // Send a new chat message for support
-export async function sendChatsSupportCall(parentVertexId: any,
-  newMessage: any) {
+export async function sendChatsSupportCall(
+  parentVertexId: any,
+  newMessage: any,
+) {
   return await makeAPICall(API.profileUrl, {
     newMessage,
     parentVertexId,

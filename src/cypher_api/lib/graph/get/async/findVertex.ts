@@ -7,9 +7,8 @@ export async function findVertexIdsByLabelMGCall(
   graph: Store<GraphInterface>,
   label: string,
 ): Promise<Id[]> {
-    // TODO
-//   return graph.vertexLabelIdMap[label] || [];
-
+  // TODO
+  //   return graph.vertexLabelIdMap[label] || [];
 }
 
 // export async function findVertexByLabelAndUniqueIdMGCall(

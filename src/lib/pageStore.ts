@@ -38,7 +38,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions
+  getSelectionOptions,
 } from "./graph/get/sync/traverse";
 import { addNewRow } from "./graph/mutate/form_functions";
 import { getFormMetaDataAsync } from "./graph/get/async/graph_functions";
@@ -73,12 +73,14 @@ const addPropsToLayoutRow = (
 // From Component To Layout drag:
 // 1. Create a Row to proper parent.
 // 2. Sort properly
-export function componentDrag(txnId: number,
+export function componentDrag(
+  txnId: number,
   fromVertex: Vertex,
   parentVertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  toIndex?: number) {
+  toIndex?: number,
+) {
   const { showErrorToast } = useToast();
 
   // handle (toNode === null) case.
@@ -113,14 +115,14 @@ export function componentDrag(txnId: number,
             toVertex,
             { pos: child.P.pos },
             false,
-            {} as any
+            {} as any,
           );
           const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
 
           const compVertex = getComponentFromLayoutRow(
             child.id,
             graph,
-            setGraph
+            setGraph,
           );
           // set Component to the row
           setSelectionValue(
@@ -129,7 +131,7 @@ export function componentDrag(txnId: number,
             graph,
             setGraph,
             attrCompMetaVertex,
-            compVertex.id
+            compVertex.id,
           );
           cloneRowProps(graph, setGraph, txnId, child, rowVertex2);
           processChildren(child, rowVertex2);
@@ -149,7 +151,7 @@ export function componentDrag(txnId: number,
       parentVertex,
       toIndex ? { pos: toIndex } : {},
       false,
-      {} as any
+      {} as any,
     );
     const rowVertex = graph.vertexes[rowResult.vertexId!];
 
@@ -162,7 +164,7 @@ export function componentDrag(txnId: number,
           graph,
           setGraph,
           attrCompMetaVertex,
-          fromVertex.id
+          fromVertex.id,
         );
         addPropsToLayoutRow(graph, txnId, rowVertex.id, fromVertex);
       } else if (fromVertex.L[0] === "Coll") {
@@ -182,13 +184,13 @@ export function componentDrag(txnId: number,
           graph,
           setGraph,
           attrCollMetaVertex,
-          fromVertex.id
+          fromVertex.id,
         );
         const formVertex = findVertexByLabelAndUniqueId(
           graph,
           "Comp",
           IdAttr,
-          "Form"
+          "Form",
         );
         if (!formVertex) {
           showErrorToast("cant find form");
@@ -199,7 +201,7 @@ export function componentDrag(txnId: number,
             graph,
             setGraph,
             attrCompMetaVertex,
-            formVertex.id
+            formVertex.id,
           );
           addPropsToLayoutRow(graph, txnId, rowVertex.id, formVertex);
         }
@@ -208,7 +210,7 @@ export function componentDrag(txnId: number,
       const compVertex = getComponentFromLayoutRow(
         fromVertex.id,
         graph,
-        setGraph
+        setGraph,
       );
       // set Component to the row
       setSelectionValue(
@@ -217,7 +219,7 @@ export function componentDrag(txnId: number,
         graph,
         setGraph,
         attrCompMetaVertex,
-        compVertex.id
+        compVertex.id,
       );
       cloneRowProps(graph, setGraph, txnId, fromVertex, rowVertex);
 
@@ -232,14 +234,14 @@ export function componentDrag(txnId: number,
             toVertex,
             { pos: child.P.pos },
             false,
-            {} as any
+            {} as any,
           );
           const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
 
           const compVertex = getComponentFromLayoutRow(
             child.id,
             graph,
-            setGraph
+            setGraph,
           );
           // set Component to the row
           setSelectionValue(
@@ -248,7 +250,7 @@ export function componentDrag(txnId: number,
             graph,
             setGraph,
             attrCompMetaVertex,
-            compVertex.id
+            compVertex.id,
           );
           cloneRowProps(graph, setGraph, txnId, child, rowVertex2);
           processChildren(child, rowVertex2);
@@ -326,23 +328,25 @@ function getChildrenAttrs(
   ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
-export function useDragDrop(graph: Store<GraphInterface>,
+export function useDragDrop(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   formData: Vertex,
   vertex: Vertex,
   collapsedKeys?: Accessor<Id[]>,
-  isPreview?: boolean) {
+  isPreview?: boolean,
+) {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedColl, setSelectedColl] = useContext(SelectedCollContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
-    SelectedComponentContext
+    SelectedComponentContext,
   );
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
-    IndicatorPositionContext
+    IndicatorPositionContext,
   );
   const { showErrorToast, showSuccessToast } = useToast();
   const propertiesVertexId = useContext(PropertiesVertexIdContext);
@@ -351,7 +355,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
 
   const activeItemChanged = createSelector<any, Vertex>(
     indicatorPosition,
-    (a, b) => a.id === b.activeItem
+    (a, b) => a.id === b.activeItem,
   );
   const isActiveItem = () => activeItemChanged(vertex);
   // indicatorPosition().activeItem === vertex.id;
@@ -361,10 +365,11 @@ export function useDragDrop(graph: Store<GraphInterface>,
   };
 
   const handleDragOverBase = (e: DragEvent) => {
-    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "before" |
-      "after" |
-      "center" |
-      null;
+    let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as
+      | "before"
+      | "after"
+      | "center"
+      | null;
     if (!position) {
       setIndicatorPosition({ activeItem: null, position: null });
       setTargetId(-1);
@@ -440,7 +445,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
         const compVertex = getComponentFromLayoutRow(
           toVertexId,
           graph,
-          setGraph
+          setGraph,
         );
         if (!compVertex?.P.child) {
           // Don't allow drag and drop
@@ -485,10 +490,14 @@ export function useDragDrop(graph: Store<GraphInterface>,
       if (form.error) {
         showErrorToast(form.error);
         return;
-      };
-      const { incoming, outgoing }: {incoming: any; outgoing: any;} = getEdgesFromRowsAttr(form.form.attributes);
-      const result = await getDataMGCall({ expression: `id:'${fromVertex.id}'`, incoming, outgoing });
-      
+      }
+      const { incoming, outgoing }: { incoming: any; outgoing: any } =
+        getEdgesFromRowsAttr(form.form.attributes);
+      const result = await getDataMGCall({
+        expression: `id:'${fromVertex.id}'`,
+        incoming,
+        outgoing,
+      });
 
       if (result.error) {
         showErrorToast(result.error);
@@ -505,9 +514,10 @@ export function useDragDrop(graph: Store<GraphInterface>,
     }
 
     const fromParentVertex = getParentVertex(["Attr"], fromVertex, graph);
-    const toParentVertex = position === "center"
-      ? toVertex
-      : getParentVertex(["Attr"], toVertex, graph).vertex;
+    const toParentVertex =
+      position === "center"
+        ? toVertex
+        : getParentVertex(["Attr"], toVertex, graph).vertex;
 
     // is Top Layer:
     if (position === "center" && toVertexId === formData.id) {
@@ -566,7 +576,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
         const compVertex = getComponentFromLayoutRow(
           toVertexId,
           graph,
-          setGraph
+          setGraph,
         );
         if (!compVertex?.P.child) {
           return;
@@ -580,7 +590,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
         fromVertex,
         toParentVertex || formData,
         graph,
-        setGraph
+        setGraph,
       );
       if (rowId === -1) return;
 
@@ -593,15 +603,17 @@ export function useDragDrop(graph: Store<GraphInterface>,
         fromVertex,
         toParentVertex || formData,
         graph,
-        setGraph
+        setGraph,
       );
       if (rowId === -1) return;
 
       fromVertex = graph.vertexes[rowId];
 
       sortChildren();
-    } else if (position !== "center" &&
-      fromParentVertex.vertex?.id === toParentVertex!.id) {
+    } else if (
+      position !== "center" &&
+      fromParentVertex.vertex?.id === toParentVertex!.id
+    ) {
       // Sort Children:
       sortChildren();
 
@@ -622,7 +634,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
           txnId,
           fromVertex,
           { P: { props: { type: "Attr" } } } as unknown as Vertex,
-          toVertexId
+          toVertexId,
         );
         mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
           pos: 9999999,
@@ -634,7 +646,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
           txnId,
           fromVertex,
           { P: { props: { type: "Attr" } } } as unknown as Vertex,
-          toParentVertex!.id
+          toParentVertex!.id,
         );
       }
 
@@ -688,7 +700,7 @@ export function useDragDrop(graph: Store<GraphInterface>,
       fromVertex,
       toParentVertex || formData,
       graph,
-      setGraph
+      setGraph,
     );
     if (rowId === -1) return;
 
@@ -707,40 +719,42 @@ export function useDragDrop(graph: Store<GraphInterface>,
       const collVertex = getChildVertex(
         graph,
         ["$0Coll"],
-        graph.vertexes[vertex!.id!]
+        graph.vertexes[vertex!.id!],
       );
       setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
       const componentVertex = getComponentFromLayoutRow(
         vertex!.id!,
         graph,
-        setGraph
+        setGraph,
       );
       setSelectedComponent({ vertexId: componentVertex?.id || -1 });
 
-      if (selectedId() !== -1 &&
+      if (
+        selectedId() !== -1 &&
         selectedComponent() &&
-        selectedComponent().vertexId !== -1) {
+        selectedComponent().vertexId !== -1
+      ) {
         const componentProps = getCompProps(
           graph,
-          graph.vertexes[selectedComponent().vertexId]
+          graph.vertexes[selectedComponent().vertexId],
         );
         const layoutPropRows = getRowProps(
           graph,
           setGraph,
-          graph.vertexes[selectedId()]
+          graph.vertexes[selectedId()],
         );
         const layoutPropRow = Object.assign(componentProps, layoutPropRows);
         // set existing layout props
         setGraph(
           "vertexes",
           propertiesVertexId,
-          reconcile({ P: layoutPropRow } as Vertex)
+          reconcile({ P: layoutPropRow } as Vertex),
         );
       } else {
         setGraph(
           "vertexes",
           propertiesVertexId,
-          reconcile({ P: {} } as Vertex)
+          reconcile({ P: {} } as Vertex),
         );
       }
     });
@@ -776,17 +790,20 @@ export function useDragDrop(graph: Store<GraphInterface>,
     deleteLayout,
   };
 }
-export function setPropertyValueGlobal(graph: Store<GraphInterface>,
+export function setPropertyValueGlobal(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   meta: Vertex,
   layoutVertex: Vertex,
   componentVertex: Vertex,
   value: any,
-  valueSet?: boolean) {
+  valueSet?: boolean,
+) {
   return untrack(() => {
     // find existing row;
-    const rowProps = getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
+    const rowProps =
+      getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
     let row = rowProps.find((vertex) => {
       const name = getChildVertex(graph, ["$0Name"], vertex).vertex;
       return name?.P.name === meta.P.name;
@@ -799,7 +816,8 @@ export function setPropertyValueGlobal(graph: Store<GraphInterface>,
         name: "Prop",
         displayName: "Property",
       });
-      const componentProps = getChildVertexes(graph, ["$0Prop"], [componentVertex]).vertexes || [];
+      const componentProps =
+        getChildVertexes(graph, ["$0Prop"], [componentVertex]).vertexes || [];
       const componentProp = componentProps.find((vertex) => {
         return vertex.P.name === meta.P.name;
       });
@@ -813,7 +831,7 @@ export function setPropertyValueGlobal(graph: Store<GraphInterface>,
           layoutVertex,
           properties,
           false,
-          {} as any
+          {} as any,
         );
         if (addRowResult.vertexId) {
           row = graph.vertexes[addRowResult.vertexId];
@@ -823,12 +841,12 @@ export function setPropertyValueGlobal(graph: Store<GraphInterface>,
             graph,
             setGraph,
             { P: { name: "Name" } } as unknown as Vertex,
-            componentProp.id
+            componentProp.id,
           );
         }
       } else {
         console.error(
-          `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`
+          `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`,
         );
       }
     }

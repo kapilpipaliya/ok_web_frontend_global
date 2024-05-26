@@ -29,11 +29,12 @@ import {
 } from "~/lib/Utils";
 import {
   getChildVertexes,
-  getSelectionOptions
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import {
   createForm,
-  createMeta, loadForm
+  createMeta,
+  loadForm,
 } from "~/lib/graph/mutate/form_functions";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -91,7 +92,6 @@ export function GenericField(
     "txnId",
     "setValue",
   ]);
-
 
   const [graph, setGraph] = useContext(GraphContext)!;
   const parentItems = useContext(PageRenderContext);
@@ -172,7 +172,7 @@ export function GenericField(
     const onSubmit = async () => {
       const data = commitTxn(txnId, Ws);
       await showLoadingToast({
-        promise: submitDataCall(data,txnId),
+        promise: submitDataCall(data, txnId),
         loadMessage: "Submitting Data...",
         successMessage: "Data submitted successfully",
         onSuccess: (value) => {
@@ -266,7 +266,7 @@ export function GenericField(
     >
       <Switch>
         <Match when={component() === "Repeater"}>
-          <Repeater meta={field.meta} data={field.data } />
+          <Repeater meta={field.meta} data={field.data} />
         </Match>
         <Match when={component() === "Text"}>
           <Show
@@ -443,10 +443,11 @@ export function GenericField(
           </Avatar>
         </Match>
         <Match when={component() === "Select"}>
-              <Select {...props.field.meta.P.props}>
-                {props.field.data?.P[props.field.meta.P[IdAttr]] ?? props.field.meta.P.props.children}
-              </Select>
-            </Match>
+          <Select {...props.field.meta.P.props}>
+            {props.field.data?.P[props.field.meta.P[IdAttr]] ??
+              props.field.meta.P.props.children}
+          </Select>
+        </Match>
         <Match when={component() === "LoadIndicator"}>
           <Spinner {...field.meta?.P.props}>{field.meta.P.children}</Spinner>
         </Match>

@@ -27,7 +27,8 @@ AvatarProps {
         name: <Avatar name="Solid Blocks" /> and with image:{" "}
         <Avatar
           img="https://avatars.githubusercontent.com/u/220405?s=60&v=4"
-          name="Alex Lohr" />
+          name="Alex Lohr"
+        />
       </div>
       <hr />
       <h2 id="avatarbadge-docs">AvatarBadge</h2>
@@ -62,16 +63,20 @@ AvatarGroupProps {
         <AvatarGroup aria-expanded={expanded()}>
           <Avatar
             img="https://avatars.githubusercontent.com/u/220405?s=60&v=4"
-            name="Alex Lohr" />
+            name="Alex Lohr"
+          />
           <Avatar name="Solid Blocks" />
           <Avatar />
           <Avatar />
         </AvatarGroup>
-        {" or with a data-plus attribute to set the last item manually (which obviously does not work if expanded): "}
+        {
+          " or with a data-plus attribute to set the last item manually (which obviously does not work if expanded): "
+        }
         <AvatarGroup data-plus={"+lots"}>
           <Avatar
             img="https://avatars.githubusercontent.com/u/220405?s=60&v=4"
-            name="Alex Lohr" />
+            name="Alex Lohr"
+          />
           <Avatar name="Solid Blocks" />
           <Avatar />
           <Avatar />

@@ -1,6 +1,14 @@
 import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
-import { createEffect, createResource, createSignal, JSX, onMount, Show, useContext } from "solid-js";
+import {
+  createEffect,
+  createResource,
+  createSignal,
+  JSX,
+  onMount,
+  Show,
+  useContext,
+} from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
@@ -18,12 +26,9 @@ import { useToast } from "~/components/custom/Toast";
 import { signOutCall } from "~/components/api/api_functions";
 import getAPI from "~/components/api/getApi";
 import { API } from "~/components/api/DataFetcher";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SideBar/SidebarLayout";
 
-
-
-
-export function MainDashboard(props: { children?: JSX.Element; }) {
+export function MainDashboard(props: { children?: JSX.Element }) {
   const border = "|solid|rgb(212,219,231)";
   const [isSideBarOpen, setSideBarOpen] = createSignal(true);
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -32,16 +37,16 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
     0,
     newVertex(vertexId, ["MainNavBarTitle"], { class: `bb:1${border}` }),
     graph,
-    setGraph
+    setGraph,
   );
 
   const location = useLocation();
   const [isShowDrawer, setIsShowDrawer] = createSignal(true);
   const [isLoginPage, setIsLoginPage] = createSignal(
-    location.pathname.includes("/auth/login")
+    location.pathname.includes("/auth/login"),
   );
   const [signUpPage, setSignUpPage] = createSignal(
-    location.pathname.includes("/auth/signup")
+    location.pathname.includes("/auth/signup"),
   );
 
   createEffect(() => {
@@ -54,7 +59,7 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
         path.includes("/auth/login") ||
         path.includes("/auth/signup") ||
         path.includes("/admin/Page/")
-      )
+      ),
     );
   });
   const [isSidebarOpen, setSidebarOpen] = createSignal(true);
@@ -79,7 +84,8 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
           isSideBarOpen={isSideBarOpen()}
           toggleSidebar={() => {
             setSideBarOpen((prev) => !prev);
-          } } />
+          }}
+        />
       </Show>
       {/* Disable Scroll when Select dropdown is open */}
       <div id="main-content" style={mainContentStyle as any}>
@@ -87,7 +93,8 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
           value={{
             events: {
               setSideBarOpen,
-              setTitle: (title: string) => mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
+              setTitle: (title: string) =>
+                mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
             },
           }}
         >
@@ -96,13 +103,13 @@ export function MainDashboard(props: { children?: JSX.Element; }) {
               showCloseDrawerBtn={isShowDrawer()}
               toggleSidebar={() => {
                 setSideBarOpen((prev) => !prev);
-              } }
+              }}
               right={<DropdownMenu />}
-              meta={graph.vertexes[vertexId]} />
+              meta={graph.vertexes[vertexId]}
+            />
           </Show>
 
           <div class="p:10">{props.children}</div>
-
         </PageContext.Provider>
       </div>
     </div>
@@ -127,19 +134,18 @@ const DropdownMenu = () => {
     // if we not use onMount, when we refresh the page,
     // on server side we get error: TypeError: Failed to parse URL from /api/get_user
     // and server redirect to login page.
-    getAPI(API.getUserUrl).then((data) => {
-      if (data) {
-        setGraph("member", data);
-      }
-    }).catch((err: any) => {
-      console.error(err)
-      if (err.message) {
-        navigate("/auth/login");
-      }
-    })
-  })
-
-
+    getAPI(API.getUserUrl)
+      .then((data) => {
+        if (data) {
+          setGraph("member", data);
+        }
+      })
+      .catch((err: any) => {
+        if (err.message) {
+          navigate("/auth/login");
+        }
+      });
+  });
 
   createEffect(() => {
     if (isOpen()) {
@@ -175,9 +181,11 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
-            }; pointer-events: ${isOpen() ? "auto" : "none"
-            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
+            isOpen() ? 1 : 0
+          }; pointer-events: ${
+            isOpen() ? "auto" : "none"
+          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"

@@ -3,6 +3,7 @@ import type { PluginOption } from "vite";
 import solidStyled from "vite-plugin-solid-styled";
 
 export default defineConfig({
+  middleware: "./src/middleware.ts",
   vite: {
     // dev: {
     //   force: false,

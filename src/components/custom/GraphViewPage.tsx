@@ -57,7 +57,7 @@ export function GraphViewPage() {
             onCleanup(() => {
               el.replaceChildren();
             });
-          } }
+          }}
         ></div>
         <pre>{JSON.stringify(json())}</pre>
       </>
@@ -89,7 +89,8 @@ export function GraphViewPage() {
           .map(([key, value]) => ({
             ...value,
             label: value.L[0],
-          }))} />
+          }))}
+      />
     </Show>
   );
 }

@@ -47,7 +47,7 @@ RadioGroupProps {
           setValue={(value) => {
             setEvents((e) => `setValue("${value}")\n${e}`);
             setValue(value);
-          } }
+          }}
         >
           <Radio value="1"> First</Radio>
           <Radio value="2"> Second</Radio>

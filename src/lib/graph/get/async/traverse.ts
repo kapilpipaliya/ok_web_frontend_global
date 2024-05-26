@@ -1,7 +1,11 @@
 import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
-import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
+import {
+  capitalizeFirstLetter,
+  getValueFromVertexOrKey,
+  replaceExpressionToLabel,
+} from "~/lib/Utils";
 
 import { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdgeAsync } from "./getToEdge";
@@ -115,17 +119,19 @@ export async function calculateFilterAsync(input: string) {
   return [type, filter, isMultiple] as const;
 }
 
-export async function getTreeDataAsync(graph: Store<GraphInterface>,
+export async function getTreeDataAsync(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  treeLevels: { [key: string]: any; },
+  treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
   options?: {
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
-  }) {
+  },
+) {
   const getChildren = async (
-    levels: { [key: string]: any; },
-    vertexes: Vertex[]
+    levels: { [key: string]: any },
+    vertexes: Vertex[],
   ) => {
     const result = [] as any[];
     if (!levels.collection) return result;
@@ -135,16 +141,19 @@ export async function getTreeDataAsync(graph: Store<GraphInterface>,
       setGraph,
     });
     for (const child of (children || []).sort(
-      (a: any, b: any) => a.P.pos - b.P.pos
+      (a: any, b: any) => a.P.pos - b.P.pos,
     )) {
-      const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
+      const name =
+        levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as any;
       navItem.name = name;
       navItem.expanded = true;
       navItem.id = child.id;
       navItem.P = child.P;
-      if (levels.child &&
-        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)) {
+      if (
+        levels.child &&
+        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
+      ) {
         navItem.children = getChildren(levels.child, [child]);
       }
 
@@ -155,7 +164,6 @@ export async function getTreeDataAsync(graph: Store<GraphInterface>,
 
   return getChildren(treeLevels, vertexes);
 }
-
 
 export async function getTextValueAsync(value: any) {
   if (typeof value === "boolean") {
@@ -171,8 +179,8 @@ export async function getSelectionOptionsAsync(
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],
   collection: string,
-  strict?: boolean
-): Promise<{ error: boolean; vertexes?: any; }> {
+  strict?: boolean,
+): Promise<{ error: boolean; vertexes?: any }> {
   collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
   try {
     const value = await evalAsync(jsep(collection), {
@@ -194,7 +202,7 @@ export async function getSelectionOptionsAsync(
 export async function getChildVertexAsync(
   graph: Store<GraphInterface>,
   path: string[],
-  currentVertex: Vertex
+  currentVertex: Vertex,
 ): Promise<{
   error: boolean;
   vertex?: Vertex;
@@ -221,7 +229,7 @@ export async function getChildVertexAsync(
     type = type.replace("$0", currentVertex.L[0]);
   }
   let vertexes = (currentVertex.OUT[type] || []).map(
-    (edgeId) => graph.vertexes[graph.edges[edgeId].E]
+    (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 
   if (filter) {
@@ -254,7 +262,7 @@ export async function getChildVertexAsync(
 export async function getParentVertexAsync(
   path: string[],
   currentVertex: Vertex,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): Promise<{
   error: boolean;
   vertex?: Vertex;
@@ -295,8 +303,8 @@ export async function getChildVertexesAsync(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
-  strict?: boolean
-): Promise<{ error: boolean; vertexes?: Vertex[]; }> {
+  strict?: boolean,
+): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
@@ -343,7 +351,7 @@ export async function getChildVertexesAsync(
       graph,
       path.slice(1),
       Array.from(stepVertexes.values()),
-      strict
+      strict,
     );
   } else {
     return {
@@ -352,4 +360,3 @@ export async function getChildVertexesAsync(
     };
   }
 }
-

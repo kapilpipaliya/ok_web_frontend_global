@@ -1,4 +1,4 @@
-import { createContext, useContext } from "solid-js";
+import { createContext, splitProps, useContext } from "solid-js";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
 import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
@@ -8,16 +8,58 @@ import {
   getChildVertex,
   getInEdge,
   getSelectionOptions,
-  getToEdge
+  getToEdge,
 } from "./graph/get/sync/traverse";
 import { Expression } from "jsep";
 
 export const APP_BASE_URL = "/admin";
 export const APP_BASE_URL_NAME = "Admin";
-export const breadcrumbData = [{ name: "Home", href: `${APP_BASE_URL}`,icon: "ic:baseline-home" }];
+export const breadcrumbData = [
+  { name: "Home", href: `${APP_BASE_URL}`, icon: "ic:baseline-home" },
+];
 export function nameExpr(v: Vertex, graph: Store<GraphInterface>) {
   const component = getChildVertex(graph, ["$0Comp"], v).vertex?.P.name;
   return `${v.P.name}${component ? ` (${component})` : ""}`;
+}
+export function expressionString(params: {
+  coll?: string;
+  skip?: number;
+  limit?: number;
+  filter?: string;
+  custom?: string;
+}): string {
+  const [field, rest] = splitProps(params, [
+    "coll",
+    "skip",
+    "limit",
+    "filter",
+    "custom",
+  ]);
+  if (field.custom) {
+    return field.custom;
+  }
+
+  let dynamicString = "";
+
+  if (field.coll) {
+    dynamicString += `g:'${field.coll}`;
+    let options = [];
+
+    if (field.filter) options.push(field.filter);
+    if (field.skip !== undefined) options.push(`skip=${field.skip}`);
+    if (field.limit !== undefined && field.limit !== 0)
+      options.push(`limit=${field.limit}`);
+
+    if (options.length > 0) {
+      dynamicString += `[${options.join(" ")}]`;
+    }
+
+    dynamicString += "'";
+  } else {
+    throw new Error("Either 'coll' or 'custom' must be provided.");
+  }
+
+  return dynamicString;
 }
 
 export const iconMap: any = {
@@ -129,27 +171,36 @@ export function validatePassword(password: string) {
 
   return undefined; // No errors, password is valid
 }
-export function getEdgesFromRowsAttr(attrs: any): { incoming: Expression[], outgoing: Expression[] } {
+export function getEdgesFromRowsAttr(attrs: any): {
+  incoming: Expression[];
+  outgoing: Expression[];
+} {
   const outgoing = [] as Expression[];
   const incoming = [] as Expression[];
 
   for (const attribute of attrs) {
-    if (attribute.component === 'SelectBox' || attribute.component === 'TagBox') {
+    if (
+      attribute.component === "SelectBox" ||
+      attribute.component === "TagBox"
+    ) {
       if (attribute.props?.inward) {
         incoming.push({
-          expression: `<-${getInEdge({ P: attribute } as Vertex, { L: ['$0'] } as Vertex)}`,
-          type: ""
+          expression: `<-${getInEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+          type: "",
         }); // `<-${capitalizedName}$0`
       } else {
         outgoing.push({
-          expression: `->${getToEdge({ P: attribute } as Vertex, { L: ['$0'] } as Vertex)}`,
-          type: ""
+          expression: `->${getToEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+          type: "",
         }); // `->$0${capitalizedName}`
       }
-    } else if (attribute.component === 'Table' || attribute.component === 'Table2') {
+    } else if (
+      attribute.component === "Table" ||
+      attribute.component === "Table2"
+    ) {
       const expression: Expression = {
-        expression: `->${getToEdge({ P: attribute } as Vertex, { L: ['$0'] } as Vertex)}`,
-        type: ""
+        expression: `->${getToEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+        type: "",
       };
 
       if (attribute.attributes) {

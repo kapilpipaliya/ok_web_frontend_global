@@ -5,7 +5,7 @@ import { mutateData } from "./mutate";
 
 export async function POST({ request }: APIEvent) {
   const { event, data } = await request.json();
-  const subdomain = getSubDomain(request.headers.get("host")!);
+  const subdomain = await getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
   try {
     const result = await mutateData(event, data, session);

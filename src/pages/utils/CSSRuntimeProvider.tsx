@@ -58,7 +58,7 @@ export function CSSRuntimeProvider(props: {
         configModule?.config || configModule?.default || configModule;
 
       const init = async () => {
-        setLoadingCss(true)
+        setLoadingCss(true);
         initializing = true;
         const currentRoot = props.root ?? document;
         const existingCSSRuntime = (globalThis as any).runtimeCSSs.find(
@@ -76,7 +76,7 @@ export function CSSRuntimeProvider(props: {
           );
           isExternalRuntimeCSS = false;
         }
-        setLoadingCss(false)
+        setLoadingCss(false);
         initializing = false;
       };
 
@@ -90,7 +90,7 @@ export function CSSRuntimeProvider(props: {
         await init();
       } else {
         newRuntimeCSS.refresh(resolvedConfig);
-        setLoadingCss(false)
+        setLoadingCss(false);
       }
     })();
   });

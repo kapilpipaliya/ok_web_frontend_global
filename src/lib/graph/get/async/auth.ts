@@ -18,7 +18,11 @@ export async function getPermissionsAsync(meta: Vertex) {
           }
         }
         if (allowedRoleIds.size > 0) {
-          const permissionRows = await getChildVertexesAsync(graph, ["$0Perm"], [roleRow]);
+          const permissionRows = await getChildVertexesAsync(
+            graph,
+            ["$0Perm"],
+            [roleRow],
+          );
           if (!permissionRows.error) {
             for (const permissionRow of permissionRows.vertexes!) {
               const permissions = await getChildVertexesAsync(

@@ -2,7 +2,7 @@ import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions
+  getSelectionOptions,
 } from "./traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
@@ -256,9 +256,11 @@ const getCollectionOneLevelAttrs = (
   }
   return { error: "", attrs };
 };
-export function getFormApiFromForm(graph: Store<GraphInterface>,
+export function getFormApiFromForm(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  formId: string): { error: string; form?: FormMetaData; } {
+  formId: string,
+): { error: string; form?: FormMetaData } {
   const coll = findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, formId);
   if (!coll) {
     return { error: "coll not found" };
@@ -352,25 +354,26 @@ export function getCollAttrComp(
     attrVertex,
   ).vertex;
   return getStringComponent(graph, attrDataTypeVertex);
-}// This method read all property vertexes and make an object.
+} // This method read all property vertexes and make an object.
 
-export function getProps(meta: Vertex,
+export function getProps(
+  meta: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>) {
+  setGraph: SetStoreFunction<GraphInterface>,
+) {
   return (getChildVertexes(graph, ["$0Prop"], [meta]).vertexes || []).reduce(
     (acc, curr) => {
       const key = getSelectionOptions(
         graph,
         setGraph,
         [curr],
-        "T:(->$0Key::'P.key')"
+        "T:(->$0Key::'P.key')",
       ).vertexes;
       if (key) {
         acc[key] = curr.P.value;
       }
       return acc;
     },
-    {} as { [key: string]: any; }
+    {} as { [key: string]: any },
   );
 }
-

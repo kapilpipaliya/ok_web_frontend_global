@@ -13,7 +13,9 @@ export function Meter(props: MeterProps) {
   return (
     <div
       {...props}
-      role={"meter" as MeterProps["role"] /* https://github.com/ryansolid/dom-expressions/pull/79 */}
+      role={
+        "meter" as MeterProps["role"] /* https://github.com/ryansolid/dom-expressions/pull/79 */
+      }
       class={props.class ? `sb-meter ${props.class}` : "sb-meter"}
       aria-valuenow={props.value ?? props["aria-valuenow"]}
       aria-valuemin={props.min ?? props["aria-valuemin"]}
@@ -27,7 +29,8 @@ export function Meter(props: MeterProps) {
           x="0"
           y="0"
           height="10"
-          width={props.value ?? props["aria-valuenow"] ?? 0} />
+          width={props.value ?? props["aria-valuenow"] ?? 0}
+        />
       </svg>
       {props.children}
     </div>

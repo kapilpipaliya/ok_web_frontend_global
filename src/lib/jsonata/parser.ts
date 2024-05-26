@@ -616,7 +616,7 @@ export function parser(source, recover) {
     this.type = "function";
     this.arguments = [];
     if (node.id !== ")") {
-      for (; ;) {
+      for (;;) {
         if (node.type === "operator" && node.id === "?") {
           // partial function application
           this.type = "partial";
@@ -631,8 +631,10 @@ export function parser(source, recover) {
     }
     advance(")", true);
     // if the name of the function is 'function' or λ, then this is function definition (lambda function)
-    if (left.type === "name" &&
-      (left.value === "function" || left.value === "\u03BB")) {
+    if (
+      left.type === "name" &&
+      (left.value === "function" || left.value === "\u03BB")
+    ) {
       // all of the args must be VARIABLE tokens
       this.arguments.forEach(function (arg, index) {
         if (arg.type !== "variable") {
@@ -697,7 +699,7 @@ export function parser(source, recover) {
   prefix("[", function () {
     var a = [];
     if (node.id !== "]") {
-      for (; ;) {
+      for (;;) {
         var item = expression(0);
         if (node.id === "..") {
           // range operator
@@ -748,7 +750,7 @@ export function parser(source, recover) {
   infix("^", operators["^"], function (left) {
     advance("(");
     var terms = [];
-    for (; ;) {
+    for (;;) {
       var term = {
         descending: false,
       };
@@ -779,7 +781,7 @@ export function parser(source, recover) {
   var objectParser = function (left) {
     var a = [];
     if (node.id !== "}") {
-      for (; ;) {
+      for (;;) {
         var n = expression(0);
         advance(":");
         var v = expression(0);
@@ -913,7 +915,7 @@ export function parser(source, recover) {
       var length = expr.expressions.length;
       if (length > 0) {
         expr.expressions[length - 1] = tailCallOptimize(
-          expr.expressions[length - 1]
+          expr.expressions[length - 1],
         );
       }
       result = expr;
@@ -952,7 +954,7 @@ export function parser(source, recover) {
           node.tuple = true;
           slot = seekParent(
             node.expressions[node.expressions.length - 1],
-            slot
+            slot,
           );
         }
         break;
@@ -979,7 +981,8 @@ export function parser(source, recover) {
 
   var pushAncestry = function (result, value) {
     if (typeof value.seekingParent !== "undefined" || value.type === "parent") {
-      var slots = typeof value.seekingParent !== "undefined" ? value.seekingParent : [];
+      var slots =
+        typeof value.seekingParent !== "undefined" ? value.seekingParent : [];
       if (value.type === "parent") {
         slots.push(value.slot);
       }
@@ -994,9 +997,10 @@ export function parser(source, recover) {
   var resolveAncestry = function (path) {
     var index = path.steps.length - 1;
     var laststep = path.steps[index];
-    var slots = typeof laststep.seekingParent !== "undefined"
-      ? laststep.seekingParent
-      : [];
+    var slots =
+      typeof laststep.seekingParent !== "undefined"
+        ? laststep.seekingParent
+        : [];
     if (laststep.type === "parent") {
       slots.push(laststep.slot);
     }
@@ -1046,11 +1050,13 @@ export function parser(source, recover) {
               result.seekingParent = [lstep.slot];
             }
             var rest = processAST(expr.rhs);
-            if (rest.type === "function" &&
+            if (
+              rest.type === "function" &&
               rest.procedure.type === "path" &&
               rest.procedure.steps.length === 1 &&
               rest.procedure.steps[0].type === "name" &&
-              result.steps[result.steps.length - 1].type === "function") {
+              result.steps[result.steps.length - 1].type === "function"
+            ) {
               // next function in chain of functions - will override a thenable
               result.steps[result.steps.length - 1].nextFunction =
                 rest.procedure.steps[0].value;
@@ -1082,9 +1088,11 @@ export function parser(source, recover) {
                 lit.type = "name";
               });
             // any step that signals keeping a singleton array, should be flagged on the path
-            if (result.steps.filter(function (step) {
-              return step.keepArray === true;
-            }).length > 0) {
+            if (
+              result.steps.filter(function (step) {
+                return step.keepArray === true;
+              }).length > 0
+            ) {
               result.keepSingletonArray = true;
             }
             // if first step is a path constructor, flag it for special handling
@@ -1195,8 +1203,10 @@ export function parser(source, recover) {
             }
             // throw error if there are any predicates defined at this point
             // at this point the only type of stages can be predicates
-            if (typeof step.stages !== "undefined" ||
-              typeof step.predicate !== "undefined") {
+            if (
+              typeof step.stages !== "undefined" ||
+              typeof step.predicate !== "undefined"
+            ) {
               throw {
                 code: "S0215",
                 stack: new Error().stack,
@@ -1345,8 +1355,10 @@ export function parser(source, recover) {
         result.expressions = expr.expressions.map(function (item) {
           var part = processAST(item);
           pushAncestry(result, part);
-          if (part.consarray ||
-            (part.type === "path" && part.steps[0].consarray)) {
+          if (
+            part.consarray ||
+            (part.type === "path" && part.steps[0].consarray)
+          ) {
             result.consarray = true;
           }
           return part;
@@ -1382,9 +1394,11 @@ export function parser(source, recover) {
         break;
       case "operator":
         // the tokens 'and' and 'or' might have been used as a name rather than an operator
-        if (expr.value === "and" ||
+        if (
+          expr.value === "and" ||
           expr.value === "or" ||
-          expr.value === "in") {
+          expr.value === "in"
+        ) {
           expr.type = "name";
           result = processAST(expr);
         } /* istanbul ignore else */ else if (expr.value === "?") {

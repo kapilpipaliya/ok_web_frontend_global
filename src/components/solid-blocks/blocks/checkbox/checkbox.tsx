@@ -43,7 +43,7 @@ export function Checkbox(props: CheckboxProps) {
       "required",
       "value",
     ],
-    ["align", "children", "onChange", "setChecked", "switch"]
+    ["align", "children", "onChange", "setChecked", "switch"],
   );
 
   return (
@@ -66,7 +66,8 @@ export function Checkbox(props: CheckboxProps) {
           onChange={(ev): void => {
             runEvent(ev, content.onChange);
             content.setChecked?.(ev.currentTarget.checked);
-          } } />
+          }}
+        />
         <svg viewBox="0 0 35.6 35.6">
           <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
           <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>

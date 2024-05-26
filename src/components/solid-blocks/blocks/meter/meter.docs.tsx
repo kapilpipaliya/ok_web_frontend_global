@@ -20,9 +20,9 @@ export function MeterDocs() {
       } else {
         setValue(
           state.current +
-          Math.floor(
-            ((state.next - state.current) / state.steps) * state.counter
-          )
+            Math.floor(
+              ((state.next - state.current) / state.steps) * state.counter,
+            ),
         );
       }
     }, 100);

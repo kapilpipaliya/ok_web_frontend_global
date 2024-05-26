@@ -1,17 +1,19 @@
 import neo4j from "neo4j-driver";
 import { DBConnection } from "~/cypher_api/functions/dbs";
-import { Node } from "~/cypher_api/functions/Type"
+import { Node } from "~/cypher_api/functions/Type";
+import { getDriver } from "../server/driver";
+import { getRequestURL } from "vinxi/http";
+import { getSubDomain } from "../server/domain_utils";
 
 export async function newVertexDBCall(
-  dbConn: DBConnection,
   label: string,
   properties?: { [key: string]: any },
 ) {
   "use server";
-  dbConn.session ||= dbConn.driver.session({
-    defaultAccessMode: neo4j.session.WRITE,
-  });
-  const transaction = dbConn.session.beginTransaction();
+  const host = getRequestURL().hostname;
+  const subDomain = await getSubDomain(host);
+  const driver = getDriver(subDomain);
+  const transaction = (await driver).session().beginTransaction();
 
   try {
     // Cypher query to create a new vertex

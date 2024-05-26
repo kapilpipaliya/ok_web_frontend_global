@@ -36,7 +36,8 @@ export function StyleCSSComponents() {
           icon={"radix-icons:box"}
           height={selected.height ?? 23}
           width={selected.width ?? 23}
-          {...restProps} />
+          {...restProps}
+        />
       );
     } else if (selected.icon === "customIcon") {
       return (
@@ -44,7 +45,8 @@ export function StyleCSSComponents() {
           icon={"lucide:box-select"}
           height={selected.height ?? 23}
           width={selected.width ?? 23}
-          {...restProps} />
+          {...restProps}
+        />
       );
     } else {
       return (
@@ -52,7 +54,8 @@ export function StyleCSSComponents() {
           icon={selected.icon}
           height={selected.height ?? 23}
           width={selected.width ?? 23}
-          {...restProps} />
+          {...restProps}
+        />
       );
     }
   };
@@ -72,12 +75,13 @@ export function StyleCSSComponents() {
         <Icon
           onClick={props.onIconClick}
           icon={"mdi:close"}
-          class={"cursor:pointer"} />
+          class={"cursor:pointer"}
+        />
       </Show>
     </span>
   );
 
-  const Container = (props: { class?: string; children: JSXElement; }) => (
+  const Container = (props: { class?: string; children: JSXElement }) => (
     <span
       class={`w:full min-h:45px flex ai:center jc:space-between flex-shrink:0 ${props.class}`}
     >
@@ -101,7 +105,8 @@ export function StyleCSSComponents() {
     const [cssState, setCssState] = useContext(CssEditorContext);
     const [isActive, setIsActive] = createSignal(false);
     const toggleDropdown = () => setIsActive(!isActive());
-    const selected = () => cssState[props.name] || props.options[0].value || props.options[0];
+    const selected = () =>
+      cssState[props.name] || props.options[0].value || props.options[0];
 
     const selectOption = (option: any) => {
       setCssState(props.name, option.value || option);
@@ -117,7 +122,8 @@ export function StyleCSSComponents() {
 
     createEffect(() => {
       document.addEventListener("mousedown", handleClickOutside);
-      onCleanup(() => document.removeEventListener("mousedown", handleClickOutside)
+      onCleanup(() =>
+        document.removeEventListener("mousedown", handleClickOutside),
       );
     });
 
@@ -125,12 +131,14 @@ export function StyleCSSComponents() {
       <Container>
         <Show
           when={props.isLabelOnTop}
-          fallback={<Show when={props.label} fallback={<Content />}>
-            <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel title={props.label} />
-              <Content />
-            </div>
-          </Show>}
+          fallback={
+            <Show when={props.label} fallback={<Content />}>
+              <div class={"w:100% flex jc:space-between ai:center"}>
+                <ContainerLabel title={props.label} />
+                <Content />
+              </div>
+            </Show>
+          }
         >
           <div class={"w:full"}>
             <ContainerLabel title={props.label} />
@@ -162,13 +170,16 @@ export function StyleCSSComponents() {
               <Icon
                 icon={"teenyicons:down-small-outline"}
                 height={22}
-                width={22} />
+                width={22}
+              />
             </div>
           </div>
 
           <ul
             class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${isActive() ? "visible" : "hidden"}`}
-            style={"max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"}
+            style={
+              "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
+            }
             role="listbox"
             id={`select-dropdown${props.label}`}
           >
@@ -187,11 +198,12 @@ export function StyleCSSComponents() {
                         icon={"icon-park-outline:check-one"}
                         height={22}
                         width={22}
-                        style={{ color: "dodgerblue" }} />
+                        style={{ color: "dodgerblue" }}
+                      />
                     </Show>
                   </li>
                 );
-              } }
+              }}
             </For>
           </ul>
         </div>
@@ -222,12 +234,14 @@ export function StyleCSSComponents() {
           type="color"
           class="color-picker__input-color mr:10 cursor:pointer; h:25px w:30px r:5 p:0 bg:#ffffff b:none"
           value={cssState[props.name] ?? "#000"}
-          onInput={handleChange} />
+          onInput={handleChange}
+        />
         <input
           type="text"
           class="b:none w:100% f:14 outline:none"
           value={cssState[props.name] ?? "#000"}
-          onInput={handleChange} />
+          onInput={handleChange}
+        />
       </div>
     );
 
@@ -235,12 +249,14 @@ export function StyleCSSComponents() {
       <Container>
         <Show
           when={props.isLabelOnTop}
-          fallback={<Show when={props.label} fallback={<Content />}>
-            <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel title={props.label} />
-              <Content />
-            </div>
-          </Show>}
+          fallback={
+            <Show when={props.label} fallback={<Content />}>
+              <div class={"w:100% flex jc:space-between ai:center"}>
+                <ContainerLabel title={props.label} />
+                <Content />
+              </div>
+            </Show>
+          }
         >
           <div class={"w:full"}>
             <ContainerLabel title={props.label} />
@@ -268,7 +284,7 @@ export function StyleCSSComponents() {
     const selected = () => cssState[props.name] ?? props.options[0].value;
     const handleChange = (
       e: any,
-      option: { key: JSX.Element; value: string; }
+      option: { key: JSX.Element; value: string },
     ) => {
       if (props.onChangeInput) {
         props.onChangeInput(option.value);
@@ -289,7 +305,8 @@ export function StyleCSSComponents() {
                     type="radio"
                     name={props.name}
                     checked={selected() === option.value}
-                    onChange={(e) => handleChange(e, option)} />
+                    onChange={(e) => handleChange(e, option)}
+                  />
                   <span class={`name`}>
                     {option.icon ? (
                       <IconifyIcon icon={option.key} />
@@ -300,7 +317,7 @@ export function StyleCSSComponents() {
                 </CustomTooltip>
               </label>
             );
-          } }
+          }}
         </For>
       </div>
     );
@@ -308,12 +325,14 @@ export function StyleCSSComponents() {
     return (
       <Show
         when={props.isLabelOnTop}
-        fallback={<Show when={props.label} fallback={<Content />}>
-          <CenterDiv>
-            <ContainerLabel title={props.label} showIcon={true} />
-            <Content />
-          </CenterDiv>
-        </Show>}
+        fallback={
+          <Show when={props.label} fallback={<Content />}>
+            <CenterDiv>
+              <ContainerLabel title={props.label} showIcon={true} />
+              <Content />
+            </CenterDiv>
+          </Show>
+        }
       >
         <div class={"w:full"}>
           <ContainerLabel title={props.label} />
@@ -322,7 +341,7 @@ export function StyleCSSComponents() {
       </Show>
     );
   };
-  const CenterDiv = (props: { children: JSXElement; }) => (
+  const CenterDiv = (props: { children: JSXElement }) => (
     <div class={"w:full flex ai:center jc:space-between"}>{props.children}</div>
   );
 
@@ -400,8 +419,8 @@ export function StyleCSSComponents() {
       setStartY(event.pageY);
       setStartValue(
         getValueWithoutUnits(
-          props.value ? props.value() : cssState[props.name] ?? ""
-        )
+          props.value ? props.value() : cssState[props.name] ?? "",
+        ),
       );
 
       document.addEventListener("mousemove", moveIncrement);
@@ -428,47 +447,54 @@ export function StyleCSSComponents() {
           <Show when={props.leftIcon || props.inputType === "number"}>
             <Show
               when={props.inputType !== "number"}
-              fallback={<button
-                onMouseDown={downIncrement}
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  cursor: "ns-resize",
-                }}
-              >
-                <Icon icon="gg:scroll-v" style={{ color: "grey" }} />
-              </button>}
+              fallback={
+                <button
+                  onMouseDown={downIncrement}
+                  style={{
+                    border: "none",
+                    background: "transparent",
+                    cursor: "ns-resize",
+                  }}
+                >
+                  <Icon icon="gg:scroll-v" style={{ color: "grey" }} />
+                </button>
+              }
             >
               {props.leftIcon}
             </Show>
           </Show>
           <Show
             when={props.showInside}
-            fallback={<TextField
-              label={props.label}
-              type={props.inputType || "text"}
-              placeholder={`${props.inputType === "number" ? "0" : props.placeholder}`}
-              value={getValueWithoutUnits(cssState[props.name] ?? "")}
-              onInput={handleChange}
-              class={`f:14`}
-              style={{ width: "100%" }} // Set width to 100%
-            />}
+            fallback={
+              <TextField
+                label={props.label}
+                type={props.inputType || "text"}
+                placeholder={`${props.inputType === "number" ? "0" : props.placeholder}`}
+                value={getValueWithoutUnits(cssState[props.name] ?? "")}
+                onInput={handleChange}
+                class={`f:14`}
+                style={{ width: "100%" }} // Set width to 100%
+              />
+            }
           >
             <input
               type={props.inputType || "text"}
               placeholder={`${props.inputType === "number" ? "0" : props.placeholder}`}
               value={getValueWithoutUnits(
-                props.value ? props.value() : cssState[props.name] ?? ""
+                props.value ? props.value() : cssState[props.name] ?? "",
               )}
               class="f:14 outline:none p:5"
               onInput={handleChange}
-              style={{ width: "100%" }} />
+              style={{ width: "100%" }}
+            />
           </Show>
         </div>
         <Show when={props.options}>
           <span
             onClick={toggleDropdown}
-            class={"color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none"}
+            class={
+              "color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none"
+            }
           >
             {selectedOption!()}
           </span>
@@ -498,12 +524,14 @@ export function StyleCSSComponents() {
       <Container>
         <Show
           when={props.isLabelOnTop}
-          fallback={<Show when={props.label} fallback={<Content />}>
-            <CenterDiv>
-              <ContainerLabel title={props.label} />
-              <Content />
-            </CenterDiv>
-          </Show>}
+          fallback={
+            <Show when={props.label} fallback={<Content />}>
+              <CenterDiv>
+                <ContainerLabel title={props.label} />
+                <Content />
+              </CenterDiv>
+            </Show>
+          }
         >
           <div class={"w:full"}>
             <ContainerLabel title={props.label} />
@@ -515,7 +543,7 @@ export function StyleCSSComponents() {
   };
 
   const ToggleButton = (props: {
-    options: { key: JSX.Element; value: string; icon?: string; }[];
+    options: { key: JSX.Element; value: string; icon?: string }[];
     label: JSXElement;
     onChangeInput: any;
     isAddToClass: boolean;
@@ -541,21 +569,23 @@ export function StyleCSSComponents() {
                   if (props.isAddToClass) {
                     setCssState(props.name, option.value);
                   }
-                } }
+                }}
                 class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
                                      bg:${isSelected(option) ? "#e0e7f3" : "transparent"}
                                       color:${isSelected(option) ? "#5252f1" : "black"}
-                                       r:${props.options.indexOf(option) === 0
-                    ? "5|0|0|5"
-                    : props.options.indexOf(option) ===
-                      props.options.length - 1
-                      ? "0|5|5|0"
-                      : "0"}`}
+                                       r:${
+                                         props.options.indexOf(option) === 0
+                                           ? "5|0|0|5"
+                                           : props.options.indexOf(option) ===
+                                               props.options.length - 1
+                                             ? "0|5|5|0"
+                                             : "0"
+                                       }`}
               >
                 {option.icon ? <IconifyIcon icon={option.key} /> : option.key}
               </div>
             );
-          } }
+          }}
         </For>
       </div>
     );
@@ -563,12 +593,14 @@ export function StyleCSSComponents() {
     return (
       <Show
         when={props.isLabelOnTop}
-        fallback={<Show when={props.label} fallback={<Content />}>
-          <CenterDiv>
-            <ContainerLabel title={props.label} />
-            <Content />
-          </CenterDiv>
-        </Show>}
+        fallback={
+          <Show when={props.label} fallback={<Content />}>
+            <CenterDiv>
+              <ContainerLabel title={props.label} />
+              <Content />
+            </CenterDiv>
+          </Show>
+        }
       >
         <div class={"w:full"}>
           <ContainerLabel title={props.label} />
@@ -616,12 +648,17 @@ export function StyleCSSComponents() {
     function createCssOption(css: CssProperties) {
       // Deconstruct the cssProperties object to extract each property
       const {
-        "x-offset": xOffset = "0", "y-offset": yOffset = "0", blur = "0", spread = "0", color = "#000", type = "",
+        "x-offset": xOffset = "0",
+        "y-offset": yOffset = "0",
+        blur = "0",
+        spread = "0",
+        color = "#000",
+        type = "",
       } = css;
 
       setCssState(
         props.name,
-        `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`
+        `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,
       );
     }
 
@@ -665,8 +702,10 @@ export function StyleCSSComponents() {
     };
 
     const getOptions = () => {
-      if (props.label.includes("Shadow") ||
-        props.label.includes("Transition")) {
+      if (
+        props.label.includes("Shadow") ||
+        props.label.includes("Transition")
+      ) {
         return (cssState[props.name] && cssState[props.name].split(",")) || [];
       } else if (props.label.includes("Filter")) {
         return (cssState[props.name] && cssState[props.name].split("|")) || [];
@@ -678,8 +717,10 @@ export function StyleCSSComponents() {
     };
     const getValueOfInput = (name: string) => changedData()[name];
     const deleteOption = (index: number) => {
-      if (props.label.includes("Shadow") ||
-        props.label.includes("Transition")) {
+      if (
+        props.label.includes("Shadow") ||
+        props.label.includes("Transition")
+      ) {
         const data = cssState[props.name]
           .split(",")
           .filter((_: any, i: any) => i !== index);
@@ -712,7 +753,8 @@ export function StyleCSSComponents() {
         const data = getCssParts(option);
 
         if (property.name === "grid" && property.children) {
-          property.children.forEach((child: any) => setCssStateFromProperties(child)
+          property.children.forEach((child: any) =>
+            setCssStateFromProperties(child),
           );
           return;
         }
@@ -730,7 +772,8 @@ export function StyleCSSComponents() {
 
         // If properties.children is an array, iterate over it and enhance each child
         if (Array.isArray(properties.children)) {
-          properties.children = properties.children.map((child: any) => addOnChangeToProperties(child)
+          properties.children = properties.children.map((child: any) =>
+            addOnChangeToProperties(child),
           );
         }
 
@@ -766,7 +809,8 @@ export function StyleCSSComponents() {
               <Icon
                 onClick={closePopup}
                 icon={"mdi:close"}
-                style={{ color: "grey" }} />
+                style={{ color: "grey" }}
+              />
             </div>
             <For each={Object.entries(props.children)}>
               {([sectionName, properties], index) => {
@@ -774,7 +818,7 @@ export function StyleCSSComponents() {
                 const enhancedProperties = addOnChangeToProperties(properties);
 
                 return <DynamicCSSComponent value={enhancedProperties} />;
-              } }
+              }}
             </For>
           </div>
         </Show>
@@ -789,11 +833,12 @@ export function StyleCSSComponents() {
     // Attach event listener to the document
     createEffect(() => {
       document.addEventListener("mousedown", handleClickOutside);
-      onCleanup(() => document.removeEventListener("mousedown", handleClickOutside)
+      onCleanup(() =>
+        document.removeEventListener("mousedown", handleClickOutside),
       );
     });
 
-    const Component = (p: { option: any; i: any; }) => {
+    const Component = (p: { option: any; i: any }) => {
       return (
         <Switch>
           <Match when={props.label.includes("Shadow")}>
@@ -801,7 +846,7 @@ export function StyleCSSComponents() {
               class={"f:14"}
               onClick={(e) => {
                 openPopup(p.i());
-              } }
+              }}
               style={{
                 flex: "1",
                 "margin-right": "8px",
@@ -810,7 +855,8 @@ export function StyleCSSComponents() {
               {p.option.replaceAll("|", " ")}
             </span>
             <div
-              class={`mr:10 h:20px bg:#fff w:20px r:5 box-shadow:${p.option}`} />
+              class={`mr:10 h:20px bg:#fff w:20px r:5 box-shadow:${p.option}`}
+            />
           </Match>
           {props.label}
           <Match when={props.label.includes("Filter")}>
@@ -818,7 +864,7 @@ export function StyleCSSComponents() {
               class={"f:14"}
               onClick={(e) => {
                 openPopup(p.i());
-              } }
+              }}
               style={{
                 flex: "1",
                 "margin-right": "8px",
@@ -832,7 +878,7 @@ export function StyleCSSComponents() {
               class={"f:14"}
               onClick={(e) => {
                 openPopup(p.i());
-              } }
+              }}
               style={{
                 flex: "1",
                 "margin-right": "8px",
@@ -846,7 +892,7 @@ export function StyleCSSComponents() {
               class={"f:14"}
               onClick={(e) => {
                 openPopup(p.i());
-              } }
+              }}
               style={{
                 flex: "1",
                 "margin-right": "8px",
@@ -883,7 +929,8 @@ export function StyleCSSComponents() {
           <Icon
             class={"cursor:pointer"}
             onClick={addOption}
-            icon={"lets-icons:add-round"} />
+            icon={"lets-icons:add-round"}
+          />
         </div>
         <For each={getOptions()}>
           {(option, i) => (
@@ -901,13 +948,15 @@ export function StyleCSSComponents() {
               <Icon
                 class={"cursor:pointer mr:8"}
                 onClick={() => openPopup(i())}
-                icon={"icon-park-outline:more-one"} />
+                icon={"icon-park-outline:more-one"}
+              />
               <Component option={option} i={i} />
               <Icon
                 class={"cursor:pointer mr:8"}
                 onClick={() => deleteOption(i())}
                 icon={"mdi:close"}
-                style={{ color: "red" }} />
+                style={{ color: "red" }}
+              />
               {renderPopup(option, i())}
             </div>
           )}
@@ -959,7 +1008,8 @@ export function StyleCSSComponents() {
               },
               component: props.mainFieldType ?? "textFieldOptions",
               options: props.options,
-            }} />
+            }}
+          />
           <ButtonGroups
             isLabelOnTop={false}
             name={props.name}
@@ -971,7 +1021,7 @@ export function StyleCSSComponents() {
               } else {
                 setOptionType("all");
               }
-            } }
+            }}
             options={[
               {
                 key: "allCustom",
@@ -985,7 +1035,8 @@ export function StyleCSSComponents() {
                 tooltip: "Custom",
                 icon: true,
               },
-            ]} />
+            ]}
+          />
         </div>
         <Show when={optionType() === "custom"}>
           <div
@@ -1009,9 +1060,10 @@ export function StyleCSSComponents() {
                       type: props.inputType ?? "number",
                       component: props.mainFieldType ?? "textFieldOptions",
                       options: props.options,
-                    }} />
+                    }}
+                  />
                 );
-              } }
+              }}
             </For>
           </div>
         </Show>

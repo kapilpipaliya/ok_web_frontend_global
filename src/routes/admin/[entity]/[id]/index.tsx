@@ -11,11 +11,12 @@ export default function admin() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
   const config = createStore({} as { formData: IFormContext });
-  return (<AbstractSingleForm
-    graph={graph}
-    formId={params.entity}
-    id={params.id}
-    setGraph={setGraph}
-  />
+  return (
+    <AbstractSingleForm
+      graph={graph}
+      formId={params.entity}
+      id={params.id}
+      setGraph={setGraph}
+    />
   );
 }

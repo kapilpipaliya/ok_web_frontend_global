@@ -16,7 +16,7 @@ export function Tag(props: TagProps) {
       rel: props.target ? "tag noopener" : "tag",
     },
     tagProps,
-    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" }
+    { class: props.class ? `sb-tag ${props.class}` : "sb-tag" },
   );
   return (
     <Show
@@ -34,6 +34,7 @@ export function TagGroup(props: TagGroupProps) {
   return (
     <div
       {...props}
-      class={props.class ? `sb-tag-group ${props.class}` : "sb-tag-group"} />
+      class={props.class ? `sb-tag-group ${props.class}` : "sb-tag-group"}
+    />
   );
 }

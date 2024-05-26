@@ -21,7 +21,7 @@ import { ContentDragAndDrop } from "./Content-DragAndDrop";
 import { ActionsDragAndDrops } from "./Actions/Actions-DragAndDrops";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
-import {PageSetting} from "../PageSetting";
+import { PageSetting } from "../PageSetting";
 import { useExpansion } from "./CommonCompUtils";
 
 const LayoutDragAndDrop = (): JSX.Element => {
@@ -36,7 +36,13 @@ const LayoutDragAndDrop = (): JSX.Element => {
   );
   const [steps, setSteps] = createSignal([
     { id: 1, name: "Build Page", href: "#", status: "current", active: true },
-    { id: 2, name: "Page Settings", href: "#", status: "upcoming", active: true },
+    {
+      id: 2,
+      name: "Page Settings",
+      href: "#",
+      status: "upcoming",
+      active: true,
+    },
     {
       id: 3,
       name: "Page Preview",
@@ -47,7 +53,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
     { id: 4, name: "Share Page", href: "#", status: "upcoming", active: false },
   ]);
   const [rightColumns, setRightColumns] = createSignal(
-    ["layout","form"].map((column) => ({
+    ["layout", "form"].map((column) => ({
       id: column,
       name: column,
     })),
@@ -75,7 +81,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
       .find((id) => id !== null)!;
   };
 
-
   const gridArea = () => ({
     display: "grid",
     "grid-template-areas": isLeftOpen()
@@ -88,35 +93,60 @@ const LayoutDragAndDrop = (): JSX.Element => {
     height: "90vh",
     "grid-template-columns": isLeftOpen()
       ? isRightOpen()
-        ? ''
-        : '17% 1fr'
+        ? ""
+        : "17% 1fr"
       : isRightOpen()
-        ? '25%'
+        ? "25%"
         : `12% 1fr`,
-  })
+  });
 
   return (
     <PropertiesVertexIdContext.Provider value={getNewGraphId()}>
-      <PageConfigContext.Provider value={createStore({} as { formData: IFormContext })}>
+      <PageConfigContext.Provider
+        value={createStore({} as { formData: IFormContext })}
+      >
         <Switch>
           <Match when={selectedStepId() === 1}>
-            <div
-              style={gridArea()}
-            >
+            <div style={gridArea()}>
               <HeaderDragAndDrop
                 NavigationBar={NavigationBar}
                 steps={steps}
                 getStepId={getStepId}
                 onChangeStep={onChangeStep}
               />
-              <Show when={isLeftOpen()} fallback={
-                <div class={`rel h:50px ${!isLeftOpen() ? "left:-1rem" : ""} r:0|15|15|0 p:2 cursor:pointer`}>
-                  <CustomButton style={{ cursor: 'pointer',padding: "15px",  borderRadius: "0px 15px 15px 0px", display: "flex", gap: "10px", alignItems: "center" }} variant="soft" onClick={toggleIsLeftOpen} class="outline:2px|solid|transparent outline:offset|2px:focus">
-                    <Icon icon={"solar:widget-add-outline"} height={22} class="ml:10 cursor:pointer" width={22} style={{ color: "#37c" }} />
-                    <span class="font:14 cursor:pointer">Add Form Element</span>
-                  </CustomButton>
-                </div>
-              }>
+              <Show
+                when={isLeftOpen()}
+                fallback={
+                  <div
+                    class={`rel h:50px ${!isLeftOpen() ? "left:-1rem" : ""} r:0|15|15|0 p:2 cursor:pointer`}
+                  >
+                    <CustomButton
+                      style={{
+                        cursor: "pointer",
+                        padding: "15px",
+                        borderRadius: "0px 15px 15px 0px",
+                        display: "flex",
+                        gap: "10px",
+                        alignItems: "center",
+                      }}
+                      variant="soft"
+                      onClick={toggleIsLeftOpen}
+                      class="outline:2px|solid|transparent outline:offset|2px:focus"
+                    >
+                      <Icon
+                        icon={"solar:widget-add-outline"}
+                        height={22}
+                        class="ml:10 cursor:pointer"
+                        width={22}
+                        style={{ color: "#37c" }}
+                      />
+                      <span class="font:14 cursor:pointer">
+                        Add Form Element
+                      </span>
+                    </CustomButton>
+                  </div>
+                }
+              >
                 <MenuDragAndDrop
                   isLeftOpen={isLeftOpen}
                   toggleIsLeftOpen={toggleIsLeftOpen}
@@ -126,43 +156,76 @@ const LayoutDragAndDrop = (): JSX.Element => {
               </Show>
               <ContentDragAndDrop />
               <Show when={!isRightOpen()}>
-                <div class={`rel h:50px ${!isRightOpen() ? "right:-1rem" : ""} r:0|15|15|0 p:2 cursor:pointer`}>
-                  <CustomButton style={{ cursor: 'pointer', padding: "15px", borderRadius: "0px 15px 15px 0px", display: "flex", gap: "10px", alignItems: "center" }} variant="soft" onClick={toggleIsRightOpen} class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus">
-                    <span class="font:14 cursor:pointer">View Form Settings</span>
-                    <Icon icon={"icon-park-outline:setting-two"} height={22} class="ml:10 cursor:pointer" width={22} style={{ color: "#37c" }} />
+                <div
+                  class={`rel h:50px ${!isRightOpen() ? "right:-1rem" : ""} r:0|15|15|0 p:2 cursor:pointer`}
+                >
+                  <CustomButton
+                    style={{
+                      cursor: "pointer",
+                      padding: "15px",
+                      borderRadius: "0px 15px 15px 0px",
+                      display: "flex",
+                      gap: "10px",
+                      alignItems: "center",
+                    }}
+                    variant="soft"
+                    onClick={toggleIsRightOpen}
+                    class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
+                  >
+                    <span class="font:14 cursor:pointer">
+                      View Form Settings
+                    </span>
+                    <Icon
+                      icon={"icon-park-outline:setting-two"}
+                      height={22}
+                      class="ml:10 cursor:pointer"
+                      width={22}
+                      style={{ color: "#37c" }}
+                    />
                   </CustomButton>
                 </div>
               </Show>
-                <ActionsDragAndDrops
-                  isRightOpen={isRightOpen}
-                  toggleIsRightOpen={toggleIsRightOpen}
-                  leftColumns={leftColumns}
-                  rightColumns={rightColumns}
-                />
+              <ActionsDragAndDrops
+                isRightOpen={isRightOpen}
+                toggleIsRightOpen={toggleIsRightOpen}
+                leftColumns={leftColumns}
+                rightColumns={rightColumns}
+              />
             </div>
           </Match>
           <Match when={selectedStepId() === 2}>
-          <div class="w:full h:50px flex ai:center mb:10 jc:center">
-            <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep} />
-          </div>
+            <div class="w:full h:50px flex ai:center mb:10 jc:center">
+              <NavigationBar
+                steps={steps}
+                getStepId={getStepId}
+                onChangeStep={onChangeStep}
+              />
+            </div>
             <PageSetting />
-        </Match>
+          </Match>
           <Match when={selectedStepId() === 3}>
             <div class="w:full h:50px flex ai:center mb:10 jc:center">
-              <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep} />
+              <NavigationBar
+                steps={steps}
+                getStepId={getStepId}
+                onChangeStep={onChangeStep}
+              />
             </div>
             <PreviewSection />
           </Match>
           <Match when={selectedStepId() === 4}>
             <div class="w:full h:50px flex ai:center mb:10 jc:center">
-              <NavigationBar steps={steps} getStepId={getStepId} onChangeStep={onChangeStep} />
+              <NavigationBar
+                steps={steps}
+                getStepId={getStepId}
+                onChangeStep={onChangeStep}
+              />
             </div>
             <ShareSection />
           </Match>
         </Switch>
       </PageConfigContext.Provider>
     </PropertiesVertexIdContext.Provider>
-
   );
 };
 
@@ -210,8 +273,9 @@ const NavigationBar = ({
                   ? "Edit Page"
                   : step.id === 2
                     ? "Setting"
-                    : step.id === 3 ? "Preview"
-                    : "Share"
+                    : step.id === 3
+                      ? "Preview"
+                      : "Share"
               }
             >
               <a
@@ -225,8 +289,9 @@ const NavigationBar = ({
                       ? "material-symbols-light:edit-calendar-outline-rounded"
                       : step.id === 2
                         ? "icon-park-outline:setting-config"
-                        : step.id === 3 ? "solar:eye-broken"
-                        : "grommet-icons:share-rounded"
+                        : step.id === 3
+                          ? "solar:eye-broken"
+                          : "grommet-icons:share-rounded"
                   }
                   style={{ color: step.id < getStepId()! ? "white" : "black" }}
                 />

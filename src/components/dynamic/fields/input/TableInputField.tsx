@@ -26,11 +26,12 @@ import { FormContext } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
-  getSelectionOptions
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import {
   addMetaVertexes,
-  addNewRow, getSublistRows
+  addNewRow,
+  getSublistRows,
 } from "~/lib/graph/mutate/form_functions";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import { ComponentProps } from "~/components/ComponentType";
@@ -60,7 +61,6 @@ export function TableInputField(
     isRealTime?: boolean;
     isShowAdd?: boolean;
   },
-  
 ) {
   const [field, others] = splitProps(props, [
     "meta",
@@ -511,7 +511,10 @@ export function TableInputField(
 
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <Show when={sortedVertexes().length}>
-          <div class={" w:80vw overflow:auto b:1px|solid|#37c r:10 m:2"} style={{ 'scrollbar-width':'thin'}}>
+          <div
+            class={" w:80vw overflow:auto b:1px|solid|#37c r:10 m:2"}
+            style={{ "scrollbar-width": "thin" }}
+          >
             <table class="styled-table b:none">
               <thead>
                 <tr

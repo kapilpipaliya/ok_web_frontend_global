@@ -14,22 +14,24 @@ export function Message(props: MessageProps) {
     "class",
     "inline",
   ]);
-  const className = createMemo(() => [
-    ...new Set(
-      [
-        "sb-message",
-        messageProps.type,
-        messageProps.class,
-        messageProps.inline && "inline",
-      ].filter(Boolean)
-    ),
-  ].join(" ")
+  const className = createMemo(() =>
+    [
+      ...new Set(
+        [
+          "sb-message",
+          messageProps.type,
+          messageProps.class,
+          messageProps.inline && "inline",
+        ].filter(Boolean),
+      ),
+    ].join(" "),
   );
 
   return (
     <p
       class={className()}
       role={messageProps.type === "error" ? "alert" : undefined}
-      {...divProps} />
+      {...divProps}
+    />
   );
 }

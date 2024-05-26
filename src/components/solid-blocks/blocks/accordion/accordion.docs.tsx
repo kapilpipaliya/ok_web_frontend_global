@@ -60,7 +60,9 @@ AccordionProps {
       <div class="example" style={{ "min-height": "6em" }}>
         <Accordion
           open={exampleOpen()}
-          setOpen={(open: boolean) => setEvents((e) => `setOpen(${open})\n${e}`)}
+          setOpen={(open: boolean) =>
+            setEvents((e) => `setOpen(${open})\n${e}`)
+          }
         >
           <AccordionHeader>Static header</AccordionHeader>
           <p>static content</p>

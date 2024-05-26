@@ -20,19 +20,21 @@ import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import { reconcile, SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
-export function setGraphData(graph: GraphInterface,
+export function setGraphData(
+  graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   args: {
     timestamp?: number;
     vertexes: VertexMap;
-    vertexLabelIdMap?: { [key: string]: Id[]; };
+    vertexLabelIdMap?: { [key: string]: Id[] };
     edges: EdgeMap;
     deleted_vertexes?: string[];
     deleted_edges?: string[];
-  }) {
+  },
+) {
   batch(() => {
     for (const vertexId in args.vertexes) {
-      setGraph("vertexes", vertexId, prev => {
+      setGraph("vertexes", vertexId, (prev) => {
         if (prev) {
           const IN = { ...prev.IN, ...args.vertexes[vertexId].IN };
           const OUT = { ...prev.OUT, ...args.vertexes[vertexId].OUT };
@@ -41,7 +43,6 @@ export function setGraphData(graph: GraphInterface,
           return args.vertexes[vertexId];
         }
       });
-
 
       for (const label of args.vertexes[vertexId]["L"]) {
         setGraph("vertexLabelIdMap", label, (vertexIds) => {
@@ -71,16 +72,18 @@ export function setGraphData(graph: GraphInterface,
       const edge = args.edges[edgeId];
 
       if (graph.vertexes[edge.S]) {
-        setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) => Array.isArray(out_edges)
-          ? [...new Set([...out_edges, edge.id])]
-          : [edge.id]
+        setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges) =>
+          Array.isArray(out_edges)
+            ? [...new Set([...out_edges, edge.id])]
+            : [edge.id],
         );
       }
 
       if (graph.vertexes[edge.E]) {
-        setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) => Array.isArray(in_edges)
-          ? [...new Set([...in_edges, edge.id])]
-          : [edge.id]
+        setGraph("vertexes", edge.E, "IN", edge.T, (in_edges) =>
+          Array.isArray(in_edges)
+            ? [...new Set([...in_edges, edge.id])]
+            : [edge.id],
         );
       }
     }
@@ -94,22 +97,25 @@ export function setGraphData(graph: GraphInterface,
     }
   });
 }
-export function onMutatDataGet(Ws: ServerEventsDispatcher,
+export function onMutatDataGet(
+  Ws: ServerEventsDispatcher,
   graph: GraphInterface,
   setGraph: SetStoreFunction<GraphInterface>,
   d: [
     number,
     {
-      [key in "insert" |
-      "replace" |
-      "deleteVertex" |
-      "insertEdge" |
-      "replaceEdge" |
-      "replaceEdgeStart" |
-      "replaceEdgeEnd" |
-      "deleteEdge"]?: any;
-    }[]
-  ][]) {
+      [key in
+        | "insert"
+        | "replace"
+        | "deleteVertex"
+        | "insertEdge"
+        | "replaceEdge"
+        | "replaceEdgeStart"
+        | "replaceEdgeEnd"
+        | "deleteEdge"]?: any;
+    }[],
+  ][],
+) {
   const { showErrorToast } = useToast();
 
   if (isObject(d) && d.ack) {
@@ -136,19 +142,19 @@ export function onMutatDataGet(Ws: ServerEventsDispatcher,
               txnObject.insert[0],
               txnObject.insert[1],
               graph,
-              setGraph
+              setGraph,
             );
           }
           if (txnObject.insertEdge) {
             edgeOldIdToNewIdMap.set(
               txnObject.insertEdge[0],
-              txnObject.insertEdge[1]
+              txnObject.insertEdge[1],
             );
             updateEdgeId(
               txnObject.insertEdge[0],
               txnObject.insertEdge[1],
               graph,
-              setGraph
+              setGraph,
             );
           }
           if (txnObject.replace) {

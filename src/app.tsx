@@ -1,12 +1,14 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense } from "solid-js";
+import { createSignal,  ErrorBoundary,  Match, Show, Suspense, Switch } from "solid-js";
 import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 import { Config } from "@master/css";
+import { defineConfig } from "@solidjs/start/config";
+import NotFound401 from "./pages/not-found/401";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -18,7 +20,7 @@ export default function App() {
     selectors: {},
     functions: {},
   };
-  
+
   const loadingSite = createSignal(false);
   return (
     <Router
@@ -28,7 +30,19 @@ export default function App() {
             <LoadingContext.Provider value={loadingSite}>
               <MetaProvider>
                 <div id="popup-root" />
-                <Suspense fallback={<LoaderNew />}>{props.children}</Suspense>
+                <Suspense fallback={<LoaderNew />}>
+                  <ErrorBoundary fallback={(error) => {
+                    
+                    if (error.message === 'Not Authorized') {
+                      return <NotFound401 />;
+                    } else {
+                      return <div>Something went wrong: {error.message}</div>;
+                    }
+                  }}>
+                    {props.children}
+                  </ErrorBoundary>
+                </Suspense>
+
                 <Show when={loadingSite[0]()} fallback={<Toaster />}>
                   <div
                     style={{

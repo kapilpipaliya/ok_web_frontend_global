@@ -1,24 +1,18 @@
 import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
-import { DBConnection } from "~/cypher_api/functions/dbs";
 import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
 import { Node } from "~/cypher_api/functions/Type";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 import { Edge, Vertex } from "~/lib/graph/graph";
 
-export async function getSelectedVertexValueMGCall(
-  dbConn: DBConnection,
-  vertex: Node,
-  meta: Node,
-) {
+export async function getSelectedVertexValueMGCall(vertex: Node, meta: Node) {
   if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);
-  const vertexResult = await getOutEdges(dbConn, vertex.id, type);
+  const vertexResult = await getOutEdges(vertex.id, type);
   return (vertexResult.pairs || []).map((pair) => pair[1].id);
 }
 
 export async function getParentVertexValueMGCall(
-  dbConn: DBConnection,
   vertex: Node,
   meta: Node,
 ): Promise<number[]> {
@@ -26,15 +20,13 @@ export async function getParentVertexValueMGCall(
   if (!type) {
     return [];
   }
-  const vertexResult = await getOutEdges(dbConn, vertex.id, type, {
+  const vertexResult = await getOutEdges(vertex.id, type, {
     isInward: true,
   });
   return (vertexResult.pairs || []).map((pair) => pair[1].id);
 }
 
-
 export async function getParentVertexesMGCall(
-  dbConn: DBConnection,
   path: string[],
   currentVertexes: Node[],
 ): Promise<{ error: boolean; vertexes?: Node[] }> {
@@ -49,7 +41,7 @@ export async function getParentVertexesMGCall(
       type = type.replace("$0", currentVertex.L[0]);
     }
 
-    const pairsResult = await getOutEdges(dbConn, currentVertex.id, type, {
+    const pairsResult = await getOutEdges(currentVertex.id, type, {
       isInward: true,
     });
     if (pairsResult.error) {
@@ -63,7 +55,6 @@ export async function getParentVertexesMGCall(
 
   if (path.length > 1) {
     return getParentVertexesMGCall(
-      dbConn,
       path.slice(0, -1),
       Array.from(stepVertexes.values()),
     );
@@ -97,7 +88,6 @@ export function calculateFilterMGCall(input: string) {
   return [type, filter, isMultiple] as const;
 }
 
-
 export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },
   vertexes: Node[] = [],
@@ -106,14 +96,21 @@ export async function getTreeDataMGCall(
     addChild?: (child: Node) => boolean;
   },
 ) {
-  'use server';
+  "use server";
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
-  const getChildren = async (levels: { [key: string]: any }, vertexes: Node[]) => {
+  const getChildren = async (
+    levels: { [key: string]: any },
+    vertexes: Node[],
+  ) => {
     const result: {}[] = [];
     if (!levels.collection) return result;
 
-    const children = await evalAsync(jsep(levels.collection), { vertexes: vertexes, nodes, relationships });
+    const children = await evalAsync(jsep(levels.collection), {
+      vertexes: vertexes,
+      nodes,
+      relationships,
+    });
     // @ts-ignore
     for (const child of (children || []).sort((a, b) => a.P.pos - b.P.pos)) {
       const name =
@@ -140,16 +137,15 @@ export async function getTreeDataMGCall(
     return result;
   };
 
-
   const children = await getChildren(treeLevels, vertexes);
   return {
     children,
     graph: {
       vertexes: nodes,
       edges: relationships,
-    }
-  }
-};
+    },
+  };
+}
 
 // TODO:
 //  if possible, use Name Keys, if not found use "name"
@@ -160,19 +156,25 @@ export async function getSelectionOptionsMGCall(
   collection: string,
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: any; graph?: any }> {
-  'use server';
+  "use server";
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
   collection = await replaceExpressionToLabel(collection, vertex[0]);
   try {
-    const value = await evalAsync(jsep(collection), { vertexes: vertex, nodes, relationships });
-    
+    const value = await evalAsync(jsep(collection), {
+      vertexes: vertex,
+      nodes,
+      relationships,
+    });
+
     if (value) {
       return {
-        error: false, vertexes: value, graph: {
+        error: false,
+        vertexes: value,
+        graph: {
           vertexes: nodes,
           edges: relationships,
-        }
+        },
       };
     } else {
       return { error: true };
@@ -183,9 +185,7 @@ export async function getSelectionOptionsMGCall(
   }
 }
 
-
 export async function getChildVertexMGCall(
-  dbConn: DBConnection,
   path: string[],
   currentVertex: Node,
 ): Promise<{ error: boolean; vertex?: Node }> {
@@ -211,7 +211,7 @@ export async function getChildVertexMGCall(
     type = type.replace("$0", currentVertex.L[0]);
   }
   // let vertexes = (currentVertex.OUT[type] || []).map((edgeId) => graph.vertexes[graph.edges[edgeId].E]);
-  const vertexesRes = await getOutEdges(dbConn, currentVertex.id, type);
+  const vertexesRes = await getOutEdges(currentVertex.id, type);
   if (vertexesRes.error) return vertexesRes;
 
   const vertexes = vertexesRes.pairs!;
@@ -228,7 +228,7 @@ export async function getChildVertexMGCall(
     const newVertex = vertexes[0][1];
     if (newVertex) {
       if (path.length > 1) {
-        return getChildVertexMGCall(dbConn, path.slice(1), newVertex);
+        return getChildVertexMGCall(path.slice(1), newVertex);
       } else {
         return {
           error: false,
@@ -244,12 +244,11 @@ export async function getChildVertexMGCall(
 }
 
 export async function getParentVertexMGCall(
-  dbConn: DBConnection,
   path: string[],
   currentVertex: Node,
 ): Promise<{ error: boolean; vertex?: Node }> {
   const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
-  const pairsResult = await getOutEdges(dbConn, currentVertex.id, type, {
+  const pairsResult = await getOutEdges(currentVertex.id, type, {
     isInward: true,
   });
 
@@ -264,7 +263,7 @@ export async function getParentVertexMGCall(
     const newVertex = pairsResult.pairs![0][1];
     if (newVertex) {
       if (path.length > 1) {
-        return getParentVertexMGCall(dbConn, path.slice(0, -1), newVertex);
+        return getParentVertexMGCall(path.slice(0, -1), newVertex);
       } else {
         return {
           error: false,
@@ -280,7 +279,6 @@ export async function getParentVertexMGCall(
 }
 
 export async function getChildVertexesMGCall(
-  dbConn: DBConnection,
   path: string[],
   currentVertexes: Node[],
   strict?: boolean,
@@ -295,7 +293,7 @@ export async function getChildVertexesMGCall(
       if (!currentVertex.L) continue;
       type = type.replace("$0", currentVertex.L[0]);
     }
-    const outEdgesResult = await getOutEdges(dbConn, currentVertex.id, type);
+    const outEdgesResult = await getOutEdges(currentVertex.id, type);
     if (outEdgesResult.error) return outEdgesResult;
     const outVertexes = outEdgesResult.pairs!;
 
@@ -317,7 +315,6 @@ export async function getChildVertexesMGCall(
 
   if (path.length > 1) {
     return getChildVertexesMGCall(
-      dbConn,
       path.slice(1),
       Array.from(stepVertexes.values()),
       strict,
@@ -330,14 +327,21 @@ export async function getChildVertexesMGCall(
   }
 }
 
-export async function replaceExpressionToLabel(collection: string, vertex: Node) {
+export async function replaceExpressionToLabel(
+  collection: string,
+  vertex: Node,
+) {
   if (!collection) return "";
   // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression
   if (collection.includes("{{") && collection.includes("}}")) {
     collection = collection.replace(
       /{{.*}}/,
-      (await getSelectionOptionsMGCall([vertex], collection.match(/{{(.*)}}/)![1]! || ""))
-        .vertexes || "",
+      (
+        await getSelectionOptionsMGCall(
+          [vertex],
+          collection.match(/{{(.*)}}/)![1]! || "",
+        )
+      ).vertexes || "",
     );
   }
   return collection;
@@ -349,31 +353,34 @@ export interface Expression {
   outgoing?: Expression[];
 }
 
-export async function getDataMGCall(expression: Expression, context = {
-  nodes: {} as { [key: string]: any },
-  relationships: {} as { [key: string]: any },
-  vertexes: undefined as any
-}): Promise<any> {
-  'use server';
+export async function getDataMGCall(
+  expression: Expression,
+  context = {
+    nodes: {} as { [key: string]: any },
+    relationships: {} as { [key: string]: any },
+    vertexes: undefined as any,
+  },
+): Promise<any> {
+  "use server";
   const mainResult = await evalAsync(jsep(expression.expression), context);
 
-  if (expression.incoming && (mainResult && mainResult.length > 0)) {
+  if (expression.incoming && mainResult && mainResult.length > 0) {
     for (const exp of expression.incoming) {
       context.vertexes = [...mainResult];
       await getDataMGCall(exp, context);
     }
   }
-  if (expression.outgoing && (mainResult && mainResult.length > 0)) { 
+  if (expression.outgoing && mainResult && mainResult.length > 0) {
     for (const exp of expression.outgoing) {
       context.vertexes = [...mainResult];
       await getDataMGCall(exp, context);
     }
   }
-  
+
   return {
     graph: {
       vertexes: context.nodes,
       edges: context.relationships,
-    }
-  }
+    },
+  };
 }

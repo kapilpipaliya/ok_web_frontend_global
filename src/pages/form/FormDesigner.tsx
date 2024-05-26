@@ -19,7 +19,7 @@ Instead of this use Page Builder
 export function NavDesigner() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const config = createStore({} as { formData: IFormContext; });
+  const config = createStore({} as { formData: IFormContext });
   const [count, setCount] = createSignal(1);
   const [previewCode, setPreviewCode] = createSignal(false);
   const { Ws } = useContext(WsContext);
@@ -34,8 +34,8 @@ export function NavDesigner() {
           getExportCode(
             graph,
             config[0].formData.formMeta,
-            config[0].formData.formData
-          )
+            config[0].formData.formData,
+          ),
         )}
       </pre>
     );
@@ -51,7 +51,7 @@ export function NavDesigner() {
       importCode(),
       graph,
       setGraph,
-      Ws
+      Ws,
     );
   };
   return (
@@ -62,10 +62,12 @@ export function NavDesigner() {
           graph={graph}
           setGraph={setGraph}
           id={params.id}
-          config={config} />
+          config={config}
+        />
         <textarea
           value={importCode()}
-          onChange={(e) => setImportCode(e.target.value)} />
+          onChange={(e) => setImportCode(e.target.value)}
+        />
         <CustomButton variant="contained" onClick={importCodeFn}>
           Import Code
         </CustomButton>
@@ -86,8 +88,7 @@ export function NavDesigner() {
           <PreviewCode />
         </Show>
         <Show when={count() && config[0].formData.formData && count()} keyed>
-          <div
-          ></div>
+          <div></div>
         </Show>
       </div>
     </div>

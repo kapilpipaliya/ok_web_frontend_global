@@ -11,11 +11,12 @@ export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
 
-  const data = () => getTreeData(graph, setGraph, {
-    collection: "g:'CompCategory'",
-    // TODO: Dont display "Form" Component
-    child: { collection: "->CompCategoryComp" },
-  });
+  const data = () =>
+    getTreeData(graph, setGraph, {
+      collection: "g:'CompCategory'",
+      // TODO: Dont display "Form" Component
+      child: { collection: "->CompCategoryComp" },
+    });
 
   /* Code to get menu data from server
   const data2 = getTreeDataMGCall({
@@ -25,7 +26,6 @@ export function ComponentPart() {
   });
   data2.then((data) => console.log(data));*/
 
-
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as ICon
 
@@ -33,8 +33,7 @@ export function ComponentPart() {
     if (data().length) {
       setFilteredData(data());
     }
-
-  })
+  });
   const titleStyle = {
     "font-size": "17px",
     "font-weight": "bolder",
@@ -85,7 +84,7 @@ export function ComponentPart() {
     }
   };
 
-  function ListItemComponent(props: { child: Vertex; }) {
+  function ListItemComponent(props: { child: Vertex }) {
     const [isHovered, setIsHovered] = createSignal(false);
 
     const baseStyle = {
@@ -110,7 +109,8 @@ export function ComponentPart() {
       boxShadow: "4px 4px 4px",
     };
 
-    const itemStyle: any = () => isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+    const itemStyle: any = () =>
+      isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
     return (
       <div
@@ -125,10 +125,13 @@ export function ComponentPart() {
       >
         <div class="pt:5px flex gap:10px ai:center">
           <Icon
-            icon={iconMap[props.child?.P.name] ??
-              "material-symbols:widgets-outline-rounded"}
+            icon={
+              iconMap[props.child?.P.name] ??
+              "material-symbols:widgets-outline-rounded"
+            }
             width={20}
-            height={20} />
+            height={20}
+          />
           <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
         </div>
 
@@ -138,13 +141,15 @@ export function ComponentPart() {
             <Icon
               ondblclick={() => {
                 const currentURL = window.location.href;
-                const navigateUrl = currentURL.split("/").slice(0, -2).join("/") +
+                const navigateUrl =
+                  currentURL.split("/").slice(0, -2).join("/") +
                   "/Comp/" +
                   props.child.id;
                 window.open(navigateUrl, "_blank");
               }}
               class={"cursor:pointer"}
-              icon={"solar:settings-linear"} />
+              icon={"solar:settings-linear"}
+            />
           </Tooltip>
         </Show>
       </div>
@@ -158,7 +163,8 @@ export function ComponentPart() {
           <Icon
             class="icon"
             icon="iconamoon:search"
-            style={{ color: "#9e9ea7" }} />
+            style={{ color: "#9e9ea7" }}
+          />
           <input
             placeholder="Search Component..."
             type="search"
@@ -167,16 +173,24 @@ export function ComponentPart() {
             onInput={(e) => {
               setSearchQuery(e.target.value);
               updateFilteredData(); // Update filteredData when searchQuery changes
-            }} />
+            }}
+          />
         </div>
       </nav>
-      <div class="overflow:auto h:full" style={{
-        "scrollbar-width": "thin",
-        "scrollbar-color": "lightgrey"
-      }}>
+      <div
+        class="overflow:auto h:full"
+        style={{
+          "scrollbar-width": "thin",
+          "scrollbar-color": "lightgrey",
+        }}
+      >
         <For
           each={filteredData()}
-          fallback={<div class="p:3 font-weight:bold m:20px|0px text-align:center">No Component Found !</div>}
+          fallback={
+            <div class="p:3 font-weight:bold m:20px|0px text-align:center">
+              No Component Found !
+            </div>
+          }
         >
           {(item) => (
             <div class="m:20px|0px">

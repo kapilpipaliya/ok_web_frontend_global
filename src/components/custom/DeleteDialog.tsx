@@ -16,7 +16,7 @@ export function DeleteDialog(props: {
   };
 
   const handleCancel = () => {
-    props.onCancel ? props.onCancel() : () => { };
+    props.onCancel ? props.onCancel() : () => {};
   };
   return (
     <CustomModal
@@ -26,9 +26,11 @@ export function DeleteDialog(props: {
       setOpen={props.setOpen}
       buttonLabel={props.buttonLabel}
       customTitle={<span>{props.title || "Delete Confirmation"}</span>}
-      body={<p class="p:10px|0px">
-        {props.message || "Are you sure you want to delete this item?"}
-      </p>}
+      body={
+        <p class="p:10px|0px">
+          {props.message || "Are you sure you want to delete this item?"}
+        </p>
+      }
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
           <CustomButton
@@ -37,7 +39,7 @@ export function DeleteDialog(props: {
             onClick={() => {
               handleCancel();
               toggle((v) => !v);
-            } }
+            }}
           >
             Cancel
           </CustomButton>
@@ -46,13 +48,14 @@ export function DeleteDialog(props: {
             onClick={() => {
               handleConfirm();
               toggle((v) => !v);
-            } }
+            }}
             style="margin-right: 10px;"
           >
             Confirm
           </CustomButton>
         </div>
       )}
-      dialogClass="min-w:20% r:10px p:0" />
+      dialogClass="min-w:20% r:10px p:0"
+    />
   );
 }

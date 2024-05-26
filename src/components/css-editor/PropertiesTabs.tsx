@@ -32,11 +32,11 @@ export function ClassDesignTab(props: {
 }) {
   const { Container, ButtonGroups } = StyleCSSComponents();
 
-  const [cssState, setCssState] = createStore({} as { [key: string]: any; });
+  const [cssState, setCssState] = createStore({} as { [key: string]: any });
 
   // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
   const parseAndApplyCssRules = (valueString: string) => {
-    const cssRules = {} as { [key: string]: string; };
+    const cssRules = {} as { [key: string]: string };
 
     for (const [key, value] of valueString
       .split(/[\s\n]+/)
@@ -50,8 +50,8 @@ export function ClassDesignTab(props: {
   createEffect(
     on(
       () => (props.data?.P[props.meta.P.name] as string) ?? "",
-      parseAndApplyCssRules
-    )
+      parseAndApplyCssRules,
+    ),
   );
 
   function getCssValue() {
@@ -81,7 +81,10 @@ export function ClassDesignTab(props: {
               </TabContainer>
               <TabContainer>
                 <Container>
-                  <TextEditor getCssValue={getCssValue} parseAndApplyCssRules={parseAndApplyCssRules} />
+                  <TextEditor
+                    getCssValue={getCssValue}
+                    parseAndApplyCssRules={parseAndApplyCssRules}
+                  />
                 </Container>
               </TabContainer>
             </Tabs>
@@ -92,7 +95,10 @@ export function ClassDesignTab(props: {
   );
 }
 
-const TextEditor = (props: { getCssValue: any, parseAndApplyCssRules: (valueString: string) => void }) => {
+const TextEditor = (props: {
+  getCssValue: any;
+  parseAndApplyCssRules: (valueString: string) => void;
+}) => {
   const [text, setText] = createSignal(props.getCssValue);
   createEffect(() => {
     setText(props.getCssValue);
@@ -190,14 +196,15 @@ const StyleEditor = () => {
 
     return (
       <div
-        class={`p:5|10 w:full b:1px|solid|lightgray ${props.index === 0 && length() === 1
-          ? "r:5"
-          : props.index === length() - 1
-            ? "r:0|0|5|5"
-            : props.index === 0 && length() > 1
-              ? "r:5|5|0|0"
-              : ""
-          }
+        class={`p:5|10 w:full b:1px|solid|lightgray ${
+          props.index === 0 && length() === 1
+            ? "r:5"
+            : props.index === length() - 1
+              ? "r:0|0|5|5"
+              : props.index === 0 && length() > 1
+                ? "r:5|5|0|0"
+                : ""
+        }
 
 `}
       >

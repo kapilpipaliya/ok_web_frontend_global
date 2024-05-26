@@ -1,12 +1,21 @@
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
-import { commitTxn, getNewGraphId, getNewTxnId, revertTransaction } from "../transaction";
+import {
+  commitTxn,
+  getNewGraphId,
+  getNewTxnId,
+  revertTransaction,
+} from "../transaction";
 import { klona } from "klona/json";
-import { addNewVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import {
+  addNewVertex,
+  mergeVertexProperties,
+  newVertex,
+} from "~/lib/graph/mutate/vertex";
 import { batch, onCleanup, untrack, useContext } from "solid-js";
 import {
   getChildVertex,
   getChildVertexes,
-  getSelectionOptions
+  getSelectionOptions,
 } from "../get/sync/traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
@@ -18,11 +27,21 @@ import {
 import { useToast } from "~/components/custom/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";
 import { FormMetaData, FieldAttribute } from "~/lib/Type";
-import { getValueFromVertexOrKey, isObject, getLabel, getId, AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
+import {
+  getValueFromVertexOrKey,
+  isObject,
+  getLabel,
+  getId,
+  AdminAttrKeys,
+  AttrsTableData,
+} from "~/lib/Utils";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { getToEdge } from "../get/sync/traverse";
 import { newEdge, addNewEdge } from "./edge";
-import { getFormApiFromForm, getPkForCollection } from "../get/sync/graph_functions";
+import {
+  getFormApiFromForm,
+  getPkForCollection,
+} from "../get/sync/graph_functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 
@@ -233,8 +252,8 @@ export function rowMetaInitialize(
 export function createMeta(
   form: FormMetaData,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
-): { error: boolean; vertex?: Vertex; } {
+  setGraph: SetStoreFunction<GraphInterface>,
+): { error: boolean; vertex?: Vertex } {
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
@@ -267,7 +286,7 @@ export function createForm(
   label: string,
   properties?: {
     [key: string]: any;
-  }
+  },
 ): {
   error: string | boolean;
   vertex?: Vertex;
@@ -295,8 +314,8 @@ export function createForm(
 }
 export function loadForm(
   graph: Store<GraphInterface>,
-  id: number
-): { error: string | boolean; vertex?: Vertex; } {
+  id: number,
+): { error: string | boolean; vertex?: Vertex } {
   if (!graph.vertexes[id]) {
     return { error: "vertex not found" };
   }
@@ -308,11 +327,13 @@ export function loadForm(
   };
 }
 
-export function addMetaVertexes(graph: Store<GraphInterface>,
+export function addMetaVertexes(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   vertex: Vertex,
-  attributes: FieldAttribute[]) {
+  attributes: FieldAttribute[],
+) {
   const { showErrorToast } = useToast();
 
   for (const attribute of attributes) {
@@ -331,7 +352,7 @@ export function addMetaVertexes(graph: Store<GraphInterface>,
       vertex,
       "MetaAttr",
       "MetaAttr",
-      attr
+      attr,
     );
     if (addAttributeResult.error) {
       showErrorToast(addAttributeResult.error.toString());
@@ -344,7 +365,7 @@ export function addMetaVertexes(graph: Store<GraphInterface>,
         setGraph,
         txnId,
         graph.vertexes[addAttributeResult.vertexId!],
-        attribute.attributes
+        attribute.attributes,
       );
     }
     // todo discard transaction
@@ -359,7 +380,7 @@ export function setValueGlobal(
   vertex: Vertex,
   data: any,
   ws: ServerEventsDispatcher,
-  isRealTime: boolean
+  isRealTime: boolean,
 ) {
   if (!vertex) {
     return;
@@ -387,23 +408,23 @@ export function setValueGlobal(
 export function getSublistRowsForType(
   graph: Store<GraphInterface>,
   type: string,
-  vertex: Vertex
+  vertex: Vertex,
 ) {
   return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
+    (a, b) => a.P.pos - b.P.pos,
   );
 }
 
 export function getSublistRows(
   graph: Store<GraphInterface>,
   meta: Vertex,
-  vertex?: Vertex
+  vertex?: Vertex,
 ) {
   if (!vertex) return [];
   // This should check for inward edges too
   const type = getToEdge(meta, vertex);
   return (getChildVertexes(graph, [`${type}`], [vertex]).vertexes || []).sort(
-    (a, b) => a.P.pos - b.P.pos
+    (a, b) => a.P.pos - b.P.pos,
   );
 }
 
@@ -414,15 +435,15 @@ export function newRow(
   parentVertex: Vertex,
   label: string,
   edgeType?: string,
-  properties?: { [key: string]: any; }
-): { error: boolean; vertexId?: Id; edgeId?: Id; } {
+  properties?: { [key: string]: any },
+): { error: boolean; vertexId?: Id; edgeId?: Id } {
   const { showErrorToast } = useToast();
 
   return batch(() => {
     const vertexNew = newVertex(
       getNewGraphId(),
       [label || edgeType!],
-      properties
+      properties,
     );
     const insertVertex = addNewVertex(txnId, vertexNew, graph, setGraph);
     if (insertVertex.error) {
@@ -437,7 +458,7 @@ export function newRow(
       edgeType || label!,
       {},
       parentVertex.id,
-      vertexNew.id
+      vertexNew.id,
     );
     const insertEdgeResult = addNewEdge(txnId, edgeNew, graph, setGraph);
     if (insertEdgeResult.error) {
@@ -455,15 +476,15 @@ export function newRow(
   });
 }
 
-export function addNewRow (
+export function addNewRow(
   txnId: number,
   meta: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   parentVertex: Vertex,
-  properties: { [key: string]: any; },
+  properties: { [key: string]: any },
   isRealTime: boolean,
-  Ws: ServerEventsDispatcher
+  Ws: ServerEventsDispatcher,
 ) {
   if (isRealTime) {
     txnId = getNewTxnId(graph, setGraph);
@@ -478,11 +499,11 @@ export function addNewRow (
     parentVertex,
     label,
     type,
-    properties
+    properties,
   );
   if (isRealTime) commitTxn(txnId, Ws);
   return newRowResult;
-};
+}
 // Select On Change Handler
 export function onChangeHandler(
   txnId: number,
@@ -490,7 +511,7 @@ export function onChangeHandler(
   vertex: Vertex,
   changedFieldAttribute: Vertex,
   graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>
+  setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!changedFieldAttribute.P.props?.onchange) return;
   const isNew = formVertex.id < 0;
@@ -514,7 +535,7 @@ export function onChangeHandler(
         graph,
         setGraph,
         [changedFieldAttribute],
-        "-MetaAttr->MetaAttr"
+        "-MetaAttr->MetaAttr",
       ).vertexes || []
     ).find((vertex: any) => vertex.P[IdAttr] === args[0]);
     if (!attribute) {
@@ -541,10 +562,13 @@ export function onChangeHandler(
 }
 // 'type' or 'label' can be overwritten in the meta.
 
-export function getFormMetaData(graph: Store<GraphInterface>,
+export function getFormMetaData(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  formId: string) {
-  let form = AttrsTableData[formId] ||
+  formId: string,
+) {
+  let form =
+    AttrsTableData[formId] ||
     (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
 
   if (!form) {
@@ -555,23 +579,27 @@ export function getFormMetaData(graph: Store<GraphInterface>,
   return { error: false, form };
 }
 
-export function getExportCode(graph: Store<GraphInterface>,
+export function getExportCode(
+  graph: Store<GraphInterface>,
   meta: Vertex,
-  data: Vertex) {
+  data: Vertex,
+) {
   const getChildren = (
     meta: Vertex,
     vertex: Vertex,
     result: {
       [key: string]: any;
-    }
+    },
   ) => {
     const { showErrorToast } = useToast();
 
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
     // const props = meta.P.props || {};
-    const selectMetaVertexes = metaVertexes.filter((meta) => ["SelectBox", "TagBox"].includes(meta.P.component)
+    const selectMetaVertexes = metaVertexes.filter((meta) =>
+      ["SelectBox", "TagBox"].includes(meta.P.component),
     );
-    const tableMetaVertexes = metaVertexes.filter((meta) => ["Table"].includes(meta.P.component)
+    const tableMetaVertexes = metaVertexes.filter((meta) =>
+      ["Table"].includes(meta.P.component),
     );
 
     for (const metaVertex of selectMetaVertexes) {
@@ -589,11 +617,11 @@ export function getExportCode(graph: Store<GraphInterface>,
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
           if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
-            const pksResult = {} as { [primaryKey: string]: any; };
+            const pksResult = {} as { [primaryKey: string]: any };
             pksResult["name"] = v.P["name"];
             if (!result["OUT"]) {
               result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any; }[];
+                [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
             result["OUT"][type] = [pksResult];
@@ -603,7 +631,7 @@ export function getExportCode(graph: Store<GraphInterface>,
               graph,
               "Coll",
               "name",
-              label
+              label,
             );
             if (!collVertex) {
               showErrorToast(`Collection not defined: ${label}`);
@@ -611,7 +639,7 @@ export function getExportCode(graph: Store<GraphInterface>,
             }
             const pks = getPkForCollection(graph, collVertex);
 
-            const pksResult = {} as { [primaryKey: string]: any; };
+            const pksResult = {} as { [primaryKey: string]: any };
             for (const pk of pks) {
               pksResult[pk] = v.P[pk];
             }
@@ -621,7 +649,7 @@ export function getExportCode(graph: Store<GraphInterface>,
 
             if (!result["OUT"]) {
               result["OUT"] = {} as {
-                [EdgeType: string]: { [primaryKey: string]: any; }[];
+                [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
 
@@ -644,19 +672,20 @@ export function getExportCode(graph: Store<GraphInterface>,
         const type = getToEdge(metaVertex, vertex);
         const childVertexes = getSublistRows(graph, metaVertex, vertex);
 
-        const out = childVertexes.map((v) => getChildren(metaVertex, v, {
-          ...klona(v),
-          L: v.L[0],
-          IN: undefined,
-          OUT: undefined,
-          id: undefined,
-          D: undefined,
-        })
+        const out = childVertexes.map((v) =>
+          getChildren(metaVertex, v, {
+            ...klona(v),
+            L: v.L[0],
+            IN: undefined,
+            OUT: undefined,
+            id: undefined,
+            D: undefined,
+          }),
         );
         if (out.length > 0) {
           if (!result["OUT"]) {
             result["OUT"] = { [type]: out } as {
-              [EdgeType: string]: { [primaryKey: string]: any; }[];
+              [EdgeType: string]: { [primaryKey: string]: any }[];
             };
           } else result["OUT"][type] = out;
         }
@@ -675,4 +704,3 @@ export function getExportCode(graph: Store<GraphInterface>,
     D: undefined,
   });
 }
-

@@ -1,7 +1,11 @@
 import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
-import { capitalizeFirstLetter, getValueFromVertexOrKey, replaceExpressionToLabel } from "~/lib/Utils";
+import {
+  capitalizeFirstLetter,
+  getValueFromVertexOrKey,
+  replaceExpressionToLabel,
+} from "~/lib/Utils";
 import { SetStoreFunction, Store } from "solid-js/store";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
@@ -131,7 +135,10 @@ export function calculateFilter(input: string) {
         const { skip: s, limit: l } = parseSkipLimit(filter);
         skip = s;
         limit = l;
-        filter = filter.replace(/skip\s*=\s*\d+/i, "").replace(/limit\s*=\s*\d+/i, "").trim();
+        filter = filter
+          .replace(/skip\s*=\s*\d+/i, "")
+          .replace(/limit\s*=\s*\d+/i, "")
+          .trim();
       }
     }
   };
@@ -148,15 +155,17 @@ export function calculateFilter(input: string) {
   return { type, filter, skip, limit, isMultiple };
 }
 
-export function getTreeData(graph: Store<GraphInterface>,
+export function getTreeData(
+  graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  treeLevels: { [key: string]: any; },
+  treeLevels: { [key: string]: any },
   vertexes: Vertex[] = [],
   options?: {
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
-  }) {
-  const getChildren = (levels: { [key: string]: any; }, vertexes: Vertex[]) => {
+  },
+) {
+  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]) => {
     const result = [] as any[];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
@@ -165,16 +174,19 @@ export function getTreeData(graph: Store<GraphInterface>,
       setGraph,
     });
     for (const child of (children || []).sort(
-      (a: any, b: any) => a.P.pos - b.P.pos
+      (a: any, b: any) => a.P.pos - b.P.pos,
     )) {
-      const name = levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
+      const name =
+        levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
       const navItem = {} as any;
       navItem.name = name;
       navItem.expanded = true;
       navItem.id = child.id;
       navItem.P = child.P;
-      if (levels.child &&
-        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)) {
+      if (
+        levels.child &&
+        ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
+      ) {
         navItem.children = getChildren(levels.child, [child]);
       }
 
@@ -199,8 +211,8 @@ export function getSelectionOptions(
   setGraph: SetStoreFunction<GraphInterface>,
   vertex: Vertex[],
   collection: string,
-  strict?: boolean
-): { error: boolean; vertexes?: any; } {
+  strict?: boolean,
+): { error: boolean; vertexes?: any } {
   collection = replaceExpressionToLabel(graph, setGraph, collection, vertex[0]);
   try {
     const value = evaluate(jsep(collection), {
@@ -222,7 +234,7 @@ export function getSelectionOptions(
 export function getChildVertex(
   graph: Store<GraphInterface>,
   path: string[],
-  currentVertex: Vertex
+  currentVertex: Vertex,
 ): {
   error: boolean;
   vertex?: Vertex;
@@ -249,7 +261,7 @@ export function getChildVertex(
     type = type.replace("$0", currentVertex.L[0]);
   }
   let vertexes = (currentVertex.OUT[type] || []).map(
-    (edgeId) => graph.vertexes[graph.edges[edgeId].E]
+    (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 
   if (filter) {
@@ -282,7 +294,7 @@ export function getChildVertex(
 export function getParentVertex(
   path: string[],
   currentVertex: Vertex,
-  graph: Store<GraphInterface>
+  graph: Store<GraphInterface>,
 ): {
   error: boolean;
   vertex?: Vertex;
@@ -323,8 +335,8 @@ export function getChildVertexes(
   graph: Store<GraphInterface>,
   path: string[],
   currentVertexes: Vertex[],
-  strict?: boolean
-): { error: boolean; vertexes?: Vertex[]; } {
+  strict?: boolean,
+): { error: boolean; vertexes?: Vertex[] } {
   const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
@@ -371,7 +383,7 @@ export function getChildVertexes(
       graph,
       path.slice(1),
       Array.from(stepVertexes.values()),
-      strict
+      strict,
     );
   } else {
     return {

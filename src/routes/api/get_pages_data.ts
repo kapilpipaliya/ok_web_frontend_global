@@ -3,7 +3,7 @@ import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {
-  const subdomain = getSubDomain(request.headers.get("host")!);
+  const subdomain = await getSubDomain(request.headers.get("host")!);
   try {
     const pageList = await getInitialData({ subdomain });
 

@@ -1,8 +1,10 @@
 import "~/css/modal.css";
 
-export function LoaderNew(props: { class?: string, loaderHeight?: string }) {
+export function LoaderNew(props: { class?: string; loaderHeight?: string }) {
   return (
-    <div style={`height:${props.loaderHeight ?? '100vh'};place-content:center;display:grid;`}>
+    <div
+      style={`height:${props.loaderHeight ?? "100vh"};place-content:center;display:grid;`}
+    >
       <div class={`${props.class ?? ""} loader`} />
     </div>
   );

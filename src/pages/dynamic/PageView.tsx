@@ -16,7 +16,7 @@ import { GraphContext, GraphInterface } from "~/lib/graph/graph";
 import { Store } from "solid-js/store";
 import { getFormMetaData } from "~/lib/graph/mutate/form_functions";
 
-export function PageView_(props: { id: string; count: number; }) {
+export function PageView_(props: { id: string; count: number }) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   if (!props.id) return "Page ID not specified.";
@@ -30,7 +30,8 @@ export function PageView_(props: { id: string; count: number; }) {
   const form = getFormMetaData(graph, setGraph, "Page");
   if (form.error) return form.error;
 
-  const metaVertexResult = untrack(() => createMeta(form.form!, graph, setGraph)
+  const metaVertexResult = untrack(() =>
+    createMeta(form.form!, graph, setGraph),
   );
 
   if (metaVertexResult.error) {
@@ -49,8 +50,8 @@ export function PagePreview(props: {}) {
     on(
       () => params.id,
       (v) => setCount((v) => v + 1),
-      { defer: true }
-    )
+      { defer: true },
+    ),
   );
 
   return (
@@ -70,7 +71,7 @@ export function SiteMap(props: {}, graph: Store<GraphInterface>) {
   return (
     <For
       each={graph.vertexLabelIdMap["Page"]?.filter(
-        (vertex) => graph.vertexes[vertex].P.public
+        (vertex) => graph.vertexes[vertex].P.public,
       )}
     >
       {(vertex) => (

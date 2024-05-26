@@ -29,11 +29,11 @@ import {
 import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
 import {
   getChildVertex,
-  getSelectionOptions
+  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import {
   onChangeHandler,
-  setValueGlobal
+  setValueGlobal,
 } from "~/lib/graph/mutate/form_functions";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
@@ -126,11 +126,15 @@ export function ensureArray(value: any) {
     return value ? [value] : [];
   }
 }
-export function selectedValue(meta: Vertex,
+export function selectedValue(
+  meta: Vertex,
   data: Vertex,
-  graph: Store<GraphInterface>): number[] {
-  if (getValueFromVertexOrKey(meta.P.props, "stringValue") ||
-    getValueFromVertexOrKey(meta.P.props, "items")) {
+  graph: Store<GraphInterface>,
+): number[] {
+  if (
+    getValueFromVertexOrKey(meta.P.props, "stringValue") ||
+    getValueFromVertexOrKey(meta.P.props, "items")
+  ) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
       return ensureArray(data.P[meta.P[IdAttr]]);
@@ -198,49 +202,57 @@ export function SelectInputField(
     "meta",
     "data",
     "setValue",
-  ])
+  ]);
 
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const formData = useContext(FormContext);
 
-  const [selectOptions] = createResource(
-    async () => {
-      let value = getValueFromVertexOrKey(field.meta.P.props, "items");
-      if (value) {
-        if (typeof value === "string") {
-          return value.split("\n");
-        } else if (Array.isArray(value)) {
-          return value;
-        } else {
-          return value ? [value] : [];
-        }
+  const [selectOptions] = createResource(async () => {
+    let value = getValueFromVertexOrKey(field.meta.P.props, "items");
+    if (value) {
+      if (typeof value === "string") {
+        return value.split("\n");
+      } else if (Array.isArray(value)) {
+        return value;
       } else {
-        // this is not working when row is enabled, select field options is not updated
-        if (field.disabled) {
-          return selectedValue(field.meta, field.data as Vertex,graph).map((vertexId) => graph.vertexes[vertexId]);
-        }
-
-        const collection =
-          getChildVertex(graph, ["$0Coll"], field.meta).vertex?.["P"]?.["name"] ||
-          getValueFromVertexOrKey(field.meta.P.props, "collection");
-        if (!collection) {
-          return [];
-        }
-
-        const res = (await getSelectionOptionsMGCall([field.data as Vertex], collection));
-
-        if (!res.error) {
-          setGraphData(graph, setGraph, res.graph);
-          return getSelectionOptions(graph, setGraph, [field.data as Vertex], collection)
-              .vertexes || []
-          
-        } else {
-          return [];
-        }
+        return value ? [value] : [];
       }
-    },
-  );
+    } else {
+      // this is not working when row is enabled, select field options is not updated
+      if (field.disabled) {
+        return selectedValue(field.meta, field.data as Vertex, graph).map(
+          (vertexId) => graph.vertexes[vertexId],
+        );
+      }
+
+      const collection =
+        getChildVertex(graph, ["$0Coll"], field.meta).vertex?.["P"]?.["name"] ||
+        getValueFromVertexOrKey(field.meta.P.props, "collection");
+      if (!collection) {
+        return [];
+      }
+
+      const res = await getSelectionOptionsMGCall(
+        [field.data as Vertex],
+        collection,
+      );
+
+      if (!res.error) {
+        setGraphData(graph, setGraph, res.graph);
+        return (
+          getSelectionOptions(
+            graph,
+            setGraph,
+            [field.data as Vertex],
+            collection,
+          ).vertexes || []
+        );
+      } else {
+        return [];
+      }
+    }
+  });
 
   function getComponent() {
     let direction = field.meta.P.dir;
@@ -254,14 +266,16 @@ export function SelectInputField(
     return field.component;
   }
 
-  const onChangeSelect = (e: any, isRemove: any) => {
+  const onChangeSelect = (e: Vertex[], isRemove: any) => {
     // TODO: ensure this working for multiselect
-    let data: number[] | number;    
+    let data: number[] | number;
     let optionvalue: any;
-    if (isRemove) {
+    if (isRemove && getComponent() === "SelectBox") {
       data = [];
-    } else {
+    } else if (getComponent() === "SelectBox"){
       data = e[0].id;
+    } else {
+      data = e.map((e) => e.id);
     }
     runWithOwner(outerOwner, () => {
       batch(() => {
@@ -288,30 +302,37 @@ export function SelectInputField(
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-              graph,
-              setGraph,
-              field.txnId!,
-              field.meta,
-              props.data!,
-              data,
-              Ws,
-              false,
-            );
+                graph,
+                setGraph,
+                field.txnId!,
+                field.meta,
+                props.data!,
+                data,
+                Ws,
+                false,
+              );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "items")) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-              graph,
-              setGraph,
-              field.txnId!,
-              field.meta,
-              props.data!,
-              data,
-              Ws,
-              false,
-            );
+                graph,
+                setGraph,
+                field.txnId!,
+                field.meta,
+                props.data!,
+                data,
+                Ws,
+                false,
+              );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "inward")) {
-          setParentValue(graph, setGraph, field.txnId || 0, props.data!, field.meta, data);
+          setParentValue(
+            graph,
+            setGraph,
+            field.txnId || 0,
+            props.data!,
+            field.meta,
+            data,
+          );
         } else {
           setSelectionValue(
             field.txnId || 0,
@@ -323,7 +344,7 @@ export function SelectInputField(
           );
         }
         onChangeHandler(
-          field. txnId || 0,
+          field.txnId || 0,
           formData?.formData,
           props.data!,
           field.meta,
@@ -348,8 +369,10 @@ export function SelectInputField(
                     graph,
                     setGraph,
                     [graph.vertexes[vertexId]],
-                    getValueFromVertexOrKey(field.meta.P.props, "displayExpr") ||
-                    `::'P.${IdAttr}'`,
+                    getValueFromVertexOrKey(
+                      field.meta.P.props,
+                      "displayExpr",
+                    ) || `::'P.${IdAttr}'`,
                   ).vertexes
                 }
               </>
@@ -358,18 +381,22 @@ export function SelectInputField(
         }
       >
         <MultiSelectField
-          selectionLimit={getComponent() === 'SelectBox' ? 1 : undefined}
+          selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
           displayValueChild="displayName"
           displayValueParent="P"
-          selectedValues={selectedValue(field.meta, field.data as Vertex, graph).map((id) => {
+          selectedValues={() => selectedValue(
+            field.meta,
+            field.data as Vertex,
+            graph
+          ).map((id) => {
             return graph.vertexes[id];
           })}
           disable={field.disabled!}
           options={selectOptions()}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
-          placeholder={`${field.title}`} />
-
+          placeholder={`${field.title}`}
+        />
       </Show>
       {/* Todo: think about validations */}
     </div>

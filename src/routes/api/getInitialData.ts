@@ -1,9 +1,9 @@
 import { getDriver, isIntegerId } from "~/cypher_api/server/driver";
+import { Session, types } from "neo4j-driver";
 import {
-  Session,
-  types
-} from "neo4j-driver";
-import { convertNodeToJson, convertRelationshipToJson } from "../../lib/convertNodeToJson";
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "../../lib/convertNodeToJson";
 
 type JsonData = Record<string, any>;
 
@@ -58,8 +58,8 @@ export async function fetchFromMGAndSaveToArray(
   nodeObj: JsonData,
   relationshipObj: JsonData,
 ): Promise<{
-  nodeObj: JsonData,
-  relationshipObj: JsonData
+  nodeObj: JsonData;
+  relationshipObj: JsonData;
 }> {
   try {
     const result = await session.run(query, params);

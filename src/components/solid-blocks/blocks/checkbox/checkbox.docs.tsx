@@ -71,7 +71,9 @@ CheckboxProps {
           checked={checked()}
           disabled={disabled()}
           aria-invalid={invalid() || undefined}
-          setChecked={(checked) => setEvents((e) => `setChecked(${checked})\n${e}`)}
+          setChecked={(checked) =>
+            setEvents((e) => `setChecked(${checked})\n${e}`)
+          }
         >
           {" "}
           Example Checkbox{" "}

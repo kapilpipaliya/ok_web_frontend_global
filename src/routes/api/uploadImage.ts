@@ -5,7 +5,7 @@ import { getQuery, HTTPEvent, readMultipartFormData } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {
-  const subdomain = getSubDomain(request.headers.get("host")!);
+  const subdomain = await getSubDomain(request.headers.get("host")!);
   const query = getQuery(event);
   const fileId = query["name"];
   const username = query["username"];

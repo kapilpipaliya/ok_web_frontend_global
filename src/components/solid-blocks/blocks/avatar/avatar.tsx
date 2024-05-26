@@ -15,12 +15,14 @@ const char =
 const initialsRegexp = new RegExp(`^.*?(${char})(?:.*\\s+\\S*?(${char}))?.*$`);
 
 export function getInitials(name: string) {
-  return name
-    // remove superfluous spaces and stuff in brackets
-    .replace(/^\s+|\(.*?\)|\{.*?\}|\[.*\]|<.*?>|\s+$/g, "")
-    // find first char of the first name and the last name
-    .replace(initialsRegexp, "$1$2")
-    .toUpperCase();
+  return (
+    name
+      // remove superfluous spaces and stuff in brackets
+      .replace(/^\s+|\(.*?\)|\{.*?\}|\[.*\]|<.*?>|\s+$/g, "")
+      // find first char of the first name and the last name
+      .replace(initialsRegexp, "$1$2")
+      .toUpperCase()
+  );
 }
 
 export function Avatar(props: AvatarProps) {
@@ -31,7 +33,8 @@ export function Avatar(props: AvatarProps) {
     "name",
     "fallback",
   ]);
-  const initials = createMemo(() => local.name ? getInitials(local.name) : ""
+  const initials = createMemo(() =>
+    local.name ? getInitials(local.name) : "",
   );
 
   if (local.img) {
@@ -97,7 +100,8 @@ export function AvatarBadge(props: AvatarBadgeProps) {
     <span
       classList={mergeProps(local.classList ?? {}, { "sb-badge": true })}
       {...spanProps}
-      style={composedStyle} />
+      style={composedStyle}
+    />
   );
 }
 
@@ -111,6 +115,7 @@ export function AvatarGroup(props: AvatarGroupProps) {
       {...props}
       classList={mergeProps(props.classList ?? {}, { "sb-avatar": true })}
       role="group"
-      aria-haspopup={Array.isArray(props.children) && props.children.length > 3} />
+      aria-haspopup={Array.isArray(props.children) && props.children.length > 3}
+    />
   );
 }
