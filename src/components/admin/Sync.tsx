@@ -8,13 +8,16 @@ import {
   onCleanup,
 } from "solid-js";
 import PageHeader from "../custom/Breadcumb";
-import { getUsers } from "./adminFunctions";
+import { getUsers } from "../../cypher_api/functions/adminFunctions";
 import { Node } from "~/cypher_api/functions/Type";
 import { syncNodesMGCall } from "~/cypher_api/functions/sync";
 import { useToast } from "../custom/Toast";
+
+// TODO: Full Navbar Sync from super
 const transferNodes = [
   { key: "Component", value: "Comp" },
   { key: "Data Type", value: "DataType" },
+  { key: "Navigation", value: "Nav" },
 ];
 
 export function SyncComopnent() {

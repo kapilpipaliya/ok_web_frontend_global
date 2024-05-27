@@ -9,6 +9,7 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 import CustomModal from "./CommonDialog";
 import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
+import MultiSelectField from "./MultiSelect";
 
 type Option =
   | Record<string, string | number | boolean | unknown>
@@ -178,21 +179,19 @@ export function ExpressionBuilder(props: {
                   </div>
                   <div class={"flex ai:center jc:space-between"}>
                     <div class={"flex"}>
-                      {/* <MultiSelect
-                      isObject
-                      displayValueParent="P"
-                      displayValueChild="name"
-                      options={Object.keys(unops).map((key) => ({
-                        id: key,
-                        P: { name: key },
-                      }))}
-                      avoidHighlightFirstOption
-                      placeholder={"Unary"}
-                      onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
-                      onRemove={(e) => onUnaryOperatorChange(index())}
-                      customCloseIcon={<Icon icon={"ic:round-close"} />}
-                      selectionLimit={1}
-                      singleSelect /> */}
+                      <MultiSelectField
+                        selectedValues={() => []}
+                        displayValueParent="P"
+                        displayValueChild="name"
+                        options={Object.keys(unops).map((key) => ({
+                          id: key,
+                          P: { name: key },
+                        }))}
+                        placeholder={"Unary"}
+                        onSelect={(e) => onUnaryOperatorChange(index(), e[0])}
+                        onRemove={(e) => onUnaryOperatorChange(index())}
+                        selectionLimit={1}
+                      />
                     </div>
                     <TextField
                       labelClass={"w:100% mr:.5rem ml:.5rem"}
@@ -215,21 +214,19 @@ export function ExpressionBuilder(props: {
                       }
                     />
                     <div class={"flex"}>
-                      {/* <MultiSelect
-                      isObject
-                      displayValueParent="P"
-                      displayValueChild="name"
-                      options={Object.keys(binops).map((key) => ({
-                        id: key,
-                        P: { name: key },
-                      }))}
-                      avoidHighlightFirstOption
-                      placeholder={"Binary"}
-                      onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
-                      onRemove={(e) => onBinaryOperatorChange(index())}
-                      customCloseIcon={<Icon icon={"ic:round-close"} />}
-                      selectionLimit={1}
-                      singleSelect /> */}
+                      <MultiSelectField
+                        selectedValues={() => []}
+                        displayValueParent="P"
+                        displayValueChild="name"
+                        options={Object.keys(binops).map((key) => ({
+                          id: key,
+                          P: { name: key },
+                        }))}
+                        placeholder={"Binary"}
+                        onSelect={(e) => onBinaryOperatorChange(index(), e[0])}
+                        onRemove={(e) => onBinaryOperatorChange(index())}
+                        selectionLimit={1}
+                      />
                     </div>
                   </div>
                 </div>

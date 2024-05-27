@@ -8,7 +8,7 @@ import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 import { Config } from "@master/css";
 import { defineConfig } from "@solidjs/start/config";
-import NotFound401 from "./pages/not-found/401";
+import NotAuthorized401 from "./pages/not-found/NotAuthorized401";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -31,16 +31,12 @@ export default function App() {
               <MetaProvider>
                 <div id="popup-root" />
                 <Suspense fallback={<LoaderNew />}>
-                  <ErrorBoundary fallback={(error) => {
+                  {/* <ErrorBoundary fallback={(error) => {
+                    return <div>Something went wrong: {error.message}</div>;
                     
-                    if (error.message === 'Not Authorized') {
-                      return <NotFound401 />;
-                    } else {
-                      return <div>Something went wrong: {error.message}</div>;
-                    }
                   }}>
-                    {props.children}
-                  </ErrorBoundary>
+                </ErrorBoundary> */}
+                {props.children}
                 </Suspense>
 
                 <Show when={loadingSite[0]()} fallback={<Toaster />}>

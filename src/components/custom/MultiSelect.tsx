@@ -18,7 +18,7 @@ const MultiSelectField = (props: {
   onRemove: (arg0: any, arg1: any) => void;
   onSelect: (arg0: any, arg1: any) => void;
   placeholder: string | undefined;
-  disable: boolean | undefined;
+  disable?: boolean | undefined;
   displayValueParent?: string | undefined;
   displayValueChild?: string | undefined;
   selectionLimit?: number | undefined;
@@ -74,6 +74,7 @@ const MultiSelectField = (props: {
     }
     return typeof option === "object" ? option.value : option;
   };
+  // todo; label and value has same logic
   const getOptionLabel = (option: {
     [x: string]: { [x: string]: any };
     label: any;
@@ -98,6 +99,7 @@ const MultiSelectField = (props: {
     } else {
       if (props.selectionLimit && selected().length >= props.selectionLimit) {
         showErrorToast("Selection limit reached");
+        setDropdownVisible(false);
         return; // Exit if selection limit is reached
       }
       const selectedOption = (props.options || []).find(
@@ -147,7 +149,7 @@ const MultiSelectField = (props: {
     display: dropdownVisible() ? "block" : "none",
   });
   const optionStyle = "padding: 8px; cursor: pointer;";
-  const optionSelectedStyle = "background: #ddd;";
+  const optionSelectedStyle = "background: #ddd;opacity: 0.5;";
 
   // Filter options based on input value
   const filteredOptions = createMemo(() => {
@@ -210,6 +212,7 @@ const MultiSelectField = (props: {
         class="dropdown"
         menuButton={btnEl}
         open={dropdownVisible}
+        animation={{ name: "fade", appendToElement: "menuPopup" }}
         setOpen={setDropdownVisible}
         mount="body"
         cursorKeys

@@ -178,11 +178,9 @@ export async function evalGlobalColl(
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
-  console.log("EdgeType -> ", edgeType);
 
   const { type, filter, isMultiple, skip, limit } = calculateFilter(edgeType);
-  console.log("Filter -> ", filter);
-  console.log("---------------");
+
   const session = (await getDriver(subDomain)).session();
 
   try {

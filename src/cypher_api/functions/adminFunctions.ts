@@ -14,6 +14,7 @@ export async function getUsers() {
     if (res.records.length > 0) {
       const records = res.records.map((record) => {
         const vertex = record.get("u");
+        // todo: use convertNodeToJson Function
         return {
           id: vertex.identity,
           L: vertex.labels,

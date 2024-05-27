@@ -1,4 +1,3 @@
-import { API, DataFetcher } from "~/components/api/DataFetcher";
 import {
   DraggedVertexContext,
   HiddenNodesContext,
@@ -29,9 +28,7 @@ export default function Page() {
   }>({ activeItem: null, position: null });
 
   return (
-    <DataFetcher
-      fetchData={API.getFormDataUrl}
-      renderContent={
+    
         <HoverIdContext.Provider value={hoverId}>
           <SelectedCollContext.Provider value={selectedColl}>
             <SelectedIdContext.Provider value={selectedId}>
@@ -53,7 +50,6 @@ export default function Page() {
             </SelectedIdContext.Provider>
           </SelectedCollContext.Provider>
         </HoverIdContext.Provider>
-      }
-    />
+      
   );
 }

@@ -1,16 +1,14 @@
 import { For, Match, Show, Switch } from "solid-js";
-import { StyleCSSComponents } from "~/components/css-editor/StyleCSSComponents";
+import { ButtonGroups } from "~/components/css-properties/css-components/ButtonGroups";
+import { ColorPickerInput } from "~/components/css-properties/css-components/ColorPickerInput";
+import { DataEditWithCustomDialog } from "~/components/css-properties/css-components/DataEditWithCustomDialog";
+import { DisplaySelector } from "~/components/css-properties/css-components/DisplaySelector";
+import { FieldWithCustomBox } from "~/components/css-properties/css-components/FieldWithCustomBox";
+import { TextFieldWithSelect } from "~/components/css-properties/css-components/TextFieldWithSelect";
+import { ToggleButton } from "~/components/css-properties/css-components/ToggleButton";
+
 
 export function DynamicCSSComponent(props: { value: any }) {
-  const {
-    DisplaySelector,
-    ButtonGroups,
-    DataEditor,
-    ColorPickerInput,
-    ToggleButton,
-    FieldWithCustomProperty,
-    TextFieldWithSelectOption,
-  } = StyleCSSComponents();
   return (
     <Switch>
       <Match when={props.value.component === "colorPicker"}>
@@ -41,7 +39,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "textField"}>
-        <TextFieldWithSelectOption
+        <TextFieldWithSelect
           value={props.value.value}
           isAddToClass={props.value.isAddToClass ?? true}
           name={props.value.name}
@@ -56,7 +54,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "textFieldOptions"}>
-        <TextFieldWithSelectOption
+        <TextFieldWithSelect
           value={props.value.value}
           isAddToClass={props.value.isAddToClass ?? true}
           name={props.value.name}
@@ -98,7 +96,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
-        <FieldWithCustomProperty
+        <FieldWithCustomBox
           isLabelOnTop={props.value.isLabelOnTop}
           customProperty={props.value.customProperty}
           gridType={props.value.gridType}
@@ -111,7 +109,7 @@ export function DynamicCSSComponent(props: { value: any }) {
         />
       </Match>
       <Match when={props.value.component === "dataEditor"}>
-        <DataEditor
+        <DataEditWithCustomDialog
           dialogLabel={props.value.dialogLabel}
           fallback={props.value.fallback}
           name={props.value.name}

@@ -1,0 +1,502 @@
+import { createSignal } from "solid-js";
+import { sizeTypes, timesTypes } from "./cssContext";
+
+const Icons = {
+  visibility: {
+    yes: "solar:eye-broken",
+    no: "ant-design:eye-invisible-outlined",
+  },
+  flex: {
+    auto: "mi:close",
+    expand: "gravity-ui:chevrons-expand-horizontal",
+    collapse: "gravity-ui:chevrons-collapse-horizontal",
+  },
+  direction: {
+    horizontal: "majesticons:arrow-right-line",
+    horizontalReverse: "majesticons:arrow-left-line",
+    vertical: "majesticons:arrow-down-line",
+    verticalReverse: "majesticons:arrow-up-line",
+  },
+  justify: {
+    start: "solar:align-left-outline",
+    center: "solar:align-horizontal-center-outline",
+    end: "solar:align-right-outline",
+    spaceBetween: "material-symbols:align-space-between",
+    spaceAround: "material-symbols:align-space-around-rounded",
+    spaceEvenly: "material-symbols:align-justify-space-even-rounded",
+  },
+  align: {
+    stretch: "material-symbols:align-items-stretch-rounded",
+    start: "material-symbols:align-start-rounded",
+    center: "material-symbols:align-center-rounded",
+    end: "material-symbols:align-end-rounded",
+  },
+};
+
+const createSelectOptions = (name: string, label: string, options: any[], isLabelOnTop = false) => ({
+  name,
+  label,
+  component: "select",
+  options,
+  isLabelOnTop,
+});
+
+const createButtonGroupOptions = (name: string, label: string, iconOptions: any[], isLabelOnTop = true) => ({
+  name,
+  label,
+  component: "buttonGroups",
+  isLabelOnTop,
+  options: iconOptions.map(({ key, value, tooltip }) => ({ key, value, tooltip, icon: true })),
+});
+
+const createGridOptions = (name: string, label: string, children: any) => ({
+  name,
+  padding: "5px",
+  gap: "5px 10px",
+  component: "grid",
+  "grid-template-columns": "repeat(2, auto)",
+  children,
+});
+
+const GeneralSection = {
+  visibility: {
+    component: "toggleButton",
+    label: "Visibility",
+    name: "visibility",
+    options: [
+      { key: Icons.visibility.yes, value: "visible", icon: true },
+      { key: Icons.visibility.no, value: "hidden", icon: true },
+    ],
+  },
+};
+
+const LayoutSection = {
+  display: createSelectOptions("display", "Display", ["block", "inline", "inline block", "flex", "none"]),
+  direction: createButtonGroupOptions("flex-direction", "Direction", [
+    { key: Icons.direction.horizontal, value: "row" },
+    { key: Icons.direction.horizontalReverse, value: "row-reverse" },
+    { key: Icons.direction.vertical, value: "column" },
+    { key: Icons.direction.verticalReverse, value: "column-reverse" },
+  ]),
+  justify: createButtonGroupOptions("justify-content", "Justify", [
+    { key: Icons.justify.start, value: "start" },
+    { key: Icons.justify.center, value: "center" },
+    { key: Icons.justify.end, value: "end" },
+    { key: Icons.justify.spaceAround, value: "space-around" },
+    { key: Icons.justify.spaceBetween, value: "space-between" },
+    { key: Icons.justify.spaceEvenly, value: "space-evenly" },
+  ]),
+  alignFlex: createButtonGroupOptions("align-items", "Align", [
+    { key: "material-symbols:align-start-rounded", value: "flex-start" },
+    { key: "material-symbols:align-center-rounded", value: "center" },
+    { key: "material-symbols:align-end-rounded", value: "flex-end" },
+    { key: "material-symbols:align-items-stretch-rounded", value: "stretch" },
+  ]),
+  gap: {
+    name: "gap",
+    type: "number",
+    isLabelOnTop: true,
+    label: "Gap",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Column", name: "gap-x" },
+      { label: "Row", name: "gap-y" },
+    ],
+    mainFieldType: "textFieldOptions",
+    component: "fieldWithCustomProperty",
+    options: sizeTypes,
+  },
+  flexWrap: createSelectOptions("flex-wrap", "Flex wrap", [
+    { label: "No Wrap", value: "nowrap" },
+    { label: "Wrap", value: "wrap" },
+    { label: "Reverse Wrap", value: "wrap-reverse" },
+  ]),
+  divider4: { title: "Flex Child", component: "divider" },
+  flex: createButtonGroupOptions("flex", "Flex", [
+    { key: "mdi:close", value: "0 0 auto", tooltip: "auto" },
+    { key: Icons.flex.expand, value: "1 1 0%", tooltip: "expand" },
+    { key: Icons.flex.collapse, value: "0 1 auto", tooltip: "collapse" },
+    { key: "customIcon", value: "custom", tooltip: "Custom" },
+  ]),
+  alignSelf: createButtonGroupOptions("align-self", "Align", [
+    { key: Icons.flex.auto, value: "auto" },
+    { key: Icons.align.start, value: "flex-start" },
+    { key: Icons.align.center, value: "center" },
+    { key: Icons.align.end, value: "flex-end" },
+    { key: Icons.align.stretch, value: "stretch" },
+  ]),
+  order: { name: "order", label: "Order", type: "number", component: "textFieldOptions" },
+};
+
+const SizeSection = createGridOptions("size Grid", "Size", [
+  { name: "height", type: "number", isLabelOnTop: true, label: "Height", component: "textFieldOptions", options: sizeTypes },
+  { name: "width", type: "number", isLabelOnTop: true, label: "Width", component: "textFieldOptions", options: sizeTypes },
+  { name: "min-height", type: "number", isLabelOnTop: true, label: "Min height", component: "textFieldOptions", options: sizeTypes },
+  { name: "min-width", type: "number", isLabelOnTop: true, label: "Min width", component: "textFieldOptions", options: sizeTypes },
+  { name: "max-height", type: "number", isLabelOnTop: true, label: "Max height", component: "textFieldOptions", options: sizeTypes },
+  { name: "max-width", type: "number", isLabelOnTop: true, label: "Max width", component: "textFieldOptions", options: sizeTypes },
+]);
+
+const SpaceSection = {
+  padding: createGridOptions("padding", "Padding", [
+    { label: "Padding Top", name: "pt" },
+    { label: "Padding Left", name: "pl" },
+    { label: "Padding Right", name: "pr" },
+    { label: "Padding Bottom", name: "pb" },
+  ]),
+  margin: createGridOptions("margin", "Margin", [
+    { label: "Margin Top", name: "mt" },
+    { label: "Margin Left", name: "ml" },
+    { label: "Margin Right", name: "mr" },
+    { label: "Margin Bottom", name: "mb" },
+  ]),
+};
+
+const PositionSection = createSelectOptions("position", "Position", [
+  "static", "relative", "absolute", "fixed", "sticky"
+]);
+
+const TypographySection = {
+  fontFamily: createSelectOptions("font-family", "Font", [
+    "Arial Black", "Brush Script MT", "Comic Sans MS", "Courier New", "Georgia", "Helvetica", "Impact", "Lucida Sans Unicode", "Tahoma", "Times New Roman", "Trebuchet MS", "Verdana"
+  ], true),
+  colorPicker: {
+    name: "color",
+    label: "Color",
+    isLabelOnTop: true,
+    component: "colorPicker",
+  },
+  typography: createGridOptions("size Grid", "Typography", [
+    { name: "font-size", type: "number", isLabelOnTop: true, label: "Size", component: "textFieldOptions", options: sizeTypes },
+    {
+      name: "font-weight", label: "Weight", isLabelOnTop: true, component: "select", options: [
+        "thin", "extra-light", "light", "normal", "medium", "semi-bold", "bold", "extra-bold", "ultra-bold"
+      ]
+    },
+    { name: "line-height", type: "number", isLabelOnTop: true, label: "Line height", component: "textFieldOptions", options: sizeTypes },
+    { name: "letter-spacing", type: "number", isLabelOnTop: true, label: "Spacing", component: "textFieldOptions", options: sizeTypes },
+    { name: "text-align", label: "Align", isLabelOnTop: true, component: "select", options: ["left", "center", "right", "justify"] },
+    { name: "text-decoration", label: "Decoration", isLabelOnTop: true, component: "select", options: ["none", "underline", "overline", "line through"] },
+    { name: "text-transform", label: "Transform", isLabelOnTop: true, component: "select", options: ["none", "capitalize", "uppercase", "lowercase"] },
+    {
+      name: "direction", label: "Direction", isLabelOnTop: true, component: "select", options: [
+        { label: "RTL", value: "rtl" }, { label: "LTR", value: "ltr" }
+      ]
+    },
+  ]),
+  whiteSpace: createSelectOptions("white-space", "Breaking", [
+    { label: "Normal", value: "normal" },
+    { label: "No Wrap", value: "nowrap" },
+    { label: "Pre", value: "pre" },
+    { label: "Pre Wrap", value: "pre-wrap" },
+    { label: "Pre Line", value: "pre-line" },
+    { label: "Break Spaces", value: "break-spaces" },
+  ], true),
+};
+
+const BackgroundSection = {
+  background: {
+    name: "box-shadow",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Shadow",
+    fallback: "No Shadow Effects",
+    children: {
+      style: {
+        component: "toggleButton",
+        label: false,
+        name: "type",
+        options: [
+          { key: "Outside", value: "" },
+          { key: "Inside", value: "inset" },
+        ],
+      },
+      shadow: createGridOptions("grid", "Shadow", [
+        { name: "x-offset", label: "X Offset", isLabelOnTop: true, type: "number", isAddToClass: false, component: "textFieldOptions", options: sizeTypes },
+        { name: "y-offset", label: "Y Offset", isLabelOnTop: true, type: "number", isAddToClass: false, component: "textFieldOptions", options: sizeTypes },
+        { name: "blur", label: "Blur", isLabelOnTop: true, type: "number", isAddToClass: false, component: "textFieldOptions", options: sizeTypes },
+        { name: "spread", type: "number", label: "Spread", isLabelOnTop: true, isAddToClass: false, component: "textFieldOptions", options: sizeTypes },
+      ]),
+      data: {
+        name: "color",
+        label: "Shadow Color",
+        isLabelOnTop: true,
+        component: "colorPicker",
+      },
+    },
+    label: "Box Shadow",
+  },
+  backgroundColor: {
+    name: "background-color",
+    label: "Background Color",
+    isLabelOnTop: true,
+    component: "colorPicker",
+  },
+  clip: createSelectOptions("clip-path", "Clip", [
+    "border-box", "padding-box", "content-box", "fill-box", "stroke-box", "margin-box"
+  ]),
+};
+
+const BorderSection = {
+  borderRadius: {
+    name: "border-radius",
+    type: "number",
+    isLabelOnTop: true,
+    label: "Border Radius",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Top Left", name: "rtl" },
+      { label: "Top Right", name: "rtr" },
+      { label: "Bottom Right", name: "rbl" },
+      { label: "Bottom Bottom", name: "rbr" },
+    ],
+    mainFieldType: "textFieldOptions",
+    component: "fieldWithCustomProperty",
+    options: sizeTypes,
+  },
+  borderWidth: {
+    name: "border-width",
+    type: "number",
+    isLabelOnTop: true,
+    label: "Border Width",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Border Top", name: "border-top" },
+      { label: "Border Left", name: "border-left" },
+      { label: "Border Right", name: "border-right" },
+      { label: "Border Bottom", name: "border-bottom" },
+    ],
+    mainFieldType: "textFieldOptions",
+    component: "fieldWithCustomProperty",
+    options: sizeTypes,
+  },
+  borderStyle: {
+    name: "border-style",
+    type: "number",
+    isLabelOnTop: true,
+    label: "Border Style",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Border Top", name: "border-top" },
+      { label: "Border Left", name: "border-left" },
+      { label: "Border Right", name: "border-right" },
+      { label: "Border Bottom", name: "border-bottom" },
+    ],
+    mainFieldType: "select",
+    component: "fieldWithCustomProperty",
+    options: [
+      "none", "solid", "dotted", "dashed", "double", "groove", "Ridge", "inset", "outset"
+    ],
+  },
+  borderColor: {
+    name: "border-color",
+    type: "number",
+    isLabelOnTop: true,
+    label: "Border Color",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Border Top", name: "border-top" },
+      { label: "Border Left", name: "border-left" },
+      { label: "Border Right", name: "border-right" },
+      { label: "Border Bottom", name: "border-bottom" },
+    ],
+    mainFieldType: "colorPicker",
+    component: "fieldWithCustomProperty",
+  },
+};
+
+const EffectsSection = {
+  opacity: createGridOptions("size Grid", "Opacity", [
+    { name: "opacity", type: "number", isLabelOnTop: true, label: "Opacity", component: "textFieldOptions", options: sizeTypes },
+    {
+      name: "blend-mode", label: "Blend Mode", isLabelOnTop: true, component: "select", options: [
+        "normal", "multiply", "screen", "overlay", "darken", "lighten", "color dodge", "color burn", "hard light", "soft light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"
+      ]
+    },
+  ]),
+  cursors: createSelectOptions("cursor", "Cursor", [
+    "auto", "pointer", "copy", "crosshair", "grab", "grabbing", "help", "move", "text"
+  ], true),
+  divider: { component: "divider" },
+  boxShadow: {
+    name: "box-shadow",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Shadow",
+    fallback: "No Shadow Effects",
+    children: {
+      style: {
+        component: "toggleButton",
+        label: false,
+        name: "Style",
+        options: [
+          { key: "Outside", value: "" },
+          { key: "Inside", value: "inset" },
+        ],
+      },
+      shadow: createGridOptions("Shadow Grid", "Box Shadow", [
+        { name: "X Offset", label: "X Offset", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Y Offset", label: "Y Offset", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Blur", label: "Blur", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Spread", type: "number", label: "Spread", isLabelOnTop: true, component: "textFieldOptions", options: sizeTypes },
+      ]),
+    },
+    label: "Box Shadow",
+  },
+  textShadow: {
+    name: "text-shadow",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Shadow",
+    fallback: "No Shadow Effects",
+    children: {
+      shadow: createGridOptions("Shadow Grid", "Text Shadow", [
+        { name: "X Offset", label: "X Offset", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Y Offset", label: "Y Offset", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Blur", label: "Blur", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+        { name: "Spread", type: "number", label: "Spread", isLabelOnTop: true, component: "textFieldOptions", options: sizeTypes },
+      ]),
+    },
+    label: "Text Shadow",
+  },
+  filter: {
+    name: "filter",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Filter",
+    fallback: "No Filter Effects",
+    children: {
+      shadow: createGridOptions("Shadow Grid", "Filter", [
+        {
+          name: "type", label: "Type", isLabelOnTop: true, component: "select", options: [
+            "blur", "brightness", "contrast", "grayscale", "hue rotate", "invert", "saturate", "sepia"
+          ]
+        },
+        { name: "value", label: "Value", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+      ]),
+    },
+    label: "Filter",
+  },
+  backdropFilter: {
+    name: "backdrop-filter",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Backdrop Filter",
+    children: {
+      shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
+        {
+          name: "type", label: "Type", isLabelOnTop: true, component: "select", options: [
+            "blur", "brightness", "contrast", "grayscale", "hue rotate", "invert", "saturate", "sepia"
+          ]
+        },
+        { name: "value", label: "Value", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: sizeTypes },
+      ]),
+    },
+    label: "Backdrop Filter",
+  },
+  transition: {
+    name: "transition",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Transition",
+    fallback: "No transition",
+    children: {
+      type: createSelectOptions("type", "Type", [
+        "height", "width", "min height", "min width", "max height", "max width", "padding", "margin", "color", "font", "font size", "line height", "letter height", "border", "border radius", "background", "opacity", "box shadow", "text shadow", "filter", "backdrop filter", "transform", "all"
+      ], true),
+      easing: createSelectOptions("easing", "Easing", ["ease", "ease-in", "ease-in-out", "ease-out", "linear"], true),
+      shadow: createGridOptions("size Grid", "Transition", [
+        { name: "duration", label: "Duration", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: timesTypes },
+        { name: "delay", label: "Delay", isLabelOnTop: true, type: "number", component: "textFieldOptions", options: timesTypes },
+      ]),
+    },
+    label: "Transition",
+  },
+  transform: {
+    name: "transform",
+    component: "dataEditor",
+    openMenu: createSignal(null),
+    dialogLabel: "Adjust Transform",
+    children: {
+      shadow: createGridOptions("Grid", "Transform", [
+        {
+          name: "type", label: "Type", isLabelOnTop: true, component: "select", options: [
+            "move x", "move y", "move z", "rotate x", "rotate y", "rotate z", "scale", "scale x", "scale y", "scale z", "skew x", "skew y"
+          ]
+        },
+        { name: "value", type: "number", label: "Value", isLabelOnTop: true, component: "textFieldOptions", options: sizeTypes },
+      ]),
+    },
+    label: "Transform",
+  },
+  divider2: { component: "divider" },
+  transformOrigin: {
+    name: "transform-origin",
+    padding: "5px",
+    gap: "5px 10px",
+    align: "end",
+    type: "number",
+    "grid-template-columns": "1fr 25%",
+    isLabelOnTop: true,
+    label: "Transform Origin",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "Left", name: "transform-origin" },
+      { label: "Top", name: "transform-origin" },
+    ],
+    options: sizeTypes,
+    mainFieldType: "textFieldOptions",
+    component: "fieldWithCustomProperty",
+  },
+  overflow: {
+    name: "overflow",
+    padding: "5px",
+    gap: "5px 10px",
+    align: "end",
+    "grid-template-columns": "1fr 25%",
+    isLabelOnTop: true,
+    label: "Overflow",
+    gridType: "repeat(2,auto)",
+    customProperty: [
+      { label: "X", name: "overflow-x" },
+      { label: "Y", name: "overflow-y" },
+    ],
+    options: ["visible", "hidden", "scroll", "auto"],
+    mainFieldType: "select",
+    component: "fieldWithCustomProperty",
+  },
+  backface: {
+    component: "toggleButton",
+    label: "Backface",
+    isLabelOnTop: true,
+    name: "backface-visibility",
+    options: [
+      { key: "Visible", value: "visible" },
+      { key: "Hidden", value: "hidden" },
+    ],
+  },
+  divider4: { title: "Children transform", component: "divider" },
+  perspective: createGridOptions("size Grid", "Perspective", [
+    { name: "perspective", type: "number", isLabelOnTop: true, label: "Perspective", component: "textFieldOptions", options: sizeTypes },
+    {
+      name: "transform-style", label: "Type", isLabelOnTop: true, component: "buttonGroups", options: [
+        { key: "2D", value: "flat", tooltip: "2D" },
+        { key: "3D", value: "preserve-3d", tooltip: "3D" },
+      ]
+    },
+  ]),
+};
+
+const JSONSchema = {
+  General: GeneralSection,
+  Layout: LayoutSection,
+  Size: SizeSection,
+  Space: SpaceSection,
+  Position: PositionSection,
+  Typography: TypographySection,
+  Background: BackgroundSection,
+  Border: BorderSection,
+  Effects: EffectsSection,
+};
+
+export default JSONSchema;

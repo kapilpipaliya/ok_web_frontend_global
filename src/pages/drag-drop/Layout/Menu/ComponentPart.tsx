@@ -1,39 +1,68 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, Show, createEffect, createSignal, useContext } from "solid-js";
+import { For, Show, createEffect, createResource, createSignal, useContext } from "solid-js";
+import { useToast } from "~/components/custom/Toast";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { iconMap } from "~/lib/Utils";
+import { expressionString, iconMap } from "~/lib/Utils";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { setGraphData } from "~/lib/websocket/ws_events";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-
-  const data = () =>
-    getTreeData(graph, setGraph, {
-      collection: "g:'CompCategory'",
-      // TODO: Dont display "Form" Component
-      child: { collection: "->CompCategoryComp" },
-    });
-
-  /* Code to get menu data from server
-  const data2 = getTreeDataMGCall({
-    collection: "g:'CompCategory'",
-    // TODO: Dont display "Form" Component
-    child: { collection: "->CompCategoryComp" },
-  });
-  data2.then((data) => console.log(data));*/
-
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as ICon
+  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as 
+  const [isFetchingData, setIsFetchingData] = createSignal(true);
+  const { showErrorToast } = useToast();
+  let defaultData = [] as any[];
 
+  // Fetch data function
+  async function fetchData(): Promise<{
+    graph?: any;
+    data?: any;
+    error?: string;
+  }> {
+    try {
+      const data = await getTreeDataMGCall({
+        collection: expressionString({ coll: "CompCategory" }),
+        child: { collection: "->CompCategoryComp" },
+      });
+      return { graph: data.graph, data: data };
+    } catch (error: any) {
+      return { error: error.message };
+    }
+  }
+
+  // Create a resource for data fetching
+  const [data] = createResource(fetchData);
+
+  // Create effect to handle data changes
   createEffect(() => {
-    if (data().length) {
-      setFilteredData(data());
+    setIsFetchingData(true);
+    if (data()) {
+      const result = data();
+      if (result?.error) {
+        showErrorToast(result.error);
+      } else {
+        if (result?.graph) {
+          setGraphData(graph, setGraph, result.graph);
+          const data2 = getTreeData(graph, setGraph, {
+            collection: expressionString({ coll: "CompCategory" }),
+            child: { collection: "->CompCategoryComp" },
+          });
+          defaultData = data2;
+          console.log(data2);
+
+          setFilteredData(data2);
+          setIsFetchingData(false);
+        }
+      }
     }
   });
+ 
+
   const titleStyle = {
     "font-size": "17px",
     "font-weight": "bolder",
@@ -53,16 +82,16 @@ export function ComponentPart() {
   // Function to get icon by category
   const updateFilteredData = () => {
     if (!searchQuery()) {
-      setFilteredData(data);
+      setFilteredData(defaultData);
     } else {
-      const filteredData = data()
+      const filteredData = defaultData
         .map((item) => {
           // Filter the children of each item based on the searchQuery
-          const category = data().find((i) => i.name === item.name);
+          const category = defaultData.find((i) => i.name === item.name);
 
           if (category) {
             // Create a copy of the category's children array
-            const filteredChildren = category.children.filter((child: any) => {
+            const filteredChildren = category.children && category.children.filter((child: any) => {
               return (
                 child.name &&
                 child.name.toLowerCase().includes(searchQuery().toLowerCase())
@@ -78,7 +107,7 @@ export function ComponentPart() {
             return item;
           }
         })
-        .filter((item) => item.children.length > 0); // Filter out items with no matching children
+        .filter((item) => item.children && item.children.length > 0); // Filter out items with no matching children
 
       setFilteredData(filteredData);
     }

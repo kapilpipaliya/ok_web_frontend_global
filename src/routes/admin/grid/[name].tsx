@@ -1,5 +1,4 @@
 import { UserDashBoardGrid } from "~/pages/dynamic/UserDashBoardGrid";
-import { API, DataFetcher } from "~/components/api/DataFetcher";
 import { breadcrumbData } from "~/lib/Utils";
 import PageHeader from "~/components/custom/Breadcumb";
 
@@ -10,10 +9,7 @@ export default function tableDashboard() {
         title="Dashboard"
         breadcrumb={[...breadcrumbData, { name: "Dashboard" }]}
       />
-      <DataFetcher
-        fetchData={API.getPagesDataUrl}
-        renderContent={<UserDashBoardGrid />}
-      />
+      <UserDashBoardGrid />
     </>
   );
 }

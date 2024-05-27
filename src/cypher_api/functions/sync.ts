@@ -158,6 +158,8 @@ async function addNodeEdges(
         });
       }
     }
+  } else if (nodeType === "Nav") {
+    // TODO
   }
 }
 

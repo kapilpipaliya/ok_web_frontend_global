@@ -15,11 +15,9 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, SetStoreFunction, Store } from "solid-js/store";
-import { toTitle } from "case-switcher-js";
 import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
 import {
-  getChildVertexes,
-  getSelectionOptions,
+  getChildVertexes
 } from "~/lib/graph/get/sync/traverse";
 import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
 import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
@@ -46,7 +44,6 @@ import {
 } from "@solidjs/router";
 import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
-import { DynamicComponent } from "./DynamicComponent";
 import { FormMetaData } from "~/lib/Type";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
@@ -55,12 +52,12 @@ import {
   getExportCodeAsync,
   getFormMetaDataAsync,
 } from "~/lib/graph/get/async/graph_functions";
-import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
 import { PageConfigContext } from "~/lib/contexts";
+import { FormGroup } from "./form/FormGroup";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -72,15 +69,6 @@ interface AbstractSingleFormProps
   isDialogContext?: boolean;
 }
 
-interface FormGroupProps {
-  metaAttributes: Vertex[];
-  vertex: Vertex;
-  labelPrefix: String;
-  graph: Store<GraphInterface>;
-  setGraph: SetStoreFunction<GraphInterface>;
-  txnId: number;
-  isLoginRegister?: string;
-}
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -95,6 +83,20 @@ export interface DynamicFormProps {
   isLoginRegister?: string;
   doMount?: boolean;
 }
+type FormData = {
+  cleanUpConfig: () => {
+    [key: string]: any;
+  };
+  txnId: number;
+  formMeta: Vertex;
+  formData: Vertex;
+  tabs: string[];
+  groupByTabsAndGroup: {
+    [tab: string]: {
+      [group: string]: Vertex[];
+    };
+  };
+};
 
 export function AbstractSingleForm(props: AbstractSingleFormProps) {
   const [formData, setFormData] = createStore(
@@ -159,22 +161,11 @@ export function DynamicForm(props: DynamicFormProps) {
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
-
+ 
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
-  } as {
-    cleanUpConfig: () => { [key: string]: any };
-    txnId: number;
-    formMeta: Vertex;
-    formData: Vertex;
-    tabs: string[];
-    groupByTabsAndGroup: {
-      [tab: string]: {
-        [group: string]: Vertex[];
-      };
-    };
-  });
+  } as FormData);
   const [activeTab, setActiveTab] = createSignal("main");
 
   const fetchData = async () => {
@@ -334,7 +325,7 @@ export function DynamicForm(props: DynamicFormProps) {
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => {},
+          onError: (error) => { },
         });
       }
       submit = true;
@@ -361,39 +352,6 @@ export function DynamicForm(props: DynamicFormProps) {
 
   const [popup, setPopup] = createSignal(false);
   const [discradPopup, setDiscradPopup] = createSignal(false);
-  const [importCode, setImportCode] = createSignal("");
-  const importCodeFn = () => {
-    // importNavigation(importCode(), formData);
-  };
-  let popupConfig: any;
-
-  const ImportComponent = () => {
-    return (
-      <textarea
-        class="h:95% w:100%"
-        value={importCode()}
-        onchange={(e) => setImportCode(e.target.value)}
-      />
-    );
-  };
-  const PreviewCode = () => {
-    return (
-      <pre>
-        {stringify(
-          getExportCodeAsync(graph, formData.formMeta, formData.formData),
-        )}
-      </pre>
-    );
-  };
-
-  const onImportClick = (data: any) => {
-    // importCodeFn();
-    setPopup(true);
-  };
-
-  const onExportClick = (data: any) => {
-    setPopup(true);
-  };
 
   // https://github.com/solidjs/solid-router
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
@@ -488,42 +446,7 @@ export function DynamicForm(props: DynamicFormProps) {
                           style={{ "max-width": "100%" }}
                         >
                           <Show when={props.importExportButtons ?? true}>
-                            <div
-                              style={{
-                                "justify-content": "end",
-                                "margin-bottom": "10px",
-                                display: "flex",
-                              }}
-                            >
-                              <GenericField
-                                meta={
-                                  {
-                                    P: {
-                                      component: "Button",
-                                      props: {
-                                        children: "Import",
-                                        variant: "outlined",
-                                        onClick: () => onImportClick,
-                                      },
-                                    },
-                                  } as any
-                                }
-                              />
-                              <GenericField
-                                meta={
-                                  {
-                                    P: {
-                                      component: "Button",
-                                      props: {
-                                        children: "Export",
-                                        onClick: () => onExportClick,
-                                        class: " b:blue",
-                                      },
-                                    },
-                                  } as any
-                                }
-                              />
-                            </div>
+                            {ImportExportButtons()}
                           </Show>
 
                           <div class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
@@ -617,97 +540,46 @@ export function DynamicForm(props: DynamicFormProps) {
       </Match>
     </Switch>
   );
-}
 
-// group of the fields
-export function FormGroup(props: FormGroupProps) {
-  return (
-    <For each={props.metaAttributes}>
-      {(metaVertex) => {
-        const id = `${props.vertex.id + metaVertex.P[IdAttr] + "Label"}`;
-        const component = createMemo(() =>
-          getComponentForCollRow(
-            metaVertex,
-            props.vertex,
-            props.graph,
-            props.setGraph,
-          ),
-        );
-        const Label = () => (
-          <>
-            {toTitle(
-              metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
-            )}
-          </>
-        );
-        const Content = () => (
-          <DynamicComponent
-            component={component()}
-            meta={metaVertex}
-            title={toTitle(
-              metaVertex.P.displayName ||
-                metaVertex.P[IdAttr] ||
-                metaVertex.P.key ||
-                "",
-            )}
-            data={props.vertex}
-            // setValue={props.setValue}
-            // disabled={props.d}
-            txnId={props.txnId}
-            isRealTime={false}
-          />
-        );
-        // TODO: Make permissions working.
-        // const permissions = metaVertex.P.metaId
-        //   ? getPermissions(props.graph.vertexes[metaVertex.P.metaId])
-        //   : getPermissions(metaVertex);
-
-        return (
-          <Switch>
-            <Match when={component() === "Table"}>
-              {/* <h3><Label/></h3> */}
-              <Content />
-            </Match>
-
-            <Match when={component() === "CollectionOption"}>
-              <Content />
-            </Match>
-
-            <Match when={true}>
-              <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
-                <div id={id}>
-                  {props.labelPrefix as string} <Label />
-                </div>
-              </div>
-              <div>
-                <Content />
-              </div>
-            </Match>
-          </Switch>
-        );
+  function ImportExportButtons() {
+    return <div
+      style={{
+        "justify-content": "end",
+        "margin-bottom": "10px",
+        display: "flex",
       }}
-    </For>
-  );
-}
-
-export function getComponentForCollRow(
-  metaVertex: Vertex,
-  data: Vertex,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (!metaVertex.P.component) {
-    return getCollAttrComp(metaVertex, graph)?.P[IdAttr];
-  } else if (metaVertex.P.component.includes("-")) {
-    return getSelectionOptions(graph, setGraph, [data], metaVertex.P.component)
-      .vertexes;
-  } else {
-    return metaVertex.P.component as string;
+    >
+      <GenericField
+        meta={{
+          P: {
+            component: "Button",
+            props: {
+              children: "Import",
+              variant: "outlined",
+              onClick: () => {
+                setPopup(true);
+              },
+            },
+          },
+        } as any} />
+      <GenericField
+        meta={{
+          P: {
+            component: "Button",
+            props: {
+              children: "Export",
+              onClick: () => {
+                setPopup(true);
+              },
+              class: " b:blue",
+            },
+          },
+        } as any} />
+    </div>;
   }
 }
+
+
 
 function getTabsWidth(group: Vertex[]) {
   return group.filter((attribute) => attribute.P.component === "Table").length

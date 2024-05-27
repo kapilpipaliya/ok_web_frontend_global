@@ -13,12 +13,12 @@ import {
 } from "~/lib/graph/mutate/import";
 import {
   AbstractSingleForm,
-  getComponentForCollRow,
 } from "~/components/dynamic/components/DynamicForm";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { toTitle } from "case-switcher-js";
-import { ClassDesignTab } from "~/components/css-editor/PropertiesTabs";
+import { ClassDesignTab } from "~/components/css-properties/PropertiesTabs";
+import { getComponentForCollRow } from "~/components/dynamic/components/form/FormGroup";
 
 export function AllForms() {
   const [graph, setGraph] = useContext(GraphContext)!;

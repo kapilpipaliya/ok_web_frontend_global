@@ -515,7 +515,7 @@ export function TableInputField(
             class={" w:80vw overflow:auto b:1px|solid|#37c r:10 m:2"}
             style={{ "scrollbar-width": "thin" }}
           >
-            <table class="styled-table b:none">
+            <table class="styled-table b:none w:-webkit-fill-available">
               <thead>
                 <tr
                   style={{

@@ -1,10 +1,10 @@
-import NotFound from "~/pages/not-found/404";
+import NotFound404 from "~/pages/not-found/NotFound404";
 
 
 export default function Notfound() {
   return (
     <div>
-      <NotFound />
+      <NotFound404 />
     </div>
   );
 }
