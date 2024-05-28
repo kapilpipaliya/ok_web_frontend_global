@@ -9,7 +9,7 @@ interface CustomModalProps {
   title?: string | JSX.Element;
   customTitle?: JSX.Element;
   body: JSX.Element;
-  footer: (toggle: Setter<boolean>) => JSX.Element;
+  footer: (setOpen: Setter<boolean>) => JSX.Element;
   dialogClass: string;
   bodyStyle?: JSX.CSSProperties;
   openButton?: boolean;

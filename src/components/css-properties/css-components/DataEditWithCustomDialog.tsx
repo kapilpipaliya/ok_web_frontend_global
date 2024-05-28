@@ -3,6 +3,7 @@ import { Accessor, JSXElement, Setter, useContext, createSignal, Show, For, crea
 import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { CssEditorContext } from "../cssContext";
 import { ContainerLabel } from "./CssUtils";
+import "~/css/componentUtilCSS.css";
 
 export const DataEditWithCustomDialog = (props: {
     label: any;

@@ -1,6 +1,7 @@
 import { createContext } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
 
+// Note: in future it will be string or object.
 export type Id = number;
 
 export const IdAttr = "name";
@@ -25,9 +26,12 @@ export interface Edge {
 
 export type VertexMap = { [key: string]: Vertex };
 export type EdgeMap = { [key: string]: Edge };
+
 // implement changes feed like: https://pouchdb.com/guides/changes.html
 // '_local/' prefix will not be synced, will not hae revision history, but need to provide the current _rev when you update local docs, just like with regular docs.
+
 // this is the In-Memory Graph Store, entire application will be based on this to work offline.
+
 // Saving a store to local storage serializes it -> accesses every property -> subscribes to the whole store
 // https://github.com/solidjs-community/solid-primitives/tree/main/packages/storage
 export interface GraphInterface {

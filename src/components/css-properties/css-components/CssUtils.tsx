@@ -1,5 +1,6 @@
 import { IconifyIconProps, Icon } from "@iconify-icon/solid";
 import { splitProps, Show, JSXElement } from "solid-js";
+import "~/css/componentUtilCSS.css";
 
 export const IconifyIcon = (props: IconifyIconProps) => {
     const [selected, restProps] = splitProps(props, [

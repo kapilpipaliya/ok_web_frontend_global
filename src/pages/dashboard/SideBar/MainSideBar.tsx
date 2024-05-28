@@ -18,7 +18,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
       style={`display: flex; padding-bottom: 2rem; flex-direction: column; align-items: center; width: 4rem; height: 100vh`}
     >
       <nav style="display: flex; margin-top: 1rem; padding-top: .5rem; flex-direction: column; flex: 1 1 0%; align-items: center;">
-        <a href="#">
+        <a href="/">
           <img style="height: 35px; " src={logo} alt="logo" />
         </a>
         <div class="flex flex-direction:column gap:10 mt:20">

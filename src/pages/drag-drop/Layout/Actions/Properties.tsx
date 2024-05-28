@@ -40,8 +40,7 @@ import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
-export function Properties(props: {}) {
-  const [isPropertiesOpen, toggleIsPropertiesOpen] = useExpansion(true);
+export function Properties(props: { setShowDrawer ?: any }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
@@ -428,7 +427,7 @@ export function Properties(props: {}) {
             // passed setValue when we have a string value in select field
             isRealTime={false}
           />
-          <span>Expression:</span>
+          <span class="float:left mt:5">Expression:</span>
           <GenericInputField
             txnId={txnId}
             title={""}
@@ -444,34 +443,36 @@ export function Properties(props: {}) {
     return (
       <>
         <Show when={selectedId() !== -1}>
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "Button",
-                  props: {
-                    children: "Rules",
-                    class: "mb:5",
-                    onClick: toggleRulesModal,
+          <div class="flex jc:start">
+            <GenericField
+              meta={
+                {
+                  P: {
+                    component: "Button",
+                    props: {
+                      children: "Rules",
+                      class: "mb:5",
+                      onClick: toggleRulesModal,
+                    },
                   },
-                },
-              } as any
-            }
-          />
-          &nbsp;&nbsp;
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "Button",
-                  props: {
-                    children: "Import",
-                    onClick: toggleImportsModal,
+                } as any
+              }
+            />
+            &nbsp;&nbsp;
+            <GenericField
+              meta={
+                {
+                  P: {
+                    component: "Button",
+                    props: {
+                      children: "Import",
+                      onClick: toggleImportsModal,
+                    },
                   },
-                },
-              } as any
-            }
-          />
+                } as any
+              }
+            />
+          </div>
           <CollAndData />
           <FormGroupProperties
             txnId={pageConfig.formData.txnId}
@@ -546,82 +547,29 @@ export function Properties(props: {}) {
     );
   };
   return (
-    <Show
-      when={isPropertiesExpanded()}
-      fallback={
+
+    <div class="ml:5 mr:5">
+      <div
+        style={{
+          display: "flex",
+          "justify-content": "space-between",
+          "align-items": "center",
+          cursor: "pointer",
+        }}
+      >
         <div
-          class="b:1|solid|rgb(37,99,253) cursor-pointer m:10px w:2rem p:5px bg:rgb(232,229,229):hover r:5|5|5|5 h:36px"
-          style="transition: opacity 0.3s ease-in-out;"
-          onClick={togglePropertiesExpansion}
-          title="Properties"
+          class="mb:2px ml:5px p:3|0"
+          style="flex-grow: 1; font-weight: bold;text-align-last: left;"
         >
-          <Icon icon={"mingcute:settings-6-line"} height={25} width={25} />
+          Properties
         </div>
-      }
-    >
-      <div class="ml:5 mr:5">
-        <div
-          onClick={toggleIsPropertiesOpen}
-          style={{
-            display: "flex",
-            "justify-content": "space-between",
-            "align-items": "center",
-            cursor: "pointer",
-          }}
-        >
-          <div
-            class="mb:2px ml:5px p:3|0"
-            style="flex-grow: 1; font-weight: bold"
-          >
-            Properties
-          </div>
-          <Tooltip content={"Delete"} nowrap>
-            <GenericField
-              meta={
-                {
-                  P: {
-                    component: "Icon",
-                    props: {
-                      style: { color: "red" },
-                      onClick: () =>
-                        deleteLayout(
-                          getChildVertex(
-                            graph,
-                            ["$0Comp"],
-                            pageConfig.formData.formData,
-                          ).vertex?.P.name,
-                        ),
-                      width: 18,
-                      height: 18,
-                      class: "cursor:pointer  mr:5px",
-                      icon: "mage:trash",
-                    },
-                  },
-                } as any
-              }
-            />
-          </Tooltip>
-          <div style="display: flex; align-items: center; transition:margin-left|5000ms|ease-in-out">
-            <Icon
-              icon={"mdi:chevron-up"}
-              style={{
-                "font-size": "24px",
-                "border-radius": "50%",
-                "margin-left": "5px",
-                transition: "transform 0.2s linear",
-                transform: `${isPropertiesOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
-              }}
-              class="flex-1"
-            />
-          </div>
-        </div>
-        <Show when={isPropertiesOpen()}>
-          <Show when={selectedId() !== -1}>
-            <hr class={"color:lightgrey m:.4rem|0"} />
-          </Show>
-          <PropertiesPart />
-        </Show>
+        <Icon onclick={() => props.setShowDrawer(false)} icon={'iconamoon:close-light'} class="bg:#ededed:hover r:50%" height={24} width={24} style={{ color: 'lightgray', cursor: 'pointer' }} />
       </div>
-    </Show>
+
+      <div class="overflow:auto h:98vh scrollbar-width:thin">
+        <hr class={"color:lightgrey m:.4rem|0"} />
+        <PropertiesPart />
+      </div>
+    </div>
   );
 }

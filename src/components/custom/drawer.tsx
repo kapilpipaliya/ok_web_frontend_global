@@ -1,24 +1,26 @@
-import { createSignal, JSX } from "solid-js";
+import { createSignal, JSX, Show } from "solid-js";
 
 function Drawer(props: {
-  customButton: (props: {
+  customButton?: (props: {
     onClick: () => void;
     isOpen: boolean;
   }) => JSX.Element;
   width: string;
-  title: any;
   children: any;
+  open?: any;
+  setIsOpen?: any;
 }) {
-  const [isOpen, setIsOpen] = createSignal(false);
-
+  const [isOpen, setIsOpen] = props.open ? [props.open, props.setIsOpen] : createSignal(false)
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
   };
 
   return (
     <>
-      <props.customButton onClick={toggleDrawer} isOpen={isOpen()} />
+<Show when={props.customButton}>
+        <props.customButton onClick={toggleDrawer} isOpen={isOpen()} />
 
+</Show>
       <div style={{ display: isOpen() ? "block" : "none" }}>
         <div
           style={{
@@ -27,8 +29,6 @@ function Drawer(props: {
             left: 0,
             width: "100%",
             height: "100%",
-            "background-color": "rgba(0, 0, 0, 0.5)",
-            "z-index": 10,
             opacity: isOpen() ? 1 : 0,
             transition: "opacity 0.5s",
           }}
@@ -41,6 +41,7 @@ function Drawer(props: {
             right: isOpen() ? 0 : `-${props.width}`,
             width: props.width || "350px",
             height: "100%",
+            color: "black",
             "background-color": "white",
             "box-shadow": "0 2px 5px rgba(0,0,0,0.5)",
             "border-radius": "15px 0px 0px 15px",
@@ -49,7 +50,6 @@ function Drawer(props: {
           }}
         >
           <div style={{ padding: "20px" }}>
-            <h2>{props.title || "Drawer Content"}</h2>
             {props.children}
           </div>
         </div>

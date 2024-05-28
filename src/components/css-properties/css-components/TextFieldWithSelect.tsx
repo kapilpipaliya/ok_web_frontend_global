@@ -3,6 +3,7 @@ import { useContext, createSignal, createEffect, onCleanup, Show, For ,JSXElemen
 import { TextField } from "~/components/solid-blocks/blocks";
 import { CssEditorContext, sizeTypes } from "../cssContext";
 import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
+import "~/css/componentUtilCSS.css";
 
 export const TextFieldWithSelect = (props: {
     name: string;

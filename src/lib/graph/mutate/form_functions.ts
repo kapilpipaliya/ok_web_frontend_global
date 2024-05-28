@@ -312,6 +312,7 @@ export function createForm(
     vertex: vertex,
   };
 }
+
 export function loadForm(
   graph: Store<GraphInterface>,
   id: number,

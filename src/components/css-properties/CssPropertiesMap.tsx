@@ -139,16 +139,16 @@ const SizeSection = createGridOptions("size Grid", "Size", [
 
 const SpaceSection = {
   padding: createGridOptions("padding", "Padding", [
-    { label: "Padding Top", name: "pt" },
-    { label: "Padding Left", name: "pl" },
-    { label: "Padding Right", name: "pr" },
-    { label: "Padding Bottom", name: "pb" },
+    { name: "padding-top", label: "Padding Top", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "padding-left", label: "Padding Left", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "padding-right", label: "Padding Right", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "padding-bottom", label: "Padding Bottom", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
   ]),
   margin: createGridOptions("margin", "Margin", [
-    { label: "Margin Top", name: "mt" },
-    { label: "Margin Left", name: "ml" },
-    { label: "Margin Right", name: "mr" },
-    { label: "Margin Bottom", name: "mb" },
+    { name: "margin-top", label: "Margin Top", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "margin-left", label: "Margin Left", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "margin-right", label: "Margin Right", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
+    { name: "margin-bottom", label: "Margin Bottom", isLabelOnTop: true, type: "number", isAddToClass: true, component: "textFieldOptions", options: sizeTypes },
   ]),
 };
 

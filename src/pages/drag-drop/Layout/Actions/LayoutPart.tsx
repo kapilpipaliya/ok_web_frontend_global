@@ -79,7 +79,8 @@ export function LayoutPart(props: {}) {
               : isSelectedHoverId(props.vertex.id)
                 ? "bg:#F2EDED"
                 : ""
-          } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} f:14 ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""}`}
+          } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""}`}
+
           classList={{
             "b:1px":
               isActiveItem() && indicatorPosition().position === "center",
@@ -94,6 +95,7 @@ export function LayoutPart(props: {}) {
             setHoverId(-1);
           }}
           style={{
+            'font-size': '14px',
             "font-weight": children().length ? "bold" : "normal",
             "margin-bottom":
               children().length ||

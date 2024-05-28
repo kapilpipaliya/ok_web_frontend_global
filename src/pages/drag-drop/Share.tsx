@@ -17,13 +17,8 @@ const ShareSection = () => {
 
   const inlineStyles = {
     shareSection: {
-      background: "rgb(206 219 255)",
       padding: "20px",
       "border-radius": "10px",
-      "box-shadow": "0 4px 8px rgba(0, 0, 0, 0.1)",
-      width: "40%",
-      margin: "auto",
-      "margin-top": "2rem",
     },
     shareLink: {
       display: "flex",
@@ -53,7 +48,7 @@ const ShareSection = () => {
       color: "white",
     },
     invitePeople: {
-      "margin-bottom": "20px",
+      "margin-bottom": "20px 0px",
       "border-radius": "6px",
     },
     shareOther: {
@@ -71,7 +66,7 @@ const ShareSection = () => {
           type="text"
           value={link()}
           readOnly
-          class={"w:full r:5|0|0|5 p:10"}
+          class={"w:full bg:rgb(245,245,245) r:5|0|0|5 p:10"}
         />
         <Tooltip content={"Copy to clipboard"}>
           <button

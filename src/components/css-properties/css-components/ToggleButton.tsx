@@ -1,6 +1,7 @@
 import { JSX, useContext, For, Show, JSXElement } from "solid-js";
 import { CssEditorContext } from "../cssContext";
 import { CenterDiv, ContainerLabel,IconifyIcon } from "./CssUtils";
+import "~/css/componentUtilCSS.css";
 
 export const ToggleButton = (props: {
     options: { key: JSX.Element; value: string; icon?: string }[];

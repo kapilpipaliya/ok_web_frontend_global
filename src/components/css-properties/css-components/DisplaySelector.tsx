@@ -2,6 +2,7 @@ import { Icon } from "@iconify-icon/solid";
 import { useContext, createSignal, createEffect, onCleanup, Show, For } from "solid-js";
 import { CssEditorContext } from "../cssContext";
 import { Container, ContainerLabel } from "./CssUtils";
+import "~/css/componentUtilCSS.css";
 
 export const DisplaySelector = (props: {
     name: string;

@@ -1,8 +1,23 @@
-import { createSignal } from "solid-js";
+import { Accessor, JSX, createEffect, createSignal } from "solid-js";
 
-const ResizableContainer = (props: any) => {
-  const [width, setWidth] = createSignal(null);
+const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element}) => {
+  const [width, setWidth] = createSignal('');
   const [height, setHeight] = createSignal("calc(-50px + 90vh)");
+
+  createEffect(() => {
+    console.log(props.view());
+    
+    if (props.view() === "Mobile") {
+      setWidth("400px");
+      setHeight("570px");
+    } else if (props.view() === "Tablet") {
+      setWidth("770px");
+      setHeight("1026px");
+    }else{
+      setWidth("100%");
+      setHeight("889px");
+    }
+  });
 
   // const handleMouseDown = (e, direction) => {
   //     e.preventDefault();
@@ -33,8 +48,8 @@ const ResizableContainer = (props: any) => {
 
   return (
     <div
-      class="resizable-container r:10|10|10|10 min-h:80% min-w:30%"
-      style={`width: ${width()}px; height: ${height()}px;max-height:80vh; resize: both; border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
+      class="r:10|10|10|10 min-h:80% min-w:30%"
+      style={`width: ${width()}; height: ${height()};max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
     >
       {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}

@@ -3,6 +3,7 @@ import {
   createContext,
   createMemo,
   createSelector,
+  createSignal,
   For,
   Match,
   Show,
@@ -100,24 +101,26 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const isSelectedHoverId = createSelector(hoverId);
 
   const PropertiesDrawer = (props: { itemId: any }) => {
+    const [showDrawer, setShowDrawer] = createSignal(false);
     return (
-      <div classList={{ "display:none": isSelectedLayoutId(props.itemId) }}>
-        <Drawer
-          customButton={(props) => (
-            <Icon
-              icon={"mingcute:settings-5-line"}
-              {...props}
-              height={22}
-              width={22}
-              class="cursor:pointer"
-            />
-          )}
-          title="First Drawer"
-          width="450px"
-        >
-          <Properties />
-        </Drawer>
-      </div>
+      <Show when={isSelectedLayoutId(props.itemId)}>
+          <Icon
+            icon={"mingcute:settings-5-line"}
+            onclick={() => setShowDrawer(true)}
+            height={22}
+            width={22}
+            class="cursor:pointer"
+          />
+          <Show when={showDrawer()}>
+            <Drawer
+              open={showDrawer}
+              setIsOpen={setShowDrawer}
+              width="400px"
+            >
+            <Properties setShowDrawer={setShowDrawer}/>
+            </Drawer>
+          </Show>
+        </Show>
     );
   };
 
@@ -269,6 +272,9 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                   <span class="position:relative  flex justify-content:flex-end ">
                     <div class="position:absolute  bottom:100% z:50 ">
                       <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50 m:0.5rem">
+                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                            <PropertiesDrawer itemId={item.id} />
+                          </div>
                         <Tooltip content={"Name"} nowrap>
                           <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
                             {getComponent()}
@@ -321,9 +327,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                             class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
                           />
                         </Tooltip>
-                        <div class="flex flex-direction:column p:5 bg:rgb(37,99,235) color:white r:24 position:absolute  right:-30px top:10px ">
-                          {PropertiesDrawer(item.id)}
-                        </div>
+                        
                       </div>
                     </div>
                   </span>

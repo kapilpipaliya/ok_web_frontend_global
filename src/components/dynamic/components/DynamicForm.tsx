@@ -6,6 +6,7 @@ import {
   For,
   JSXElement,
   Match,
+  on,
   onCleanup,
   onMount,
   Show,
@@ -129,6 +130,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
         setFormData({ form: result.form as FormMetaData });
       }
     }
+
   });
 
   return (
@@ -137,9 +139,9 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
 
       <Match when={data.error}>Error</Match>
 
-      <Match when={data()?.error}>Error</Match>
+      {/* <Match when={data()?.error}>Error</Match> */}
 
-      <Match when={true}>
+      <Match when={formData.form}>
         <DynamicForm
           form={formData.form!}
           id={id() as Id}
@@ -161,7 +163,7 @@ export function DynamicForm(props: DynamicFormProps) {
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
- 
+
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
@@ -169,25 +171,16 @@ export function DynamicForm(props: DynamicFormProps) {
   const [activeTab, setActiveTab] = createSignal("main");
 
   const fetchData = async () => {
+    console.log(Object.keys(props), Object.values(props));
+
     try {
       if (!props.id) {
         // Load Form Meta from API
-        const createResult = createForm(
-          graph,
-          setGraph,
-          txnId,
-          Ws,
-          props.form[IdAttr],
-        );
-
-        if (createResult.error) {
-          return { error: createResult.error };
-        }
-
-        return { vertex: createResult.vertex };
+        return 'new';
       } else {
         // Load vertex from server
         const loadResult = await findVertexByIdMGCall(props.id);
+        console.log(loadResult);
 
         if (loadResult.error) {
           return { error: loadResult.error };
@@ -195,6 +188,7 @@ export function DynamicForm(props: DynamicFormProps) {
 
         const { incoming, outgoing }: { incoming: any; outgoing: any } =
           getEdgesFromRowsAttr(props.form.attributes);
+
         const result = await getDataMGCall({
           expression: `id:'${props.id}'`,
           incoming,
@@ -214,9 +208,22 @@ export function DynamicForm(props: DynamicFormProps) {
 
   const [data, { refetch }] = createResource(fetchData);
 
-  createEffect(() => {
-    if (data()) {
-      const result = data();
+  createEffect(on(data, (data) => {
+    if (data) {
+      const result = data;
+      let dataVertex;
+      if (result === 'new') {
+        const createResult = createForm(
+          graph,
+          setGraph,
+          txnId,
+          Ws,
+          props.form[IdAttr],
+        );
+
+        dataVertex = createResult.vertex
+      }
+
       if (result && !(result as { error?: string }).error) {
         if ((result as { graph?: GraphInterface }).graph) {
           setGraphData(
@@ -271,7 +278,7 @@ export function DynamicForm(props: DynamicFormProps) {
         setFormData({
           txnId,
           formMeta: metaVertexResult.vertex!,
-          formData: graph.vertexes[props.id!],
+          formData: graph.vertexes[props.id!] ?? dataVertex!,
           tabs,
           groupByTabsAndGroup,
         });
@@ -279,7 +286,7 @@ export function DynamicForm(props: DynamicFormProps) {
         setPageConfig?.("formData", formData);
       }
     }
-  });
+  }));
 
   // focus first input
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -420,7 +427,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <Match when={data.error}>Error</Match>
       <Match when={data()?.error}>Error</Match>
 
-      <Match when={true}>
+      <Match when={formData.formData}>
         <RepeaterContext.Provider
           value={[formData.formData, ...useContext(RepeaterContext)]}
         >

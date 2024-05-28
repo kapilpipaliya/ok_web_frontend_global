@@ -12,22 +12,26 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-In the 'use server' function, if no user logged in return error.
-
+Make a Label component
+Add a setting to customize label style.
+add up dowm button in the table.
+show add button when table is empty.
+Make a Forms section in menu bar same like Page section.
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
-Make Select Input load async data. ✅ 
-instead of dbConn  use session in cypher_api functions ✅ 
+add name property in each input components
+Refactor 3 functions in findvertex.ts to one function
+use convertNodeToJson and convertRelationshipToJson in cypher_api functions
+For cypher_api functions, make two folder get and mutate
+delete unused css files
+there is two copy of validatePassword functiom. move all validation function to validations.ts file
 
-
+Big Task:
+Dont use integer id for node and edge.
 
 
 Kapil:
 on click add element at last (Kapil)
-Make Nav sync full data.
-Make API to fetch nav bar data
-Make API to fetch Page data
-Make API to fetch form data
-Make API to fetch page editor full data
+Make Nav sync full data. (IMP)
 Make Page working with some async data too.
 Make Working Forms using Page Designer.
 Make Page Share working.
@@ -40,10 +44,7 @@ Use async everywhere, it will load data from server. Only few places use sync AP
 Fix NavBar yaml Import file Issue.
 make a file upload component in page builder.
 Make Permissions working in DynamicForm component.
-
 ------------------------------------------------------------------------------------------
-load full page data with all joins when the page loads.
-use createResource in FormGroup, PageView_, GenericField(Form)
 
 Letter:
 Sorting, Filtering support on the table
@@ -52,4 +53,4 @@ fix import export button on the form
 
 Notes:
 we are using two libraries:
-jsep (for +,-) => jsonata(filter, projection)
+expression-eval => jsep (for +,-) => jsonata(filter, projection)
