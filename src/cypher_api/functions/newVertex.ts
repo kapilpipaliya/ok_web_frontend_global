@@ -4,6 +4,7 @@ import { Node } from "~/cypher_api/functions/Type";
 import { getDriver } from "../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../server/domain_utils";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function newVertexDBCall(
   label: string,
@@ -26,10 +27,7 @@ export async function newVertexDBCall(
     if (vertexResult.records.length === 0) {
       throw new Error("Failed to create vertex.");
     }
-    const newVertex = vertexResult.records[0].get("v") as Node;
-    newVertex.id = newVertex.identity!;
-    newVertex.L = newVertex.labels!;
-    newVertex.P = newVertex.properties!;
+    const newVertex = convertNodeToJson(vertexResult.records[0].get("v"));
 
     // Commit the transaction
     await transaction.commit();

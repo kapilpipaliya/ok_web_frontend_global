@@ -56,7 +56,7 @@ import {
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
+import { findVertexesMGCall } from "~/cypher_api/functions/findVertex";
 import { PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./form/FormGroup";
 
@@ -179,9 +179,7 @@ export function DynamicForm(props: DynamicFormProps) {
         return 'new';
       } else {
         // Load vertex from server
-        const loadResult = await findVertexByIdMGCall(props.id);
-        console.log(loadResult);
-
+        const loadResult = await findVertexesMGCall({ id: props.id });
         if (loadResult.error) {
           return { error: loadResult.error };
         }
@@ -425,7 +423,6 @@ export function DynamicForm(props: DynamicFormProps) {
       <Match when={data.loading}>Loading</Match>
 
       <Match when={data.error}>Error</Match>
-      <Match when={data()?.error}>Error</Match>
 
       <Match when={formData.formData}>
         <RepeaterContext.Provider

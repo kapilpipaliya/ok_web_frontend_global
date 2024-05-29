@@ -114,7 +114,7 @@ const MultiSelectField = (props: {
     if (props.selectionLimit === 1) {
       setDropdownVisible(false);
     }
-    setIsRefetch(v=>v+1);
+    setIsRefetch(v => v + 1);
   };
   // Remove tag from selected values
   const handleRemoveTag = (value: any) => {
@@ -133,8 +133,15 @@ const MultiSelectField = (props: {
   const tagStyle =
     "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
   const closeButtonStyle = "cursor: pointer; display: flex;";
-  const inputStyle =
-    "flex: 1; min-width: 100px; padding: 5px; border: none; outline: none;";
+  const inputStyle = () => ({
+    display: props.selectedValues().length == 1 && props.selectionLimit == 1 ? "none" : "",
+    flex: 1,
+    'smin-width': '100px',
+    padding: '5px',
+    border: 'none',
+    outline: 'none'
+
+  })
   const dropdownStyle: any = () => ({
     // position: 'absolute',
     // top: '100%',
@@ -154,7 +161,7 @@ const MultiSelectField = (props: {
   // Filter options based on input value
   const filteredOptions = createMemo(() => {
     return (props.options || []).filter((option) =>
-      getOptionLabel(option).toLowerCase().includes(inputValue().toLowerCase()),
+      getOptionLabel(option) && getOptionLabel(option).toLowerCase().includes(inputValue().toLowerCase()),
     );
   });
 
@@ -167,7 +174,7 @@ const MultiSelectField = (props: {
       dropdownEl.style.top = bottom + scrollY + "px";
       dropdownEl.style.left = left + scrollX + "px";
       dropdownEl.style.width = width + "px";
-      dropdownEl.style.zIndex = "100";
+      dropdownEl.style.zIndex = "99999";
     }
   });
 
@@ -198,9 +205,9 @@ const MultiSelectField = (props: {
           )}
         </For>
         <input
-          ref={btnEl} 
+          ref={btnEl}
           type="text"
-          style={inputStyle}
+          style={inputStyle()}
           value={inputValue()}
           onInput={(e) => setInputValue(e.target.value)}
           // onFocus={handleInputFocus}

@@ -11,7 +11,9 @@
   color: #ffffff;
   text-align: center;
 }
-
+.dragging {
+  opacity: 0.5;
+}
 .styled-table thead td {
   color: #ffffff;
   text-align: left;

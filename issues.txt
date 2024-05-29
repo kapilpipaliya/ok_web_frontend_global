@@ -12,18 +12,21 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-Make a Label component
-Add a setting to customize label style.
-add up dowm button in the table.
-show add button when table is empty.
-Make a Forms section in menu bar same like Page section.
+
+Make a Label component ✅
+Add a setting to customize label style. ✅
+add up dowm button in the table.  ✅
+Sorting row  ✅
+show add button when table is empty. ✅
+Make a Forms section in menu bar same like Page section. ✅
+Refactor 3 functions in findvertex.ts to one function  ✅
+use convertNodeToJson and convertRelationshipToJson in cypher_api functions  ✅
+delete unused css files ✅
+there is two copy of validatePassword functiom. move all validation function to validations.ts file ✅
+
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
-add name property in each input components
-Refactor 3 functions in findvertex.ts to one function
-use convertNodeToJson and convertRelationshipToJson in cypher_api functions
+add name property in each input components 
 For cypher_api functions, make two folder get and mutate
-delete unused css files
-there is two copy of validatePassword functiom. move all validation function to validations.ts file
 
 Big Task:
 Dont use integer id for node and edge.

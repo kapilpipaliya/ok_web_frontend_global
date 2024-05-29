@@ -16,7 +16,7 @@ import {
 } from "solid-js";
 import "~/css/table.css";
 import { toTitle } from "case-switcher-js";
-import { replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -92,12 +92,14 @@ export function TableInputField(
       return childAttrVertex;
     }
 
+
     // else get attributes from a collection.
     const attrVertex = getChildVertex(graph, ["$0Att"], field.meta).vertex;
     if (!attrVertex) return;
 
     return getChildVertexes(graph, ["Attr"], [attrVertex]).vertexes;
   };
+
   const tableColumnsTemplate = createMemo(
     () =>
       getAttributes() ||
@@ -167,9 +169,27 @@ export function TableInputField(
     setSortedVertexes(vertexes);
   });
 
+  const [dragToIndex, setDragToIndex] = createSignal<number | null>(null);
+  const [dragFromIndex, setDragFromIndex] = createSignal<number | null>(null);
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
+
+
+    const handleDrop = () => {
+      if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
+        const updatedRows = [...sortedVertexes()];
+        const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
+        updatedRows.splice(dragToIndex()!, 0, draggedRow);
+        setSortedVertexes(updatedRows);
+        updatedRows.forEach((vertex, index) => {
+          mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, { pos: index + 1 });
+        });
+      }
+      setDragFromIndex(null);
+      setDragToIndex(null)
+    };
     const metaVertices = new Map();
+
     const getMetaVertex = (columnId: any) => {
       if (!metaVertices.has(columnId)) {
         const instRes = instResult();
@@ -243,9 +263,11 @@ export function TableInputField(
       return (
         <For each={rowColumnsMetaAttrs()}>
           {(column) => {
+
             const metaVertex = createMemo(() => getMetaVertex(column.id));
 
-            const component = createMemo(() => getComponent(column.id));
+            const component = getComponent(column.id);
+
 
             // if mergeProps not keep reactivity use memo
             createEffect(() => {
@@ -262,37 +284,39 @@ export function TableInputField(
                   ).vertexes}
               </>
             );
-            const Content = () => (
-              <>
-                <Show when={component() == "Error"}>Error</Show>
-                <DynamicComponent
-                  title={toTitle(
-                    column.P.displayName || column.P[IdAttr] || "",
-                  )}
-                  isShowAdd={true}
-                  component={component()}
-                  // When we have a Table we pass original Table Meta Vertex
-                  meta={
-                    component() === "Table2"
+            const Content = () => {
+
+              return (
+                <>
+                  <Show when={component == "Error"}>Error</Show>
+                  <DynamicComponent
+                    title={toTitle(
+                      column.P.displayName || column.P[IdAttr] || ""
+                    )}
+                    isShowAdd={false}
+                    component={component}
+                    // When we have a Table we pass original Table Meta Vertex
+                    meta={component === "Table2" || component === "Table"
                       ? graph.vertexes[metaVertex().P.templateId]
-                      : metaVertex()
-                  }
-                  data={p.joinVertex}
-                  setValue={field.setValue}
-                  disabled={disabled()}
-                  txnId={field.txnId}
-                  isRealTime={field.isRealTime}
-                />
-              </>
-            );
+                      : metaVertex()}
+                    data={p.joinVertex}
+                    setValue={field.setValue}
+                    disabled={disabled()}
+                    txnId={field.txnId}
+                    isRealTime={field.isRealTime} />
+                </>
+              );
+            };
 
             return (
               <Switch>
                 <Match when={metaVertex().P.props?.hidden}>
                   <td>
+
+
                     <div
                       class={`flex ai:center jc:center ${(() => {
-                        const comp = component();
+                        const comp = component;
                         switch (comp) {
                           case "TextBox":
                             return "min-w:150px";
@@ -311,12 +335,12 @@ export function TableInputField(
                     </div>
                   </td>
                 </Match>
-                <Match when={component() === "Table2"}>
+                <Match when={component === "Table2"}>
                   <td>
-                    <Show when={!disabled}>
+                    <Show when={!disabled()}>
                       <div
                         class={`flex ai:center jc:center ${(() => {
-                          const comp = component();
+                          const comp = component;
                           switch (comp) {
                             case "TextBox":
                               return "min-w:150px";
@@ -340,7 +364,7 @@ export function TableInputField(
                 <Match when={true}>
                   <td
                     class={`padding:1px ${(() => {
-                      const comp = component();
+                      const comp = component;
                       switch (comp) {
                         case "TextBox":
                           return "min-w:150px";
@@ -371,17 +395,18 @@ export function TableInputField(
     return (
       <>
         <tr
-          // use:sortable
-          // classList={{ "opacity-25": sortable.isActiveDraggable }}
-          style={{ "text-align": "center", width: "50px" }}
+          draggable={true}
+          onDragStart={() => setDragFromIndex(p.index)}
+          onDragOver={(event) => event.preventDefault()}
+          onDragEnter={() => setDragToIndex(p.index)}
+          onDrop={handleDrop}
+          style={{
+            "text-align": "center", width: "50px",
+            'background-color': dragFromIndex() === p.index ? "#e0e0e0" : dragToIndex() === p.index ? "#f0f0f0" : "white",
+            transition: "background-color 0.2s ease",
+            'border': dragToIndex() === p.index ? "2px solid #007bff" : "1px solid #ddd",
+          }}
         >
-          <td>
-            <Show when={field.meta.P.props?.hidden}>
-              <button onClick={() => setExpanded(!expanded())}>
-                {expanded() ? "↑" : "↓"}
-              </button>
-            </Show>
-          </td>
           <td>
             <div class={"flex ai:center jc:center"}>
               {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
@@ -389,7 +414,40 @@ export function TableInputField(
               {/*<Icon icon="mingcute:up-fill"  />*/}
               {/*<Icon icon="mingcute:down-fill"  />*/}
               {/*<Icon icon="material-symbols:add-box"  />*/}
+              {/* <Show when={expandVertex() && getSelectionOptions(graph, setGraph, [p.joinVertex],
+                 `->${expandVertex()?.P.props.type}`).vertexes
+                 }> */}
+              <button
 
+                class="cursor: grab;"
+
+              >
+                <Icon
+                  icon="material-symbols:drag-indicator"
+                  class={"transform 2s ease-in-out"}
+                />
+              </button>
+              <button
+                class="cursor: pointer;"
+                onClick={(e) => {
+                  // console.log(getSelectionOptions(graph, setGraph, [p.joinVertex], expandVertex()?.P.collection).vertexes);
+                  setExpanded(!expanded())
+                }}
+              >
+                <Icon
+                  icon="mingcute:down-fill"
+                  class={"transform 2s ease-in-out"}
+                  style={{
+                    transition: "transform 0.2s linear",
+                    "margin-top": "7px",
+                    transform: `${!expanded()}
+                        ? "rotate(0deg)"
+                        : "rotate(180deg)"
+                      }`,
+                  }}
+                />
+              </button>
+              {/* </Show> */}
               <Icon
                 height={20}
                 width={20}
@@ -439,7 +497,7 @@ export function TableInputField(
         {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
         <Show when={expandVertex()}>
           <tr>
-            <td class="pl:24" colspan={rowColumnsMetaAttrs().length + 2}>
+            <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
                 component={"Table2"}
                 // When we have a Table we pass original Table Meta Vertex
@@ -545,8 +603,8 @@ export function TableInputField(
                             >
                               {toTitle(
                                 attribute.P.displayName ||
-                                  attribute.P[IdAttr] ||
-                                  "",
+                                attribute.P[IdAttr] ||
+                                "",
                               )}
                             </th>
                           </Match>
@@ -588,3 +646,80 @@ export function TableInputField(
     </Switch>
   );
 }
+// const DragHandle = (): JSX.Element => {
+//   return (
+//     <span style={{ cursor: "grab" }}>
+//       <svg width="16" height="16" fill="currentColor" class="bi bi-grip-horizontal" viewBox="0 0 16 16">
+//         <path d="M2 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+//       </svg>
+//     </span>
+//   );
+// };
+
+// interface Row {
+//   id: number;
+//   firstName: string;
+//   lastName: string;
+//   age: number;
+//   visits: number;
+//   status: string;
+//   progress: number;
+// }
+
+// const SortableTable = () => {
+//   const [rows, setRows] = createSignal<Row[]>([
+//     { id: 1, firstName: "request", lastName: "cellar", age: 15, visits: 7, status: "relationship", progress: 88 },
+//     { id: 2, firstName: "sister", lastName: "lab", age: 23, visits: 95, status: "complicated", progress: 72 },
+//     { id: 3, firstName: "cellar", lastName: "letter", age: 13, visits: 12, status: "single", progress: 34 },
+//     { id: 4, firstName: "wish", lastName: "confusion", age: 26, visits: 67, status: "relationship", progress: 17 },
+//   ]);
+
+
+//   return (
+//     <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
+//       <thead>
+//         <tr>
+//           <th style="width: 50px; padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Drag</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">First Name</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Last Name</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Age</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Visits</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Status</th>
+//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Progress</th>
+//         </tr>
+//       </thead>
+//       <tbody>
+//         <For each={rows()}>
+//           {(row, index) => (
+//             <tr
+//               draggable={true}
+//               onDragStart={() => handleDragStart(index())}
+//               onDragOver={handleDragOver}
+//               onDragEnter={() => handleDragEnter(index())}
+
+//               onDrop={handleDrop}
+//               style={{
+//                 cursor: "grab",
+//                 'background-color': draggingIndex() === index() ? "#e0e0e0" : targetIndex() === index() ? "#f0f0f0" : "white",
+//                 transition: "background-color 0.2s ease",
+//                 'border-bottom': targetIndex() === index() ? "2px solid #007bff" : "1px solid #ddd",
+//               }}
+//             >
+//               <td style="padding: 8px; border: 1px solid #ddd;">
+//                 <DragHandle />
+//               </td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.firstName}</td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.lastName}</td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.age}</td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.visits}</td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.status}</td>
+//               <td style="padding: 8px; border: 1px solid #ddd;">{row.progress}</td>
+//             </tr>
+//           )}
+//         </For>
+//       </tbody>
+//     </table>
+//   );
+// };
+
+// export default SortableTable;

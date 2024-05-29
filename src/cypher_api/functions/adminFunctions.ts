@@ -2,6 +2,7 @@ import { getCookie, getRequestIP, getRequestURL } from "vinxi/http";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver } from "~/cypher_api/server/driver";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function getUsers() {
   "use server";
@@ -12,19 +13,12 @@ export async function getUsers() {
     const res = await driver.run(`MATCH (u:User) RETURN u;`);
 
     if (res.records.length > 0) {
-      const records = res.records.map((record) => {
-        const vertex = record.get("u");
-        // todo: use convertNodeToJson Function
-        return {
-          id: vertex.identity,
-          L: vertex.labels,
-          P: vertex.properties,
-        };
-      });
+      const vertexes = convertNodeToJson(res.records[0].get("v"));
+
 
       return {
         error: false,
-        vertexes: records,
+        vertexes: vertexes,
       };
     } else {
       return [];

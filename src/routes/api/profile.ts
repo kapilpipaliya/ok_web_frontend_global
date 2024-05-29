@@ -1,7 +1,7 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { Session } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher_api/functions/deleteVertex";
-import { findVertexByIdMGCall } from "~/cypher_api/functions/findVertex";
+import {  findVertexesMGCall } from "~/cypher_api/functions/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/newRow";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
@@ -236,10 +236,10 @@ const supportTicket = async (
         );
         return data;
       case "get":
-        const result = await findVertexByIdMGCall(parentVertexId);
+        const result = await findVertexesMGCall({ id: parentVertexId });
         const message = await getChildVertexesMGCall(
           ["SupportUser"],
-          [result.vertex!],
+          [result.vertexes!],
         );
         return message;
     }

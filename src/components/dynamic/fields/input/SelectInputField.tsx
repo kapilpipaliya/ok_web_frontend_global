@@ -2,8 +2,10 @@ import {
   batch,
   createEffect,
   createResource,
+  createSignal,
   For,
   getOwner,
+  onMount,
   runWithOwner,
   Show,
   splitProps,
@@ -206,9 +208,10 @@ export function SelectInputField(
 
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [options, setOptions] = createSignal([]);
   const formData = useContext(FormContext);
 
-  const [selectOptions] = createResource(async () => {
+  const selectOptions = async () => {
     let value = getValueFromVertexOrKey(field.meta.P.props, "items");
     if (value) {
       if (typeof value === "string") {
@@ -216,7 +219,7 @@ export function SelectInputField(
       } else if (Array.isArray(value)) {
         return value;
       } else {
-        return value ? [value] : [];
+        setOptions(value ? [value] : []);
       }
     } else {
       // this is not working when row is enabled, select field options is not updated
@@ -240,7 +243,7 @@ export function SelectInputField(
 
       if (!res.error) {
         setGraphData(graph, setGraph, res.graph);
-        return (
+        setOptions(
           getSelectionOptions(
             graph,
             setGraph,
@@ -252,6 +255,10 @@ export function SelectInputField(
         return [];
       }
     }
+  };
+  
+  onMount(() => {
+    selectOptions();
   });
 
   function getComponent() {
@@ -392,7 +399,7 @@ export function SelectInputField(
             return graph.vertexes[id];
           })}
           disable={field.disabled!}
-          options={selectOptions()}
+          options={options()}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
           placeholder={`${field.title}`}

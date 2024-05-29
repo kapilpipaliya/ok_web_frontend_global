@@ -42,7 +42,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
       : isRightOpen()
         ? `'menu header header' 'content content callToAction'`
         : `'menu header callToAction' 'content content content'`,
-    height: "90vh",
     "grid-template-columns": isLeftOpen()
       ? isRightOpen()
         ? ""

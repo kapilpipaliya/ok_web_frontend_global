@@ -16,6 +16,7 @@ import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
 import { ComponentProps } from "~/components/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
+import Label from "~/components/solid-blocks/blocks/label/Label";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -279,6 +280,13 @@ export function GenericInputField(
               }}
               value={field.data?.P[field.meta.P[IdAttr]]}
             />
+          </Match>
+          <Match when={component() === "Label"}>
+            <Label
+              {...field.meta?.P.props}
+            >
+              <PageItemRender metaVertex={field.meta} />
+            </Label>
           </Match>
         </Switch>
       </Show>

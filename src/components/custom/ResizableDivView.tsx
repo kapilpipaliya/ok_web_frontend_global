@@ -11,10 +11,10 @@ const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element
       setWidth("400px");
       setHeight("570px");
     } else if (props.view() === "Tablet") {
-      setWidth("770px");
+      setWidth("30vw");
       setHeight("1026px");
     }else{
-      setWidth("100%");
+      setWidth("55vw");
       setHeight("889px");
     }
   });
@@ -48,7 +48,7 @@ const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element
 
   return (
     <div
-      class="r:10|10|10|10 min-h:80% min-w:30%"
+      class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"
       style={`width: ${width()}; height: ${height()};max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
     >
       {/*<div

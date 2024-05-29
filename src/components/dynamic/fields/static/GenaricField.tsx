@@ -45,6 +45,7 @@ import {
 import Drawer from "~/components/custom/drawer";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Properties } from "~/pages/drag-drop/Layout/Actions/Properties";
+import { CustomTooltip } from "~/components/custom/Tooltip";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -106,7 +107,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
       <Show when={isSelectedLayoutId(props.itemId)}>
           <Icon
             icon={"mingcute:settings-5-line"}
-            onclick={() => setShowDrawer(true)}
+            onclick={() => setShowDrawer(!showDrawer())}
             height={22}
             width={22}
             class="cursor:pointer"
@@ -185,9 +186,9 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 }
               } else if (indicatorPosition().position === "after") {
                 if (compProps.class) {
-                  compProps.class += ` bb:rgb(0,0,255)|2px|solid`;
+                  compProps.class += ` bb:rgb(0,0,255)|2px|solid @fade|.3s`;
                 } else {
-                  compProps.class = `bb:rgb(0,0,255)|2px|solid`;
+                  compProps.class = `bb:rgb(0,0,255)|2px|solid @fade|.3s`;
                 }
               }
             }
@@ -270,7 +271,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               >
                 <Show when={isSelectedLayoutId(item.id)}>
                   <span class="position:relative  flex justify-content:flex-end ">
-                    <div class="position:absolute  bottom:100% z:50 ">
+                    <div class="position:absolute @fade|.3s bottom:100% z:50 ">
                       <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50 m:0.5rem">
                           <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
                             <PropertiesDrawer itemId={item.id} />

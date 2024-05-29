@@ -2,7 +2,6 @@ import { createSignal, useContext } from "solid-js";
 import {
   APP_BASE_URL,
   validateEmail,
-  validatePassword,
   validateUsername,
 } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
@@ -12,6 +11,7 @@ import logo from "~/assets/graphics/logo.png";
 import "~/css/base.css";
 import { registerUserCall } from "~/components/api/api_functions";
 import { LoadingContext } from "~/lib/contexts";
+import { validatePassword } from "~/lib/validations";
 
 export function SignUp() {
   // const {Ws} = useContext(WsContext);

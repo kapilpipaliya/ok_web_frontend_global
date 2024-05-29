@@ -558,7 +558,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
         }}
       >
         <div
-          class="mb:2px ml:5px p:3|0"
+          class="mb:2px ml:5px p:3|0 f:16"
           style="flex-grow: 1; font-weight: bold;text-align-last: left;"
         >
           Properties

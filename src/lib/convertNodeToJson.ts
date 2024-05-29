@@ -9,10 +9,11 @@ export function convertNodeToJson(node: Node): Vertex {
     id: !isIntegerId ? node.identity.toNumber() : node.identity,
     L: node.labels,
     P: node.properties,
-    OUT: {},
-    IN: {},
+    OUT: node.OUT || {},
+    IN: node.IN || {},
   };
 }
+
 export function convertRelationshipToJson(relationship: Relationship): Edge {
   return {
     // @ts-ignore

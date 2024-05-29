@@ -2,6 +2,7 @@ import { Relationship } from "~/cypher_api/functions/Type";
 import { getDriver } from "../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../server/domain_utils";
+import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
 
 export async function newEdgeMGCall(
   edgeType: string,
@@ -31,13 +32,8 @@ export async function newEdgeMGCall(
     if (edgeResult.records.length === 0) {
       throw new Error("Failed to create Edge.");
     }
-    const newEdge = edgeResult.records[0].get("e") as Relationship;
-    newEdge.id = newEdge.identity!;
-    newEdge.T = newEdge.type!;
-    newEdge.S = newEdge.start!;
-    newEdge.E = newEdge.end!;
-    newEdge.P = newEdge.properties!;
 
+    const newEdge = convertRelationshipToJson(edgeResult.records[0].get("e"));
     // Commit the transaction
     await transaction.commit();
 

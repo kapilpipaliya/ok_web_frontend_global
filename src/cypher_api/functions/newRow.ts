@@ -2,6 +2,7 @@ import { Node, Relationship } from "~/cypher_api/functions/Type";
 import { getDriver } from "../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../server/domain_utils";
+import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 
 export async function newRowMGCall(
   parentVertexId: number,
@@ -26,10 +27,7 @@ export async function newRowMGCall(
     if (vertexResult.records.length === 0) {
       throw new Error("Failed to create vertex.");
     }
-    const newVertex = vertexResult.records[0].get("v") as Node;
-    newVertex.id = newVertex.identity!;
-    newVertex.L = newVertex.labels!;
-    newVertex.P = newVertex.properties!;
+    const newVertex = convertNodeToJson(vertexResult.records[0].get("v"));
 
     // Cypher query to create an edge
     let createEdgeQuery = `
@@ -47,12 +45,7 @@ export async function newRowMGCall(
     if (edgeResult.records.length === 0) {
       throw new Error("Failed to create Edge.");
     }
-    const newEdge = edgeResult.records[0].get("e") as Relationship;
-    newEdge.id = newEdge.identity!;
-    newEdge.T = newEdge.type!;
-    newEdge.S = newEdge.start!;
-    newEdge.E = newEdge.end!;
-    newEdge.P = newEdge.properties!;
+    const newEdge = convertRelationshipToJson(edgeResult.records[0].get("e"));
 
     // Commit the transaction
     await transaction.commit();

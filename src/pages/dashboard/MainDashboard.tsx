@@ -109,7 +109,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
             />
           </Show>
 
-          <div class="p:10">{props.children}</div>
+          <div class="p:4|10 overflow-y:auto">{props.children}</div>
         </PageContext.Provider>
       </div>
     </div>

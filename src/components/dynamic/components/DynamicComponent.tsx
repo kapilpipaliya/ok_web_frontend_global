@@ -16,6 +16,7 @@ export const genericInputComponents = [
   "FileUploader",
   "HtmlEditor",
   "NumberBox",
+  "Label",
   "ProgressBar",
   "Radio",
   "RadioGroup",

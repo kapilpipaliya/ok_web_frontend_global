@@ -4,6 +4,7 @@ import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import sendEmail from "~/cypher_api/server/email";
+import { validatePassword } from "~/lib/validations";
 
 export function ForgotPasswordForm() {
   const { showErrorToast, showLoadingToast } = useToast();
@@ -16,11 +17,6 @@ export function ForgotPasswordForm() {
   const [isLoading, setIsLoading] = createSignal(false);
   const [stage, setStage] = createSignal(0); // 0: Email, 1: OTP, 2: New Passwords
 
-  const validatePassword = (password: string) => {
-    // Example validation: Minimum eight characters, at least one letter and one number
-    const regex = /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{6,16}$/;
-    return regex.test(password);
-  };
   const handleEmailSubmit = async (event: Event) => {
     event.preventDefault();
     setIsLoading(true);

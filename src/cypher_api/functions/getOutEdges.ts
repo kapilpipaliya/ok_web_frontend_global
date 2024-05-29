@@ -3,6 +3,7 @@ import { Node, Relationship } from "~/cypher_api/functions/Type";
 import { getDriver } from "../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../server/domain_utils";
+import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 
 export async function getOutEdges(
   fromId: number | string | any,
@@ -27,17 +28,9 @@ RETURN targetNode, relationshipType
 
     const resultNodes = [] as [Relationship, Node][];
     for (const record of vertexResult.records) {
-      const targetNode = record.get("targetNode") as Node;
-      targetNode.id = targetNode.identity!;
-      targetNode.P = targetNode.properties!;
-      targetNode.L = targetNode.labels!;
-
-      const targetRelationship = record.get("relationshipType") as Relationship;
-      targetRelationship.id = targetRelationship.identity!;
-      targetRelationship.P = targetRelationship.properties!;
-      targetRelationship.T = targetRelationship.type!;
-      targetRelationship.S = targetRelationship.start!;
-      targetRelationship.E = targetRelationship.end!;
+      const targetNode = convertNodeToJson(record.get("targetNode"));
+      const targetRelationship = convertRelationshipToJson(record.get("relationshipType"));
+      
       resultNodes.push([targetRelationship, targetNode]);
     }
     return {

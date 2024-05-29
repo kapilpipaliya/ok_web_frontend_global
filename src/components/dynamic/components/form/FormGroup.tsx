@@ -44,6 +44,7 @@ export function FormGroup(props: FormGroupProps) {
                     <DynamicComponent
                         component={component()}
                         meta={metaVertex}
+                        isShowAdd={true}
                         title={toTitle(
                             metaVertex.P.displayName ||
                             metaVertex.P[IdAttr] ||
@@ -64,7 +65,7 @@ export function FormGroup(props: FormGroupProps) {
 
                 return (
                     <Switch>
-                        <Match when={component() === "Table"}>
+                        <Match when={component() === "Table2"}>
                             {/* <h3><Label/></h3> */}
                             <Content />
                         </Match>

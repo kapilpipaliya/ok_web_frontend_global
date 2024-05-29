@@ -1,14 +1,13 @@
 import { removeUndefinedProperties } from "~/lib/functions";
 import { Node } from "~/cypher_api/functions/Type";
-import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, IdAttr } from "~/lib/graph/graph";
+import {  IdAttr } from "~/lib/graph/graph";
 import {
   getChildVertexMGCall,
   getChildVertexesMGCall,
   getParentVertexMGCall,
   getSelectionOptionsMGCall,
 } from "./traverse";
-import { findVertexMGCall } from "~/cypher_api/functions/findVertex";
+import {  findVertexesMGCall } from "~/cypher_api/functions/findVertex";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { getDriver } from "~/cypher_api/server/driver";
 import { getRequestURL } from "vinxi/http";
@@ -94,16 +93,17 @@ export async function getCollAttrsMGCall(
         vertexCollAttr.P.name,
         "taking string dataType",
       );
-      const dataTypeVertex = await findVertexMGCall(
-        "DataType",
-        "name",
-        "String",
-      );
+      const dataTypeVertex = await findVertexesMGCall(
+        {
+          label: "DataType",
+          value: "String",
+          attribute: "name",
+        });
       if (dataTypeVertex.error) {
         console.warn("String data Type not found");
         return { error: true };
       }
-      dataType.vertex = dataTypeVertex.vertex!;
+      dataType.vertex = dataTypeVertex.vertexes!;
       attr.dataType = dataType.vertex!.P[IdAttr];
     } else {
       const dataTypeFromComp = await getParentVertexMGCall(
@@ -232,11 +232,18 @@ export async function getFormApiFromFormMGCall(
   const subDomain = await getSubDomain(host);
   const driver = await getDriver(subDomain);
   const session = driver.session();
-  const collResult = await findVertexMGCall("Coll", IdAttr, formId);
-  if (collResult.error) {
+  const collResult =  await findVertexesMGCall(
+    {
+      label: "Coll",
+      attribute: IdAttr,
+      value: formId,
+    }) 
+  if (collResult.error ) {
     return { error: "coll not found" };
   }
-  const coll = collResult.vertex!;
+  console.log(collResult);
+  
+  const coll = collResult.vertexes!;
   const attrsResult = await getCollectionOneLevelAttrsMGCall(coll);
   if (attrsResult.error) {
     return { error: attrsResult.error };
@@ -289,15 +296,16 @@ export async function getNameKeyForCollectionMGCall(collVertex: Node) {
 
 export async function getStringComponentMGCall(attrDataTypeVertex?: Node) {
   if (!attrDataTypeVertex) {
-    const attrDataTypeVertexResult = await findVertexMGCall(
-      "DataType",
-      "name",
-      "String",
-    );
+    const attrDataTypeVertexResult =  await findVertexesMGCall(
+      {
+        label: "DataType",
+        value: "String",
+        attribute: "name",
+      }) 
     if (attrDataTypeVertexResult.error) {
       return;
     }
-    attrDataTypeVertex = attrDataTypeVertexResult.vertex!;
+    attrDataTypeVertex = attrDataTypeVertexResult.vertexes!;
   }
   return (await getChildVertexMGCall(["$0Default"], attrDataTypeVertex!))
     .vertex;

@@ -4,8 +4,8 @@ import { createStore } from "solid-js/store";
 import { resetPasswordCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
-import { validatePassword } from "~/lib/Utils";
 import { GraphContext } from "~/lib/graph/graph";
+import { validatePassword } from "~/lib/validations";
 
 export const PasswordSection = (props: { profileData: any }) => {
   const [graph, setGraph] = useContext(GraphContext)!;

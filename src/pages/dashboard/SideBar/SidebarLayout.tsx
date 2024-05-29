@@ -106,6 +106,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     "/admin/Role": "eos-icons:role-binding-outlined",
     "/admin/Perm": "tabler:lock-access",
     "/admin/Coll": "ep:collection-tag",
+    '/admin/Form': "fluent:form-28-regular",
     "/admin/CollCategory": "ic:outline-collections-bookmark",
     "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
