@@ -5,8 +5,6 @@ const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element
   const [height, setHeight] = createSignal("calc(-50px + 90vh)");
 
   createEffect(() => {
-    console.log(props.view());
-    
     if (props.view() === "Mobile") {
       setWidth("400px");
       setHeight("570px");
