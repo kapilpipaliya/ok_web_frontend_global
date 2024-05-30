@@ -13,15 +13,10 @@
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 
-multiple compnents should be droped.  ✅ 
+
 handle not work select parent in page designer.
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
-delete isVertexExistWithPropMGCall function use findVertexesMGCall function ✅ 
-Do not save : when saving timestamp in the file, because in windows its not supported. ✅  
-
-Big Task:
-Dont use integer id for node and edge.
 
 
 Kapil:

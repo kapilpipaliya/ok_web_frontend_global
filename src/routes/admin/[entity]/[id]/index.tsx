@@ -16,7 +16,7 @@ export default function admin() {
 
   return (
     <Switch>
-      <Match when={(params.entity === 'Form' || params.entity === 'Page') && params.id === 'new'}>
+      <Match when={(params.entity === 'Form' || params.entity === 'Page')}>
         <PageDesignerContext>
           <LayoutDragAndDrop />
         </PageDesignerContext>
