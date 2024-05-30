@@ -318,7 +318,7 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   // }
 }
 
-function getChildrenAttrs(
+export function getChildrenAttrs(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   child: Vertex,
@@ -361,7 +361,9 @@ export function useDragDrop(
   // indicatorPosition().activeItem === vertex.id;
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    setDraggedVertex(vertex);
+    // setDraggedVertex(vertex);
+    setDraggedVertex((prev) => [...prev, vertex]);
+
   };
 
   const handleDragOverBase = (e: DragEvent) => {
@@ -410,46 +412,48 @@ export function useDragDrop(
     e.stopPropagation();
     handleDragOverBase(e);
 
-    let fromVertex = draggedVertex();
-    const toVertexId = indicatorPosition().activeItem!;
-    if (!fromVertex) {
-      // Don't allow drag and drop
-      return;
-    }
-    const fromVertexLabel = fromVertex.L[0];
-    const position = indicatorPosition().position;
-    if (!position) {
-      // Don't allow drag and drop
-      showErrorToast("Position not found when dropping");
-      return;
-    }
-    // Don't allow parent to move inside children.
-    let parentVertex = graph.vertexes[toVertexId];
-    while (true) {
-      const parentResult = getParentVertex(["Attr"], parentVertex, graph);
-      if (parentResult.error) {
-        break;
-      }
-      if (parentResult.vertex!.id === fromVertex.id) {
+    for (const vertex of draggedVertex()) {
+      let fromVertex = vertex;
+      const toVertexId = indicatorPosition().activeItem!;
+      if (!fromVertex) {
         // Don't allow drag and drop
         return;
       }
-      parentVertex = parentResult.vertex!;
-    }
-
-    if (position === "center") {
-      // is Top Layer:
-      if (toVertexId === formData.id) {
-        // Allow drag over it
-      } else {
-        const compVertex = getComponentFromLayoutRow(
-          toVertexId,
-          graph,
-          setGraph,
-        );
-        if (!compVertex?.P.child) {
+      const fromVertexLabel = fromVertex.L[0];
+      const position = indicatorPosition().position;
+      if (!position) {
+        // Don't allow drag and drop
+        showErrorToast("Position not found when dropping");
+        return;
+      }
+      // Don't allow parent to move inside children.
+      let parentVertex = graph.vertexes[toVertexId];
+      while (true) {
+        const parentResult = getParentVertex(["Attr"], parentVertex, graph);
+        if (parentResult.error) {
+          break;
+        }
+        if (parentResult.vertex!.id === fromVertex.id) {
           // Don't allow drag and drop
           return;
+        }
+        parentVertex = parentResult.vertex!;
+      }
+
+      if (position === "center") {
+        // is Top Layer:
+        if (toVertexId === formData.id) {
+          // Allow drag over it
+        } else {
+          const compVertex = getComponentFromLayoutRow(
+            toVertexId,
+            graph,
+            setGraph,
+          );
+          if (!compVertex?.P.child) {
+            // Don't allow drag and drop
+            return;
+          }
         }
       }
     }
@@ -470,198 +474,205 @@ export function useDragDrop(
   const handleDrop = async (e: DragEvent) => {
     e.stopPropagation();
 
-    let fromVertex = draggedVertex();
+    for (const vertex of draggedVertex()) {
+      let fromVertex = vertex;
 
-    const toVertexId = indicatorPosition().activeItem!;
-    const toVertex = graph.vertexes[toVertexId]; // vertex;
-    if (!fromVertex) {
-      showErrorToast("from vertex not found");
-      return;
-    }
-    const fromVertexLabel = fromVertex.L[0];
-
-    // When Page is dropped, fetch its layout and add to the current place
-    if (fromVertexLabel === "Page") {
-      const form: any = await getFormMetaDataAsync(
-        graph,
-        setGraph,
-        fromVertexLabel,
-      );
-      if (form.error) {
-        showErrorToast(form.error);
+      const toVertexId = indicatorPosition().activeItem!;
+      const toVertex = graph.vertexes[toVertexId]; // vertex;
+      if (!fromVertex) {
+        showErrorToast("from vertex not found when dropping ");
         return;
       }
-      const { incoming, outgoing }: { incoming: any; outgoing: any } =
-        getEdgesFromRowsAttr(form.form.attributes);
-      const result = await getDataMGCall({
-        expression: `id:'${fromVertex.id}'`,
-        incoming,
-        outgoing,
-      });
+      const fromVertexLabel = fromVertex.L[0];
 
-      if (result.error) {
-        showErrorToast(result.error);
-        return;
-      }
-
-      setGraphData(graph, setGraph, result.graph);
-    }
-
-    const position = indicatorPosition().position;
-    if (!position) {
-      showErrorToast("Position not found when dropping");
-      return;
-    }
-
-    const fromParentVertex = getParentVertex(["Attr"], fromVertex, graph);
-    const toParentVertex =
-      position === "center"
-        ? toVertex
-        : getParentVertex(["Attr"], toVertex, graph).vertex;
-
-    // is Top Layer:
-    if (position === "center" && toVertexId === formData.id) {
-      // Allow drag over it
-    } else if (!toParentVertex) {
-      // Dont allow drag before and after first element
-      return;
-    }
-
-    // const fromIndex = fromVertex.P.pos as number;
-    // const toIndex = toVertex.P.pos as number;
-    // if (fromIndex === undefined || toIndex === undefined) {
-    //  alert('from and to index should have position set')
-    //  return;
-    // }
-    function sortChildren() {
-      let pos = 1;
-      const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
-      for (const child of childrenAttrs) {
-        if (child.id === fromVertex!.id) {
-          continue;
-        }
-        // const childIndex = child.P.pos;
-        // if (childIndex === undefined) {
-        //  alert ('childIndex Pos should not be undefined.');
-        // }
-        if (child.id === toVertex.id) {
-          // childIndex === toIndex, childIndex may be undefined.
-          if (position === "before") {
-            mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
-              pos,
-            });
-            pos++;
-            mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
-            pos++;
-          } else if (position === "after") {
-            mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
-            pos++;
-            mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
-              pos,
-            });
-            pos++;
-          }
-        } else {
-          mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
-          pos++;
-        }
-      }
-    }
-
-    if (position === "center") {
-      // is Top Layer:
-      if (toVertexId === formData.id) {
-        // Allow drag over it
-      } else {
-        const compVertex = getComponentFromLayoutRow(
-          toVertexId,
+      // When Page is dropped, fetch its layout and add to the current place
+      if (fromVertexLabel === "Page") {
+        const form: any = await getFormMetaDataAsync(
           graph,
           setGraph,
+          fromVertexLabel,
         );
-        if (!compVertex?.P.child) {
+        if (form.error) {
+          showErrorToast(form.error);
           return;
         }
+        const { incoming, outgoing }: { incoming: any; outgoing: any } =
+          getEdgesFromRowsAttr(form.form.attributes);
+        const result = await getDataMGCall({
+          expression: `id:'${fromVertex.id}'`,
+          incoming,
+          outgoing,
+        });
+
+        if (result.error) {
+          showErrorToast(result.error);
+          return;
+        }
+
+        setGraphData(graph, setGraph, result.graph);
       }
-    }
 
-    if (fromVertexLabel === "Comp") {
-      const rowId = componentDrag(
-        txnId,
-        fromVertex,
-        toParentVertex || formData,
-        graph,
-        setGraph,
-      );
-      if (rowId === -1) return;
-
-      fromVertex = graph.vertexes[rowId];
-
-      sortChildren();
-    } else if (fromVertexLabel === "Page") {
-      const rowId = componentDrag(
-        txnId,
-        fromVertex,
-        toParentVertex || formData,
-        graph,
-        setGraph,
-      );
-      if (rowId === -1) return;
-
-      fromVertex = graph.vertexes[rowId];
-
-      sortChildren();
-    } else if (
-      position !== "center" &&
-      fromParentVertex.vertex?.id === toParentVertex!.id
-    ) {
-      // Sort Children:
-      sortChildren();
-
-      ///sortChildren(childrenItems, record.txnId);
-    } else {
-      console.log("when this case is run?");
-      // remove previous incoming edge if present.
-      if (fromParentVertex.vertex) {
-        setParentValue(graph, setGraph, txnId, fromVertex, {
-          P: { props: { type: "Attr" } },
-        } as unknown as Vertex);
+      const position = indicatorPosition().position;
+      if (!position) {
+        showErrorToast("Position not found when dropping");
+        return;
       }
-      // add new edge.
+
+      const fromParentVertex = getParentVertex(["Attr"], fromVertex, graph);
+      const toParentVertex =
+        position === "center"
+          ? toVertex
+          : getParentVertex(["Attr"], toVertex, graph).vertex;
+
+      // is Top Layer:
+      if (position === "center" && toVertexId === formData.id) {
+        // Allow drag over it
+      } else if (!toParentVertex) {
+        // Dont allow drag before and after first element
+        return;
+      }
+
+      // const fromIndex = fromVertex.P.pos as number;
+      // const toIndex = toVertex.P.pos as number;
+      // if (fromIndex === undefined || toIndex === undefined) {
+      //  alert('from and to index should have position set')
+      //  return;
+      // }
+      function sortChildren() {
+        let pos = 1;
+        const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
+        for (const child of childrenAttrs) {
+          if (child.id === fromVertex!.id) {
+            continue;
+          }
+          // const childIndex = child.P.pos;
+          // if (childIndex === undefined) {
+          //  alert ('childIndex Pos should not be undefined.');
+          // }
+          if (child.id === toVertex.id) {
+            // childIndex === toIndex, childIndex may be undefined.
+            if (position === "before") {
+              mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+                pos,
+              });
+              pos++;
+              mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+              pos++;
+            } else if (position === "after") {
+              mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+              pos++;
+              mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+                pos,
+              });
+              pos++;
+            }
+          } else {
+            mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+            pos++;
+          }
+        }
+      }
+
       if (position === "center") {
-        setParentValue(
-          graph,
-          setGraph,
-          txnId,
-          fromVertex,
-          { P: { props: { type: "Attr" } } } as unknown as Vertex,
-          toVertexId,
-        );
-        mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
-          pos: 9999999,
-        }); // move to end
-      } else {
-        setParentValue(
-          graph,
-          setGraph,
-          txnId,
-          fromVertex,
-          { P: { props: { type: "Attr" } } } as unknown as Vertex,
-          toParentVertex!.id,
-        );
+        // is Top Layer:
+        if (toVertexId === formData.id) {
+          // Allow drag over it
+        } else {
+          const compVertex = getComponentFromLayoutRow(
+            toVertexId,
+            graph,
+            setGraph,
+          );
+          if (!compVertex?.P.child) {
+            return;
+          }
+        }
       }
 
-      // sort from parent's children
-      // sort if required.
-      // sort to parent's children
-      sortChildren();
+      if (fromVertexLabel === "Comp") {
+        const rowId = componentDrag(
+          txnId,
+          fromVertex,
+          toParentVertex || formData,
+          graph,
+          setGraph,
+        );
+        if (rowId === -1) return;
+
+        fromVertex = graph.vertexes[rowId];
+
+        sortChildren();
+      } else if (fromVertexLabel === "Page") {
+        const rowId = componentDrag(
+          txnId,
+          fromVertex,
+          toParentVertex || formData,
+          graph,
+          setGraph,
+        );
+        if (rowId === -1) return;
+
+        fromVertex = graph.vertexes[rowId];
+
+        sortChildren();
+      } else if (
+        position !== "center" &&
+        fromParentVertex.vertex?.id === toParentVertex!.id
+      ) {
+        // Sort Children:
+        sortChildren();
+
+        ///sortChildren(childrenItems, record.txnId);
+      } else {
+        console.log("when this case is run?");
+        // remove previous incoming edge if present.
+        if (fromParentVertex.vertex) {
+          setParentValue(graph, setGraph, txnId, fromVertex, {
+            P: { props: { type: "Attr" } },
+          } as unknown as Vertex);
+        }
+        // add new edge.
+        if (position === "center") {
+          setParentValue(
+            graph,
+            setGraph,
+            txnId,
+            fromVertex,
+            { P: { props: { type: "Attr" } } } as unknown as Vertex,
+            toVertexId,
+          );
+          mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+            pos: 9999999,
+          }); // move to end
+        } else {
+          setParentValue(
+            graph,
+            setGraph,
+            txnId,
+            fromVertex,
+            { P: { props: { type: "Attr" } } } as unknown as Vertex,
+            toParentVertex!.id,
+          );
+        }
+
+        // sort from parent's children
+        // sort if required.
+        // sort to parent's children
+        sortChildren();
+      }
     }
 
-    setDraggedVertex(null);
+
+
+    // setDraggedVertex(null);
+    setDraggedVertex([]);
 
     // Handle drop action here
     setIndicatorPosition({ activeItem: null, position: null });
     setTargetId(-1);
   };
+
+
 
   const clone = () => {
     let fromVertex = vertex;

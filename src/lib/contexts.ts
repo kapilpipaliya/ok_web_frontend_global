@@ -37,9 +37,7 @@ export const SelectedComponentContext = createContext(
 export const PropertiesVertexIdContext = createContext(getNewGraphId());
 
 export const DraggedVertexContext = createContext(
-  createSignal<Vertex | null>(null),
-  // createSignal<Vertex[] | null>([]),
-
+  createSignal<Vertex[] | []>([]),
 );
 
 export const PageConfigContext = createContext(

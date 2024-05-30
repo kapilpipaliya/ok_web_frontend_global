@@ -58,7 +58,7 @@ const Column = (props: {
   return (
     <>
       <div class={"p:5 direction:ltr "}>
-        <div class="position:sticky top:0 p:4 bg:white">
+        <div class="position:sticky top:0 p:4 bg:white z:1">
           <div class="p:5|10 flex ai:center jc:space-between bg:#f4f4f4 f:0.875rem r:5">
             <div class="font-weight:600">Form Elements</div>
             <Icon

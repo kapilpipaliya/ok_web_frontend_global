@@ -40,6 +40,9 @@ export interface GraphInterface {
   vertexLabelIdMap: { [key: string]: Id[] };
   member?: { [key: string]: any } | null;
   txnId: number;
+  navigationData?: { [key: string]: any }[];
+  isSideBarOpen?: boolean;
+  isSubSideBarOpen?: boolean;
 }
 
 export const GraphContext = createContext<

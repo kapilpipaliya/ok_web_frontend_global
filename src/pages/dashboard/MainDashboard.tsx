@@ -30,7 +30,7 @@ import Sidebar from "./SideBar/SidebarLayout";
 
 export function MainDashboard(props: { children?: JSX.Element }) {
   const border = "|solid|rgb(212,219,231)";
-  const [isSideBarOpen, setSideBarOpen] = createSignal(true);
+
   const [graph, setGraph] = useContext(GraphContext)!;
   const vertexId = getNewGraphId();
   addNewVertex(
@@ -51,24 +51,17 @@ export function MainDashboard(props: { children?: JSX.Element }) {
 
   createEffect(() => {
     const path = location.pathname;
-
     setIsLoginPage(path.includes("/auth/login"));
     setSignUpPage(path.includes("/auth/signup"));
     setIsShowDrawer(
       !(
         path.includes("/auth/login") ||
         path.includes("/auth/signup") ||
-        path.includes("/admin/Page/")
+        path.toLowerCase().includes("/admin/page/") ||
+        path.toLowerCase().includes("/admin/form/")
       ),
     );
   });
-  const [isSidebarOpen, setSidebarOpen] = createSignal(true);
-
-  const appStyle = {
-    display: "flex",
-    height: "100vh",
-  };
-
   const mainContentStyle = {
     "flex-grow": 1,
     "scrollbar-width": "thin",
@@ -78,21 +71,10 @@ export function MainDashboard(props: { children?: JSX.Element }) {
   };
 
   return (
-    <div style={appStyle}>
-      <Show when={isSideBarOpen() && isShowDrawer()}>
-        <Sidebar
-          isSideBarOpen={isSideBarOpen()}
-          toggleSidebar={() => {
-            setSideBarOpen((prev) => !prev);
-          }}
-        />
-      </Show>
-      {/* Disable Scroll when Select dropdown is open */}
       <div id="main-content" style={mainContentStyle as any}>
         <PageContext.Provider
           value={{
             events: {
-              setSideBarOpen,
               setTitle: (title: string) =>
                 mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
             },
@@ -102,7 +84,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
             <Navbar
               showCloseDrawerBtn={isShowDrawer()}
               toggleSidebar={() => {
-                setSideBarOpen((prev) => !prev);
+                setGraph('isSideBarOpen', prev => !prev);
               }}
               right={<DropdownMenu />}
               meta={graph.vertexes[vertexId]}
@@ -112,7 +94,6 @@ export function MainDashboard(props: { children?: JSX.Element }) {
           <div class="p:4|10 overflow-y:auto">{props.children}</div>
         </PageContext.Provider>
       </div>
-    </div>
   );
 }
 
@@ -181,11 +162,9 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
-            isOpen() ? 1 : 0
-          }; pointer-events: ${
-            isOpen() ? "auto" : "none"
-          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
+            }; pointer-events: ${isOpen() ? "auto" : "none"
+            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"

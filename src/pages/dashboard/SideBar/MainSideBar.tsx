@@ -5,7 +5,7 @@ import logo from "~/assets/graphics/sidebarLogo.svg";
 type MainSideBarProps = {
   activeSection: Accessor<string>;
   setActiveSection: Setter<string>;
-  navData: Resource<any>;
+  navData: any;
   mainIcon: any;
   isCollapsed: Accessor<boolean>;
   toggleCollapse: () => void;
@@ -22,7 +22,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
           <img style="height: 35px; " src={logo} alt="logo" />
         </a>
         <div class="flex flex-direction:column gap:10 mt:20">
-          <For each={props.navData()}>
+          <For each={props.navData}>
             {(navNode) => (
               <Show when={navNode.P.url !== "undefined"}>
                 <a

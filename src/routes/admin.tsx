@@ -14,38 +14,24 @@ import {
 import { createStore } from "solid-js/store";
 import { API, DataFetcher } from "~/components/api/DataFetcher";
 import { MainDashboard } from "~/pages/dashboard/MainDashboard";
+import { createEffect, createResource, onMount } from "solid-js";
+import { expressionString } from "~/lib/Utils";
+import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
 
 export default function UsersLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);
-  const navigate = useNavigate();
-  const graph = createStore<GraphInterface>({
-    vertexes: {} as VertexMap,
-    edges: {} as EdgeMap,
-    vertexLabelIdMap: {} as { [key: string]: Id[] },
-
-    member: {},
-    txnId: 0,
-  });
-
-  // getUser().then(value =>
-  // {
-  //     if (value?.error) {
-  //         navigate(`/auth/login`)
-  //     }
-  // });
+ 
+ 
 
   return (
     // <CSSRuntimeProvider config={config}>
-    <GraphContext.Provider value={graph}>
       <WsContext.Provider value={{ Ws }}>
+        
         {/* In DataFetch fetch only side bar data*/}
-        <DataFetcher
-          fetchData={API.fetchDataUrl}
-          renderContent={<MainDashboard children={props.children} />}
-        />
+        <MainDashboard children={props.children} />
         {/*{props.children}*/}
       </WsContext.Provider>
-    </GraphContext.Provider>
     // </CSSRuntimeProvider>
   );
 }

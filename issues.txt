@@ -13,24 +13,19 @@
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 
-Use Solid Dismiss for Tooltip in page designer. ✅
-Add FormSettings section ✅
-use component for Page and Form new route ✅
-For cypher_api functions, make two folder get and mutate ✅
-
-multiple compnents should be droped. 
+multiple compnents should be droped.  ✅ 
 handle not work select parent in page designer.
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
-delete isVertexExistWithPropMGCall function use findVertexesMGCall function
-Do not save : when saving timestamp in the file, because in windows its not supported.
+delete isVertexExistWithPropMGCall function use findVertexesMGCall function ✅ 
+Do not save : when saving timestamp in the file, because in windows its not supported. ✅  
 
 Big Task:
 Dont use integer id for node and edge.
 
 
 Kapil:
-on double click add element at last (kapil) - last in selected layout?
+on double click add element at last (kapil) - last in selected layout?  ✅ 
 Make Nav sync full data. (IMP)
 Make Page working with some async data too.
 Make Working Forms using Page Designer.

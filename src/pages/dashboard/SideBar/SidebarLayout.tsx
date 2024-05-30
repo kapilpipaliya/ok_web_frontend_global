@@ -1,23 +1,24 @@
-import { useLocation } from "@solidjs/router";
 import {
   createEffect,
+  createMemo,
   createResource,
-  createSignal,
-  For,
-  JSX,
+  createSignal, JSX,
+  onMount,
   Show,
-  useContext,
+  useContext
 } from "solid-js";
-import { GraphContext } from "~/lib/graph/graph";
 
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import "~/css/sideBarSearch.css";
-import { Icon } from "@iconify-icon/solid";
-import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
+import { getTreeData } from "~/lib/graph/get/sync/traverse";
+import { graph } from "neo4j-driver";
+import { GraphContext } from "~/lib/graph/graph";
 import { expressionString } from "~/lib/Utils";
+import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
+import { useLocation } from "@solidjs/router";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -27,25 +28,14 @@ export interface navbarDataI {
   name: string;
 }
 
-function treeViewFilter(
-  nodes: navbarDataI[],
-  cb: (node: navbarDataI) => boolean,
-): any {
-  return nodes
-    .map((node) => {
-      if (cb(node)) return node;
-      const children = treeViewFilter(node.children || [], cb);
-      return children.length && { ...node, children };
-    })
-    .filter(Boolean);
-}
 
-function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
+function Sidebar(props: {  }) {
   const [searchData, setSearchData] = createSignal<any>([]);
-  const location = useLocation();
+  const [navData, setNavData] = createSignal<any>([]);
   const [activeSection, setActiveSection] = createSignal("Home");
   const [searchTerm, setSearchTerm] = createSignal("");
   const [isSearchMode, setIsSearchMode] = createSignal(false);
+  const [graph, setGraph] = useContext(GraphContext)!;
   const [expandedSections, setExpandedSections] = createSignal<
     Map<string, boolean>
   >(new Map());
@@ -60,7 +50,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       return newExpandedSections;
     });
   };
-
+  
   function handleSearch(input: string) {
     setSearchTerm(input);
 
@@ -68,10 +58,11 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     setIsSearchMode(searchName.length > 0);
 
     if (searchName.length > 0) {
-      const filteredData = filterNavData(navData(), searchName);
+      debugger
+      const filteredData = filterNavData(graph.navigationData, searchName);
       setSearchData(filteredData);
     } else {
-      setSearchData(navData());
+      setSearchData(graph.navigationData);
     }
   }
 
@@ -116,8 +107,10 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
     setIsCollapsed(!isCollapsed());
   };
 
+  
+
   async function getNavData() {
-    const data: any = await await getTreeDataMGCall({
+    const data: any = await getTreeDataMGCall({
       collection: expressionString({ coll: "Nav", filter: "Navigation" }),
       // TODO: Dont display "Form" Component
       child: {
@@ -126,19 +119,23 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       },
     });
 
-    return data.children ? data.children[0].children : [];
+    return data;
   }
 
   // When loading from server side, the client side will not run createResource function again.
   // so setState inside it will not be triggered.
-  const [navData] = createResource(async () => {
-    const data = await getNavData();
+  // const [navData] = createResource(async () => {
+  //   const data = await getNavData();
+  //   return data && data.children[0].children;
+  // });
 
-    return data;
-  });
-  createEffect(() => {
-    if (navData()) {
-      setSearchData(navData());
+  onMount(async () => {
+    const data = await getNavData();
+    if (data) {
+      setGraphData(graph,setGraph,data.graph);
+      setNavData(data.children[0].children);
+      setSearchData(data.children[0].children);
+      setGraph('navigationData', data.children[0].children);
     }
   });
 
@@ -147,7 +144,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
       width: isCollapsed() ? "70px" : "310px",
       background: "#f4f4f4",
       transition: "transform 0.3s ease-in-out",
-      transform: props.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
+      transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",
       "border-right": "1px solid lightgray",
     }) as JSX.CSSProperties;
@@ -168,7 +165,7 @@ function Sidebar(props: { isSideBarOpen: boolean; toggleSidebar: () => void }) {
               <MainSideBar
                 activeSection={activeSection}
                 setActiveSection={setActiveSection}
-                navData={navData}
+                navData={navData()}
                 mainIcon={sidebarIcon}
                 isCollapsed={isCollapsed}
                 toggleCollapse={toggleSectionCollapse}

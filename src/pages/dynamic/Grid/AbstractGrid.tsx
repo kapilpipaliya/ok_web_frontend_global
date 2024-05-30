@@ -19,6 +19,7 @@ import PageHeader from "~/components/custom/Breadcumb";
 import DataGrid from "./DataGrid";
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { getTreeData } from "~/lib/graph/get/sync/traverse";
 
 interface AbstractGridProps {
   tableId: string;
@@ -26,18 +27,19 @@ interface AbstractGridProps {
 
 export function AbstractGrid(props: AbstractGridProps) {
   const [locationData, setLocationData] = createSignal([]);
+  const [graph, setGraph] = useContext(GraphContext)!;
   const param = useLocation();
   const navigate = useNavigate();
 
   async function getNavData() {
-    const data: any = await getTreeDataMGCall({
+    const data: any = await getTreeData(graph, setGraph, {
       collection: expressionString({ coll: "Nav", filter: "Navigation" }),
       child: {
         collection: "->NavAttr",
         child: { collection: "->NavAttr", child: { collection: "->NavAttr" } },
       },
     });
-    return data.children[0].children;
+    return data && data[0].children;
   }
 
   const [tableId, setTableId] = createSignal("");
@@ -67,19 +69,20 @@ export function AbstractGrid(props: AbstractGridProps) {
   const [nav] = createResource(tableId, async () => {
     const navData = await getNavData();
     const filtered = getCurrentLocation(navData);
+
     setLocationData(filtered);
     return filtered;
   });
 
   return (
     <>
-      <Show when={locationData()[0] !== undefined}>
+      <Show when={nav()}>
         <PageHeader
-          title={`${locationData()[0]}`}
+          title={`${nav()[0]}`}
           breadcrumb={[
             ...breadcrumbData,
-            { name: `${locationData()[1]}` },
-            { name: locationData()[2] },
+            { name: `${nav()[1]}` },
+            { name: nav()[2] },
           ]}
         />
       </Show>
@@ -93,7 +96,7 @@ export function AbstractGrid(props: AbstractGridProps) {
                 props: {
                   onClick: () => navigate("new"),
                   variant: "soft",
-                  style: { padding: "7px 10px",'margin-bottom': "10px" },
+                  style: { padding: "7px 10px", 'margin-bottom': "10px" },
                   leading:
                     // TO solve Hydration error passed a function
                     () => (

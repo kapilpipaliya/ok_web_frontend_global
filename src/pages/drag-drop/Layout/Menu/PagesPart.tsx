@@ -118,7 +118,8 @@ export function PagesPart() {
           draggable={true}
           onDragStart={(e) => {
             e.stopPropagation();
-            setDraggedVertex(graph.vertexes[props.child.id]);
+
+            setDraggedVertex(prev => [...prev, graph.vertexes[props.child.id]]);
           }}
         >
           <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />

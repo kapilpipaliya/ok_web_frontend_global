@@ -9,7 +9,6 @@ export default function PageDesignerContext(props: any) {
     const selectedId = createSignal<Id>(-1);
     const targetId = createSignal<Id>(-1);
     const hiddenNodes = createSignal<Id[]>([]);
-    const draggedVertex = createSignal<Vertex | null>(null);
     const showDrawerContext = createSignal(false);
     const selectedComponent = createSignal<{ vertexId: number }>({
         vertexId: -1,
@@ -22,8 +21,8 @@ export default function PageDesignerContext(props: any) {
         labelPosition: 'top',  // Default position
         labelColor: 'black',   // Default label color
         inputBackground: 'white',
-} as { labelPosition: string, labelColor: string, inputBackground: string });
-
+    } as { labelPosition: string, labelColor: string, inputBackground: string });
+    const draggedVertices = createSignal<Vertex[] | []>([]);
     return (
         <FormSettingsContext.Provider value={formSetting}>
             <HoverIdContext.Provider value={hoverId}>
@@ -31,20 +30,20 @@ export default function PageDesignerContext(props: any) {
                     <SelectedIdContext.Provider value={selectedId}>
                         <TargetIdContext.Provider value={targetId}>
                             <ShowDrawerContext.Provider value={showDrawerContext}>
-                            <HiddenNodesContext.Provider value={hiddenNodes}>
-                                <DraggedVertexContext.Provider value={draggedVertex}>
-                                    <SelectedComponentContext.Provider
-                                        value={selectedComponent}
-                                    >
-                                        <IndicatorPositionContext.Provider
-                                            value={indicatorPosition}
+                                <HiddenNodesContext.Provider value={hiddenNodes}>
+                                    <DraggedVertexContext.Provider value={draggedVertices}>
+                                        <SelectedComponentContext.Provider
+                                            value={selectedComponent}
                                         >
-                                            {props.children}
-                                        </IndicatorPositionContext.Provider>
-                                    </SelectedComponentContext.Provider>
-                                </DraggedVertexContext.Provider>
-                            </HiddenNodesContext.Provider>
-                        </ShowDrawerContext.Provider>
+                                            <IndicatorPositionContext.Provider
+                                                value={indicatorPosition}
+                                            >
+                                                {props.children}
+                                            </IndicatorPositionContext.Provider>
+                                        </SelectedComponentContext.Provider>
+                                    </DraggedVertexContext.Provider>
+                                </HiddenNodesContext.Provider>
+                            </ShowDrawerContext.Provider>
                         </TargetIdContext.Provider>
                     </SelectedIdContext.Provider>
                 </SelectedCollContext.Provider>

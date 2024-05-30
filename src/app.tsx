@@ -9,6 +9,9 @@ import { LoaderNew } from "./components/custom/LoaderSimple";
 import { Config } from "@master/css";
 import { defineConfig } from "@solidjs/start/config";
 import NotAuthorized401 from "./pages/not-found/NotAuthorized401";
+import Sidebar from "./pages/dashboard/SideBar/SidebarLayout";
+import { EdgeMap, GraphContext, GraphInterface, Id, VertexMap } from "./lib/graph/graph";
+import { createStore } from "solid-js/store";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -22,14 +25,41 @@ export default function App() {
   };
 
   const loadingSite = createSignal(false);
+
+  const appStyle = {
+    display: "flex",
+    height: "100vh",
+  };
+  const graph = createStore<GraphInterface>({
+    vertexes: {} as VertexMap,
+    edges: {} as EdgeMap,
+    vertexLabelIdMap: {} as { [key: string]: Id[] },
+    member: {},
+    navigationData: [],
+    txnId: 0,
+    isSideBarOpen: true,
+    isSubSideBarOpen: true
+  });
+
   return (
     <Router
       root={(props) => {
         return (
+
           <CSSRuntimeProvider config={config}>
+          <GraphContext.Provider value={graph}>
+
             <LoadingContext.Provider value={loadingSite}>
               <MetaProvider>
                 <div id="popup-root" />
+                <div style={appStyle}>
+
+                <Show when={graph[0].isSideBarOpen}>
+                  <Sidebar
+                   
+  
+                  />
+                </Show>
                 <Suspense fallback={<LoaderNew />}>
                   {/* <ErrorBoundary fallback={(error) => {
                     return <div>Something went wrong: {error.message}</div>;
@@ -38,6 +68,7 @@ export default function App() {
                 </ErrorBoundary> */}
                 {props.children}
                 </Suspense>
+                </div>
 
                 <Show when={loadingSite[0]()} fallback={<Toaster />}>
                   <div
@@ -59,7 +90,10 @@ export default function App() {
                 </Show>
               </MetaProvider>
             </LoadingContext.Provider>
+            </GraphContext.Provider>
           </CSSRuntimeProvider>
+       
+
         );
       }}
     >

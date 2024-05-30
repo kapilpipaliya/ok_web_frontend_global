@@ -9,12 +9,12 @@ export async function findVertexesMGCall(options: {
   attribute?: string;
   value?: number | string;
   id?: number;
-}): Promise<{error?: boolean, message?: string, vertexes?: Vertex}> {
+}): Promise<{ error?: boolean, message?: string, vertexes?: Vertex }> {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
   const driver = await (await getDriver(subDomain)).session();
- 
+
   try {
     let query;
     let params;
@@ -39,15 +39,15 @@ export async function findVertexesMGCall(options: {
     } else {
       return { error: true, message: "Invalid parameters" };
     }
-    
+
     const vertexResult = await driver.run(query, params);
-    if(vertexResult.records.length === 0) {
+    if (vertexResult.records.length === 0) {
       return {
         error: true,
       }
-    }else{
+    } else {
       const vertexes = convertNodeToJson(vertexResult.records[0].get("v"));
-      
+
       return {
         error: false,
         vertexes,
@@ -57,7 +57,7 @@ export async function findVertexesMGCall(options: {
     console.error(error);
 
     return { error: true, message: "An error occurred" };
-  } 
+  }
 }
 
 
