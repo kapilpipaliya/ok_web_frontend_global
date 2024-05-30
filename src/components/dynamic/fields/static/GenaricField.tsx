@@ -40,12 +40,13 @@ import {
   IndicatorPositionContext,
   IsPreviewContext,
   SelectedIdContext,
+  ShowDrawerContext,
   TargetIdContext,
 } from "~/lib/contexts";
 import Drawer from "~/components/custom/drawer";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Properties } from "~/pages/drag-drop/Layout/Actions/Properties";
-import { CustomTooltip } from "~/components/custom/Tooltip";
+import { Popover } from "@kobalte/core/popover";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
 
@@ -92,6 +93,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
   const [isPreview, setIsPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
@@ -100,28 +102,18 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
-
   const PropertiesDrawer = (props: { itemId: any }) => {
-    const [showDrawer, setShowDrawer] = createSignal(false);
     return (
       <Show when={isSelectedLayoutId(props.itemId)}>
-          <Icon
-            icon={"mingcute:settings-5-line"}
-            onclick={() => setShowDrawer(!showDrawer())}
-            height={22}
-            width={22}
-            class="cursor:pointer"
-          />
-          <Show when={showDrawer()}>
-            <Drawer
-              open={showDrawer}
-              setIsOpen={setShowDrawer}
-              width="400px"
-            >
-            <Properties setShowDrawer={setShowDrawer}/>
-            </Drawer>
-          </Show>
-        </Show>
+        <Icon
+          icon={"mingcute:settings-5-line"}
+          onclick={() => setShowDrawer(!showDrawer())}
+          height={22}
+          width={22}
+          class="cursor:pointer"
+        />
+
+      </Show>
     );
   };
 
@@ -254,111 +246,128 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             value={[...useContext(PageRenderContext), item]}
           >
             <Show when={!isPreview()} fallback={<Content />}>
-              <span
-                class="display:contents "
-                onMouseOver={(e) => {
-                  e.stopPropagation();
-                  setHoverId(item.id);
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLayoutItemClick();
-                }}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <Show when={isSelectedLayoutId(item.id)}>
-                  <span class="position:relative  flex justify-content:flex-end ">
-                    <div class="position:absolute @fade|.3s bottom:100% z:50 ">
-                      <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50 m:0.5rem">
-                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
-                            <PropertiesDrawer itemId={item.id} />
+            <span
+              class="display:contents"
+              onMouseOver={(e) => {
+                e.stopPropagation();
+                setHoverId(item.id);
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onLayoutItemClick();
+              }}
+              onDragOver={handleDragOver}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <Popover placement="top-start" open={isSelectedLayoutId(item.id)}>
+
+                <Popover.Anchor>
+                    <Content />
+                </Popover.Anchor>
+                <Popover.Portal>
+
+                  <Popover.Content class="popover__content">
+
+                    <Show when={isSelectedLayoutId(item.id)}>
+                      <span class="position:relative  flex justify-content:flex-end ">
+                        <div class="position:absolute @fade|.3s z:50">
+                          <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50">
+                            <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                              <PropertiesDrawer itemId={item.id} />
+                            </div>
+                            <Tooltip content={"Name"} nowrap>
+                              <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                                {getComponent()}
+                              </div>
+                            </Tooltip>
+                            <Tooltip content={"Move"} nowrap>
+                              <Icon
+                                draggable={true}
+                                onDragStart={handleDragStart}
+                                icon={"material-symbols-light:drag-pan-rounded"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Parent"} nowrap>
+                              <Icon
+                                icon={"mdi:arrow-up"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                onClick={(e) => {
+                                  const parentResult = getParentVertex(
+                                    ["Attr"],
+                                    item,
+                                    graph,
+                                  );
+                                  if (parentResult.error) {
+                                    return;
+                                  }
+
+                                  // todo: handle not work select parent
+                                  setSelectedId(parentResult.vertex!.id);
+                                }}
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Duplicate"}>
+                              <Icon
+                                icon={"mage:copy"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                onClick={clone}
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Delete"}>
+                              <Icon
+                                onClick={() => deleteLayout(getComponent())}
+                                icon={"fluent:delete-20-regular"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                              />
+                            </Tooltip>
+
                           </div>
-                        <Tooltip content={"Name"} nowrap>
-                          <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
-                            {getComponent()}
-                          </div>
-                        </Tooltip>
-                        <Tooltip content={"Move"} nowrap>
-                          <Icon
-                            draggable={true}
-                            onDragStart={handleDragStart}
-                            icon={"material-symbols-light:drag-pan-rounded"}
-                            height={20}
-                            width={20}
-                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
-                          />
-                        </Tooltip>
-                        <Tooltip content={"Parent"} nowrap>
-                          <Icon
-                            icon={"mdi:arrow-up"}
-                            height={20}
-                            width={20}
-                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
-                            onClick={(e) => {
-                              const parentResult = getParentVertex(
-                                ["Attr"],
-                                item,
-                                graph,
-                              );
-                              if (parentResult.error) {
-                                return;
-                              }
-                              setSelectedId(parentResult.vertex!.id);
-                            }}
-                          />
-                        </Tooltip>
-                        <Tooltip content={"Duplicate"}>
-                          <Icon
-                            icon={"mage:copy"}
-                            height={20}
-                            width={20}
-                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
-                            onClick={clone}
-                          />
-                        </Tooltip>
-                        <Tooltip content={"Delete"}>
-                          <Icon
-                            onClick={() => deleteLayout(getComponent())}
-                            icon={"fluent:delete-20-regular"}
-                            height={20}
-                            width={20}
-                            class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
-                          />
-                        </Tooltip>
-                        
-                      </div>
-                    </div>
-                  </span>
-                </Show>
-                <Show
-                  when={
-                    !isSelectedLayoutId(item.id) && isSelectedHoverId(item.id)
-                  }
-                >
-                  <span class="position:relative ">
-                    <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
-                      <Icon
-                        icon={iconMap[getComponent()]}
-                        class="color:rgb(255,255,255) "
-                      />
-                      <Tooltip content={"Name"} nowrap>
-                        <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
-                          {getComponent()}
                         </div>
-                      </Tooltip>
-                    </div>
-                  </span>
-                </Show>
-                <Content />
-              </span>
+                      </span>
+                    </Show>
+                    <Show
+                      when={
+                        !isSelectedLayoutId(item.id) && isSelectedHoverId(item.id)
+                      }
+                    >
+                      <span class="position:relative ">
+                        <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
+                          <Icon
+                            icon={iconMap[getComponent()]}
+                            class="color:rgb(255,255,255) "
+                          />
+                          <Tooltip content={"Name"} nowrap>
+                            <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                              {getComponent()}
+                            </div>
+                          </Tooltip>
+                        </div>
+                      </span>
+                    </Show>
+
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover>
+            </span>
             </Show>
           </PageRenderContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
         return (
+
+
+
           <Switch>
             <Match when={parentComponent() === "TabList"}>
               <Tab style={item.P.props}>
@@ -390,6 +399,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               <PageComponent />
             </Match>
           </Switch>
+
         );
       }}
     </For>

@@ -13,7 +13,7 @@ import {
   evalGetParents,
   evalGlobalColl,
   evalVertexById,
-} from "../cypher_api/functions/expression_eval_async_fns";
+} from "../cypher_api/functions/get/expression_eval_async_fns";
 import { graph } from "neo4j-driver";
 
 /**

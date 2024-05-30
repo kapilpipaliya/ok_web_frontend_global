@@ -26,6 +26,7 @@ export function DynamicCSSComponent(props: { value: any }) {
           label={props.value.label}
           isLabelOnTop={props.value.isLabelOnTop}
           options={props.value.options}
+          onChangeInput={props.value.onChangeInput}
         />
       </Match>
       <Match when={props.value.component === "toggleButton"}>

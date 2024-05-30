@@ -1,11 +1,10 @@
 import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
-import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
-import { Node } from "~/cypher_api/functions/Type";
+import { getOutEdges } from "~/cypher_api/functions/get/getOutEdges";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 import { Edge, Vertex } from "~/lib/graph/graph";
 
-export async function getSelectedVertexValueMGCall(vertex: Node, meta: Node) {
+export async function getSelectedVertexValueMGCall(vertex: Vertex, meta: Vertex) {
   if (!vertex?.L) return [];
   const type = getToEdge(meta, vertex);
   const vertexResult = await getOutEdges(vertex.id, type);
@@ -13,8 +12,8 @@ export async function getSelectedVertexValueMGCall(vertex: Node, meta: Node) {
 }
 
 export async function getParentVertexValueMGCall(
-  vertex: Node,
-  meta: Node,
+  vertex: Vertex,
+  meta: Vertex,
 ): Promise<number[]> {
   const type = getInEdge(meta, vertex);
   if (!type) {
@@ -28,9 +27,9 @@ export async function getParentVertexValueMGCall(
 
 export async function getParentVertexesMGCall(
   path: string[],
-  currentVertexes: Node[],
-): Promise<{ error: boolean; vertexes?: Node[] }> {
-  const stepVertexes = new Map<number, Node>();
+  currentVertexes: Vertex[],
+): Promise<{ error: boolean; vertexes?: Vertex[] }> {
+  const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -90,10 +89,10 @@ export function calculateFilterMGCall(input: string) {
 
 export async function getTreeDataMGCall(
   treeLevels: { [key: string]: any },
-  vertexes: Node[] = [],
+  vertexes: Vertex[] = [],
   options?: {
-    nameExpr?: (child: Node) => string;
-    addChild?: (child: Node) => boolean;
+    nameExpr?: (child: Vertex) => string;
+    addChild?: (child: Vertex) => boolean;
   },
 ) {
   "use server";
@@ -101,7 +100,7 @@ export async function getTreeDataMGCall(
   const relationships: { [key: string]: Edge } = {};
   const getChildren = async (
     levels: { [key: string]: any },
-    vertexes: Node[],
+    vertexes: Vertex[],
   ) => {
     const result: {}[] = [];
     if (!levels.collection) return result;
@@ -152,7 +151,7 @@ export async function getTreeDataMGCall(
 //  key else Primary Keys will be used.
 // TODO:
 export async function getSelectionOptionsMGCall(
-  vertex: Node[],
+  vertex: Vertex[],
   collection: string,
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: any; graph?: any }> {
@@ -187,8 +186,8 @@ export async function getSelectionOptionsMGCall(
 
 export async function getChildVertexMGCall(
   path: string[],
-  currentVertex: Node,
-): Promise<{ error: boolean; vertex?: Node }> {
+  currentVertex: Vertex,
+): Promise<{ error: boolean; vertex?: Vertex }> {
   if (path.length === 0)
     return {
       error: true,
@@ -245,8 +244,8 @@ export async function getChildVertexMGCall(
 
 export async function getParentVertexMGCall(
   path: string[],
-  currentVertex: Node,
-): Promise<{ error: boolean; vertex?: Node }> {
+  currentVertex: Vertex,
+): Promise<{ error: boolean; vertex?: Vertex }> {
   const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
   const pairsResult = await getOutEdges(currentVertex.id, type, {
     isInward: true,
@@ -280,10 +279,10 @@ export async function getParentVertexMGCall(
 
 export async function getChildVertexesMGCall(
   path: string[],
-  currentVertexes: Node[],
+  currentVertexes: Vertex[],
   strict?: boolean,
-): Promise<{ error: boolean; vertexes?: Node[] }> {
-  const stepVertexes = new Map<number, Node>();
+): Promise<{ error: boolean; vertexes?: Vertex[] }> {
+  const stepVertexes = new Map<number, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -329,7 +328,7 @@ export async function getChildVertexesMGCall(
 
 export async function replaceExpressionToLabel(
   collection: string,
-  vertex: Node,
+  vertex: Vertex,
 ) {
   if (!collection) return "";
   // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression

@@ -1,8 +1,8 @@
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "../server/domain_utils";
-import { getDriver } from "../server/driver";
+import { getDriver } from "../../server/driver";
+import { getSubDomain } from "../../server/domain_utils";
 
-export async function deleteRelationShipMGCall(edgeId: string | number | any) {
+export async function deleteVertexMGCall(nodeId: string | number | any) {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
@@ -10,10 +10,10 @@ export async function deleteRelationShipMGCall(edgeId: string | number | any) {
   const transaction = (await driver).session().beginTransaction();
   try {
     // Cypher query to create a new vertex
-    let createVertexQuery = `MATCH ()-[rel]->()
-WHERE id(rel) = $edgeId
-DELETE rel`;
-    const vertexResult = await transaction.run(createVertexQuery, { edgeId });
+    let createVertexQuery = `MATCH (n)
+WHERE id(n) = $nodeId
+DELETE n`;
+    const vertexResult = await transaction.run(createVertexQuery, { nodeId });
 
     // Commit the transaction
     await transaction.commit();

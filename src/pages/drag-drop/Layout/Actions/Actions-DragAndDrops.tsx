@@ -13,6 +13,7 @@ import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
 import { Properties } from "./Properties";
 import { capitalizeFirstLetter } from "~/lib/Utils";
+import { FormSetting } from "./FormSetting";
 interface ActionsProps {
   leftColumns: any;
   rightColumns: any;
@@ -52,7 +53,7 @@ const Column = (props: { datas: any; toggleIsRightOpen: any }) => {
   return (
     <>
       <div class={"p:5 direction:ltr"}>
-        <div class="position:sticky top:0 z:10 bg:white">
+        <div class="position:sticky top:0 bg:white">
           <div class="p:5|10 flex ai:center jc:space-between bg:#f4f4f4 f:0.875rem r:5">
             <div class="font-weight:600">Form Layout</div>
             <Icon
@@ -90,6 +91,12 @@ const Column = (props: { datas: any; toggleIsRightOpen: any }) => {
           class="p:5"
         >
           <FormConfig />
+        </div>
+        <div
+          classList={{ "display:none": selectedTab() !== "formSetting" }}
+          class="p:5"
+        >
+          <FormSetting />
         </div>
       </div>
     </>

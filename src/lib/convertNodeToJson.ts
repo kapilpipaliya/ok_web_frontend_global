@@ -1,5 +1,8 @@
 import { isIntegerId } from "~/cypher_api/server/driver";
-import { Node, Relationship } from "neo4j-driver";
+import {
+  Node,
+  Relationship,
+} from "neo4j-driver";
 import { Vertex, Edge } from "~/lib/graph/graph";
 
 // Functions to handle database values and convert them to JSON
@@ -9,7 +12,9 @@ export function convertNodeToJson(node: Node): Vertex {
     id: !isIntegerId ? node.identity.toNumber() : node.identity,
     L: node.labels,
     P: node.properties,
+    // @ts-ignore
     OUT: node.OUT || {},
+    // @ts-ignore
     IN: node.IN || {},
   };
 }

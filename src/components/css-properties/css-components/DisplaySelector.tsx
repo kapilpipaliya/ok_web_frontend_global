@@ -9,6 +9,7 @@ export const DisplaySelector = (props: {
     options: any;
     isLabelOnTop: boolean;
     label: string;
+    onChangeInput?: (label:any,value: any) => void;
 }) => {
     function formatString(str: string) {
         return str
@@ -25,6 +26,7 @@ export const DisplaySelector = (props: {
 
     const selectOption = (option: any) => {
         setCssState(props.name, option.value || option);
+        if(props.onChangeInput) props.onChangeInput(props.name,option.value || option);
         setIsActive(false);
     };
 

@@ -56,9 +56,9 @@ import {
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { findVertexesMGCall } from "~/cypher_api/functions/findVertex";
 import { PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./form/FormGroup";
+import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {

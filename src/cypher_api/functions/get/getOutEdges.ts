@@ -1,9 +1,8 @@
-import neo4j from "neo4j-driver";
-import { Node, Relationship } from "~/cypher_api/functions/Type";
-import { getDriver } from "../server/driver";
+import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "../server/domain_utils";
+import { getSubDomain } from "../../server/domain_utils";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import { Edge, Vertex } from "~/lib/graph/graph";
 
 export async function getOutEdges(
   fromId: number | string | any,
@@ -26,7 +25,7 @@ RETURN targetNode, relationshipType
 `;
     const vertexResult = await transaction.run(matchVertexQuery, { fromId });
 
-    const resultNodes = [] as [Relationship, Node][];
+    const resultNodes = [] as [Edge, Vertex][];
     for (const record of vertexResult.records) {
       const targetNode = convertNodeToJson(record.get("targetNode"));
       const targetRelationship = convertRelationshipToJson(record.get("relationshipType"));

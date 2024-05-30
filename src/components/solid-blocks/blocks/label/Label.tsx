@@ -1,14 +1,18 @@
-import { JSX } from "solid-js";
+import { JSX, useContext } from "solid-js";
+import { FormSettingsContext } from "~/lib/contexts";
 
 interface LabeledFieldProps {
     label: string;
-    position: "top" | "left" | "right" | "bottom";
+    position: "top" | "left" | "right" | "bottom" | "system";
     children: JSX.Element;
 }
 
 export const Label = (props: LabeledFieldProps) => {
+      const [formSettingContext, setFormSettingContext] = useContext(FormSettingsContext);
+
     const getFlexDirection = () => {
-        switch (props.position) {
+        let position = props.position === 'system' ? formSettingContext.labelPosition : props.position
+        switch (position) {
             case "top":
                 return "column";
             case "bottom":

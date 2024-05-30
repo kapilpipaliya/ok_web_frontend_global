@@ -1,13 +1,13 @@
 import { APIEvent } from "@solidjs/start/dist/server";
 import { Session } from "neo4j-driver";
-import { deleteVertexMGCall } from "~/cypher_api/functions/deleteVertex";
-import {  findVertexesMGCall } from "~/cypher_api/functions/findVertex";
-import { newRowMGCall } from "~/cypher_api/functions/newRow";
+import { deleteVertexMGCall } from "~/cypher_api/functions/mutate/deleteVertex";
+import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { newRowMGCall } from "~/cypher_api/functions/mutate/newRow";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithProp";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/get/isVertexExistWithProp";
 
 /**
  * Handles errors and responses in a consistent way.

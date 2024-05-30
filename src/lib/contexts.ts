@@ -18,7 +18,15 @@ export const SelectedIdContext = createContext(createSignal<Id>(-1));
 
 export const TargetIdContext = createContext(createSignal<Id>(-1));
 
+export const ShowDrawerContext = createContext(createSignal<boolean>(false));
+
 export const HiddenNodesContext = createContext(createSignal([] as Id[]));
+
+export const FormSettingsContext = createContext(createStore({} as {
+  labelPosition: string;
+  labelColor: string;
+  inputBackground: string;
+ }));
 
 export const SelectedComponentContext = createContext(
   createSignal({
@@ -30,6 +38,8 @@ export const PropertiesVertexIdContext = createContext(getNewGraphId());
 
 export const DraggedVertexContext = createContext(
   createSignal<Vertex | null>(null),
+  // createSignal<Vertex[] | null>([]),
+
 );
 
 export const PageConfigContext = createContext(

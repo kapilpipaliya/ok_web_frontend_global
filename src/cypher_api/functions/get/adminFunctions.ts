@@ -14,8 +14,6 @@ export async function getUsers() {
 
     if (res.records.length > 0) {
       const vertexes = convertNodeToJson(res.records[0].get("v"));
-
-
       return {
         error: false,
         vertexes: vertexes,
@@ -23,7 +21,8 @@ export async function getUsers() {
     } else {
       return [];
     }
-  } catch (e) {
-    console.log(e);
+  } catch (e: any) {
+    throw new Response(e.message,{
+      status: 500});
   }
 }

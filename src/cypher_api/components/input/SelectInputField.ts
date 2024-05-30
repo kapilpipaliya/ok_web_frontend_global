@@ -1,18 +1,19 @@
-import { getOutEdges } from "~/cypher_api/functions/getOutEdges";
-import { deleteRelationShipMGCall } from "~/cypher_api/functions/deleteRelationShip";
-import { newEdgeMGCall } from "~/cypher_api/functions/newEdge";
+import { getOutEdges } from "~/cypher_api/functions/get/getOutEdges";
+import { deleteRelationShipMGCall } from "~/cypher_api/functions/mutate/deleteRelationShip";
+import { newEdgeMGCall } from "~/cypher_api/functions/mutate/newEdge";
 import {
   compareId,
   isIdArrayIncludesID,
 } from "~/lib/graph/get/sync/graph_functions";
-import { Node } from "~/cypher_api/functions/Type";
+
 import { getInEdge } from "~/lib/graph/get/sync/traverse";
 import { getToEdge } from "~/lib/graph/get/sync/traverse";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { Vertex } from "~/lib/graph/graph";
 
 async function vertexOutEdgeContainVertexMGCall(
-  vertex: Node,
+  vertex: Vertex,
   type: string,
   vertexId: number,
 ) {
@@ -30,7 +31,7 @@ async function vertexOutEdgeContainVertexMGCall(
 }
 
 async function vertexInEdgeContainVertexMGCall(
-  vertex: Node,
+  vertex: Vertex,
   type: any,
   vertexId: number,
 ) {
@@ -49,8 +50,8 @@ async function vertexInEdgeContainVertexMGCall(
 }
 
 export async function setSelectionValueMGCall(
-  vertex: Node,
-  meta: Node,
+  vertex: Vertex,
+  meta: Vertex,
   value?: number[] | number,
 ) {
   "use server";
@@ -92,8 +93,8 @@ export async function setSelectionValueMGCall(
 }
 
 export async function setParentValueMGCall(
-  vertex: Node,
-  meta: Node,
+  vertex: Vertex,
+  meta: Vertex,
   value?: number[] | number,
 ) {
   "use server";

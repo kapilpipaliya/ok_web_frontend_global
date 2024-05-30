@@ -1,5 +1,5 @@
-import {  findVertexesMGCall } from "~/cypher_api/functions/findVertex";
-import { newVertexDBCall } from "~/cypher_api/functions/newVertex";
+import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { newVertexDBCall } from "~/cypher_api/functions/mutate/newVertex";
 
 export async function findOrCreateNewVertexMGCall(
   label: string,

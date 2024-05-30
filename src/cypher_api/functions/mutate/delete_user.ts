@@ -2,11 +2,11 @@ import neo4j, { Session } from "neo4j-driver";
 import {
   removeDockerContainer,
   stopDockerContainer,
-} from "../server/docker_functions";
+} from "../../server/docker_functions";
 import { getRequestURL } from "vinxi/http";
 import admin from "~/routes/admin";
-import { getSubDomain } from "../server/domain_utils";
-import { getDriver } from "../server/driver";
+import { getSubDomain } from "../../server/domain_utils";
+import { getDriver } from "../../server/driver";
 
 // Main function to initiate the migration process.
 export async function deleteUser(args: any) {

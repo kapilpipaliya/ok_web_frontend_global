@@ -13,27 +13,24 @@
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 
-Make a Label component ✅
-Add a setting to customize label style. ✅
-add up dowm button in the table.  ✅
-Sorting row  ✅
-show add button when table is empty. ✅
-Make a Forms section in menu bar same like Page section. ✅
-Refactor 3 functions in findvertex.ts to one function  ✅
-use convertNodeToJson and convertRelationshipToJson in cypher_api functions  ✅
-delete unused css files ✅
-there is two copy of validatePassword functiom. move all validation function to validations.ts file ✅
+Use Solid Dismiss for Tooltip in page designer. ✅
+Add FormSettings section ✅
+use component for Page and Form new route ✅
+For cypher_api functions, make two folder get and mutate ✅
 
+multiple compnents should be droped. 
+handle not work select parent in page designer.
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
-For cypher_api functions, make two folder get and mutate
+delete isVertexExistWithPropMGCall function use findVertexesMGCall function
+Do not save : when saving timestamp in the file, because in windows its not supported.
 
 Big Task:
 Dont use integer id for node and edge.
 
 
 Kapil:
-on click add element at last (Kapil)
+on double click add element at last (kapil) - last in selected layout?
 Make Nav sync full data. (IMP)
 Make Page working with some async data too.
 Make Working Forms using Page Designer.
@@ -44,7 +41,6 @@ When user upload a file, also save entry in the database.
 make automatic backup for all the users everyday
 Fix Inline Editing Modal not close in list page.
 Use async everywhere, it will load data from server. Only few places use sync API.
-Fix NavBar yaml Import file Issue.
 make a file upload component in page builder.
 Make Permissions working in DynamicForm component.
 ------------------------------------------------------------------------------------------

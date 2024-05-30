@@ -26,7 +26,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
   );
  
   const [rightColumns, setRightColumns] = createSignal(
-    ["layout", "form"].map((column) => ({
+    ["layout", "form",'formSetting'].map((column) => ({
       id: column,
       name: column,
     })),

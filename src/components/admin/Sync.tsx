@@ -8,10 +8,10 @@ import {
   onCleanup,
 } from "solid-js";
 import PageHeader from "../custom/Breadcumb";
-import { getUsers } from "../../cypher_api/functions/adminFunctions";
-import { Node } from "~/cypher_api/functions/Type";
-import { syncNodesMGCall } from "~/cypher_api/functions/sync";
+import { getUsers } from "../../cypher_api/functions/get/adminFunctions";
 import { useToast } from "../custom/Toast";
+import { syncNodesMGCall } from "~/cypher_api/functions/mutate/sync";
+import { Vertex } from "~/lib/graph/graph";
 
 // TODO: Full Navbar Sync from super
 const transferNodes = [
@@ -22,15 +22,15 @@ const transferNodes = [
 
 export function SyncComopnent() {
   const { showLoadingToast } = useToast();
-  const [users, setUsers] = createSignal([]);
+  const [users, setUsers] = createSignal([] as Vertex[]);
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [selectedUsers, setSelectedUsers] = createSignal([]);
+  const [selectedUsers, setSelectedUsers] = createSignal([] as Vertex[]);
 
   getUsers().then((res: any) => {
     setUsers(res.vertexes || []);
   });
 
-  async function migrateNodes(element: Node, node: any) {
+  async function migrateNodes(element: Vertex, node: any) {
     const result = await syncNodesMGCall({
       userport: element.P.driverPort,
       nodesToTransfer: node,
@@ -39,7 +39,7 @@ export function SyncComopnent() {
   }
 
   const onClickTransfer = (node: any) => {
-    selectedUsers().forEach(async (element: Node) => {
+    selectedUsers().forEach(async (element) => {
       await showLoadingToast({
         promise: migrateNodes(element, node),
         loadMessage: "Transfering nodes...",
@@ -82,7 +82,7 @@ export function SyncComopnent() {
       }
       const query = searchQuery().toLowerCase();
       return users().filter(
-        (user: Node) =>
+        (user) =>
           user.P.username.toLowerCase().includes(query) ||
           user.P.email.toLowerCase().includes(query),
       );
@@ -166,7 +166,7 @@ export function SyncComopnent() {
           </thead>
           <tbody>
             <For each={displayedUsers()}>
-              {(user: Node) => (
+              {(user) => (
                 <tr class="bg:rgb(255,255,255) border-bottom-width:1px bg:rgb(31,41,55)@dark border-color:rgb(55,65,81)@dark bg:rgb(249,250,251):hover bg:rgb(75,85,99):hover@dark">
                   <td class="w:1rem p:1rem">
                     <div class="flex ai:center">

@@ -1,9 +1,6 @@
-import neo4j from "neo4j-driver";
-import { DBConnection } from "~/cypher_api/functions/dbs";
-import { Node } from "~/cypher_api/functions/Type";
-import { getDriver } from "../server/driver";
+import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "../server/domain_utils";
+import { getSubDomain } from "../../server/domain_utils";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function newVertexDBCall(

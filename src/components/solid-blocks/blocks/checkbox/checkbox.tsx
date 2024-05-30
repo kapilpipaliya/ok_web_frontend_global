@@ -20,6 +20,7 @@ export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {
   required?: boolean;
   switch?: boolean;
   value?: string;
+  wrapperStyle?: JSX.CSSProperties;
 };
 
 export function Checkbox(props: CheckboxProps) {
@@ -57,7 +58,7 @@ export function Checkbox(props: CheckboxProps) {
           {content.children}
         </span>
       </Show>
-      <div class={`checkbox-wrapper m:-5px`}>
+      <div class={`checkbox-wrapper m:-5px`} style={props.wrapperStyle}>
         <input
           ref={props.ref}
           type="checkbox"

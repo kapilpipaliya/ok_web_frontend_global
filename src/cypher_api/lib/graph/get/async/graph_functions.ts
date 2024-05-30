@@ -1,30 +1,29 @@
 import { removeUndefinedProperties } from "~/lib/functions";
-import { Node } from "~/cypher_api/functions/Type";
-import {  IdAttr } from "~/lib/graph/graph";
+import {  IdAttr, Vertex } from "~/lib/graph/graph";
 import {
   getChildVertexMGCall,
   getChildVertexesMGCall,
   getParentVertexMGCall,
   getSelectionOptionsMGCall,
 } from "./traverse";
-import {  findVertexesMGCall } from "~/cypher_api/functions/findVertex";
 import { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { getDriver } from "~/cypher_api/server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 
-export async function getCompPropsMapMGCall(comp: Node) {
+export async function getCompPropsMapMGCall(comp: Vertex) {
   const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
   return (children.vertexes || []).reduce(
     (acc, curr) => {
       acc[curr.P.name] = curr;
       return acc;
     },
-    {} as { [key: string]: Node },
+    {} as { [key: string]: Vertex },
   );
 }
 
-export async function getCompPropsMGCall(comp: Node) {
+export async function getCompPropsMGCall(comp: Vertex) {
   const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
   return (children.vertexes || []).reduce(
     (acc, curr) => {
@@ -37,7 +36,7 @@ export async function getCompPropsMGCall(comp: Node) {
   );
 }
 
-export async function getRowPropsMGCall(comp: Node) {
+export async function getRowPropsMGCall(comp: Vertex) {
   const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
   return (children.vertexes || []).reduce(
     async (acc, curr) => {
@@ -54,7 +53,7 @@ export async function getRowPropsMGCall(comp: Node) {
   );
 }
 
-function getComponentPropertiesMGCall(metaRows: Node[]) {
+function getComponentPropertiesMGCall(metaRows: Vertex[]) {
   const metaData = metaRows.reduce(
     async (acc, curr) => {
       const key = (await getSelectionOptionsMGCall([curr], "::'P.name'"))
@@ -70,7 +69,7 @@ function getComponentPropertiesMGCall(metaRows: Node[]) {
 }
 
 export async function getCollAttrsMGCall(
-  vertexCollAttr: Node,
+  vertexCollAttr: Vertex,
 ): Promise<{ error: boolean; attr?: FieldAttribute }> {
   const attr = Object.assign(
     {},
@@ -199,7 +198,7 @@ export async function getCollAttrsMGCall(
 }
 
 const getCollectionOneLevelAttrsMGCall = async (
-  collVertex: Node,
+  collVertex: Vertex,
 ): Promise<{ error: string; attrs?: FieldAttribute[] }> => {
   const vertexCollAttrResult = await getChildVertexesMGCall(
     ["Attr"],
@@ -236,12 +235,11 @@ export async function getFormApiFromFormMGCall(
     {
       label: "Coll",
       attribute: IdAttr,
-      value: formId,
+      value: formId, 
     }) 
   if (collResult.error ) {
     return { error: "coll not found" };
   }
-  console.log(collResult);
   
   const coll = collResult.vertexes!;
   const attrsResult = await getCollectionOneLevelAttrsMGCall(coll);
@@ -264,7 +262,7 @@ export async function getFormApiFromFormMGCall(
 }
 
 // TODO: when meta changed realtime its not updating.
-export async function componentPropsMGCall(metaVertex: Node, data: Node) {
+export async function componentPropsMGCall(metaVertex: Vertex, data: Vertex) {
   const meta = metaVertex.P.meta.split("+");
   const results = [] as { [key: string]: any }[];
   for (const metaPart of meta) {
@@ -282,19 +280,19 @@ export async function componentPropsMGCall(metaVertex: Node, data: Node) {
   );
 }
 
-export async function getPkForCollectionMGCall(collVertex: Node) {
+export async function getPkForCollectionMGCall(collVertex: Vertex) {
   const pks =
     (await getChildVertexesMGCall(["$0Pk"], [collVertex])).vertexes || [];
   return pks.map((pk) => pk.P.name);
 }
 
-export async function getNameKeyForCollectionMGCall(collVertex: Node) {
+export async function getNameKeyForCollectionMGCall(collVertex: Vertex) {
   const pks =
     (await getChildVertexesMGCall(["$0NameKey"], [collVertex])).vertexes || [];
   return pks.map((pk) => pk.P.name);
 }
 
-export async function getStringComponentMGCall(attrDataTypeVertex?: Node) {
+export async function getStringComponentMGCall(attrDataTypeVertex?: Vertex) {
   if (!attrDataTypeVertex) {
     const attrDataTypeVertexResult =  await findVertexesMGCall(
       {
@@ -312,8 +310,8 @@ export async function getStringComponentMGCall(attrDataTypeVertex?: Node) {
 }
 
 export async function getCollAttrCompMGCall(
-  attrVertex: Node,
-): Promise<Node | undefined> {
+  attrVertex: Vertex,
+): Promise<Vertex | undefined> {
   const attrComp = (await getChildVertexMGCall(["$0Comp"], attrVertex)).vertex;
   if (attrComp) return attrComp;
 
@@ -323,7 +321,7 @@ export async function getCollAttrCompMGCall(
   return getStringComponentMGCall(attrDataTypeVertex);
 }
 
-export async function getSublistRowsForTypeMGCall(type: string, vertex: Node) {
+export async function getSublistRowsForTypeMGCall(type: string, vertex: Vertex) {
   return (
     (await getChildVertexesMGCall([`${type}`], [vertex])).vertexes || []
   ).sort((a, b) => a.P.pos - b.P.pos);

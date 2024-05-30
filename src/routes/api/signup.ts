@@ -11,7 +11,7 @@ import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { v4 as uuidv4 } from "uuid";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/isVertexExistWithProp";
+import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/get/isVertexExistWithProp";
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {

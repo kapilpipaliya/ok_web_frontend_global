@@ -1,5 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext, createSignal, createSelector, For, Show } from "solid-js";
+import Drawer from "~/components/custom/drawer";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { iconMap, nameExpr } from "~/lib/Utils";
@@ -9,12 +10,15 @@ import {
   HiddenNodesContext,
   SelectedIdContext,
   IndicatorPositionContext,
+  ShowDrawerContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/pageStore";
+import { Properties } from "./Properties";
 
 export function LayoutPart(props: {}) {
+  const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -66,6 +70,7 @@ export function LayoutPart(props: {}) {
 
     return (
       <div>
+        
         <div
           draggable={true}
           onDragStart={handleDragStart}
@@ -169,6 +174,15 @@ export function LayoutPart(props: {}) {
                   isSelectedHoverId(props.vertex.id)
                 }
               >
+                <Tooltip content={"Properties"} nowrap>
+                  <Icon
+                    icon={"mingcute:settings-5-line"}
+                    onclick={() => setShowDrawer(!showDrawer())}
+                    height={22}
+                    width={22}
+                    class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                  />
+                </Tooltip>
                 <Tooltip content={"Duplicate"} nowrap>
                   <Icon
                     icon={"mage:copy"}
@@ -268,6 +282,15 @@ export function LayoutPart(props: {}) {
 
   return (
     <>
+      <Show when={showDrawer()}>
+        <Drawer
+          open={showDrawer}
+          setIsOpen={setShowDrawer}
+          width="400px"
+        >
+          <Properties setShowDrawer={setShowDrawer} />
+        </Drawer>
+      </Show>
       <For each={rootVertexes()}>
         {(item) => (
           <Show when={pageConfig.formData}>
