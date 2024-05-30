@@ -1,6 +1,7 @@
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { getDriver } from "../../server/driver";
+import { int } from "neo4j-driver";
 
 export async function deleteRelationShipMGCall(edgeId: string | number | any) {
   "use server";
@@ -13,7 +14,7 @@ export async function deleteRelationShipMGCall(edgeId: string | number | any) {
     let createVertexQuery = `MATCH ()-[rel]->()
 WHERE id(rel) = $edgeId
 DELETE rel`;
-    const vertexResult = await transaction.run(createVertexQuery, { edgeId });
+    const vertexResult = await transaction.run(createVertexQuery, { edgeId: int(edgeId) });
 
     // Commit the transaction
     await transaction.commit();

@@ -108,7 +108,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
   const id = createMemo(() =>
-    p.id === "new" ? undefined : parseInt(p.id as string),
+    p.id === "new" ? undefined : p.id,
   );
   // TODO: add validation on form that AttrsTableData keys should not available.
   // Note: When the page is loaded server side, the client side will not run this again,

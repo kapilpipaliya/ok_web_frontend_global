@@ -1,7 +1,5 @@
 import { auth, driver as createDriver, Driver } from "neo4j-driver";
 
-export const isIntegerId = true;
-
 const drivers = {} as { [port: string]: Driver };
 
 export async function getDriverWithPort(
@@ -13,7 +11,7 @@ export async function getDriverWithPort(
     drivers[port] = createDriver(
       `bolt://localhost:${port}`,
       username && password ? auth.basic(username, password) : undefined,
-      isIntegerId ? { disableLosslessIntegers: true } : undefined,
+      undefined,
     );
   }
 

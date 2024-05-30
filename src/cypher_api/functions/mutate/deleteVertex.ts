@@ -1,6 +1,7 @@
 import { getRequestURL } from "vinxi/http";
 import { getDriver } from "../../server/driver";
 import { getSubDomain } from "../../server/domain_utils";
+import { int } from "neo4j-driver";
 
 export async function deleteVertexMGCall(nodeId: string | number | any) {
   "use server";
@@ -13,7 +14,7 @@ export async function deleteVertexMGCall(nodeId: string | number | any) {
     let createVertexQuery = `MATCH (n)
 WHERE id(n) = $nodeId
 DELETE n`;
-    const vertexResult = await transaction.run(createVertexQuery, { nodeId });
+    const vertexResult = await transaction.run(createVertexQuery, { nodeId: int(nodeId) });
 
     // Commit the transaction
     await transaction.commit();

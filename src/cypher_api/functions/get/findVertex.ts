@@ -3,6 +3,7 @@ import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { Vertex } from "~/lib/graph/graph";
+import { int } from "neo4j-driver";
 
 export async function findVertexesMGCall(options: {
   label?: string;
@@ -21,7 +22,7 @@ export async function findVertexesMGCall(options: {
 
     if (options.id !== undefined) {
       query = `MATCH (v) WHERE id(v) = $id RETURN v`;
-      params = { id: options.id };
+      params = { id: int(options.id) };
     } else if (
       options.label &&
       options.attribute &&

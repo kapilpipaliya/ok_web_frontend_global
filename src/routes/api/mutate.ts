@@ -1,5 +1,4 @@
-import { Session } from "neo4j-driver";
-import { isIntegerId } from "~/cypher_api/server/driver";
+import { Session, int } from "neo4j-driver";
 import { isObject } from "~/lib/Utils";
 import { Edge, Vertex } from "~/lib/graph/graph";
 
@@ -213,9 +212,7 @@ export async function mutateData(
             properties: mutationObject.insert.P,
           });
           if (result.records.length > 0) {
-            const id = !isIntegerId
-              ? result.records[0].get("n").identity.toNumber()
-              : result.records[0].get("n").identity;
+            const id = result.records[0].get("n").identity.toString();
             const oldId = mutationObject.insert.id;
             clientToServerVertexIdMap.set(oldId, id);
             txnResult.push({ insert: [oldId, id] });
@@ -237,7 +234,7 @@ export async function mutateData(
         const query = `MATCH (n) WHERE ID(n) = $id SET n = $properties RETURN n`;
         try {
           const result = await tx.run(query, {
-            id: id,
+            id: int(id),
             properties: mutationObject.replace.P,
           });
           if (result.records.length > 0) {
@@ -260,7 +257,7 @@ export async function mutateData(
         const query = `MATCH (n) WHERE ID(n) = $id SET n += $properties RETURN n`;
         try {
           const result = await tx.run(query, {
-            id: id,
+            id: int(id),
             properties: mutationObject.merge.P,
           });
           if (result.records.length > 0) {
@@ -283,7 +280,7 @@ export async function mutateData(
         const query = `MATCH (n) WHERE ID(n) = $id DELETE n`;
 
         try {
-          await tx.run(query, { id });
+          await tx.run(query, { id: int(id) });
 
           txnResult.push({ deleteVertex: { id, error: false } });
         } catch (error: any) {
@@ -311,15 +308,13 @@ export async function mutateData(
 
         try {
           const result = await tx.run(query, {
-            startId,
-            endId,
+            startId: int(startId),
+            endId: int(endId),
             properties: mutationObject.insertEdge.P,
           });
           if (result.records.length > 0) {
             const oldId = mutationObject.insertEdge.id;
-            const edgeId = !isIntegerId
-              ? result.records[0].get("r").identity.toNumber()
-              : result.records[0].get("r").identity;
+            const edgeId = result.records[0].get("r").identity.toString();
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ insertEdge: [oldId, edgeId] });
@@ -354,16 +349,14 @@ export async function mutateData(
 
         try {
           const result = await tx.run(query, {
-            id,
-            startId,
-            endId,
+            id: int(id),
+            startId: int(startId),
+            endId: int(endId),
             properties: mutationObject.replaceEdge.P,
           });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdge.id;
-            const edgeId = !isIntegerId
-              ? result.records[0].get("r").identity.toNumber()
-              : result.records[0].get("r").identity;
+            const edgeId = result.records[0].get("r").identity.toString();
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdge: [oldId, edgeId] });
@@ -399,12 +392,10 @@ export async function mutateData(
                     return t`;
 
         try {
-          const result = await tx.run(query, { edgeId: id, newstart: startId });
+          const result = await tx.run(query, { edgeId: int(id), newstart: int(startId) });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeStart.id;
-            const edgeId = !isIntegerId
-              ? result.records[0].get("r").identity.toNumber()
-              : result.records[0].get("r").identity;
+            const edgeId = result.records[0].get("r").identity.toString();
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeStart: { error: false } });
@@ -440,12 +431,10 @@ export async function mutateData(
                     return t`;
 
         try {
-          const result = await tx.run(query, { edgeId: id, newend: endId });
+          const result = await tx.run(query, { edgeId: int(id), newend:int(endId) });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeEnd.id;
-            const edgeId = !isIntegerId
-              ? result.records[0].get("r").identity.toNumber()
-              : result.records[0].get("r").identity;
+            const edgeId = result.records[0].get("r").identity.toString();
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ replaceEdgeEnd: { error: false } });
@@ -476,12 +465,10 @@ export async function mutateData(
                     delete r`;
 
         try {
-          const result = await tx.run(query, { id, startId, endId });
+          const result = await tx.run(query, { id: int(id), startId: int(startId), endId: int(endId) });
           if (result.records.length > 0) {
             const oldId = mutationObject.deleteEdge.id;
-            const edgeId = !isIntegerId
-              ? result.records[0].get("r").identity.toNumber()
-              : result.records[0].get("r").identity;
+            const edgeId = result.records[0].get("r").identity.toString();
             clientToServerEdgeIdMap.set(oldId, edgeId);
 
             txnResult.push({ deleteEdge: { error: false } });

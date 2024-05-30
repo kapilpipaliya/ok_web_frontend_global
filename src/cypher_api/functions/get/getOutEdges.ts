@@ -3,6 +3,7 @@ import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { Edge, Vertex } from "~/lib/graph/graph";
+import { int } from "neo4j-driver";
 
 export async function getOutEdges(
   fromId: number | string | any,
@@ -23,7 +24,7 @@ export async function getOutEdges(
 WHERE id(sourceNode) = $fromId
 RETURN targetNode, relationshipType
 `;
-    const vertexResult = await transaction.run(matchVertexQuery, { fromId });
+    const vertexResult = await transaction.run(matchVertexQuery, { fromId: int(fromId) });
 
     const resultNodes = [] as [Edge, Vertex][];
     for (const record of vertexResult.records) {

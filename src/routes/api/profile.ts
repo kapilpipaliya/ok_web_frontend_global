@@ -1,5 +1,5 @@
 import { APIEvent } from "@solidjs/start/dist/server";
-import { Session } from "neo4j-driver";
+import { Session, int } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher_api/functions/mutate/deleteVertex";
 import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/mutate/newRow";
@@ -218,7 +218,7 @@ const supportTicket = async (
     const { id, status } = payload;
 
     const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status RETURN n;`;
-    await session.run(query, { id: id, status: status });
+    await session.run(query, { id: int(id), status: status });
     return {
       message: "Status updated successfully",
     };

@@ -1,4 +1,4 @@
-import neo4j, { Session } from "neo4j-driver";
+import neo4j, { Session, Node} from "neo4j-driver";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: any) {
@@ -91,7 +91,7 @@ async function transferNode(
 // Function to update properties of an existing node.
 async function updateNodeProperties(
   session: { run: (arg0: string, arg1: { id: any; props: any }) => any },
-  node: { identity: any },
+  node: Node,
   properties: any,
 ) {
   const result = await session.run(
@@ -119,8 +119,8 @@ async function addNodeEdges(
   sessionSource: Session,
   sessionTarget: Session,
   nodeType: string,
-  node: any,
-  createdNode: any,
+  node: Node,
+  createdNode: Node,
 ) {
   if (nodeType === "CompCategory") {
   } else if (nodeType === "Comp") {
@@ -164,10 +164,10 @@ async function addNodeEdges(
 }
 
 // Function to retrieve child vertices of a node based on a specific edge type.
-const getChildrenVertex = (session: any, id: any, edgeType: any) => {
+const getChildrenVertex = (session: any, identity: any, edgeType: any) => {
   return session.run(
     `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;`,
-    { id: id },
+    { id: identity },
   );
 };
 

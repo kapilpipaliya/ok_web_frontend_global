@@ -1,7 +1,7 @@
 import { Edge, IdAttr, Vertex } from "../../../lib/graph/graph";
 import { calculateFilter } from "../../../lib/graph/get/sync/traverse";
 import { getDriver } from "~/cypher_api/server/driver";
-import { Session } from "neo4j-driver";
+import { Session, int } from "neo4j-driver";
 import {
   convertNodeToJson,
   convertRelationshipToJson,
@@ -39,14 +39,14 @@ export async function evalGetChildren(
   WHERE id(parent) IN $parentIds AND type(r) IN $types
   RETURN r, child
 `;
-    params = { parentIds: vertexes.map((v) => v.id), types: type.split("|") };
+    params = { parentIds: vertexes.map((v) => int(v.id)), types: type.split("|") };
   } else {
     query = `
   MATCH (parent)-[r:${type}]->(child)
   WHERE id(parent) IN $parentIds
   RETURN r, child
 `;
-    params = { parentIds: vertexes.map((v) => v.id) };
+    params = { parentIds: vertexes.map((v) => int(v.id)) };
   }
 
   try {
@@ -97,14 +97,14 @@ export async function evalGetParents(
   WHERE id(child) IN $childIds AND type(r) IN $types
   RETURN r, parent
 `;
-    params = { childIds: vertexes.map((v) => v.id), types: type.split("|") };
+    params = { childIds: vertexes.map((v) => int(v.id)), types: type.split("|") };
   } else {
     query = `
   MATCH (parent)-[r:${type}]->(child)
   WHERE id(child) IN $childIds
   RETURN r, parent
 `;
-    params = { childIds: vertexes.map((v) => v.id) };
+    params = { childIds: vertexes.map((v) => int(v.id)) };
   }
 
   try {
@@ -146,9 +146,11 @@ async function findVertexsMGCallId(
   } = {},
 ) {
   let query: string | undefined;
+  let params = {};
 
   if (id) {
-    query = `MATCH (n) WHERE id(n) = ${id} RETURN n`;
+    query = `MATCH (n) WHERE id(n) = $id RETURN n`;
+    params = {id: int(id)}
   } else if (label) {
     query = `MATCH (n:${label}) RETURN n`;
   }
@@ -158,7 +160,7 @@ async function findVertexsMGCallId(
   if (!query) {
     throw new Error("Either 'id' or 'label' must be provided.");
   }
-  const result = await session.run(query);
+  const result = await session.run(query, params);
   return result.records.map((record) => {
     const vertex = convertNodeToJson(record.get("n"));
     if (nodes) {

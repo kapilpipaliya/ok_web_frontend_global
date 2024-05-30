@@ -4,7 +4,6 @@ import { TransactionPromise } from "neo4j-driver-core";
 import {
   getDriver,
   getDriverWithPort,
-  isIntegerId,
 } from "~/cypher_api/server/driver";
 // import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
@@ -57,9 +56,7 @@ export async function POST({ request }: APIEvent) {
     const { password: _, ...properties } =
       createUserResult.records[0].get("u").properties;
     return {
-      id: !isIntegerId
-        ? createUserResult.records[0].get("u").identity.toNumber()
-        : createUserResult.records[0].get("u").identity,
+      id: createUserResult.records[0].get("u").identity.toString(),
       properties,
     };
   } catch (error: any) {

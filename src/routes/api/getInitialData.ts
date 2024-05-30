@@ -1,4 +1,4 @@
-import { getDriver, isIntegerId } from "~/cypher_api/server/driver";
+import { getDriver } from "~/cypher_api/server/driver";
 import { Session, types } from "neo4j-driver";
 import {
   convertNodeToJson,
@@ -67,14 +67,14 @@ export async function fetchFromMGAndSaveToArray(
     for (const record of result.records) {
       record.forEach((value) => {
         if (value instanceof types.Node) {
-          const id = !isIntegerId ? value.identity.toNumber() : value.identity;
+          const id = value.identity.toString() ;
           nodeObj[id] = convertNodeToJson(value);
         } else if (value instanceof types.Relationship) {
-          const id = !isIntegerId ? value.identity.toNumber() : value.identity;
+          const id = value.identity.toString() ;
           relationshipObj[id] = convertRelationshipToJson(value);
         } else if (Array.isArray(value)) {
           for (const item of value) {
-            const id = !isIntegerId ? item.identity.toNumber() : item.identity;
+            const id = item.identity.toString();
             if (item instanceof types.Node) {
               nodeObj[id] = convertNodeToJson(item);
             } else if (item instanceof types.Relationship) {

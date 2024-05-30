@@ -2,6 +2,7 @@ import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import { int } from "neo4j-driver";
 
 export async function newEdgeMGCall(
   edgeType: string,
@@ -23,8 +24,8 @@ export async function newEdgeMGCall(
       RETURN e
     `;
     const edgeResult = await transaction.run(createEdgeQuery, {
-      startVertexId,
-      toId: endVertexId,
+      startVertexId: int(startVertexId),
+      toId: int(endVertexId),
     });
 
     // Extract the new vertex ID from the result

@@ -1,8 +1,7 @@
 import { createContext } from "solid-js";
 import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
 
-// Note: in future it will be string or object.
-export type Id = number;
+export type Id = string;
 
 export const IdAttr = "name";
 

@@ -1,7 +1,6 @@
 import {
   getDriver,
   getDriverWithPort,
-  isIntegerId,
 } from "~/cypher_api/server/driver";
 import { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
@@ -24,7 +23,7 @@ export async function POST({ request }: APIEvent) {
 
     const { password: _, ...properties } = user.properties;
     return {
-      id: !isIntegerId ? user.identity.toNumber() : user.identity,
+      id: user.identity.toString(),
       properties,
     };
   } catch (error: any) {

@@ -1,4 +1,4 @@
-import { isIntegerId } from "~/cypher_api/server/driver";
+
 import {
   Node,
   Relationship,
@@ -9,7 +9,7 @@ import { Vertex, Edge } from "~/lib/graph/graph";
 export function convertNodeToJson(node: Node): Vertex {
   return {
     // @ts-ignore
-    id: !isIntegerId ? node.identity.toNumber() : node.identity,
+    id: node.identity.toString(),
     L: node.labels,
     P: node.properties,
     // @ts-ignore
@@ -22,12 +22,12 @@ export function convertNodeToJson(node: Node): Vertex {
 export function convertRelationshipToJson(relationship: Relationship): Edge {
   return {
     // @ts-ignore
-    id: !isIntegerId ? relationship.identity.toNumber() : relationship.identity,
+    id: relationship.identity.toString(),
     T: relationship.type,
     // @ts-ignore
-    S: !isIntegerId ? relationship.start.toNumber() : relationship.start,
+    S: relationship.start.toNumber(),
     // @ts-ignore
-    E: !isIntegerId ? relationship.end.toNumber() : relationship.end,
+    E: relationship.end.toNumber(),
     // when disableLosslessIntegers is false, we get object in number property.
     // Todo: data is not handled as properly, object is returned from server
     P: relationship.properties,
