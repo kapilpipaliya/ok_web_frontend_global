@@ -17,13 +17,11 @@ import { capitalizeFirstLetter } from "~/lib/Utils";
 
 interface MenuProps {
   leftColumns: any;
-  rightColumns: any;
   isLeftOpen: Accessor<boolean>;
   toggleIsLeftOpen: Accessor<boolean>;
 }
 
 export function MenuDragAndDrop(props: MenuProps) {
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   return (
     <nav style={{ "grid-area": "menu", "width": "55%", "min-width": "318px", 'justify-self': 'left', }}>
       <div class={"rel"}>
@@ -39,7 +37,6 @@ export function MenuDragAndDrop(props: MenuProps) {
             <Column
               datas={props.leftColumns()}
               toggleLeftOpen={props.toggleIsLeftOpen}
-              vertex={pageConfig.formData?.formData}
             />
           </Show>
         </div>
@@ -50,7 +47,6 @@ export function MenuDragAndDrop(props: MenuProps) {
 
 const Column = (props: {
   datas: any;
-  vertex: Vertex;
   toggleLeftOpen: Accessor<boolean>;
 }) => {
   const [selectedTab, setSelectedTab] = createSignal("components");

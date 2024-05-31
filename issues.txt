@@ -12,14 +12,35 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
+login and signup ✅
+Make sure Form Designer new form is saving properly
+delete extra components. ✅ 
+drag over takes too much time(see in the console).
+Reduce Saved Relationships in the page designer.
+Do not allow duplicate Page/Form name to be saved.
+Fix the home page(in the home page menu should not be shown). ✅
+when insert/mutation done add createdAt/updatedAt in the properties. ✅
+When deleting the layout in page designer the delete message is not displayed properly.  ✅
+when we drag and drop form component, wrap in Label component. ✅
 
 
-handle not work select parent in page designer.
+Display Save/Cancel button in the form designer preview(Wrap in Form Component).
+Make the forms made using form designer load and save working
+Make a custom forms builder using the original forms.
+Make a table designer using the forms fields.
+ Write a function to get all the fields in the form
+Make a Route designer where user can Tables, Buttons, Modals etc.
+
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
 
+Make page preview route working
+
+Refactor HOME page, pricing page, contact page, code
+
 
 Kapil:
+collection edit page is broken.
 on double click add element at last (kapil) - last in selected layout?  ✅ 
 Make Nav sync full data. (IMP)
 Make Page working with some async data too.
@@ -35,10 +56,18 @@ make a file upload component in page builder.
 Make Permissions working in DynamicForm component.
 ------------------------------------------------------------------------------------------
 
+Auth:
+Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are autorized.
+Only super admin can modify permissions data for now.
+
+
 Letter:
 Sorting, Filtering support on the table
 Load table data from server with pagination when form have many rows
 fix import export button on the form
+Make Drag and Drop on touch screen working
+
+
 
 Notes:
 we are using two libraries:

@@ -31,14 +31,14 @@ export function LayoutPart(props: {}) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
 
-  function toggleExpand(itemId: number) {
+  function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
         : [...prev, itemId],
     );
   }
-  function toggleHidden(itemId: number) {
+  function toggleHidden(itemId: Id) {
     setHiddenNodes((prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
@@ -65,7 +65,7 @@ export function LayoutPart(props: {}) {
       props.vertex,
       collapsedKeys,
     );
-    const getComponent: any = async () =>
+    const getComponent: any = () =>
       getChildVertex(graph, ["$0Comp"], props.vertex).vertex?.P.name;
 
     return (
@@ -201,7 +201,10 @@ export function LayoutPart(props: {}) {
                           component: "Icon",
                           props: {
                             style: { color: "red" },
-                            onClick: () => deleteLayout(getComponent()),
+                            onClick: () => {
+                              const name = getComponent();
+                             deleteLayout(name)
+                            },
                             width: 18,
                             height: 18,
                             class:

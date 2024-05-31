@@ -6,7 +6,7 @@ import { Edge, Vertex } from "~/lib/graph/graph";
 import { int } from "neo4j-driver";
 
 export async function getOutEdges(
-  fromId: number | string | any,
+  fromId: string | any,
   type: string,
   options: {
     isInward?: boolean;

@@ -40,7 +40,7 @@ export async function findVertexesMGCall(options: {
     } else {
       return { error: true, message: "Invalid parameters" };
     }
-
+    
     const vertexResult = await driver.run(query, params);
     if (vertexResult.records.length === 0) {
       return {

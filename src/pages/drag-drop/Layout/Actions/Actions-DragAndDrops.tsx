@@ -14,15 +14,13 @@ import { FormConfig } from "./FormConfig";
 import { Properties } from "./Properties";
 import { capitalizeFirstLetter } from "~/lib/Utils";
 import { FormSetting } from "./FormSetting";
+
 interface ActionsProps {
-  leftColumns: any;
   rightColumns: any;
   isRightOpen: Accessor<boolean>;
   toggleIsRightOpen: Accessor<boolean>;
 }
 export function ActionsDragAndDrops(props: ActionsProps) {
-  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
-
   return (
     <aside
       style={{ "grid-area": "callToAction", "width": "75%","min-width": "400px",'justify-self':'right', }}

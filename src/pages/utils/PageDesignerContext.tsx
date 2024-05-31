@@ -4,13 +4,13 @@ import { HoverIdContext, SelectedCollContext, SelectedIdContext, TargetIdContext
 import { Id, Vertex } from "~/lib/graph/graph";
 
 export default function PageDesignerContext(props: any) {
-    const hoverId = createSignal<number>(-1);
-    const selectedColl = createSignal<{ vertexId: number }>({ vertexId: -1 });
-    const selectedId = createSignal<Id>(-1);
-    const targetId = createSignal<Id>(-1);
+    const hoverId = createSignal<Id | number>(-1);
+    const selectedColl = createSignal<{ vertexId: Id | number }>({ vertexId: -1 });
+    const selectedId = createSignal<Id | number>(-1);
+    const targetId = createSignal<Id | number>(-1);
     const hiddenNodes = createSignal<Id[]>([]);
     const showDrawerContext = createSignal(false);
-    const selectedComponent = createSignal<{ vertexId: number }>({
+    const selectedComponent = createSignal<{ vertexId: Id | number }>({
         vertexId: -1,
     });
     const indicatorPosition = createSignal<{

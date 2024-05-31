@@ -8,15 +8,15 @@ export const LoadingContext = createContext(createSignal(false));
 export const IsPreviewContext = createContext(createSignal(false));
 export const NewTxnIdContext = createContext(1);
 
-export const HoverIdContext = createContext(createSignal<Id>(-1));
+export const HoverIdContext = createContext(createSignal<Id | number>(-1));
 
 export const SelectedCollContext = createContext(
-  createSignal({ vertexId: -1 }),
+  createSignal({ vertexId: -1 as Id | number }),
 );
 
-export const SelectedIdContext = createContext(createSignal<Id>(-1));
+export const SelectedIdContext = createContext(createSignal<Id | number>(-1));
 
-export const TargetIdContext = createContext(createSignal<Id>(-1));
+export const TargetIdContext = createContext(createSignal<Id | number>(-1));
 
 export const ShowDrawerContext = createContext(createSignal<boolean>(false));
 
@@ -30,11 +30,11 @@ export const FormSettingsContext = createContext(createStore({} as {
 
 export const SelectedComponentContext = createContext(
   createSignal({
-    vertexId: -1,
+    vertexId: -1 as Id | number,
   }),
 );
 
-export const PropertiesVertexIdContext = createContext(getNewGraphId());
+export const PropertiesVertexIdContext = createContext(createSignal(getNewGraphId()));
 
 export const DraggedVertexContext = createContext(
   createSignal<Vertex[] | []>([]),

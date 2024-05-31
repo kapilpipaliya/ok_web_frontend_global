@@ -5,8 +5,7 @@ export default function NotFound404() {
     <main class="position:relative  isolation:isolate  height:100vh ">
       <img
         src="https://images.unsplash.com/photo-1545972154-9bb223aac798?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=3050&q=80&exp=8&con=-15&sat=-75"
-        alt=""
-        class="position:absolute  inset:0px z-index:-10 height:100%  width:100%  object-position:top "
+        class="position:absolute  inset:0px z-index:-10 height:100%  width:100% object-fit:cover  object-position:top "
       />
       <div class="mx:auto max-width:80rem  px:1.5rem py:8rem text-align:center  py:10rem@sm px:2rem@lg">
         <p class="f:1rem lh:1.5rem font-weight:600  leading:2rem color:rgb(255,255,255) ">

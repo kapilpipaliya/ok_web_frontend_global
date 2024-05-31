@@ -43,6 +43,7 @@ export function Navbar(
       "background-color": "white",
       padding: "6px",
       display: "flex",
+      'box-shadow':'3px -1px 4px 3px lightgrey',
       width: "-webkit-fill-available",
       "justify-content": "space-between",
       "align-items": "center",

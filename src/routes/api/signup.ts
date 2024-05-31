@@ -10,7 +10,8 @@ import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { v4 as uuidv4 } from "uuid";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/get/isVertexExistWithProp";
+import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
@@ -42,10 +43,10 @@ export async function POST({ request }: APIEvent) {
       labPort,
     );
 
-    const user = createUserResult.records[0].get("u");
+    const user = convertNodeToJson(createUserResult.records[0].get("u"));
 
     // Import CSV data to the user's database
-    await FetchCSVData(user.properties.driverPort);
+    await FetchCSVData(user.P.driverPort);
 
     await tx.commit();
     await session.close();
@@ -53,14 +54,14 @@ export async function POST({ request }: APIEvent) {
     // Update session data with user's email and subdomain
     await updateSession(createUserResult);
 
-    const { password: _, ...properties } =
-      createUserResult.records[0].get("u").properties;
+    const { password: _, ...properties } = user.P;
+    
     return {
-      id: createUserResult.records[0].get("u").identity.toString(),
-      properties,
+      id: user.id,
+      properties: user.P,
     };
   } catch (error: any) {
-    console.error("Server error:", error.message);
+    console.error("Server error:", error.message,error);
     await tx.rollback();
     await session.close();
     return new Response(error.message, { status: 500 });
@@ -111,7 +112,7 @@ async function createUserInDB(
             logsPort: $logsPort,
             labPort: $labPort,
             profileImage: ''
-        }) RETURN u;`;
+        }) SET u.createdAt = localDateTime() RETURN u;`;
   const createUserResult = await tx.run(createUserQuery, {
     username,
     uId,
@@ -136,7 +137,7 @@ async function createUserInDB(
                 logsPort: $logsPort,
                 labPort: $labPort,
                 profileImage: ''
-            }) RETURN u;`;
+            }) SET u.createdAt = localDateTime() RETURN u;`;
     await session2.run(createUserQuery2, {
       username,
       uId,
@@ -167,12 +168,15 @@ async function PortConfigure(
 
     if (resultPort.records.length === 0) {
       // Create default database port configuration if not exists
-      const query = `CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) RETURN n;`;
+      const query = `CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) SET n.createdAt = localDateTime() RETURN n;`;
       const resultPort = await tx.run(query);
-      portsResult = resultPort.records[0].get("n").properties;
+
+      const portResult = convertNodeToJson(resultPort.records[0].get("n"));
+      portsResult = portResult.P;
     } else {
       // if exists than return ports from db
-      portsResult = resultPort.records[0].get("n").properties;
+      const portResult = convertNodeToJson(resultPort.records[0].get("n"));
+      portsResult = portResult.P;
     }
 
     let { driverPort, logsPort, labPort } = portsResult;
@@ -184,10 +188,10 @@ async function PortConfigure(
       [labPort]: "3000",
     });
 
-    await new Promise((resolve, reject) => setTimeout(resolve, 5000));
+    await new Promise((resolve, reject) => setTimeout(resolve, 10000));
 
     // Update port configuration in the database
-    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} RETURN n;`;
+    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} SET n.updatedAt = localDateTime() RETURN n;`;
     await tx.run(updatePort);
 
     return { driverPort, logsPort, labPort };
@@ -207,7 +211,7 @@ async function checkExistance(
   // Check if the subdomain already exists
   if (
     subdomain &&
-    (await isVertexExistWithPropMGCall("User", tx, "subdomain", subdomain))
+    !(await findVertexesMGCall({label: "User", attribute: "subdomain", value: subdomain})).error
   ) {
     throw new Error("Sub Domain already exists");
   }
@@ -215,7 +219,7 @@ async function checkExistance(
   // Check if the username already exists
   if (
     username &&
-    (await isVertexExistWithPropMGCall("User", tx, "username", username))
+    !(await findVertexesMGCall({label: "User", attribute: "username", value: username})).error
   ) {
     throw new Error("Username already exists");
   }
@@ -223,7 +227,7 @@ async function checkExistance(
   // Check if the email already exists
   if (
     email &&
-    (await isVertexExistWithPropMGCall("User", tx, "email", email))
+    !(await findVertexesMGCall({label: "User", attribute: "email", value: email})).error
   ) {
     throw new Error("Email address already exists");
   }

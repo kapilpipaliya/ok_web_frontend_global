@@ -11,7 +11,7 @@ export function getPermissions(meta: Vertex) {
     for (const roleRow of roleRows.vertexes!) {
       const roles = getChildVertexes(graph, ["$0Role"], [roleRow]);
       if (!roles.error) {
-        const allowedRoleIds = new Set<number>();
+        const allowedRoleIds = new Set<Id>();
         for (const role of roles.vertexes!) {
           if (graph.member && graph.member.P.roles?.includes(role.id)) {
             allowedRoleIds.add(role.id);

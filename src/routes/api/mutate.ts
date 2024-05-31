@@ -201,11 +201,20 @@ export async function mutateData(
     const txnResult = [] as any[];
     for (const mutationObject of txns[transactions]) {
       if (mutationObject.insert && isObject(mutationObject.insert)) {
+        // check if current user has permission to insert, if not return error.
+        // most of the time, it will be checked before in the client side
+        // display proper error in modal in frontend
+
+        // also check user has permissions to insert all properties.
+        // if not all properties are allowed, do not save and return error.
+        // only save the properties that are allowed and ignore remaining properties.
+
         const labels = mutationObject.insert.L.map(
           (label: string) => `:${label}`,
         ).join("");
 
-        const query = `CREATE (n${labels} $properties) RETURN n`;
+        const query = `CREATE (n${labels} $properties) SET n.createdAt = localDateTime() RETURN n`;
+        
 
         try {
           const result = await tx.run(query, {
@@ -231,7 +240,7 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = `MATCH (n) WHERE ID(n) = $id SET n = $properties RETURN n`;
+        const query = `MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n`;
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -254,7 +263,7 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = `MATCH (n) WHERE ID(n) = $id SET n += $properties RETURN n`;
+        const query = `MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n`;
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -292,6 +301,9 @@ export async function mutateData(
       }
 
       if (mutationObject.insertEdge) {
+        // if user has no permission to insert row vertex, do not allow and return error.
+        // if user has no permission to insert select, dont allow it.
+        //
         const startId =
           clientToServerVertexIdMap.get(mutationObject.insertEdge.S) ||
           mutationObject.insertEdge.S;
@@ -304,6 +316,7 @@ export async function mutateData(
               match (n2) where id(n2)=$endId
               merge (n1)-[r:${type}]->(n2)
               SET r += $properties
+              SET r.updatedAt = localDateTime()
               return r`;
 
         try {
@@ -345,6 +358,7 @@ export async function mutateData(
               match (n1)-[r:${type}]->(n2)
               where id(r) = $id
               set r = $properties
+              SET r.updatedAt = localDateTime()
               return r`;
 
         try {
@@ -388,6 +402,7 @@ export async function mutateData(
                     match (e) where id(e) = id(endNode(r)) 
                     create (s)-[t:${type}]->(e)
                     set t = properties(r)
+                    SET t.updatedAt = localDateTime()
                     delete r
                     return t`;
 
@@ -427,6 +442,7 @@ export async function mutateData(
                     match (e) where id(e) = $newend 
                     create (s)-[t:${type}]->(e)
                     set t = properties(r)
+                    SET t.updatedAt = localDateTime()
                     delete r
                     return t`;
 

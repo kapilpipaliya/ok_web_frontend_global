@@ -1,7 +1,7 @@
 import { JSX, Show, createSignal } from "solid-js";
 import { Store, SetStoreFunction } from "solid-js/store";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { componentDrag, getChildrenAttrs } from "~/lib/pageStore";
 
@@ -11,7 +11,7 @@ export function useExpansion(defaultValue = true) {
   return [expanded, toggleExpansion];
 }
 
-export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number, fromVertex: Vertex, toVertexId: number) {
+export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number, fromVertex: Vertex, toVertexId: Id) {
   const toParentVertex = graph.vertexes[toVertexId];
 
   function sortChildren() {

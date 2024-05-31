@@ -5,8 +5,8 @@ import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import sendEmail from "~/cypher_api/server/email";
 import { validatePassword } from "~/lib/validations";
-
-export function ForgotPasswordForm() {
+import '~/css/base.css'
+export function ForgotPassword() {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
   const [otp, setOtp] = createSignal("");
@@ -60,6 +60,7 @@ export function ForgotPasswordForm() {
     <div
       class="@fade|.5s"
       style={{
+        "flex": "auto",
         "background-size": "cover",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",

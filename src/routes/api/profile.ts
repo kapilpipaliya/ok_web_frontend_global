@@ -7,7 +7,6 @@ import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { isVertexExistWithPropMGCall } from "~/cypher_api/functions/get/isVertexExistWithProp";
 
 /**
  * Handles errors and responses in a consistent way.
@@ -71,13 +70,13 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   // Check if email and username already exists
   if (
     email &&
-    (await isVertexExistWithPropMGCall("User", session, "email", email))
+    !(await findVertexesMGCall({ label: "User", attribute: "email", value: email })).error
   ) {
     return { status: 500, error: "Email address already exists" };
   }
   if (
     username &&
-    (await isVertexExistWithPropMGCall("User", session, "username", username))
+    !(await findVertexesMGCall({label:"User",attribute : "username",value: username})).error
   ) {
     return { status: 500, error: "Username already exists" };
   }
@@ -88,7 +87,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   if (email) updates.push(`u.email = $email`);
   if (username) updates.push(`u.username = $username`);
   if (profileImage) updates.push(`u.profileImage = $profileImage`);
-  query += updates.join(", ") + " RETURN u;";
+  query += updates.join(", ") + " SET u.updatedAt = localDateTime() RETURN u;";
 
   const result = await session.run(query, {
     userId,
@@ -202,7 +201,7 @@ const supportTicket = async (
   async function createTicket(payload: any, session: Session) {
     const { name, email, subject, message } = payload;
 
-    const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) RETURN n;`;
+    const query = `CREATE (n:Support {name: $name, email: $email,subject: $subject, message: $message, status: "pending"}) SET n.createdAt = localDateTime() RETURN n;`;
     await session.run(query, {
       name: name,
       email: email,
@@ -217,7 +216,7 @@ const supportTicket = async (
   async function updateStatus(payload: any, session: Session) {
     const { id, status } = payload;
 
-    const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status RETURN n;`;
+    const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;`;
     await session.run(query, { id: int(id), status: status });
     return {
       message: "Status updated successfully",

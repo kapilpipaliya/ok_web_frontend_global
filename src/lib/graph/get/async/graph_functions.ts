@@ -1,5 +1,5 @@
 import { klona } from "klona/json";
-import { AdminAttrKeys, AttrsTableData } from "~/lib/Utils";
+import { AdminAttrKeys } from "~/lib/Utils";
 import {
   getChildVertexAsync,
   getChildVertexesAsync,
@@ -15,6 +15,7 @@ import { findVertexByLabelAndUniqueIdAsync } from "./findVertex";
 import { getToEdgeAsync } from "./getToEdge";
 import { useToast } from "~/components/custom/Toast";
 import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
+import { AttrsTableData } from "~/lib/api";
 
 export async function getCompPropsMapAsync(
   graph: Store<GraphInterface>,

@@ -27,7 +27,6 @@ import { submitDataCall } from "~/components/api/api_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import {
-  AttrsTableData,
   PageContext,
   capitalizeFirstLetter,
   expressionString,
@@ -40,6 +39,7 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { FormMetaData } from "~/lib/Type";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import Label from "~/components/solid-blocks/blocks/label/Label";
+import { AttrsTableData } from "~/lib/api";
 interface DataGridProps {
   tableId: string;
 }

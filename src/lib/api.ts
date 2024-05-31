@@ -934,4 +934,114 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
       },
     ],
   },
+  Form: {
+    title: "Form",
+    name: "Form",
+    attributes: [
+      {
+        name: "title",
+        component: "TextBox",
+        props: {
+          onchange: '{"new": ["name","id"]}',
+        },
+      },
+      {
+        name: "name",
+        component: "TextBox",
+        props: {
+          validationRules: [
+            {
+              type: "required",
+              message: "ID is required",
+            },
+            {
+              type: "custom",
+              ignoreEmptyValue: true,
+              message: "This ID is already taken",
+              validationCallback: (options: any) => {
+                const { formData } =
+                  (options.validator.context as IFormContext) ||
+                  ({} as IFormContext);
+                const [graph, setGraph] = useContext(GraphContext)!;
+                const val = options.value;
+                return !findVertexByLabelAndUniqueIdWithSkip(
+                  "Page",
+                  "id",
+                  val,
+                  formData.id,
+                  graph,
+                );
+              },
+            },
+          ],
+        },
+      },
+      { name: "description", component: "TextArea" },
+      {
+        name: "dashboard",
+        component: "TagBox",
+        props: {
+          collection: "g:'Dashboard'",
+          parentLabel: "Dashboard",
+          inward: true,
+        },
+      },
+      { name: "public", component: "CheckBox" },
+      { name: "isRealTime", component: "CheckBox" },
+      {
+        name: "coll",
+        displayName: "Collection",
+        component: "SelectBox",
+        props: {
+          collection: "g:'Coll'",
+          // inward: true,
+          parentLabel: "Coll",
+        },
+      },
+      {
+        name: "data",
+        component: "SelectBox",
+        props: {
+          collection: `g:'{{->$0Coll::'P.name'}}'`,
+        },
+      },
+      {
+        name: "Attr",
+        component: "Table2",
+        tab: "Attribute",
+        props: {
+          type: "Attr",
+          label: "Attr",
+        },
+        attributes: pageAttr,
+      },
+      {
+        name: "Role",
+        component: "Table2",
+        tab: "Permission",
+        attributes: [
+          {
+            name: "role",
+            component: "SelectBox",
+            props: {
+              collection: "g:'Role'",
+            },
+          },
+          {
+            name: "Perm",
+            component: "Table2",
+            attributes: [
+              {
+                name: "perm",
+                component: "SelectBox",
+                props: {
+                  collection: "g:'Perm'",
+                },
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
 };

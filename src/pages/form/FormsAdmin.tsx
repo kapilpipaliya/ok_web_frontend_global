@@ -79,7 +79,6 @@ perm`,
       <AbstractSingleForm
         id={"new"}
         formId={"Import"}
-        config={config}
         graph={graph}
         setGraph={setGraph}
       />

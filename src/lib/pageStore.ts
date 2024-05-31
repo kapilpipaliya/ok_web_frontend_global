@@ -15,6 +15,7 @@ import {
   DraggedVertexContext,
   HoverIdContext,
   IndicatorPositionContext,
+  LoadingContext,
   PropertiesVertexIdContext,
   SelectedCollContext,
   SelectedComponentContext,
@@ -44,7 +45,7 @@ import { addNewRow } from "./graph/mutate/form_functions";
 import { getFormMetaDataAsync } from "./graph/get/async/graph_functions";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "./websocket/ws_events";
-import { getEdgesFromRowsAttr } from "./Utils";
+import { getEdgesFromRowsAttr, isObject } from "./Utils";
 
 const addPropsToLayoutRow = (
   graph: Store<GraphInterface>,
@@ -339,6 +340,7 @@ export function useDragDrop(
 ) {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedColl, setSelectedColl] = useContext(SelectedCollContext);
+  const [loadingSite, setLoadingSite] = useContext(LoadingContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [targetId, setTargetId] = useContext(TargetIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
@@ -349,7 +351,7 @@ export function useDragDrop(
     IndicatorPositionContext,
   );
   const { showErrorToast, showSuccessToast } = useToast();
-  const propertiesVertexId = useContext(PropertiesVertexIdContext);
+  const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
 
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, vertex));
 
@@ -473,7 +475,8 @@ export function useDragDrop(
 
   const handleDrop = async (e: DragEvent) => {
     e.stopPropagation();
-
+    setLoadingSite(true);
+    //new Promise((resolve) => setTimeout(resolve, 2000));
     for (const vertex of draggedVertex()) {
       let fromVertex = vertex;
 
@@ -590,18 +593,45 @@ export function useDragDrop(
       }
 
       if (fromVertexLabel === "Comp") {
-        const rowId = componentDrag(
-          txnId,
-          fromVertex,
-          toParentVertex || formData,
-          graph,
-          setGraph,
-        );
-        if (rowId === -1) return;
+        // when component is input add label
+        const labelParentVertex = getParentVertex(["CompCategory$0"], fromVertex, graph);
+        if (labelParentVertex?.vertex?.P.name === "Form" || labelParentVertex?.vertex?.P.name === "Join") {
+          const labelVertex = findVertexByLabelAndUniqueId(graph,"Comp",IdAttr,"Label");
+          const rowId = componentDrag(
+            txnId,
+            labelVertex!,
+            toParentVertex || formData,
+            graph,
+            setGraph,
+          );
+          if (rowId === -1) return;
 
-        fromVertex = graph.vertexes[rowId];
-
-        sortChildren();
+          const rowId2 = componentDrag(
+            txnId,
+            fromVertex,
+            graph.vertexes[rowId] || formData,
+            graph,
+            setGraph,
+          );
+          if (rowId2 === -1) return;
+  
+          fromVertex = graph.vertexes[rowId];
+  
+          sortChildren();
+        } else {
+          const rowId = componentDrag(
+            txnId,
+            fromVertex,
+            toParentVertex || formData,
+            graph,
+            setGraph,
+          );
+          if (rowId === -1) return;
+  
+          fromVertex = graph.vertexes[rowId];
+  
+          sortChildren();
+        }
       } else if (fromVertexLabel === "Page") {
         const rowId = componentDrag(
           txnId,
@@ -662,14 +692,13 @@ export function useDragDrop(
       }
     }
 
-
-
     // setDraggedVertex(null);
     setDraggedVertex([]);
 
     // Handle drop action here
     setIndicatorPosition({ activeItem: null, position: null });
     setTargetId(-1);
+    setLoadingSite(false);
   };
 
 
@@ -758,13 +787,13 @@ export function useDragDrop(
         // set existing layout props
         setGraph(
           "vertexes",
-          propertiesVertexId,
+          propertiesVertexId(),
           reconcile({ P: layoutPropRow } as Vertex),
         );
       } else {
         setGraph(
           "vertexes",
-          propertiesVertexId,
+          propertiesVertexId(),
           reconcile({ P: {} } as Vertex),
         );
       }
@@ -784,8 +813,9 @@ export function useDragDrop(
     });
 
     deleteNestedLayout(graph, setGraph, txnId, [vertex]);
-
-    showSuccessToast(`${name} deleted Successfully`);
+    if(name){
+      showSuccessToast(`${name} deleted successfully`);    
+    }
   };
 
   return {
@@ -823,7 +853,7 @@ export function setPropertyValueGlobal(
       if (valueSet ?? true)
         mergeVertexProperties(txnId, row.id, graph, setGraph, { value });
     } else {
-      const propMetaVertex = newVertex(0, ["Meta"], {
+      const propMetaVertex = newVertex("", ["Meta"], {
         name: "Prop",
         displayName: "Property",
       });

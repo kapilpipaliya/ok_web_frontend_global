@@ -1,5 +1,5 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
 import { SetStoreFunction, Store } from "solid-js/store";
@@ -13,7 +13,7 @@ export function setSelectionValue(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   meta: Vertex,
-  value?: number[] | number,
+  value?: Id[] | Id,
 ) {
   const { showErrorToast } = useToast();
 
@@ -56,7 +56,7 @@ export function setSelectionValue(
 function vertexOutEdgeContainVertex(
   vertex: Vertex,
   type: string,
-  vertexId: number,
+  vertexId: Id,
   graph: Store<GraphInterface>,
 ) {
   const outEdges = vertex.OUT[type] || [];

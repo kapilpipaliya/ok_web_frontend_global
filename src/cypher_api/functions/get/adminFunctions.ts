@@ -13,7 +13,7 @@ export async function getUsers() {
     const res = await driver.run(`MATCH (u:User) RETURN u;`);
 
     if (res.records.length > 0) {
-      const vertexes = convertNodeToJson(res.records[0].get("v"));
+      const vertexes = res.records.map((r) => convertNodeToJson(r.get("u")));
       return {
         error: false,
         vertexes: vertexes,

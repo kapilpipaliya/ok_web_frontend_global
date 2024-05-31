@@ -3,11 +3,12 @@ import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
+import { Id } from "~/lib/graph/graph";
 
 export async function newEdgeMGCall(
   edgeType: string,
-  startVertexId: number,
-  endVertexId: number,
+  startVertexId: Id,
+  endVertexId: Id,
   properties: { [key: string]: any } = {},
 ) {
   "use server";
@@ -21,11 +22,13 @@ export async function newEdgeMGCall(
       MATCH (startVertex), (endVertex)
       WHERE id(startVertex) = $startVertexId AND id(endVertex) = $toId
       CREATE (startVertex)-[e:${edgeType}]->(endVertex)
+      SET e.createdAt = localDateTime()
       RETURN e
     `;
     const edgeResult = await transaction.run(createEdgeQuery, {
       startVertexId: int(startVertexId),
       toId: int(endVertexId),
+
     });
 
     // Extract the new vertex ID from the result
@@ -53,3 +56,4 @@ export async function newEdgeMGCall(
     // await driver.close();
   }
 }
+

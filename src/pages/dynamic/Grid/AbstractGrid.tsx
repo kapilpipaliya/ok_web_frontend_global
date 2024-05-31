@@ -32,7 +32,7 @@ export function AbstractGrid(props: AbstractGridProps) {
   const navigate = useNavigate();
 
   async function getNavData() {
-    const data: any = await getTreeData(graph, setGraph, {
+    const data: any = getTreeData(graph, setGraph, {
       collection: expressionString({ coll: "Nav", filter: "Navigation" }),
       child: {
         collection: "->NavAttr",

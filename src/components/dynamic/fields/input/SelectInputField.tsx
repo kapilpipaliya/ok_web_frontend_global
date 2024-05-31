@@ -17,6 +17,7 @@ import {
 import {
   GraphContext,
   GraphInterface,
+  Id,
   IdAttr,
   Vertex,
 } from "~/lib/graph/graph";
@@ -53,7 +54,7 @@ import MultiSelectField from "~/components/custom/MultiSelect";
 function vertexInEdgeContainVertex(
   vertex: Vertex,
   type: any,
-  vertexId: number,
+  vertexId: Id,
   graph: Store<GraphInterface>,
 ) {
   const inEdges = vertex.IN[type] || [];
@@ -75,7 +76,7 @@ export function setParentValue(
   txnId: number,
   vertex: Vertex,
   meta: Vertex,
-  value?: number[] | number,
+  value?: Id[] | Id,
 ) {
   const { showWarningToast, showErrorToast } = useToast();
 
@@ -84,7 +85,7 @@ export function setParentValue(
   if (!type) showWarningToast("edge type cant be empty");
   const previousEdges = vertex.IN[type] || [];
 
-  let valueArray = [] as number[];
+  let valueArray = [] as Id[];
 
   if (!Array.isArray(value)) {
     if (value !== null && value !== undefined) {
@@ -132,7 +133,7 @@ export function selectedValue(
   meta: Vertex,
   data: Vertex,
   graph: Store<GraphInterface>,
-): number[] {
+): Id[] {
   if (
     getValueFromVertexOrKey(meta.P.props, "stringValue") ||
     getValueFromVertexOrKey(meta.P.props, "items")
@@ -208,7 +209,7 @@ export function SelectInputField(
 
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [options, setOptions] = createSignal([]);
+  const [options, setOptions] = createSignal([] as Array<string | Vertex>);
   const formData = useContext(FormContext);
 
   const selectOptions = async () => {
@@ -275,7 +276,7 @@ export function SelectInputField(
 
   const onChangeSelect = (e: Vertex[], isRemove: any) => {
     // TODO: ensure this working for multiselect
-    let data: number[] | number;
+    let data: Id[] | Id;
     let optionvalue: any;
     if (isRemove && getComponent() === "SelectBox") {
       data = [];

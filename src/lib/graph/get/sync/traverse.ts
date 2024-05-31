@@ -56,7 +56,7 @@ export function getParentVertexes(
   path: string[],
   currentVertexes: Vertex[],
 ): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -337,7 +337,7 @@ export function getChildVertexes(
   currentVertexes: Vertex[],
   strict?: boolean,
 ): { error: boolean; vertexes?: Vertex[] } {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }

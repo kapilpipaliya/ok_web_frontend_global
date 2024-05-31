@@ -1,7 +1,5 @@
 import {
   createEffect,
-  createMemo,
-  createResource,
   createSignal, JSX,
   onMount,
   Show,
@@ -12,13 +10,11 @@ import { LoaderNew } from "~/components/custom/LoaderSimple";
 import "~/css/sideBarSearch.css";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
-import { getTreeData } from "~/lib/graph/get/sync/traverse";
-import { graph } from "neo4j-driver";
 import { GraphContext } from "~/lib/graph/graph";
 import { expressionString } from "~/lib/Utils";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { useLocation } from "@solidjs/router";
+import { useLocation, useNavigate } from "@solidjs/router";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -29,7 +25,7 @@ export interface navbarDataI {
 }
 
 
-function Sidebar(props: {  }) {
+function Sidebar() {
   const [searchData, setSearchData] = createSignal<any>([]);
   const [navData, setNavData] = createSignal<any>([]);
   const [activeSection, setActiveSection] = createSignal("Home");
@@ -106,8 +102,26 @@ function Sidebar(props: {  }) {
   const toggleSectionCollapse = () => {
     setIsCollapsed(!isCollapsed());
   };
-
   
+
+  const location = useLocation();
+
+  const handleUrlChange = () => {
+    const path = location.pathname;
+    const mainDiv = document.getElementById('mainDiv');
+  
+    if (!path.includes("/admin")) {
+      setGraph('isSideBarOpen', false);
+      setGraph('isSubSideBarOpen', false);
+    }else{
+      mainDiv?.classList.add('flex');
+    }
+  };
+
+  createEffect(() => {
+    handleUrlChange(); // Call the function initially
+    return location.pathname; // Track changes in pathname
+  });
 
   async function getNavData() {
     const data: any = await getTreeDataMGCall({
@@ -143,6 +157,7 @@ function Sidebar(props: {  }) {
     ({
       width: isCollapsed() ? "70px" : "310px",
       background: "#f4f4f4",
+      display: graph.isSideBarOpen ? 'contents': 'none',
       transition: "transform 0.3s ease-in-out",
       transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",
@@ -191,70 +206,3 @@ function Sidebar(props: {  }) {
 }
 
 export default Sidebar;
-
-// export function renderNavTreeFromGraph(
-//   meta: Vertex,
-//   data: Vertex,
-//   showNav: boolean,
-//   graph: Store<GraphInterface>,
-// ) {
-//   // !!!TODO!!!: This code can we written in the code itself
-//   const getChildren = (meta: Vertex, vertex: Vertex) => {
-//     // rome-ignore lint/suspicious/noExplicitAny: <explanation>
-//     const result = [] as any[];
-
-//     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
-//     const attrMeta = metaVertexes.find((meta) => meta.P.name === "Attr");
-
-//     if (!attrMeta) return result;
-
-//     const children = getSublistRows(graph, attrMeta, vertex);
-
-//     for (const child of children) {
-//       const name = child.P.name;
-//       const func = child.P.func;
-//       const expanded = child.P.expanded;
-//       // rome-ignore lint/suspicious/noExplicitAny: <explanation>
-//       const navItem = {} as any;
-
-//       if (func === "Table") {
-//         const collVertex = getChildVertex(graph, ["$0Coll"], child).vertex;
-//         // TODO: Check Permission
-//         if (collVertex) {
-//           // TODO: Check Permission
-//           // add to result if its allowed
-//           navItem.name = name;
-//           navItem.href = `/admin/${collVertex.P.name}`;
-//         } else {
-//           const formVertex = getChildVertex(graph, ["$0Form"], child).vertex;
-//           if (formVertex) {
-//             // TODO: Check Permission
-//             // add to result if its allowed
-//             navItem.name = name;
-//             navItem.href = `/admin/${formVertex.P.name}`;
-//           } else {
-//             const url = "" + child.P.url;
-//             navItem.name = name;
-//             navItem.href = url;
-//           }
-//         }
-//       } else {
-//         const url = "" + child.P.url;
-//         navItem.name = name;
-//         navItem.href = url;
-//       }
-//       navItem.expanded = expanded;
-//       navItem.id = createUniqueId();
-
-//       // rome-ignore lint/style/noNonNullAssertion: <explanation>
-//       navItem.children = getChildren(attrMeta!, child);
-
-//       result.push(navItem);
-//     }
-//     return result;
-//   };
-
-//   const navigation: navbarDataI[] = getChildren(meta, data);
-
-//   return navigation;
-// }

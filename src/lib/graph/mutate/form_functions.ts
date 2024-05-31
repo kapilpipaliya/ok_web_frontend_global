@@ -33,7 +33,6 @@ import {
   getLabel,
   getId,
   AdminAttrKeys,
-  AttrsTableData,
 } from "~/lib/Utils";
 import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { getToEdge } from "../get/sync/traverse";
@@ -44,6 +43,7 @@ import {
 } from "../get/sync/graph_functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
+import { AttrsTableData } from "~/lib/api";
 
 export function cloneRowProps(
   graph: Store<GraphInterface>,
@@ -315,7 +315,7 @@ export function createForm(
 
 export function loadForm(
   graph: Store<GraphInterface>,
-  id: number,
+  id: Id,
 ): { error: string | boolean; vertex?: Vertex } {
   if (!graph.vertexes[id]) {
     return { error: "vertex not found" };

@@ -133,7 +133,7 @@ export function SyncComopnent() {
 
     return (
       <>
-        <table class="width:100% f:0.875rem lh:1.25rem text-align:left text-align:right:rtl color:rgb(107,114,128) color:rgb(156,163,175)@dark">
+        <table class="width:100% f:0.875rem lh:1.25rem text-align:left text-align:right color:rgb(107,114,128) color:rgb(156,163,175)@dark">
           <thead class="f:0.75rem lh:1rem color:rgb(55,65,81) text-transform:uppercase bg:rgb(249,250,251) bg:rgb(55,65,81)@dark color:rgb(156,163,175)@dark">
             <tr>
               <th scope="col" class="p:1rem">

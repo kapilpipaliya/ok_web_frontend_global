@@ -11,8 +11,6 @@ import PageDesignerContext from "~/pages/utils/PageDesignerContext";
 export default function admin() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const config = createStore({} as { formData: IFormContext });
-  console.log(params.entity, params.id);
 
   return (
     <Switch>

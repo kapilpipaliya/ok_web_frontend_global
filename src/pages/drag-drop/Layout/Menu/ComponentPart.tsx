@@ -7,7 +7,7 @@ import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { expressionString, iconMap } from "~/lib/Utils";
 import { DraggedVertexContext, PageConfigContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext, Vertex, Id } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { useDragDrop } from "~/lib/pageStore";
@@ -25,7 +25,7 @@ export function ComponentPart() {
   const { showErrorToast } = useToast();
   const [selectedComponents, setSelectedComponents] = createSignal(new Set<Vertex>());
   let defaultData = [] as any[];
-  const handleCheckboxChange = (event: Event, id: number) => {
+  const handleCheckboxChange = (event: Event, id: Id) => {
     const isChecked = (event.target as HTMLInputElement).checked;
     if (isChecked) {
       setSelectedComponents((prev) => new Set(prev).add(graph.vertexes[id]));

@@ -13,7 +13,6 @@ import {
   Tooltip,
 } from "~/components/solid-blocks/blocks";
 import { FieldAttribute } from "~/lib/Type";
-import { AttrsTableData } from "~/lib/Utils";
 import {
   PageConfigContext,
   SelectedIdContext,
@@ -39,33 +38,27 @@ import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
+import { AttrsTableData } from "~/lib/api";
 
 export function Properties(props: { setShowDrawer ?: any }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const propertiesVertexId = useContext(PropertiesVertexIdContext);
+  const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
     SelectedComponentContext,
   );
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
 
-  const { deleteLayout } = useDragDrop(
-    graph,
-    setGraph,
-    pageConfig.formData.txnId,
-    pageConfig.formData.formData,
-    pageConfig.formData.formData,
-  );
 
   const PropertiesPart = () => {
     const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
     const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
 
-    if (!graph.vertexes[propertiesVertexId]) {
+    if (!graph.vertexes[propertiesVertexId()]) {
       const addNewVertexResult = addNewVertex(
         0,
-        newVertex(propertiesVertexId, ["PropsJson"], { sample: true }),
+        newVertex(propertiesVertexId(), ["PropsJson"], { sample: true }),
         graph,
         setGraph,
       );
@@ -316,7 +309,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
                 </ModalHeader>
                 <ModalBody class={"mt:1rem"}>
                   <GenericInputField
-                    txnId={dataVertexId}
+                    txnId={pageConfig.formData.txnId}
                     title={"Write HTML"}
                     component="TextArea"
                     meta={graph.vertexes[metaVertexId]}
@@ -442,6 +435,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
 
     return (
       <>
+       
         <Show when={selectedId() !== -1}>
           <div class="flex jc:start">
             <GenericField
@@ -476,8 +470,8 @@ export function Properties(props: { setShowDrawer ?: any }) {
           <CollAndData />
           <FormGroupProperties
             txnId={pageConfig.formData.txnId}
-            metaAttributes={selectedComponentProperties().vertexes || []}
-            vertex={graph.vertexes[propertiesVertexId]}
+            metaAttributes={selectedComponentProperties().vertexes ?? []}
+            vertex={graph.vertexes[propertiesVertexId()]}
             setValue={setPropertyValue}
             selectedLayout={graph.vertexes[selectedId()]}
           />

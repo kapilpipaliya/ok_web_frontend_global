@@ -17,7 +17,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
   const [view, setView] = createSignal("Tablet");
   const [isLeftOpen, toggleIsLeftOpen] = useExpansion(true);
   const [isRightOpen, toggleIsRightOpen] = useExpansion(true);
-  const [selectedStepId, setSelectedStepId] = createSignal(1); // Initially set to the first step
+
   const [leftColumns, setLeftColumns] = createSignal(
     ["components", "pages", "collection"].map((column) => ({
       id: column,
@@ -31,7 +31,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
       name: column,
     })),
   );
-
 
   const gridArea = () => ({
     display: "grid",
@@ -52,11 +51,10 @@ const LayoutDragAndDrop = (): JSX.Element => {
   });
 
   return (
-    <PropertiesVertexIdContext.Provider value={getNewGraphId()}>
+    <PropertiesVertexIdContext.Provider value={createSignal(getNewGraphId())}>
       <PageConfigContext.Provider
         value={createStore({} as { formData: IFormContext })}
       >
-        
             <div style={gridArea()}>
               <HeaderDragAndDrop
                 view={view}
@@ -99,7 +97,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
                   isLeftOpen={isLeftOpen}
                   toggleIsLeftOpen={toggleIsLeftOpen}
                   leftColumns={leftColumns}
-                  rightColumns={rightColumns}
                 />
               </Show>
               <ContentDragAndDrop view={view}/>
@@ -136,7 +133,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
               <ActionsDragAndDrops
                 isRightOpen={isRightOpen}
                 toggleIsRightOpen={toggleIsRightOpen}
-                leftColumns={leftColumns}
                 rightColumns={rightColumns}
               />
             </div>

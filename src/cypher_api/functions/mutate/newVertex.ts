@@ -15,7 +15,7 @@ export async function newVertexDBCall(
 
   try {
     // Cypher query to create a new vertex
-    let createVertexQuery = `CREATE (v:${label}) SET v = $properties RETURN v`;
+    let createVertexQuery = `CREATE (v:${label}) SET v = $properties SET v.createdAt = localDateTime() RETURN v`;
     const vertexResult = await transaction.run(createVertexQuery, {
       properties,
     });

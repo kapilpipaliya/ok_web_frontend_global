@@ -1,4 +1,4 @@
-import { useContext } from "solid-js";
+import { onMount, useContext } from "solid-js";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { PageConfigContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
@@ -10,7 +10,7 @@ export function FormConfig() {
   return (
     <AbstractSingleForm
       buttonAlign={"center"}
-      formId={"Page"}
+      formId={params.entity}
       id={params.id}
       graph={graph}
       showMainFieldsOnly={true}

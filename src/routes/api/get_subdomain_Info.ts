@@ -3,7 +3,7 @@ import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver } from "~/cypher_api/server/driver";
 
 export async function POST({ request }: APIEvent) {
-  const subdomain = await getSubDomain(request.headers.get("host")!, false);
+  const subdomain = await getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
   if (subdomain === "super") {
     return { success: true };

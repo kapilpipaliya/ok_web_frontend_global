@@ -17,6 +17,8 @@ function unwrapProperties(properties: Record<string, any>): Record<string, any> 
       if ('low' in properties[key] && 'high' in properties[key]) {
         // Assuming the property is a Neo4j Integer
         unwrapped[key] = properties[key].toNumber(); // Convert to JavaScript number
+      } else if ('date' in properties[key] && 'month' in properties[key] && 'year' in properties[key] ) {
+        unwrapped[key] = `${properties[key].year}-${properties[key].month}-${properties[key].date}`
       } else {
         // Recursively unwrap nested objects
         unwrapped[key] = unwrapProperties(properties[key]);

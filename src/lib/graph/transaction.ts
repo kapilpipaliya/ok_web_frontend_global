@@ -210,5 +210,5 @@ export function isAllTxnProcessed() {
 }
 
 export function isValidId(startVertexId: Id) {
-  return isNumber(startVertexId);
+  return true;
 }

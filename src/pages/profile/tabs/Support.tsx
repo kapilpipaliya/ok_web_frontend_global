@@ -24,7 +24,7 @@ export const SupportTicketSection = (props: {
   const [inputMessage, setInputMessage] = createSignal("");
   const { showErrorToast, showSuccessToast, showLoadingToast } = useToast();
 
-  const sendMessage = async (parentVertexId: number) => {
+  const sendMessage = async (parentVertexId: Id) => {
     if (inputMessage().trim() !== "") {
       const newMessage = {
         text: inputMessage(),

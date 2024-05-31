@@ -2,7 +2,7 @@ import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { getOutEdges } from "~/cypher_api/functions/get/getOutEdges";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import { Edge, Id, Vertex } from "~/lib/graph/graph";
 
 export async function getSelectedVertexValueMGCall(vertex: Vertex, meta: Vertex) {
   if (!vertex?.L) return [];
@@ -14,7 +14,7 @@ export async function getSelectedVertexValueMGCall(vertex: Vertex, meta: Vertex)
 export async function getParentVertexValueMGCall(
   vertex: Vertex,
   meta: Vertex,
-): Promise<number[]> {
+): Promise<Id[]> {
   const type = getInEdge(meta, vertex);
   if (!type) {
     return [];
@@ -29,7 +29,7 @@ export async function getParentVertexesMGCall(
   path: string[],
   currentVertexes: Vertex[],
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }
@@ -282,7 +282,7 @@ export async function getChildVertexesMGCall(
   currentVertexes: Vertex[],
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length == 0) {
     return { error: true };
   }

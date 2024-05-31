@@ -45,7 +45,7 @@ export function findVertexByLabelAndUniqueIdWithSkip(
   label: string,
   attribute: string,
   value: any,
-  skipId: number,
+  skipId: Id,
   graph: Store<GraphInterface>,
 ) {
   let vertexIds = graph.vertexLabelIdMap[label] || [];

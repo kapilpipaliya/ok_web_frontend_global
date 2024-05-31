@@ -95,7 +95,7 @@ async function updateNodeProperties(
   properties: any,
 ) {
   const result = await session.run(
-    `MATCH (n) WHERE id(n) = $id SET n += $props RETURN n;`,
+    `MATCH (n) WHERE id(n) = $id SET n += $props SET n.updatedAt = localDateTime() RETURN n;`,
     { id: node.identity, props: properties },
   );
   return result.records[0].get("n");
@@ -108,7 +108,7 @@ async function createNode(
   properties: any,
 ) {
   const result = await session.run(
-    `CREATE (n:${nodeType}) SET n = $props RETURN n;`,
+    `CREATE (n:${nodeType}) SET n = $props SET n.createdAt = localDateTime() RETURN n;`,
     { props: properties },
   );
   return result.records[0].get("n");
@@ -142,7 +142,7 @@ async function addNodeEdges(
       for (const childVertex of userChildrenVertexes.records) {
         const userProperties = { ...childVertex.get("m").properties };
         if (superProperties.name === userProperties.name) {
-          const query = `MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props RETURN a;`;
+          const query = `MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;`;
           await sessionTarget.run(query, {
             compPropNodeId: childVertex.get("m").identity,
             props: superProperties,
@@ -151,7 +151,7 @@ async function addNodeEdges(
         }
       }
       if (!isPropertyExist) {
-        const query = `MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props RETURN b;`;
+        const query = `MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;`;
         await sessionTarget.run(query, {
           compNodeId: createdNode.identity,
           props: superProperties,

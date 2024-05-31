@@ -39,28 +39,21 @@ export function MainDashboard(props: { children?: JSX.Element }) {
     graph,
     setGraph,
   );
-
   const location = useLocation();
-  const [isShowDrawer, setIsShowDrawer] = createSignal(true);
-  const [isLoginPage, setIsLoginPage] = createSignal(
-    location.pathname.includes("/auth/login"),
-  );
-  const [signUpPage, setSignUpPage] = createSignal(
-    location.pathname.includes("/auth/signup"),
-  );
-
-  createEffect(() => {
+// on form and page designer hide the sidebar
+  const handleUrlChange = () => {
     const path = location.pathname;
-    setIsLoginPage(path.includes("/auth/login"));
-    setSignUpPage(path.includes("/auth/signup"));
-    setIsShowDrawer(
+    setGraph('isSideBarOpen',
       !(
-        path.includes("/auth/login") ||
-        path.includes("/auth/signup") ||
         path.toLowerCase().includes("/admin/page/") ||
         path.toLowerCase().includes("/admin/form/")
       ),
     );
+  };
+
+  createEffect(() => {
+    handleUrlChange(); // Call the function initially
+    return location.pathname; // Track changes in pathname
   });
   const mainContentStyle = {
     "flex-grow": 1,
@@ -80,9 +73,9 @@ export function MainDashboard(props: { children?: JSX.Element }) {
             },
           }}
         >
-          <Show when={!isLoginPage() && !signUpPage()}>
+          <Show when={graph.isSideBarOpen}>
             <Navbar
-              showCloseDrawerBtn={isShowDrawer()}
+              showCloseDrawerBtn={graph.isSideBarOpen!}
               toggleSidebar={() => {
                 setGraph('isSideBarOpen', prev => !prev);
               }}
@@ -91,7 +84,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
             />
           </Show>
 
-          <div class="p:4|10 overflow-y:auto">{props.children}</div>
+          <div class="p:4|10 overflow-y:auto h:93vh">{props.children}</div>
         </PageContext.Provider>
       </div>
   );
