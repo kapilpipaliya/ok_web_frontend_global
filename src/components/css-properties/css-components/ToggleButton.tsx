@@ -1,4 +1,4 @@
-import { JSX, useContext, For, Show, JSXElement } from "solid-js";
+import { type JSX, useContext, For, Show, type JSXElement } from "solid-js";
 import { CssEditorContext } from "../cssContext";
 import { CenterDiv, ContainerLabel,IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";

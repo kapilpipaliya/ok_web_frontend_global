@@ -1,8 +1,8 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdge } from "~/lib/graph/get/sync/traverse";
 import { useToast } from "~/components/custom/Toast";
 

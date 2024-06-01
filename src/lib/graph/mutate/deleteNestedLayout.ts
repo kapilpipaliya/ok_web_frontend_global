@@ -1,7 +1,7 @@
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getChildVertexes } from "../get/sync/traverse";
 import { deleteRow } from "./deleteRow";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 export function deleteNestedLayout(
   graph: Store<GraphInterface>,

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Accessor, For, Setter, createSignal } from "solid-js";
+import { type Accessor, For, type Setter, createSignal } from "solid-js";
 import { Tooltip } from "~/components/solid-blocks/blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { ToggleButton } from "~/components/css-properties/css-components/ToggleButton";

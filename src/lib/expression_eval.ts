@@ -2,7 +2,7 @@
 import jsep from "jsep";
 // https://github.com/donmccurdy/expression-eval
 //import { eval as eval1} from 'expression-eval';
-import { IdAttr, Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import { path } from "rambda";
 import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
@@ -47,84 +47,34 @@ const DEFAULT_PRECEDENCE = {
 };
 
 export const binops = {
-  "+": function (a, b) {
-    return a + b;
-  },
-  "-": function (a, b) {
-    return a - b;
-  },
-  "*": function (a, b) {
-    return a * b;
-  },
-  "/": function (a, b) {
-    return a / b;
-  },
-  "%": function (a, b) {
-    return a % b;
-  },
-  "||": function (a, b) {
-    return a || b;
-  },
-  "&&": function (a, b) {
-    return a && b;
-  },
-  "|": function (a, b) {
-    return a | b;
-  },
-  "^": function (a, b) {
-    return a ^ b;
-  },
-  "&": function (a, b) {
-    return a & b;
-  },
-  "==": function (a, b) {
-    return a == b;
-  }, // jshint ignore:line
-  "!=": function (a, b) {
-    return a != b;
-  }, // jshint ignore:line
-  "===": function (a, b) {
-    return a === b;
-  },
-  "!==": function (a, b) {
-    return a !== b;
-  },
-  "<": function (a, b) {
-    return a < b;
-  },
-  ">": function (a, b) {
-    return a > b;
-  },
-  "<=": function (a, b) {
-    return a <= b;
-  },
-  ">=": function (a, b) {
-    return a >= b;
-  },
-  "<<": function (a, b) {
-    return a << b;
-  },
-  ">>": function (a, b) {
-    return a >> b;
-  },
-  ">>>": function (a, b) {
-    return a >>> b;
-  },
+  "+": (a, b) => a + b,
+  "-": (a, b) => a - b,
+  "*": (a, b) => a * b,
+  "/": (a, b) => a / b,
+  "%": (a, b) => a % b,
+  "||": (a, b) => a || b,
+  "&&": (a, b) => a && b,
+  "|": (a, b) => a | b,
+  "^": (a, b) => a ^ b,
+  "&": (a, b) => a & b,
+  "==": (a, b) => a == b, // jshint ignore:line
+  "!=": (a, b) => a != b, // jshint ignore:line
+  "===": (a, b) => a === b,
+  "!==": (a, b) => a !== b,
+  "<": (a, b) => a < b,
+  ">": (a, b) => a > b,
+  "<=": (a, b) => a <= b,
+  ">=": (a, b) => a >= b,
+  "<<": (a, b) => a << b,
+  ">>": (a, b) => a >> b,
+  ">>>": (a, b) => a >>> b,
 } as { [key: string]: (v1: any, v2: any, context: object) => any };
 
 export const unops = {
-  "-": function (a) {
-    return -a;
-  },
-  "+": function (a) {
-    return +a;
-  },
-  "~": function (a) {
-    return ~a;
-  },
-  "!": function (a) {
-    return !a;
-  },
+  "-": (a) => -a,
+  "+": (a) => +a,
+  "~": (a) => ~a,
+  "!": (a) => !a,
 } as { [key: string]: (v: any, context: any) => any };
 
 declare type operand = number | string | any;
@@ -136,9 +86,7 @@ declare type binaryCallback = (
 ) => operand;
 
 function evaluateArray(list: jsep.Expression[], context: object) {
-  return list.map(function (v) {
-    return evaluate(v, context);
-  });
+  return list.map((v) => evaluate(v, context));
 }
 
 async function evaluateArrayAsync(list: jsep.Expression[], context: object) {
@@ -372,7 +320,7 @@ export function addBinaryOp(
 // https://github.com/EricSmekens/jsep/blob/29049a0704b4a4e5d52b479ed72615c04adf81ec/src/jsep.js#L934
 export function getChildrenUnaray(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
+    const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
     if (vertex) return [vertex];
     return [];
@@ -381,7 +329,7 @@ export function getChildrenUnaray(collection: string, context: object) {
 }
 export function getChildrenUnarayAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
+    const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
     if (vertex) return [vertex];
     return [];
@@ -446,7 +394,7 @@ addBinaryOp(
 
 export async function getPraents(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
+    const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
     if (vertex) return [vertex];
     return [];
@@ -456,7 +404,7 @@ export async function getPraents(collection: string, context: object) {
 
 export async function getPraentsAsync(collection: string, context: object) {
   if (/^\$[1-9]+[0-9]*$/.test(collection)) {
-    const numericValue = parseInt(collection.slice(1));
+    const numericValue = Number.parseInt(collection.slice(1));
     const vertex = context.vertexes[numericValue - 1];
     if (vertex) return [vertex];
     return [];
@@ -575,9 +523,7 @@ function projectedValueBinOps(vertexes1: any, projection: string): any {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      function (match, p1, offset, string) {
-        return projectedValueBinOps(vertexes1, p1);
-      },
+      (match, p1, offset, string) => projectedValueBinOps(vertexes1, p1),
     );
   }
 
@@ -611,9 +557,7 @@ function projectedValueUnOps(projection: any, context: any) {
   if (projection.match(/\$([A-Za-z][\w+]?[:\w.]*)/g)) {
     return projection.replace(
       /\$([A-Za-z][\w+]?[:\w.]*)/g,
-      function (match, p1, offset, string) {
-        return projectedValueUnOps(p1, context);
-      },
+      (match, p1, offset, string) => projectedValueUnOps(p1, context),
     );
   }
   let vertex;

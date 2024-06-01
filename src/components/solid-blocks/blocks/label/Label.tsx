@@ -1,4 +1,4 @@
-import { JSX, useContext } from "solid-js";
+import { type JSX, useContext } from "solid-js";
 import { FormSettingsContext } from "~/lib/contexts";
 
 interface LabeledFieldProps {
@@ -11,7 +11,7 @@ export const Label = (props: LabeledFieldProps) => {
       const [formSettingContext, setFormSettingContext] = useContext(FormSettingsContext);
 
     const getFlexDirection = () => {
-        let position = props.position === 'system' ? formSettingContext.labelPosition : props.position
+        const position = props.position === 'system' ? formSettingContext.labelPosition : props.position
         switch (position) {
             case "top":
                 return "column";

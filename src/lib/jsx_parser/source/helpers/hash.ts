@@ -3,7 +3,7 @@
  * @param value the value to hash
  * @param radix the base-n to hash into (default 16)
  */
-export const hash = (value: string = "", radix: number = 16): string => {
+export const hash = (value = "", radix = 16): string => {
   const string = String(value);
   let h = 0;
   string.split("").forEach((char: string) => {

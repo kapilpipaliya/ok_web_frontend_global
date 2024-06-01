@@ -1,6 +1,6 @@
 import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/Utils";
 
-import { IdAttr, Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 
 export async function getToEdgeAsync(
   meta: Vertex,

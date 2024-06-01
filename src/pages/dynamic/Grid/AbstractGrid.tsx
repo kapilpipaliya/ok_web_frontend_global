@@ -7,7 +7,7 @@ import {
   Show,
 } from "solid-js";
 import { useContext } from "solid-js";
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {

@@ -11,7 +11,7 @@ export async function deleteRelationShipMGCall(edgeId: string | number | any) {
   const transaction = (await driver).session().beginTransaction();
   try {
     // Cypher query to create a new vertex
-    let createVertexQuery = `MATCH ()-[rel]->()
+    const createVertexQuery = `MATCH ()-[rel]->()
 WHERE id(rel) = $edgeId
 DELETE rel`;
     const vertexResult = await transaction.run(createVertexQuery, { edgeId: int(edgeId) });

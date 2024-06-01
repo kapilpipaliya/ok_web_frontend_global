@@ -1,4 +1,4 @@
-import { Component, JSX, Show, splitProps } from "solid-js";
+import { Component, type JSX, Show, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
 

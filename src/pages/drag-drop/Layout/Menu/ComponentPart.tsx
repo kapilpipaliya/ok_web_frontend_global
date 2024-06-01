@@ -7,7 +7,7 @@ import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { expressionString, iconMap } from "~/lib/Utils";
 import { DraggedVertexContext, PageConfigContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, Vertex, Id } from "~/lib/graph/graph";
+import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { useDragDrop } from "~/lib/pageStore";

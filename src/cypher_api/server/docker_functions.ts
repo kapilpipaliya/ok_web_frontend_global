@@ -176,7 +176,7 @@ export async function createDockerContainer(
   // Preparing PortBindings for Docker
   const hostConfig: any = {};
   // For documentation purpose only
-  let ExposedPorts: any = {};
+  const ExposedPorts: any = {};
   if (portBindings) {
     const formattedPortBindings: any = {};
     for (const [externalPort, internalPort] of Object.entries(portBindings)) {

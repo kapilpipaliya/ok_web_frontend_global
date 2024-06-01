@@ -1,9 +1,9 @@
 import {
-  Accessor,
+  type Accessor,
   createContext,
   createSignal,
   createUniqueId,
-  Setter,
+  type Setter,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 

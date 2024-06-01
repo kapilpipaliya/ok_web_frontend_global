@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createEffect, onCleanup, Show, For ,JSXElement} from "solid-js";
+import { useContext, createSignal, createEffect, onCleanup, Show, For ,type JSXElement} from "solid-js";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { CssEditorContext, sizeTypes } from "../cssContext";
 import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
@@ -36,7 +36,7 @@ export const TextFieldWithSelect = (props: {
 
     const handleChange = (event: any) => {
         const value = event.target.value;
-        const numericValue = parseFloat(value);
+        const numericValue = Number.parseFloat(value);
         if (props.isAddToClass) {
             setCssState(props.name, `${numericValue}${selectedOption() ?? ""}`);
         }
@@ -61,7 +61,7 @@ export const TextFieldWithSelect = (props: {
         if (!valueWithUnits) return "";
         const unitsToRemove = ["px", "%", "em", "rem", "vh", "vw"];
         const regexPattern = new RegExp(unitsToRemove.join("|"), "g");
-        return parseFloat(valueWithUnits.replace(regexPattern, ""));
+        return Number.parseFloat(valueWithUnits.replace(regexPattern, ""));
     };
 
     // Function to normalize and set the new value based on mouse movement

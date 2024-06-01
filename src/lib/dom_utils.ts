@@ -33,7 +33,7 @@ export function fileDownloader(opt: {
   mime?: string;
   bom?: string;
 }) {
-  const throwError = function (name: string) {
+  const throwError = (name: string) => {
     throw new Error("No " + name + " provided to generate-download-link.");
   };
 
@@ -52,17 +52,17 @@ export function fileDownloader(opt: {
       ? window.URL.createObjectURL(blob)
       : window.webkitURL.createObjectURL(blob);
 
-  const attachDataAsOctetStream = function (data: any) {
+  const attachDataAsOctetStream = (data: any) => {
     // const link = 'data:application/octet-stream,' + encodeURIComponent(data);
     // anchor.setAttribute('href', link);
     anchor.href = blobURL;
   };
 
-  const setFilename = function (filename: string) {
+  const setFilename = (filename: string) => {
     anchor.setAttribute("download", filename);
   };
 
-  const setTitle = function (title: string) {
+  const setTitle = (title: string) => {
     anchor.appendChild(document.createTextNode(title));
   };
 
@@ -82,7 +82,7 @@ export function fileDownloader(opt: {
   anchor.click();
 
   // Fixes "webkit blob resource error 1"
-  setTimeout(function () {
+  setTimeout(() => {
     document.body.removeChild(anchor);
     window.URL.revokeObjectURL(blobURL);
   }, 200);

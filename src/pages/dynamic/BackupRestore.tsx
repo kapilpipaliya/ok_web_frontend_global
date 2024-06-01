@@ -1,4 +1,4 @@
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 import { A } from "@solidjs/router";
 import { APP_BASE_URL } from "~/lib/Utils";
 

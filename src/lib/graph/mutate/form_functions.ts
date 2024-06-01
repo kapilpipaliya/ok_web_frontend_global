@@ -1,4 +1,4 @@
-import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   commitTxn,
   getNewGraphId,
@@ -19,14 +19,14 @@ import {
 } from "../get/sync/traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import {
   componentProps,
   getCollAttrComp,
 } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";
-import { FormMetaData, FieldAttribute } from "~/lib/Type";
+import type { FormMetaData, FieldAttribute } from "~/lib/Type";
 import {
   getValueFromVertexOrKey,
   isObject,
@@ -34,7 +34,7 @@ import {
   getId,
   AdminAttrKeys,
 } from "~/lib/Utils";
-import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { getToEdge } from "../get/sync/traverse";
 import { newEdge, addNewEdge } from "./edge";
 import {

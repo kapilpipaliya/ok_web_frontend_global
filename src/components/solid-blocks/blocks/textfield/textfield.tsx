@@ -1,6 +1,6 @@
 import {
   Component,
-  JSX,
+  type JSX,
   Match,
   mergeProps,
   splitProps,
@@ -36,7 +36,7 @@ export type SingleLineTextFieldProps =
     labelClass?: string;
     label?: JSX.Element;
     type?: string;
-    placeholder?: String;
+    placeholder?: string;
     class?: string;
     trailing?: JSX.Element;
     leading?: JSX.Element;
@@ -52,7 +52,7 @@ export type MultiLineTextFieldProps =
     type?: string;
     label?: JSX.Element;
     class?: string;
-    placeholder?: String;
+    placeholder?: string;
     trailing?: JSX.Element;
     leading?: JSX.Element;
     setValue?: (value: string) => void;

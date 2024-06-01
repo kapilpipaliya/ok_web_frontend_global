@@ -3,7 +3,7 @@ import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
-import { Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 export async function newRowMGCall(
   parentVertexId: Id,
@@ -19,7 +19,7 @@ export async function newRowMGCall(
 
   try {
     // Cypher query to create a new vertex
-    let createVertexQuery = `CREATE (v:${label || edgeType}) SET v = $properties SET v.createdAt = localDateTime(), v.updatedAt = localDateTime() RETURN v`;
+    const createVertexQuery = `CREATE (v:${label || edgeType}) SET v = $properties SET v.createdAt = localDateTime(), v.updatedAt = localDateTime() RETURN v`;
     const vertexResult = await transaction.run(createVertexQuery, {
       properties,
     });
@@ -31,7 +31,7 @@ export async function newRowMGCall(
     const newVertex = convertNodeToJson(vertexResult.records[0].get("v"));
 
     // Cypher query to create an edge
-    let createEdgeQuery = `
+    const createEdgeQuery = `
       MATCH (startVertex), (endVertex)
       WHERE id(startVertex) = $parentVertexId AND id(endVertex) = $toId
       CREATE (startVertex)-[e:${edgeType || label!}]->(endVertex) 

@@ -1,7 +1,7 @@
 import { JSX, Show, createSignal } from "solid-js";
-import { Store, SetStoreFunction } from "solid-js/store";
+import type { Store, SetStoreFunction } from "solid-js/store";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { componentDrag, getChildrenAttrs } from "~/lib/pageStore";
 

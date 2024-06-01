@@ -1,4 +1,4 @@
-import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { getChildVertexesAsync } from "./traverse";
 import { useContext } from "solid-js";
 

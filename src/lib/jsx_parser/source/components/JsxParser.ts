@@ -8,10 +8,10 @@ import {
 import { randomHash } from "~/lib/jsx_parser/source/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/source/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/source/helpers/resolvePath";
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 import { componentDrag, setPropertyValueGlobal } from "~/lib/pageStore";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import attributeNames from "~/lib/jsx_parser/source/constants/attributeNames";
 
@@ -581,7 +581,7 @@ export default class JsxParser {
     // ui-kit keys
     const uiKitProps = {} as { [key: string]: any };
     const nonUiKitProps = {} as { [key: string]: any };
-    for (let key in props) {
+    for (const key in props) {
       if (key.startsWith("uk-")) {
         uiKitProps[key] = props[key];
       } else {
@@ -600,7 +600,7 @@ export default class JsxParser {
       );
     }
 
-    for (let key in nonUiKitProps) {
+    for (const key in nonUiKitProps) {
       if (key === "key") {
         continue;
       }

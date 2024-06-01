@@ -1,5 +1,5 @@
-import { APIEvent } from "@solidjs/start/dist/server";
-import { Session, int } from "neo4j-driver";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import { type Session, int } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher_api/functions/mutate/deleteVertex";
 import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/mutate/newRow";

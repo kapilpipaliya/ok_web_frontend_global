@@ -1,4 +1,4 @@
-import { createSignal, Match, Setter, Show, Switch, untrack } from "solid-js";
+import { createSignal, Match, type Setter, Show, Switch, untrack } from "solid-js";
 import "~/css/base.css";
 import PageHeader from "~/components/custom/Breadcumb";
 import "~/css/tab.css";

@@ -2,7 +2,7 @@ import { For, Show, useContext } from "solid-js";
 import { TextField } from "~/components/solid-blocks/blocks";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { binops, unops } from "~/lib/expression_eval";
 import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -56,7 +56,7 @@ export function ExpressionBuilder(props: {
   txnId?: number;
   data?: any;
 }) {
-  let state = props.content.split("+").map(
+  const state = props.content.split("+").map(
     (value) =>
       ({ value }) as {
         unAryOperator?: Option;
@@ -116,7 +116,7 @@ export function ExpressionBuilder(props: {
     const hasErrors = contentList.some((item) => item.error);
     if (hasErrors) return;
 
-    let expressionParts: string[] = [];
+    const expressionParts: string[] = [];
     contentList.forEach((item, index) => {
       // If the item has a unary operator, add it before the value
       if (item.unAryOperator && typeof item.unAryOperator === "object") {

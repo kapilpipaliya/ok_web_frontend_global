@@ -1,11 +1,11 @@
 import { batch } from "solid-js";
-import {
+import type {
   ServerEventsDispatcher,
   WSEvent,
 } from "~/lib/websocket/ws_events_dispatcher";
 import { isNumber } from "~/lib/Utils";
-import { GraphInterface, Id } from "./graph";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Id } from "./graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 // temporary we start from 500000 because newId should not conflict with existing Ids
 export let uniqueId = -50000;
@@ -25,11 +25,11 @@ export type InsertFn = {
 };
 
 export enum ProcessStatus {
-  Unset,
-  Ready,
-  Sent,
-  AckReceived,
-  Processed,
+  Unset = 0,
+  Ready = 1,
+  Sent = 2,
+  AckReceived = 3,
+  Processed = 4,
 }
 
 export type TransactionValue = InsertFn & Revert & { data: any };
@@ -115,8 +115,8 @@ export function getTransactionData(txnId: number) {
   );
   return existingTxnValue;
 }
-export let vertexOldIdToNewIdMap = new Map<Id, Id>();
-export let edgeOldIdToNewIdMap = new Map<Id, Id>();
+export const vertexOldIdToNewIdMap = new Map<Id, Id>();
+export const edgeOldIdToNewIdMap = new Map<Id, Id>();
 
 export function commitTransaction(Ws: ServerEventsDispatcher) {
   let firstReadyTxn = 0;

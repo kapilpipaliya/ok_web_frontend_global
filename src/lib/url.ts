@@ -4,7 +4,7 @@ export function getQueryParams() {
   const querystring = window.location.search;
   const searchParams = new URLSearchParams(querystring);
   //* ** :loop to add key and values to the param object.
-  searchParams.forEach(function (value, key) {
+  searchParams.forEach((value, key) => {
     paramObj[key] = value;
   });
   return paramObj;

@@ -17,7 +17,7 @@ import {
 import "~/css/table.css";
 import { toTitle } from "case-switcher-js";
 import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { klona } from "klona";
@@ -34,7 +34,7 @@ import {
   getSublistRows,
 } from "~/lib/graph/mutate/form_functions";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
-import { ComponentProps } from "~/components/ComponentType";
+import type { ComponentProps } from "~/components/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {
   PageRenderContext,
@@ -43,7 +43,7 @@ import {
 } from "~/components/dynamic/fields/static/GenaricField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { getLastItem } from "~/lib/functions";
-import { FieldAttribute } from "~/lib/Type";
+import type { FieldAttribute } from "~/lib/Type";
 import "~/css/base.css";
 import {
   componentProps,
@@ -77,7 +77,7 @@ export function TableInputField(
 
   const [graph, setGraph] = useContext(GraphContext)!;
   // if there is no parent FormContext, it should still work.
-  let { cleanUpConfig } = useContext(FormContext);
+  const { cleanUpConfig } = useContext(FormContext);
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 

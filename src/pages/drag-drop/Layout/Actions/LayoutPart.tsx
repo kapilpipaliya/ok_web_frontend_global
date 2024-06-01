@@ -13,7 +13,7 @@ import {
   ShowDrawerContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/pageStore";
 import { Properties } from "./Properties";
 

@@ -34,9 +34,7 @@ export function isArrayOfStrings(arg) {
   /* istanbul ignore else */
   if (Array.isArray(arg)) {
     result =
-      arg.filter(function (item) {
-        return typeof item !== "string";
-      }).length === 0;
+      arg.filter((item) => typeof item !== "string").length === 0;
   }
   return result;
 }
@@ -50,9 +48,7 @@ export function isArrayOfNumbers(arg) {
   var result = false;
   if (Array.isArray(arg)) {
     result =
-      arg.filter(function (item) {
-        return !isNumeric(item);
-      }).length === 0;
+      arg.filter((item) => !isNumeric(item)).length === 0;
   }
   return result;
 }
@@ -211,7 +207,7 @@ export function isPromise(arg) {
  */
 export function stringToArray(str) {
   var arr = [];
-  for (let char of str) {
+  for (const char of str) {
     arr.push(char);
   }
   return arr;

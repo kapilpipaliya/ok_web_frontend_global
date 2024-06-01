@@ -1,8 +1,8 @@
 import { getDriver } from "~/cypher_api/server/driver";
-import { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { Node } from "neo4j-driver";
+import type { Node } from "neo4j-driver";
 
 // Main POST function
 export async function GET({ request }: APIEvent) {

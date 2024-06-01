@@ -1,10 +1,10 @@
 import {
-  Accessor,
+  type Accessor,
   Component,
   createEffect,
   createMemo,
   createSignal,
-  JSX,
+  type JSX,
   Match,
   mergeProps,
   splitProps,
@@ -14,7 +14,7 @@ import { Portal } from "solid-js/web";
 
 import "../base.css";
 import "./modal.css";
-import { getElements, WrappedElement } from "../tools";
+import { getElements, type WrappedElement } from "../tools";
 
 export type WrappedModalContentProps = {
   open: Accessor<boolean>;

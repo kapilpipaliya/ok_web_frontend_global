@@ -1,6 +1,6 @@
-import { Session, int } from "neo4j-driver";
+import { type Session, int } from "neo4j-driver";
 import { isObject } from "~/lib/Utils";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
 const txnId = 0;
 const vertexIdMap = 1;
@@ -64,7 +64,7 @@ function isProperEdgeFormat(edge: Partial<Edge>): string {
 type WsEvent = [number, string, string];
 
 function mutateArgsValidation(event: WsEvent, args: any[]): any {
-  let responseResult = [] as any[];
+  const responseResult = [] as any[];
 
   if (!Array.isArray(args)) {
     return addFailure(
@@ -74,7 +74,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
     );
   }
 
-  for (let txns of args) {
+  for (const txns of args) {
     if (!Array.isArray(txns)) {
       return addFailure(
         responseResult,
@@ -97,7 +97,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
         "Invalid argument shape, the inner argument to sync(mutate) must be an array and it should contain 4 elements. vertexIdMap and EdgeIdMap each item is [num, num] tuple",
       );
     }
-    for (let idmap of txns[vertexIdMap]) {
+    for (const idmap of txns[vertexIdMap]) {
       if (
         idmap.length !== 2 ||
         typeof idmap[0] !== "number" ||
@@ -110,7 +110,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
         );
       }
     }
-    for (let idmap of txns[edgeIdMap]) {
+    for (const idmap of txns[edgeIdMap]) {
       if (
         idmap.length !== 2 ||
         typeof idmap[0] !== "number" ||
@@ -123,7 +123,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
         );
       }
     }
-    for (let mutationObject of txns[transactions]) {
+    for (const mutationObject of txns[transactions]) {
       const mutationTypes = ["insert", "replace", "merge", "deleteVertex"];
       const edgeMutationTypes = [
         "insertEdge",
@@ -133,7 +133,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
         "deleteEdge",
       ];
 
-      for (let key of mutationTypes) {
+      for (const key of mutationTypes) {
         if (key in mutationObject && !isObject(mutationObject[key])) {
           return addFailure(
             responseResult,
@@ -142,13 +142,13 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
           );
         }
         if (key in mutationObject) {
-          let err = isProperNodeFormat(mutationObject[key]);
+          const err = isProperNodeFormat(mutationObject[key]);
           if (err) {
             return addFailure(responseResult, event, `${key} ${err}`);
           }
         }
       }
-      for (let key of edgeMutationTypes) {
+      for (const key of edgeMutationTypes) {
         if (key in mutationObject && !isObject(mutationObject[key])) {
           return addFailure(
             responseResult,
@@ -157,7 +157,7 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
           );
         }
         if (key in mutationObject) {
-          let err = isProperEdgeFormat(mutationObject[key]);
+          const err = isProperEdgeFormat(mutationObject[key]);
           if (err) {
             return addFailure(responseResult, event, `${key} ${err}`);
           }

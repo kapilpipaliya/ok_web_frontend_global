@@ -21,7 +21,7 @@ export function CheckboxDocs() {
         <a
           href="https://developer.mozilla.org/de/docs/Web/HTML/Element/Input/checkbox"
           target="_blank"
-          rel="noopener"
+          rel="noreferrer noopener"
         >
           the properties of an input of type "checkbox"
         </a>

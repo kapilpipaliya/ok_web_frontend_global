@@ -1,5 +1,5 @@
 import { createContext } from "solid-js";
-import { createStore, SetStoreFunction } from "solid-js/store";
+import { createStore, type SetStoreFunction } from "solid-js/store";
 
 export const CssEditorContext = createContext<
   [

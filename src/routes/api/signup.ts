@@ -1,6 +1,6 @@
 // Import necessary modules and functions
-import { APIEvent } from "@solidjs/start/dist/server";
-import { TransactionPromise } from "neo4j-driver-core";
+import type { APIEvent } from "@solidjs/start/dist/server";
+import type { TransactionPromise } from "neo4j-driver-core";
 import {
   getDriver,
   getDriverWithPort,
@@ -179,7 +179,7 @@ async function PortConfigure(
       portsResult = portResult.P;
     }
 
-    let { driverPort, logsPort, labPort } = portsResult;
+    const { driverPort, logsPort, labPort } = portsResult;
 
     // Create Docker container with configured ports
     await createDockerContainer("memgraph/memgraph-platform", username, {

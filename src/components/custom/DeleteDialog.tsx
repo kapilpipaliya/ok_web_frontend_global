@@ -1,6 +1,6 @@
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import CustomModal from "./CommonDialog";
-import { JSX } from "solid-js";
+import type { JSX } from "solid-js";
 
 export function DeleteDialog(props: {
   onConfirm: () => void;

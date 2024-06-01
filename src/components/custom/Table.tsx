@@ -6,7 +6,7 @@ import {
   onMount,
   Switch,
   Match,
-  Accessor,
+  type Accessor,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "../solid-blocks/blocks";

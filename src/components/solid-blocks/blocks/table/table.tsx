@@ -1,4 +1,4 @@
-import { Component, createContext, JSX, useContext } from "solid-js";
+import { Component, createContext, type JSX, useContext } from "solid-js";
 
 import "../base.css";
 import "../radio/radio.css";

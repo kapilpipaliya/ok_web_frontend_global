@@ -19,8 +19,8 @@ declare module "acorn-jsx" {
 
   export interface ArrowFunctionExpression extends BaseExpression {
     type: "ArrowFunctionExpression";
-    async: Boolean;
-    generator: Boolean;
+    async: boolean;
+    generator: boolean;
     expression: true;
     argument?: Expression;
     body: Expression;

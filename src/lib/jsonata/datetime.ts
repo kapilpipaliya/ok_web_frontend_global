@@ -76,7 +76,7 @@ const magnitudes = ["Thousand", "Million", "Billion", "Trillion"];
  * @returns {string} - representation in words
  */
 function numberToWords(value, ordinal) {
-  var lookup = function (num, prev, ord) {
+  var lookup = (num, prev, ord) => {
     var words = "";
     if (num <= 19) {
       words = (prev ? " and " : "") + (ord ? ordinals[num] : few[num]);
@@ -125,19 +125,19 @@ function numberToWords(value, ordinal) {
 }
 
 const wordValues = {};
-few.forEach(function (word, index) {
+few.forEach((word, index) => {
   wordValues[word.toLowerCase()] = index;
 });
-ordinals.forEach(function (word, index) {
+ordinals.forEach((word, index) => {
   wordValues[word.toLowerCase()] = index;
 });
-decades.forEach(function (word, index) {
+decades.forEach((word, index) => {
   const lword = word.toLowerCase();
   wordValues[lword] = (index + 2) * 10;
   wordValues[lword.substring(0, word.length - 1) + "ieth"] = wordValues[lword];
 });
 wordValues.hundredth = 100;
-magnitudes.forEach(function (word, index) {
+magnitudes.forEach((word, index) => {
   const lword = word.toLowerCase();
   const val = Math.pow(10, (index + 1) * 3);
   wordValues[lword] = val;
@@ -152,7 +152,7 @@ magnitudes.forEach(function (word, index) {
 function wordsToNumber(text) {
   const parts = text.split(/,\s|\sand\s|[\s\\-]/);
   const values = parts.map((part) => wordValues[part]);
-  let segs = [0];
+  const segs = [0];
   values.forEach((value) => {
     if (value < 100) {
       let top = segs.pop();
@@ -450,7 +450,7 @@ function analyseIntegerPicture(picture) {
       let zeroCode = null;
       let mandatoryDigits = 0;
       let optionalDigits = 0;
-      let groupingSeparators = [];
+      const groupingSeparators = [];
       let separatorPosition = 0;
       const formatCodepoints = stringToArray(primaryFormat)
         .map((c) => c.codePointAt(0))
@@ -502,7 +502,7 @@ function analyseIntegerPicture(picture) {
         format.optionalDigits = optionalDigits;
         // grouping separator template
         // are the grouping-separator-signs 'regular'?
-        const regularRepeat = function (separators) {
+        const regularRepeat = (separators) => {
           // are the grouping positions regular? i.e. same interval between each of them
           // is there at least one separator?
           if (separators.length === 0) {
@@ -517,9 +517,7 @@ function analyseIntegerPicture(picture) {
           }
           // are they equally spaced?
           const indexes = separators.map((separator) => separator.position);
-          const gcd = function (a, b) {
-            return b === 0 ? a : gcd(b, a % b);
-          };
+          const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
           // find the greatest common divisor of all the positions
           const factor = indexes.reduce(gcd);
           // is every position separated by this divisor? If so, it's regular
@@ -588,7 +586,7 @@ function analyseDateTimePicture(picture) {
     type: "datetime",
     parts: spec,
   };
-  const addLiteral = function (start, end) {
+  const addLiteral = (start, end) => {
     if (end > start) {
       let literal = picture.substring(start, end);
       // replace any doubled ]] with single ]
@@ -638,12 +636,12 @@ function analyseDateTimePicture(picture) {
         const widthMod = marker.substring(comma + 1);
         const dash = widthMod.indexOf("-");
         let min, max;
-        const parseWidth = function (wm) {
+        const parseWidth = (wm) => {
           if (typeof wm === "undefined" || wm === "*") {
             return undefined;
           } else {
             // TODO validate wm is an unsigned int
-            return parseInt(wm);
+            return Number.parseInt(wm);
           }
         };
         if (dash === -1) {
@@ -763,7 +761,7 @@ const months = [
 ];
 const millisInADay = 1000 * 60 * 60 * 24;
 
-const startOfFirstWeek = function (ym) {
+const startOfFirstWeek = (ym) => {
   // ISO 8601 defines the first week of the year to be the week that contains the first Thursday
   // XPath F&O extends this same definition for the first week of a month
   // the week starts on a Monday - calculate the millis for the start of the first week
@@ -779,28 +777,16 @@ const startOfFirstWeek = function (ym) {
     : jan1 - (dayOfJan1 - 1) * millisInADay;
 };
 
-const yearMonth = function (year, month) {
-  return {
+const yearMonth = (year, month) => ({
     year: year,
     month: month,
-    nextMonth: function () {
-      return month === 11 ? yearMonth(year + 1, 0) : yearMonth(year, month + 1);
-    },
-    previousMonth: function () {
-      return month === 0 ? yearMonth(year - 1, 11) : yearMonth(year, month - 1);
-    },
-    nextYear: function () {
-      return yearMonth(year + 1, month);
-    },
-    previousYear: function () {
-      return yearMonth(year - 1, month);
-    },
-  };
-};
+    nextMonth: () => month === 11 ? yearMonth(year + 1, 0) : yearMonth(year, month + 1),
+    previousMonth: () => month === 0 ? yearMonth(year - 1, 11) : yearMonth(year, month - 1),
+    nextYear: () => yearMonth(year + 1, month),
+    previousYear: () => yearMonth(year - 1, month),
+  });
 
-const deltaWeeks = function (start, end) {
-  return (end - start) / (millisInADay * 7) + 1;
-};
+const deltaWeeks = (start, end) => (end - start) / (millisInADay * 7) + 1;
 
 const getDateTimeFragment = (date, component) => {
   let componentValue;
@@ -975,12 +961,12 @@ function formatDateTime(millis, picture, timezone) {
   if (typeof timezone !== "undefined") {
     // parse the hour and minute offsets
     // assume for now the format supplied is +hhmm
-    const offset = parseInt(timezone);
+    const offset = Number.parseInt(timezone);
     offsetHours = Math.floor(offset / 100);
     offsetMinutes = offset % 100;
   }
 
-  var formatComponent = function (date, markerSpec) {
+  var formatComponent = (date, markerSpec) => {
     var componentValue = getDateTimeFragment(date, markerSpec.component);
 
     // §9.8.4.3 Formatting Integer-Valued Date/Time Components
@@ -1080,7 +1066,7 @@ function formatDateTime(millis, picture, timezone) {
   const dateTime = new Date(millis + offsetMillis);
 
   let result = "";
-  formatSpec.parts.forEach(function (part) {
+  formatSpec.parts.forEach((part) => {
     if (part.type === "literal") {
       result += part.value;
     } else {
@@ -1100,7 +1086,7 @@ function generateRegex(formatSpec) {
   var matcher = {};
   if (formatSpec.type === "datetime") {
     matcher.type = "datetime";
-    matcher.parts = formatSpec.parts.map(function (part) {
+    matcher.parts = formatSpec.parts.map((part) => {
       var res = {};
       if (part.type === "literal") {
         res.regex = part.value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1118,7 +1104,7 @@ function generateRegex(formatSpec) {
         if (separator) {
           res.regex += separator.character + "[0-9]+";
         }
-        res.parse = function (value) {
+        res.parse = (value) => {
           if (part.component === "z") {
             value = value.substring(3); // remove the leading GMT
           }
@@ -1153,7 +1139,7 @@ function generateRegex(formatSpec) {
         var lookup = {};
         if (part.component === "M" || part.component === "x") {
           // months
-          months.forEach(function (name, index) {
+          months.forEach((name, index) => {
             if (part.width && part.width.max) {
               lookup[name.substring(0, part.width.max)] = index + 1;
             } else {
@@ -1162,7 +1148,7 @@ function generateRegex(formatSpec) {
           });
         } else if (part.component === "F") {
           // days
-          days.forEach(function (name, index) {
+          days.forEach((name, index) => {
             if (index > 0) {
               if (part.width && part.width.max) {
                 lookup[name.substring(0, part.width.max)] = index;
@@ -1180,9 +1166,7 @@ function generateRegex(formatSpec) {
             value: part.component,
           };
         }
-        res.parse = function (value) {
-          return lookup[value];
-        };
+        res.parse = (value) => lookup[value];
       }
       res.component = part.component;
       return res;
@@ -1205,24 +1189,18 @@ function generateRegex(formatSpec) {
     switch (formatSpec.primary) {
       case formats.LETTERS:
         matcher.regex = isUpper ? "[A-Z]+" : "[a-z]+";
-        matcher.parse = function (value) {
-          return lettersToDecimal(value, isUpper ? "A" : "a");
-        };
+        matcher.parse = (value) => lettersToDecimal(value, isUpper ? "A" : "a");
         break;
       case formats.ROMAN:
         matcher.regex = isUpper ? "[MDCLXVI]+" : "[mdclxvi]+";
-        matcher.parse = function (value) {
-          return romanToDecimal(isUpper ? value : value.toUpperCase());
-        };
+        matcher.parse = (value) => romanToDecimal(isUpper ? value : value.toUpperCase());
         break;
       case formats.WORDS:
         matcher.regex =
           "(?:" +
           Object.keys(wordValues).concat("and", "[\\-, ]").join("|") +
           ")+";
-        matcher.parse = function (value) {
-          return wordsToNumber(value.toLowerCase());
-        };
+        matcher.parse = (value) => wordsToNumber(value.toLowerCase());
         break;
       case formats.DECIMAL:
         matcher.regex = `[0-9]${occurrences}`;
@@ -1230,7 +1208,7 @@ function generateRegex(formatSpec) {
           // ordinals
           matcher.regex += "(?:th|st|nd|rd)";
         }
-        matcher.parse = function (value) {
+        matcher.parse = (value) => {
           let digits = value;
           if (formatSpec.ordinal) {
             // strip off the suffix
@@ -1255,7 +1233,7 @@ function generateRegex(formatSpec) {
               )
               .join("");
           }
-          return parseInt(digits);
+          return Number.parseInt(digits);
         };
         break;
       case formats.SEQUENCE:
@@ -1477,9 +1455,7 @@ function parseDateTime(timestamp, picture) {
 }
 
 // Regular expression to match an ISO 8601 formatted timestamp
-var iso8601regex = new RegExp(
-  "^\\d{4}(-[01]\\d)*(-[0-3]\\d)*(T[0-2]\\d:[0-5]\\d:[0-5]\\d)*(\\.\\d+)?([+-][0-2]\\d:?[0-5]\\d|Z)?$",
-);
+var iso8601regex = /^\d{4}(-[01]\d)*(-[0-3]\d)*(T[0-2]\d:[0-5]\d:[0-5]\d)*(\.\d+)?([+-][0-2]\d:?[0-5]\d|Z)?$/;
 
 /**
  * Converts an ISO 8601 timestamp to milliseconds since the epoch

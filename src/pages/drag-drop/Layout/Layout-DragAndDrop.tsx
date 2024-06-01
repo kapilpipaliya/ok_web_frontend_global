@@ -1,10 +1,10 @@
 import {
-  JSX, Show, createSignal
+  type JSX, Show, createSignal
 } from "solid-js";
 import { HeaderDragAndDrop } from "./Header-DragAndDrop";
 import { MenuDragAndDrop } from "./Menu/Menu-DragAndDrop";
 import { Icon } from "@iconify-icon/solid";
-import { IFormContext } from "~/lib/Utils";
+import type { IFormContext } from "~/lib/Utils";
 import { createStore } from "solid-js/store";
 import { PageConfigContext, PropertiesVertexIdContext } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content-DragAndDrop";

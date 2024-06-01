@@ -2,7 +2,7 @@ import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { getOutEdges } from "~/cypher_api/functions/get/getOutEdges";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
-import { Edge, Id, Vertex } from "~/lib/graph/graph";
+import type { Edge, Id, Vertex } from "~/lib/graph/graph";
 
 export async function getSelectedVertexValueMGCall(vertex: Vertex, meta: Vertex) {
   if (!vertex?.L) return [];

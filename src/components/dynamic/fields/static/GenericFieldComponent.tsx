@@ -3,7 +3,7 @@ import {
   createMemo,
   createSignal,
   For,
-  JSXElement,
+  type JSXElement,
   Match,
   onCleanup,
   Show,
@@ -15,7 +15,7 @@ import {
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   commitTxn,
   getNewTxnId,
@@ -38,7 +38,7 @@ import {
 } from "~/lib/graph/mutate/form_functions";
 import { getLastItem } from "~/lib/functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { ComponentProps } from "~/components/ComponentType";
+import type { ComponentProps } from "~/components/ComponentType";
 import {
   Accordion,
   Avatar,

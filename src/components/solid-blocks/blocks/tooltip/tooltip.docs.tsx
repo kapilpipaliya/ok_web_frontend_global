@@ -2,7 +2,7 @@ import { createSignal } from "solid-js";
 import { Checkbox } from "../checkbox/checkbox";
 import { Radio, RadioGroup } from "../radio/radio";
 import { Select } from "../select/select";
-import { Tooltip, TooltipPosition, TooltipTrigger } from "./tooltip";
+import { Tooltip, type TooltipPosition, type TooltipTrigger } from "./tooltip";
 
 export function TooltipDocs() {
   const [arrow, setArrow] = createSignal(true);

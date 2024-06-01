@@ -1,4 +1,4 @@
-import { Component, JSX } from "solid-js";
+import { Component, type JSX } from "solid-js";
 
 import "../base.css";
 import "./meter.css";

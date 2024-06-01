@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { createStore } from "solid-js/store";
 import { HoverIdContext, SelectedCollContext, SelectedIdContext, TargetIdContext, HiddenNodesContext, DraggedVertexContext, SelectedComponentContext, IndicatorPositionContext, FormSettingsContext, ShowDrawerContext } from "~/lib/contexts";
-import { Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 export default function PageDesignerContext(props: any) {
     const hoverId = createSignal<Id | number>(-1);

@@ -1,4 +1,4 @@
-import { JSX, useContext, For, Show } from "solid-js";
+import { type JSX, useContext, For, Show } from "solid-js";
 import { CustomTooltip } from "~/components/custom/Tooltip";
 import { CssEditorContext } from "../cssContext";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";

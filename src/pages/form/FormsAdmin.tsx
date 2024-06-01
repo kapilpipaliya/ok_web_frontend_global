@@ -1,10 +1,10 @@
 // TODO make default component property applied to
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { createMemo, For, Match, Switch, useContext } from "solid-js";
 import { A } from "@solidjs/router";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { createStore, Store } from "solid-js/store";
-import { APP_BASE_URL, IFormContext } from "~/lib/Utils";
+import { createStore, type Store } from "solid-js/store";
+import { APP_BASE_URL, type IFormContext } from "~/lib/Utils";
 
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import {

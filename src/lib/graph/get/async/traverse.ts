@@ -1,4 +1,4 @@
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
 import {
@@ -7,7 +7,7 @@ import {
   replaceExpressionToLabel,
 } from "~/lib/Utils";
 
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { getToEdgeAsync } from "./getToEdge";
 
 export async function getSelectedVertexValueAsync(
@@ -228,7 +228,7 @@ export async function getChildVertexAsync(
       };
     type = type.replace("$0", currentVertex.L[0]);
   }
-  let vertexes = (currentVertex.OUT[type] || []).map(
+  const vertexes = (currentVertex.OUT[type] || []).map(
     (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 

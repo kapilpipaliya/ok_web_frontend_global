@@ -1,11 +1,11 @@
 import {
-  Accessor,
+  type Accessor,
   Component,
   createContext,
   createEffect,
   createMemo,
   createSignal,
-  JSX,
+  type JSX,
   onCleanup,
   onMount,
   Show,

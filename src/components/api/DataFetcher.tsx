@@ -1,4 +1,4 @@
-import { JSX, onMount, Show, useContext } from "solid-js";
+import { type JSX, onMount, Show, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 

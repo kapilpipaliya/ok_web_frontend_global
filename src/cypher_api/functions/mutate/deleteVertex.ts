@@ -11,7 +11,7 @@ export async function deleteVertexMGCall(nodeId: string | number | any) {
   const transaction = (await driver).session().beginTransaction();
   try {
     // Cypher query to create a new vertex
-    let createVertexQuery = `MATCH (n)
+    const createVertexQuery = `MATCH (n)
 WHERE id(n) = $nodeId
 DELETE n`;
     const vertexResult = await transaction.run(createVertexQuery, { nodeId: int(nodeId) });

@@ -4,7 +4,7 @@ import {
   createEffect,
   createResource,
   createSignal,
-  JSX,
+  type JSX,
   onMount,
   Show,
   useContext,

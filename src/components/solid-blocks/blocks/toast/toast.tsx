@@ -2,14 +2,14 @@ import {
   createEffect,
   createMemo,
   createSignal,
-  JSX,
+  type JSX,
   onMount,
-  Setter,
+  type Setter,
   Show,
   splitProps,
 } from "solid-js";
 import { isServer, Portal } from "solid-js/web";
-import { getElements, WrappedElement } from "../tools";
+import { getElements, type WrappedElement } from "../tools";
 
 import "../base.css";
 import "./toast.css";

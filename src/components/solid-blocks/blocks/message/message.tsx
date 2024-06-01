@@ -1,4 +1,4 @@
-import { Component, createMemo, JSX, splitProps } from "solid-js";
+import { Component, createMemo, type JSX, splitProps } from "solid-js";
 
 import "../base.css";
 import "./message.css";

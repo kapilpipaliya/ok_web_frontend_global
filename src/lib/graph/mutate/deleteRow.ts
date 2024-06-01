@@ -1,10 +1,10 @@
 import { batch } from "solid-js";
-import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewTxnId } from "../transaction";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
 export function deleteRow(

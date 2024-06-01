@@ -1,6 +1,6 @@
 import "~/css/modal.css";
 import Dismiss from "solid-dismiss";
-import { createSignal, JSX, Setter, Show } from "solid-js";
+import { createSignal, type JSX, type Setter, Show } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 
 interface CustomModalProps {

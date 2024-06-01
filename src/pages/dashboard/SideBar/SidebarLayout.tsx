@@ -1,6 +1,6 @@
 import {
   createEffect,
-  createSignal, JSX,
+  createSignal, type JSX,
   onMount,
   Show,
   useContext

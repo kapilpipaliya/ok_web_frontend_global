@@ -7,7 +7,7 @@ export function ThemeDocs() {
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties"
           target="_blank"
-          rel="noopener"
+          rel="noreferrer noopener"
         >
           CSS variables
         </a>

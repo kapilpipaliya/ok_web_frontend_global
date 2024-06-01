@@ -3,7 +3,7 @@ import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
-import { Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 export async function newEdgeMGCall(
   edgeType: string,
@@ -18,7 +18,7 @@ export async function newEdgeMGCall(
   const transaction = (await driver).session().beginTransaction();
 
   try {
-    let createEdgeQuery = `
+    const createEdgeQuery = `
       MATCH (startVertex), (endVertex)
       WHERE id(startVertex) = $startVertexId AND id(endVertex) = $toId
       CREATE (startVertex)-[e:${edgeType}]->(endVertex)

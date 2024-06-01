@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, JSX, Show } from "solid-js";
+import { For, type JSX, Show } from "solid-js";
 import SiteTitle from "~/components/website/utils";
 
 export type PageHeaderProps = {

@@ -3,7 +3,7 @@
  * \todo Implement drag and drop from: Svelte-FileField-Upload-Component
  * https://github.com/vipero07/svelte-file-upload-component
  */
-import { createSignal, JSX, splitProps } from "solid-js";
+import { createSignal, type JSX, splitProps } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
@@ -101,7 +101,7 @@ export function FileField(props: Properties) {
       };
 
       xhr.upload.onprogress = progressFunction;
-      xhr.upload.onloadstart = function () {
+      xhr.upload.onloadstart = () => {
         oTime = new Date().getTime();
         oLoaded = 0;
       };

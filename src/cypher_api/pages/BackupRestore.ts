@@ -5,8 +5,8 @@ import {
   getParentVertexMGCall,
 } from "~/cypher_api/lib/data/traverse";
 
-import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface } from "~/lib/graph/graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 
 let componentPropsInputRef: HTMLInputElement;
@@ -134,7 +134,7 @@ const importCollections = () => {
   if (file) {
     file.text().then(async (jsonText) => {
       const json = JSON.parse(jsonText);
-      let txnId = getNewTxnId(graph, setGraph); // Note txnId 0 not working
+      const txnId = getNewTxnId(graph, setGraph); // Note txnId 0 not working
       for (const collectionId in json) {
         const collection = json[collectionId];
         const name = collection["name"] as string;

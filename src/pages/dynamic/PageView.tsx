@@ -12,8 +12,8 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createMeta, loadForm } from "~/lib/graph/mutate/form_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
-import { GraphContext, GraphInterface } from "~/lib/graph/graph";
-import { Store } from "solid-js/store";
+import { GraphContext, type GraphInterface } from "~/lib/graph/graph";
+import type { Store } from "solid-js/store";
 import { getFormMetaData } from "~/lib/graph/mutate/form_functions";
 
 export function PageView_(props: { id: string; count: number }) {

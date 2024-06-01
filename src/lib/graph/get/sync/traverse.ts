@@ -1,4 +1,4 @@
-import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import {
@@ -6,7 +6,7 @@ import {
   getValueFromVertexOrKey,
   replaceExpressionToLabel,
 } from "~/lib/Utils";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
   if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
@@ -117,19 +117,19 @@ export function calculateFilter(input: string) {
     const skipMatch = filter.match(/skip\s*=\s*(\d+)/i);
     const limitMatch = filter.match(/limit\s*=\s*(\d+)/i);
     if (skipMatch) {
-      skip = parseInt(skipMatch[1], 10);
+      skip = Number.parseInt(skipMatch[1], 10);
     }
     if (limitMatch) {
-      limit = parseInt(limitMatch[1], 10);
+      limit = Number.parseInt(limitMatch[1], 10);
     }
     return { skip, limit };
   };
 
   const parseFilter = (input: string, startChar: string, endChar: string) => {
-    let filterStart = input.indexOf(startChar);
+    const filterStart = input.indexOf(startChar);
     if (filterStart > 0) {
       type = input.slice(0, filterStart);
-      let filterEnd = input.indexOf(endChar, filterStart);
+      const filterEnd = input.indexOf(endChar, filterStart);
       if (filterEnd > filterStart) {
         filter = input.slice(filterStart + 1, filterEnd);
         const { skip: s, limit: l } = parseSkipLimit(filter);
@@ -260,7 +260,7 @@ export function getChildVertex(
       };
     type = type.replace("$0", currentVertex.L[0]);
   }
-  let vertexes = (currentVertex.OUT[type] || []).map(
+  const vertexes = (currentVertex.OUT[type] || []).map(
     (edgeId) => graph.vertexes[graph.edges[edgeId].E],
   );
 

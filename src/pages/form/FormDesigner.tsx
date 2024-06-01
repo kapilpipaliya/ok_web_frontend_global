@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from "@solidjs/router";
 import { createSignal, Show, useContext } from "solid-js";
 
-import { IFormContext } from "~/lib/Utils";
+import type { IFormContext } from "~/lib/Utils";
 // Comment This Lines in web build
 import { createStore } from "solid-js/store";
 import { stringify } from "yaml";

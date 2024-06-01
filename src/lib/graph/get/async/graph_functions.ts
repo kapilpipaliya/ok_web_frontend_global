@@ -8,9 +8,9 @@ import {
 } from "./traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { FieldAttribute, FormMetaData } from "~/lib/Type";
-import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueIdAsync } from "./findVertex";
 import { getToEdgeAsync } from "./getToEdge";
 import { useToast } from "~/components/custom/Toast";
@@ -256,7 +256,7 @@ const getCollectionOneLevelAttrsAsync = async (
   const collAttrs = vertexCollAttrResult.vertexes!.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
-  let attrs: FieldAttribute[] = [];
+  const attrs: FieldAttribute[] = [];
 
   for (const vertexCollAttr of collAttrs) {
     const addPropsResult = await getCollAttrsAsync(
@@ -541,7 +541,7 @@ export async function getCollAttrCompAsync(
     .vertex;
   if (attrComp) return attrComp;
 
-  let attrDataTypeVertex = (
+  const attrDataTypeVertex = (
     await getChildVertexAsync(graph, ["$0DataType"], attrVertex)
   ).vertex;
   return getStringComponentAsync(graph, attrDataTypeVertex);

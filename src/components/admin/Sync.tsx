@@ -11,7 +11,7 @@ import PageHeader from "../custom/Breadcumb";
 import { getUsers } from "../../cypher_api/functions/get/adminFunctions";
 import { useToast } from "../custom/Toast";
 import { syncNodesMGCall } from "~/cypher_api/functions/mutate/sync";
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 // TODO: Full Navbar Sync from super
 const transferNodes = [

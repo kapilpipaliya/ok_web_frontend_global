@@ -28,7 +28,7 @@ createLocalStorageSignal<T>(
         <a
           href="https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries"
           target="_blank"
-          rel="noopener"
+          rel="noreferrer noopener"
         >
           media query
         </a>{" "}

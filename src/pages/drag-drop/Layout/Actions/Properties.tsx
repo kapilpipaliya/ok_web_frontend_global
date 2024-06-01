@@ -12,7 +12,7 @@ import {
   ModalHeader,
   Tooltip,
 } from "~/components/solid-blocks/blocks";
-import { FieldAttribute } from "~/lib/Type";
+import type { FieldAttribute } from "~/lib/Type";
 import {
   PageConfigContext,
   SelectedIdContext,
@@ -24,7 +24,7 @@ import {
   getChildVertexes,
 } from "~/lib/graph/get/sync/traverse";
 import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   revertTransactionUpTo,
   transactions,

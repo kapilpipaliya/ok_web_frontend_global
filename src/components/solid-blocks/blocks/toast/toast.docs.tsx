@@ -2,7 +2,7 @@ import { createSignal, Show } from "solid-js";
 import { Message } from "../message/message";
 import { Select } from "../select/select";
 import { TextField } from "../textfield/textfield";
-import { Toast, ToastPosition } from "./toast";
+import { Toast, type ToastPosition } from "./toast";
 
 export function ToastDocs() {
   const [shown, setShown] = createSignal(false);

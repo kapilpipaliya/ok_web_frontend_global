@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, Show, For, useContext } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 import { API } from "~/components/api/DataFetcher";
 import {
   sendChatsSupportCall,

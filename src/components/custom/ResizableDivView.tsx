@@ -1,4 +1,4 @@
-import { Accessor, JSX, createEffect, createSignal } from "solid-js";
+import { type Accessor, type JSX, createEffect, createSignal } from "solid-js";
 
 const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element}) => {
   const [width, setWidth] = createSignal('');

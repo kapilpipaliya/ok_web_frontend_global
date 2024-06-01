@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import {
   For,
-  Accessor,
+  type Accessor,
   Match,
   Switch,
   useContext,

@@ -1,16 +1,16 @@
 import { createContext, splitProps, useContext } from "solid-js";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
-import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type GraphInterface, type Vertex } from "~/lib/graph/graph";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { FieldAttribute, FormMetaData } from "~/lib/Type";
-import { SetStoreFunction, Store } from "solid-js/store";
+import { type FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import {
   getChildVertex,
   getInEdge,
   getSelectionOptions,
   getToEdge,
 } from "./graph/get/sync/traverse";
-import { Expression } from "jsep";
+import type { Expression } from "jsep";
 
 export const APP_BASE_URL = "/admin";
 export const APP_BASE_URL_NAME = "Admin";
@@ -44,7 +44,7 @@ export function expressionString(params: {
 
   if (field.coll) {
     dynamicString += `g:'${field.coll}`;
-    let options = [];
+    const options = [];
 
     if (field.filter) options.push(field.filter);
     if (field.skip !== undefined) options.push(`skip=${field.skip}`);

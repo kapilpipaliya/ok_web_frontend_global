@@ -5,9 +5,9 @@ import {
   getSelectionOptions,
 } from "./traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
-import { FieldAttribute, FormMetaData } from "~/lib/Type";
-import { SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 export function compareId(id1: any, id2: any) {
@@ -239,7 +239,7 @@ const getCollectionOneLevelAttrs = (
   const collAttrs = vertexCollAttrResult.vertexes!.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
-  let attrs: FieldAttribute[] = [];
+  const attrs: FieldAttribute[] = [];
 
   for (const vertexCollAttr of collAttrs) {
     const addPropsResult = getCollAttrs(graph, setGraph, vertexCollAttr);
@@ -348,7 +348,7 @@ export function getCollAttrComp(
   const attrComp = getChildVertex(graph, ["$0Comp"], attrVertex).vertex;
   if (attrComp) return attrComp;
 
-  let attrDataTypeVertex = getChildVertex(
+  const attrDataTypeVertex = getChildVertex(
     graph,
     ["$0DataType"],
     attrVertex,

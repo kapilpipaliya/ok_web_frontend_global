@@ -1,18 +1,18 @@
 import { Icon } from "@iconify-icon/solid";
-import { CellContext } from "@tanstack/solid-table";
+import type { CellContext } from "@tanstack/solid-table";
 import { graph } from "neo4j-driver";
 import Dismiss from "solid-dismiss";
 import { Accessor, createSignal, Show } from "solid-js";
-import { SetStoreFunction, createStore } from "solid-js/store";
+import { type SetStoreFunction, createStore } from "solid-js/store";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import {
   selectedValue,
   collectionNameDisplayExpr,
 } from "~/components/dynamic/fields/input/SelectInputField";
-import { FieldAttribute } from "~/lib/Type";
-import { IFormContext } from "~/lib/Utils";
+import type { FieldAttribute } from "~/lib/Type";
+import type { IFormContext } from "~/lib/Utils";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 
 export const QuickEditModal = (p: {
   graph: GraphInterface;

@@ -1,7 +1,7 @@
 import { batch } from "solid-js";
 import { klona } from "klona";
-import { reconcile, SetStoreFunction, Store } from "solid-js/store";
-import { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import {
   getNewGraphId,
   transactionDetailAdd,

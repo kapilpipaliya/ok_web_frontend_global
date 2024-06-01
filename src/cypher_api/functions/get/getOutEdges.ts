@@ -2,7 +2,7 @@ import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 import { int } from "neo4j-driver";
 
 export async function getOutEdges(

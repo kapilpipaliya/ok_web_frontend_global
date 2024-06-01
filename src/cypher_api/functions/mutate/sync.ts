@@ -1,4 +1,4 @@
-import neo4j, { Session, Node} from "neo4j-driver";
+import neo4j, { type Session, type Node} from "neo4j-driver";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: any) {

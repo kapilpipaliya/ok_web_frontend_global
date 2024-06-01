@@ -1,7 +1,7 @@
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { FieldAttribute, FormMetaData } from "~/lib/Type";
-import { IFormContext } from "~/lib/Utils";
+import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { IFormContext } from "~/lib/Utils";
 import { useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 

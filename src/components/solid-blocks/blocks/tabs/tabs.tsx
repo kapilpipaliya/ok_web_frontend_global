@@ -5,7 +5,7 @@ import {
   createSelector,
   createSignal,
   createUniqueId,
-  JSX,
+  type JSX,
   mergeProps,
   on,
   useContext,
@@ -104,7 +104,7 @@ export function Tab(props: TabProps) {
               : ev.key === "End"
                 ? (ev.preventDefault(),
                   ev.stopPropagation(),
-                  setIndex(Infinity))
+                  setIndex(Number.POSITIVE_INFINITY))
                 : ev.key === "ArrowLeft"
                   ? setIndex(index - 1)
                   : ev.key === "ArrowRight"

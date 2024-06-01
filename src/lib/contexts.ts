@@ -1,6 +1,6 @@
 import { createContext, createSignal } from "solid-js";
-import { Id, Vertex } from "~/lib/graph/graph";
-import { IFormContext } from "./Utils";
+import type { Id, Vertex } from "~/lib/graph/graph";
+import type { IFormContext } from "./Utils";
 import { createStore } from "solid-js/store";
 import { getNewGraphId } from "./graph/transaction";
 

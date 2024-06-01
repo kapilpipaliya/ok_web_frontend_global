@@ -292,7 +292,7 @@ function evaluateStep(expr, input, environment, lastStep) {
     resultSequence = result[0];
   } else {
     // flatten the sequence
-    result.forEach(function (res) {
+    result.forEach((res) => {
       if (!Array.isArray(res) || res.cons) {
         // it's not an array - just push into the result sequence
         resultSequence.push(res);
@@ -445,7 +445,7 @@ function evaluateFilter(predicate, input, environment) {
         res = [res];
       }
       if (isArrayOfNumbers(res)) {
-        res.forEach(function (ires) {
+        res.forEach((ires) => {
           // round it down
           var ii = Math.floor(ires);
           if (ii < 0) {
@@ -557,13 +557,13 @@ function evaluateUnary(expr, input, environment) {
     case "[":
       // array constructor - evaluate each item
       result = [];
-      let generators = Promise.all(
+      const generators = Promise.all(
         expr.expressions.map((item, idx) => {
           environment.isParallelCall = idx > 0;
           return [item, evaluate(item, input, environment)];
         }),
       );
-      for (let generator of generators) {
+      for (const generator of generators) {
         var [item, value] = generator;
         if (typeof value !== "undefined") {
           if (item.value === "[") {
@@ -622,7 +622,7 @@ function evaluateWildcard(expr, input) {
     input = input[0];
   }
   if (input !== null && typeof input === "object") {
-    Object.keys(input).forEach(function (key) {
+    Object.keys(input).forEach((key) => {
       var value = input[key];
       if (Array.isArray(value)) {
         value = flatten(value);
@@ -648,7 +648,7 @@ function flatten(arg, flattened) {
     flattened = [];
   }
   if (Array.isArray(arg)) {
-    arg.forEach(function (item) {
+    arg.forEach((item) => {
       flatten(item, flattened);
     });
   } else {
@@ -689,11 +689,11 @@ function recurseDescendants(input, results) {
     results.push(input);
   }
   if (Array.isArray(input)) {
-    input.forEach(function (member) {
+    input.forEach((member) => {
       recurseDescendants(member, results);
     });
   } else if (input !== null && typeof input === "object") {
-    Object.keys(input).forEach(function (key) {
+    Object.keys(input).forEach((key) => {
       recurseDescendants(input[key], results);
     });
   }
@@ -979,9 +979,9 @@ function evaluateGroupExpression(expr, input, environment) {
   }
 
   // iterate over the groups to evaluate the 'value' expression
-  let generators = Promise.all(
+  const generators = Promise.all(
     Object.keys(groups).map((key, idx) => {
-      let entry = groups[key];
+      const entry = groups[key];
       var context = entry.data;
       var env = environment;
       if (reduce) {
@@ -995,7 +995,7 @@ function evaluateGroupExpression(expr, input, environment) {
     }),
   );
 
-  for (let generator of generators) {
+  for (const generator of generators) {
     var [key, value] = generator;
     if (typeof value !== "undefined") {
       result[key] = value;
@@ -1134,7 +1134,7 @@ function evaluateBlock(expr, input, environment) {
  */
 function evaluateRegex(expr) {
   var re = new jsonata.RegexEngine(expr.value);
-  var closure = function (str, fromIndex) {
+  var closure = (str, fromIndex) => {
     var result;
     re.lastIndex = fromIndex || 0;
     var match = re.exec(str);
@@ -1150,7 +1150,7 @@ function evaluateRegex(expr) {
           result.groups.push(match[i]);
         }
       }
-      result.next = function () {
+      result.next = () => {
         if (re.lastIndex >= str.length) {
           return undefined;
         } else {
@@ -1209,7 +1209,7 @@ function evaluateSortExpression(expr, input, environment) {
 
   // sort the lhs array
   // use comparator function
-  var comparator = function (a, b) {
+  var comparator = (a, b) => {
     // expr.terms is an array of order-by in priority order
     var comp = 0;
     for (var index = 0; comp === 0 && index < expr.terms.length; index++) {
@@ -1303,7 +1303,7 @@ function evaluateSortExpression(expr, input, environment) {
  */
 function evaluateTransformExpression(expr, input, environment) {
   // create a function to implement the transform definition
-  var transformer = function (obj) {
+  var transformer = (obj) => {
     // signature <(oa):o>
     // undefined inputs always return undefined
     if (typeof obj === "undefined") {
@@ -1465,7 +1465,7 @@ function evaluateFunction(expr, input, environment, applyto) {
     const arg = evaluate(expr.arguments[jj], input, environment);
     if (isFunction(arg)) {
       // wrap this in a closure
-      const closure = function (...params) {
+      const closure = (...params) => {
         // invoke func
         return apply(arg, params, null, environment);
       };
@@ -1619,14 +1619,12 @@ function evaluateLambda(expr, input, environment) {
   if (expr.thunk === true) {
     procedure.thunk = true;
   }
-  procedure.apply = function (self, args) {
-    return apply(
+  procedure.apply = (self, args) => apply(
       procedure,
       args,
       input,
       !!self ? self.environment : environment,
     );
-  };
   return procedure;
 }
 
@@ -1710,7 +1708,7 @@ function validateArguments(signature, args, context) {
 function applyProcedure(proc, args) {
   var result;
   var env = createFrame(proc.environment);
-  proc.arguments.forEach(function (param, index) {
+  proc.arguments.forEach((param, index) => {
     env.bind(param.value, args[index]);
   });
   if (typeof proc.body === "function") {
@@ -1732,7 +1730,7 @@ function partialApplyProcedure(proc, args) {
   // create a closure, bind the supplied parameters and return a function that takes the remaining (?) parameters
   var env = createFrame(proc.environment);
   var unboundArgs = [];
-  proc.arguments.forEach(function (param, index) {
+  proc.arguments.forEach((param, index) => {
     var arg = args[index];
     if (arg && arg.type === "operator" && arg.value === "?") {
       unboundArgs.push(param);
@@ -1761,9 +1759,7 @@ function partialApplyNativeFunction(native, args) {
   // get the list of declared arguments from the native function
   // this has to be picked out from the toString() value
   var sigArgs = getNativeFunctionArguments(native);
-  sigArgs = sigArgs.map(function (sigArg) {
-    return "$" + sigArg.trim();
-  });
+  sigArgs = sigArgs.map((sigArg) => "$" + sigArg.trim());
   var body = "function(" + sigArgs.join(", ") + "){ _ }";
 
   var bodyAST = parser(body);
@@ -1782,9 +1778,7 @@ function partialApplyNativeFunction(native, args) {
 function applyNativeFunction(proc, env) {
   var sigArgs = getNativeFunctionArguments(proc);
   // generate the array of arguments for invoking the function - look them up in the environment
-  var args = sigArgs.map(function (sigArg) {
-    return env.lookup(sigArg.trim());
-  });
+  var args = sigArgs.map((sigArg) => env.lookup(sigArg.trim()));
 
   var focus = {
     environment: env,
@@ -1895,10 +1889,10 @@ function functionClone(arg) {
 function createFrame(enclosingEnvironment) {
   var bindings = {};
   return {
-    bind: function (name, value) {
+    bind: (name, value) => {
       bindings[name] = value;
     },
-    lookup: function (name) {
+    lookup: (name) => {
       var value;
       if (bindings.hasOwnProperty(name)) {
         value = bindings[name];
@@ -2178,12 +2172,8 @@ function populateMessage(err) {
     // if there are any handlebars, replace them with the field references
     // triple braces - replace with value
     // double braces - replace with json stringified value
-    var message = template.replace(/\{\{\{([^}]+)}}}/g, function () {
-      return err[arguments[1]];
-    });
-    message = message.replace(/\{\{([^}]+)}}/g, function () {
-      return JSON.stringify(err[arguments[1]]);
-    });
+    var message = template.replace(/\{\{\{([^}]+)}}}/g, () => err[arguments[1]]);
+    message = message.replace(/\{\{([^}]+)}}/g, () => JSON.stringify(err[arguments[1]]));
     err.message = message;
   }
   // Otherwise retain the original `err.message`
@@ -2214,15 +2204,11 @@ export function jsonata(expr: string, options?: {}) {
   var timestamp = new Date(); // will be overridden on each call to evalute()
   environment.bind(
     "now",
-    defineFunction(function (picture, timezone) {
-      return datetime.fromMillis(timestamp.getTime(), picture, timezone);
-    }, "<s?s?:s>"),
+    defineFunction((picture, timezone) => datetime.fromMillis(timestamp.getTime(), picture, timezone), "<s?s?:s>"),
   );
   environment.bind(
     "millis",
-    defineFunction(function () {
-      return timestamp.getTime();
-    }, "<:n>"),
+    defineFunction(() => timestamp.getTime(), "<:n>"),
   );
 
   if (options && options.RegexEngine) {
@@ -2232,11 +2218,11 @@ export function jsonata(expr: string, options?: {}) {
   }
 
   return {
-    evaluate: function (
+    evaluate: (
       input: any,
       bindings?: { [key: string]: any },
       callback?: (result: any) => any,
-    ) {
+    ) => {
       // throw if the expression compiled with syntax errors
       if (typeof errors !== "undefined") {
         var err = {
@@ -2284,18 +2270,14 @@ export function jsonata(expr: string, options?: {}) {
         throw err;
       }
     },
-    assign: function (name, value) {
+    assign: (name, value) => {
       environment.bind(name, value);
     },
-    registerFunction: function (name, implementation, signature) {
+    registerFunction: (name, implementation, signature) => {
       var func = defineFunction(implementation, signature);
       environment.bind(name, func);
     },
-    ast: function () {
-      return ast;
-    },
-    errors: function () {
-      return errors;
-    },
+    ast: () => ast,
+    errors: () => errors,
   };
 }

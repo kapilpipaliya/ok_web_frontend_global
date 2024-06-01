@@ -7,7 +7,7 @@ import {
   newRow,
 } from "./form_functions";
 import { deleteRow } from "./deleteRow";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "../transaction";
 import {
   addNewVertex,
@@ -21,7 +21,7 @@ import {
   findVertexByLabelAndPks,
   findVertexByLabelAndUniqueId,
 } from "~/lib/graph/get/sync/findVertex";
-import { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
+import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import csvtojson from "csvtojson";
 import { getToEdge } from "../get/sync/traverse";
 import { A, D } from "@mobily/ts-belt";
@@ -34,7 +34,7 @@ import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { AttrsTableData } from "~/lib/api";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
 
@@ -317,7 +317,7 @@ export function onDataDirectoryImportClick(
       }
     }
 
-    let collId = metaVertex.P.collId || IdAttr;
+    const collId = metaVertex.P.collId || IdAttr;
 
     // collection may not exist before, in that case write Label
     let collLabel = metaVertex.P.collLabel;
@@ -362,7 +362,7 @@ export function onDataDirectoryImportClick(
         if (!value) return;
         if (value === "undefined") return;
         // find and if not exist then only add new vertex
-        let existingVertex = findVertexByLabelAndUniqueId(
+        const existingVertex = findVertexByLabelAndUniqueId(
           graph,
           meta.collLabel,
           meta.collId,

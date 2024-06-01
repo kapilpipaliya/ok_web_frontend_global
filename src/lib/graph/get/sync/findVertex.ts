@@ -1,5 +1,5 @@
-import { Store } from "solid-js/store";
-import { GraphInterface, Id } from "~/lib/graph/graph";
+import type { Store } from "solid-js/store";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
 
 // helper function to find all the vertex ids of the label
 export function findVertexIdsByLabel(

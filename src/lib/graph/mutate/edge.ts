@@ -1,8 +1,8 @@
 import { klona } from "klona";
 import { batch } from "solid-js";
-import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 import { pipe } from "@mobily/ts-belt";
-import { Edge, GraphInterface, Id } from "~/lib/graph/graph";
+import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
 import { isValidId, transactionDetailAdd, transactions } from "../transaction";
 
 export function newEdge(

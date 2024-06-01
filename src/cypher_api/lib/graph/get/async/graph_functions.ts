@@ -1,12 +1,12 @@
 import { removeUndefinedProperties } from "~/lib/functions";
-import {  IdAttr, Vertex } from "~/lib/graph/graph";
+import {  IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   getChildVertexMGCall,
   getChildVertexesMGCall,
   getParentVertexMGCall,
   getSelectionOptionsMGCall,
 } from "./traverse";
-import { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { getDriver } from "~/cypher_api/server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
@@ -77,7 +77,7 @@ export async function getCollAttrsMGCall(
   );
   attr.metaId = vertexCollAttr.id;
 
-  let collAttrCompResult = await getChildVertexMGCall(
+  const collAttrCompResult = await getChildVertexMGCall(
     ["$0Comp"],
     vertexCollAttr,
   );
@@ -210,7 +210,7 @@ const getCollectionOneLevelAttrsMGCall = async (
   const collAttrs = vertexCollAttrResult.vertexes!.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
-  let attrs: FieldAttribute[] = [];
+  const attrs: FieldAttribute[] = [];
 
   for (const vertexCollAttr of collAttrs) {
     const addPropsResult = await getCollAttrsMGCall(vertexCollAttr);
@@ -315,7 +315,7 @@ export async function getCollAttrCompMGCall(
   const attrComp = (await getChildVertexMGCall(["$0Comp"], attrVertex)).vertex;
   if (attrComp) return attrComp;
 
-  let attrDataTypeVertex = (
+  const attrDataTypeVertex = (
     await getChildVertexMGCall(["$0DataType"], attrVertex)
   ).vertex;
   return getStringComponentMGCall(attrDataTypeVertex);

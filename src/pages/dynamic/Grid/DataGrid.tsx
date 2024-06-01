@@ -34,9 +34,9 @@ import {
   isNumber,
 } from "~/lib/Utils";
 import { QuickEditModal, SelectValue, TagValue } from "./GridUtils";
-import { ColumnDef } from "@tanstack/solid-table";
+import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { FormMetaData } from "~/lib/Type";
+import type { FormMetaData } from "~/lib/Type";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import Label from "~/components/solid-blocks/blocks/label/Label";
 import { AttrsTableData } from "~/lib/api";
@@ -48,7 +48,7 @@ const DataGrid = (props: DataGridProps) => {
   const [graph, setGraph] = useContext(GraphContext)!;
   const navigate = useNavigate();
   const datas = useLocation();
-  let { events } = useContext(PageContext);
+  const { events } = useContext(PageContext);
   const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal(null);
   const [tableStore, setTableStore] = createStore({

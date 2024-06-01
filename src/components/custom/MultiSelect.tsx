@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  JSX,
+  type JSX,
   createSignal,
   For,
   mergeProps,

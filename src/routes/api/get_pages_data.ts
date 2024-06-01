@@ -1,5 +1,5 @@
 import { getInitialData } from "./getInitialData";
-import { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {

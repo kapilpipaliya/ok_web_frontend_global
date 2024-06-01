@@ -1,4 +1,4 @@
-import { RouteSectionProps } from "@solidjs/router";
+import type { RouteSectionProps } from "@solidjs/router";
 import {
   ServerEventsDispatcher,
   WS_PATH,

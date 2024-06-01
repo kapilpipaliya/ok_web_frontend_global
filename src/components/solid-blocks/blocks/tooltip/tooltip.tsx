@@ -1,7 +1,7 @@
 import type { JSX } from "solid-js";
 import {
-  Accessor,
-  Component,
+  type Accessor,
+  type Component,
   createEffect,
   createMemo,
   createSignal,

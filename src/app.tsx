@@ -6,9 +6,9 @@ import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
-import { Config } from "@master/css";
+import type { Config } from "@master/css";
 import Sidebar from "./pages/dashboard/SideBar/SidebarLayout";
-import { EdgeMap, GraphContext, GraphInterface, Id, VertexMap } from "./lib/graph/graph";
+import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
 import { DataFetcher, API } from "./components/api/DataFetcher";
 

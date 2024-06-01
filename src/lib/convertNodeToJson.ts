@@ -1,9 +1,9 @@
 
-import {
+import type {
   Node,
   Relationship,
 } from "neo4j-driver";
-import { Vertex, Edge } from "~/lib/graph/graph";
+import type { Vertex, Edge } from "~/lib/graph/graph";
 
 
 function unwrapProperties(properties: Record<string, any>): Record<string, any> {

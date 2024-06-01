@@ -14,7 +14,7 @@ import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
 import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
-import { ComponentProps } from "~/components/ComponentType";
+import type { ComponentProps } from "~/components/ComponentType";
 import { FormSettingsContext, SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid-blocks/blocks/label/Label";
 

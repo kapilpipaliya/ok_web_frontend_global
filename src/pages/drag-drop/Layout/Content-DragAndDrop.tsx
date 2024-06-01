@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { props } from "rambda";
-import { Accessor, Show, useContext } from "solid-js";
+import { type Accessor, Show, useContext } from "solid-js";
 import ResizableContainer from "~/components/custom/ResizableDivView";
 import Drawer from "~/components/custom/drawer";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";

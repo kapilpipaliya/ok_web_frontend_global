@@ -1,7 +1,7 @@
 import { toTitle } from "case-switcher-js";
 import { For, Match, Switch, createMemo } from "solid-js";
-import { Store, SetStoreFunction } from "solid-js/store";
-import { Vertex, GraphInterface, IdAttr } from "~/lib/graph/graph";
+import type { Store, SetStoreFunction } from "solid-js/store";
+import { type Vertex, type GraphInterface, IdAttr } from "~/lib/graph/graph";
 import { DynamicComponent } from "../DynamicComponent";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
@@ -9,7 +9,7 @@ import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 interface FormGroupProps {
     metaAttributes: Vertex[];
     vertex: Vertex;
-    labelPrefix: String;
+    labelPrefix: string;
     graph: Store<GraphInterface>;
     setGraph: SetStoreFunction<GraphInterface>;
     txnId: number;

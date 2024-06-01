@@ -1,13 +1,13 @@
 import jsep from "jsep";
 import {
-  Accessor,
+  type Accessor,
   batch,
   createMemo,
   createSelector,
   untrack,
   useContext,
 } from "solid-js";
-import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
@@ -29,7 +29,7 @@ import {
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
 import { deleteNestedLayout } from "./graph/mutate/deleteNestedLayout";
-import { GraphInterface, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { evaluate } from "~/lib/expression_eval";
 
@@ -415,7 +415,7 @@ export function useDragDrop(
     handleDragOverBase(e);
 
     for (const vertex of draggedVertex()) {
-      let fromVertex = vertex;
+      const fromVertex = vertex;
       const toVertexId = indicatorPosition().activeItem!;
       if (!fromVertex) {
         // Don't allow drag and drop

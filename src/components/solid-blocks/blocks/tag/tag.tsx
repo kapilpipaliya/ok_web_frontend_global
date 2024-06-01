@@ -1,4 +1,4 @@
-import { Component, JSX, mergeProps, Show, splitProps } from "solid-js";
+import { Component, type JSX, mergeProps, Show, splitProps } from "solid-js";
 
 import { getRandom } from "../tools";
 

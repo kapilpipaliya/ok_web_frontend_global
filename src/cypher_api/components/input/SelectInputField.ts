@@ -10,7 +10,7 @@ import { getInEdge } from "~/lib/graph/get/sync/traverse";
 import { getToEdge } from "~/lib/graph/get/sync/traverse";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
-import { Id, Vertex } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 async function vertexOutEdgeContainVertexMGCall(
   vertex: Vertex,

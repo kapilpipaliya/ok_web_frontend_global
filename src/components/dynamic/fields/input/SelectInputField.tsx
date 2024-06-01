@@ -16,10 +16,10 @@ import {
 // Comment This Lines in web build
 import {
   GraphContext,
-  GraphInterface,
-  Id,
+  type GraphInterface,
+  type Id,
   IdAttr,
-  Vertex,
+  type Vertex,
 } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "~/lib/graph/transaction";
 import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
@@ -40,9 +40,9 @@ import {
 } from "~/lib/graph/mutate/form_functions";
 import MultiSelect from "~/components/custom/MultiSelect";
 import { Icon } from "@iconify-icon/solid";
-import { ComponentProps } from "~/components/ComponentType";
+import type { ComponentProps } from "~/components/ComponentType";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
@@ -191,7 +191,7 @@ export function collectionNameDisplayExpr(
 export function SelectInputField(
   props: ComponentProps & {
     component: string;
-    title: String;
+    title: string;
     txnId?: number;
     isRealTime?: boolean;
   },
@@ -213,7 +213,7 @@ export function SelectInputField(
   const formData = useContext(FormContext);
 
   const selectOptions = async () => {
-    let value = getValueFromVertexOrKey(field.meta.P.props, "items");
+    const value = getValueFromVertexOrKey(field.meta.P.props, "items");
     if (value) {
       if (typeof value === "string") {
         return value.split("\n");
@@ -263,7 +263,7 @@ export function SelectInputField(
   });
 
   function getComponent() {
-    let direction = field.meta.P.dir;
+    const direction = field.meta.P.dir;
     if (!field.component && direction) {
       if (direction === "->") {
         field.component = "SelectBox";

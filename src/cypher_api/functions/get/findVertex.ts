@@ -2,7 +2,7 @@ import { getDriver } from "../../server/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 import { int } from "neo4j-driver";
 
 export async function findVertexesMGCall(options: {

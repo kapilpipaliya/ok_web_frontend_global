@@ -1,13 +1,13 @@
 import { batch, useContext } from "solid-js";
 import {
   getCookie,
-  ServerEventsDispatcher,
+  type ServerEventsDispatcher,
   WsContext,
 } from "~/lib/websocket/ws_events_dispatcher";
 
 import { isObject } from "~/lib/Utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
-import { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
+import type { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {
   commitTransaction,
   edgeOldIdToNewIdMap,
@@ -17,7 +17,7 @@ import {
   vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
-import { reconcile, SetStoreFunction, Store } from "solid-js/store";
+import { reconcile, type SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
 export function setGraphData(
@@ -90,10 +90,10 @@ export function setGraphData(
     // timeTaken = Date.now() - start;
     // console.log("Total time taken : " + timeTaken + " milliseconds");
     for (const edgeId of args.deleted_edges || []) {
-      deleteEdge(0, parseInt(edgeId), graph, setGraph);
+      deleteEdge(0, Number.parseInt(edgeId), graph, setGraph);
     }
     for (const vertexId of args.deleted_vertexes || []) {
-      deleteVertex(0, parseInt(vertexId), graph, setGraph);
+      deleteVertex(0, Number.parseInt(vertexId), graph, setGraph);
     }
   });
 }

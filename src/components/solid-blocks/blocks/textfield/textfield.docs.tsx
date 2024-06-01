@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { Checkbox } from "../checkbox/checkbox";
 import { Select } from "../select/select";
-import { TextField, TextFieldType } from "./textfield";
+import { TextField, type TextFieldType } from "./textfield";
 
 export function TextfieldDocs() {
   const [vertical, setVertical] = createSignal(false);
@@ -51,7 +51,7 @@ TextfieldProps {
           <a
             href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/Input#input_types"
             target="_blank"
-            rel="noopener"
+            rel="noreferrer noopener"
           >
             &lt;input&gt; types
           </a>{" "}

@@ -1,7 +1,7 @@
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
-import { FormMetaData } from "~/lib/Type";
-import { IFormContext } from "~/lib/Utils";
+import type { FormMetaData } from "~/lib/Type";
+import type { IFormContext } from "~/lib/Utils";
 import { GraphContext } from "~/lib/graph/graph";
 import { useContext } from "solid-js";
 

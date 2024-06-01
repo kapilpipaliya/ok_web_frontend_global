@@ -1,12 +1,12 @@
 import {
-  Accessor,
+  type Accessor,
   createContext,
   createSignal,
-  Setter,
+  type Setter,
   Show,
   useContext,
 } from "solid-js";
-import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 

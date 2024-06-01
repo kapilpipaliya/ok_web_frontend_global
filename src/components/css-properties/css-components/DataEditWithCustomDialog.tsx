@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { Accessor, JSXElement, Setter, useContext, createSignal, Show, For, createEffect, onCleanup, Switch, Match } from "solid-js";
+import { type Accessor, type JSXElement, type Setter, useContext, createSignal, Show, For, createEffect, onCleanup, Switch, Match } from "solid-js";
 import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { CssEditorContext } from "../cssContext";
 import { ContainerLabel } from "./CssUtils";
@@ -59,35 +59,35 @@ export const DataEditWithCustomDialog = (props: {
 
     const addOption = () => {
         if (props.label.includes("Text Shadow")) {
-            let currentOptions = cssState[props.name]
+            const currentOptions = cssState[props.name]
                 ? cssState[props.name].split(",")
                 : [];
             currentOptions.push("0|0|5|0|#000|inset");
             const newValue = currentOptions.join(",");
             setCssState(props.name, newValue);
         } else if (props.label.includes("Filter")) {
-            let currentOptions = cssState[props.name]
+            const currentOptions = cssState[props.name]
                 ? cssState[props.name].split("|")
                 : [];
             currentOptions.push("blur(3px)");
             const newValue = currentOptions.join("|");
             setCssState(props.name, newValue);
         } else if (props.label.includes("Box Shadow")) {
-            let currentOptions = cssState[props.name]
+            const currentOptions = cssState[props.name]
                 ? cssState[props.name].split(",")
                 : [];
             currentOptions.push("0|0|5|0|#000|inset");
             const newValue = currentOptions.join(",");
             setCssState(props.name, newValue);
         } else if (props.label.includes("Transition")) {
-            let currentOptions = cssState[props.name]
+            const currentOptions = cssState[props.name]
                 ? cssState[props.name].split(",")
                 : [];
             currentOptions.push("opacity|1s|ease|0s");
             const newValue = currentOptions.join(",");
             setCssState(props.name, newValue);
         } else if (props.label.includes("Transform")) {
-            let currentOptions = cssState[props.name]
+            const currentOptions = cssState[props.name]
                 ? cssState[props.name].split("|")
                 : [];
             currentOptions.push("rotate(10deg)");

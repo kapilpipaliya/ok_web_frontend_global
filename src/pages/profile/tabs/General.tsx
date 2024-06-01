@@ -1,6 +1,6 @@
 import { equals } from "rambda";
 import { Show, createSignal, untrack, useContext } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 import { API } from "~/components/api/DataFetcher";
 import getAPI from "~/components/api/getApi";
 import postAPI from "~/components/api/postApi";
@@ -39,7 +39,7 @@ export const GeneralSection = (props: GenralProps) => {
   };
 
   const profileCall = async () => {
-    let updatedData: { [key: string]: any } = {};
+    const updatedData: { [key: string]: any } = {};
     for (const key in props.profileData) {
       if (props.profileData[key] !== props.originalProfileData[key]) {
         // Compare with original data

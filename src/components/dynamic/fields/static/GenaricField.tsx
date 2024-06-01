@@ -13,9 +13,9 @@ import {
 import { toTitle } from "case-switcher-js";
 import {
   GraphContext,
-  GraphInterface,
+  type GraphInterface,
   IdAttr,
-  Vertex,
+  type Vertex,
 } from "~/lib/graph/graph";
 import { FormContext, iconMap, PageContext } from "~/lib/Utils";
 import {
@@ -28,7 +28,7 @@ import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { useDragDrop } from "~/lib/pageStore";
 import { Icon } from "@iconify-icon/solid";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
 import {
   getCollAttrComp,
@@ -98,7 +98,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
-  let { txnId, formData, cleanUpConfig } = useContext(FormContext);
+  const { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedTargetId = createSelector(targetId);
   const isSelectedHoverId = createSelector(hoverId);
@@ -425,7 +425,7 @@ export function getUrl(
   projection: string,
   repeaterContext: Vertex[],
 ) {
-  let url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
+  const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
     .vertexes as string | undefined;
   if (typeof url === "string" && url.startsWith("/")) {
     // url = (showNav() ? '/nav' : '') + url;

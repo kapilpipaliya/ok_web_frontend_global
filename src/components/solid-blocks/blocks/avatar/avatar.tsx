@@ -1,4 +1,4 @@
-import { Component, createMemo, JSX, mergeProps, splitProps } from "solid-js";
+import { Component, createMemo, type JSX, mergeProps, splitProps } from "solid-js";
 import { composeStyles, getRandom } from "../tools";
 import "../base.css";
 import "./avatar.css";

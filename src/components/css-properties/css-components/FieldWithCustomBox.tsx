@@ -19,7 +19,7 @@ export const FieldWithCustomBox = (props: {
     const [cssState, setCssState] = useContext(CssEditorContext);
 
     const onChangeAllField = () => {
-        let newState = { ...cssState };
+        const newState = { ...cssState };
         props.customProperty.forEach((property: any) => {
             newState[property.name] = cssState[props.name];
         });

@@ -1,4 +1,4 @@
-import { APIEvent } from "@solidjs/start/dist/server";
+import type { APIEvent } from "@solidjs/start/dist/server";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 
 // Cant export this function

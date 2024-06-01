@@ -38,13 +38,13 @@ export function parseSignature(signature) {
       break;
     }
 
-    var next = function () {
+    var next = () => {
       params.push(param);
       prevParam = param;
       param = {};
     };
 
-    var findClosingBracket = function (str, start, openSymbol, closeSymbol) {
+    var findClosingBracket = (str, start, openSymbol, closeSymbol) => {
       // returns the position of the closing symbol (e.g. bracket) in a string
       // that balances the opening symbol at position start
       var depth = 1;
@@ -147,13 +147,11 @@ export function parseSignature(signature) {
   var regexStr =
     "^" +
     params
-      .map(function (param) {
-        return "(" + param.regex + ")";
-      })
+      .map((param) => "(" + param.regex + ")")
       .join("") +
     "$";
   var regex = new RegExp(regexStr);
-  var getSymbol = function (value) {
+  var getSymbol = (value) => {
     var symbol;
     if (utils.isFunction(value)) {
       symbol = "f";
@@ -187,7 +185,7 @@ export function parseSignature(signature) {
     return symbol;
   };
 
-  var throwValidationError = function (badArgs, badSig) {
+  var throwValidationError = (badArgs, badSig) => {
     // to figure out where this went wrong we need apply each component of the
     // regex to each argument until we get to the one that fails to match
     var partialPattern = "^";
@@ -218,16 +216,16 @@ export function parseSignature(signature) {
 
   return {
     definition: signature,
-    validate: function (args, context) {
+    validate: (args, context) => {
       var suppliedSig = "";
-      args.forEach(function (arg) {
+      args.forEach((arg) => {
         suppliedSig += getSymbol(arg);
       });
       var isValid = regex.exec(suppliedSig);
       if (isValid) {
         var validatedArgs = [];
         var argIndex = 0;
-        params.forEach(function (param, index) {
+        params.forEach((param, index) => {
           var arg = args[argIndex];
           var match = isValid[index + 1];
           if (match === "") {
@@ -254,7 +252,7 @@ export function parseSignature(signature) {
           } else {
             // may have matched multiple args (if the regex ends with a '+'
             // split into single tokens
-            match.split("").forEach(function (single) {
+            match.split("").forEach((single) => {
               if (param.type === "a") {
                 if (single === "m") {
                   // missing (undefined)
@@ -274,9 +272,7 @@ export function parseSignature(signature) {
                           arrayOK = false;
                         } else {
                           // make sure every item in the array is this type
-                          var differentItems = arg.filter(function (val) {
-                            return getSymbol(val) !== itemType;
-                          });
+                          var differentItems = arg.filter((val) => getSymbol(val) !== itemType);
                           arrayOK = differentItems.length === 0;
                         }
                       }

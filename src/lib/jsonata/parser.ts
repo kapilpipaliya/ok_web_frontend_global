@@ -58,16 +58,16 @@ var escapes = {
 };
 
 // Tokenizer (lexer) - invoked by the parser to return one token at a time
-var tokenizer = function (path) {
+var tokenizer = (path) => {
   var position = 0;
   var length = path.length;
 
-  var create = function (type, value) {
+  var create = (type, value) => {
     var obj = { type: type, value: value, position: position };
     return obj;
   };
 
-  var scanRegex = function () {
+  var scanRegex = () => {
     // the prefix '/' will have been previously scanned. Find the end of the regex.
     // search for closing '/' ignoring any that are escaped, or within brackets
     var start = position;
@@ -75,7 +75,7 @@ var tokenizer = function (path) {
     var pattern;
     var flags;
 
-    var isClosingSlash = function (position) {
+    var isClosingSlash = (position) => {
       if (path.charAt(position) === "/" && depth === 0) {
         var backslashCount = 0;
         while (path.charAt(position - (backslashCount + 1)) === "\\") {
@@ -133,7 +133,7 @@ var tokenizer = function (path) {
     };
   };
 
-  var next = function (prefix) {
+  var next = (prefix) => {
     if (position >= length) return null;
     var currentChar = path.charAt(position);
     // skip whitespace
@@ -225,7 +225,7 @@ var tokenizer = function (path) {
             // \u should be followed by 4 hex digits
             var octets = path.substr(position + 1, 4);
             if (/^[0-9a-fA-F]+$/.test(octets)) {
-              var codepoint = parseInt(octets, 16);
+              var codepoint = Number.parseInt(octets, 16);
               qstr += String.fromCharCode(codepoint);
               position += 4;
             } else {
@@ -262,7 +262,7 @@ var tokenizer = function (path) {
     var numregex = /^-?(0|([1-9][0-9]*))(\.[0-9]+)?([Ee][-+]?[0-9]+)?/;
     var match = numregex.exec(path.substring(position));
     if (match !== null) {
-      var num = parseFloat(match[0]);
+      var num = Number.parseFloat(match[0]);
       if (!isNaN(num) && isFinite(num)) {
         position += match[0].length;
         return create("number", num);
@@ -350,7 +350,7 @@ export function parser(source, recover) {
   var symbol_table = {};
   var errors = [];
 
-  var remainingTokens = function () {
+  var remainingTokens = () => {
     var remaining = [];
     if (node.id !== "(end)") {
       remaining.push({
@@ -388,7 +388,7 @@ export function parser(source, recover) {
     },
   };
 
-  var symbol = function (id, bp) {
+  var symbol = (id, bp) => {
     var s = symbol_table[id];
     bp = bp || 0;
     if (s) {
@@ -404,7 +404,7 @@ export function parser(source, recover) {
     return s;
   };
 
-  var handleError = function (err) {
+  var handleError = (err) => {
     if (recover) {
       // tokenize the rest of the buffer and add it to an error token
       err.remaining = remainingTokens();
@@ -420,7 +420,7 @@ export function parser(source, recover) {
     }
   };
 
-  var advance = function (id, infix) {
+  var advance = (id, infix) => {
     if (id && node.id !== id) {
       var code;
       if (node.id === "(end)") {
@@ -489,7 +489,7 @@ export function parser(source, recover) {
   };
 
   // Pratt's algorithm
-  var expression = function (rbp) {
+  var expression = (rbp) => {
     var left;
     var t = node;
     advance(null, true);
@@ -502,7 +502,7 @@ export function parser(source, recover) {
     return left;
   };
 
-  var terminal = function (id) {
+  var terminal = (id) => {
     var s = symbol(id, 0);
     s.nud = function () {
       return this;
@@ -512,7 +512,7 @@ export function parser(source, recover) {
   // match infix operators
   // <expression> <operator> <expression>
   // left associative
-  var infix = function (id, bp, led) {
+  var infix = (id, bp, led) => {
     var bindingPower = bp || operators[id];
     var s = symbol(id, bindingPower);
     s.led =
@@ -529,7 +529,7 @@ export function parser(source, recover) {
   // match infix operators
   // <expression> <operator> <expression>
   // right associative
-  var infixr = function (id, bp, led) {
+  var infixr = (id, bp, led) => {
     var s = symbol(id, bp);
     s.led = led;
     return s;
@@ -537,7 +537,7 @@ export function parser(source, recover) {
 
   // match prefix operators
   // <operator> <expression>
-  var prefix = function (id, nud) {
+  var prefix = (id, nud) => {
     var s = symbol(id);
     s.nud =
       nud ||
@@ -636,7 +636,7 @@ export function parser(source, recover) {
       (left.value === "function" || left.value === "\u03BB")
     ) {
       // all of the args must be VARIABLE tokens
-      this.arguments.forEach(function (arg, index) {
+      this.arguments.forEach((arg, index) => {
         if (arg.type !== "variable") {
           return handleError({
             code: "S0208",
@@ -892,7 +892,7 @@ export function parser(source, recover) {
   // if they make a tail call.  If so, it is replaced by a thunk which will
   // be invoked by the trampoline loop during function application.
   // This enables tail-recursive functions to be written without growing the stack
-  var tailCallOptimize = function (expr) {
+  var tailCallOptimize = (expr) => {
     var result;
     if (expr.type === "function" && !expr.predicate) {
       var thunk = {
@@ -929,7 +929,7 @@ export function parser(source, recover) {
   var ancestorIndex = 0;
   var ancestry = [];
 
-  var seekParent = function (node, slot) {
+  var seekParent = (node, slot) => {
     switch (node.type) {
       case "name":
       case "wildcard":
@@ -979,7 +979,7 @@ export function parser(source, recover) {
     return slot;
   };
 
-  var pushAncestry = function (result, value) {
+  var pushAncestry = (result, value) => {
     if (typeof value.seekingParent !== "undefined" || value.type === "parent") {
       var slots =
         typeof value.seekingParent !== "undefined" ? value.seekingParent : [];
@@ -994,7 +994,7 @@ export function parser(source, recover) {
     }
   };
 
-  var resolveAncestry = function (path) {
+  var resolveAncestry = (path) => {
     var index = path.steps.length - 1;
     var laststep = path.steps[index];
     var slots =
@@ -1033,7 +1033,7 @@ export function parser(source, recover) {
   // This includes flattening the parts of the AST representing location paths,
   // converting them to arrays of steps which in turn may contain arrays of predicates.
   // following this, nodes containing '.' and '[' should be eliminated from the AST.
-  var processAST = function (expr) {
+  var processAST = (expr) => {
     var result;
     switch (expr.type) {
       case "binary":
@@ -1072,7 +1072,7 @@ export function parser(source, recover) {
             }
             // any steps within a path that are string literals, should be changed to 'name'
             result.steps
-              .filter(function (step) {
+              .filter((step) => {
                 if (step.type === "number" || step.type === "value") {
                   // don't allow steps to be numbers or the values true/false/null
                   throw {
@@ -1084,14 +1084,12 @@ export function parser(source, recover) {
                 }
                 return step.type === "string";
               })
-              .forEach(function (lit) {
+              .forEach((lit) => {
                 lit.type = "name";
               });
             // any step that signals keeping a singleton array, should be flagged on the path
             if (
-              result.steps.filter(function (step) {
-                return step.keepArray === true;
-              }).length > 0
+              result.steps.filter((step) => step.keepArray === true).length > 0
             ) {
               result.keepSingletonArray = true;
             }
@@ -1159,9 +1157,7 @@ export function parser(source, recover) {
             }
             // object constructor - process each pair
             result.group = {
-              lhs: expr.rhs.map(function (pair) {
-                return [processAST(pair[0]), processAST(pair[1])];
-              }),
+              lhs: expr.rhs.map((pair) => [processAST(pair[0]), processAST(pair[1])]),
               position: expr.position,
             };
             break;
@@ -1174,7 +1170,7 @@ export function parser(source, recover) {
               result = { type: "path", steps: [result] };
             }
             var sortStep = { type: "sort", position: expr.position };
-            sortStep.terms = expr.rhs.map(function (terms) {
+            sortStep.terms = expr.rhs.map((terms) => {
               var expression = processAST(terms.expression);
               pushAncestry(sortStep, expression);
               return {
@@ -1279,14 +1275,14 @@ export function parser(source, recover) {
         };
         if (expr.value === "[") {
           // array constructor - process each item
-          result.expressions = expr.expressions.map(function (item) {
+          result.expressions = expr.expressions.map((item) => {
             var value = processAST(item);
             pushAncestry(result, value);
             return value;
           });
         } else if (expr.value === "{") {
           // object constructor - process each pair
-          result.lhs = expr.lhs.map(function (pair) {
+          result.lhs = expr.lhs.map((pair) => {
             var key = processAST(pair[0]);
             pushAncestry(result, key);
             var value = processAST(pair[1]);
@@ -1313,7 +1309,7 @@ export function parser(source, recover) {
           value: expr.value,
           position: expr.position,
         };
-        result.arguments = expr.arguments.map(function (arg) {
+        result.arguments = expr.arguments.map((arg) => {
           var argAST = processAST(arg);
           pushAncestry(result, argAST);
           return argAST;
@@ -1352,7 +1348,7 @@ export function parser(source, recover) {
       case "block":
         result = { type: expr.type, position: expr.position };
         // array of expressions - process each one
-        result.expressions = expr.expressions.map(function (item) {
+        result.expressions = expr.expressions.map((item) => {
           var part = processAST(item);
           pushAncestry(result, part);
           if (

@@ -1,5 +1,5 @@
-import { IconifyIconProps, Icon } from "@iconify-icon/solid";
-import { splitProps, Show, JSXElement } from "solid-js";
+import { type IconifyIconProps, Icon } from "@iconify-icon/solid";
+import { splitProps, Show, type JSXElement } from "solid-js";
 import "~/css/componentUtilCSS.css";
 
 export const IconifyIcon = (props: IconifyIconProps) => {

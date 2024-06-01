@@ -29,7 +29,7 @@ export function sum(args) {
   }
 
   var total = 0;
-  args.forEach(function (num) {
+  args.forEach((num) => {
     total += num;
   });
   return total;
@@ -89,7 +89,7 @@ export function average(args) {
   }
 
   var total = 0;
-  args.forEach(function (num) {
+  args.forEach((num) => {
     total += num;
   });
   return total / args.length;
@@ -128,16 +128,14 @@ export function string(arg, prettify = false) {
     }
     str = JSON.stringify(
       arg,
-      function (key, val) {
-        return typeof val !== "undefined" &&
+      (key, val) => typeof val !== "undefined" &&
           val !== null &&
           val.toPrecision &&
           isNumeric(val)
           ? Number(val.toPrecision(15))
           : val && isFunction(val)
             ? ""
-            : val;
-      },
+            : val,
       space,
     );
   }
@@ -431,8 +429,6 @@ export function replace(str, pattern, replacement, limit) {
     return undefined;
   }
 
-  var self = this;
-
   // pattern cannot be an empty string
   if (pattern === "") {
     throw {
@@ -455,7 +451,7 @@ export function replace(str, pattern, replacement, limit) {
 
   var replacer;
   if (typeof replacement === "string") {
-    replacer = function (regexMatch) {
+    replacer = (regexMatch) => {
       var substitute = "";
       // scan forward, copying the replacement text into the substitute string
       // and replace any occurrence of $n with the values matched by the regex
@@ -482,12 +478,12 @@ export function replace(str, pattern, replacement, limit) {
             maxDigits =
               Math.floor(Math.log(regexMatch.groups.length) * Math.LOG10E) + 1;
           }
-          index = parseInt(
+          index = Number.parseInt(
             replacement.substring(position, position + maxDigits),
             10,
           );
           if (maxDigits > 1 && index > regexMatch.groups.length) {
-            index = parseInt(
+            index = Number.parseInt(
               replacement.substring(position, position + maxDigits - 1),
               10,
             );
@@ -537,7 +533,7 @@ export function replace(str, pattern, replacement, limit) {
           (typeof limit === "undefined" || count < limit)
         ) {
           result += str.substring(position, matches.start);
-          var replacedWith = replacer.apply(self, [matches]);
+          var replacedWith = replacer.apply(this, [matches]);
           // if (isPromise(replacedWith)) {
           //     replacedWith = await replacedWith;
           // }
@@ -583,12 +579,12 @@ export function base64encode(str) {
   var btoa =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.btoa
-      : function (str) {
+      : ((str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
           return new global.Buffer.from(str, "binary").toString("base64"); // eslint-disable-line new-cap
-        };
+        });
   return btoa(str);
 }
 
@@ -606,12 +602,12 @@ export function base64decode(str) {
   var atob =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.atob
-      : function (str) {
+      : ((str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
           return new global.Buffer.from(str, "base64").toString("binary"); // eslint-disable-line new-cap
-        };
+        });
   return atob(str);
 }
 
@@ -823,7 +819,7 @@ export function formatNumber(value, picture, options) {
   // if `options` is specified, then its entries override defaults
   var properties = defaults;
   if (typeof options !== "undefined") {
-    Object.keys(options).forEach(function (key) {
+    Object.keys(options).forEach((key) => {
       properties[key] = options[key];
     });
   }
@@ -851,8 +847,8 @@ export function formatNumber(value, picture, options) {
     };
   }
 
-  var splitParts = function (subpicture) {
-    var prefix = (function () {
+  var splitParts = (subpicture) => {
+    var prefix = (() => {
       var ch;
       for (var ii = 0; ii < subpicture.length; ii++) {
         ch = subpicture.charAt(ii);
@@ -864,7 +860,7 @@ export function formatNumber(value, picture, options) {
         }
       }
     })();
-    var suffix = (function () {
+    var suffix = (() => {
       var ch;
       for (var ii = subpicture.length - 1; ii >= 0; ii--) {
         ch = subpicture.charAt(ii);
@@ -916,7 +912,7 @@ export function formatNumber(value, picture, options) {
   };
 
   // validate the picture string, F&O 4.7.3
-  var validate = function (parts) {
+  var validate = (parts) => {
     var error;
     var ii;
     var subpicture = parts.subpicture;
@@ -957,9 +953,7 @@ export function formatNumber(value, picture, options) {
     }
     var charTypes = parts.activePart
       .split("")
-      .map(function (char) {
-        return activeChars.indexOf(char) === -1 ? "p" : "a";
-      })
+      .map((char) => activeChars.indexOf(char) === -1 ? "p" : "a")
       .join("");
     if (charTypes.indexOf("p") !== -1) {
       error = "D3086";
@@ -991,9 +985,7 @@ export function formatNumber(value, picture, options) {
       parts.integerPart
         .substring(0, optionalDigitPos)
         .split("")
-        .filter(function (char) {
-          return decimalDigitFamily.indexOf(char) > -1;
-        }).length > 0
+        .filter((char) => decimalDigitFamily.indexOf(char) > -1).length > 0
     ) {
       error = "D3090";
     }
@@ -1003,9 +995,7 @@ export function formatNumber(value, picture, options) {
       parts.fractionalPart
         .substring(optionalDigitPos)
         .split("")
-        .filter(function (char) {
-          return decimalDigitFamily.indexOf(char) > -1;
-        }).length > 0
+        .filter((char) => decimalDigitFamily.indexOf(char) > -1).length > 0
     ) {
       error = "D3091";
     }
@@ -1021,9 +1011,7 @@ export function formatNumber(value, picture, options) {
     if (
       exponentExists &&
       (parts.exponentPart.length === 0 ||
-        parts.exponentPart.split("").filter(function (char) {
-          return decimalDigitFamily.indexOf(char) === -1;
-        }).length > 0)
+        parts.exponentPart.split("").filter((char) => decimalDigitFamily.indexOf(char) === -1).length > 0)
     ) {
       error = "D3093";
     }
@@ -1036,8 +1024,8 @@ export function formatNumber(value, picture, options) {
   };
 
   // analyse the picture string, F&O 4.7.4
-  var analyse = function (parts) {
-    var getGroupingPositions = function (part, toLeft) {
+  var analyse = (parts) => {
+    var getGroupingPositions = (part, toLeft) => {
       var positions = [];
       var groupingPosition = part.indexOf(properties["grouping-separator"]);
       while (groupingPosition !== -1) {
@@ -1047,12 +1035,10 @@ export function formatNumber(value, picture, options) {
             : part.substring(groupingPosition)
         )
           .split("")
-          .filter(function (char) {
-            return (
+          .filter((char) => (
               decimalDigitFamily.indexOf(char) !== -1 ||
               char === properties.digit
-            );
-          }).length;
+            )).length;
         positions.push(charsToTheRight);
         groupingPosition = parts.integerPart.indexOf(
           properties["grouping-separator"],
@@ -1062,14 +1048,12 @@ export function formatNumber(value, picture, options) {
       return positions;
     };
     var integerPartGroupingPositions = getGroupingPositions(parts.integerPart);
-    var regular = function (indexes) {
+    var regular = (indexes) => {
       // are the grouping positions regular? i.e. same interval between each of them
       if (indexes.length === 0) {
         return 0;
       }
-      var gcd = function (a, b) {
-        return b === 0 ? a : gcd(b, a % b);
-      };
+      var gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
       // find the greatest common divisor of all the positions
       var factor = indexes.reduce(gcd);
       // is every position separated by this divisor? If so, it's regular
@@ -1089,20 +1073,14 @@ export function formatNumber(value, picture, options) {
 
     var minimumIntegerPartSize = parts.integerPart
       .split("")
-      .filter(function (char) {
-        return decimalDigitFamily.indexOf(char) !== -1;
-      }).length;
+      .filter((char) => decimalDigitFamily.indexOf(char) !== -1).length;
     var scalingFactor = minimumIntegerPartSize;
 
     var fractionalPartArray = parts.fractionalPart.split("");
-    var minimumFactionalPartSize = fractionalPartArray.filter(function (char) {
-      return decimalDigitFamily.indexOf(char) !== -1;
-    }).length;
-    var maximumFactionalPartSize = fractionalPartArray.filter(function (char) {
-      return (
+    var minimumFactionalPartSize = fractionalPartArray.filter((char) => decimalDigitFamily.indexOf(char) !== -1).length;
+    var maximumFactionalPartSize = fractionalPartArray.filter((char) => (
         decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit
-      );
-    }).length;
+      )).length;
     var exponentPresent = typeof parts.exponentPart === "string";
     if (minimumIntegerPartSize === 0 && maximumFactionalPartSize === 0) {
       if (exponentPresent) {
@@ -1126,9 +1104,7 @@ export function formatNumber(value, picture, options) {
     if (exponentPresent) {
       minimumExponentSize = parts.exponentPart
         .split("")
-        .filter(function (char) {
-          return decimalDigitFamily.indexOf(char) !== -1;
-        }).length;
+        .filter((char) => decimalDigitFamily.indexOf(char) !== -1).length;
     }
 
     return {
@@ -1205,12 +1181,12 @@ export function formatNumber(value, picture, options) {
   // bullet 6:
   var roundedNumber = round(mantissa, pic.maximumFactionalPartSize);
   // bullet 7:
-  var makeString = function (value, dp) {
+  var makeString = (value, dp) => {
     var str = Math.abs(value).toFixed(dp);
     if (zero_digit !== "0") {
       str = str
         .split("")
-        .map(function (digit) {
+        .map((digit) => {
           if (digit >= "0" && digit <= "9") {
             return decimalDigitFamily[digit.charCodeAt(0) - 48];
           } else {
@@ -1256,7 +1232,7 @@ export function formatNumber(value, picture, options) {
       ].join("");
     }
   } else {
-    pic.integerPartGroupingPositions.forEach(function (pos) {
+    pic.integerPartGroupingPositions.forEach((pos) => {
       stringValue = [
         stringValue.slice(0, decimalPos - pos),
         grouping_separator,
@@ -1267,7 +1243,7 @@ export function formatNumber(value, picture, options) {
   }
   // bullet 11:
   decimalPos = stringValue.indexOf(decimal_separator);
-  pic.fractionalPartGroupingPositions.forEach(function (pos) {
+  pic.fractionalPartGroupingPositions.forEach((pos) => {
     stringValue = [
       stringValue.slice(0, pos + decimalPos + 1),
       grouping_separator,
@@ -1352,10 +1328,10 @@ export function number(arg) {
   } else if (
     typeof arg === "string" &&
     /^-?[0-9]+(\.[0-9]+)?([Ee][-+]?[0-9]+)?$/.test(arg) &&
-    !isNaN(parseFloat(arg)) &&
+    !isNaN(Number.parseFloat(arg)) &&
     isFinite(arg)
   ) {
-    result = parseFloat(arg);
+    result = Number.parseFloat(arg);
   } else if (
     typeof arg === "string" &&
     /^(0[xX][0-9A-Fa-f]+)|(0[oO][0-7]+)|(0[bB][0-1]+)$/.test(arg)
@@ -1567,9 +1543,7 @@ export function boolean(arg) {
     if (arg.length === 1) {
       result = boolean(arg[0]);
     } else if (arg.length > 1) {
-      var trues = arg.filter(function (val) {
-        return boolean(val);
-      });
+      var trues = arg.filter((val) => boolean(val));
       result = trues.length > 0;
     }
   } else if (typeof arg === "string") {
@@ -1740,7 +1714,7 @@ export function zip() {
   // length of the shortest array
   var length = Math.min.apply(
     Math,
-    args.map(function (arg) {
+    args.map((arg) => {
       if (Array.isArray(arg)) {
         return arg.length;
       }
@@ -1815,9 +1789,9 @@ export function keys(arg) {
   if (Array.isArray(arg)) {
     // merge the keys of all of the items in the array
     var merge = {};
-    arg.forEach(function (item) {
+    arg.forEach((item) => {
       var allkeys = keys(item);
-      allkeys.forEach(function (key) {
+      allkeys.forEach((key) => {
         merge[key] = true;
       });
     });
@@ -1902,7 +1876,7 @@ export function spread(arg) {
 
   if (Array.isArray(arg)) {
     // spread all of the items in the array
-    arg.forEach(function (item) {
+    arg.forEach((item) => {
       result = append(result, spread(item));
     });
   } else if (arg !== null && typeof arg === "object" && !isLambda(arg)) {
@@ -1931,7 +1905,7 @@ export function merge(arg) {
 
   var result = {};
 
-  arg.forEach(function (obj) {
+  arg.forEach((obj) => {
     for (var prop in obj) {
       result[prop] = obj[prop];
     }
@@ -2081,16 +2055,14 @@ export function sort(arr, comparator) {
       };
     }
 
-    comp = function (a, b) {
-      return a > b;
-    };
+    comp = (a, b) => a > b;
   } else {
     // for internal usage of functionSort (i.e. order-by syntax)
     comp = comparator;
   }
 
-  var merge = function (l, r) {
-    var merge_iter = function (result, left, right) {
+  var merge = (l, r) => {
+    var merge_iter = (result, left, right) => {
       if (left.length === 0) {
         Array.prototype.push.apply(result, right);
       } else if (right.length === 0) {
@@ -2111,7 +2083,7 @@ export function sort(arr, comparator) {
     return merged;
   };
 
-  var msort = function (array) {
+  var msort = (array) => {
     if (!Array.isArray(array) || array.length <= 1) {
       return array;
     } else {

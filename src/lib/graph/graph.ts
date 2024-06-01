@@ -1,5 +1,5 @@
 import { createContext } from "solid-js";
-import { createStore, reconcile, SetStoreFunction } from "solid-js/store";
+import { type createStore, reconcile, SetStoreFunction } from "solid-js/store";
 
 export type Id = string;
 

@@ -4,7 +4,7 @@ import {
   createResource,
   createSignal,
   For,
-  JSXElement,
+  type JSXElement,
   Match,
   on,
   onCleanup,
@@ -15,7 +15,7 @@ import {
   untrack,
   useContext,
 } from "solid-js";
-import { createStore, SetStoreFunction, Store } from "solid-js/store";
+import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
 import {
   getChildVertexes
@@ -25,10 +25,10 @@ import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import {
   GraphContext,
-  GraphInterface,
-  Id,
+  type GraphInterface,
+  type Id,
   IdAttr,
-  Vertex,
+  type Vertex,
 } from "~/lib/graph/graph";
 import {
   commitTxn,
@@ -38,14 +38,14 @@ import {
 } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
-  BeforeLeaveEventArgs,
+  type BeforeLeaveEventArgs,
   useBeforeLeave,
   useLocation,
   useNavigate,
 } from "@solidjs/router";
 import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
-import { FormMetaData } from "~/lib/Type";
+import type { FormMetaData } from "~/lib/Type";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";

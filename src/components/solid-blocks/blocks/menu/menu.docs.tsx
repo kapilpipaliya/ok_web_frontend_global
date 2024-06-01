@@ -6,7 +6,7 @@ import {
   MenuItemGroup,
   MenuOption,
   MenuOptionGroup,
-  MenuProps,
+  type MenuProps,
 } from "./menu";
 import { Radio, RadioGroup } from "../radio/radio";
 
