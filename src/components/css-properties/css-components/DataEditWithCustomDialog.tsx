@@ -102,13 +102,12 @@ export const DataEditWithCustomDialog = (props: {
             props.label.includes("Transition")
         ) {
             return (cssState[props.name] && cssState[props.name].split(",")) || [];
-        } else if (props.label.includes("Filter")) {
+        }if (props.label.includes("Filter")) {
             return (cssState[props.name] && cssState[props.name].split("|")) || [];
-        } else if (props.label.includes("Transform")) {
+        }if (props.label.includes("Transform")) {
             return (cssState[props.name] && cssState[props.name].split("|")) || [];
-        } else {
-            return [];
         }
+            return [];
     };
     const getValueOfInput = (name: string) => changedData()[name];
     const deleteOption = (index: number) => {

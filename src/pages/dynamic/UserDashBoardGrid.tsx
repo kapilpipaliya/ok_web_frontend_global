@@ -30,7 +30,7 @@ export function UserDashBoardGrid() {
       <For each={allTableLayouts()}>
         {(tableLayout) => (
           <div class="bg:gray-5 box-shadow:1|1|1|1|gray-20 pb:50 pt:50 r:7|7|7|7 r:10 flex">
-            <h3 class="f:18@md font:semibold"></h3>
+            <h3 class="f:18@md font:semibold" />
             <p class="mt:5 mb:0 mx:auto f:18@md font:semibold">
               <A href={`${APP_BASE_URL}/${tableLayout.P[IdAttr]}`}>
                 {tableLayout.P.title || tableLayout.P[IdAttr]}

@@ -148,10 +148,10 @@ export async function getCollAttrsAsync(
         );
         return { error: true };
       }
-      attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
+      attr.dataType = dataTypeFromComp.vertex?.P[IdAttr];
     }
   } else {
-    attr.dataType = dataType.vertex!.P[IdAttr];
+    attr.dataType = dataType.vertex?.P[IdAttr];
   }
 
   const collAttrColl = (
@@ -180,7 +180,7 @@ export async function getCollAttrsAsync(
   }
 
   if (collAttrColl) {
-    collProps.collection = collAttrColl["P"]?.["name"];
+    collProps.collection = collAttrColl.P?.name;
   }
 
   // merge default component props
@@ -232,7 +232,7 @@ export async function getCollAttrsAsync(
       removeUndefinedProperties(parentCompProps, false, 10),
       collProps,
     );
-    attr.component = parentVertexResult.vertex!.P[IdAttr];
+    attr.component = parentVertexResult.vertex?.P[IdAttr];
   } else {
     attr.component = collAttrComp.P[IdAttr];
   }
@@ -253,7 +253,7 @@ const getCollectionOneLevelAttrsAsync = async (
   if (vertexCollAttrResult.error) {
     return { error: "No Attributes in a Coll" };
   }
-  const collAttrs = vertexCollAttrResult.vertexes!.sort(
+  const collAttrs = vertexCollAttrResult.vertexes?.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
   const attrs: FieldAttribute[] = [];
@@ -423,13 +423,13 @@ export async function getExportCodeAsync(
           const label = v.L[0];
           if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
             const pksResult = {} as { [primaryKey: string]: any };
-            pksResult["name"] = v.P["name"];
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
+            pksResult.name = v.P.name;
+            if (!result.OUT) {
+              result.OUT = {} as {
                 [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
-            result["OUT"][type] = [pksResult];
+            result.OUT[type] = [pksResult];
             // getChildren(metaVertex, v, pksResult);
           } else {
             const collVertex = await findVertexByLabelAndUniqueIdAsync(
@@ -449,19 +449,19 @@ export async function getExportCodeAsync(
               pksResult[pk] = v.P[pk];
             }
             if (pks.length === 0) {
-              pksResult["name"] = v.P["name"];
+              pksResult.name = v.P.name;
             }
 
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
+            if (!result.OUT) {
+              result.OUT = {} as {
                 [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
 
-            if (!result["OUT"][type]) {
-              result["OUT"][type] = [pksResult];
+            if (!result.OUT[type]) {
+              result.OUT[type] = [pksResult];
             } else {
-              result["OUT"][type].push(pksResult);
+              result.OUT[type].push(pksResult);
             }
             // getChildren(metaVertex, v, pksResult);
           }
@@ -492,11 +492,11 @@ export async function getExportCodeAsync(
           }),
         );
         if (out.length > 0) {
-          if (!result["OUT"]) {
-            result["OUT"] = { [type]: out } as {
+          if (!result.OUT) {
+            result.OUT = { [type]: out } as {
               [EdgeType: string]: { [primaryKey: string]: any }[];
             };
-          } else result["OUT"][type] = out;
+          } else result.OUT[type] = out;
         }
       }
     }
@@ -568,7 +568,7 @@ export async function getProps(
 
     if (keyVertexes.length > 0) {
       const key = keyVertexes[0]; // Assuming the first vertex is the desired key
-      if (key && key.P && key.P.value) {
+      if (key?.P?.value) {
         props[key.P.value] = vertex.P.value;
       }
     }

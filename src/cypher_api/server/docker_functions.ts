@@ -1,9 +1,9 @@
 // For executing child processes
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 
 import fetch from "node-fetch";
 // For HTTP agents
-import { Agent } from "http";
+import { Agent } from "node:http";
 
 // Docker API Reference: https://docs.docker.com/engine/api/v1.24/
 
@@ -54,12 +54,11 @@ function startDockerContainer(containerId: string, callback: Callback<string>) {
     (err, stdout, stderr) => {
       if (err) {
         return callback(err);
-      } else {
+      }
         return callback(
           null,
           `Docker container ${containerId} started successfully`,
         );
-      }
     },
   );
 }
@@ -75,20 +74,18 @@ function pullImageFromRegistry(imageName: string, callback: Callback<string>) {
       (err, stdout, stderr) => {
         if (err) {
           return callback(err);
-        } else {
+        }
           const response = stdout;
           if (response.includes("pull access denied for")) {
             return callback(
               null,
               `Pull access denied for Docker image ${imageName} ,please provide correct  repository `,
             );
-          } else {
+          }
             return callback(
               null,
               `Docker image ${imageName} pulled successfully ,please click create button to create container`,
             );
-          }
-        }
       },
     );
   } catch (error) {
@@ -208,9 +205,8 @@ export async function createDockerContainer(
       if (err) {
         console.error(err);
         throw Error(err.message);
-      } else {
-        return { message };
       }
+        return { message };
     });
     return { data };
   } catch (error: any) {

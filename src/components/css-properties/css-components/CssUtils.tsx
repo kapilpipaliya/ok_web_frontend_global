@@ -17,7 +17,7 @@ export const IconifyIcon = (props: IconifyIconProps) => {
                 {...restProps}
             />
         );
-    } else if (selected.icon === "customIcon") {
+    }if (selected.icon === "customIcon") {
         return (
             <Icon
                 icon={"lucide:box-select"}
@@ -26,7 +26,7 @@ export const IconifyIcon = (props: IconifyIconProps) => {
                 {...restProps}
             />
         );
-    } else {
+    }
         return (
             <Icon
                 icon={selected.icon}
@@ -35,7 +35,6 @@ export const IconifyIcon = (props: IconifyIconProps) => {
                 {...restProps}
             />
         );
-    }
 };
 
 export const ContainerLabel = (props: {

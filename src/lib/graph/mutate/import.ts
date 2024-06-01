@@ -244,9 +244,8 @@ const resoDataTypeToComponents = (
     case "Number": {
       if (row.SugMaxPrecision) {
         return "Int";
-      } else {
-        return "Float";
       }
+        return "Float";
     }
     case "Resource":
       return "SelectBox";
@@ -306,7 +305,7 @@ export function onDataDirectoryImportClick(
     skip: boolean;
   }
 
-  const normalizeMeta = metaData.vertexes!.map((metaVertex) => {
+  const normalizeMeta = metaData.vertexes?.map((metaVertex) => {
     const column = metaVertex.P.column as string;
     // attribute may not exist before, in that case write ID
     let attrId = metaVertex.P.attrId;
@@ -521,7 +520,7 @@ export function onDataDirectoryImportClick(
                 },
               },
             } as unknown as Vertex,
-            v()!.id,
+            v()?.id,
           );
         } else {
           setSelectionValue(
@@ -532,7 +531,7 @@ export function onDataDirectoryImportClick(
             {
               P: { [IdAttr]: selectMeta.edge || selectMeta.collLabel },
             } as unknown as Vertex,
-            v()!.id,
+            v()?.id,
           );
         }
       }
@@ -695,7 +694,7 @@ export function importRecordWithYAMLSchema(
         // input['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
       } else {
         const type = getToEdge(metaVertex, vertex);
-        const childVertexes = input?.["OUT"]?.[type] || [];
+        const childVertexes = input?.OUT?.[type] || [];
         if (metaVertex.P.props?.items) {
           continue;
         }
@@ -715,12 +714,12 @@ export function importRecordWithYAMLSchema(
 
         for (const v of childVertexes) {
           if (AttrsTableData[label] || AttrsAdminTableData[label]) {
-            if (v["name"]) {
+            if (v.name) {
               const selectedVertex = findOrCreateNewVertex(
                 txnId,
                 label,
                 "name",
-                v["name"],
+                v.name,
                 graph,
                 setGraph,
               );
@@ -730,7 +729,7 @@ export function importRecordWithYAMLSchema(
                 graph,
                 setGraph,
                 metaVertex,
-                selectedVertex!.id,
+                selectedVertex?.id,
               );
             }
           } else {
@@ -751,7 +750,7 @@ export function importRecordWithYAMLSchema(
               pksResult[pk] = v[pk];
             }
             if (pks.length === 0) {
-              pksResult["name"] = v["name"];
+              pksResult.name = v.name;
             }
             const selectedVertex = findVertexByLabelAndPks(
               label,
@@ -764,7 +763,7 @@ export function importRecordWithYAMLSchema(
               graph,
               setGraph,
               metaVertex,
-              selectedVertex!.id,
+              selectedVertex?.id,
             );
           }
         }
@@ -777,7 +776,7 @@ export function importRecordWithYAMLSchema(
         // not possible now
       } else {
         const type = getToEdge(metaVertex, vertex);
-        const childVertexes = input?.["OUT"]?.[type] || [];
+        const childVertexes = input?.OUT?.[type] || [];
 
         for (const v of childVertexes) {
           const newRowResult = addNewRow(

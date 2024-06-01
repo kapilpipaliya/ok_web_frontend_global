@@ -68,7 +68,7 @@ export function addNewVertex(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -94,7 +94,7 @@ export function replaceVertexProperties(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -125,7 +125,7 @@ export function mergeVertexProperties(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -158,13 +158,13 @@ export function deleteVertex(
     );
     return { error: "Vertex Children Exist When deleting vertex" };
   }
-  for (const attrInstEdgeId of vertex.OUT["AttrInst"] || []) {
+  for (const attrInstEdgeId of vertex.OUT.AttrInst || []) {
     const attrInstEdge = graph.edges[attrInstEdgeId];
     if (attrInstEdge) {
       const endVertex = graph.vertexes[attrInstEdge.E];
       deleteEdge(txnId, attrInstEdgeId, graph, setGraph);
       if (endVertex) {
-        for (const metaAttrEdgeId of endVertex.OUT["MetaAttr"] || []) {
+        for (const metaAttrEdgeId of endVertex.OUT.MetaAttr || []) {
           const metaAttrEdge = graph.edges[metaAttrEdgeId];
           if (metaAttrEdge) {
             const endVertex = graph.vertexes[metaAttrEdge.E];
@@ -210,7 +210,7 @@ export function deleteVertex(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 

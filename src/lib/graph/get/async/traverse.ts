@@ -50,7 +50,7 @@ export async function getParentVertexesAsync(
   currentVertexes: Vertex[],
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<number, Vertex>();
-  if (path.length == 0) {
+  if (path.length === 0) {
     return { error: true };
   }
   let type = path[path.length - 1];
@@ -89,12 +89,11 @@ export async function getParentVertexesAsync(
       path.slice(0, -1),
       Array.from(stepVertexes.values()),
     );
-  } else {
+  }
     return {
       error: false,
       vertexes: Array.from(stepVertexes.values()),
     };
-  }
 }
 
 export async function calculateFilterAsync(input: string) {
@@ -168,7 +167,7 @@ export async function getTreeDataAsync(
 export async function getTextValueAsync(value: any) {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
-  } else if (typeof value === "object") {
+  }if (typeof value === "object") {
     return JSON.stringify(value);
   }
   return value;
@@ -190,9 +189,8 @@ export async function getSelectionOptionsAsync(
     });
     if (value) {
       return { error: false, vertexes: value };
-    } else {
-      return { error: true };
     }
+      return { error: true };
   } catch (e) {
     console.error(e, vertex, collection);
     return { error: true };
@@ -236,27 +234,24 @@ export async function getChildVertexAsync(
     // TODO:
     // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'component')
   }
-  if (vertexes.length != 1) {
+  if (vertexes.length !== 1) {
     return {
       error: true,
     };
-  } else {
+  }
     const newVertex = vertexes[0];
     if (newVertex) {
       if (path.length > 1) {
         return getChildVertexAsync(graph, path.slice(1), newVertex);
-      } else {
+      }
         return {
           error: false,
           vertex: newVertex,
         };
-      }
-    } else {
+    }
       return {
         error: true,
       };
-    }
-  }
 }
 
 export async function getParentVertexAsync(
@@ -269,34 +264,30 @@ export async function getParentVertexAsync(
 }> {
   const type = path[path.length - 1].replace("$0", currentVertex.L[0]);
   const edges = currentVertex.IN[type];
-  if (!edges || (edges && edges.length != 1)) {
+  if (!edges || (edges && edges.length !== 1)) {
     return {
       error: true,
     };
-  } else {
+  }
     const edge = graph.edges[edges[0]];
     if (edge) {
       const newVertex = graph.vertexes[edge.S];
       if (newVertex) {
         if (path.length > 1) {
           return getParentVertexAsync(path.slice(0, -1), newVertex, graph);
-        } else {
+        }
           return {
             error: false,
             vertex: newVertex,
           };
-        }
-      } else {
+      }
         return {
           error: true,
         };
-      }
-    } else {
+    }
       return {
         error: true,
       };
-    }
-  }
 }
 
 export async function getChildVertexesAsync(
@@ -306,7 +297,7 @@ export async function getChildVertexesAsync(
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<number, Vertex>();
-  if (path.length == 0) {
+  if (path.length === 0) {
     return { error: true };
   }
   let type = path[0];
@@ -316,15 +307,14 @@ export async function getChildVertexesAsync(
       type = type.replace("$0", currentVertex.L[0]);
     }
     const edgeIds = currentVertex.OUT?.[type] || [];
-    if (edgeIds.length == 0) {
+    if (edgeIds.length === 0) {
       // we only return error if its in middle of path
       if (strict && path.length > 1) {
         return {
           error: true,
         };
-      } else {
-        continue;
       }
+        continue;
     }
 
     for (const edgeId of edgeIds) {
@@ -353,10 +343,9 @@ export async function getChildVertexesAsync(
       Array.from(stepVertexes.values()),
       strict,
     );
-  } else {
+  }
     return {
       error: false,
       vertexes: Array.from(stepVertexes.values()),
     };
-  }
 }

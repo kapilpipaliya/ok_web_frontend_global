@@ -305,11 +305,10 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   const height = bounds.bottom - bounds.top;
   if (offset < height * 0.25) {
     return "before";
-  } else if (offset > height * 0.75) {
+  }if (offset > height * 0.75) {
     return "after";
-  } else {
-    return "center";
   }
+    return "center";
   // if (offset < (height + 10)) {
   //  return 'before';
   // } else if (offset > (height - 10)) {
@@ -384,7 +383,7 @@ export function useDragDrop(
     if (position === "before") {
       activeItem = vertex.id;
     } else if (position === "after") {
-      if (isPreview || (collapsedKeys && collapsedKeys().includes(vertex.id))) {
+      if (isPreview || (collapsedKeys?.().includes(vertex.id))) {
         // collapsed state
         activeItem = vertex.id;
       } else {
@@ -435,7 +434,7 @@ export function useDragDrop(
         if (parentResult.error) {
           break;
         }
-        if (parentResult.vertex!.id === fromVertex.id) {
+        if (parentResult.vertex?.id === fromVertex.id) {
           // Don't allow drag and drop
           return;
         }
@@ -545,7 +544,7 @@ export function useDragDrop(
         let pos = 1;
         const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
         for (const child of childrenAttrs) {
-          if (child.id === fromVertex!.id) {
+          if (child.id === fromVertex?.id) {
             continue;
           }
           // const childIndex = child.P.pos;
@@ -555,7 +554,7 @@ export function useDragDrop(
           if (child.id === toVertex.id) {
             // childIndex === toIndex, childIndex may be undefined.
             if (position === "before") {
-              mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+              mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
                 pos,
               });
               pos++;
@@ -564,7 +563,7 @@ export function useDragDrop(
             } else if (position === "after") {
               mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
               pos++;
-              mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+              mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
                 pos,
               });
               pos++;
@@ -647,7 +646,7 @@ export function useDragDrop(
         sortChildren();
       } else if (
         position !== "center" &&
-        fromParentVertex.vertex?.id === toParentVertex!.id
+        fromParentVertex.vertex?.id === toParentVertex?.id
       ) {
         // Sort Children:
         sortChildren();
@@ -671,7 +670,7 @@ export function useDragDrop(
             { P: { props: { type: "Attr" } } } as unknown as Vertex,
             toVertexId,
           );
-          mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+          mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
             pos: 9999999,
           }); // move to end
         } else {
@@ -681,7 +680,7 @@ export function useDragDrop(
             txnId,
             fromVertex,
             { P: { props: { type: "Attr" } } } as unknown as Vertex,
-            toParentVertex!.id,
+            toParentVertex?.id,
           );
         }
 
@@ -715,7 +714,7 @@ export function useDragDrop(
       let pos = 1;
       const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
       for (const child of childrenAttrs) {
-        if (child.id === fromVertex!.id) {
+        if (child.id === fromVertex?.id) {
           continue;
         }
 
@@ -723,7 +722,7 @@ export function useDragDrop(
           if (position === "after") {
             mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
             pos++;
-            mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+            mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
               pos,
             });
             pos++;
@@ -759,11 +758,11 @@ export function useDragDrop(
       const collVertex = getChildVertex(
         graph,
         ["$0Coll"],
-        graph.vertexes[vertex!.id!],
+        graph.vertexes[vertex?.id!],
       );
       setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
       const componentVertex = getComponentFromLayoutRow(
-        vertex!.id!,
+        vertex?.id!,
         graph,
         setGraph,
       );

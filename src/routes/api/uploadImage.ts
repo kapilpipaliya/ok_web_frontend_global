@@ -1,14 +1,14 @@
-import fs from "fs";
+import fs from "node:fs";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import path from "path";
+import path from "node:path";
 import { getQuery, type HTTPEvent, readMultipartFormData } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {
   const subdomain = await getSubDomain(request.headers.get("host")!);
   const query = getQuery(event);
-  const fileId = query["name"];
-  const username = query["username"];
+  const fileId = query.name;
+  const username = query.username;
   const data = await readMultipartFormData(event);
   const baseProfileImagesDir =
     "/root/ok_web_frontend_global/public/profile_images";
@@ -19,7 +19,7 @@ export async function POST({ request }: APIEvent, event: HTTPEvent) {
     if (!fs.existsSync(subdomainProfileImagesDir)) {
       fs.mkdirSync(subdomainProfileImagesDir, { recursive: true });
     }
-    if (data && data[0] && data[0].filename) {
+    if (data?.[0]?.filename) {
       const { ext, name } = path.parse(data[0].filename);
       const newFilename = `${fileId}_${username}_${new Date().toISOString()}${ext}`;
       const imagePath = path.join(subdomainProfileImagesDir, newFilename);
@@ -28,9 +28,8 @@ export async function POST({ request }: APIEvent, event: HTTPEvent) {
         message: "File saved successfully",
         newFilename: `/profile_images/${subdomain}/${newFilename}`,
       };
-    } else {
-      return { error: "No file data available" };
     }
+      return { error: "No file data available" };
   } catch (error) {
     console.error("Error saving file:", error);
     throw error; // Rethrow or handle as necessary

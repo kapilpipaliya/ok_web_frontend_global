@@ -5,7 +5,7 @@ import { APP_BASE_URL } from "~/lib/Utils";
 
 export function UserDashboards() {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const vertexes = () => graph.vertexLabelIdMap["Dashboard"] || [];
+  const vertexes = () => graph.vertexLabelIdMap.Dashboard || [];
   return (
     <div class="">
       <For each={vertexes()}>

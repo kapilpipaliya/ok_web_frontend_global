@@ -15,16 +15,14 @@ export const StyleEditor = () => {
         const filteredProperties = Object.entries(properties)
           .map(([propertyName, property]: any) => {
             let includeProperty = false;
-            if (property.label &&
-              property.label.toLowerCase().includes(query.toLowerCase())) {
+            if (property.label?.toLowerCase().includes(query.toLowerCase())) {
               includeProperty = true;
             }
             if (property.component === "grid" &&
               property.children &&
               property.children.length > 0) {
               const matchingChildren = property.children.filter(
-                (child: { label: string; }) => child.label &&
-                  child.label.toLowerCase().includes(query.toLowerCase())
+                (child: { label: string; }) => child.label?.toLowerCase().includes(query.toLowerCase())
               );
               if (matchingChildren.length > 0) {
                 includeProperty = true;

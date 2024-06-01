@@ -44,8 +44,8 @@ export function SyncComopnent() {
         promise: migrateNodes(element, node),
         loadMessage: "Transfering nodes...",
         successMessage:
-          "Transfer completed successfully for " + element.P.username,
-        errorMessage: "Error Transfering nodes for " + element.P.username,
+          `Transfer completed successfully for ${element.P.username}`,
+        errorMessage: `Error Transfering nodes for ${element.P.username}`,
         onSuccess: (value) => {
           setSelectedUsers([]);
         },
@@ -91,9 +91,8 @@ export function SyncComopnent() {
       setSelectedUsers((prev: any) => {
         if (prev.includes(userId)) {
           return prev.filter((id: any) => id !== userId);
-        } else {
-          return [...prev, userId];
         }
+          return [...prev, userId];
       });
     };
 
@@ -197,7 +196,7 @@ export function SyncComopnent() {
                                 user.P.profileImage ||
                                 "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
                               }
-                              alt={`image`}
+                              alt={"image"}
                             />
                             <div class="ml:13">
                               <div class="f:1rem lh:1.5rem font-weight:600">

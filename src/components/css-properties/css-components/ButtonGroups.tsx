@@ -32,11 +32,11 @@ export const ButtonGroups = (props: {
     };
 
     const Content = () => (
-        <div class={`radio-inputs w:100%`}>
+        <div class={"radio-inputs w:100%"}>
             <For each={props.options}>
                 {(option, index) => {
                     return (
-                        <label class={`radio`}>
+                        <label class={"radio"}>
                             <CustomTooltip message={option.tooltip ?? option.value}>
                                 <input
                                     type="radio"
@@ -44,7 +44,7 @@ export const ButtonGroups = (props: {
                                     checked={selected() === option.value}
                                     onChange={(e) => handleChange(e, option)}
                                 />
-                                <span class={`name`}>
+                                <span class={"name"}>
                                     {option.icon ? (
                                         <IconifyIcon icon={option.key as string} />
                                     ) : (

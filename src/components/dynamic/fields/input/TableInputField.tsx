@@ -288,7 +288,7 @@ export function TableInputField(
 
               return (
                 <>
-                  <Show when={component == "Error"}>Error</Show>
+                  <Show when={component === "Error"}>Error</Show>
                   <DynamicComponent
                     title={toTitle(
                       column.P.displayName || column.P[IdAttr] || ""
@@ -404,7 +404,7 @@ export function TableInputField(
             "text-align": "center", width: "50px",
             'background-color': dragFromIndex() === p.index ? "#e0e0e0" : dragToIndex() === p.index ? "#f0f0f0" : "white",
             transition: "background-color 0.2s ease",
-            'border': dragToIndex() === p.index ? "2px solid #007bff" : "1px solid #ddd",
+            border: dragToIndex() === p.index ? "2px solid #007bff" : "1px solid #ddd",
           }}
         >
           <td>
@@ -580,7 +580,7 @@ export function TableInputField(
                     width: "max-content",
                   }}
                 >
-                  <td></td>
+                  <td />
                   <td>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => {
@@ -588,7 +588,7 @@ export function TableInputField(
                         <Switch>
                           {/*<Match when={attribute.props?.skip}></Match>*/}
                           <Match when={attribute.P.tab === "expand"}>
-                            <span></span>
+                            <span />
                           </Match>
                           <Match
                             when={
@@ -610,7 +610,7 @@ export function TableInputField(
                           </Match>
 
                           <Match when={true}>
-                            <th></th>
+                            <th />
                           </Match>
                         </Switch>
                       );

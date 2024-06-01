@@ -37,7 +37,7 @@ export class EventBus {
       const eventCb = events[index++];
       if (eventCb) {
         const result = eventCb.call(this._ctx, ...args);
-        return result && result.then ? result : Promise.resolve(result);
+        return result?.then ? result : Promise.resolve(result);
       }
     };
 

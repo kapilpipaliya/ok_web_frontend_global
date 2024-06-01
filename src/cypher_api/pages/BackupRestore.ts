@@ -16,7 +16,7 @@ const insertAttributes = async (
   parentVertex: Node,
   collectionMetaData: FormMetaData,
 ) => {
-  const collectionAttributes = collectionMetaData["attributes"];
+  const collectionAttributes = collectionMetaData.attributes;
   if (!collectionAttributes) return;
 
   for (const attribute of collectionAttributes) {
@@ -97,7 +97,7 @@ const insertAttributes = async (
         } else {
           dataTypeVertex = setDataType(
             graph.vertexes[rowResult.vertexId!],
-            dataTypeDefault.vertex!.P[IdAttr],
+            dataTypeDefault.vertex?.P[IdAttr],
           );
         }
       }
@@ -129,7 +129,7 @@ const insertAttributes = async (
 };
 // @ts-ignore
 const importCollections = () => {
-  const file = componentPropsInputRef!.files![0];
+  const file = componentPropsInputRef?.files?.[0];
 
   if (file) {
     file.text().then(async (jsonText) => {
@@ -137,8 +137,8 @@ const importCollections = () => {
       const txnId = getNewTxnId(graph, setGraph); // Note txnId 0 not working
       for (const collectionId in json) {
         const collection = json[collectionId];
-        const name = collection["name"] as string;
-        const title = collection["title"] as string;
+        const name = collection.name as string;
+        const title = collection.title as string;
 
         const parentVertexId = getNewGraphId();
         addNewVertex(
@@ -166,7 +166,7 @@ const makeASampleForm = async () => {
     }),
   );
   const existingVertex = graph.vertexes[vertexId];
-  for (const compVertexId of graph.vertexLabelIdMap["Comp"]) {
+  for (const compVertexId of graph.vertexLabelIdMap.Comp) {
     const componentVertex = graph.vertexes[compVertexId];
     const componentName = componentVertex.P[IdAttr];
     if (
@@ -195,7 +195,7 @@ const makeASampleForm = async () => {
         graph.vertexes[newRow1.vertexId!],
         // @ts-ignore
         { P: { [IdAttr]: "dataType" } } as Node,
-        dataType.vertex!.id,
+        dataType.vertex?.id,
       );
       setSelectionValue(
         txnId,
@@ -218,7 +218,7 @@ export async function importAllCSV(
   const form = await getFormMetaData(dbConn, "Import");
   if (form.error) return form.error;
   const record = new Record({ dbConn, graph, setGraph });
-  const createResult = record.create(form.form![IdAttr]);
+  const createResult = record.create(form.form?.[IdAttr]);
   record.createMeta(form.form!);
   if (createResult.error) return createResult.error;
 
@@ -375,7 +375,7 @@ const importMainNavigation = (
 ) => {
   const record = new Record({ dbConn, graph, setGraph });
   record.create("Nav", {});
-  record.createMeta(AttrsAdminTableData["Nav"]);
+  record.createMeta(AttrsAdminTableData.Nav);
   importRecordWithYAMLSchema(
     `L: Nav
 P:

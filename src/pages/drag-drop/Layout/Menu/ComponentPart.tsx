@@ -109,10 +109,9 @@ export function ComponentPart() {
 
           if (category) {
             // Create a copy of the category's children array
-            const filteredChildren = category.children && category.children.filter((child: any) => {
+            const filteredChildren = category.children?.filter((child: any) => {
               return (
-                child.name &&
-                child.name.toLowerCase().includes(searchQuery().toLowerCase())
+                child.name?.toLowerCase().includes(searchQuery().toLowerCase())
               );
             });
 
@@ -121,9 +120,8 @@ export function ComponentPart() {
               ...item,
               children: filteredChildren,
             };
-          } else {
-            return item;
           }
+            return item;
         })
         .filter((item) => item.children && item.children.length > 0); // Filter out items with no matching children
 
@@ -181,16 +179,14 @@ export function ComponentPart() {
           <Icon onClick={() => {
             const currentURL = window.location.href;
             const navigateUrl =
-              currentURL.split("/").slice(0, -2).join("/") +
-              "/Comp/" +
-              props.child.id;
+              `${currentURL.split("/").slice(0, -2).join("/")}/Comp/${props.child.id}`;
             window.open(navigateUrl, "_blank");
           }} style={{ cursor: "pointer", position: "absolute", right: "3px", top: "3px" }} icon={'solar:settings-linear'} width={21} height={21} />
         </Show>
         {/* @ts-ignore  */}
         <Show when={isHovered() || (selectedComponents().has(graph.vertexes[props.child.id]))} >
           <Checkbox
-            wrapperStyle={{ 'height': '19px', 'width': '19px' }}
+            wrapperStyle={{ height: '19px', width: '19px' }}
             type="checkbox"
             style={{ position: "absolute", top: "-2px", left: "7px" }}
             onChange={(e) => handleCheckboxChange(e, props.child.id)}

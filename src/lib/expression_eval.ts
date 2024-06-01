@@ -135,7 +135,7 @@ export function evaluate(_node: jsep.Expression, context: object): any {
     case "BinaryExpression":
       if (node.operator === "||") {
         return evaluate(node.left, context) || evaluate(node.right, context);
-      } else if (node.operator === "&&") {
+      }if (node.operator === "&&") {
         return evaluate(node.left, context) && evaluate(node.right, context);
       }
       return binops[node.operator](
@@ -144,8 +144,10 @@ export function evaluate(_node: jsep.Expression, context: object): any {
         context,
       );
 
-    case "CallExpression":
-      let caller, fn, assign;
+    case "CallExpression": {
+      let caller;
+      let fn;
+      let assign;
       if (node.callee.type === "MemberExpression") {
         assign = evaluateMember(node.callee as jsep.MemberExpression, context);
         caller = assign[0];
@@ -157,6 +159,7 @@ export function evaluate(_node: jsep.Expression, context: object): any {
         return undefined;
       }
       return fn.apply(caller, evaluateArray(node.arguments, context));
+    }
 
     case "ConditionalExpression":
       return evaluate(node.test, context)
@@ -202,7 +205,7 @@ export async function evalAsync(
           (await evalAsync(node.left, context)) ||
           (await evalAsync(node.right, context))
         );
-      } else if (node.operator === "&&") {
+      }if (node.operator === "&&") {
         return (
           (await evalAsync(node.left, context)) &&
           (await evalAsync(node.right, context))
@@ -213,15 +216,17 @@ export async function evalAsync(
         evalAsync(node.right, context),
       ]);
 
-      if (binops[node.operator + "_async"]) {
-        return binops[node.operator + "_async"](left, right, context);
+      if (binops[`${node.operator}_async`]) {
+        return binops[`${node.operator}_async`](left, right, context);
       }
 
       return binops[node.operator](left, right, context);
     }
 
     case "CallExpression": {
-      let caller, fn, assign;
+      let caller;
+      let fn;
+      let assign;
       if (node.callee.type === "MemberExpression") {
         assign = await evaluateMemberAsync(
           node.callee as jsep.MemberExpression,
@@ -260,8 +265,8 @@ export async function evalAsync(
       return context;
 
     case "UnaryExpression":
-      if (unops[node.operator + "_async"]) {
-        return unops[node.operator + "_async"](
+      if (unops[`${node.operator}_async`]) {
+        return unops[`${node.operator}_async`](
           await evalAsync(node.argument, context),
           context,
         );
@@ -297,7 +302,7 @@ export function addUnaryOp(
   jsep.addUnaryOp(operator);
   unops[operator] = _function;
   if (_asyncFunction) {
-    unops[operator + "_async"] = _asyncFunction;
+    unops[`${operator}_async`] = _asyncFunction;
   }
 }
 
@@ -313,7 +318,7 @@ export function addBinaryOp(
   jsep.addBinaryOp(operator, precedence, rightToLeft);
   binops[operator] = _function;
   if (_asyncFunction) {
-    binops[operator + "_async"] = _asyncFunction;
+    binops[`${operator}_async`] = _asyncFunction;
   }
 }
 
@@ -364,14 +369,13 @@ addBinaryOp(
       const type = edgeType.replace("$0", currentVertex.L[0]);
 
       const edgeIds = currentVertex.OUT[type] || [];
-      if (edgeIds.length == 0) {
+      if (edgeIds.length === 0) {
         const strict = true;
         // we only return error if its in middle of path
         if (strict && path.length > 1) {
           return;
-        } else {
-          continue;
         }
+          continue;
       }
       for (const edgeId of edgeIds) {
         const edge = context.graph.edges[edgeId];
@@ -485,11 +489,10 @@ addUnaryOp(
         }
       }
       return filteredVertexes;
-    } else {
+    }
       return findVertexIdsByLabel(context.graph, edgeType).map(
         (id) => context.graph.vertexes[id],
       );
-    }
   },
   evalGlobalColl,
 );

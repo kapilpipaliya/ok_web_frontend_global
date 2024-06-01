@@ -86,7 +86,7 @@ export function revertTransactionUpTo(txnId: number, txnIndex: number) {
 }
 export function revertTransaction(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])];
+  const existingTxnValue = [...(transactions.get(txnId)?.steps || [])];
   batch(() => {
     existingTxnValue.reverse().forEach((txn) => txn.revert());
   });
@@ -94,13 +94,13 @@ export function revertTransaction(txnId: number) {
 }
 export function txnHasSteps(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return false;
-  const existingTxnValue = transactions.get(txnId)!.steps || [];
+  const existingTxnValue = transactions.get(txnId)?.steps || [];
   return existingTxnValue.length > 0;
 }
 
 export function getTransactionData(txnId: number) {
   if (!transactions.has(txnId)) return [];
-  const existingTxnValue = [...(transactions.get(txnId)!.steps || [])].map(
+  const existingTxnValue = [...(transactions.get(txnId)?.steps || [])].map(
     (txnDetail) => ({
       insert: txnDetail.insert?.(),
       replace: txnDetail.replace?.(),
@@ -125,7 +125,7 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    } else if (
+    }if (
       value.status === ProcessStatus.AckReceived ||
       value.status === ProcessStatus.Sent
     ) {

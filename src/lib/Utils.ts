@@ -116,7 +116,7 @@ export const getTextColumnValue = (value: any) => {
 
   if (value === true) {
     return "True";
-  } else if (value === false) {
+  }if (value === false) {
     return "False";
   }
   if (!value) {
@@ -207,7 +207,7 @@ export function replaceExpressionToLabel(
         graph,
         setGraph,
         [vertex],
-        collection.match(/{{(.*)}}/)![1]! || "",
+        collection.match(/{{(.*)}}/)?.[1]! || "",
       ).vertexes || "",
     );
   }
@@ -484,10 +484,9 @@ export function getValueFromVertexOrKey(
 
 export function isObject(i: any) {
   if (i && !Array.isArray(i)) {
-    return "object" == typeof i;
-  } else {
-    return !1;
+    return "object" === typeof i;
   }
+    return !1;
 }
 
 export function groupBy(
@@ -522,9 +521,8 @@ export function getId(input: string) {
   return input;
 } // ts-belt
 export function isNumber(i: any) {
-  if ("number" == typeof i) {
+  if ("number" === typeof i) {
     return !Number.isNaN(i);
-  } else {
-    return !1;
   }
+    return !1;
 }

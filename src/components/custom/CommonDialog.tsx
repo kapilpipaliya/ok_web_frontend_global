@@ -56,7 +56,7 @@ const CustomModal = (props: CustomModalProps) => {
           class={`cursor:pointer bg:lightgrey:hover r:5|5|5|5 p:5|5|5|5 ${props.iconClass}`}
           onClick={() => setOpen(true)}
           icon={props.buttonIcon ?? "material-symbols:error"}
-        ></Icon>
+        />
       </Show>
       <Dismiss menuButton={btnEl!} open={open} setOpen={setOpen} modal>
         <div

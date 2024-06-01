@@ -30,7 +30,7 @@ export async function getParentVertexesMGCall(
   currentVertexes: Vertex[],
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<Id, Vertex>();
-  if (path.length == 0) {
+  if (path.length === 0) {
     return { error: true };
   }
   let type = path[path.length - 1];
@@ -57,12 +57,11 @@ export async function getParentVertexesMGCall(
       path.slice(0, -1),
       Array.from(stepVertexes.values()),
     );
-  } else {
+  }
     return {
       error: false,
       vertexes: Array.from(stepVertexes.values()),
     };
-  }
 }
 
 export function calculateFilterMGCall(input: string) {
@@ -175,9 +174,8 @@ export async function getSelectionOptionsMGCall(
           edges: relationships,
         },
       };
-    } else {
-      return { error: true };
     }
+      return { error: true };
   } catch (e) {
     console.error(e, vertex, collection);
     return { error: true };
@@ -219,27 +217,24 @@ export async function getChildVertexMGCall(
     // TODO:
     // vertexes = vertexes.filter(x=>x.P[IdAttr] === 'component')
   }
-  if (vertexes.length != 1) {
+  if (vertexes.length !== 1) {
     return {
       error: true,
     };
-  } else {
+  }
     const newVertex = vertexes[0][1];
     if (newVertex) {
       if (path.length > 1) {
         return getChildVertexMGCall(path.slice(1), newVertex);
-      } else {
+      }
         return {
           error: false,
           vertex: newVertex,
         };
-      }
-    } else {
+    }
       return {
         error: true,
       };
-    }
-  }
 }
 
 export async function getParentVertexMGCall(
@@ -253,28 +248,25 @@ export async function getParentVertexMGCall(
 
   if (
     pairsResult.error ||
-    (pairsResult.pairs && pairsResult.pairs.length != 1)
+    (pairsResult.pairs && pairsResult.pairs.length !== 1)
   ) {
     return {
       error: true,
     };
-  } else {
-    const newVertex = pairsResult.pairs![0][1];
+  }
+    const newVertex = pairsResult.pairs?.[0][1];
     if (newVertex) {
       if (path.length > 1) {
         return getParentVertexMGCall(path.slice(0, -1), newVertex);
-      } else {
+      }
         return {
           error: false,
           vertex: newVertex,
         };
-      }
-    } else {
+    }
       return {
         error: true,
       };
-    }
-  }
 }
 
 export async function getChildVertexesMGCall(
@@ -283,7 +275,7 @@ export async function getChildVertexesMGCall(
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
   const stepVertexes = new Map<Id, Vertex>();
-  if (path.length == 0) {
+  if (path.length === 0) {
     return { error: true };
   }
   let type = path[0];
@@ -296,15 +288,14 @@ export async function getChildVertexesMGCall(
     if (outEdgesResult.error) return outEdgesResult;
     const outVertexes = outEdgesResult.pairs!;
 
-    if (outVertexes.length == 0) {
+    if (outVertexes.length === 0) {
       // we only return error if its in middle of path
       if (strict && path.length > 1) {
         return {
           error: true,
         };
-      } else {
-        continue;
       }
+        continue;
     }
 
     for (const newVertex of outVertexes) {
@@ -318,12 +309,11 @@ export async function getChildVertexesMGCall(
       Array.from(stepVertexes.values()),
       strict,
     );
-  } else {
+  }
     return {
       error: false,
       vertexes: Array.from(stepVertexes.values()),
     };
-  }
 }
 
 export async function replaceExpressionToLabel(
@@ -338,7 +328,7 @@ export async function replaceExpressionToLabel(
       (
         await getSelectionOptionsMGCall(
           [vertex],
-          collection.match(/{{(.*)}}/)![1]! || "",
+          collection.match(/{{(.*)}}/)?.[1]! || "",
         )
       ).vertexes || "",
     );

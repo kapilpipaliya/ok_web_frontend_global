@@ -125,9 +125,8 @@ export function setParentValue(
 export function ensureArray(value: any) {
   if (Array.isArray(value)) {
     return value;
-  } else {
-    return value ? [value] : [];
   }
+    return value ? [value] : [];
 }
 export function selectedValue(
   meta: Vertex,
@@ -180,9 +179,8 @@ export function collectionNameDisplayExpr(
     const nameKeys = getNameKeyForCollection(graph, collectionVertex);
     if (nameKeys.length === 1) {
       return `P.${nameKeys[0]}`;
-    } else {
-      return nameKeys.map((name) => `$P.${name}`).join(" ");
     }
+      return nameKeys.map((name) => `$P.${name}`).join(" ");
   }
   return;
 }
@@ -217,11 +215,10 @@ export function SelectInputField(
     if (value) {
       if (typeof value === "string") {
         return value.split("\n");
-      } else if (Array.isArray(value)) {
+      }if (Array.isArray(value)) {
         return value;
-      } else {
-        setOptions(value ? [value] : []);
       }
+        setOptions(value ? [value] : []);
     } else {
       // this is not working when row is enabled, select field options is not updated
       if (field.disabled) {
@@ -231,7 +228,7 @@ export function SelectInputField(
       }
 
       const collection =
-        getChildVertex(graph, ["$0Coll"], field.meta).vertex?.["P"]?.["name"] ||
+        getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
         getValueFromVertexOrKey(field.meta.P.props, "collection");
       if (!collection) {
         return [];
@@ -365,7 +362,7 @@ export function SelectInputField(
   };
   const outerOwner = getOwner();
   return (
-    <div aria-labeledby={props["aria-labeledby"]}>
+    <div >
       <Show
         when={!field.disabled}
         fallback={

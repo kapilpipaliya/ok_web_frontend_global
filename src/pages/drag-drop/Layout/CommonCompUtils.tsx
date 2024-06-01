@@ -18,7 +18,7 @@ export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetS
     let pos = 1;
     const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
     for (const child of childrenAttrs) {
-      if (child.id === fromVertex!.id) {
+      if (child.id === fromVertex?.id) {
         continue;
       }
       // const childIndex = child.P.pos;
@@ -50,7 +50,7 @@ export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetS
     { P: { props: { type: "Attr" } } } as unknown as Vertex,
     toVertexId,
   );
-  mergeVertexProperties(txnId, fromVertex!.id, graph, setGraph, {
+  mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
     pos: 9999999,
   });
   

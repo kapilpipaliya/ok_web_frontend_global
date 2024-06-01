@@ -65,14 +65,14 @@ const wrapText = (children: JSX.Element): JSX.Element => {
     return wrapText(children());
   }
   if (typeof children === "string") {
-    return <span tabIndex="0">{children}</span>;
+    return <span >{children}</span>;
   }
   if (Array.isArray(children)) {
     const result = children.map((child) =>
       typeof child === "function" ? child() : child,
     );
     if (result.every((child) => typeof child === "string")) {
-      return <span tabIndex="0">{result}</span>;
+      return <span >{result}</span>;
     }
     return result;
   }

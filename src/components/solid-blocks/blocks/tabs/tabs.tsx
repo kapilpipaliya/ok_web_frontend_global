@@ -78,10 +78,10 @@ export function Tab(props: TabProps) {
   const [_index, setIndex, isActive, getIndex, id] = useContext(tabsContext);
   const [ref, setRef] = createSignal<HTMLButtonElement>();
   const index = getIndex ? getIndex(false) : -1;
-  const active = () => isActive && isActive(index);
+  const active = () => isActive?.(index);
   createEffect(
     on(
-      () => isActive && isActive(index),
+      () => isActive?.(index),
       (active) => active && ref()?.focus(),
       { defer: true },
     ),
@@ -129,7 +129,7 @@ export function TabContainer(props: TabContainerProps) {
       role="tabpanel"
       id={`${id}-container${index}`}
       aria-labelledby={`${id}-tab${index}`}
-      tabIndex={isActive && isActive(index) ? 0 : undefined}
+      tabIndex={isActive?.(index) ? 0 : undefined}
       hidden={!isActive || isActive(index) ? undefined : true}
       {...props}
     />

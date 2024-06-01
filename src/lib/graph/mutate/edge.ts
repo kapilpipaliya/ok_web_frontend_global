@@ -100,7 +100,7 @@ export function addNewEdge(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -125,7 +125,7 @@ export function replaceEdgeProperties(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -169,7 +169,7 @@ export function replaceEdgeStart(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 //private
@@ -211,7 +211,7 @@ export function replaceEdgeEnd(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -259,7 +259,7 @@ export function deleteEdge(
   });
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)!.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 

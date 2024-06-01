@@ -22,7 +22,7 @@ import { getComponentForCollRow } from "~/components/dynamic/components/form/For
 
 export function AllForms() {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const allForms = () => graph.vertexLabelIdMap["Form"] || [];
+  const allForms = () => graph.vertexLabelIdMap.Form || [];
 
   return (
     <div class="">
@@ -145,7 +145,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
         <tbody>
           <For each={props.metaAttributes}>
             {(metaVertex) => {
-              const id = props.vertex.id + metaVertex.P[IdAttr] + "Label";
+              const id = `${props.vertex.id + metaVertex.P[IdAttr]}Label`;
               const component = createMemo(() =>
                 getComponentForCollRow(
                   metaVertex,

@@ -21,7 +21,7 @@ export async function findVertexesMGCall(options: {
     let params;
 
     if (options.id !== undefined) {
-      query = `MATCH (v) WHERE id(v) = $id RETURN v`;
+      query = "MATCH (v) WHERE id(v) = $id RETURN v";
       params = { id: int(options.id) };
     } else if (
       options.label &&
@@ -46,14 +46,13 @@ export async function findVertexesMGCall(options: {
       return {
         error: true,
       }
-    } else {
+    }
       const vertexes = convertNodeToJson(vertexResult.records[0].get("v"));
 
       return {
         error: false,
         vertexes,
       };
-    }
   } catch (error) {
     console.error(error);
 

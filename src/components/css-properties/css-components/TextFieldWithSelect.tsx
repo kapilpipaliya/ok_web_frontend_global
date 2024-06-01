@@ -132,7 +132,7 @@ export const TextFieldWithSelect = (props: {
                             placeholder={`${props.inputType === "number" ? "0" : props.placeholder}`}
                             value={getValueWithoutUnits(cssState[props.name] ?? "")}
                             onInput={handleChange}
-                            class={`f:14`}
+                            class={"f:14"}
                             style={{ width: "100%" }} // Set width to 100%
                         />
                     }
@@ -156,20 +156,20 @@ export const TextFieldWithSelect = (props: {
                         "color:lightgrey f:14 ml:5 pr:5 cursor:pointer user-select:none"
                     }
                 >
-                    {selectedOption!()}
+                    {selectedOption?.()}
                 </span>
                 <Show when={isDropdownOpen()}>
                     <div
-                        class={`bg:white w:full box-shadow:0px|2px|5px|rgba(0,0,0,0.2) r:5 p:5 abs z-index:1000 top:100% left:0`}
+                        class={"bg:white w:full box-shadow:0px|2px|5px|rgba(0,0,0,0.2) r:5 p:5 abs z-index:1000 top:100% left:0"}
                     >
                         <For each={props.options}>
                             {(option) => (
                                 <div
                                     onClick={() => selectOption(option)}
-                                    class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${selectedOption!() === option ? "bg:rgb(229,234,253) font-weight:medium" : "bg:transparent"} r:5`}
+                                    class={`flex ai:center jc:space-between p:5 cursor:pointer bg:#efefef:hover ${selectedOption?.() === option ? "bg:rgb(229,234,253) font-weight:medium" : "bg:transparent"} r:5`}
                                 >
                                     {option}
-                                    <Show when={selectedOption!() === option}>
+                                    <Show when={selectedOption?.() === option}>
                                         <Icon icon={"mdi:check"} />
                                     </Show>
                                 </div>

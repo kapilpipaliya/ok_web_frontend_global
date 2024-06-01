@@ -88,7 +88,7 @@ export function NavDesigner() {
           <PreviewCode />
         </Show>
         <Show when={count() && config[0].formData.formData && count()} keyed>
-          <div></div>
+          <div />
         </Show>
       </div>
     </div>

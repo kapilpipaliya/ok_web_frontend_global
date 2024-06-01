@@ -58,7 +58,7 @@ export function Checkbox(props: CheckboxProps) {
           {content.children}
         </span>
       </Show>
-      <div class={`checkbox-wrapper m:-5px`} style={props.wrapperStyle}>
+      <div class={"checkbox-wrapper m:-5px"} style={props.wrapperStyle}>
         <input
           ref={props.ref}
           type="checkbox"
@@ -70,12 +70,12 @@ export function Checkbox(props: CheckboxProps) {
           }}
         />
         <svg viewBox="0 0 35.6 35.6">
-          <circle class="background" cx="17.8" cy="17.8" r="17.8"></circle>
-          <circle class="stroke" cx="17.8" cy="17.8" r="14.37"></circle>
+          <circle class="background" cx="17.8" cy="17.8" r="17.8" />
+          <circle class="stroke" cx="17.8" cy="17.8" r="14.37" />
           <polyline
             class="check"
             points="11.78 18.12 15.55 22.23 25.17 12.87"
-          ></polyline>
+          />
         </svg>
       </div>
       <Show when={content.align !== "right"}>

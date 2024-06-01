@@ -81,7 +81,7 @@ export const DisplaySelector = (props: {
                         aria-expanded={isActive()}
                     >
                         <span class="selected-value">{formatString(selected())}</span>
-                        <span class="arrow"></span>
+                        <span class="arrow" />
                     </button>
                     <div>
                         <Icon
@@ -97,7 +97,6 @@ export const DisplaySelector = (props: {
                     style={
                         "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
                     }
-                    role="listbox"
                     id={`select-dropdown${props.label}`}
                 >
                     <For each={props.options}>
@@ -106,7 +105,6 @@ export const DisplaySelector = (props: {
                             return (
                                 <li
                                     class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${selected() !== label() ? "bg:#efefef:hover" : "bg:rgb(229,234,253):hover"} font-weight:${selected() === label() ? "medium" : ""} r:5 ${selected() === label() ? "bg:rgb(229,234,253)" : ""}`}
-                                    role="option"
                                     onClick={() => selectOption(option)}
                                 >
                                     <label>{formatString(label())}</label>

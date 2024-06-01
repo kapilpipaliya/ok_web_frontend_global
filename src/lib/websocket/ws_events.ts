@@ -39,12 +39,11 @@ export function setGraphData(
           const IN = { ...prev.IN, ...args.vertexes[vertexId].IN };
           const OUT = { ...prev.OUT, ...args.vertexes[vertexId].OUT };
           return { ...args.vertexes[vertexId], IN, OUT };
-        } else {
-          return args.vertexes[vertexId];
         }
+          return args.vertexes[vertexId];
       });
 
-      for (const label of args.vertexes[vertexId]["L"]) {
+      for (const label of args.vertexes[vertexId].L) {
         setGraph("vertexLabelIdMap", label, (vertexIds) => {
           return Array.isArray(vertexIds)
             ? [...new Set([...vertexIds, args.vertexes[vertexId].id])]
@@ -53,16 +52,7 @@ export function setGraphData(
       }
     }
 
-    // todo: remove this for loop
-    if (args.vertexLabelIdMap) {
-      for (const label in args.vertexLabelIdMap) {
-        setGraph("vertexLabelIdMap", label, (vertexIds) => {
-          return Array.isArray(vertexIds)
-            ? [...new Set([...vertexIds, ...args.vertexLabelIdMap![label]])]
-            : args.vertexLabelIdMap![label];
-        });
-      }
-    }
+    
 
     for (const edgeId in args.edges) {
       setGraph("edges", edgeId, args.edges[edgeId]);

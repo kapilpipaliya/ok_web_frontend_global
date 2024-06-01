@@ -47,7 +47,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
         : "17% 1fr"
       : isRightOpen()
         ? "25%"
-        : `12% 1fr`,
+        : "12% 1fr",
   });
 
   return (

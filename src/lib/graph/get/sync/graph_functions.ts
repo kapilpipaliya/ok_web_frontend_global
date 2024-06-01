@@ -17,7 +17,7 @@ export function compareId(id1: any, id2: any) {
   if (typeof id2 === "object") {
     id2 = id2.toString();
   }
-  return id1 == id2;
+  return id1 === id2;
 }
 
 export function isIdArrayIncludesID(value: Array<any>, id: any) {
@@ -145,10 +145,10 @@ export function getCollAttrs(
         );
         return { error: true };
       }
-      attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
+      attr.dataType = dataTypeFromComp.vertex?.P[IdAttr];
     }
   } else {
-    attr.dataType = dataType.vertex!.P[IdAttr];
+    attr.dataType = dataType.vertex?.P[IdAttr];
   }
 
   const collAttrColl = getChildVertex(graph, ["$0Coll"], vertexCollAttr).vertex;
@@ -172,7 +172,7 @@ export function getCollAttrs(
     {} as { [key: string]: any },
   );
   if (collAttrColl) {
-    collProps.collection = collAttrColl["P"]?.["name"];
+    collProps.collection = collAttrColl.P?.name;
   }
 
   // merge default component props
@@ -219,7 +219,7 @@ export function getCollAttrs(
       removeUndefinedProperties(parentCompProps, false, 10),
       collProps,
     );
-    attr.component = parentVertexResult.vertex!.P[IdAttr];
+    attr.component = parentVertexResult.vertex?.P[IdAttr];
   } else {
     attr.component = collAttrComp.P[IdAttr];
   }
@@ -236,7 +236,7 @@ const getCollectionOneLevelAttrs = (
   if (vertexCollAttrResult.error) {
     return { error: "No Attributes in a Coll" };
   }
-  const collAttrs = vertexCollAttrResult.vertexes!.sort(
+  const collAttrs = vertexCollAttrResult.vertexes?.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
   const attrs: FieldAttribute[] = [];

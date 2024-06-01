@@ -48,7 +48,7 @@ describe("addNewVertex", () => {
     expect(error1).toBe(false);
     expect(txnDetailIndex1).toBe(1);
     const txnDetails = transactions.get(1)!;
-    expect(txnDetails.steps.map((txn) => txn.insert!())).toEqual([
+    expect(txnDetails.steps.map((txn) => txn.insert?.())).toEqual([
       klona(vertex1),
       klona(vertex2),
     ]);

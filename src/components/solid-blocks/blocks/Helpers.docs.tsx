@@ -35,7 +35,7 @@ createLocalStorageSignal<T>(
         changes.
       </p>
       <pre data-title="function signature">
-        {`useMediaQuery(query: MediaQuery) => Accessor<boolean>`}
+        {"useMediaQuery(query: MediaQuery) => Accessor<boolean>"}
       </pre>
       <p>
         For example, if you want an element to be shown only on mobile devices,

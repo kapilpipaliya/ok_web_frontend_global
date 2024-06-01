@@ -72,10 +72,10 @@ export function DynamicCSSComponent(props: { value: any }) {
       <Match when={props.value.component === "grid"}>
         <div
           style={{
-            padding: props.value["padding"] || 0,
+            padding: props.value.padding || 0,
             display: "grid",
-            gap: props.value["gap"] || 10,
-            "align-items": props.value["align"] || "center",
+            gap: props.value.gap || 10,
+            "align-items": props.value.align || "center",
             "grid-template-columns": props.value["grid-template-columns"],
           }}
         >

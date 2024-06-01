@@ -32,7 +32,8 @@ export async function evalGetChildren(
     type = edgeType;
   }
 
-  let query, params;
+  let query;
+  let params;
   if (type.includes("|")) {
     query = `
   MATCH (parent)-[r]->(child)
@@ -89,7 +90,8 @@ export async function evalGetParents(
   if (!vertexes || vertexes.length === 0) return;
   const session = (await getDriver(subDomain)).session();
   const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
-  let query, params;
+  let query;
+  let params;
   if (type.includes("|")) {
     // Cypher query to get parents
     query = `
@@ -149,7 +151,7 @@ async function findVertexsMGCallId(
   let params = {};
 
   if (id) {
-    query = `MATCH (n) WHERE id(n) = $id RETURN n`;
+    query = "MATCH (n) WHERE id(n) = $id RETURN n";
     params = {id: int(id)}
   } else if (label) {
     query = `MATCH (n:${label}) RETURN n`;
@@ -197,13 +199,12 @@ export async function evalGlobalColl(
       );
 
       return filteredVertexes;
-    } else {
+    }
       return await findVertexsMGCallId(
         session,
         { label: edgeType, skip, limit },
         context,
       );
-    }
   } catch (error: any) {
     throw new Response(error.message, { status: 500 });
   } finally {

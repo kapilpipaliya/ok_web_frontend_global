@@ -14,20 +14,20 @@ export function Footer() {
           </div>
 
           <a class="pb-1 btn-underline" href="#">
-            Get Easy Form Forge <i class="fa-solid fa-arrow-right"></i>
+            Get Easy Form Forge <i class="fa-solid fa-arrow-right" />
           </a>
           <div class="footericon">
             <a href="#">
-              <i class="fa-brands fa-square-facebook"></i>
+              <i class="fa-brands fa-square-facebook" />
             </a>
             <a href="#">
-              <i class="fa-brands fa-square-x-twitter"></i>
+              <i class="fa-brands fa-square-x-twitter" />
             </a>
             <a href="#">
-              <i class="fa-brands fa-linkedin"></i>
+              <i class="fa-brands fa-linkedin" />
             </a>
             <a href="#">
-              <i class="fa-brands fa-youtube"></i>
+              <i class="fa-brands fa-youtube" />
             </a>
           </div>
         </div>
@@ -91,10 +91,10 @@ export function Footer() {
           </h6>
         </div>
         <div>
-          <i class="fa-brands fa-square-facebook"></i>
-          <i class="fa-brands fa-square-x-twitter"></i>
-          <i class="fa-brands fa-linkedin"></i>
-          <i class="fa-brands fa-youtube"></i>
+          <i class="fa-brands fa-square-facebook" />
+          <i class="fa-brands fa-square-x-twitter" />
+          <i class="fa-brands fa-linkedin" />
+          <i class="fa-brands fa-youtube" />
         </div>
       </div>
     </section>

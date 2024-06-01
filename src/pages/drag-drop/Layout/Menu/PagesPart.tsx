@@ -76,8 +76,7 @@ export function PagesPart() {
     } else {
       const filtered = originalData.filter(
         (item) =>
-          item.name &&
-          item.name.toLowerCase().includes(searchQuery().toLowerCase()),
+          item.name?.toLowerCase().includes(searchQuery().toLowerCase()),
       );
       setFilteredData(filtered);
     }

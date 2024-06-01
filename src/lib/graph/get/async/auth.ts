@@ -13,7 +13,7 @@ export async function getPermissionsAsync(meta: Vertex) {
       if (!roles.error) {
         const allowedRoleIds = new Set<number>();
         for (const role of roles.vertexes!) {
-          if (graph.member && graph.member.P.roles?.includes(role.id)) {
+          if (graph.member?.P.roles?.includes(role.id)) {
             allowedRoleIds.add(role.id);
           }
         }
@@ -32,7 +32,7 @@ export async function getPermissionsAsync(meta: Vertex) {
               );
               if (!permissions.error) {
                 permissionResult.push([
-                  permissions.vertexes!.map((perm) => perm.id),
+                  permissions.vertexes?.map((perm) => perm.id),
                   permissionRow.P.scope,
                 ]);
               }

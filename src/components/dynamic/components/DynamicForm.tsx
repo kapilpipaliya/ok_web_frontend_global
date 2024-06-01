@@ -177,7 +177,7 @@ export function DynamicForm(props: DynamicFormProps) {
       if (!props.id) {
         // Load Form Meta from API
         return 'new';
-      } else {
+      }
         // Load vertex from server
         const loadResult = await findVertexesMGCall({ id: props.id });
         if (loadResult.error) {
@@ -198,7 +198,6 @@ export function DynamicForm(props: DynamicFormProps) {
         }
 
         return { graph: result.graph };
-      }
     } catch (e: any) {
       return { error: `Error When Loading Form: ${e.message}` };
     }
@@ -442,7 +441,7 @@ export function DynamicForm(props: DynamicFormProps) {
               <FormContext.Provider value={formData}>
                 <Show when={formData.groupByTabsAndGroup !== undefined}>
                   {/* Main Tab is displayed as top level fields */}
-                  <For each={Object.keys(formData.groupByTabsAndGroup["main"])}>
+                  <For each={Object.keys(formData.groupByTabsAndGroup.main)}>
                     {(group) => (
                       <>
                         <div
@@ -459,7 +458,7 @@ export function DynamicForm(props: DynamicFormProps) {
                                 graph={graph}
                                 setGraph={setGraph}
                                 metaAttributes={
-                                  formData.groupByTabsAndGroup["main"][group]
+                                  formData.groupByTabsAndGroup.main[group]
                                 }
                                 labelPrefix={"Form"}
                                 vertex={formData.formData}

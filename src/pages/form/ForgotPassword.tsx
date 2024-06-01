@@ -60,7 +60,7 @@ export function ForgotPassword() {
     <div
       class="@fade|.5s"
       style={{
-        "flex": "auto",
+        flex: "auto",
         "background-size": "cover",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
@@ -143,7 +143,7 @@ export function ForgotPassword() {
               <div class="flex justify-content:center mt:20 f:15">
                 <span>
                   Return to&nbsp;
-                  <A href={`/auth/login`}>
+                  <A href={"/auth/login"}>
                     <u class="font:bolder text-fill:black">Log In</u>
                   </A>
                 </span>
@@ -207,7 +207,7 @@ export function ForgotPassword() {
               <div class="flex justify-content:center mt:20 f:15">
                 <span>
                   Return to&nbsp;
-                  <A href={`/auth/login`}>
+                  <A href={"/auth/login"}>
                     <u class="font:bolder text-fill:black">Log In</u>
                   </A>
                 </span>
@@ -304,7 +304,7 @@ export function ForgotPassword() {
               </button>
               <div class="flex mt:20 f:15" style={{ "text-align": "center" }}>
                 Return to&nbsp;
-                <A href={`/auth/login`}>
+                <A href={"/auth/login"}>
                   <u class="font:bolder text-fill:black">Log In</u>
                 </A>
               </div>

@@ -84,7 +84,7 @@ export const CurrentPlan = () => {
       </span>
       <div class={"w:50%@>md w:39%@lg m:10|0 mb:20"}>
         <div
-          class={`b:2px|solid|rgb(33,146,15) color:black r:10 p:0|5 cursor:pointer`}
+          class={"b:2px|solid|rgb(33,146,15) color:black r:10 p:0|5 cursor:pointer"}
         >
           <div
             class={"flex jc:space-between ai:center font-weight:medium p:10|20"}

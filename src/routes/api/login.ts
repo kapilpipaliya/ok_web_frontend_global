@@ -41,7 +41,7 @@ async function authenticateUser(
   const session = (await getDriver(subdomain)).session();
 
   try {
-    const query = `MATCH (u:User {email: $email}) RETURN u`;
+    const query = "MATCH (u:User {email: $email}) RETURN u";
     const result = await session.run(query, { email });
 
     if (result.records.length === 0) {
@@ -52,9 +52,8 @@ async function authenticateUser(
 
     if (subdomain === "super") {
       return await authenticateSuperUser(user, email, password);
-    } else {
-      return authenticateRegularUser(user, password);
     }
+      return authenticateRegularUser(user, password);
   } finally {
     await session.close();
   }
@@ -83,7 +82,7 @@ async function authenticateSuperUser(
   ).session();
 
   try {
-    const query = `MATCH (u:User {email: $email}) RETURN u`;
+    const query = "MATCH (u:User {email: $email}) RETURN u";
     const result = await session.run(query, { email });
     const res = result.records[0].get("u");
 
@@ -93,9 +92,8 @@ async function authenticateSuperUser(
 
     if (res.properties.password === password) {
       return result.records[0].get("u");
-    } else {
-      throw new Error("Not Authorized Email!");
     }
+      throw new Error("Not Authorized Email!");
   } finally {
     await session.close();
   }

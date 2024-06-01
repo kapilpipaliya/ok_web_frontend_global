@@ -63,14 +63,14 @@ export function PagePreview(props: {}) {
 export function RobotsTxt(props: {}) {
   return (
     <>
-      User-agent: * Allow: / Sitemap: {window.location.origin + "/sitemap.txt"}
+      User-agent: * Allow: / Sitemap: {`${window.location.origin}/sitemap.txt`}
     </>
   );
 }
 export function SiteMap(props: {}, graph: Store<GraphInterface>) {
   return (
     <For
-      each={graph.vertexLabelIdMap["Page"]?.filter(
+      each={graph.vertexLabelIdMap.Page?.filter(
         (vertex) => graph.vertexes[vertex].P.public,
       )}
     >

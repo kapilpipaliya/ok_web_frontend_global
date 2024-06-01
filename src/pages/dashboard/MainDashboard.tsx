@@ -127,9 +127,9 @@ const DropdownMenu = () => {
       const { scrollX, scrollY } = window;
 
       dropdownContainerEl.style.position = "absolute";
-      dropdownContainerEl.style.top = bottom + scrollY + "px";
-      dropdownContainerEl.style.left = left + scrollX + "px";
-      dropdownContainerEl.style.width = width + "px";
+      dropdownContainerEl.style.top = `${bottom + scrollY}px`;
+      dropdownContainerEl.style.left = `${left + scrollX}px`;
+      dropdownContainerEl.style.width = `${width}px`;
       dropdownContainerEl.style.zIndex = "100";
     }
   });
@@ -144,7 +144,7 @@ const DropdownMenu = () => {
           "flex width:40px height:40px ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
         }
         style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${graph.member?.properties?.profileImage || "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"})`}
-      ></button>
+      />
       <Dismiss
         menuButton={btnEl}
         open={isOpen}
@@ -162,7 +162,7 @@ const DropdownMenu = () => {
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
             onClick={handleClose}
-          ></div>
+          />
           <ul
             class="@fade|.3s"
             style="list-style-type: none; padding: 0; margin: 0; position:relative;"
@@ -238,7 +238,7 @@ const DropdownMenu = () => {
                           successMessage: "Log Out Successfully",
                           onSuccess: (value) => {
                             if (value != null && value.message !== null) {
-                              navigate(`/auth/login`);
+                              navigate("/auth/login");
                             }
                           },
                         });
@@ -256,7 +256,7 @@ const DropdownMenu = () => {
               <div>
                 <li style="margin-top: 5px; " class={"m:5|10"}>
                   <A
-                    href={`/auth/login`}
+                    href={"/auth/login"}
                     replace={true}
                     onclick={() => {
                       setIsOpen(false);
@@ -269,7 +269,7 @@ const DropdownMenu = () => {
                 </li>
                 <li style="margin-top: 5px; " class={"m:5|10"}>
                   <A
-                    href={`/auth/signup`}
+                    href={"/auth/signup"}
                     replace={true}
                     onclick={() => {
                       setIsOpen(false);

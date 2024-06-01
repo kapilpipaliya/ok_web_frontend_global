@@ -108,9 +108,8 @@ export function ExpressionBuilder(props: {
     const updatedList = contentList.map((item) => {
       if (item.value.trim() === "") {
         return { ...item, error: true };
-      } else {
-        return item;
       }
+        return item;
     });
     setContentList(updatedList);
     const hasErrors = contentList.some((item) => item.error);

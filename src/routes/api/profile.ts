@@ -16,7 +16,7 @@ import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/travers
  */
 async function handleRequest(
   func: Function,
-  params = {},
+  params,
   session: Session,
   subdomain: string,
 ) {
@@ -60,7 +60,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
 
   // Ensure user exists
   const userExists = await session.run(
-    `MATCH (u:User) WHERE u.uId = $uId RETURN u;`,
+    "MATCH (u:User) WHERE u.uId = $uId RETURN u;",
     { uId },
   );
   if (userExists.records.length === 0) {
@@ -82,12 +82,12 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   }
 
   // Update user profile
-  let query = `MATCH (u:User) WHERE u.uId = $uId SET `;
+  let query = "MATCH (u:User) WHERE u.uId = $uId SET ";
   const updates = [];
-  if (email) updates.push(`u.email = $email`);
-  if (username) updates.push(`u.username = $username`);
-  if (profileImage) updates.push(`u.profileImage = $profileImage`);
-  query += updates.join(", ") + " SET u.updatedAt = localDateTime() RETURN u;";
+  if (email) updates.push("u.email = $email");
+  if (username) updates.push("u.username = $username");
+  if (profileImage) updates.push("u.profileImage = $profileImage");
+  query += `${updates.join(", ")} SET u.updatedAt = localDateTime() RETURN u;`;
 
   const result = await session.run(query, {
     userId,
@@ -123,7 +123,7 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
 const password = async (payload: any, session: Session) => {
   const { currentPassword, username, newPassword } = payload;
 
-  const findUserQuery = `MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;`;
+  const findUserQuery = "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
   const findUserResult = await session.run(findUserQuery, {
     password: currentPassword,
     username: username,
@@ -132,7 +132,7 @@ const password = async (payload: any, session: Session) => {
     return { error: "Current Password is not valid" };
   }
 
-  const query = `MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;`;
+  const query = "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
   const result = await session.run(query, {
     username: username,
     password: newPassword,
@@ -146,7 +146,7 @@ const password = async (payload: any, session: Session) => {
 };
 
 const pricing = async (payload: any, session: Session) => {
-  const query = `MATCH (n:Pricing) RETURN n;`;
+  const query = "MATCH (n:Pricing) RETURN n;";
   const result = await session.run(query);
   const plans = result.records.map((r) => r.get("n").properties);
   return {
@@ -184,12 +184,12 @@ const supportTicket = async (
   async function getTicket(payload: any, session: Session) {
     const { email } = payload;
 
-    const query = `MATCH (n:Support {email: $email}) RETURN n;`;
+    const query = "MATCH (n:Support {email: $email}) RETURN n;";
     const result = await session.run(query, { email });
 
     const data = result.records.map((r) => {
       const data = r.get("n").properties;
-      data["id"] = r.get("n").identity;
+      data.id = r.get("n").identity;
       return data;
     });
 
@@ -216,7 +216,7 @@ const supportTicket = async (
   async function updateStatus(payload: any, session: Session) {
     const { id, status } = payload;
 
-    const query = `MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;`;
+    const query = "MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
     await session.run(query, { id: int(id), status: status });
     return {
       message: "Status updated successfully",
@@ -226,7 +226,7 @@ const supportTicket = async (
   async function chat(payload: any, session: Session, subdomain: string) {
     const { subAction, parentVertexId, newMessage } = payload;
     switch (subAction) {
-      case "send":
+      case "send": {
         const data = await newRowMGCall(
           parentVertexId,
           "SupportUser",
@@ -234,13 +234,15 @@ const supportTicket = async (
           newMessage,
         );
         return data;
-      case "get":
+      }
+      case "get": {
         const result = await findVertexesMGCall({ id: parentVertexId });
         const message = await getChildVertexesMGCall(
           ["SupportUser"],
           [result.vertexes!],
         );
         return message;
+      }
     }
   }
 

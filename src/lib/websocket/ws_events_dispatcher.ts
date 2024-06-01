@@ -10,7 +10,7 @@ import { createContext } from "solid-js";
 import { commitTransaction } from "../graph/transaction";
 
 // automatically set NODE_ENV == 'production' when we build the project.
-export const IS_PRODUCTION = process.env.NODE_ENV == "production";
+export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 // const http_proto = location.protocol;
 const http_proto = "http:";
@@ -19,7 +19,7 @@ const http_proto = "http:";
 let domain = "localhost";
 // @ts-ignore
 let port = ":3001";
-if (domain == "localhost") {
+if (domain === "localhost") {
   // domain = "65.21.181.71"
   domain = "easyformforge.com";
   port = ":1101";
@@ -27,11 +27,11 @@ if (domain == "localhost") {
   // port = ":1101";
 } else if (IS_PRODUCTION) {
   // port = `:${window.location.port}`;
-  port = `:$3001`;
+  port = ":$3001";
 }
 // const port = location.protocol == "http:" ? (IS_PRODUCTION ? "" : ":8500") : IS_PRODUCTION ? "" : ":8504";
 // const port = ''; // ':8500';
-const ws_proto = http_proto == "http:" ? "ws" : "wss";
+const ws_proto = http_proto === "http:" ? "ws" : "wss";
 
 // const BACKEND = process.env.b ? process.env.b : `${domain}${port}`;
 const BACKEND = `${domain}${port}`;
@@ -64,7 +64,7 @@ export function saveCookie(name: string, value: string, max_age: number) {
 }
 
 export function clearCookie(d: any) {
-  document.cookie = `time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+  document.cookie = "time=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
 }
 
 // https://stackoverflow.com/questions/10730362/get-cookie-by-name
@@ -249,7 +249,7 @@ export class ServerEventsDispatcher extends WSBase {
       const { length } = chain;
       for (let i = 0; i < length; i++) {
         chain[i][1](...message);
-        if (chain[i][0] == 0) {
+        if (chain[i][0] === 0) {
           this.callbacks[JSON.stringify(event)] = undefined;
         }
       }

@@ -47,7 +47,7 @@ export default function Home() {
                     </clipPath>
                   </defs>
                 </svg>
-                <i class=" icon fa-solid fa-file"></i>
+                <i class=" icon fa-solid fa-file" />
               </div>
               <p class="pt-2">
                 Contact <br /> Form
@@ -196,7 +196,7 @@ export default function Home() {
               Get Easy Form Forge
             </button>
             <a class="pb-05 btn-underline h3" href="#">
-              Explorer Features <i class="fa-solid fa-arrow-right"></i>
+              Explorer Features <i class="fa-solid fa-arrow-right" />
             </a>
           </div>
         </div>
@@ -226,7 +226,7 @@ export default function Home() {
             Experience a whole new & <br /> quicker way of making forms!
           </h2>
           <button class="btn-small-icon-filled bg-black">
-            View All Features <i class="fa-solid fa-chevron-right"></i>
+            View All Features <i class="fa-solid fa-chevron-right" />
           </button>
         </div>
         <p class="font-600 mt-3">
@@ -235,7 +235,7 @@ export default function Home() {
 
         <div class="row mt-5 d-flex justify-content-spacebetween">
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -260,7 +260,7 @@ export default function Home() {
             </p>
           </div>
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -286,7 +286,7 @@ export default function Home() {
             </p>
           </div>
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -314,7 +314,7 @@ export default function Home() {
 
         <div class="row mt-4 d-flex justify-content-spacebetween">
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -339,7 +339,7 @@ export default function Home() {
             </p>
           </div>
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -364,7 +364,7 @@ export default function Home() {
             <p>Add short codes to show custom fields in the forms</p>
           </div>
           <div class="featurebox d-flex p-relative ">
-            <div class="iconbg"></div>
+            <div class="iconbg" />
             <div class="iconsvg d-flex justify-content-center align-item-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -470,7 +470,7 @@ export default function Home() {
                     name="subject"
                     placeholder="Write something.."
                     style="height:200px"
-                  ></textarea>
+                  />
 
                   <input
                     class="btn-small-icon-filled"
@@ -514,10 +514,10 @@ export default function Home() {
 
         <div class="accordionParent d-grid justify-content-center pt-5">
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1"></i>Do I need knowledge of coding
+            <i class="fa-solid fa-square pr-1" />Do I need knowledge of coding
             to Use EasyFormForge?{" "}
             <span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" />
             </span>
           </button>
           <div class="panel">
@@ -528,10 +528,10 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1"></i>Does EasyFormForge have any
+            <i class="fa-solid fa-square pr-1" />Does EasyFormForge have any
             video documentation?
             <span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" />
             </span>
           </button>
           <div class="panel">
@@ -542,10 +542,10 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1"></i>What happens after the
+            <i class="fa-solid fa-square pr-1" />What happens after the
             subscription expires?
             <span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" />
             </span>
           </button>
           <div class="panel">
@@ -559,9 +559,9 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1"></i>How long do I get support?
+            <i class="fa-solid fa-square pr-1" />How long do I get support?
             <span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" />
             </span>
           </button>
           <div class="panel">
@@ -569,9 +569,9 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1"></i>Do you offer refunds?
+            <i class="fa-solid fa-square pr-1" />Do you offer refunds?
             <span>
-              <i class="fa-solid fa-chevron-down"></i>
+              <i class="fa-solid fa-chevron-down" />
             </span>
           </button>
           <div class="panel">
@@ -595,10 +595,10 @@ export default function Home() {
           <div class="row pt-5 d-flex justify-content-spacebetween">
             <div class="personaltestimonial">
               <p class="ratestar">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
               </p>
               <h4>Great form builder</h4>
               <p>
@@ -611,10 +611,10 @@ export default function Home() {
             </div>
             <div class="personaltestimonial">
               <p class="ratestar">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
               </p>
               <h4>Great form builder</h4>
               <p>
@@ -627,10 +627,10 @@ export default function Home() {
             </div>
             <div class="personaltestimonial">
               <p class="ratestar">
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
-                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
+                <i class="fa-solid fa-star" />
               </p>
               <h4>Great form builder</h4>
               <p>
@@ -644,7 +644,7 @@ export default function Home() {
           </div>
           <div class="d-flex justify-content-center mt-5">
             <a class="btn-underline" href="#">
-              See more reviews <i class="fa-solid fa-chevron-right"></i>
+              See more reviews <i class="fa-solid fa-chevron-right" />
             </a>
           </div>
         </div>

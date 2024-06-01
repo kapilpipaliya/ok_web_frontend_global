@@ -49,7 +49,7 @@ export function findVertexByLabelAndUniqueIdWithSkip(
   graph: Store<GraphInterface>,
 ) {
   let vertexIds = graph.vertexLabelIdMap[label] || [];
-  if (skipId != undefined) {
+  if (skipId !== undefined) {
     vertexIds = vertexIds.filter((value) => value !== skipId);
   }
   const vertexId = vertexIds.find(

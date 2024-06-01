@@ -86,7 +86,7 @@ export function FileField(props: Properties) {
       if (byteSpeed === 0) setSpeedText("Upload cancelled");
     }
 
-    if (props.dom && props.dom.files) {
+    if (props.dom?.files) {
       const fileObj = props.dom.files[0]; // js get file object
       const url = "/api/upload";
 

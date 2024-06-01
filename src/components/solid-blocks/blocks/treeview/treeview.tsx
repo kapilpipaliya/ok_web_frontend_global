@@ -36,7 +36,7 @@ const TreeView = (props: { title: string; meta: Vertex; children: any }) => {
       getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length || 0;
     return (
       <div class={`ml:${isExpanded() ? "50px" : "0px"};`}>
-        <span class={`display:inline-flex`}>
+        <span class={"display:inline-flex"}>
           <Show when={childrenLength() > 0}>
             <span
               style="cursor: pointer;"
@@ -58,7 +58,7 @@ const TreeView = (props: { title: string; meta: Vertex; children: any }) => {
           </Show>
           {TreeItemProps.title}
         </span>
-        {isExpanded() && <span class={`ml:40px`}>{props.children}</span>}
+        {isExpanded() && <span class={"ml:40px"}>{props.children}</span>}
       </div>
     );
   };

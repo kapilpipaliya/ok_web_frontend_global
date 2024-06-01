@@ -54,7 +54,6 @@ function Sidebar() {
     setIsSearchMode(searchName.length > 0);
 
     if (searchName.length > 0) {
-      debugger
       const filteredData = filterNavData(graph.navigationData, searchName);
       setSearchData(filteredData);
     } else {

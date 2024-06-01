@@ -188,7 +188,7 @@ export const SupportTicketSection = (props: {
       loadMessage: "Deleting Ticket...",
       successMessage: "Support ticket deleted successfully",
       onSuccess: (value) => {
-        const data = props.contactList().filter((c: any) => c.id != id);
+        const data = props.contactList().filter((c: any) => c.id !== id);
         props.setContactList(data);
       },
     });
@@ -208,7 +208,7 @@ export const SupportTicketSection = (props: {
     } else {
       showSuccessToast(res.message);
       const data = props.contactList().map((c: any) => {
-        if (c.id == id) {
+        if (c.id === id) {
           c.status = status;
         }
         return c;
@@ -238,7 +238,7 @@ export const SupportTicketSection = (props: {
           <For
             fallback={
               <div
-                class={`grid-column-span:6`}
+                class={"grid-column-span:6"}
                 style="display: flex; justify-content: center; padding: 1rem; "
               >
                 No Tickets Found

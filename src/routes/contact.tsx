@@ -55,7 +55,7 @@ export default function Contact() {
                 name="subject"
                 placeholder="Your message.."
                 style="height:200px"
-              ></textarea>
+              />
 
               <input
                 class="btn-small-icon-filled formsubmitbtn"
@@ -68,21 +68,21 @@ export default function Contact() {
           <div class="contactways pt-5">
             <div class="phone">
               <a href="#">
-                <i class="fa-solid fa-phone-volume"></i>
+                <i class="fa-solid fa-phone-volume" />
               </a>
               <h5 class="">Call</h5>
               <h4>9879879879</h4>
             </div>
             <div class="email">
               <a href="#">
-                <i class="fa-solid fa-envelope"></i>
+                <i class="fa-solid fa-envelope" />
               </a>
               <h5 class="">Email</h5>
               <h4>hi@easyform.com</h4>
             </div>
             <div class="address">
               <a href="#">
-                <i class="fa-solid fa-location-dot"></i>
+                <i class="fa-solid fa-location-dot" />
               </a>
               <h5 class="">Address</h5>
               <p class="text-center">

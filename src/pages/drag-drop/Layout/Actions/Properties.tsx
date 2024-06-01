@@ -143,7 +143,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
         setGraph,
       );
       const attributes: FieldAttribute[] = JSON.parse(
-        JSON.stringify(metaAttributes!.attributes!),
+        JSON.stringify(metaAttributes?.attributes!),
       );
 
       for (const attribute of attributes) {
@@ -402,7 +402,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
           {/*<span>Collection:</span>*/}
           <SelectInputField
             data={graph.vertexes[selectedId()!]}
-            meta={collMetaVertex.vertexes![0]!}
+            meta={collMetaVertex.vertexes?.[0]!}
             disabled={false}
             title={"Collection:"}
             component={"SelectBox"}
@@ -412,7 +412,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
           {/*<span>Data:</span>*/}
           <SelectInputField
             data={graph.vertexes[selectedId()!]}
-            meta={collMetaVertex.vertexes![1]!}
+            meta={collMetaVertex.vertexes?.[1]!}
             disabled={false}
             title={"Data:"}
             component={"SelectBox"}
@@ -425,7 +425,7 @@ export function Properties(props: { setShowDrawer ?: any }) {
             txnId={txnId}
             title={""}
             data={graph.vertexes[selectedId()!]}
-            meta={collMetaVertex.vertexes![2]!}
+            meta={collMetaVertex.vertexes?.[2]!}
             disabled={false}
             component={"TextBox"}
           />

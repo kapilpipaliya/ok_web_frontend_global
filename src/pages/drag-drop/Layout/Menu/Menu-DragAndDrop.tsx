@@ -23,10 +23,10 @@ interface MenuProps {
 
 export function MenuDragAndDrop(props: MenuProps) {
   return (
-    <nav style={{ "grid-area": "menu", "width": "55%", "min-width": "318px", 'justify-self': 'left', }}>
+    <nav style={{ "grid-area": "menu", width: "55%", "min-width": "318px", 'justify-self': 'left', }}>
       <div class={"rel"}>
         <div
-          class={`h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl`}
+          class={"h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"}
           style={{
             "max-height": "calc(100vh - 120px)",
             "scrollbar-width": "thin",

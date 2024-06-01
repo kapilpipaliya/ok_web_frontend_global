@@ -240,7 +240,7 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = `MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n`;
+        const query = "MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -263,7 +263,7 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = `MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n`;
+        const query = "MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -286,7 +286,7 @@ export async function mutateData(
           clientToServerVertexIdMap.get(mutationObject.deleteVertex.id) ||
           mutationObject.deleteVertex.id;
 
-        const query = `MATCH (n) WHERE ID(n) = $id DELETE n`;
+        const query = "MATCH (n) WHERE ID(n) = $id DELETE n";
 
         try {
           await tx.run(query, { id: int(id) });

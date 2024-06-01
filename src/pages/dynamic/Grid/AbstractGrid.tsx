@@ -39,7 +39,7 @@ export function AbstractGrid(props: AbstractGridProps) {
         child: { collection: "->NavAttr", child: { collection: "->NavAttr" } },
       },
     });
-    return data && data[0].children;
+    return data?.[0].children;
   }
 
   const [tableId, setTableId] = createSignal("");

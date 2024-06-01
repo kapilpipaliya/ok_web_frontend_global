@@ -69,9 +69,8 @@ import { Repeater } from "~/components/solid-blocks/blocks/repeater/Repeater";
 function getAttrs(meta: Vertex) {
   if (meta.P.props?.attr) {
     return JSON.parse(meta.P.props?.attr);
-  } else {
-    return {};
   }
+    return {};
 }
 
 export function GenericField(
@@ -299,7 +298,7 @@ export function GenericField(
               {(vertex) => (
                 <A
                   {...field.meta.P.props}
-                  href={`${APP_BASE_URL}/` + vertex().P.name}
+                  href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
                 >
                   <Show
@@ -453,7 +452,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "TreeViewItem"}>
           <TreeView
-            title={field.meta.P?.props["title"] ?? "MenuItem"}
+            title={field.meta.P?.props.title ?? "MenuItem"}
             meta={field.meta}
           >
             <PageItemRender metaVertex={field.meta} />

@@ -180,11 +180,11 @@ export function useToast() {
               </div>
             </div>
             <div style="position: relative; padding-top: 16px;">
-              <div style="width: 100%; height: 4px; border-radius: 9999px; background-color: #164e63;"></div>
+              <div style="width: 100%; height: 4px; border-radius: 9999px; background-color: #164e63;" />
               <div
                 style="height: 4px; position: absolute; top: 16px; border-radius: 9999px; background-color: #ecfeff;"
                 style={{ width: `${life()}%` }}
-              ></div>
+              />
             </div>
           </div>
         );

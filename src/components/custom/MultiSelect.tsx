@@ -69,7 +69,7 @@ const MultiSelectField = (props: {
     if (props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
-        option[props.displayValueParent]?.["name"]
+        option[props.displayValueParent]?.name
       );
     }
     return typeof option === "object" ? option.value : option;
@@ -82,7 +82,7 @@ const MultiSelectField = (props: {
     if (props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
-        option[props.displayValueParent]?.["name"]
+        option[props.displayValueParent]?.name
       );
     }
     return typeof option === "object" ? option.label : option;
@@ -134,7 +134,7 @@ const MultiSelectField = (props: {
     "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
   const closeButtonStyle = "cursor: pointer; display: flex;";
   const inputStyle = () => ({
-    display: props.selectedValues().length == 1 && props.selectionLimit == 1 ? "none" : "",
+    display: props.selectedValues().length === 1 && props.selectionLimit === 1 ? "none" : "",
     flex: 1,
     'smin-width': '100px',
     padding: '5px',
@@ -161,7 +161,7 @@ const MultiSelectField = (props: {
   // Filter options based on input value
   const filteredOptions = createMemo(() => {
     return (props.options || []).filter((option) =>
-      getOptionLabel(option) && getOptionLabel(option).toLowerCase().includes(inputValue().toLowerCase()),
+      getOptionLabel(option)?.toLowerCase().includes(inputValue().toLowerCase()),
     );
   });
 
@@ -171,9 +171,9 @@ const MultiSelectField = (props: {
       const { scrollX, scrollY } = window;
 
       dropdownEl.style.position = "absolute";
-      dropdownEl.style.top = bottom + scrollY + "px";
-      dropdownEl.style.left = left + scrollX + "px";
-      dropdownEl.style.width = width + "px";
+      dropdownEl.style.top = `${bottom + scrollY}px`;
+      dropdownEl.style.left = `${left + scrollX}px`;
+      dropdownEl.style.width = `${width}px`;
       dropdownEl.style.zIndex = "99999";
     }
   });
@@ -232,7 +232,7 @@ const MultiSelectField = (props: {
           >
             {(option, index) => (
               <div
-                class={`bg:#f4f4f4:hover ${index() == filteredOptions().length - 1 ? "r:0|0|5|5" : ""} f:14 m:3 r:5`}
+                class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""} f:14 m:3 r:5`}
                 style={`${optionStyle} ${selected().some((item: { value: any }) => getOptionValue(item) === getOptionValue(option)) ? optionSelectedStyle : ""}`}
                 onMouseDown={() => handleSelectChange(getOptionValue(option))}
               >

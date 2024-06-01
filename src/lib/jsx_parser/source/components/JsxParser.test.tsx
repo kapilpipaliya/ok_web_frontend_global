@@ -1093,10 +1093,10 @@ describe("JsxParser Component", () => {
         );
 
         expect(rendered.childNodes[0].textContent).toEqual(
-          bindings.object["with"].child,
+          bindings.object.with.child,
         );
         expect(component.ParsedChildren[0].props.foo).toEqual(
-          bindings.object["with"].child,
+          bindings.object.with.child,
         );
       });
       test('can evaluate a["b" + 1].c', () => {

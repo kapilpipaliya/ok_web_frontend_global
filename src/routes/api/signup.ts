@@ -162,13 +162,13 @@ async function PortConfigure(
 ) {
   try {
     // Query to retrieve database port configuration
-    const query = `MATCH (n:DBPort) RETURN n;`;
+    const query = "MATCH (n:DBPort) RETURN n;";
     const resultPort = await tx.run(query);
     let portsResult: any;
 
     if (resultPort.records.length === 0) {
       // Create default database port configuration if not exists
-      const query = `CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) SET n.createdAt = localDateTime() RETURN n;`;
+      const query = "CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) SET n.createdAt = localDateTime() RETURN n;";
       const resultPort = await tx.run(query);
 
       const portResult = convertNodeToJson(resultPort.records[0].get("n"));

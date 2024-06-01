@@ -18,9 +18,9 @@ export async function deleteUser(args: any) {
   const sessionSource = (await getDriver(subDomain)).session();
 
   try {
-    const stopDockerRes = await stopDockerContainer(`user`);
+    const stopDockerRes = await stopDockerContainer("user");
     if (!stopDockerRes.error) {
-      const removeDockerRes = await removeDockerContainer(`user`);
+      const removeDockerRes = await removeDockerContainer("user");
       if (!removeDockerRes.error) {
         return {
           error: false,

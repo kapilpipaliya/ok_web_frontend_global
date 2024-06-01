@@ -103,7 +103,7 @@ export async function getCollAttrsMGCall(
         return { error: true };
       }
       dataType.vertex = dataTypeVertex.vertexes!;
-      attr.dataType = dataType.vertex!.P[IdAttr];
+      attr.dataType = dataType.vertex?.P[IdAttr];
     } else {
       const dataTypeFromComp = await getParentVertexMGCall(
         ["DataTypeComp"],
@@ -116,10 +116,10 @@ export async function getCollAttrsMGCall(
         );
         return { error: true };
       }
-      attr.dataType = dataTypeFromComp.vertex!.P[IdAttr];
+      attr.dataType = dataTypeFromComp.vertex?.P[IdAttr];
     }
   } else {
-    attr.dataType = dataType.vertex!.P[IdAttr];
+    attr.dataType = dataType.vertex?.P[IdAttr];
   }
 
   const collAttrCollResult = await getChildVertexMGCall(
@@ -144,7 +144,7 @@ export async function getCollAttrsMGCall(
     {} as { [key: string]: any },
   );
   if (collAttrColl) {
-    collProps.collection = collAttrColl["P"]?.["name"];
+    collProps.collection = collAttrColl.P?.name;
   }
 
   // merge default component props
@@ -189,7 +189,7 @@ export async function getCollAttrsMGCall(
       removeUndefinedProperties(parentCompProps, false, 10),
       collProps,
     );
-    attr.component = parentVertexResult.vertex!.P[IdAttr];
+    attr.component = parentVertexResult.vertex?.P[IdAttr];
   } else {
     attr.component = collAttrComp.P[IdAttr];
   }
@@ -207,7 +207,7 @@ const getCollectionOneLevelAttrsMGCall = async (
   if (vertexCollAttrResult.error) {
     return { error: "No Attributes in a Coll" };
   }
-  const collAttrs = vertexCollAttrResult.vertexes!.sort(
+  const collAttrs = vertexCollAttrResult.vertexes?.sort(
     (a, b) => a.P.pos - b.P.pos,
   );
   const attrs: FieldAttribute[] = [];

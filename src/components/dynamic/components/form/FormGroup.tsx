@@ -21,7 +21,7 @@ export function FormGroup(props: FormGroupProps) {
     return (
         <For each={props.metaAttributes}>
             {(metaVertex) => {
-                const id = `${props.vertex.id + metaVertex.P[IdAttr] + "Label"}`;
+                const id = `${`${props.vertex.id + metaVertex.P[IdAttr]}Label`}`;
                 const component = createMemo(() =>
                     getComponentForCollRow(
                         metaVertex,
@@ -100,10 +100,9 @@ export function getComponentForCollRow(
 ) {
     if (!metaVertex.P.component) {
         return getCollAttrComp(metaVertex, graph)?.P[IdAttr];
-    } else if (metaVertex.P.component.includes("-")) {
+    }if (metaVertex.P.component.includes("-")) {
         return getSelectionOptions(graph, setGraph, [data], metaVertex.P.component)
             .vertexes;
-    } else {
-        return metaVertex.P.component as string;
     }
+        return metaVertex.P.component as string;
 }

@@ -8,7 +8,7 @@ export function SpinnerDocs() {
       <div class="example">
         <Spinner />
       </div>
-      <pre>{`<Spinner />`}</pre>
+      <pre>{"<Spinner />"}</pre>
       <hr />
     </>
   );

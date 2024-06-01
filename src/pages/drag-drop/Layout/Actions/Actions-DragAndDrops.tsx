@@ -23,11 +23,11 @@ interface ActionsProps {
 export function ActionsDragAndDrops(props: ActionsProps) {
   return (
     <aside
-      style={{ "grid-area": "callToAction", "width": "75%","min-width": "400px",'justify-self':'right', }}
+      style={{ "grid-area": "callToAction", width: "75%","min-width": "400px",'justify-self':'right', }}
       classList={{ "display:none": !props.isRightOpen() }}
     >
       <div
-        class={`h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5`}
+        class={"h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5"}
         style={{
           "max-height": "calc(100vh - 120px)",
           "scrollbar-width": "thin",

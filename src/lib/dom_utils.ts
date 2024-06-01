@@ -34,7 +34,7 @@ export function fileDownloader(opt: {
   bom?: string;
 }) {
   const throwError = (name: string) => {
-    throw new Error("No " + name + " provided to generate-download-link.");
+    throw new Error(`No ${name} provided to generate-download-link.`);
   };
 
   const data = opt.data || throwError("data");
@@ -48,7 +48,7 @@ export function fileDownloader(opt: {
     type: opt.mime || "application/octet-stream",
   });
   const blobURL =
-    window.URL && window.URL.createObjectURL
+    window.URL?.createObjectURL
       ? window.URL.createObjectURL(blob)
       : window.webkitURL.createObjectURL(blob);
 

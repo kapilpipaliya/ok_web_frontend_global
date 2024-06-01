@@ -137,9 +137,10 @@ export default class JsxParser {
           expression.expression,
           scope,
         );
-      case "JSXText":
+      case "JSXText": {
         const key = this.props.disableKeyGeneration ? undefined : randomHash();
         return expression.value;
+      }
       // return this.props.disableFragments
       // 	? expression.value
       // 	: <Fragment key={key}>{expression.value}</Fragment>
@@ -223,14 +224,14 @@ export default class JsxParser {
           /* eslint-enable eqeqeq,max-len */
         }
         return undefined;
-      case "CallExpression":
+      case "CallExpression": {
         const parsedCallee = this.#parseExpression(
           graph,
           setGraph,
           expression.callee,
         );
         if (parsedCallee === undefined) {
-          this.props.onError!(
+          this.props.onError?.(
             new Error(
               `The expression '${expression.callee}' could not be resolved, resulting in an undefined return value.`,
             ),
@@ -242,6 +243,7 @@ export default class JsxParser {
             this.#parseExpression(graph, setGraph, arg, expression.callee),
           ),
         );
+      }
       case "ConditionalExpression":
         return this.#parseExpression(graph, setGraph, expression.test)
           ? this.#parseExpression(graph, setGraph, expression.consequent)
@@ -252,11 +254,11 @@ export default class JsxParser {
         if (scope && expression.name in scope) {
           return scope[expression.name];
         }
-        return (this.props.bindings || {})[expression.name];
+        return this.props.bindings?.[expression.name];
 
       case "Literal":
         return expression.value;
-      case "LogicalExpression":
+      case "LogicalExpression": {
         const left = this.#parseExpression(graph, setGraph, expression.left);
         if (expression.operator === "||" && left) return left;
         if (
@@ -266,9 +268,10 @@ export default class JsxParser {
           return this.#parseExpression(graph, setGraph, expression.right);
         }
         return false;
+      }
       case "MemberExpression":
         return this.#parseMemberExpression(graph, setGraph, expression, scope);
-      case "ObjectExpression":
+      case "ObjectExpression": {
         const object: Record<string, any> = {};
         expression.properties.forEach((prop) => {
           object[prop.key.name! || prop.key.value!] = this.#parseExpression(
@@ -278,6 +281,7 @@ export default class JsxParser {
           );
         });
         return object;
+      }
       case "TemplateElement":
         return expression.value.cooked;
       case "TemplateLiteral":
@@ -358,7 +362,7 @@ export default class JsxParser {
       return member;
     } catch {
       const name = (object as AcornJSX.MemberExpression)?.name || "unknown";
-      this.props.onError!(
+      this.props.onError?.(
         new Error(`Unable to parse ${name}["${path.join('"]["')}"]}`),
       );
     }
@@ -404,7 +408,7 @@ export default class JsxParser {
     }
     const tagName = name.trim().toLowerCase();
     if (blacklistedTags.indexOf(tagName) !== -1) {
-      onError!(
+      onError?.(
         new Error(
           `The tag <${name}> is blacklisted, and will not be rendered.`,
         ),
@@ -414,24 +418,24 @@ export default class JsxParser {
 
     if (name !== "" && !resolvePath(components, name)) {
       if (componentsOnly) {
-        onError!(
+        onError?.(
           new Error(
             `The component <${name}> is unrecognized, and will not be rendered.`,
           ),
         );
-        return this.props.renderUnrecognized!(name);
+        return this.props.renderUnrecognized?.(name);
       }
 
       if (
         !allowUnknownElements &&
         document.createElement(name) instanceof HTMLUnknownElement
       ) {
-        onError!(
+        onError?.(
           new Error(
             `The tag <${name}> is unrecognized in this browser, and will not be rendered.`,
           ),
         );
-        return this.props.renderUnrecognized!(name);
+        return this.props.renderUnrecognized?.(name);
       }
     }
 
@@ -553,7 +557,7 @@ export default class JsxParser {
         } else if (
           (expr.type === "JSXSpreadAttribute" &&
             expr.argument.type === "Identifier") ||
-          expr.argument!.type === "MemberExpression"
+          expr.argument?.type === "MemberExpression"
         ) {
           const value = this.#parseExpression(graph, setGraph, expr.argument!, {
             ...scope,

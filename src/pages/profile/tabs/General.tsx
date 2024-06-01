@@ -163,10 +163,10 @@ export const GeneralSection = (props: GenralProps) => {
             />
           </div>
           <div class="ml:10">
-            <div style={`font-size: 22px; font-weight: 600;`}>
+            <div style={"font-size: 22px; font-weight: 600;"}>
               {props.profileData.username}
             </div>
-            <div style={`font-size: 18px;`}>{props.profileData.email}</div>
+            <div style={"font-size: 18px;"}>{props.profileData.email}</div>
           </div>
         </div>
         <div class="p:10 gap:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">

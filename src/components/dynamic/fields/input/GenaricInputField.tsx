@@ -40,7 +40,6 @@ export function GenericInputField(
   const component = () => field.component;
   return (
     <div
-      aria-labeledby={props["aria-labeledby"]}
       classList={{
         "width:100%": component() === "TextArea",
       }}

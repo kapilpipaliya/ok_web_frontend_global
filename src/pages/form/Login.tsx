@@ -74,7 +74,7 @@ export function Login() {
       class="@fade|.5s"
       style={{
 
-        "flex": "auto",
+        flex: "auto",
         "background-size": "cover",
         "background-image":
           "url('https://img.freepik.com/free-vector/blurred-background-with-light-colors_1034-245.jpg?size=338&ext=jpg&ga=GA1.1.1224184972.1714435200&semt=ais')",
@@ -226,7 +226,7 @@ export function Login() {
           <div class="flex justify-content:center mt:20 f:15">
             <span>
               Don't have an account?{" "}
-              <A href={`/auth/signup`}>
+              <A href={"/auth/signup"}>
                 <u class="font:bolder text-fill:black">Sign Up</u>
               </A>
             </span>

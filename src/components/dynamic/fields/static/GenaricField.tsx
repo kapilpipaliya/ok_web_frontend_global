@@ -66,7 +66,7 @@ export const PageRenderUtils = {
     item && getChildVertex(graph, ["$0Att"], item).vertex,
   getAttr: (graph: Store<GraphInterface>, item?: Vertex): string | undefined =>
     item && PageRenderUtils.getAttrVertex(graph, item)?.P[IdAttr],
-  getID: (item?: Vertex): string | undefined => item && item.P["name"],
+  getID: (item?: Vertex): string | undefined => item?.P.name,
   getId: (graph: Store<GraphInterface>, item?: Vertex): string | undefined =>
     PageRenderUtils.getAttr(graph, item) || PageRenderUtils.getID(item) || "",
   // get component or Attribute component
@@ -156,31 +156,31 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           if (!isPreview()) {
             if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
               if (compProps.class) {
-                compProps.class += ` b:#3996E1|1.5px|solid r:5`;
+                compProps.class += " b:#3996E1|1.5px|solid r:5";
               } else {
-                compProps.class = `b:#3996E1|1px|solid r:5`;
+                compProps.class = "b:#3996E1|1px|solid r:5";
               }
             }
             if (isSelectedHoverId(item.id)) {
               if (compProps.class) {
-                compProps.class += ` b:#3996E1|1.5px|dashed r:5`;
+                compProps.class += " b:#3996E1|1.5px|dashed r:5";
               } else {
-                compProps.class = `b:#3996E1|1px|dashed r:5`;
+                compProps.class = "b:#3996E1|1px|dashed r:5";
               }
             }
 
             if (isActiveItem()) {
               if (indicatorPosition().position === "before") {
                 if (compProps.class) {
-                  compProps.class += ` bt:rgb(0,0,255)|1px|solid`;
+                  compProps.class += " bt:rgb(0,0,255)|1px|solid";
                 } else {
-                  compProps.class = `bt:rgb(0,0,255)|1px|solid`;
+                  compProps.class = "bt:rgb(0,0,255)|1px|solid";
                 }
               } else if (indicatorPosition().position === "after") {
                 if (compProps.class) {
-                  compProps.class += ` bb:rgb(0,0,255)|2px|solid @fade|.3s`;
+                  compProps.class += " bb:rgb(0,0,255)|2px|solid @fade|.3s";
                 } else {
-                  compProps.class = `bb:rgb(0,0,255)|2px|solid @fade|.3s`;
+                  compProps.class = "bb:rgb(0,0,255)|2px|solid @fade|.3s";
                 }
               }
             }
@@ -309,7 +309,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                   }
 
                                   // todo: handle not work select parent
-                                  setSelectedId(parentResult.vertex!.id);
+                                  setSelectedId(parentResult.vertex?.id);
                                 }}
                               />
                             </Tooltip>
@@ -390,7 +390,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               </li>
             </Match>
             <Match when={parentComponent() === "TableRow"}>
-              <td class={`p:10px bb:1px|solid|rgb(227,231,236)`}>
+              <td class={"p:10px bb:1px|solid|rgb(227,231,236)"}>
                 <PageComponent />
                 {/*<div class=" h:1px  bg:rgb(229,231,235) w:100% " />*/}
               </td>

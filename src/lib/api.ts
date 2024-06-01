@@ -474,7 +474,7 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                   Object.keys(AttrsAdminTableData).includes(val)
                 ) {
                   return false;
-                } else {
+                }
                   return !findVertexByLabelAndUniqueIdWithSkip(
                     "Coll",
                     "id",
@@ -482,7 +482,6 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                     formData.id,
                     graph,
                   );
-                }
               },
             },
             // , {

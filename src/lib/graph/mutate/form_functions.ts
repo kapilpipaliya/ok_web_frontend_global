@@ -198,9 +198,9 @@ export function rowMetaInitialize(
       // revertTransaction(metaTxnId);
     });
     return metaTxnId;
-  } else {
-    const rows = klona(rowMetaAttrInst.vertex!.P.rows);
-    const metaTxnId = rowMetaAttrInst.vertex!.P.metaTxnId;
+  }
+    const rows = klona(rowMetaAttrInst.vertex?.P.rows);
+    const metaTxnId = rowMetaAttrInst.vertex?.P.metaTxnId;
     batch(() => {
       for (const attrColumn of tableColumnsTemplate) {
         if (rows[attrColumn.id]) {
@@ -210,7 +210,7 @@ export function rowMetaInitialize(
           graph,
           setGraph,
           metaTxnId,
-          graph.vertexes[rowMetaAttrInst.vertex!.id],
+          graph.vertexes[rowMetaAttrInst.vertex?.id],
           "MetaAttr",
         );
         if (AttrRowResult.error) {
@@ -234,7 +234,7 @@ export function rowMetaInitialize(
       }
       mergeVertexProperties(
         metaTxnId,
-        rowMetaAttrInst.vertex!.id,
+        rowMetaAttrInst.vertex?.id,
         graph,
         setGraph,
         { rows },
@@ -247,7 +247,6 @@ export function rowMetaInitialize(
       // revertTransaction(metaTxnId);
     });
     return metaTxnId;
-  }
 }
 export function createMeta(
   form: FormMetaData,
@@ -399,7 +398,7 @@ export function setValueGlobal(
   // we directly save the dataType on vertex:
   // @ts-ignore
   setGraph("vertexes", vertex.id, "D", {
-    [attribute.P[IdAttr]]: attribute.P["dataType"],
+    [attribute.P[IdAttr]]: attribute.P.dataType,
   });
 
   onChangeHandler(txnId, vertex, vertex, attribute, graph, setGraph);
@@ -550,7 +549,7 @@ export function onChangeHandler(
     if (value === "id")
       value = getId(vertex.P[changedFieldAttribute.P[IdAttr]]);
     if (value === "clear") value = null;
-    if (attribute.P.component == "Select" || attribute.P.component === "Tag") {
+    if (attribute.P.component === "Select" || attribute.P.component === "Tag") {
       setSelectionValue(txnId, vertex, graph, setGraph, attribute, value);
     } else {
       mergeVertexProperties(txnId, vertex.id, graph, setGraph, {
@@ -619,13 +618,13 @@ export function getExportCode(
           const label = v.L[0];
           if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
             const pksResult = {} as { [primaryKey: string]: any };
-            pksResult["name"] = v.P["name"];
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
+            pksResult.name = v.P.name;
+            if (!result.OUT) {
+              result.OUT = {} as {
                 [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
-            result["OUT"][type] = [pksResult];
+            result.OUT[type] = [pksResult];
             // getChildren(metaVertex, v, pksResult);
           } else {
             const collVertex = findVertexByLabelAndUniqueId(
@@ -645,19 +644,19 @@ export function getExportCode(
               pksResult[pk] = v.P[pk];
             }
             if (pks.length === 0) {
-              pksResult["name"] = v.P["name"];
+              pksResult.name = v.P.name;
             }
 
-            if (!result["OUT"]) {
-              result["OUT"] = {} as {
+            if (!result.OUT) {
+              result.OUT = {} as {
                 [EdgeType: string]: { [primaryKey: string]: any }[];
               };
             }
 
-            if (!result["OUT"][type]) {
-              result["OUT"][type] = [pksResult];
+            if (!result.OUT[type]) {
+              result.OUT[type] = [pksResult];
             } else {
-              result["OUT"][type].push(pksResult);
+              result.OUT[type].push(pksResult);
             }
             // getChildren(metaVertex, v, pksResult);
           }
@@ -684,11 +683,11 @@ export function getExportCode(
           }),
         );
         if (out.length > 0) {
-          if (!result["OUT"]) {
-            result["OUT"] = { [type]: out } as {
+          if (!result.OUT) {
+            result.OUT = { [type]: out } as {
               [EdgeType: string]: { [primaryKey: string]: any }[];
             };
-          } else result["OUT"][type] = out;
+          } else result.OUT[type] = out;
         }
       }
     }

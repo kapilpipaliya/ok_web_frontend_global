@@ -15,7 +15,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
   return (
     <div
       class="rel bg:#E5EAFE r:0|15|15|0"
-      style={`display: flex; padding-bottom: 2rem; flex-direction: column; align-items: center; width: 4rem; height: 100vh`}
+      style={"display: flex; padding-bottom: 2rem; flex-direction: column; align-items: center; width: 4rem; height: 100vh"}
     >
       <nav style="display: flex; margin-top: 1rem; padding-top: .5rem; flex-direction: column; flex: 1 1 0%; align-items: center;">
         <a href="/">
@@ -28,7 +28,7 @@ export const MainSideBar = (props: MainSideBarProps) => {
                 <a
                   class={`${props.activeSection() === navNode.P.name ? "bg:white color:#37c" : ""} gap:10 `}
                   href={navNode.P.url}
-                  style={`display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; `}
+                  style={"display: inline-block; padding: 5px 5px 0px 5px; transition-property: background-color, border-color, color, fill, stroke; transition-duration: 200ms; border-radius: 0.5rem; "}
                   onClick={() => props.setActiveSection(navNode.P.name)}
                 >
                   <Icon

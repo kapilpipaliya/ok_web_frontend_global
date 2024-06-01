@@ -177,7 +177,7 @@ const DataGrid = (props: DataGridProps) => {
   function setGridHeaders(formNew: FormMetaData) {
     const tableColumns = [] as ColumnDef<any>[];
 
-    for (const attribute of formNew!.attributes) {
+    for (const attribute of formNew?.attributes) {
       const column = { ...attribute } as unknown as ColumnDef<any>;
       if (attribute.component === "Table") continue;
       // if (attribute.props?.skip) continue;

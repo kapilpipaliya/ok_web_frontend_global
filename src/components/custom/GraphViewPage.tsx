@@ -58,7 +58,7 @@ export function GraphViewPage() {
               el.replaceChildren();
             });
           }}
-        ></div>
+        />
         <pre>{JSON.stringify(json())}</pre>
       </>
     );
