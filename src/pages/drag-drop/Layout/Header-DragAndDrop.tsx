@@ -2,14 +2,10 @@ import { Icon } from "@iconify-icon/solid";
 import { type Accessor, For, type Setter, createSignal } from "solid-js";
 import { Tooltip } from "~/components/solid-blocks/blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
-import { ToggleButton } from "~/components/css-properties/css-components/ToggleButton";
 import CustomModal from "~/components/custom/CommonDialog";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
-import { TextEditor } from "~/components/css-properties/css-tabs/TextEditor";
-import { CenterDiv } from "~/components/css-properties/css-components/CssUtils";
 import ShareSection from "../Share";
-import { APP_BASE_URL } from "~/lib/Utils";
-import { useLocation, useNavigate } from "@solidjs/router";
+import { useNavigate } from "@solidjs/router";
 
 export function HeaderDragAndDrop(props: {
   view: Accessor<string>;

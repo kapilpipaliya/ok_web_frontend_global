@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { createSignal, Show, For, useContext } from "solid-js";
+import { createSignal, Show, For, } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import { API } from "~/components/api/DataFetcher";
 import {
@@ -13,7 +13,6 @@ import CustomModal from "~/components/custom/CommonDialog";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { Table, TableHeadCell, TableBodyCell } from "~/components/custom/Table";
 import { useToast } from "~/components/custom/Toast";
-import { GraphContext } from "~/lib/graph/graph";
 
 export const SupportTicketSection = (props: {
   setIsMainScreenLoad: SetStoreFunction<boolean>;

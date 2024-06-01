@@ -1,9 +1,7 @@
 import {
   For,
-  JSX,
   Show,
   createEffect,
-  createResource,
   createSignal,
   onCleanup,
 } from "solid-js";

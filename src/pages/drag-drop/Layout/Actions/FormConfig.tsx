@@ -1,6 +1,5 @@
-import { onMount, useContext } from "solid-js";
+import { useContext } from "solid-js";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
-import { PageConfigContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { useParams } from "@solidjs/router";
 

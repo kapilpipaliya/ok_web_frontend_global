@@ -50,7 +50,7 @@ import { addNewRow } from "./graph/mutate/form_functions";
 import { getFormMetaDataAsync } from "./graph/get/async/graph_functions";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "./websocket/ws_events";
-import { getEdgesFromRowsAttr, isObject } from "./Utils";
+import { getEdgesFromRowsAttr, } from "./Utils";
 
 const addPropsToLayoutRow = (
   graph: Store<GraphInterface>,

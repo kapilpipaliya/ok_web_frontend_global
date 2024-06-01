@@ -1,5 +1,5 @@
 import { equals } from "rambda";
-import { Show, createSignal, untrack, useContext } from "solid-js";
+import { Show, createSignal, useContext } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import { API } from "~/components/api/DataFetcher";
 import getAPI from "~/components/api/getApi";

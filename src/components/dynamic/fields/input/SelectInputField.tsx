@@ -1,7 +1,5 @@
 import {
   batch,
-  createEffect,
-  createResource,
   createSignal,
   For,
   getOwner,
@@ -38,15 +36,12 @@ import {
   onChangeHandler,
   setValueGlobal,
 } from "~/lib/graph/mutate/form_functions";
-import MultiSelect from "~/components/custom/MultiSelect";
-import { Icon } from "@iconify-icon/solid";
 import type { ComponentProps } from "~/components/ComponentType";
 import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
-import { getSelectionOptionsAsync } from "~/lib/graph/get/async/traverse";
 import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import MultiSelectField from "~/components/custom/MultiSelect";

@@ -41,14 +41,12 @@ import {
   useLocation,
   useNavigate,
 } from "@solidjs/router";
-import { stringify } from "yaml";
 import { TableTabs } from "~/components/custom/TableTabs";
 import type { FormMetaData } from "~/lib/Type";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import {
-  getExportCodeAsync,
   getFormMetaDataAsync,
 } from "~/lib/graph/get/async/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";

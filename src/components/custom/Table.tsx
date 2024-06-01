@@ -2,8 +2,6 @@ import {
   createSignal,
   For,
   Show,
-  createEffect,
-  onMount,
   Switch,
   Match,
   type Accessor,
@@ -11,7 +9,6 @@ import {
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "../solid-blocks/blocks";
 import CustomButton from "../solid-blocks/blocks/button/buttons";
-import { ColumnDef } from "@tanstack/solid-table";
 import { capitalizeFirstLetter } from "~/lib/Utils";
 
 type TableProps<T> = {

@@ -1,5 +1,4 @@
 import {
-  Component,
   type JSX,
   Match,
   mergeProps,

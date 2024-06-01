@@ -1,4 +1,4 @@
-import { Component, type JSX, mergeProps, splitProps } from "solid-js";
+import { type JSX, mergeProps, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 import "../base.css";

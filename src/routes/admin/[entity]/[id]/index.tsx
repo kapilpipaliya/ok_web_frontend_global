@@ -1,10 +1,8 @@
 import { useParams } from "@solidjs/router";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 
-import { Match, Show, Switch, useContext } from "solid-js";
+import { Match, Switch, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-import { createStore } from "solid-js/store";
-import { IFormContext } from "~/lib/Utils";
 import LayoutDragAndDrop from "~/pages/drag-drop/Layout/Layout-DragAndDrop";
 import PageDesignerContext from "~/pages/utils/PageDesignerContext";
 

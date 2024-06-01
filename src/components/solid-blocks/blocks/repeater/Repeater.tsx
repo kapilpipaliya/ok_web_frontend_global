@@ -6,7 +6,6 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
 import {
   PageRenderUtils,
   RepeaterContext,
@@ -15,7 +14,7 @@ import {
 } from "~/components/dynamic/fields/static/GenaricField";
 import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
-import { GraphContext, GraphInterface } from "~/lib/graph/graph";
+import { GraphContext, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 
 export const Repeater = (props: { data: any; meta: any }) => {

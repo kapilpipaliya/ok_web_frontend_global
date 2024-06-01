@@ -3,7 +3,6 @@ import type {
   ServerEventsDispatcher,
   WSEvent,
 } from "~/lib/websocket/ws_events_dispatcher";
-import { isNumber } from "~/lib/Utils";
 import type { GraphInterface, Id } from "./graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 

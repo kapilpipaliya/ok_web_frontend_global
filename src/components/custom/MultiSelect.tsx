@@ -3,9 +3,7 @@ import {
   type JSX,
   createSignal,
   For,
-  mergeProps,
   createEffect,
-  onMount,
   createMemo,
   onCleanup,
 } from "solid-js";

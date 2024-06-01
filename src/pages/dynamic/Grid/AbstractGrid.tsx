@@ -1,18 +1,14 @@
-import { useLocation, useNavigate, useParams } from "@solidjs/router";
+import { useLocation, useNavigate, } from "@solidjs/router";
 import {
   createEffect,
-  createMemo,
   createResource,
   createSignal,
   Show,
 } from "solid-js";
 import { useContext } from "solid-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   breadcrumbData,
-  capitalizeFirstLetter,
   expressionString,
 } from "~/lib/Utils";
 import PageHeader from "~/components/custom/Breadcumb";

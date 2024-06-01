@@ -1,6 +1,5 @@
 import {
   type Accessor,
-  Component,
   createContext,
   createEffect,
   createMemo,

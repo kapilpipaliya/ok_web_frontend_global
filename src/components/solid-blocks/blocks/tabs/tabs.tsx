@@ -1,5 +1,4 @@
 import {
-  Component,
   createContext,
   createEffect,
   createSelector,

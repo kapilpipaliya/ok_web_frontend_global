@@ -1,7 +1,7 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router, useLocation } from "@solidjs/router";
+import { Router, } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createEffect, createSignal, Show, Suspense } from "solid-js";
+import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";

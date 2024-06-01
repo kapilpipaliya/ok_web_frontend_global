@@ -1,5 +1,4 @@
 import {
-  Component,
   createMemo,
   type JSX,
   mergeProps,

@@ -1,5 +1,4 @@
-import { getCookie, getRequestIP, getRequestURL } from "vinxi/http";
-import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
+import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver } from "~/cypher_api/server/driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";

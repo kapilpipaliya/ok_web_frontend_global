@@ -2,7 +2,6 @@ import { A, useLocation, useNavigate } from "@solidjs/router";
 // import {get, set} from "idb-keyval";
 import {
   createEffect,
-  createResource,
   createSignal,
   type JSX,
   onMount,
@@ -26,7 +25,6 @@ import { useToast } from "~/components/custom/Toast";
 import { signOutCall } from "~/components/api/api_functions";
 import getAPI from "~/components/api/getApi";
 import { API } from "~/components/api/DataFetcher";
-import Sidebar from "./SideBar/SidebarLayout";
 
 export function MainDashboard(props: { children?: JSX.Element }) {
   const border = "|solid|rgb(212,219,231)";

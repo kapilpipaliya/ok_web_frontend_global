@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { useLocation } from "@solidjs/router";
-import { Show, For, type Accessor, Resource, type Setter } from "solid-js";
+import { Show, For, type Accessor, type Setter } from "solid-js";
 type MainSideBarProps = {
   activeSection: Accessor<string>;
   handleSearch: (input: string) => void;

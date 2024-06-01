@@ -1,7 +1,6 @@
 import { createMiddleware } from "@solidjs/start/middleware";
 import { getHttpsSession } from "./cypher_api/server/auth/getHttpsSession";
 import { redirect } from "@solidjs/router";
-import { useToast } from "./components/custom/Toast";
 export default createMiddleware({
   onRequest: [
     async (event) => {

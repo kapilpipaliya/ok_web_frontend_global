@@ -1,8 +1,6 @@
-import { batch, useContext } from "solid-js";
-import {
-  getCookie,
-  type ServerEventsDispatcher,
-  WsContext,
+import { batch, } from "solid-js";
+import type {
+  ServerEventsDispatcher,
 } from "~/lib/websocket/ws_events_dispatcher";
 
 import { isObject } from "~/lib/Utils";
@@ -17,7 +15,7 @@ import {
   vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
-import { reconcile, type SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
 export function setGraphData(

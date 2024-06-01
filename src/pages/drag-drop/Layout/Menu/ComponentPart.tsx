@@ -1,6 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
 import {
-  Accessor,
   For,
   Show,
   createEffect,
@@ -8,22 +7,17 @@ import {
   createSignal,
   useContext,
 } from "solid-js";
-import { SetStoreFunction } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
-import { Checkbox, Tooltip } from "~/components/solid-blocks/blocks";
+import { Checkbox, } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { expressionString, iconMap } from "~/lib/Utils";
 import {
   DraggedVertexContext,
   PageConfigContext,
-  SelectedComponentContext,
   SelectedIdContext,
 } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
-import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
-import { getNewTxnId } from "~/lib/graph/transaction";
-import { useDragDrop } from "~/lib/pageStore";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { onClickAddComponent } from "../CommonCompUtils";
 

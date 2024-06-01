@@ -14,7 +14,6 @@ import {
   evalGlobalColl,
   evalVertexById,
 } from "../cypher_api/functions/get/expression_eval_async_fns";
-import { graph } from "neo4j-driver";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

@@ -1,7 +1,4 @@
-import { For, createMemo, createSignal, useContext } from "solid-js";
-import { Icon } from "@iconify-icon/solid";
-import { PageView } from "~/components/dynamic/fields/static/GenaricField";
-import { IsPreviewContext, PageConfigContext } from "~/lib/contexts";
+import { For, createSignal, } from "solid-js";
 
 export const PageSetting = () => {
   return (

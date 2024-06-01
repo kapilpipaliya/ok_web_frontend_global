@@ -1,8 +1,6 @@
 import {
-  createEffect,
   createMemo,
   createSignal,
-  For,
   type JSXElement,
   Match,
   onCleanup,
@@ -29,7 +27,6 @@ import {
 } from "~/lib/Utils";
 import {
   getChildVertexes,
-  getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import {
   createForm,

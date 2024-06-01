@@ -5,7 +5,6 @@ import {
   Show,
   Switch,
   Match,
-  JSX,
 } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
@@ -38,7 +37,6 @@ import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { FormMetaData } from "~/lib/Type";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import Label from "~/components/solid-blocks/blocks/label/Label";
 import { AttrsTableData } from "~/lib/api";
 interface DataGridProps {
   tableId: string;

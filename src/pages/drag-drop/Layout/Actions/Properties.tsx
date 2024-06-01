@@ -10,7 +10,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Tooltip,
 } from "~/components/solid-blocks/blocks";
 import type { FieldAttribute } from "~/lib/Type";
 import {
@@ -33,7 +32,7 @@ import {
   revertTransaction,
 } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
-import { setPropertyValueGlobal, useDragDrop } from "~/lib/pageStore";
+import { setPropertyValueGlobal, } from "~/lib/pageStore";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

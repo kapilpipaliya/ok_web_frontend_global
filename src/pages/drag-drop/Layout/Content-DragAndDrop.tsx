@@ -1,11 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
-import { props } from "rambda";
 import { type Accessor, Show, useContext } from "solid-js";
 import ResizableContainer from "~/components/custom/ResizableDivView";
-import Drawer from "~/components/custom/drawer";
 import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { Tooltip } from "~/components/solid-blocks/blocks";
-import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { FormContext } from "~/lib/Utils";
 import { PageConfigContext } from "~/lib/contexts";
 

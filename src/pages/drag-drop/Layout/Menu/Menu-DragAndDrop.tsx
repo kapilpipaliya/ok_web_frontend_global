@@ -4,12 +4,9 @@ import {
   type Accessor,
   Match,
   Switch,
-  useContext,
   createSignal,
   Show,
 } from "solid-js";
-import { PageConfigContext } from "~/lib/contexts";
-import { Vertex } from "~/lib/graph/graph";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
 import { CollectionPart } from "./CollectionPart";

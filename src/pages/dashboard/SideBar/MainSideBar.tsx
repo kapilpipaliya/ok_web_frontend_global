@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, Resource, type Setter, Show } from "solid-js";
+import { type Accessor, For, type Setter, Show } from "solid-js";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 
 type MainSideBarProps = {

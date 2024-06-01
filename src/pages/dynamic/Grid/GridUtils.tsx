@@ -1,8 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import type { CellContext } from "@tanstack/solid-table";
-import { graph } from "neo4j-driver";
 import Dismiss from "solid-dismiss";
-import { Accessor, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
 import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import {

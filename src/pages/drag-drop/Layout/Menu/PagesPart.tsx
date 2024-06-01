@@ -10,7 +10,6 @@ import {
   Show,
 } from "solid-js";
 import { useToast } from "~/components/custom/Toast";
-import { TextField } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { DraggedVertexContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";

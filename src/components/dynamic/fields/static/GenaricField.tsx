@@ -3,7 +3,6 @@ import {
   createContext,
   createMemo,
   createSelector,
-  createSignal,
   For,
   Match,
   Show,
@@ -43,9 +42,6 @@ import {
   ShowDrawerContext,
   TargetIdContext,
 } from "~/lib/contexts";
-import Drawer from "~/components/custom/drawer";
-import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
-import { Properties } from "~/pages/drag-drop/Layout/Actions/Properties";
 import { Popover } from "@kobalte/core/popover";
 // Do not specify the items property if you specified the dataSource, and vice versa.
 // It's best to use dataSource but we are using items for simplicity.
