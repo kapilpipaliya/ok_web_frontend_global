@@ -1,7 +1,10 @@
 import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
-import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/lib/convertNodeToJson";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 import { int } from "neo4j-driver";
 
@@ -20,17 +23,23 @@ export async function getOutEdges(
 
   try {
     // Cypher query to create a new vertex
-    const matchVertexQuery = `MATCH (sourceNode)${options.isInward ? "<-" : "-"}[relationshipType${type ? `:${type}` : ""}]${options.isInward ? "-" : "->"}(targetNode)
+    const matchVertexQuery = `MATCH (sourceNode)${
+      options.isInward ? "<-" : "-"
+    }[relationshipType${type ? `:${type}` : ""}]${options.isInward ? "-" : "->"}(targetNode)
 WHERE id(sourceNode) = $fromId
 RETURN targetNode, relationshipType
 `;
-    const vertexResult = await transaction.run(matchVertexQuery, { fromId: int(fromId) });
+    const vertexResult = await transaction.run(matchVertexQuery, {
+      fromId: int(fromId),
+    });
 
     const resultNodes = [] as [Edge, Vertex][];
     for (const record of vertexResult.records) {
       const targetNode = convertNodeToJson(record.get("targetNode"));
-      const targetRelationship = convertRelationshipToJson(record.get("relationshipType"));
-      
+      const targetRelationship = convertRelationshipToJson(
+        record.get("relationshipType"),
+      );
+
       resultNodes.push([targetRelationship, targetNode]);
     }
     return {

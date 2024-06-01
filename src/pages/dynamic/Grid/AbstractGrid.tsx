@@ -96,7 +96,7 @@ export function AbstractGrid(props: AbstractGridProps) {
                 props: {
                   onClick: () => navigate("new"),
                   variant: "soft",
-                  style: { padding: "7px 10px", 'margin-bottom': "10px" },
+                  style: { padding: "7px 10px", "margin-bottom": "10px" },
                   leading:
                     // TO solve Hydration error passed a function
                     () => (

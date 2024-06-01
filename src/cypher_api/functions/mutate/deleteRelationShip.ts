@@ -14,7 +14,9 @@ export async function deleteRelationShipMGCall(edgeId: string | number | any) {
     const createVertexQuery = `MATCH ()-[rel]->()
 WHERE id(rel) = $edgeId
 DELETE rel`;
-    const vertexResult = await transaction.run(createVertexQuery, { edgeId: int(edgeId) });
+    const vertexResult = await transaction.run(createVertexQuery, {
+      edgeId: int(edgeId),
+    });
 
     // Commit the transaction
     await transaction.commit();

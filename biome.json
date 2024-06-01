@@ -8,5 +8,15 @@
 		"rules": {
 			"recommended": true
 		}
-	}
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"ignore": [],
+		"attributePosition": "auto",
+		"indentStyle": "space",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 80
+	  }
 }

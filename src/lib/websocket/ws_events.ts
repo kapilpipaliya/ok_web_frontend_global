@@ -40,7 +40,7 @@ export function setGraphData(
           const OUT = { ...prev.OUT, ...args.vertexes[vertexId].OUT };
           return { ...args.vertexes[vertexId], IN, OUT };
         }
-          return args.vertexes[vertexId];
+        return args.vertexes[vertexId];
       });
 
       for (const label of args.vertexes[vertexId].L) {
@@ -51,8 +51,6 @@ export function setGraphData(
         });
       }
     }
-
-    
 
     for (const edgeId in args.edges) {
       setGraph("edges", edgeId, args.edges[edgeId]);

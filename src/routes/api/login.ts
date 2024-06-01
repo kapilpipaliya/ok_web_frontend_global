@@ -1,7 +1,4 @@
-import {
-  getDriver,
-  getDriverWithPort,
-} from "~/cypher_api/server/driver";
+import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
@@ -53,7 +50,7 @@ async function authenticateUser(
     if (subdomain === "super") {
       return await authenticateSuperUser(user, email, password);
     }
-      return authenticateRegularUser(user, password);
+    return authenticateRegularUser(user, password);
   } finally {
     await session.close();
   }
@@ -93,7 +90,7 @@ async function authenticateSuperUser(
     if (res.properties.password === password) {
       return result.records[0].get("u");
     }
-      throw new Error("Not Authorized Email!");
+    throw new Error("Not Authorized Email!");
   } finally {
     await session.close();
   }

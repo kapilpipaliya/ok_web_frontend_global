@@ -1,9 +1,5 @@
 import { createSignal, useContext } from "solid-js";
-import {
-  APP_BASE_URL,
-  validateEmail,
-  validateUsername,
-} from "~/lib/Utils";
+import { APP_BASE_URL, validateEmail, validateUsername } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
@@ -212,7 +208,9 @@ export function SignUp() {
                   onClick={togglePasswordVisibility}
                   class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+                  icon={`${
+                    showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
+                  }`}
                 />
               </div>
             </div>

@@ -17,9 +17,7 @@ import {
 } from "solid-js";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
-import {
-  getChildVertexes
-} from "~/lib/graph/get/sync/traverse";
+import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
 import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
@@ -70,7 +68,6 @@ interface AbstractSingleFormProps
   isDialogContext?: boolean;
 }
 
-
 export interface DynamicFormProps {
   meta?: Vertex;
   form: FormMetaData;
@@ -107,9 +104,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   );
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
-  const id = createMemo(() =>
-    p.id === "new" ? undefined : p.id,
-  );
+  const id = createMemo(() => (p.id === "new" ? undefined : p.id));
   // TODO: add validation on form that AttrsTableData keys should not available.
   // Note: When the page is loaded server side, the client side will not run this again,
   // so set state inside it will not set when page is reloaded.
@@ -130,7 +125,6 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
         setFormData({ form: result.form as FormMetaData });
       }
     }
-
   });
 
   return (
@@ -176,28 +170,28 @@ export function DynamicForm(props: DynamicFormProps) {
     try {
       if (!props.id) {
         // Load Form Meta from API
-        return 'new';
+        return "new";
       }
-        // Load vertex from server
-        const loadResult = await findVertexesMGCall({ id: props.id });
-        if (loadResult.error) {
-          return { error: loadResult.error };
-        }
+      // Load vertex from server
+      const loadResult = await findVertexesMGCall({ id: props.id });
+      if (loadResult.error) {
+        return { error: loadResult.error };
+      }
 
-        const { incoming, outgoing }: { incoming: any; outgoing: any } =
-          getEdgesFromRowsAttr(props.form.attributes);
+      const { incoming, outgoing }: { incoming: any; outgoing: any } =
+        getEdgesFromRowsAttr(props.form.attributes);
 
-        const result = await getDataMGCall({
-          expression: `id:'${props.id}'`,
-          incoming,
-          outgoing,
-        });
+      const result = await getDataMGCall({
+        expression: `id:'${props.id}'`,
+        incoming,
+        outgoing,
+      });
 
-        if (result.error) {
-          return { error: result.error };
-        }
+      if (result.error) {
+        return { error: result.error };
+      }
 
-        return { graph: result.graph };
+      return { graph: result.graph };
     } catch (e: any) {
       return { error: `Error When Loading Form: ${e.message}` };
     }
@@ -205,85 +199,87 @@ export function DynamicForm(props: DynamicFormProps) {
 
   const [data, { refetch }] = createResource(fetchData);
 
-  createEffect(on(data, (data) => {
-    if (data) {
-      const result = data;
-      let dataVertex;
-      if (result === 'new') {
-        const createResult = createForm(
-          graph,
-          setGraph,
-          txnId,
-          Ws,
-          props.form[IdAttr],
-        );
-
-        dataVertex = createResult.vertex
-      }
-
-      if (result && !(result as { error?: string }).error) {
-        if ((result as { graph?: GraphInterface }).graph) {
-          setGraphData(
+  createEffect(
+    on(data, (data) => {
+      if (data) {
+        const result = data;
+        let dataVertex;
+        if (result === "new") {
+          const createResult = createForm(
             graph,
             setGraph,
-            (result as { graph: GraphInterface }).graph,
+            txnId,
+            Ws,
+            props.form[IdAttr],
           );
+
+          dataVertex = createResult.vertex;
         }
-        // Load Form Meta and Data from API
-        const metaVertexResult = untrack(() =>
-          createMeta(props.form, graph, setGraph),
-        );
 
-        if (metaVertexResult.error) {
-          console.error("Meta Vertex Error:", metaVertexResult.error);
-          return;
-        }
-        const groupByTabsAndGroupFn = () => {
-          const mainAttributes = getChildVertexes(
-            graph,
-            ["MetaAttr"],
-            [metaVertexResult.vertex!],
-          ); //.sort((a, b) => a.P.pos - b.P.pos);
-
-          const groupByTabs = groupBy(
-            mainAttributes.vertexes!,
-            (item) => item.P.tab!,
-          ) as unknown as {
-            [tab: string]: Vertex[];
-          };
-
-          const groupByTabsAndGroup = {} as {
-            [tab: string]: { [group: string]: Vertex[] };
-          };
-
-          for (const tab in groupByTabs) {
-            groupByTabsAndGroup[tab] = groupBy(
-              groupByTabs[tab]!,
-              (item) => item.P.group!,
-            ) as unknown as {
-              [group: string]: Vertex[];
-            };
+        if (result && !(result as { error?: string }).error) {
+          if ((result as { graph?: GraphInterface }).graph) {
+            setGraphData(
+              graph,
+              setGraph,
+              (result as { graph: GraphInterface }).graph,
+            );
           }
-          return groupByTabsAndGroup;
-        };
-        const groupByTabsAndGroup = groupByTabsAndGroupFn();
-        const tabs = Object.keys(groupByTabsAndGroup).filter(
-          (tab) => tab !== "main",
-        );
+          // Load Form Meta and Data from API
+          const metaVertexResult = untrack(() =>
+            createMeta(props.form, graph, setGraph),
+          );
 
-        setActiveTab(tabs[0]);
-        setFormData({
-          txnId,
-          formMeta: metaVertexResult.vertex!,
-          formData: graph.vertexes[props.id!] ?? dataVertex!,
-          tabs,
-          groupByTabsAndGroup,
-        });
+          if (metaVertexResult.error) {
+            console.error("Meta Vertex Error:", metaVertexResult.error);
+            return;
+          }
+          const groupByTabsAndGroupFn = () => {
+            const mainAttributes = getChildVertexes(
+              graph,
+              ["MetaAttr"],
+              [metaVertexResult.vertex!],
+            ); //.sort((a, b) => a.P.pos - b.P.pos);
 
-        setPageConfig?.("formData", formData);
+            const groupByTabs = groupBy(
+              mainAttributes.vertexes!,
+              (item) => item.P.tab!,
+            ) as unknown as {
+              [tab: string]: Vertex[];
+            };
+
+            const groupByTabsAndGroup = {} as {
+              [tab: string]: { [group: string]: Vertex[] };
+            };
+
+            for (const tab in groupByTabs) {
+              groupByTabsAndGroup[tab] = groupBy(
+                groupByTabs[tab]!,
+                (item) => item.P.group!,
+              ) as unknown as {
+                [group: string]: Vertex[];
+              };
+            }
+            return groupByTabsAndGroup;
+          };
+          const groupByTabsAndGroup = groupByTabsAndGroupFn();
+          const tabs = Object.keys(groupByTabsAndGroup).filter(
+            (tab) => tab !== "main",
+          );
+
+          setActiveTab(tabs[0]);
+          setFormData({
+            txnId,
+            formMeta: metaVertexResult.vertex!,
+            formData: graph.vertexes[props.id!] ?? dataVertex!,
+            tabs,
+            groupByTabsAndGroup,
+          });
+
+          setPageConfig?.("formData", formData);
+        }
       }
-    }
-  }));
+    }),
+  );
 
   // focus first input
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -329,7 +325,7 @@ export function DynamicForm(props: DynamicFormProps) {
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => { },
+          onError: (error) => {},
         });
       }
       submit = true;
@@ -545,44 +541,50 @@ export function DynamicForm(props: DynamicFormProps) {
   );
 
   function ImportExportButtons() {
-    return <div
-      style={{
-        "justify-content": "end",
-        "margin-bottom": "10px",
-        display: "flex",
-      }}
-    >
-      <GenericField
-        meta={{
-          P: {
-            component: "Button",
-            props: {
-              children: "Import",
-              variant: "outlined",
-              onClick: () => {
-                setPopup(true);
+    return (
+      <div
+        style={{
+          "justify-content": "end",
+          "margin-bottom": "10px",
+          display: "flex",
+        }}
+      >
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
+                props: {
+                  children: "Import",
+                  variant: "outlined",
+                  onClick: () => {
+                    setPopup(true);
+                  },
+                },
               },
-            },
-          },
-        } as any} />
-      <GenericField
-        meta={{
-          P: {
-            component: "Button",
-            props: {
-              children: "Export",
-              onClick: () => {
-                setPopup(true);
+            } as any
+          }
+        />
+        <GenericField
+          meta={
+            {
+              P: {
+                component: "Button",
+                props: {
+                  children: "Export",
+                  onClick: () => {
+                    setPopup(true);
+                  },
+                  class: " b:blue",
+                },
               },
-              class: " b:blue",
-            },
-          },
-        } as any} />
-    </div>;
+            } as any
+          }
+        />
+      </div>
+    );
   }
 }
-
-
 
 function getTabsWidth(group: Vertex[]) {
   return group.filter((attribute) => attribute.P.component === "Table").length

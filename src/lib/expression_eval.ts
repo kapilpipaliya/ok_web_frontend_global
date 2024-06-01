@@ -135,7 +135,8 @@ export function evaluate(_node: jsep.Expression, context: object): any {
     case "BinaryExpression":
       if (node.operator === "||") {
         return evaluate(node.left, context) || evaluate(node.right, context);
-      }if (node.operator === "&&") {
+      }
+      if (node.operator === "&&") {
         return evaluate(node.left, context) && evaluate(node.right, context);
       }
       return binops[node.operator](
@@ -205,7 +206,8 @@ export async function evalAsync(
           (await evalAsync(node.left, context)) ||
           (await evalAsync(node.right, context))
         );
-      }if (node.operator === "&&") {
+      }
+      if (node.operator === "&&") {
         return (
           (await evalAsync(node.left, context)) &&
           (await evalAsync(node.right, context))
@@ -375,7 +377,7 @@ addBinaryOp(
         if (strict && path.length > 1) {
           return;
         }
-          continue;
+        continue;
       }
       for (const edgeId of edgeIds) {
         const edge = context.graph.edges[edgeId];
@@ -490,9 +492,9 @@ addUnaryOp(
       }
       return filteredVertexes;
     }
-      return findVertexIdsByLabel(context.graph, edgeType).map(
-        (id) => context.graph.vertexes[id],
-      );
+    return findVertexIdsByLabel(context.graph, edgeType).map(
+      (id) => context.graph.vertexes[id],
+    );
   },
   evalGlobalColl,
 );

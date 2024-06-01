@@ -65,14 +65,14 @@ const wrapText = (children: JSX.Element): JSX.Element => {
     return wrapText(children());
   }
   if (typeof children === "string") {
-    return <span >{children}</span>;
+    return <span>{children}</span>;
   }
   if (Array.isArray(children)) {
     const result = children.map((child) =>
       typeof child === "function" ? child() : child,
     );
     if (result.every((child) => typeof child === "string")) {
-      return <span >{result}</span>;
+      return <span>{result}</span>;
     }
     return result;
   }
@@ -126,7 +126,9 @@ export const Tooltip: Component<TooltipProps> = (props) => {
         : local.position === "n"
           ? {
               top: `${wrapperRef.offsetTop}px`,
-              left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
+              left: `${
+                wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)
+              }px`,
             }
           : local.position === "ne"
             ? {
@@ -135,7 +137,9 @@ export const Tooltip: Component<TooltipProps> = (props) => {
               }
             : local.position === "e"
               ? {
-                  top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
+                  top: `${
+                    wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)
+                  }px`,
                   left: `${wrapperRef.offsetLeft + wrapperRef.offsetWidth}px`,
                 }
               : local.position === "se"
@@ -145,17 +149,25 @@ export const Tooltip: Component<TooltipProps> = (props) => {
                   }
                 : local.position === "sw"
                   ? {
-                      top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
+                      top: `${
+                        wrapperRef.offsetTop + wrapperRef.offsetHeight
+                      }px`,
                       left: `${wrapperRef.offsetLeft}px`,
                     }
                   : local.position === "w"
                     ? {
-                        top: `${wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)}px`,
+                        top: `${
+                          wrapperRef.offsetTop + (wrapperRef.offsetHeight >> 1)
+                        }px`,
                         left: `${wrapperRef.offsetLeft}px`,
                       }
                     : /* s is default */ {
-                        top: `${wrapperRef.offsetTop + wrapperRef.offsetHeight}px`,
-                        left: `${wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)}px`,
+                        top: `${
+                          wrapperRef.offsetTop + wrapperRef.offsetHeight
+                        }px`,
+                        left: `${
+                          wrapperRef.offsetLeft + (wrapperRef.offsetWidth >> 1)
+                        }px`,
                       },
     );
   });

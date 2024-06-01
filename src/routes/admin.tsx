@@ -8,17 +8,14 @@ import { MainDashboard } from "~/pages/dashboard/MainDashboard";
 
 export default function UsersLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);
- 
- 
 
   return (
     // <CSSRuntimeProvider config={config}>
-      <WsContext.Provider value={{ Ws }}>
-        
-        {/* In DataFetch fetch only side bar data*/}
-        <MainDashboard children={props.children} />
-        {/*{props.children}*/}
-      </WsContext.Provider>
+    <WsContext.Provider value={{ Ws }}>
+      {/* In DataFetch fetch only side bar data*/}
+      <MainDashboard children={props.children} />
+      {/*{props.children}*/}
+    </WsContext.Provider>
     // </CSSRuntimeProvider>
   );
 }

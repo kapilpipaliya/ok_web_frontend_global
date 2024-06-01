@@ -109,7 +109,7 @@ export function ExpressionBuilder(props: {
       if (item.value.trim() === "") {
         return { ...item, error: true };
       }
-        return item;
+      return item;
     });
     setContentList(updatedList);
     const hasErrors = contentList.some((item) => item.error);

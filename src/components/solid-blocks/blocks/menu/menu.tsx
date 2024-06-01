@@ -178,7 +178,9 @@ export function Menu(props: MenuProps) {
     <div
       ref={menuRef}
       {...divProps}
-      class={`sb-menu${divProps.class ? ` ${divProps.class}` : ""}${local.align ? ` ${local.align}` : ""}`}
+      class={`sb-menu${divProps.class ? ` ${divProps.class}` : ""}${
+        local.align ? ` ${local.align}` : ""
+      }`}
       onkeydown={keyHandler}
     >
       {opener()}

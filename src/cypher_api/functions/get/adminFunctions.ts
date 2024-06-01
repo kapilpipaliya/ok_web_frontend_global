@@ -19,9 +19,10 @@ export async function getUsers() {
         vertexes: vertexes,
       };
     }
-      return [];
+    return [];
   } catch (e: any) {
-    throw new Response(e.message,{
-      status: 500});
+    throw new Response(e.message, {
+      status: 500,
+    });
   }
 }

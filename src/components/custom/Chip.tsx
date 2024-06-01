@@ -54,7 +54,9 @@ export function ChipDropDown(props: {
         setStatus(newValue); // Update the signal
         props.onChanged(newValue); // Callback to parent component
       }}
-      style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles(status())}`}
+      style={`display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 14px; font-weight: bold; text-transform: uppercase; ${getStatusStyles(
+        status(),
+      )}`}
     >
       <For each={options}>
         {(option) => (

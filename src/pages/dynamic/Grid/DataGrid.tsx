@@ -158,7 +158,7 @@ const DataGrid = (props: DataGridProps) => {
       incoming,
       outgoing,
     });
-    
+
     const vertexCount = Object.keys(result.graph.vertexes).length;
     if (vertexCount < (limit ?? 10)! || vertexCount === 0) {
       setIsShowLoadMore(false);

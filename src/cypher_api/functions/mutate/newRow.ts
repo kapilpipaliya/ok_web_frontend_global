@@ -1,7 +1,10 @@
 import { getDriver } from "../../server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "../../server/domain_utils";
-import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
+import {
+  convertNodeToJson,
+  convertRelationshipToJson,
+} from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
 import type { Id } from "~/lib/graph/graph";
 
@@ -19,7 +22,9 @@ export async function newRowMGCall(
 
   try {
     // Cypher query to create a new vertex
-    const createVertexQuery = `CREATE (v:${label || edgeType}) SET v = $properties SET v.createdAt = localDateTime(), v.updatedAt = localDateTime() RETURN v`;
+    const createVertexQuery = `CREATE (v:${
+      label || edgeType
+    }) SET v = $properties SET v.createdAt = localDateTime(), v.updatedAt = localDateTime() RETURN v`;
     const vertexResult = await transaction.run(createVertexQuery, {
       properties,
     });

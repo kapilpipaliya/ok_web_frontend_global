@@ -1,4 +1,9 @@
-import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  IdAttr,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import {
@@ -97,10 +102,10 @@ export function getParentVertexes(
       Array.from(stepVertexes.values()),
     );
   }
-    return {
-      error: false,
-      vertexes: Array.from(stepVertexes.values()),
-    };
+  return {
+    error: false,
+    vertexes: Array.from(stepVertexes.values()),
+  };
 }
 
 export function calculateFilter(input: string) {
@@ -200,7 +205,8 @@ export function getTreeData(
 export function getTextValue(value: any) {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
-  }if (typeof value === "object") {
+  }
+  if (typeof value === "object") {
     return JSON.stringify(value);
   }
   return value;
@@ -222,7 +228,7 @@ export function getSelectionOptions(
     if (value) {
       return { error: false, vertexes: value };
     }
-      return { error: true };
+    return { error: true };
   } catch (e) {
     console.error(e, vertex, collection);
     return { error: true };
@@ -271,19 +277,19 @@ export function getChildVertex(
       error: true,
     };
   }
-    const newVertex = vertexes[0];
-    if (newVertex) {
-      if (path.length > 1) {
-        return getChildVertex(graph, path.slice(1), newVertex);
-      }
-        return {
-          error: false,
-          vertex: newVertex,
-        };
+  const newVertex = vertexes[0];
+  if (newVertex) {
+    if (path.length > 1) {
+      return getChildVertex(graph, path.slice(1), newVertex);
     }
-      return {
-        error: true,
-      };
+    return {
+      error: false,
+      vertex: newVertex,
+    };
+  }
+  return {
+    error: true,
+  };
 }
 
 export function getParentVertex(
@@ -301,25 +307,25 @@ export function getParentVertex(
       error: true,
     };
   }
-    const edge = graph.edges[edges[0]];
-    if (edge) {
-      const newVertex = graph.vertexes[edge.S];
-      if (newVertex) {
-        if (path.length > 1) {
-          return getParentVertex(path.slice(0, -1), newVertex, graph);
-        }
-          return {
-            error: false,
-            vertex: newVertex,
-          };
+  const edge = graph.edges[edges[0]];
+  if (edge) {
+    const newVertex = graph.vertexes[edge.S];
+    if (newVertex) {
+      if (path.length > 1) {
+        return getParentVertex(path.slice(0, -1), newVertex, graph);
       }
-        return {
-          error: true,
-        };
-    }
       return {
-        error: true,
+        error: false,
+        vertex: newVertex,
       };
+    }
+    return {
+      error: true,
+    };
+  }
+  return {
+    error: true,
+  };
 }
 
 export function getChildVertexes(
@@ -346,7 +352,7 @@ export function getChildVertexes(
           error: true,
         };
       }
-        continue;
+      continue;
     }
 
     for (const edgeId of edgeIds) {
@@ -376,8 +382,8 @@ export function getChildVertexes(
       strict,
     );
   }
-    return {
-      error: false,
-      vertexes: Array.from(stepVertexes.values()),
-    };
+  return {
+    error: false,
+    vertexes: Array.from(stepVertexes.values()),
+  };
 }

@@ -29,6 +29,7 @@ export const TextEditor = (props: {
         props.parseAndApplyCssRules(e.target.value);
         // props.setValue?.(e.target.value);
       }}
-      placeholder="Start typing..." />
+      placeholder="Start typing..."
+    />
   );
 };

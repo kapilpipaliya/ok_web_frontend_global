@@ -10,7 +10,7 @@ export async function findVertexesMGCall(options: {
   attribute?: string;
   value?: number | string;
   id?: number;
-}): Promise<{ error?: boolean, message?: string, vertexes?: Vertex }> {
+}): Promise<{ error?: boolean; message?: string; vertexes?: Vertex }> {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
@@ -40,26 +40,25 @@ export async function findVertexesMGCall(options: {
     } else {
       return { error: true, message: "Invalid parameters" };
     }
-    
+
     const vertexResult = await driver.run(query, params);
     if (vertexResult.records.length === 0) {
       return {
         error: true,
-      }
-    }
-      const vertexes = convertNodeToJson(vertexResult.records[0].get("v"));
-
-      return {
-        error: false,
-        vertexes,
       };
+    }
+    const vertexes = convertNodeToJson(vertexResult.records[0].get("v"));
+
+    return {
+      error: false,
+      vertexes,
+    };
   } catch (error) {
     console.error(error);
 
     return { error: true, message: "An error occurred" };
   }
 }
-
 
 // export async function findVertexByLabelAndPksMGCall(
 //   label: string,

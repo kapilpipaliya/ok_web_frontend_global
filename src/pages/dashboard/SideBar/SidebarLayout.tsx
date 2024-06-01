@@ -1,9 +1,10 @@
 import {
   createEffect,
-  createSignal, type JSX,
+  createSignal,
+  type JSX,
   onMount,
   Show,
-  useContext
+  useContext,
 } from "solid-js";
 
 import { LoaderNew } from "~/components/custom/LoaderSimple";
@@ -23,7 +24,6 @@ export interface navbarDataI {
   id: string;
   name: string;
 }
-
 
 function Sidebar() {
   const [searchData, setSearchData] = createSignal<any>([]);
@@ -46,7 +46,7 @@ function Sidebar() {
       return newExpandedSections;
     });
   };
-  
+
   function handleSearch(input: string) {
     setSearchTerm(input);
 
@@ -92,7 +92,7 @@ function Sidebar() {
     "/admin/Role": "eos-icons:role-binding-outlined",
     "/admin/Perm": "tabler:lock-access",
     "/admin/Coll": "ep:collection-tag",
-    '/admin/Form': "fluent:form-28-regular",
+    "/admin/Form": "fluent:form-28-regular",
     "/admin/CollCategory": "ic:outline-collections-bookmark",
     "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
@@ -101,19 +101,18 @@ function Sidebar() {
   const toggleSectionCollapse = () => {
     setIsCollapsed(!isCollapsed());
   };
-  
 
   const location = useLocation();
 
   const handleUrlChange = () => {
     const path = location.pathname;
-    const mainDiv = document.getElementById('mainDiv');
-  
+    const mainDiv = document.getElementById("mainDiv");
+
     if (!path.includes("/admin")) {
-      setGraph('isSideBarOpen', false);
-      setGraph('isSubSideBarOpen', false);
-    }else{
-      mainDiv?.classList.add('flex');
+      setGraph("isSideBarOpen", false);
+      setGraph("isSubSideBarOpen", false);
+    } else {
+      mainDiv?.classList.add("flex");
     }
   };
 
@@ -145,10 +144,10 @@ function Sidebar() {
   onMount(async () => {
     const data = await getNavData();
     if (data) {
-      setGraphData(graph,setGraph,data.graph);
+      setGraphData(graph, setGraph, data.graph);
       setNavData(data.children[0].children);
       setSearchData(data.children[0].children);
-      setGraph('navigationData', data.children[0].children);
+      setGraph("navigationData", data.children[0].children);
     }
   });
 
@@ -156,7 +155,7 @@ function Sidebar() {
     ({
       width: isCollapsed() ? "70px" : "310px",
       background: "#f4f4f4",
-      display: graph.isSideBarOpen ? 'contents': 'none',
+      display: graph.isSideBarOpen ? "contents" : "none",
       transition: "transform 0.3s ease-in-out",
       transform: graph.isSideBarOpen ? "translateX(0)" : "translateX(-100%)",
       "box-shadow": "-15px 0px 31px rgb(95,156,249)",

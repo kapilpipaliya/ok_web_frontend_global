@@ -32,7 +32,9 @@ const MultiSelectField = (props: {
   const [isRefetch, setIsRefetch] = createSignal(1);
 
   // Define signals for managing state
-  const selected = createMemo(() => isRefetch() && props.selectedValues() || ([] as any[]));
+  const selected = createMemo(
+    () => (isRefetch() && props.selectedValues()) || ([] as any[]),
+  );
 
   const [inputValue, setInputValue] = createSignal("");
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
@@ -114,7 +116,7 @@ const MultiSelectField = (props: {
     if (props.selectionLimit === 1) {
       setDropdownVisible(false);
     }
-    setIsRefetch(v => v + 1);
+    setIsRefetch((v) => v + 1);
   };
   // Remove tag from selected values
   const handleRemoveTag = (value: any) => {
@@ -134,14 +136,16 @@ const MultiSelectField = (props: {
     "background: #3377cc;color: #fff; padding: 2px 5px; border-radius: 4px; display: flex; align-items: center; gap: 5px; cursor: default;";
   const closeButtonStyle = "cursor: pointer; display: flex;";
   const inputStyle = () => ({
-    display: props.selectedValues().length === 1 && props.selectionLimit === 1 ? "none" : "",
+    display:
+      props.selectedValues().length === 1 && props.selectionLimit === 1
+        ? "none"
+        : "",
     flex: 1,
-    'smin-width': '100px',
-    padding: '5px',
-    border: 'none',
-    outline: 'none'
-
-  })
+    "smin-width": "100px",
+    padding: "5px",
+    border: "none",
+    outline: "none",
+  });
   const dropdownStyle: any = () => ({
     // position: 'absolute',
     // top: '100%',
@@ -161,7 +165,9 @@ const MultiSelectField = (props: {
   // Filter options based on input value
   const filteredOptions = createMemo(() => {
     return (props.options || []).filter((option) =>
-      getOptionLabel(option)?.toLowerCase().includes(inputValue().toLowerCase()),
+      getOptionLabel(option)
+        ?.toLowerCase()
+        .includes(inputValue().toLowerCase()),
     );
   });
 
@@ -232,8 +238,17 @@ const MultiSelectField = (props: {
           >
             {(option, index) => (
               <div
-                class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""} f:14 m:3 r:5`}
-                style={`${optionStyle} ${selected().some((item: { value: any }) => getOptionValue(item) === getOptionValue(option)) ? optionSelectedStyle : ""}`}
+                class={`bg:#f4f4f4:hover ${
+                  index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
+                } f:14 m:3 r:5`}
+                style={`${optionStyle} ${
+                  selected().some(
+                    (item: { value: any }) =>
+                      getOptionValue(item) === getOptionValue(option),
+                  )
+                    ? optionSelectedStyle
+                    : ""
+                }`}
                 onMouseDown={() => handleSelectChange(getOptionValue(option))}
               >
                 {props.renderLabel

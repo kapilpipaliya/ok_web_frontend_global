@@ -5,11 +5,15 @@ export async function getSubDomain(host: string, isAuthCheck = true) {
   const url = getRequestURL();
   const path = url.pathname;
   const httpSession = await getHttpsSession();
-    
-  if (isAuthCheck && !httpSession.data?.email && !path.includes("/api/signup")) {
+
+  if (
+    isAuthCheck &&
+    !httpSession.data?.email &&
+    !path.includes("/api/signup")
+  ) {
     throw new Error("Not Authorized");
   }
-  
+
   // Assuming the URL is something like `subdomain.example.com`
   // Split the host by '.' and check the length
   const parts = host.split(".");

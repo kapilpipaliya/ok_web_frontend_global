@@ -23,7 +23,10 @@ export const SubSideBar = (props: MainSideBarProps) => {
       );
   return (
     <Show when={!props.isCollapsed()}>
-      <div class={"bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20"} style={{ 'box-shadow':'-1px 3px 4px 3px lightgrey'}}>
+      <div
+        class={"bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20"}
+        style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
+      >
         <nav class="flex 0px 0px 10px 10px pt:13">
           <div class="group">
             <Icon
@@ -62,7 +65,15 @@ export const SubSideBar = (props: MainSideBarProps) => {
                     style="padding-top: 12px; padding-bottom: 12px;"
                   >
                     <div
-                      class={`flex ai:center jc:space-between ${!props.expandedSections().get(nav.P.name) ? "color:#37c" : ""} ${location.pathname === nav.P.url ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} pl:12 f:15 pr:12 capitalize`}
+                      class={`flex ai:center jc:space-between ${
+                        !props.expandedSections().get(nav.P.name)
+                          ? "color:#37c"
+                          : ""
+                      } ${
+                        location.pathname === nav.P.url
+                          ? "bg:#E5EAFE font-weight:600"
+                          : "font-weight:400"
+                      } pl:12 f:15 pr:12 capitalize`}
                     >
                       <div onClick={() => props.toggleSection(nav.P.name)}>
                         {nav.P.name}
@@ -97,11 +108,19 @@ export const SubSideBar = (props: MainSideBarProps) => {
                         {(child) => {
                           return (
                             <a
-                              class={`${location.pathname === child.P.url ? "bg:#E5EAFE font-weight:600" : "font-weight:400"} r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
+                              class={`${
+                                location.pathname === child.P.url
+                                  ? "bg:#E5EAFE font-weight:600"
+                                  : "font-weight:400"
+                              } r:7 f:14 d:flex ai:center p:8|12 color:#4B5563 trs:color|.3s|bg|.3s td:none bg:#E5E7EB:hover m:5px|10px`}
                               href={child.P.url}
                             >
                               <Icon
-                                color={`${props.activeSection() === child.P.name ? "#3B82F6" : "#4B5563"}`}
+                                color={`${
+                                  props.activeSection() === child.P.name
+                                    ? "#3B82F6"
+                                    : "#4B5563"
+                                }`}
                                 icon={props.mainIcon[child.P.url]}
                                 height={24}
                                 width={24}

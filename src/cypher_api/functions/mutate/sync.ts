@@ -1,4 +1,4 @@
-import neo4j, { type Session, type Node} from "neo4j-driver";
+import neo4j, { type Session, type Node } from "neo4j-driver";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: any) {
@@ -142,7 +142,8 @@ async function addNodeEdges(
       for (const childVertex of userChildrenVertexes.records) {
         const userProperties = { ...childVertex.get("m").properties };
         if (superProperties.name === userProperties.name) {
-          const query = "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
+          const query =
+            "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
           await sessionTarget.run(query, {
             compPropNodeId: childVertex.get("m").identity,
             props: superProperties,
@@ -151,7 +152,8 @@ async function addNodeEdges(
         }
       }
       if (!isPropertyExist) {
-        const query = "MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;";
+        const query =
+          "MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;";
         await sessionTarget.run(query, {
           compNodeId: createdNode.identity,
           props: superProperties,

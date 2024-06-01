@@ -1,5 +1,5 @@
 import { removeUndefinedProperties } from "~/lib/functions";
-import {  IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   getChildVertexMGCall,
   getChildVertexesMGCall,
@@ -92,12 +92,11 @@ export async function getCollAttrsMGCall(
         vertexCollAttr.P.name,
         "taking string dataType",
       );
-      const dataTypeVertex = await findVertexesMGCall(
-        {
-          label: "DataType",
-          value: "String",
-          attribute: "name",
-        });
+      const dataTypeVertex = await findVertexesMGCall({
+        label: "DataType",
+        value: "String",
+        attribute: "name",
+      });
       if (dataTypeVertex.error) {
         console.warn("String data Type not found");
         return { error: true };
@@ -231,16 +230,15 @@ export async function getFormApiFromFormMGCall(
   const subDomain = await getSubDomain(host);
   const driver = await getDriver(subDomain);
   const session = driver.session();
-  const collResult =  await findVertexesMGCall(
-    {
-      label: "Coll",
-      attribute: IdAttr,
-      value: formId, 
-    }) 
-  if (collResult.error ) {
+  const collResult = await findVertexesMGCall({
+    label: "Coll",
+    attribute: IdAttr,
+    value: formId,
+  });
+  if (collResult.error) {
     return { error: "coll not found" };
   }
-  
+
   const coll = collResult.vertexes!;
   const attrsResult = await getCollectionOneLevelAttrsMGCall(coll);
   if (attrsResult.error) {
@@ -294,12 +292,11 @@ export async function getNameKeyForCollectionMGCall(collVertex: Vertex) {
 
 export async function getStringComponentMGCall(attrDataTypeVertex?: Vertex) {
   if (!attrDataTypeVertex) {
-    const attrDataTypeVertexResult =  await findVertexesMGCall(
-      {
-        label: "DataType",
-        value: "String",
-        attribute: "name",
-      }) 
+    const attrDataTypeVertexResult = await findVertexesMGCall({
+      label: "DataType",
+      value: "String",
+      attribute: "name",
+    });
     if (attrDataTypeVertexResult.error) {
       return;
     }
@@ -321,7 +318,10 @@ export async function getCollAttrCompMGCall(
   return getStringComponentMGCall(attrDataTypeVertex);
 }
 
-export async function getSublistRowsForTypeMGCall(type: string, vertex: Vertex) {
+export async function getSublistRowsForTypeMGCall(
+  type: string,
+  vertex: Vertex,
+) {
   return (
     (await getChildVertexesMGCall([`${type}`], [vertex])).vertexes || []
   ).sort((a, b) => a.P.pos - b.P.pos);

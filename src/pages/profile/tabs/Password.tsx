@@ -127,7 +127,11 @@ export const PasswordSection = (props: { profileData: any }) => {
             onClick={() => togglePasswordVisibility("currentPassword")}
             class="abs top:50px top:25px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
-            icon={`${showPassword.currentPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            icon={`${
+              showPassword.currentPassword
+                ? "iconamoon:eye-light"
+                : "iconamoon:eye-off"
+            }`}
           />
         </div>
         <div class={"flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"}>
@@ -144,7 +148,11 @@ export const PasswordSection = (props: { profileData: any }) => {
             onClick={() => togglePasswordVisibility("newPassword")}
             class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
-            icon={`${showPassword.newPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            icon={`${
+              showPassword.newPassword
+                ? "iconamoon:eye-light"
+                : "iconamoon:eye-off"
+            }`}
           />
         </div>
         <div
@@ -165,7 +173,11 @@ export const PasswordSection = (props: { profileData: any }) => {
             onClick={() => togglePasswordVisibility("confirmPassword")}
             class="abs top:33px top:10px@md right:20 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
             aria-label="Toggle password visibility"
-            icon={`${showPassword.confirmPassword ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+            icon={`${
+              showPassword.confirmPassword
+                ? "iconamoon:eye-light"
+                : "iconamoon:eye-off"
+            }`}
           />
         </div>
       </div>

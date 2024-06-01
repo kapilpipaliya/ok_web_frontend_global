@@ -122,7 +122,9 @@ export function TextField(props: TextFieldProps) {
         </Match>
         <Match when={!local.multiline}>
           <div
-            class={` ${local.trailing || local.leading ? "flex gap:3 ai:center" : ""}`}
+            class={` ${
+              local.trailing || local.leading ? "flex gap:3 ai:center" : ""
+            }`}
           >
             {local.leading}
             <div class={"textInputWrapper w:full"}>

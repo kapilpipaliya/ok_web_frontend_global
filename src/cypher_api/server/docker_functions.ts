@@ -55,10 +55,10 @@ function startDockerContainer(containerId: string, callback: Callback<string>) {
       if (err) {
         return callback(err);
       }
-        return callback(
-          null,
-          `Docker container ${containerId} started successfully`,
-        );
+      return callback(
+        null,
+        `Docker container ${containerId} started successfully`,
+      );
     },
   );
 }
@@ -75,17 +75,17 @@ function pullImageFromRegistry(imageName: string, callback: Callback<string>) {
         if (err) {
           return callback(err);
         }
-          const response = stdout;
-          if (response.includes("pull access denied for")) {
-            return callback(
-              null,
-              `Pull access denied for Docker image ${imageName} ,please provide correct  repository `,
-            );
-          }
-            return callback(
-              null,
-              `Docker image ${imageName} pulled successfully ,please click create button to create container`,
-            );
+        const response = stdout;
+        if (response.includes("pull access denied for")) {
+          return callback(
+            null,
+            `Pull access denied for Docker image ${imageName} ,please provide correct  repository `,
+          );
+        }
+        return callback(
+          null,
+          `Docker image ${imageName} pulled successfully ,please click create button to create container`,
+        );
       },
     );
   } catch (error) {
@@ -206,7 +206,7 @@ export async function createDockerContainer(
         console.error(err);
         throw Error(err.message);
       }
-        return { message };
+      return { message };
     });
     return { data };
   } catch (error: any) {

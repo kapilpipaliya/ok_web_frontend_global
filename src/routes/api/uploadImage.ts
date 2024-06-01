@@ -29,7 +29,7 @@ export async function POST({ request }: APIEvent, event: HTTPEvent) {
         newFilename: `/profile_images/${subdomain}/${newFilename}`,
       };
     }
-      return { error: "No file data available" };
+    return { error: "No file data available" };
   } catch (error) {
     console.error("Error saving file:", error);
     throw error; // Rethrow or handle as necessary

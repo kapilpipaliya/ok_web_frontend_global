@@ -5,7 +5,7 @@ import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import sendEmail from "~/cypher_api/server/email";
 import { validatePassword } from "~/lib/validations";
-import '~/css/base.css'
+import "~/css/base.css";
 export function ForgotPassword() {
   const { showErrorToast, showLoadingToast } = useToast();
   const [username, setUsername] = createSignal("");
@@ -256,7 +256,11 @@ export function ForgotPassword() {
                   onClick={() => setNewShowPassword(!showNewPassword())}
                   class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showNewPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+                  icon={`${
+                    showNewPassword()
+                      ? "iconamoon:eye-light"
+                      : "iconamoon:eye-off"
+                  }`}
                 />
               </div>
               <div class="rel" style={{ margin: "10px 0" }}>
@@ -284,7 +288,11 @@ export function ForgotPassword() {
                   onClick={() => setConfirmShowPassword(!showConfirmPassword())}
                   class="abs top:32 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
                   aria-label="Toggle password visibility"
-                  icon={`${showConfirmPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+                  icon={`${
+                    showConfirmPassword()
+                      ? "iconamoon:eye-light"
+                      : "iconamoon:eye-off"
+                  }`}
                 />
               </div>
 

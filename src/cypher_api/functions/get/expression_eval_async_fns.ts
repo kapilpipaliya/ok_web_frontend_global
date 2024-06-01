@@ -40,7 +40,10 @@ export async function evalGetChildren(
   WHERE id(parent) IN $parentIds AND type(r) IN $types
   RETURN r, child
 `;
-    params = { parentIds: vertexes.map((v) => int(v.id)), types: type.split("|") };
+    params = {
+      parentIds: vertexes.map((v) => int(v.id)),
+      types: type.split("|"),
+    };
   } else {
     query = `
   MATCH (parent)-[r:${type}]->(child)
@@ -65,7 +68,9 @@ export async function evalGetChildren(
     });
   } catch (error) {
     console.error(
-      `Error fetching children for vertex ${vertexes.map((v) => v.id).join(",")}:`,
+      `Error fetching children for vertex ${vertexes
+        .map((v) => v.id)
+        .join(",")}:`,
       error,
     );
     return;
@@ -99,7 +104,10 @@ export async function evalGetParents(
   WHERE id(child) IN $childIds AND type(r) IN $types
   RETURN r, parent
 `;
-    params = { childIds: vertexes.map((v) => int(v.id)), types: type.split("|") };
+    params = {
+      childIds: vertexes.map((v) => int(v.id)),
+      types: type.split("|"),
+    };
   } else {
     query = `
   MATCH (parent)-[r:${type}]->(child)
@@ -124,7 +132,9 @@ export async function evalGetParents(
     });
   } catch (error) {
     console.error(
-      `Error fetching parents for vertex ${vertexes.map((v) => v.id).join(", ")}:`,
+      `Error fetching parents for vertex ${vertexes
+        .map((v) => v.id)
+        .join(", ")}:`,
       error,
     );
     return;
@@ -152,7 +162,7 @@ async function findVertexsMGCallId(
 
   if (id) {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
-    params = {id: int(id)}
+    params = { id: int(id) };
   } else if (label) {
     query = `MATCH (n:${label}) RETURN n`;
   }
@@ -200,11 +210,11 @@ export async function evalGlobalColl(
 
       return filteredVertexes;
     }
-      return await findVertexsMGCallId(
-        session,
-        { label: edgeType, skip, limit },
-        context,
-      );
+    return await findVertexsMGCallId(
+      session,
+      { label: edgeType, skip, limit },
+      context,
+    );
   } catch (error: any) {
     throw new Response(error.message, { status: 500 });
   } finally {

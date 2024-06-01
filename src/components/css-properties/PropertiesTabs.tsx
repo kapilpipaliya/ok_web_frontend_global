@@ -5,10 +5,7 @@ import {
   Tabs,
 } from "~/components/solid-blocks/blocks";
 import type { Vertex } from "~/lib/graph/graph";
-import {
-  createEffect,
-  on,
-} from "solid-js";
+import { createEffect, on } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { CssEditorContext } from "./cssContext";
 import { Container } from "./css-components/CssUtils";
@@ -25,7 +22,6 @@ export function ClassDesignTab(props: {
   isRealTime?: boolean;
   txnId?: number;
 }) {
-
   const [cssState, setCssState] = createStore({} as { [key: string]: any });
 
   // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
@@ -88,5 +84,3 @@ export function ClassDesignTab(props: {
     </CssEditorContext.Provider>
   );
 }
-
-

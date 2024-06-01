@@ -1,4 +1,9 @@
-import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  IdAttr,
+  type Vertex,
+} from "~/lib/graph/graph";
 import {
   commitTxn,
   getNewGraphId,
@@ -199,54 +204,54 @@ export function rowMetaInitialize(
     });
     return metaTxnId;
   }
-    const rows = klona(rowMetaAttrInst.vertex?.P.rows);
-    const metaTxnId = rowMetaAttrInst.vertex?.P.metaTxnId;
-    batch(() => {
-      for (const attrColumn of tableColumnsTemplate) {
-        if (rows[attrColumn.id]) {
-          continue;
-        }
-        const AttrRowResult = newRow(
-          graph,
-          setGraph,
-          metaTxnId,
-          graph.vertexes[rowMetaAttrInst.vertex?.id],
-          "MetaAttr",
-        );
-        if (AttrRowResult.error) {
-          showErrorToast(AttrRowResult.error.toString());
-        }
-        const P = klona(attrColumn.P);
-        P.templateId = attrColumn.id;
+  const rows = klona(rowMetaAttrInst.vertex?.P.rows);
+  const metaTxnId = rowMetaAttrInst.vertex?.P.metaTxnId;
+  batch(() => {
+    for (const attrColumn of tableColumnsTemplate) {
+      if (rows[attrColumn.id]) {
+        continue;
+      }
+      const AttrRowResult = newRow(
+        graph,
+        setGraph,
+        metaTxnId,
+        graph.vertexes[rowMetaAttrInst.vertex?.id],
+        "MetaAttr",
+      );
+      if (AttrRowResult.error) {
+        showErrorToast(AttrRowResult.error.toString());
+      }
+      const P = klona(attrColumn.P);
+      P.templateId = attrColumn.id;
 
-        if (!P.component) {
-          const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
-          if (component) P.component = component;
-        }
-        mergeVertexProperties(
-          metaTxnId,
-          AttrRowResult.vertexId!,
-          graph,
-          setGraph,
-          P,
-        );
-        rows[attrColumn.id] = AttrRowResult.vertexId!;
+      if (!P.component) {
+        const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
+        if (component) P.component = component;
       }
       mergeVertexProperties(
         metaTxnId,
-        rowMetaAttrInst.vertex?.id,
+        AttrRowResult.vertexId!,
         graph,
         setGraph,
-        { rows },
+        P,
       );
-    });
-    onCleanup(() => {
-      // remove all AttrInst vertex.
-      // TODO: This is breaking when new row is added, its interesting to fix this.
-      // console.log('called', metaTxnId)
-      // revertTransaction(metaTxnId);
-    });
-    return metaTxnId;
+      rows[attrColumn.id] = AttrRowResult.vertexId!;
+    }
+    mergeVertexProperties(
+      metaTxnId,
+      rowMetaAttrInst.vertex?.id,
+      graph,
+      setGraph,
+      { rows },
+    );
+  });
+  onCleanup(() => {
+    // remove all AttrInst vertex.
+    // TODO: This is breaking when new row is added, its interesting to fix this.
+    // console.log('called', metaTxnId)
+    // revertTransaction(metaTxnId);
+  });
+  return metaTxnId;
 }
 export function createMeta(
   form: FormMetaData,

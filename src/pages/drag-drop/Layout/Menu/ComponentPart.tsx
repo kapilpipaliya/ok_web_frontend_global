@@ -1,11 +1,24 @@
 import { Icon } from "@iconify-icon/solid";
-import { Accessor, For, Show, createEffect, createResource, createSignal, useContext } from "solid-js";
+import {
+  Accessor,
+  For,
+  Show,
+  createEffect,
+  createResource,
+  createSignal,
+  useContext,
+} from "solid-js";
 import { SetStoreFunction } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 import { Checkbox, Tooltip } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { expressionString, iconMap } from "~/lib/Utils";
-import { DraggedVertexContext, PageConfigContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
+import {
+  DraggedVertexContext,
+  PageConfigContext,
+  SelectedComponentContext,
+  SelectedIdContext,
+} from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
@@ -20,10 +33,12 @@ export function ComponentPart() {
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const [searchQuery, setSearchQuery] = createSignal("");
-  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as 
+  const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as
   const [isFetchingData, setIsFetchingData] = createSignal(true);
   const { showErrorToast } = useToast();
-  const [selectedComponents, setSelectedComponents] = createSignal(new Set<Vertex>());
+  const [selectedComponents, setSelectedComponents] = createSignal(
+    new Set<Vertex>(),
+  );
   let defaultData = [] as any[];
   const handleCheckboxChange = (event: Event, id: Id) => {
     const isChecked = (event.target as HTMLInputElement).checked;
@@ -79,7 +94,6 @@ export function ComponentPart() {
     }
   });
 
-
   const titleStyle = {
     "font-size": "17px",
     "font-weight": "600",
@@ -110,9 +124,9 @@ export function ComponentPart() {
           if (category) {
             // Create a copy of the category's children array
             const filteredChildren = category.children?.filter((child: any) => {
-              return (
-                child.name?.toLowerCase().includes(searchQuery().toLowerCase())
-              );
+              return child.name
+                ?.toLowerCase()
+                .includes(searchQuery().toLowerCase());
             });
 
             // Return a new object with the filtered children
@@ -121,7 +135,7 @@ export function ComponentPart() {
               children: filteredChildren,
             };
           }
-            return item;
+          return item;
         })
         .filter((item) => item.children && item.children.length > 0); // Filter out items with no matching children
 
@@ -145,7 +159,7 @@ export function ComponentPart() {
       position: "relative",
       gap: "5px",
       padding: "10px 0px",
-      'place-content': 'center',
+      "place-content": "center",
       "box-shadow": "rgba(0, 0, 0, 0.2) 0px 0px 5px 0px",
     };
 
@@ -165,28 +179,57 @@ export function ComponentPart() {
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
-          const dataTransfer = selectedComponents().size > 0 ? Array.from(selectedComponents()) : [graph.vertexes[props.child.id]];
+          const dataTransfer =
+            selectedComponents().size > 0
+              ? Array.from(selectedComponents())
+              : [graph.vertexes[props.child.id]];
           setDraggedVertex((prev) => [...prev, ...dataTransfer]);
           setSelectedComponents(new Set());
         }}
         ondblclick={(e) => {
           setDraggedVertex([graph.vertexes[props.child.id]]);
-          onClickAddComponent(graph, setGraph, pageConfig.formData.txnId, draggedVertex()[0], selectedId() !== -1 ? selectedId() : pageConfig.formData.formData.id);
+          onClickAddComponent(
+            graph,
+            setGraph,
+            pageConfig.formData.txnId,
+            draggedVertex()[0],
+            selectedId() !== -1
+              ? selectedId()
+              : pageConfig.formData.formData.id,
+          );
           setDraggedVertex([]);
         }}
       >
         <Show when={isHovered()}>
-          <Icon onClick={() => {
-            const currentURL = window.location.href;
-            const navigateUrl =
-              `${currentURL.split("/").slice(0, -2).join("/")}/Comp/${props.child.id}`;
-            window.open(navigateUrl, "_blank");
-          }} style={{ cursor: "pointer", position: "absolute", right: "3px", top: "3px" }} icon={'solar:settings-linear'} width={21} height={21} />
+          <Icon
+            onClick={() => {
+              const currentURL = window.location.href;
+              const navigateUrl = `${currentURL
+                .split("/")
+                .slice(0, -2)
+                .join("/")}/Comp/${props.child.id}`;
+              window.open(navigateUrl, "_blank");
+            }}
+            style={{
+              cursor: "pointer",
+              position: "absolute",
+              right: "3px",
+              top: "3px",
+            }}
+            icon={"solar:settings-linear"}
+            width={21}
+            height={21}
+          />
         </Show>
         {/* @ts-ignore  */}
-        <Show when={isHovered() || (selectedComponents().has(graph.vertexes[props.child.id]))} >
+        <Show
+          when={
+            isHovered() ||
+            selectedComponents().has(graph.vertexes[props.child.id])
+          }
+        >
           <Checkbox
-            wrapperStyle={{ height: '19px', width: '19px' }}
+            wrapperStyle={{ height: "19px", width: "19px" }}
             type="checkbox"
             style={{ position: "absolute", top: "-2px", left: "7px" }}
             onChange={(e) => handleCheckboxChange(e, props.child.id)}
@@ -194,7 +237,10 @@ export function ComponentPart() {
             checked={selectedComponents().has(graph.vertexes[props.child.id])}
           />
         </Show>
-        <div class="pt:5px flex gap:5px ai:center" style={{ 'flex-flow': 'column' }}>
+        <div
+          class="pt:5px flex gap:5px ai:center"
+          style={{ "flex-flow": "column" }}
+        >
           <Icon
             icon={
               iconMap[props.child?.P.name] ??

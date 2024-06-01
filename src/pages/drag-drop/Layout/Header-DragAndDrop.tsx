@@ -17,17 +17,17 @@ export function HeaderDragAndDrop(props: {
 }) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const views = [
-    { key: 'prime:mobile', value: 'Mobile', icon: true },
-    { key: 'uil:tablet', value: 'Tablet', icon: true },
-    { key: 'humbleicons:desktop', value: 'Desktop', icon: true },
+    { key: "prime:mobile", value: "Mobile", icon: true },
+    { key: "uil:tablet", value: "Tablet", icon: true },
+    { key: "humbleicons:desktop", value: "Desktop", icon: true },
   ];
 
   const navigate = useNavigate();
   function removeLastPathSegment() {
     const pathname = window.location.pathname;
-    const segments = pathname.split('/');
+    const segments = pathname.split("/");
     segments.pop(); // Remove the last segment
-    const newPathname = segments.join('/');
+    const newPathname = segments.join("/");
     return newPathname;
   }
   return (
@@ -62,18 +62,41 @@ export function HeaderDragAndDrop(props: {
           <div class="w:150">
             <For each={views}>
               {(view, index) => {
-                return <Tooltip content={view.value} position={"n"}>
-                  <button style={{ 'background-color': view.value === props.view() ? '#E0E7F3' : '', color: view.value === props.view() ? '#5252F1' : 'grey' }} onclick={() => props.setView(view.value)} type="button" class={`rel  d:inline-flex  ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${index() === 0 ? "r:5|0|0|5" : index() === 2 ? "r:0|5|5|0" : ""}`}>
-                  <Icon icon={view.key} height={22} width={22} />
-                </button>
-                </Tooltip>
+                return (
+                  <Tooltip content={view.value} position={"n"}>
+                    <button
+                      style={{
+                        "background-color":
+                          view.value === props.view() ? "#E0E7F3" : "",
+                        color: view.value === props.view() ? "#5252F1" : "grey",
+                      }}
+                      onclick={() => props.setView(view.value)}
+                      type="button"
+                      class={`rel  d:inline-flex  ai:center px:0.75rem py:0.5rem f:0.875rem font-weight:600 color:rgb(17,24,39) b:1px|solid|lightgrey cursor:default z:10:focus ${
+                        index() === 0
+                          ? "r:5|0|0|5"
+                          : index() === 2
+                            ? "r:0|5|5|0"
+                            : ""
+                      }`}
+                    >
+                      <Icon icon={view.key} height={22} width={22} />
+                    </button>
+                  </Tooltip>
+                );
               }}
             </For>
           </div>
 
           <div class={"ai:center justify-content:space-between flex gap:5"}>
-            <PreviewSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
-            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
+            <PreviewSection
+              setOpenDialog={setOpenDialog}
+              openDialog={openDialog}
+            />
+            <ExportSection
+              setOpenDialog={setOpenDialog}
+              openDialog={openDialog}
+            />
           </div>
         </div>
       </div>
@@ -81,56 +104,71 @@ export function HeaderDragAndDrop(props: {
   );
 }
 
-const ExportSection = (props: { setOpenDialog: Setter<boolean>, openDialog: Accessor<boolean> }) => {
-  return <CustomModal
-    dialogClass=""
-    title={"Code"}
-    openButton={false}
-    buttonLabel={<Tooltip content={"Share"} position={"n"}>
-      <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
-        <Icon icon={"basil:share-box-outline"} height={22} width={22} />
-      </div>
-    </Tooltip>}
-    body={<ShareSection />}
-    footer={(toggle) => (
-      <div class="flex ai:center jc:flex-end">
-        <CustomButton
-          variant="soft"
-          onClick={() => {
-            toggle(false);
-          }}
-        >
-          Close
-        </CustomButton>
-      </div>
-    )}
-    setOpen={props.setOpenDialog}
-    open={props.openDialog()} />;
-}
-const PreviewSection = (props: { setOpenDialog: Setter<boolean>, openDialog: Accessor<boolean> }) => {
-  return <CustomModal
-    dialogClass=""
-    title={"Preview"}
-    openButton={false}
-    buttonLabel={<Tooltip content={"Preview"} position={"n"}>
-      <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
-        <Icon icon={"ph:eye"} height={22} width={22} />
-      </div>
-    </Tooltip>}
-    body={<ShareSection />}
-    footer={(toggle) => (
-      <div class="flex ai:center jc:flex-end">
-        <CustomButton
-          variant="soft"
-          onClick={() => {
-            toggle(false);
-          }}
-        >
-          Close
-        </CustomButton>
-      </div>
-    )}
-    setOpen={props.setOpenDialog}
-    open={props.openDialog()} />;
-}
-
+const ExportSection = (props: {
+  setOpenDialog: Setter<boolean>;
+  openDialog: Accessor<boolean>;
+}) => {
+  return (
+    <CustomModal
+      dialogClass=""
+      title={"Code"}
+      openButton={false}
+      buttonLabel={
+        <Tooltip content={"Share"} position={"n"}>
+          <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
+            <Icon icon={"basil:share-box-outline"} height={22} width={22} />
+          </div>
+        </Tooltip>
+      }
+      body={<ShareSection />}
+      footer={(toggle) => (
+        <div class="flex ai:center jc:flex-end">
+          <CustomButton
+            variant="soft"
+            onClick={() => {
+              toggle(false);
+            }}
+          >
+            Close
+          </CustomButton>
+        </div>
+      )}
+      setOpen={props.setOpenDialog}
+      open={props.openDialog()}
+    />
+  );
+};
+const PreviewSection = (props: {
+  setOpenDialog: Setter<boolean>;
+  openDialog: Accessor<boolean>;
+}) => {
+  return (
+    <CustomModal
+      dialogClass=""
+      title={"Preview"}
+      openButton={false}
+      buttonLabel={
+        <Tooltip content={"Preview"} position={"n"}>
+          <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
+            <Icon icon={"ph:eye"} height={22} width={22} />
+          </div>
+        </Tooltip>
+      }
+      body={<ShareSection />}
+      footer={(toggle) => (
+        <div class="flex ai:center jc:flex-end">
+          <CustomButton
+            variant="soft"
+            onClick={() => {
+              toggle(false);
+            }}
+          >
+            Close
+          </CustomButton>
+        </div>
+      )}
+      setOpen={props.setOpenDialog}
+      open={props.openDialog()}
+    />
+  );
+};

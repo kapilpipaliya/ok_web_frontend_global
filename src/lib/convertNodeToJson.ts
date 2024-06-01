@@ -1,24 +1,26 @@
-
-import type {
-  Node,
-  Relationship,
-} from "neo4j-driver";
+import type { Node, Relationship } from "neo4j-driver";
 import type { Vertex, Edge } from "~/lib/graph/graph";
 
-
-function unwrapProperties(properties: Record<string, any>): Record<string, any> {
+function unwrapProperties(
+  properties: Record<string, any>,
+): Record<string, any> {
   if (Array.isArray(properties)) {
-      return properties.map(item => unwrapProperties(item));
-    }
+    return properties.map((item) => unwrapProperties(item));
+  }
   const unwrapped: Record<string, any> = {};
 
   for (const key in properties) {
-    if (properties[key] && typeof properties[key] === 'object') {
-      if ('low' in properties[key] && 'high' in properties[key]) {
+    if (properties[key] && typeof properties[key] === "object") {
+      if ("low" in properties[key] && "high" in properties[key]) {
         // Assuming the property is a Neo4j Integer
         unwrapped[key] = properties[key].toNumber(); // Convert to JavaScript number
-      } else if ('date' in properties[key] && 'month' in properties[key] && 'year' in properties[key] ) {
-        unwrapped[key] = `${properties[key].year}-${properties[key].month}-${properties[key].date}`
+      } else if (
+        "date" in properties[key] &&
+        "month" in properties[key] &&
+        "year" in properties[key]
+      ) {
+        unwrapped[key] =
+          `${properties[key].year}-${properties[key].month}-${properties[key].date}`;
       } else {
         // Recursively unwrap nested objects
         unwrapped[key] = unwrapProperties(properties[key]);
@@ -30,7 +32,6 @@ function unwrapProperties(properties: Record<string, any>): Record<string, any> 
 
   return unwrapped;
 }
-
 
 // Functions to handle database values and convert them to JSON
 export function convertNodeToJson(node: Node): Vertex {

@@ -374,7 +374,9 @@ export default class JsxParser {
     if (element.type === "JSXIdentifier") {
       return element.name;
     }
-    return `${this.#parseName(element.object)}.${this.#parseName(element.property)}`;
+    return `${this.#parseName(element.object)}.${this.#parseName(
+      element.property,
+    )}`;
   };
 
   #parseElement = (

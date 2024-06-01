@@ -70,7 +70,6 @@ export function LayoutPart(props: {}) {
 
     return (
       <div>
-        
         <div
           draggable={true}
           onDragStart={handleDragStart}
@@ -84,8 +83,9 @@ export function LayoutPart(props: {}) {
               : isSelectedHoverId(props.vertex.id)
                 ? "bg:#F2EDED"
                 : ""
-          } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""}`}
-
+          } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${
+            children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+          }`}
           classList={{
             "b:1px":
               isActiveItem() && indicatorPosition().position === "center",
@@ -100,7 +100,7 @@ export function LayoutPart(props: {}) {
             setHoverId(-1);
           }}
           style={{
-            'font-size': '14px',
+            "font-size": "14px",
             "font-weight": children().length ? "bold" : "normal",
             "margin-bottom":
               children().length ||
@@ -203,7 +203,7 @@ export function LayoutPart(props: {}) {
                             style: { color: "red" },
                             onClick: () => {
                               const name = getComponent();
-                             deleteLayout(name)
+                              deleteLayout(name);
                             },
                             width: 18,
                             height: 18,
@@ -225,7 +225,9 @@ export function LayoutPart(props: {}) {
                 }
               >
                 <Tooltip
-                  content={`${!hiddenNodes().includes(props.vertex.id) ? "Show" : "Show"}`}
+                  content={`${
+                    !hiddenNodes().includes(props.vertex.id) ? "Show" : "Show"
+                  }`}
                   nowrap
                 >
                   <button
@@ -286,11 +288,7 @@ export function LayoutPart(props: {}) {
   return (
     <>
       <Show when={showDrawer()}>
-        <Drawer
-          open={showDrawer}
-          setIsOpen={setShowDrawer}
-          width="400px"
-        >
+        <Drawer open={showDrawer} setIsOpen={setShowDrawer} width="400px">
           <Properties setShowDrawer={setShowDrawer} />
         </Drawer>
       </Show>

@@ -43,10 +43,7 @@ export function ThemeDocs() {
       <dl>
         <dt>--text</dt>
         <dd>
-          <span
-            class="color-example"
-            style={{ background: "var(--text)" }}
-          />{" "}
+          <span class="color-example" style={{ background: "var(--text)" }} />{" "}
           textual content, background for inverted content
         </dd>
         <dt>--negative-text</dt>
@@ -99,10 +96,7 @@ export function ThemeDocs() {
         </dd>
         <dt>--info</dt>
         <dd>
-          <span
-            class="color-example"
-            style={{ background: "var(--info)" }}
-          />{" "}
+          <span class="color-example" style={{ background: "var(--info)" }} />{" "}
           background for informational messages
         </dd>
         <dt>--info-text</dt>
@@ -131,10 +125,7 @@ export function ThemeDocs() {
         </dd>
         <dt>--error</dt>
         <dd>
-          <span
-            class="color-example"
-            style={{ background: "var(--error)" }}
-          />{" "}
+          <span class="color-example" style={{ background: "var(--error)" }} />{" "}
           background for error messages
         </dd>
         <dt>--error-text</dt>

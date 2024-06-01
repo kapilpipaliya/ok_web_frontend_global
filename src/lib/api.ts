@@ -475,13 +475,13 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 ) {
                   return false;
                 }
-                  return !findVertexByLabelAndUniqueIdWithSkip(
-                    "Coll",
-                    "id",
-                    val,
-                    formData.id,
-                    graph,
-                  );
+                return !findVertexByLabelAndUniqueIdWithSkip(
+                  "Coll",
+                  "id",
+                  val,
+                  formData.id,
+                  graph,
+                );
               },
             },
             // , {

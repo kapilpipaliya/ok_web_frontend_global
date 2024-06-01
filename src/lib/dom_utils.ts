@@ -47,10 +47,9 @@ export function fileDownloader(opt: {
   const blob = new Blob(blobData, {
     type: opt.mime || "application/octet-stream",
   });
-  const blobURL =
-    window.URL?.createObjectURL
-      ? window.URL.createObjectURL(blob)
-      : window.webkitURL.createObjectURL(blob);
+  const blobURL = window.URL?.createObjectURL
+    ? window.URL.createObjectURL(blob)
+    : window.webkitURL.createObjectURL(blob);
 
   const attachDataAsOctetStream = (data: any) => {
     // const link = 'data:application/octet-stream,' + encodeURIComponent(data);

@@ -514,8 +514,8 @@ export default function Home() {
 
         <div class="accordionParent d-grid justify-content-center pt-5">
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1" />Do I need knowledge of coding
-            to Use EasyFormForge?{" "}
+            <i class="fa-solid fa-square pr-1" />
+            Do I need knowledge of coding to Use EasyFormForge?{" "}
             <span>
               <i class="fa-solid fa-chevron-down" />
             </span>
@@ -528,8 +528,8 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1" />Does EasyFormForge have any
-            video documentation?
+            <i class="fa-solid fa-square pr-1" />
+            Does EasyFormForge have any video documentation?
             <span>
               <i class="fa-solid fa-chevron-down" />
             </span>
@@ -542,8 +542,8 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1" />What happens after the
-            subscription expires?
+            <i class="fa-solid fa-square pr-1" />
+            What happens after the subscription expires?
             <span>
               <i class="fa-solid fa-chevron-down" />
             </span>
@@ -559,7 +559,8 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1" />How long do I get support?
+            <i class="fa-solid fa-square pr-1" />
+            How long do I get support?
             <span>
               <i class="fa-solid fa-chevron-down" />
             </span>
@@ -569,7 +570,8 @@ export default function Home() {
           </div>
 
           <button class="accordion h5 mb-1">
-            <i class="fa-solid fa-square pr-1" />Do you offer refunds?
+            <i class="fa-solid fa-square pr-1" />
+            Do you offer refunds?
             <span>
               <i class="fa-solid fa-chevron-down" />
             </span>

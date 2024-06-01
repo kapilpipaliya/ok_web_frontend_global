@@ -282,7 +282,9 @@ export function TableBodyCell(props: any) {
   return (
     <div
       style="padding: 7px; align-content: center;"
-      class={`h:50 text:center bg:${props.index % 2 === 0 ? "white" : "#3478cc0d"} @fade|.4s ${props.class}`}
+      class={`h:50 text:center bg:${
+        props.index % 2 === 0 ? "white" : "#3478cc0d"
+      } @fade|.4s ${props.class}`}
     >
       {props.children}
     </div>

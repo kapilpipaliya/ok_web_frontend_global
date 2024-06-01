@@ -16,7 +16,10 @@ import {
 } from "solid-js";
 import "~/css/table.css";
 import { toTitle } from "case-switcher-js";
-import { mergeVertexProperties, replaceVertexProperties } from "~/lib/graph/mutate/vertex";
+import {
+  mergeVertexProperties,
+  replaceVertexProperties,
+} from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -91,7 +94,6 @@ export function TableInputField(
     if (childAttrVertex?.length) {
       return childAttrVertex;
     }
-
 
     // else get attributes from a collection.
     const attrVertex = getChildVertex(graph, ["$0Att"], field.meta).vertex;
@@ -173,20 +175,24 @@ export function TableInputField(
   const [dragFromIndex, setDragFromIndex] = createSignal<number | null>(null);
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
-
-
     const handleDrop = () => {
-      if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
+      if (
+        dragFromIndex() !== null &&
+        dragToIndex() !== null &&
+        dragFromIndex() !== dragToIndex()
+      ) {
         const updatedRows = [...sortedVertexes()];
         const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
         updatedRows.splice(dragToIndex()!, 0, draggedRow);
         setSortedVertexes(updatedRows);
         updatedRows.forEach((vertex, index) => {
-          mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, { pos: index + 1 });
+          mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, {
+            pos: index + 1,
+          });
         });
       }
       setDragFromIndex(null);
-      setDragToIndex(null)
+      setDragToIndex(null);
     };
     const metaVertices = new Map();
 
@@ -263,11 +269,9 @@ export function TableInputField(
       return (
         <For each={rowColumnsMetaAttrs()}>
           {(column) => {
-
             const metaVertex = createMemo(() => getMetaVertex(column.id));
 
             const component = getComponent(column.id);
-
 
             // if mergeProps not keep reactivity use memo
             createEffect(() => {
@@ -285,25 +289,27 @@ export function TableInputField(
               </>
             );
             const Content = () => {
-
               return (
                 <>
                   <Show when={component === "Error"}>Error</Show>
                   <DynamicComponent
                     title={toTitle(
-                      column.P.displayName || column.P[IdAttr] || ""
+                      column.P.displayName || column.P[IdAttr] || "",
                     )}
                     isShowAdd={false}
                     component={component}
                     // When we have a Table we pass original Table Meta Vertex
-                    meta={component === "Table2" || component === "Table"
-                      ? graph.vertexes[metaVertex().P.templateId]
-                      : metaVertex()}
+                    meta={
+                      component === "Table2" || component === "Table"
+                        ? graph.vertexes[metaVertex().P.templateId]
+                        : metaVertex()
+                    }
                     data={p.joinVertex}
                     setValue={field.setValue}
                     disabled={disabled()}
                     txnId={field.txnId}
-                    isRealTime={field.isRealTime} />
+                    isRealTime={field.isRealTime}
+                  />
                 </>
               );
             };
@@ -312,8 +318,6 @@ export function TableInputField(
               <Switch>
                 <Match when={metaVertex().P.props?.hidden}>
                   <td>
-
-
                     <div
                       class={`flex ai:center jc:center ${(() => {
                         const comp = component;
@@ -401,10 +405,19 @@ export function TableInputField(
           onDragEnter={() => setDragToIndex(p.index)}
           onDrop={handleDrop}
           style={{
-            "text-align": "center", width: "50px",
-            'background-color': dragFromIndex() === p.index ? "#e0e0e0" : dragToIndex() === p.index ? "#f0f0f0" : "white",
+            "text-align": "center",
+            width: "50px",
+            "background-color":
+              dragFromIndex() === p.index
+                ? "#e0e0e0"
+                : dragToIndex() === p.index
+                  ? "#f0f0f0"
+                  : "white",
             transition: "background-color 0.2s ease",
-            border: dragToIndex() === p.index ? "2px solid #007bff" : "1px solid #ddd",
+            border:
+              dragToIndex() === p.index
+                ? "2px solid #007bff"
+                : "1px solid #ddd",
           }}
         >
           <td>
@@ -417,11 +430,7 @@ export function TableInputField(
               {/* <Show when={expandVertex() && getSelectionOptions(graph, setGraph, [p.joinVertex],
                  `->${expandVertex()?.P.props.type}`).vertexes
                  }> */}
-              <button
-
-                class="cursor: grab;"
-
-              >
+              <button class="cursor: grab;">
                 <Icon
                   icon="material-symbols:drag-indicator"
                   class={"transform 2s ease-in-out"}
@@ -431,7 +440,7 @@ export function TableInputField(
                 class="cursor: pointer;"
                 onClick={(e) => {
                   // console.log(getSelectionOptions(graph, setGraph, [p.joinVertex], expandVertex()?.P.collection).vertexes);
-                  setExpanded(!expanded())
+                  setExpanded(!expanded());
                 }}
               >
                 <Icon
@@ -603,8 +612,8 @@ export function TableInputField(
                             >
                               {toTitle(
                                 attribute.P.displayName ||
-                                attribute.P[IdAttr] ||
-                                "",
+                                  attribute.P[IdAttr] ||
+                                  "",
                               )}
                             </th>
                           </Match>
@@ -673,7 +682,6 @@ export function TableInputField(
 //     { id: 3, firstName: "cellar", lastName: "letter", age: 13, visits: 12, status: "single", progress: 34 },
 //     { id: 4, firstName: "wish", lastName: "confusion", age: 26, visits: 67, status: "relationship", progress: 17 },
 //   ]);
-
 
 //   return (
 //     <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">

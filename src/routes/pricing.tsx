@@ -100,35 +100,37 @@ export default function Pricing() {
                 <span>form limit</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />100{" "}
-                <span>Monthly Subscription</span>
+                <i class="fa-solid fa-check mr-1" />
+                100 <span>Monthly Subscription</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />1 User{" "}
-                <span>Per Team</span>
+                <i class="fa-solid fa-check mr-1" />1 User <span>Per Team</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />100 MB{" "}
-                <span>Available Space</span>
+                <i class="fa-solid fa-check mr-1" />
+                100 MB <span>Available Space</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />1000{" "}
-                <span>Monthly Views</span>
+                <i class="fa-solid fa-check mr-1" />
+                1000 <span>Monthly Views</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />500{" "}
-                <span>Total Submission Storage</span>
+                <i class="fa-solid fa-check mr-1" />
+                500 <span>Total Submission Storage</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />10 Fields
+                <i class="fa-solid fa-check mr-1" />
+                10 Fields
                 <span>Per Form</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />10
+                <i class="fa-solid fa-check mr-1" />
+                10
                 <span>Monthly payment submission</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />10
+                <i class="fa-solid fa-check mr-1" />
+                10
                 <span>Monthly signed document</span>
               </h5>
             </div>
@@ -150,12 +152,12 @@ export default function Pricing() {
                 <h5 class="mb-2 mt-1">FEATURES</h5>
 
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />25 forms{" "}
-                  <span>form limit</span>
+                  <i class="fa-solid fa-check mr-1" />
+                  25 forms <span>form limit</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />1000{" "}
-                  <span>Monthly Subscription</span>
+                  <i class="fa-solid fa-check mr-1" />
+                  1000 <span>Monthly Subscription</span>
                 </h5>
                 <h5>
                   <i class="fa-solid fa-check mr-1" />1 User{" "}
@@ -166,23 +168,26 @@ export default function Pricing() {
                   <span>Available Space</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />10000{" "}
-                  <span>Monthly Views</span>
+                  <i class="fa-solid fa-check mr-1" />
+                  10000 <span>Monthly Views</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />1000{" "}
-                  <span>Total Submission Storage</span>
+                  <i class="fa-solid fa-check mr-1" />
+                  1000 <span>Total Submission Storage</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />30 Fields
+                  <i class="fa-solid fa-check mr-1" />
+                  30 Fields
                   <span>Per Form</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />49
+                  <i class="fa-solid fa-check mr-1" />
+                  49
                   <span>Monthly payment submission</span>
                 </h5>
                 <h5>
-                  <i class="fa-solid fa-check mr-1" />90
+                  <i class="fa-solid fa-check mr-1" />
+                  90
                   <span>Monthly signed document</span>
                 </h5>
               </div>
@@ -203,39 +208,42 @@ export default function Pricing() {
               <h5 class="mb-2 mt-1">FEATURES</h5>
 
               <h5>
-                <i class="fa-solid fa-check mr-1" />100 forms{" "}
-                <span>form limit</span>
+                <i class="fa-solid fa-check mr-1" />
+                100 forms <span>form limit</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />5000{" "}
-                <span>Monthly Subscription</span>
+                <i class="fa-solid fa-check mr-1" />
+                5000 <span>Monthly Subscription</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />10 User{" "}
-                <span>Per Team</span>
+                <i class="fa-solid fa-check mr-1" />
+                10 User <span>Per Team</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />10 GB{" "}
-                <span>Available Space</span>
+                <i class="fa-solid fa-check mr-1" />
+                10 GB <span>Available Space</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />9999{" "}
-                <span>Monthly Views</span>
+                <i class="fa-solid fa-check mr-1" />
+                9999 <span>Monthly Views</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />9999{" "}
-                <span>Total Submission Storage</span>
+                <i class="fa-solid fa-check mr-1" />
+                9999 <span>Total Submission Storage</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />50 Fields
+                <i class="fa-solid fa-check mr-1" />
+                50 Fields
                 <span>Per Form</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />99
+                <i class="fa-solid fa-check mr-1" />
+                99
                 <span>Monthly payment submission</span>
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />1000
+                <i class="fa-solid fa-check mr-1" />
+                1000
                 <span>Monthly signed document</span>
               </h5>
             </div>
@@ -259,17 +267,21 @@ export default function Pricing() {
               <h5 class="mb-2 mt-1">FEATURES</h5>
 
               <h5>
-                <i class="fa-solid fa-check mr-1" />Unlimited forms
+                <i class="fa-solid fa-check mr-1" />
+                Unlimited forms
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />Special pricing <br />{" "}
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for all features
+                <i class="fa-solid fa-check mr-1" />
+                Special pricing <br /> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for
+                all features
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />Extra API supports
+                <i class="fa-solid fa-check mr-1" />
+                Extra API supports
               </h5>
               <h5>
-                <i class="fa-solid fa-check mr-1" />Priority support
+                <i class="fa-solid fa-check mr-1" />
+                Priority support
               </h5>
             </div>
           </div>

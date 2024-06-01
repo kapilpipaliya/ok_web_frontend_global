@@ -1,8 +1,4 @@
-import {
-  createMemo,
-  createSignal,
-  For, Show
-} from "solid-js";
+import { createMemo, createSignal, For, Show } from "solid-js";
 import { DynamicCSSComponent } from "~/components/dynamic/components/DynamicCssComponent";
 import { Icon } from "@iconify-icon/solid";
 import JSONSchema from "../CssPropertiesMap";
@@ -18,11 +14,14 @@ export const StyleEditor = () => {
             if (property.label?.toLowerCase().includes(query.toLowerCase())) {
               includeProperty = true;
             }
-            if (property.component === "grid" &&
+            if (
+              property.component === "grid" &&
               property.children &&
-              property.children.length > 0) {
+              property.children.length > 0
+            ) {
               const matchingChildren = property.children.filter(
-                (child: { label: string; }) => child.label?.toLowerCase().includes(query.toLowerCase())
+                (child: { label: string }) =>
+                  child.label?.toLowerCase().includes(query.toLowerCase()),
               );
               if (matchingChildren.length > 0) {
                 includeProperty = true;
@@ -53,7 +52,7 @@ export const StyleEditor = () => {
 
   const [search, setSearch] = createSignal("");
   const [filteredSections, setFilteredSections] = createSignal(
-    filterSections(search())
+    filterSections(search()),
   );
   const length = createMemo(() => Object.keys(filteredSections()).length);
 
@@ -67,13 +66,15 @@ export const StyleEditor = () => {
 
     return (
       <div
-        class={`p:5|10 w:full b:1px|solid|lightgray ${props.index === 0 && length() === 1
+        class={`p:5|10 w:full b:1px|solid|lightgray ${
+          props.index === 0 && length() === 1
             ? "r:5"
             : props.index === length() - 1
               ? "r:0|0|5|5"
               : props.index === 0 && length() > 1
                 ? "r:5|5|0|0"
-                : ""}
+                : ""
+        }
 
 `}
       >
@@ -90,7 +91,8 @@ export const StyleEditor = () => {
             style={{
               transition: "transform 0.2s linear",
               transform: `${isOpen() ? "rotate(0deg)" : "rotate(180deg)"}`,
-            }} />
+            }}
+          />
         </div>
         <Show when={isOpen()}>
           <hr class={"color:#e1e1e1 m:2"} />
@@ -110,14 +112,17 @@ export const StyleEditor = () => {
   return (
     <>
       <span
-        class={"flex ai:start jc:space-between flex-direction:column w:full mb:10 mt:10"}
+        class={
+          "flex ai:start jc:space-between flex-direction:column w:full mb:10 mt:10"
+        }
       >
         <nav class="bg:white 0px 0px 10px 10px w:full p:5|0">
           <div class="group">
             <Icon
               class="icon"
               icon="iconamoon:search"
-              style={{ color: "#9e9ea7" }} />
+              style={{ color: "#9e9ea7" }}
+            />
             <input
               placeholder="Search Style..."
               type="search"
@@ -125,7 +130,8 @@ export const StyleEditor = () => {
               value={search()}
               onInput={(e) => {
                 handleSearch(e.target.value);
-              }} />
+              }}
+            />
           </div>
         </nav>
         <For each={Object.entries(filteredSections())} fallback={""}>
@@ -138,7 +144,8 @@ export const StyleEditor = () => {
                   title={sectionName}
                   properties={properties}
                   index={index()}
-                  isOpen={isOpen} />
+                  isOpen={isOpen}
+                />
               </Show>
             );
           }}

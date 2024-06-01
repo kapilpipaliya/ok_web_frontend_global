@@ -67,10 +67,10 @@ export async function fetchFromMGAndSaveToArray(
     for (const record of result.records) {
       record.forEach((value) => {
         if (value instanceof types.Node) {
-          const id = value.identity.toString() ;
+          const id = value.identity.toString();
           nodeObj[id] = convertNodeToJson(value);
         } else if (value instanceof types.Relationship) {
-          const id = value.identity.toString() ;
+          const id = value.identity.toString();
           relationshipObj[id] = convertRelationshipToJson(value);
         } else if (Array.isArray(value)) {
           for (const item of value) {

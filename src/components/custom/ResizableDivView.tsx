@@ -1,7 +1,10 @@
 import { type Accessor, type JSX, createEffect, createSignal } from "solid-js";
 
-const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element}) => {
-  const [width, setWidth] = createSignal('');
+const ResizableContainer = (props: {
+  view: Accessor<string>;
+  children: JSX.Element;
+}) => {
+  const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(-50px + 90vh)");
 
   createEffect(() => {
@@ -11,7 +14,7 @@ const ResizableContainer = (props: {view: Accessor<string>,children: JSX.Element
     } else if (props.view() === "Tablet") {
       setWidth("30vw");
       setHeight("1026px");
-    }else{
+    } else {
       setWidth("55vw");
       setHeight("889px");
     }

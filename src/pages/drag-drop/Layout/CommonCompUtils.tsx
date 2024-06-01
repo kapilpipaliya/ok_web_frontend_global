@@ -11,7 +11,13 @@ export function useExpansion(defaultValue = true) {
   return [expanded, toggleExpansion];
 }
 
-export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number, fromVertex: Vertex, toVertexId: Id) {
+export function onClickAddComponent(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  txnId: number,
+  fromVertex: Vertex,
+  toVertexId: Id,
+) {
   const toParentVertex = graph.vertexes[toVertexId];
 
   function sortChildren() {
@@ -31,7 +37,7 @@ export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetS
       }
     }
   }
-  
+
   const rowId = componentDrag(
     txnId,
     fromVertex,
@@ -53,8 +59,6 @@ export function onClickAddComponent(graph: Store<GraphInterface>, setGraph: SetS
   mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
     pos: 9999999,
   });
-  
-  sortChildren();
-  
-}
 
+  sortChildren();
+}

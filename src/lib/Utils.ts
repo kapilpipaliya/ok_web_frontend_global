@@ -1,6 +1,10 @@
 import { createContext, splitProps, useContext } from "solid-js";
 import { findVertexByLabelAndUniqueIdWithSkip } from "./graph/get/sync/findVertex";
-import { GraphContext, type GraphInterface, type Vertex } from "~/lib/graph/graph";
+import {
+  GraphContext,
+  type GraphInterface,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { type FieldAttribute, FormMetaData } from "~/lib/Type";
 import type { SetStoreFunction, Store } from "solid-js/store";
@@ -71,9 +75,9 @@ export const iconMap: any = {
   Text: "ci:text",
   Repeater: "formkit:repeater",
   TabPanel: "material-symbols:backup-table-rounded",
-  TreeView:"ph:tree-view-light",
+  TreeView: "ph:tree-view-light",
   Page: "fluent:form-20-regular",
-  Label:"mdi:label-outline",
+  Label: "mdi:label-outline",
   Box: "mage:box-3d-scan",
   ProgressBar: "carbon:progress-bar",
   LoadIndicator: "ep:loading",
@@ -116,7 +120,8 @@ export const getTextColumnValue = (value: any) => {
 
   if (value === true) {
     return "True";
-  }if (value === false) {
+  }
+  if (value === false) {
     return "False";
   }
   if (!value) {
@@ -163,12 +168,18 @@ export function getEdgesFromRowsAttr(attrs: any): {
     ) {
       if (attribute.props?.inward) {
         incoming.push({
-          expression: `<-${getInEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+          expression: `<-${getInEdge(
+            { P: attribute } as Vertex,
+            { L: ["$0"] } as Vertex,
+          )}`,
           type: "",
         }); // `<-${capitalizedName}$0`
       } else {
         outgoing.push({
-          expression: `->${getToEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+          expression: `->${getToEdge(
+            { P: attribute } as Vertex,
+            { L: ["$0"] } as Vertex,
+          )}`,
           type: "",
         }); // `->$0${capitalizedName}`
       }
@@ -177,7 +188,10 @@ export function getEdgesFromRowsAttr(attrs: any): {
       attribute.component === "Table2"
     ) {
       const expression: Expression = {
-        expression: `->${getToEdge({ P: attribute } as Vertex, { L: ["$0"] } as Vertex)}`,
+        expression: `->${getToEdge(
+          { P: attribute } as Vertex,
+          { L: ["$0"] } as Vertex,
+        )}`,
         type: "",
       };
 
@@ -486,7 +500,7 @@ export function isObject(i: any) {
   if (i && !Array.isArray(i)) {
     return "object" === typeof i;
   }
-    return !1;
+  return !1;
 }
 
 export function groupBy(
@@ -524,5 +538,5 @@ export function isNumber(i: any) {
   if ("number" === typeof i) {
     return !Number.isNaN(i);
   }
-    return !1;
+  return !1;
 }

@@ -28,7 +28,6 @@ export async function newEdgeMGCall(
     const edgeResult = await transaction.run(createEdgeQuery, {
       startVertexId: int(startVertexId),
       toId: int(endVertexId),
-
     });
 
     // Extract the new vertex ID from the result
@@ -56,4 +55,3 @@ export async function newEdgeMGCall(
     // await driver.close();
   }
 }
-

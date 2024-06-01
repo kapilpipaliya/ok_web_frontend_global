@@ -4,7 +4,7 @@ import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import logo from "~/assets/graphics/logo.png";
 import { contactUsCall } from "~/components/api/api_functions";
-import '~/css/base.css'
+import "~/css/base.css";
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();

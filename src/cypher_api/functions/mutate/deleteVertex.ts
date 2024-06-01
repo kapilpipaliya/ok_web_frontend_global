@@ -14,7 +14,9 @@ export async function deleteVertexMGCall(nodeId: string | number | any) {
     const createVertexQuery = `MATCH (n)
 WHERE id(n) = $nodeId
 DELETE n`;
-    const vertexResult = await transaction.run(createVertexQuery, { nodeId: int(nodeId) });
+    const vertexResult = await transaction.run(createVertexQuery, {
+      nodeId: int(nodeId),
+    });
 
     // Commit the transaction
     await transaction.commit();

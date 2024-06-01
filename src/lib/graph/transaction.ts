@@ -125,7 +125,8 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
-    }if (
+    }
+    if (
       value.status === ProcessStatus.AckReceived ||
       value.status === ProcessStatus.Sent
     ) {

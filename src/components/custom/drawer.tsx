@@ -10,7 +10,9 @@ function Drawer(props: {
   open?: any;
   setIsOpen?: any;
 }) {
-  const [isOpen, setIsOpen] = props.open ? [props.open, props.setIsOpen] : createSignal(false);
+  const [isOpen, setIsOpen] = props.open
+    ? [props.open, props.setIsOpen]
+    : createSignal(false);
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
   };
@@ -18,13 +20,15 @@ function Drawer(props: {
   return (
     <>
       <Show when={props.customButton}>
-        {props.customButton && <props.customButton onClick={toggleDrawer} isOpen={isOpen()} />}
+        {props.customButton && (
+          <props.customButton onClick={toggleDrawer} isOpen={isOpen()} />
+        )}
       </Show>
       <div
         style={`
           position: fixed;
           top: 0;
-          right: ${isOpen() ? '0' : `-${props.width || "350px"}`};
+          right: ${isOpen() ? "0" : `-${props.width || "350px"}`};
           width: ${props.width || "350px"};
           height: 100%;
           color: black;
@@ -35,9 +39,7 @@ function Drawer(props: {
           transition: right 0.5s;
         `}
       >
-        <div style="padding: 20px;">
-          {props.children}
-        </div>
+        <div style="padding: 20px;">{props.children}</div>
       </div>
     </>
   );

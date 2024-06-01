@@ -23,10 +23,19 @@ interface MenuProps {
 
 export function MenuDragAndDrop(props: MenuProps) {
   return (
-    <nav style={{ "grid-area": "menu", width: "55%", "min-width": "318px", 'justify-self': 'left', }}>
+    <nav
+      style={{
+        "grid-area": "menu",
+        width: "55%",
+        "min-width": "318px",
+        "justify-self": "left",
+      }}
+    >
       <div class={"rel"}>
         <div
-          class={"h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"}
+          class={
+            "h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"
+          }
           style={{
             "max-height": "calc(100vh - 120px)",
             "scrollbar-width": "thin",
@@ -73,7 +82,11 @@ const Column = (props: {
                   <li class="me-2 cursor:pointer">
                     <a
                       onclick={() => setSelectedTab(data.id)}
-                      class={`${selectedTab() === data.id ? "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)" : "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover"} display:inline-block  p:10px border-bottom-width:2.5px  border-color:transparent  rounded-t-lg`}
+                      class={`${
+                        selectedTab() === data.id
+                          ? "font-weight:600 color:rgb(37,99,235) border-bottom-width:2.5px border-color:rgb(37,99,235)"
+                          : "border-color:rgb(209,213,219):hover color:rgb(75,85,99):hover"
+                      } display:inline-block  p:10px border-bottom-width:2.5px  border-color:transparent  rounded-t-lg`}
                     >
                       {capitalizeFirstLetter(data.name)}
                     </a>

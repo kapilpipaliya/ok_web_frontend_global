@@ -70,7 +70,7 @@ function getAttrs(meta: Vertex) {
   if (meta.P.props?.attr) {
     return JSON.parse(meta.P.props?.attr);
   }
-    return {};
+  return {};
 }
 
 export function GenericField(

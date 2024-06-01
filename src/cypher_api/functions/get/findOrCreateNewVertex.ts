@@ -1,4 +1,4 @@
-import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { newVertexDBCall } from "~/cypher_api/functions/mutate/newVertex";
 
 export async function findOrCreateNewVertexMGCall(
@@ -10,13 +10,11 @@ export async function findOrCreateNewVertexMGCall(
     console.error("lookup Unique Value must not be empty");
     return;
   }
-  const existingVertex = await findVertexesMGCall(
-    {
-      label: label,
-      attribute: lookupId,
-      value: lookUpUniqueValue,
-    },
-  );
+  const existingVertex = await findVertexesMGCall({
+    label: label,
+    attribute: lookupId,
+    value: lookUpUniqueValue,
+  });
 
   if (existingVertex.error) {
     const newVertexResult = await newVertexDBCall(label, {

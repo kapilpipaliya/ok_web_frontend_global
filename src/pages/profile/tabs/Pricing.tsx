@@ -28,7 +28,11 @@ export const PricingPlans = (props: { plans: any }) => {
         <For each={props.plans()}>
           {(plan: any) => (
             <div
-              class={`${isSelected(plan.name) ? "b:2px|solid|rgb(56,114,250) color:black" : "b:1.5px|solid|rgb(227,227,227) color:black"} r:10 p:0|5 cursor:pointer`}
+              class={`${
+                isSelected(plan.name)
+                  ? "b:2px|solid|rgb(56,114,250) color:black"
+                  : "b:1.5px|solid|rgb(227,227,227) color:black"
+              } r:10 p:0|5 cursor:pointer`}
               onClick={() => setSelectedPlan(plan.name)}
             >
               <div
@@ -84,7 +88,9 @@ export const CurrentPlan = () => {
       </span>
       <div class={"w:50%@>md w:39%@lg m:10|0 mb:20"}>
         <div
-          class={"b:2px|solid|rgb(33,146,15) color:black r:10 p:0|5 cursor:pointer"}
+          class={
+            "b:2px|solid|rgb(33,146,15) color:black r:10 p:0|5 cursor:pointer"
+          }
         >
           <div
             class={"flex jc:space-between ai:center font-weight:medium p:10|20"}

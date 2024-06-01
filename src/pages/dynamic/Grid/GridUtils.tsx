@@ -37,7 +37,9 @@ export const QuickEditModal = (p: {
         width={22}
         color={"grey"}
         aria-disabled={open()}
-        class={"cursor:pointer bg:#e6f8ff:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue"}
+        class={
+          "cursor:pointer bg:#e6f8ff:hover r:5|5|5|5 p:5|5|5|5 color:cornflowerblue"
+        }
         onClick={() => {
           setOpen(true);
         }}

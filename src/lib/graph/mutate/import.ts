@@ -245,7 +245,7 @@ const resoDataTypeToComponents = (
       if (row.SugMaxPrecision) {
         return "Int";
       }
-        return "Float";
+      return "Float";
     }
     case "Resource":
       return "SelectBox";

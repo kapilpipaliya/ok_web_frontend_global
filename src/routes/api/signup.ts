@@ -1,10 +1,7 @@
 // Import necessary modules and functions
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { TransactionPromise } from "neo4j-driver-core";
-import {
-  getDriver,
-  getDriverWithPort,
-} from "~/cypher_api/server/driver";
+import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 // import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
 import { createDockerContainer } from "~/cypher_api/server/docker_functions";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
@@ -18,7 +15,10 @@ export async function POST({ request }: APIEvent) {
   const { username, email, password, subdomain } = await request.json();
 
   // Get subdomain from the request URL
-  const subdomainFromUrl = await getSubDomain(request.headers.get("host")!, false);
+  const subdomainFromUrl = await getSubDomain(
+    request.headers.get("host")!,
+    false,
+  );
   const session = (await getDriver(subdomainFromUrl)).session();
   const tx = session.beginTransaction();
 
@@ -55,13 +55,13 @@ export async function POST({ request }: APIEvent) {
     await updateSession(createUserResult);
 
     const { password: _, ...properties } = user.P;
-    
+
     return {
       id: user.id,
       properties: user.P,
     };
   } catch (error: any) {
-    console.error("Server error:", error.message,error);
+    console.error("Server error:", error.message, error);
     await tx.rollback();
     await session.close();
     return new Response(error.message, { status: 500 });
@@ -168,7 +168,8 @@ async function PortConfigure(
 
     if (resultPort.records.length === 0) {
       // Create default database port configuration if not exists
-      const query = "CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) SET n.createdAt = localDateTime() RETURN n;";
+      const query =
+        "CREATE (n:DBPort {driverPort: 1150, logsPort: 1151, labPort: 1152}) SET n.createdAt = localDateTime() RETURN n;";
       const resultPort = await tx.run(query);
 
       const portResult = convertNodeToJson(resultPort.records[0].get("n"));
@@ -191,7 +192,11 @@ async function PortConfigure(
     await new Promise((resolve, reject) => setTimeout(resolve, 10000));
 
     // Update port configuration in the database
-    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${driverPort + 10}, n.logsPort = ${logsPort + 10}, n.labPort = ${labPort + 10} SET n.updatedAt = localDateTime() RETURN n;`;
+    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${
+      driverPort + 10
+    }, n.logsPort = ${logsPort + 10}, n.labPort = ${
+      labPort + 10
+    } SET n.updatedAt = localDateTime() RETURN n;`;
     await tx.run(updatePort);
 
     return { driverPort, logsPort, labPort };
@@ -211,7 +216,13 @@ async function checkExistance(
   // Check if the subdomain already exists
   if (
     subdomain &&
-    !(await findVertexesMGCall({label: "User", attribute: "subdomain", value: subdomain})).error
+    !(
+      await findVertexesMGCall({
+        label: "User",
+        attribute: "subdomain",
+        value: subdomain,
+      })
+    ).error
   ) {
     throw new Error("Sub Domain already exists");
   }
@@ -219,7 +230,13 @@ async function checkExistance(
   // Check if the username already exists
   if (
     username &&
-    !(await findVertexesMGCall({label: "User", attribute: "username", value: username})).error
+    !(
+      await findVertexesMGCall({
+        label: "User",
+        attribute: "username",
+        value: username,
+      })
+    ).error
   ) {
     throw new Error("Username already exists");
   }
@@ -227,7 +244,13 @@ async function checkExistance(
   // Check if the email already exists
   if (
     email &&
-    !(await findVertexesMGCall({label: "User", attribute: "email", value: email})).error
+    !(
+      await findVertexesMGCall({
+        label: "User",
+        attribute: "email",
+        value: email,
+      })
+    ).error
   ) {
     throw new Error("Email address already exists");
   }

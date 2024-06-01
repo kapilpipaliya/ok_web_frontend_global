@@ -8,7 +8,13 @@ import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
 import { LoaderNew } from "./components/custom/LoaderSimple";
 import type { Config } from "@master/css";
 import Sidebar from "./pages/dashboard/SideBar/SidebarLayout";
-import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap } from "./lib/graph/graph";
+import {
+  type EdgeMap,
+  GraphContext,
+  type GraphInterface,
+  type Id,
+  type VertexMap,
+} from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
 import { DataFetcher, API } from "./components/api/DataFetcher";
 
@@ -33,26 +39,26 @@ export default function App() {
     navigationData: [],
     txnId: 0,
     isSideBarOpen: true,
-    isSubSideBarOpen: true
+    isSubSideBarOpen: true,
   });
 
   return (
     <Router
       root={(props) => {
         return (
-
           <CSSRuntimeProvider config={config}>
             <GraphContext.Provider value={graph}>
               <LoadingContext.Provider value={loadingSite}>
                 <MetaProvider>
                   <div id="popup-root" />
                   <div id="mainDiv">
-
                     <Show when={graph[0].isSideBarOpen}>
                       <Sidebar />
                     </Show>
                     <DataFetcher
-                      fetchData={API.fetchDataUrl} renderContent={<></>} />
+                      fetchData={API.fetchDataUrl}
+                      renderContent={<></>}
+                    />
 
                     <Suspense fallback={<LoaderNew />}>
                       {/* <ErrorBoundary fallback={(error) => {

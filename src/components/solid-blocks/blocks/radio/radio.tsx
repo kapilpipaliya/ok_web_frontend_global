@@ -68,7 +68,9 @@ export function Radio(props: RadioProps) {
 
   return (
     <label
-      class={`${content.align || "left"} sb-radio${inputProps.disabled ? " disabled" : ""}`}
+      class={`${content.align || "left"} sb-radio${
+        inputProps.disabled ? " disabled" : ""
+      }`}
       {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>{content.children}</Show>

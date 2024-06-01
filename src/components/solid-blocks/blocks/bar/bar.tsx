@@ -19,7 +19,9 @@ export function Bar(props: BarProps) {
     "portal",
   ]);
   const divProps = mergeProps(rest, {
-    class: `${local.placement}${local.position ? ` ${local.position}` : ""} sb-bar ${props.class ? ` ${props.class}` : ""}`,
+    class: `${local.placement}${
+      local.position ? ` ${local.position}` : ""
+    } sb-bar ${props.class ? ` ${props.class}` : ""}`,
   });
   return local.portal === false ? (
     <div {...divProps} />

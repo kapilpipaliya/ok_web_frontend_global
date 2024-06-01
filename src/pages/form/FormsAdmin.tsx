@@ -11,9 +11,7 @@ import {
   onDataDirectoryImportClick,
   updateImportRecord,
 } from "~/lib/graph/mutate/import";
-import {
-  AbstractSingleForm,
-} from "~/components/dynamic/components/DynamicForm";
+import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
 import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
 import { toTitle } from "case-switcher-js";

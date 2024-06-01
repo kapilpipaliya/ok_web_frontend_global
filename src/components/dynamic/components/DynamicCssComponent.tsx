@@ -7,7 +7,6 @@ import { FieldWithCustomBox } from "~/components/css-properties/css-components/F
 import { TextFieldWithSelect } from "~/components/css-properties/css-components/TextFieldWithSelect";
 import { ToggleButton } from "~/components/css-properties/css-components/ToggleButton";
 
-
 export function DynamicCSSComponent(props: { value: any }) {
   return (
     <Switch>

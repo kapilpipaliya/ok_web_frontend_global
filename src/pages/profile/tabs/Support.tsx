@@ -110,18 +110,32 @@ export const SupportTicketSection = (props: {
                 <>
                   <div class="rel mb:10 mt:10 @fade|.5s">
                     <div
-                      style={`color: #fff; float: ${msg.personal ? "right" : "left"}; text-align: ${msg.personal ? "right" : "left"}; background: ${msg.personal ? "linear-gradient(120deg, #248A52, #257287)" : "rgb(29 92 194 / 76%)"}; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}
+                      style={`color: #fff; float: ${
+                        msg.personal ? "right" : "left"
+                      }; text-align: ${
+                        msg.personal ? "right" : "left"
+                      }; background: ${
+                        msg.personal
+                          ? "linear-gradient(120deg, #248A52, #257287)"
+                          : "rgb(29 92 194 / 76%)"
+                      }; border-radius: 5px; padding: 5px; margin-bottom: 5px;`}
                     >
                       {msg.text}
                     </div>
                     <div
-                      class={`abs bottom:-10 ${msg.personal ? "right:0" : "left:0"}`}
+                      class={`abs bottom:-10 ${
+                        msg.personal ? "right:0" : "left:0"
+                      }`}
                       style="font-size: 8px;"
                     >
                       {msg.timestamp}
                     </div>
                     <div
-                      class={`abs ${msg.personal ? "right:0 bg:#267e70 h:7px bottom:7px" : "left:0 bg:#5783d2 h:7px bottom:8px"}`}
+                      class={`abs ${
+                        msg.personal
+                          ? "right:0 bg:#267e70 h:7px bottom:7px"
+                          : "left:0 bg:#5783d2 h:7px bottom:8px"
+                      }`}
                       style="font-size:8px;width: 10px;transform: skew(298deg, 22deg);top: ;"
                     />
                   </div>

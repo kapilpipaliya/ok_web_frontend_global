@@ -49,7 +49,9 @@ export function Checkbox(props: CheckboxProps) {
 
   return (
     <label
-      class={`${content.align || "left"} ${content.switch ? " switch" : ""} ${inputProps.class || ""}`}
+      class={`${content.align || "left"} ${content.switch ? " switch" : ""} ${
+        inputProps.class || ""
+      }`}
       {...(labelProps as JSX.HTMLAttributes<HTMLLabelElement>)}
     >
       <Show when={content.align === "right"}>

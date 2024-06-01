@@ -34,7 +34,6 @@ const accordionContext = createContext<
        * otherwise the number of opened tabs
        */
       opened: () => number,
-
       setOpened: (opened: number) => void,
     ]
   | []

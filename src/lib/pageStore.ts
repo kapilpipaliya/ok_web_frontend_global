@@ -29,7 +29,12 @@ import {
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
 import { deleteNestedLayout } from "./graph/mutate/deleteNestedLayout";
-import { type GraphInterface, type Id, IdAttr, type Vertex } from "~/lib/graph/graph";
+import {
+  type GraphInterface,
+  type Id,
+  IdAttr,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { evaluate } from "~/lib/expression_eval";
 
@@ -305,10 +310,11 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   const height = bounds.bottom - bounds.top;
   if (offset < height * 0.25) {
     return "before";
-  }if (offset > height * 0.75) {
+  }
+  if (offset > height * 0.75) {
     return "after";
   }
-    return "center";
+  return "center";
   // if (offset < (height + 10)) {
   //  return 'before';
   // } else if (offset > (height - 10)) {
@@ -364,7 +370,6 @@ export function useDragDrop(
     e.stopPropagation();
     // setDraggedVertex(vertex);
     setDraggedVertex((prev) => [...prev, vertex]);
-
   };
 
   const handleDragOverBase = (e: DragEvent) => {
@@ -383,7 +388,7 @@ export function useDragDrop(
     if (position === "before") {
       activeItem = vertex.id;
     } else if (position === "after") {
-      if (isPreview || (collapsedKeys?.().includes(vertex.id))) {
+      if (isPreview || collapsedKeys?.().includes(vertex.id)) {
         // collapsed state
         activeItem = vertex.id;
       } else {
@@ -542,7 +547,11 @@ export function useDragDrop(
       // }
       function sortChildren() {
         let pos = 1;
-        const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
+        const childrenAttrs = getChildrenAttrs(
+          graph,
+          setGraph,
+          toParentVertex!,
+        );
         for (const child of childrenAttrs) {
           if (child.id === fromVertex?.id) {
             continue;
@@ -593,9 +602,21 @@ export function useDragDrop(
 
       if (fromVertexLabel === "Comp") {
         // when component is input add label
-        const labelParentVertex = getParentVertex(["CompCategory$0"], fromVertex, graph);
-        if (labelParentVertex?.vertex?.P.name === "Form" || labelParentVertex?.vertex?.P.name === "Join") {
-          const labelVertex = findVertexByLabelAndUniqueId(graph,"Comp",IdAttr,"Label");
+        const labelParentVertex = getParentVertex(
+          ["CompCategory$0"],
+          fromVertex,
+          graph,
+        );
+        if (
+          labelParentVertex?.vertex?.P.name === "Form" ||
+          labelParentVertex?.vertex?.P.name === "Join"
+        ) {
+          const labelVertex = findVertexByLabelAndUniqueId(
+            graph,
+            "Comp",
+            IdAttr,
+            "Label",
+          );
           const rowId = componentDrag(
             txnId,
             labelVertex!,
@@ -613,9 +634,9 @@ export function useDragDrop(
             setGraph,
           );
           if (rowId2 === -1) return;
-  
+
           fromVertex = graph.vertexes[rowId];
-  
+
           sortChildren();
         } else {
           const rowId = componentDrag(
@@ -626,9 +647,9 @@ export function useDragDrop(
             setGraph,
           );
           if (rowId === -1) return;
-  
+
           fromVertex = graph.vertexes[rowId];
-  
+
           sortChildren();
         }
       } else if (fromVertexLabel === "Page") {
@@ -699,8 +720,6 @@ export function useDragDrop(
     setTargetId(-1);
     setLoadingSite(false);
   };
-
-
 
   const clone = () => {
     let fromVertex = vertex;
@@ -812,8 +831,8 @@ export function useDragDrop(
     });
 
     deleteNestedLayout(graph, setGraph, txnId, [vertex]);
-    if(name){
-      showSuccessToast(`${name} deleted successfully`);    
+    if (name) {
+      showSuccessToast(`${name} deleted successfully`);
     }
   };
 

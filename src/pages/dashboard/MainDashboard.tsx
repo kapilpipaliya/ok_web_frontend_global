@@ -40,10 +40,11 @@ export function MainDashboard(props: { children?: JSX.Element }) {
     setGraph,
   );
   const location = useLocation();
-// on form and page designer hide the sidebar
+  // on form and page designer hide the sidebar
   const handleUrlChange = () => {
     const path = location.pathname;
-    setGraph('isSideBarOpen',
+    setGraph(
+      "isSideBarOpen",
       !(
         path.toLowerCase().includes("/admin/page/") ||
         path.toLowerCase().includes("/admin/form/")
@@ -64,29 +65,29 @@ export function MainDashboard(props: { children?: JSX.Element }) {
   };
 
   return (
-      <div id="main-content" style={mainContentStyle as any}>
-        <PageContext.Provider
-          value={{
-            events: {
-              setTitle: (title: string) =>
-                mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
-            },
-          }}
-        >
-          <Show when={graph.isSideBarOpen}>
-            <Navbar
-              showCloseDrawerBtn={graph.isSideBarOpen!}
-              toggleSidebar={() => {
-                setGraph('isSideBarOpen', prev => !prev);
-              }}
-              right={<DropdownMenu />}
-              meta={graph.vertexes[vertexId]}
-            />
-          </Show>
+    <div id="main-content" style={mainContentStyle as any}>
+      <PageContext.Provider
+        value={{
+          events: {
+            setTitle: (title: string) =>
+              mergeVertexProperties(0, vertexId, graph, setGraph, { title }),
+          },
+        }}
+      >
+        <Show when={graph.isSideBarOpen}>
+          <Navbar
+            showCloseDrawerBtn={graph.isSideBarOpen!}
+            toggleSidebar={() => {
+              setGraph("isSideBarOpen", (prev) => !prev);
+            }}
+            right={<DropdownMenu />}
+            meta={graph.vertexes[vertexId]}
+          />
+        </Show>
 
-          <div class="p:4|10 overflow-y:auto h:93vh">{props.children}</div>
-        </PageContext.Provider>
-      </div>
+        <div class="p:4|10 overflow-y:auto h:93vh">{props.children}</div>
+      </PageContext.Provider>
+    </div>
   );
 }
 
@@ -143,7 +144,10 @@ const DropdownMenu = () => {
         class={
           "flex width:40px height:40px ai:center bg:rgb(229,234,253) bg:rgb(190,211,238,.7):hover p:.2rem|.3rem r:50%"
         }
-        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${graph.member?.properties?.profileImage || "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"})`}
+        style={`background-size:cover;border: none; cursor: pointer;background-color:rgb(237,237,255);background-image: url(${
+          graph.member?.properties?.profileImage ||
+          "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
+        })`}
       />
       <Dismiss
         menuButton={btnEl}
@@ -155,9 +159,11 @@ const DropdownMenu = () => {
         ref={dropdownContainerEl}
       >
         <div
-          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${isOpen() ? 1 : 0
-            }; pointer-events: ${isOpen() ? "auto" : "none"
-            }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
+          style={`position: absolute; top: calc(100% + 5px); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); opacity: ${
+            isOpen() ? 1 : 0
+          }; pointer-events: ${
+            isOpen() ? "auto" : "none"
+          }; transition: opacity 0.2s ease-in-out;width:max-content; right: -15px`} // Adjust width here
         >
           <div
             style="position:fixed; top:0; left:0; bottom:0; right:0; background:#01093138; z-index:-1;"
@@ -171,7 +177,10 @@ const DropdownMenu = () => {
               <div
                 // alt="profile"
                 class="h:45 w:45 r:50%"
-                style={`background-size:cover;background-image: url(${graph.member?.properties?.profileImage || "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"})`}
+                style={`background-size:cover;background-image: url(${
+                  graph.member?.properties?.profileImage ||
+                  "https://i.pinimg.com/originals/05/5a/91/055a91979264664a1ee12b9453610d82.png"
+                })`}
               />
               <div class={"ml:10 mr:1rem"}>
                 <div class={"text-align:start f:15 font-weight:bold"}>

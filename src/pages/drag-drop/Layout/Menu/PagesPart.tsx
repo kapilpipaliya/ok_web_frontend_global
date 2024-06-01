@@ -74,9 +74,8 @@ export function PagesPart() {
     if (!searchQuery()) {
       setFilteredData(originalData);
     } else {
-      const filtered = originalData.filter(
-        (item) =>
-          item.name?.toLowerCase().includes(searchQuery().toLowerCase()),
+      const filtered = originalData.filter((item) =>
+        item.name?.toLowerCase().includes(searchQuery().toLowerCase()),
       );
       setFilteredData(filtered);
     }
@@ -118,7 +117,10 @@ export function PagesPart() {
           onDragStart={(e) => {
             e.stopPropagation();
 
-            setDraggedVertex(prev => [...prev, graph.vertexes[props.child.id]]);
+            setDraggedVertex((prev) => [
+              ...prev,
+              graph.vertexes[props.child.id],
+            ]);
           }}
         >
           <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />

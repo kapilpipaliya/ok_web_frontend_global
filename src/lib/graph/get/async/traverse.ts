@@ -90,10 +90,10 @@ export async function getParentVertexesAsync(
       Array.from(stepVertexes.values()),
     );
   }
-    return {
-      error: false,
-      vertexes: Array.from(stepVertexes.values()),
-    };
+  return {
+    error: false,
+    vertexes: Array.from(stepVertexes.values()),
+  };
 }
 
 export async function calculateFilterAsync(input: string) {
@@ -167,7 +167,8 @@ export async function getTreeDataAsync(
 export async function getTextValueAsync(value: any) {
   if (typeof value === "boolean") {
     return value ? "true" : "false";
-  }if (typeof value === "object") {
+  }
+  if (typeof value === "object") {
     return JSON.stringify(value);
   }
   return value;
@@ -190,7 +191,7 @@ export async function getSelectionOptionsAsync(
     if (value) {
       return { error: false, vertexes: value };
     }
-      return { error: true };
+    return { error: true };
   } catch (e) {
     console.error(e, vertex, collection);
     return { error: true };
@@ -239,19 +240,19 @@ export async function getChildVertexAsync(
       error: true,
     };
   }
-    const newVertex = vertexes[0];
-    if (newVertex) {
-      if (path.length > 1) {
-        return getChildVertexAsync(graph, path.slice(1), newVertex);
-      }
-        return {
-          error: false,
-          vertex: newVertex,
-        };
+  const newVertex = vertexes[0];
+  if (newVertex) {
+    if (path.length > 1) {
+      return getChildVertexAsync(graph, path.slice(1), newVertex);
     }
-      return {
-        error: true,
-      };
+    return {
+      error: false,
+      vertex: newVertex,
+    };
+  }
+  return {
+    error: true,
+  };
 }
 
 export async function getParentVertexAsync(
@@ -269,25 +270,25 @@ export async function getParentVertexAsync(
       error: true,
     };
   }
-    const edge = graph.edges[edges[0]];
-    if (edge) {
-      const newVertex = graph.vertexes[edge.S];
-      if (newVertex) {
-        if (path.length > 1) {
-          return getParentVertexAsync(path.slice(0, -1), newVertex, graph);
-        }
-          return {
-            error: false,
-            vertex: newVertex,
-          };
+  const edge = graph.edges[edges[0]];
+  if (edge) {
+    const newVertex = graph.vertexes[edge.S];
+    if (newVertex) {
+      if (path.length > 1) {
+        return getParentVertexAsync(path.slice(0, -1), newVertex, graph);
       }
-        return {
-          error: true,
-        };
-    }
       return {
-        error: true,
+        error: false,
+        vertex: newVertex,
       };
+    }
+    return {
+      error: true,
+    };
+  }
+  return {
+    error: true,
+  };
 }
 
 export async function getChildVertexesAsync(
@@ -314,7 +315,7 @@ export async function getChildVertexesAsync(
           error: true,
         };
       }
-        continue;
+      continue;
     }
 
     for (const edgeId of edgeIds) {
@@ -344,8 +345,8 @@ export async function getChildVertexesAsync(
       strict,
     );
   }
-    return {
-      error: false,
-      vertexes: Array.from(stepVertexes.values()),
-    };
+  return {
+    error: false,
+    vertexes: Array.from(stepVertexes.values()),
+  };
 }

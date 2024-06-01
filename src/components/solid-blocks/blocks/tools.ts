@@ -64,7 +64,11 @@ export type MediaQueryItem =
       | "height"
       | "orientation"
       | "pointer"
-      | `prefers-${"color-scheme" | "contrast" | "reduced-motion" | "reduced-transparency"}`
+      | `prefers-${
+          | "color-scheme"
+          | "contrast"
+          | "reduced-motion"
+          | "reduced-transparency"}`
       | "resolution"
       | "scan"
       | "width"}: ${string})`;

@@ -73,7 +73,6 @@ export function Login() {
     <div
       class="@fade|.5s"
       style={{
-
         flex: "auto",
         "background-size": "cover",
         "background-image":
@@ -185,7 +184,9 @@ export function Login() {
               onClick={togglePasswordVisibility}
               class="abs top:8 right:5 flex ai:center bg:rgb(232,232,232):hover cursor:pointer p:5 r:50%"
               aria-label="Toggle password visibility"
-              icon={`${showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"}`}
+              icon={`${
+                showPassword() ? "iconamoon:eye-light" : "iconamoon:eye-off"
+              }`}
             />
           </div>
           <div

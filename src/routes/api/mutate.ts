@@ -214,7 +214,6 @@ export async function mutateData(
         ).join("");
 
         const query = `CREATE (n${labels} $properties) SET n.createdAt = localDateTime() RETURN n`;
-        
 
         try {
           const result = await tx.run(query, {
@@ -240,7 +239,8 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = "MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
+        const query =
+          "MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -263,7 +263,8 @@ export async function mutateData(
           id = clientToServerVertexIdMap.get(id);
         }
 
-        const query = "MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n";
+        const query =
+          "MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -407,7 +408,10 @@ export async function mutateData(
                     return t`;
 
         try {
-          const result = await tx.run(query, { edgeId: int(id), newstart: int(startId) });
+          const result = await tx.run(query, {
+            edgeId: int(id),
+            newstart: int(startId),
+          });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeStart.id;
             const edgeId = result.records[0].get("r").identity.toString();
@@ -447,7 +451,10 @@ export async function mutateData(
                     return t`;
 
         try {
-          const result = await tx.run(query, { edgeId: int(id), newend:int(endId) });
+          const result = await tx.run(query, {
+            edgeId: int(id),
+            newend: int(endId),
+          });
           if (result.records.length > 0) {
             const oldId = mutationObject.replaceEdgeEnd.id;
             const edgeId = result.records[0].get("r").identity.toString();
@@ -481,7 +488,11 @@ export async function mutateData(
                     delete r`;
 
         try {
-          const result = await tx.run(query, { id: int(id), startId: int(startId), endId: int(endId) });
+          const result = await tx.run(query, {
+            id: int(id),
+            startId: int(startId),
+            endId: int(endId),
+          });
           if (result.records.length > 0) {
             const oldId = mutationObject.deleteEdge.id;
             const edgeId = result.records[0].get("r").identity.toString();

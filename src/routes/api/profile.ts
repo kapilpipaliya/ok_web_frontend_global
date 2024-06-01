@@ -1,7 +1,7 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import { type Session, int } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher_api/functions/mutate/deleteVertex";
-import {  findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { newRowMGCall } from "~/cypher_api/functions/mutate/newRow";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
@@ -70,13 +70,25 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
   // Check if email and username already exists
   if (
     email &&
-    !(await findVertexesMGCall({ label: "User", attribute: "email", value: email })).error
+    !(
+      await findVertexesMGCall({
+        label: "User",
+        attribute: "email",
+        value: email,
+      })
+    ).error
   ) {
     return { status: 500, error: "Email address already exists" };
   }
   if (
     username &&
-    !(await findVertexesMGCall({label:"User",attribute : "username",value: username})).error
+    !(
+      await findVertexesMGCall({
+        label: "User",
+        attribute: "username",
+        value: username,
+      })
+    ).error
   ) {
     return { status: 500, error: "Username already exists" };
   }
@@ -123,7 +135,8 @@ const profile = async (payload: any, session: Session, subdomain: string) => {
 const password = async (payload: any, session: Session) => {
   const { currentPassword, username, newPassword } = payload;
 
-  const findUserQuery = "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
+  const findUserQuery =
+    "MATCH (u:User) WHERE u.password = $password AND u.username = $username RETURN u;";
   const findUserResult = await session.run(findUserQuery, {
     password: currentPassword,
     username: username,
@@ -132,7 +145,8 @@ const password = async (payload: any, session: Session) => {
     return { error: "Current Password is not valid" };
   }
 
-  const query = "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
+  const query =
+    "MATCH (u:User) WHERE u.username = $username SET u.password = $password RETURN u;";
   const result = await session.run(query, {
     username: username,
     password: newPassword,
@@ -216,7 +230,8 @@ const supportTicket = async (
   async function updateStatus(payload: any, session: Session) {
     const { id, status } = payload;
 
-    const query = "MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
+    const query =
+      "MATCH (n) WHERE id(n) = $id SET n.status = $status SET n.updatedAt = localDateTime() RETURN n;";
     await session.run(query, { id: int(id), status: status });
     return {
       message: "Status updated successfully",

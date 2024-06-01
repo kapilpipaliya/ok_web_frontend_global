@@ -9,7 +9,7 @@ import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { FormContext } from "~/lib/Utils";
 import { PageConfigContext } from "~/lib/contexts";
 
-export function ContentDragAndDrop(props: {view: Accessor<string>}) {
+export function ContentDragAndDrop(props: { view: Accessor<string> }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
 
   return (

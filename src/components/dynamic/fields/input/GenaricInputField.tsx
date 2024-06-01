@@ -281,9 +281,7 @@ export function GenericInputField(
             />
           </Match>
           <Match when={component() === "Label"}>
-            <Label
-              {...field.meta?.P.props}
-            >
+            <Label {...field.meta?.P.props}>
               <PageItemRender metaVertex={field.meta} />
             </Label>
           </Match>

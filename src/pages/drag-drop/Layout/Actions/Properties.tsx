@@ -40,7 +40,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { AttrsTableData } from "~/lib/api";
 
-export function Properties(props: { setShowDrawer ?: any }) {
+export function Properties(props: { setShowDrawer?: any }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
@@ -49,7 +49,6 @@ export function Properties(props: { setShowDrawer ?: any }) {
     SelectedComponentContext,
   );
   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
-
 
   const PropertiesPart = () => {
     const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
@@ -175,7 +174,9 @@ export function Properties(props: { setShowDrawer ?: any }) {
                       nameExpr: (v: Vertex) => {
                         const component = getChildVertex(graph, ["$0Comp"], v)
                           .vertex?.P.name;
-                        return `${v.P.name}${component ? ` (${component})` : ""}`;
+                        return `${v.P.name}${
+                          component ? ` (${component})` : ""
+                        }`;
                       },
                     },
                   );
@@ -435,7 +436,6 @@ export function Properties(props: { setShowDrawer ?: any }) {
 
     return (
       <>
-       
         <Show when={selectedId() !== -1}>
           <div class="flex jc:start">
             <GenericField
@@ -541,7 +541,6 @@ export function Properties(props: { setShowDrawer ?: any }) {
     );
   };
   return (
-
     <div class="ml:5 mr:5">
       <div
         style={{
@@ -557,7 +556,14 @@ export function Properties(props: { setShowDrawer ?: any }) {
         >
           Properties
         </div>
-        <Icon onclick={() => props.setShowDrawer(false)} icon={'iconamoon:close-light'} class="bg:#ededed:hover r:50%" height={24} width={24} style={{ color: 'lightgray', cursor: 'pointer' }} />
+        <Icon
+          onclick={() => props.setShowDrawer(false)}
+          icon={"iconamoon:close-light"}
+          class="bg:#ededed:hover r:50%"
+          height={24}
+          width={24}
+          style={{ color: "lightgray", cursor: "pointer" }}
+        />
       </div>
 
       <div class="overflow:auto h:98vh scrollbar-width:thin">

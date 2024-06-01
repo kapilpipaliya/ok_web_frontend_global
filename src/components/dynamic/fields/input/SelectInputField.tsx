@@ -126,7 +126,7 @@ export function ensureArray(value: any) {
   if (Array.isArray(value)) {
     return value;
   }
-    return value ? [value] : [];
+  return value ? [value] : [];
 }
 export function selectedValue(
   meta: Vertex,
@@ -180,7 +180,7 @@ export function collectionNameDisplayExpr(
     if (nameKeys.length === 1) {
       return `P.${nameKeys[0]}`;
     }
-      return nameKeys.map((name) => `$P.${name}`).join(" ");
+    return nameKeys.map((name) => `$P.${name}`).join(" ");
   }
   return;
 }
@@ -215,10 +215,11 @@ export function SelectInputField(
     if (value) {
       if (typeof value === "string") {
         return value.split("\n");
-      }if (Array.isArray(value)) {
+      }
+      if (Array.isArray(value)) {
         return value;
       }
-        setOptions(value ? [value] : []);
+      setOptions(value ? [value] : []);
     } else {
       // this is not working when row is enabled, select field options is not updated
       if (field.disabled) {
@@ -247,14 +248,14 @@ export function SelectInputField(
             setGraph,
             [field.data as Vertex],
             collection,
-          ).vertexes || []
+          ).vertexes || [],
         );
       } else {
         return [];
       }
     }
   };
-  
+
   onMount(() => {
     selectOptions();
   });
@@ -277,7 +278,7 @@ export function SelectInputField(
     let optionvalue: any;
     if (isRemove && getComponent() === "SelectBox") {
       data = [];
-    } else if (getComponent() === "SelectBox"){
+    } else if (getComponent() === "SelectBox") {
       data = e[0].id;
     } else {
       data = e.map((e) => e.id);
@@ -362,7 +363,7 @@ export function SelectInputField(
   };
   const outerOwner = getOwner();
   return (
-    <div >
+    <div>
       <Show
         when={!field.disabled}
         fallback={
@@ -389,13 +390,11 @@ export function SelectInputField(
           selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
           displayValueChild="displayName"
           displayValueParent="P"
-          selectedValues={() => selectedValue(
-            field.meta,
-            field.data as Vertex,
-            graph
-          ).map((id) => {
-            return graph.vertexes[id];
-          })}
+          selectedValues={() =>
+            selectedValue(field.meta, field.data as Vertex, graph).map((id) => {
+              return graph.vertexes[id];
+            })
+          }
           disable={field.disabled!}
           options={options()}
           onRemove={(e) => onChangeSelect(e, true)}

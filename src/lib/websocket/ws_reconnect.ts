@@ -97,7 +97,7 @@ export class WSBase {
     this.state(WebSocket.CLOSED);
     const waitMs = 2000;
     if (ev.code !== 1006 && ev.code !== 1001) {
-      console.log("WS Reconnect",ev);
+      console.log("WS Reconnect", ev);
     }
     this.onClose_?.();
     this.socket = null;
