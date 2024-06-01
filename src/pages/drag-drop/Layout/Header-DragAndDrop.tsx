@@ -8,6 +8,8 @@ import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import { TextEditor } from "~/components/css-properties/css-tabs/TextEditor";
 import { CenterDiv } from "~/components/css-properties/css-components/CssUtils";
 import ShareSection from "../Share";
+import { APP_BASE_URL } from "~/lib/Utils";
+import { useLocation, useNavigate } from "@solidjs/router";
 
 export function HeaderDragAndDrop(props: {
   view: Accessor<string>;
@@ -20,6 +22,14 @@ export function HeaderDragAndDrop(props: {
     { key: 'humbleicons:desktop', value: 'Desktop', icon: true },
   ];
 
+  const navigate = useNavigate();
+  function removeLastPathSegment() {
+    const pathname = window.location.pathname;
+    const segments = pathname.split('/');
+    segments.pop(); // Remove the last segment
+    const newPathname = segments.join('/');
+    return newPathname;
+  }
   return (
     <header class="h:50px" style={{ "grid-area": "header" }}>
       <div class="flex-grow:1 min-w:400 grid ji:center">
@@ -28,9 +38,27 @@ export function HeaderDragAndDrop(props: {
             "ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between mb:5 p:10 r:7 w:99%"
           }
         >
-          <a href="/">
-            <img style="height: 35px; " src={logo} alt="logo" />
-          </a>
+          <div class="flex ai:center">
+            <div
+              class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
+              onclick={() => {
+                const newPath = removeLastPathSegment();
+
+                navigate(newPath);
+              }}
+              title="Back"
+            >
+              <Icon
+                icon={"flowbite:caret-left-outline"}
+                class={"color:black:hover color:lightgrey"}
+                height={30}
+                width={30}
+              />
+            </div>
+            <a href="/">
+              <img style="height: 35px; " src={logo} alt="logo" />
+            </a>
+          </div>
           <div class="w:150">
             <For each={views}>
               {(view, index) => {
