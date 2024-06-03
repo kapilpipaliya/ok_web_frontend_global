@@ -32,12 +32,12 @@ import {
   revertTransaction,
 } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/source/components/JsxParser";
-import { setPropertyValueGlobal, } from "~/lib/pageStore";
 import { FormGroupProperties } from "~/pages/form/FormsAdmin";
 import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { AttrsTableData } from "~/lib/api";
+import {setPropertyValueGlobal} from "~/lib/drag-drop/setPropertyValueGlobal";
 
 export function Properties(props: { setShowDrawer?: any }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);

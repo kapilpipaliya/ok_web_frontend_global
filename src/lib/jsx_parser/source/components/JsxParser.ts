@@ -9,11 +9,12 @@ import { randomHash } from "~/lib/jsx_parser/source/helpers/hash";
 import { parseStyle } from "~/lib/jsx_parser/source/helpers/parseStyle";
 import { resolvePath } from "~/lib/jsx_parser/source/helpers/resolvePath";
 import type { JSX } from "solid-js";
-import { componentDrag, setPropertyValueGlobal } from "~/lib/pageStore";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import attributeNames from "~/lib/jsx_parser/source/constants/attributeNames";
+import {componentDrag} from "~/lib/drag-drop/componentDrag";
+import {setPropertyValueGlobal} from "~/lib/drag-drop/setPropertyValueGlobal";
 
 type ParsedJSX = JSX.Element | boolean | string;
 type ParsedTree = ParsedJSX | ParsedJSX[] | null;

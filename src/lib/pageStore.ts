@@ -1,16 +1,7 @@
-import jsep from "jsep";
-import {
-  type Accessor,
-  batch,
-  createMemo,
-  createSelector,
-  untrack,
-  useContext,
-} from "solid-js";
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
-import { useToast } from "~/components/custom/Toast";
-import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
+import {type Accessor, batch, createMemo, createSelector, useContext,} from "solid-js";
+import {reconcile, type SetStoreFunction, type Store} from "solid-js/store";
+import {useToast} from "~/components/custom/Toast";
+import {setParentValue} from "~/components/dynamic/fields/input/SelectInputField";
 import {
   DraggedVertexContext,
   HoverIdContext,
@@ -22,279 +13,19 @@ import {
   SelectedIdContext,
   TargetIdContext,
 } from "~/lib/contexts";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import {
-  getCompProps,
-  getRowProps,
-  getStringComponent,
-} from "~/lib/graph/get/sync/graph_functions";
-import { deleteNestedLayout } from "./graph/mutate/deleteNestedLayout";
-import {
-  type GraphInterface,
-  type Id,
-  IdAttr,
-  type Vertex,
-} from "~/lib/graph/graph";
-import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { evaluate } from "~/lib/expression_eval";
+import {findVertexByLabelAndUniqueId} from "~/lib/graph/get/sync/findVertex";
+import {getCompProps, getRowProps,} from "~/lib/graph/get/sync/graph_functions";
+import {deleteNestedLayout} from "./graph/mutate/deleteNestedLayout";
+import {type GraphInterface, type Id, IdAttr, type Vertex,} from "~/lib/graph/graph";
+import {mergeVertexProperties} from "~/lib/graph/mutate/vertex";
+import {getChildVertex, getParentVertex,} from "./graph/get/sync/traverse";
+import {getFormMetaDataAsync} from "./graph/get/async/graph_functions";
+import {getDataMGCall} from "~/cypher_api/lib/graph/get/async/traverse";
+import {setGraphData} from "./websocket/ws_events";
+import {getEdgesFromRowsAttr,} from "./Utils";
+import {componentDrag, getComponentFromLayoutRow} from "~/lib/drag-drop/componentDrag";
+import {getChildrenAttrs} from "~/lib/drag-drop/getChildrenAttrs";
 
-import { cloneRowProps } from "./graph/mutate/form_functions";
-import { getNewGraphId } from "./graph/transaction";
-import {
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions,
-} from "./graph/get/sync/traverse";
-import { addNewRow } from "./graph/mutate/form_functions";
-import { getFormMetaDataAsync } from "./graph/get/async/graph_functions";
-import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { setGraphData } from "./websocket/ws_events";
-import { getEdgesFromRowsAttr, } from "./Utils";
-
-const addPropsToLayoutRow = (
-  graph: Store<GraphInterface>,
-  txnId: number,
-  layoutRowId: Id,
-  componentVertex: Vertex,
-) => {
-  const propVertexes = getChildVertexes(graph, ["$0Prop"], [componentVertex]);
-  if (propVertexes.vertexes) {
-    const initialValues = propVertexes.vertexes.reduce(
-      (acc, curr) => {
-        if (typeof curr.P.value === "boolean") {
-          acc[curr.P.key] = curr.P.value;
-        } else if (curr.P.value) {
-          acc[curr.P.key] = curr.P.value;
-        }
-        return acc;
-      },
-      {} as { [key: string]: any },
-    );
-    // TODO: This has no effect so commenting it.
-    // replaceVertexProperties(txnId, layoutRowId, initialValues);
-  }
-};
-// @Note:
-// From Component To Layout drag:
-// 1. Create a Row to proper parent.
-// 2. Sort properly
-export function componentDrag(
-  txnId: number,
-  fromVertex: Vertex,
-  parentVertex: Vertex,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  toIndex?: number,
-) {
-  const { showErrorToast } = useToast();
-
-  // handle (toNode === null) case.
-  if (fromVertex) {
-    const attrMetaVertex = newVertex(getNewGraphId(), [], {
-      name: "Attr",
-      component: "Table",
-      tab: "Attribute",
-      props: {
-        type: "Attr",
-        label: "Attr",
-      },
-    });
-    const attrCompMetaVertex = newVertex(getNewGraphId(), [], {
-      name: "Comp",
-      component: "SelectBox",
-      props: {
-        collection: "g:'Comp'",
-      },
-    });
-
-    if (fromVertex.L[0] === "Page") {
-      function processChildren(fromVertex: Vertex, toVertex: Vertex) {
-        const childrenVertexes = getChildrenAttrs(graph, setGraph, fromVertex);
-        const results = [];
-        for (const child of childrenVertexes) {
-          const rowResult2 = addNewRow(
-            txnId,
-            attrMetaVertex,
-            graph,
-            setGraph,
-            toVertex,
-            { pos: child.P.pos },
-            false,
-            {} as any,
-          );
-          const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
-
-          const compVertex = getComponentFromLayoutRow(
-            child.id,
-            graph,
-            setGraph,
-          );
-          // set Component to the row
-          setSelectionValue(
-            txnId,
-            rowVertex2,
-            graph,
-            setGraph,
-            attrCompMetaVertex,
-            compVertex.id,
-          );
-          cloneRowProps(graph, setGraph, txnId, child, rowVertex2);
-          processChildren(child, rowVertex2);
-          results.push(rowResult2.vertexId!);
-        }
-        return results;
-      }
-
-      return processChildren(fromVertex, parentVertex)[0] ?? -1;
-    }
-
-    const rowResult = addNewRow(
-      txnId,
-      attrMetaVertex,
-      graph,
-      setGraph,
-      parentVertex,
-      toIndex ? { pos: toIndex } : {},
-      false,
-      {} as any,
-    );
-    const rowVertex = graph.vertexes[rowResult.vertexId!];
-
-    if (fromVertex.L[0] === "Comp" || fromVertex.L[0] === "Coll") {
-      if (fromVertex.L[0] === "Comp") {
-        // set Component to the row
-        setSelectionValue(
-          txnId,
-          rowVertex,
-          graph,
-          setGraph,
-          attrCompMetaVertex,
-          fromVertex.id,
-        );
-        addPropsToLayoutRow(graph, txnId, rowVertex.id, fromVertex);
-      } else if (fromVertex.L[0] === "Coll") {
-        // set Collection to the row
-        const attrCollMetaVertex = newVertex(getNewGraphId(), [], {
-          name: "coll",
-          displayName: "Collection",
-          component: "SelectBox",
-          props: {
-            collection: "g:'Coll'",
-            parentLabel: "Coll",
-          },
-        });
-        setSelectionValue(
-          txnId,
-          rowVertex,
-          graph,
-          setGraph,
-          attrCollMetaVertex,
-          fromVertex.id,
-        );
-        const formVertex = findVertexByLabelAndUniqueId(
-          graph,
-          "Comp",
-          IdAttr,
-          "Form",
-        );
-        if (!formVertex) {
-          showErrorToast("cant find form");
-        } else {
-          setSelectionValue(
-            txnId,
-            rowVertex,
-            graph,
-            setGraph,
-            attrCompMetaVertex,
-            formVertex.id,
-          );
-          addPropsToLayoutRow(graph, txnId, rowVertex.id, formVertex);
-        }
-      }
-    } else if (fromVertex.L[0] === "Attr") {
-      const compVertex = getComponentFromLayoutRow(
-        fromVertex.id,
-        graph,
-        setGraph,
-      );
-      // set Component to the row
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrCompMetaVertex,
-        compVertex.id,
-      );
-      cloneRowProps(graph, setGraph, txnId, fromVertex, rowVertex);
-
-      function processChildren(fromVertex: Vertex, toVertex: Vertex) {
-        const childrenVertexes = getChildrenAttrs(graph, setGraph, fromVertex);
-        for (const child of childrenVertexes) {
-          const rowResult2 = addNewRow(
-            txnId,
-            attrMetaVertex,
-            graph,
-            setGraph,
-            toVertex,
-            { pos: child.P.pos },
-            false,
-            {} as any,
-          );
-          const rowVertex2 = graph.vertexes[rowResult2.vertexId!];
-
-          const compVertex = getComponentFromLayoutRow(
-            child.id,
-            graph,
-            setGraph,
-          );
-          // set Component to the row
-          setSelectionValue(
-            txnId,
-            rowVertex2,
-            graph,
-            setGraph,
-            attrCompMetaVertex,
-            compVertex.id,
-          );
-          cloneRowProps(graph, setGraph, txnId, child, rowVertex2);
-          processChildren(child, rowVertex2);
-        }
-      }
-
-      processChildren(fromVertex, rowVertex);
-    }
-
-    return rowResult.vertexId!;
-  }
-  return -1;
-}
-
-const getComponentFromLayoutRow = (
-  layoutRowId: string | number,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) => {
-  // There must be a component found.
-  const currentVertex = graph.vertexes[layoutRowId];
-  const compVertex =
-    getSelectionOptions(
-      graph,
-      setGraph,
-      [currentVertex],
-      "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default",
-    ).vertexes || [];
-  if (compVertex[0]) {
-    return compVertex[0];
-  }
-  const collVertex = getChildVertex(graph, ["$0Coll"], currentVertex);
-  if (collVertex.vertex?.P.name === "Form") {
-    return findVertexByLabelAndUniqueId(graph, "Comp", IdAttr, "Form");
-  }
-
-  return getStringComponent(graph);
-};
 export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   let bounds: DOMRect;
   if (node.classList.contains("contents")) {
@@ -324,22 +55,12 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   // }
 }
 
-export function getChildrenAttrs(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  child: Vertex,
-) {
-  return (
-    evaluate(jsep("->Attr"), { vertexes: [child], graph, setGraph }) || []
-  ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
-}
-
 export function useDragDrop(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
   formData: Vertex,
-  vertex: Vertex,
+  layoutVertex: Vertex,
   collapsedKeys?: Accessor<Id[]>,
   isPreview?: boolean,
 ) {
@@ -358,18 +79,18 @@ export function useDragDrop(
   const { showErrorToast, showSuccessToast } = useToast();
   const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
 
-  const children = createMemo(() => getChildrenAttrs(graph, setGraph, vertex));
+  const children = createMemo(() => getChildrenAttrs(graph, setGraph, layoutVertex));
 
   const activeItemChanged = createSelector<any, Vertex>(
     indicatorPosition,
     (a, b) => a.id === b.activeItem,
   );
-  const isActiveItem = () => activeItemChanged(vertex);
-  // indicatorPosition().activeItem === vertex.id;
+  const isActiveItem = () => activeItemChanged(layoutVertex);
+  // indicatorPosition().activeItem === layoutVertex.id;
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    // setDraggedVertex(vertex);
-    setDraggedVertex((prev) => [...prev, vertex]);
+    // setDraggedVertex(layoutVertex);
+    setDraggedVertex((prev) => [...prev, layoutVertex]);
   };
 
   const handleDragOverBase = (e: DragEvent) => {
@@ -386,27 +107,27 @@ export function useDragDrop(
 
     let activeItem: Id;
     if (position === "before") {
-      activeItem = vertex.id;
+      activeItem = layoutVertex.id;
     } else if (position === "after") {
-      if (isPreview || collapsedKeys?.().includes(vertex.id)) {
+      if (isPreview || collapsedKeys?.().includes(layoutVertex.id)) {
         // collapsed state
-        activeItem = vertex.id;
+        activeItem = layoutVertex.id;
       } else {
         // expanded State
         if (children().length) {
           activeItem = children()[0].id;
           position = "before";
         } else {
-          activeItem = vertex.id;
+          activeItem = layoutVertex.id;
         }
       }
     } else {
       // drop over
-      activeItem = vertex.id;
+      activeItem = layoutVertex.id;
     }
 
     setIndicatorPosition({ activeItem, position });
-    setTargetId(vertex.id);
+    setTargetId(layoutVertex.id);
   };
 
   const handleDragEnter = (e: DragEvent) => {
@@ -472,7 +193,7 @@ export function useDragDrop(
   const handleDragLeave = (e: DragEvent) => {
     // e.stopPropagation();
     // setIndicatorPosition({});
-    // console.log('leave',vertex.id)
+    // console.log('leave',layoutVertex.id)
     // Do not uncomment this, because drag is called before on drop
     // setDraggedVertex(null);
   };
@@ -485,9 +206,9 @@ export function useDragDrop(
       let fromVertex = vertex;
 
       const toVertexId = indicatorPosition().activeItem!;
-      const toVertex = graph.vertexes[toVertexId]; // vertex;
+      const toVertex = graph.vertexes[toVertexId]; // layoutVertex;
       if (!fromVertex) {
-        showErrorToast("from vertex not found when dropping ");
+        showErrorToast("from Vertex not found when dropping ");
         return;
       }
       const fromVertexLabel = fromVertex.L[0];
@@ -722,8 +443,8 @@ export function useDragDrop(
   };
 
   const clone = () => {
-    let fromVertex = vertex;
-    const toVertex = vertex;
+    let fromVertex = layoutVertex;
+    const toVertex = layoutVertex;
 
     const position = "after";
 
@@ -773,15 +494,15 @@ export function useDragDrop(
       setSelectedComponent({ vertexId: -1 });
       setSelectedColl({ vertexId: -1 });
 
-      setSelectedId(vertex.id);
+      setSelectedId(layoutVertex.id);
       const collVertex = getChildVertex(
         graph,
         ["$0Coll"],
-        graph.vertexes[vertex?.id!],
+        graph.vertexes[layoutVertex?.id!],
       );
       setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
       const componentVertex = getComponentFromLayoutRow(
-        vertex?.id!,
+        layoutVertex?.id!,
         graph,
         setGraph,
       );
@@ -820,17 +541,17 @@ export function useDragDrop(
 
   const deleteLayout = (name: string) => {
     batch(() => {
-      if (selectedId() === vertex.id) {
+      if (selectedId() === layoutVertex.id) {
         setSelectedId(-1);
         setSelectedComponent({ vertexId: -1 });
         setSelectedColl({ vertexId: -1 });
       }
-      if (hoverId() === vertex.id) {
+      if (hoverId() === layoutVertex.id) {
         setHoverId(-1);
       }
     });
 
-    deleteNestedLayout(graph, setGraph, txnId, [vertex]);
+    deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
     if (name) {
       showSuccessToast(`${name} deleted successfully`);
     }
@@ -848,68 +569,4 @@ export function useDragDrop(
     onLayoutItemClick,
     deleteLayout,
   };
-}
-export function setPropertyValueGlobal(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  txnId: number,
-  meta: Vertex,
-  layoutVertex: Vertex,
-  componentVertex: Vertex,
-  value: any,
-  valueSet?: boolean,
-) {
-  return untrack(() => {
-    // find existing row;
-    const rowProps =
-      getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
-    let row = rowProps.find((vertex) => {
-      const name = getChildVertex(graph, ["$0Name"], vertex).vertex;
-      return name?.P.name === meta.P.name;
-    });
-    if (row) {
-      if (valueSet ?? true)
-        mergeVertexProperties(txnId, row.id, graph, setGraph, { value });
-    } else {
-      const propMetaVertex = newVertex("", ["Meta"], {
-        name: "Prop",
-        displayName: "Property",
-      });
-      const componentProps =
-        getChildVertexes(graph, ["$0Prop"], [componentVertex]).vertexes || [];
-      const componentProp = componentProps.find((vertex) => {
-        return vertex.P.name === meta.P.name;
-      });
-      if (componentProp) {
-        const properties = valueSet ?? true ? { value } : {};
-        const addRowResult = addNewRow(
-          txnId,
-          propMetaVertex,
-          graph,
-          setGraph,
-          layoutVertex,
-          properties,
-          false,
-          {} as any,
-        );
-        if (addRowResult.vertexId) {
-          row = graph.vertexes[addRowResult.vertexId];
-          setSelectionValue(
-            txnId,
-            graph.vertexes[addRowResult.vertexId],
-            graph,
-            setGraph,
-            { P: { name: "Name" } } as unknown as Vertex,
-            componentProp.id,
-          );
-        }
-      } else {
-        console.error(
-          `component prop ${meta.P.name} is not found in component ${componentVertex.P.name}. so skipped inserting property.`,
-        );
-      }
-    }
-    // TODO: if reset, delete the row.
-    return row;
-  });
 }
