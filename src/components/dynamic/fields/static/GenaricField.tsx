@@ -25,7 +25,7 @@ import {
 } from "~/lib/graph/get/sync/traverse";
 import { getLastItem } from "~/lib/functions";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
-import { useDragDrop } from "~/lib/pageStore";
+import { useDragDrop } from "~/lib/drag-drop/useDragDrop";
 import { Icon } from "@iconify-icon/solid";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
@@ -40,7 +40,7 @@ import {
   IsPreviewContext,
   SelectedIdContext,
   ShowDrawerContext,
-  TargetIdContext,
+  DragOverTargetIdContext,
 } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
 // Do not specify the items property if you specified the dataSource, and vice versa.
@@ -88,7 +88,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [targetId, setTargetId] = useContext(TargetIdContext);
+  const [dragOverTargetId, _] = useContext(DragOverTargetIdContext);
   const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
   const [isPreview, setIsPreview] = useContext(IsPreviewContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
@@ -96,7 +96,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   );
   const { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
-  const isSelectedTargetId = createSelector(targetId);
+  const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);
   const PropertiesDrawer = (props: { itemId: any }) => {
     return (
@@ -149,7 +149,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           const compProps = Object.assign(componentProps, rowProps);
 
           if (!isPreview()) {
-            if (isSelectedLayoutId(item.id) || isSelectedTargetId(item.id)) {
+            if (isSelectedLayoutId(item.id) || isSelectedDragOverTargetId(item.id)) {
               if (compProps.class) {
                 compProps.class += " b:#3996E1|1.5px|solid r:5";
               } else {

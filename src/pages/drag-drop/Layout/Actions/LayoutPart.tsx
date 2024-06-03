@@ -14,7 +14,7 @@ import {
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { useDragDrop } from "~/lib/pageStore";
+import { useDragDrop } from "~/lib/drag-drop/useDragDrop";
 import { Properties } from "./Properties";
 
 export function LayoutPart(props: {}) {

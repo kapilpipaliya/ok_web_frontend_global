@@ -4,7 +4,7 @@ import {
   HoverIdContext,
   SelectedCollContext,
   SelectedIdContext,
-  TargetIdContext,
+  DragOverTargetIdContext,
   HiddenNodesContext,
   DraggedVertexContext,
   SelectedComponentContext,
@@ -20,7 +20,7 @@ export default function PageDesignerContext(props: any) {
     vertexId: -1,
   });
   const selectedId = createSignal<Id | number>(-1);
-  const targetId = createSignal<Id | number>(-1);
+  const dragOverTargetId = createSignal<Id | number>(-1);
   const hiddenNodes = createSignal<Id[]>([]);
   const showDrawerContext = createSignal(false);
   const selectedComponent = createSignal<{ vertexId: Id | number }>({
@@ -41,7 +41,7 @@ export default function PageDesignerContext(props: any) {
       <HoverIdContext.Provider value={hoverId}>
         <SelectedCollContext.Provider value={selectedColl}>
           <SelectedIdContext.Provider value={selectedId}>
-            <TargetIdContext.Provider value={targetId}>
+            <DragOverTargetIdContext.Provider value={dragOverTargetId}>
               <ShowDrawerContext.Provider value={showDrawerContext}>
                 <HiddenNodesContext.Provider value={hiddenNodes}>
                   <DraggedVertexContext.Provider value={draggedVertices}>
@@ -57,7 +57,7 @@ export default function PageDesignerContext(props: any) {
                   </DraggedVertexContext.Provider>
                 </HiddenNodesContext.Provider>
               </ShowDrawerContext.Provider>
-            </TargetIdContext.Provider>
+            </DragOverTargetIdContext.Provider>
           </SelectedIdContext.Provider>
         </SelectedCollContext.Provider>
       </HoverIdContext.Provider>

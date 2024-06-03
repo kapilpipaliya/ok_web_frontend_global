@@ -17,14 +17,13 @@ import {getChildrenAttrs} from "~/lib/drag-drop/getChildrenAttrs";
 export function componentDrag(
   txnId: number,
   fromVertex: Vertex,
-  parentVertex: Vertex,
+  toParentVertex: Vertex,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   toIndex?: number,
 ) {
   const {showErrorToast} = useToast();
 
-  // handle (toNode === null) case.
   if (fromVertex) {
     const attrMetaVertex = newVertex(getNewGraphId(), [], {
       name: "Attr",
@@ -81,7 +80,7 @@ export function componentDrag(
         return results;
       }
 
-      return processChildren(fromVertex, parentVertex)[0] ?? -1;
+      return processChildren(fromVertex, toParentVertex)[0] ?? -1;
     }
 
     const rowResult = addNewRow(
@@ -89,7 +88,7 @@ export function componentDrag(
       attrMetaVertex,
       graph,
       setGraph,
-      parentVertex,
+      toParentVertex,
       toIndex ? {pos: toIndex} : {},
       false,
       {} as any,

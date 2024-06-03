@@ -16,7 +16,7 @@ export const SelectedCollContext = createContext(
 
 export const SelectedIdContext = createContext(createSignal<Id | number>(-1));
 
-export const TargetIdContext = createContext(createSignal<Id | number>(-1));
+export const DragOverTargetIdContext = createContext(createSignal<Id | number>(-1));
 
 export const ShowDrawerContext = createContext(createSignal<boolean>(false));
 
