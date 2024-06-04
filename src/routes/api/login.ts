@@ -2,6 +2,7 @@ import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
+import { Node } from "neo4j-driver";
 
 // Main POST function
 export async function POST({ request }: APIEvent) {
@@ -20,7 +21,7 @@ export async function POST({ request }: APIEvent) {
 
     const { password: _, ...properties } = user.properties;
     return {
-      id: user.identity.toString(),
+      id: user.elementId,
       properties,
     };
   } catch (error: any) {
@@ -58,7 +59,7 @@ async function authenticateUser(
 
 // Function to authenticate regular user
 function authenticateRegularUser(
-  user: { [key: string]: any },
+  user: Node,
   password: string,
 ) {
   if (user.properties.password !== password) {
@@ -88,7 +89,7 @@ async function authenticateSuperUser(
     }
 
     if (res.properties.password === password) {
-      return result.records[0].get("u");
+      return result.records[0].get("u") as Node;
     }
     throw new Error("Not Authorized Email!");
   } finally {

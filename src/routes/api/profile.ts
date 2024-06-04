@@ -203,7 +203,7 @@ const supportTicket = async (
 
     const data = result.records.map((r) => {
       const data = r.get("n").properties;
-      data.id = r.get("n").identity;
+      data.id = r.get("n").elementId;
       return data;
     });
 

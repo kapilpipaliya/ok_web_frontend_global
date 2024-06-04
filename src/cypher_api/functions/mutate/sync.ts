@@ -96,7 +96,7 @@ async function updateNodeProperties(
 ) {
   const result = await session.run(
     "MATCH (n) WHERE id(n) = $id SET n += $props SET n.updatedAt = localDateTime() RETURN n;",
-    { id: node.identity, props: properties },
+    { id: node.elementId, props: properties },
   );
   return result.records[0].get("n");
 }
@@ -126,12 +126,12 @@ async function addNodeEdges(
   } else if (nodeType === "Comp") {
     const superChildrenVertexes = await getChildrenVertex(
       sessionSource,
-      node.identity,
+      node.elementId,
       "CompProp",
     );
     const userChildrenVertexes = await getChildrenVertex(
       sessionTarget,
-      createdNode.identity,
+      createdNode.elementId,
       "CompProp",
     );
 
@@ -145,7 +145,7 @@ async function addNodeEdges(
           const query =
             "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
           await sessionTarget.run(query, {
-            compPropNodeId: childVertex.get("m").identity,
+            compPropNodeId: childVertex.get("m").elementId,
             props: superProperties,
           });
           isPropertyExist = true;
@@ -155,7 +155,7 @@ async function addNodeEdges(
         const query =
           "MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;";
         await sessionTarget.run(query, {
-          compNodeId: createdNode.identity,
+          compNodeId: createdNode.elementId,
           props: superProperties,
         });
       }
@@ -166,10 +166,10 @@ async function addNodeEdges(
 }
 
 // Function to retrieve child vertices of a node based on a specific edge type.
-const getChildrenVertex = (session: any, identity: any, edgeType: any) => {
+const getChildrenVertex = (session: any, elementId: any, edgeType: any) => {
   return session.run(
     `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;`,
-    { id: identity },
+    { id: elementId },
   );
 };
 

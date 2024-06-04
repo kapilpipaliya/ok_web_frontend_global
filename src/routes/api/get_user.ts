@@ -3,6 +3,7 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
 import type { Node } from "neo4j-driver";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 // Main POST function
 export async function GET({ request }: APIEvent) {
@@ -25,10 +26,10 @@ export async function GET({ request }: APIEvent) {
       return { error: `Not Authorized Email ${email}` };
     }
     const user = result.records[0].get("u") as Node;
-    const { password, ...properties } = user.properties;
+    const { password, ...properties } = convertNodeToJson(user).P;
 
     return {
-      id: user.identity.toString(),
+      id: user.elementId,
       properties,
     };
   } catch (error: any) {

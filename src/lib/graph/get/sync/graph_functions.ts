@@ -12,10 +12,10 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 export function compareId(id1: any, id2: any) {
   if (typeof id1 === "object") {
-    id1 = id1.toString();
+    id1 = id1;
   }
   if (typeof id2 === "object") {
-    id2 = id2.toString();
+    id2 = id2;
   }
   return id1 === id2;
 }

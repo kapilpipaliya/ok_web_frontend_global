@@ -15,7 +15,7 @@ import {
   transactions,
 } from "~/lib/graph/transaction";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
 import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
@@ -146,13 +146,15 @@ const DataGrid = (props: DataGridProps) => {
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(formNew.attributes);
     // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
+    const expression = expressionString({
+      coll: coll,
+      skip: skip,
+      limit: limit,
+      filter: "",
+    })
+  
     const result = await getDataMGCall({
-      expression: expressionString({
-        coll: coll,
-        skip: skip,
-        limit: limit,
-        filter: "",
-      }),
+      expression,
       incoming,
       outgoing,
     });
@@ -164,7 +166,7 @@ const DataGrid = (props: DataGridProps) => {
       setIsShowLoadMore(true);
     }
     setGraphData(graph, setGraph, result.graph);
-    const resultData = Object.values(result.graph.vertexes);
+    const resultData = Object.values(result.graph.vertexes as Vertex[]).filter(v => v.L[0] === coll);
     const nodes = tableStore.data
       ? [...tableStore.data, ...resultData]
       : resultData;

@@ -11,7 +11,7 @@ export async function getDriverWithPort(
     drivers[port] = createDriver(
       `bolt://localhost:${port}`,
       username && password ? auth.basic(username, password) : undefined,
-      undefined,
+      { disableLosslessIntegers: true }, // undefined
     );
   }
 

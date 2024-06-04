@@ -30,27 +30,21 @@ export function expressionString(params: {
   filter?: string;
   custom?: string;
 }): string {
-  const [field, rest] = splitProps(params, [
-    "coll",
-    "skip",
-    "limit",
-    "filter",
-    "custom",
-  ]);
-  if (field.custom) {
-    return field.custom;
+
+  if (params.custom) {
+    return params.custom;
   }
 
   let dynamicString = "";
 
-  if (field.coll) {
-    dynamicString += `g:'${field.coll}`;
-    const options = [];
+  if (params.coll) {
+    dynamicString += `g:'${params.coll}`;
+    const options = [] as string[];
 
-    if (field.filter) options.push(field.filter);
-    if (field.skip !== undefined) options.push(`skip=${field.skip}`);
-    if (field.limit !== undefined && field.limit !== 0)
-      options.push(`limit=${field.limit}`);
+    if (params.filter) options.push(params.filter);
+    if (params.skip) options.push(`skip=${params.skip}`);
+    if (params.limit && params.limit !== 0)
+      options.push(`limit=${params.limit}`);
 
     if (options.length > 0) {
       dynamicString += `[${options.join(" ")}]`;
