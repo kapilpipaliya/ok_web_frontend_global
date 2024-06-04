@@ -6,7 +6,6 @@ import {
   DragOverTargetIdContext,
   HoverIdContext,
   IndicatorPositionContext,
-  LoadingContext,
   PropertiesVertexIdContext,
   SelectedCollContext,
   SelectedComponentContext,
@@ -35,7 +34,6 @@ export function useDragDrop(
 ) {
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [, setSelectedColl] = useContext(SelectedCollContext);
-  const [, setLoadingSite] = useContext(LoadingContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
@@ -142,8 +140,6 @@ export function useDragDrop(
 
   const handleDrop = async (e: DragEvent) => {
     e.stopPropagation();
-    setLoadingSite(true);
-    //new Promise((resolve) => setTimeout(resolve, 2000));
     for (const vertex of draggedVertex()) {
       let fromVertex = vertex;
 
@@ -153,11 +149,8 @@ export function useDragDrop(
         showErrorToast("from Vertex not found when dropping ");
         return;
       }
-      const fromVertexLabel = fromVertex.L[0];
 
-      // When Page is dropped, fetch its layout and add to the current place
-      if (fromVertexLabel === "Page") {
-        // load page data:
+      if (fromVertex.L[0] === "Page") {
         await loadPageData(graph, setGraph, fromVertex, showErrorToast)
       }
 
@@ -291,7 +284,6 @@ export function useDragDrop(
     setDraggedVertex([]);
     setIndicatorPosition({ activeItem: null, position: null });
     setDragOverTargetId(-1);
-    setLoadingSite(false);
   }
 
   return {

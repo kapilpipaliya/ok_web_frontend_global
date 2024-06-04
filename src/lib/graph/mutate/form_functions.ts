@@ -285,7 +285,7 @@ export function createMeta(
 export function createForm(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
-  txnId: Id,
+  txnId: number,
   ws: ServerEventsDispatcher,
   label: string,
   properties?: {
@@ -519,7 +519,7 @@ export function onChangeHandler(
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
   if (!changedFieldAttribute.P.props?.onchange) return;
-  const isNew = formVertex.id < 0;
+  const isNew = typeof formVertex.id === "number" && formVertex.id < 0;
   try {
     let args = JSON.parse(changedFieldAttribute.P.props.onchange);
     if (Array.isArray(args)) {

@@ -99,160 +99,6 @@ export function GenericField(
     ];
   });
 
-  const Form = () => {
-    const { Ws } = useContext(WsContext);
-    const { showLoadingToast } = useToast();
-    const navigate = useNavigate();
-
-    const cleanUpConfig = {} as { [key: string]: any };
-    const txnId = getNewTxnId(graph, setGraph);
-    const [formData, setFormData] = createStore({
-      txnId,
-      cleanUpConfig: () => cleanUpConfig,
-    } as {
-      cleanUpConfig: () => { [key: string]: any };
-      txnId: number;
-      formMeta: Vertex;
-      formData: Vertex;
-      tabs: string[];
-      groupByTabsAndGroup: {
-        [tab: string]: {
-          [group: string]: Vertex[];
-        };
-      };
-    });
-    const collectionVertex = createMemo(() => {
-      return PageRenderUtils.getCollection(graph, getLastItem(parentItems, 1));
-    });
-    if (!collectionVertex()) return "No Collection Found";
-
-    let dataVertex: Vertex;
-    if (!field.data?.id) {
-      const createResult = createForm(
-        graph,
-        setGraph,
-        txnId,
-        Ws,
-        props.form[IdAttr],
-      );
-      if (createResult.error) return createResult.error;
-      dataVertex = createResult.vertex!;
-    } else {
-      const loadResult = loadForm(graph, props.id);
-      if (loadResult.error) return loadResult.error;
-      dataVertex = loadResult.vertex!;
-    }
-
-    const metaVertexResult = untrack(() =>
-      createMeta(props.form, graph, setGraph),
-    );
-
-    if (metaVertexResult.error) {
-      console.error(metaVertexResult.error);
-      return metaVertexResult.error;
-    }
-
-    // props.config[1]?.("record", record);
-
-    const [divRef, setDivRef] = createSignal<HTMLDivElement>();
-
-    // let validationGroup: dxValidationGroup;
-    // letter if we need a record, write a solution.
-    // but we should not need to access record,
-
-    onCleanup(() => {
-      for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
-        revertTransaction(rowMetaTxnId);
-    });
-
-    const onSubmit = async () => {
-      const data = commitTxn(txnId, Ws);
-      await showLoadingToast({
-        promise: submitDataCall(data, txnId),
-        loadMessage: "Submitting Data...",
-        successMessage: "Data submitted successfully",
-        onSuccess: (value) => {
-          setTimeout(() => navigate(-1), 0);
-        },
-      });
-      // todo fix validations
-      // const result = validationGroup.validate();
-      // if (result.isValid) {
-      //     console.log("valid");
-      //     // !!!TODO!!! Handle Error Received From server when commit
-      //     if (!isRealTime) {
-      //         commitTxn(txnId, Ws);
-      //     }
-      //     // currently we are navigating back.
-      //     navigate(-1);
-      // } else {
-      //     alert("please fix all errors");
-      // }
-    };
-
-    const onCancel = () => {
-      revertTransaction(txnId);
-      setTimeout(() => navigate(-1));
-    };
-
-    return (
-      <div
-        ref={(el) => {
-          setDivRef(el);
-          // validationGroup = new dxValidationGroup(divRef()!);
-        }}
-      >
-        <Show when={divRef()}>
-          <FormContext.Provider value={formData}>
-            <PageItemRender metaVertex={field.meta} />
-            {/* @ts-ignore */}
-            <div />
-
-            <div class="flex gap:1">
-              <Show
-                when={props.submitButton}
-                fallback={
-                  <GenericField
-                    // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-                    meta={
-                      {
-                        P: {
-                          component: "Button",
-                          props: {
-                            children: "Submit",
-                            onClick: () => onSubmit,
-                          },
-                        },
-                      } as any
-                    }
-                  />
-                }
-              >
-                {props.submitButton}
-              </Show>
-
-              <GenericField
-                meta={
-                  {
-                    P: {
-                      component: "Button",
-                      props: {
-                        onClick: () => onCancel,
-                        variant: "outlined",
-                        class: "border-color:#FF0000 color:#FF0000",
-                        children: "Cancel",
-                      },
-                    },
-                  } as any
-                }
-              />
-            </div>
-          </FormContext.Provider>
-        </Show>
-      </div>
-    );
-  };
-
   const repeaterContext = useContext(RepeaterContext);
 
   return (
@@ -349,7 +195,7 @@ export function GenericField(
 
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView number={1} vertex={field.data} />
+          <PageView vertex={field.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
@@ -490,3 +336,111 @@ export function GenericField(
     </Show>
   );
 }
+function FormWrapper(props: ComponentProps & {
+  submitButton: any
+}) {
+  const { Ws } = useContext(WsContext);
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const { showLoadingToast } = useToast();
+  const navigate = useNavigate();
+
+  const cleanUpConfig = {} as { [key: string]: any; };
+  const txnId = getNewTxnId(graph, setGraph);
+  const [formData, setFormData] = createStore({
+    txnId,
+    cleanUpConfig: () => cleanUpConfig,
+  } as {
+    cleanUpConfig: () => { [key: string]: any; };
+    txnId: number;
+    formMeta: Vertex;
+    formData: Vertex;
+    tabs: string[];
+    groupByTabsAndGroup: {
+      [tab: string]: {
+        [group: string]: Vertex[];
+      };
+    };
+  });
+
+  let dataVertex: Vertex;
+  // if (!props.data?.id) {
+  const createResult = createForm(
+    graph,
+    setGraph,
+    txnId,
+    Ws,
+    "FixFormLabel"
+  );
+  if (createResult.error) return createResult.error;
+  dataVertex = createResult.vertex!;
+  // } else {
+  //   const loadResult = loadForm(graph, props.id);
+  //   if (loadResult.error) return loadResult.error;
+  //   dataVertex = loadResult.vertex!;
+  // }
+
+
+  // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
+
+  const onSubmit = async () => {
+    const data = commitTxn(txnId, Ws);
+    await showLoadingToast({
+      promise: submitDataCall(data, txnId),
+      loadMessage: "Submitting Data...",
+      successMessage: "Data submitted successfully",
+      onSuccess: (value) => {
+        setTimeout(() => navigate(-1), 0);
+      },
+    });
+  };
+
+  const onCancel = () => {
+    revertTransaction(txnId);
+    setTimeout(() => navigate(-1));
+  };
+
+  return (
+    <div
+      ref={(el) => {
+        // setDivRef(el);
+      }}
+    >
+      <FormContext.Provider value={formData}>
+        <PageItemRender metaVertex={props.meta} />
+        <div />
+
+        <div class="flex gap:1">
+          <Show
+            when={props.submitButton}
+            fallback={<GenericField
+              meta={{
+                P: {
+                  component: "Button",
+                  props: {
+                    children: "Submit",
+                    onClick: () => onSubmit,
+                  },
+                },
+              } as any} />}
+          >
+            {props.submitButton}
+          </Show>
+
+          <GenericField
+            meta={{
+              P: {
+                component: "Button",
+                props: {
+                  onClick: () => onCancel,
+                  variant: "outlined",
+                  class: "border-color:#FF0000 color:#FF0000",
+                  children: "Cancel",
+                },
+              },
+            } as any} />
+        </div>
+      </FormContext.Provider>
+    </div>
+  );
+}
+
