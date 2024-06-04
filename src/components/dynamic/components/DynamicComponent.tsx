@@ -12,7 +12,6 @@ export const genericInputComponents = [
   "ColorBox",
   "FormSubmit",
   "FormCancel",
-  "Form",
   "FileUploader",
   "HtmlEditor",
   "NumberBox",

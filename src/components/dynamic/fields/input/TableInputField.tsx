@@ -194,9 +194,8 @@ export function TableInputField(
       setDragFromIndex(null);
       setDragToIndex(null);
     };
-    const metaVertices = new Map();
 
-    const getMetaVertex = (columnId: any) => {
+    const getMetaVertex = (columnId: any, metaVertices = new Map()) => {
       if (!metaVertices.has(columnId)) {
         const instRes = instResult();
         const rowId = instRes?.P?.rows[columnId];
@@ -209,8 +208,7 @@ export function TableInputField(
       return metaVertices.get(columnId);
     };
 
-    const components = new Map();
-    const getComponent = (columnId: any) => {
+    const getComponent = (columnId: any, components = new Map()) => {
       if (!components.has(columnId)) {
         const metaVertex = getMetaVertex(columnId);
         if (metaVertex.P.component.includes("-")) {
@@ -269,38 +267,38 @@ export function TableInputField(
       return (
         <For each={rowColumnsMetaAttrs()}>
           {(column) => {
+
             const metaVertex = createMemo(() => getMetaVertex(column.id));
 
-            const component = getComponent(column.id);
+            const component = createMemo(() => getComponent(column.id));
 
             // if mergeProps not keep reactivity use memo
             createEffect(() => {
               addMeta(graph, setGraph, metaVertex(), p.joinVertex);
             });
             const DefaultValue = () => (
-              <>
-                {metaVertex().P.props?.defaultValue &&
-                  getSelectionOptions(
-                    graph,
-                    setGraph,
-                    [p.joinVertex],
-                    metaVertex().P.props.defaultValue,
-                  ).vertexes}
-              </>
+              <Show when={metaVertex().P.props?.defaultValue}>
+                {getSelectionOptions(
+                  graph,
+                  setGraph,
+                  [p.joinVertex],
+                  metaVertex().P.props.defaultValue,
+                ).vertexes}
+              </Show>
             );
             const Content = () => {
               return (
                 <>
-                  <Show when={component === "Error"}>Error</Show>
+                  <Show when={component() === "Error"}>Error</Show>
                   <DynamicComponent
                     title={toTitle(
                       column.P.displayName || column.P[IdAttr] || "",
                     )}
                     isShowAdd={false}
-                    component={component}
+                    component={component()}
                     // When we have a Table we pass original Table Meta Vertex
                     meta={
-                      component === "Table2" || component === "Table"
+                      component() === "Table2" || component() === "Table"
                         ? graph.vertexes[metaVertex().P.templateId]
                         : metaVertex()
                     }
@@ -320,7 +318,7 @@ export function TableInputField(
                   <td>
                     <div
                       class={`flex ai:center jc:center ${(() => {
-                        const comp = component;
+                        const comp = component();
                         switch (comp) {
                           case "TextBox":
                             return "min-w:150px";
@@ -339,12 +337,12 @@ export function TableInputField(
                     </div>
                   </td>
                 </Match>
-                <Match when={component === "Table2"}>
+                <Match when={component() === "Table2"}>
                   <td>
                     <Show when={!disabled()}>
                       <div
                         class={`flex ai:center jc:center ${(() => {
-                          const comp = component;
+                          const comp = component();
                           switch (comp) {
                             case "TextBox":
                               return "min-w:150px";
@@ -368,7 +366,7 @@ export function TableInputField(
                 <Match when={true}>
                   <td
                     class={`padding:1px ${(() => {
-                      const comp = component;
+                      const comp = component();
                       switch (comp) {
                         case "TextBox":
                           return "min-w:150px";
@@ -589,7 +587,6 @@ export function TableInputField(
                     width: "max-content",
                   }}
                 >
-                  <td />
                   <td>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => {
@@ -612,8 +609,8 @@ export function TableInputField(
                             >
                               {toTitle(
                                 attribute.P.displayName ||
-                                  attribute.P[IdAttr] ||
-                                  "",
+                                attribute.P[IdAttr] ||
+                                "",
                               )}
                             </th>
                           </Match>
@@ -655,79 +652,3 @@ export function TableInputField(
     </Switch>
   );
 }
-// const DragHandle = (): JSX.Element => {
-//   return (
-//     <span style={{ cursor: "grab" }}>
-//       <svg width="16" height="16" fill="currentColor" class="bi bi-grip-horizontal" viewBox="0 0 16 16">
-//         <path d="M2 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm4 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-//       </svg>
-//     </span>
-//   );
-// };
-
-// interface Row {
-//   id: number;
-//   firstName: string;
-//   lastName: string;
-//   age: number;
-//   visits: number;
-//   status: string;
-//   progress: number;
-// }
-
-// const SortableTable = () => {
-//   const [rows, setRows] = createSignal<Row[]>([
-//     { id: 1, firstName: "request", lastName: "cellar", age: 15, visits: 7, status: "relationship", progress: 88 },
-//     { id: 2, firstName: "sister", lastName: "lab", age: 23, visits: 95, status: "complicated", progress: 72 },
-//     { id: 3, firstName: "cellar", lastName: "letter", age: 13, visits: 12, status: "single", progress: 34 },
-//     { id: 4, firstName: "wish", lastName: "confusion", age: 26, visits: 67, status: "relationship", progress: 17 },
-//   ]);
-
-//   return (
-//     <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
-//       <thead>
-//         <tr>
-//           <th style="width: 50px; padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Drag</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">First Name</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Last Name</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Age</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Visits</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Status</th>
-//           <th style="padding: 8px; border: 1px solid #ddd; background-color: #f2f2f2;">Progress</th>
-//         </tr>
-//       </thead>
-//       <tbody>
-//         <For each={rows()}>
-//           {(row, index) => (
-//             <tr
-//               draggable={true}
-//               onDragStart={() => handleDragStart(index())}
-//               onDragOver={handleDragOver}
-//               onDragEnter={() => handleDragEnter(index())}
-
-//               onDrop={handleDrop}
-//               style={{
-//                 cursor: "grab",
-//                 'background-color': draggingIndex() === index() ? "#e0e0e0" : targetIndex() === index() ? "#f0f0f0" : "white",
-//                 transition: "background-color 0.2s ease",
-//                 'border-bottom': targetIndex() === index() ? "2px solid #007bff" : "1px solid #ddd",
-//               }}
-//             >
-//               <td style="padding: 8px; border: 1px solid #ddd;">
-//                 <DragHandle />
-//               </td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.firstName}</td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.lastName}</td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.age}</td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.visits}</td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.status}</td>
-//               <td style="padding: 8px; border: 1px solid #ddd;">{row.progress}</td>
-//             </tr>
-//           )}
-//         </For>
-//       </tbody>
-//     </table>
-//   );
-// };
-
-// export default SortableTable;

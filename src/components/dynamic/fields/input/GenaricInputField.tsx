@@ -49,9 +49,6 @@ export function GenericInputField(
         fallback={getTextColumnValue(field.data?.P[field.meta.P[IdAttr]])}
       >
         <Switch>
-          <Match when={component() === "Form"}>
-            <PageItemRender metaVertex={field.meta} />
-          </Match>
           <Match
             when={component() === "FormSubmit" || component() === "FormCancel"}
           >

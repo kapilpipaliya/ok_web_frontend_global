@@ -323,6 +323,9 @@ export function GenericField(
         <Match when={component() === "ProgressBar"}>
           <Progress {...field.meta.P.props} />
         </Match>
+        <Match when={component() === "Form"}>
+          <FormWrapper meta={field.meta} />
+        </Match>
         <Match when={true}>
           <Dynamic
             component={field.meta.P.props?.as || "div"}
@@ -337,7 +340,7 @@ export function GenericField(
   );
 }
 function FormWrapper(props: ComponentProps & {
-  submitButton: any
+  submitButton?: any
 }) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -406,7 +409,9 @@ function FormWrapper(props: ComponentProps & {
       }}
     >
       <FormContext.Provider value={formData}>
-        <PageItemRender metaVertex={props.meta} />
+        <div class="">
+          <PageItemRender metaVertex={props.meta} />
+        </div>
         <div />
 
         <div class="flex gap:1">

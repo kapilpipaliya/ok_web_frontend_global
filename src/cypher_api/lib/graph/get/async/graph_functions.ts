@@ -245,7 +245,7 @@ export async function getFormApiFromFormMGCall(
     return { error: attrsResult.error };
   }
 
-  return {
+  return JSON.parse(JSON.stringify({
     error: "",
     form: {
       attributes: attrsResult.attrs!,
@@ -256,7 +256,7 @@ export async function getFormApiFromFormMGCall(
       // @ts-ignore
       collection: coll.P[IdAttr],
     },
-  };
+  }));
 }
 
 // TODO: when meta changed realtime its not updating.

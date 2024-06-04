@@ -148,7 +148,8 @@ async function findVertexsMGCallId(
     label,
     skip,
     limit,
-  }: { id?: string; label?: string; skip?: number; limit?: number },
+    name
+  }: { id?: string; label?: string; skip?: number; limit?: number, name?: string },
   {
     nodes,
     relationships,
@@ -158,28 +159,43 @@ async function findVertexsMGCallId(
   } = {},
 ) {
   let query: string | undefined;
-  let params = {};
+  let params = {} as {name?: string, id: any};
 
   if (id) {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
-    params = { id: int(id) };
+    params.id = parseInt(id, 10);
   } else if (label) {
-    query = `MATCH (n:${label}) RETURN n`;
+    if (name) {
+      query = `MATCH (n:${label}) WHERE n.name = $name RETURN n`;
+      params.name = name;
+    }else{
+      query = `MATCH (n:${label}) RETURN n`;
+    }
   }
-  if (skip || limit) {
-    query += ` SKIP ${skip} LIMIT ${limit}`;
+  
+  if (name || skip || limit) {
+
+    if (skip) {
+      query += ` SKIP ${skip}`;
+    }
+
+    if (limit) {
+      query += ` LIMIT ${limit}`;
+    }
   }
   if (!query) {
     throw new Error("Either 'id' or 'label' must be provided.");
   }
+  
   const result = await session.run(query, params);
-  return result.records.map((record) => {
+  const vertexes = result.records.map((record) => {
     const vertex = convertNodeToJson(record.get("n"));
     if (nodes) {
       nodes[vertex.id] = vertex;
     }
     return vertex;
-  });
+  })
+  return vertexes;
 }
 
 export async function evalGlobalColl(
@@ -198,25 +214,15 @@ export async function evalGlobalColl(
   const session = (await getDriver(subDomain)).session();
 
   try {
-    if (filter) {
-      const vertexes = await findVertexsMGCallId(
-        session,
-        { label: type, skip, limit },
-        context,
-      );
-      const filteredVertexes = vertexes.filter(
-        (vertex) => vertex.P[IdAttr] === filter,
-      );
-
-      return filteredVertexes;
-    }
-    return await findVertexsMGCallId(
+    const result = await findVertexsMGCallId(
       session,
-      { label: edgeType, skip, limit },
+      { label: type ?? edgeType, skip, limit, name: filter },
       context,
     );
+    
+    return result
   } catch (error: any) {
-    throw new Response(error.message, { status: 500 });
+    throw new Error(error.message);
   } finally {
     await session.close();
   }
@@ -236,7 +242,7 @@ export async function evalVertexById(
   try {
     return await findVertexsMGCallId(session, { id }, context);
   } catch (error: any) {
-    throw new Response(error.message, { status: 500 });
+    throw new Error(error.message);
   } finally {
     await session.close();
   }

@@ -267,13 +267,13 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     <Popover.Content class="popover__content">
                       <Show when={isSelectedLayoutId(item.id)}>
                         <span class="position:relative  flex justify-content:flex-end ">
-                          <div class="position:absolute @fade|.3s z:50">
-                            <div class="flex bg:rgb(37,99,235)  border-radius:0.25rem  z:50">
-                              <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                          <div class="@fade|.3s z:50" style={{ 'border-radius': "0.25rem", position:"absolute" ,'background-color': "rgb(37,99,235)",color:"rgb(255,255,255)",padding:"3px" }}>
+                            <div style={{'z-index':50,display:"flex",gap:"3px",margin:'2px 6px'}}>
+                              <div class="mr:0.5rem f:0.875rem lh:1.25rem" style={{display:"flex"}}>
                                 <PropertiesDrawer itemId={item.id} />
                               </div>
                               <Tooltip content={"Name"} nowrap>
-                                <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                                <div style={{display:"flex","font-size":"0.875rem","line-height":"1.25rem","margin-right":"4px"}}>
                                   {getComponent()}
                                 </div>
                               </Tooltip>
@@ -286,7 +286,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                   }
                                   height={20}
                                   width={20}
-                                  class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                  class="cursor:pointer flex"
                                 />
                               </Tooltip>
                               <Tooltip content={"Parent"} nowrap>
@@ -294,7 +294,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                   icon={"mdi:arrow-up"}
                                   height={20}
                                   width={20}
-                                  class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                  class="cursor:pointer  flex "
                                   onClick={(e) => {
                                     const parentResult = getParentVertex(
                                       ["Attr"],
@@ -314,7 +314,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                   icon={"mage:copy"}
                                   height={20}
                                   width={20}
-                                  class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                  class="cursor:pointer  flex "
                                   onClick={clone}
                                 />
                               </Tooltip>
@@ -324,7 +324,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                   icon={"fluent:delete-20-regular"}
                                   height={20}
                                   width={20}
-                                  class="cursor:pointer  m:0.25rem color:rgb(255,255,255) "
+                                  class="cursor:pointer  flex "
                                 />
                               </Tooltip>
                             </div>
@@ -341,10 +341,10 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                           <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
                             <Icon
                               icon={iconMap[getComponent()]}
-                              class="color:rgb(255,255,255) "
+                              class=" flex"
                             />
                             <Tooltip content={"Name"} nowrap>
-                              <div class="m:0.25rem mr:0.5rem color:rgb(255,255,255)  f:0.875rem lh:1.25rem">
+                              <div class="mr:0.5rem   f:0.875rem lh:1.25rem">
                                 {getComponent()}
                               </div>
                             </Tooltip>

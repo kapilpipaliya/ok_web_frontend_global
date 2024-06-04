@@ -13,7 +13,7 @@ export async function POST({ request }: APIEvent) {
     return { message: "Saved Successfully", result };
   } catch (error) {
     // await session.close();
-    console.error("Server error Failed to login:", error);
+    console.error("Failed to save data:", error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

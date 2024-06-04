@@ -248,7 +248,7 @@ const TableActions = (props: {
   );
 };
 
-export function Table(props: any) {
+export function Table(props: {headers: number; children: any}) {
   return (
     <div
       class="overflow:visible rel r:10"
@@ -275,12 +275,12 @@ export function TableHeadCell(props: any) {
   );
 }
 
-export function TableBodyCell(props: any) {
+export function TableBodyCell(props: { index?: number; children: any; class?: string}) {
   return (
     <div
       style="padding: 7px; align-content: center;"
       class={`h:50 text:center bg:${
-        props.index % 2 === 0 ? "white" : "#3478cc0d"
+        props.index ? props.index % 2 === 0 ? "white" : "#3478cc0d":''
       } @fade|.4s ${props.class}`}
     >
       {props.children}

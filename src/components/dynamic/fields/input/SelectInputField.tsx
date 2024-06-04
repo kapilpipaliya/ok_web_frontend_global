@@ -151,7 +151,8 @@ export function SelectInputField(
         collection,
       );
 
-      if (!res.error) {
+      // @ts-ignore
+      if (!res.error && res.statusCode != 500) {
         setGraphData(graph, setGraph, res.graph);
         setOptions(
           getSelectionOptions(

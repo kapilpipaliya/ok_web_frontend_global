@@ -187,6 +187,7 @@ export function ComponentPart() {
             setGraph,
             pageConfig.formData.txnId,
             draggedVertex()[0],
+            pageConfig.formData || {},
             selectedId() !== -1
               ? selectedId()
               : pageConfig.formData.formData.id,

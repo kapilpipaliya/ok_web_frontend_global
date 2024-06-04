@@ -41,10 +41,10 @@ function isProperEdgeFormat(edge: Partial<Edge>): string {
   if (edge.T === undefined || typeof edge.T !== "string") {
     return "edge must contain T (type) and it must be a string.";
   }
-  if (edge.S === undefined || typeof edge.S !== "number") {
+  if (edge.S === undefined) { //  || typeof edge.S !== "number"
     return "edge must contain S (start) and it must be an integer.";
   }
-  if (edge.E === undefined || typeof edge.E !== "number") {
+  if (edge.E === undefined) { //  || typeof edge.E !== "number"
     return "edge must contain E (end) and it must be an integer.";
   }
   if (
@@ -240,7 +240,7 @@ export async function mutateData(
         }
 
         const query =
-          "MATCH (n) WHERE ID(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
+          "MATCH (n) WHERE id(n) = $id SET n = $properties SET n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -264,7 +264,7 @@ export async function mutateData(
         }
 
         const query =
-          "MATCH (n) WHERE ID(n) = $id SET n += $properties n.updatedAt = localDateTime() RETURN n";
+          "MATCH (n) WHERE id(n) = $id SET n += $properties, n.updatedAt = localDateTime() RETURN n";
         try {
           const result = await tx.run(query, {
             id: int(id),
@@ -287,7 +287,7 @@ export async function mutateData(
           clientToServerVertexIdMap.get(mutationObject.deleteVertex.id) ||
           mutationObject.deleteVertex.id;
 
-        const query = "MATCH (n) WHERE ID(n) = $id DELETE n";
+        const query = "MATCH (n) WHERE id(n) = $id DELETE n";
 
         try {
           await tx.run(query, { id: int(id) });
@@ -485,7 +485,7 @@ export async function mutateData(
         const type = mutationObject.deleteEdge.T;
         const query = `match (n1)-[r:${type}]->(n2)
                     where id(n1) = $startId and id(n2) = $endId and id(r) = $id 
-                    delete r`;
+                    delete r;`;
 
         try {
           const result = await tx.run(query, {

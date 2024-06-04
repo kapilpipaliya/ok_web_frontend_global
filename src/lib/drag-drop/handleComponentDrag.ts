@@ -12,9 +12,14 @@ export async function handleComponentDrag(graph: GraphInterface, setGraph: SetSt
     fromVertex,
     graph,
   );
+  
+  const isParentIsLabel = toParentVertex.P.props?.label === "Label";
   if (
-    labelParentVertex?.vertex?.P.name === "Form" ||
-    labelParentVertex?.vertex?.P.name === "Join"
+    !isParentIsLabel &&
+    (fromVertex.P.name !== "Form" &&
+    fromVertex.P.name !== "Label") &&
+    (labelParentVertex?.vertex?.P.name === "Form" ||
+    labelParentVertex?.vertex?.P.name === "Join")
   ) {
     // add label at
     const labelVertex = findVertexByLabelAndUniqueId(

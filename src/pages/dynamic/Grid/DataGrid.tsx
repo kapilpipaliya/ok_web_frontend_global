@@ -151,7 +151,7 @@ const DataGrid = (props: DataGridProps) => {
         coll: coll,
         skip: skip,
         limit: limit,
-        filter: "asd",
+        filter: "",
       }),
       incoming,
       outgoing,
