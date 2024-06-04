@@ -1,10 +1,10 @@
 import { createSignal } from "solid-js";
 import type { Store, SetStoreFunction } from "solid-js/store";
-import { setParentValue } from "~/components/dynamic/fields/input/SelectInputField";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import {componentDrag} from "~/lib/drag-drop/componentDrag";
 import {getChildrenAttrs} from "~/lib/drag-drop/getChildrenAttrs";
+import {setParentValue} from "~/lib/graph/mutate/setParentValue";
 
 export function useExpansion(defaultValue = true) {
   const [expanded, setExpanded] = createSignal(defaultValue);

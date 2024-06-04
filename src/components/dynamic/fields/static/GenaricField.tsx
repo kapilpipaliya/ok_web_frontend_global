@@ -44,7 +44,7 @@ import {
 } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
 // Do not specify the items property if you specified the dataSource, and vice versa.
-// It's best to use dataSource but we are using items for simplicity.
+// It's best to use dataSource, but we are using items for simplicity.
 
 export const PageRenderContext = createContext([] as Vertex[]);
 export const RepeaterContext = createContext([] as Vertex[]); // DataVertex[]
@@ -249,7 +249,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onLayoutItemClick();
+                  onLayoutItemClick(item);
                 }}
                 onDragOver={handleDragOver}
                 onDragEnter={handleDragEnter}
@@ -305,8 +305,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                       return;
                                     }
 
-                                    // todo: handle not work select parent
-                                    setSelectedId(parentResult.vertex?.id);
+                                    onLayoutItemClick(parentResult.vertex!);
                                   }}
                                 />
                               </Tooltip>

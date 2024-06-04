@@ -23,7 +23,6 @@ import {
   getSelectionOptions,
 } from "../get/sync/traverse";
 import { removeUndefinedProperties } from "~/lib/functions";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import {
   componentProps,
@@ -49,6 +48,7 @@ import {
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 import { AttrsTableData } from "~/lib/api";
+import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 
 export function cloneRowProps(
   graph: Store<GraphInterface>,
@@ -204,8 +204,8 @@ export function rowMetaInitialize(
     });
     return metaTxnId;
   }
-  const rows = klona(rowMetaAttrInst.vertex?.P.rows);
-  const metaTxnId = rowMetaAttrInst.vertex?.P.metaTxnId;
+  const rows = klona(rowMetaAttrInst.vertex!.P.rows);
+  const metaTxnId = rowMetaAttrInst.vertex!.P.metaTxnId;
   batch(() => {
     for (const attrColumn of tableColumnsTemplate) {
       if (rows[attrColumn.id]) {
@@ -215,7 +215,7 @@ export function rowMetaInitialize(
         graph,
         setGraph,
         metaTxnId,
-        graph.vertexes[rowMetaAttrInst.vertex?.id],
+        graph.vertexes[rowMetaAttrInst.vertex!.id],
         "MetaAttr",
       );
       if (AttrRowResult.error) {
@@ -239,7 +239,7 @@ export function rowMetaInitialize(
     }
     mergeVertexProperties(
       metaTxnId,
-      rowMetaAttrInst.vertex?.id,
+      rowMetaAttrInst.vertex!.id,
       graph,
       setGraph,
       { rows },

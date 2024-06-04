@@ -27,16 +27,17 @@ import { getToEdge } from "../get/sync/traverse";
 import { A, D } from "@mobily/ts-belt";
 import {
   isSimpleCollection,
-  setParentValue,
+
 } from "~/components/dynamic/fields/input/SelectInputField";
 import { parse } from "yaml";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { AttrsTableData } from "~/lib/api";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/custom/Toast";
+import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
+import {setParentValue} from "~/lib/graph/mutate/setParentValue";
 
 export function updateImportRecord(
   graph: Store<GraphInterface>,

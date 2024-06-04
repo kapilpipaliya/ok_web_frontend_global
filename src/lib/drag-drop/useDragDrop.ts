@@ -211,7 +211,7 @@ export function useDragDrop(
     sortChildren();
   };
 
-  const onLayoutItemClick = () => {
+  const onLayoutItemClick = (layoutVertex: Vertex) => {
     batch(() => {
       setSelectedId(-1);
       setSelectedComponent({ vertexId: -1 });

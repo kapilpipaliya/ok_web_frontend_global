@@ -4,11 +4,11 @@ import { useToast } from "~/components/custom/Toast";
 import { newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import { addNewRow, cloneRowProps } from "~/lib/graph/mutate/form_functions";
-import { setSelectionValue } from "~/components/dynamic/fields/static/SelectionUtils";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getChildVertex, getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { getStringComponent } from "~/lib/graph/get/sync/graph_functions";
 import { getChildrenAttrs } from "~/lib/drag-drop/getChildrenAttrs";
+import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 
 // @Note:
 // From Component To Layout drag:

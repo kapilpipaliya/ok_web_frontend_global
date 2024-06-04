@@ -90,7 +90,7 @@ export function LayoutPart(props: {}) {
             "b:1px":
               isActiveItem() && indicatorPosition().position === "center",
           }}
-          onClick={onLayoutItemClick}
+          onClick={() => onLayoutItemClick(props.vertex)}
           onMouseOver={(e) => {
             e.stopPropagation();
             setHoverId(props.vertex.id);
