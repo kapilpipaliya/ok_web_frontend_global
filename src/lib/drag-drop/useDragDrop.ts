@@ -136,6 +136,7 @@ export function useDragDrop(
     // console.log('leave',layoutVertex.id)
     // Do not uncomment this, because drag is called before on drop
     // setDraggedVertex(null);
+    // resetDragDropState();
   };
 
   const handleDrop = async (e: DragEvent) => {
@@ -281,9 +282,11 @@ export function useDragDrop(
   };
 
   function resetDragDropState() {
-    setDraggedVertex([]);
-    setIndicatorPosition({ activeItem: null, position: null });
-    setDragOverTargetId(-1);
+    batch(() => {
+      setDraggedVertex([]);
+      setIndicatorPosition({ activeItem: null, position: null });
+      setDragOverTargetId(-1);
+    })
   }
 
   return {

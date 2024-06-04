@@ -1,5 +1,6 @@
 export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   let bounds: DOMRect;
+  // for page designer canvas use the first element in `.contents` class
   if (node.classList.contains("contents")) {
     if (node.lastElementChild) {
       bounds = node.lastElementChild.getBoundingClientRect();

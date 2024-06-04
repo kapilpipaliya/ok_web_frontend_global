@@ -242,10 +242,14 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           >
             <Show when={!isPreview()} fallback={<Content />}>
               <span
-                class="display:contents"
+                class="contents"
                 onMouseOver={(e) => {
                   e.stopPropagation();
                   setHoverId(item.id);
+                }}
+                onmouseleave={(e) => {
+                  e.stopPropagation();
+                  setHoverId(-1);
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
