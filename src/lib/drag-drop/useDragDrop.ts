@@ -132,7 +132,7 @@ export function useDragDrop(
 
   const handleDragLeave = (e: DragEvent) => {
     // e.stopPropagation();
-    // setIndicatorPosition({});
+    setIndicatorPosition({});
     // console.log('leave',layoutVertex.id)
     // Do not uncomment this, because drag is called before on drop
     // setDraggedVertex(null);

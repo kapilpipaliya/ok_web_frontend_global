@@ -10,6 +10,7 @@ import {
   useContext,
 } from "solid-js";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { LoadingContext } from "~/lib/contexts";
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();
 
@@ -26,7 +27,8 @@ export function CSSRuntimeProvider(props: {
   const [runtimeCSS, setCSSRuntime] = createSignal<RuntimeCSS | undefined>(
     undefined,
   );
-  const [loadingCss, setLoadingCss] = createSignal(true);
+
+  const [loadingCss, setLoadingCss] = useContext(LoadingContext);
 
   let identifier = 0;
   let initializing = false;

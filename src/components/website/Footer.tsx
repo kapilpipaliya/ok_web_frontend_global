@@ -4,7 +4,7 @@ import "~/css/krd.css";
 export function Footer() {
   return (
     <section class="footer">
-      <div class="row container d-flex pb-3">
+      <div class=" pb-3 flex jc:space-around ai:center flex-direction:row">
         <div class="info d-grid align-content-spacebetween">
           <div>
             <a href="">

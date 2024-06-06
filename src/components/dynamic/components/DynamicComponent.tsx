@@ -7,11 +7,11 @@ import { GenericField } from "~/components/dynamic/fields/static/GenericFieldCom
 import { HiddenNodesContext } from "~/lib/contexts";
 
 export const genericInputComponents = [
-  "Autocomplete",
+  // "Autocomplete",
   "CheckBox",
   "ColorBox",
-  "FormSubmit",
-  "FormCancel",
+  // "FormSubmit",
+  // "FormCancel",
   "FileUploader",
   "HtmlEditor",
   "NumberBox",
@@ -20,10 +20,10 @@ export const genericInputComponents = [
   "Radio",
   "RadioGroup",
   "SelectBox",
-  "Switch",
+  // "Switch",
   "TextArea",
   "TextBox",
-  "TextInput",
+  // "TextInput",
 ];
 export const genericComponents2 = [
   "Box",
@@ -38,6 +38,9 @@ export const genericComponents2 = [
   "TreeViewChild",
   "Collapsible",
   "LoadIndicator",
+  "Divider",
+  "Heading",
+  'Rating',
   "Button",
   "Form",
   "Text",

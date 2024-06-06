@@ -62,7 +62,7 @@ const FeaturesSection = () => {
                 Easy Form Forge serves everyone’s needs by out of the box like
             </p>
 
-            <div class="row mt-5 grid grid-cols:3 gap:20 grid-rows:2 ">
+            <div class="row mt-5 grid grid-cols:3@>lg grid-cols:2@md grid-cols:1@<sm gap:10px">
                 <For each={featureData}>
                     {(feature) => (
                         <FeatureBox

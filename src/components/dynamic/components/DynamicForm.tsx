@@ -55,6 +55,8 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import { PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./form/FormGroup";
 import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { checkIfNameExistsMGCall } from "~/cypher_api/functions/get/expression_eval_async_fns";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -127,7 +129,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
 
   return (
     <Switch>
-      <Match when={data.loading}>Loading</Match>
+      <Match when={data.loading}><LoaderNew /></Match>
 
       <Match when={data.error}>Error</Match>
 
@@ -150,7 +152,7 @@ export function DynamicForm(props: DynamicFormProps) {
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const { showLoadingToast, showWarningToast } = useToast();
+  const { showLoadingToast, showWarningToast, showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
@@ -163,8 +165,6 @@ export function DynamicForm(props: DynamicFormProps) {
   const [activeTab, setActiveTab] = createSignal("main");
 
   const fetchData = async () => {
-    console.log(Object.keys(props), Object.values(props));
-
     try {
       if (!props.id) {
         // Load Form Meta from API
@@ -315,15 +315,24 @@ export function DynamicForm(props: DynamicFormProps) {
           return;
         }
 
+        const name = formData?.formData?.P.name
+
+        const res = await checkIfNameExistsMGCall(props.form[IdAttr], name, props.id);
+
+        if (res.error == true) {
+          showErrorToast(res.message);
+          return;
+        }
+
         await showLoadingToast({
-          promise: submitDataCall(data, txnId),
+          promise: submitDataCall({ ...data, name }, txnId),
           loadMessage: "Submitting Data...",
           successMessage: "Data submitted successfully",
           onSuccess: (value) => {
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => {},
+          onError: (error) => { },
         });
       }
       submit = true;
@@ -413,7 +422,7 @@ export function DynamicForm(props: DynamicFormProps) {
 
   return (
     <Switch>
-      <Match when={data.loading}>Loading</Match>
+      <Match when={data.loading}><LoaderNew /></Match>
 
       <Match when={data.error}>Error</Match>
 

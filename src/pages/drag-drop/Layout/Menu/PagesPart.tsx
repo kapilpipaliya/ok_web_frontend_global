@@ -17,6 +17,7 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { expressionString } from "~/lib/Utils";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export function PagesPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -130,7 +131,7 @@ export function PagesPart() {
   }
 
   return (
-    <Switch fallback={<div>Loading...</div>}>
+    <Switch fallback={<LoaderNew loaderHeight="55vh" />}>
       <Match when={data.error}>Error: {data.error}</Match>
       <Match when={!isFetchingData()}>
         <>

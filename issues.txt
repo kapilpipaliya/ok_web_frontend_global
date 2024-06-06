@@ -2,35 +2,40 @@
 
 🌟 Project Fetures 🌟-----------------------------------------------------------------------------------------
 
-1. open properties when click element using drawer
-2. seperate form design drawer
-3. form page setting section
-4. built in component group like address, name, choice option
-5. Make a Route designer where user can add Tables, Buttons, Modals to nav etc.
+1. built in component group like address, name, choice option
+2. Make a Route designer where user can add Tables, Buttons, Modals to nav etc.
 
 👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
 
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
+Make sure all inputs are working.
+when drag and drop from layer, if the placement is above node it is not showing in the preview properly.
+when drag and drop above below the input the borders are not visible at top and bottom of input in pange designer preview area.
 
-Make sure Form Designer new form is saving properly
-drag over takes too much time(see in the console).
-Reduce Saved Relationships in the page designer.
-Do not allow duplicate Page/Form name to be saved.
 
-Display Save/Cancel button in the form designer preview(Wrap in Form Component). ✅
+remain(kapil);
+i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
+
+Write a function to get all the fields in the form
+
+table length
+collapsible
+TreeViewChild
+
+Letter:
 Make the forms made using form designer load and save working
 Make a custom forms builder using the original forms.
 Make a table designer using the forms fields.
-Write a function to get all the fields in the form
+Reduce Saved Relationships in the page designer.
 
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
 
 Make page preview route working
 
-Refactor HOME page, pricing page, contact page, code
+
 
 
 Kapil:

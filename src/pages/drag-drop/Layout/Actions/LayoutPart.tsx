@@ -102,18 +102,10 @@ export function LayoutPart(props: {}) {
           style={{
             "font-size": "14px",
             "font-weight": children().length ? "bold" : "normal",
-            "margin-bottom":
-              children().length ||
-              !(isActiveItem() && indicatorPosition().position === "after")
-                ? "0px"
-                : "10px",
+
             "box-shadow": children().length
               ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
               : "0px",
-            "margin-top":
-              isActiveItem() && indicatorPosition().position === "before"
-                ? "10px"
-                : "",
             "border-top":
               isActiveItem() && indicatorPosition().position === "before"
                 ? "2px solid green"

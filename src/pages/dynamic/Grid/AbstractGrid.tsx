@@ -69,6 +69,7 @@ export function AbstractGrid(props: AbstractGridProps) {
     setLocationData(filtered);
     return filtered;
   });
+ 
 
   return (
     <>
@@ -82,33 +83,7 @@ export function AbstractGrid(props: AbstractGridProps) {
           ]}
         />
       </Show>
-      <div class="flex justify-content:start p:5">
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-                [IdAttr]: "meta",
-                props: {
-                  onClick: () => navigate("new"),
-                  variant: "soft",
-                  style: { padding: "7px 10px", "margin-bottom": "10px" },
-                  leading:
-                    // TO solve Hydration error passed a function
-                    () => (
-                      <Icon
-                        icon={"lets-icons:add-round"}
-                        height={22}
-                        width={22}
-                      />
-                    ),
-                  children: "Add New",
-                },
-              },
-            } as unknown as Vertex
-          }
-        />
-      </div>
+      
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>

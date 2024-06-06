@@ -52,7 +52,7 @@ async function vertexInEdgeContainVertexMGCall(
 export async function setSelectionValueMGCall(
   vertex: Vertex,
   meta: Vertex,
-  value?: number[] | number,
+  value?: Id[] | Id,
 ) {
   "use server";
   const host = getRequestURL().hostname;
@@ -95,7 +95,7 @@ export async function setSelectionValueMGCall(
 export async function setParentValueMGCall(
   vertex: Vertex,
   meta: Vertex,
-  value?: number[] | number,
+  value?: Id[] | Id,
 ) {
   "use server";
   const host = getRequestURL().hostname;
@@ -108,7 +108,7 @@ export async function setParentValueMGCall(
   });
   const previousEdges = previousEdgesResult.pairs! || [];
 
-  let valueArray = [] as number[];
+  let valueArray = [] as Id[];
 
   if (!Array.isArray(value)) {
     if (value !== null && value !== undefined) {

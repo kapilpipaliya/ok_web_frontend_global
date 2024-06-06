@@ -1,5 +1,6 @@
 import { createSignal, For } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
+import { LoaderNew } from "./LoaderSimple";
 
 interface TableTabProps {
   tabs: string[];
@@ -22,7 +23,7 @@ export function TableTabs(props: TableTabProps) {
 
   return (
     <div class="flex flex:row gap-x:30 border-bottom:0.7 bb:#E0E0E0 ">
-      <For each={props.tabs} fallback={<div>Loading...</div>}>
+      <For each={props.tabs} fallback={<LoaderNew loaderHeight="55vh" />}>
         {(item) => (
           <div
             id={`tabletab-${item}`}

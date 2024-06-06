@@ -9,7 +9,7 @@ export async function findVertexesMGCall(options: {
   label?: string;
   attribute?: string;
   value?: number | string;
-  id?: number;
+  id?: string | number;
 }): Promise<{ error?: boolean; message?: string; vertexes?: Vertex }> {
   "use server";
   const host = getRequestURL().hostname;

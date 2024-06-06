@@ -7,7 +7,7 @@ import "~/css/krd.css";
 export function Header() {
   const navigate = useNavigate();
   return (
-    <section class="header container">
+    <section class="header flex jc:space-around ai:center flex-direction:row">
       <div class="logo">
         <a href="/">
           <img class="headerLogo" src={logos} alt="logo" />
@@ -19,11 +19,6 @@ export function Header() {
           <li>
             <a class="bodycopytext-16" href="/">
               Home
-            </a>
-          </li>
-          <li>
-            <a class="bodycopytext-16" href="/account">
-              Account
             </a>
           </li>
           <li>

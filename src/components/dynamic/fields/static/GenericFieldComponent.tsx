@@ -43,6 +43,9 @@ import {
   Progress,
   Select,
   Spinner,
+  Tab,
+  TabContainer,
+  TabList,
   Tabs,
 } from "~/components/solid-blocks/blocks";
 import {
@@ -61,6 +64,9 @@ import { useToast } from "~/components/custom/Toast";
 import { submitDataCall } from "~/components/api/api_functions";
 import { createStore } from "solid-js/store";
 import { Repeater } from "~/components/solid-blocks/blocks/repeater/Repeater";
+import { Table, TableBodyCell, TableHeadCell } from "~/components/custom/Table";
+import Heading from "~/components/solid-blocks/blocks/Heading";
+import StarRating from "~/components/solid-blocks/blocks/Rating";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -100,6 +106,10 @@ export function GenericField(
   });
 
   const repeaterContext = useContext(RepeaterContext);
+
+  const propWithDefault = (props: string, defaultValue?: any) => {
+    return field.meta.P.props[`${props}`] ?? defaultValue;
+  }
 
   return (
     <Show
@@ -251,9 +261,9 @@ export function GenericField(
           </CustomButton>
         </Match>
         <Match when={component() === "Table"}>
-          <table {...field.meta.P.props}>
+          <Table headers={getChildVertexes(graph, ["Attr"], [field.meta]).vertexes?.length || []} {...field.meta.P.props}>
             <PageItemRender metaVertex={field.meta} />
-          </table>
+          </Table>
         </Match>
         <Match
           when={
@@ -261,21 +271,18 @@ export function GenericField(
             getChildVertexes(graph, ["Attr"], [field.meta]).vertexes?.length
           }
         >
-          <thead class={"r:5|5|5|5"}>
-            <tr class={"p:10 text:center h:5"}>
-              <PageItemRender metaVertex={field.meta} />
-            </tr>
-          </thead>
+          <TableHeadCell class={"p:10 text:center h:5"}>
+            <PageItemRender metaVertex={field.meta} />
+          </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
-          <tbody>
-            <tr class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
-              <PageItemRender metaVertex={field.meta} />
-            </tr>
-          </tbody>
+
+          <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
+            <PageItemRender metaVertex={field.meta} />
+          </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
-          <Collapsible {...field.meta.P.props}>
+          <Collapsible {...field.meta.P.props} >
             <PageItemRender metaVertex={field.meta} />
           </Collapsible>
         </Match>
@@ -302,9 +309,9 @@ export function GenericField(
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <li>
-            <PageItemRender metaVertex={field.meta} />
-          </li>
+
+          <PageItemRender metaVertex={field.meta} />
+
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion {...field.meta.P.props}>
@@ -325,6 +332,15 @@ export function GenericField(
         </Match>
         <Match when={component() === "Form"}>
           <FormWrapper meta={field.meta} />
+        </Match>
+        <Match when={component() === "Divider"}>
+          <hr {...field.meta.P.props} class={` h:${propWithDefault('height', '2')} color:${propWithDefault('color', 'lightgrey')} w:full ${getValueFromVertexOrKey(field.meta.P.props, "class")}`} />
+        </Match>
+        <Match when={component() === "Heading"}>
+          <Heading {...field.meta.P.props} heading={propWithDefault('heading')} divider={propWithDefault('divider', true)} subheading={propWithDefault('subheading')}/>
+        </Match>
+        <Match when={component() === "StarRating"}>
+          <StarRating {...field.meta.P.props} heading={propWithDefault('heading', 'Rating')} subheading={propWithDefault('subheading', 'Rate Us')} />
         </Match>
         <Match when={true}>
           <Dynamic

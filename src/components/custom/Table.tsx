@@ -18,6 +18,7 @@ type TableProps<T> = {
   defaultRowsPerPage?: number;
   onLoadMore: (skip: number, limit: number) => void;
   totalItems: number;
+  isSearching: boolean;
   isShowLoadMore?: boolean;
 };
 
@@ -35,6 +36,7 @@ export function CommonTable<T>(props: TableProps<T>) {
   };
 
   const handlePreviousPage = () => {
+    
     // handlePageChange(Math.max(currentPage() - 1, 0));
     setCurrentPage(Math.min(currentPage() - 1));
   };
@@ -132,7 +134,8 @@ export function CommonTable<T>(props: TableProps<T>) {
         when={
           (currentPage() === totalPages() - 1 ||
             (currentPage() === 0 && props.data.length < props.totalItems)) &&
-          props.isShowLoadMore
+          props.isShowLoadMore &&
+          !props.isSearching
         }
       >
         <div style="display: flex; justify-content: end; padding: 5px 10px;">

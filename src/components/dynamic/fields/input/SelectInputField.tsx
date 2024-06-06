@@ -12,26 +12,26 @@ import {
 } from "solid-js";
 
 // Comment This Lines in web build
-import {GraphContext, type GraphInterface, type Id, IdAttr, type Vertex,} from "~/lib/graph/graph";
-import {commitTxn, getNewTxnId} from "~/lib/graph/transaction";
-import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
+import { GraphContext, type GraphInterface, type Id, IdAttr, type Vertex, } from "~/lib/graph/graph";
+import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
   getChildVertex,
   getParentVertexValue,
   getSelectedVertexValue,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
-import {FormContext, getValueFromVertexOrKey} from "~/lib/Utils";
-import {onChangeHandler, setValueGlobal,} from "~/lib/graph/mutate/form_functions";
-import type {ComponentProps} from "~/components/ComponentType";
-import type {Store} from "solid-js/store";
-import {findVertexByLabelAndUniqueId} from "~/lib/graph/get/sync/findVertex";
-import {getNameKeyForCollection} from "~/lib/graph/get/sync/graph_functions";
-import {getSelectionOptionsMGCall} from "~/cypher_api/lib/graph/get/async/traverse";
-import {setGraphData} from "~/lib/websocket/ws_events";
+import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
+import { onChangeHandler, setValueGlobal, } from "~/lib/graph/mutate/form_functions";
+import type { ComponentProps } from "~/components/ComponentType";
+import type { Store } from "solid-js/store";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
+import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
 import MultiSelectField from "~/components/custom/MultiSelect";
-import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
-import {setParentValue} from "~/lib/graph/mutate/setParentValue";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { setParentValue } from "~/lib/graph/mutate/setParentValue";
 
 export function ensureArray(value: any) {
   if (Array.isArray(value)) {
@@ -118,55 +118,71 @@ export function SelectInputField(
 
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [options, setOptions] = createSignal([] as Array<string | Vertex>);
+
   const formData = useContext(FormContext);
 
-  const selectOptions = async () => {
+  const selectOptions = () => {
     const value = getValueFromVertexOrKey(field.meta.P.props, "items");
+
     if (value) {
-      if (typeof value === "string") {
-        return value.split("\n");
-      }
-      if (Array.isArray(value)) {
-        return value;
-      }
-      setOptions(value ? [value] : []);
-    } else {
-      // this is not working when row is enabled, select field options is not updated
-      if (field.disabled) {
-        return selectedValue(field.meta, field.data as Vertex, graph).map(
-          (vertexId) => graph.vertexes[vertexId],
-        );
-      }
-
-      const collection =
-        getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
-        getValueFromVertexOrKey(field.meta.P.props, "collection");
-      if (!collection) {
-        return [];
-      }
-
-      const res = await getSelectionOptionsMGCall(
-        [field.data as Vertex],
-        collection,
-      );
-
-      // @ts-ignore
-      if (!res.error && res.statusCode != 500) {
-        setGraphData(graph, setGraph, res.graph);
-        setOptions(
-          getSelectionOptions(
-            graph,
-            setGraph,
-            [field.data as Vertex],
-            collection,
-          ).vertexes || [],
-        );
-      } else {
-        return [];
-      }
+      return handleValue(value);
     }
+
+    return handleNoValue();
   };
+
+  const handleValue = (value: any) => {
+    if (typeof value === "string") {
+      return value.split("\n");
+    }
+
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    return value ? [value] : [];
+  };
+
+  const handleNoValue = () => {
+    if (field.disabled) {
+      return getSelectedOptions();
+    }
+
+    const collection = getCollection();
+    if (!collection) {
+      return [];
+    }
+
+    return getSelectionOptions(graph, setGraph, [field.data as Vertex], collection).vertexes ||
+      [];
+  };
+  onMount(() => {
+    const collection = getCollection();
+    getSelectionOptionsMGCall([field.data as Vertex], collection).then((res) => {
+      if (isValidResponse(res)) {
+        setGraphData(graph, setGraph, res.graph);
+      }
+    })
+  });
+
+  const getSelectedOptions = () => {
+    return selectedValue(field.meta, field.data as Vertex, graph).map(
+      (vertexId) => graph.vertexes[vertexId]
+    );
+  };
+
+  const getCollection = () => {
+    return (
+      getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
+      getValueFromVertexOrKey(field.meta.P.props, "collection")
+    );
+  };
+
+  const isValidResponse = (res: any) => {
+    return !res.error && res.statusCode != 500;
+  };
+
+
 
   onMount(() => {
     selectOptions();
@@ -220,28 +236,28 @@ export function SelectInputField(
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-                graph,
-                setGraph,
-                field.txnId!,
-                field.meta,
-                props.data!,
-                data,
-                Ws,
-                false,
-              );
+              graph,
+              setGraph,
+              field.txnId!,
+              field.meta,
+              props.data!,
+              data,
+              Ws,
+              false,
+            );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "items")) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-                graph,
-                setGraph,
-                field.txnId!,
-                field.meta,
-                props.data!,
-                data,
-                Ws,
-                false,
-              );
+              graph,
+              setGraph,
+              field.txnId!,
+              field.meta,
+              props.data!,
+              data,
+              Ws,
+              false,
+            );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "inward")) {
           setParentValue(
             graph,
@@ -308,7 +324,7 @@ export function SelectInputField(
             })
           }
           disable={field.disabled!}
-          options={options()}
+          options={selectOptions()}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
           placeholder={`${field.title}`}
