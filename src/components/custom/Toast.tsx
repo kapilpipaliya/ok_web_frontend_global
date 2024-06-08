@@ -5,7 +5,7 @@ import {
   onCleanup,
   Show,
 } from "solid-js";
-import { type Renderable, toast, } from "solid-toast";
+import { type Renderable, toast } from "solid-toast";
 import { Icon } from "@iconify-icon/solid";
 
 const DismissButton: Component<{

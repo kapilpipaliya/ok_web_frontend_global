@@ -3,7 +3,7 @@ import type { CellContext } from "@tanstack/solid-table";
 import Dismiss from "solid-dismiss";
 import { createSignal, Show } from "solid-js";
 import { type SetStoreFunction, createStore } from "solid-js/store";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import { AbstractSingleForm } from "~/components/dynamic/components/form/DynamicForm";
 import {
   selectedValue,
   collectionNameDisplayExpr,

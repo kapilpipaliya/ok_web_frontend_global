@@ -9,7 +9,6 @@ export async function GET({ request }: APIEvent) {
 
     return pageList;
   } catch (error) {
-    console.error("Server error Failed to login:", error);
-    return new Response("Internal Server Error", { status: 500 });
+    return new Error("Internal Server Error");
   }
 }

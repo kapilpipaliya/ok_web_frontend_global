@@ -8,7 +8,7 @@ import {
   useContext,
 } from "solid-js";
 import { useToast } from "~/components/custom/Toast";
-import { Checkbox, } from "~/components/solid-blocks/blocks";
+import { Checkbox } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { expressionString, iconMap } from "~/lib/Utils";
 import {
@@ -20,6 +20,7 @@ import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { onClickAddComponent } from "../CommonCompUtils";
+import { LoaderNew } from "~/components/custom/LoaderSimple";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -173,6 +174,7 @@ export function ComponentPart() {
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
+          setDraggedVertex([]);
           const dataTransfer =
             selectedComponents().size > 0
               ? Array.from(selectedComponents())
@@ -278,25 +280,28 @@ export function ComponentPart() {
           "scrollbar-color": "lightgrey",
         }}
       >
-        <For
-          each={filteredData()}
-          fallback={
-            <div class="p:3 font-weight:bold m:20px|0px text-align:center">
-              No Component Found !
-            </div>
-          }
-        >
-          {(item) => (
-            <div class="m:20px|0px">
-              <div style={titleStyle}>{item.name}</div>
-              <ul style={{ ...listBoxStyle, ...listStyle }}>
-                <For each={item.children}>
-                  {(child) => <ListItemComponent child={child} />}
-                </For>
-              </ul>
-            </div>
-          )}
-        </For>
+        <Show when={!isFetchingData()} fallback={<LoaderNew loaderHeight="55vh" />}>
+          <For
+            each={filteredData()}
+            fallback={
+              <div class="p:3 font-weight:bold m:20px|0px text-align:center">
+                No Component Found !
+              </div>
+            }
+          >
+            {(item) => (
+              <div class="m:20px|0px">
+                <div style={titleStyle}>{item.name}</div>
+                <ul style={{ ...listBoxStyle, ...listStyle }}>
+                  <For each={item.children}>
+                    {(child) => <ListItemComponent child={child} />}
+                  </For>
+                </ul>
+              </div>
+            )}
+          </For>
+        </Show>
+
       </div>
     </>
   );

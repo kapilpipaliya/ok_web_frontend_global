@@ -40,7 +40,7 @@ export const genericComponents2 = [
   "LoadIndicator",
   "Divider",
   "Heading",
-  'Rating',
+  "Rating",
   "Button",
   "Form",
   "Text",
@@ -58,7 +58,7 @@ export function DynamicComponent(props: {
   meta: Vertex;
   title?: string;
   data?: Vertex;
-  isShowAdd?: boolean;
+  isTableInside?: boolean;
   setValue?: (data: any) => void;
   disabled?: boolean;
   isRealTime?: boolean;
@@ -75,7 +75,7 @@ export function DynamicComponent(props: {
     "component",
     "txnId",
     "setValue",
-    "isShowAdd",
+    "isTableInside",
   ]);
 
   return (
@@ -101,18 +101,17 @@ export function DynamicComponent(props: {
       </Match>
       <Match when={field.component === "Table2"}>
         <Show when={!hiddenNodes().includes(field.meta?.id)}>
-          <Show when={!field.disabled} fallback={<>...</>}>
+          
             <TableInputField
               meta={field.meta}
               data={field.data}
-              isShowAdd={field.isShowAdd}
+              isTableInside={field.isTableInside}
               disabled={field.disabled!}
               txnId={field.txnId}
               setValue={field.setValue}
               isRealTime={field.isRealTime}
             />
           </Show>
-        </Show>
       </Match>
       <Match
         when={

@@ -103,7 +103,9 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
       <Show when={isSelectedLayoutId(props.itemId)}>
         <Icon
           icon={"mingcute:settings-5-line"}
-          onclick={() => setShowDrawer(!showDrawer())}
+          onclick={() => {
+            setShowDrawer(!showDrawer());
+          }}
           height={22}
           width={22}
           class="cursor:pointer"
@@ -149,33 +151,36 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           const compProps = Object.assign(componentProps, rowProps);
 
           if (!isPreview()) {
-            if (isSelectedLayoutId(item.id) || isSelectedDragOverTargetId(item.id)) {
+            if (
+              isSelectedLayoutId(item.id) ||
+              isSelectedDragOverTargetId(item.id)
+            ) {
               if (compProps.class) {
                 compProps.class += " b:#3996E1|1.5px|solid r:5";
               } else {
-                compProps.class = "b:#3996E1|1px|solid r:5";
+                compProps.class = "b:#3996E1|1.5px|solid r:5";
               }
             }
             if (isSelectedHoverId(item.id)) {
               if (compProps.class) {
                 compProps.class += " b:#3996E1|1.5px|dashed r:5";
               } else {
-                compProps.class = "b:#3996E1|1px|dashed r:5";
+                compProps.class = "b:#3996E1|1.5px|dashed r:5";
               }
             }
 
             if (isActiveItem()) {
               if (indicatorPosition().position === "before") {
                 if (compProps.class) {
-                  compProps.class += " bt:rgb(0,0,255)|1px|solid";
+                  compProps.class += " bt:rgb(0,0,255)|2.5px|solid";
                 } else {
-                  compProps.class = "bt:rgb(0,0,255)|1px|solid";
+                  compProps.class = "bt:rgb(0,0,255)|2.5px|solid";
                 }
               } else if (indicatorPosition().position === "after") {
                 if (compProps.class) {
-                  compProps.class += " bb:rgb(0,0,255)|2px|solid @fade|.3s";
+                  compProps.class += " bb:rgb(0,0,255)|2.5px|solid @fade|.3s";
                 } else {
-                  compProps.class = "bb:rgb(0,0,255)|2px|solid @fade|.3s";
+                  compProps.class = "bb:rgb(0,0,255)|2.5px|solid @fade|.3s";
                 }
               }
             }
@@ -271,13 +276,39 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     <Popover.Content class="popover__content">
                       <Show when={isSelectedLayoutId(item.id)}>
                         <span class="position:relative  flex justify-content:flex-end ">
-                          <div class="@fade|.3s z:50" style={{ 'border-radius': "0.25rem", position:"absolute" ,'background-color': "rgb(37,99,235)",color:"rgb(255,255,255)",padding:"3px" }}>
-                            <div style={{'z-index':50,display:"flex",gap:"3px",margin:'2px 6px'}}>
-                              <div class="mr:0.5rem f:0.875rem lh:1.25rem" style={{display:"flex"}}>
+                          <div
+                            class="@fade|.3s z:50"
+                            style={{
+                              "border-radius": "0.25rem",
+                              position: "absolute",
+                              "background-color": "rgb(37,99,235)",
+                              color: "rgb(255,255,255)",
+                              padding: "3px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                "z-index": 50,
+                                display: "flex",
+                                gap: "3px",
+                                margin: "2px 6px",
+                              }}
+                            >
+                              <div
+                                class="mr:0.5rem f:0.875rem lh:1.25rem"
+                                style={{ display: "flex" }}
+                              >
                                 <PropertiesDrawer itemId={item.id} />
                               </div>
                               <Tooltip content={"Name"} nowrap>
-                                <div style={{display:"flex","font-size":"0.875rem","line-height":"1.25rem","margin-right":"4px"}}>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    "font-size": "0.875rem",
+                                    "line-height": "1.25rem",
+                                    "margin-right": "4px",
+                                  }}
+                                >
                                   {getComponent()}
                                 </div>
                               </Tooltip>

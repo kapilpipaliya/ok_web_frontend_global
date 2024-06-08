@@ -25,9 +25,7 @@ import {
   getTextColumnValue,
   getValueFromVertexOrKey,
 } from "~/lib/Utils";
-import {
-  getChildVertexes,
-} from "~/lib/graph/get/sync/traverse";
+import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import {
   createForm,
   createMeta,
@@ -109,7 +107,7 @@ export function GenericField(
 
   const propWithDefault = (props: string, defaultValue?: any) => {
     return field.meta.P.props[`${props}`] ?? defaultValue;
-  }
+  };
 
   return (
     <Show
@@ -261,7 +259,13 @@ export function GenericField(
           </CustomButton>
         </Match>
         <Match when={component() === "Table"}>
-          <Table headers={getChildVertexes(graph, ["Attr"], [field.meta]).vertexes?.length || []} {...field.meta.P.props}>
+          <Table
+            headers={
+              getChildVertexes(graph, ["Attr"], [field.meta]).vertexes
+                ?.length || []
+            }
+            {...field.meta.P.props}
+          >
             <PageItemRender metaVertex={field.meta} />
           </Table>
         </Match>
@@ -276,13 +280,12 @@ export function GenericField(
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
-
           <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
             <PageItemRender metaVertex={field.meta} />
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
-          <Collapsible {...field.meta.P.props} >
+          <Collapsible {...field.meta.P.props}>
             <PageItemRender metaVertex={field.meta} />
           </Collapsible>
         </Match>
@@ -309,9 +312,7 @@ export function GenericField(
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-
           <PageItemRender metaVertex={field.meta} />
-
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion {...field.meta.P.props}>
@@ -334,13 +335,24 @@ export function GenericField(
           <FormWrapper meta={field.meta} />
         </Match>
         <Match when={component() === "Divider"}>
-          <hr {...field.meta.P.props} class={` h:${propWithDefault('height', '2')} color:${propWithDefault('color', 'lightgrey')} w:full ${getValueFromVertexOrKey(field.meta.P.props, "class")}`} />
+          <hr
+            {...field.meta.P.props}
+            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${getValueFromVertexOrKey(field.meta.P.props, "class")}`}
+          />
         </Match>
         <Match when={component() === "Heading"}>
-          <Heading {...field.meta.P.props} heading={propWithDefault('heading')} divider={propWithDefault('divider', true)} subheading={propWithDefault('subheading')}/>
+          <Heading
+            etc={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            heading={propWithDefault("heading")}
+            divider={propWithDefault("divider", true)}
+            subheading={propWithDefault("subheading")}
+          />
         </Match>
-        <Match when={component() === "StarRating"}>
-          <StarRating {...field.meta.P.props} heading={propWithDefault('heading', 'Rating')} subheading={propWithDefault('subheading', 'Rate Us')} />
+        <Match when={component() === "Rating"}>
+          <StarRating
+            etc={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            heading={propWithDefault("heading", "Rating")}
+          />
         </Match>
         <Match when={true}>
           <Dynamic
@@ -355,21 +367,23 @@ export function GenericField(
     </Show>
   );
 }
-function FormWrapper(props: ComponentProps & {
-  submitButton?: any
-}) {
+function FormWrapper(
+  props: ComponentProps & {
+    submitButton?: any;
+  },
+) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const { showLoadingToast } = useToast();
   const navigate = useNavigate();
 
-  const cleanUpConfig = {} as { [key: string]: any; };
+  const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
   } as {
-    cleanUpConfig: () => { [key: string]: any; };
+    cleanUpConfig: () => { [key: string]: any };
     txnId: number;
     formMeta: Vertex;
     formData: Vertex;
@@ -383,13 +397,7 @@ function FormWrapper(props: ComponentProps & {
 
   let dataVertex: Vertex;
   // if (!props.data?.id) {
-  const createResult = createForm(
-    graph,
-    setGraph,
-    txnId,
-    Ws,
-    "FixFormLabel"
-  );
+  const createResult = createForm(graph, setGraph, txnId, Ws, "FixFormLabel");
   if (createResult.error) return createResult.error;
   dataVertex = createResult.vertex!;
   // } else {
@@ -398,13 +406,12 @@ function FormWrapper(props: ComponentProps & {
   //   dataVertex = loadResult.vertex!;
   // }
 
-
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
   const onSubmit = async () => {
     const data = commitTxn(txnId, Ws);
     await showLoadingToast({
-      promise: submitDataCall(data, txnId),
+      promise: submitDataCall(data, graph, setGraph, txnId),
       loadMessage: "Submitting Data...",
       successMessage: "Data submitted successfully",
       onSuccess: (value) => {
@@ -433,35 +440,42 @@ function FormWrapper(props: ComponentProps & {
         <div class="flex gap:1">
           <Show
             when={props.submitButton}
-            fallback={<GenericField
-              meta={{
-                P: {
-                  component: "Button",
-                  props: {
-                    children: "Submit",
-                    onClick: () => onSubmit,
-                  },
-                },
-              } as any} />}
+            fallback={
+              <GenericField
+                meta={
+                  {
+                    P: {
+                      component: "Button",
+                      props: {
+                        children: "Submit",
+                        onClick: () => onSubmit,
+                      },
+                    },
+                  } as any
+                }
+              />
+            }
           >
             {props.submitButton}
           </Show>
 
           <GenericField
-            meta={{
-              P: {
-                component: "Button",
-                props: {
-                  onClick: () => onCancel,
-                  variant: "outlined",
-                  class: "border-color:#FF0000 color:#FF0000",
-                  children: "Cancel",
+            meta={
+              {
+                P: {
+                  component: "Button",
+                  props: {
+                    onClick: () => onCancel,
+                    variant: "outlined",
+                    class: "border-color:#FF0000 color:#FF0000",
+                    children: "Cancel",
+                  },
                 },
-              },
-            } as any} />
+              } as any
+            }
+          />
         </div>
       </FormContext.Provider>
     </div>
   );
 }
-

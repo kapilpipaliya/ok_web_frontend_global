@@ -86,7 +86,7 @@ export const PasswordSection = (props: { profileData: any }) => {
   };
 
   return (
-    <div class="bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|#92afdc">
+    <div class="bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|rgb(237,239,241)">
       <div>
         <div class={"font-weight:700"}>Password</div>
         <div class={"font-weight:400 mb:30"}>

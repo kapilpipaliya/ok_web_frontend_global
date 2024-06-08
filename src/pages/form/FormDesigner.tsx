@@ -5,7 +5,7 @@ import type { IFormContext } from "~/lib/Utils";
 // Comment This Lines in web build
 import { createStore } from "solid-js/store";
 import { stringify } from "yaml";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import { AbstractSingleForm } from "~/components/dynamic/components/form/DynamicForm";
 import { importRecordWithYAMLSchema } from "~/lib/graph/mutate/import";
 import { GraphContext } from "~/lib/graph/graph";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";

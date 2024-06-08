@@ -6,7 +6,5 @@ import SiteTitle from "~/components/website/utils";
 import { MainPage } from "~/components/website/main/MainPage";
 
 export default function Home() {
-  return (
-    <MainPage />
-  );
+  return <MainPage />;
 }

@@ -33,8 +33,7 @@ export function isArrayOfStrings(arg) {
   var result = false;
   /* istanbul ignore else */
   if (Array.isArray(arg)) {
-    result =
-      arg.filter((item) => typeof item !== "string").length === 0;
+    result = arg.filter((item) => typeof item !== "string").length === 0;
   }
   return result;
 }
@@ -47,8 +46,7 @@ export function isArrayOfStrings(arg) {
 export function isArrayOfNumbers(arg) {
   var result = false;
   if (Array.isArray(arg)) {
-    result =
-      arg.filter((item) => !isNumeric(item)).length === 0;
+    result = arg.filter((item) => !isNumeric(item)).length === 0;
   }
   return result;
 }

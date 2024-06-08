@@ -1,9 +1,9 @@
-import type {SetStoreFunction, Store} from "solid-js/store";
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
-import {useToast} from "~/components/custom/Toast";
-import {getInEdge} from "~/lib/graph/get/sync/traverse";
-import {addNewEdge, deleteEdge, newEdge} from "~/lib/graph/mutate/edge";
-import {getNewGraphId} from "~/lib/graph/transaction";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { useToast } from "~/components/custom/Toast";
+import { getInEdge } from "~/lib/graph/get/sync/traverse";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
+import { getNewGraphId } from "~/lib/graph/transaction";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setParentValue(
@@ -14,7 +14,7 @@ export function setParentValue(
   meta: Vertex,
   value?: Id[] | Id,
 ) {
-  const {showWarningToast, showErrorToast} = useToast();
+  const { showWarningToast, showErrorToast } = useToast();
 
   // delete removed edges:
   const type = getInEdge(meta, vertex);

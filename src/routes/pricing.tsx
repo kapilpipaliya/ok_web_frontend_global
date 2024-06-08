@@ -3,7 +3,5 @@ import "~/css/krd.css";
 import { PricingSection } from "~/components/website/pricing/PricingSection";
 
 export default function Pricing() {
-  return (
-    <PricingSection />
-  );
+  return <PricingSection />;
 }

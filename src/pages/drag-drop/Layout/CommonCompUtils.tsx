@@ -2,9 +2,9 @@ import { createSignal } from "solid-js";
 import type { Store, SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import {componentDrag} from "~/lib/drag-drop/componentDrag";
-import {getChildrenAttrs} from "~/lib/drag-drop/getChildrenAttrs";
-import {setParentValue} from "~/lib/graph/mutate/setParentValue";
+import { componentDrag } from "~/lib/drag-drop/componentDrag";
+import { getChildrenAttrs } from "~/lib/drag-drop/getChildrenAttrs";
+import { setParentValue } from "~/lib/graph/mutate/setParentValue";
 import { handleComponentDrag } from "~/lib/drag-drop/handleComponentDrag";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 
@@ -24,9 +24,17 @@ export function onClickAddComponent(
 ) {
   const toVertex = graph.vertexes[toVertexId];
   const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
- 
-  
-  handleComponentDrag(graph, setGraph, txnId, fromVertex, toVertex, toParentVertex!, formData, '999999');
+
+  handleComponentDrag(
+    graph,
+    setGraph,
+    txnId,
+    fromVertex,
+    toVertex,
+    toParentVertex!,
+    formData,
+    "999999",
+  );
 
   // function sortChildren() {
   //   let pos = 1;

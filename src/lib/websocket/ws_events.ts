@@ -1,7 +1,5 @@
-import { batch, } from "solid-js";
-import type {
-  ServerEventsDispatcher,
-} from "~/lib/websocket/ws_events_dispatcher";
+import { batch } from "solid-js";
+import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 
 import { isObject } from "~/lib/Utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
@@ -15,7 +13,7 @@ import {
   vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
-import type { SetStoreFunction, } from "solid-js/store";
+import type { SetStoreFunction } from "solid-js/store";
 import { useToast } from "~/components/custom/Toast";
 
 export function setGraphData(
@@ -175,6 +173,8 @@ export function onMutatDataGet(
     if (isAllTxnProcessed()) {
       vertexOldIdToNewIdMap.clear();
       edgeOldIdToNewIdMap.clear();
-    } else commitTransaction(Ws);
+    } else {
+      // commitTransaction(Ws);
+    }
   });
 }

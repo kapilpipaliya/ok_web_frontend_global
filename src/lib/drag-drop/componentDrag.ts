@@ -5,10 +5,14 @@ import { newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import { addNewRow, cloneRowProps } from "~/lib/graph/mutate/form_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { getChildVertex, getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import {
+  getChildVertex,
+  getChildVertexes,
+  getSelectionOptions,
+} from "~/lib/graph/get/sync/traverse";
 import { getStringComponent } from "~/lib/graph/get/sync/graph_functions";
 import { getChildrenAttrs } from "~/lib/drag-drop/getChildrenAttrs";
-import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 // @Note:
 // From Component To Layout drag:
@@ -30,7 +34,17 @@ export function componentDrag(
   const attrCompMetaVertex = createAttrCompMetaVertex();
 
   if (fromVertex.L[0] === "Page") {
-    return processChildren(fromVertex, toParentVertex, txnId, graph, setGraph, attrMetaVertex, attrCompMetaVertex)[0] ?? -1;
+    return (
+      processChildren(
+        fromVertex,
+        toParentVertex,
+        txnId,
+        graph,
+        setGraph,
+        attrMetaVertex,
+        attrCompMetaVertex,
+      )[0] ?? -1
+    );
   }
 
   const rowResult = addNewRow(
@@ -46,9 +60,25 @@ export function componentDrag(
   const rowVertex = graph.vertexes[rowResult.vertexId!];
 
   if (["Comp", "Coll"].includes(fromVertex.L[0])) {
-    handleCompOrCollVertex(fromVertex, txnId, rowVertex, graph, setGraph, attrCompMetaVertex, showErrorToast);
+    handleCompOrCollVertex(
+      fromVertex,
+      txnId,
+      rowVertex,
+      graph,
+      setGraph,
+      attrCompMetaVertex,
+      showErrorToast,
+    );
   } else if (fromVertex.L[0] === "Attr") {
-    handleAttrVertex(fromVertex, rowVertex, txnId, graph, setGraph, attrMetaVertex, attrCompMetaVertex);
+    handleAttrVertex(
+      fromVertex,
+      rowVertex,
+      txnId,
+      graph,
+      setGraph,
+      attrMetaVertex,
+      attrCompMetaVertex,
+    );
   }
 
   return rowResult.vertexId!;
@@ -61,21 +91,47 @@ function handleCompOrCollVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   attrCompMetaVertex: Vertex,
-  showErrorToast: (message: string) => void
+  showErrorToast: (message: string) => void,
 ) {
   if (fromVertex.L[0] === "Comp") {
     // set Component to the row
-    setSelectionValue(txnId, rowVertex, graph, setGraph, attrCompMetaVertex, fromVertex.id);
+    setSelectionValue(
+      txnId,
+      rowVertex,
+      graph,
+      setGraph,
+      attrCompMetaVertex,
+      fromVertex.id,
+    );
     addPropsToLayoutRow(graph, txnId, rowVertex.id, fromVertex);
   } else if (fromVertex.L[0] === "Coll") {
     // set Collection to the row
     const attrCollMetaVertex = createAttrCollMetaVertex();
-    setSelectionValue(txnId, rowVertex, graph, setGraph, attrCollMetaVertex, fromVertex.id);
-    const formVertex = findVertexByLabelAndUniqueId(graph, "Comp", IdAttr, "Form");
+    setSelectionValue(
+      txnId,
+      rowVertex,
+      graph,
+      setGraph,
+      attrCollMetaVertex,
+      fromVertex.id,
+    );
+    const formVertex = findVertexByLabelAndUniqueId(
+      graph,
+      "Comp",
+      IdAttr,
+      "Form",
+    );
     if (!formVertex) {
       showErrorToast("Can't find form");
     } else {
-      setSelectionValue(txnId, rowVertex, graph, setGraph, attrCompMetaVertex, formVertex.id);
+      setSelectionValue(
+        txnId,
+        rowVertex,
+        graph,
+        setGraph,
+        attrCompMetaVertex,
+        formVertex.id,
+      );
       addPropsToLayoutRow(graph, txnId, rowVertex.id, formVertex);
     }
   }
@@ -88,12 +144,27 @@ function handleAttrVertex(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   attrMetaVertex: Vertex,
-  attrCompMetaVertex: Vertex
+  attrCompMetaVertex: Vertex,
 ) {
   const compVertex = getComponentFromLayoutRow(fromVertex.id, graph, setGraph);
-  setSelectionValue(txnId, rowVertex, graph, setGraph, attrCompMetaVertex, compVertex.id);
+  setSelectionValue(
+    txnId,
+    rowVertex,
+    graph,
+    setGraph,
+    attrCompMetaVertex,
+    compVertex.id,
+  );
   cloneRowProps(graph, setGraph, txnId, fromVertex, rowVertex);
-  processChildren(fromVertex, rowVertex, txnId, graph, setGraph, attrMetaVertex, attrCompMetaVertex);
+  processChildren(
+    fromVertex,
+    rowVertex,
+    txnId,
+    graph,
+    setGraph,
+    attrMetaVertex,
+    attrCompMetaVertex,
+  );
 }
 
 function processChildren(
@@ -103,7 +174,7 @@ function processChildren(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   attrMetaVertex: Vertex,
-  attrCompMetaVertex: Vertex
+  attrCompMetaVertex: Vertex,
 ) {
   const childrenVertexes = getChildrenAttrs(graph, setGraph, fromVertex);
   const results = [];
@@ -120,9 +191,24 @@ function processChildren(
     );
     const rowVertex = graph.vertexes[rowResult.vertexId!];
     const compVertex = getComponentFromLayoutRow(child.id, graph, setGraph);
-    setSelectionValue(txnId, rowVertex, graph, setGraph, attrCompMetaVertex, compVertex.id);
+    setSelectionValue(
+      txnId,
+      rowVertex,
+      graph,
+      setGraph,
+      attrCompMetaVertex,
+      compVertex.id,
+    );
     cloneRowProps(graph, setGraph, txnId, child, rowVertex);
-    processChildren(child, rowVertex, txnId, graph, setGraph, attrMetaVertex, attrCompMetaVertex);
+    processChildren(
+      child,
+      rowVertex,
+      txnId,
+      graph,
+      setGraph,
+      attrMetaVertex,
+      attrCompMetaVertex,
+    );
     results.push(rowResult.vertexId!);
   }
   return results;
@@ -193,12 +279,13 @@ export const getComponentFromLayoutRow = (
 ) => {
   // There must be a component found.
   const currentVertex = graph.vertexes[layoutRowId];
-  const compVertex = getSelectionOptions(
-    graph,
-    setGraph,
-    [currentVertex],
-    "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default",
-  ).vertexes || [];
+  const compVertex =
+    getSelectionOptions(
+      graph,
+      setGraph,
+      [currentVertex],
+      "->$0Comp||->$0Att->$0Comp||->$0Att->$0DataType->$0Default",
+    ).vertexes || [];
   if (compVertex[0]) {
     return compVertex[0];
   }

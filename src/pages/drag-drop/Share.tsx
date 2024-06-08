@@ -1,9 +1,11 @@
-import { createEffect, createSignal } from "solid-js";
+import { createEffect, createSignal, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid-blocks/blocks";
+import { PageConfigContext } from "~/lib/contexts";
 
 const ShareSection = () => {
-  const [link, setLink] = createSignal("https://www.easyform.com/534656546756");
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
+  const [link, setLink] = createSignal("");
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   createEffect(() => {
@@ -11,6 +13,15 @@ const ShareSection = () => {
       setEmail(""); // Clear email
     }
   });
+
+  createEffect(() => {
+    if (pageConfig) {
+      setLink(
+        `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.id}`,
+      );
+    }
+  });
+
   const copyToClipboard = () => {
     navigator.clipboard.writeText(link());
   };

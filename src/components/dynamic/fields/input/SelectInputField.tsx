@@ -12,7 +12,13 @@ import {
 } from "solid-js";
 
 // Comment This Lines in web build
-import { GraphContext, type GraphInterface, type Id, IdAttr, type Vertex, } from "~/lib/graph/graph";
+import {
+  GraphContext,
+  type GraphInterface,
+  type Id,
+  IdAttr,
+  type Vertex,
+} from "~/lib/graph/graph";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import {
@@ -22,7 +28,10 @@ import {
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
 import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
-import { onChangeHandler, setValueGlobal, } from "~/lib/graph/mutate/form_functions";
+import {
+  onChangeHandler,
+  setValueGlobal,
+} from "~/lib/graph/mutate/form_functions";
 import type { ComponentProps } from "~/components/ComponentType";
 import type { Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
@@ -153,21 +162,25 @@ export function SelectInputField(
       return [];
     }
 
-    return getSelectionOptions(graph, setGraph, [field.data as Vertex], collection).vertexes ||
-      [];
+    return (
+      getSelectionOptions(graph, setGraph, [field.data as Vertex], collection)
+        .vertexes || []
+    );
   };
   onMount(() => {
     const collection = getCollection();
-    getSelectionOptionsMGCall([field.data as Vertex], collection).then((res) => {
-      if (isValidResponse(res)) {
-        setGraphData(graph, setGraph, res.graph);
-      }
-    })
+    getSelectionOptionsMGCall([field.data as Vertex], collection).then(
+      (res) => {
+        if (isValidResponse(res)) {
+          setGraphData(graph, setGraph, res.graph);
+        }
+      },
+    );
   });
 
   const getSelectedOptions = () => {
     return selectedValue(field.meta, field.data as Vertex, graph).map(
-      (vertexId) => graph.vertexes[vertexId]
+      (vertexId) => graph.vertexes[vertexId],
     );
   };
 
@@ -181,8 +194,6 @@ export function SelectInputField(
   const isValidResponse = (res: any) => {
     return !res.error && res.statusCode != 500;
   };
-
-
 
   onMount(() => {
     selectOptions();
@@ -236,28 +247,28 @@ export function SelectInputField(
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-              graph,
-              setGraph,
-              field.txnId!,
-              field.meta,
-              props.data!,
-              data,
-              Ws,
-              false,
-            );
+                graph,
+                setGraph,
+                field.txnId!,
+                field.meta,
+                props.data!,
+                data,
+                Ws,
+                false,
+              );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "items")) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
-              graph,
-              setGraph,
-              field.txnId!,
-              field.meta,
-              props.data!,
-              data,
-              Ws,
-              false,
-            );
+                graph,
+                setGraph,
+                field.txnId!,
+                field.meta,
+                props.data!,
+                data,
+                Ws,
+                false,
+              );
         } else if (getValueFromVertexOrKey(field.meta.P.props, "inward")) {
           setParentValue(
             graph,

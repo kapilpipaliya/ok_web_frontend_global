@@ -125,12 +125,12 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
     }
-    if (
-      value.status === ProcessStatus.AckReceived ||
-      value.status === ProcessStatus.Sent
-    ) {
-      return;
-    }
+    // if (
+    //   value.status === ProcessStatus.AckReceived ||
+    //   value.status === ProcessStatus.Sent
+    // ) {
+    //   return;
+    // }
   }
   if (firstReadyTxn) {
     const existingTxnValue = getTransactionData(firstReadyTxn);

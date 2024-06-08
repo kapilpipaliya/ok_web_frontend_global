@@ -48,7 +48,7 @@ import {
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 import { AttrsTableData } from "~/lib/api";
-import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 export function cloneRowProps(
   graph: Store<GraphInterface>,

@@ -1,10 +1,10 @@
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
-import type {SetStoreFunction, Store} from "solid-js/store";
-import {useToast} from "~/components/custom/Toast";
-import {getToEdge} from "~/lib/graph/get/sync/traverse";
-import {addNewEdge, deleteEdge, newEdge} from "~/lib/graph/mutate/edge";
-import {getNewGraphId} from "~/lib/graph/transaction";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import { useToast } from "~/components/custom/Toast";
+import { getToEdge } from "~/lib/graph/get/sync/traverse";
+import { addNewEdge, deleteEdge, newEdge } from "~/lib/graph/mutate/edge";
+import { getNewGraphId } from "~/lib/graph/transaction";
 
 // This function will call multiple times, but it is optimized to not delete existing edges and use existing edges.
 export function setSelectionValue(
@@ -15,7 +15,7 @@ export function setSelectionValue(
   meta: Vertex,
   value?: Id[] | Id,
 ) {
-  const {showErrorToast} = useToast();
+  const { showErrorToast } = useToast();
 
   // delete removed edges:
   const type = getToEdge(meta, vertex);

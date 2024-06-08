@@ -62,7 +62,7 @@ export function TableInputField(
   props: ComponentProps & {
     txnId?: number;
     isRealTime?: boolean;
-    isShowAdd?: boolean;
+    isTableInside?: boolean;
   },
 ) {
   const [field, others] = splitProps(props, [
@@ -70,7 +70,7 @@ export function TableInputField(
     "data",
     "isRealTime",
     "disabled",
-    "isShowAdd",
+    "isTableInside",
     "txnId",
     "setValue",
   ]);
@@ -129,7 +129,7 @@ export function TableInputField(
         );
         if (!vertexCollAttrResult.error) {
           const vertexCollAttr = vertexCollAttrResult.vertexes!;
-          const attrs = [] as FieldAttribute[];
+          const attrs = [] as FieldAttribute[] | any;
           for (const attr of vertexCollAttr) {
             const props = getCollAttrs(graph, setGraph, attr);
             if (!props.error) attrs.push(attr!);
@@ -174,7 +174,7 @@ export function TableInputField(
   const [dragToIndex, setDragToIndex] = createSignal<number | null>(null);
   const [dragFromIndex, setDragFromIndex] = createSignal<number | null>(null);
   // Todo dont allow duplicate value in the select field
-  const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
+  const SortableRow = (p: {joinVertex: Vertex; index: number }) => {
     const handleDrop = () => {
       if (
         dragFromIndex() !== null &&
@@ -267,7 +267,6 @@ export function TableInputField(
       return (
         <For each={rowColumnsMetaAttrs()}>
           {(column) => {
-
             const metaVertex = createMemo(() => getMetaVertex(column.id));
 
             const component = createMemo(() => getComponent(column.id));
@@ -278,12 +277,14 @@ export function TableInputField(
             });
             const DefaultValue = () => (
               <Show when={metaVertex().P.props?.defaultValue}>
-                {getSelectionOptions(
-                  graph,
-                  setGraph,
-                  [p.joinVertex],
-                  metaVertex().P.props.defaultValue,
-                ).vertexes}
+                {
+                  getSelectionOptions(
+                    graph,
+                    setGraph,
+                    [p.joinVertex],
+                    metaVertex().P.props.defaultValue,
+                  ).vertexes
+                }
               </Show>
             );
             const Content = () => {
@@ -294,7 +295,7 @@ export function TableInputField(
                     title={toTitle(
                       column.P.displayName || column.P[IdAttr] || "",
                     )}
-                    isShowAdd={false}
+                    isTableInside={false}
                     component={component()}
                     // When we have a Table we pass original Table Meta Vertex
                     meta={
@@ -414,46 +415,34 @@ export function TableInputField(
             transition: "background-color 0.2s ease",
             border:
               dragToIndex() === p.index
-                ? "2px solid #007bff"
+                ? "2px solid green"
                 : "1px solid #ddd",
           }}
         >
           <td>
             <div class={"flex ai:center jc:center"}>
-              {/*<Icon icon="material-symbols:drag-indicator" width={25} height={25} />*/}
-
-              {/*<Icon icon="mingcute:up-fill"  />*/}
-              {/*<Icon icon="mingcute:down-fill"  />*/}
-              {/*<Icon icon="material-symbols:add-box"  />*/}
-              {/* <Show when={expandVertex() && getSelectionOptions(graph, setGraph, [p.joinVertex],
-                 `->${expandVertex()?.P.props.type}`).vertexes
-                 }> */}
               <button class="cursor: grab;">
                 <Icon
                   icon="material-symbols:drag-indicator"
                   class={"transform 2s ease-in-out"}
                 />
               </button>
-              <button
-                class="cursor: pointer;"
-                onClick={(e) => {
-                  // console.log(getSelectionOptions(graph, setGraph, [p.joinVertex], expandVertex()?.P.collection).vertexes);
-                  setExpanded(!expanded());
-                }}
-              >
-                <Icon
-                  icon="mingcute:down-fill"
-                  class={"transform 2s ease-in-out"}
-                  style={{
-                    transition: "transform 0.2s linear",
-                    "margin-top": "7px",
-                    transform: `${!expanded()}
-                        ? "rotate(0deg)"
-                        : "rotate(180deg)"
-                      }`,
+              {/* {p.joinVertex} */}
+              {/* <Show when={sortedVertexes()}> */}
+                <button
+                  class="cursor: pointer;"
+                  onClick={(e) => {
+                    setExpanded(!expanded());
                   }}
-                />
-              </button>
+                >
+                  <Icon
+                    icon={`${expanded() ? "mingcute:up-fill" : "mingcute:down-fill"}`}
+                    class={"transform 2s ease-in-out"}
+                    style={{
+                      "margin-top": "7px",
+                    }}
+                  />
+                </button>
               {/* </Show> */}
               <Icon
                 height={20}
@@ -502,14 +491,15 @@ export function TableInputField(
         </tr>
         {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
         {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
-        <Show when={expandVertex()}>
+        <Show when={expandVertex() && expanded()}>
           <tr>
             <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
+
               <DynamicComponent
                 component={"Table2"}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={expandVertex()!}
-                isShowAdd={false}
+                isTableInside={false}
                 data={p.joinVertex}
                 setValue={field.setValue}
                 disabled={disabled()}
@@ -570,24 +560,29 @@ export function TableInputField(
         {/*<Show when={field.meta.P.attributes}>*/}
         {/*  <FormGroup form={{title: '', label: field.meta.P.title || field.meta.P[IdAttr], attributes: field.meta.P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
-        <Show when={field.isShowAdd || sortedVertexes().length > 0}>
+        <Show when={field.isTableInside}>
           <AddNewButton />
         </Show>
-
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
-        <Show when={sortedVertexes().length}>
           <div
-            class={" w:80vw overflow:auto b:1px|solid|#37c r:10 m:2"}
-            style={{ "scrollbar-width": "thin" }}
+            class={" overflow:auto r:10 m:2"}
+          style={{ 'border': sortedVertexes().length ? '1px solid #37c':'', "scrollbar-width": "thin" }}
           >
-            <table class="styled-table b:none w:-webkit-fill-available">
+            <table class="styled-table b:none" style={{
+              width: props.isTableInside ? '-webkit-fill-available' : ''
+            }}>
+            <Show when={sortedVertexes().length}>
+
               <thead>
                 <tr
                   style={{
                     width: "max-content",
                   }}
                 >
-                  <td>&nbsp;Actions</td>
+                  <td class={"font-weight:medium p:0px|10px"}
+                    style={{
+                      "justify-content": "center",
+                    }}>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => {
                       return (
@@ -624,7 +619,7 @@ export function TableInputField(
                   </For>
                 </tr>
               </thead>
-
+</Show>
               <tbody>
                 {/*<DragDropProvider onDragStart={onDragStart} onDragEnd={onDragEnd} collisionDetector={closestCenter}>*/}
                 {/*  <DragDropSensors />*/}
@@ -634,6 +629,7 @@ export function TableInputField(
                     <RepeaterContext.Provider
                       value={[vertex, ...useContext(RepeaterContext)]}
                     >
+                      
                       <SortableRow joinVertex={vertex} index={index()} />
                     </RepeaterContext.Provider>
                   )}
@@ -643,7 +639,6 @@ export function TableInputField(
               </tbody>
             </table>
           </div>
-        </Show>
 
         {/*<Show when={Page}>*/}
         {/*  <For each={Object.values(Page!)}>{(errorMsg: string) => <small>{errorMsg}</small>}</For>*/}

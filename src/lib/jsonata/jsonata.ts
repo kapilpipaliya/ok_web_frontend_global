@@ -1619,12 +1619,8 @@ function evaluateLambda(expr, input, environment) {
   if (expr.thunk === true) {
     procedure.thunk = true;
   }
-  procedure.apply = (self, args) => apply(
-      procedure,
-      args,
-      input,
-      !!self ? self.environment : environment,
-    );
+  procedure.apply = (self, args) =>
+    apply(procedure, args, input, !!self ? self.environment : environment);
   return procedure;
 }
 
@@ -2172,8 +2168,13 @@ function populateMessage(err) {
     // if there are any handlebars, replace them with the field references
     // triple braces - replace with value
     // double braces - replace with json stringified value
-    var message = template.replace(/\{\{\{([^}]+)}}}/g, () => err[arguments[1]]);
-    message = message.replace(/\{\{([^}]+)}}/g, () => JSON.stringify(err[arguments[1]]));
+    var message = template.replace(
+      /\{\{\{([^}]+)}}}/g,
+      () => err[arguments[1]],
+    );
+    message = message.replace(/\{\{([^}]+)}}/g, () =>
+      JSON.stringify(err[arguments[1]]),
+    );
     err.message = message;
   }
   // Otherwise retain the original `err.message`
@@ -2204,7 +2205,11 @@ export function jsonata(expr: string, options?: {}) {
   var timestamp = new Date(); // will be overridden on each call to evalute()
   environment.bind(
     "now",
-    defineFunction((picture, timezone) => datetime.fromMillis(timestamp.getTime(), picture, timezone), "<s?s?:s>"),
+    defineFunction(
+      (picture, timezone) =>
+        datetime.fromMillis(timestamp.getTime(), picture, timezone),
+      "<s?s?:s>",
+    ),
   );
   environment.bind(
     "millis",

@@ -145,11 +145,7 @@ export function parseSignature(signature) {
     position++;
   }
   var regexStr =
-    "^" +
-    params
-      .map((param) => "(" + param.regex + ")")
-      .join("") +
-    "$";
+    "^" + params.map((param) => "(" + param.regex + ")").join("") + "$";
   var regex = new RegExp(regexStr);
   var getSymbol = (value) => {
     var symbol;
@@ -272,7 +268,9 @@ export function parseSignature(signature) {
                           arrayOK = false;
                         } else {
                           // make sure every item in the array is this type
-                          var differentItems = arg.filter((val) => getSymbol(val) !== itemType);
+                          var differentItems = arg.filter(
+                            (val) => getSymbol(val) !== itemType,
+                          );
                           arrayOK = differentItems.length === 0;
                         }
                       }

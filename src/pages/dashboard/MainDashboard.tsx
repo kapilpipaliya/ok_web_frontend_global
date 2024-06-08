@@ -72,9 +72,9 @@ export function MainDashboard(props: { children?: JSX.Element }) {
           },
         }}
       >
-        <Show when={graph.isSideBarOpen}>
+        <Show when={location.pathname.includes("/admin/") && !location.pathname.includes("admin/form/") && !location.pathname.includes("admin/Page/")}>
           <Navbar
-            showCloseDrawerBtn={graph.isSideBarOpen!}
+            showCloseDrawerBtn={location.pathname.includes("/admin/")}
             toggleSidebar={() => {
               setGraph("isSideBarOpen", (prev) => !prev);
             }}
@@ -82,8 +82,13 @@ export function MainDashboard(props: { children?: JSX.Element }) {
             meta={graph.vertexes[vertexId]}
           />
         </Show>
-
-        <div class="p:4|10 overflow-y:auto h:93vh">{props.children}</div>
+        <div
+          classList={{ "height:93vh": graph.isSideBarOpen }}
+          class={` p:4|10 overflow-y:auto`}
+          style={{ "scrollbar-width": "thin" }}
+        >
+          {props.children}
+        </div>
       </PageContext.Provider>
     </div>
   );
@@ -221,7 +226,7 @@ const DropdownMenu = () => {
                   </li>
                   <li style="margin-top: 5px; " class={"m:5|10"}>
                     <A
-                      href={`${APP_BASE_URL}/setting`}
+                      href={`/contact-us`}
                       onclick={() => {
                         setIsOpen(false);
                       }}

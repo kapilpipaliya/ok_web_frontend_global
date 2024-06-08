@@ -1,4 +1,4 @@
-import neo4j, { type Session, type Node } from "neo4j-driver";
+import neo4j, { type Session, type Node, int } from "neo4j-driver";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: any) {
@@ -96,7 +96,7 @@ async function updateNodeProperties(
 ) {
   const result = await session.run(
     "MATCH (n) WHERE id(n) = $id SET n += $props SET n.updatedAt = localDateTime() RETURN n;",
-    { id: node.elementId, props: properties },
+    { id: int(node.elementId), props: properties },
   );
   return result.records[0].get("n");
 }
@@ -145,7 +145,7 @@ async function addNodeEdges(
           const query =
             "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
           await sessionTarget.run(query, {
-            compPropNodeId: childVertex.get("m").elementId,
+            compPropNodeId: int(childVertex.get("m").elementId),
             props: superProperties,
           });
           isPropertyExist = true;
@@ -155,7 +155,7 @@ async function addNodeEdges(
         const query =
           "MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;";
         await sessionTarget.run(query, {
-          compNodeId: createdNode.elementId,
+          compNodeId: int(createdNode.elementId),
           props: superProperties,
         });
       }
@@ -169,7 +169,7 @@ async function addNodeEdges(
 const getChildrenVertex = (session: any, elementId: any, edgeType: any) => {
   return session.run(
     `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;`,
-    { id: elementId },
+    { id: int(elementId) },
   );
 };
 

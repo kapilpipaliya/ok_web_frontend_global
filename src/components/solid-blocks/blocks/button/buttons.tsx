@@ -13,9 +13,14 @@ const CustomButton = (props) => {
     custom: "custom-button",
   };
   return (
-    <button {...local} class={`${styles[variant()]} ${local.class || ""}`} {...field}>
+    <button
+      {...local}
+      class={`${styles[variant()]} ${local.class || ""}`}
+      {...field}
+    >
       {props.leading ? <>{props.leading}&nbsp;</> : ""}
-      {props.text || props.children} {props.trailing ? <>&nbsp;{props.trailing}</> : ""}
+      {props.text || props.children}{" "}
+      {props.trailing ? <>&nbsp;{props.trailing}</> : ""}
     </button>
   );
 };

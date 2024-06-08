@@ -58,10 +58,7 @@ async function authenticateUser(
 }
 
 // Function to authenticate regular user
-function authenticateRegularUser(
-  user: Node,
-  password: string,
-) {
+function authenticateRegularUser(user: Node, password: string) {
   if (user.properties.password !== password) {
     throw new Error("Not Authorized Email!");
   }

@@ -29,9 +29,11 @@ import {
   type Vertex,
 } from "~/lib/graph/graph";
 import {
+  ProcessStatus,
   commitTxn,
   getNewTxnId,
   revertTransaction,
+  transactions,
   txnHasSteps,
 } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -46,17 +48,16 @@ import type { FormMetaData } from "~/lib/Type";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/components/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
-import {
-  getFormMetaDataAsync,
-} from "~/lib/graph/get/async/graph_functions";
+import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { PageConfigContext } from "~/lib/contexts";
-import { FormGroup } from "./form/FormGroup";
+import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { checkIfNameExistsMGCall } from "~/cypher_api/functions/get/expression_eval_async_fns";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { Icon } from "@iconify-icon/solid";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -108,7 +109,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   // TODO: add validation on form that AttrsTableData keys should not available.
   // Note: When the page is loaded server side, the client side will not run this again,
   // so set state inside it will not set when page is reloaded.
-  const [data, { mutate, refetch }] = createResource(async () => {
+  const [data, { mutate, refetch }]: any = createResource(async () => {
     const form = await getFormMetaDataAsync(
       props.graph,
       props.setGraph,
@@ -120,7 +121,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   });
   createEffect(() => {
     if (data() && data() !== "Error") {
-      const result = JSON.parse(data().formData);
+      const result = JSON.parse(data().formData );
       if (result && !(result as { error: string }).error) {
         setFormData({ form: result.form as FormMetaData });
       }
@@ -129,12 +130,12 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
 
   return (
     <Switch>
-      <Match when={data.loading}><LoaderNew /></Match>
+      <Match when={data.loading}>
+        <LoaderNew />
+      </Match>
 
       <Match when={data.error}>Error</Match>
-
-      {/* <Match when={data()?.error}>Error</Match> */}
-
+      
       <Match when={formData.form}>
         <DynamicForm
           form={formData.form!}
@@ -315,9 +316,13 @@ export function DynamicForm(props: DynamicFormProps) {
           return;
         }
 
-        const name = formData?.formData?.P.name
+        const name = formData?.formData?.P.name;
 
-        const res = await checkIfNameExistsMGCall(props.form[IdAttr], name, props.id);
+        const res = await checkIfNameExistsMGCall(
+          props.form[IdAttr],
+          name,
+          props.id,
+        );
 
         if (res.error == true) {
           showErrorToast(res.message);
@@ -325,14 +330,15 @@ export function DynamicForm(props: DynamicFormProps) {
         }
 
         await showLoadingToast({
-          promise: submitDataCall({ ...data, name }, txnId),
+          promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
           loadMessage: "Submitting Data...",
           successMessage: "Data submitted successfully",
           onSuccess: (value) => {
+            transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => { },
+          onError: (error) => {},
         });
       }
       submit = true;
@@ -422,7 +428,9 @@ export function DynamicForm(props: DynamicFormProps) {
 
   return (
     <Switch>
-      <Match when={data.loading}><LoaderNew /></Match>
+      <Match when={data.loading}>
+        <LoaderNew />
+      </Match>
 
       <Match when={data.error}>Error</Match>
 
@@ -456,7 +464,7 @@ export function DynamicForm(props: DynamicFormProps) {
                           </Show>
 
                           <div class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
-                            <div class="p:5|15|15|15 w:full">
+                            <div class="p:5|15|15|15 w:full grid grid-cols:2 grid-cols:1@<md gap:0|10 grid-cols:auto">
                               <FormGroup
                                 graph={graph}
                                 setGraph={setGraph}
@@ -491,11 +499,6 @@ export function DynamicForm(props: DynamicFormProps) {
                       return (
                         <div
                           class="dx-fieldset"
-                          style={{
-                            "max-width": getTabsWidth(
-                              formData.groupByTabsAndGroup[activeTab()][group],
-                            ),
-                          }}
                         >
                           <Show when={group !== "main"}>
                             <div class="dx-fieldset-header">{group}</div>
@@ -564,6 +567,16 @@ export function DynamicForm(props: DynamicFormProps) {
                 props: {
                   children: "Import",
                   variant: "outlined",
+                  style: { display: "flex" },
+                  leading:
+                    // TO solve Hydration error passed a function
+                    () => (
+                      <Icon
+                        icon={"lets-icons:import"}
+                        height={22}
+                        width={22}
+                      />
+                    ),
                   onClick: () => {
                     setPopup(true);
                   },
@@ -582,6 +595,16 @@ export function DynamicForm(props: DynamicFormProps) {
                   onClick: () => {
                     setPopup(true);
                   },
+                  style: { display: "flex" },
+                  leading:
+                    // TO solve Hydration error passed a function
+                    () => (
+                      <Icon
+                        icon={"lets-icons:export"}
+                        height={22}
+                        width={22}
+                      />
+                    ),
                   class: " b:blue",
                 },
               },

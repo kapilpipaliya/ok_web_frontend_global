@@ -132,7 +132,7 @@ export const GeneralSection = (props: GenralProps) => {
     }
   };
   return (
-    <div class="max-w:70%@>lg bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|#92afdc">
+    <div class="max-w:70%@>lg bg:#f5f7fa p:10px|15px w:80% m:20 r:8 box-shadow:0|0|12|.1|rgb(237,239,241)">
       <div class={"font-weight:700"}>Personal Info</div>
       <div class={"font-weight:400"}>
         Update personal details here

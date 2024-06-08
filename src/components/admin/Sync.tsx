@@ -1,10 +1,4 @@
-import {
-  For,
-  Show,
-  createEffect,
-  createSignal,
-  onCleanup,
-} from "solid-js";
+import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
 import PageHeader from "../custom/Breadcumb";
 import { getUsers } from "../../cypher_api/functions/get/adminFunctions";
 import { useToast } from "../custom/Toast";

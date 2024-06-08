@@ -1,9 +1,16 @@
-import type {SetStoreFunction, Store} from "solid-js/store";
-import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
-import {getParentVertex} from "~/lib/graph/get/sync/traverse";
-import {getComponentFromLayoutRow} from "~/lib/drag-drop/componentDrag";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
+import { getParentVertex } from "~/lib/graph/get/sync/traverse";
+import { getComponentFromLayoutRow } from "~/lib/drag-drop/componentDrag";
 
-export function validateDragOver(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, fromVertex: Vertex, toVertexId: Id, formData: Vertex, position: string) {
+export function validateDragOver(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  fromVertex: Vertex,
+  toVertexId: Id,
+  formData: Vertex,
+  position: string,
+) {
   // Don't allow parent to move inside children.
   let parentVertex = graph.vertexes[toVertexId];
   while (true) {
@@ -23,11 +30,7 @@ export function validateDragOver(graph: Store<GraphInterface>, setGraph: SetStor
     if (toVertexId === formData.id) {
       // Allow drag over it
     } else {
-      const compVertex = getComponentFromLayoutRow(
-        toVertexId,
-        graph,
-        setGraph,
-      );
+      const compVertex = getComponentFromLayoutRow(toVertexId, graph, setGraph);
       if (!compVertex?.P.child) {
         // Don't allow drag and drop
         return false;

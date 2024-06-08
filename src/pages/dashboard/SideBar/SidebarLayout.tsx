@@ -15,7 +15,7 @@ import { GraphContext } from "~/lib/graph/graph";
 import { expressionString } from "~/lib/Utils";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { useLocation, } from "@solidjs/router";
+import { useLocation } from "@solidjs/router";
 
 export interface navbarDataI {
   children: navbarDataI[];

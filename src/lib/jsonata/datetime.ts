@@ -517,7 +517,7 @@ function analyseIntegerPicture(picture) {
           }
           // are they equally spaced?
           const indexes = separators.map((separator) => separator.position);
-          const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+          const gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
           // find the greatest common divisor of all the positions
           const factor = indexes.reduce(gcd);
           // is every position separated by this divisor? If so, it's regular
@@ -778,13 +778,15 @@ const startOfFirstWeek = (ym) => {
 };
 
 const yearMonth = (year, month) => ({
-    year: year,
-    month: month,
-    nextMonth: () => month === 11 ? yearMonth(year + 1, 0) : yearMonth(year, month + 1),
-    previousMonth: () => month === 0 ? yearMonth(year - 1, 11) : yearMonth(year, month - 1),
-    nextYear: () => yearMonth(year + 1, month),
-    previousYear: () => yearMonth(year - 1, month),
-  });
+  year: year,
+  month: month,
+  nextMonth: () =>
+    month === 11 ? yearMonth(year + 1, 0) : yearMonth(year, month + 1),
+  previousMonth: () =>
+    month === 0 ? yearMonth(year - 1, 11) : yearMonth(year, month - 1),
+  nextYear: () => yearMonth(year + 1, month),
+  previousYear: () => yearMonth(year - 1, month),
+});
 
 const deltaWeeks = (start, end) => (end - start) / (millisInADay * 7) + 1;
 
@@ -1193,7 +1195,8 @@ function generateRegex(formatSpec) {
         break;
       case formats.ROMAN:
         matcher.regex = isUpper ? "[MDCLXVI]+" : "[mdclxvi]+";
-        matcher.parse = (value) => romanToDecimal(isUpper ? value : value.toUpperCase());
+        matcher.parse = (value) =>
+          romanToDecimal(isUpper ? value : value.toUpperCase());
         break;
       case formats.WORDS:
         matcher.regex =
@@ -1455,7 +1458,8 @@ function parseDateTime(timestamp, picture) {
 }
 
 // Regular expression to match an ISO 8601 formatted timestamp
-var iso8601regex = /^\d{4}(-[01]\d)*(-[0-3]\d)*(T[0-2]\d:[0-5]\d:[0-5]\d)*(\.\d+)?([+-][0-2]\d:?[0-5]\d|Z)?$/;
+var iso8601regex =
+  /^\d{4}(-[01]\d)*(-[0-3]\d)*(T[0-2]\d:[0-5]\d:[0-5]\d)*(\.\d+)?([+-][0-2]\d:?[0-5]\d|Z)?$/;
 
 /**
  * Converts an ISO 8601 timestamp to milliseconds since the epoch

@@ -13,7 +13,7 @@ function unwrapProperties(
     if (properties[key] && typeof properties[key] === "object") {
       if ("low" in properties[key] && "high" in properties[key]) {
         // Assuming the property is a Neo4j Integer
-        unwrapped[key] = properties[key] //.toNumber(); // Convert to JavaScript number
+        unwrapped[key] = properties[key]; //.toNumber(); // Convert to JavaScript number
         // There is isDateTime function in the Neo4j driver too
       } else if (
         "year" in properties[key] &&
@@ -31,7 +31,7 @@ function unwrapProperties(
           properties[key].hour,
           properties[key].minute,
           properties[key].second,
-          Math.floor(properties[key].nanosecond / 1000000)
+          Math.floor(properties[key].nanosecond / 1000000),
         );
         unwrapped[key] = date.toISOString();
       } else {

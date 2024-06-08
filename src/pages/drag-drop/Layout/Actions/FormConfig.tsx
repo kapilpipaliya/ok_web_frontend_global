@@ -1,5 +1,5 @@
 import { useContext } from "solid-js";
-import { AbstractSingleForm } from "~/components/dynamic/components/DynamicForm";
+import { AbstractSingleForm } from "~/components/dynamic/components/form/DynamicForm";
 import { GraphContext } from "~/lib/graph/graph";
 import { useParams } from "@solidjs/router";
 

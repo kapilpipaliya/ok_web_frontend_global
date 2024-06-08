@@ -44,7 +44,7 @@ export function FormGroup(props: FormGroupProps) {
           <DynamicComponent
             component={component()}
             meta={metaVertex}
-            isShowAdd={true}
+            isTableInside={true}
             title={toTitle(
               metaVertex.P.displayName ||
                 metaVertex.P[IdAttr] ||
@@ -75,13 +75,15 @@ export function FormGroup(props: FormGroupProps) {
             </Match>
 
             <Match when={true}>
-              <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
-                <div id={id}>
-                  {props.labelPrefix as string} <Label />
+              <div class="align-content:center">
+                <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
+                  <div id={id}>
+                    {props.labelPrefix as string} <Label />
+                  </div>
                 </div>
-              </div>
-              <div>
-                <Content />
+                <div>
+                  <Content />
+                </div>
               </div>
             </Match>
           </Switch>

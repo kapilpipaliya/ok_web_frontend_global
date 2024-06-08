@@ -1,6 +1,12 @@
-import {type Accessor, batch, createMemo, createSelector, useContext,} from "solid-js";
-import {reconcile, type SetStoreFunction, type Store} from "solid-js/store";
-import {useToast} from "~/components/custom/Toast";
+import {
+  type Accessor,
+  batch,
+  createMemo,
+  createSelector,
+  useContext,
+} from "solid-js";
+import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import { useToast } from "~/components/custom/Toast";
 import {
   DraggedVertexContext,
   DragOverTargetIdContext,
@@ -11,17 +17,23 @@ import {
   SelectedComponentContext,
   SelectedIdContext,
 } from "~/lib/contexts";
-import {getCompProps, getRowProps,} from "~/lib/graph/get/sync/graph_functions";
-import {deleteNestedLayout} from "../graph/mutate/deleteNestedLayout";
-import {type GraphInterface, type Id, type Vertex,} from "~/lib/graph/graph";
-import {mergeVertexProperties} from "~/lib/graph/mutate/vertex";
-import {getChildVertex, getParentVertex,} from "../graph/get/sync/traverse";
-import {componentDrag, getComponentFromLayoutRow} from "~/lib/drag-drop/componentDrag";
-import {getChildrenAttrs} from "~/lib/drag-drop/getChildrenAttrs";
-import {validateDragOver} from "~/lib/drag-drop/validateDragOver";
-import {getIndicatorPosition} from "~/lib/drag-drop/getIndicatorPosition";
-import {loadPageData} from "~/lib/drag-drop/loadPageData";
-import {handleDropAtPosition} from "~/lib/drag-drop/handleDropAtPosition";
+import {
+  getCompProps,
+  getRowProps,
+} from "~/lib/graph/get/sync/graph_functions";
+import { deleteNestedLayout } from "../graph/mutate/deleteNestedLayout";
+import { type GraphInterface, type Id, type Vertex } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { getChildVertex, getParentVertex } from "../graph/get/sync/traverse";
+import {
+  componentDrag,
+  getComponentFromLayoutRow,
+} from "~/lib/drag-drop/componentDrag";
+import { getChildrenAttrs } from "~/lib/drag-drop/getChildrenAttrs";
+import { validateDragOver } from "~/lib/drag-drop/validateDragOver";
+import { getIndicatorPosition } from "~/lib/drag-drop/getIndicatorPosition";
+import { loadPageData } from "~/lib/drag-drop/loadPageData";
+import { handleDropAtPosition } from "~/lib/drag-drop/handleDropAtPosition";
 
 export function useDragDrop(
   graph: Store<GraphInterface>,
@@ -46,7 +58,9 @@ export function useDragDrop(
   const { showErrorToast, showSuccessToast } = useToast();
   const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
 
-  const children = createMemo(() => getChildrenAttrs(graph, setGraph, layoutVertex));
+  const children = createMemo(() =>
+    getChildrenAttrs(graph, setGraph, layoutVertex),
+  );
 
   const activeItemChanged = createSelector<any, Vertex>(
     indicatorPosition,
@@ -120,7 +134,16 @@ export function useDragDrop(
         console.error("Position not found when dropping");
         return;
       }
-      if (!validateDragOver(graph, setGraph, fromVertex, toVertexId, formData, position)) {
+      if (
+        !validateDragOver(
+          graph,
+          setGraph,
+          fromVertex,
+          toVertexId,
+          formData,
+          position,
+        )
+      ) {
         return;
       }
     }
@@ -152,7 +175,7 @@ export function useDragDrop(
       }
 
       if (fromVertex.L[0] === "Page") {
-        await loadPageData(graph, setGraph, fromVertex, showErrorToast)
+        await loadPageData(graph, setGraph, fromVertex, showErrorToast);
       }
 
       const position = indicatorPosition().position;
@@ -160,7 +183,15 @@ export function useDragDrop(
         showErrorToast("Position not found when dropping");
         return;
       }
-      await handleDropAtPosition(graph, setGraph, txnId, formData, fromVertex, toVertex, position);
+      await handleDropAtPosition(
+        graph,
+        setGraph,
+        txnId,
+        formData,
+        fromVertex,
+        toVertex,
+        position,
+      );
     }
 
     resetDragDropState();
@@ -286,7 +317,7 @@ export function useDragDrop(
       setDraggedVertex([]);
       setIndicatorPosition({ activeItem: null, position: null });
       setDragOverTargetId(-1);
-    })
+    });
   }
 
   return {
@@ -302,4 +333,3 @@ export function useDragDrop(
     deleteLayout,
   };
 }
-

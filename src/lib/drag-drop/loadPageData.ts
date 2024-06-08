@@ -1,11 +1,16 @@
-import type {SetStoreFunction, Store} from "solid-js/store";
-import type {GraphInterface, Vertex} from "~/lib/graph/graph";
-import {getFormMetaDataAsync} from "~/lib/graph/get/async/graph_functions";
-import {getEdgesFromRowsAttr} from "~/lib/Utils";
-import {getDataMGCall} from "~/cypher_api/lib/graph/get/async/traverse";
-import {setGraphData} from "~/lib/websocket/ws_events";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
+import { getEdgesFromRowsAttr } from "~/lib/Utils";
+import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { setGraphData } from "~/lib/websocket/ws_events";
 
-export async function loadPageData(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, fromVertex: Vertex, showErrorToast: any) {
+export async function loadPageData(
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  fromVertex: Vertex,
+  showErrorToast: any,
+) {
   const form: any = await getFormMetaDataAsync(
     graph,
     setGraph,
@@ -15,7 +20,7 @@ export async function loadPageData(graph: Store<GraphInterface>, setGraph: SetSt
     showErrorToast(form.error);
     return;
   }
-  const {incoming, outgoing}: { incoming: any; outgoing: any } =
+  const { incoming, outgoing }: { incoming: any; outgoing: any } =
     getEdgesFromRowsAttr(form.form.attributes);
   const result = await getDataMGCall({
     expression: `id:'${fromVertex.id}'`,

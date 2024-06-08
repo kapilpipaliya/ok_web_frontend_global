@@ -1,9 +1,6 @@
-import { createContext, splitProps, } from "solid-js";
-import type {
-  GraphInterface,
-  Vertex,
-} from "~/lib/graph/graph";
-import type { FieldAttribute, } from "~/lib/Type";
+import { createContext, splitProps } from "solid-js";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { FieldAttribute } from "~/lib/Type";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import {
   getChildVertex,
@@ -30,7 +27,6 @@ export function expressionString(params: {
   filter?: string;
   custom?: string;
 }): string {
-
   if (params.custom) {
     return params.custom;
   }
@@ -64,8 +60,8 @@ export const iconMap: any = {
   Image: "mage:image",
   A: "ph:link-bold",
   Text: "ci:text",
-  Heading:'gravity-ui:circle-letter-h',
-  Rating:'mage:star',
+  Heading: "gravity-ui:circle-letter-h",
+  Rating: "mage:star",
   Repeater: "formkit:repeater",
   TabPanel: "material-symbols:backup-table-rounded",
   TreeView: "ph:tree-view-light",

@@ -1,10 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import {
-  useContext,
-  For,
-  type Accessor,
-  createSignal,
-} from "solid-js";
+import { useContext, For, type Accessor, createSignal } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
@@ -32,7 +27,7 @@ export function ActionsDragAndDrops(props: ActionsProps) {
           "h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5"
         }
         style={{
-          "max-height": "calc(100vh - 120px)",
+          "max-height": "calc(100vh - 70px)",
           "scrollbar-width": "thin",
           "scrollbar-color": "lightgrey",
         }}

@@ -1,16 +1,8 @@
-import { useLocation, useNavigate, } from "@solidjs/router";
-import {
-  createEffect,
-  createResource,
-  createSignal,
-  Show,
-} from "solid-js";
+import { useLocation, useNavigate } from "@solidjs/router";
+import { createEffect, createResource, createSignal, Show } from "solid-js";
 import { useContext } from "solid-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import {
-  breadcrumbData,
-  expressionString,
-} from "~/lib/Utils";
+import { breadcrumbData, expressionString } from "~/lib/Utils";
 import PageHeader from "~/components/custom/Breadcumb";
 import DataGrid from "./DataGrid";
 import { Icon } from "@iconify-icon/solid";
@@ -62,14 +54,13 @@ export function AbstractGrid(props: AbstractGridProps) {
     return [];
   };
 
-  const [nav] = createResource(tableId, async () => {
+  const [nav, { refetch }] = createResource(tableId, async () => {
     const navData = await getNavData();
     const filtered = getCurrentLocation(navData);
 
     setLocationData(filtered);
     return filtered;
   });
- 
 
   return (
     <>
@@ -83,7 +74,7 @@ export function AbstractGrid(props: AbstractGridProps) {
           ]}
         />
       </Show>
-      
+
       <Show when={tableId()}>
         <DataGrid tableId={tableId()} />
       </Show>

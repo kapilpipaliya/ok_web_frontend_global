@@ -1,6 +1,9 @@
 import { postAPI } from "~/components/api/postApi";
 import { API } from "~/components/api/DataFetcher";
 import { ProcessStatus, transactions } from "~/lib/graph/transaction";
+import { onMutatDataGet } from "~/lib/websocket/ws_events";
+import { GraphInterface } from "~/lib/graph/graph";
+import { SetStoreFunction, Store } from "solid-js/store";
 
 // General function to make API calls with a payload
 async function makeAPICall(url: string, payload: object) {
@@ -13,10 +16,13 @@ export async function getPagesDataCall(pageName: string) {
 }
 
 // Submit generic data to the server
-export async function submitDataCall(data: any, txnId: number) {
+export async function submitDataCall(data: any, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number) {
   const result = await makeAPICall(API.SubmitDataUrl, data);
   if (transactions.has(txnId))
     transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+  for (const oneResult of result.result) {
+    onMutatDataGet(undefined as any, graph, setGraph, oneResult[1]);
+  }
   return result;
 }
 

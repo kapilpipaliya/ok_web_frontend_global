@@ -1,10 +1,4 @@
-import {
-  type JSX,
-  Match,
-  mergeProps,
-  splitProps,
-  Switch,
-} from "solid-js";
+import { type JSX, Match, mergeProps, splitProps, Switch } from "solid-js";
 import { runEvent } from "../tools";
 
 import "../base.css";

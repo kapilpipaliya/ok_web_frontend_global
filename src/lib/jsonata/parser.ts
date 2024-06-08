@@ -1157,7 +1157,10 @@ export function parser(source, recover) {
             }
             // object constructor - process each pair
             result.group = {
-              lhs: expr.rhs.map((pair) => [processAST(pair[0]), processAST(pair[1])]),
+              lhs: expr.rhs.map((pair) => [
+                processAST(pair[0]),
+                processAST(pair[1]),
+              ]),
               position: expr.position,
             };
             break;

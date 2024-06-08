@@ -1,37 +1,26 @@
-import { For, createSignal, } from "solid-js";
+import { For, createSignal } from "solid-js";
 
 export const PageSetting = () => {
-  return (
-    <div class={"mt:2rem"}>
-      <Sidebar />
-    </div>
-  );
+  return <Sidebar />;
 };
 
 const Sidebar = () => {
-  const [selected, setSelected] = createSignal("form-settings");
+  const [selected, setSelected] = createSignal("thank-you-page");
 
   const menuItems: any = [
-    { id: "form-settings", label: "Form Settings", icon: "⚙️" },
-    { id: "emails", label: "Emails", icon: "📧" },
-    { id: "conditions", label: "Conditions", icon: "🔄" },
     { id: "thank-you-page", label: "Thank You Page", icon: "✅" },
-    { id: "integrations", label: "Integrations", icon: "🔗" },
-    { id: "approval-flows", label: "Approval Flows", icon: "✔️" },
-    { id: "jotform-sign", label: "Jotform Sign", icon: "✍️" },
-    { id: "mobile-notifications", label: "Mobile Notifications", icon: "📱" },
   ];
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex" }} class="mt:1rem w:98vw flex:column@<sm">
       <div
+        class="h:90vh@>sm"
         style={{
           width: "250px",
           "background-color": "rgb(64,74,86)",
           padding: "20px",
           color: "#fff",
           "border-radius": "5px",
-          height: "80vh",
         }}
       >
         <For each={menuItems}>
@@ -56,8 +45,11 @@ const Sidebar = () => {
         </For>
       </div>
       <div style={{ flex: 1, padding: "20px", "background-color": "#f8f9fa" }}>
-        <h2>{menuItems.find((item: any) => item.id === selected()).label}</h2>
-        <p>Customize form status and properties</p>
+        <h2 class="font-weight:700 font:18 ">
+          {menuItems.find((item: any) => item.id === selected()).icon}&nbsp;
+          {menuItems.find((item: any) => item.id === selected()).label}
+        </h2>
+        <p class="font:14">Show Page After Submission Form</p>
         {/* Add the content for the selected menu item here */}
       </div>
     </div>

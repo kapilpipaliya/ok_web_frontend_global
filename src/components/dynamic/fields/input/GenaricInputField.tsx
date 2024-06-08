@@ -17,6 +17,7 @@ import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField"
 import type { ComponentProps } from "~/components/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid-blocks/blocks/label/Label";
+import MultiSelectField from "~/components/custom/MultiSelect";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -49,16 +50,6 @@ export function GenericInputField(
         fallback={getTextColumnValue(field.data?.P[field.meta.P[IdAttr]])}
       >
         <Switch>
-          <Match
-            when={component() === "FormSubmit" || component() === "FormCancel"}
-          >
-            <button
-              onClick={() => setSelectedId(field.meta.id)}
-              {...field.meta.P.props}
-            >
-              {field.data?.P[field.meta.P[IdAttr]] ?? field.meta.P.children}
-            </button>
-          </Match>
           <Match when={component() === "CheckBox"}>
             <Checkbox
               {...field.meta?.P.props}
@@ -166,6 +157,45 @@ export function GenericInputField(
             <Progress
               style={{ ...field.meta?.P.props }}
               {...field.meta?.P.props}
+            />
+          </Match>
+          <Match when={component() === "SelectBox"}>
+            <MultiSelectField
+              onRemove={(e: any) => {
+                field.setValue
+                  ? field.setValue(e.target.value)
+                  : setValueGlobal(
+                      graph,
+                      setGraph,
+                      field.txnId!,
+                      field.meta,
+                      field.data!,
+                      e.target.value,
+                      Ws,
+                      false,
+                    );
+              }}
+              onSelect={(e: any) => {
+                field.setValue
+                  ? field.setValue(e.target.value)
+                  : setValueGlobal(
+                      graph,
+                      setGraph,
+                      field.txnId!,
+                      field.meta,
+                      field.data!,
+                      e.target.value,
+                      Ws,
+                      false,
+                    );
+              }}
+              options={field.meta?.P.props?.options ?? []}
+              selectedValues={() => [field.data?.P[field.meta.P[IdAttr]]]}
+              placeholder={field.meta?.P.props?.placeholder ?? "Select Item"}
+              disable={field.disabled}
+              displayValueParent="P"
+              displayValueChild="name"
+              selectionLimit={1}
             />
           </Match>
           <Match when={component() === "RadioGroup"}>

@@ -1,4 +1,4 @@
-import { type Session, int } from "neo4j-driver";
+import { int, type Session } from "neo4j-driver";
 import { isObject } from "~/lib/Utils";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
@@ -41,10 +41,12 @@ function isProperEdgeFormat(edge: Partial<Edge>): string {
   if (edge.T === undefined || typeof edge.T !== "string") {
     return "edge must contain T (type) and it must be a string.";
   }
-  if (edge.S === undefined) { //  || typeof edge.S !== "number"
+  if (edge.S === undefined) {
+    //  || typeof edge.S !== "number"
     return "edge must contain S (start) and it must be an integer.";
   }
-  if (edge.E === undefined) { //  || typeof edge.E !== "number"
+  if (edge.E === undefined) {
+    //  || typeof edge.E !== "number"
     return "edge must contain E (end) and it must be an integer.";
   }
   if (
@@ -99,9 +101,9 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
     }
     for (const idmap of txns[vertexIdMap]) {
       if (
-        idmap.length !== 2 ||
-        typeof idmap[0] !== "number" ||
-        typeof idmap[1] !== "number"
+        idmap.length !== 2
+        // typeof idmap[0] !== "number" ||
+        // typeof idmap[1] !== "number"
       ) {
         return addFailure(
           responseResult,
@@ -112,9 +114,9 @@ function mutateArgsValidation(event: WsEvent, args: any[]): any {
     }
     for (const idmap of txns[edgeIdMap]) {
       if (
-        idmap.length !== 2 ||
-        typeof idmap[0] !== "number" ||
-        typeof idmap[1] !== "number"
+        idmap.length !== 2
+        // typeof idmap[0] !== "number" ||
+        // typeof idmap[1] !== "number"
       ) {
         return addFailure(
           responseResult,
@@ -182,8 +184,11 @@ export async function mutateData(
   const clientToServerVertexIdMap = new Map<number, number>();
   const clientToServerEdgeIdMap = new Map<number, number>();
   const responseResult = [] as any[];
-
+  console.log(args)
   const validationResult = mutateArgsValidation(event, args);
+  if (!validationResult) {
+    return {error: true, message: 'Invalid argument shape'};
+  }
   if (Object.keys(validationResult).length > 0) {
     return validationResult;
   }
@@ -472,6 +477,7 @@ export async function mutateData(
       }
 
       if (mutationObject.deleteEdge) {
+        console.log('deleteEDge')
         const id =
           clientToServerEdgeIdMap.get(mutationObject.deleteEdge.id) ||
           mutationObject.deleteEdge.id;

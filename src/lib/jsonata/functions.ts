@@ -128,10 +128,11 @@ export function string(arg, prettify = false) {
     }
     str = JSON.stringify(
       arg,
-      (key, val) => typeof val !== "undefined" &&
-          val !== null &&
-          val.toPrecision &&
-          isNumeric(val)
+      (key, val) =>
+        typeof val !== "undefined" &&
+        val !== null &&
+        val.toPrecision &&
+        isNumeric(val)
           ? Number(val.toPrecision(15))
           : val && isFunction(val)
             ? ""
@@ -579,12 +580,12 @@ export function base64encode(str) {
   var btoa =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.btoa
-      : ((str) => {
+      : (str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
           return new global.Buffer.from(str, "binary").toString("base64"); // eslint-disable-line new-cap
-        });
+        };
   return btoa(str);
 }
 
@@ -602,12 +603,12 @@ export function base64decode(str) {
   var atob =
     typeof window !== "undefined"
       ? /* istanbul ignore next */ window.atob
-      : ((str) => {
+      : (str) => {
           // Simply doing `new Buffer` at this point causes Browserify to pull
           // in the entire Buffer browser library, which is large and unnecessary.
           // Using `global.Buffer` defeats this.
           return new global.Buffer.from(str, "base64").toString("binary"); // eslint-disable-line new-cap
-        });
+        };
   return atob(str);
 }
 
@@ -953,7 +954,7 @@ export function formatNumber(value, picture, options) {
     }
     var charTypes = parts.activePart
       .split("")
-      .map((char) => activeChars.indexOf(char) === -1 ? "p" : "a")
+      .map((char) => (activeChars.indexOf(char) === -1 ? "p" : "a"))
       .join("");
     if (charTypes.indexOf("p") !== -1) {
       error = "D3086";
@@ -1011,7 +1012,9 @@ export function formatNumber(value, picture, options) {
     if (
       exponentExists &&
       (parts.exponentPart.length === 0 ||
-        parts.exponentPart.split("").filter((char) => decimalDigitFamily.indexOf(char) === -1).length > 0)
+        parts.exponentPart
+          .split("")
+          .filter((char) => decimalDigitFamily.indexOf(char) === -1).length > 0)
     ) {
       error = "D3093";
     }
@@ -1035,10 +1038,11 @@ export function formatNumber(value, picture, options) {
             : part.substring(groupingPosition)
         )
           .split("")
-          .filter((char) => (
+          .filter(
+            (char) =>
               decimalDigitFamily.indexOf(char) !== -1 ||
-              char === properties.digit
-            )).length;
+              char === properties.digit,
+          ).length;
         positions.push(charsToTheRight);
         groupingPosition = parts.integerPart.indexOf(
           properties["grouping-separator"],
@@ -1053,7 +1057,7 @@ export function formatNumber(value, picture, options) {
       if (indexes.length === 0) {
         return 0;
       }
-      var gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+      var gcd = (a, b) => (b === 0 ? a : gcd(b, a % b));
       // find the greatest common divisor of all the positions
       var factor = indexes.reduce(gcd);
       // is every position separated by this divisor? If so, it's regular
@@ -1077,10 +1081,13 @@ export function formatNumber(value, picture, options) {
     var scalingFactor = minimumIntegerPartSize;
 
     var fractionalPartArray = parts.fractionalPart.split("");
-    var minimumFactionalPartSize = fractionalPartArray.filter((char) => decimalDigitFamily.indexOf(char) !== -1).length;
-    var maximumFactionalPartSize = fractionalPartArray.filter((char) => (
-        decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit
-      )).length;
+    var minimumFactionalPartSize = fractionalPartArray.filter(
+      (char) => decimalDigitFamily.indexOf(char) !== -1,
+    ).length;
+    var maximumFactionalPartSize = fractionalPartArray.filter(
+      (char) =>
+        decimalDigitFamily.indexOf(char) !== -1 || char === properties.digit,
+    ).length;
     var exponentPresent = typeof parts.exponentPart === "string";
     if (minimumIntegerPartSize === 0 && maximumFactionalPartSize === 0) {
       if (exponentPresent) {

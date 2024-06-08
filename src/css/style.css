@@ -874,7 +874,7 @@ label {
 
 .planprice {
   display: inline-flex;
-  clear:left;
+  clear: left;
   align-items: center;
 }
 

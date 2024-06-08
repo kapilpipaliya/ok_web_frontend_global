@@ -1,11 +1,14 @@
-import type {SetStoreFunction, Store} from "solid-js/store";
-import type {GraphInterface, Vertex} from "~/lib/graph/graph";
-import {untrack} from "solid-js";
-import {getChildVertex, getChildVertexes} from "~/lib/graph/get/sync/traverse";
-import {mergeVertexProperties, newVertex} from "~/lib/graph/mutate/vertex";
-import {addNewRow} from "~/lib/graph/mutate/form_functions";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import { untrack } from "solid-js";
+import {
+  getChildVertex,
+  getChildVertexes,
+} from "~/lib/graph/get/sync/traverse";
+import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { addNewRow } from "~/lib/graph/mutate/form_functions";
 
-import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
+import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 
 export function setPropertyValueGlobal(
   graph: Store<GraphInterface>,
@@ -27,7 +30,7 @@ export function setPropertyValueGlobal(
     });
     if (row) {
       if (valueSet ?? true)
-        mergeVertexProperties(txnId, row.id, graph, setGraph, {value});
+        mergeVertexProperties(txnId, row.id, graph, setGraph, { value });
     } else {
       const propMetaVertex = newVertex("", ["Meta"], {
         name: "Prop",
@@ -39,7 +42,7 @@ export function setPropertyValueGlobal(
         return vertex.P.name === meta.P.name;
       });
       if (componentProp) {
-        const properties = valueSet ?? true ? {value} : {};
+        const properties = valueSet ?? true ? { value } : {};
         const addRowResult = addNewRow(
           txnId,
           propMetaVertex,
@@ -57,7 +60,7 @@ export function setPropertyValueGlobal(
             graph.vertexes[addRowResult.vertexId],
             graph,
             setGraph,
-            {P: {name: "Name"}} as unknown as Vertex,
+            { P: { name: "Name" } } as unknown as Vertex,
             componentProp.id,
           );
         }

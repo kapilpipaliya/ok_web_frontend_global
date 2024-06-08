@@ -34,7 +34,7 @@ export function MenuDragAndDrop(props: MenuProps) {
             "h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"
           }
           style={{
-            "max-height": "calc(100vh - 120px)",
+            "max-height": "calc(100vh - 70px)",
             "scrollbar-width": "thin",
             "scrollbar-color": "lightgrey",
           }}
@@ -51,10 +51,7 @@ export function MenuDragAndDrop(props: MenuProps) {
   );
 }
 
-const Column = (props: {
-  datas: any;
-  toggleLeftOpen: Accessor<boolean>;
-}) => {
+const Column = (props: { datas: any; toggleLeftOpen: Accessor<boolean> }) => {
   const [selectedTab, setSelectedTab] = createSignal("components");
 
   return (

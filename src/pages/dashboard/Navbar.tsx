@@ -60,22 +60,7 @@ export function Navbar(
       >
         <Show
           when={field.showCloseDrawerBtn}
-          fallback={
-            <div
-              class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
-              onclick={() => {
-                navigate(`${APP_BASE_URL}/Page`);
-              }}
-              title="Back"
-            >
-              <Icon
-                icon={"flowbite:caret-left-outline"}
-                class={"color:black:hover color:lightgrey"}
-                height={30}
-                width={30}
-              />
-            </div>
-          }
+          
         >
           <NavToggleBtn toggleSidebar={field.toggleSidebar} />
         </Show>

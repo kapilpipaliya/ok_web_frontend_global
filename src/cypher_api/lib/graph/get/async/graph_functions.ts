@@ -245,18 +245,20 @@ export async function getFormApiFromFormMGCall(
     return { error: attrsResult.error };
   }
 
-  return JSON.parse(JSON.stringify({
-    error: "",
-    form: {
-      attributes: attrsResult.attrs!,
-      [IdAttr]: coll.P[IdAttr],
-      title: coll.P.title,
-      isRealTime: coll.P.isRealTime,
-      // collection used in Grid, its same like id key
-      // @ts-ignore
-      collection: coll.P[IdAttr],
-    },
-  }));
+  return JSON.parse(
+    JSON.stringify({
+      error: "",
+      form: {
+        attributes: attrsResult.attrs!,
+        [IdAttr]: coll.P[IdAttr],
+        title: coll.P.title,
+        isRealTime: coll.P.isRealTime,
+        // collection used in Grid, its same like id key
+        // @ts-ignore
+        collection: coll.P[IdAttr],
+      },
+    }),
+  );
 }
 
 // TODO: when meta changed realtime its not updating.

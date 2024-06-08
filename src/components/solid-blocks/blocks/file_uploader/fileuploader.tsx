@@ -1,9 +1,4 @@
-import {
-  createEffect,
-  createSignal,
-  type JSX,
-  splitProps,
-} from "solid-js";
+import { createEffect, createSignal, type JSX, splitProps } from "solid-js";
 import { runEvent } from "../tools";
 
 export type FileUploaderProps = JSX.HTMLAttributes<HTMLInputElement> & {

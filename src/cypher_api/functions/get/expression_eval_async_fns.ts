@@ -148,8 +148,14 @@ async function findVertexsMGCallId(
     label,
     skip,
     limit,
-    name
-  }: { id?: string; label?: string; skip?: number; limit?: number, name?: string },
+    name,
+  }: {
+    id?: string;
+    label?: string;
+    skip?: number;
+    limit?: number;
+    name?: string;
+  },
   {
     nodes,
     relationships,
@@ -159,22 +165,21 @@ async function findVertexsMGCallId(
   } = {},
 ) {
   let query: string | undefined;
-  let params = {} as {name?: string, id: any};
+  let params = {} as { name?: string; id: any };
 
   if (id) {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";
-    params.id = parseInt(id, 10);
+    params.id = int(id);
   } else if (label) {
     if (name) {
       query = `MATCH (n:${label}) WHERE n.name = $name RETURN n`;
       params.name = name;
-    }else{
+    } else {
       query = `MATCH (n:${label}) RETURN n`;
     }
   }
-  
-  if (name || skip || limit) {
 
+  if (name || skip || limit) {
     if (skip) {
       query += ` SKIP ${skip}`;
     }
@@ -186,7 +191,7 @@ async function findVertexsMGCallId(
   if (!query) {
     throw new Error("Either 'id' or 'label' must be provided.");
   }
-  
+
   const result = await session.run(query, params);
   const vertexes = result.records.map((record) => {
     const vertex = convertNodeToJson(record.get("n"));
@@ -194,7 +199,7 @@ async function findVertexsMGCallId(
       nodes[vertex.id] = vertex;
     }
     return vertex;
-  })
+  });
   return vertexes;
 }
 
@@ -219,8 +224,8 @@ export async function evalGlobalColl(
       { label: type ?? edgeType, skip, limit, name: filter },
       context,
     );
-    
-    return result
+
+    return result;
   } catch (error: any) {
     throw new Error(error.message);
   } finally {
@@ -260,11 +265,11 @@ export const checkIfNameExistsMGCall = async (
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);
   const session = (await getDriver(subDomain)).session();
-  
+
   try {
     const checkQuery = id
-      ? `MATCH (v${label}) WHERE v.name = \$name AND v.elementId != \$id RETURN v`
-      : `MATCH (v:${label}) WHERE v.name = \$name RETURN v`;
+      ? `MATCH (v:${label}) WHERE v.name = $name AND v.elementId != $id RETURN v`
+      : `MATCH (v:${label}) WHERE v.name = $name RETURN v`;
 
     const params = id ? { name, id } : { name };
     const checkResult = await session.run(checkQuery, params);
@@ -285,4 +290,4 @@ export const checkIfNameExistsMGCall = async (
   } finally {
     await session.close();
   }
-}
+};

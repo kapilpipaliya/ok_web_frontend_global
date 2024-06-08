@@ -24,7 +24,7 @@ export const SubSideBar = (props: MainSideBarProps) => {
   return (
     <Show when={!props.isCollapsed()}>
       <div
-        class={"bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20"}
+        class={"bg:ghostwhite r:0|0|15|0 @fade|.3s p:10|20 w:max-content"}
         style={{ "box-shadow": "-1px 3px 4px 3px lightgrey" }}
       >
         <nav class="flex 0px 0px 10px 10px pt:13">
