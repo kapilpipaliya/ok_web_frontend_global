@@ -352,7 +352,7 @@ export async function getDataMGCall(
     relationships: {} as { [key: string]: any },
     vertexes: undefined as any,
   },
-): Promise<any> {
+) {
   "use server";
   const mainResult = await evalAsync(jsep(expression.expression), context);
 

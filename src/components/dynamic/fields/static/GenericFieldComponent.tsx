@@ -203,7 +203,7 @@ export function GenericField(
 
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView vertex={field.data} />
+          <PageView metaVertex={field.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
@@ -379,6 +379,12 @@ function FormWrapper(
 
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
+  const {formMeta: formDeisgnerMeta, formData: formDesignerDeta} = useContext(FormContext)!;
+
+  // const [dataVertex, setDataVertex] = createSignal<Vertex>();
+  // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
+
+
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
@@ -395,11 +401,13 @@ function FormWrapper(
     };
   });
 
-  let dataVertex: Vertex;
+
   // if (!props.data?.id) {
-  const createResult = createForm(graph, setGraph, txnId, Ws, "FixFormLabel");
+
+  const createResult = createForm(graph, setGraph, txnId, Ws, formDeisgnerMeta.P[IdAttr]);
   if (createResult.error) return createResult.error;
-  dataVertex = createResult.vertex!;
+  setFormData('formData', createResult.vertex!);
+
   // } else {
   //   const loadResult = loadForm(graph, props.id);
   //   if (loadResult.error) return loadResult.error;
@@ -433,7 +441,7 @@ function FormWrapper(
     >
       <FormContext.Provider value={formData}>
         <div class="">
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemRender metaVertex={props.meta}/>
         </div>
         <div />
 
@@ -448,7 +456,7 @@ function FormWrapper(
                       component: "Button",
                       props: {
                         children: "Submit",
-                        onClick: () => onSubmit,
+                        onClick: () => onSubmit(),
                       },
                     },
                   } as any
@@ -465,7 +473,7 @@ function FormWrapper(
                 P: {
                   component: "Button",
                   props: {
-                    onClick: () => onCancel,
+                    onClick: () => onCancel(),
                     variant: "outlined",
                     class: "border-color:#FF0000 color:#FF0000",
                     children: "Cancel",

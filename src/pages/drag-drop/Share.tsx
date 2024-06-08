@@ -1,11 +1,15 @@
-import { createEffect, createSignal, useContext } from "solid-js";
+import { createEffect, createSignal, onMount, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid-blocks/blocks";
 import { PageConfigContext } from "~/lib/contexts";
+import { useToast } from "~/components/custom/Toast";
+import { useNavigate } from "@solidjs/router";
 
 const ShareSection = () => {
+  const { showSuccessToast, showErrorToast } = useToast();
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const [link, setLink] = createSignal("");
+  const navigate = useNavigate();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
   createEffect(() => {
@@ -14,16 +18,23 @@ const ShareSection = () => {
     }
   });
 
-  createEffect(() => {
+  onMount(() => {
     if (pageConfig) {
       setLink(
-        `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.id}`,
+        `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.id}/new`,
       );
     }
   });
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(link());
+    showSuccessToast("Link copied to clipboard");
+  };
+  const previewLink = () => {
+    const url = link();
+    if (url) {
+      window.open(url, "_blank");
+    }
   };
 
   const inlineStyles = {
@@ -79,7 +90,16 @@ const ShareSection = () => {
           readOnly
           class={"w:full bg:rgb(245,245,245) r:5|0|0|5 p:10"}
         />
-        <Tooltip content={"Copy to clipboard"}>
+        <Tooltip content={"Preview link"}   >
+          <button
+            onClick={previewLink}
+            style={inlineStyles.button}
+            class={"r:0|5|5|0 p:10"}
+          >
+            🚀
+          </button>
+        </Tooltip>
+        <Tooltip content={"Click to copy"} nowrap>
           <button
             onClick={copyToClipboard}
             style={inlineStyles.button}
@@ -121,8 +141,8 @@ const ShareSection = () => {
         <input
           value={email()}
           onInput={(e) => setEmail(e.target.value)}
-          class={"w:full r:0|5|5|0 p:10"}
-          type={"email"}
+          class="w:full r:0|5|5|0 p:10"
+          type="email"
           name="email"
           disabled={access() === "everyone"}
           placeholder="Enter email, for multiple email use';' separate"

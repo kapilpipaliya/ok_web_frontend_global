@@ -204,7 +204,7 @@ export function DynamicForm(props: DynamicFormProps) {
     on(data, (data) => {
       if (data) {
         const result = data;
-        let dataVertex;
+        let dataVertex: Vertex;
         if (result === "new") {
           const createResult = createForm(
             graph,
@@ -214,7 +214,7 @@ export function DynamicForm(props: DynamicFormProps) {
             props.form[IdAttr],
           );
 
-          dataVertex = createResult.vertex;
+          dataVertex = createResult.vertex!;
 
           // if new form then add a form component in the layout
           if (dataVertex!.L[0] === "Form") {

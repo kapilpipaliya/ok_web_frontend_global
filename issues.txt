@@ -10,7 +10,15 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-Make sure all inputs are working. 
+Make sure all inputs are working.
+when drag and drop, dont allow before and after main 'Form' element.
+
+set https://www.easyformforge.com/view/Form/2339/new on share dialog
+
+when click outside properties drawer, it should close. ✅ 
+(when Submit do not redirect to parent screen?)
+In share dialog when user click on Copy icon, it should display message copied. ✅ 
+
 
 remain(kapil);
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.

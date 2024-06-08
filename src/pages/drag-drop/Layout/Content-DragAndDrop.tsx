@@ -26,7 +26,7 @@ export function ContentDragAndDrop(props: { view: Accessor<string> }) {
         </div>
         <ResizableContainer view={props.view}>
           <FormContext.Provider value={pageConfig.formData}>
-            <PageView vertex={pageConfig.formData?.formData} />
+            <PageView metaVertex={pageConfig.formData?.formData} />
           </FormContext.Provider>
         </ResizableContainer>
       </Show>

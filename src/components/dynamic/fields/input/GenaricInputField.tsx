@@ -9,7 +9,7 @@ import {
   TextField,
 } from "~/components/solid-blocks/blocks";
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
-import { getTextColumnValue } from "~/lib/Utils";
+import { FormContext, getTextColumnValue } from "~/lib/Utils";
 import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
@@ -28,17 +28,10 @@ export function GenericInputField(
 ) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [field, others] = splitProps(props, [
-    "meta",
-    "data",
-    "setValue",
-    "disabled",
-    "component",
-    "title",
-    "txnId",
-  ]);
+  const { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const component = () => field.component;
+  const component = () => props.component;
+  // todo: make a common onChange if possible.
   return (
     <div
       classList={{
@@ -46,22 +39,22 @@ export function GenericInputField(
       }}
     >
       <Show
-        when={!field.disabled}
-        fallback={getTextColumnValue(field.data?.P[field.meta.P[IdAttr]])}
+        when={!props.disabled}
+        fallback={getTextColumnValue(formData?.P[props.meta.P[IdAttr]])}
       >
         <Switch>
           <Match when={component() === "CheckBox"}>
             <Checkbox
-              {...field.meta?.P.props}
+              {...props.meta?.P.props}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.checked)
+                props.setValue
+                  ? props.setValue(e.target.checked)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.checked,
                       Ws,
                       false,
@@ -69,27 +62,27 @@ export function GenericInputField(
               }}
               align="left"
               checked={
-                field.data?.P[field.meta.P[IdAttr]] ??
-                field.meta?.P.props?.checked
+                formData?.P[props.meta.P[IdAttr]] ??
+                props.meta?.P.props?.checked
               }
             >
-              {<PageItemRender metaVertex={field.meta} />}
+              {<PageItemRender metaVertex={props.meta} />}
             </Checkbox>
           </Match>
           <Match when={component() === "ColorBox"}>
             <input
               type="color"
-              {...field.meta?.P.props}
-              value={field.data?.P[field.meta.P[IdAttr]]}
+              {...props.meta?.P.props}
+              value={formData?.P[props.meta.P[IdAttr]]}
               onInput={(e) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
@@ -100,99 +93,99 @@ export function GenericInputField(
           <Match when={component() === "DropDownBox"}>Dropdown</Match>
           <Match when={component() === "FileUploader"}>
             <FileUploader
-              {...field.meta?.P.props}
-              image={field.meta?.P.image}
+              {...props.meta?.P.props}
+              image={props.meta?.P.image}
             />
           </Match>
           <Match when={component() === "HtmlEditor"}>
-            {field.data?.P[field.meta.P[IdAttr]]}
+            {formData?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={component() === "NumberBox"}>
             <TextField
-              placeholder={field.meta?.P.label ?? ""}
+              placeholder={props.meta?.P.label ?? ""}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              {...field.meta?.P.props}
+              {...props.meta?.P.props}
               isNumber
-              value={field.data?.P[field.meta.P[IdAttr]]}
+              value={formData?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
-              {...field.meta?.P.props}
-              // value={field.data?.P[field.meta.P[IdAttr]] ?? ""}
+              {...props.meta?.P.props}
+              // value={formData?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.checked)
+                props.setValue
+                  ? props.setValue(e.target.checked)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.checked,
                       Ws,
                       false,
                     );
               }}
-              // name={field.meta?.P.props?.label ?? "radio"}
+              // name={props.meta?.P.props?.label ?? "radio"}
               align="left"
             >
-              {field.meta?.P.props?.label ?? "radio"}
+              {props.meta?.P.props?.label ?? "radio"}
             </Radio>
           </Match>
           <Match when={component() === "ProgressBar"}>
             <Progress
-              style={{ ...field.meta?.P.props }}
-              {...field.meta?.P.props}
+              style={{ ...props.meta?.P.props }}
+              {...props.meta?.P.props}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
             <MultiSelectField
               onRemove={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
               onSelect={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              options={field.meta?.P.props?.options ?? []}
-              selectedValues={() => [field.data?.P[field.meta.P[IdAttr]]]}
-              placeholder={field.meta?.P.props?.placeholder ?? "Select Item"}
-              disable={field.disabled}
+              options={props.meta?.P.props?.options ?? []}
+              selectedValues={() => [formData?.P[props.meta.P[IdAttr]]]}
+              placeholder={props.meta?.P.props?.placeholder ?? "Select Item"}
+              disable={props.disabled}
               displayValueParent="P"
               displayValueChild="name"
               selectionLimit={1}
@@ -200,82 +193,82 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "RadioGroup"}>
             <RadioGroup>
-              <PageItemRender metaVertex={field.meta} />
+              <PageItemRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
 
           <Match when={component() === "TextArea"}>
             <TextField
               class="global-style"
-              {...field.meta?.P.props}
+              {...props.meta?.P.props}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              placeholder={field.meta?.P.props?.label ?? field.title}
+              placeholder={props.meta?.P.props?.label ?? props.title}
               multiline
-              value={field.data?.P[field.meta.P[IdAttr]]}
+              value={formData?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match
             when={
               component() === "TextBox" &&
-              field.data &&
-              field.meta &&
-              field.meta.P &&
-              field.meta.P[IdAttr] &&
-              field.data.P &&
-              field.data.P[field.meta.P[IdAttr]] &&
-              field.data.P[field.meta.P[IdAttr]].toString().includes(")+(")
+              formData &&
+              props.meta &&
+              props.meta.P &&
+              props.meta.P[IdAttr] &&
+              formData.P &&
+              formData.P[props.meta.P[IdAttr]] &&
+              formData.P[props.meta.P[IdAttr]].toString().includes(")+(")
             }
           >
             <TextField
               class="global-style"
-              {...field.meta?.P.props}
+              {...props.meta?.P.props}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              placeholder={field.meta?.P.props?.label ?? field.title}
-              value={field.data?.P[field.meta.P[IdAttr]]}
+              placeholder={props.meta?.P.props?.label ?? props.title}
+              value={formData?.P[props.meta.P[IdAttr]]}
               trailing={
                 <ExpressionBuilder
-                  content={field.data?.P[field.meta.P[IdAttr]]}
-                  meta={field.meta}
-                  data={field.data}
-                  title={field.title}
-                  txnId={field.txnId}
+                  content={formData?.P[props.meta.P[IdAttr]]}
+                  meta={props.meta}
+                  data={formData}
+                  title={props.title}
+                  txnId={props.txnId}
                   component={component()}
                   setValue={
-                    field.setValue
-                      ? field.setValue
+                    props.setValue
+                      ? props.setValue
                       : (value) =>
                           setValueGlobal(
                             graph,
                             setGraph,
-                            field.txnId!,
-                            field.meta,
-                            field.data!,
+                            props.txnId!,
+                            props.meta,
+                            formData!,
                             value,
                             Ws,
                             false,
@@ -288,28 +281,28 @@ export function GenericInputField(
           <Match when={component() === "TextBox"}>
             <TextField
               class="global-style"
-              {...field.meta?.P.props}
-              placeholder={field.meta?.P.props?.label ?? field.title}
+              {...props.meta?.P.props}
+              placeholder={props.meta?.P.props?.label ?? props.title}
               onchange={(e: any) => {
-                field.setValue
-                  ? field.setValue(e.target.value)
+                props.setValue
+                  ? props.setValue(e.target.value)
                   : setValueGlobal(
                       graph,
                       setGraph,
-                      field.txnId!,
-                      field.meta,
-                      field.data!,
+                      props.txnId!,
+                      props.meta,
+                      formData!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              value={field.data?.P[field.meta.P[IdAttr]]}
+              value={formData?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Label"}>
-            <Label {...field.meta?.P.props}>
-              <PageItemRender metaVertex={field.meta} />
+            <Label {...props.meta?.P.props}>
+              <PageItemRender metaVertex={props.meta} />
             </Label>
           </Match>
         </Switch>

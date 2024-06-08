@@ -238,6 +238,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             // setValue={props.setValue}
             disabled={false}
             component={component()}
+            txnId={txnId}
           />
         );
 
@@ -448,18 +449,18 @@ export function getUrl(
   return url;
 }
 
-export function PageView(props: { vertex?: Vertex; isPreview?: boolean }) {
+export function PageView(props: { metaVertex?: Vertex; data?: Vertex; isPreview?: boolean }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const collection = createMemo(() =>
-    PageRenderUtils.getCollection(graph, props.vertex),
+    PageRenderUtils.getCollection(graph, props.metaVertex),
   );
   const dataVertex = createMemo(() =>
-    PageRenderUtils.getDataVertex(graph, props.vertex),
+    PageRenderUtils.getDataVertex(graph, props.metaVertex),
   );
 
   return (
     <PageContext.Provider value={{ events: {} }}>
-      <Show when={props.vertex} keyed>
+      <Show when={props.metaVertex} keyed>
         <Switch>
           {/* <Match when={collection() && !dataVertex()}> */}
           {/* <For
@@ -483,7 +484,7 @@ export function PageView(props: { vertex?: Vertex; isPreview?: boolean }) {
             <PageItemRender metaVertex={props.vertex!} />
           </Match> */}
           <Match when={true}>
-            <PageItemRender metaVertex={props.vertex!} />
+            <PageItemRender metaVertex={props.metaVertex!} data={props.data}/>
           </Match>
         </Switch>
       </Show>

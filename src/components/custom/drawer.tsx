@@ -1,4 +1,4 @@
-import { createSignal, type JSX, Show } from "solid-js";
+import { createSignal, type JSX, Show, onCleanup, onMount } from "solid-js";
 
 function Drawer(props: {
   customButton?: (props: {
@@ -16,7 +16,20 @@ function Drawer(props: {
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
   };
+  const handleClickOutside = (event: MouseEvent) => {
+    const drawerElement = document.getElementById("drawer");
+    if (drawerElement && !drawerElement.contains(event.target as Node)) {
+      setIsOpen(false);
+    }
+  };
 
+  onMount(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  });
   return (
     <>
       <Show when={props.customButton}>
@@ -25,6 +38,8 @@ function Drawer(props: {
         )}
       </Show>
       <div
+        id="drawer"
+
         style={`
           position: fixed;
           top: 0;
