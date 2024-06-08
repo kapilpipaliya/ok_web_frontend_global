@@ -3,7 +3,7 @@ import { A } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
-import sendEmail from "~/cypher_api/server/email";
+import sendEmail from "~/cypher/server/email";
 import { validatePassword } from "~/lib/validations";
 import "~/css/base.css";
 export function ForgotPassword() {

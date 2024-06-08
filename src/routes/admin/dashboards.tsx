@@ -1,7 +1,5 @@
-import { mutateData } from "~/lib/graph/mutate/mutate";
-import { UserDashboards } from "~/pages/dynamic/UserDashboards";
+import { UserDashboards } from "~/pages/user_dashboard/UserDashboards";
 
 export default function allDashboards() {
-  mutateData();
   return <UserDashboards />;
 }

@@ -1,4 +1,4 @@
-import { getDriver } from "~/cypher_api/server/driver";
+import { getDriver } from "~/cypher/server/driver";
 import { type Session, types } from "neo4j-driver";
 import {
   convertNodeToJson,

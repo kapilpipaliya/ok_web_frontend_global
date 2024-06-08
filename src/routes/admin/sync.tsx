@@ -1,4 +1,4 @@
-import { SyncData } from "~/components/admin/SyncData";
+import { SyncData } from "~/pages/SyncData";
 
 export default function Sync() {
   return <SyncData />;

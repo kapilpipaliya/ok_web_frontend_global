@@ -1,13 +1,13 @@
 // Import necessary modules and functions
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { TransactionPromise } from "neo4j-driver-core";
-import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
-// import { importAllCSV } from "~/cypher_api/pages/BackupRestore";
-import { createDockerContainer } from "~/cypher_api/server/docker_functions";
-import { getSubDomain } from "~/cypher_api/server/domain_utils";
-import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
+import { getDriver, getDriverWithPort } from "~/cypher/server/driver";
+// import { importAllCSV } from "~/cypher/pages/BackupRestore";
+import { createDockerContainer } from "~/cypher/server/docker_functions";
+import { getSubDomain } from "~/cypher/server/domain_utils";
+import { getHttpsSession } from "~/cypher/server/auth/getHttpsSession";
 import { v4 as uuidv4 } from "uuid";
-import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { findVertexesMGCall } from "~/cypher/functions/get/findVertex";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 // Define the POST function to handle user registration

@@ -1,12 +1,12 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
 import { type Session, int } from "neo4j-driver";
-import { deleteVertexMGCall } from "~/cypher_api/functions/mutate/deleteVertex";
-import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
-import { newRowMGCall } from "~/cypher_api/functions/mutate/newRow";
-import { getSubDomain } from "~/cypher_api/server/domain_utils";
-import { getDriver, getDriverWithPort } from "~/cypher_api/server/driver";
-import { getHttpsSession } from "~/cypher_api/server/auth/getHttpsSession";
-import { getChildVertexesMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { deleteVertexMGCall } from "~/cypher/functions/mutate/deleteVertex";
+import { findVertexesMGCall } from "~/cypher/functions/get/findVertex";
+import { newRowMGCall } from "~/cypher/functions/mutate/newRow";
+import { getSubDomain } from "~/cypher/server/domain_utils";
+import { getDriver, getDriverWithPort } from "~/cypher/server/driver";
+import { getHttpsSession } from "~/cypher/server/auth/getHttpsSession";
+import { getChildVertexesMGCall } from "~/cypher/lib/graph/get/async/traverse";
 
 /**
  * Handles errors and responses in a consistent way.

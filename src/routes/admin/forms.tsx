@@ -1,4 +1,4 @@
-import { AllForms } from "~/pages/form/FormsAdmin";
+import {AllForms} from "~/pages/AllForms";
 
 export default function allDashboards() {
   return <AllForms />;

@@ -1,6 +1,6 @@
 import type { APIEvent } from "@solidjs/start/server";
 import { getInitialData } from "./getInitialData";
-import { getSubDomain } from "~/cypher_api/server/domain_utils";
+import { getSubDomain } from "~/cypher/server/domain_utils";
 
 export async function GET({ request }: APIEvent) {
   const subdomain = await getSubDomain(request.headers.get("host")!);

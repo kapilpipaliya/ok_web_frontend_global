@@ -1,5 +1,5 @@
-import { SimpleImport } from "~/pages/form/FormsAdmin";
+import { SimpleImport } from "~/pages/SimpleImport";
 
-export default function simpleimport() {
+export default function SimpleImportPage() {
   return <SimpleImport />;
 }

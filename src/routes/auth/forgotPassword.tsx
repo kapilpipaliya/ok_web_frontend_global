@@ -1,5 +1,5 @@
 import { ForgotPassword } from "~/pages/form/ForgotPassword";
-import SiteTitle from "~/components/website/SiteTitle";
+import SiteTitle from "~/pages/website/SiteTitle";
 
 export default function logIn() {
   return (

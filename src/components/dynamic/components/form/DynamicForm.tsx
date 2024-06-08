@@ -49,12 +49,12 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
-import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { getDataMGCall } from "~/cypher/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { FormContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
-import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
-import { checkIfNameExistsMGCall } from "~/cypher_api/functions/get/expression_eval_async_fns";
+import { findVertexesMGCall } from "~/cypher/functions/get/findVertex";
+import { checkIfNameExistsMGCall } from "~/cypher/functions/get/expression_eval_async_fns";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
 import { componentDrag } from "~/lib/drag-drop/componentDrag";
@@ -154,7 +154,7 @@ export function AbstractSingleForm(props: AbstractSingleFormProps) {
   );
 }
 
-export function DynamicForm(props: DynamicFormProps) {
+function DynamicForm(props: DynamicFormProps) {
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -638,10 +638,4 @@ export function DynamicForm(props: DynamicFormProps) {
       </div>
     );
   }
-}
-
-function getTabsWidth(group: Vertex[]) {
-  return group.filter((attribute) => attribute.P.component === "Table").length
-    ? "100%"
-    : "600px";
 }

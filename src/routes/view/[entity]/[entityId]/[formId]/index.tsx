@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
-import { Show, createSignal, onMount, useContext } from "solid-js";
-import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import {Show, createSignal, onMount, useContext, createEffect, on} from "solid-js";
+import { getDataMGCall } from "~/cypher/lib/graph/get/async/traverse";
 import { AttrsTableData } from "~/lib/api";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
@@ -50,20 +50,31 @@ export default function PageShareView() {
   onMount(() => {
     setMounted(true);
     loadFormDesignerMetaData();
-  })
+  });
+  const [count, setCount] = createSignal(1);
+
+  createEffect(
+    on(
+      () => params.formId,
+      (v) => setCount((v) => v + 1),
+      { defer: true },
+    ),
+  );
 
   const cleanUpConfig = {};
 
   return (
-    <Show when={mounted() && metaVertex()}>
-      <IsPreviewContext.Provider value={createSignal(true)}>
-        {/* Pass Dummy Values */}
-        <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}>
-          <PageView
-            metaVertex={metaVertex()}
-          />
-        </FormContext.Provider>
-      </IsPreviewContext.Provider>
+    <Show when={count()} keyed>
+      <Show when={mounted() && metaVertex()}>
+        <IsPreviewContext.Provider value={createSignal(true)}>
+          {/* Pass Dummy Values */}
+          <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}>
+            <PageView
+              metaVertex={metaVertex()}
+            />
+          </FormContext.Provider>
+        </IsPreviewContext.Provider>
+      </Show>
     </Show>
   );
 }

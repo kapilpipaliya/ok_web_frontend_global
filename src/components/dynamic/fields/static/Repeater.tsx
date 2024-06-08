@@ -10,7 +10,7 @@ import {
   PageRenderUtils,
   PageItemRender,
 } from "~/components/dynamic/fields/static/PageItemRender";
-import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { getSelectionOptionsMGCall } from "~/cypher/lib/graph/get/async/traverse";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";

@@ -1,6 +1,6 @@
-import "~/components/website/style.css";
-import "~/components/website/krd.css";
-import ContactUs from "~/components/website/contact_us/ContactUs";
+import "~/pages/website/style.css";
+import "~/pages/website/krd.css";
+import ContactUs from "~/pages/website/contact_us/ContactUs";
 
 export default function Contact() {
   return <ContactUs />;

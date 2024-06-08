@@ -3,8 +3,8 @@ import { AbstractSingleForm } from "~/components/dynamic/components/form/Dynamic
 
 import { Match, Switch, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-import LayoutDragAndDrop from "~/pages/drag-drop/Layout/Layout-DragAndDrop";
-import PageDesignerContext from "~/pages/drag-drop/Layout/PageDesignerContext";
+import LayoutDragAndDrop from "~/pages/drag_drop/layout/Layout-DragAndDrop";
+import PageDesignerContext from "~/pages/drag_drop/layout/PageDesignerContext";
 
 export default function admin() {
   const params = useParams();

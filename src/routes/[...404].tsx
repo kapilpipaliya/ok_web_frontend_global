@@ -1,4 +1,4 @@
-import NotFound404 from "~/pages/not-found/NotFound404";
+import NotFound404 from "~/pages/not_found/NotFound404";
 
 export default function Notfound() {
   return (

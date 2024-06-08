@@ -36,7 +36,7 @@ import type { ComponentProps } from "~/components/ComponentType";
 import type { Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
-import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
+import { getSelectionOptionsMGCall } from "~/cypher/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import MultiSelectField from "~/components/custom/MultiSelect";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";

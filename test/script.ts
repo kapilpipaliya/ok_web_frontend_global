@@ -2,7 +2,7 @@ import neo4j, { Session } from "neo4j-driver";
 import {
   removeDockerContainer,
   stopDockerContainer,
-} from "../src/cypher_api/server/docker_functions";
+} from "../src/cypher/server/docker_functions";
 
 // Main function to initiate the migration process.
 export async function deleteUser(args: any) {

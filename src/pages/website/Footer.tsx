@@ -1,0 +1,102 @@
+import "~/pages/website/style.css";
+import "~/pages/website/krd.css";
+
+export function Footer() {
+  return (
+    <section class="footer">
+      <div class=" pb-3 flex jc:space-around ai:center flex-direction:row">
+        <div class="info d-grid align-content-spacebetween">
+          <div>
+            <a href="">
+              <img class="headerLogo" src="graphics/logo.png" alt="logo" />
+            </a>
+            <p>Design and publish forms faster, smoother</p>
+          </div>
+
+          <a class="pb-1 btn-underline" href="#">
+            Get Easy Form Forge <i class="fa-solid fa-arrow-right" />
+          </a>
+          <div class="footericon">
+            <a href="#">
+              <i class="fa-brands fa-square-facebook" />
+            </a>
+            <a href="#">
+              <i class="fa-brands fa-square-x-twitter" />
+            </a>
+            <a href="#">
+              <i class="fa-brands fa-linkedin" />
+            </a>
+            <a href="#">
+              <i class="fa-brands fa-youtube" />
+            </a>
+          </div>
+        </div>
+        <div class="company">
+          <h5>Company</h5>
+          <ul>
+            <li>
+              <a href="#">About Us</a>
+            </li>
+            <li>
+              <a href="#">Testimonials</a>
+            </li>
+            <li>
+              <a href="#">My Account</a>
+            </li>
+            <li>
+              <a href="#">Blogs</a>
+            </li>
+          </ul>
+        </div>
+        <div class="company">
+          <h5>Links</h5>
+          <ul>
+            <li>
+              <a href="#">Site maps</a>
+            </li>
+            <li>
+              <a href="#">Blogs</a>
+            </li>
+            <li>
+              <a href="#">Documentation</a>
+            </li>
+            <li>
+              <a href="#">Return</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="company">
+          <h5>Privacy</h5>
+          <ul>
+            <li>
+              <a href="#">About Us</a>
+            </li>
+            <li>
+              <a href="#">Testimonials</a>
+            </li>
+            <li>
+              <a href="#">My Account</a>
+            </li>
+            <li>
+              <a href="#">Blogs</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyrightandsocial container d-flex pt-2 justify-content-center">
+        <div>
+          <h6>
+            © 2024 <b>EasyFromForge </b> All rights reserved
+          </h6>
+        </div>
+        <div>
+          <i class="fa-brands fa-square-facebook" />
+          <i class="fa-brands fa-square-x-twitter" />
+          <i class="fa-brands fa-linkedin" />
+          <i class="fa-brands fa-youtube" />
+        </div>
+      </div>
+    </section>
+  );
+}
