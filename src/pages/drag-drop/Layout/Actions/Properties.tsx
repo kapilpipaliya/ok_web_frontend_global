@@ -4,7 +4,7 @@ import { Portal } from "solid-js/web";
 import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import {
   ModalBody,
   ModalContent,

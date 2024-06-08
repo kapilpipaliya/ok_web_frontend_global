@@ -1,4 +1,4 @@
-import { setSelectionValue } from "~/cypher_api/components/input/SelectInputField";
+import { setSelectionValue } from "~/cypher_api/selection_functions";
 
 import {
   getChildVertexMGCall,

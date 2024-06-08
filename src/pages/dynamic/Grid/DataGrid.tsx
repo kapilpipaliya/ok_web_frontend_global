@@ -22,23 +22,23 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import { CommonTable } from "~/components/custom/Table";
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
-import { submitDataCall } from "~/components/api/api_functions";
+import { submitDataCall } from "~/lib/api/api_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import {
-  PageContext,
   capitalizeFirstLetter,
-  expressionString,
-  getEdgesFromRowsAttr,
   isNumber,
-} from "~/lib/Utils";
+} from "~/lib/utils";
 import { QuickEditModal, SelectValue, TagValue } from "./GridUtils";
 import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { FormMetaData } from "~/lib/Type";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { AttrsTableData } from "~/lib/api";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
+import { PageContext } from "~/lib/contexts";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 interface DataGridProps {
   tableId: string;
 }
@@ -217,7 +217,7 @@ const DataGrid = (props: DataGridProps) => {
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(formNew.attributes);
     // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
-    const expression = expressionString({
+    const expression = paginationExpression({
       coll: coll,
       skip: skip,
       limit: limit,

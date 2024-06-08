@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Footer } from "../Footer";
 import { Header } from "../Header";
-import SiteTitle from "../utils";
+import SiteTitle from "../SiteTitle";
 import HeroSection from "./HeroSection";
 import FeaturesSection from "./FeaturesSection";
 import FormInActionSection from "./FormInActionSection";

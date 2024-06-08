@@ -1,5 +1,5 @@
-import { postAPI } from "~/components/api/postApi";
-import { API } from "~/components/api/DataFetcher";
+import { postAPI } from "~/lib/api/postApi";
+import { API } from "~/lib/api/endpoints";
 import { ProcessStatus, transactions } from "~/lib/graph/transaction";
 import { onMutatDataGet } from "~/lib/websocket/ws_events";
 import { GraphInterface } from "~/lib/graph/graph";

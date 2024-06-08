@@ -3,7 +3,7 @@ import type { Vertex } from "~/lib/graph/graph";
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import { TableInputField } from "~/components/dynamic/fields/input/TableInputField";
 import { GenericInputField } from "~/components/dynamic/fields/input/GenaricInputField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import { HiddenNodesContext } from "~/lib/contexts";
 
 export const genericInputComponents = [

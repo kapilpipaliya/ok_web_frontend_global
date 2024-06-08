@@ -1,14 +1,14 @@
 import { createSignal, onMount, Show, useContext } from "solid-js";
-import { APP_BASE_URL, validateEmail } from "~/lib/Utils";
 import { A, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import { Icon } from "@iconify-icon/solid";
 import { LoadingContext } from "~/lib/contexts";
 import logo from "~/assets/graphics/logo.png";
-import { signInCall } from "~/components/api/api_functions";
+import { signInCall } from "~/lib/api/api_functions";
 import "~/css/base.css";
-import postAPI from "~/components/api/postApi";
-import { validatePassword } from "~/lib/validations";
+import postAPI from "~/lib/api/postApi";
+import { validateEmail, validatePassword } from "~/lib/validations";
+import { APP_BASE_URL } from "~/lib/constants";
 
 export function Login() {
   const navigate = useNavigate();

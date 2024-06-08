@@ -12,7 +12,6 @@ import { GraphContext } from "~/lib/graph/graph";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import Dismiss from "solid-dismiss";
 import { Navbar } from "~/pages/dashboard/Navbar";
-import { APP_BASE_URL, PageContext } from "~/lib/Utils";
 import {
   addNewVertex,
   mergeVertexProperties,
@@ -20,11 +19,12 @@ import {
 } from "~/lib/graph/mutate/vertex";
 import "~/css/base.css";
 import "~/css/modal.css";
-import { LoadingContext } from "~/lib/contexts";
+import { LoadingContext, PageContext } from "~/lib/contexts";
 import { useToast } from "~/components/custom/Toast";
-import { signOutCall } from "~/components/api/api_functions";
-import getAPI from "~/components/api/getApi";
-import { API } from "~/components/api/DataFetcher";
+import { signOutCall } from "~/lib/api/api_functions";
+import getAPI from "~/lib/api/getApi";
+import { API } from "~/lib/api/endpoints";
+import { APP_BASE_URL } from "~/lib/constants";
 
 export function MainDashboard(props: { children?: JSX.Element }) {
   const border = "|solid|rgb(212,219,231)";

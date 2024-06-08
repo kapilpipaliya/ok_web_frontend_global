@@ -1,9 +1,8 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext, createSignal, createSelector, For, Show } from "solid-js";
-import Drawer from "~/components/custom/drawer";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import Drawer from "~/components/custom/Drawer";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import { Tooltip } from "~/components/solid-blocks/blocks";
-import { iconMap, nameExpr } from "~/lib/Utils";
 import {
   PageConfigContext,
   HoverIdContext,
@@ -18,6 +17,8 @@ import { useDragDrop } from "~/lib/drag-drop/useDragDrop";
 import { Properties } from "./Properties";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
+import { iconMap } from "~/lib/constants";
+import { nameExpr } from "~/pages/drag-drop/Layout/Actions/Utils/nameExpr";
 
 export function LayoutPart(props: {}) {
   const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);

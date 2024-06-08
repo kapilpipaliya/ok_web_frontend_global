@@ -2,12 +2,13 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { createEffect, createResource, createSignal, Show } from "solid-js";
 import { useContext } from "solid-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { breadcrumbData, expressionString } from "~/lib/Utils";
 import PageHeader from "~/components/custom/Breadcumb";
 import DataGrid from "./DataGrid";
 import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
+import { breadcrumbData } from "~/lib/constants";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 interface AbstractGridProps {
   tableId: string;
@@ -21,7 +22,7 @@ export function AbstractGrid(props: AbstractGridProps) {
 
   async function getNavData() {
     const data: any = getTreeData(graph, setGraph, {
-      collection: expressionString({ coll: "Nav", filter: "Navigation" }),
+      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
       child: {
         collection: "->NavAttr",
         child: { collection: "->NavAttr", child: { collection: "->NavAttr" } },

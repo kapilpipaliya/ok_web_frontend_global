@@ -1,6 +1,5 @@
 import { createContext, createSignal } from "solid-js";
 import type { Id, Vertex } from "~/lib/graph/graph";
-import type { IFormContext } from "./Utils";
 import { createStore } from "solid-js/store";
 import { getNewGraphId } from "./graph/transaction";
 
@@ -48,6 +47,14 @@ export const DraggedVertexContext = createContext(
   createSignal<Vertex[] | []>([]),
 );
 
+export interface IFormContext {
+ cleanUpConfig: () => { [key: string]: any };
+ validationGroup?: {};
+ txnId: number;
+ formMeta: Vertex;
+ formData: Vertex;
+}
+
 export const PageConfigContext = createContext(
   createStore({} as { formData: IFormContext }),
 );
@@ -58,3 +65,6 @@ export const IndicatorPositionContext = createContext(
     position: null as "before" | "after" | "center" | null,
   }),
 );
+
+export const FormContext = createContext({} as IFormContext);
+export const PageContext = createContext({} as { [key: string]: any });

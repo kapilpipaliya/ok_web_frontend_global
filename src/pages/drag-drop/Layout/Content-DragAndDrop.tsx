@@ -1,10 +1,9 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, Show, useContext } from "solid-js";
 import ResizableContainer from "~/components/custom/ResizableDivView";
-import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { Tooltip } from "~/components/solid-blocks/blocks";
-import { FormContext } from "~/lib/Utils";
-import { PageConfigContext } from "~/lib/contexts";
+import { FormContext, PageConfigContext } from "~/lib/contexts";
+import { PageView } from "~/components/dynamic/fields/static/PageView";
 
 export function ContentDragAndDrop(props: { view: Accessor<string> }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);

@@ -1,5 +1,5 @@
 import { int, type Session } from "neo4j-driver";
-import { isObject } from "~/lib/Utils";
+import { isObject } from "~/lib/utils";
 import type { Edge, Vertex } from "~/lib/graph/graph";
 
 const txnId = 0;

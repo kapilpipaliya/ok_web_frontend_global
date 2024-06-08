@@ -2,9 +2,12 @@ import { type JSX, Show, createSignal } from "solid-js";
 import { HeaderDragAndDrop } from "./Header-DragAndDrop";
 import { MenuDragAndDrop } from "./Menu/Menu-DragAndDrop";
 import { Icon } from "@iconify-icon/solid";
-import type { IFormContext } from "~/lib/Utils";
 import { createStore } from "solid-js/store";
-import { PageConfigContext, PropertiesVertexIdContext } from "~/lib/contexts";
+import {
+ IFormContext,
+ PageConfigContext,
+ PropertiesVertexIdContext
+} from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content-DragAndDrop";
 import { ActionsDragAndDrops } from "./Actions/Actions-DragAndDrops";
 import { getNewGraphId } from "~/lib/graph/transaction";

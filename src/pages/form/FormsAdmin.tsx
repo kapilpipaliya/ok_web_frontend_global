@@ -4,7 +4,6 @@ import { createMemo, For, Match, Switch, useContext } from "solid-js";
 import { A } from "@solidjs/router";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { createStore, type Store } from "solid-js/store";
-import { APP_BASE_URL, type IFormContext } from "~/lib/Utils";
 
 import { SelectInputField } from "~/components/dynamic/fields/input/SelectInputField";
 import {
@@ -13,10 +12,12 @@ import {
 } from "~/lib/graph/mutate/import";
 import { AbstractSingleForm } from "~/components/dynamic/components/form/DynamicForm";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import { toTitle } from "case-switcher-js";
-import { ClassDesignTab } from "~/components/css-properties/PropertiesTabs";
+import { ClassDesignTab } from "~/components/css_properties/PropertiesTabs";
 import { getComponentForCollRow } from "~/components/dynamic/components/form/FormGroup";
+import { APP_BASE_URL } from "~/lib/constants";
+import { IFormContext } from "~/lib/contexts";
 
 export function AllForms() {
   const [graph, setGraph] = useContext(GraphContext)!;

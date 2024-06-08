@@ -14,7 +14,7 @@ import {
   Switch,
   useContext,
 } from "solid-js";
-import "~/css/table.css";
+import "~/components/dynamic/fields/input/table.css";
 import { toTitle } from "case-switcher-js";
 import {
   mergeVertexProperties,
@@ -25,7 +25,7 @@ import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { klona } from "klona";
 import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
-import { FormContext } from "~/lib/Utils";
+
 import {
   getChildVertex,
   getChildVertexes,
@@ -40,12 +40,9 @@ import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import type { ComponentProps } from "~/components/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import {
-  PageRenderContext,
   PageRenderUtils,
-  RepeaterContext,
-} from "~/components/dynamic/fields/static/GenaricField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
-import { getLastItem } from "~/lib/functions";
+} from "~/components/dynamic/fields/static/PageItemRender";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import type { FieldAttribute } from "~/lib/Type";
 import "~/css/base.css";
 import {
@@ -56,7 +53,11 @@ import {
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { addMeta, rowMetaInitialize } from "~/lib/graph/mutate/form_functions";
 import { useToast } from "~/components/custom/Toast";
-import { NewTxnIdContext } from "~/lib/contexts";
+import { FormContext, NewTxnIdContext } from "~/lib/contexts";
+import {
+  PageRenderVertexContext, RepeaterVertexContext
+} from "~/components/dynamic/fields/static/Context";
+import { getLastItem } from "~/components/dynamic/fields/static/getLastItem";
 
 export function TableInputField(
   props: ComponentProps & {
@@ -153,7 +154,7 @@ export function TableInputField(
       }
     }
   }
-  const parentItems = useContext(PageRenderContext);
+  const parentItems = useContext(PageRenderVertexContext);
 
   const parentData = createMemo(() => {
     return PageRenderUtils.getDataVertex(graph, getLastItem(parentItems, 1));
@@ -626,12 +627,12 @@ export function TableInputField(
                 {/*  <SortableProvider ids={ids()}>*/}
                 <For each={sortedVertexes()}>
                   {(vertex, index) => (
-                    <RepeaterContext.Provider
-                      value={[vertex, ...useContext(RepeaterContext)]}
+                    <RepeaterVertexContext.Provider
+                      value={[vertex, ...useContext(RepeaterVertexContext)]}
                     >
                       
                       <SortableRow joinVertex={vertex} index={index()} />
-                    </RepeaterContext.Provider>
+                    </RepeaterVertexContext.Provider>
                   )}
                 </For>
                 {/*  </SortableProvider>*/}

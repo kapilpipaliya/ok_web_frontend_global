@@ -9,9 +9,9 @@ import {
   collectionNameDisplayExpr,
 } from "~/components/dynamic/fields/input/SelectInputField";
 import type { FieldAttribute } from "~/lib/Type";
-import type { IFormContext } from "~/lib/Utils";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { IFormContext } from "~/lib/contexts";
 
 export const QuickEditModal = (p: {
   graph: GraphInterface;

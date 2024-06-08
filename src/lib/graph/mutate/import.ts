@@ -1,4 +1,4 @@
-import { isObject } from "~/lib/Utils";
+import { isObject } from "~/lib/utils";
 import { getChildVertex, getChildVertexes } from "../get/sync/traverse";
 import {
   addNewRow,

@@ -1,0 +1,60 @@
+export const APP_BASE_URL = "/admin";
+export const APP_BASE_URL_NAME = "Admin";
+export const breadcrumbData = [
+ { name: "Home", href: `${APP_BASE_URL}`, icon: "ic:baseline-home" }
+];
+export const iconMap: any = {
+ TextInput: "streamline:input-box",
+ Icon: "mynaui:letter-i-hexagon",
+ Image: "mage:image",
+ A: "ph:link-bold",
+ Text: "ci:text",
+ Heading: "gravity-ui:circle-letter-h",
+ Rating: "mage:star",
+ Repeater: "formkit:repeater",
+ TabPanel: "material-symbols:backup-table-rounded",
+ TreeView: "ph:tree-view-light",
+ Page: "fluent:form-20-regular",
+ Label: "mdi:label-outline",
+ Box: "mage:box-3d-scan",
+ ProgressBar: "carbon:progress-bar",
+ LoadIndicator: "ep:loading",
+ SelectBox: "radix-icons:dropdown-menu",
+ TagBox: "radix-icons:dropdown-menu",
+ Tabs: "material-symbols-light:tabs-outline",
+ Button: "teenyicons:button-outline",
+ Breadcrumb: "tdesign:component-breadcrumb",
+ Autocomplete: "fluent-mdl2:completed",
+ CheckBox: "tabler:checkbox",
+ ColorBox: "ic:outline-color-lens",
+ DateBox: "circum:calendar-date",
+ FileUploader: "arcticons:custom-uploader",
+ Form: "lets-icons:form-duotone",
+ NumberBox: "fluent-emoji-high-contrast:input-numbers",
+ RadioGroup: "ri:list-radio",
+ Radio: "fluent:radio-button-16-filled",
+ Switch: "iconoir:switch-off",
+ HtmlEditor: "mdi:code-block-html",
+ Table: "material-symbols-light:table",
+ TextArea: "bi:textarea",
+ Divider: "radix-icons:divider-horizontal",
+ TextBox: "ph:textbox",
+ ScrollView: "mdi:scroll",
+ FormSubmit: "ant-design:file-done-outlined",
+ FormCancel: "oui:index-close",
+ TableHeader: "fluent:dual-screen-header-20-regular",
+ TableRow: "carbon:row",
+ TabContainer: "fluent:tabs-20-regular",
+ TabList: "fluent:tab-desktop-20-regular",
+ TreeViewItem: "tdesign:tree-list",
+ TreeViewChild: "carbon:tree-view-alt",
+ Collapsible: "lets-icons:collapse"
+};
+export const AdminAttrKeys = [
+ "User",
+ "Perm",
+ "Role",
+ "Dashboard",
+ "Import",
+ "Nav"
+];

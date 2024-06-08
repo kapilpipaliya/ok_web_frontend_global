@@ -12,10 +12,10 @@ import "~/css/sideBarSearch.css";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
 import { GraphContext } from "~/lib/graph/graph";
-import { expressionString } from "~/lib/Utils";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { useLocation } from "@solidjs/router";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 export interface navbarDataI {
   children: navbarDataI[];
@@ -123,7 +123,7 @@ function Sidebar() {
 
   async function getNavData() {
     const data: any = await getTreeDataMGCall({
-      collection: expressionString({ coll: "Nav", filter: "Navigation" }),
+      collection: paginationExpression({ coll: "Nav", filter: "Navigation" }),
       // TODO: Dont display "Form" Component
       child: {
         collection: "->NavAttr",

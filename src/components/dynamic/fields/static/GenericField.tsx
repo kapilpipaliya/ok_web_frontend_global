@@ -1,37 +1,34 @@
 import {
   createMemo,
-  createSignal,
   type JSXElement,
   Match,
-  onCleanup,
   Show,
   splitProps,
   Switch,
-  untrack,
-  useContext,
+  useContext
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { A, useNavigate } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import {
+  GraphContext,
+  GraphInterface,
+  IdAttr,
+  type Vertex
+} from "~/lib/graph/graph";
 import {
   commitTxn,
   getNewTxnId,
-  revertTransaction,
+  revertTransaction
 } from "~/lib/graph/transaction";
 import {
-  APP_BASE_URL,
-  FormContext,
-  getTextColumnValue,
-  getValueFromVertexOrKey,
-} from "~/lib/Utils";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
+  getValueFromVertexOrKey
+} from "~/lib/utils";
 import {
-  createForm,
-  createMeta,
-  loadForm,
-} from "~/lib/graph/mutate/form_functions";
-import { getLastItem } from "~/lib/functions";
+  getChildVertexes,
+  getSelectionOptions
+} from "~/lib/graph/get/sync/traverse";
+import { createForm } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { ComponentProps } from "~/components/ComponentType";
 import {
@@ -41,30 +38,34 @@ import {
   Progress,
   Select,
   Spinner,
-  Tab,
   TabContainer,
   TabList,
-  Tabs,
+  Tabs
 } from "~/components/solid-blocks/blocks";
 import {
-  getText,
-  getUrl,
   PageItemRender,
-  PageRenderContext,
   PageRenderUtils,
-  PageView,
-  RepeaterContext,
-} from "./GenaricField";
+} from "./PageItemRender";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import TreeView from "~/components/solid-blocks/blocks/treeview/treeview";
-import { Collapsible } from "~/components/solid-blocks/blocks/collapsible/collapsible";
+import {
+  Collapsible
+} from "~/components/solid-blocks/blocks/collapsible/collapsible";
 import { useToast } from "~/components/custom/Toast";
-import { submitDataCall } from "~/components/api/api_functions";
-import { createStore } from "solid-js/store";
-import { Repeater } from "~/components/solid-blocks/blocks/repeater/Repeater";
+import { submitDataCall } from "~/lib/api/api_functions";
+import { createStore, SetStoreFunction, Store } from "solid-js/store";
+import { Repeater } from "~/components/dynamic/fields/static/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/custom/Table";
 import Heading from "~/components/solid-blocks/blocks/Heading";
 import StarRating from "~/components/solid-blocks/blocks/Rating";
+import { PageView } from "~/components/dynamic/fields/static/PageView";
+import {
+  PageRenderVertexContext, RepeaterVertexContext
+} from "~/components/dynamic/fields/static/Context";
+import { getLastItem } from "~/components/dynamic/fields/static/getLastItem";
+import { APP_BASE_URL } from "~/lib/constants";
+import { FormContext } from "~/lib/contexts";
+import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -72,6 +73,30 @@ function getAttrs(meta: Vertex) {
     return JSON.parse(meta.P.props?.attr);
   }
   return {};
+}
+
+export function getText(
+ graph: Store<GraphInterface>,
+ setGraph: SetStoreFunction<GraphInterface>,
+ projection: string,
+ repeaterContext: Vertex[]
+) {
+  return getSelectionOptions(graph, setGraph, repeaterContext, projection)
+   .vertexes as string;
+}
+
+export function getUrl(
+ graph: Store<GraphInterface>,
+ setGraph: SetStoreFunction<GraphInterface>,
+ projection: string,
+ repeaterContext: Vertex[]
+) {
+  const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
+   .vertexes as string | undefined;
+  if (typeof url === "string" && url.startsWith("/")) {
+    // url = (showNav() ? '/nav' : '') + url;
+  }
+  return url;
 }
 
 export function GenericField(
@@ -83,19 +108,10 @@ export function GenericField(
     [key: string]: any;
   },
 ) {
-  const [field, others] = splitProps(props, [
-    "meta",
-    "data",
-    "children",
-    "disabled",
-    "component",
-    "txnId",
-    "setValue",
-  ]);
 
   const [graph, setGraph] = useContext(GraphContext)!;
-  const parentItems = useContext(PageRenderContext);
-  const component = createMemo(() => field.component || field.meta.P.component);
+  const parentItems = useContext(PageRenderVertexContext);
+  const component = createMemo(() => props.component || props.meta.P.component);
 
   const parentComponent = createMemo(() => {
     return PageRenderUtils.getComponent(graph, getLastItem(parentItems, 2))?.P[
@@ -103,99 +119,99 @@ export function GenericField(
     ];
   });
 
-  const repeaterContext = useContext(RepeaterContext);
+  const repeaterContext = useContext(RepeaterVertexContext);
 
-  const propWithDefault = (props: string, defaultValue?: any) => {
-    return field.meta.P.props[`${props}`] ?? defaultValue;
+  const propWithDefault = (key: string, defaultValue?: any) => {
+    return props.meta.P.props[`${key}`] ?? defaultValue;
   };
 
   return (
     <Show
-      when={!field.disabled}
-      fallback={getTextColumnValue(field.data?.P[field.meta.P[IdAttr]])}
+      when={!props.disabled}
+      fallback={getViewValue(props.data?.P[props.meta.P[IdAttr]])}
     >
       <Switch>
         <Match when={component() === "Repeater"}>
-          <Repeater meta={field.meta} data={field.data} />
+          <Repeater meta={props.meta} data={props.data} />
         </Match>
         <Match when={component() === "Text"}>
           <Show
-            when={field.meta.P.props?.as}
+            when={props.meta.P.props?.as}
             fallback={getText(
               graph,
               setGraph,
-              field.meta.P.props?.text,
+              props.meta.P.props?.text,
               repeaterContext,
             )}
           >
             <Dynamic
-              component={field.meta.P.props?.as}
-              class={getValueFromVertexOrKey(field.meta.P.props, "class")}
+              component={props.meta.P.props?.as}
+              class={props.meta.P.props["class"]}
             >
               {getText(
                 graph,
                 setGraph,
-                field.meta.P.props?.text,
+                props.meta.P.props?.text,
                 repeaterContext,
               )}
-              {field.children}
-              <PageItemRender metaVertex={field.meta} />
+              {props.children}
+              <PageItemRender metaVertex={props.meta} />
             </Dynamic>
           </Show>
         </Match>
         <Match when={component() === "A"}>
           <Switch>
-            <Match when={PageRenderUtils.getDataVertex(graph, field.meta)}>
+            <Match when={PageRenderUtils.getDataVertex(graph, props.meta)}>
               {(vertex) => (
                 <A
-                  {...field.meta.P.props}
+                  {...props.meta.P.props}
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
                 >
                   <Show
-                    when={!field.meta.P.props?.text}
+                    when={!props.meta.P.props?.text}
                     fallback={getText(
                       graph,
                       setGraph,
-                      field.meta.P.props?.text,
+                      props.meta.P.props?.text,
                       repeaterContext,
                     )}
                   >
-                    {field.children}
-                    <PageItemRender metaVertex={field.meta} />
+                    {props.children}
+                    <PageItemRender metaVertex={props.meta} />
                   </Show>
                 </A>
               )}
             </Match>
-            <Match when={field.meta.P.props?.href}>
+            <Match when={props.meta.P.props?.href}>
               <A
-                {...field.meta.P.props}
+                {...props.meta.P.props}
                 href={getUrl(
                   graph,
                   setGraph,
-                  field.meta.P.href,
+                  props.meta.P.href,
                   repeaterContext,
                 )}
                 draggable
               >
                 <Show
-                  when={!field.meta.P.props?.text}
+                  when={!props.meta.P.props?.text}
                   fallback={getText(
                     graph,
                     setGraph,
-                    field.meta.P.props?.text,
+                    props.meta.P.props?.text,
                     repeaterContext,
                   )}
                 >
-                  {field.children}
-                  <PageItemRender metaVertex={field.meta} />
+                  {props.children}
+                  <PageItemRender metaVertex={props.meta} />
                 </Show>
               </A>
             </Match>
             <Match when={true}>
               <a draggable>
-                {field.children}
-                <PageItemRender metaVertex={field.meta} />
+                {props.children}
+                <PageItemRender metaVertex={props.meta} />
               </a>
             </Match>
           </Switch>
@@ -203,16 +219,16 @@ export function GenericField(
 
         <Match when={component() === "Page"}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView metaVertex={field.data} />
+          <PageView metaVertex={props.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
             loading="lazy"
-            {...field.meta.P.props}
+            {...props.meta.P.props}
             src={getText(
               graph,
               setGraph,
-              field.meta.P.props?.src,
+              props.meta.P.props?.src,
               repeaterContext,
             )}
             draggable={true}
@@ -220,129 +236,129 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs {...field.meta.P.props}>
-            <PageItemRender metaVertex={field.meta} />
+          <Tabs {...props.meta.P.props}>
+            <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender metaVertex={field.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender metaVertex={field.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
-            icon={field.meta.P.props?.icon}
-            class={getValueFromVertexOrKey(field.meta.P?.props, "class")}
-            width={field.meta.P.props?.width || "24"}
-            height={field.meta.P.props?.height || "24"}
-            {...field.meta.P.props}
+            icon={props.meta.P.props?.icon}
+            class={props.meta.P?.props["class"]}
+            width={props.meta.P.props?.width || "24"}
+            height={props.meta.P.props?.height || "24"}
+            {...props.meta.P.props}
           />
         </Match>
-        <Match when={component() === "Box" && field.meta.P.props?.text}>
+        <Match when={component() === "Box" && props.meta.P.props?.text}>
           <Dynamic
-            component={field.meta.P.props?.as || "div"}
-            {...getAttrs(field.meta)}
-            class={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            component={props.meta.P.props?.as || "div"}
+            {...getAttrs(props.meta)}
+            class={props.meta.P.props["class"]}
           >
             {getText(
               graph,
               setGraph,
-              field.meta.P.props?.text,
+              props.meta.P.props?.text,
               repeaterContext,
             )}
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <CustomButton {...field.meta.P.props}>
-            {field.data?.P[field.meta.P[IdAttr]] ?? field.meta.P.children}
+          <CustomButton {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </CustomButton>
         </Match>
         <Match when={component() === "Table"}>
           <Table
             headers={
-              getChildVertexes(graph, ["Attr"], [field.meta]).vertexes
+              getChildVertexes(graph, ["Attr"], [props.meta]).vertexes
                 ?.length || []
             }
-            {...field.meta.P.props}
+            {...props.meta.P.props}
           >
-            <PageItemRender metaVertex={field.meta} />
+            <PageItemRender metaVertex={props.meta} />
           </Table>
         </Match>
         <Match
           when={
             component() === "TableHeader" &&
-            getChildVertexes(graph, ["Attr"], [field.meta]).vertexes?.length
+            getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length
           }
         >
           <TableHeadCell class={"p:10 text:center h:5"}>
-            <PageItemRender metaVertex={field.meta} />
+            <PageItemRender metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
           <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
-            <PageItemRender metaVertex={field.meta} />
+            <PageItemRender metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
-          <Collapsible {...field.meta.P.props}>
-            <PageItemRender metaVertex={field.meta} />
+          <Collapsible {...props.meta.P.props}>
+            <PageItemRender metaVertex={props.meta} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
-          <Avatar {...field.meta.P.props}>
-            {field.data?.P[field.meta.P[IdAttr]] ?? field.meta.P.children}
+          <Avatar {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
         </Match>
         <Match when={component() === "Select"}>
-          <Select {...props.field.meta.P.props}>
-            {props.field.data?.P[props.field.meta.P[IdAttr]] ??
-              props.field.meta.P.props.children}
+          <Select {...props.props.meta.P.props}>
+            {props.props.data?.P[props.props.meta.P[IdAttr]] ??
+              props.props.meta.P.props.children}
           </Select>
         </Match>
         <Match when={component() === "LoadIndicator"}>
-          <Spinner {...field.meta?.P.props}>{field.meta.P.children}</Spinner>
+          <Spinner {...props.meta?.P.props}>{props.meta.P.children}</Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
           <TreeView
-            title={field.meta.P?.props.title ?? "MenuItem"}
-            meta={field.meta}
+            title={props.meta.P?.props.title ?? "MenuItem"}
+            meta={props.meta}
           >
-            <PageItemRender metaVertex={field.meta} />
+            <PageItemRender metaVertex={props.meta} />
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <PageItemRender metaVertex={field.meta} />
+          <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Accordion"}>
-          <Accordion {...field.meta.P.props}>
-            {field.data?.P[field.meta.P[IdAttr]] ?? field.meta.P.children}
+          <Accordion {...props.meta.P.props}>
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
         </Match>
         <Match when={component() === "Breadcrumb"}>
           <Breadcrumbs
-            separator={field.meta.P.props.separator ?? "›"}
+            separator={props.meta.P.props.separator ?? "›"}
             aria-label="breadcrumb"
-            {...field.meta.P.props}
+            {...props.meta.P.props}
           >
-            <PageItemRender metaVertex={field.meta} />
+            <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
-          <Progress {...field.meta.P.props} />
+          <Progress {...props.meta.P.props} />
         </Match>
         <Match when={component() === "Form"}>
-          <FormWrapper meta={field.meta} />
+          <FormWrapper meta={props.meta} />
         </Match>
         <Match when={component() === "Divider"}>
           <hr
-            {...field.meta.P.props}
-            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${getValueFromVertexOrKey(field.meta.P.props, "class")}`}
+            {...props.meta.P.props}
+            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P.props["class"]}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
-            etc={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            etc={props.meta.P.props["class"]}
             heading={propWithDefault("heading")}
             divider={propWithDefault("divider", true)}
             subheading={propWithDefault("subheading")}
@@ -350,17 +366,17 @@ export function GenericField(
         </Match>
         <Match when={component() === "Rating"}>
           <StarRating
-            etc={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            etc={props.meta.P.props["class"]}
             heading={propWithDefault("heading", "Rating")}
           />
         </Match>
         <Match when={true}>
           <Dynamic
-            component={field.meta.P.props?.as || "div"}
-            class={getValueFromVertexOrKey(field.meta.P.props, "class")}
+            component={props.meta.P.props?.as || "div"}
+            class={props.meta.P.props["class"]}
           >
-            {field.children}
-            <PageItemRender metaVertex={field.meta} />
+            {props.children}
+            <PageItemRender metaVertex={props.meta} />
           </Dynamic>
         </Match>
       </Switch>

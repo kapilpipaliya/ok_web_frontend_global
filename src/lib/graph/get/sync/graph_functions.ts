@@ -4,25 +4,15 @@ import {
   getParentVertex,
   getSelectionOptions,
 } from "./traverse";
-import { removeUndefinedProperties } from "~/lib/functions";
 import type { FieldAttribute, FormMetaData } from "~/lib/Type";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-
-export function compareId(id1: any, id2: any) {
-  if (typeof id1 === "object") {
-    id1 = id1;
-  }
-  if (typeof id2 === "object") {
-    id2 = id2;
-  }
-  return id1 === id2;
-}
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 
 export function isIdArrayIncludesID(value: Array<any>, id: any) {
   for (const element of value) {
-    if (compareId(element, id)) {
+    if (element === id) {
       return true;
     }
   }

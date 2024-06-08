@@ -10,7 +10,7 @@ import {
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
 import { CollectionPart } from "./CollectionPart";
-import { capitalizeFirstLetter } from "~/lib/Utils";
+import { capitalizeFirstLetter } from "~/lib/utils";
 
 interface MenuProps {
   leftColumns: any;

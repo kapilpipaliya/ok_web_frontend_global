@@ -9,15 +9,15 @@ import {
   TextField,
 } from "~/components/solid-blocks/blocks";
 import { FileUploader } from "~/components/solid-blocks/blocks/file_uploader/fileuploader";
-import { FormContext, getTextColumnValue } from "~/lib/Utils";
 import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/custom/ExpressionBuilder";
-import { PageItemRender } from "~/components/dynamic/fields/static/GenaricField";
+import { PageItemRender } from "~/components/dynamic/fields/static/PageItemRender";
 import type { ComponentProps } from "~/components/ComponentType";
-import { SelectedIdContext } from "~/lib/contexts";
+import { FormContext, SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid-blocks/blocks/label/Label";
 import MultiSelectField from "~/components/custom/MultiSelect";
+import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -40,7 +40,7 @@ export function GenericInputField(
     >
       <Show
         when={!props.disabled}
-        fallback={getTextColumnValue(formData?.P[props.meta.P[IdAttr]])}
+        fallback={getViewValue(formData?.P[props.meta.P[IdAttr]])}
       >
         <Switch>
           <Match when={component() === "CheckBox"}>

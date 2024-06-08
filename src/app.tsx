@@ -1,7 +1,7 @@
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, Show, Suspense } from "solid-js";
+import { createSignal, onMount, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./pages/utils/CSSRuntimeProvider";
@@ -16,7 +16,8 @@ import {
   type VertexMap,
 } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
-import { DataFetcher, API } from "./components/api/DataFetcher";
+import { API } from "~/lib/api/endpoints";
+import { setGraphData } from "~/lib/websocket/ws_events";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -42,7 +43,23 @@ export default function App() {
     isSubSideBarOpen: true,
   });
 
-  return (
+
+ const getdata = async () => {
+  try {
+   const response = await fetch(API.fetchDataUrl);
+   const data = await response.json();
+   setGraphData(graph[0], graph[1], data);
+   return data;
+  } catch (error) {
+   throw error;
+  }
+ };
+ onMount(() => {
+  getdata();
+ });
+
+
+ return (
     <Router
       root={(props) => {
         return (
@@ -55,10 +72,6 @@ export default function App() {
                     <Show when={graph[0].isSideBarOpen}>
                       <Sidebar />
                     </Show>
-                    <DataFetcher
-                      fetchData={API.fetchDataUrl}
-                      renderContent={<></>}
-                    />
 
                     <Suspense fallback={<LoaderNew />}>
                       {/* <ErrorBoundary fallback={(error) => {

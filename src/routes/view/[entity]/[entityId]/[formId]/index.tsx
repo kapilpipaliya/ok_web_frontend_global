@@ -1,13 +1,13 @@
 import { useParams } from "@solidjs/router";
 import { Show, createSignal, onMount, useContext } from "solid-js";
-import { PageView } from "~/components/dynamic/fields/static/GenaricField";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { FormContext, getEdgesFromRowsAttr } from "~/lib/Utils";
 import { AttrsTableData } from "~/lib/api";
-import { IsPreviewContext } from "~/lib/contexts";
+import { FormContext, IsPreviewContext } from "~/lib/contexts";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import { PageView } from "~/components/dynamic/fields/static/PageView";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
 
 export default function PageShareView() {

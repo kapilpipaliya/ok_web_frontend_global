@@ -1,13 +1,13 @@
 import { equals } from "rambda";
 import { Show, createSignal, useContext } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-import { API } from "~/components/api/DataFetcher";
-import getAPI from "~/components/api/getApi";
-import postAPI from "~/components/api/postApi";
+import { API } from "~/lib/api/endpoints";
+import getAPI from "~/lib/api/getApi";
+import postAPI from "~/lib/api/postApi";
 import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
-import { validateEmail } from "~/lib/Utils";
 import { GraphContext } from "~/lib/graph/graph";
+import { validateEmail } from "~/lib/validations";
 
 type GenralProps = {
   profileData: {

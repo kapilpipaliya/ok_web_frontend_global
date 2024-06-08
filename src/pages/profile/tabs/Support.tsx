@@ -1,13 +1,13 @@
 import { Icon } from "@iconify-icon/solid";
 import { createSignal, Show, For } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
-import { API } from "~/components/api/DataFetcher";
+import { API } from "~/lib/api/endpoints";
 import {
   sendChatsSupportCall,
   getChatsSupportCall,
   deleteSupportTicketCall,
-} from "~/components/api/api_functions";
-import postAPI from "~/components/api/postApi";
+} from "~/lib/api/api_functions";
+import postAPI from "~/lib/api/postApi";
 import { ChipDropDown } from "~/components/custom/Chip";
 import CustomModal from "~/components/custom/CommonDialog";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";

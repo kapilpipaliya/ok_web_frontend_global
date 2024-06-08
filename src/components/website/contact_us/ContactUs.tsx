@@ -1,15 +1,15 @@
 import { Footer } from "~/components/website/Footer";
-import "~/css/style.css";
-import "~/css/krd.css";
+import "~/components/website/style.css";
+import "~/components/website/krd.css";
 import { createSignal, useContext } from "solid-js";
 import { Header } from "../Header";
-import SiteTitle from "../utils";
-import { validateEmail } from "~/lib/Utils";
-import { contactUsCall } from "~/components/api/api_functions";
+import SiteTitle from "../SiteTitle";
+import { contactUsCall } from "~/lib/api/api_functions";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
+import { validateEmail } from "~/lib/validations";
 export default function ContactUs() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();

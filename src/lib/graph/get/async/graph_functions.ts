@@ -1,12 +1,10 @@
 import { klona } from "klona/json";
-import { AdminAttrKeys } from "~/lib/Utils";
 import {
   getChildVertexAsync,
   getChildVertexesAsync,
   getParentVertexAsync,
   getSelectionOptionsAsync,
 } from "./traverse";
-import { removeUndefinedProperties } from "~/lib/functions";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import type { FieldAttribute, FormMetaData } from "~/lib/Type";
 import type { SetStoreFunction, Store } from "solid-js/store";
@@ -16,6 +14,8 @@ import { getToEdgeAsync } from "./getToEdge";
 import { useToast } from "~/components/custom/Toast";
 import { getFormApiFromFormMGCall } from "~/cypher_api/lib/graph/get/async/graph_functions";
 import { AttrsTableData } from "~/lib/api";
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+import { AdminAttrKeys } from "~/lib/constants";
 
 export async function getCompPropsMapAsync(
   graph: Store<GraphInterface>,

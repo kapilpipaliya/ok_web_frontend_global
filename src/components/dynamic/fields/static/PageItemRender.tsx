@@ -7,47 +7,49 @@ import {
   Match,
   Show,
   Switch,
-  useContext,
+  useContext
 } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import {
   GraphContext,
   type GraphInterface,
   IdAttr,
-  type Vertex,
+  type Vertex
 } from "~/lib/graph/graph";
-import { FormContext, iconMap, PageContext } from "~/lib/Utils";
 import {
   getChildVertex,
   getChildVertexes,
   getParentVertex,
-  getSelectionOptions,
+  getSelectionOptions
 } from "~/lib/graph/get/sync/traverse";
-import { getLastItem } from "~/lib/functions";
-import { DynamicComponent } from "~/components/dynamic/components/DynamicComponent";
+import {
+  DynamicComponent
+} from "~/components/dynamic/components/DynamicComponent";
 import { useDragDrop } from "~/lib/drag-drop/useDragDrop";
 import { Icon } from "@iconify-icon/solid";
-import type { SetStoreFunction, Store } from "solid-js/store";
+import type { Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid-blocks/blocks";
 import {
   getCollAttrComp,
   getCompProps,
-  getRowProps,
+  getRowProps
 } from "~/lib/graph/get/sync/graph_functions";
 import {
+  DragOverTargetIdContext, FormContext,
   HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
   SelectedIdContext,
-  ShowDrawerContext,
-  DragOverTargetIdContext,
+  ShowDrawerContext
 } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
-// Do not specify the items property if you specified the dataSource, and vice versa.
-// It's best to use dataSource, but we are using items for simplicity.
+import {
+  PageRenderVertexContext,
+  RepeaterVertexContext
+} from "~/components/dynamic/fields/static/Context";
+import { getLastItem } from "~/components/dynamic/fields/static/getLastItem";
+import { iconMap } from "~/lib/constants";
 
-export const PageRenderContext = createContext([] as Vertex[]);
-export const RepeaterContext = createContext([] as Vertex[]); // DataVertex[]
 
 export const PageRenderUtils = {
   getCollection: (
@@ -84,7 +86,7 @@ export const PageRenderUtils = {
 };
 
 export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
-  const parentItems = useContext(PageRenderContext);
+  const parentItems = useContext(PageRenderVertexContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
@@ -98,7 +100,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);
-  const PropertiesDrawer = (props: { itemId: any }) => {
+  const PropertyDrawer = (props: { itemId: any }) => {
     return (
       <Show when={isSelectedLayoutId(props.itemId)}>
         <Icon
@@ -229,7 +231,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               getSelectionOptions(
                 graph,
                 setGraph,
-                [...useContext(RepeaterContext)],
+                [...useContext(RepeaterVertexContext)],
                 item.P.data,
               ).vertexes ||
               PageRenderUtils.getDataVertex(graph, item)
@@ -243,8 +245,8 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         );
 
         const PageComponent = () => (
-          <PageRenderContext.Provider
-            value={[...useContext(PageRenderContext), item]}
+          <PageRenderVertexContext.Provider
+            value={[...useContext(PageRenderVertexContext), item]}
           >
             <Show when={!isPreview()} fallback={<Content />}>
               <span
@@ -299,7 +301,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                 class="mr:0.5rem f:0.875rem lh:1.25rem"
                                 style={{ display: "flex" }}
                               >
-                                <PropertiesDrawer itemId={item.id} />
+                                <PropertyDrawer itemId={item.id} />
                               </div>
                               <Tooltip content={"Name"} nowrap>
                                 <div
@@ -392,7 +394,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 </Popover>
               </span>
             </Show>
-          </PageRenderContext.Provider>
+          </PageRenderVertexContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
         return (
@@ -421,73 +423,4 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
     </For>
   );
 }
-// Do not specify the items property if you specified the dataSource, and vice versa.
-// It's best to use dataSource, but we are using items for simplicity.
-// Components that don't have children.
 
-export function getText(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  repeaterContext: Vertex[],
-) {
-  return getSelectionOptions(graph, setGraph, repeaterContext, projection)
-    .vertexes as string;
-}
-
-export function getUrl(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  projection: string,
-  repeaterContext: Vertex[],
-) {
-  const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
-    .vertexes as string | undefined;
-  if (typeof url === "string" && url.startsWith("/")) {
-    // url = (showNav() ? '/nav' : '') + url;
-  }
-  return url;
-}
-
-export function PageView(props: { metaVertex?: Vertex; data?: Vertex; isPreview?: boolean }) {
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const collection = createMemo(() =>
-    PageRenderUtils.getCollection(graph, props.metaVertex),
-  );
-  const dataVertex = createMemo(() =>
-    PageRenderUtils.getDataVertex(graph, props.metaVertex),
-  );
-
-  return (
-    <PageContext.Provider value={{ events: {} }}>
-      <Show when={props.metaVertex} keyed>
-        <Switch>
-          {/* <Match when={collection() && !dataVertex()}> */}
-          {/* <For
-              each={
-                getSelectionOptions(
-                  graph,
-                  setGraph,
-                  [props.vertex!],
-                  `'g:${collection()!}'`,
-                ).vertexes
-              }
-            >
-              {(vertex) => (
-                <PageRenderContext.Provider value={[props.vertex!]}>
-                  <PageItemRender metaVertex={props.vertex!} data={vertex} />
-                </PageRenderContext.Provider>
-              )}
-            </For> */}
-          {/* </Match> */}
-          {/* <Match when={collection() && dataVertex()}>
-            <PageItemRender metaVertex={props.vertex!} />
-          </Match> */}
-          <Match when={true}>
-            <PageItemRender metaVertex={props.metaVertex!} data={props.data}/>
-          </Match>
-        </Switch>
-      </Show>
-    </PageContext.Provider>
-  );
-}

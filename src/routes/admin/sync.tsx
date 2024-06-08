@@ -1,5 +1,5 @@
-import { SyncComopnent } from "~/components/admin/Sync";
+import { SyncData } from "~/components/admin/SyncData";
 
 export default function Sync() {
-  return <SyncComopnent />;
+  return <SyncData />;
 }

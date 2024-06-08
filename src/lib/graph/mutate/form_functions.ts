@@ -22,7 +22,6 @@ import {
   getChildVertexes,
   getSelectionOptions,
 } from "../get/sync/traverse";
-import { removeUndefinedProperties } from "~/lib/functions";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import {
   componentProps,
@@ -36,8 +35,8 @@ import {
   isObject,
   getLabel,
   getId,
-  AdminAttrKeys,
-} from "~/lib/Utils";
+
+} from "~/lib/utils";
 import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { getToEdge } from "../get/sync/traverse";
 import { newEdge, addNewEdge } from "./edge";
@@ -49,6 +48,8 @@ import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
 import { AttrsTableData } from "~/lib/api";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+import { AdminAttrKeys } from "~/lib/constants";
 
 export function cloneRowProps(
   graph: Store<GraphInterface>,
@@ -495,7 +496,7 @@ export function addNewRow(
     txnId = getNewTxnId(graph, setGraph);
   }
   const type = getToEdge(meta, parentVertex);
-  const label = getValueFromVertexOrKey(meta.P.props || {}, "label");
+  const label = meta.P.props || {}["label"];
 
   const newRowResult = newRow(
     graph,

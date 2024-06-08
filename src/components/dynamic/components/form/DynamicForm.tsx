@@ -16,11 +16,10 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
-import { FormContext, getEdgesFromRowsAttr, groupBy } from "~/lib/Utils";
+import { groupBy } from "~/lib/utils";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
-import { RepeaterContext } from "~/components/dynamic/fields/static/GenaricField";
-import { GenericField } from "~/components/dynamic/fields/static/GenericFieldComponent";
+import { GenericField } from "~/components/dynamic/fields/static/GenericField";
 import {
   GraphContext,
   type GraphInterface,
@@ -46,13 +45,13 @@ import {
 import { TableTabs } from "~/components/custom/TableTabs";
 import type { FormMetaData } from "~/lib/Type";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
-import { submitDataCall } from "~/components/api/api_functions";
+import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
 import { DeleteDialog } from "~/components/custom/DeleteDialog";
 import { getDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { PageConfigContext } from "~/lib/contexts";
+import { FormContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { checkIfNameExistsMGCall } from "~/cypher_api/functions/get/expression_eval_async_fns";
@@ -60,6 +59,10 @@ import { LoaderNew } from "~/components/custom/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
 import { componentDrag } from "~/lib/drag-drop/componentDrag";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
+import {
+  RepeaterVertexContext
+} from "~/components/dynamic/fields/static/Context";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -456,8 +459,8 @@ export function DynamicForm(props: DynamicFormProps) {
       <Match when={data.error}>Error</Match>
 
       <Match when={formData.formData}>
-        <RepeaterContext.Provider
-          value={[formData.formData, ...useContext(RepeaterContext)]}
+        <RepeaterVertexContext.Provider
+          value={[formData.formData, ...useContext(RepeaterVertexContext)]}
         >
           <div
             ref={(el) => {
@@ -566,7 +569,7 @@ export function DynamicForm(props: DynamicFormProps) {
               />
             </Show>
           </div>
-        </RepeaterContext.Provider>
+        </RepeaterVertexContext.Provider>
       </Match>
     </Switch>
   );

@@ -9,12 +9,15 @@ import jsep from "jsep";
 import {
   capitalizeFirstLetter,
   getValueFromVertexOrKey,
-  replaceExpressionToLabel,
-} from "~/lib/Utils";
+  
+} from "~/lib/utils";
 import type { SetStoreFunction, Store } from "solid-js/store";
+import {
+ replaceExpressionToLabel
+} from "~/lib/graph/get/sync/replaceExpressionToLabel";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
-  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
+  if (meta.P.props?.type) return meta.P.props["type"];
 
   const attributeId = meta.P[IdAttr];
   return (
@@ -33,10 +36,10 @@ export function getSelectedVertexValue(
 }
 
 export function getInEdge(meta: Vertex, vertex: Vertex) {
-  if (meta.P.props?.type) return getValueFromVertexOrKey(meta.P.props, "type");
+  if (meta.P.props?.type) return meta.P.props["type"];
 
-  const parentLabel = getValueFromVertexOrKey(meta.P.props, "parentLabel");
-  const childLabel = getValueFromVertexOrKey(meta.P.props, "childLabel");
+  const parentLabel = meta.P.props["parentLabel"];
+  const childLabel = meta.P.props["childLabel"];
   if (!parentLabel) return "";
   return (
     capitalizeFirstLetter(parentLabel) +

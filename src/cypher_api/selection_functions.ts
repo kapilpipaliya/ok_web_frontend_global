@@ -2,7 +2,6 @@ import { getOutEdges } from "~/cypher_api/functions/get/getOutEdges";
 import { deleteRelationShipMGCall } from "~/cypher_api/functions/mutate/deleteRelationShip";
 import { newEdgeMGCall } from "~/cypher_api/functions/mutate/newEdge";
 import {
-  compareId,
   isIdArrayIncludesID,
 } from "~/lib/graph/get/sync/graph_functions";
 
@@ -23,7 +22,7 @@ async function vertexOutEdgeContainVertexMGCall(
   const outEdgesResult = await getOutEdges(vertex.id, type);
 
   for (const [relationship, endVertex] of outEdgesResult.pairs || []) {
-    if (compareId(endVertex, vertexId)) {
+    if (endVertex.id === vertexId) {
       return true;
     }
   }
@@ -42,7 +41,7 @@ async function vertexInEdgeContainVertexMGCall(
     isInward: true,
   });
   for (const [relationship, startVertex] of inEdgesResult.pairs || []) {
-    if (compareId(startVertex.id, vertexId)) {
+    if (startVertex.id === vertexId) {
       return true;
     }
   }

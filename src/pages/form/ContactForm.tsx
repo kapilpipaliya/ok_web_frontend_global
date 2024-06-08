@@ -1,10 +1,10 @@
 import { createSignal } from "solid-js";
-import { validateEmail } from "~/lib/Utils";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/custom/Toast";
 import logo from "~/assets/graphics/logo.png";
-import { contactUsCall } from "~/components/api/api_functions";
+import { contactUsCall } from "~/lib/api/api_functions";
 import "~/css/base.css";
+import { validateEmail } from "~/lib/validations";
 export function ContactForm() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();

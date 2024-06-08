@@ -16,8 +16,8 @@ import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
-import { expressionString } from "~/lib/Utils";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 export function PagesPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -36,7 +36,7 @@ export function PagesPart() {
   }> {
     try {
       const data = await getTreeDataMGCall({
-        collection: expressionString({ coll: "Page" }),
+        collection: paginationExpression({ coll: "Page" }),
       });
       return { graph: data.graph, data: data };
     } catch (error: any) {
@@ -59,7 +59,7 @@ export function PagesPart() {
           setGraphData(graph, setGraph, result.graph);
 
           const data2 = getTreeData(graph, setGraph, {
-            collection: expressionString({ coll: "Page" }),
+            collection: paginationExpression({ coll: "Page" }),
           });
           originalData = data2;
           setFilteredData(data2);

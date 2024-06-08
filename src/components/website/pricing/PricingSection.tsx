@@ -1,7 +1,7 @@
 import { createSignal } from "solid-js";
 import { Footer } from "../Footer";
 import { Header } from "../Header";
-import SiteTitle from "../utils";
+import SiteTitle from "../SiteTitle";
 import { Icon } from "@iconify-icon/solid";
 
 function PricingContent() {

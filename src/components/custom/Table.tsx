@@ -9,7 +9,7 @@ import {
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "../solid-blocks/blocks";
 import CustomButton from "../solid-blocks/blocks/button/buttons";
-import { capitalizeFirstLetter } from "~/lib/Utils";
+import { capitalizeFirstLetter } from "~/lib/utils";
 
 type TableProps<T> = {
   headers: any[];

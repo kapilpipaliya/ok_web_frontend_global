@@ -1,7 +1,7 @@
 import { batch } from "solid-js";
 import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 
-import { isObject } from "~/lib/Utils";
+import { isObject } from "~/lib/utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
 import type { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {

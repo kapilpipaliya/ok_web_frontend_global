@@ -1,11 +1,11 @@
 import { For, Match, Show, Switch } from "solid-js";
-import { ButtonGroups } from "~/components/css-properties/css-components/ButtonGroups";
-import { ColorPickerInput } from "~/components/css-properties/css-components/ColorPickerInput";
-import { DataEditWithCustomDialog } from "~/components/css-properties/css-components/DataEditWithCustomDialog";
-import { DisplaySelector } from "~/components/css-properties/css-components/DisplaySelector";
-import { FieldWithCustomBox } from "~/components/css-properties/css-components/FieldWithCustomBox";
-import { TextFieldWithSelect } from "~/components/css-properties/css-components/TextFieldWithSelect";
-import { ToggleButton } from "~/components/css-properties/css-components/ToggleButton";
+import { ButtonGroups } from "~/components/css_properties/css_components/ButtonGroups";
+import { ColorPickerInput } from "~/components/css_properties/css_components/ColorPickerInput";
+import { DataEditWithCustomDialog } from "~/components/css_properties/css_components/DataEditWithCustomDialog";
+import { DisplaySelector } from "~/components/css_properties/css_components/DisplaySelector";
+import { FieldWithCustomBox } from "~/components/css_properties/css_components/FieldWithCustomBox";
+import { TextFieldWithSelect } from "~/components/css_properties/css_components/TextFieldWithSelect";
+import { ToggleButton } from "~/components/css_properties/css_components/ToggleButton";
 
 export function DynamicCSSComponent(props: { value: any }) {
   return (

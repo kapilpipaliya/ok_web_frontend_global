@@ -10,7 +10,6 @@ import {
 import { useToast } from "~/components/custom/Toast";
 import { Checkbox } from "~/components/solid-blocks/blocks";
 import { getTreeDataMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
-import { expressionString, iconMap } from "~/lib/Utils";
 import {
   DraggedVertexContext,
   PageConfigContext,
@@ -21,6 +20,8 @@ import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { onClickAddComponent } from "../CommonCompUtils";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { iconMap } from "~/lib/constants";
+import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -55,7 +56,7 @@ export function ComponentPart() {
   }> {
     try {
       const data = await getTreeDataMGCall({
-        collection: expressionString({ coll: "CompCategory" }),
+        collection: paginationExpression({ coll: "CompCategory" }),
         child: { collection: "->CompCategoryComp" },
       });
       return { graph: data.graph, data: data };
@@ -78,7 +79,7 @@ export function ComponentPart() {
         if (result?.graph) {
           setGraphData(graph, setGraph, result.graph);
           const data2 = getTreeData(graph, setGraph, {
-            collection: expressionString({ coll: "CompCategory" }),
+            collection: paginationExpression({ coll: "CompCategory" }),
             child: { collection: "->CompCategoryComp" },
           });
           defaultData = data2;

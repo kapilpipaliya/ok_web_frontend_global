@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext } from "solid-js";
 import { createStore } from "solid-js/store";
-import { resetPasswordCall } from "~/components/api/api_functions";
+import { resetPasswordCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/custom/Toast";
 import { TextField } from "~/components/solid-blocks/blocks";
 import { GraphContext } from "~/lib/graph/graph";

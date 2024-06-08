@@ -8,9 +8,9 @@ import type { Vertex } from "~/lib/graph/graph";
 import { createEffect, on } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { CssEditorContext } from "./cssContext";
-import { Container } from "./css-components/CssUtils";
-import { TextEditor } from "./css-tabs/TextEditor";
-import { StyleEditor } from "./css-tabs/StyleEditor";
+import { Container } from "~/components/css_properties/css_components/CssUtils";
+import { TextEditor } from "~/components/css_properties/css_tabs/TextEditor";
+import { StyleEditor } from "~/components/css_properties/css_tabs/StyleEditor";
 
 export function ClassDesignTab(props: {
   component: string;

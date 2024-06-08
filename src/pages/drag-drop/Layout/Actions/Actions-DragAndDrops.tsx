@@ -3,7 +3,7 @@ import { useContext, For, type Accessor, createSignal } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
-import { capitalizeFirstLetter } from "~/lib/Utils";
+import { capitalizeFirstLetter } from "~/lib/utils";
 import { FormSetting } from "./FormSetting";
 
 interface ActionsProps {

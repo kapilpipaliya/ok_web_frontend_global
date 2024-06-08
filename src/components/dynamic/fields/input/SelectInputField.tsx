@@ -27,7 +27,7 @@ import {
   getSelectedVertexValue,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
-import { FormContext, getValueFromVertexOrKey } from "~/lib/Utils";
+import { getValueFromVertexOrKey } from "~/lib/utils";
 import {
   onChangeHandler,
   setValueGlobal,
@@ -41,6 +41,7 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import MultiSelectField from "~/components/custom/MultiSelect";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
+import { FormContext } from "~/lib/contexts";
 
 export function ensureArray(value: any) {
   if (Array.isArray(value)) {
@@ -54,8 +55,8 @@ export function selectedValue(
   graph: Store<GraphInterface>,
 ): Id[] {
   if (
-    getValueFromVertexOrKey(meta.P.props, "stringValue") ||
-    getValueFromVertexOrKey(meta.P.props, "items")
+    meta.P.props["stringValue"] ||
+    meta.P.props["items"]
   ) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
@@ -64,7 +65,7 @@ export function selectedValue(
   }
   try {
     // when new row added or modified this gives error.
-    return getValueFromVertexOrKey(meta.P.props, "inward")
+    return meta.P.props["inward"]
       ? getParentVertexValue(graph, data, meta)
       : getSelectedVertexValue(graph, data, meta);
   } catch (e) {
@@ -72,7 +73,7 @@ export function selectedValue(
   }
 }
 
-// if getValueFromVertexOrKey(meta.P.props, "collection") is simple string
+// if meta.P.props["collection"] is simple string
 // no need to pass displayExpr,
 // it will be calculated automatically
 // * - { } $ [ | is special characters,
@@ -131,7 +132,7 @@ export function SelectInputField(
   const formData = useContext(FormContext);
 
   const selectOptions = () => {
-    const value = getValueFromVertexOrKey(field.meta.P.props, "items");
+    const value = field.meta.P.props["items"];
 
     if (value) {
       return handleValue(value);
@@ -187,7 +188,7 @@ export function SelectInputField(
   const getCollection = () => {
     return (
       getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
-      getValueFromVertexOrKey(field.meta.P.props, "collection")
+      field.meta.P.props["collection"]
     );
   };
 
@@ -243,7 +244,7 @@ export function SelectInputField(
         if (field.isRealTime) {
           field.txnId = getNewTxnId(graph, setGraph);
         }
-        if (getValueFromVertexOrKey(field.meta.P.props, "stringValue")) {
+        if (field.meta.P.props["stringValue"]) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -256,7 +257,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (getValueFromVertexOrKey(field.meta.P.props, "items")) {
+        } else if (field.meta.P.props["items"]) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -269,7 +270,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (getValueFromVertexOrKey(field.meta.P.props, "inward")) {
+        } else if (field.meta.P.props["inward"]) {
           setParentValue(
             graph,
             setGraph,

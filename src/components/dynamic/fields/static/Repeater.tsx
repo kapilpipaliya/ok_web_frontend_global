@@ -8,14 +8,15 @@ import {
 } from "solid-js";
 import {
   PageRenderUtils,
-  RepeaterContext,
-  PageRenderContext,
   PageItemRender,
-} from "~/components/dynamic/fields/static/GenaricField";
+} from "~/components/dynamic/fields/static/PageItemRender";
 import { getSelectionOptionsMGCall } from "~/cypher_api/lib/graph/get/async/traverse";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import {
+  RepeaterVertexContext, PageRenderVertexContext
+} from "~/components/dynamic/fields/static/Context";
 
 export const Repeater = (props: { data: any; meta: any }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -60,15 +61,15 @@ export const Repeater = (props: { data: any; meta: any }) => {
     <Show when={!isFetching()}>
       <For each={options()}>
         {(vertex) => (
-          <RepeaterContext.Provider
-            value={[vertex, ...useContext(RepeaterContext)]}
+          <RepeaterVertexContext.Provider
+            value={[vertex, ...useContext(RepeaterVertexContext)]}
           >
-            <PageRenderContext.Provider
-              value={[...useContext(PageRenderContext), props.meta]}
+            <PageRenderVertexContext.Provider
+              value={[...useContext(PageRenderVertexContext), props.meta]}
             >
               <PageItemRender metaVertex={props.meta} data={vertex} />
-            </PageRenderContext.Provider>
-          </RepeaterContext.Provider>
+            </PageRenderVertexContext.Provider>
+          </RepeaterVertexContext.Provider>
         )}
       </For>
     </Show>

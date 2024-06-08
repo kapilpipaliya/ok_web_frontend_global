@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show } from "solid-js";
-import SiteTitle from "~/components/website/utils";
+import SiteTitle from "~/components/website/SiteTitle";
 
 export type PageHeaderProps = {
   title: string;

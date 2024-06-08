@@ -1,6 +1,6 @@
 import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
 import PageHeader from "../custom/Breadcumb";
-import { getUsers } from "../../cypher_api/functions/get/adminFunctions";
+import { getUsers } from "~/cypher_api/functions/get/adminFunctions";
 import { useToast } from "../custom/Toast";
 import { syncNodesMGCall } from "~/cypher_api/functions/mutate/sync";
 import type { Vertex } from "~/lib/graph/graph";
@@ -12,7 +12,7 @@ const transferNodes = [
   { key: "Navigation", value: "Nav" },
 ];
 
-export function SyncComopnent() {
+export function SyncData() {
   const { showLoadingToast } = useToast();
   const [users, setUsers] = createSignal([] as Vertex[]);
   const [searchQuery, setSearchQuery] = createSignal("");

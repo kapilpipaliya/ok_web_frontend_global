@@ -3,8 +3,8 @@ import { type JSX, type JSXElement, Show, splitProps } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import "~/css/sideBarSearch.css";
 
-import { APP_BASE_URL } from "~/lib/Utils";
 import type { DisplayComponentProps } from "~/components/ComponentType";
+import { APP_BASE_URL } from "~/lib/constants";
 
 function NavToggleBtn(props: { toggleSidebar: () => void }) {
   return (

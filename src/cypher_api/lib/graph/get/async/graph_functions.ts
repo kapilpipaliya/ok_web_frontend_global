@@ -1,4 +1,3 @@
-import { removeUndefinedProperties } from "~/lib/functions";
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   getChildVertexMGCall,
@@ -11,6 +10,7 @@ import { getDriver } from "~/cypher_api/server/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/cypher_api/server/domain_utils";
 import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
+import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 
 export async function getCompPropsMapMGCall(comp: Vertex) {
   const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
