@@ -1,36 +1,10 @@
-import {
-  createMemo,
-  type JSXElement,
-  Match,
-  Show,
-  splitProps,
-  Switch,
-  useContext
-} from "solid-js";
-import { Icon } from "@iconify-icon/solid";
-import { A, useNavigate } from "@solidjs/router";
-import { Dynamic } from "solid-js/web";
-import {
-  GraphContext,
-  GraphInterface,
-  IdAttr,
-  type Vertex
-} from "~/lib/graph/graph";
-import {
-  commitTxn,
-  getNewTxnId,
-  revertTransaction
-} from "~/lib/graph/transaction";
-import {
-  getValueFromVertexOrKey
-} from "~/lib/utils";
-import {
-  getChildVertexes,
-  getSelectionOptions
-} from "~/lib/graph/get/sync/traverse";
-import { createForm } from "~/lib/graph/mutate/form_functions";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import type { ComponentProps } from "~/components/ComponentType";
+import {createMemo, type JSXElement, Match, Show, Switch, useContext} from "solid-js";
+import {Icon} from "@iconify-icon/solid";
+import {A} from "@solidjs/router";
+import {Dynamic} from "solid-js/web";
+import {GraphContext, GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
+import {getChildVertexes, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import type {ComponentProps} from "~/components/ComponentType";
 import {
   Accordion,
   Avatar,
@@ -42,30 +16,21 @@ import {
   TabList,
   Tabs
 } from "~/components/solid-blocks/blocks";
-import {
-  PageItemRender,
-  PageRenderUtils,
-} from "./PageItemRender";
+import {PageItemRender, PageRenderUtils,} from "./PageItemRender";
 import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
 import TreeView from "~/components/solid-blocks/blocks/treeview/treeview";
-import {
-  Collapsible
-} from "~/components/solid-blocks/blocks/collapsible/collapsible";
-import { useToast } from "~/components/custom/Toast";
-import { submitDataCall } from "~/lib/api/api_functions";
-import { createStore, SetStoreFunction, Store } from "solid-js/store";
-import { Repeater } from "~/components/dynamic/fields/static/Repeater";
-import { Table, TableBodyCell, TableHeadCell } from "~/components/custom/Table";
+import {Collapsible} from "~/components/solid-blocks/blocks/collapsible/collapsible";
+import {SetStoreFunction, Store} from "solid-js/store";
+import {Repeater} from "~/components/dynamic/fields/static/Repeater";
+import {Table, TableBodyCell, TableHeadCell} from "~/components/custom/Table";
 import Heading from "~/components/solid-blocks/blocks/Heading";
 import StarRating from "~/components/solid-blocks/blocks/Rating";
-import { PageView } from "~/components/dynamic/fields/static/PageView";
-import {
-  PageRenderVertexContext, RepeaterVertexContext
-} from "~/components/dynamic/fields/static/Context";
-import { getLastItem } from "~/components/dynamic/fields/static/getLastItem";
-import { APP_BASE_URL } from "~/lib/constants";
-import { FormContext } from "~/lib/contexts";
-import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
+import {PageView} from "~/components/dynamic/fields/static/PageView";
+import {PageRenderVertexContext, RepeaterVertexContext} from "~/components/dynamic/fields/static/Context";
+import {getLastItem} from "~/components/dynamic/fields/static/getLastItem";
+import {APP_BASE_URL} from "~/lib/constants";
+import {getViewValue} from "~/lib/graph/get/sync/getViewValue";
+import {FormWrapper} from "~/components/dynamic/fields/static/FormWrapper";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -381,125 +346,5 @@ export function GenericField(
         </Match>
       </Switch>
     </Show>
-  );
-}
-function FormWrapper(
-  props: ComponentProps & {
-    submitButton?: any;
-  },
-) {
-  const { Ws } = useContext(WsContext);
-  const [graph, setGraph] = useContext(GraphContext)!;
-  const { showLoadingToast } = useToast();
-  const navigate = useNavigate();
-
-  const cleanUpConfig = {} as { [key: string]: any };
-  const txnId = getNewTxnId(graph, setGraph);
-  const {formMeta: formDeisgnerMeta, formData: formDesignerDeta} = useContext(FormContext)!;
-
-  // const [dataVertex, setDataVertex] = createSignal<Vertex>();
-  // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
-
-
-  const [formData, setFormData] = createStore({
-    txnId,
-    cleanUpConfig: () => cleanUpConfig,
-  } as {
-    cleanUpConfig: () => { [key: string]: any };
-    txnId: number;
-    formMeta: Vertex;
-    formData: Vertex;
-    tabs: string[];
-    groupByTabsAndGroup: {
-      [tab: string]: {
-        [group: string]: Vertex[];
-      };
-    };
-  });
-
-
-  // if (!props.data?.id) {
-
-  const createResult = createForm(graph, setGraph, txnId, Ws, formDeisgnerMeta.P[IdAttr]);
-  if (createResult.error) return createResult.error;
-  setFormData('formData', createResult.vertex!);
-
-  // } else {
-  //   const loadResult = loadForm(graph, props.id);
-  //   if (loadResult.error) return loadResult.error;
-  //   dataVertex = loadResult.vertex!;
-  // }
-
-  // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
-
-  const onSubmit = async () => {
-    const data = commitTxn(txnId, Ws);
-    await showLoadingToast({
-      promise: submitDataCall(data, graph, setGraph, txnId),
-      loadMessage: "Submitting Data...",
-      successMessage: "Data submitted successfully",
-      onSuccess: (value) => {
-        setTimeout(() => navigate(-1), 0);
-      },
-    });
-  };
-
-  const onCancel = () => {
-    revertTransaction(txnId);
-    setTimeout(() => navigate(-1));
-  };
-
-  return (
-    <div
-      ref={(el) => {
-        // setDivRef(el);
-      }}
-    >
-      <FormContext.Provider value={formData}>
-        <div class="">
-          <PageItemRender metaVertex={props.meta}/>
-        </div>
-        <div />
-
-        <div class="flex gap:1">
-          <Show
-            when={props.submitButton}
-            fallback={
-              <GenericField
-                meta={
-                  {
-                    P: {
-                      component: "Button",
-                      props: {
-                        children: "Submit",
-                        onClick: () => onSubmit(),
-                      },
-                    },
-                  } as any
-                }
-              />
-            }
-          >
-            {props.submitButton}
-          </Show>
-
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "Button",
-                  props: {
-                    onClick: () => onCancel(),
-                    variant: "outlined",
-                    class: "border-color:#FF0000 color:#FF0000",
-                    children: "Cancel",
-                  },
-                },
-              } as any
-            }
-          />
-        </div>
-      </FormContext.Provider>
-    </div>
   );
 }
