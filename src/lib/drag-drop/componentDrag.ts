@@ -214,7 +214,7 @@ function processChildren(
   return results;
 }
 
-function createAttrMetaVertex() {
+export function createAttrMetaVertex() {
   return newVertex(getNewGraphId(), [], {
     name: "Attr",
     component: "Table",
@@ -226,7 +226,7 @@ function createAttrMetaVertex() {
   });
 }
 
-function createAttrCompMetaVertex() {
+export function createAttrCompMetaVertex() {
   return newVertex(getNewGraphId(), [], {
     name: "Comp",
     component: "SelectBox",

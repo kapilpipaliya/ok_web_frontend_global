@@ -16,6 +16,8 @@ import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/drag-drop/useDragDrop";
 import { Properties } from "./Properties";
+import { evaluate } from "~/lib/expression_eval";
+import jsep from "jsep";
 
 export function LayoutPart(props: {}) {
   const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
@@ -101,6 +103,7 @@ export function LayoutPart(props: {}) {
           }}
           style={{
             "font-size": "14px",
+            height: "25px",
             "font-weight": children().length ? "bold" : "normal",
 
             "box-shadow": children().length
@@ -158,8 +161,9 @@ export function LayoutPart(props: {}) {
             &nbsp;&nbsp;
             {nameExpr(props.vertex, graph) || props.vertex.P.name}
           </div>
-          <Show when={pageConfig.formData.formData.id !== props.vertex.id}>
-            <div>
+          {/* When root element, dont display icons */}
+          <Show when={!rootVertexes().includes(props.vertex)}>
+            <div class="flex ai:center mt:4">  
               <Show
                 when={
                   isSelectedLayoutId(props.vertex.id) ||
@@ -274,8 +278,15 @@ export function LayoutPart(props: {}) {
     );
   };
 
+  const rootChildren = () => evaluate(jsep("->Attr"), { vertexes: [pageConfig.formData?.formData], graph, setGraph }) || []
+  const isFormRootVertetx = () => pageConfig.formData?.formData?.L?.[0] === "Form";
   const rootVertexes = () =>
-    pageConfig.formData?.formData ? [pageConfig.formData.formData] : []; // Starting point(s)
+    {
+      if (isFormRootVertetx()) {
+        return rootChildren();
+      }
+      return pageConfig.formData?.formData ? [pageConfig.formData.formData] : [];
+    }; // Starting point(s)
 
   return (
     <>

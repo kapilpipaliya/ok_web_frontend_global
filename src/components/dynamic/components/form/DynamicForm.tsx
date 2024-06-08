@@ -58,6 +58,8 @@ import { findVertexesMGCall } from "~/cypher_api/functions/get/findVertex";
 import { checkIfNameExistsMGCall } from "~/cypher_api/functions/get/expression_eval_async_fns";
 import { LoaderNew } from "~/components/custom/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
+import { componentDrag } from "~/lib/drag-drop/componentDrag";
+import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -213,6 +215,25 @@ export function DynamicForm(props: DynamicFormProps) {
           );
 
           dataVertex = createResult.vertex;
+
+          // if new form then add a form component in the layout
+          if (dataVertex!.L[0] === "Form") {
+            // add form component
+            const labelVertex = findVertexByLabelAndUniqueId(
+              graph,
+              "Comp",
+              IdAttr,
+              "Form",
+            );
+            const layoutRowId = componentDrag(
+              txnId,
+              labelVertex!,
+              dataVertex!,
+              graph,
+              setGraph,
+            );
+            if (layoutRowId === -1) return;
+          }
         }
 
         if (result && !(result as { error?: string }).error) {
@@ -464,7 +485,7 @@ export function DynamicForm(props: DynamicFormProps) {
                           </Show>
 
                           <div class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
-                            <div class="p:5|15|15|15 w:full grid grid-cols:2 grid-cols:1@<md gap:0|10 grid-cols:auto">
+                            <div class={`p:5|15|15|15 w:full grid  grid-cols:1@<md gap:0|10 grid-cols:auto ${location.pathname.includes("/admin/Form/") || location.pathname.includes("/admin/Page/") ? "" : "grid-cols:2"}`}>
                               <FormGroup
                                 graph={graph}
                                 setGraph={setGraph}

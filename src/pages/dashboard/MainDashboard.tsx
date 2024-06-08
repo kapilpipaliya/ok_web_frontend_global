@@ -72,7 +72,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
           },
         }}
       >
-        <Show when={location.pathname.includes("/admin/") && !location.pathname.includes("admin/form/") && !location.pathname.includes("admin/Page/")}>
+        <Show when={location.pathname.includes("/admin/") && !location.pathname.includes("/admin/Form/") && !location.pathname.includes("/admin/Page/")}>
           <Navbar
             showCloseDrawerBtn={location.pathname.includes("/admin/")}
             toggleSidebar={() => {

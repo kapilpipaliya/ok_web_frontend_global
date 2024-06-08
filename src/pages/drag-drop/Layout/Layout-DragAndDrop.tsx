@@ -27,7 +27,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
     ["layout", "form", "formSetting"].map((column) => ({
       id: column,
       name: column,
-    })),
+    })),  
   );
 
   const gridArea = () => ({

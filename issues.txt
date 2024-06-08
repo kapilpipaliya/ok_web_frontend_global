@@ -11,9 +11,6 @@
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 Make sure all inputs are working. 
-when drag and drop from layer, if the placement is above node it is not showing in the preview properly. ✅
-when drag and drop above below the input the borders are not visible at top and bottom of input in pange designer preview area. ✅
-
 
 remain(kapil);
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.

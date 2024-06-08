@@ -581,7 +581,7 @@ export function TableInputField(
                 >
                   <td class={"font-weight:medium p:0px|10px"}
                     style={{
-                      "justify-content": "center",
+                      "text-align-last": "center",
                     }}>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => {
