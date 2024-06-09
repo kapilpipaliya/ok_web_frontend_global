@@ -1,4 +1,4 @@
-import { UserDashboards } from "~/pages/user_dashboard/UserDashboards";
+import { UserDashboards } from "~/pages/UserDashboards";
 
 export default function allDashboards() {
   return <UserDashboards />;

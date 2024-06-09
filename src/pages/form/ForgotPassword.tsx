@@ -1,9 +1,9 @@
 import { createSignal, Match, Show, Switch } from "solid-js";
 import { A } from "@solidjs/router";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
-import sendEmail from "~/cypher/server/email";
+import sendEmail from "~/server/email";
 import { validatePassword } from "~/lib/validations";
 import "~/css/base.css";
 export function ForgotPassword() {

@@ -5,7 +5,7 @@ import { createSignal, onMount, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
-import { LoaderNew } from "./components/custom/LoaderSimple";
+import { LoaderNew } from "./components/LoaderSimple";
 import type { Config } from "@master/css";
 import Sidebar from "~/pages/dashboard/sidebar/SidebarLayout";
 import {
@@ -44,9 +44,9 @@ export default function App() {
   });
 
 
- const getdata = async () => {
+ const getData = async () => {
   try {
-   const response = await fetch(API.fetchDataUrl);
+   const response = await fetch(API.getInitialDataUrl);
    const data = await response.json();
    setGraphData(graph[0], graph[1], data);
    return data;
@@ -55,7 +55,7 @@ export default function App() {
   }
  };
  onMount(() => {
-  getdata();
+  getData();
  });
 
 

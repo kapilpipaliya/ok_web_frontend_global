@@ -10,7 +10,7 @@ import {
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 
 // return a new Vertex
 export function newVertex(

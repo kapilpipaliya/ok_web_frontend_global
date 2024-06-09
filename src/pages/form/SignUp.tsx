@@ -1,6 +1,6 @@
 import { createSignal, useContext } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import { Icon } from "@iconify-icon/solid";
 import logo from "~/assets/graphics/logo.png";
 import "~/css/base.css";

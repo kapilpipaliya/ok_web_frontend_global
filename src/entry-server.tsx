@@ -1,7 +1,7 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
 import "~/css/modal.css";
-import { LoaderNew } from "./components/custom/LoaderSimple";
+import { LoaderNew } from "./components/LoaderSimple";
 import "tippy.js/dist/tippy.css";
 export default createHandler(() => (
   <StartServer
@@ -13,19 +13,19 @@ export default createHandler(() => (
           <link
             rel="apple-touch-icon"
             sizes="180x180"
-            href="/Website_Icons/apple-touch-icon.png"
+            href="/website_icons/apple-touch-icon.png"
           />
           <link
             rel="icon"
             type="image/png"
             sizes="32x32"
-            href="/Website_Icons/favicon-32x32.png"
+            href="/website_icons/favicon-32x32.png"
           />
           <link
             rel="icon"
             type="image/png"
             sizes="16x16"
-            href="/Website_Icons/favicon-16x16.png"
+            href="/website_icons/favicon-16x16.png"
           />
 
           <meta name="msapplication-TileColor" content="#da532c" />

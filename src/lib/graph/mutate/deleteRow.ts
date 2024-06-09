@@ -5,7 +5,7 @@ import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewTxnId } from "../transaction";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 
 export function deleteRow(
   vertex: Vertex,

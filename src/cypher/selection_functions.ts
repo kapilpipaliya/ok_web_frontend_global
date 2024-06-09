@@ -1,6 +1,6 @@
-import { getOutEdges } from "~/cypher/functions/get/getOutEdges";
-import { deleteRelationShipMGCall } from "~/cypher/functions/mutate/deleteRelationShip";
-import { newEdgeMGCall } from "~/cypher/functions/mutate/newEdge";
+import { getOutEdges } from "~/cypher/get/getOutEdges";
+import { deleteRelationShipMGCall } from "~/cypher/mutate/deleteRelationShip";
+import { newEdgeMGCall } from "~/cypher/mutate/newEdge";
 import {
   isIdArrayIncludesID,
 } from "~/lib/graph/get/sync/graph_functions";
@@ -8,7 +8,7 @@ import {
 import { getInEdge } from "~/lib/graph/get/sync/traverse";
 import { getToEdge } from "~/lib/graph/get/sync/traverse";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/cypher/server/domain_utils";
+import { getSubDomain } from "~/server/domain_utils";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
 async function vertexOutEdgeContainVertexMGCall(

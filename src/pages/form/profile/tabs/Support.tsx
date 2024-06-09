@@ -8,11 +8,11 @@ import {
   deleteSupportTicketCall,
 } from "~/lib/api/api_functions";
 import postAPI from "~/lib/api/postApi";
-import { ChipDropDown } from "~/components/custom/Chip";
-import CustomModal from "~/components/custom/CommonDialog";
-import { DeleteDialog } from "~/components/custom/DeleteDialog";
-import { Table, TableHeadCell, TableBodyCell } from "~/components/custom/Table";
-import { useToast } from "~/components/custom/Toast";
+import { ChipDropDown } from "~/components/Chip";
+import CustomModal from "~/components/CommonDialog";
+import { DeleteDialog } from "~/components/DeleteDialog";
+import { Table, TableHeadCell, TableBodyCell } from "~/components/Table";
+import { useToast } from "~/components/Toast";
 import { Id } from "~/lib/graph/graph";
 
 export const SupportTicketSection = (props: {

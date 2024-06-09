@@ -13,7 +13,7 @@ import {
   evalGetParents,
   evalGlobalColl,
   evalVertexById,
-} from "~/cypher/functions/get/expression_eval_async_fns";
+} from "~/cypher/get/expression_eval_async_fns";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

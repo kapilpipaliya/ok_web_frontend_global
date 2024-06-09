@@ -1,11 +1,9 @@
 export const API = {
-  fetchDataUrl: "/api/get_data",
+  getInitialDataUrl: "/api/get_initial_data",
   loginUrl: "/api/login",
   signUpUrl: "/api/signup",
   profileUrl: "/api/profile",
   logOutUrl: "/api/logout",
-  getFormDataUrl: "/api/get_form_data",
-  SubmitDataUrl: "/api/submit_data",
-  getPagesDataUrl: "/api/get_pages_data",
+  submitDataUrl: "/api/submit_data",
   getUserUrl: "/api/get_user",
 };

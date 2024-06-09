@@ -2,8 +2,8 @@ import { Icon } from "@iconify-icon/solid";
 import { useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { resetPasswordCall } from "~/lib/api/api_functions";
-import { useToast } from "~/components/custom/Toast";
-import { TextField } from "~/components/solid-blocks/blocks";
+import { useToast } from "~/components/Toast";
+import { TextField } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validations";
 

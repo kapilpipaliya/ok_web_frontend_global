@@ -7,10 +7,10 @@ import {
   untrack,
 } from "solid-js";
 import "~/css/base.css";
-import PageHeader from "~/components/custom/Breadcumb";
+import PageHeader from "~/components/Breadcrumb";
 import "~/css/tab.css";
 import { createStore } from "solid-js/store";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import postAPI from "~/lib/api/postApi";
 import { API } from "~/lib/api/endpoints";
 import getAPI from "~/lib/api/getApi";
@@ -18,7 +18,7 @@ import { PasswordSection } from "./tabs/Password";
 import { GeneralSection } from "./tabs/General";
 import { CurrentPlan, PricingPlans } from "./tabs/Pricing";
 import { SupportTicketSection } from "./tabs/Support";
-import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { LoaderNew } from "~/components/LoaderSimple";
 
 function Settings() {
   const [selectedTab, setSelectedTab] = createSignal("General");

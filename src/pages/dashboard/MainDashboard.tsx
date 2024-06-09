@@ -20,7 +20,7 @@ import {
 import "~/css/base.css";
 import "~/css/modal.css";
 import { LoadingContext, PageContext } from "~/lib/contexts";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import { signOutCall } from "~/lib/api/api_functions";
 import getAPI from "~/lib/api/getApi";
 import { API } from "~/lib/api/endpoints";

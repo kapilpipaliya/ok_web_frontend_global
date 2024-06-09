@@ -1,7 +1,7 @@
-import { getDriver, getDriverWithPort } from "~/cypher/server/driver";
+import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getSubDomain } from "~/cypher/server/domain_utils";
-import { getHttpsSession } from "~/cypher/server/auth/getHttpsSession";
+import { getSubDomain } from "~/server/domain_utils";
+import { getHttpsSession } from "~/server/getHttpsSession";
 import { Node } from "neo4j-driver";
 
 // Main POST function

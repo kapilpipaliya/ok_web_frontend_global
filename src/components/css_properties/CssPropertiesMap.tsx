@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { sizeTypes, timesTypes } from "./cssContext";
+import { sizeTypes, timesTypes } from "./context";
 
 const Icons = {
   visibility: {

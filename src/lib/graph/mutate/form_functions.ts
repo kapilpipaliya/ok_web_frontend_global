@@ -27,7 +27,7 @@ import {
   componentProps,
   getCollAttrComp,
 } from "~/lib/graph/get/sync/graph_functions";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";
 import type { FormMetaData, FieldAttribute } from "~/lib/Type";
 import {

@@ -10,25 +10,15 @@ async function makeAPICall(url: string, payload: object) {
   return await postAPI(url, payload);
 }
 
-// Fetch data for a specific page by name
-export async function getPagesDataCall(pageName: string) {
-  return await makeAPICall(API.getPagesDataUrl, { pageName });
-}
-
 // Submit generic data to the server
 export async function submitDataCall(data: any, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number) {
-  const result = await makeAPICall(API.SubmitDataUrl, data);
+  const result = await makeAPICall(API.submitDataUrl, data);
   if (transactions.has(txnId))
     transactions.get(txnId)!.status = ProcessStatus.AckReceived;
   for (const oneResult of result.result) {
     onMutatDataGet(undefined as any, graph, setGraph, oneResult[1]);
   }
   return result;
-}
-
-// Fetch form data by form name and ID
-export async function getFormData(formName: string, formId: number) {
-  return await makeAPICall(API.getFormDataUrl, { formName, formId });
 }
 
 // Register a new user with form data

@@ -1,0 +1,151 @@
+import { Match, Show, splitProps, Switch, useContext } from "solid-js";
+import type { Vertex } from "~/lib/graph/graph";
+import { SelectInputField } from "~/components/fields/SelectInputField";
+import { TableInputField } from "~/components/fields/TableInputField";
+import { GenericInputField } from "~/components/fields/GenericInputField";
+import { GenericField } from "~/components/fields/GenericField";
+import { HiddenNodesContext } from "~/lib/contexts";
+
+export const genericInputComponents = [
+  // "Autocomplete",
+  "CheckBox",
+  "ColorBox",
+  // "FormSubmit",
+  // "FormCancel",
+  "FileUploader",
+  "HtmlEditor",
+  "NumberBox",
+  "Label",
+  "ProgressBar",
+  "Radio",
+  "RadioGroup",
+  "SelectBox",
+  // "Switch",
+  "TextArea",
+  "TextBox",
+  // "TextInput",
+];
+export const genericComponents2 = [
+  "Box",
+  "Breadcrumb",
+  "Table",
+  "TableHeader",
+  "TableRow",
+  "Tabs",
+  "TabContainer",
+  "TabList",
+  "TreeViewItem",
+  "TreeViewChild",
+  "Collapsible",
+  "LoadIndicator",
+  "Divider",
+  "Heading",
+  "Rating",
+  "Button",
+  "Form",
+  "Text",
+  "Repeater",
+  "A",
+  "Image",
+  "Page",
+  "Icon",
+];
+
+// Dynamic Component used in the form
+export function DynamicComponent(props: {
+  // component is required, cant refactor it to remove it, because parent component needs it too.
+  component: string;
+  meta: Vertex;
+  title?: string;
+  data?: Vertex;
+  isTableInside?: boolean;
+  setValue?: (data: any) => void;
+  disabled?: boolean;
+  isRealTime?: boolean;
+  txnId?: number;
+}) {
+  const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
+
+  const [field, others] = splitProps(props, [
+    "isRealTime",
+    "meta",
+    "data",
+    "title",
+    "disabled",
+    "component",
+    "txnId",
+    "setValue",
+    "isTableInside",
+  ]);
+
+  return (
+    <Switch>
+      <Match when={!field.component}>NO INPUT</Match>
+      <Match
+        when={field.component === "SelectBox" || field.component === "TagBox"}
+        keyed
+      >
+        <Show when={!hiddenNodes().includes(field.meta?.id)}>
+          <SelectInputField
+            data={field.data}
+            meta={field.meta}
+            title={field.title ?? ""}
+            // passed setValue when we have a string value in select field
+            setValue={field.setValue}
+            disabled={field.disabled!}
+            component={field.component}
+            txnId={field.txnId}
+            isRealTime={field.isRealTime}
+          />
+        </Show>
+      </Match>
+      <Match when={field.component === "Table2"}>
+        <Show when={!hiddenNodes().includes(field.meta?.id)}>
+          
+            <TableInputField
+              meta={field.meta}
+              data={field.data}
+              isTableInside={field.isTableInside}
+              disabled={field.disabled!}
+              txnId={field.txnId}
+              setValue={field.setValue}
+              isRealTime={field.isRealTime}
+            />
+          </Show>
+      </Match>
+      <Match
+        when={
+          genericInputComponents.includes(field.component) && field.component
+        }
+        keyed
+      >
+        <Show when={!hiddenNodes().includes(field.meta?.id)}>
+          <GenericInputField
+            data={field.data}
+            meta={field.meta}
+            title={field.title ?? ""}
+            txnId={field.txnId!}
+            component={field.component}
+            setValue={field.setValue}
+            disabled={field.disabled!}
+          />
+        </Show>
+      </Match>
+      <Match
+        when={genericComponents2.includes(field.component) && field.component}
+        keyed
+      >
+        <Show when={!hiddenNodes().includes(field.meta?.id)}>
+          <GenericField
+            data={field.data}
+            meta={field.meta}
+            txnId={field.txnId}
+            component={field.component}
+            setValue={field.setValue}
+            disabled={field.disabled!}
+          />
+        </Show>
+      </Match>
+    </Switch>
+  );
+}

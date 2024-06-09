@@ -9,7 +9,7 @@ import {
   Show,
   useContext,
 } from "solid-js";
-import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { LoaderNew } from "~/components/LoaderSimple";
 import { LoadingContext } from "~/lib/contexts";
 
 export const RuntimeCSSContext = createContext<RuntimeCSS | undefined>();

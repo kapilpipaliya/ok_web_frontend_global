@@ -1,5 +1,5 @@
-import { UserDashBoardGrid } from "~/pages/user_dashboard/UserDashBoardGrid";
-import PageHeader from "~/components/custom/Breadcumb";
+import { UserDashBoardGrid } from "~/pages/UserDashBoardGrid";
+import PageHeader from "~/components/Breadcrumb";
 import { breadcrumbData } from "~/lib/constants";
 
 export default function tableDashboard() {

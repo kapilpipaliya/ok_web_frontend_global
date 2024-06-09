@@ -1,7 +1,7 @@
 import { createSignal, createEffect, For, Show, Match, Switch } from "solid-js";
-import { Table, TableBodyCell, TableHeadCell } from "~/components/custom/Table";
-import CustomButton from "~/components/solid-blocks/blocks/button/buttons";
-import { TableHeader } from "~/components/solid-blocks/blocks/table/table";
+import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
+import CustomButton from "~/components/solid_blocks/button/buttons";
+import { TableHeader } from "~/components/solid_blocks/Table";
 
 const RouteDesigner = () => {
   const [elements, setElements]: any = createSignal([]);

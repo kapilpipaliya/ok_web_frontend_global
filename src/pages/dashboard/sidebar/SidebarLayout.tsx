@@ -7,12 +7,12 @@ import {
   useContext,
 } from "solid-js";
 
-import { LoaderNew } from "~/components/custom/LoaderSimple";
+import { LoaderNew } from "~/components/LoaderSimple";
 import "~/css/sideBarSearch.css";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
 import { GraphContext } from "~/lib/graph/graph";
-import { getTreeDataMGCall } from "~/cypher/lib/graph/get/async/traverse";
+import { getTreeDataMGCall } from "~/cypher/get/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { useLocation } from "@solidjs/router";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";

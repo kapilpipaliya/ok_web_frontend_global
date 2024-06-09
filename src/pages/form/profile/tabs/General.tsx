@@ -4,8 +4,8 @@ import type { SetStoreFunction } from "solid-js/store";
 import { API } from "~/lib/api/endpoints";
 import getAPI from "~/lib/api/getApi";
 import postAPI from "~/lib/api/postApi";
-import { useToast } from "~/components/custom/Toast";
-import { TextField } from "~/components/solid-blocks/blocks";
+import { useToast } from "~/components/Toast";
+import { TextField } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validations";
 

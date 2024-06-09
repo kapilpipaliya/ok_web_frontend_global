@@ -25,14 +25,14 @@ import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatche
 import csvtojson from "csvtojson";
 import { getToEdge } from "../get/sync/traverse";
 import { A, D } from "@mobily/ts-belt";
-import { isSimpleCollection } from "~/components/dynamic/fields/input/SelectInputField";
+import { isSimpleCollection } from "~/components/fields/SelectInputField";
 import { parse } from "yaml";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { AttrsTableData } from "~/lib/api";
 import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
 

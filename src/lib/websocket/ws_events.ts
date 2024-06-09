@@ -14,7 +14,7 @@ import {
 } from "../graph/transaction";
 import { deleteVertex, updateVertexId } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction } from "solid-js/store";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 
 export function setGraphData(
   graph: GraphInterface,

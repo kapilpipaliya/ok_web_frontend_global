@@ -4,10 +4,10 @@ import {useContext} from "solid-js";
 import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
 import {createStore, type Store} from "solid-js/store";
 
-import {SelectInputField} from "~/components/dynamic/fields/input/SelectInputField";
+import {SelectInputField} from "~/components/fields/SelectInputField";
 import {onDataDirectoryImportClick, updateImportRecord,} from "~/lib/graph/mutate/import";
-import {AbstractSingleForm} from "~/components/dynamic/components/form/DynamicForm";
-import {GenericField} from "~/components/dynamic/fields/static/GenericField";
+import {DynamicForm} from "~/components/form/DynamicForm";
+import {GenericField} from "~/components/fields/GenericField";
 import {IFormContext} from "~/lib/contexts";
 
 export function SimpleImport(props: {}) {
@@ -50,7 +50,7 @@ perm`,
           )
         }
       />
-      <AbstractSingleForm
+      <DynamicForm
         id={"new"}
         formId={"Import"}
         graph={graph}

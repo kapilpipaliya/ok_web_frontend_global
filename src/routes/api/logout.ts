@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getHttpsSession } from "~/cypher/server/auth/getHttpsSession";
+import { getHttpsSession } from "~/server/getHttpsSession";
 
 // Cant export this function
 async function logout() {

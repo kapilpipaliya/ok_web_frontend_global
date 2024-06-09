@@ -1,5 +1,5 @@
 import { createMiddleware } from "@solidjs/start/middleware";
-import { getHttpsSession } from "~/cypher/server/auth/getHttpsSession";
+import { getHttpsSession } from "~/server/getHttpsSession";
 import { redirect } from "@solidjs/router";
 export default createMiddleware({
   onRequest: [

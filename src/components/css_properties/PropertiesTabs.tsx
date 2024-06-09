@@ -3,14 +3,14 @@ import {
   TabContainer,
   TabList,
   Tabs,
-} from "~/components/solid-blocks/blocks";
+} from "~/components/solid_blocks";
 import type { Vertex } from "~/lib/graph/graph";
 import { createEffect, on } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { CssEditorContext } from "./cssContext";
-import { Container } from "~/components/css_properties/css_components/CssUtils";
-import { TextEditor } from "~/components/css_properties/css_tabs/TextEditor";
-import { StyleEditor } from "~/components/css_properties/css_tabs/StyleEditor";
+import { CssEditorContext } from "./context";
+import { Container } from "~/components/css_properties/components/CssUtils";
+import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
+import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
 
 export function ClassDesignTab(props: {
   component: string;
@@ -66,12 +66,12 @@ export function ClassDesignTab(props: {
               </TabList>
               <TabContainer>
                 <Container>
-                  <StyleEditor />
+                  <StyleEditorTab />
                 </Container>
               </TabContainer>
               <TabContainer>
                 <Container>
-                  <TextEditor
+                  <TextEditorTab
                     getCssValue={getCssValue}
                     parseAndApplyCssRules={parseAndApplyCssRules}
                   />

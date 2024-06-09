@@ -1,9 +1,9 @@
 import { useParams } from "@solidjs/router";
-import { AbstractSingleForm } from "~/components/dynamic/components/form/DynamicForm";
+import { DynamicForm } from "~/components/form/DynamicForm";
 
 import { Match, Switch, useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-import LayoutDragAndDrop from "~/pages/drag_drop/layout/Layout-DragAndDrop";
+import LayoutDragAndDrop from "~/pages/drag_drop/layout/Layout_DragAndDrop";
 import PageDesignerContext from "~/pages/drag_drop/layout/PageDesignerContext";
 
 export default function admin() {
@@ -18,7 +18,7 @@ export default function admin() {
         </PageDesignerContext>
       </Match>
       <Match when={true}>
-        <AbstractSingleForm
+        <DynamicForm
           graph={graph}
           formId={params.entity}
           id={params.id}

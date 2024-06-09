@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import { AbstractGrid } from "~/components/dynamic/grid/AbstractGrid";
+import { AbstractGrid } from "~/components/grid/AbstractGrid";
 
 export default function admin() {
   const params = useParams();

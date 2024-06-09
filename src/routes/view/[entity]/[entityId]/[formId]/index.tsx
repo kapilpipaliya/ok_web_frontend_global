@@ -1,12 +1,12 @@
 import { useParams } from "@solidjs/router";
 import {Show, createSignal, onMount, useContext, createEffect, on} from "solid-js";
-import { getDataMGCall } from "~/cypher/lib/graph/get/async/traverse";
+import { getDataMGCall } from "~/cypher/get/traverse";
 import { AttrsTableData } from "~/lib/api";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { PageView } from "~/components/dynamic/fields/static/PageView";
+import { PageView } from "~/components/page_item_render/PageView";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
 

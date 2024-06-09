@@ -1,4 +1,4 @@
-import { UserDashboards } from "~/pages/user_dashboard/UserDashboards";
+import { UserDashboards } from "~/pages/UserDashboards";
 import Designer from "~/pages/RouteDesigner";
 
 export default function designer() {

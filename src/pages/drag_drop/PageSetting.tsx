@@ -1,18 +1,14 @@
 import { For, createSignal } from "solid-js";
 
-export const PageSetting = () => {
-  return <Sidebar />;
-};
-
-const Sidebar = () => {
+export function PageSetting() {
   const [selected, setSelected] = createSignal("thank-you-page");
 
   const menuItems: any = [
-    { id: "thank-you-page", label: "Thank You Page", icon: "✅" },
+    {id: "thank-you-page", label: "Thank You Page", icon: "✅"},
   ];
 
   return (
-    <div style={{ display: "flex" }} class="mt:1rem w:98vw flex:column@<sm">
+    <div style={{display: "flex"}} class="mt:1rem w:98vw flex:column@<sm">
       <div
         class="h:90vh@>sm"
         style={{
@@ -38,13 +34,13 @@ const Sidebar = () => {
                 "align-items": "center",
               }}
             >
-              <span style={{ "margin-right": "10px" }}>{item.icon}</span>
+              <span style={{"margin-right": "10px"}}>{item.icon}</span>
               <span>{item.label}</span>
             </div>
           )}
         </For>
       </div>
-      <div style={{ flex: 1, padding: "20px", "background-color": "#f8f9fa" }}>
+      <div style={{flex: 1, padding: "20px", "background-color": "#f8f9fa"}}>
         <h2 class="font-weight:700 font:18 ">
           {menuItems.find((item: any) => item.id === selected()).icon}&nbsp;
           {menuItems.find((item: any) => item.id === selected()).label}
@@ -54,4 +50,4 @@ const Sidebar = () => {
       </div>
     </div>
   );
-};
+}

@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 import { useNavigate } from "@solidjs/router";
-import { useToast } from "~/components/custom/Toast";
+import { useToast } from "~/components/Toast";
 import logo from "~/assets/graphics/logo.png";
 import { contactUsCall } from "~/lib/api/api_functions";
 import "~/css/base.css";

@@ -1,8 +1,8 @@
 import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
-import PageHeader from "../components/custom/Breadcumb";
-import { getUsers } from "~/cypher/functions/get/adminFunctions";
-import { useToast } from "../components/custom/Toast";
-import { syncNodesMGCall } from "~/cypher/functions/mutate/sync";
+import PageHeader from "../components/Breadcrumb";
+import { getUsers } from "~/cypher/get/adminFunctions";
+import { useToast } from "../components/Toast";
+import { syncNodesMGCall } from "~/cypher/mutate/sync";
 import type { Vertex } from "~/lib/graph/graph";
 
 // TODO: Full Navbar Sync from super
