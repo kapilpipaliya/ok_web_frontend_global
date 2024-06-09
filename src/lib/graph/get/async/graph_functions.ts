@@ -5,15 +5,15 @@ import {
   getParentVertexAsync,
   getSelectionOptionsAsync,
 } from "./traverse";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueIdAsync } from "./findVertex";
 import { getToEdgeAsync } from "./getToEdge";
 import { useToast } from "~/components/Toast";
 import { getFormApiFromFormMGCall } from "~/cypher/get/graph_functions";
-import { AttrsTableData } from "~/lib/api";
+import { FormMetaData } from "~/lib/formMetaData";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 import { AdminAttrKeys } from "~/lib/constants";
 
@@ -281,7 +281,7 @@ export async function getFormApiFromFormAsync(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
-): Promise<{ error: string; form?: FormMetaData }> {
+): Promise<{ error: string; form?: IFormMetaData }> {
   const coll = await findVertexByLabelAndUniqueIdAsync(
     graph,
     "Coll",
@@ -364,8 +364,8 @@ export async function getFormMetaDataAsync(
   formId: string,
 ) {
   let form =
-    AttrsTableData[formId] ||
-    (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
+    FormMetaData[formId] ||
+    (AdminAttrKeys.includes(formId) && FormMetaDataAuth[formId]);
 
   if (!form) {
     // const formResult = await getFormApiFromFormAsync(graph, setGraph, formId);
@@ -421,7 +421,7 @@ export async function getExportCodeAsync(
           // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
-          if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
+          if (FormMetaData[label] || AdminAttrKeys.includes(label)) {
             const pksResult = {} as { [primaryKey: string]: any };
             pksResult.name = v.P.name;
             if (!result.OUT) {

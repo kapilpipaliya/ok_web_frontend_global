@@ -5,7 +5,7 @@ import {
   getParentVertexMGCall,
   getSelectionOptionsMGCall,
 } from "./traverse";
-import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { getDriver } from "~/cypher/driver";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/server/domain_utils";
@@ -224,7 +224,7 @@ const getCollectionOneLevelAttrsMGCall = async (
 };
 export async function getFormApiFromFormMGCall(
   formId: string,
-): Promise<{ error: string; form?: FormMetaData }> {
+): Promise<{ error: string; form?: IFormMetaData }> {
   "use server";
   const host = getRequestURL().hostname;
   const subDomain = await getSubDomain(host);

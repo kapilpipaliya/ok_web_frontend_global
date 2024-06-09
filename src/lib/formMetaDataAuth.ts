@@ -1,11 +1,11 @@
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
 
-import type { FormMetaData } from "~/lib/Type";
+import type { IFormMetaData } from "~/lib/FormMetadataType";
 import { GraphContext } from "~/lib/graph/graph";
 import { useContext } from "solid-js";
 import type { IFormContext } from "~/lib/contexts";
 
-export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
+export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
   User: {
     title: "User",
     name: "User",

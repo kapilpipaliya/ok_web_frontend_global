@@ -28,8 +28,8 @@ import { A, D } from "@mobily/ts-belt";
 import { isSimpleCollection } from "~/components/fields/SelectInputField";
 import { parse } from "yaml";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
-import { AttrsTableData } from "~/lib/api";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FormMetaData } from "~/lib/formMetaData";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { getPkForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/Toast";
@@ -711,7 +711,7 @@ export function importRecordWithYAMLSchema(
         }
 
         for (const v of childVertexes) {
-          if (AttrsTableData[label] || AttrsAdminTableData[label]) {
+          if (FormMetaData[label] || FormMetaDataAuth[label]) {
             if (v.name) {
               const selectedVertex = findOrCreateNewVertex(
                 txnId,

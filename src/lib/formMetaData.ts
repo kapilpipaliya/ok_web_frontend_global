@@ -1,6 +1,6 @@
 import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findVertex";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
 import type { IFormContext } from "~/lib/contexts";
@@ -248,7 +248,7 @@ export const AdminAttrKeys = [
   "Import",
   "Nav",
 ];
-export const AttrsTableData: { [key: string]: FormMetaData } = {
+export const FormMetaData: { [key: string]: IFormMetaData } = {
   DataType: {
     title: "DataType",
     name: "DataType",
@@ -466,8 +466,8 @@ export const AttrsTableData: { [key: string]: FormMetaData } = {
                 const [graph, setGraph] = useContext(GraphContext)!;
                 const val = options.value;
                 if (
-                  Object.keys(AttrsTableData).includes(val) ||
-                  Object.keys(AttrsAdminTableData).includes(val)
+                  Object.keys(FormMetaData).includes(val) ||
+                  Object.keys(FormMetaDataAuth).includes(val)
                 ) {
                   return false;
                 }

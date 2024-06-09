@@ -32,9 +32,9 @@ import {
 import { QuickEditModal, SelectValue, TagValue } from "./GridUtils";
 import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import type { FormMetaData } from "~/lib/Type";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
-import { AttrsTableData } from "~/lib/api";
+import type { IFormMetaData } from "~/lib/FormMetadataType";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { FormMetaData } from "~/lib/formMetaData";
 import { GenericField } from "~/components/fields/GenericField";
 import { PageContext } from "~/lib/contexts";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
@@ -181,13 +181,13 @@ const DataGrid = (props: DataGridProps) => {
   async function getTableData(skip?: number, limit?: number) {
     //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
     const form = await getFormApiFromFormMGCall(props.tableId);
-    let formNew: FormMetaData;
+    let formNew: IFormMetaData;
     let collection: string;
 
     if (form.error) {
-      if (AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId]) {
+      if (FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId]) {
         formNew =
-          AttrsTableData[props.tableId] || AttrsAdminTableData[props.tableId];
+          FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
         collection = props.tableId;
       } else {
         return form.error;
@@ -248,7 +248,7 @@ const DataGrid = (props: DataGridProps) => {
     setFilteredData(nodes);
   }
 
-  function setGridHeaders(formNew: FormMetaData) {
+  function setGridHeaders(formNew: IFormMetaData) {
     const tableColumns = [] as ColumnDef<any>[];
 
     for (const attribute of formNew?.attributes) {

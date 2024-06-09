@@ -43,7 +43,7 @@ import {
   PageRenderUtils,
 } from "~/components/page_item_render/PageItemRender";
 import { GenericField } from "~/components/fields/GenericField";
-import type { FieldAttribute } from "~/lib/Type";
+import type { FieldAttribute } from "~/lib/FormMetadataType";
 import "~/css/base.css";
 import {
   componentProps,

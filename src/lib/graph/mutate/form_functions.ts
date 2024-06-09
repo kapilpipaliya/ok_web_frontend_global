@@ -29,7 +29,7 @@ import {
 } from "~/lib/graph/get/sync/graph_functions";
 import { useToast } from "~/components/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";
-import type { FormMetaData, FieldAttribute } from "~/lib/Type";
+import type { IFormMetaData, FieldAttribute } from "~/lib/FormMetadataType";
 import {
   isObject,
   getLabel,
@@ -43,9 +43,9 @@ import {
   getFormApiFromForm,
   getPkForCollection,
 } from "../get/sync/graph_functions";
-import { AttrsAdminTableData } from "~/lib/apiAdmin";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { findVertexByLabelAndUniqueId } from "../get/sync/findVertex";
-import { AttrsTableData } from "~/lib/api";
+import { FormMetaData } from "~/lib/formMetaData";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 import { AdminAttrKeys } from "~/lib/constants";
@@ -254,7 +254,7 @@ export function rowMetaInitialize(
   return metaTxnId;
 }
 export function createMeta(
-  form: FormMetaData,
+  form: IFormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ): { error: boolean; vertex?: Vertex } {
@@ -573,8 +573,8 @@ export function getFormMetaData(
   formId: string,
 ) {
   let form =
-    AttrsTableData[formId] ||
-    (AdminAttrKeys.includes(formId) && AttrsAdminTableData[formId]);
+    FormMetaData[formId] ||
+    (AdminAttrKeys.includes(formId) && FormMetaDataAuth[formId]);
 
   if (!form) {
     const formResult = getFormApiFromForm(graph, setGraph, formId);
@@ -621,7 +621,7 @@ export function getExportCode(
           // getCollFromCollectionExpr function is not available means Cant find a collection from meta,
           // so get Primary Key from Vertex itself.
           const label = v.L[0];
-          if (AttrsTableData[label] || AdminAttrKeys.includes(label)) {
+          if (FormMetaData[label] || AdminAttrKeys.includes(label)) {
             const pksResult = {} as { [primaryKey: string]: any };
             pksResult.name = v.P.name;
             if (!result.OUT) {

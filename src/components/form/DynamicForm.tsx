@@ -43,7 +43,7 @@ import {
   useNavigate,
 } from "@solidjs/router";
 import { TableTabs } from "~/components/TableTabs";
-import type { FormMetaData } from "~/lib/Type";
+import type { IFormMetaData } from "~/lib/FormMetadataType";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
@@ -76,7 +76,7 @@ interface AbstractSingleFormProps
 
 export interface DynamicFormProps {
   meta?: Vertex;
-  form: FormMetaData;
+  form: IFormMetaData;
   id?: Id;
   isDialogContext?: boolean;
   buttonAlign?: string;
@@ -105,7 +105,7 @@ type FormData = {
 export function DynamicForm(props: AbstractSingleFormProps) {
   const [formData, setFormData] = createStore(
     {} as {
-      form: FormMetaData;
+      form: IFormMetaData;
     },
   );
 
@@ -128,7 +128,7 @@ export function DynamicForm(props: AbstractSingleFormProps) {
     if (data() && data() !== "Error") {
       const result = JSON.parse(data().formData );
       if (result && !(result as { error: string }).error) {
-        setFormData({ form: result.form as FormMetaData });
+        setFormData({ form: result.form as IFormMetaData });
       }
     }
   });

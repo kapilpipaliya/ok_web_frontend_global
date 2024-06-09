@@ -8,7 +8,7 @@ import {
   selectedValue,
   collectionNameDisplayExpr,
 } from "~/components/fields/SelectInputField";
-import type { FieldAttribute } from "~/lib/Type";
+import type { FieldAttribute } from "~/lib/FormMetadataType";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import type { IFormContext } from "~/lib/contexts";

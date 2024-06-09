@@ -1,7 +1,7 @@
 import { useParams } from "@solidjs/router";
 import {Show, createSignal, onMount, useContext, createEffect, on} from "solid-js";
 import { getDataMGCall } from "~/cypher/get/traverse";
-import { AttrsTableData } from "~/lib/api";
+import { FormMetaData } from "~/lib/formMetaData";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
@@ -24,7 +24,7 @@ export default function PageShareView() {
 
   // load form meta data
   async function loadFormDesignerMetaData() {
-    const form = AttrsTableData.Form;
+    const form = FormMetaData.Form;
 
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(form.attributes);

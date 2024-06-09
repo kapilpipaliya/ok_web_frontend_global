@@ -4,7 +4,7 @@ import {
   getParentVertex,
   getSelectionOptions,
 } from "./traverse";
-import type { FieldAttribute, FormMetaData } from "~/lib/Type";
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
@@ -250,7 +250,7 @@ export function getFormApiFromForm(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   formId: string,
-): { error: string; form?: FormMetaData } {
+): { error: string; form?: IFormMetaData } {
   const coll = findVertexByLabelAndUniqueId(graph, "Coll", IdAttr, formId);
   if (!coll) {
     return { error: "coll not found" };

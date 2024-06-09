@@ -1,4 +1,4 @@
-export interface FormMetaData {
+export interface IFormMetaData {
   name: string; // required to create new vertex
   isInlineEditable?: boolean;
   title: string;

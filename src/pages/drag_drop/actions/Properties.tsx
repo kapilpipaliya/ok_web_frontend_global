@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "~/components/solid_blocks";
-import type { FieldAttribute } from "~/lib/Type";
+import type { FieldAttribute } from "~/lib/FormMetadataType";
 import {
   PageConfigContext,
   SelectedIdContext,
@@ -34,7 +34,7 @@ import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import { useExpansion } from "../CommonCompUtils";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
-import { AttrsTableData } from "~/lib/api";
+import { FormMetaData } from "~/lib/formMetaData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 import {FormGroupProperties} from "~/pages/drag_drop/actions/FormGroupProperties";
 
@@ -113,7 +113,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 
       const metaVertexId = getNewGraphId();
       const txnId = getNewTxnId(graph, setGraph);
-      const metaAttributes = AttrsTableData.Coll.attributes.find(
+      const metaAttributes = FormMetaData.Coll.attributes.find(
         (x) => x.name === "Rules",
       );
 
