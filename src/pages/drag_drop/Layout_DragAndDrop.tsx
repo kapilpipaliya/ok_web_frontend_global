@@ -1,6 +1,6 @@
 import { type JSX, Show, createSignal } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
-import { MenuDragAndDrop } from "~/pages/drag_drop/layout/menu/Menu_DragAndDrop";
+import { MenuDragAndDrop } from "~/pages/drag_drop/menu/Menu_DragAndDrop";
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
 import {
@@ -9,7 +9,7 @@ import {
  PropertiesVertexIdContext
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
-import { ActionsDragAndDrops } from "~/pages/drag_drop/layout/actions/Actions_DragAndDrops";
+import { ActionsDragAndDrops } from "~/pages/drag_drop/actions/Actions_DragAndDrops";
 import { getNewGraphId } from "~/lib/graph/transaction";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import { useExpansion } from "./CommonCompUtils";
