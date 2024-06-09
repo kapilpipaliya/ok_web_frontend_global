@@ -5,7 +5,7 @@ import {
   Show,
   Switch,
   untrack,
-  Accessor,
+  type Accessor,
 } from "solid-js";
 import "~/css/base.css";
 import PageHeader from "~/components/Breadcrumb";

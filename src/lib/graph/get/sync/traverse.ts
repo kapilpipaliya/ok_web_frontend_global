@@ -8,7 +8,6 @@ import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import {
   capitalizeFirstLetter,
-  getValueFromVertexOrKey,
   
 } from "~/lib/utils";
 import type { SetStoreFunction, Store } from "solid-js/store";

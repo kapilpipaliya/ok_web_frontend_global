@@ -3,7 +3,7 @@ import { AttrsAdminTableData } from "~/lib/apiAdmin";
 import type { FieldAttribute, FormMetaData } from "~/lib/Type";
 import { useContext } from "solid-js";
 import { GraphContext } from "~/lib/graph/graph";
-import { IFormContext } from "~/lib/contexts";
+import type { IFormContext } from "~/lib/contexts";
 
 const collectionAttr = [
   {

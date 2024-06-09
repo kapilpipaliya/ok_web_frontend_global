@@ -3,7 +3,7 @@ import {Show, createSignal, onMount, useContext, createEffect, on} from "solid-j
 import { getDataMGCall } from "~/cypher/get/traverse";
 import { AttrsTableData } from "~/lib/api";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { PageView } from "~/components/page_item_render/PageView";
@@ -24,7 +24,7 @@ export default function PageShareView() {
 
   // load form meta data
   async function loadFormDesignerMetaData() {
-    let form = AttrsTableData.Form;
+    const form = AttrsTableData.Form;
 
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(form.attributes);

@@ -11,7 +11,7 @@ import {
 import type { FieldAttribute } from "~/lib/Type";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { IFormContext } from "~/lib/contexts";
+import type { IFormContext } from "~/lib/contexts";
 
 export const QuickEditModal = (p: {
   graph: GraphInterface;

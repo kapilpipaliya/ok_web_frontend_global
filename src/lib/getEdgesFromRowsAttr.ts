@@ -1,6 +1,6 @@
-import { Expression } from "jsep";
+import type { Expression } from "jsep";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
-import { Vertex } from "~/lib/graph/graph";
+import type { Vertex } from "~/lib/graph/graph";
 
 export function getEdgesFromRowsAttr(attrs: any): {
  incoming: Expression[];

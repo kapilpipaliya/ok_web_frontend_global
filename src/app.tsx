@@ -14,7 +14,7 @@ import {
   type GraphInterface,
   type Id,
   type VertexMap,
-  Vertex,
+  type Vertex,
 } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
 import { API } from "~/lib/api/endpoints";
@@ -60,9 +60,8 @@ export default function App() {
 
   const getData = async () => {
     try {
-      const response = await fetch(API.getInitialDataUrl);
-      const data = await response.json();
-      setGraphData(graph[0], graph[1], data);
+      const data = await getAPI(API.getInitialDataUrl);
+      setGraphData(graph[0], graph[1], data as any);
       setComponentIdMap(data.vertexes);
       return data;
     } catch (error) {

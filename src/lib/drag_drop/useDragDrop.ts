@@ -5,7 +5,7 @@ import {
   createSelector,
   useContext,
 } from "solid-js";
-import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/Toast";
 import {
   DraggedVertexContext,
@@ -16,12 +16,8 @@ import {
   SelectedComponentContext,
   SelectedIdContext,
 } from "~/lib/contexts";
-import {
-  getCompProps,
-  getRowProps,
-} from "~/lib/graph/get/sync/graph_functions";
 import { deleteNestedLayout } from "../graph/mutate/deleteNestedLayout";
-import { type GraphInterface, type Id, type Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { getChildVertex, getParentVertex } from "../graph/get/sync/traverse";
 import {
@@ -163,7 +159,7 @@ export function useDragDrop(
   const handleDrop = async (e: DragEvent) => {
     e.stopPropagation();
     for (const vertex of draggedVertex()) {
-      let fromVertex = vertex;
+      const fromVertex = vertex;
 
       const toVertexId = indicatorPosition().activeItem!;
       const toVertex = graph.vertexes[toVertexId]; // layoutVertex;

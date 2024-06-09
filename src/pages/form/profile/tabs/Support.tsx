@@ -13,7 +13,7 @@ import CustomModal from "~/components/CommonDialog";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { Table, TableHeadCell, TableBodyCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";
-import { Id } from "~/lib/graph/graph";
+import type { Id } from "~/lib/graph/graph";
 
 export const SupportTicketSection = (props: {
   setIsMainScreenLoad: SetStoreFunction<boolean>;

@@ -5,7 +5,6 @@ import { isObject } from "~/lib/utils";
 import { deleteEdge, updateEdgeId } from "~/lib/graph/mutate/edge";
 import type { EdgeMap, GraphInterface, Id, VertexMap } from "~/lib/graph/graph";
 import {
-  commitTransaction,
   edgeOldIdToNewIdMap,
   isAllTxnProcessed,
   ProcessStatus,

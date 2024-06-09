@@ -2,8 +2,8 @@ import { postAPI } from "~/lib/api/postApi";
 import { API } from "~/lib/api/endpoints";
 import { ProcessStatus, transactions } from "~/lib/graph/transaction";
 import { onMutatDataGet } from "~/lib/websocket/ws_events";
-import { GraphInterface } from "~/lib/graph/graph";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { GraphInterface } from "~/lib/graph/graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
 
 // General function to make API calls with a payload
 async function makeAPICall(url: string, payload: object) {

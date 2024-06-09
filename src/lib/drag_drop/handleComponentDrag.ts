@@ -1,4 +1,4 @@
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";

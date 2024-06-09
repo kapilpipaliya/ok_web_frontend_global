@@ -31,7 +31,6 @@ import { useToast } from "~/components/Toast";
 import { NewTxnIdContext } from "~/lib/contexts";
 import type { FormMetaData, FieldAttribute } from "~/lib/Type";
 import {
-  getValueFromVertexOrKey,
   isObject,
   getLabel,
   getId,

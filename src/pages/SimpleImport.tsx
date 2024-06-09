@@ -8,7 +8,7 @@ import {SelectInputField} from "~/components/fields/SelectInputField";
 import {onDataDirectoryImportClick, updateImportRecord,} from "~/lib/graph/mutate/import";
 import {DynamicForm} from "~/components/form/DynamicForm";
 import {GenericField} from "~/components/fields/GenericField";
-import {IFormContext} from "~/lib/contexts";
+import type {IFormContext} from "~/lib/contexts";
 
 export function SimpleImport(props: {}) {
   const { Ws } = useContext(WsContext);

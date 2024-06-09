@@ -1,11 +1,9 @@
 import { useLocation, useNavigate } from "@solidjs/router";
 import { createEffect, createResource, createSignal, Show } from "solid-js";
 import { useContext } from "solid-js";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, } from "~/lib/graph/graph";
 import PageHeader from "~/components/Breadcrumb";
 import DataGrid from "./DataGrid";
-import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "~/components/fields/GenericField";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { breadcrumbData } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";

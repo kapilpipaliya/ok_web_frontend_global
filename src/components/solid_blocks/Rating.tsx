@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { For, JSX, createSignal, splitProps } from "solid-js";
+import { For, type JSX, createSignal, } from "solid-js";
 
 const StarRating = (
   props: JSX.IntrinsicAttributes &

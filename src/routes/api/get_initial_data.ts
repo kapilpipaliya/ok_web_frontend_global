@@ -1,7 +1,7 @@
 import type {APIEvent} from "@solidjs/start/dist/server";
 import {getSubDomain} from "~/server/domain_utils";
 import {getDriver} from "~/cypher/driver";
-import {Session, types} from "neo4j-driver";
+import {type Session, types} from "neo4j-driver";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
 
 type JsonData = Record<string, any>;

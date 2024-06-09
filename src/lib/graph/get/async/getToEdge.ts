@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, getValueFromVertexOrKey } from "~/lib/utils";
+import { capitalizeFirstLetter, } from "~/lib/utils";
 
 import { IdAttr, type Vertex } from "~/lib/graph/graph";
 

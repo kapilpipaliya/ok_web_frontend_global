@@ -1,7 +1,6 @@
 import { createContext, createSignal } from "solid-js";
 import type { Id, Vertex } from "~/lib/graph/graph";
 import { createStore } from "solid-js/store";
-import { getNewGraphId } from "./graph/transaction";
 
 export const LoadingContext = createContext(createSignal(false));
 export const IsPreviewContext = createContext(createSignal(false));

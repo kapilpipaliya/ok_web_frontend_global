@@ -15,7 +15,7 @@ import {
   transactions,
 } from "~/lib/graph/transaction";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { GraphContext, IdAttr, Vertex, VertexMap } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, type Vertex, } from "~/lib/graph/graph";
 import { getFormApiFromFormMGCall } from "~/cypher/get/graph_functions";
 import { getDataMGCall } from "~/cypher/get/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";

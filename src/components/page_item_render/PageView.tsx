@@ -1,4 +1,4 @@
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createMemo, Match, Show, Switch, useContext } from "solid-js";
 import {
  PageItemRender,

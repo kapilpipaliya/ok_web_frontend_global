@@ -3,7 +3,7 @@ import { findVertexByLabelAndUniqueIdWithSkip } from "~/lib/graph/get/sync/findV
 import type { FormMetaData } from "~/lib/Type";
 import { GraphContext } from "~/lib/graph/graph";
 import { useContext } from "solid-js";
-import { IFormContext } from "~/lib/contexts";
+import type { IFormContext } from "~/lib/contexts";
 
 export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
   User: {

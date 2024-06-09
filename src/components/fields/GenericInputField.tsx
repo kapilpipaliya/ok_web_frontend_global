@@ -1,4 +1,4 @@
-import { Match, Show, splitProps, Switch, useContext } from "solid-js";
+import { Match, Show, Switch, useContext } from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import {
@@ -14,7 +14,7 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { PageItemRender } from "~/components/page_item_render/PageItemRender";
 import type { ComponentProps } from "~/components/fields/ComponentType";
-import { FormContext, SelectedIdContext } from "~/lib/contexts";
+import { SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid_blocks/Label";
 import MultiSelectField from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";

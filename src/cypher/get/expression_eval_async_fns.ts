@@ -1,4 +1,4 @@
-import { type Edge, IdAttr, type Vertex } from "../../lib/graph/graph";
+import type { Edge, Vertex } from "../../lib/graph/graph";
 import { calculateFilter } from "../../lib/graph/get/sync/traverse";
 import { getDriver } from "~/cypher/driver";
 import { type Session, int } from "neo4j-driver";
@@ -165,7 +165,7 @@ async function findVertexsMGCallId(
   } = {},
 ) {
   let query: string | undefined;
-  let params = {} as { name?: string; id: any };
+  const params = {} as { name?: string; id: any };
 
   if (id) {
     query = "MATCH (n) WHERE id(n) = $id RETURN n";

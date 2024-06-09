@@ -1,14 +1,7 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { untrack } from "solid-js";
-import {
-  getChildVertex,
-  getChildVertexes,
-} from "~/lib/graph/get/sync/traverse";
-import { mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
-import { addNewRow } from "~/lib/graph/mutate/form_functions";
-
-import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { mergeVertexProperties, } from "~/lib/graph/mutate/vertex";
 
 export function setPropertyValueGlobal(
   graph: Store<GraphInterface>,

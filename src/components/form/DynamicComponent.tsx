@@ -1,4 +1,4 @@
-import { Match, Show, splitProps, Switch, useContext } from "solid-js";
+import { Match, Show, Switch, useContext } from "solid-js";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/TableInputField";

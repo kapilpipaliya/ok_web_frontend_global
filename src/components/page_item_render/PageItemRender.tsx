@@ -1,11 +1,8 @@
 import {
-  createComputed,
-  createContext,
   createMemo,
   createSelector,
   For,
   Match,
-  onMount,
   Show,
   Switch,
   useContext
@@ -32,8 +29,6 @@ import type { Store } from "solid-js/store";
 import { Tab, TabContainer, Tooltip } from "~/components/solid_blocks";
 import {
   getCollAttrComp,
-  getCompProps,
-  getRowProps
 } from "~/lib/graph/get/sync/graph_functions";
 import {
   DragOverTargetIdContext, FormContext,

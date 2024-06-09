@@ -2,7 +2,7 @@ import { createMemo, type JSXElement, Match, Show, Switch, useContext } from "so
 import { Icon } from "@iconify-icon/solid";
 import { A } from "@solidjs/router";
 import { Dynamic } from "solid-js/web";
-import { GraphContext, GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import {
@@ -12,15 +12,13 @@ import {
   Progress,
   Select,
   Spinner,
-  TabContainer,
-  TabList,
   Tabs
 } from "~/components/solid_blocks";
 import { PageItemRender, PageRenderUtils, } from "~/components/page_item_render/PageItemRender";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import TreeView from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
-import { SetStoreFunction, Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { Repeater } from "~/components/page_item_render/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import Heading from "~/components/solid_blocks/Heading";

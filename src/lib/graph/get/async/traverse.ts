@@ -3,7 +3,6 @@ import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
 import {
   capitalizeFirstLetter,
-  getValueFromVertexOrKey,
   
 } from "~/lib/utils";
 
