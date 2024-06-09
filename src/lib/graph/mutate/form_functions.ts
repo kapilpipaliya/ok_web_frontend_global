@@ -496,7 +496,7 @@ export function addNewRow(
     txnId = getNewTxnId(graph, setGraph);
   }
   const type = getToEdge(meta, parentVertex);
-  const label = meta.P.props || {}["label"];
+  const label = meta.P.props?.["label"];
 
   const newRowResult = newRow(
     graph,

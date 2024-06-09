@@ -14,10 +14,12 @@ import {
   type GraphInterface,
   type Id,
   type VertexMap,
+  Vertex,
 } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
 import { API } from "~/lib/api/endpoints";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import getAPI from "./lib/api/getApi";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -41,25 +43,38 @@ export default function App() {
     txnId: 0,
     isSideBarOpen: true,
     isSubSideBarOpen: true,
+    componentIdMap: {},
+  });
+
+  function setComponentIdMap(vertexes: Vertex[]) {
+    const vertexMap = {} as { [key: string]: Id; };
+    for (const vertex of Object.values(vertexes)) {
+      if (vertex.L[0] === 'Comp') {
+        const propName = vertex.P.name;
+        const vertexId = vertex.id;
+        vertexMap[propName] = vertexId;
+      }
+    };
+    graph[1]('componentIdMap', vertexMap);
+  }
+
+  const getData = async () => {
+    try {
+      const response = await fetch(API.getInitialDataUrl);
+      const data = await response.json();
+      setGraphData(graph[0], graph[1], data);
+      setComponentIdMap(data.vertexes);
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+  onMount(() => {
+    getData();
   });
 
 
- const getData = async () => {
-  try {
-   const response = await fetch(API.getInitialDataUrl);
-   const data = await response.json();
-   setGraphData(graph[0], graph[1], data);
-   return data;
-  } catch (error) {
-   throw error;
-  }
- };
- onMount(() => {
-  getData();
- });
-
-
- return (
+  return (
     <Router
       root={(props) => {
         return (
