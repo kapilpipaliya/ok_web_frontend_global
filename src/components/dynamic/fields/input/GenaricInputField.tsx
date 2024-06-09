@@ -28,7 +28,6 @@ export function GenericInputField(
 ) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const { txnId, formData, cleanUpConfig } = useContext(FormContext);
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const component = () => props.component;
   // todo: make a common onChange if possible.
@@ -40,7 +39,7 @@ export function GenericInputField(
     >
       <Show
         when={!props.disabled}
-        fallback={getViewValue(formData?.P[props.meta.P[IdAttr]])}
+        fallback={getViewValue(props.data?.P[props.meta.P[IdAttr]])}
       >
         <Switch>
           <Match when={component() === "CheckBox"}>
@@ -54,7 +53,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.checked,
                       Ws,
                       false,
@@ -62,7 +61,7 @@ export function GenericInputField(
               }}
               align="left"
               checked={
-                formData?.P[props.meta.P[IdAttr]] ??
+                props.data?.P[props.meta.P[IdAttr]] ??
                 props.meta?.P.props?.checked
               }
             >
@@ -73,7 +72,7 @@ export function GenericInputField(
             <input
               type="color"
               {...props.meta?.P.props}
-              value={formData?.P[props.meta.P[IdAttr]]}
+              value={props.data?.P[props.meta.P[IdAttr]]}
               onInput={(e) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -82,7 +81,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
@@ -98,7 +97,7 @@ export function GenericInputField(
             />
           </Match>
           <Match when={component() === "HtmlEditor"}>
-            {formData?.P[props.meta.P[IdAttr]]}
+            {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={component() === "NumberBox"}>
             <TextField
@@ -111,7 +110,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
@@ -119,13 +118,13 @@ export function GenericInputField(
               }}
               {...props.meta?.P.props}
               isNumber
-              value={formData?.P[props.meta.P[IdAttr]]}
+              value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
               {...props.meta?.P.props}
-              // value={formData?.P[props.meta.P[IdAttr]] ?? ""}
+              // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
@@ -134,7 +133,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.checked,
                       Ws,
                       false,
@@ -162,7 +161,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
@@ -176,14 +175,14 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
               options={props.meta?.P.props?.options ?? []}
-              selectedValues={() => [formData?.P[props.meta.P[IdAttr]]]}
+              selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
               placeholder={props.meta?.P.props?.placeholder ?? "Select Item"}
               disable={props.disabled}
               displayValueParent="P"
@@ -209,7 +208,7 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
@@ -217,19 +216,19 @@ export function GenericInputField(
               }}
               placeholder={props.meta?.P.props?.label ?? props.title}
               multiline
-              value={formData?.P[props.meta.P[IdAttr]]}
+              value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match
             when={
               component() === "TextBox" &&
-              formData &&
+              props.data &&
               props.meta &&
               props.meta.P &&
               props.meta.P[IdAttr] &&
-              formData.P &&
-              formData.P[props.meta.P[IdAttr]] &&
-              formData.P[props.meta.P[IdAttr]].toString().includes(")+(")
+              props.data.P &&
+              props.data.P[props.meta.P[IdAttr]] &&
+              props.data.P[props.meta.P[IdAttr]].toString().includes(")+(")
             }
           >
             <TextField
@@ -243,19 +242,19 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
               placeholder={props.meta?.P.props?.label ?? props.title}
-              value={formData?.P[props.meta.P[IdAttr]]}
+              value={props.data?.P[props.meta.P[IdAttr]]}
               trailing={
                 <ExpressionBuilder
-                  content={formData?.P[props.meta.P[IdAttr]]}
+                  content={props.data?.P[props.meta.P[IdAttr]]}
                   meta={props.meta}
-                  data={formData}
+                  data={props.data}
                   title={props.title}
                   txnId={props.txnId}
                   component={component()}
@@ -268,7 +267,7 @@ export function GenericInputField(
                             setGraph,
                             props.txnId!,
                             props.meta,
-                            formData!,
+                            props.data!,
                             value,
                             Ws,
                             false,
@@ -291,13 +290,13 @@ export function GenericInputField(
                       setGraph,
                       props.txnId!,
                       props.meta,
-                      formData!,
+                      props.data!,
                       e.target.value,
                       Ws,
                       false,
                     );
               }}
-              value={formData?.P[props.meta.P[IdAttr]]}
+              value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Label"}>

@@ -96,7 +96,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
-  const { txnId, formData, cleanUpConfig } = useContext(FormContext);
+  const { txnId, formData: pageDesignerFormVertex, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);
@@ -136,7 +136,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           onLayoutItemClick,
           clone,
           deleteLayout,
-        } = useDragDrop(graph, setGraph, txnId, formData, item, () => [], true);
+        } = useDragDrop(graph, setGraph, txnId, pageDesignerFormVertex, item, () => [], true);
 
         // createComputed is hard to debug
         createComputed(() => {

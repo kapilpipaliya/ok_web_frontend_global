@@ -86,7 +86,7 @@ export function FormWrapper(
     >
       <FormContext.Provider value={formData}>
         <div class="">
-          <PageItemRender metaVertex={props.meta}/>
+          <PageItemRender metaVertex={props.meta} data={formData.formData}/>
         </div>
         <div/>
 
