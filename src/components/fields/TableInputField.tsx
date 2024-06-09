@@ -277,13 +277,13 @@ export function TableInputField(
               addMeta(graph, setGraph, metaVertex(), p.joinVertex);
             });
             const DefaultValue = () => (
-              <Show when={metaVertex().P.props?.defaultValue}>
+              <Show when={metaVertex().P.defaultValue}>
                 {
                   getSelectionOptions(
                     graph,
                     setGraph,
                     [p.joinVertex],
-                    metaVertex().P.props.defaultValue,
+                    metaVertex().P.defaultValue,
                   ).vertexes
                 }
               </Show>
@@ -316,7 +316,7 @@ export function TableInputField(
 
             return (
               <Switch>
-                <Match when={metaVertex().P.props?.hidden}>
+                <Match when={metaVertex().P.hidden}>
                   <td>
                     <div
                       class={`flex ai:center jc:center ${(() => {

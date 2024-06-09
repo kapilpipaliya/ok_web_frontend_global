@@ -196,7 +196,7 @@ export function ExpressionBuilder(props: {
                       labelClass={"w:100% mr:.5rem ml:.5rem"}
                       style={`border: ${item.error ? "1px solid red " : ""}`}
                       class={"global-style flex-col"}
-                      {...props.meta?.P.props}
+                      {...props.meta?.P}
                       placeholder={"Write Expression..."}
                       onchange={(e: any) => handleChange(index(), e)}
                       value={item.value}
@@ -238,7 +238,7 @@ export function ExpressionBuilder(props: {
             <CustomButton
               variant={"soft"}
               onclick={handleInsert}
-              {...props.meta.P.props}
+              {...props.meta.P}
             >
               Add
             </CustomButton>
@@ -246,7 +246,7 @@ export function ExpressionBuilder(props: {
               variant={"outlined"}
               class="border-color:#FF0000 color:#FF0000 ml:5"
               onclick={toggle}
-              {...props.meta.P.props}
+              {...props.meta.P}
             >
               Cancel
             </CustomButton>
@@ -257,7 +257,7 @@ export function ExpressionBuilder(props: {
                 handleSubmit();
                 toggle((v) => !v);
               }}
-              {...props.meta.P.props}
+              {...props.meta.P}
             >
               Submit
             </CustomButton>

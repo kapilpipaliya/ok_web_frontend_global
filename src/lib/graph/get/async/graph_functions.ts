@@ -395,7 +395,7 @@ export async function getExportCodeAsync(
       "MetaAttr",
       meta,
     );
-    // const props = meta.P.props || {};
+    // const props = meta.P;
     const selectMetaVertexes = metaVertexes.filter((meta) =>
       ["SelectBox", "TagBox"].includes(meta.P.component),
     );
@@ -404,7 +404,7 @@ export async function getExportCodeAsync(
     );
 
     for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
@@ -469,7 +469,7 @@ export async function getExportCodeAsync(
       }
     }
     for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // not possible now

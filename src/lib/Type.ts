@@ -14,10 +14,10 @@ export interface FieldAttribute {
   meta?: string;
   component: string;
   displayName?: string;
-  props?: {
-    [key: string]: any;
-    validationRules?: Array<{}>;
-  };
+
+  [key: string]: any;
+   validationRules?: Array<{}>;
+  
   // postSubmit?: (formValues: IFormGroup, formGroup: IFormGroup, tableItemFormGroup: IFormGroup, values: FormResult)=>void
   attributes?: FieldAttribute[];
 }

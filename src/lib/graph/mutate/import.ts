@@ -614,7 +614,7 @@ export function importRecordWithYAMLSchema(
     );
 
     for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // Todo
@@ -631,7 +631,7 @@ export function importRecordWithYAMLSchema(
     }
 
     for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // not possible now
@@ -676,7 +676,7 @@ export function importRecordWithYAMLSchema(
     const { showErrorToast } = useToast();
 
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
-    // const props = meta.P.props || {};
+    // const props = meta.P;
 
     const selectMetaVertexes = metaVertexes.filter((meta) =>
       ["SelectBox", "TagBox"].includes(meta.P.component),
@@ -686,26 +686,26 @@ export function importRecordWithYAMLSchema(
     );
 
     for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // input['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
       } else {
         const type = getToEdge(metaVertex, vertex);
         const childVertexes = input?.OUT?.[type] || [];
-        if (metaVertex.P.props?.items) {
+        if (metaVertex.P.items) {
           continue;
         }
-        if (!metaVertex.P.props?.collection) {
+        if (!metaVertex.P.collection) {
           showErrorToast("collection is not defined in the meta");
           continue;
         }
 
         // when a collection is not simple, label is required to import data
-        const label = isSimpleCollection(metaVertex.P.props.collection)
-          ? metaVertex.P.props.collection
-          : metaVertex.P.props.label;
-        if (!metaVertex.P.props?.collection) {
+        const label = isSimpleCollection(metaVertex.P.collection)
+          ? metaVertex.P.collection
+          : metaVertex.P.label;
+        if (!metaVertex.P.collection) {
           showErrorToast("collection label is not defined in the meta");
           continue;
         }
@@ -768,7 +768,7 @@ export function importRecordWithYAMLSchema(
       }
     }
     for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // not possible now

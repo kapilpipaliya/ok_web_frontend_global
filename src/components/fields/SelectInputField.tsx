@@ -55,8 +55,8 @@ export function selectedValue(
   graph: Store<GraphInterface>,
 ): Id[] {
   if (
-    meta.P.props["stringValue"] ||
-    meta.P.props["items"]
+    meta.P["stringValue"] ||
+    meta.P["items"]
   ) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
@@ -65,7 +65,7 @@ export function selectedValue(
   }
   try {
     // when new row added or modified this gives error.
-    return meta.P.props["inward"]
+    return meta.P["inward"]
       ? getParentVertexValue(graph, data, meta)
       : getSelectedVertexValue(graph, data, meta);
   } catch (e) {
@@ -73,7 +73,7 @@ export function selectedValue(
   }
 }
 
-// if meta.P.props["collection"] is simple string
+// if meta.P["collection"] is simple string
 // no need to pass displayExpr,
 // it will be calculated automatically
 // * - { } $ [ | is special characters,
@@ -106,7 +106,7 @@ export function collectionNameDisplayExpr(
   return;
 }
 
-// displayExpr is required when meta.P.props.collection is complex
+// displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
   props: ComponentProps & {
     component: string;
@@ -132,7 +132,7 @@ export function SelectInputField(
   const formData = useContext(FormContext);
 
   const selectOptions = () => {
-    const value = field.meta.P.props["items"];
+    const value = field.meta.P["items"];
 
     if (value) {
       return handleValue(value);
@@ -188,7 +188,7 @@ export function SelectInputField(
   const getCollection = () => {
     return (
       getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
-      field.meta.P.props["collection"]
+      field.meta.P["collection"]
     );
   };
 
@@ -244,7 +244,7 @@ export function SelectInputField(
         if (field.isRealTime) {
           field.txnId = getNewTxnId(graph, setGraph);
         }
-        if (field.meta.P.props["stringValue"]) {
+        if (field.meta.P["stringValue"]) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -257,7 +257,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (field.meta.P.props["items"]) {
+        } else if (field.meta.P["items"]) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -270,7 +270,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (field.meta.P.props["inward"]) {
+        } else if (field.meta.P["inward"]) {
           setParentValue(
             graph,
             setGraph,
@@ -316,7 +316,7 @@ export function SelectInputField(
                     setGraph,
                     [graph.vertexes[vertexId]],
                     getValueFromVertexOrKey(
-                      field.meta.P.props,
+                      field.meta.P,
                       "displayExpr",
                     ) || `::'P.${IdAttr}'`,
                   ).vertexes

@@ -22,7 +22,7 @@ export async function handleComponentDrag(
     graph,
   );
 
-  const isParentIsLabel = toParentVertex.P.props?.label === "Label";
+  const isParentIsLabel = toParentVertex.P.label === "Label";
   if (
     !isParentIsLabel &&
     fromVertex.P.name !== "Form" &&

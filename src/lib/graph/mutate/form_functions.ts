@@ -496,7 +496,7 @@ export function addNewRow(
     txnId = getNewTxnId(graph, setGraph);
   }
   const type = getToEdge(meta, parentVertex);
-  const label = meta.P.props?.["label"];
+  const label = meta.P["label"];
 
   const newRowResult = newRow(
     graph,
@@ -519,10 +519,10 @@ export function onChangeHandler(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
 ) {
-  if (!changedFieldAttribute.P.props?.onchange) return;
+  if (!changedFieldAttribute.P.onchange) return;
   const isNew = typeof formVertex.id === "number" && formVertex.id < 0;
   try {
-    let args = JSON.parse(changedFieldAttribute.P.props.onchange);
+    let args = JSON.parse(changedFieldAttribute.P.onchange);
     if (Array.isArray(args)) {
       // args in proper format.
     } else if (isObject(args)) {
@@ -600,7 +600,7 @@ export function getExportCode(
     const { showErrorToast } = useToast();
 
     const metaVertexes = getSublistRowsForType(graph, "MetaAttr", meta);
-    // const props = meta.P.props || {};
+    // const props = meta.P;
     const selectMetaVertexes = metaVertexes.filter((meta) =>
       ["SelectBox", "TagBox"].includes(meta.P.component),
     );
@@ -609,7 +609,7 @@ export function getExportCode(
     );
 
     for (const metaVertex of selectMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // result['IN'] = {} as {[EdgeType: string]: {[primaryKey: string]: any}[]};
@@ -670,7 +670,7 @@ export function getExportCode(
       }
     }
     for (const metaVertex of tableMetaVertexes) {
-      const metaProps = metaVertex.P.props || {};
+      const metaProps = metaVertex.P;
 
       if (metaProps.inward) {
         // not possible now

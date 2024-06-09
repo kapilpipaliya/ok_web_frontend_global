@@ -44,7 +44,7 @@ export function GenericInputField(
         <Switch>
           <Match when={component() === "CheckBox"}>
             <Checkbox
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
@@ -62,7 +62,7 @@ export function GenericInputField(
               align="left"
               checked={
                 props.data?.P[props.meta.P[IdAttr]] ??
-                props.meta?.P.props?.checked
+                props.meta?.P.checked
               }
             >
               {<PageItemRender metaVertex={props.meta} />}
@@ -71,7 +71,7 @@ export function GenericInputField(
           <Match when={component() === "ColorBox"}>
             <input
               type="color"
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               value={props.data?.P[props.meta.P[IdAttr]]}
               onInput={(e) => {
                 props.setValue
@@ -92,7 +92,7 @@ export function GenericInputField(
           <Match when={component() === "DropDownBox"}>Dropdown</Match>
           <Match when={component() === "FileUploader"}>
             <FileUploader
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               image={props.meta?.P.image}
             />
           </Match>
@@ -116,14 +116,14 @@ export function GenericInputField(
                       false,
                     );
               }}
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               isNumber
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
@@ -139,16 +139,16 @@ export function GenericInputField(
                       false,
                     );
               }}
-              // name={props.meta?.P.props?.label ?? "radio"}
+              // name={props.meta?.P.label ?? "radio"}
               align="left"
             >
-              {props.meta?.P.props?.label ?? "radio"}
+              {props.meta?.P.label ?? "radio"}
             </Radio>
           </Match>
           <Match when={component() === "ProgressBar"}>
             <Progress
-              style={{ ...props.meta?.P.props }}
-              {...props.meta?.P.props}
+              style={{ ...props.meta?.P }}
+              {...props.meta?.P}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
@@ -181,9 +181,9 @@ export function GenericInputField(
                       false,
                     );
               }}
-              options={props.meta?.P.props?.options ?? []}
+              options={props.meta?.P.options ?? []}
               selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
-              placeholder={props.meta?.P.props?.placeholder ?? "Select Item"}
+              placeholder={props.meta?.P.placeholder ?? "Select Item"}
               disable={props.disabled}
               displayValueParent="P"
               displayValueChild="name"
@@ -199,7 +199,7 @@ export function GenericInputField(
           <Match when={component() === "TextArea"}>
             <TextField
               class="global-style"
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -214,7 +214,7 @@ export function GenericInputField(
                       false,
                     );
               }}
-              placeholder={props.meta?.P.props?.label ?? props.title}
+              placeholder={props.meta?.P.label ?? props.title}
               multiline
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
@@ -233,7 +233,7 @@ export function GenericInputField(
           >
             <TextField
               class="global-style"
-              {...props.meta?.P.props}
+              {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -248,7 +248,7 @@ export function GenericInputField(
                       false,
                     );
               }}
-              placeholder={props.meta?.P.props?.label ?? props.title}
+              placeholder={props.meta?.P.label ?? props.title}
               value={props.data?.P[props.meta.P[IdAttr]]}
               trailing={
                 <ExpressionBuilder
@@ -280,8 +280,8 @@ export function GenericInputField(
           <Match when={component() === "TextBox"}>
             <TextField
               class="global-style"
-              {...props.meta?.P.props}
-              placeholder={props.meta?.P.props?.label ?? props.title}
+              {...props.meta?.P}
+              placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -300,7 +300,7 @@ export function GenericInputField(
             />
           </Match>
           <Match when={component() === "Label"}>
-            <Label {...props.meta?.P.props}>
+            <Label {...props.meta?.P}>
               <PageItemRender metaVertex={props.meta} />
             </Label>
           </Match>

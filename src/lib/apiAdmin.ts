@@ -17,9 +17,9 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
       {
         name: "role",
         component: "TagBox",
-        props: {
+        
           collection: "g:'Role'",
-        },
+        
       },
     ],
   },
@@ -52,7 +52,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
       {
         name: "csv",
         component: "TextArea",
-        props: { width: 600, height: 500 },
+         width: 600, height: 500,
       },
       { name: "label", component: "TextBox" },
       { name: "dry", component: "CheckBox" },
@@ -67,7 +67,7 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
           // {
           //  name: "column",
           //  component: "SelectBox",
-          //  props: {
+          //  
           //   displayExpr: "key",
           //   collection: "Update Dynamically on meta based on first row",
           //  },
@@ -77,10 +77,10 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
             name: "coll",
             displayName: "Lookup Collection",
             component: "SelectBox",
-            props: {
+            
               displayExpr: "name",
               collection: "g:'Coll'",
-            },
+            
           },
           {
             name: "collLabel",
@@ -98,12 +98,12 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
             name: "func",
             displayName: "Function",
             component: "SelectBox",
-            props: {
+            
               stringValue: true,
               displayExpr: "key",
               collection:
                 '[{"key":"dataType","id":"dataType"}, {"id": "lookup", "key": "lookup"}]',
-            },
+            
           },
           { name: "skip", component: "CheckBox" },
           { name: "skipRow", component: "TextArea" },
@@ -118,14 +118,14 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
       {
         name: "title",
         component: "TextBox",
-        props: {
+        
           onchange: '{"new": ["name","id"]}',
-        },
+        
       },
       {
         name: "name",
         component: "TextBox",
-        props: {
+        
           validationRules: [
             {
               type: "required",
@@ -152,22 +152,22 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
               },
             },
           ],
-        },
+        
       },
       { name: "description", component: "TextArea" },
       {
         name: "Attr",
         component: "Table2",
         tab: "Attributes",
-        props: {
+        
           type: "NavAttr",
-        },
+        
         attributes: [
           {
             name: "name",
             displayName: "ID",
             component: "TextBox",
-            props: {},
+
           },
           {
             name: "definition",
@@ -180,25 +180,25 @@ export const AttrsAdminTableData: { [key: string]: FormMetaData } = {
           {
             name: "func",
             component: "SelectBox",
-            props: {
+            
               items: `Table
 Form
 Url`,
-            },
+            
           },
           {
             name: "Coll",
             component: "SelectBox",
-            props: {
+            
               collection: "g:'Coll'",
-            },
+            
           },
           {
             name: "Form",
             component: "SelectBox",
-            props: {
+            
               collection: "g:'Form'",
-            },
+            
           },
           {
             name: "url",
@@ -212,9 +212,9 @@ Url`,
               {
                 name: "role",
                 component: "SelectBox",
-                props: {
+                
                   collection: "g:'Role'",
-                },
+                
               },
               {
                 name: "Perm",
@@ -223,9 +223,9 @@ Url`,
                   {
                     name: "perm",
                     component: "SelectBox",
-                    props: {
+                    
                       collection: "g:'Perm'",
-                    },
+                    
                   },
                 ],
               },
@@ -235,15 +235,15 @@ Url`,
             name: "Attr",
             component: "Table2",
             tab: "expand",
-            props: {
+            
               type: "NavAttr",
-            },
+ 
             attributes: [
               {
                 name: "name",
                 displayName: "ID",
                 component: "TextBox",
-                props: {},
+                
               },
               {
                 name: "definition",
@@ -256,25 +256,25 @@ Url`,
               {
                 name: "func",
                 component: "SelectBox",
-                props: {
+                
                   items: `Table
 Form
 Url`,
-                },
+
               },
               {
                 name: "Coll",
                 component: "SelectBox",
-                props: {
+                
                   collection: "g:'Coll'",
-                },
+          
               },
               {
                 name: "Form",
                 component: "SelectBox",
-                props: {
+                
                   collection: "g:'Form'",
-                },
+                
               },
               {
                 name: "url",
@@ -288,9 +288,9 @@ Url`,
                   {
                     name: "role",
                     component: "SelectBox",
-                    props: {
+                    
                       collection: "g:'Role'",
-                    },
+                    
                   },
                   {
                     name: "Perm",
@@ -299,9 +299,9 @@ Url`,
                       {
                         name: "perm",
                         component: "SelectBox",
-                        props: {
+                        
                           collection: "g:'Perm'",
-                        },
+                        
                       },
                     ],
                   },
@@ -311,15 +311,15 @@ Url`,
                 name: "Attr",
                 component: "Table2",
                 tab: "expand",
-                props: {
+                
                   type: "NavAttr",
-                },
+                
                 attributes: [
                   {
                     name: "name",
                     displayName: "ID",
                     component: "TextBox",
-                    props: {},
+                    
                   },
                   {
                     name: "definition",
@@ -332,25 +332,25 @@ Url`,
                   {
                     name: "func",
                     component: "SelectBox",
-                    props: {
+                    
                       items: `Table
 Form
 Url`,
-                    },
+                    
                   },
                   {
                     name: "Coll",
                     component: "SelectBox",
-                    props: {
+                    
                       collection: "g:'Coll'",
-                    },
+                    
                   },
                   {
                     name: "Form",
                     component: "SelectBox",
-                    props: {
+                    
                       collection: "g:'Form'",
-                    },
+                    
                   },
                   {
                     name: "url",
@@ -364,9 +364,9 @@ Url`,
                       {
                         name: "role",
                         component: "SelectBox",
-                        props: {
+                        
                           collection: "g:'Role'",
-                        },
+                        
                       },
                       {
                         name: "Perm",
@@ -375,9 +375,9 @@ Url`,
                           {
                             name: "perm",
                             component: "SelectBox",
-                            props: {
+                            
                               collection: "g:'Perm'",
-                            },
+                            
                           },
                         ],
                       },
@@ -387,15 +387,15 @@ Url`,
                     name: "Attr",
                     component: "Table2",
                     tab: "expand",
-                    props: {
+                    
                       type: "NavAttr",
-                    },
+                    
                     attributes: [
                       {
                         name: "name",
                         displayName: "ID",
                         component: "TextBox",
-                        props: {},
+                 
                       },
                       {
                         name: "definition",
@@ -408,25 +408,25 @@ Url`,
                       {
                         name: "func",
                         component: "SelectBox",
-                        props: {
+                        
                           items: `Table
 Form
 Url`,
-                        },
+                        
                       },
                       {
                         name: "Coll",
                         component: "SelectBox",
-                        props: {
+                        
                           collection: "g:'Coll'",
-                        },
+                        
                       },
                       {
                         name: "Form",
                         component: "SelectBox",
-                        props: {
+                        
                           collection: "g:'Form'",
-                        },
+                        
                       },
                       {
                         name: "url",
@@ -440,9 +440,9 @@ Url`,
                           {
                             name: "role",
                             component: "SelectBox",
-                            props: {
+                            
                               collection: "g:'Role'",
-                            },
+                            
                           },
                           {
                             name: "Perm",
@@ -451,9 +451,9 @@ Url`,
                               {
                                 name: "perm",
                                 component: "SelectBox",
-                                props: {
+                                
                                   collection: "g:'Perm'",
-                                },
+                                
                               },
                             ],
                           },
