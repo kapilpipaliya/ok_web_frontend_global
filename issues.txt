@@ -11,7 +11,6 @@
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
 Make sure all inputs are working.
-when drag and drop, dont allow before and after main 'Form' element.
 
 form view link should support name key too 
 
@@ -22,6 +21,9 @@ Properties drawer when page height is small, it is not visible.
 in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible.
 add default props in each component itself
 when selecting dropdown in css properties the drawer close.
+add a option to remove a property value
+when Page Settings and Page designer is switched dont refresh the page.
+
 
 
 (when Submit do not redirect to parent screen?)
@@ -32,9 +34,6 @@ i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page
 
 Write a function to get all the fields in the form
 
-table length
-collapsible
-TreeViewChild
 
 Letter:
 Make the forms made using form designer load and save working

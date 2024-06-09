@@ -2,6 +2,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { getComponentFromLayoutRow } from "~/lib/drag_drop/componentDrag";
+import { evaluate } from "../expression_eval";
+import jsep from "jsep";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,
@@ -37,12 +39,23 @@ export function validateDragOver(
       }
     }
   } else {
-    const toParentVertex =
-      position === "center"
-        ? graph.vertexes[toVertexId]
-        : getParentVertex(["Attr"], graph.vertexes[toVertexId], graph).vertex;
+    const toParentVertex = getParentVertex(["Attr"], graph.vertexes[toVertexId], graph).vertex;
 
     if (!toParentVertex) {
+      // Dont allow drag before and after first element
+      return;
+    }
+
+    const rootChildren = () => evaluate(jsep("->Attr"), { vertexes: [formData], graph, setGraph }) || [];
+    const isFormRootVertetx = () => formData?.L?.[0] === "Form";
+    const rootVertexes = () =>
+      {
+        if (isFormRootVertetx()) {
+          return rootChildren();
+        }
+        return [formData];
+      }; 
+    if (rootVertexes().includes(graph.vertexes[toVertexId])) {
       // Dont allow drag before and after first element
       return;
     }
