@@ -155,7 +155,7 @@ export function useDragDrop(
 
   const handleDragLeave = (e: DragEvent) => {
     // e.stopPropagation();
-    setIndicatorPosition({});
+    setIndicatorPosition({ activeItem: null, position: null });
     // console.log('leave',layoutVertex.id)
     // Do not uncomment this, because drag is called before on drop
     // setDraggedVertex(null);
@@ -277,19 +277,19 @@ export function useDragDrop(
           setGraph,
           graph.vertexes[selectedId()],
         );
-        const layoutPropRow = Object.assign(componentProps, layoutPropRows);
+        const layoutPropRow = Object.assign(componentProps, layoutPropRows, layoutVertex.P);
         // set existing layout props
-        setGraph(
-          "vertexes",
-          propertiesVertexId(),
-          reconcile({ P: layoutPropRow } as Vertex),
-        );
+        // setGraph(
+        //   "vertexes",
+        //   propertiesVertexId(),
+        //   reconcile({ P: layoutPropRow } as Vertex),
+        // );
       } else {
-        setGraph(
-          "vertexes",
-          propertiesVertexId(),
-          reconcile({ P: {} } as Vertex),
-        );
+        // setGraph(
+        //   "vertexes",
+        //   propertiesVertexId(),
+        //   reconcile({ P: {...layoutVertex.P} } as Vertex),
+        // );
       }
     });
   };

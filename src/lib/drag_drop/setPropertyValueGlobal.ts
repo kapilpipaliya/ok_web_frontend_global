@@ -21,6 +21,9 @@ export function setPropertyValueGlobal(
   valueSet?: boolean,
 ) {
   return untrack(() => {
+    if (valueSet ?? true)
+      mergeVertexProperties(txnId, layoutVertex.id, graph, setGraph, { [meta.P.name]: value });
+    /*
     // find existing row;
     const rowProps =
       getChildVertexes(graph, ["$0Prop"], [layoutVertex]).vertexes || [];
@@ -70,7 +73,8 @@ export function setPropertyValueGlobal(
         );
       }
     }
+    
     // TODO: if reset, delete the row.
-    return row;
+    return row;*/
   });
 }

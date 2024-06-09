@@ -18,6 +18,7 @@ import {
 import { createStore } from "solid-js/store";
 import { API } from "~/lib/api/endpoints";
 import { setGraphData } from "~/lib/websocket/ws_events";
+import getAPI from "./lib/api/getApi";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -44,22 +45,23 @@ export default function App() {
   });
 
 
- const getData = async () => {
-  try {
-   const response = await fetch(API.getInitialDataUrl);
-   const data = await response.json();
-   setGraphData(graph[0], graph[1], data);
-   return data;
-  } catch (error) {
-   throw error;
-  }
- };
- onMount(() => {
-  getData();
- });
+  const getData = async () => {
+    try {
+      const data = await getAPI(API.getInitialDataUrl);
+      setGraphData(graph[0], graph[1], data as any);
+      debugger
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  onMount(() => {
+    getData();
+  });
 
 
- return (
+  return (
     <Router
       root={(props) => {
         return (

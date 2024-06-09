@@ -137,65 +137,26 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           clone,
           deleteLayout,
         } = useDragDrop(graph, setGraph, txnId, pageDesignerFormVertex, item, () => [], true);
-
-        // createComputed is hard to debug
-        createComputed(() => {
-          // @Note:(Question)
-          // We may need to link vertex with meta,
-          // so each vertex can identify its meta.
-          // 1. this will re-render when Props length changes.
-          // 2. when Prop Key changes.
-          const componentVertex = PageRenderUtils.getComponent(graph, item);
-          const componentProps = componentVertex
-            ? getCompProps(graph, componentVertex)
-            : {};
-          const rowProps = getRowProps(graph, setGraph, item);
-          const compProps = Object.assign(componentProps, rowProps);
-
+        const getBorder = () => {
           if (!isPreview()) {
             if (
               isSelectedLayoutId(item.id) ||
               isSelectedDragOverTargetId(item.id)
             ) {
-              if (compProps.class) {
-                compProps.class += " b:#3996E1|1.5px|solid r:5";
-              } else {
-                compProps.class = "b:#3996E1|1.5px|solid r:5";
-              }
+              return "b:#3996E1|1.5px|solid>* r:5>*";
             }
             if (isSelectedHoverId(item.id)) {
-              if (compProps.class) {
-                compProps.class += " b:#3996E1|1.5px|dashed r:5";
-              } else {
-                compProps.class = "b:#3996E1|1.5px|dashed r:5";
-              }
+              return "b:#3996E1|1.5px|dashed>* r:5>*";
             }
-
             if (isActiveItem()) {
               if (indicatorPosition().position === "before") {
-                if (compProps.class) {
-                  compProps.class += " bt:rgb(0,0,255)|2.5px|solid";
-                } else {
-                  compProps.class = "bt:rgb(0,0,255)|2.5px|solid";
-                }
+                return "bt:rgb(0,0,255)|2.5px|solid>*";
               } else if (indicatorPosition().position === "after") {
-                if (compProps.class) {
-                  compProps.class += " bb:rgb(0,0,255)|2.5px|solid @fade|.3s";
-                } else {
-                  compProps.class = "bb:rgb(0,0,255)|2.5px|solid @fade|.3s";
-                }
+                return "bb:rgb(0,0,255)|2.5px|solid @fade|.3s>*";
               }
             }
           }
-
-          // supported deleted properties.
-          // mergeProperties only merge top level properties. so props will be replaced.
-          setGraph("vertexes", item.id, "P", {
-            props: compProps,
-            name: PageRenderUtils.getId(graph, item),
-          });
-          // untrack(() => { mergeVertexProperties(getNewTxnId(), item.id, { props: compProps }); })
-        });
+        }
 
         const component = createMemo(
           () =>
@@ -250,7 +211,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           >
             <Show when={!isPreview()} fallback={<Content />}>
               <span
-                class="contents"
+                class={`contents ${getBorder() || ""}`}
                 onMouseOver={(e) => {
                   e.stopPropagation();
                   setHoverId(item.id);

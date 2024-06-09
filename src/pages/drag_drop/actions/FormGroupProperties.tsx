@@ -12,7 +12,7 @@ interface FormGroupPropertiesProps {
   txnId: number;
   selectedLayout: Vertex;
 
-  setValue(meta: Vertex, data: any): Vertex | undefined;
+  setValue(meta: Vertex, data: any): void;
 }
 
 export function FormGroupProperties(props: FormGroupPropertiesProps) {

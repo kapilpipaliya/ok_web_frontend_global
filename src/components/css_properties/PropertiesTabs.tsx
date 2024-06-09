@@ -50,6 +50,7 @@ export function ClassDesignTab(props: {
       .join("\n");
   }
 
+  // TODO: Remove this createEffect
   createEffect(() => {
     props.setValue?.(getCssValue());
   });

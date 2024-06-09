@@ -13,11 +13,17 @@ Savan:
 Make sure all inputs are working.
 when drag and drop, dont allow before and after main 'Form' element.
 
-set https://www.easyformforge.com/view/Form/2339/new on share dialog
+form view link should support name key too 
+
+whenever any css property is selected, highlight it.
+make undo redo working
+when click on setting, it should not reload the page.
+Properties drawer when page height is small, it is not visible.
+in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible.
+add default props in each component itself
 
 
 (when Submit do not redirect to parent screen?)
-In share dialog when user click on Copy icon, it should display message copied. ✅ 
 
 
 remain(kapil);

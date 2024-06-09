@@ -66,7 +66,6 @@ export function Properties(props: { setShowDrawer?: any }) {
     }
 
     const setPropertyValue = (meta: Vertex, value: any) => {
-      debugger
       if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
         return setPropertyValueGlobal(
           graph,
