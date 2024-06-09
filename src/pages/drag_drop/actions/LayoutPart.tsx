@@ -18,7 +18,7 @@ import { Properties } from "./Properties";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { iconMap } from "~/lib/constants";
-import { nameExpr } from "~/pages/drag_drop/layout/actions/utils/nameExpr";
+import { nameExpr } from "~/pages/drag_drop/actions/utils/nameExpr";
 
 export function LayoutPart(props: {}) {
   const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);

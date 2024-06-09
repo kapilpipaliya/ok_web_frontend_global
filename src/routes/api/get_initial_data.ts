@@ -5,8 +5,8 @@ import {Session, types} from "neo4j-driver";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
 
 type JsonData = Record<string, any>;
-
-export async function getInitialData(args: {
+// exporting this function breaks the api
+async function getInitialData(args: {
   subdomain: string;
 }): Promise<{ [key: string]: any }> {
   const nodeObj: JsonData = {};
@@ -50,7 +50,7 @@ export async function getInitialData(args: {
   };
 }
 
-export async function fetchFromMGAndSaveToArray(
+async function fetchFromMGAndSaveToArray(
   session: Session,
   query: string,
   params: Record<string, any>,

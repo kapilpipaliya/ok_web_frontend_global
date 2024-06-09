@@ -2,16 +2,15 @@ import { createEffect, createSignal, onMount, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
 import { PageConfigContext } from "~/lib/contexts";
-import { useToast } from "~/components/Toast";
 import { useNavigate } from "@solidjs/router";
 
 const ShareSection = () => {
-  const { showSuccessToast, showErrorToast } = useToast();
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const [link, setLink] = createSignal("");
   const navigate = useNavigate();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
+  const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   createEffect(() => {
     if (access() === "everyone") {
       setEmail(""); // Clear email
@@ -28,7 +27,9 @@ const ShareSection = () => {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(link());
-    showSuccessToast("Link copied to clipboard");
+
+    setShowCopiedTooltip(true);
+    setTimeout(() => setShowCopiedTooltip(false), 1000);
   };
   const previewLink = () => {
     const url = link();
@@ -99,7 +100,7 @@ const ShareSection = () => {
             🚀
           </button>
         </Tooltip>
-        <Tooltip content={"Click to copy"} nowrap>
+        <Tooltip content={showCopiedTooltip() ? "Copied" : "Click to copy"} nowrap>
           <button
             onClick={copyToClipboard}
             style={inlineStyles.button}
@@ -159,3 +160,4 @@ const ShareSection = () => {
 };
 
 export default ShareSection;
+

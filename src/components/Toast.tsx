@@ -161,7 +161,9 @@ export function useToast() {
               <div class="flex items-center">
                 <button
                   style="padding: 14px; height: 80%; letter-spacing: 0.025em; font-weight: 500; border-radius: 6px; font-size: 13px; color: white; background-color: #0e7490;"
+                  // @ts-ignore
                   onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.7)'"
+                 // @ts-ignore
                   onMouseOut="this.style.backgroundColor='#0e7490'"
                   onClick={() => toast.dismiss(t.id)}
                 >
@@ -171,7 +173,9 @@ export function useToast() {
               <div class="flex items-center">
                 <button
                   style="padding: 10px; display: flex; align-items: center; position: relative; height: 80%; letter-spacing: 0.025em; border-radius: 6px; font-size: 24px; color: white; background-color: rgba(14, 116, 144, 0.4);"
+                  // @ts-ignore
                   onMouseOver="this.style.backgroundColor='rgba(14, 116, 144, 0.2)'"
+                  // @ts-ignore
                   onMouseOut="this.style.backgroundColor='rgba(14, 116, 144, 0.4)'"
                   onClick={() => toast.dismiss(t.id)}
                 >
@@ -182,8 +186,7 @@ export function useToast() {
             <div style="position: relative; padding-top: 16px;">
               <div style="width: 100%; height: 4px; border-radius: 9999px; background-color: #164e63;" />
               <div
-                style="height: 4px; position: absolute; top: 16px; border-radius: 9999px; background-color: #ecfeff;"
-                style={{ width: `${life()}%` }}
+                style={`height: 4px; width: ${life()}%; position: absolute; top: 16px; border-radius: 9999px; background-color: #ecfeff;`}
               />
             </div>
           </div>
@@ -204,4 +207,3 @@ export function useToast() {
     showTimerToast,
   };
 }
-// todo fix on ouseover function

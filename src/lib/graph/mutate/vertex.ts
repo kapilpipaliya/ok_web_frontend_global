@@ -115,6 +115,7 @@ export function mergeVertexProperties(
   for (const property in properties) {
     originalProperties[property] = vertex.P[property];
   }
+  // It will only merge top level properties.
   setGraph("vertexes", vertexId, "P", properties);
 
   transactionDetailAdd(txnId, {

@@ -14,6 +14,5 @@ export * from "./spinner/spinner";
 export * from "./tabs/tabs";
 export * from "./tag/tag";
 export * from "./textfield/textfield";
-export * from "./toast/toast";
 export * from "./tooltip/tooltip";
 export * from "./tools";
