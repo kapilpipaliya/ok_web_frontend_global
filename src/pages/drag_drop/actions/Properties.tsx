@@ -16,7 +16,6 @@ import {
   PageConfigContext,
   SelectedIdContext,
   SelectedComponentContext,
-  PropertiesVertexIdContext,
 } from "~/lib/contexts";
 import {
   getChildVertex,
@@ -43,7 +42,6 @@ export function Properties(props: { setShowDrawer?: any }) {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(
     SelectedComponentContext,
   );
@@ -52,18 +50,6 @@ export function Properties(props: { setShowDrawer?: any }) {
   const PropertiesPart = () => {
     const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
     const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
-
-    if (!graph.vertexes[propertiesVertexId()]) {
-      const addNewVertexResult = addNewVertex(
-        0,
-        newVertex(propertiesVertexId(), ["PropsJson"], { sample: true }),
-        graph,
-        setGraph,
-      );
-      if (addNewVertexResult.error) {
-        console.warn("error while inserting");
-      }
-    }
 
     const setPropertyValue = (meta: Vertex, value: any) => {
       if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
@@ -135,7 +121,7 @@ export function Properties(props: { setShowDrawer?: any }) {
         txnId,
         newVertex(metaVertexId, ["MetaAttr"], {
           name: metaAttributes?.name,
-          props: metaAttributes?.props,
+          ...metaAttributes?.props,
         }),
         graph,
         setGraph,
@@ -234,7 +220,7 @@ export function Properties(props: { setShowDrawer?: any }) {
       const dataVertexId = getNewGraphId();
 
       setGraph("vertexes", metaVertexId, {
-        P: { name: "jsx", props: { width: 700, height: 700 } },
+        P: { name: "jsx", width: 700, height: 700 },
       });
       setGraph("vertexes", dataVertexId, { id: dataVertexId, P: {} });
 
@@ -249,7 +235,6 @@ export function Properties(props: { setShowDrawer?: any }) {
           meta: {
             P: {
               component: "Button",
-              props: {
                 children: "Import",
                 variant: "soft",
 
@@ -264,7 +249,7 @@ export function Properties(props: { setShowDrawer?: any }) {
                   // reset layout
                   // layoutTreeViewInstance.option("items", getLayoutTreeData());
                 },
-              },
+
             },
           } as any,
         },
@@ -272,10 +257,10 @@ export function Properties(props: { setShowDrawer?: any }) {
           meta: {
             P: {
               component: "Button",
-              props: {
+          
                 children: "Submit",
                 onClick: onImportsSubmit,
-              },
+              
             },
           } as any,
         },
@@ -283,12 +268,12 @@ export function Properties(props: { setShowDrawer?: any }) {
           meta: {
             P: {
               component: "Button",
-              props: {
+            
                 children: "Cancel",
                 class: "border-color:#FF0000 color:#FF0000",
                 variant: "outlined",
                 onClick: onImportsCancel,
-              },
+              
             },
           } as any,
         },
@@ -349,10 +334,10 @@ export function Properties(props: { setShowDrawer?: any }) {
         txnId,
         newVertex(metaVertexId, ["MetaAttr"], {
           name: "Attr",
-          props: {
+      
             type: "Attr",
             label: "Attr",
-          },
+          
         }),
         graph,
         setGraph,
@@ -362,17 +347,17 @@ export function Properties(props: { setShowDrawer?: any }) {
           name: "coll",
           displayName: "Collection",
           component: "SelectBox",
-          props: {
+        
             collection: "g:'Coll'",
             parentLabel: "Coll",
-          },
+          
         },
         {
           name: "data",
           component: "SelectBox",
-          props: {
+    
             collection: `g:'{{->$0Coll::'P.${IdAttr}'}}'`,
-          },
+          
         },
         {
           name: "data",
@@ -442,11 +427,11 @@ export function Properties(props: { setShowDrawer?: any }) {
                 {
                   P: {
                     component: "Button",
-                    props: {
+                 
                       children: "Rules",
                       class: "mb:5",
                       onClick: toggleRulesModal,
-                    },
+                    
                   },
                 } as any
               }
@@ -457,10 +442,10 @@ export function Properties(props: { setShowDrawer?: any }) {
                 {
                   P: {
                     component: "Button",
-                    props: {
+                
                       children: "Import",
                       onClick: toggleImportsModal,
-                    },
+                    
                   },
                 } as any
               }
@@ -470,7 +455,6 @@ export function Properties(props: { setShowDrawer?: any }) {
           <FormGroupProperties
             txnId={pageConfig.formData.txnId}
             metaAttributes={selectedComponentProperties().vertexes ?? []}
-            vertex={graph.vertexes[propertiesVertexId()]}
             setValue={setPropertyValue}
             selectedLayout={graph.vertexes[selectedId()]}
           />
@@ -502,11 +486,11 @@ export function Properties(props: { setShowDrawer?: any }) {
                         {
                           P: {
                             component: "Button",
-                            props: {
+                         
                               children:
                                 "Submithttps://coindcx.com/futures/B-BTC_USDT",
                               onClick: () => onRulesSubmit,
-                            },
+                            
                           },
                         } as any
                       }
@@ -517,12 +501,12 @@ export function Properties(props: { setShowDrawer?: any }) {
                         {
                           P: {
                             component: "Button",
-                            props: {
+                            
                               variant: "outlined",
                               class: "border-color:#FF0000 color:#FF0000",
                               children: "Cancel",
                               onClick: () => onRulesCancel,
-                            },
+                            
                           },
                         } as any
                       }

@@ -111,7 +111,7 @@ export function TableInputField(
   );
 
   // add dynamic field.meta from separate collection.
-  // If field.meta.P.attributes are not present and field.meta.props.collection is present then get attributes from the collection
+  // If field.meta.P.attributes are not present and field.meta.collection is present then get attributes from the collection
   if (!field.meta.P.attributes && field.meta.P.meta) {
     const metaData = componentProps(graph, setGraph, field.meta, field.data!);
     if (metaData.collection) {
@@ -540,11 +540,11 @@ export function TableInputField(
           {
             P: {
               component: "Button",
-              props: {
+              
                 children: "Add",
                 variant: "soft",
                 onClick: () => insertNewRow(),
-              },
+              
             },
           } as unknown as Vertex
         }
@@ -588,7 +588,7 @@ export function TableInputField(
                     {(attribute) => {
                       return (
                         <Switch>
-                          {/*<Match when={attribute.props?.skip}></Match>*/}
+                          {/*<Match when={attribute.P.skip}></Match>*/}
                           <Match when={attribute.P.tab === "expand"}>
                             <span />
                           </Match>

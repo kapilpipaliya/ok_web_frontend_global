@@ -11,13 +11,13 @@ const collectionAttr = [
     component: "TextBox",
     
       onchange: '{"new": ["name","id"], "edit": ["name","id"]}',
-    },
+
   },
   {
     name: "name",
     displayName: "ID",
     component: "TextBox",
-    },
+    
   },
   {
     name: "definition",
@@ -28,7 +28,7 @@ const collectionAttr = [
     component: "SelectBox",
     
       collection: "g:'DataType'",
-    },
+    
   },
   {
     name: "Comp",
@@ -37,14 +37,14 @@ const collectionAttr = [
       collection: "->$0DataType->$0Comp",
       // smaller version:
       // collection: "g:'Comp'",
-    },
+    
   },
   {
     name: "coll",
     component: "SelectBox",
     
       collection: "g:'Coll'",
-    },
+    
   },
   {
     name: "required",
@@ -65,7 +65,7 @@ const collectionAttr = [
         
           displayExpr: "::'P.name'",
           collection: "<-$0->$0Comp->$0Prop",
-        },
+        
       },
       {
         name: "value",
@@ -85,7 +85,7 @@ const collectionAttr = [
         component: "SelectBox",
         
           collection: "g:'Role'",
-        },
+        
       },
       {
         name: "Perm",
@@ -96,7 +96,7 @@ const collectionAttr = [
             component: "TagBox",
             
               collection: "g:'Perm'",
-            },
+            
           },
           {
             name: "scope",
@@ -113,7 +113,7 @@ const collectionAttr = [
     
       type: "Attr",
       label: "Attr",
-    },
+    
   },
 ] as FieldAttribute[];
 let childAttrs: FieldAttribute = collectionAttr[collectionAttr.length - 1];
@@ -131,7 +131,7 @@ const pageAttr = [
     
       collection: "g:'Coll'",
       parentLabel: "Coll",
-    },
+    
   },
   {
     name: "Att",
@@ -141,13 +141,12 @@ const pageAttr = [
       // displayExpr: "P.displayName||P.name",
       displayExpr: "$P.displayName ($P.name)",
       collection: "->$0Coll->Attr||-$0->$0Coll->Attr",
-    },
+    
   },
   {
     name: "name",
     displayName: "ID",
     component: "TextBox",
-    // },
   },
   // {
   //   name: "definition",
@@ -160,14 +159,13 @@ const pageAttr = [
   //
   //     collection: "<-$0->Attr",
   //     focusRefresh: true
-  //   },
   // },
   {
     name: "data",
     component: "SelectBox",
     
       collection: `g:'{{->$0Coll::'P.name'}}'`,
-    },
+  
   },
   {
     name: "Comp",
@@ -176,7 +174,7 @@ const pageAttr = [
       collection: "g:'Comp'",
       // smaller version:
       // collection: "g:'Comp'",
-    },
+    
   },
   {
     name: "Prop",
@@ -189,7 +187,7 @@ const pageAttr = [
         
           displayExpr: "::'P.name'",
           collection: "<-$0->$0Comp->$0Prop",
-        },
+        
       },
       {
         name: "value",
@@ -208,7 +206,7 @@ const pageAttr = [
         component: "SelectBox",
         
           collection: "g:'Role'",
-        },
+        
       },
       {
         name: "Perm",
@@ -219,7 +217,7 @@ const pageAttr = [
             component: "SelectBox",
             
               collection: "g:'Perm'",
-            },
+            
           },
         ],
       },
@@ -232,7 +230,7 @@ const pageAttr = [
     
       type: "Attr",
       label: "Attr",
-    },
+    
   },
 ] as FieldAttribute[];
 let pageChildAttrs: FieldAttribute = pageAttr[pageAttr.length - 1];

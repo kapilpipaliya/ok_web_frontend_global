@@ -12,7 +12,6 @@ interface Properties
   name?: string;
   disabled?: boolean;
   value?: string;
-  props: {};
   dom?: HTMLInputElement;
   class?: string;
   error?: string;

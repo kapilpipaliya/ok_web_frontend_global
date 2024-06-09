@@ -5,6 +5,7 @@ import {
   Show,
   Switch,
   untrack,
+  Accessor,
 } from "solid-js";
 import "~/css/base.css";
 import PageHeader from "~/components/Breadcrumb";
@@ -140,7 +141,7 @@ function Settings() {
 }
 const TabSection = (props: {
   setSelectedTab: Setter<string>;
-  selectedTab: any;
+  selectedTab: Accessor<string>;
 }) => {
   return (
     <div class="radio-inputs m:20">

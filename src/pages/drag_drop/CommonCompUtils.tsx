@@ -35,46 +35,4 @@ export function onClickAddComponent(
     formData,
     "999999",
   );
-
-  // function sortChildren() {
-  //   let pos = 1;
-  //   const childrenAttrs = getChildrenAttrs(graph, setGraph, toParentVertex!);
-  //   for (const child of childrenAttrs) {
-  //     if (child.id === fromVertex?.id) {
-  //       continue;
-  //     }
-  //     // const childIndex = child.P.pos;
-  //     // if (childIndex === undefined) {
-  //     //  alert ('childIndex Pos should not be undefined.');
-  //     // }
-  //     if (child.id !== toVertexId) {
-  //       mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
-  //       pos++;
-  //     }
-  //   }
-  // }
-
-  // const rowId = componentDrag(
-  //   txnId,
-  //   fromVertex,
-  //   toParentVertex,
-  //   graph,
-  //   setGraph,
-  // );
-  // if (rowId === -1) return;
-
-  // fromVertex = graph.vertexes[rowId];
-  // setParentValue(
-  //   graph,
-  //   setGraph,
-  //   txnId,
-  //   fromVertex,
-  //   { P: { props: { type: "Attr" } } } as unknown as Vertex,
-  //   toVertexId,
-  // );
-  // mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
-  //   pos: 9999999,
-  // });
-
-  // sortChildren();
 }

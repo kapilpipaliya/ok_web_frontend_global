@@ -5,6 +5,7 @@ import {
   createSelector,
   For,
   Match,
+  onMount,
   Show,
   Switch,
   useContext
@@ -96,6 +97,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
+  // TODO: Fix dont use PageDisnger Txn Id here.
   const { txnId, formData: pageDesignerFormVertex, cleanUpConfig } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
@@ -202,6 +204,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             disabled={false}
             component={component()}
             txnId={txnId}
+            applyDefaults={true}
           />
         );
 

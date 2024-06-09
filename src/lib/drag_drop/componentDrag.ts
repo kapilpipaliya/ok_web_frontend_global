@@ -219,10 +219,10 @@ export function createAttrMetaVertex() {
     name: "Attr",
     component: "Table",
     tab: "Attribute",
-    props: {
+    
       type: "Attr",
       label: "Attr",
-    },
+    
   });
 }
 
@@ -230,9 +230,9 @@ export function createAttrCompMetaVertex() {
   return newVertex(getNewGraphId(), [], {
     name: "Comp",
     component: "SelectBox",
-    props: {
+
       collection: "g:'Comp'",
-    },
+    
   });
 }
 
@@ -241,10 +241,10 @@ function createAttrCollMetaVertex() {
     name: "coll",
     displayName: "Collection",
     component: "SelectBox",
-    props: {
+    
       collection: "g:'Coll'",
       parentLabel: "Coll",
-    },
+    
   });
 }
 

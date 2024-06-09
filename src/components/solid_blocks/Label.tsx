@@ -3,7 +3,7 @@ import { FormSettingsContext } from "~/lib/contexts";
 
 interface LabeledFieldProps {
   label: string;
-  position: "top" | "left" | "right" | "bottom" | "system";
+  position?: "top" | "left" | "right" | "bottom" | "system";
   children: JSX.Element;
 }
 

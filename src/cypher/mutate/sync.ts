@@ -1,7 +1,7 @@
 import neo4j, { type Session, type Node, int } from "neo4j-driver";
 
 // Main function to initiate the migration process.
-export async function syncNodesMGCall(args: any) {
+export async function syncNodesMGCall(args: { userport: string; nodesToTransfer: string[]; }) {
   "use server";
 
   const nodesToTransfer = args.nodesToTransfer;
@@ -51,19 +51,18 @@ async function transferNodeTypes(
     // console.log(`Retrieved ${readResult.records.length} ${nodeType} nodes from admin database.`);
 
     for (const record of readResult.records) {
-      await transferNode(sessionSource, sessionTarget, record, nodeType);
+      await transferNode(sessionSource, sessionTarget, record.get("n"), nodeType);
     }
   }
 }
 
 // Function to handle transfer of a single node.
 async function transferNode(
-  sessionSource: any,
-  sessionTarget: any,
-  record: { get: (arg0: string) => any },
+  sessionSource: Session,
+  sessionTarget: Session,
+  node: Node,
   nodeType: string,
 ) {
-  const node = record.get("n");
   const properties = { ...node.properties };
   const existingNode = await findExistingNode(
     sessionTarget,
@@ -90,22 +89,22 @@ async function transferNode(
 
 // Function to update properties of an existing node.
 async function updateNodeProperties(
-  session: { run: (arg0: string, arg1: { id: any; props: any }) => any },
+  session: Session,
   node: Node,
-  properties: any,
+  properties: {[key: string]: any},
 ) {
   const result = await session.run(
-    "MATCH (n) WHERE id(n) = $id SET n += $props SET n.updatedAt = localDateTime() RETURN n;",
-    { id: int(node.elementId), props: properties },
+    "MATCH (n) WHERE id(n) = $id SET n += $properties SET n.updatedAt = localDateTime() RETURN n;",
+    { id: int(node.elementId), properties },
   );
   return result.records[0].get("n");
 }
 
 // Function to create a new node.
 async function createNode(
-  session: { run: (arg0: string, arg1: { props: any }) => any },
-  nodeType: any,
-  properties: any,
+  session: Session,
+  nodeType: string,
+  properties: {[key: string]: any},
 ) {
   const result = await session.run(
     `CREATE (n:${nodeType}) SET n = $props SET n.createdAt = localDateTime() RETURN n;`,
@@ -166,7 +165,7 @@ async function addNodeEdges(
 }
 
 // Function to retrieve child vertices of a node based on a specific edge type.
-const getChildrenVertex = (session: any, elementId: any, edgeType: any) => {
+const getChildrenVertex = (session: Session, elementId: string, edgeType: string) => {
   return session.run(
     `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;`,
     { id: int(elementId) },
@@ -175,9 +174,9 @@ const getChildrenVertex = (session: any, elementId: any, edgeType: any) => {
 
 // Function to find an existing node by name.
 async function findExistingNode(
-  session: { run: (arg0: string, arg1: { name: any }) => any },
-  nodeType: any,
-  name: any,
+  session: Session,
+  nodeType: string,
+  name: string,
 ) {
   const result = await session.run(
     `MATCH (n:${nodeType} {name: $name}) RETURN n;`,

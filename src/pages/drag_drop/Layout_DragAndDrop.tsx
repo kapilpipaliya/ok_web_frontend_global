@@ -6,7 +6,7 @@ import { createStore } from "solid-js/store";
 import {
  IFormContext,
  PageConfigContext,
- PropertiesVertexIdContext
+
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
 import { ActionsDragAndDrops } from "~/pages/drag_drop/actions/Actions_DragAndDrops";
@@ -52,7 +52,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
   });
 
   return (
-    <PropertiesVertexIdContext.Provider value={createSignal(getNewGraphId())}>
       <PageConfigContext.Provider
         value={createStore({} as { formData: IFormContext })}
       >
@@ -145,7 +144,6 @@ const LayoutDragAndDrop = (): JSX.Element => {
           </Show>
         </div>
       </PageConfigContext.Provider>
-    </PropertiesVertexIdContext.Provider>
   );
 };
 

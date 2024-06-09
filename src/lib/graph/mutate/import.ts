@@ -512,10 +512,10 @@ export function onDataDirectoryImportClick(
             vertex,
             {
               P: {
-                props: {
+                
                   parentLabel: selectMeta.collLabel,
                   childLabel: selectMeta.edge,
-                },
+                
               },
             } as unknown as Vertex,
             v()?.id,

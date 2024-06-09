@@ -23,7 +23,7 @@ export function SimpleImport(props: {}) {
           {
             P: {
               [IdAttr]: "import",
-              props: {
+            
                 stringValue: true,
                 items: `dataType
 component
@@ -33,7 +33,7 @@ attribute
 user
 role
 perm`,
-              },
+              
             },
           } as unknown as Vertex
         }
@@ -63,7 +63,7 @@ perm`,
             P: {
               component: "Button",
               [IdAttr]: "meta",
-              props: {
+           
                 children: "Import",
                 onClick: () =>
                   onDataDirectoryImportClick(
@@ -72,7 +72,7 @@ perm`,
                     graph,
                     setGraph,
                   ),
-              },
+              
             },
           } as unknown as Vertex
         }

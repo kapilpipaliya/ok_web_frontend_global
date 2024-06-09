@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For, Show } from "solid-js";
+import { useContext, createSignal, createSelector, For, Show, onMount } from "solid-js";
 import Drawer from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
@@ -19,9 +19,11 @@ import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { iconMap } from "~/lib/constants";
 import { nameExpr } from "~/pages/drag_drop/actions/utils/nameExpr";
+import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 
 export function LayoutPart(props: {}) {
-  const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
+  const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -48,7 +50,7 @@ export function LayoutPart(props: {}) {
         : [...prev, itemId],
     );
   }
-  const TreeView = (props: { vertex: Vertex }) => {
+  const TreeView = (props: { metaVertex: Vertex }) => {
     const {
       children,
       isActiveItem,
@@ -65,11 +67,24 @@ export function LayoutPart(props: {}) {
       setGraph,
       pageConfig.formData.txnId,
       pageConfig.formData.formData,
-      props.vertex,
+      props.metaVertex,
       collapsedKeys,
     );
     const getComponent: any = () =>
-      getChildVertex(graph, ["$0Comp"], props.vertex).vertex?.P.name;
+      getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name;
+
+    // TODO: remove this function after testing
+    onMount(() => {
+      const layoutPropRows = getRowProps(
+        graph,
+        setGraph,
+        props.metaVertex,
+      );
+      // console.log("adding old properties", getComponent(), layoutPropRows);
+      if (Object.keys(layoutPropRows).length) {
+        mergeVertexProperties(pageConfig.formData.txnId, props.metaVertex.id, graph, setGraph,layoutPropRows);
+      }
+    });
 
     return (
       <div>
@@ -81,9 +96,9 @@ export function LayoutPart(props: {}) {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           class={`${
-            isSelectedLayoutId(props.vertex.id)
+            isSelectedLayoutId(props.metaVertex.id)
               ? "bg:rgb(197,221,255)"
-              : isSelectedHoverId(props.vertex.id)
+              : isSelectedHoverId(props.metaVertex.id)
                 ? "bg:#F2EDED"
                 : ""
           } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${
@@ -93,10 +108,10 @@ export function LayoutPart(props: {}) {
             "b:1px":
               isActiveItem() && indicatorPosition().position === "center",
           }}
-          onClick={() => onLayoutItemClick(props.vertex)}
+          onClick={() => onLayoutItemClick(props.metaVertex)}
           onMouseOver={(e) => {
             e.stopPropagation();
-            setHoverId(props.vertex.id);
+            setHoverId(props.metaVertex.id);
           }}
           onmouseleave={(e) => {
             e.stopPropagation();
@@ -132,7 +147,7 @@ export function LayoutPart(props: {}) {
                 onClick={(e) => {
                   e.stopPropagation();
 
-                  toggleExpand(props.vertex.id);
+                  toggleExpand(props.metaVertex.id);
                 }}
               >
                 <Icon
@@ -142,7 +157,7 @@ export function LayoutPart(props: {}) {
                     transition: "transform 0.2s linear",
                     "margin-top": "7px",
                     transform: `${
-                      collapsedKeys().includes(props.vertex.id)
+                      collapsedKeys().includes(props.metaVertex.id)
                         ? "rotate(0deg)"
                         : "rotate(180deg)"
                     }`,
@@ -160,21 +175,21 @@ export function LayoutPart(props: {}) {
               height={17}
             />
             &nbsp;&nbsp;
-            {nameExpr(props.vertex, graph) || props.vertex.P.name}
+            {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}
           </div>
           {/* When root element, dont display icons */}
-          <Show when={!rootVertexes().includes(props.vertex)}>
+          <Show when={!rootVertexes().includes(props.metaVertex)}>
             <div class="flex ai:center mt:4">  
               <Show
                 when={
-                  isSelectedLayoutId(props.vertex.id) ||
-                  isSelectedHoverId(props.vertex.id)
+                  isSelectedLayoutId(props.metaVertex.id) ||
+                  isSelectedHoverId(props.metaVertex.id)
                 }
               >
                 <Tooltip content={"Properties"} nowrap>
                   <Icon
                     icon={"mingcute:settings-5-line"}
-                    onclick={() => setShowDrawer(!showDrawer())}
+                    onclick={() => setShowPropertiesDrawer(!showPropertiesDrawer())}
                     height={22}
                     width={22}
                     class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
@@ -196,7 +211,7 @@ export function LayoutPart(props: {}) {
                       {
                         P: {
                           component: "Icon",
-                          props: {
+
                             style: { color: "red" },
                             onClick: () => {
                               const name = getComponent();
@@ -207,7 +222,7 @@ export function LayoutPart(props: {}) {
                             class:
                               "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
                             icon: "mage:trash",
-                          },
+
                         },
                       } as any
                     }
@@ -216,14 +231,14 @@ export function LayoutPart(props: {}) {
               </Show>
               <Show
                 when={
-                  isSelectedLayoutId(props.vertex.id) ||
-                  isSelectedHoverId(props.vertex.id) ||
-                  hiddenNodes().includes(props.vertex.id)
+                  isSelectedLayoutId(props.metaVertex.id) ||
+                  isSelectedHoverId(props.metaVertex.id) ||
+                  hiddenNodes().includes(props.metaVertex.id)
                 }
               >
                 <Tooltip
                   content={`${
-                    !hiddenNodes().includes(props.vertex.id) ? "Show" : "Show"
+                    !hiddenNodes().includes(props.metaVertex.id) ? "Show" : "Show"
                   }`}
                   nowrap
                 >
@@ -231,11 +246,11 @@ export function LayoutPart(props: {}) {
                     class="opacity:.5 opacity:1:hover"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleHidden(props.vertex.id);
+                      toggleHidden(props.metaVertex.id);
                     }}
                   >
                     <Show
-                      when={!hiddenNodes().includes(props.vertex.id)}
+                      when={!hiddenNodes().includes(props.metaVertex.id)}
                       fallback={
                         <Icon
                           height={18}
@@ -262,14 +277,14 @@ export function LayoutPart(props: {}) {
 
         <Show
           when={
-            !collapsedKeys().includes(props.vertex.id) && children().length > 0
+            !collapsedKeys().includes(props.metaVertex.id) && children().length > 0
           }
         >
           <ul class="pl:8 pt:3 pb:5">
             <For each={children()}>
               {(vertex) => (
                 <Show when={pageConfig.formData}>
-                  <TreeView vertex={vertex} />
+                  <TreeView metaVertex={vertex} />
                 </Show>
               )}
             </For>
@@ -291,15 +306,15 @@ export function LayoutPart(props: {}) {
 
   return (
     <>
-      <Show when={showDrawer()}>
-        <Drawer open={showDrawer} setIsOpen={setShowDrawer} width="400px">
-          <Properties setShowDrawer={setShowDrawer} />
+      <Show when={showPropertiesDrawer()}>
+        <Drawer open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer} width="400px">
+          <Properties setShowDrawer={setShowPropertiesDrawer} />
         </Drawer>
       </Show>
       <For each={rootVertexes()}>
         {(item) => (
           <Show when={pageConfig.formData}>
-            <TreeView vertex={item} />
+            <TreeView metaVertex={item} />
           </Show>
         )}
       </For>

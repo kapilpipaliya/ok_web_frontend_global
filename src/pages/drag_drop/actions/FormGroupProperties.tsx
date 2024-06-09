@@ -8,7 +8,6 @@ import {ClassDesignTab} from "~/components/css_properties/PropertiesTabs";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
-  vertex: Vertex;
   txnId: number;
   selectedLayout: Vertex;
 
@@ -27,7 +26,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
       {/*  </div>*/}
       {/*  <div class="dx-field-value flex gap:2 justify-content:space-between">*/}
       {/*    <GenericInputField*/}
-      {/*        data={props.vertex}*/}
+      {/*        data={props.selectedLayout}*/}
       {/*        meta={*/}
       {/*          {*/}
       {/*            P: {*/}
@@ -45,11 +44,11 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
         <tbody>
         <For each={props.metaAttributes}>
           {(metaVertex) => {
-            const id = `${props.vertex.id + metaVertex.P[IdAttr]}Label`;
+            const id = `${props.selectedLayout.id + metaVertex.P[IdAttr]}Label`;
             const component = createMemo(() =>
               getComponentForCollRow(
                 metaVertex,
-                props.vertex,
+                props.selectedLayout,
                 graph,
                 setGraph,
               ),
@@ -68,7 +67,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
               <DynamicComponent
                 component={component()}
                 meta={metaVertex}
-                data={props.vertex}
+                data={props.selectedLayout}
                 setValue={(data) => props.setValue(metaVertex, data)}
                 // disabled={props.d}
                 txnId={props.txnId}
@@ -82,7 +81,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                   <ClassDesignTab
                     component={component()}
                     meta={metaVertex}
-                    data={props.vertex}
+                    data={props.selectedLayout}
                     setValue={(data) => props.setValue(metaVertex, data)}
                     txnId={props.txnId}
                   />
@@ -111,10 +110,8 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                       {/*   {*/}
                       {/*     P: {*/}
                       {/*       [IdAttr]: "import",*/}
-                      {/*       props: {*/}
                       {/*         displayExpr: "$P.name",*/}
                       {/*         collection: `ids:'${props.selectedLayout.id}'->Rules`*/}
-                      {/*       },*/}
                       {/*     },*/}
                       {/*   } as unknown as Vertex*/}
                       {/* }*/}

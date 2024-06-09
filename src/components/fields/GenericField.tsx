@@ -1,10 +1,10 @@
-import {createMemo, type JSXElement, Match, Show, Switch, useContext} from "solid-js";
-import {Icon} from "@iconify-icon/solid";
-import {A} from "@solidjs/router";
-import {Dynamic} from "solid-js/web";
-import {GraphContext, GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
-import {getChildVertexes, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
-import type {ComponentProps} from "~/components/fields/ComponentType";
+import { createMemo, type JSXElement, Match, Show, Switch, useContext } from "solid-js";
+import { Icon } from "@iconify-icon/solid";
+import { A } from "@solidjs/router";
+import { Dynamic } from "solid-js/web";
+import { GraphContext, GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { getChildVertexes, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import type { ComponentProps } from "~/components/fields/ComponentType";
 import {
   Accordion,
   Avatar,
@@ -16,21 +16,22 @@ import {
   TabList,
   Tabs
 } from "~/components/solid_blocks";
-import {PageItemRender, PageRenderUtils,} from "~/components/page_item_render/PageItemRender";
+import { PageItemRender, PageRenderUtils, } from "~/components/page_item_render/PageItemRender";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import TreeView from "~/components/solid_blocks/TreeView";
-import {Collapsible} from "~/components/solid_blocks/Collapsible";
-import {SetStoreFunction, Store} from "solid-js/store";
-import {Repeater} from "~/components/page_item_render/Repeater";
-import {Table, TableBodyCell, TableHeadCell} from "~/components/Table";
+import { Collapsible } from "~/components/solid_blocks/Collapsible";
+import { SetStoreFunction, Store } from "solid-js/store";
+import { Repeater } from "~/components/page_item_render/Repeater";
+import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import Heading from "~/components/solid_blocks/Heading";
 import StarRating from "~/components/solid_blocks/Rating";
-import {PageView} from "~/components/page_item_render/PageView";
-import {PageRenderVertexContext, RepeaterVertexContext} from "~/components/page_item_render/Context";
-import {getLastItem} from "~/components/page_item_render/getLastItem";
-import {APP_BASE_URL} from "~/lib/constants";
-import {getViewValue} from "~/lib/graph/get/sync/getViewValue";
-import {FormWrapper} from "~/components/page_item_render/FormWrapper";
+import { PageView } from "~/components/page_item_render/PageView";
+import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_item_render/Context";
+import { getLastItem } from "~/components/page_item_render/getLastItem";
+import { APP_BASE_URL } from "~/lib/constants";
+import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
+import { FormWrapper } from "~/components/page_item_render/FormWrapper";
+import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -41,23 +42,23 @@ function getAttrs(meta: Vertex) {
 }
 
 export function getText(
- graph: Store<GraphInterface>,
- setGraph: SetStoreFunction<GraphInterface>,
- projection: string,
- repeaterContext: Vertex[]
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  repeaterContext: Vertex[]
 ) {
   return getSelectionOptions(graph, setGraph, repeaterContext, projection)
-   .vertexes as string;
+    .vertexes as string;
 }
 
 export function getUrl(
- graph: Store<GraphInterface>,
- setGraph: SetStoreFunction<GraphInterface>,
- projection: string,
- repeaterContext: Vertex[]
+  graph: Store<GraphInterface>,
+  setGraph: SetStoreFunction<GraphInterface>,
+  projection: string,
+  repeaterContext: Vertex[]
 ) {
   const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
-   .vertexes as string | undefined;
+    .vertexes as string | undefined;
   if (typeof url === "string" && url.startsWith("/")) {
     // url = (showNav() ? '/nav' : '') + url;
   }
@@ -71,6 +72,7 @@ export function GenericField(
     txnId?: number;
     children?: JSXElement;
     [key: string]: any;
+    applyDefaults?: boolean;
   },
 ) {
 
@@ -129,6 +131,7 @@ export function GenericField(
             <Match when={PageRenderUtils.getDataVertex(graph, props.meta)}>
               {(vertex) => (
                 <A
+                  {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
                   {...props.meta.P}
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
@@ -150,6 +153,7 @@ export function GenericField(
             </Match>
             <Match when={props.meta.P.href}>
               <A
+                {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
                 {...props.meta.P}
                 href={getUrl(
                   graph,
@@ -189,6 +193,7 @@ export function GenericField(
         <Match when={component() === "Image"}>
           <img
             loading="lazy"
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
             src={getText(
               graph,
@@ -201,7 +206,10 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Tabs"}>
-          <Tabs {...props.meta.P}>
+          <Tabs
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          >
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
         </Match>
@@ -214,15 +222,18 @@ export function GenericField(
         <Match when={component() === "Icon"}>
           <Icon
             icon={props.meta.P.icon}
-            class={props.meta.P?.props["class"]}
+            class={props.meta.P["class"]}
             width={props.meta.P.width || "24"}
             height={props.meta.P.height || "24"}
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.text}>
           <Dynamic
             component={props.meta.P.as || "div"}
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
             {...getAttrs(props.meta)}
             class={props.meta.P["class"]}
           >
@@ -235,7 +246,10 @@ export function GenericField(
           </Dynamic>
         </Match>
         <Match when={component() === "Button"}>
-          <CustomButton {...props.meta.P}>
+          <CustomButton
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </CustomButton>
         </Match>
@@ -245,6 +259,7 @@ export function GenericField(
               getChildVertexes(graph, ["Attr"], [props.meta]).vertexes
                 ?.length || []
             }
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
           >
             <PageItemRender metaVertex={props.meta} />
@@ -266,23 +281,35 @@ export function GenericField(
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
-          <Collapsible {...props.meta.P}>
+          <Collapsible
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          >
             <PageItemRender metaVertex={props.meta} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
-          <Avatar {...props.meta.P}>
+          <Avatar
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
         </Match>
         <Match when={component() === "Select"}>
-          <Select {...props.props.meta.P}>
+          <Select
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.props.meta.P}
+          >
             {props.props.data?.P[props.props.meta.P[IdAttr]] ??
               props.props.meta.P.children}
           </Select>
         </Match>
         <Match when={component() === "LoadIndicator"}>
-          <Spinner {...props.meta?.P}>{props.meta.P.children}</Spinner>
+          <Spinner
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta?.P}
+          >{props.meta.P.children}</Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
           <TreeView
@@ -296,7 +323,10 @@ export function GenericField(
           <PageItemRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Accordion"}>
-          <Accordion {...props.meta.P}>
+          <Accordion
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
         </Match>
@@ -304,25 +334,32 @@ export function GenericField(
           <Breadcrumbs
             separator={props.meta.P.separator ?? "›"}
             aria-label="breadcrumb"
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
           >
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
-          <Progress {...props.meta.P} />
+          <Progress
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
+          />
         </Match>
         <Match when={component() === "Form"}>
           <FormWrapper meta={props.meta} />
         </Match>
         <Match when={component() === "Divider"}>
           <hr
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
             class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P["class"]}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
             etc={props.meta.P["class"]}
             heading={propWithDefault("heading")}
             divider={propWithDefault("divider", true)}
@@ -331,6 +368,8 @@ export function GenericField(
         </Match>
         <Match when={component() === "Rating"}>
           <StarRating
+            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...props.meta.P}
             etc={props.meta.P["class"]}
             heading={propWithDefault("heading", "Rating")}
           />

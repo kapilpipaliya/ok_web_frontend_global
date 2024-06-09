@@ -42,7 +42,7 @@ export interface GraphInterface {
   navigationData?: { [key: string]: any }[];
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
-  componentIdMap?: { [key: string]: string };
+  componentIdMap: { [key: string]: string };
 }
 
 export const GraphContext = createContext<

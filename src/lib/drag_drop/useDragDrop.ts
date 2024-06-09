@@ -12,7 +12,6 @@ import {
   DragOverTargetIdContext,
   HoverIdContext,
   IndicatorPositionContext,
-  PropertiesVertexIdContext,
   SelectedCollContext,
   SelectedComponentContext,
   SelectedIdContext,
@@ -56,7 +55,6 @@ export function useDragDrop(
     IndicatorPositionContext,
   );
   const { showErrorToast, showSuccessToast } = useToast();
-  const [propertiesVertexId, _] = useContext(PropertiesVertexIdContext);
 
   const children = createMemo(() =>
     getChildrenAttrs(graph, setGraph, layoutVertex),
@@ -262,35 +260,6 @@ export function useDragDrop(
         setGraph,
       );
       setSelectedComponent({ vertexId: componentVertex?.id || -1 });
-
-      if (
-        selectedId() !== -1 &&
-        selectedComponent() &&
-        selectedComponent().vertexId !== -1
-      ) {
-        const componentProps = getCompProps(
-          graph,
-          graph.vertexes[selectedComponent().vertexId],
-        );
-        const layoutPropRows = getRowProps(
-          graph,
-          setGraph,
-          graph.vertexes[selectedId()],
-        );
-        const layoutPropRow = Object.assign(componentProps, layoutPropRows, layoutVertex.P);
-        // set existing layout props
-        // setGraph(
-        //   "vertexes",
-        //   propertiesVertexId(),
-        //   reconcile({ P: layoutPropRow } as Vertex),
-        // );
-      } else {
-        // setGraph(
-        //   "vertexes",
-        //   propertiesVertexId(),
-        //   reconcile({ P: {...layoutVertex.P} } as Vertex),
-        // );
-      }
     });
   };
 

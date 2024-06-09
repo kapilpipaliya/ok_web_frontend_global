@@ -417,12 +417,12 @@ function DynamicFormBase(props: DynamicFormProps) {
           {
             P: {
               component: "Button",
-              props: {
+
                 variant: "outlined",
                 class: "border-color:#FF0000 color:#FF0000 danger",
                 children: "Cancel",
                 onClick: () => onCancel(),
-              },
+            
             },
           } as any
         }
@@ -436,11 +436,11 @@ function DynamicFormBase(props: DynamicFormProps) {
               {
                 P: {
                   component: "Button",
-                  props: {
+           
                     type: "primary",
                     children: "Submit",
                     onClick: () => onSubmit(),
-                  },
+                  
                 },
               } as any
             }
@@ -590,7 +590,7 @@ function DynamicFormBase(props: DynamicFormProps) {
             {
               P: {
                 component: "Button",
-                props: {
+              
                   children: "Import",
                   variant: "outlined",
                   style: { display: "flex" },
@@ -606,7 +606,7 @@ function DynamicFormBase(props: DynamicFormProps) {
                   onClick: () => {
                     setPopup(true);
                   },
-                },
+                
               },
             } as any
           }
@@ -616,7 +616,7 @@ function DynamicFormBase(props: DynamicFormProps) {
             {
               P: {
                 component: "Button",
-                props: {
+              
                   children: "Export",
                   onClick: () => {
                     setPopup(true);
@@ -632,7 +632,7 @@ function DynamicFormBase(props: DynamicFormProps) {
                       />
                     ),
                   class: " b:blue",
-                },
+                
               },
             } as any
           }

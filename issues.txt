@@ -21,6 +21,7 @@ when click on setting, it should not reload the page.
 Properties drawer when page height is small, it is not visible.
 in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible.
 add default props in each component itself
+when selecting dropdown in css properties the drawer close.
 
 
 (when Submit do not redirect to parent screen?)

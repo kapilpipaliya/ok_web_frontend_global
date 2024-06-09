@@ -18,12 +18,14 @@ import { FormContext, SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid_blocks/Label";
 import MultiSelectField from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
+import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 
 export function GenericInputField(
   props: ComponentProps & {
     component: string;
     title: string;
     txnId: number;
+    applyDefaults?: boolean;
   },
 ) {
   const { Ws } = useContext(WsContext);
@@ -44,20 +46,21 @@ export function GenericInputField(
         <Switch>
           <Match when={component() === "CheckBox"}>
             <Checkbox
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.checked,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.checked,
+                    Ws,
+                    false,
+                  );
               }}
               align="left"
               checked={
@@ -71,27 +74,29 @@ export function GenericInputField(
           <Match when={component() === "ColorBox"}>
             <input
               type="color"
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               value={props.data?.P[props.meta.P[IdAttr]]}
               onInput={(e) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
             />
           </Match>
           <Match when={component() === "DropDownBox"}>Dropdown</Match>
           <Match when={component() === "FileUploader"}>
             <FileUploader
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               image={props.meta?.P.image}
             />
@@ -106,16 +111,17 @@ export function GenericInputField(
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               isNumber
               value={props.data?.P[props.meta.P[IdAttr]]}
@@ -123,21 +129,22 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.checked,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.checked,
+                    Ws,
+                    false,
+                  );
               }}
               // name={props.meta?.P.label ?? "radio"}
               align="left"
@@ -148,38 +155,40 @@ export function GenericInputField(
           <Match when={component() === "ProgressBar"}>
             <Progress
               style={{ ...props.meta?.P }}
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
             <MultiSelectField
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               onRemove={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
               onSelect={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
               options={props.meta?.P.options ?? []}
               selectedValues={() => [props.data?.P[props.meta.P[IdAttr]]]}
@@ -199,20 +208,21 @@ export function GenericInputField(
           <Match when={component() === "TextArea"}>
             <TextField
               class="global-style"
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
               placeholder={props.meta?.P.label ?? props.title}
               multiline
@@ -233,20 +243,21 @@ export function GenericInputField(
           >
             <TextField
               class="global-style"
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
               placeholder={props.meta?.P.label ?? props.title}
               value={props.data?.P[props.meta.P[IdAttr]]}
@@ -262,16 +273,16 @@ export function GenericInputField(
                     props.setValue
                       ? props.setValue
                       : (value) =>
-                          setValueGlobal(
-                            graph,
-                            setGraph,
-                            props.txnId!,
-                            props.meta,
-                            props.data!,
-                            value,
-                            Ws,
-                            false,
-                          )
+                        setValueGlobal(
+                          graph,
+                          setGraph,
+                          props.txnId!,
+                          props.meta,
+                          props.data!,
+                          value,
+                          Ws,
+                          false,
+                        )
                   }
                 />
               }
@@ -280,27 +291,31 @@ export function GenericInputField(
           <Match when={component() === "TextBox"}>
             <TextField
               class="global-style"
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
                   : setValueGlobal(
-                      graph,
-                      setGraph,
-                      props.txnId!,
-                      props.meta,
-                      props.data!,
-                      e.target.value,
-                      Ws,
-                      false,
-                    );
+                    graph,
+                    setGraph,
+                    props.txnId!,
+                    props.meta,
+                    props.data!,
+                    e.target.value,
+                    Ws,
+                    false,
+                  );
               }}
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
           <Match when={component() === "Label"}>
-            <Label {...props.meta?.P}>
+            <Label
+              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...props.meta?.P}
+            >
               <PageItemRender metaVertex={props.meta} />
             </Label>
           </Match>

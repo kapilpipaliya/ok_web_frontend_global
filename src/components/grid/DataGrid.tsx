@@ -114,7 +114,7 @@ const DataGrid = (props: DataGridProps) => {
                 P: {
                   component: "Button",
                   [IdAttr]: "meta",
-                  props: {
+           
                     onClick: () => navigate("new"),
                     variant: "soft",
                     style: { padding: "7px 10px", "margin-bottom": "10px" },
@@ -128,7 +128,7 @@ const DataGrid = (props: DataGridProps) => {
                         />
                       ),
                     children: "Add New",
-                  },
+                 
                 },
               } as unknown as Vertex
             }
