@@ -307,7 +307,7 @@ export function LayoutPart(props: {}) {
   return (
     <>
       <Show when={showPropertiesDrawer()}>
-        <Drawer open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer} width="400px">
+        <Drawer open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer}>
           <Properties setShowDrawer={setShowPropertiesDrawer} />
         </Drawer>
       </Show>

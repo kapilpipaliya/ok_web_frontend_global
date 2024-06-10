@@ -7,6 +7,7 @@ import {
   Show,
   For,
   type JSXElement,
+  createMemo,
 } from "solid-js";
 import { TextField } from "~/components/solid_blocks";
 import { CssEditorContext, sizeTypes } from "../context";
@@ -31,6 +32,7 @@ export const TextFieldWithSelect = (props: {
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
   const [startValue, setStartValue] = createSignal(cssState[props.name]);
+  const initialValue = cssState[props.name] ?? "";
 
   createEffect((v) => {
     setOption(determineSelectedOption());
@@ -44,6 +46,10 @@ export const TextFieldWithSelect = (props: {
 
   const handleChange = (event: any) => {
     const value = event.target.value;
+    if(value === "") {
+      setCssState(props.name, "");
+      return
+    }
     const numericValue = Number.parseFloat(value);
     if (props.isAddToClass) {
       setCssState(props.name, `${numericValue}${selectedOption() ?? ""}`);
@@ -59,10 +65,16 @@ export const TextFieldWithSelect = (props: {
   };
 
   const selectOption = (option: string) => {
+    if (option === "") {
+      setIsDropdownOpen(false);
+      setOption(option);
+      setCssState(props.name, "");
+      return;
+    }
     setIsDropdownOpen(false);
     setOption(option);
     const value = getValueWithoutUnits(cssState[props.name]);
-    setCssState(props.name, `${value}${selectedOption()}`);
+    setCssState(props.name, `${value}${option}`);
   };
 
   const getValueWithoutUnits = (valueWithUnits: string) => {
@@ -139,6 +151,7 @@ export const TextFieldWithSelect = (props: {
           when={props.showInside}
           fallback={
             <TextField
+              step="any"
               label={props.label}
               type={props.inputType || "text"}
               placeholder={`${
@@ -152,6 +165,7 @@ export const TextFieldWithSelect = (props: {
           }
         >
           <input
+            step="any"
             type={props.inputType || "text"}
             placeholder={`${
               props.inputType === "number" ? "0" : props.placeholder
@@ -202,6 +216,15 @@ export const TextFieldWithSelect = (props: {
       </Show>
     </div>
   );
+
+  const isDefaultValue = createMemo(() => initialValue !== cssState[props.name]);
+
+  const resetValue = () => {
+    setCssState(props.name, "");
+    setStartValue("");
+    setOption(determineSelectedOption());
+  };
+  
   return (
     <Container>
       <Show
@@ -209,14 +232,16 @@ export const TextFieldWithSelect = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <CenterDiv>
-              <ContainerLabel title={props.label} />
+              <ContainerLabel onIconClick={resetValue}
+                showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </CenterDiv>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel title={props.label} />
+          <ContainerLabel onIconClick={resetValue}
+            showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

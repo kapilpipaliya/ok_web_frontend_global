@@ -16,7 +16,7 @@ import {
   useContext,
 } from "solid-js";
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
-import { groupBy } from "~/lib/utils";
+import { groupBy, isPageDesignerPath } from "~/lib/utils";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
 import { GenericField } from "~/components/fields/GenericField";
@@ -490,7 +490,7 @@ function DynamicFormBase(props: DynamicFormProps) {
                           </Show>
 
                           <div class="b:1 b:rgb(214,214,216) w:100% r:10|10|10|10 bg:rgb(237,237,237,.75)">
-                            <div class={`p:5|15|15|15 w:full grid  grid-cols:1@<md gap:0|10 grid-cols:auto ${location.pathname.includes("/admin/Form/") || location.pathname.includes("/admin/Page/") ? "" : "grid-cols:2"}`}>
+                            <div class={`p:5|15|15|15 w:full grid  grid-cols:1@<md gap:0|10 grid-cols:auto ${isPageDesignerPath(location.pathname) ? "" : "grid-cols:2"}`}>
                               <FormGroup
                                 graph={graph}
                                 setGraph={setGraph}

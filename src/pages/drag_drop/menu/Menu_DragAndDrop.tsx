@@ -95,10 +95,10 @@ const Column = (props: { datas: any; toggleLeftOpen: Accessor<boolean> }) => {
             <ComponentPart />
           </Match>
           <Match when={selectedTab() === "pages"}>
-            <PagesPart />
+            <PagesPart coll="Page" />
           </Match>
-          <Match when={selectedTab() === "collection"}>
-            <CollectionPart />
+          <Match when={selectedTab() === "templates"}>
+            <PagesPart coll="Template"/>
           </Match>
         </Switch>
       </div>

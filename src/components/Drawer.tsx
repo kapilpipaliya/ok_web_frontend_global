@@ -5,31 +5,42 @@ function Drawer(props: {
     onClick: () => void;
     isOpen: boolean;
   }) => JSX.Element;
-  width: string;
   children: any;
+  width?: string;
   open?: any;
   setIsOpen?: any;
 }) {
   const [isOpen, setIsOpen] = props.open
     ? [props.open, props.setIsOpen]
     : createSignal(false);
+  const [drawerWidth, setDrawerWidth] = createSignal(props.width || "450px");
+  const [mainDivHover, setMainDivHover] = createSignal(false);
+
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
   };
-  const handleClickOutside = (event: MouseEvent) => {
-    const drawerElement = document.getElementById("drawer");
-    if (drawerElement && !drawerElement.contains(event.target as Node)) {
-      setIsOpen(false);
-    }
+
+
+  let initialX: number;
+  let initialWidth: number;
+
+  const handleMouseDown = (event: MouseEvent) => {
+    initialX = event.clientX;
+    initialWidth = parseInt(drawerWidth(), 10);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
   };
 
-  onMount(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-  });
+  const handleMouseMove = (event: MouseEvent) => {
+    const newWidth = initialWidth - (event.clientX - initialX);
+    setDrawerWidth(`${newWidth}px`);
+  };
 
-  onCleanup(() => {
-    document.removeEventListener("mousedown", handleClickOutside);
-  });
+  const handleMouseUp = () => {
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
+  };
+
   return (
     <>
       <Show when={props.customButton}>
@@ -39,12 +50,11 @@ function Drawer(props: {
       </Show>
       <div
         id="drawer"
-
         style={`
           position: fixed;
           top: 0;
-          right: ${isOpen() ? "0" : `-${props.width || "350px"}`};
-          width: ${props.width || "350px"};
+          right: ${isOpen() ? "0" : `-${drawerWidth()}`};
+          width: ${drawerWidth()};
           height: 100%;
           color: black;
           background-color: white;
@@ -52,10 +62,36 @@ function Drawer(props: {
           border-radius: 15px 0px 0px 15px;
           z-index: 20;
           transition: right 0.5s;
+          border-left: ${mainDivHover()?"2px solid #37c":"none"};
         `}
       >
-        <div style="padding: 20px;">{props.children}</div>
+        <div style="padding: 20px;scrollbar-width: thin;" class="overflow:auto  h:100%">{props.children}</div>
+        <div
+          onMouseEnter={() => setMainDivHover(true)}
+          onMouseLeave={() => setMainDivHover(false)}
+          style={`
+            position: absolute;
+            top: 0;
+            left: -5px;
+            width: 10px;
+            height: 100%;
+            cursor: ew-resize;
+          `}
+          onMouseDown={handleMouseDown}
+        />
       </div>
+      <div
+        style={`
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
+          display: ${isOpen() ? "block" : "none"};
+        `}
+        onClick={toggleDrawer}
+      />
     </>
   );
 }

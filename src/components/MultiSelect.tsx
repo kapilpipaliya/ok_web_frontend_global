@@ -9,6 +9,7 @@ import {
 } from "solid-js";
 import { useToast } from "./Toast";
 import Dismiss from "solid-dismiss";
+import { isServer } from "solid-js/web";
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 const MultiSelectField = (props: {
   selectedValues: () => any;
@@ -38,6 +39,7 @@ const MultiSelectField = (props: {
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
   createEffect(() => {
+    if(isServer) return;
     if (dropdownVisible()) {
       const mainContent = document.getElementById("main-content");
       const bodyContent = document.getElementById("body");
@@ -183,6 +185,7 @@ const MultiSelectField = (props: {
   });
 
   onCleanup(() => {
+    if(isServer) return;
     const mainContent = document.getElementById("main-content");
     if (mainContent) {
       mainContent.style.overflow = ""; // Ensure scrolling is enabled

@@ -47,6 +47,7 @@ export const ContainerLabel = (props: {
     <Show when={props.showIcon ?? false}>
       &nbsp;
       <Icon
+        style={{'color':'purple'}}
         onClick={props.onIconClick}
         icon={"mdi:close"}
         class={"cursor:pointer"}

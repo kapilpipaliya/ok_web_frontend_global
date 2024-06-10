@@ -1,5 +1,5 @@
 import { useParams } from "@solidjs/router";
-import {Show, createSignal, onMount, useContext, createEffect, on} from "solid-js";
+import { Show, createSignal, onMount, useContext, createEffect, on } from "solid-js";
 import { getDataMGCall } from "~/cypher/get/traverse";
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
@@ -13,7 +13,7 @@ import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 export default function PageShareView() {
   const params = useParams();
   const label = params["entity"];
-  const entityId = params["entityId"];
+  const entityname = params["entityname"];
   const formId = params["formId"];
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
@@ -22,6 +22,7 @@ export default function PageShareView() {
   const [metaVertex, setMetaVertex] = createSignal<Vertex>();
   const [mounted, setMounted] = createSignal(false);
 
+
   // load form meta data
   async function loadFormDesignerMetaData() {
     const form = FormMetaData.Form;
@@ -29,23 +30,26 @@ export default function PageShareView() {
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(form.attributes);
 
-    const result = await getDataMGCall({
-      expression: `id:'${entityId}'`,
+    const data = await getDataMGCall({
+      expression: `g:'${label}[${entityname}]'`,
       incoming,
       outgoing,
     });
 
     // @ts-ignore
-    if (result.error) {
+    if (data.error) {
       // @ts-ignore
-      return { error: result.error };
+      return { error: data.error };
     }
     setGraphData(
       graph,
       setGraph,
-      result.graph,
+      data.graph,
     );
-    setMetaVertex(graph.vertexes[entityId]);
+
+    const metaVertex = graph.vertexes[data.result[0].id];
+    setMetaVertex(metaVertex);
+
   }
   onMount(() => {
     setMounted(true);

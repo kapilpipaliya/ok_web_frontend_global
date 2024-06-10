@@ -229,6 +229,7 @@ export function GenericInputField(
               value={props.data?.P[props.meta.P[IdAttr]]}
             />
           </Match>
+          {/* Expression Builder */}
           <Match
             when={
               component() === "TextBox" &&
@@ -290,7 +291,7 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "TextBox"}>
             <TextField
-              class="global-style"
+              class={`global-style`}
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
               {...props.meta?.P}
               placeholder={props.meta?.P.label ?? props.title}

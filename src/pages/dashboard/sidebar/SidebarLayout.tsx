@@ -96,6 +96,8 @@ function Sidebar() {
     "/admin/CollCategory": "ic:outline-collections-bookmark",
     "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
+    "/admin/Template": "eos-icons:templates-outlined",
+    "/admin/ThankYou": "icon-park-outline:doc-success",
   };
 
   const toggleSectionCollapse = () => {

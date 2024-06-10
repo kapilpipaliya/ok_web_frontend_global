@@ -1,0 +1,1 @@
+export const PageDesignerLabels = ["Page", "Form", "ThankYou", "Template"]

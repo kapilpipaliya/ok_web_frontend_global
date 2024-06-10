@@ -19,7 +19,7 @@ import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 
-export function PagesPart() {
+export function PagesPart(props: {coll: string}) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const { showErrorToast } = useToast();
@@ -36,7 +36,7 @@ export function PagesPart() {
   }> {
     try {
       const data = await getTreeDataMGCall({
-        collection: paginationExpression({ coll: "Page" }),
+        collection: paginationExpression({ coll: props.coll }),
       });
       return { graph: data.graph, data: data };
     } catch (error: any) {
@@ -59,7 +59,7 @@ export function PagesPart() {
           setGraphData(graph, setGraph, result.graph);
 
           const data2 = getTreeData(graph, setGraph, {
-            collection: paginationExpression({ coll: "Page" }),
+            collection: paginationExpression({ coll: props.coll }),
           });
           originalData = data2;
           setFilteredData(data2);
@@ -143,7 +143,7 @@ export function PagesPart() {
                 style={{ color: "#9e9ea7" }}
               />
               <input
-                placeholder="Search Page..."
+                placeholder={`Search ${props.coll}...`}
                 type="search"
                 class="inputSearch f:14"
                 value={searchQuery()}
@@ -165,7 +165,7 @@ export function PagesPart() {
               each={filteredData()}
               fallback={
                 <div class="p:3 m:20px|0px font-weight:bold text-align:center">
-                  No Page Found!
+                  No {props.coll} Found!
                 </div>
               }
             >

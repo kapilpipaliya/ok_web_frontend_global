@@ -1,4 +1,6 @@
-import { For, createSignal } from "solid-js";
+import { Match, createMemo } from "solid-js";
+import { For, Switch, createSignal } from "solid-js";
+import MultiSelectField from "~/components/MultiSelect";
 
 export function PageSetting() {
   const [selected, setSelected] = createSignal("thank-you-page");
@@ -7,6 +9,8 @@ export function PageSetting() {
     {id: "thank-you-page", label: "Thank You Page", icon: "✅"},
   ];
 
+  const selectedSection=() => createMemo(() => menuItems.find((item: any) => item.id === selected()));
+  
   return (
     <div style={{display: "flex"}} class="mt:1rem w:98vw flex:column@<sm">
       <div
@@ -41,13 +45,35 @@ export function PageSetting() {
         </For>
       </div>
       <div style={{flex: 1, padding: "20px", "background-color": "#f8f9fa"}}>
-        <h2 class="font-weight:700 font:18 ">
-          {menuItems.find((item: any) => item.id === selected()).icon}&nbsp;
-          {menuItems.find((item: any) => item.id === selected()).label}
-        </h2>
-        <p class="font:14">Show Page After Submission Form</p>
-        {/* Add the content for the selected menu item here */}
+        <Switch>
+          <Match when={selected() === "thank-you-page"}>
+            <ThankYouPage selectedSection={selectedSection()}/>
+          </Match>
+        </Switch>
       </div>
     </div>
   );
+}
+
+const ThankYouPage = (selectedSection: any) => {
+  return <>
+    <h2 class="font-weight:700 font:18 ">
+      {selectedSection.icon}&nbsp;
+      {selectedSection.label}
+    </h2>
+    <p class="font:14">Show Page After Submission Form</p>
+    <MultiSelectField
+      options={['thank-you-page', 'thank-you-page-2']}
+      selectedValues={()=>["thank-you-page"]}
+      onSelect={(e)=>{
+        console.log(e)
+      }}
+      placeholder="Select thank you page"
+      selectionLimit={1}
+      onRemove={(e)=>{
+        
+        console.log(e)
+      }}
+    />
+  </>;
 }

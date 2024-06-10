@@ -50,7 +50,7 @@ const DataGrid = (props: DataGridProps) => {
   const { events } = useContext(PageContext);
   const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal(null);
-  const [tableStore, setTableStore] = createStore({
+  const [tableStore, setTableStore]: any = createStore({
     data: [],
     tableColumns: [],
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
@@ -88,7 +88,7 @@ const DataGrid = (props: DataGridProps) => {
     if (value && value.length > 0) {
       setIsSearching(true);
 
-      const filtered = tableStore.data.filter(
+      const filtered: any = tableStore.data.filter(
         (item: Vertex) =>
           item.P.name &&
           item.P.name.toLowerCase().includes(value.toLowerCase()),
@@ -240,7 +240,7 @@ const DataGrid = (props: DataGridProps) => {
     const resultData = Object.values(result.graph.vertexes as Vertex[]).filter(
       (v) => v.L[0] === coll,
     );
-    const nodes = tableStore.data
+    const nodes: any = tableStore.data
       ? [...tableStore.data, ...resultData]
       : resultData;
     setTableStore({ data: nodes, tableColumns });

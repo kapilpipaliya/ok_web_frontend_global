@@ -524,7 +524,7 @@ export function Properties(props: { setShowDrawer?: any }) {
     );
   };
   return (
-    <div class="ml:5 mr:5">
+    <div class="ml:5 mr:5 ">
       <div
         style={{
           display: "flex",
@@ -549,10 +549,8 @@ export function Properties(props: { setShowDrawer?: any }) {
         />
       </div>
 
-      <div class="overflow:auto h:98vh scrollbar-width:thin">
         <hr class={"color:lightgrey m:.4rem|0"} />
         <PropertiesPart />
-      </div>
     </div>
   );
 }

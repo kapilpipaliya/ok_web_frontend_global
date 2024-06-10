@@ -370,6 +370,7 @@ export async function getDataMGCall(
   }
 
   return {
+    result: mainResult,
     graph: {
       vertexes: context.nodes,
       edges: context.relationships,

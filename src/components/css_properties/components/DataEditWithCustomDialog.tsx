@@ -11,6 +11,7 @@ import {
   onCleanup,
   Switch,
   Match,
+  createMemo,
 } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { CssEditorContext } from "../context";
@@ -120,6 +121,8 @@ export const DataEditWithCustomDialog = (props: {
     }
     return [];
   };
+  const isDefaultValue = createMemo(() => cssState[props.name] !== "");
+
   const getValueOfInput = (name: string) => changedData()[name];
   const deleteOption = (index: number) => {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
@@ -223,23 +226,25 @@ export const DataEditWithCustomDialog = (props: {
             }}
           </For>
         </div>
+        <div
+          style={`
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 10;
+          display: ${props.openMenu() ? "block" : "none"};
+        `}
+          onClick={closePopup}
+        />
       </Show>
     );
   };
-  const handleClickOutside = (event: any) => {
-    if (!event.target.closest(".popup")) {
-      closePopup();
-    }
+  const resetValues = () => {
+    setCssState(props.name, "");
+    setChangedData({});
   };
-
-  // Attach event listener to the document
-  createEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    onCleanup(() =>
-      document.removeEventListener("mousedown", handleClickOutside),
-    );
-  });
-
   const Component = (p: { option: any; i: any }) => {
     return (
       <Switch>
@@ -329,7 +334,7 @@ export const DataEditWithCustomDialog = (props: {
           "margin-bottom": "6px",
         }}
       >
-        <ContainerLabel title={props.label} />
+        <ContainerLabel title={props.label} onIconClick={resetValues} showIcon={isDefaultValue()} />
         <Icon
           class={"cursor:pointer"}
           onClick={addOption}
@@ -339,6 +344,7 @@ export const DataEditWithCustomDialog = (props: {
       <For each={getOptions()}>
         {(option, i) => (
           <div
+          id={`option${i()}`}
             style={{
               display: "flex",
               "align-items": "center",

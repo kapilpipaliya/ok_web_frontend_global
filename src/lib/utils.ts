@@ -4,6 +4,7 @@ import type { Vertex } from "~/lib/graph/graph";
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 export function getValueFromVertexOrKey(
   obj: { [key: string]: Vertex } | any,
   key: string,
@@ -11,7 +12,17 @@ export function getValueFromVertexOrKey(
   return obj?.[key];
   // return obj[key]?.id ? obj[key].P.value : obj[key];
 }
+export const isPageDesignerPath = (path: string) => {
+  const lowerPath = path.toLowerCase();
+  const pageDesignerPath = [
+    "/admin/page/",
+    "/admin/form/",
+    "/admin/template/",
+    "/admin/thankyou/"
+  ];
 
+  return pageDesignerPath.some(Path => lowerPath.includes(Path));
+};
 export function isObject(i: any) {
   if (i && !Array.isArray(i)) {
     return "object" === typeof i;

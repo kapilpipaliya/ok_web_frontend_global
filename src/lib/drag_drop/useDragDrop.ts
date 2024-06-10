@@ -29,6 +29,7 @@ import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
 import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
+import { PageDesignerLabels } from "./constant";
 
 export function useDragDrop(
   graph: Store<GraphInterface>,
@@ -101,6 +102,20 @@ export function useDragDrop(
       activeItem = layoutVertex.id;
     }
 
+    const fromVertex = draggedVertex()[0];
+    const toVertexId = activeItem;
+    if (
+      !validateDragOver(
+        graph,
+        setGraph,
+        fromVertex,
+        toVertexId,
+        formData,
+        position,
+      )
+    ) {
+      return;
+    }
     setIndicatorPosition({ activeItem, position });
     setDragOverTargetId(layoutVertex.id);
   };
@@ -114,6 +129,12 @@ export function useDragDrop(
     e.stopPropagation();
     handleDragOverAndSetDropPosition(e);
 
+    const position = indicatorPosition().position;
+    if (!position) {
+      // Don't allow drag and drop
+      return;
+    }
+
     for (const vertex of draggedVertex()) {
       const fromVertex = vertex;
       const toVertexId = indicatorPosition().activeItem!;
@@ -122,12 +143,6 @@ export function useDragDrop(
         return;
       }
 
-      const position = indicatorPosition().position;
-      if (!position) {
-        // Don't allow drag and drop
-        console.error("Position not found when dropping");
-        return;
-      }
       if (
         !validateDragOver(
           graph,
@@ -138,11 +153,11 @@ export function useDragDrop(
           position,
         )
       ) {
+        // Don't allow drag and drop
         return;
       }
     }
 
-    console.log("drag over complete");
     // This is necessary to allow the drop action to proceed
     e.preventDefault();
   };
@@ -168,7 +183,7 @@ export function useDragDrop(
         return;
       }
 
-      if (fromVertex.L[0] === "Page") {
+      if (PageDesignerLabels.includes(fromVertex.L[0])) {
         await loadPageData(graph, setGraph, fromVertex, showErrorToast);
       }
 
@@ -177,6 +192,7 @@ export function useDragDrop(
         showErrorToast("Position not found when dropping");
         return;
       }
+      // NOTE: Multiple selected dragged vertexes may not drop before or after as expected. test it.
       await handleDropAtPosition(
         graph,
         setGraph,

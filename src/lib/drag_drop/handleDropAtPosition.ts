@@ -6,6 +6,7 @@ import { handleComponentDrag } from "~/lib/drag_drop/handleComponentDrag";
 import { handlePageDrag } from "~/lib/drag_drop/handlePageDrag";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 import { handleParentChange } from "~/lib/drag_drop/handleParentChange";
+import { PageDesignerLabels } from "./constant";
 
 export async function handleDropAtPosition(
   graph: Store<GraphInterface>,
@@ -45,7 +46,7 @@ export async function handleDropAtPosition(
       formData,
       position,
     );
-  } else if (fromVertex.L[0] === "Page") {
+  } else if (PageDesignerLabels.includes(fromVertex.L[0])) {
     await handlePageDrag(
       graph,
       setGraph,

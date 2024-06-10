@@ -24,6 +24,7 @@
     "@orbit/records": "^0.17.0",
     "@solid-aria/primitives": "^0.4.0",
     "@solid-bricks/barcode": "^1.0.1",
+    "@solid-primitives/scheduled": "^1.4.3",
     "@solidjs/meta": "^0.29.4",
     "@solidjs/router": "^0.13.5",
     "@solidjs/start": "^1.0.1",

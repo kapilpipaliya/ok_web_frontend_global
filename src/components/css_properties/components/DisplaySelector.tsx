@@ -6,6 +6,7 @@ import {
   onCleanup,
   Show,
   For,
+  createMemo,
 } from "solid-js";
 import { CssEditorContext } from "../context";
 import { Container, ContainerLabel } from "./CssUtils";
@@ -52,6 +53,9 @@ export const DisplaySelector = (props: {
     );
   });
 
+  const isDefaultValue = createMemo(() => selected() !== (props.options[0].value || props.options[0]));
+
+
   return (
     <Container>
       <Show
@@ -59,14 +63,14 @@ export const DisplaySelector = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel title={props.label} />
+              <ContainerLabel onIconClick={() => setCssState(props.name, (props.options[0].value || props.options[0]))} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel title={props.label} />
+          <ContainerLabel onIconClick={() => setCssState(props.name, (props.options[0].value || props.options[0]))} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

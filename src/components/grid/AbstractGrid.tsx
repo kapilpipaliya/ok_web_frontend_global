@@ -65,7 +65,7 @@ export function AbstractGrid(props: AbstractGridProps) {
     <>
       <Show when={nav()}>
         <PageHeader
-          title={`${nav()[0]}`}
+          title={`${nav()[2]}`}
           breadcrumb={[
             ...breadcrumbData,
             { name: `${nav()[1]}` },

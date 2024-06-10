@@ -28,10 +28,5 @@ export async function loadPageData(
     outgoing,
   });
 
-  if (result.error) {
-    showErrorToast(result.error);
-    return;
-  }
-
   setGraphData(graph, setGraph, result.graph);
 }

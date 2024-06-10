@@ -13,6 +13,7 @@ import {
 import { getStringComponent } from "~/lib/graph/get/sync/graph_functions";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
+import { PageDesignerLabels } from "./constant";
 
 // @Note:
 // From Component To Layout drag:
@@ -33,7 +34,7 @@ export function componentDrag(
   const attrMetaVertex = createAttrMetaVertex();
   const attrCompMetaVertex = createAttrCompMetaVertex();
 
-  if (fromVertex.L[0] === "Page") {
+  if(PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
       processChildren(
         fromVertex,

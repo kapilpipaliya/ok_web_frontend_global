@@ -51,7 +51,7 @@ export async function getParentVertexesAsync(
   path: string[],
   currentVertexes: Vertex[],
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length === 0) {
     return { error: true };
   }
@@ -299,7 +299,7 @@ export async function getChildVertexesAsync(
   currentVertexes: Vertex[],
   strict?: boolean,
 ): Promise<{ error: boolean; vertexes?: Vertex[] }> {
-  const stepVertexes = new Map<number, Vertex>();
+  const stepVertexes = new Map<Id, Vertex>();
   if (path.length === 0) {
     return { error: true };
   }

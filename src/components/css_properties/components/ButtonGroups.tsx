@@ -1,4 +1,4 @@
-import { type JSX, useContext, For, Show } from "solid-js";
+import { type JSX, useContext, For, Show, createMemo } from "solid-js";
 import { CustomTooltip } from "~/components/Tooltip";
 import { CssEditorContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
@@ -59,20 +59,22 @@ export const ButtonGroups = (props: {
     </div>
   );
 
+  const isDefaultValue = createMemo(() => selected() !== props.options[0].value);
+
   return (
     <Show
       when={props.isLabelOnTop}
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel title={props.label} showIcon={true} />
+            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, props.options[0].value)} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel title={props.label} />
+        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, props.options[0].value)} />
         <Content />
       </div>
     </Show>

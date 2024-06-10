@@ -6,7 +6,6 @@ import { useNavigate } from "@solidjs/router";
 
 const ShareSection = () => {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
-  const [link, setLink] = createSignal("");
   const navigate = useNavigate();
   const [access, setAccess] = createSignal("everyone");
   const [email, setEmail] = createSignal(""); // Initializes email state
@@ -17,22 +16,23 @@ const ShareSection = () => {
     }
   });
 
-  onMount(() => {
+  const getLink = () => {
     if (pageConfig) {
-      setLink(
-        `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.id}/new`,
-      );
+      return `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
+    } else {
+      return ""
     }
-  });
+  };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(link());
+    navigator.clipboard.writeText(getLink());
 
     setShowCopiedTooltip(true);
     setTimeout(() => setShowCopiedTooltip(false), 1000);
   };
+
   const previewLink = () => {
-    const url = link();
+    const url = getLink();
     if (url) {
       window.open(url, "_blank");
     }
@@ -87,7 +87,7 @@ const ShareSection = () => {
       <div style={inlineStyles.shareLink}>
         <input
           type="text"
-          value={link()}
+          value={getLink()}
           readOnly
           class={"w:full bg:rgb(245,245,245) r:5|0|0|5 p:10"}
         />

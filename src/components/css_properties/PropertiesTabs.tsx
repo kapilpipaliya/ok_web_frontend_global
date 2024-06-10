@@ -5,7 +5,7 @@ import {
   Tabs,
 } from "~/components/solid_blocks";
 import type { Vertex } from "~/lib/graph/graph";
-import { createEffect, on } from "solid-js";
+import { createMemo } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
 import { CssEditorContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
@@ -37,28 +37,27 @@ export function ClassDesignTab(props: {
     setCssState(reconcile(cssRules));
   };
 
-  createEffect(
-    on(
-      () => (props.data?.P[props.meta.P.name] as string) ?? "",
-      parseAndApplyCssRules,
-    ),
-  );
-
   function getCssValue() {
     return Object.entries(cssState)
       .map(([key, value]) => `${key}:${value}`)
       .join("\n");
   }
 
-  // TODO: Remove this createEffect
-  createEffect(() => {
-    props.setValue?.(getCssValue());
+  // Create a memo to reactively track the CSS value string
+  const cssValue = createMemo(() => (props.data?.P[props.meta.P.name] as string) ?? "");
+
+  // Use the memo to parse and apply CSS rules
+  parseAndApplyCssRules(cssValue());
+
+  // Update the setValue prop when cssState changes
+  const memoizedCssValue = createMemo(() => {
+    const value = getCssValue();
+    props.setValue?.(value);
+    return value;
   });
 
   return (
     <CssEditorContext.Provider value={[cssState, setCssState]}>
-      <tr class={"min-w:100% m:5px"}>
-        <td colspan="2">
           <span class={"m:10|0"}>
             <Tabs style={{ padding: "10px" }}>
               <TabList class={"m:5px"}>
@@ -80,8 +79,6 @@ export function ClassDesignTab(props: {
               </TabContainer>
             </Tabs>
           </span>
-        </td>
-      </tr>
     </CssEditorContext.Provider>
   );
 }

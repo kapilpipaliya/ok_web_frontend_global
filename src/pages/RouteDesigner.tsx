@@ -17,7 +17,6 @@ const RouteDesigner = () => {
     formData.forEach((value, key) => {
       fields[key] = value;
     });
-    console.log(formData.getAll("table"));
   };
 
   return (

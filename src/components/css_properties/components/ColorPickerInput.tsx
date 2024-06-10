@@ -1,4 +1,4 @@
-import { Show, useContext } from "solid-js";
+import { Show, createMemo, useContext } from "solid-js";
 import { CssEditorContext } from "../context";
 import { Container, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
@@ -19,19 +19,20 @@ export const ColorPickerInput = (props: {
       setCssState(props.name, event.target.value);
     }
   };
+  const isDefaultValue = createMemo(() => cssState[props.name] !== '#000');
 
   const Content = () => (
     <div class="flex ai:center b:1px|solid|lightgrey p:5 r:5">
       <input
         type="color"
         class="color-picker__input-color mr:10 cursor:pointer; h:25px w:30px r:5 p:0 bg:#ffffff b:none"
-        value={cssState[props.name] ?? "#000"}
+        value={cssState[props.name] ?? "#000000"}
         onInput={handleChange}
       />
       <input
         type="text"
         class="b:none w:100% f:14 outline:none"
-        value={cssState[props.name] ?? "#000"}
+        value={cssState[props.name] ?? "#000000"}
         onInput={handleChange}
       />
     </div>
@@ -44,14 +45,14 @@ export const ColorPickerInput = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel title={props.label} />
+              <ContainerLabel onIconClick={() => setCssState(props.name, "#000000")} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel title={props.label} />
+          <ContainerLabel onIconClick={() => setCssState(props.name, "#000000")} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

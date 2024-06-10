@@ -25,6 +25,7 @@ import { signOutCall } from "~/lib/api/api_functions";
 import getAPI from "~/lib/api/getApi";
 import { API } from "~/lib/api/endpoints";
 import { APP_BASE_URL } from "~/lib/constants";
+import { isPageDesignerPath } from "~/lib/utils";
 
 export function MainDashboard(props: { children?: JSX.Element }) {
   const border = "|solid|rgb(212,219,231)";
@@ -43,10 +44,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
     const path = location.pathname;
     setGraph(
       "isSideBarOpen",
-      !(
-        path.toLowerCase().includes("/admin/page/") ||
-        path.toLowerCase().includes("/admin/form/")
-      ),
+      !(isPageDesignerPath(path)),
     );
   };
 
@@ -72,7 +70,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
           },
         }}
       >
-        <Show when={location.pathname.includes("/admin/") && !location.pathname.includes("/admin/Form/") && !location.pathname.includes("/admin/Page/")}>
+        <Show when={location.pathname.includes("/admin/") && !isPageDesignerPath(location.pathname)}>
           <Navbar
             showCloseDrawerBtn={location.pathname.includes("/admin/")}
             toggleSidebar={() => {

@@ -12,22 +12,17 @@
 Savan:
 Make sure all inputs are working.
 
-form view link should support name key too 
+whenever any css property is selected, highlight it.  ✅ 
+in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible. ✅ 
+add a option to remove a property value ✅ 
 
-whenever any css property is selected, highlight it.
+
+
+
 make undo redo working
-when click on setting, it should not reload the page.
-Properties drawer when page height is small, it is not visible.
-in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible.
-add default props in each component itself
-when selecting dropdown in css properties the drawer close.
-add a option to remove a property value
-when Page Settings and Page designer is switched dont refresh the page.
-
-
+make same page designer display in thank you page.
 
 (when Submit do not redirect to parent screen?)
-
 
 remain(kapil);
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.

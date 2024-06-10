@@ -184,7 +184,7 @@ export async function mutateData(
   const clientToServerVertexIdMap = new Map<number, number>();
   const clientToServerEdgeIdMap = new Map<number, number>();
   const responseResult = [] as any[];
-  console.log(args)
+  
   const validationResult = mutateArgsValidation(event, args);
   if (!validationResult) {
     return {error: true, message: 'Invalid argument shape'};
@@ -477,7 +477,6 @@ export async function mutateData(
       }
 
       if (mutationObject.deleteEdge) {
-        console.log('deleteEDge')
         const id =
           clientToServerEdgeIdMap.get(mutationObject.deleteEdge.id) ||
           mutationObject.deleteEdge.id;

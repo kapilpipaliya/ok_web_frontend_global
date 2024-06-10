@@ -4,8 +4,8 @@ import { MenuDragAndDrop } from "~/pages/drag_drop/menu/Menu_DragAndDrop";
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
 import {
- type IFormContext,
- PageConfigContext,
+  type IFormContext,
+  PageConfigContext,
 
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
@@ -20,7 +20,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
   const [isRightOpen, toggleIsRightOpen] = useExpansion(true);
   const [selectedSection, setSelectedSection] = createSignal("build");
   const [leftColumns, setLeftColumns] = createSignal(
-    ["components", "pages", "collection"].map((column) => ({
+    ["components", "pages","templates"].map((column) => ({
       id: column,
       name: column,
     })),
@@ -29,7 +29,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
     ["layout", "form", "formSetting"].map((column) => ({
       id: column,
       name: column,
-    })),  
+    })),
   );
 
   const gridArea = () => ({
@@ -51,62 +51,23 @@ const LayoutDragAndDrop = (): JSX.Element => {
   });
 
   return (
-      <PageConfigContext.Provider
-        value={createStore({} as { formData: IFormContext })}
-      >
-        <div style={gridArea()}>
-          <HeaderDragAndDrop
-            selectedSection={selectedSection}
-            setSelectedSection={setSelectedSection}
-            view={view}
-            setView={setView}
-          />
-          <Show when={selectedSection() === "build"}>
-            <Show
-              when={isLeftOpen()}
-              fallback={
-                <div
-                  class={`rel h:50px ${
-                    !isLeftOpen() ? "left:-1rem" : ""
-                  } r:0|15|15|0 p:2 cursor:pointer`}
-                >
-                  <CustomButton
-                    style={{
-                      cursor: "pointer",
-                      padding: "15px",
-                      borderRadius: "0px 15px 15px 0px",
-                      display: "flex",
-                      gap: "10px",
-                      alignItems: "center",
-                    }}
-                    variant="soft"
-                    onClick={toggleIsLeftOpen}
-                    class="outline:2px|solid|transparent outline:offset|2px:focus"
-                  >
-                    <Icon
-                      icon={"solar:widget-add-outline"}
-                      height={22}
-                      class="ml:10 cursor:pointer"
-                      width={22}
-                      style={{ color: "#37c" }}
-                    />
-                    <span class="font:14 cursor:pointer">Add Form Element</span>
-                  </CustomButton>
-                </div>
-              }
-            >
-              <MenuDragAndDrop
-                isLeftOpen={isLeftOpen}
-                toggleIsLeftOpen={toggleIsLeftOpen}
-                leftColumns={leftColumns}
-              />
-            </Show>
-            <ContentDragAndDrop view={view} />
-            <Show when={!isRightOpen()}>
+    <PageConfigContext.Provider
+      value={createStore({} as { formData: IFormContext })}
+    >
+      <div style={gridArea()}>
+        <HeaderDragAndDrop
+          selectedSection={selectedSection}
+          setSelectedSection={setSelectedSection}
+          view={view}
+          setView={setView}
+        />
+        <span class={`${selectedSection() !== 'build' ? 'd:none' : 'd:contents'}`}>
+          <Show
+            when={isLeftOpen()}
+            fallback={
               <div
-                class={`rel h:50px ${
-                  !isRightOpen() ? "right:-1rem" : ""
-                } r:0|15|15|0 p:2 cursor:pointer`}
+                class={`rel h:50px ${!isLeftOpen() ? "left:-1rem" : ""
+                  } r:0|15|15|0 p:2 cursor:pointer`}
               >
                 <CustomButton
                   style={{
@@ -118,31 +79,68 @@ const LayoutDragAndDrop = (): JSX.Element => {
                     alignItems: "center",
                   }}
                   variant="soft"
-                  onClick={toggleIsRightOpen}
-                  class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
+                  onClick={toggleIsLeftOpen}
+                  class="outline:2px|solid|transparent outline:offset|2px:focus"
                 >
-                  <span class="font:14 cursor:pointer">View Form Settings</span>
                   <Icon
-                    icon={"icon-park-outline:setting-two"}
+                    icon={"solar:widget-add-outline"}
                     height={22}
                     class="ml:10 cursor:pointer"
                     width={22}
                     style={{ color: "#37c" }}
                   />
+                  <span class="font:14 cursor:pointer">Add Form Element</span>
                 </CustomButton>
               </div>
-            </Show>
-            <ActionsDragAndDrops
-              isRightOpen={isRightOpen}
-              toggleIsRightOpen={toggleIsRightOpen}
-              rightColumns={rightColumns}
+            }
+          >
+            <MenuDragAndDrop
+              isLeftOpen={isLeftOpen}
+              toggleIsLeftOpen={toggleIsLeftOpen}
+              leftColumns={leftColumns}
             />
           </Show>
-          <Show when={selectedSection() === "setting"}>
-            <PageSetting />
+          <ContentDragAndDrop view={view} />
+          <Show when={!isRightOpen()}>
+            <div
+              class={`rel h:50px ${!isRightOpen() ? "right:-1rem" : ""
+                } r:0|15|15|0 p:2 cursor:pointer`}
+            >
+              <CustomButton
+                style={{
+                  cursor: "pointer",
+                  padding: "15px",
+                  borderRadius: "0px 15px 15px 0px",
+                  display: "flex",
+                  gap: "10px",
+                  alignItems: "center",
+                }}
+                variant="soft"
+                onClick={toggleIsRightOpen}
+                class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
+              >
+                <span class="font:14 cursor:pointer">View Form Settings</span>
+                <Icon
+                  icon={"icon-park-outline:setting-two"}
+                  height={22}
+                  class="ml:10 cursor:pointer"
+                  width={22}
+                  style={{ color: "#37c" }}
+                />
+              </CustomButton>
+            </div>
           </Show>
+          <ActionsDragAndDrops
+            isRightOpen={isRightOpen}
+            toggleIsRightOpen={toggleIsRightOpen}
+            rightColumns={rightColumns}
+          />
+        </span>
+        <div class={`${selectedSection() !== 'setting' ? 'd:none' : 'd:contents'}`}>
+          <PageSetting />
         </div>
-      </PageConfigContext.Provider>
+      </div>
+    </PageConfigContext.Provider>
   );
 };
 

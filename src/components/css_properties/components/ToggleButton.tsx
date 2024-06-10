@@ -1,4 +1,4 @@
-import { type JSX, useContext, For, Show, type JSXElement } from "solid-js";
+import { type JSX, useContext, For, Show, type JSXElement, createMemo } from "solid-js";
 import { CssEditorContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
@@ -14,6 +14,9 @@ export const ToggleButton = (props: {
   const [cssState, setCssState] = useContext(CssEditorContext);
   const selected = () => cssState[props.name] ?? props.options[0].value;
   const isSelected = (option: any) => selected() === option.value;
+
+  const isDefaultValue = createMemo(() => selected() !== props.options[0].value);
+
 
   const Content = () => (
     <div
@@ -69,14 +72,14 @@ export const ToggleButton = (props: {
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel title={props.label} />
+            <ContainerLabel onIconClick={() => setCssState(props.name, props.options[0].value)} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel title={props.label} />
+        <ContainerLabel onIconClick={() => setCssState(props.name, props.options[0].value)} showIcon={isDefaultValue()} title={props.label} />
         <Content />
       </div>
     </Show>
