@@ -110,7 +110,7 @@ function PricingContent() {
         <h5 class="color-info mt-2">Save upto 20%</h5>
 
         <div
-          class={`mt-5 grid grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg gap:20px`}
+          class={"mt-5 grid grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg gap:20px"}
         >
           {plans.map((plan) => (
             <PricingPlan

@@ -148,7 +148,8 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             if (isActiveItem()) {
               if (indicatorPosition().position === "before") {
                 return "bt:rgb(0,0,255)|2.5px|solid>*";
-              } else if (indicatorPosition().position === "after") {
+              }
+              if (indicatorPosition().position === "after") {
                 return "bb:rgb(0,0,255)|2.5px|solid @fade|.3s>*";
               }
             }

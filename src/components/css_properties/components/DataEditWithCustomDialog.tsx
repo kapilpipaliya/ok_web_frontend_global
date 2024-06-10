@@ -7,8 +7,6 @@ import {
   createSignal,
   Show,
   For,
-  createEffect,
-  onCleanup,
   Switch,
   Match,
   createMemo,

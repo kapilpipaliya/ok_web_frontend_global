@@ -82,7 +82,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
         </Show>
         <div
           classList={{ "height:93vh": graph.isSideBarOpen }}
-          class={` p:4|10 overflow-y:auto`}
+          class={" p:4|10 overflow-y:auto"}
           style={{ "scrollbar-width": "thin" }}
         >
           {props.children}
@@ -224,7 +224,7 @@ const DropdownMenu = () => {
                   </li>
                   <li style="margin-top: 5px; " class={"m:5|10"}>
                     <A
-                      href={`/contact-us`}
+                      href={"/contact-us"}
                       onclick={() => {
                         setIsOpen(false);
                       }}

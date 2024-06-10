@@ -23,10 +23,10 @@ export async function getSelectedVertexValueAsync(
 }
 
 export async function getInEdgeAsync(meta: Vertex, vertex: Vertex) {
-  if (meta.P.type) return meta.P["type"];
+  if (meta.P.type) return meta.P.type;
 
-  const parentLabel = meta.P["parentLabel"];
-  const childLabel = meta.P["childLabel"];
+  const parentLabel = meta.P.parentLabel;
+  const childLabel = meta.P.childLabel;
   if (!parentLabel) return "";
   return (
     capitalizeFirstLetter(parentLabel) +

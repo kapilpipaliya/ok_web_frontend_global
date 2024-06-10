@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount, useContext } from "solid-js";
+import { createEffect, createSignal, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
 import { PageConfigContext } from "~/lib/contexts";
@@ -19,9 +19,8 @@ const ShareSection = () => {
   const getLink = () => {
     if (pageConfig) {
       return `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
-    } else {
-      return ""
     }
+      return ""
   };
 
   const copyToClipboard = () => {

@@ -56,8 +56,8 @@ export const binops = {
   "|": (a, b) => a | b,
   "^": (a, b) => a ^ b,
   "&": (a, b) => a & b,
-  "==": (a, b) => a == b, // jshint ignore:line
-  "!=": (a, b) => a != b, // jshint ignore:line
+  "==": (a, b) => a === b, // jshint ignore:line
+  "!=": (a, b) => a !== b, // jshint ignore:line
   "===": (a, b) => a === b,
   "!==": (a, b) => a !== b,
   "<": (a, b) => a < b,

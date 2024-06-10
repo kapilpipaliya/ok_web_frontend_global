@@ -16,7 +16,7 @@ import {
 } from "~/lib/graph/get/sync/replaceExpressionToLabel";
 
 export function getToEdge(meta: Vertex, vertex: Vertex): string {
-  if (meta.P.type) return meta.P["type"];
+  if (meta.P.type) return meta.P.type;
 
   const attributeId = meta.P[IdAttr];
   return (
@@ -35,10 +35,10 @@ export function getSelectedVertexValue(
 }
 
 export function getInEdge(meta: Vertex, vertex: Vertex) {
-  if (meta.P.type) return meta.P["type"];
+  if (meta.P.type) return meta.P.type;
 
-  const parentLabel = meta.P["parentLabel"];
-  const childLabel = meta.P["childLabel"];
+  const parentLabel = meta.P.parentLabel;
+  const childLabel = meta.P.childLabel;
   if (!parentLabel) return "";
   return (
     capitalizeFirstLetter(parentLabel) +

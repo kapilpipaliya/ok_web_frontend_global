@@ -111,7 +111,7 @@ export function GenericField(
           >
             <Dynamic
               component={props.meta.P.as}
-              class={props.meta.P["class"]}
+              class={props.meta.P.class}
             >
               {getText(
                 graph,
@@ -220,7 +220,7 @@ export function GenericField(
         <Match when={component() === "Icon"}>
           <Icon
             icon={props.meta.P.icon}
-            class={props.meta.P["class"]}
+            class={props.meta.P.class}
             width={props.meta.P.width || "24"}
             height={props.meta.P.height || "24"}
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
@@ -233,7 +233,7 @@ export function GenericField(
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
             {...getAttrs(props.meta)}
-            class={props.meta.P["class"]}
+            class={props.meta.P.class}
           >
             {getText(
               graph,
@@ -351,14 +351,14 @@ export function GenericField(
           <hr
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
-            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P["class"]}`}
+            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P.class}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
-            etc={props.meta.P["class"]}
+            etc={props.meta.P.class}
             heading={propWithDefault("heading")}
             divider={propWithDefault("divider", true)}
             subheading={propWithDefault("subheading")}
@@ -368,14 +368,14 @@ export function GenericField(
           <StarRating
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
             {...props.meta.P}
-            etc={props.meta.P["class"]}
+            etc={props.meta.P.class}
             heading={propWithDefault("heading", "Rating")}
           />
         </Match>
         <Match when={true}>
           <Dynamic
             component={props.meta.P.as || "div"}
-            class={props.meta.P["class"]}
+            class={props.meta.P.class}
           >
             {props.children}
             <PageItemRender metaVertex={props.meta} />

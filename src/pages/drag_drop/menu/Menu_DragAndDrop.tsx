@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
-import { CollectionPart } from "./CollectionPart";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 interface MenuProps {

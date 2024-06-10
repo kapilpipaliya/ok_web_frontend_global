@@ -12,9 +12,9 @@ import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 
 export default function PageShareView() {
   const params = useParams();
-  const label = params["entity"];
-  const entityname = params["entityname"];
-  const formId = params["formId"];
+  const label = params.entity;
+  const entityname = params.entityname;
+  const formId = params.formId;
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
 

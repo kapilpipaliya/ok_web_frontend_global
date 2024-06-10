@@ -54,8 +54,8 @@ export function selectedValue(
   graph: Store<GraphInterface>,
 ): Id[] {
   if (
-    meta.P["stringValue"] ||
-    meta.P["items"]
+    meta.P.stringValue ||
+    meta.P.items
   ) {
     // this is causing maximum call stack error when selecting an option
     return untrack(() => {
@@ -64,7 +64,7 @@ export function selectedValue(
   }
   try {
     // when new row added or modified this gives error.
-    return meta.P["inward"]
+    return meta.P.inward
       ? getParentVertexValue(graph, data, meta)
       : getSelectedVertexValue(graph, data, meta);
   } catch (e) {
@@ -131,7 +131,7 @@ export function SelectInputField(
   const formData = useContext(FormContext);
 
   const selectOptions = () => {
-    const value = field.meta.P["items"];
+    const value = field.meta.P.items;
 
     if (value) {
       return handleValue(value);
@@ -187,12 +187,12 @@ export function SelectInputField(
   const getCollection = () => {
     return (
       getChildVertex(graph, ["$0Coll"], field.meta).vertex?.P?.name ||
-      field.meta.P["collection"]
+      field.meta.P.collection
     );
   };
 
   const isValidResponse = (res: any) => {
-    return !res.error && res.statusCode != 500;
+    return !res.error && res.statusCode !== 500;
   };
 
   onMount(() => {
@@ -243,7 +243,7 @@ export function SelectInputField(
         if (field.isRealTime) {
           field.txnId = getNewTxnId(graph, setGraph);
         }
-        if (field.meta.P["stringValue"]) {
+        if (field.meta.P.stringValue) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -256,7 +256,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (field.meta.P["items"]) {
+        } else if (field.meta.P.items) {
           field.setValue
             ? field.setValue(optionvalue)
             : setValueGlobal(
@@ -269,7 +269,7 @@ export function SelectInputField(
                 Ws,
                 false,
               );
-        } else if (field.meta.P["inward"]) {
+        } else if (field.meta.P.inward) {
           setParentValue(
             graph,
             setGraph,

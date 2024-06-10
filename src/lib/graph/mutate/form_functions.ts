@@ -204,8 +204,8 @@ export function rowMetaInitialize(
     });
     return metaTxnId;
   }
-  const rows = klona(rowMetaAttrInst.vertex!.P.rows);
-  const metaTxnId = rowMetaAttrInst.vertex!.P.metaTxnId;
+  const rows = klona(rowMetaAttrInst.vertex?.P.rows);
+  const metaTxnId = rowMetaAttrInst.vertex?.P.metaTxnId;
   batch(() => {
     for (const attrColumn of tableColumnsTemplate) {
       if (rows[attrColumn.id]) {
@@ -495,7 +495,7 @@ export function addNewRow(
     txnId = getNewTxnId(graph, setGraph);
   }
   const type = getToEdge(meta, parentVertex);
-  const label = meta.P["label"];
+  const label = meta.P.label;
 
   const newRowResult = newRow(
     graph,

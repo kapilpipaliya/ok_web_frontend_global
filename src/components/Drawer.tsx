@@ -1,4 +1,4 @@
-import { createSignal, type JSX, Show, onCleanup, onMount } from "solid-js";
+import { createSignal, type JSX, Show, } from "solid-js";
 
 function Drawer(props: {
   customButton?: (props: {
@@ -26,7 +26,7 @@ function Drawer(props: {
 
   const handleMouseDown = (event: MouseEvent) => {
     initialX = event.clientX;
-    initialWidth = parseInt(drawerWidth(), 10);
+    initialWidth = Number.parseInt(drawerWidth(), 10);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
   };

@@ -6,7 +6,7 @@ export async function getToEdgeAsync(
   meta: Vertex,
   vertex: Vertex,
 ): Promise<string> {
-  if (meta.P.type) return meta.P["type"];
+  if (meta.P.type) return meta.P.type;
 
   const attributeId = meta.P[IdAttr];
   return (

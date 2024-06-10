@@ -222,7 +222,7 @@ function DynamicFormBase(props: DynamicFormProps) {
           dataVertex = createResult.vertex!;
 
           // if new form then add a form component in the layout
-          if (dataVertex!.L[0] === "Form") {
+          if (dataVertex?.L[0] === "Form") {
             // add form component
             const labelVertex = findVertexByLabelAndUniqueId(
               graph,
@@ -350,7 +350,7 @@ function DynamicFormBase(props: DynamicFormProps) {
           props.id,
         );
 
-        if (res.error == true) {
+        if (res.error === true) {
           showErrorToast(res.message);
           return;
         }

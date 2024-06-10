@@ -90,8 +90,7 @@ const DataGrid = (props: DataGridProps) => {
 
       const filtered: any = tableStore.data.filter(
         (item: Vertex) =>
-          item.P.name &&
-          item.P.name.toLowerCase().includes(value.toLowerCase()),
+          item.P.name?.toLowerCase().includes(value.toLowerCase()),
       );
       setFilteredData(filtered);
     } else {
