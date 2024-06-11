@@ -5,9 +5,9 @@ import {
   Tabs,
 } from "~/components/solid_blocks";
 import type { Vertex } from "~/lib/graph/graph";
-import { createMemo } from "solid-js";
+import { createMemo, onCleanup, onMount } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { CssEditorContext } from "./context";
+import { CssDefaultEditorContext, CssEditorContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
@@ -23,9 +23,9 @@ export function ClassDesignTab(props: {
   txnId?: number;
 }) {
   const [cssState, setCssState] = createStore({} as { [key: string]: any });
+  const [cssDefaultState, setDefaultCssState] = createStore({} as { [key: string]: any });
 
-  // note: 'props.data?.P[props.meta.P.name]' only change by Page Designer component when click on Layout item.
-  const parseAndApplyCssRules = (valueString: string) => {
+  const parseAndApplyCssRules = (valueString: string, isDefault = false) => {
     const cssRules = {} as { [key: string]: string };
 
     for (const [key, value] of valueString
@@ -34,53 +34,63 @@ export function ClassDesignTab(props: {
       if (key === "") continue;
       cssRules[key] = value;
     }
-    setCssState(reconcile(cssRules));
+    if (isDefault) {
+      setDefaultCssState(reconcile(cssRules));
+    } else {
+      setCssState(reconcile(cssRules));
+    }
   };
-
-  function getCssValue() {
-    return Object.entries(cssState)
-      .map(([key, value]) => `${key}:${value}`)
-      .join("\n");
-  }
 
   const defaultValues = createMemo(() => props.meta.P.value || "");
 
-  // Create a memo to reactively track the CSS value string
   const cssValue = createMemo(() => (props.data?.P[props.meta.P.name] as string) ?? "");
 
-  // Use the memo to parse and apply CSS rules
-  parseAndApplyCssRules(cssValue());
+  onMount(() => {
+    parseAndApplyCssRules(cssValue());
+    parseAndApplyCssRules(defaultValues(), true);
+  });
 
-  // Update the setValue prop when cssState changes
+  // Merge null key into the default state and update setValue prop
   const memoizedCssValue = createMemo(() => {
-    const value = getCssValue();
+    const mergedState = {
+      ...cssDefaultState,
+      ...cssState,
+    };
+
+    const value = Object.entries(mergedState)
+      .map(([key, value]) => `${key}:${value}`)
+      .join("\n");
     props.setValue?.(value);
+    setCssState(mergedState);
+    setDefaultCssState(cssDefaultState);
     return value;
   });
 
   return (
     <CssEditorContext.Provider value={[cssState, setCssState]}>
-          <span class={"m:10|0"}>
-            <Tabs style={{ padding: "10px" }}>
-              <TabList class={"m:5px"}>
-                <Tab class={"w:50%"}>Design</Tab>
-                <Tab class={"w:50%"}>Code</Tab>
-              </TabList>
-              <TabContainer>
-                <Container>
-                  <StyleEditorTab />
-                </Container>
-              </TabContainer>
-              <TabContainer>
-                <Container>
-                  <TextEditorTab
-                    getCssValue={getCssValue}
-                    parseAndApplyCssRules={parseAndApplyCssRules}
-                  />
-                </Container>
-              </TabContainer>
-            </Tabs>
-          </span>
+      <CssDefaultEditorContext.Provider value={[cssDefaultState, setDefaultCssState]}>
+        <span class={"m:10|0"}>
+          <Tabs style={{ padding: "10px" }}>
+            <TabList class={"m:5px"}>
+              <Tab class={"w:50%"}>Design</Tab>
+              <Tab class={"w:50%"}>Code</Tab>
+            </TabList>
+            <TabContainer>
+              <Container>
+                <StyleEditorTab />
+              </Container>
+            </TabContainer>
+            <TabContainer>
+              <Container>
+                <TextEditorTab
+                  getCssValue={memoizedCssValue()}
+                  parseAndApplyCssRules={parseAndApplyCssRules}
+                />
+              </Container>
+            </TabContainer>
+          </Tabs>
+        </span>
+      </CssDefaultEditorContext.Provider>
     </CssEditorContext.Provider>
   );
 }
