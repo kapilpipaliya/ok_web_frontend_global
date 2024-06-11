@@ -1,6 +1,6 @@
 import { type JSX, useContext, For, Show, createMemo } from "solid-js";
 import { CustomTooltip } from "~/components/Tooltip";
-import { CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -17,8 +17,9 @@ export const ButtonGroups = (props: {
   isAddToClass?: boolean;
   onChangeInput?: any;
 }) => {
+  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const selected = () => cssState[props.name] ?? props.options[0].value;
+  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
   const handleChange = (
     e: any,
     option: { key: JSX.Element; value: string },
@@ -59,22 +60,21 @@ export const ButtonGroups = (props: {
     </div>
   );
 
-  const isDefaultValue = createMemo(() => selected() !== props.options[0].value);
-
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
   return (
     <Show
       when={props.isLabelOnTop}
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, props.options[0].value)} />
+            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, cssDefault[props.name])} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, props.options[0].value)} />
+        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, cssDefault[props.name])} />
         <Content />
       </div>
     </Show>

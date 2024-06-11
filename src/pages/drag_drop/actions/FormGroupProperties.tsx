@@ -124,9 +124,9 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                     {/*/>*/}
                   </span>
                   <Show when={props.selectedLayout?.P[metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[metaVertex.P[IdAttr]] !== null}>
-                    <span class="flex:.25">
+                    <span>
                       <Icon
-                        class="clickable"
+                        class="cursor:pointer color:#ff0000"
                         icon="mdi:close"
                         data-testid="clearIcon"
                         onClick={() => props.setValue(metaVertex, null)}

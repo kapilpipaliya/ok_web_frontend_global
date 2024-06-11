@@ -6,7 +6,7 @@ import "tippy.js/dist/tippy.css";
 export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => (
-      <html lang="en">
+      <html lang="en" style="display: none">
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,28 +31,10 @@ export default createHandler(() => (
           <meta name="msapplication-TileColor" content="#da532c" />
 
           {assets}
-          <style>
-            {`
-              /* Hide the loader after the page has loaded */
-              body.loaded #loader {
-                display: none;
-              }
-            `}
-          </style>
         </head>
         <body>
-          <div id="loader" class="h:10 w:10">
-            <LoaderNew />
-          </div>
           <div id="app">{children}</div>
           {scripts}
-          <script>
-            {`
-              window.addEventListener('load', () => {
-                document.body.classList.add('loaded');
-              });
-            `}
-          </script>
         </body>
       </html>
     )}

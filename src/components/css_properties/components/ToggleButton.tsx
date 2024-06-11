@@ -1,5 +1,5 @@
 import { type JSX, useContext, For, Show, type JSXElement, createMemo } from "solid-js";
-import { CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -12,17 +12,17 @@ export const ToggleButton = (props: {
   isLabelOnTop: boolean;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const selected = () => cssState[props.name] ?? props.options[0].value;
+  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
   const isSelected = (option: any) => selected() === option.value;
 
-  const isDefaultValue = createMemo(() => selected() !== props.options[0].value);
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
 
 
   const Content = () => (
     <div
-      class={`inline-flex b:1px|solid|#ccc r:5 overflow:hidden ${
-        !props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
-      }`}
+      class={`inline-flex b:1px|solid|#ccc r:5 overflow:hidden ${!props.isLabelOnTop && props.label ? "w:50%" : "w:100%"
+        }`}
     >
       <For each={props.options}>
         {(option) => {
@@ -37,22 +37,19 @@ export const ToggleButton = (props: {
                 }
               }}
               class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
-                                     bg:${
-                                       isSelected(option)
-                                         ? "#e0e7f3"
-                                         : "transparent"
-                                     }
-                                      color:${
-                                        isSelected(option) ? "#5252f1" : "black"
-                                      }
-                                       r:${
-                                         props.options.indexOf(option) === 0
-                                           ? "5|0|0|5"
-                                           : props.options.indexOf(option) ===
-                                               props.options.length - 1
-                                             ? "0|5|5|0"
-                                             : "0"
-                                       }`}
+                                     bg:${isSelected(option)
+                  ? "#e0e7f3"
+                  : "transparent"
+                }
+                 color:${isSelected(option) ? "#5252f1" : "black"
+                }
+                 r:${props.options.indexOf(option) === 0
+                  ? "5|0|0|5"
+                  : props.options.indexOf(option) ===
+                    props.options.length - 1
+                    ? "0|5|5|0"
+                    : "0"
+                }`}
             >
               {option.icon ? (
                 <IconifyIcon icon={option.key as string} />
@@ -72,14 +69,14 @@ export const ToggleButton = (props: {
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel onIconClick={() => setCssState(props.name, props.options[0].value)} showIcon={isDefaultValue()} title={props.label} />
+            <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel onIconClick={() => setCssState(props.name, props.options[0].value)} showIcon={isDefaultValue()} title={props.label} />
+        <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
         <Content />
       </div>
     </Show>

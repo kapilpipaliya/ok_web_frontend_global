@@ -10,7 +10,7 @@ import {
   createMemo,
 } from "solid-js";
 import { TextField } from "~/components/solid_blocks";
-import { CssEditorContext, sizeTypes } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, sizeTypes } from "../context";
 import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -28,18 +28,21 @@ export const TextFieldWithSelect = (props: {
   isAddToClass?: boolean;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
+  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
+
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
   const [startY, setStartY] = createSignal(0);
-  const [startValue, setStartValue] = createSignal(cssState[props.name]);
-  const initialValue = cssState[props.name] ?? "";
+  const [startValue, setStartValue] = createSignal(selected());
+  
 
   createEffect((v) => {
     setOption(determineSelectedOption());
   });
   const determineSelectedOption = () => {
-    if (!cssState[props.name]) return props.options?.[0];
-    return sizeTypes.find((unit) => cssState[props.name].includes(unit));
+    if (!selected()) return '';
+    return sizeTypes.find((unit) => selected().includes(unit));
   };
 
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
@@ -52,10 +55,10 @@ export const TextFieldWithSelect = (props: {
     }
     const numericValue = Number.parseFloat(value);
     if (props.isAddToClass) {
-      setCssState(props.name, `${numericValue}${selectedOption() ?? ""}`);
+      setCssState(props.name, `${numericValue}${selectedOption()}`);
     }
     if (props.onChangeInput) {
-      props.onChangeInput(`${numericValue}${selectedOption() ?? ""}`);
+      props.onChangeInput(`${numericValue}${selectedOption()}`);
     }
   };
 
@@ -73,7 +76,7 @@ export const TextFieldWithSelect = (props: {
     }
     setIsDropdownOpen(false);
     setOption(option);
-    const value = getValueWithoutUnits(cssState[props.name]);
+    const value = getValueWithoutUnits(selected());
     setCssState(props.name, `${value}${option}`);
   };
 
@@ -99,7 +102,7 @@ export const TextFieldWithSelect = (props: {
     setStartY(event.pageY);
     setStartValue(
       getValueWithoutUnits(
-        props.value ? props.value() : cssState[props.name] ?? "",
+        props.value ? props.value() : selected(),
       ),
     );
 
@@ -157,7 +160,7 @@ export const TextFieldWithSelect = (props: {
               placeholder={`${
                 props.inputType === "number" ? "0" : props.placeholder
               }`}
-              value={getValueWithoutUnits(cssState[props.name] ?? "")}
+              value={getValueWithoutUnits(selected())}
               onInput={handleChange}
               class={"f:14"}
               style={{ width: "100%" }} // Set width to 100%
@@ -171,7 +174,7 @@ export const TextFieldWithSelect = (props: {
               props.inputType === "number" ? "0" : props.placeholder
             }`}
             value={getValueWithoutUnits(
-              props.value ? props.value() : cssState[props.name] ?? "",
+              props.value ? props.value() : selected(),
             )}
             class="f:14 outline:none p:5"
             onInput={handleChange}
@@ -217,11 +220,11 @@ export const TextFieldWithSelect = (props: {
     </div>
   );
 
-  const isDefaultValue = createMemo(() => initialValue !== cssState[props.name]);
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== "");
 
   const resetValue = () => {
-    setCssState(props.name, "");
-    setStartValue("");
+    setCssState(props.name, cssDefault[props.name]);
+    setStartValue(cssDefault[props.name]);
     setOption(determineSelectedOption());
   };
   

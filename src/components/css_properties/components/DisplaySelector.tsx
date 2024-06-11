@@ -8,7 +8,7 @@ import {
   For,
   createMemo,
 } from "solid-js";
-import { CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext } from "../context";
 import { Container, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -17,8 +17,12 @@ export const DisplaySelector = (props: {
   options: any;
   isLabelOnTop: boolean;
   label: string;
+  isAddToClass: boolean;
+  value: any;
   onChangeInput?: (label: any, value: any) => void;
 }) => {
+  const [isAddToClass, setIsAddToClass] = createSignal(props.isAddToClass ?? true);
+
   function formatString(str: string) {
     return str
       .split("-") // Split the string by hyphen
@@ -27,13 +31,16 @@ export const DisplaySelector = (props: {
   }
 
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [isActive, setIsActive] = createSignal(false);
   const toggleDropdown = () => setIsActive(!isActive());
   const selected = () =>
-    cssState[props.name] || props.options[0].value || props.options[0];
+      cssState[props.name] ||props.value || cssDefault[props.name] || '';
 
   const selectOption = (option: any) => {
-    setCssState(props.name, option.value || option);
+    if (isAddToClass()) {
+      setCssState(props.name, option.value || option);
+    }
     if (props.onChangeInput)
       props.onChangeInput(props.name, option.value || option);
     setIsActive(false);
@@ -53,7 +60,7 @@ export const DisplaySelector = (props: {
     );
   });
 
-  const isDefaultValue = createMemo(() => selected() !== (props.options[0].value || props.options[0]));
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
 
 
   return (
@@ -63,14 +70,17 @@ export const DisplaySelector = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel onIconClick={() => setCssState(props.name, (props.options[0].value || props.options[0]))} showIcon={isDefaultValue()} title={props.label} />
+              <ContainerLabel onIconClick={() => {
+                console.log(props.name, selected(),cssDefault[props.name]);
+                
+                setCssState(props.name, cssDefault[props.name])}} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={() => setCssState(props.name, (props.options[0].value || props.options[0]))} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>
@@ -81,9 +91,8 @@ export const DisplaySelector = (props: {
     return (
       <div class={`rel ${props.isLabelOnTop ? "w:full" : "w:50%"}`}>
         <div
-          class={`flex ai:center jc:space-between b:1px|solid|lightgray r:5 p:2|7 f:14 ${
-            isActive() ? "open" : ""
-          }`}
+          class={`flex ai:center jc:space-between b:1px|solid|lightgray r:5 p:2|7 f:14 ${isActive() ? "open" : ""
+            }`}
           onClick={toggleDropdown}
         >
           <button
@@ -94,7 +103,7 @@ export const DisplaySelector = (props: {
             aria-controls={`select-dropdown${props.label}`}
             aria-expanded={isActive()}
           >
-            <span class="selected-value">{formatString(selected())}</span>
+            <span class={`selected-value ${!selected() && "color:lightgray"}`}>{selected() ? formatString(selected()) : `Select Value`}</span>
             <span class="arrow" />
           </button>
           <div>
@@ -107,9 +116,8 @@ export const DisplaySelector = (props: {
         </div>
 
         <ul
-          class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${
-            isActive() ? "visible" : "hidden"
-          }`}
+          class={`popup b:1px|solid|lightgray bg:white mt:2 p:4|10 r:5 w:-webkit-fill-available ${isActive() ? "visible" : "hidden"
+            }`}
           style={
             "max-height: 15rem;overflow: auto;scrollbar-width:thin;cursor: auto;position: absolute;outline: 0;top: 100%;text-shadow: none;text-align: left;box-shadow: -1px 0px 14px 3px rgba(17,36,38,.15);border: 1px solid rgba(34,36,38,.15);border-radius: .28571429rem;transition: opacity .1s ease;z-index: 11;will-change: transform,opacity;"
           }
@@ -120,13 +128,11 @@ export const DisplaySelector = (props: {
               const label = () => option.value || option;
               return (
                 <li
-                  class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${
-                    selected() !== label()
-                      ? "bg:#efefef:hover"
-                      : "bg:rgb(229,234,253):hover"
-                  } font-weight:${selected() === label() ? "medium" : ""} r:5 ${
-                    selected() === label() ? "bg:rgb(229,234,253)" : ""
-                  }`}
+                  class={`rel f:14 flex ai:center jc:space-between p:5 cursor:pointer ${selected() !== label()
+                    ? "bg:#efefef:hover"
+                    : "bg:rgb(229,234,253):hover"
+                    } font-weight:${selected() === label() ? "medium" : ""} r:5 ${selected() === label() ? "bg:rgb(229,234,253)" : ""
+                    }`}
                   onClick={() => selectOption(option)}
                 >
                   <label>{formatString(label())}</label>

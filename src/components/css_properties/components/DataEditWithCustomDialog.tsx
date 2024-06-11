@@ -12,7 +12,7 @@ import {
   createMemo,
 } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext } from "../context";
 import { ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -27,7 +27,10 @@ export const DataEditWithCustomDialog = (props: {
   fallback?: any;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [changedData, setChangedData] = createSignal<any>({});
+
+  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
 
   interface CssProperties {
     "x-offset": string;
@@ -61,7 +64,6 @@ export const DataEditWithCustomDialog = (props: {
       color = "#000",
       type = "",
     } = css;
-
     setCssState(
       props.name,
       `${xOffset}|${yOffset}|${blur}|${spread}|${color}|${type}`,
@@ -70,36 +72,36 @@ export const DataEditWithCustomDialog = (props: {
 
   const addOption = () => {
     if (props.label.includes("Text Shadow")) {
-      const currentOptions = cssState[props.name]
-        ? cssState[props.name].split(",")
+      const currentOptions = selected()
+        ? selected().split(",")
         : [];
       currentOptions.push("0|0|5|0|#000|inset");
       const newValue = currentOptions.join(",");
       setCssState(props.name, newValue);
     } else if (props.label.includes("Filter")) {
-      const currentOptions = cssState[props.name]
-        ? cssState[props.name].split("|")
+      const currentOptions = selected()
+        ? selected().split("|")
         : [];
       currentOptions.push("blur(3px)");
       const newValue = currentOptions.join("|");
       setCssState(props.name, newValue);
     } else if (props.label.includes("Box Shadow")) {
-      const currentOptions = cssState[props.name]
-        ? cssState[props.name].split(",")
+      const currentOptions = selected()
+        ? selected().split(",")
         : [];
       currentOptions.push("0|0|5|0|#000|inset");
       const newValue = currentOptions.join(",");
       setCssState(props.name, newValue);
     } else if (props.label.includes("Transition")) {
-      const currentOptions = cssState[props.name]
-        ? cssState[props.name].split(",")
+      const currentOptions = selected()
+        ? selected().split(",")
         : [];
       currentOptions.push("opacity|1s|ease|0s");
       const newValue = currentOptions.join(",");
       setCssState(props.name, newValue);
     } else if (props.label.includes("Transform")) {
-      const currentOptions = cssState[props.name]
-        ? cssState[props.name].split("|")
+      const currentOptions = selected()
+        ? selected().split("|")
         : [];
       currentOptions.push("rotate(10deg)");
       const newValue = currentOptions.join("|");
@@ -109,32 +111,32 @@ export const DataEditWithCustomDialog = (props: {
 
   const getOptions = () => {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
-      return (cssState[props.name] && cssState[props.name].split(",")) || [];
+      return (selected() && selected().split(",")) || [];
     }
     if (props.label.includes("Filter")) {
-      return (cssState[props.name] && cssState[props.name].split("|")) || [];
+      return (selected() && selected().split("|")) || [];
     }
     if (props.label.includes("Transform")) {
-      return (cssState[props.name] && cssState[props.name].split("|")) || [];
+      return (selected() && selected().split("|")) || [];
     }
     return [];
   };
-  const isDefaultValue = createMemo(() => cssState[props.name] !== "");
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
 
   const getValueOfInput = (name: string) => changedData()[name];
   const deleteOption = (index: number) => {
     if (props.label.includes("Shadow") || props.label.includes("Transition")) {
-      const data = cssState[props.name]
+      const data = selected()
         .split(",")
         .filter((_: any, i: any) => i !== index);
       setCssState(props.name, data.join(","));
     } else if (props.label.includes("Filter")) {
-      const data = cssState[props.name]
+      const data = selected()
         .split("|")
         .filter((_: any, i: any) => i !== index);
       setCssState(props.name, data.join("|"));
     } else if (props.label.includes("Transform")) {
-      const data = cssState[props.name]
+      const data = selected()
         .split("|")
         .filter((_: any, i: any) => i !== index);
       setCssState(props.name, data.join("|"));
@@ -188,12 +190,13 @@ export const DataEditWithCustomDialog = (props: {
         onChangeInput: (value: any) => {
           setChangedData({ ...changedData(), [properties.name]: value });
           createCssOption(changedData());
+          setCssState(properties.name, value);
         },
       };
     };
 
     return (
-      <Show when={props.openMenu() === index}>
+      <Show when={props.openMenu() === index} >
         <div
           style={{
             position: "absolute",
@@ -240,7 +243,7 @@ export const DataEditWithCustomDialog = (props: {
     );
   };
   const resetValues = () => {
-    setCssState(props.name, "");
+    setCssState(props.name, cssDefault[props.name]);
     setChangedData({});
   };
   const Component = (p: { option: any; i: any }) => {

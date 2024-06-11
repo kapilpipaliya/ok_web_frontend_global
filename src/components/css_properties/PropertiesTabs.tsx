@@ -11,6 +11,8 @@ import { CssDefaultEditorContext, CssEditorContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
+import { DisplaySelector } from "./components/DisplaySelector";
+import { createSignal } from "solid-js";
 
 export function ClassDesignTab(props: {
   component: string;
@@ -24,16 +26,21 @@ export function ClassDesignTab(props: {
 }) {
   const [cssState, setCssState] = createStore({} as { [key: string]: any });
   const [cssDefaultState, setDefaultCssState] = createStore({} as { [key: string]: any });
-
+  const [state,setState]= createSignal('');
   const parseAndApplyCssRules = (valueString: string, isDefault = false) => {
     const cssRules = {} as { [key: string]: string };
 
-    for (const [key, value] of valueString
-      .split(/[\s\n]+/)
-      .map((rule) => rule.split(":"))) {
-      if (key === "") continue;
-      cssRules[key] = value;
+    for (const rule of valueString.split(/[\s\n]+/)) {
+      const [property, ...valueAndState] = rule.split(/:(.+)/);
+      if (!property) continue;
+
+      const value = valueAndState[0];
+      const state = valueAndState[1] || "";
+
+      const stateKey = state ? `:${state}` : "";
+      cssRules[`${property}${stateKey}`] = value;
     }
+    
     if (isDefault) {
       setDefaultCssState(reconcile(cssRules));
     } else {
@@ -58,7 +65,7 @@ export function ClassDesignTab(props: {
     };
 
     const value = Object.entries(mergedState)
-      .map(([key, value]) => `${key}:${value}`)
+      .map(([key, value]) => `${key}:${value}${state() ? `:${state()}` : ""}`)
       .join("\n");
     props.setValue?.(value);
     setCssState(mergedState);
@@ -77,7 +84,10 @@ export function ClassDesignTab(props: {
             </TabList>
             <TabContainer>
               <Container>
-                <StyleEditorTab />
+                <div class="block w:inherit p:20px|10px|0px|10px">
+                  <DisplaySelector value={state()} isAddToClass={false} isLabelOnTop={false} label="Select State" name="state" options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']} onChangeInput={(name,v)=>setState(v)} />
+                  <StyleEditorTab />
+                </div>
               </Container>
             </TabContainer>
             <TabContainer>

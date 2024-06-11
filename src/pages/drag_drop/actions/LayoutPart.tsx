@@ -14,7 +14,7 @@ import {
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
-import { Properties } from "./Properties";
+import { Properties } from "./properties/Properties";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { iconMap } from "~/lib/constants";

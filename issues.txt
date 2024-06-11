@@ -29,6 +29,9 @@ Refactor files:
 /lib/graph/mutate/form_functions.ts
 /pages/drag_drop/actions/Properties.tsx
 
+instead of using loader in CSSRuntimeProvider use https://rc.css.master.co/guide/flash-of-unstyled-content
+
+
 Refactor all cypher functions, use eval function whenever possible.
 
 make undo redo working
