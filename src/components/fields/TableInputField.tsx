@@ -66,16 +66,6 @@ export function TableInputField(
     isTableInside?: boolean;
   },
 ) {
-  const [field, others] = splitProps(props, [
-    "meta",
-    "data",
-    "isRealTime",
-    "disabled",
-    "isTableInside",
-    "txnId",
-    "setValue",
-  ]);
-
   const { Ws } = useContext(WsContext);
   const { showErrorToast } = useToast();
 
@@ -90,14 +80,14 @@ export function TableInputField(
     const childAttrVertex = getChildVertexes(
       graph,
       ["Attr", "$0Att"],
-      [field.meta],
+      [props.meta],
     ).vertexes;
     if (childAttrVertex?.length) {
       return childAttrVertex;
     }
 
     // else get attributes from a collection.
-    const attrVertex = getChildVertex(graph, ["$0Att"], field.meta).vertex;
+    const attrVertex = getChildVertex(graph, ["$0Att"], props.meta).vertex;
     if (!attrVertex) return;
 
     return getChildVertexes(graph, ["Attr"], [attrVertex]).vertexes;
@@ -106,14 +96,14 @@ export function TableInputField(
   const tableColumnsTemplate = createMemo(
     () =>
       getAttributes() ||
-      getChildVertexes(graph, ["MetaAttr"], [field.meta]).vertexes ||
+      getChildVertexes(graph, ["MetaAttr"], [props.meta]).vertexes ||
       [],
   );
 
-  // add dynamic field.meta from separate collection.
-  // If field.meta.P.attributes are not present and field.meta.collection is present then get attributes from the collection
-  if (!field.meta.P.attributes && field.meta.P.meta) {
-    const metaData = componentProps(graph, setGraph, field.meta, field.data!);
+  // add dynamic props.meta from separate collection.
+  // If props.meta.P.attributes are not present and props.meta.collection is present then get attributes from the collection
+  if (!props.meta.P.attributes && props.meta.P.meta) {
+    const metaData = componentProps(graph, setGraph, props.meta, props.data!);
     if (metaData.collection) {
       // add metadata from separate collection.
       const collVertex = findVertexByLabelAndUniqueId(
@@ -135,18 +125,18 @@ export function TableInputField(
             const props = getCollAttrs(graph, setGraph, attr);
             if (!props.error) attrs.push(attr!);
           }
-          const newProperties = klona(field.meta.P);
+          const newProperties = klona(props.meta.P);
           newProperties.attributes = attrs;
           replaceVertexProperties(
             useContext(NewTxnIdContext),
-            field.meta.id,
+            props.meta.id,
             graph,
             setGraph,
             newProperties,
           );
 
           const txnId = getNewTxnId(graph, setGraph);
-          addMetaVertexes(graph, setGraph, txnId, field.meta, attrs);
+          addMetaVertexes(graph, setGraph, txnId, props.meta, attrs);
           onCleanup(() => {
             revertTransaction(txnId);
           });
@@ -166,8 +156,8 @@ export function TableInputField(
     // TODO: else if it has a parent Form Container(Record) use it.
     const vertexes = getSublistRows(
       graph,
-      field.meta,
-      field.data || parentData(),
+      props.meta,
+      props.data || parentData(),
     );
     setSortedVertexes(vertexes);
   });
@@ -233,7 +223,7 @@ export function TableInputField(
           graph,
           setGraph,
           p.joinVertex,
-          field.meta,
+          props.meta,
           columns,
         );
 
@@ -305,10 +295,10 @@ export function TableInputField(
                         : metaVertex()
                     }
                     data={p.joinVertex}
-                    setValue={field.setValue}
+                    setValue={props.setValue}
                     disabled={disabled()}
-                    txnId={field.txnId}
-                    isRealTime={field.isRealTime}
+                    txnId={props.txnId}
+                    isRealTime={props.isRealTime}
                   />
                 </>
               );
@@ -454,10 +444,10 @@ export function TableInputField(
                 onClick={() =>
                   deleteRow(
                     p.joinVertex,
-                    field.isRealTime!,
+                    props.isRealTime!,
                     graph,
                     setGraph,
-                    field.txnId!,
+                    props.txnId!,
                     Ws,
                   )
                 }
@@ -471,13 +461,13 @@ export function TableInputField(
                   style={{ color: "green" }}
                   onClick={() => {
                     return addNewRow(
-                      field.txnId || 0,
+                      props.txnId || 0,
                       expandVertex()!,
                       graph,
                       setGraph,
                       p.joinVertex,
                       {},
-                      field.isRealTime ?? false,
+                      props.isRealTime ?? false,
                       Ws,
                     );
                   }}
@@ -502,10 +492,10 @@ export function TableInputField(
                 meta={expandVertex()!}
                 isTableInside={false}
                 data={p.joinVertex}
-                setValue={field.setValue}
+                setValue={props.setValue}
                 disabled={disabled()}
-                txnId={field.txnId}
-                isRealTime={field.isRealTime}
+                txnId={props.txnId}
+                isRealTime={props.isRealTime}
               />
             </td>
           </tr>
@@ -515,20 +505,20 @@ export function TableInputField(
   };
 
   const insertNewRow = () => {
-    if (!field.data) {
+    if (!props.data) {
       showErrorToast("Table data is not set");
       return;
     }
 
     return runWithOwner(outerOwner, () =>
       addNewRow(
-        field.txnId || 0,
-        field.meta,
+        props.txnId || 0,
+        props.meta,
         graph,
         setGraph,
-        field.data!,
+        props.data!,
         {},
-        field.isRealTime ?? false,
+        props.isRealTime ?? false,
         Ws,
       ),
     );
@@ -558,10 +548,10 @@ export function TableInputField(
         Please Define table columns
       </Match>
       <Match when={true}>
-        {/*<Show when={field.meta.P.attributes}>*/}
-        {/*  <FormGroup form={{title: '', label: field.meta.P.title || field.meta.P[IdAttr], attributes: field.meta.P.attributes}} vertex={vertex}/>*/}
+        {/*<Show when={props.meta.P.attributes}>*/}
+        {/*  <FormGroup form={{title: '', label: props.meta.P.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
-        <Show when={field.isTableInside}>
+        <Show when={props.isTableInside}>
           <AddNewButton />
         </Show>
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}

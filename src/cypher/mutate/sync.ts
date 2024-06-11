@@ -107,8 +107,8 @@ async function createNode(
   properties: {[key: string]: any},
 ) {
   const result = await session.run(
-    `CREATE (n:${nodeType}) SET n = $props SET n.createdAt = localDateTime() RETURN n;`,
-    { props: properties },
+    `CREATE (n:${nodeType}) SET n = $properties SET n.createdAt = localDateTime() RETURN n;`,
+    { properties },
   );
   return result.records[0].get("n");
 }

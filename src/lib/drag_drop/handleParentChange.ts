@@ -16,7 +16,7 @@ export async function handleParentChange(
 ) {
   // remove previous incoming edge if present.
   const attrMetaVertex = {
-    P: { props: { type: "Attr" } },
+    P: { type: "Attr" },
   } as unknown as Vertex;
   if (fromParentVertex) {
     setParentValue(graph, setGraph, txnId, fromVertex, attrMetaVertex);

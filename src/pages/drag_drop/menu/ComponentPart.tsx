@@ -48,6 +48,10 @@ export function ComponentPart() {
       });
     }
   };
+  const componentTreeMetaData = {
+    collection: paginationExpression({ coll: "CompCategory" }),
+    child: { collection: "->CompCategoryComp" },
+  };
   // Fetch data function
   async function fetchData(): Promise<{
     graph?: any;
@@ -55,10 +59,7 @@ export function ComponentPart() {
     error?: string;
   }> {
     try {
-      const data = await getTreeDataMGCall({
-        collection: paginationExpression({ coll: "CompCategory" }),
-        child: { collection: "->CompCategoryComp" },
-      });
+      const data = await getTreeDataMGCall(componentTreeMetaData);
       return { graph: data.graph, data: data };
     } catch (error: any) {
       return { error: error.message };
@@ -78,17 +79,18 @@ export function ComponentPart() {
       } else {
         if (result?.graph) {
           setGraphData(graph, setGraph, result.graph);
-          const data2 = getTreeData(graph, setGraph, {
-            collection: paginationExpression({ coll: "CompCategory" }),
-            child: { collection: "->CompCategoryComp" },
-          });
-          defaultData = data2;
-          setFilteredData(data2);
-          setIsFetchingData(false);
+          getTreeDataAndSetState();
         }
       }
     }
   });
+
+  function getTreeDataAndSetState() {
+    const data2 = getTreeData(graph, setGraph, componentTreeMetaData);
+    defaultData = data2;
+    setFilteredData(data2);
+    setIsFetchingData(false);
+  }
 
   const titleStyle = {
     "font-size": "17px",
@@ -138,6 +140,7 @@ export function ComponentPart() {
       setFilteredData(filteredData);
     }
   };
+
 
   function ListItemComponent(props: { child: Vertex }) {
     const [isHovered, setIsHovered] = createSignal(false);

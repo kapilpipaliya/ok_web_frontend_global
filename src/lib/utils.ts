@@ -1,17 +1,8 @@
-import type { Vertex } from "~/lib/graph/graph";
-
 
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-export function getValueFromVertexOrKey(
-  obj: { [key: string]: Vertex } | any,
-  key: string,
-) {
-  return obj?.[key];
-  // return obj[key]?.id ? obj[key].P.value : obj[key];
-}
 export const isPageDesignerPath = (path: string) => {
   const lowerPath = path.toLowerCase();
   const pageDesignerPath = [
@@ -66,4 +57,20 @@ export function isNumber(i: any) {
     return !Number.isNaN(i);
   }
   return !1;
+}
+export function deNullify<T extends Record<string, any>>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+
+  for (const key of Object.keys(obj)) {
+    if (obj[key] !== null && obj[key] !== undefined) {
+      result[key as keyof T] = obj[key];
+    }
+  }
+
+  return result;
+}
+
+
+export function ifNotNull<T>(value: T | null): T | undefined {
+  return value !== null ? value : undefined;
 }

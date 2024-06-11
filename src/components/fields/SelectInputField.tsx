@@ -26,7 +26,6 @@ import {
   getSelectedVertexValue,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
-import { getValueFromVertexOrKey } from "~/lib/utils";
 import {
   onChangeHandler,
   setValueGlobal,
@@ -314,10 +313,7 @@ export function SelectInputField(
                     graph,
                     setGraph,
                     [graph.vertexes[vertexId]],
-                    getValueFromVertexOrKey(
-                      field.meta.P,
-                      "displayExpr",
-                    ) || `::'P.${IdAttr}'`,
+                    field.meta.P.displayExpr || `::'P.${IdAttr}'`,
                   ).vertexes
                 }
               </>

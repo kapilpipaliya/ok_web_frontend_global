@@ -30,6 +30,7 @@ import { APP_BASE_URL } from "~/lib/constants";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { FormWrapper } from "~/components/page_item_render/FormWrapper";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
+import { deNullify } from "~/lib/utils";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -130,7 +131,7 @@ export function GenericField(
               {(vertex) => (
                 <A
                   {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-                  {...props.meta.P}
+                  {...deNullify(props.meta.P)}
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
                 >
@@ -152,7 +153,7 @@ export function GenericField(
             <Match when={props.meta.P.href}>
               <A
                 {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-                {...props.meta.P}
+                {...deNullify(props.meta.P)}
                 href={getUrl(
                   graph,
                   setGraph,
@@ -192,7 +193,7 @@ export function GenericField(
           <img
             loading="lazy"
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
             src={getText(
               graph,
               setGraph,
@@ -206,7 +207,7 @@ export function GenericField(
         <Match when={component() === "Tabs"}>
           <Tabs
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
@@ -224,14 +225,14 @@ export function GenericField(
             width={props.meta.P.width || "24"}
             height={props.meta.P.height || "24"}
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.text}>
           <Dynamic
             component={props.meta.P.as || "div"}
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
             {...getAttrs(props.meta)}
             class={props.meta.P.class}
           >
@@ -246,7 +247,7 @@ export function GenericField(
         <Match when={component() === "Button"}>
           <CustomButton
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </CustomButton>
@@ -258,7 +259,7 @@ export function GenericField(
                 ?.length || []
             }
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Table>
@@ -281,7 +282,7 @@ export function GenericField(
         <Match when={component() === "Collapsible"}>
           <Collapsible
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Collapsible>
@@ -289,7 +290,7 @@ export function GenericField(
         <Match when={component() === "Avtar"}>
           <Avatar
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
@@ -323,7 +324,7 @@ export function GenericField(
         <Match when={component() === "Accordion"}>
           <Accordion
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
@@ -333,7 +334,7 @@ export function GenericField(
             separator={props.meta.P.separator ?? "›"}
             aria-label="breadcrumb"
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
@@ -341,7 +342,7 @@ export function GenericField(
         <Match when={component() === "ProgressBar"}>
           <Progress
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
           />
         </Match>
         <Match when={component() === "Form"}>
@@ -350,14 +351,14 @@ export function GenericField(
         <Match when={component() === "Divider"}>
           <hr
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
             class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P.class}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
             etc={props.meta.P.class}
             heading={propWithDefault("heading")}
             divider={propWithDefault("divider", true)}
@@ -367,7 +368,7 @@ export function GenericField(
         <Match when={component() === "Rating"}>
           <StarRating
             {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
-            {...props.meta.P}
+            {...deNullify(props.meta.P)}
             etc={props.meta.P.class}
             heading={propWithDefault("heading", "Rating")}
           />

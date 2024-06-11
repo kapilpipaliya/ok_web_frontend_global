@@ -19,6 +19,7 @@ import Label from "~/components/solid_blocks/Label";
 import MultiSelectField from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
+import { deNullify, ifNotNull } from "~/lib/utils";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -47,7 +48,7 @@ export function GenericInputField(
           <Match when={component() === "CheckBox"}>
             <Checkbox
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
@@ -75,8 +76,8 @@ export function GenericInputField(
             <input
               type="color"
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              {...deNullify(props.meta.P)}
+              value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
               onInput={(e) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -97,7 +98,7 @@ export function GenericInputField(
           <Match when={component() === "FileUploader"}>
             <FileUploader
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               image={props.meta?.P.image}
             />
           </Match>
@@ -122,15 +123,15 @@ export function GenericInputField(
                   );
               }}
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               isNumber
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
@@ -156,7 +157,7 @@ export function GenericInputField(
             <Progress
               style={{ ...props.meta?.P }}
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
@@ -209,7 +210,7 @@ export function GenericInputField(
             <TextField
               class="global-style"
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -226,7 +227,7 @@ export function GenericInputField(
               }}
               placeholder={props.meta?.P.label ?? props.title}
               multiline
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
           {/* Expression Builder */}
@@ -245,7 +246,7 @@ export function GenericInputField(
             <TextField
               class="global-style"
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -261,7 +262,7 @@ export function GenericInputField(
                   );
               }}
               placeholder={props.meta?.P.label ?? props.title}
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
               trailing={
                 <ExpressionBuilder
                   content={props.data?.P[props.meta.P[IdAttr]]}
@@ -293,7 +294,7 @@ export function GenericInputField(
             <TextField
               class={"global-style"}
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue
@@ -309,13 +310,13 @@ export function GenericInputField(
                     false,
                   );
               }}
-              value={props.data?.P[props.meta.P[IdAttr]]}
+              value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
           <Match when={component() === "Label"}>
             <Label
               {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
-              {...props.meta?.P}
+              {...deNullify(props.meta.P)}
             >
               <PageItemRender metaVertex={props.meta} />
             </Label>

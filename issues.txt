@@ -16,8 +16,21 @@ whenever any css property is selected, highlight it.  ✅
 in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible. ✅ 
 add a option to remove a property value ✅ 
 
+In page designer, Page menu tab, on mouse hover display page preview.
+In form designer, root vertex when hover over it display properties icon.
+Test all css properties applying properly.
+make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
+(Kapil) write a table routes to see all the form entries.
+Make Multi Stage Form design possible.
+When null value is set, apply default value.
 
+Refactor files:
+/lib/graph/get/async/graph_functions.ts
+/lib/graph/mutate/mutate.ts
+/lib/graph/mutate/form_functions.ts
+/pages/drag_drop/actions/Properties.tsx
 
+Refactor all cypher functions, use eval function whenever possible.
 
 make undo redo working
 make same page designer display in thank you page.
@@ -77,3 +90,6 @@ Make Drag and Drop on touch screen working
 Notes:
 we are using two libraries:
 expression-eval => jsep (for +,-) => jsonata(filter, projection)
+
+To find all files in your codebase whose line count is greater than 400, you can use the following command:
+find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
