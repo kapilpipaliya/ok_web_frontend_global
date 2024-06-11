@@ -8,7 +8,7 @@ import {
   For,
   createMemo,
 } from "solid-js";
-import { CssDefaultEditorContext, CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { Container, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -31,15 +31,16 @@ export const DisplaySelector = (props: {
   }
 
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [cssDisplayState, setCssDisplayState] = useContext(CssStateContext);
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [isActive, setIsActive] = createSignal(false);
   const toggleDropdown = () => setIsActive(!isActive());
   const selected = () =>
-      cssState[props.name] ||props.value || cssDefault[props.name] || '';
+    cssState[cssDisplayState() ?? '']?.[props.name] ||props.value || cssDefault[props.name] || '';
 
   const selectOption = (option: any) => {
     if (isAddToClass()) {
-      setCssState(props.name, option.value || option);
+      setCssState(cssDisplayState(),props.name, option.value || option);
     }
     if (props.onChangeInput)
       props.onChangeInput(props.name, option.value || option);
@@ -71,16 +72,16 @@ export const DisplaySelector = (props: {
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
               <ContainerLabel onIconClick={() => {
-                console.log(props.name, selected(),cssDefault[props.name]);
+                console.log(props.name, selected(),cssDefault[props.name] || '');
                 
-                setCssState(props.name, cssDefault[props.name])}} showIcon={isDefaultValue()} title={props.label} />
+                setCssState(cssDisplayState(),props.name, cssDefault[props.name] || '')}} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel onIconClick={() => setCssState(cssDisplayState(), props.name, cssDefault[props.name] || '')} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

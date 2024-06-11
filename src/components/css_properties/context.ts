@@ -1,12 +1,11 @@
-import { createContext } from "solid-js";
+import { Accessor, Setter, createContext, createSignal } from "solid-js";
 import { createStore, type SetStoreFunction } from "solid-js/store";
 
 export const CssEditorContext = createContext<
   [
-    { [p: string]: any },
-    SetStoreFunction<{
+    { [state: string]: { [key: string]: string } }, SetStoreFunction<{
       [p: string]: any;
-    }>,
+    }>
   ]
 >(createStore({}));
 export const CssDefaultEditorContext = createContext<
@@ -17,5 +16,6 @@ export const CssDefaultEditorContext = createContext<
     }>,
   ]
 >(createStore({}));
+export const CssStateContext = createContext(createSignal(''));
 export const sizeTypes = ["px", "%", "em", "rem", "vh", "vw"];
 export const timesTypes = ["s", "ms"];

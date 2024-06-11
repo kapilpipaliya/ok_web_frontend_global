@@ -7,7 +7,7 @@ import {
 import type { Vertex } from "~/lib/graph/graph";
 import { createMemo, onCleanup, onMount } from "solid-js";
 import { createStore, reconcile } from "solid-js/store";
-import { CssDefaultEditorContext, CssEditorContext } from "./context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
@@ -24,23 +24,24 @@ export function ClassDesignTab(props: {
   isRealTime?: boolean;
   txnId?: number;
 }) {
-  const [cssState, setCssState] = createStore({} as { [key: string]: any });
-  const [cssDefaultState, setDefaultCssState] = createStore({} as { [key: string]: any });
-  const [state,setState]= createSignal('');
+  const [cssState, setCssState] = createStore({} as { [state: string]: { [key: string]: string } });
+  const [cssDefaultState, setDefaultCssState] = createStore({} as { [state: string]: { [key: string]: string } });
+  const [state, setState] = createSignal('');
+  
   const parseAndApplyCssRules = (valueString: string, isDefault = false) => {
-    const cssRules = {} as { [key: string]: string };
+    const cssRules = {} as { [state: string]: { [key: string]: string } };
 
-    for (const rule of valueString.split(/[\s\n]+/)) {
+    for (const rule of valueString.split(/[\s\n]+/)) {      
       const [property, ...valueAndState] = rule.split(/:(.+)/);
       if (!property) continue;
 
-      const value = valueAndState[0];
-      const state = valueAndState[1] || "";
-
-      const stateKey = state ? `:${state}` : "";
-      cssRules[`${property}${stateKey}`] = value;
+      const [value, state = ''] = valueAndState[0].split(/:(.+)/);
+      if (!cssRules[state]) {
+        cssRules[state] = {};
+      }
+      cssRules[state][property] = value;
     }
-    
+
     if (isDefault) {
       setDefaultCssState(reconcile(cssRules));
     } else {
@@ -63,10 +64,17 @@ export function ClassDesignTab(props: {
       ...cssDefaultState,
       ...cssState,
     };
-
+    console.log(mergedState);
+    
+    // TODO: process the value
     const value = Object.entries(mergedState)
-      .map(([key, value]) => `${key}:${value}${state() ? `:${state()}` : ""}`)
+      .map(([stateKey, value]) => {        
+        return Object.entries(value)
+          .map(([property, val]) => `${property}:${val}${stateKey ? `:${stateKey}` : ""}`)
+          .join("\n");
+      })
       .join("\n");
+
     props.setValue?.(value);
     setCssState(mergedState);
     setDefaultCssState(cssDefaultState);
@@ -76,30 +84,32 @@ export function ClassDesignTab(props: {
   return (
     <CssEditorContext.Provider value={[cssState, setCssState]}>
       <CssDefaultEditorContext.Provider value={[cssDefaultState, setDefaultCssState]}>
-        <span class={"m:10|0"}>
-          <Tabs style={{ padding: "10px" }}>
-            <TabList class={"m:5px"}>
-              <Tab class={"w:50%"}>Design</Tab>
-              <Tab class={"w:50%"}>Code</Tab>
-            </TabList>
-            <TabContainer>
-              <Container>
-                <div class="block w:inherit p:20px|10px|0px|10px">
-                  <DisplaySelector value={state()} isAddToClass={false} isLabelOnTop={false} label="Select State" name="state" options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']} onChangeInput={(name,v)=>setState(v)} />
-                  <StyleEditorTab />
-                </div>
-              </Container>
-            </TabContainer>
-            <TabContainer>
-              <Container>
-                <TextEditorTab
-                  getCssValue={memoizedCssValue()}
-                  parseAndApplyCssRules={parseAndApplyCssRules}
-                />
-              </Container>
-            </TabContainer>
-          </Tabs>
-        </span>
+        <CssStateContext.Provider value={[state, setState]}>
+          <span class={"m:10|0"}>
+            <Tabs style={{ padding: "10px" }}>
+              <TabList class={"m:5px"}>
+                <Tab class={"w:50%"}>Design</Tab>
+                <Tab class={"w:50%"}>Code</Tab>
+              </TabList>
+              <TabContainer>
+                <Container>
+                  <div class="block w:inherit p:20px|10px|0px|10px">
+                    <DisplaySelector value={state()} isAddToClass={false} isLabelOnTop={false} label="Select State" name="state" options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']} onChangeInput={(name, v) => setState(v)} />
+                    <StyleEditorTab />
+                  </div>
+                </Container>
+              </TabContainer>
+              <TabContainer>
+                <Container>
+                  <TextEditorTab
+                    getCssValue={memoizedCssValue()}
+                    parseAndApplyCssRules={parseAndApplyCssRules}
+                  />
+                </Container>
+              </TabContainer>
+            </Tabs>
+          </span>
+        </CssStateContext.Provider>
       </CssDefaultEditorContext.Provider>
     </CssEditorContext.Provider>
   );
