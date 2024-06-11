@@ -43,6 +43,8 @@ export function ClassDesignTab(props: {
       .join("\n");
   }
 
+  const defaultValues = createMemo(() => props.meta.P.value || "");
+
   // Create a memo to reactively track the CSS value string
   const cssValue = createMemo(() => (props.data?.P[props.meta.P.name] as string) ?? "");
 

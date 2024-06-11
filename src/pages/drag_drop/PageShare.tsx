@@ -12,7 +12,7 @@ const ShareSection = () => {
   const [showCopiedTooltip, setShowCopiedTooltip] = createSignal(false);
   createEffect(() => {
     if (access() === "everyone") {
-      setEmail(""); // Clear email
+      setEmail("");
     }
   });
 
@@ -20,7 +20,7 @@ const ShareSection = () => {
     if (pageConfig) {
       return `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
     }
-      return ""
+    return ""
   };
 
   const copyToClipboard = () => {

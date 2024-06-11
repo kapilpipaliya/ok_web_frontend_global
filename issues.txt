@@ -22,7 +22,6 @@ Test all css properties applying properly.
 make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
 (Kapil) write a table routes to see all the form entries.
 Make Multi Stage Form design possible.
-When null value is set, apply default value.
 
 Refactor files:
 /lib/graph/get/async/graph_functions.ts
@@ -35,27 +34,26 @@ Refactor all cypher functions, use eval function whenever possible.
 make undo redo working
 make same page designer display in thank you page.
 
+Fix page component data not loaded in page designer
+
 (when Submit do not redirect to parent screen?)
 
 remain(kapil);
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
 
-Write a function to get all the fields in the form
+Write a function to get all the fields in the form, make sync of Nav working
 
-
-Letter:
 Make the forms made using form designer load and save working
 Make a custom forms builder using the original forms.
 Make a table designer using the forms fields.
-Reduce Saved Relationships in the page designer.
 
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
 add name property in each input components 
 
-Make page preview route working
-
-
-
+Sorting, Filtering support on the table
+Load table data from server with pagination when form have many rows
+fix import export button on the form
+Make Drag and Drop on touch screen working
 
 Kapil:
 collection edit page is broken.
@@ -77,13 +75,6 @@ Make Permissions working in DynamicForm component.
 Auth:
 Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are autorized.
 Only super admin can modify permissions data for now.
-
-
-Letter:
-Sorting, Filtering support on the table
-Load table data from server with pagination when form have many rows
-fix import export button on the form
-Make Drag and Drop on touch screen working
 
 
 
