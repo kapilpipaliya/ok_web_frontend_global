@@ -1,4 +1,11 @@
 import neo4j, { type Session, type Node, int } from "neo4j-driver";
+import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
+import {getFormMetaDataAsync} from "~/lib/graph/get/async/graph_functions";
+import {evalAsync} from "~/lib/expression_eval";
+import jsep from "jsep";
+import {Expression, getDataMGCall} from "~/cypher/get/traverse";
+import {Vertex} from "~/lib/graph/graph";
+import {convertNodeToJson} from "~/lib/convertNodeToJson";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: { userport: string; nodesToTransfer: string[]; }) {
@@ -45,25 +52,81 @@ async function transferNodeTypes(
   nodesToTransfer: string[],
 ) {
   for (const nodeType of nodesToTransfer) {
-    const readResult = await sessionSource.run(
+    const form = await getFormMetaDataAsync(
+      // @ts-ignore
+      undefined,
+      undefined,
+      nodeType,
+    );
+    if (form.error) return "Error";
+    const { incoming, outgoing }: { incoming: any; outgoing: any } =
+      getEdgesFromRowsAttr(form.form!.attributes);
+
+    const result = await processNodeSync({
+      expression: `g:'${nodeType}'`,
+      incoming,
+      outgoing,
+    });
+
+/*    const readResult = await sessionSource.run(
       `MATCH (n:${nodeType}) RETURN n;`,
     );
     // console.log(`Retrieved ${readResult.records.length} ${nodeType} nodes from admin database.`);
 
     for (const record of readResult.records) {
-      await transferNode(sessionSource, sessionTarget, record.get("n"), nodeType);
-    }
+      await findOrCreateNodeAndProcessEdges(sessionSource, sessionTarget, record.get("n"), nodeType);
+    }*/
   }
 }
 
-// Function to handle transfer of a single node.
-async function transferNode(
+export async function processNodeSync(
   sessionSource: Session,
   sessionTarget: Session,
-  node: Node,
+  expression: Expression,
+) {
+  const context = {
+    nodes: {} as { [key: string]: any },
+    relationships: {} as { [key: string]: any },
+    vertexes: undefined as any,
+  }
+  let mainResult = await evalAsync(jsep(expression.expression), context);
+  if (mainResult && mainResult.length > 0) {
+      for (const vertex of mainResult) {
+        const createdVertex = findOrCreateNodeAndProcessEdges(sessionSource, sessionTarget, vertex, vertex.L[0]);
+        if (expression.incoming && mainResult && mainResult.length > 0) {
+          for (const exp of expression.incoming) {
+            context.vertexes = [createdVertex];
+            await processNodeSync(sessionSource, sessionTarget, exp);
+          }
+        }
+        if (expression.outgoing && mainResult && mainResult.length > 0) {
+          for (const exp of expression.outgoing) {
+            context.vertexes = [createdVertex];
+            await processNodeSync(sessionSource, sessionTarget, exp);
+          }
+        }
+      }
+  }
+
+
+
+  return {
+    result: mainResult,
+    graph: {
+      vertexes: context.nodes,
+      edges: context.relationships,
+    },
+  };
+}
+
+// Function to handle transfer of a single node.
+async function findOrCreateNodeAndProcessEdges( // transferNode
+  sessionSource: Session,
+  sessionTarget: Session,
+  node: Vertex,
   nodeType: string,
 ) {
-  const properties = { ...node.properties };
+  const properties = { ...node.P };
   const existingNode = await findExistingNode(
     sessionTarget,
     nodeType,
@@ -82,9 +145,10 @@ async function transferNode(
     createdNode = await createNode(sessionTarget, nodeType, properties);
   }
 
-  await addNodeEdges(sessionSource, sessionTarget, nodeType, node, createdNode);
+  // await addNodeEdges(sessionSource, sessionTarget, nodeType, node, createdNode);
 
   // console.log("Node successfully transferd or updated.");
+  return createdNode;
 }
 
 // Function to update properties of an existing node.
@@ -117,29 +181,31 @@ async function createNode(
 async function addNodeEdges(
   sessionSource: Session,
   sessionTarget: Session,
-  nodeType: string,
-  node: Node,
+
+  superChildrenVertexes: Vertex[],
   createdNode: Node,
+  inward: boolean
 ) {
-  if (nodeType === "CompCategory") {
-  } else if (nodeType === "Comp") {
-    const superChildrenVertexes = await getChildrenVertex(
+
+    const superChildrenVertexes = await getChildrenOrParentVertex(
       sessionSource,
       node.elementId,
       "CompProp",
+      inward
     );
-    const userChildrenVertexes = await getChildrenVertex(
+    const userChildrenVertexes = await getChildrenOrParentVertex(
       sessionTarget,
       createdNode.elementId,
       "CompProp",
+      inward
     );
 
-    for (const superVertex of superChildrenVertexes.records) {
-      const superProperties = { ...superVertex.get("m").properties };
+    for (const superVertex of superChildrenVertexes) {
+      const superProperties = { ...superVertex.P };
       let isPropertyExist = false;
 
-      for (const childVertex of userChildrenVertexes.records) {
-        const userProperties = { ...childVertex.get("m").properties };
+      for (const childVertex of userChildrenVertexes) {
+        const userProperties = { ...childVertex.P };
         if (superProperties.name === userProperties.name) {
           const query =
             "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
@@ -159,17 +225,16 @@ async function addNodeEdges(
         });
       }
     }
-  } else if (nodeType === "Nav") {
-    // TODO
-  }
+
 }
 
 // Function to retrieve child vertices of a node based on a specific edge type.
-const getChildrenVertex = (session: Session, elementId: string, edgeType: string) => {
-  return session.run(
-    `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;`,
+const getChildrenOrParentVertex = async (session: Session, elementId: string, edgeType: string, inward: boolean) => {
+  const result = await session.run(
+    !inward ? `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;` : `MATCH (n)<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`,
     { id: int(elementId) },
   );
+  return result.records.map(v => convertNodeToJson(v.get('m')))
 };
 
 // Function to find an existing node by name.

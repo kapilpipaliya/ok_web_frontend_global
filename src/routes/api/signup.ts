@@ -1,4 +1,4 @@
-// Import necessary modules and functions
+import type { Node } from "neo4j-driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
 import type { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
@@ -9,6 +9,7 @@ import { getHttpsSession } from "~/server/getHttpsSession";
 import { v4 as uuidv4 } from "uuid";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import {connectToNeo4jWithRetry} from "~/cypher/retry";
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {
@@ -24,11 +25,15 @@ export async function POST({ request }: APIEvent) {
 
   try {
     // Check if the properties already exists
-    await checkExistance(tx, username, email, subdomain);
+    await checkExistence(tx, username, email, subdomain);
 
-    // Configure ports for the user's database
+    // Get ports for the user's database
     const { driverPort, logsPort, labPort }: { [key: string]: any } =
-      await PortConfigure(tx, username, subdomainFromUrl);
+      await getNewPortsForUser(tx);
+
+    await waitForDockerCreate(username, driverPort, logsPort, labPort);
+
+    await updatePortForNewUser(tx, driverPort, logsPort, labPort);
 
     // Create a new user in the database according subdomain
     const createUserResult = await createUserInDB(
@@ -43,7 +48,7 @@ export async function POST({ request }: APIEvent) {
       labPort,
     );
 
-    const user = convertNodeToJson(createUserResult.records[0].get("u"));
+    const user = convertNodeToJson(createUserResult);
 
     // Import CSV data to the user's database
     await FetchCSVData(user.P.driverPort);
@@ -51,7 +56,7 @@ export async function POST({ request }: APIEvent) {
     await tx.commit();
     await session.close();
 
-    // Update session data with user's email and subdomain
+    // Update session data with user's email
     await updateSession(createUserResult);
 
     const { password: _, ...properties } = user.P;
@@ -151,16 +156,13 @@ async function createUserInDB(
     session2.close();
   }
 
-  return createUserResult;
+  return createUserResult.records[0].get("u") as Node;
 }
 
 // Function to configure ports for the user's database
-async function PortConfigure(
+async function getNewPortsForUser(
   tx: TransactionPromise,
-  username: string,
-  subdomainFromUrl: string,
 ) {
-  try {
     // Query to retrieve database port configuration
     const query = "MATCH (n:DBPort) RETURN n;";
     const resultPort = await tx.run(query);
@@ -180,34 +182,34 @@ async function PortConfigure(
       portsResult = portResult.P;
     }
 
-    const { driverPort, logsPort, labPort } = portsResult;
+    return portsResult
 
-    // Create Docker container with configured ports
-    await createDockerContainer("memgraph/memgraph-platform", username, {
-      [driverPort]: "7687",
-      [logsPort]: "7444",
-      [labPort]: "3000",
-    });
-
-    await new Promise((resolve, reject) => setTimeout(resolve, 10000));
-
-    // Update port configuration in the database
-    const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${
-      driverPort + 10
-    }, n.logsPort = ${logsPort + 10}, n.labPort = ${
-      labPort + 10
-    } SET n.updatedAt = localDateTime() RETURN n;`;
-    await tx.run(updatePort);
-
-    return { driverPort, logsPort, labPort };
-  } catch (error: any) {
-    console.log("DB Setup error:", error.stack);
-    await tx.rollback();
-    throw new Error(error.message);
-  }
 }
+async function waitForDockerCreate(username: string, driverPort: number, logsPort: number, labPort: number) {
+  // Create Docker container with configured ports
+  await createDockerContainer("memgraph/memgraph-platform", username, {
+    [driverPort]: "7687",
+    [logsPort]: "7444",
+    [labPort]: "3000",
+  });
 
-async function checkExistance(
+  const driver = await connectToNeo4jWithRetry(`bolt://localhost:${driverPort}`, "", "", 20);
+  // Remember to close the driver when done
+  // driver.close();
+
+  await new Promise((resolve, reject) => setTimeout(resolve, 1000));
+}
+async function updatePortForNewUser(  tx: TransactionPromise,
+                            driverPort: number, logsPort: number, labPort: number) {
+  // Update port configuration in the database for the new user
+  const updatePort = `MATCH (n:DBPort) SET n.driverPort = ${
+    driverPort + 10
+  }, n.logsPort = ${logsPort + 10}, n.labPort = ${
+    labPort + 10
+  } SET n.updatedAt = localDateTime() RETURN n;`;
+  await tx.run(updatePort);
+}
+async function checkExistence(
   tx: TransactionPromise,
   username: string,
   email: string,

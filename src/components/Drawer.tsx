@@ -5,7 +5,7 @@ function Drawer(props: {
     onClick: () => void;
     isOpen: boolean;
   }) => JSX.Element;
-  children: any;
+  children: JSX.Element;
   width?: string;
   open?: any;
   setIsOpen?: any;

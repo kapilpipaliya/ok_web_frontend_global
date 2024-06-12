@@ -4,7 +4,7 @@ import {
   Show,
   Switch,
   Match,
-  type Accessor,
+  type Accessor, JSX,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
@@ -250,14 +250,14 @@ const TableActions = (props: {
   );
 };
 
-export function Table(props: { headers: number; children: any }) {
+export function Table(props: { headers: number; children: JSX.Element; class?: string }) {
   return (
     <div
       class="overflow:visible rel r:10"
       style={{ "scrollbar-width": "thin" }}
     >
       <div
-        class="grid bb:2px|solid|#37c"
+        class={`grid bb:2px|solid|#37c ${props.class || ""}`}
         style={`grid-template-columns: repeat(${props.headers}, 1fr);width: 100%; border-radius: 10px;overflow: auto;scrollbar-width: thin;font-size: 0.9em;`}
       >
         {props.children}
@@ -279,7 +279,7 @@ export function TableHeadCell(props: any) {
 
 export function TableBodyCell(props: {
   index?: number;
-  children: any;
+  children: JSX.Element;
   class?: string;
 }) {
   return (

@@ -1,8 +1,8 @@
-import { createEffect, createSignal, createUniqueId, Show } from "solid-js";
+import {createEffect, createSignal, createUniqueId, JSX, Show} from "solid-js";
 
 export function CustomTooltip(props: {
   message: string;
-  children: any;
+  children: JSX.Element;
   title?: string;
 }) {
   const [isHovered, setIsHovered] = createSignal(false);

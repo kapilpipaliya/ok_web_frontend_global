@@ -1,4 +1,4 @@
-import { Match, Show, Switch, useContext } from "solid-js";
+import {createMemo, Match, Show, Switch, useContext} from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import {
@@ -20,6 +20,7 @@ import MultiSelectField from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify, ifNotNull } from "~/lib/utils";
+import {mergeCSS} from "~/components/css_properties/cssUtils";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -34,6 +35,7 @@ export function GenericInputField(
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const component = () => props.component;
   // todo: make a common onChange if possible.
+  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {});
   return (
     <div
       classList={{
@@ -47,8 +49,9 @@ export function GenericInputField(
         <Switch>
           <Match when={component() === "CheckBox"}>
             <Checkbox
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
@@ -75,8 +78,9 @@ export function GenericInputField(
           <Match when={component() === "ColorBox"}>
             <input
               type="color"
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
               onInput={(e) => {
                 props.setValue
@@ -97,8 +101,9 @@ export function GenericInputField(
           <Match when={component() === "DropDownBox"}>Dropdown</Match>
           <Match when={component() === "FileUploader"}>
             <FileUploader
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
               image={props.meta?.P.image}
             />
           </Match>
@@ -122,16 +127,18 @@ export function GenericInputField(
                     false,
                   );
               }}
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
               isNumber
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
@@ -156,13 +163,14 @@ export function GenericInputField(
           <Match when={component() === "ProgressBar"}>
             <Progress
               style={{ ...props.meta?.P }}
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
             <MultiSelectField
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               onRemove={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -208,9 +216,9 @@ export function GenericInputField(
 
           <Match when={component() === "TextArea"}>
             <TextField
-              class="global-style"
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -244,9 +252,9 @@ export function GenericInputField(
             }
           >
             <TextField
-              class="global-style"
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -292,9 +300,9 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "TextBox"}>
             <TextField
-              class={"global-style"}
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue
@@ -315,8 +323,9 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "Label"}>
             <Label
-              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {})}
+              {...defaultValues()}
               {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().css, props.meta.P.css)}
             >
               <PageItemRender metaVertex={props.meta} />
             </Label>

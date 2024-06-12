@@ -1,30 +1,23 @@
-import type { Edge, Vertex } from "../../lib/graph/graph";
-import { calculateFilter } from "../../lib/graph/get/sync/traverse";
-import { getDriver } from "~/cypher/driver";
-import { type Session, int } from "neo4j-driver";
-import {
-  convertNodeToJson,
-  convertRelationshipToJson,
-} from "../../lib/convertNodeToJson";
-import { getSubDomain } from "~/server/domain_utils";
-import { getRequestURL } from "vinxi/http";
+import type {Edge, Vertex} from "~/lib/graph/graph";
+import {calculateFilter} from "~/lib/graph/get/sync/traverse";
+import {int, type Session} from "neo4j-driver";
+import {convertNodeToJson, convertRelationshipToJson,} from "~/lib/convertNodeToJson";
+import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
+import {findVertexMGCallId} from "~/cypher/get/findVertexMGCallId";
+
 // ->
 export async function evalGetChildren(
   vertexes: Vertex[],
   edgeType: string,
-  {
-    nodes,
-    relationships,
-  }: {
+  context: {
     nodes?: { [key: string]: Vertex };
     relationships?: { [key: string]: Edge };
+    session?: Session
   } = {},
 ) {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
   if (!vertexes || vertexes.length === 0) return;
-  const session = (await getDriver(subDomain)).session();
+  const session = context.session || await getSessionForSubdomain();
   let type;
   if (edgeType.includes("$0")) {
     type = edgeType.replaceAll("$0", vertexes[0].L[0]);
@@ -57,12 +50,12 @@ export async function evalGetChildren(
     const result = await session.run(query, params);
     return result.records.map((record) => {
       const vertex = convertNodeToJson(record.get("child"));
-      if (nodes) {
-        nodes[vertex.id] = vertex;
+      if (context.nodes) {
+        context.nodes[vertex.id] = vertex;
       }
-      if (relationships) {
+      if (context.relationships) {
         const relationship = convertRelationshipToJson(record.get("r"));
-        relationships[relationship.id] = relationship;
+        context.relationships[relationship.id] = relationship;
       }
       return vertex;
     });
@@ -74,6 +67,8 @@ export async function evalGetChildren(
       error,
     );
     return;
+  } finally {
+    await context.session?.close();
   }
 }
 
@@ -81,19 +76,15 @@ export async function evalGetChildren(
 export async function evalGetParents(
   vertexes: Vertex[],
   edgeType: string,
-  {
-    nodes,
-    relationships,
-  }: {
+  context: {
     nodes?: { [key: string]: Vertex };
     relationships?: { [key: string]: Edge };
+    session?: Session
   } = {},
 ) {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
   if (!vertexes || vertexes.length === 0) return;
-  const session = (await getDriver(subDomain)).session();
+  const session = context.session || await getSessionForSubdomain();
   const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
   let query;
   let params;
@@ -121,12 +112,12 @@ export async function evalGetParents(
     const result = await session.run(query, params);
     return result.records.map((record) => {
       const vertex = convertNodeToJson(record.get("parent"));
-      if (nodes) {
-        nodes[vertex.id] = vertex;
+      if (context.nodes) {
+        context.nodes[vertex.id] = vertex;
       }
-      if (relationships) {
+      if (context.relationships) {
         const relationship = convertRelationshipToJson(record.get("r"));
-        relationships[relationship.id] = relationship;
+        context.relationships[relationship.id] = relationship;
       }
       return vertex;
     });
@@ -138,69 +129,9 @@ export async function evalGetParents(
       error,
     );
     return;
+  } finally {
+    await context.session?.close();
   }
-}
-
-async function findVertexsMGCallId(
-  session: Session,
-  {
-    id,
-    label,
-    skip,
-    limit,
-    name,
-  }: {
-    id?: string;
-    label?: string;
-    skip?: number;
-    limit?: number;
-    name?: string;
-  },
-  {
-    nodes,
-    relationships,
-  }: {
-    nodes?: { [key: string]: Vertex };
-    relationships?: { [key: string]: Edge };
-  } = {},
-) {
-  let query: string | undefined;
-  const params = {} as { name?: string; id: any };
-
-  if (id) {
-    query = "MATCH (n) WHERE id(n) = $id RETURN n";
-    params.id = int(id);
-  } else if (label) {
-    if (name) {
-      query = `MATCH (n:${label}) WHERE n.name = $name RETURN n`;
-      params.name = name;
-    } else {
-      query = `MATCH (n:${label}) RETURN n`;
-    }
-  }
-
-  if (name || skip || limit) {
-    if (skip) {
-      query += ` SKIP ${skip}`;
-    }
-
-    if (limit) {
-      query += ` LIMIT ${limit}`;
-    }
-  }
-  if (!query) {
-    throw new Error("Either 'id' or 'label' must be provided.");
-  }
-
-  const result = await session.run(query, params);
-  const vertexes = result.records.map((record) => {
-    const vertex = convertNodeToJson(record.get("n"));
-    if (nodes) {
-      nodes[vertex.id] = vertex;
-    }
-    return vertex;
-  });
-  return vertexes;
 }
 
 export async function evalGlobalColl(
@@ -208,28 +139,23 @@ export async function evalGlobalColl(
   context: {
     nodes?: { [key: string]: Vertex };
     relationships?: { [key: string]: Edge };
+    session?: Session;
   } = {},
 ) {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
-
+  const session = context.session  ||= await getSessionForSubdomain();
   const { type, filter, isMultiple, skip, limit } = calculateFilter(edgeType);
 
-  const session = (await getDriver(subDomain)).session();
-
   try {
-    const result = await findVertexsMGCallId(
+    return await findVertexMGCallId(
       session,
-      { label: type ?? edgeType, skip, limit, name: filter },
+      {label: type ?? edgeType, skip, limit, name: filter},
       context,
     );
-
-    return result;
   } catch (error: any) {
     throw new Error(error.message);
   } finally {
-    await session.close();
+    await context.session?.close();
   }
 }
 
@@ -238,56 +164,20 @@ export async function evalVertexById(
   context: {
     nodes?: { [key: string]: Vertex };
     relationships?: { [key: string]: Edge };
+    session?: Session
   } = {},
 ) {
   "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
-  const session = (await getDriver(subDomain)).session();
+  const session = context.session ||= await getSessionForSubdomain();
   try {
-    return await findVertexsMGCallId(session, { id }, context);
+    return await findVertexMGCallId(session, { id }, context);
   } catch (error: any) {
     throw new Error(error.message);
   } finally {
-    await session.close();
+    await context.session?.close();
   }
 }
 
 // evalVertexById
 // evalGetParents
 
-export const checkIfNameExistsMGCall = async (
-  label: string,
-  name: string,
-  id?: string,
-) => {
-  "use server";
-  const host = getRequestURL().hostname;
-  const subDomain = await getSubDomain(host);
-  const session = (await getDriver(subDomain)).session();
-
-  try {
-    const checkQuery = id
-      ? `MATCH (v:${label}) WHERE v.name = $name AND v.elementId != $id RETURN v`
-      : `MATCH (v:${label}) WHERE v.name = $name RETURN v`;
-
-    const params = id ? { name, id } : { name };
-    const checkResult = await session.run(checkQuery, params);
-    if (checkResult.records.length > 0) {
-      return {
-        error: true,
-        message: "Provided name already exists",
-      };
-    }
-    return {
-      error: false,
-    };
-  } catch (error: any) {
-    return {
-      error: true,
-      message: error.message,
-    };
-  } finally {
-    await session.close();
-  }
-};

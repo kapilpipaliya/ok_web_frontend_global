@@ -41,7 +41,7 @@ export type MultiLineTextFieldProps =
     "aria-orientation"?: "horizontal" | "vertical";
     multiline: true;
     labelClass?: string;
-    isNumber: false;
+    isNumber?: boolean;
     type?: string;
     label?: JSX.Element;
     class?: string;

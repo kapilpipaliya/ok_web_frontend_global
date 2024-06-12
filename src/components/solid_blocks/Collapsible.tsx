@@ -2,7 +2,7 @@ import {
   type Accessor,
   createContext,
   createSignal,
-  createUniqueId,
+  createUniqueId, JSX,
   type Setter,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
@@ -17,7 +17,8 @@ export function Collapsible(props: {
   isOpen: boolean;
   handleToggle: () => void;
   title: any;
-  children: any;
+  children: JSX.Element;
+  class?: string;
 }) {
   return (
     // Provide the unique ID value to the collapsible context

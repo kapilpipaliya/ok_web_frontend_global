@@ -9,7 +9,7 @@ import {
   For,
   Switch,
   Match,
-  createMemo,
+  createMemo, JSX,
 } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { CssDefaultEditorContext, CssEditorContext } from "../context";
@@ -23,7 +23,7 @@ export const DataEditWithCustomDialog = (props: {
   setOpenMenu: Setter<any>;
   centerComponent?: JSXElement;
   dialogLabel: any;
-  children: any;
+  children: JSX.Element;
   fallback?: any;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);

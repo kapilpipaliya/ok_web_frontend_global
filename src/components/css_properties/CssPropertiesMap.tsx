@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js";
+import {createSignal, JSX} from "solid-js";
 import { sizeTypes, timesTypes } from "./context";
 
 const Icons = {
@@ -64,7 +64,7 @@ const createButtonGroupOptions = (
   })),
 });
 
-const createGridOptions = (name: string, label: string, children: any) => ({
+const createGridOptions = (name: string, label: string, children: JSX.Element) => ({
   name,
   padding: "5px",
   gap: "5px 10px",

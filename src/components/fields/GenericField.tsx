@@ -31,6 +31,7 @@ import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { FormWrapper } from "~/components/page_item_render/FormWrapper";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify } from "~/lib/utils";
+import {mergeCSS} from "~/components/css_properties/cssUtils";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -91,6 +92,7 @@ export function GenericField(
     return props.meta.P[`${key}`] ?? defaultValue;
   };
 
+  const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
   return (
     <Show
       when={!props.disabled}
@@ -130,8 +132,9 @@ export function GenericField(
             <Match when={PageRenderUtils.getDataVertex(graph, props.meta)}>
               {(vertex) => (
                 <A
-                  {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+                  {...defaultValues()}
                   {...deNullify(props.meta.P)}
+                  class={mergeCSS(defaultValues().css, props.meta.P.css)}
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
                 >
@@ -152,14 +155,15 @@ export function GenericField(
             </Match>
             <Match when={props.meta.P.href}>
               <A
-                {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+                {...defaultValues()}
                 {...deNullify(props.meta.P)}
+                class={mergeCSS(defaultValues().css, props.meta.P.css)}
                 href={getUrl(
                   graph,
                   setGraph,
                   props.meta.P.href,
                   repeaterContext,
-                )}
+                ) || "#"}
                 draggable
               >
                 <Show
@@ -192,8 +196,9 @@ export function GenericField(
         <Match when={component() === "Image"}>
           <img
             loading="lazy"
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
             src={getText(
               graph,
               setGraph,
@@ -206,8 +211,9 @@ export function GenericField(
         </Match>
         <Match when={component() === "Tabs"}>
           <Tabs
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
@@ -221,20 +227,20 @@ export function GenericField(
         <Match when={component() === "Icon"}>
           <Icon
             icon={props.meta.P.icon}
-            class={props.meta.P.class}
             width={props.meta.P.width || "24"}
             height={props.meta.P.height || "24"}
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.text}>
           <Dynamic
             component={props.meta.P.as || "div"}
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
             {...getAttrs(props.meta)}
-            class={props.meta.P.class}
           >
             {getText(
               graph,
@@ -246,8 +252,9 @@ export function GenericField(
         </Match>
         <Match when={component() === "Button"}>
           <CustomButton
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </CustomButton>
@@ -256,10 +263,11 @@ export function GenericField(
           <Table
             headers={
               getChildVertexes(graph, ["Attr"], [props.meta]).vertexes
-                ?.length || []
+                ?.length || 0
             }
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Table>
@@ -281,24 +289,27 @@ export function GenericField(
         </Match>
         <Match when={component() === "Collapsible"}>
           <Collapsible
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
           <Avatar
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
         </Match>
         <Match when={component() === "Select"}>
           <Select
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...props.props.meta.P}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             {props.props.data?.P[props.props.meta.P[IdAttr]] ??
               props.props.meta.P.children}
@@ -306,8 +317,9 @@ export function GenericField(
         </Match>
         <Match when={component() === "LoadIndicator"}>
           <Spinner
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...props.meta?.P}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >{props.meta.P.children}</Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
@@ -323,26 +335,30 @@ export function GenericField(
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
         </Match>
         <Match when={component() === "Breadcrumb"}>
           <Breadcrumbs
+            // @ts-ignore
             separator={props.meta.P.separator ?? "›"}
             aria-label="breadcrumb"
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
           <Progress
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
           />
         </Match>
         <Match when={component() === "Form"}>
@@ -350,15 +366,16 @@ export function GenericField(
         </Match>
         <Match when={component() === "Divider"}>
           <hr
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${props.meta.P.class}`}
+            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
             etc={props.meta.P.class}
             heading={propWithDefault("heading")}
             divider={propWithDefault("divider", true)}
@@ -367,8 +384,9 @@ export function GenericField(
         </Match>
         <Match when={component() === "Rating"}>
           <StarRating
-            {...(props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {})}
+            {...defaultValues()}
             {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().css, props.meta.P.css)}
             etc={props.meta.P.class}
             heading={propWithDefault("heading", "Rating")}
           />

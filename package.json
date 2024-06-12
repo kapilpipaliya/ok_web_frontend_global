@@ -55,6 +55,7 @@
     "jsonwebtoken": "^9.0.2",
     "klona": "^2.0.6",
     "madge": "^7.0.0",
+    "merge": "^2.1.1",
     "nanoid": "^5.0.7",
     "neo4j-driver": "^5.21.0",
     "node-fetch": "^3.3.2",

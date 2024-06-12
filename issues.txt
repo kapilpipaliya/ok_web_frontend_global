@@ -14,7 +14,8 @@ Make sure all inputs are working.
 
 whenever any css property is selected, highlight it.  ✅ 
 in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible. ✅ 
-add a option to remove a property value ✅ 
+add a option to remove a property value ✅
+
 
 In page designer, Page menu tab, on mouse hover display page preview.
 In form designer, root vertex when hover over it display properties icon.

@@ -1,13 +1,13 @@
-import { type JSX, useContext } from "solid-js";
+import {type JSX, Show, useContext} from "solid-js";
 import { FormSettingsContext } from "~/lib/contexts";
 
 interface LabeledFieldProps {
-  label: string;
+  label?: string;
   position?: "top" | "left" | "right" | "bottom" | "system";
   children: JSX.Element;
 }
 
-export const Label = (props: LabeledFieldProps) => {
+export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & LabeledFieldProps) => {
   const [formSettingContext, setFormSettingContext] =
     useContext(FormSettingsContext);
 
@@ -51,9 +51,11 @@ export const Label = (props: LabeledFieldProps) => {
 
   return (
     <div style={containerStyle()}>
-      <label style={labelStyle()} {...props}>
-        {props.label}
-      </label>
+      <Show when={props.label}>
+        <label style={labelStyle()} {...props}>
+          {props.label}
+        </label>
+      </Show>
       {props.children}
     </div>
   );

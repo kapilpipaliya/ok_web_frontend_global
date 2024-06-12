@@ -54,7 +54,6 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import { FormContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
-import { checkIfNameExistsMGCall } from "~/cypher/get/expression_eval_async_fns";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
 import { componentDrag } from "~/lib/drag_drop/componentDrag";
@@ -63,6 +62,7 @@ import {
   RepeaterVertexContext
 } from "~/components/page_item_render/Context";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {

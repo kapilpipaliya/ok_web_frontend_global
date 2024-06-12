@@ -1,7 +1,7 @@
 import {
   type Accessor,
   createContext,
-  createSignal,
+  createSignal, JSX,
   type Setter,
   Show,
   useContext,
@@ -26,7 +26,7 @@ const toggleExpansion = (id: Id) => {
   setExpandedItems(expandedSet);
 };
 
-const TreeView = (props: { title: string; meta: Vertex; children: any }) => {
+const TreeView = (props: { title: string; meta: Vertex; children: JSX.Element }) => {
   let parentValues = useContext(treeContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   // Recursive function to render tree nodes
