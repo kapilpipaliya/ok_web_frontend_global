@@ -3,7 +3,7 @@ import {
   getChildVertexMGCall,
   getChildVertexesMGCall,
   getParentVertexMGCall,
-  getSelectionOptionsMGCall,
+
 } from "./traverse";
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { getDriver } from "~/cypher/driver";
@@ -11,17 +11,8 @@ import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/server/domain_utils";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
+import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
 
-export async function getCompPropsMapMGCall(comp: Vertex) {
-  const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
-  return (children.vertexes || []).reduce(
-    (acc, curr) => {
-      acc[curr.P.name] = curr;
-      return acc;
-    },
-    {} as { [key: string]: Vertex },
-  );
-}
 
 export async function getCompPropsMGCall(comp: Vertex) {
   const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
@@ -36,37 +27,6 @@ export async function getCompPropsMGCall(comp: Vertex) {
   );
 }
 
-export async function getRowPropsMGCall(comp: Vertex) {
-  const children = await getChildVertexesMGCall(["$0Prop"], [comp]);
-  return (children.vertexes || []).reduce(
-    async (acc, curr) => {
-      const key = (
-        await getSelectionOptionsMGCall([curr], "->$0Name::'P.name'")
-      ).vertexes;
-      if (key && curr.P.value !== undefined) {
-        acc[key] = curr.P.value;
-      }
-
-      return acc;
-    },
-    {} as { [key: string]: any },
-  );
-}
-
-function getComponentPropertiesMGCall(metaRows: Vertex[]) {
-  const metaData = metaRows.reduce(
-    async (acc, curr) => {
-      const key = (await getSelectionOptionsMGCall([curr], "::'P.name'"))
-        .vertexes; // ->$0Name:P.name||:P.name
-      if (key && curr.P.value !== undefined) {
-        acc[key] = curr.P.value;
-      }
-      return acc;
-    },
-    {} as { [key: string]: any },
-  );
-  return metaData;
-}
 
 export async function getCollAttrsMGCall(
   vertexCollAttr: Vertex,
@@ -259,72 +219,4 @@ export async function getFormApiFromFormMGCall(
       },
     }),
   );
-}
-
-// TODO: when meta changed realtime its not updating.
-export async function componentPropsMGCall(metaVertex: Vertex, data: Vertex) {
-  const meta = metaVertex.P.meta.split("+");
-  const results = [] as { [key: string]: any }[];
-  for (const metaPart of meta) {
-    const metaRows =
-      (await getSelectionOptionsMGCall([data], metaPart)).vertexes || [];
-    const metaData = getComponentPropertiesMGCall(metaRows);
-    results.push(metaData);
-  }
-  return results.reduce(
-    (acc, curr) => {
-      Object.assign(acc, curr);
-      return acc;
-    },
-    {} as { [key: string]: any },
-  );
-}
-
-export async function getPkForCollectionMGCall(collVertex: Vertex) {
-  const pks =
-    (await getChildVertexesMGCall(["$0Pk"], [collVertex])).vertexes || [];
-  return pks.map((pk) => pk.P.name);
-}
-
-export async function getNameKeyForCollectionMGCall(collVertex: Vertex) {
-  const pks =
-    (await getChildVertexesMGCall(["$0NameKey"], [collVertex])).vertexes || [];
-  return pks.map((pk) => pk.P.name);
-}
-
-export async function getStringComponentMGCall(attrDataTypeVertex?: Vertex) {
-  if (!attrDataTypeVertex) {
-    const attrDataTypeVertexResult = await findVertexesMGCall({
-      label: "DataType",
-      value: "String",
-      attribute: "name",
-    });
-    if (attrDataTypeVertexResult.error) {
-      return;
-    }
-    attrDataTypeVertex = attrDataTypeVertexResult.vertexes!;
-  }
-  return (await getChildVertexMGCall(["$0Default"], attrDataTypeVertex!))
-    .vertex;
-}
-
-export async function getCollAttrCompMGCall(
-  attrVertex: Vertex,
-): Promise<Vertex | undefined> {
-  const attrComp = (await getChildVertexMGCall(["$0Comp"], attrVertex)).vertex;
-  if (attrComp) return attrComp;
-
-  const attrDataTypeVertex = (
-    await getChildVertexMGCall(["$0DataType"], attrVertex)
-  ).vertex;
-  return getStringComponentMGCall(attrDataTypeVertex);
-}
-
-export async function getSublistRowsForTypeMGCall(
-  type: string,
-  vertex: Vertex,
-) {
-  return (
-    (await getChildVertexesMGCall([`${type}`], [vertex])).vertexes || []
-  ).sort((a, b) => a.P.pos - b.P.pos);
 }

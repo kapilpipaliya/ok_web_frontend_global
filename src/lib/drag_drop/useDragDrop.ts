@@ -21,15 +21,16 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { getChildVertex, getParentVertex } from "../graph/get/sync/traverse";
 import {
-  componentDrag,
-  getComponentFromLayoutRow,
-} from "~/lib/drag_drop/componentDrag";
+  componentDrop,
+
+} from "~/lib/drag_drop/component_drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
 import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
 import { PageDesignerLabels } from "./constant";
+import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
 
 export function useDragDrop(
   graph: Store<GraphInterface>,
@@ -239,7 +240,7 @@ export function useDragDrop(
       }
     }
 
-    const layoutRowId = componentDrag(
+    const layoutRowId = componentDrop(
       txnId,
       fromVertex,
       toParentVertex || formData,

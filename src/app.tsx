@@ -1,25 +1,16 @@
-import { MetaProvider } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
-import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, onMount, Show, Suspense } from "solid-js";
-import { Toaster } from "solid-toast";
-import { LoadingContext } from "~/lib/contexts";
-import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
-import { LoaderNew } from "./components/LoaderSimple";
-import type { Config } from "@master/css";
+import {MetaProvider} from "@solidjs/meta";
+import {Router} from "@solidjs/router";
+import {FileRoutes} from "@solidjs/start/router";
+import {createSignal, onMount, Show, Suspense} from "solid-js";
+import {Toaster} from "solid-toast";
+import {LoadingContext} from "~/lib/contexts";
+import {CSSRuntimeProvider} from "./components/CSSRuntimeProvider";
+import {LoaderNew} from "./components/LoaderSimple";
+import type {Config} from "@master/css";
 import Sidebar from "~/pages/dashboard/sidebar/SidebarLayout";
-import {
-  type EdgeMap,
-  GraphContext,
-  type GraphInterface,
-  type Id,
-  type VertexMap,
-  type Vertex,
-} from "./lib/graph/graph";
-import { createStore } from "solid-js/store";
-import { API } from "~/lib/api/endpoints";
-import { setGraphData } from "~/lib/websocket/ws_events";
-import getAPI from "./lib/api/getApi";
+import {type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap,} from "./lib/graph/graph";
+import {createStore} from "solid-js/store";
+import {getInitialDataAndSetToGraph} from "~/getInitialDataAndSetToGraph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {
@@ -45,33 +36,9 @@ export default function App() {
     isSubSideBarOpen: true,
     componentIdMap: {},
   });
-
-  function setComponentIdMap(vertexes: Vertex[]) {
-    const vertexMap = {} as { [key: string]: Id; };
-    for (const vertex of Object.values(vertexes)) {
-      if (vertex.L[0] === 'Comp') {
-        const propName = vertex.P.name;
-        const vertexId = vertex.id;
-        vertexMap[propName] = vertexId;
-      }
-    };
-    graph[1]('componentIdMap', vertexMap);
-  }
-
-  const getData = async () => {
-    try {
-      const data = await getAPI(API.getInitialDataUrl);
-      setGraphData(graph[0], graph[1], data as any);
-      setComponentIdMap(data.vertexes);
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
   onMount(() => {
-    getData();
+    getInitialDataAndSetToGraph(graph);
   });
-
 
   return (
     <Router

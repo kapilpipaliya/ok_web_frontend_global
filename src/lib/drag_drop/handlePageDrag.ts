@@ -1,6 +1,6 @@
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
-import { componentDrag } from "~/lib/drag_drop/componentDrag";
+import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 
 export async function handlePageDrag(
@@ -13,7 +13,7 @@ export async function handlePageDrag(
   formData: Vertex,
   position: string,
 ) {
-  const layoutRowId = componentDrag(
+  const layoutRowId = componentDrop(
     txnId,
     fromVertex,
     toParentVertex || formData,

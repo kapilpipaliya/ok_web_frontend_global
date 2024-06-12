@@ -1,6 +1,5 @@
 import { useParams } from "@solidjs/router";
 import { Show, createSignal, onMount, useContext, createEffect, on } from "solid-js";
-import { getDataMGCall } from "~/cypher/get/traverse";
 import { FormMetaData } from "~/lib/formMetaData";
 import { FormContext, IsPreviewContext } from "~/lib/contexts";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
@@ -8,6 +7,7 @@ import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { PageView } from "~/components/page_item_render/PageView";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import {getDataMGCall} from "~/cypher/get/getDataMGCall";
 
 
 export default function PageShareView() {

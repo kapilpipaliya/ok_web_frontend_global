@@ -8,12 +8,10 @@ import { findVertexIdsByLabel } from "~/lib/graph/get/sync/findVertex";
 import { jsonata } from "~/lib/jsonata/jsonata";
 import { isObject } from "~/lib/utils";
 import { calculateFilter, getTextValue } from "./graph/get/sync/traverse";
-import {
-  evalGetChildren,
-  evalGetParents,
-  evalGlobalColl,
-  evalVertexById,
-} from "~/cypher/get/expression_eval_async_fns";
+import {evalGetChildren} from "~/cypher/get/evaluate/evalGetChildren";
+import {evalGetParents} from "~/cypher/get/evaluate/evalGetParents";
+import {evalGlobalColl} from "~/cypher/get/evaluate/evalGlobalColl";
+import {evalVertexById} from "~/cypher/get/evaluate/evalVertexById";
 
 /**
  * Evaluation code from JSEP project, under MIT License.

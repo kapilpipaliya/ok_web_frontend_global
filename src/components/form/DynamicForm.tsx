@@ -48,22 +48,22 @@ import type { IFormMetaData } from "~/lib/FormMetadataType";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
-import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
 import { DeleteDialog } from "~/components/DeleteDialog";
-import { getDataMGCall } from "~/cypher/get/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { FormContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
-import { componentDrag } from "~/lib/drag_drop/componentDrag";
+import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   RepeaterVertexContext
 } from "~/components/page_item_render/Context";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
+import {getDataMGCall} from "~/cypher/get/getDataMGCall";
+import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -117,8 +117,6 @@ export function DynamicForm(props: AbstractSingleFormProps) {
   // so set state inside it will not set when page is reloaded.
   const [data]: any = createResource(async () => {
     const form = await getFormMetaDataAsync(
-      props.graph,
-      props.setGraph,
       props.formId,
     );
     if (form.error) return "Error";
@@ -231,7 +229,7 @@ function DynamicFormBase(props: DynamicFormProps) {
               IdAttr,
               "Form",
             );
-            const layoutRowId = componentDrag(
+            const layoutRowId = componentDrop(
               txnId,
               labelVertex!,
               dataVertex!,

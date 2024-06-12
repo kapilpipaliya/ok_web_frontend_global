@@ -39,9 +39,6 @@ import {
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Icon } from "@iconify-icon/solid";
-import {
-  PageRenderUtils,
-} from "~/components/page_item_render/PageItemRender";
 import { GenericField } from "~/components/fields/GenericField";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
 import "~/css/base.css";
@@ -59,6 +56,7 @@ import {
   PageRenderVertexContext, RepeaterVertexContext
 } from "~/components/page_item_render/Context";
 import { getLastItem } from "~/components/page_item_render/getLastItem";
+import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
 
 export function TableInputField(
   props: ComponentProps & {

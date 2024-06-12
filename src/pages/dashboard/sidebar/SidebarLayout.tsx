@@ -12,10 +12,10 @@ import "~/css/sideBarSearch.css";
 import { MainSideBar } from "./MainSideBar";
 import { SubSideBar } from "./SubSideBar";
 import { GraphContext } from "~/lib/graph/graph";
-import { getTreeDataMGCall } from "~/cypher/get/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { useLocation } from "@solidjs/router";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
 
 export interface navbarDataI {
   children: navbarDataI[];

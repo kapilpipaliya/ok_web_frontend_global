@@ -1,10 +1,9 @@
-import { toTitle } from "case-switcher-js";
-import { For, Match, Switch, createMemo } from "solid-js";
-import type { Store, SetStoreFunction } from "solid-js/store";
-import { type Vertex, type GraphInterface, IdAttr } from "~/lib/graph/graph";
-import { DynamicComponent } from "./DynamicComponent";
-import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
-import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import {toTitle} from "case-switcher-js";
+import {createMemo, For, Match, Switch} from "solid-js";
+import type {SetStoreFunction, Store} from "solid-js/store";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
+import {DynamicComponent} from "./DynamicComponent";
+import {getComponentForCollRow} from "~/components/form/GetComponentForCollRow";
 
 interface FormGroupProps {
   metaAttributes: Vertex[];
@@ -93,18 +92,3 @@ export function FormGroup(props: FormGroupProps) {
   );
 }
 
-export function getComponentForCollRow(
-  metaVertex: Vertex,
-  data: Vertex,
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  if (!metaVertex.P.component) {
-    return getCollAttrComp(metaVertex, graph)?.P[IdAttr];
-  }
-  if (metaVertex.P.component.includes("-")) {
-    return getSelectionOptions(graph, setGraph, [data], metaVertex.P.component)
-      .vertexes;
-  }
-  return metaVertex.P.component as string;
-}

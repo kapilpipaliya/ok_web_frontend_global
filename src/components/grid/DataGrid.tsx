@@ -16,8 +16,7 @@ import {
 } from "~/lib/graph/transaction";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex, } from "~/lib/graph/graph";
-import { getFormApiFromFormMGCall } from "~/cypher/get/graph_functions";
-import { getDataMGCall } from "~/cypher/get/traverse";
+import { getFormApiFromFormMGCall } from "~/cypher/get/getFormApiFromFormMGCall";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { CommonTable } from "~/components/Table";
 import { Icon } from "@iconify-icon/solid";
@@ -39,6 +38,7 @@ import { GenericField } from "~/components/fields/GenericField";
 import { PageContext } from "~/lib/contexts";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import {getDataMGCall} from "~/cypher/get/getDataMGCall";
 interface DataGridProps {
   tableId: string;
 }

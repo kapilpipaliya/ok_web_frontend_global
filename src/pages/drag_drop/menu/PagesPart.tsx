@@ -10,14 +10,15 @@ import {
   Show,
 } from "solid-js";
 import { useToast } from "~/components/Toast";
-import { getTreeDataMGCall } from "~/cypher/get/traverse";
 import { DraggedVertexContext } from "~/lib/contexts";
-import { GraphContext } from "~/lib/graph/graph";
+import { GraphContext, Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import { createPopper } from "@popperjs/core";
+import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
 
 export function PagesPart(props: {coll: string}) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -27,6 +28,8 @@ export function PagesPart(props: {coll: string}) {
   const [isFetchingData, setIsFetchingData] = createSignal(true);
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<any[]>([]);
+  const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
+  const [tooltip, setTooltip] = createSignal<HTMLElement | null>(null);
 
   // Fetch data function
   async function fetchData(): Promise<{
@@ -83,6 +86,13 @@ export function PagesPart(props: {coll: string}) {
 
   function ListItemComponent(props: { child: any }) {
     const [isHovered, setIsHovered] = createSignal(false);
+    const handleHover = (el: HTMLElement) => {
+      setIsHovered(true);
+      if (previewPageId() !== props.child.id) {
+        setPreviewPageId(props.child.id);
+      }
+      ;
+    };
 
     const baseStyle = {
       "border-radius": ".2rem",
@@ -110,9 +120,13 @@ export function PagesPart(props: {coll: string}) {
     return (
       <Show when={props.child.name}>
         <div
+          ref={el=>setTooltip(el)}
           style={itemStyle()}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          onMouseLeave={() => {
+            setIsHovered(false);
+            setPreviewPageId(null);
+            setTooltip(null);
+          }}
           draggable={true}
           onDragStart={(e) => {
             e.stopPropagation();
@@ -125,6 +139,27 @@ export function PagesPart(props: {coll: string}) {
         >
           <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
           <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+            <Show when={tooltip()}>
+              <div
+                ref={(el) => {
+                  if (el) {
+                    createPopper(tooltip()!, el, {
+                      placement: "right",
+                    });
+                  }
+                }}
+                class="tooltip"
+                style={{
+                  "z-index": 1000,
+                  "background-color": "white",
+                  "border-radius": "0.2rem",
+                  padding: "5px",
+                  "font-size": "12px",
+                }}
+              >
+                {props.child.preview}
+              </div>
+            </Show>
         </div>
       </Show>
     );

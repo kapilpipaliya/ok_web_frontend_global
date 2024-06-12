@@ -3,13 +3,13 @@ import type { APIEvent } from "@solidjs/start/dist/server";
 import type { TransactionPromise } from "neo4j-driver-core";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 // import { importAllCSV } from "~/cypher/pages/BackupRestore";
-import { createDockerContainer } from "~/server/docker_functions";
 import { getSubDomain } from "~/server/domain_utils";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import { v4 as uuidv4 } from "uuid";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import {connectToNeo4jWithRetry} from "~/cypher/retry";
+import {createDockerContainer} from "~/server/docker/createDockerContainer";
 
 // Define the POST function to handle user registration
 export async function POST({ request }: APIEvent) {

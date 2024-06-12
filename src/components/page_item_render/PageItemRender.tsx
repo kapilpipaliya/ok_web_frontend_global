@@ -1,85 +1,26 @@
+import {createMemo, createSelector, For, Match, Show, Switch, useContext} from "solid-js";
+import {toTitle} from "case-switcher-js";
+import {GraphContext, IdAttr, type Vertex} from "~/lib/graph/graph";
+import {getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
+import {DynamicComponent} from "~/components/form/DynamicComponent";
+import {useDragDrop} from "~/lib/drag_drop/useDragDrop";
+import {Icon} from "@iconify-icon/solid";
+import {Tab, TabContainer, Tooltip} from "~/components/solid_blocks";
 import {
-  createMemo,
-  createSelector,
-  For,
-  Match,
-  Show,
-  Switch,
-  useContext
-} from "solid-js";
-import { toTitle } from "case-switcher-js";
-import {
-  GraphContext,
-  type GraphInterface,
-  IdAttr,
-  type Vertex
-} from "~/lib/graph/graph";
-import {
-  getChildVertex,
-  getChildVertexes,
-  getParentVertex,
-  getSelectionOptions
-} from "~/lib/graph/get/sync/traverse";
-import {
-  DynamicComponent
-} from "~/components/form/DynamicComponent";
-import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
-import { Icon } from "@iconify-icon/solid";
-import type { Store } from "solid-js/store";
-import { Tab, TabContainer, Tooltip } from "~/components/solid_blocks";
-import {
-  getCollAttrComp,
-} from "~/lib/graph/get/sync/graph_functions";
-import {
-  DragOverTargetIdContext, FormContext,
+  DragOverTargetIdContext,
+  FormContext,
   HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
   SelectedIdContext,
   ShowDrawerContext
 } from "~/lib/contexts";
-import { Popover } from "@kobalte/core/popover";
-import {
-  PageRenderVertexContext,
-  RepeaterVertexContext
-} from "~/components/page_item_render/Context";
-import { getLastItem } from "~/components/page_item_render/getLastItem";
-import { iconMap } from "~/lib/constants";
+import {Popover} from "@kobalte/core/popover";
+import {PageRenderVertexContext, RepeaterVertexContext} from "~/components/page_item_render/Context";
+import {getLastItem} from "~/components/page_item_render/getLastItem";
+import {iconMap} from "~/lib/constants";
+import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
 
-
-export const PageRenderUtils = {
-  getCollection: (
-    graph: Store<GraphInterface>,
-    item?: Vertex,
-  ): string | undefined =>
-    item && getChildVertex(graph, ["$0Coll"], item).vertex?.P[IdAttr],
-  getAttrVertex: (
-    graph: Store<GraphInterface>,
-    item?: Vertex,
-  ): Vertex | undefined =>
-    item && getChildVertex(graph, ["$0Att"], item).vertex,
-  getAttr: (graph: Store<GraphInterface>, item?: Vertex): string | undefined =>
-    item && PageRenderUtils.getAttrVertex(graph, item)?.P[IdAttr],
-  getID: (item?: Vertex): string | undefined => item?.P.name,
-  getId: (graph: Store<GraphInterface>, item?: Vertex): string | undefined =>
-    PageRenderUtils.getAttr(graph, item) || PageRenderUtils.getID(item) || "",
-  // get component or Attribute component
-  getComponent: (
-    graph: Store<GraphInterface>,
-    item?: Vertex,
-  ): Vertex | undefined => {
-    if (!item) return;
-
-    const currentComp = getChildVertex(graph, ["$0Comp"], item).vertex;
-    if (currentComp) return currentComp;
-
-    const attrVertex = PageRenderUtils.getAttrVertex(graph, item);
-    if (!attrVertex) return;
-    return getCollAttrComp(attrVertex, graph);
-  },
-  getDataVertex: (graph: Store<GraphInterface>, item?: Vertex) =>
-    item && getChildVertex(graph, ["$0Data"], item).vertex,
-};
 
 export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);

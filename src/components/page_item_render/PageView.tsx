@@ -1,10 +1,10 @@
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createMemo, Match, Show, Switch, useContext } from "solid-js";
 import {
- PageItemRender,
- PageRenderUtils
+ PageItemRender
 } from "~/components/page_item_render/PageItemRender";
 import { PageContext } from "~/lib/contexts";
+import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
 
 export function PageView(props: {
  metaVertex?: Vertex;

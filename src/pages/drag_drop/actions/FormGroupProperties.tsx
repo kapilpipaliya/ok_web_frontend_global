@@ -1,11 +1,11 @@
 import { Show, createMemo, For, Match, Switch, useContext } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { getComponentForCollRow } from "~/components/form/FormGroup";
 import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { ClassDesignTab } from "~/components/css_properties/PropertiesTabs";
 import { Icon } from "@iconify-icon/solid";
+import {getComponentForCollRow} from "~/components/form/GetComponentForCollRow";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];

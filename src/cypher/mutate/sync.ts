@@ -1,11 +1,11 @@
 import neo4j, { type Session, type Node, int } from "neo4j-driver";
 import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
-import {getFormMetaDataAsync} from "~/lib/graph/get/async/graph_functions";
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
-import {Expression, getDataMGCall} from "~/cypher/get/traverse";
 import {Vertex} from "~/lib/graph/graph";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
+import {Expression, getDataMGCall} from "~/cypher/get/getDataMGCall";
+import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: { userport: string; nodesToTransfer: string[]; }) {
@@ -53,9 +53,6 @@ async function transferNodeTypes(
 ) {
   for (const nodeType of nodesToTransfer) {
     const form = await getFormMetaDataAsync(
-      // @ts-ignore
-      undefined,
-      undefined,
       nodeType,
     );
     if (form.error) return "Error";

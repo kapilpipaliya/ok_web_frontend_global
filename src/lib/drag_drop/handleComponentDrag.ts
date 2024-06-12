@@ -2,7 +2,7 @@ import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction } from "solid-js/store";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { componentDrag } from "~/lib/drag_drop/componentDrag";
+import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 
 export async function handleComponentDrag(
@@ -37,7 +37,7 @@ export async function handleComponentDrag(
       IdAttr,
       "Label",
     );
-    const layoutRowId = componentDrag(
+    const layoutRowId = componentDrop(
       txnId,
       labelVertex!,
       toParentVertex || formData,
@@ -47,7 +47,7 @@ export async function handleComponentDrag(
     if (layoutRowId === -1) return;
 
     // add component inside the label
-    const layoutRowId2 = componentDrag(
+    const layoutRowId2 = componentDrop(
       txnId,
       fromVertex,
       graph.vertexes[layoutRowId] || formData,
@@ -68,7 +68,7 @@ export async function handleComponentDrag(
       position,
     );
   } else {
-    const layoutRowId = componentDrag(
+    const layoutRowId = componentDrop(
       txnId,
       fromVertex,
       toParentVertex || formData,

@@ -1,8 +1,6 @@
 import neo4j, { Session } from "neo4j-driver";
-import {
-  removeDockerContainer,
-  stopDockerContainer,
-} from "../src/server/docker_functions";
+import {stopDockerContainer} from "../src/server/docker/stopDockerContainer";
+import {removeDockerContainer} from "../src/server/docker/removeDockerContainer";
 
 // Main function to initiate the migration process.
 export async function deleteUser(args: any) {

@@ -1,9 +1,9 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { getFormMetaDataAsync } from "~/lib/graph/get/async/graph_functions";
-import { getDataMGCall } from "~/cypher/get/traverse";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import {getDataMGCall} from "~/cypher/get/getDataMGCall";
+import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,
@@ -12,8 +12,6 @@ export async function loadPageData(
   showErrorToast: any,
 ) {
   const form: any = await getFormMetaDataAsync(
-    graph,
-    setGraph,
     fromVertex.L[0],
   );
   if (form.error) {

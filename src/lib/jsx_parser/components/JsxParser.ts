@@ -13,7 +13,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
-import { componentDrag } from "~/lib/drag_drop/componentDrag";
+import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 
 type ParsedJSX = JSX.Element | boolean | string;
@@ -503,7 +503,7 @@ export default class JsxParser {
         "Text",
       )!;
     }
-    const rowId = componentDrag(
+    const rowId = componentDrop(
       this.props.txnId,
       componentVertex!,
       scope.parent,
@@ -653,7 +653,7 @@ export default class JsxParser {
             "name",
             "Text",
           )!;
-          const rowId = componentDrag(
+          const rowId = componentDrop(
             this.props.txnId,
             componentVertex!,
             parentVertex,

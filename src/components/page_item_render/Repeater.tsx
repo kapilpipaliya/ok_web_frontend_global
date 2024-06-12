@@ -7,16 +7,16 @@ import {
   useContext,
 } from "solid-js";
 import {
-  PageRenderUtils,
   PageItemRender,
 } from "~/components/page_item_render/PageItemRender";
-import { getSelectionOptionsMGCall } from "~/cypher/get/traverse";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import {
   RepeaterVertexContext, PageRenderVertexContext
 } from "~/components/page_item_render/Context";
+import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
+import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
 
 export const Repeater = (props: { data: any; meta: any }) => {
   const [graph, setGraph] = useContext(GraphContext)!;

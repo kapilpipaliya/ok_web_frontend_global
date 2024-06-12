@@ -9,7 +9,6 @@ import {
 } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { Checkbox } from "~/components/solid_blocks";
-import { getTreeDataMGCall } from "~/cypher/get/traverse";
 import {
   DraggedVertexContext,
   PageConfigContext,
@@ -22,6 +21,7 @@ import { onClickAddComponent } from "../CommonCompUtils";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { iconMap } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
+import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;

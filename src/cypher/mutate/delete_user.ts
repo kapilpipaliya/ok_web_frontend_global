@@ -1,10 +1,8 @@
-import {
-  removeDockerContainer,
-  stopDockerContainer,
-} from "~/server/docker_functions";
 import { getRequestURL } from "vinxi/http";
 import { getSubDomain } from "~/server/domain_utils";
 import { getDriver } from "~/cypher/driver";
+import {stopDockerContainer} from "~/server/docker/stopDockerContainer";
+import {removeDockerContainer} from "~/server/docker/removeDockerContainer";
 
 // Main function to initiate the migration process.
 export async function deleteUser(args: any) {
