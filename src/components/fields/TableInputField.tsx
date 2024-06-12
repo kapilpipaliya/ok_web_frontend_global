@@ -31,11 +31,11 @@ import {
   getChildVertexes,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import {
-  addMetaVertexes,
   addNewRow,
-  getSublistRows,
-} from "~/lib/graph/mutate/form_functions";
+  getSublistRows
+} from "~/lib/graph/mutate/form/rowFunction";
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Icon } from "@iconify-icon/solid";
@@ -51,7 +51,8 @@ import {
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { addMeta, rowMetaInitialize } from "~/lib/graph/mutate/form_functions";
+import { addMeta } from "~/lib/graph/mutate/form/metaFunction";
+import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 import { useToast } from "~/components/Toast";
 import { FormContext, NewTxnIdContext } from "~/lib/contexts";
 import {

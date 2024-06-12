@@ -21,6 +21,9 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "select"}>
         <DisplaySelector
+          isAddToClass={props.value.isAddToClass ?? true}
+          value={props.value.value}
+          onRemoveIconClick={props.value.onRemoveIconClick}
           name={props.value.name}
           label={props.value.label}
           isLabelOnTop={props.value.isLabelOnTop}

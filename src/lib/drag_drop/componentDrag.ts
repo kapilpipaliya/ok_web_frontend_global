@@ -3,7 +3,8 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import { useToast } from "~/components/Toast";
 import { newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId } from "~/lib/graph/transaction";
-import { addNewRow, cloneRowProps } from "~/lib/graph/mutate/form_functions";
+import { cloneRowProps } from "../graph/mutate/form/rowFunction";
+import { addNewRow } from "../graph/mutate/form/rowFunction";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   getChildVertex,

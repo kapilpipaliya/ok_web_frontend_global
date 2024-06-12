@@ -12,7 +12,7 @@ import { GenericInputField } from "~/components/fields/GenericInputField";
 import { TableInputField } from "~/components/fields/TableInputField";
 import { FieldAttribute } from "~/lib/FormMetadataType";
 import { FormMetaData } from "~/lib/formMetaData";
-import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { transactions, getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";

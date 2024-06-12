@@ -16,7 +16,6 @@ export const TextEditorTab = (props: {
     margin: "5px",
     width: "100%",
     "min-height": "5rem",
-    height: "20rem",
     "border-radius": "6px",
   };
 

@@ -20,15 +20,14 @@ add a option to remove a property value ✅
 In page designer, Page menu tab, on mouse hover display page preview.
 In form designer, root vertex when hover over it display properties icon.
 Test all css properties applying properly.
+
 make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
 (Kapil) write a table routes to see all the form entries.
 Make Multi Stage Form design possible.
 
-Refactor files:
-/lib/graph/get/async/graph_functions.ts
-/lib/graph/mutate/mutate.ts
-/lib/graph/mutate/form_functions.ts
-/pages/drag_drop/actions/Properties.tsx
+css issue:
+ box-shadow
+ not merge css working
 
 instead of using loader in CSSRuntimeProvider use https://rc.css.master.co/guide/flash-of-unstyled-content
 
@@ -88,3 +87,5 @@ expression-eval => jsep (for +,-) => jsonata(filter, projection)
 
 To find all files in your codebase whose line count is greater than 400, you can use the following command:
 find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
+
+make sure collapsiable components working in page designer.

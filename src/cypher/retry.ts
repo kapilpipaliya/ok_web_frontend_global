@@ -12,7 +12,7 @@ export async function connectToNeo4jWithRetry(
 
   while (retries < maxRetries) {
     try {
-      const driver = neo4j.driver(, undefined, {
+      const driver = neo4j.driver(uri, undefined, {
         disableLosslessIntegers: true,
       });
       // Try to establish a connection by creating a session and running a simple query

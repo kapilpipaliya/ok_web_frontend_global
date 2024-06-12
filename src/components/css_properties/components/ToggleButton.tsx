@@ -1,5 +1,5 @@
 import { type JSX, useContext, For, Show, type JSXElement, createMemo } from "solid-js";
-import { CssDefaultEditorContext, CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -12,11 +12,12 @@ export const ToggleButton = (props: {
   isLabelOnTop: boolean;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [state, setState] = useContext(CssStateContext);
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
-  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
+  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
   const isSelected = (option: any) => selected() === option.value;
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
 
 
   const Content = () => (
@@ -33,7 +34,7 @@ export const ToggleButton = (props: {
                   props.onChangeInput(option.value);
                 }
                 if (props.isAddToClass) {
-                  setCssState(props.name, option.value);
+                  setCssState(state(), { [props.name]: option.value });
                 }
               }}
               class={`f:14 p:2|5 flex ai:center cursor:pointer w:-webkit-fill-available jc:center
@@ -69,14 +70,14 @@ export const ToggleButton = (props: {
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
+            <ContainerLabel onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel onIconClick={() => setCssState(props.name, cssDefault[props.name])} showIcon={isDefaultValue()} title={props.label} />
+        <ContainerLabel onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
         <Content />
       </div>
     </Show>

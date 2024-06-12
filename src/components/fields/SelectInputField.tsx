@@ -26,10 +26,8 @@ import {
   getSelectedVertexValue,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
-import {
-  onChangeHandler,
-  setValueGlobal,
-} from "~/lib/graph/mutate/form_functions";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
+import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import type { Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";

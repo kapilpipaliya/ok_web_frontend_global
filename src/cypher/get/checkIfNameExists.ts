@@ -1,4 +1,4 @@
-import {getRequestURL} from "vinxi/runtime/http-types";
+import {getRequestURL} from "vinxi/http";
 import {getSubDomain} from "~/server/domain_utils";
 import {getDriver} from "~/cypher/driver";
 

@@ -91,8 +91,9 @@ export function GenericField(
   const propWithDefault = (key: string, defaultValue?: any) => {
     return props.meta.P[`${key}`] ?? defaultValue;
   };
-
+  
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
+  
   return (
     <Show
       when={!props.disabled}

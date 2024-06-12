@@ -20,9 +20,8 @@ export const DisplaySelector = (props: {
   isAddToClass: boolean;
   value: any;
   onChangeInput?: (label: any, value: any) => void;
+  onRemoveIconClick?: () => void
 }) => {
-  const [isAddToClass, setIsAddToClass] = createSignal(props.isAddToClass ?? true);
-
   function formatString(str: string) {
     return str
       .split("-") // Split the string by hyphen
@@ -31,16 +30,16 @@ export const DisplaySelector = (props: {
   }
 
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const [cssDisplayState, setCssDisplayState] = useContext(CssStateContext);
+  const [state, setState] = useContext(CssStateContext);
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [isActive, setIsActive] = createSignal(false);
   const toggleDropdown = () => setIsActive(!isActive());
   const selected = () =>
-    cssState[cssDisplayState() ?? '']?.[props.name] ||props.value || cssDefault[props.name] || '';
-
+    cssState[state() ?? '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || props.value || '';
+  
   const selectOption = (option: any) => {
-    if (isAddToClass()) {
-      setCssState(cssDisplayState(),props.name, option.value || option);
+    if (props.isAddToClass) {
+      setCssState(state(), {[props.name]: option.value || option});
     }
     if (props.onChangeInput)
       props.onChangeInput(props.name, option.value || option);
@@ -61,7 +60,7 @@ export const DisplaySelector = (props: {
     );
   });
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
 
 
   return (
@@ -72,16 +71,23 @@ export const DisplaySelector = (props: {
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
               <ContainerLabel onIconClick={() => {
-                console.log(props.name, selected(),cssDefault[props.name] || '');
-                
-                setCssState(cssDisplayState(),props.name, cssDefault[props.name] || '')}} showIcon={isDefaultValue()} title={props.label} />
+                setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
+                if (props.value) {
+                  props.onRemoveIconClick?.();
+                }
+              }} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={() => setCssState(cssDisplayState(), props.name, cssDefault[props.name] || '')} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel onIconClick={() => {
+            if (props.value) {
+              props.onRemoveIconClick?.();
+            }
+            setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
+          }} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

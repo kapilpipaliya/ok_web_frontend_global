@@ -7,7 +7,7 @@ import {useNavigate} from "@solidjs/router";
 import {commitTxn, getNewTxnId, revertTransaction} from "~/lib/graph/transaction";
 import {FormContext} from "~/lib/contexts";
 import {createStore} from "solid-js/store";
-import {createForm} from "~/lib/graph/mutate/form_functions";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
 import {submitDataCall} from "~/lib/api/api_functions";
 import {PageItemRender} from "~/components/page_item_render/PageItemRender";
 import {GenericField} from "~/components/fields/GenericField";

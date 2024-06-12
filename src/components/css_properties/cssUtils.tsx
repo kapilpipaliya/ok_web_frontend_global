@@ -1,4 +1,5 @@
-import {recursive} from "merge";
+import { recursive } from "merge";
+import { isObject } from "~/lib/utils";
 
 export interface CSSStore {
   [state: string]: { [key: string]: string }
@@ -19,17 +20,22 @@ export const parseAndApplyCssRules = (valueString: string) => {
 
   return cssRules
 };
+
 export function cssStateToString(cssState: CSSStore) {
   return Object.entries(cssState)
-    .map(([stateKey, value]) => {
-      return Object.entries(value)
-        .map(([property, val]) => `${property}:${val}${stateKey ? `:${stateKey}` : ""}`)
-        .join("\n");
+    .map(([state, value]) => {
+      if (!value || state===undefined) return;
+      if (!isObject(value)) return `${state}:${value}`;
+      return Object.entries(value).map(([key, value]) => {
+        return `${key}:${value}${state ? `:${state}` : ""}`;
+      }).join("\n");
     })
     .join("\n");
 }
 
 export function mergeCSS(input1: string, input2: string) {
+  console.log(input1, input2);
+  
   if (!input1) {
     return input2;
   }
@@ -37,10 +43,12 @@ export function mergeCSS(input1: string, input2: string) {
     return input1;
   }
 
+  
   const mergedState = recursive(
     parseAndApplyCssRules(input1),
     parseAndApplyCssRules(input2),
   ) as CSSStore;
+  
   return cssStateToString(mergedState);
 }
 

@@ -2,7 +2,7 @@ import { createSignal, onCleanup, useContext } from "solid-js";
 import { SelectInputField } from "~/components/fields/SelectInputField";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { addMetaVertexes } from "~/lib/graph/mutate/form_functions";
+import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { FieldAttribute } from "~/lib/FormMetadataType";
 import { SelectedIdContext, PageConfigContext } from "~/lib/contexts";

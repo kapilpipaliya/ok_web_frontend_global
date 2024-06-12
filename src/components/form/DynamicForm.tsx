@@ -18,7 +18,8 @@ import {
 import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
 import { groupBy, isPageDesignerPath } from "~/lib/utils";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
-import { createForm, createMeta } from "~/lib/graph/mutate/form_functions";
+import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { GenericField } from "~/components/fields/GenericField";
 import {
   GraphContext,

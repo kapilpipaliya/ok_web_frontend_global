@@ -1,6 +1,6 @@
 import { type JSX, useContext, For, Show, createMemo } from "solid-js";
 import { CustomTooltip } from "~/components/Tooltip";
-import { CssDefaultEditorContext, CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { CenterDiv, ContainerLabel, IconifyIcon } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -19,7 +19,8 @@ export const ButtonGroups = (props: {
 }) => {
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
   const [cssState, setCssState] = useContext(CssEditorContext);
-  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
+  const [state, setState] = useContext(CssStateContext);
+  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() || '']?.[props.name] || '';
   const handleChange = (
     e: any,
     option: { key: JSX.Element; value: string },
@@ -27,8 +28,8 @@ export const ButtonGroups = (props: {
     if (props.onChangeInput) {
       props.onChangeInput(option.value);
     }
-    if (props.isAddToClass) {
-      setCssState(props.name, option.value);
+    if (!props.isAddToClass==false) {
+      setCssState(state(), { [props.name]: option.value });
     }
   };
 
@@ -60,21 +61,21 @@ export const ButtonGroups = (props: {
     </div>
   );
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== '');
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== '');
   return (
     <Show
       when={props.isLabelOnTop}
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, cssDefault[props.name])} />
+            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(props.name, cssDefault[props.name])} />
+        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
         <Content />
       </div>
     </Show>

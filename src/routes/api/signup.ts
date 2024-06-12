@@ -47,6 +47,7 @@ export async function POST({ request }: APIEvent) {
       logsPort,
       labPort,
     );
+    console.log("FetchCSVData");
 
     const user = convertNodeToJson(createUserResult);
 
@@ -55,7 +56,8 @@ export async function POST({ request }: APIEvent) {
 
     await tx.commit();
     await session.close();
-
+    console.log("updateSessio", createUserResult);
+    
     // Update session data with user's email
     await updateSession(createUserResult);
 
@@ -67,7 +69,6 @@ export async function POST({ request }: APIEvent) {
     };
   } catch (error: any) {
     console.error("Server error:", error.message, error);
-    await tx.rollback();
     await session.close();
     return new Response(error.message, { status: 500 });
   } finally {
@@ -79,8 +80,8 @@ async function updateSession(createUserResult: { [key: string]: any }) {
   const http_session = await getHttpsSession();
   await http_session.update((oldData) => ({
     ...oldData,
-    email: createUserResult.records[0].get("u").properties.email,
-    subdomain: createUserResult.records[0].get("u").properties.subdomain,
+    email: createUserResult.properties.email,
+    subdomain: createUserResult.properties.subdomain,
   }));
 }
 

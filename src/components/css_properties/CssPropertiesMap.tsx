@@ -64,7 +64,7 @@ const createButtonGroupOptions = (
   })),
 });
 
-const createGridOptions = (name: string, label: string, children: JSX.Element) => ({
+const createGridOptions = (name: string, label: string, children: any) => ({
   name,
   padding: "5px",
   gap: "5px 10px",

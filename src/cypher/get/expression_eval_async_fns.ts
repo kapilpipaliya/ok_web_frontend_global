@@ -168,7 +168,7 @@ export async function evalVertexById(
   } = {},
 ) {
   "use server";
-  const session = context.session ||= await getSessionForSubdomain();
+  const session = context.session || await getSessionForSubdomain();
   try {
     return await findVertexMGCallId(session, { id }, context);
   } catch (error: any) {

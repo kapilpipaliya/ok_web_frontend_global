@@ -230,7 +230,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               >
                 <Popover
                   placement="top-start"
-                  open={isSelectedLayoutId(item.id)}
+                  open={isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)}
                 >
                   <Popover.Anchor>
                     <Content />
@@ -336,7 +336,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                         }
                       >
                         <span class="position:relative ">
-                          <div class="position:absolute bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
+                          <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
                             <Icon
                               icon={iconMap[getComponent()]}
                               class=" flex"

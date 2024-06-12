@@ -1,6 +1,6 @@
 import { createSignal, useContext, Show, For } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { CssDefaultEditorContext, CssEditorContext } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
 import { ButtonGroups } from "./ButtonGroups";
 import "~/css/componentUtilCSS.css";
 
@@ -17,13 +17,15 @@ export const FieldWithCustomBox = (props: {
 }) => {
   const [optionType, setOptionType] = createSignal("all");
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [state, setState] = useContext(CssStateContext);
   
   const onChangeAllField = () => {
-    const newState = { ...cssState };
-    props.customProperty.forEach((property: any) => {
-      newState[property.name] = cssState[props.name] || cssState[property.name] || "";
+    const currentState = state() ?? '';
+    const newState: { [key: string]: string } = { ...cssState[currentState] };
+    props.customProperty.forEach((property) => {
+      newState[property.name] = cssState[currentState]?.[property.name] || "";
     });
-    setCssState(newState);
+    setCssState(currentState, newState);
   };
 
   return (

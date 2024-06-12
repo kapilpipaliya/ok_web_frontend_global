@@ -8,7 +8,7 @@ import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
 import CustomModal from "./CommonDialog";
-import { setValueGlobal } from "~/lib/graph/mutate/form_functions";
+import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import MultiSelectField from "./MultiSelect";
 
 type Option =

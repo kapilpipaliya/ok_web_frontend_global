@@ -10,7 +10,7 @@ import {
   createMemo,
 } from "solid-js";
 import { TextField } from "~/components/solid_blocks";
-import { CssDefaultEditorContext, CssEditorContext, sizeTypes } from "../context";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext, sizeTypes } from "../context";
 import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
 
@@ -28,8 +28,9 @@ export const TextFieldWithSelect = (props: {
   isAddToClass?: boolean;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
+  const [state, setState] = useContext(CssStateContext);
   const [cssDefault, setCssDefault] = useContext(CssDefaultEditorContext);
-  const selected = () => cssState[props.name] || cssDefault[props.name] || '';
+  const selected = () => cssState[state() || '']?.[props.name] || cssDefault[state() ?? '']?.[props.name] || '';
 
   const [isDropdownOpen, setIsDropdownOpen] = createSignal(false);
   const [isMoving, setIsMoving] = createSignal(false);
@@ -50,12 +51,12 @@ export const TextFieldWithSelect = (props: {
   const handleChange = (event: any) => {
     const value = event.target.value;
     if(value === "") {
-      setCssState(props.name, "");
+      setCssState(state(),{[props.name]: ""});
       return
     }
     const numericValue = Number.parseFloat(value);
     if (props.isAddToClass) {
-      setCssState(props.name, `${numericValue}${selectedOption()}`);
+      setCssState(state(),{[props.name]: `${numericValue}${selectedOption()}`});
     }
     if (props.onChangeInput) {
       props.onChangeInput(`${numericValue}${selectedOption()}`);
@@ -71,13 +72,13 @@ export const TextFieldWithSelect = (props: {
     if (option === "") {
       setIsDropdownOpen(false);
       setOption(option);
-      setCssState(props.name, "");
+      setCssState(state(),{[props.name]: ""});
       return;
     }
     setIsDropdownOpen(false);
     setOption(option);
     const value = getValueWithoutUnits(selected());
-    setCssState(props.name, `${value}${option}`);
+    setCssState(state(), {[props.name]: `${value}${option}`});
   };
 
   const getValueWithoutUnits = (valueWithUnits: string) => {
@@ -91,7 +92,7 @@ export const TextFieldWithSelect = (props: {
   const moveIncrement = (event: any) => {
     if (isMoving()) {
       const diff = startY() - event.pageY;
-      setCssState(props.name, `${startValue() + diff}${selectedOption()}`); // Assuming each pixel move changes the value by 1
+      setCssState(state(), {[props.name]: `${startValue() + diff}${selectedOption()}`}); // Assuming each pixel move changes the value by 1
     }
   };
 
@@ -220,11 +221,11 @@ export const TextFieldWithSelect = (props: {
     </div>
   );
 
-  const isDefaultValue = createMemo(() => selected() !== cssDefault[props.name] && selected() !== "");
+  const isDefaultValue = createMemo(() => selected() !== cssDefault[state() ?? '']?.[props.name] && selected() !== "");
 
   const resetValue = () => {
-    setCssState(props.name, cssDefault[props.name]);
-    setStartValue(cssDefault[props.name]);
+    setCssState(state(), {[props.name]: cssDefault[state() ?? '']?.[props.name]});
+    setStartValue(cssDefault[state() ?? '']?.[props.name]);
     setOption(determineSelectedOption());
   };
   

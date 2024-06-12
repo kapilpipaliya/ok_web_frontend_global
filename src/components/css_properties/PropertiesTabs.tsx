@@ -1,14 +1,15 @@
-import {Tab, TabContainer, TabList, Tabs,} from "~/components/solid_blocks";
-import {Icon} from "@iconify-icon/solid";
-import type {Vertex} from "~/lib/graph/graph";
-import {createMemo, createSignal, onMount} from "solid-js";
-import {createStore, reconcile} from "solid-js/store";
-import {CssDefaultEditorContext, CssEditorContext, CssStateContext} from "./context";
-import {Container} from "~/components/css_properties/components/CssUtils";
-import {TextEditorTab} from "~/components/css_properties/TextEditorTab";
-import {StyleEditorTab} from "~/components/css_properties/StyleEditorTab";
-import {DisplaySelector} from "./components/DisplaySelector";
-import {cssStateToString, CSSStore, parseAndApplyCssRules} from "~/components/css_properties/cssUtils";
+import { Tab, TabContainer, TabList, Tabs, } from "~/components/solid_blocks";
+import { Icon } from "@iconify-icon/solid";
+import type { Vertex } from "~/lib/graph/graph";
+import { Show, createMemo, createSignal, onMount } from "solid-js";
+import { createStore, reconcile } from "solid-js/store";
+import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
+import { Container } from "~/components/css_properties/components/CssUtils";
+import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
+import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
+import { DisplaySelector } from "./components/DisplaySelector";
+import { cssStateToString, CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
+import CustomButton from "../solid_blocks/button/buttons";
 
 export function ClassDesignTab(props: {
   component: string;
@@ -21,7 +22,7 @@ export function ClassDesignTab(props: {
   txnId?: number;
 }) {
   const [cssState, setCssState] = createStore({} as CSSStore);
-  const [cssDefaultState, setDefaultCssState] = createStore({} as CSSStore);
+  const [cssDefaultState, setCssDefaultCssState] = createStore({} as CSSStore);
   const [state, setState] = createSignal('');
 
   const defaultValues = createMemo(() => props.meta.P.value || "");
@@ -29,7 +30,7 @@ export function ClassDesignTab(props: {
 
   onMount(() => {
     setCssState(reconcile(parseAndApplyCssRules(cssValue())));
-    setDefaultCssState(reconcile(parseAndApplyCssRules(defaultValues())));
+    setCssDefaultCssState(reconcile(parseAndApplyCssRules(defaultValues())));
   });
 
   // Merge null key into the default state and update setValue prop
@@ -37,20 +38,25 @@ export function ClassDesignTab(props: {
     const value = cssStateToString(cssState);
 
     props.setValue?.(value);
-    // setCssState(mergedState);
-    // setDefaultCssState(cssDefaultState);
+    setCssState(cssState);
+    // setCssDefaultCssState(cssDefaultState);
     return value;
   });
 
   return (
     <CssEditorContext.Provider value={[cssState, setCssState]}>
-      <CssDefaultEditorContext.Provider value={[cssDefaultState, setDefaultCssState]}>
+      <CssDefaultEditorContext.Provider value={[cssDefaultState, setCssDefaultCssState]}>
         <CssStateContext.Provider value={[state, setState]}>
-          <Icon
-            onClick={() => setCssState(reconcile({}))}
-            icon={"mdi:close"}
-            style={{ color: "grey" }}
-          />
+          <Show when={Object.entries(cssState).length}>
+            <div class="flex jc:end p:10|0">
+              <CustomButton
+                variant="outlined"
+                onClick={() => setCssState(reconcile({}))}
+                leading={<Icon icon="mdi:close" />}
+                style={{ display:"flex" }}
+              >Reset</CustomButton>
+            </div>
+          </Show>
           <span class={"m:10|0"}>
             <Tabs style={{ padding: "10px" }}>
               <TabList class={"m:5px"}>
@@ -62,6 +68,7 @@ export function ClassDesignTab(props: {
                   <div class="block w:inherit p:20px|10px|0px|10px">
                     <DisplaySelector
                       value={state()}
+                      onRemoveIconClick={() => setState('')}
                       isAddToClass={false}
                       isLabelOnTop={false}
                       label="Select State"
@@ -74,16 +81,18 @@ export function ClassDesignTab(props: {
               </TabContainer>
               <TabContainer>
                 <Container>
-                  Default Value(Read only)
-                  <TextEditorTab
-                    getCssValue={defaultValues()}
-                    parseAndApplyCssRules={parseAndApplyCssRules}
-                  />
-                  Property value
-                  <TextEditorTab
-                    getCssValue={memoizedCssValue()}
-                    parseAndApplyCssRules={parseAndApplyCssRules}
-                  />
+                  <div class="content mt:5">
+                    Default Value(Read only)
+                    <TextEditorTab
+                      getCssValue={defaultValues()}
+                      parseAndApplyCssRules={parseAndApplyCssRules}
+                    />
+                    Property value
+                    <TextEditorTab
+                      getCssValue={memoizedCssValue()}
+                      parseAndApplyCssRules={parseAndApplyCssRules}
+                    />
+                  </div>
                 </Container>
               </TabContainer>
             </Tabs>

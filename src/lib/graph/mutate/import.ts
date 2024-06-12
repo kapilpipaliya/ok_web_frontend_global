@@ -4,8 +4,8 @@ import {
   addNewRow,
   getSublistRows,
   getSublistRowsForType,
-  newRow,
-} from "./form_functions";
+  newRow
+} from "./form/rowFunction";
 import { deleteRow } from "./deleteRow";
 import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { commitTxn, getNewGraphId, getNewTxnId } from "../transaction";
