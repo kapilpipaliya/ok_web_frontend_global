@@ -301,7 +301,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         return (
           <Switch>
             <Match when={parentComponent() === "TabList"}>
-              <Tab style={item.P}>
+            <Tab style={item.P}>
                 <PageComponent />
               </Tab>
             </Match>

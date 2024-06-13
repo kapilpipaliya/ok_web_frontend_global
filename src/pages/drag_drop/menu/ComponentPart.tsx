@@ -5,7 +5,7 @@ import {
   createEffect,
   createResource,
   createSignal,
-  useContext,
+  useContext
 } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { Checkbox } from "~/components/solid_blocks";
@@ -21,7 +21,7 @@ import { onClickAddComponent } from "../CommonCompUtils";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { iconMap } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;

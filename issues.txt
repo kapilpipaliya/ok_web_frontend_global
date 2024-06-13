@@ -12,14 +12,16 @@
 Savan:
 Make sure all inputs are working.
 
-whenever any css property is selected, highlight it.  ✅ 
-in src/components/css_properties/PropertiesTabs.tsx remove createEffect if possible. ✅ 
-add a option to remove a property value ✅
-
-
-In page designer, Page menu tab, on mouse hover display page preview.
-In form designer, root vertex when hover over it display properties icon.
+instead of using loader in CSSRuntimeProvider use rc.css.master.co/guide/flash-of-unstyled-content ✅ 
+In page designer, Page menu tab, on mouse hover display page preview. ✅
+ - make a tooltip display working
+ - make a page preview in tooltip working. 
+In form designer, root vertex when hover over it display properties icon. ✅
+make sure signup is working. I have refactored some code. and make it wait only until db is ready. ✅
+    
 Test all css properties applying properly.
+
+make drag and drop working on ipad or mobile working.
 
 make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
 (Kapil) write a table routes to see all the form entries.
@@ -28,9 +30,6 @@ Make Multi Stage Form design possible.
 css issue:
  box-shadow
  not merge css working
-
-instead of using loader in CSSRuntimeProvider use https://rc.css.master.co/guide/flash-of-unstyled-content
-
 
 Refactor all cypher functions, use eval function whenever possible.
 
@@ -87,5 +86,3 @@ expression-eval => jsep (for +,-) => jsonata(filter, projection)
 
 To find all files in your codebase whose line count is greater than 400, you can use the following command:
 find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
-
-make sure collapsiable components working in page designer.

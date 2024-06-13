@@ -192,7 +192,7 @@ export function PropertiesBody(props: any) {
                       nameExpr: (v: Vertex) => {
                         const component = getChildVertex(graph, ["$0Comp"], v)
                           .vertex?.P.name;
-                        return `${v.P.name}${component ? ` (${component})` : ""}`;
+                        return `${v.P.name || ''}${component ? ` (${component})` : ""}`;
                       },
                     }
                   );

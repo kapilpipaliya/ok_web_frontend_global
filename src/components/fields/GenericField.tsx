@@ -88,10 +88,6 @@ export function GenericField(
   });
 
   const repeaterContext = useContext(RepeaterVertexContext);
-
-  const propWithDefault = (key: string, defaultValue?: any) => {
-    return props.meta.P[`${key}`] ?? defaultValue;
-  };
   
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
   
@@ -291,6 +287,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "Collapsible"}>
           <Collapsible
+            isOpen={props.meta.P.isOpen ?? true}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().css, props.meta.P.css)}
@@ -370,7 +367,7 @@ export function GenericField(
           <hr
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={` h:${propWithDefault("height", "2")} color:${propWithDefault("color", "lightgrey")} w:full ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
+            class={` h:${props.meta.P.height ?? "2"} color:${props.meta.P.color ?? "lightgrey"} w:full ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
@@ -379,9 +376,9 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().css, props.meta.P.css)}
             etc={props.meta.P.class}
-            heading={propWithDefault("heading")}
-            divider={propWithDefault("divider", true)}
-            subheading={propWithDefault("subheading")}
+            heading={props.meta.P.heading}
+            divider={props.meta.P.divider ?? true}
+            subheading={props.meta.P.subheading}
           />
         </Match>
         <Match when={component() === "Rating"}>
@@ -390,7 +387,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().css, props.meta.P.css)}
             etc={props.meta.P.class}
-            heading={propWithDefault("heading", "Rating")}
+            heading={props.meta.P.heading ?? "Rating"}
           />
         </Match>
         <Match when={true}>

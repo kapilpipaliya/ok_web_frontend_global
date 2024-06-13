@@ -17,10 +17,12 @@ import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { createPopper } from "@popperjs/core";
 import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+import Popover from "~/components/PopOver";
+import CustomPopover from "~/components/PopOver";
+import { PageViewBase } from "~/pages/PageView";
 
-export function PagesPart(props: {coll: string}) {
+export function PagesPart(props: { coll: string }) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const { showErrorToast } = useToast();
@@ -30,6 +32,7 @@ export function PagesPart(props: {coll: string}) {
   const [filteredData, setFilteredData] = createSignal<any[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
   const [tooltip, setTooltip] = createSignal<HTMLElement | null>(null);
+  const [openPopoverId, setOpenPopoverId] = createSignal<Id | null>(null);
 
   // Fetch data function
   async function fetchData(): Promise<{
@@ -84,14 +87,13 @@ export function PagesPart(props: {coll: string}) {
     }
   };
 
-  function ListItemComponent(props: { child: any }) {
+  function ListItemComponent(props: { child: any, openPopoverId: Id | null, setOpenPopoverId: (id: Id | null) => void }) {
     const [isHovered, setIsHovered] = createSignal(false);
     const handleHover = (el: HTMLElement) => {
       setIsHovered(true);
       if (previewPageId() !== props.child.id) {
         setPreviewPageId(props.child.id);
       }
-      ;
     };
 
     const baseStyle = {
@@ -119,35 +121,31 @@ export function PagesPart(props: {coll: string}) {
 
     return (
       <Show when={props.child.name}>
-        <div
-          ref={el=>setTooltip(el)}
-          style={itemStyle()}
-          onMouseLeave={() => {
-            setIsHovered(false);
-            setPreviewPageId(null);
-            setTooltip(null);
-          }}
-          draggable={true}
-          onDragStart={(e) => {
-            e.stopPropagation();
+        <CustomPopover
+          isOpen={props.openPopoverId === props.child.id}
+          setIsOpen={(isOpen) => props.setOpenPopoverId(isOpen ? props.child.id : null)}
+          trigger={<div
+            ref={el => setTooltip(el)}
+            style={itemStyle()}
+            onMouseLeave={() => {
+              setIsHovered(false);
+              setPreviewPageId(null);
+              setTooltip(null);
+            }}
+            draggable={true}
+            onDragStart={(e) => {
+              e.stopPropagation();
 
-            setDraggedVertex((prev) => [
-              ...prev,
-              graph.vertexes[props.child.id],
-            ]);
-          }}
-        >
-          <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
-          <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+              setDraggedVertex((prev) => [
+                ...prev,
+                graph.vertexes[props.child.id],
+              ]);
+            }}
+          >
+            <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
+            <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
             <Show when={tooltip()}>
               <div
-                ref={(el) => {
-                  if (el) {
-                    createPopper(tooltip()!, el, {
-                      placement: "right",
-                    });
-                  }
-                }}
                 class="tooltip"
                 style={{
                   "z-index": 1000,
@@ -160,7 +158,11 @@ export function PagesPart(props: {coll: string}) {
                 {props.child.preview}
               </div>
             </Show>
-        </div>
+          </div>
+          }
+          title={`${toTitle(props.child.name)} Preview`}
+          description="This is a description inside the popover."
+        ><PageViewBase formId={props.child.id} /></CustomPopover>
       </Show>
     );
   }
@@ -190,7 +192,7 @@ export function PagesPart(props: {coll: string}) {
             </div>
           </nav>
           <div
-            class="overflow:auto h:full"
+            class="overflow:auto h:full grid"
             style={{
               "scrollbar-width": "thin",
               "scrollbar-color": "lightgrey",
@@ -204,7 +206,7 @@ export function PagesPart(props: {coll: string}) {
                 </div>
               }
             >
-              {(item, index) => <ListItemComponent child={item} />}
+              {(item, index) => <ListItemComponent child={item} openPopoverId={openPopoverId()} setOpenPopoverId={setOpenPopoverId} />}
             </For>
           </div>
         </>

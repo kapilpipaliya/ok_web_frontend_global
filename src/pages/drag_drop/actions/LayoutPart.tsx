@@ -82,7 +82,7 @@ export function LayoutPart(props: {}) {
       );
       // console.log("adding old properties", getComponent(), layoutPropRows);
       if (Object.keys(layoutPropRows).length) {
-        mergeVertexProperties(pageConfig.formData.txnId, props.metaVertex.id, graph, setGraph,layoutPropRows);
+        mergeVertexProperties(pageConfig.formData.txnId, props.metaVertex.id, graph, setGraph, layoutPropRows);
       }
     });
 
@@ -95,15 +95,13 @@ export function LayoutPart(props: {}) {
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          class={`${
-            isSelectedLayoutId(props.metaVertex.id)
+          class={`${isSelectedLayoutId(props.metaVertex.id)
               ? "bg:rgb(197,221,255)"
               : isSelectedHoverId(props.metaVertex.id)
                 ? "bg:#F2EDED"
                 : ""
-          } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${
-            children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
-          }`}
+            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+            }`}
           classList={{
             "b:1px":
               isActiveItem() && indicatorPosition().position === "center",
@@ -156,11 +154,10 @@ export function LayoutPart(props: {}) {
                   style={{
                     transition: "transform 0.2s linear",
                     "margin-top": "7px",
-                    transform: `${
-                      collapsedKeys().includes(props.metaVertex.id)
+                    transform: `${collapsedKeys().includes(props.metaVertex.id)
                         ? "rotate(0deg)"
                         : "rotate(180deg)"
-                    }`,
+                      }`,
                   }}
                 />
               </button>
@@ -178,57 +175,25 @@ export function LayoutPart(props: {}) {
             {nameExpr(props.metaVertex, graph) || props.metaVertex.P.name}
           </div>
           {/* When root element, dont display icons */}
-          <Show when={!rootVertexes().includes(props.metaVertex)}>
-            <div class="flex ai:center mt:4">  
-              <Show
-                when={
-                  isSelectedLayoutId(props.metaVertex.id) ||
-                  isSelectedHoverId(props.metaVertex.id)
-                }
-              >
-                <Tooltip content={"Properties"} nowrap>
-                  <Icon
-                    icon={"mingcute:settings-5-line"}
-                    onclick={() => setShowPropertiesDrawer(!showPropertiesDrawer())}
-                    height={22}
-                    width={22}
-                    class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                  />
-                </Tooltip>
-                <Tooltip content={"Duplicate"} nowrap>
-                  <Icon
-                    icon={"mage:copy"}
-                    height={18}
-                    width={18}
-                    color={"black"}
-                    class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                    onclick={clone}
-                  />
-                </Tooltip>
-                <Tooltip content={"Delete"} nowrap>
-                  <GenericField
-                    meta={
-                      {
-                        P: {
-                          component: "Icon",
+          <div class="flex ai:center mt:4">
+            <Show
+              when={(
+                isSelectedLayoutId(props.metaVertex.id) ||
+                isSelectedHoverId(props.metaVertex.id)) && isFormRootVertetx()
+              }
+            >
+              <Tooltip content={"Properties"} nowrap>
+                <Icon
+                  icon={"mingcute:settings-5-line"}
+                  onclick={() => setShowPropertiesDrawer(!showPropertiesDrawer())}
+                  height={22}
+                  width={22}
+                  class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                />
+              </Tooltip>
+            </Show>
 
-                            style: { color: "red" },
-                            onClick: () => {
-                              const name = getComponent();
-                              deleteLayout(name);
-                            },
-                            width: 18,
-                            height: 18,
-                            class:
-                              "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
-                            icon: "mage:trash",
-
-                        },
-                      } as any
-                    }
-                  />
-                </Tooltip>
-              </Show>
+            <Show when={!rootVertexes().includes(props.metaVertex)}>
               <Show
                 when={
                   isSelectedLayoutId(props.metaVertex.id) ||
@@ -236,10 +201,43 @@ export function LayoutPart(props: {}) {
                   hiddenNodes().includes(props.metaVertex.id)
                 }
               >
+              <Tooltip content={"Duplicate"} nowrap>
+                <Icon
+                  icon={"mage:copy"}
+                  height={18}
+                  width={18}
+                  color={"black"}
+                  class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
+                  onclick={clone}
+                />
+              </Tooltip>
+              <Tooltip content={"Delete"} nowrap>
+                <GenericField
+                  meta={
+                    {
+                      P: {
+                        component: "Icon",
+
+                        style: { color: "red" },
+                        onClick: () => {
+                          const name = getComponent();
+                          deleteLayout(name);
+                        },
+                        width: 18,
+                        height: 18,
+                        class:
+                          "cursor:pointer  mr:5px opacity:.5 opacity:1:hover",
+                        icon: "mage:trash",
+
+                      },
+                    } as any
+                  }
+                />
+              </Tooltip>
+              
                 <Tooltip
-                  content={`${
-                    !hiddenNodes().includes(props.metaVertex.id) ? "Show" : "Show"
-                  }`}
+                  content={`${!hiddenNodes().includes(props.metaVertex.id) ? "Show" : "Show"
+                    }`}
                   nowrap
                 >
                   <button
@@ -271,8 +269,9 @@ export function LayoutPart(props: {}) {
                 </Tooltip>
                 &nbsp;
               </Show>
-            </div>
-          </Show>
+            </Show>
+          </div>
+
         </div>
 
         <Show
@@ -296,13 +295,12 @@ export function LayoutPart(props: {}) {
 
   const rootChildren = () => evaluate(jsep("->Attr"), { vertexes: [pageConfig.formData?.formData], graph, setGraph }) || []
   const isFormRootVertetx = () => pageConfig.formData?.formData?.L?.[0] === "Form";
-  const rootVertexes = () =>
-    {
-      if (isFormRootVertetx()) {
-        return rootChildren();
-      }
-      return pageConfig.formData?.formData ? [pageConfig.formData.formData] : [];
-    }; // Starting point(s)
+  const rootVertexes = () => {
+    if (isFormRootVertetx()) {
+      return rootChildren();
+    }
+    return pageConfig.formData?.formData ? [pageConfig.formData.formData] : [];
+  }; // Starting point(s)
 
   return (
     <>

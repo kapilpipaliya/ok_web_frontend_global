@@ -16,7 +16,7 @@ export function onClickAddComponent(
   txnId: number,
   fromVertex: Vertex,
   formData: any,
-  toVertexId: Id,
+  toVertexId: Id | number,
 ) {
   const toVertex = graph.vertexes[toVertexId];
   const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
