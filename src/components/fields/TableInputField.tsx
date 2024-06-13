@@ -55,8 +55,10 @@ import { FormContext, NewTxnIdContext } from "~/lib/contexts";
 import {
   PageRenderVertexContext, RepeaterVertexContext
 } from "~/components/page_item_render/Context";
-import { getLastItem } from "~/components/page_item_render/getLastItem";
-import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
+import {
+  getDataVertex
+} from "~/components/page_item_render/utils/getDataVertex";
+import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
 
 export function TableInputField(
   props: ComponentProps & {
@@ -146,7 +148,7 @@ export function TableInputField(
   const parentItems = useContext(PageRenderVertexContext);
 
   const parentData = createMemo(() => {
-    return PageRenderUtils.getDataVertex(graph, getLastItem(parentItems, 1));
+    return getDataVertex(graph, getLastItem(parentItems, 1));
   });
   // load data:
   // add row vertexes data to store

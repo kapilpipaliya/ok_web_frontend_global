@@ -4,7 +4,12 @@ import {
  PageItemRender
 } from "~/components/page_item_render/PageItemRender";
 import { PageContext } from "~/lib/contexts";
-import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
+import {
+ getCollection
+} from "~/components/page_item_render/utils/getCollection";
+import {
+ getDataVertex
+} from "~/components/page_item_render/utils/getDataVertex";
 
 export function PageView(props: {
  metaVertex?: Vertex;
@@ -13,10 +18,10 @@ export function PageView(props: {
 }) {
  const [graph, setGraph] = useContext(GraphContext)!;
  const collection = createMemo(() =>
-  PageRenderUtils.getCollection(graph, props.metaVertex)
+  getCollection(graph, props.metaVertex)
  );
  const dataVertex = createMemo(() =>
-  PageRenderUtils.getDataVertex(graph, props.metaVertex)
+  getDataVertex(graph, props.metaVertex)
  );
 
  return (

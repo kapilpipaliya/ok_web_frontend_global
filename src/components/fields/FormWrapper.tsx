@@ -99,10 +99,8 @@ export function FormWrapper(
                   {
                     P: {
                       component: "Button",
-             
                         children: "Submit",
                         onClick: () => onSubmit(),
-                   
                     },
                   } as any
                 }
@@ -117,12 +115,10 @@ export function FormWrapper(
               {
                 P: {
                   component: "Button",
-                  
                     onClick: () => onCancel(),
                     variant: "outlined",
                     class: "border-color:#FF0000 color:#FF0000",
                     children: "Cancel",
-                  
                 },
               } as any
             }

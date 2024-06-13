@@ -25,14 +25,18 @@ import Heading from "~/components/solid_blocks/Heading";
 import StarRating from "~/components/solid_blocks/Rating";
 import { PageView } from "~/components/page_item_render/PageView";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_item_render/Context";
-import { getLastItem } from "~/components/page_item_render/getLastItem";
+
 import { APP_BASE_URL } from "~/lib/constants";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
-import { FormWrapper } from "~/components/page_item_render/FormWrapper";
+import { FormWrapper } from "~/components/fields/FormWrapper";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify } from "~/lib/utils";
 import {mergeCSS} from "~/components/css_properties/cssUtils";
-import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
+import { getComponent } from "~/components/page_item_render/utils/getComponent";
+import {
+  getDataVertex
+} from "~/components/page_item_render/utils/getDataVertex";
+import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -82,7 +86,7 @@ export function GenericField(
   const component = createMemo(() => props.component || props.meta.P.component);
 
   const parentComponent = createMemo(() => {
-    return PageRenderUtils.getComponent(graph, getLastItem(parentItems, 2))?.P[
+    return getComponent(graph, getLastItem(parentItems, 2))?.P[
       IdAttr
     ];
   });
@@ -127,7 +131,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "A"}>
           <Switch>
-            <Match when={PageRenderUtils.getDataVertex(graph, props.meta)}>
+            <Match when={getDataVertex(graph, props.meta)}>
               {(vertex) => (
                 <A
                   {...defaultValues()}

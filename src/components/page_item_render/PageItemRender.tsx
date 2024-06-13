@@ -17,10 +17,13 @@ import {
 } from "~/lib/contexts";
 import {Popover} from "@kobalte/core/popover";
 import {PageRenderVertexContext, RepeaterVertexContext} from "~/components/page_item_render/Context";
-import {getLastItem} from "~/components/page_item_render/getLastItem";
 import {iconMap} from "~/lib/constants";
-import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
-
+import { getComponent } from "~/components/page_item_render/utils/getComponent";
+import {
+  getDataVertex
+} from "~/components/page_item_render/utils/getDataVertex";
+import { getId } from "~/components/page_item_render/utils/getID";
+import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
 
 export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
@@ -100,10 +103,10 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         const component = createMemo(
           () =>
             item.P.component ||
-            PageRenderUtils.getComponent(graph, item)?.P[IdAttr],
+            getComponent(graph, item)?.P[IdAttr],
         );
         const parentComponent = createMemo(() => {
-          return PageRenderUtils.getComponent(
+          return getComponent(
             graph,
             getLastItem(parentItems, 1),
           )?.P[IdAttr];
@@ -112,20 +115,20 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         // Need Repetitive parent checks?
         // @ts-ignore
         const parentData = () => {
-          return PageRenderUtils.getDataVertex(
+          return getDataVertex(
             graph,
             getLastItem(parentItems, 1),
           );
         };
 
-        const getComponent = () =>
+        const getComponentName = () =>
           getChildVertex(graph, ["$0Comp"], item).vertex?.P.name;
 
         const Content = () => (
           <DynamicComponent
             meta={item}
             // NOTE: For repeater we cant use parentData
-            // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || PageRenderUtils.getDataVertex(item) || parentData()}
+            // data={props.data || getSelectionOptions([...useContext(RepeaterContext)], item.P.data).vertexes || getDataVertex(item) || parentData()}
             data={
               props.data ||
               getSelectionOptions(
@@ -134,9 +137,9 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 [...useContext(RepeaterVertexContext)],
                 item.P.data,
               ).vertexes ||
-              PageRenderUtils.getDataVertex(graph, item)
+              getDataVertex(graph, item)
             }
-            title={toTitle(PageRenderUtils.getId(graph, item) || "")}
+            title={toTitle(getId(graph, item) || "")}
             // setValue={props.setValue}
             disabled={false}
             component={component()}
@@ -213,7 +216,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                     "margin-right": "4px",
                                   }}
                                 >
-                                  {getComponent()}
+                                  {getComponentName()}
                                 </div>
                               </Tooltip>
                               <Tooltip content={"Move"} nowrap>
@@ -259,7 +262,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                               </Tooltip>
                               <Tooltip content={"Delete"}>
                                 <Icon
-                                  onClick={() => deleteLayout(getComponent())}
+                                  onClick={() => deleteLayout(getComponentName())}
                                   icon={"fluent:delete-20-regular"}
                                   height={20}
                                   width={20}
@@ -279,12 +282,12 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                         <span class="position:relative ">
                           <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
                             <Icon
-                              icon={iconMap[getComponent()]}
+                              icon={iconMap[getComponentName()]}
                               class=" flex"
                             />
                             <Tooltip content={"Name"} nowrap>
                               <div class="mr:0.5rem   f:0.875rem lh:1.25rem">
-                                {getComponent()}
+                                {getComponentName()}
                               </div>
                             </Tooltip>
                           </div>

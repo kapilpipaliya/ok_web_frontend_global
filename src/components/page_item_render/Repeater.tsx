@@ -15,8 +15,10 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 import {
   RepeaterVertexContext, PageRenderVertexContext
 } from "~/components/page_item_render/Context";
-import {PageRenderUtils} from "~/components/page_item_render/PageRenderUtils";
 import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
+import {
+  getCollection
+} from "~/components/page_item_render/utils/getCollection";
 
 export const Repeater = (props: { data: any; meta: any }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -27,7 +29,7 @@ export const Repeater = (props: { data: any; meta: any }) => {
   const fetchOptions = async () => {
     const mgData = await getSelectionOptionsMGCall(
       [props.data],
-      `g:'${PageRenderUtils.getCollection(graph, props.meta)!}'`,
+      `g:'${getCollection(graph, props.meta)!}'`,
     );
     return { mgData };
   };
@@ -47,7 +49,7 @@ export const Repeater = (props: { data: any; meta: any }) => {
               graph,
               setGraph,
               [props.meta],
-              `g:'${PageRenderUtils.getCollection(graph, props.meta)!}'`,
+              `g:'${getCollection(graph, props.meta)!}'`,
             ).vertexes,
         );
 
