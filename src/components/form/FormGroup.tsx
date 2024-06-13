@@ -3,7 +3,7 @@ import {createMemo, For, Match, Switch} from "solid-js";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import {DynamicComponent} from "./DynamicComponent";
-import {getComponentForCollRow} from "~/components/form/GetComponentForCollRow";
+import {getComponentForCollRow} from "~/components/form/getComponentForCollRow";
 
 interface FormGroupProps {
   metaAttributes: Vertex[];

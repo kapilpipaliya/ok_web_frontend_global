@@ -13,11 +13,8 @@ Savan:
 Make sure all inputs are working.
 
 instead of using loader in CSSRuntimeProvider use rc.css.master.co/guide/flash-of-unstyled-content ✅ 
-In page designer, Page menu tab, on mouse hover display page preview. ✅
- - make a tooltip display working
- - make a page preview in tooltip working. 
 In form designer, root vertex when hover over it display properties icon. ✅
-make sure signup is working. I have refactored some code. and make it wait only until db is ready. ✅
+
     
 Test all css properties applying properly.
 

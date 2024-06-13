@@ -3,6 +3,7 @@ import {GraphInterface, IdAttr, Vertex} from "~/lib/graph/graph";
 import {getChildVertex} from "~/lib/graph/get/sync/traverse";
 import {getCollAttrComp} from "~/lib/graph/get/sync/graph_functions";
 
+// refactor this file
 export const PageRenderUtils = {
   getCollection: (
     graph: Store<GraphInterface>,

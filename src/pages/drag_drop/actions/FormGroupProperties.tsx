@@ -5,7 +5,7 @@ import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { ClassDesignTab } from "~/components/css_properties/PropertiesTabs";
 import { Icon } from "@iconify-icon/solid";
-import {getComponentForCollRow} from "~/components/form/GetComponentForCollRow";
+import {getComponentForCollRow} from "~/components/form/getComponentForCollRow";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
