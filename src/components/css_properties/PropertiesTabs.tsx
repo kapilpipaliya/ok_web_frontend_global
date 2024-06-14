@@ -38,7 +38,7 @@ export function ClassDesignTab(props: {
     const value = cssStateToString(cssState);
 
     props.setValue?.(value);
-    setCssState(cssState);
+    // setCssState(cssState);
     // setCssDefaultCssState(cssDefaultState);
     return value;
   });

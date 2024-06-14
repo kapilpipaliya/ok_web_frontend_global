@@ -51,7 +51,7 @@ export function GenericInputField(
             <Checkbox
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.checked)
@@ -80,7 +80,7 @@ export function GenericInputField(
               type="color"
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
               onInput={(e) => {
                 props.setValue
@@ -103,7 +103,7 @@ export function GenericInputField(
             <FileUploader
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
               image={props.meta?.P.image}
             />
           </Match>
@@ -129,7 +129,7 @@ export function GenericInputField(
               }}
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
               isNumber
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
@@ -138,7 +138,7 @@ export function GenericInputField(
             <Radio
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
                 props.setValue
@@ -165,7 +165,7 @@ export function GenericInputField(
               style={{ ...props.meta?.P }}
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
             />
           </Match>
           <Match when={component() === "SelectBox"}>
@@ -218,7 +218,7 @@ export function GenericInputField(
             <TextField
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
+              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -254,7 +254,7 @@ export function GenericInputField(
             <TextField
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
+              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -302,7 +302,7 @@ export function GenericInputField(
             <TextField
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={`global-style ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
+              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue
@@ -325,7 +325,7 @@ export function GenericInputField(
             <Label
               {...defaultValues()}
               {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().css, props.meta.P.css)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
             >
               <PageItemRender metaVertex={props.meta} />
             </Label>

@@ -136,7 +136,7 @@ export function GenericField(
                 <A
                   {...defaultValues()}
                   {...deNullify(props.meta.P)}
-                  class={mergeCSS(defaultValues().css, props.meta.P.css)}
+                  class={mergeCSS(defaultValues().class, props.meta.P.class)}
                   href={`${APP_BASE_URL}/${vertex().P.name}`}
                   draggable
                 >
@@ -159,7 +159,7 @@ export function GenericField(
               <A
                 {...defaultValues()}
                 {...deNullify(props.meta.P)}
-                class={mergeCSS(defaultValues().css, props.meta.P.css)}
+                class={mergeCSS(defaultValues().class, props.meta.P.class)}
                 href={getUrl(
                   graph,
                   setGraph,
@@ -200,7 +200,7 @@ export function GenericField(
             loading="lazy"
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
             src={getText(
               graph,
               setGraph,
@@ -215,7 +215,7 @@ export function GenericField(
           <Tabs
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Tabs>
@@ -233,7 +233,7 @@ export function GenericField(
             height={props.meta.P.height || "24"}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           />
         </Match>
         <Match when={component() === "Box" && props.meta.P.text}>
@@ -241,7 +241,7 @@ export function GenericField(
             component={props.meta.P.as || "div"}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
             {...getAttrs(props.meta)}
           >
             {getText(
@@ -256,7 +256,7 @@ export function GenericField(
           <CustomButton
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </CustomButton>
@@ -269,7 +269,7 @@ export function GenericField(
             }
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Table>
@@ -294,7 +294,7 @@ export function GenericField(
             isOpen={props.meta.P.isOpen ?? true}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Collapsible>
@@ -303,7 +303,7 @@ export function GenericField(
           <Avatar
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Avatar>
@@ -312,7 +312,7 @@ export function GenericField(
           <Select
             {...defaultValues()}
             {...props.props.meta.P}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             {props.props.data?.P[props.props.meta.P[IdAttr]] ??
               props.props.meta.P.children}
@@ -322,7 +322,7 @@ export function GenericField(
           <Spinner
             {...defaultValues()}
             {...props.meta?.P}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >{props.meta.P.children}</Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
@@ -340,7 +340,7 @@ export function GenericField(
           <Accordion
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Accordion>
@@ -352,7 +352,7 @@ export function GenericField(
             aria-label="breadcrumb"
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             <PageItemRender metaVertex={props.meta} />
           </Breadcrumbs>
@@ -361,7 +361,7 @@ export function GenericField(
           <Progress
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           />
         </Match>
         <Match when={component() === "Form"}>
@@ -371,14 +371,14 @@ export function GenericField(
           <hr
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={` h:${props.meta.P.height ?? "2"} color:${props.meta.P.color ?? "lightgrey"} w:full ${mergeCSS(defaultValues().css, props.meta.P.css)}`}
+            class={` h:${props.meta.P.height ?? "2"} color:${props.meta.P.color ?? "lightgrey"} w:full ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
           />
         </Match>
         <Match when={component() === "Heading"}>
           <Heading
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
             etc={props.meta.P.class}
             heading={props.meta.P.heading}
             divider={props.meta.P.divider ?? true}
@@ -389,7 +389,7 @@ export function GenericField(
           <StarRating
             {...defaultValues()}
             {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().css, props.meta.P.css)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
             etc={props.meta.P.class}
             heading={props.meta.P.heading ?? "Rating"}
           />

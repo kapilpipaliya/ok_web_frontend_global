@@ -27,7 +27,7 @@ export function cssStateToString(cssState: CSSStore) {
       if (!value || state===undefined) return;
       if (!isObject(value)) return `${state}:${value}`;
       return Object.entries(value).map(([key, value]) => {
-        return `${key}:${value}${state ? `:${state}` : ""}`;
+        return `${key}:${value}${state && state !== 'undefined' ? `:${state}` : ""}`;
       }).join("\n");
     })
     .join("\n");

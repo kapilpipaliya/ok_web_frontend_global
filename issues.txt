@@ -10,13 +10,15 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-Make sure all inputs are working.
+when we apply font 'Courier New' it apply     font-family: Courier class, when space in font name, generate css like: font-family:Courier|New
+flex rules are generated like: 'flex:1 1 0%', but it should be generated like: flex:1|1|0%
+Test all css properties applying properly.
+Make sure all inputs are working, make video of all the inputs using drag and drop.
+
 
 instead of using loader in CSSRuntimeProvider use rc.css.master.co/guide/flash-of-unstyled-content ✅ 
 In form designer, root vertex when hover over it display properties icon. ✅
 
-    
-Test all css properties applying properly.
 
 make drag and drop working on ipad or mobile working.
 
