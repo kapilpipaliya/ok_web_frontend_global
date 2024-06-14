@@ -1,11 +1,11 @@
-import {createMemo, createSelector, For, Match, Show, Switch, useContext} from "solid-js";
-import {toTitle} from "case-switcher-js";
-import {GraphContext, IdAttr, type Vertex} from "~/lib/graph/graph";
-import {getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions} from "~/lib/graph/get/sync/traverse";
-import {DynamicComponent} from "~/components/form/DynamicComponent";
-import {useDragDrop} from "~/lib/drag_drop/useDragDrop";
-import {Icon} from "@iconify-icon/solid";
-import {Tab, TabContainer, Tooltip} from "~/components/solid_blocks";
+import { createMemo, createSelector, For, Match, Show, Switch, useContext } from "solid-js";
+import { toTitle } from "case-switcher-js";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { DynamicComponent } from "~/components/form/DynamicComponent";
+import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
+import { Icon } from "@iconify-icon/solid";
+import { Tab, TabContainer, Tooltip } from "~/components/solid_blocks";
 import {
   DragOverTargetIdContext,
   FormContext,
@@ -15,9 +15,9 @@ import {
   SelectedIdContext,
   ShowDrawerContext
 } from "~/lib/contexts";
-import {Popover} from "@kobalte/core/popover";
-import {PageRenderVertexContext, RepeaterVertexContext} from "~/components/page_item_render/Context";
-import {iconMap} from "~/lib/constants";
+import { Popover } from "@kobalte/core/popover";
+import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_item_render/Context";
+import { iconMap } from "~/lib/constants";
 import { getComponent } from "~/components/page_item_render/utils/getComponent";
 import {
   getDataVertex
@@ -68,7 +68,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
       {(item, index) => {
         const {
           children,
-          isActiveItem,
+          isActiveTargetItem,
           handleDragStart,
           handleDragEnter,
           handleDragOver,
@@ -80,6 +80,14 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         } = useDragDrop(graph, setGraph, txnId, pageDesignerFormVertex, item, () => [], true);
         const getBorder = () => {
           if (!isPreview()) {
+            if (isActiveTargetItem()) {
+              if (indicatorPosition().position === "before") {
+                return "bt:rgb(0,0,255)|2.5px|solid>*";
+              }
+              if (indicatorPosition().position === "after") {
+                return "bb:rgb(0,0,255)|2.5px|solid>*";
+              }
+            }
             if (
               isSelectedLayoutId(item.id) ||
               isSelectedDragOverTargetId(item.id)
@@ -88,14 +96,6 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             }
             if (isSelectedHoverId(item.id)) {
               return "b:#3996E1|1.5px|dashed>* r:5>*";
-            }
-            if (isActiveItem()) {
-              if (indicatorPosition().position === "before") {
-                return "bt:rgb(0,0,255)|2.5px|solid>*";
-              }
-              if (indicatorPosition().position === "after") {
-                return "bb:rgb(0,0,255)|2.5px|solid @fade|.3s>*";
-              }
             }
           }
         }
@@ -304,7 +304,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         return (
           <Switch>
             <Match when={parentComponent() === "TabList"}>
-            <Tab style={item.P}>
+              <Tab style={item.P}>
                 <PageComponent />
               </Tab>
             </Match>

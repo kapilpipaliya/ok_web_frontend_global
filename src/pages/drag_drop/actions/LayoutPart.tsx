@@ -53,7 +53,7 @@ export function LayoutPart(props: {}) {
   const TreeView = (props: { metaVertex: Vertex }) => {
     const {
       children,
-      isActiveItem,
+      isActiveTargetItem,
       handleDragStart,
       handleDragEnter,
       handleDragOver,
@@ -104,7 +104,7 @@ export function LayoutPart(props: {}) {
             }`}
           classList={{
             "b:1px":
-              isActiveItem() && indicatorPosition().position === "center",
+              isActiveTargetItem() && indicatorPosition().position === "center",
           }}
           onClick={() => onLayoutItemClick(props.metaVertex)}
           onMouseOver={(e) => {
@@ -124,11 +124,11 @@ export function LayoutPart(props: {}) {
               ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
               : "0px",
             "border-top":
-              isActiveItem() && indicatorPosition().position === "before"
+              isActiveTargetItem() && indicatorPosition().position === "before"
                 ? "2px solid green"
                 : "",
             "border-bottom":
-              isActiveItem() && indicatorPosition().position === "after"
+              isActiveTargetItem() && indicatorPosition().position === "after"
                 ? "2px solid green"
                 : "",
             "border-left": children().length ? "" : "1px dashed black",

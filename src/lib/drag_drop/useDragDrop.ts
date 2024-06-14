@@ -62,7 +62,7 @@ export function useDragDrop(
     indicatorPosition,
     (a, b) => a.id === b.activeItem,
   );
-  const isActiveItem = () => activeItemChanged(layoutVertex);
+  const isActiveTargetItem = () => activeItemChanged(layoutVertex);
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
@@ -304,7 +304,7 @@ export function useDragDrop(
 
   return {
     children,
-    isActiveItem,
+    isActiveTargetItem,
     handleDragStart,
     handleDragEnter,
     handleDragOver,
