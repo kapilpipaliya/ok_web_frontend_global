@@ -1,5 +1,5 @@
-import { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { Store } from "solid-js/store";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { Store } from "solid-js/store";
 import { getAttr } from "~/components/page_attr_render/utils/getAttr";
 
 export function getID(item?: Vertex): string | undefined {

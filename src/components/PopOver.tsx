@@ -1,5 +1,5 @@
 import { Popover } from '@kobalte/core/popover';
-import { Component, createSignal, JSX } from 'solid-js';
+import type { JSX } from 'solid-js';
 
 export function CustomPopover(props: {
   isOpen: boolean;

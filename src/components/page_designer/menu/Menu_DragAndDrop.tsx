@@ -6,7 +6,7 @@ import {
   Switch,
   createSignal,
   Show,
-  Setter,
+  type Setter,
 } from "solid-js";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";

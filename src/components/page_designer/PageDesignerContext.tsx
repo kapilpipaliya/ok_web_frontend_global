@@ -11,7 +11,7 @@ import {
   IndicatorPositionContext,
   FormSettingsContext,
   ShowDrawerContext,
-  FormSettings,
+  type FormSettings,
 } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 

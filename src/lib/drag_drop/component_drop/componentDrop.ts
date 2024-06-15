@@ -1,4 +1,4 @@
-import {type GraphInterface, type Vertex} from "~/lib/graph/graph";
+import type {GraphInterface, Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {useToast} from "~/components/Toast";
 import {addNewRow} from "../../graph/mutate/form/rowFunction";

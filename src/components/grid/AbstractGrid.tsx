@@ -16,7 +16,8 @@ export function AbstractGrid(props: AbstractGridProps) {
   const [locationData, setLocationData] = createSignal([]);
   const [graph, setGraph] = useContext(GraphContext)!;
   const param = useLocation();
-  const navigate = useNavigate();
+  const navigate = useNavigate();debugger
+  
 
   async function getNavData() {
     const data: any = getTreeData(graph, setGraph, {
@@ -28,9 +29,10 @@ export function AbstractGrid(props: AbstractGridProps) {
     });
     return data?.[0]?.children || [];
   }
-
+  console.log('hie', props.tableId)
   const [tableId, setTableId] = createSignal("");
   createEffect(() => {
+    console.log('hi2', props.tableId)
     setTableId("");
     props.tableId;
     setTimeout(() => setTableId(props.tableId));

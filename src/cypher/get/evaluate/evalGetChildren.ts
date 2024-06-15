@@ -1,6 +1,6 @@
 // ->
 import type {Edge, Vertex} from "~/lib/graph/graph";
-import {int, Session} from "neo4j-driver";
+import {int, type Session} from "neo4j-driver";
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
 

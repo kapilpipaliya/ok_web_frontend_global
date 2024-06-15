@@ -2,7 +2,7 @@ import {
   type Accessor,
   createContext,
   createSignal,
-  createUniqueId, JSX,
+  createUniqueId, type JSX,
   type Setter,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";

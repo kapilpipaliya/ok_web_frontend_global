@@ -1,4 +1,4 @@
-import {createEffect, createSignal, createUniqueId, JSX, Show} from "solid-js";
+import {createEffect, createSignal, createUniqueId, type JSX, Show} from "solid-js";
 
 export function CustomTooltip(props: {
   message: string;

@@ -10,7 +10,6 @@ import {
   onCleanup,
   runWithOwner,
   Show,
-  splitProps,
   Switch,
   useContext,
 } from "solid-js";

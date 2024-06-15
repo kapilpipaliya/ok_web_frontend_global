@@ -17,7 +17,6 @@ import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatche
 import { getToEdge } from "../../get/sync/traverse";
 import { newEdge, addNewEdge } from "../edge";
 import { klona } from "klona/json";
-import { setSelectionValue } from "../setSelectionValue";
 import { getCollAttrComp } from "../../get/sync/graph_functions";
 
 

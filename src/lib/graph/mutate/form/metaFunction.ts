@@ -1,13 +1,13 @@
 import { onCleanup, untrack, useContext } from "solid-js";
-import { Store, SetStoreFunction } from "solid-js/store";
+import type { Store, SetStoreFunction } from "solid-js/store";
 import { NewTxnIdContext } from "~/lib/contexts";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 import { componentProps } from "../../get/sync/graph_functions";
-import { GraphInterface, Vertex } from "../../graph";
+import type { GraphInterface, Vertex } from "../../graph";
 import { addNewVertex, mergeVertexProperties, newVertex } from "../vertex";
 import { klona } from "klona/json";
 import { useToast } from "~/components/Toast";
-import { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
+import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { newRow } from "./rowFunction";
 import { getNewTxnId, getNewGraphId, revertTransaction } from "../../transaction";
 

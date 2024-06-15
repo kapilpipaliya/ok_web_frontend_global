@@ -1,4 +1,4 @@
-import {GraphInterface, IdAttr, Vertex} from "~/lib/graph/graph";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {getCollAttrComp} from "~/lib/graph/get/sync/graph_functions";
 import {getSelectionOptions} from "~/lib/graph/get/sync/traverse";

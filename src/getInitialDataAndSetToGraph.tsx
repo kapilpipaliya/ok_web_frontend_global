@@ -1,5 +1,5 @@
 import type {GraphInterface, Id, Vertex} from "~/lib/graph/graph";
-import {SetStoreFunction} from "solid-js/store";
+import type {SetStoreFunction} from "solid-js/store";
 import {getAPI} from "~/lib/api/getApi";
 import {API} from "~/lib/api/endpoints";
 import {setGraphData} from "~/lib/websocket/ws_events";

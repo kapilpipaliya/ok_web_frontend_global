@@ -1,4 +1,4 @@
-import {GraphInterface, IdAttr, Vertex} from "~/lib/graph/graph";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 import {addPropsToLayoutRow} from "~/lib/drag_drop/component_drop/addPropsToLayoutRow";

@@ -31,7 +31,7 @@ import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
 import { PageDesignerLabels } from "./constant";
 import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
-import { Setter } from "solid-js";
+import type { Setter } from "solid-js";
 
 export function useDragDrop(
   graph: Store<GraphInterface>,

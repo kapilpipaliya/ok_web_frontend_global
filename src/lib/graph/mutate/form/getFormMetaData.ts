@@ -1,4 +1,4 @@
-import { type GraphInterface } from "~/lib/graph/graph";
+import type { GraphInterface } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { getFormApiFromForm } from "../../get/sync/graph_functions";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";

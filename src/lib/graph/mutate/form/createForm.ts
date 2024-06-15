@@ -1,6 +1,6 @@
-import {
-  type GraphInterface,
-  type Vertex
+import type {
+  GraphInterface,
+  Vertex
 } from "~/lib/graph/graph";
 import {
   commitTxn,

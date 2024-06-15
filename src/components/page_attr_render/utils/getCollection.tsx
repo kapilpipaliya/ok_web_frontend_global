@@ -1,6 +1,6 @@
 // refactor this file
-import { Store } from "solid-js/store";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import type { Store } from "solid-js/store";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 
 export function getCollection(

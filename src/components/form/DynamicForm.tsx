@@ -44,7 +44,6 @@ import {
   useNavigate,
 } from "@solidjs/router";
 import { TableTabs } from "~/components/TableTabs";
-import type { IFormMetaData } from "~/lib/FormMetadataType";
 // import { getPermissions } from "~/lib/graph/get/sync/auth";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
@@ -120,7 +119,7 @@ export function DynamicForm(props: DynamicFormProps) {
     cleanUpConfig: () => cleanUpConfig,
   } as FormData);
   const [activeTab, setActiveTab] = createSignal("main");
-  let form =
+  const form =
   FormMetaData[props.formId] ||
   (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
 

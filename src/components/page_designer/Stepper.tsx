@@ -1,15 +1,13 @@
-import { createEffect, createMemo, createSignal, For, Show, useContext } from "solid-js";
+import { createMemo, For, Show, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { FormContext, FormSettingsContext, HoverIdContext, PageConfigContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
-import jsep from "jsep";
-import { evaluate } from "~/lib/expression_eval";
-import { GraphContext, Id, IdAttr, Vertex } from "~/lib/graph/graph";
+import { FormSettingsContext, HoverIdContext, PageConfigContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import { deleteLayoutGlobal, useDragDrop } from "~/lib/drag_drop/useDragDrop";
+import { deleteLayoutGlobal, } from "~/lib/drag_drop/useDragDrop";
 import { useToast } from "~/components/Toast";
 
 export const Stepper = () => {

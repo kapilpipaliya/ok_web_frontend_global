@@ -2,7 +2,7 @@ import { type JSX, Show, useContext, splitProps, createSignal, onMount } from "s
 import { FormContext, FormSettingsContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
-import { ComponentProps } from "../fields/ComponentType";
+import type { ComponentProps } from "../fields/ComponentType";
 
 interface LabeledFieldProps {
   label?: string;

@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, For, type Accessor, createSignal, Setter } from "solid-js";
+import { useContext, For, type Accessor, createSignal, type Setter } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";

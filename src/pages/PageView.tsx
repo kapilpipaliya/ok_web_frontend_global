@@ -1,11 +1,11 @@
-import { graph } from "neo4j-driver";
+
 import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { IsPreviewContext, FormContext } from "~/lib/contexts";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { GraphContext, GraphInterface, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
 

@@ -1,7 +1,7 @@
 import {
   type Accessor,
   createContext,
-  createSignal, JSX,
+  createSignal, type JSX,
   type Setter,
   Show,
   useContext,

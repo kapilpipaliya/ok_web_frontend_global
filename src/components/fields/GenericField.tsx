@@ -15,7 +15,6 @@ import {
   Tabs
 } from "~/components/solid_blocks";
 import { PageAttrRender,  } from "~/components/page_attr_render/PageAttrRender";
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import {TreeView} from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import type { SetStoreFunction, Store } from "solid-js/store";

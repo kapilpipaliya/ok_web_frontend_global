@@ -1,14 +1,14 @@
-import neo4j, { Driver } from 'neo4j-driver';
+import neo4j, { type Driver } from 'neo4j-driver';
 
 export async function connectToNeo4jWithRetry(
   uri: string,
   username: string,
   password: string,
-  maxRetries: number = 5,
-  initialDelay: number = 1000
+  maxRetries = 5,
+  initialDelay = 1000
 ): Promise<Driver> {
   let retries = 0;
-  let delay = initialDelay;
+  const delay = initialDelay;
 
   while (retries < maxRetries) {
     try {

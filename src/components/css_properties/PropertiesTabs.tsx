@@ -8,7 +8,7 @@ import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
 import { DisplaySelector } from "./components/DisplaySelector";
-import { cssStateToString, CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
+import { cssStateToString, type CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
 import {CustomButton} from "../solid_blocks/button/buttons";
 
 export function ClassDesignTab(props: {

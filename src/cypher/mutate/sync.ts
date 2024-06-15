@@ -2,9 +2,9 @@ import neo4j, { type Session, type Node, int } from "neo4j-driver";
 import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
-import {Vertex} from "~/lib/graph/graph";
+import type {Vertex} from "~/lib/graph/graph";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
-import {Expression, getDataMGCall} from "~/cypher/get/getDataMGCall";
+import type {Expression, } from "~/cypher/get/getDataMGCall";
 import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 
 // Main function to initiate the migration process.
@@ -86,7 +86,7 @@ export async function processNodeSync(
     relationships: {} as { [key: string]: any },
     vertexes: undefined as any,
   }
-  let mainResult = await evalAsync(jsep(expression.expression), context);
+  const mainResult = await evalAsync(jsep(expression.expression), context);
   if (mainResult && mainResult.length > 0) {
       for (const vertex of mainResult) {
         const createdVertex = findOrCreateNodeAndProcessEdges(sessionSource, sessionTarget, vertex, vertex.L[0]);

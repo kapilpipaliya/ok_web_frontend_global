@@ -1,6 +1,6 @@
 import { createSignal, useContext, Show, For } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";
+import { CssEditorContext, CssStateContext } from "../context";
 import { ButtonGroups } from "./ButtonGroups";
 import "~/css/componentUtilCSS.css";
 

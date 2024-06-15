@@ -9,7 +9,7 @@ import {
   For,
   Switch,
   Match,
-  createMemo, JSX,
+  createMemo, type JSX,
 } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "../context";

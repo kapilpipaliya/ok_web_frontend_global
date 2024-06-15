@@ -1,4 +1,4 @@
-import { type GraphInterface, type Vertex } from "~/lib/graph/graph";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { klona } from "klona/json";
 import type { Store } from "solid-js/store";
 import { useToast } from "~/components/Toast";

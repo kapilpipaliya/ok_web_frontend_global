@@ -1,7 +1,7 @@
-import {
-  type GraphInterface,
-  type Id,
-  type Vertex
+import type {
+  GraphInterface,
+  Id,
+  Vertex
 } from "~/lib/graph/graph";
 import type { Store } from "solid-js/store";
 

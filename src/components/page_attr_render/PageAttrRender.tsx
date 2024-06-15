@@ -1,7 +1,7 @@
 import { createMemo, createSelector, For, Match, Show, Switch, useContext } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { getChildVertex, getChildVertexes, getParentVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
+import { getChildVertex, getParentVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
 import { Icon } from "@iconify-icon/solid";

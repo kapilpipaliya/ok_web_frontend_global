@@ -1,7 +1,6 @@
 // @refresh reload
 import { createHandler, StartServer } from "@solidjs/start/server";
 import "~/css/modal.css";
-import { LoaderNew } from "./components/LoaderSimple";
 import "tippy.js/dist/tippy.css";
 export default createHandler(() => (
   <StartServer

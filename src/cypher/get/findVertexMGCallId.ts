@@ -1,4 +1,4 @@
-import {int, Session} from "neo4j-driver";
+import {int, type Session} from "neo4j-driver";
 import type {Edge, Vertex} from "~/lib/graph/graph";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
 

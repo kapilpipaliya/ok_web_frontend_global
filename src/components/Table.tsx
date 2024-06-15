@@ -4,7 +4,7 @@ import {
   Show,
   Switch,
   Match,
-  type Accessor, JSX,
+  type Accessor, type JSX,
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";

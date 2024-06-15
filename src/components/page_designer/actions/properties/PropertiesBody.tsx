@@ -2,15 +2,15 @@ import { createSignal, For, onCleanup, Show, useContext } from "solid-js";
 import { Portal } from "solid-js/web";
 import { getChildVertex, getChildVertexes, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GenericField } from "~/components/fields/GenericField";
-import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
+import { ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
 
 import { PageConfigContext, SelectedIdContext, SelectedComponentContext } from "~/lib/contexts";
-import { GraphContext, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { CollAndData } from "./CollAndData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { TableInputField } from "~/components/fields/TableInputField";
-import { FieldAttribute } from "~/lib/FormMetadataType";
+import type { FieldAttribute } from "~/lib/FormMetadataType";
 import { FormMetaData } from "~/lib/formMetaData";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";

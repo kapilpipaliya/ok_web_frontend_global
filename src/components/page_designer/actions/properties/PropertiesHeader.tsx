@@ -1,8 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
-import { graph } from "neo4j-driver";
 import { useContext } from "solid-js";
 import { SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
-import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 
 export function PropertiesHeader(props: { setShowDrawer: (show: boolean) => void }) {

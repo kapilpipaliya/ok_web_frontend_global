@@ -11,14 +11,13 @@ import {
 } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
-import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
+import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import {Popover} from "~/components/PopOver";
 import {CustomPopover} from "~/components/PopOver";
 import { PageViewBase } from "~/pages/PageView";
 import { onClickAddComponent } from "../CommonCompUtils";

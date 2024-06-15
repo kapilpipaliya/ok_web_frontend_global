@@ -17,8 +17,6 @@ import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
 import { Properties } from "./properties/Properties";
-import { evaluate } from "~/lib/expression_eval";
-import jsep from "jsep";
 import { iconMap } from "~/lib/constants";
 
 import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
@@ -95,7 +93,7 @@ export function LayoutPart(props: {}) {
     });
 
     let startTime = 0;
-    let endTime = 0;
+    const endTime = 0;
     const handleDragEnter = (e: DragEvent) => {
       startTime = Date.now();
       // e.stopPropagation();

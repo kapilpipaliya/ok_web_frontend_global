@@ -1,5 +1,5 @@
-import { Store } from "solid-js/store";
-import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
+import type { Store } from "solid-js/store";
+import { type GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import {
   getAttrVertex
 } from "~/components/page_attr_render/utils/getAttrVertex";
