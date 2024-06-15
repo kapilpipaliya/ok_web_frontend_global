@@ -47,7 +47,8 @@ export function HeroSection() {
       </div>
     </section>
   );
-}
+};
+
 
 export const IconCard = (props: {
   icon: any;

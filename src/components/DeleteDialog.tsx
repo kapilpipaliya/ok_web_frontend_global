@@ -1,5 +1,5 @@
 import {CustomButton} from "~/components/solid_blocks/button/buttons";
-import {CustomModal} from "./CommonDialog";
+import CustomModal from "./CommonDialog";
 import type { JSX } from "solid-js";
 
 export function DeleteDialog(props: {

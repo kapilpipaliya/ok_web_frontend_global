@@ -20,11 +20,12 @@ import { Properties } from "./properties/Properties";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { iconMap } from "~/lib/constants";
-import { nameExpr } from "~/pages/drag_drop/actions/utils/nameExpr";
+
 import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { nameExpr } from "./utils/nameExpr";
 
 export function LayoutPart(props: {}) {
   const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];

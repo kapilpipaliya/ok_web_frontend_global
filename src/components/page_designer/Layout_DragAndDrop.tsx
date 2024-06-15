@@ -1,6 +1,6 @@
 import { type JSX, Show, createSignal, onCleanup, onMount } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
-import { MenuDragAndDrop } from "~/pages/drag_drop/menu/Menu_DragAndDrop";
+
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";
 import {
@@ -18,7 +18,8 @@ import { isServer } from "solid-js/web";
 import { Stepper } from "./Stepper";
 import { useLocation } from "@solidjs/router";
 import { FormSetting } from "./actions/FormSetting";
-import {ActionsDragAndDrops} from "~/components/page_designer/actions/Actions_DragAndDrops";
+import { ActionsDragAndDrops } from "./actions/Actions_DragAndDrops";
+import { MenuDragAndDrop } from "./menu/Menu_DragAndDrop";
 
 export function LayoutDragAndDrop(): JSX.Element {
   const location = useLocation();

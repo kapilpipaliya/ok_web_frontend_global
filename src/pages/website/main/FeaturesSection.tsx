@@ -81,7 +81,7 @@ export function FeaturesSection() {
       </div>
     </section>
   );
-}
+};
 
 const FeatureBox = (props: {
   icon: string;

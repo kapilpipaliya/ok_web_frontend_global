@@ -20,7 +20,6 @@ export function FormInActionSection() {
   );
 }
 
-
 const FormSection = () => {
   return (
     <div class="formsection">

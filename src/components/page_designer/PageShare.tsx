@@ -156,4 +156,4 @@ export function ShareSection() {
       </div>
     </div>
   );
-}
+};

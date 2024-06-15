@@ -47,7 +47,7 @@ export function TestimonialSection() {
   );
 }
 
-export function Testimonial(props: {
+function Testimonial(props: {
   rating: number;
   title: string;
   feedback: string;

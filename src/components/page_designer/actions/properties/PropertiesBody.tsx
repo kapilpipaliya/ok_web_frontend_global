@@ -3,7 +3,7 @@ import { Portal } from "solid-js/web";
 import { getChildVertex, getChildVertexes, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GenericField } from "~/components/fields/GenericField";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
-import { FormGroupProperties } from "~/pages/drag_drop/actions/FormGroupProperties";
+
 import { PageConfigContext, SelectedIdContext, SelectedComponentContext } from "~/lib/contexts";
 import { GraphContext, Vertex } from "~/lib/graph/graph";
 import { CollAndData } from "./CollAndData";
@@ -17,6 +17,7 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { transactions, getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import {CustomButton} from "~/components/solid_blocks/button/buttons";
+import { FormGroupProperties } from "../FormGroupProperties";
 
 export function PropertiesBody(props: any) {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
