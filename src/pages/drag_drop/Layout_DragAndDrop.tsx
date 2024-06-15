@@ -24,7 +24,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
   const [selectedSection, setSelectedSection] = createSignal("build");
   const [isSmallScreen, setIsSmallScreen] = createSignal(false);
   const [leftColumns, setLeftColumns] = createSignal(
-    ["components", "pages", "templates"].map((column) => ({
+    ["components", "pages", "templates", "forms"].map((column) => ({
       id: column,
       name: column,
     })),

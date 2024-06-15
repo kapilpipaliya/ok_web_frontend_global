@@ -16,14 +16,29 @@ In form designer, root vertex when hover over it display properties icon. ✅
 
 add a steeper component in the form builder, by default first step(1) is active. user can add new step too. like, step 1, step 2, step 3, step 4 etc,
 which step user select display that step form only.
+Add gap in the properties icons.
+add save button on top.
+display steeper only on forms.
+
+Bug:
+drag and drop layout issue.
+page and component drag and drop not working(kapil)
+
+(for label, use name property, instead of label property for changing the label.)
+
+validation:
 add validation Tab on properties if validations are configured on the component, validations will run on fiel value change.
 when validation is failed, display error message below the component, if custom message is not provided display common message.
+
+New component:
 add Upload Video component, it will upload video in the server and return video url.
 add Upload Image component, it will upload image in the server and return image url.
 add a Take a Picture component, it will open camera, take a picture from the camara and return image url.
+
+Dependent field:
 add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
 make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
-for label, use name property, instead of label property for changing the label.
+
 when we change width, height the textbox should be resized.
 when droping the component over content area, the icon is constaly coming and going, try to fix it as much as possible.
 
@@ -102,4 +117,3 @@ find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
 
 
 bugs:
-when both sidebar are collapsed, it display the horizontal scrollbar.

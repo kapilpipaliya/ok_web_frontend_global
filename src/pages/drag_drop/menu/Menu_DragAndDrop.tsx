@@ -93,6 +93,9 @@ const Column = (props: { datas: any; toggleLeftOpen: Accessor<boolean> }) => {
           <Match when={selectedTab() === "templates"}>
             <PagesPart coll="Template"/>
           </Match>
+          <Match when={selectedTab() === "forms"}>
+            <PagesPart coll="Form"/>
+          </Match>
         </Switch>
       </div>
     </>

@@ -19,12 +19,11 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   function moveClassToLast(vertices: Vertex[]) {
-    const nameVertices = vertices.filter(vertex => vertex.P.name === 'name');
-    const classVertices = vertices.filter(vertex => vertex.P.name === 'class');
+
     const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class');
 
     // Concatenate nameVertices, otherVertices, and classVertices
-    return [...nameVertices, ...otherVertices, ...classVertices];
+    return [{P: {name: 'name'}}, ...otherVertices, {P: {name: 'class'}}];
   }
   return (
     <>

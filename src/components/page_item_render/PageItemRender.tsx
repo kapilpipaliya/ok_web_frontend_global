@@ -44,15 +44,17 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const PropertyDrawer = (props: { itemId: any }) => {
     return (
       <Show when={isSelectedLayoutId(props.itemId)}>
-        <Icon
-          icon={"mingcute:settings-5-line"}
-          onclick={() => {
-            setShowDrawer(!showDrawer());
-          }}
-          height={22}
-          width={22}
-          class="cursor:pointer"
-        />
+        <Tooltip content={"Properties"} nowrap>
+          <Icon
+            icon={"mingcute:settings-5-line"}
+            onclick={() => {
+              setShowDrawer(!showDrawer());
+            }}
+            height={22}
+            width={22}
+            class="cursor:pointer"
+          />
+        </Tooltip>
       </Show>
     );
   };
@@ -186,13 +188,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     <Popover.Content class="popover__content">
                       <Show when={isSelectedLayoutId(item.id)}>
                         <span class="position:relative ">
-                          <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
-                            <div
-                              class="mr:0.5rem f:0.875rem lh:1.25rem"
-                              style={{ display: "flex" }}
-                            >
-                              <PropertyDrawer itemId={item.id} />
-                            </div>
+                          <div class="position:absolute color:white bottom:100% flex gap:2 bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
                             <Tooltip content={"Name"} nowrap>
                               <div
                                 style={{
@@ -205,6 +201,13 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                                 {getComponentName()}
                               </div>
                             </Tooltip>
+                            <div
+                              class="mr:0.5rem f:0.875rem lh:1.25rem"
+                              style={{ display: "flex" }}
+                            >
+                              <PropertyDrawer itemId={item.id} />
+                            </div>
+
                             <Tooltip content={"Move"} nowrap>
                               <Icon
                                 draggable={true}

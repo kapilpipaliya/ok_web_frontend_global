@@ -4,6 +4,7 @@ import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
+import { mergeVertexProperties } from "../graph/mutate/vertex";
 
 export async function handleComponentDrag(
   graph: GraphInterface,
@@ -45,6 +46,10 @@ export async function handleComponentDrag(
       setGraph,
     );
     if (layoutRowId === -1) return;
+
+    mergeVertexProperties(txnId, layoutRowId, graph, setGraph, {
+      label: fromVertex.P.name
+    })
 
     // add component inside the label
     const layoutRowId2 = componentDrop(
