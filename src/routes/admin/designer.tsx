@@ -1,6 +1,6 @@
 
-import {Designer} from "~/pages/RouteDesigner";
+import {RouteDesigner} from "~/pages/RouteDesigner";
 
 export default function designer() {
-  return <Designer />;
+  return <RouteDesigner />;
 }

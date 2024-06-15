@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "@solidjs/router";
 import { createEffect, createResource, createSignal, Show } from "solid-js";
 import { useContext } from "solid-js";
 import { GraphContext, } from "~/lib/graph/graph";
-import {PageHeader} from "~/components/Breadcrumb";
+import {Breadcrumb} from "~/components/Breadcrumb";
 import {DataGrid} from "./DataGrid";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { breadcrumbData } from "~/lib/constants";
@@ -64,7 +64,7 @@ export function AbstractGrid(props: AbstractGridProps) {
   return (
     <>
       <Show when={nav()}>
-        <PageHeader
+        <Breadcrumb
           title={`${nav()[2]}`}
           breadcrumb={[
             ...breadcrumbData,

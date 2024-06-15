@@ -1,5 +1,5 @@
 import { For, Show, createEffect, createSignal, onCleanup } from "solid-js";
-import {PageHeader} from "../components/Breadcrumb";
+import {Breadcrumb} from "~/components/Breadcrumb";
 import { getUsers } from "~/cypher/get/adminFunctions";
 import { useToast } from "~/components/Toast";
 import { syncNodesMGCall } from "~/cypher/mutate/sync";
@@ -46,7 +46,7 @@ export function SyncData() {
 
   return (
     <>
-      <PageHeader
+      <Breadcrumb
         title="Sync"
         breadcrumb={[
           { name: "Admin", icon: "clarity:administrator-line", href: "/admin" },

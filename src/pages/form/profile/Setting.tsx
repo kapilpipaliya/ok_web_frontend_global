@@ -8,7 +8,7 @@ import {
   type Accessor,
 } from "solid-js";
 import "~/css/base.css";
-import {PageHeader} from "~/components/Breadcrumb";
+import {Breadcrumb} from "~/components/Breadcrumb";
 import "~/css/tab.css";
 import { createStore } from "solid-js/store";
 import { useToast } from "~/components/Toast";
@@ -104,7 +104,7 @@ export function Settings() {
 
   return (
     <>
-      <PageHeader title="Account Setting" breadcrumb={breadcrumbData} />
+      <Breadcrumb title="Account Setting" breadcrumb={breadcrumbData} />
       <TabSection setSelectedTab={setSelectedTab} selectedTab={selectedTab} />
 
       <Show
