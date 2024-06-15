@@ -14,17 +14,17 @@ import {
   Spinner,
   Tabs
 } from "~/components/solid_blocks";
-import { PageItemAttrRender,  } from "~/components/page_item_render/PageItemAttrRender";
+import { PageAttrRender,  } from "~/components/page_attr_render/PageAttrRender";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import TreeView from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import type { SetStoreFunction, Store } from "solid-js/store";
-import { Repeater } from "~/components/page_item_render/Repeater";
+import { Repeater } from "~/components/page_attr_render/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import Heading from "~/components/solid_blocks/Heading";
 import StarRating from "~/components/solid_blocks/Rating";
-import { PageView } from "~/components/page_item_render/PageView";
-import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_item_render/Context";
+import { PageView } from "~/components/page_attr_render/PageView";
+import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 
 import { APP_BASE_URL } from "~/lib/constants";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
@@ -32,11 +32,11 @@ import { FormWrapper } from "~/components/fields/FormWrapper";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify } from "~/lib/utils";
 import {mergeCSS} from "~/components/css_properties/cssUtils";
-import { getComponent } from "~/components/page_item_render/utils/getComponent";
+import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
-} from "~/components/page_item_render/utils/getDataVertex";
-import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
+} from "~/components/page_attr_render/utils/getDataVertex";
+import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -125,7 +125,7 @@ export function GenericField(
                 repeaterContext,
               )}
               {props.children}
-              <PageItemAttrRender metaVertex={props.meta} />
+              <PageAttrRender metaVertex={props.meta} />
             </Dynamic>
           </Show>
         </Match>
@@ -150,7 +150,7 @@ export function GenericField(
                     )}
                   >
                     {props.children}
-                    <PageItemAttrRender metaVertex={props.meta} />
+                    <PageAttrRender metaVertex={props.meta} />
                   </Show>
                 </A>
               )}
@@ -178,14 +178,14 @@ export function GenericField(
                   )}
                 >
                   {props.children}
-                  <PageItemAttrRender metaVertex={props.meta} />
+                  <PageAttrRender metaVertex={props.meta} />
                 </Show>
               </A>
             </Match>
             <Match when={true}>
               <a draggable>
                 {props.children}
-                <PageItemAttrRender metaVertex={props.meta} />
+                <PageAttrRender metaVertex={props.meta} />
               </a>
             </Match>
           </Switch>
@@ -217,14 +217,14 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemAttrRender metaVertex={props.meta} />
+          <PageAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemAttrRender metaVertex={props.meta} />
+          <PageAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
@@ -267,7 +267,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-             <PageItemAttrRender metaVertex={props.meta} />
+             <PageAttrRender metaVertex={props.meta} />
           </button>
         </Match>
         <Match when={component() === "Table"}>
@@ -280,7 +280,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </Table>
         </Match>
         <Match
@@ -290,12 +290,12 @@ export function GenericField(
           }
         >
           <TableHeadCell class={"p:10 text:center h:5"}>
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
           <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
@@ -305,7 +305,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
@@ -339,11 +339,11 @@ export function GenericField(
             title={props.meta.P?.title ?? "MenuItem"}
             meta={props.meta}
           >
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <PageItemAttrRender metaVertex={props.meta} />
+          <PageAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
@@ -363,7 +363,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
@@ -409,7 +409,7 @@ export function GenericField(
             class={props.meta.P.class}
           >
             {props.children}
-            <PageItemAttrRender metaVertex={props.meta} />
+            <PageAttrRender metaVertex={props.meta} />
           </Dynamic>
         </Match>
       </Switch>

@@ -54,11 +54,11 @@ import { useToast } from "~/components/Toast";
 import { FormContext, NewTxnIdContext } from "~/lib/contexts";
 import {
   PageRenderVertexContext, RepeaterVertexContext
-} from "~/components/page_item_render/Context";
+} from "~/components/page_attr_render/Context";
 import {
   getDataVertex
-} from "~/components/page_item_render/utils/getDataVertex";
-import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
+} from "~/components/page_attr_render/utils/getDataVertex";
+import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 
 export function TableInputField(
   props: ComponentProps & {

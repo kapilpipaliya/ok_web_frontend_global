@@ -12,7 +12,7 @@ import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
-import { PageItemAttrRender } from "~/components/page_item_render/PageItemAttrRender";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
 import Label from "~/components/solid_blocks/Label";
@@ -72,7 +72,7 @@ export function GenericInputField(
                 props.meta?.P.checked
               }
             >
-              {<PageItemAttrRender metaVertex={props.meta} />}
+              {<PageAttrRender metaVertex={props.meta} />}
             </Checkbox>
           </Match>
           <Match when={component() === "ColorBox"}>
@@ -210,7 +210,7 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "RadioGroup"}>
             <RadioGroup>
-              <PageItemAttrRender metaVertex={props.meta} />
+              <PageAttrRender metaVertex={props.meta} />
             </RadioGroup>
           </Match>
 
@@ -328,7 +328,7 @@ export function GenericInputField(
               {...deNullify(props.meta.P)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
             >
-              <PageItemAttrRender metaVertex={props.meta} />
+              <PageAttrRender metaVertex={props.meta} />
             </Label>
           </Match>
         </Switch>

@@ -5,7 +5,7 @@ import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { getCollAttrComp } from "~/lib/graph/get/sync/graph_functions";
 import {
  getAttrVertex
-} from "~/components/page_item_render/utils/getAttrVertex";
+} from "~/components/page_attr_render/utils/getAttrVertex";
 
 export function getComponent(
  graph: Store<GraphInterface>,

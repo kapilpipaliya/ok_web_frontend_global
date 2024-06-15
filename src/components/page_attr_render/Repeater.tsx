@@ -7,18 +7,18 @@ import {
   useContext,
 } from "solid-js";
 import {
-  PageItemAttrRender,
-} from "~/components/page_item_render/PageItemAttrRender";
+  PageAttrRender,
+} from "~/components/page_attr_render/PageAttrRender";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import {
   RepeaterVertexContext, PageRenderVertexContext
-} from "~/components/page_item_render/Context";
+} from "~/components/page_attr_render/Context";
 import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
 import {
   getCollection
-} from "~/components/page_item_render/utils/getCollection";
+} from "~/components/page_attr_render/utils/getCollection";
 
 export const Repeater = (props: { data: any; meta: any }) => {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -69,7 +69,7 @@ export const Repeater = (props: { data: any; meta: any }) => {
             <PageRenderVertexContext.Provider
               value={[...useContext(PageRenderVertexContext), props.meta]}
             >
-              <PageItemAttrRender metaVertex={props.meta} data={vertex} />
+              <PageAttrRender metaVertex={props.meta} data={vertex} />
             </PageRenderVertexContext.Provider>
           </RepeaterVertexContext.Provider>
         )}

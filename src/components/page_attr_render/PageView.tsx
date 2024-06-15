@@ -1,15 +1,15 @@
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createMemo, Match, Show, Switch, useContext } from "solid-js";
 import {
- PageItemAttrRender
-} from "~/components/page_item_render/PageItemAttrRender";
+ PageAttrRender
+} from "~/components/page_attr_render/PageAttrRender";
 import { FormSettingsContext, PageContext } from "~/lib/contexts";
 import {
  getCollection
-} from "~/components/page_item_render/utils/getCollection";
+} from "~/components/page_attr_render/utils/getCollection";
 import {
  getDataVertex
-} from "~/components/page_item_render/utils/getDataVertex";
+} from "~/components/page_attr_render/utils/getDataVertex";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { FormWrapper } from "../fields/FormWrapper";
 
@@ -62,7 +62,7 @@ const selectedFormVertex = () => {
         <FormWrapper meta={selectedFormVertex()!} data={props.data} />
       </Match>
      <Match when={true}>
-      <PageItemAttrRender metaVertex={props.metaVertex!} data={props.data} />
+      <PageAttrRender metaVertex={props.metaVertex!} data={props.data} />
      </Match>
     </Switch>
    </Show>

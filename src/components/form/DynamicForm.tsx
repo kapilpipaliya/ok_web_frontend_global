@@ -59,7 +59,7 @@ import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   RepeaterVertexContext
-} from "~/components/page_item_render/Context";
+} from "~/components/page_attr_render/Context";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";

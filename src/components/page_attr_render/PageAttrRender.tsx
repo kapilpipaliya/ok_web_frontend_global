@@ -16,17 +16,17 @@ import {
   ShowDrawerContext
 } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
-import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_item_render/Context";
+import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 import { iconMap } from "~/lib/constants";
-import { getComponent } from "~/components/page_item_render/utils/getComponent";
+import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
-} from "~/components/page_item_render/utils/getDataVertex";
-import { getId } from "~/components/page_item_render/utils/getID";
-import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
+} from "~/components/page_attr_render/utils/getDataVertex";
+import { getId } from "~/components/page_attr_render/utils/getID";
+import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 
-export function PageItemAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
+export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);

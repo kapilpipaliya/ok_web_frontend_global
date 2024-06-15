@@ -1,6 +1,6 @@
 import { graph } from "neo4j-driver";
 import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
-import { PageView } from "~/components/page_item_render/PageView";
+import { PageView } from "~/components/page_attr_render/PageView";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { IsPreviewContext, FormContext } from "~/lib/contexts";
 import { FormMetaData } from "~/lib/formMetaData";
@@ -11,7 +11,7 @@ import { setGraphData } from "~/lib/websocket/ws_events";
 
 export function PageViewBase(props: {
     pageVertexLabel?: string,
-    pageVertexname?: string,
+    pageVertexName?: string,
     pageId?: string,
     formId?: string,
 }) {
@@ -31,7 +31,7 @@ export function PageViewBase(props: {
         getEdgesFromRowsAttr(form.attributes);
   
       const data = await getDataMGCall({
-        expression: props.formId ? `id:'${props.formId}'` : `g:'${props.pageVertexLabel}[${props.pageVertexname}]'`,
+        expression: props.formId ? `id:'${props.formId}'` : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`,
         incoming,
         outgoing,
       });

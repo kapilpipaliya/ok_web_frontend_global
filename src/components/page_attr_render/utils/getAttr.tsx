@@ -2,7 +2,7 @@ import { Store } from "solid-js/store";
 import { GraphInterface, IdAttr, Vertex } from "~/lib/graph/graph";
 import {
   getAttrVertex
-} from "~/components/page_item_render/utils/getAttrVertex";
+} from "~/components/page_attr_render/utils/getAttrVertex";
 
 export function getAttr(
  graph: Store<GraphInterface>,
