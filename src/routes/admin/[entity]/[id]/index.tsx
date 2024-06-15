@@ -8,7 +8,7 @@ import { PageDesignerLabels } from "~/lib/drag_drop/constant";
 import {PageDesignerContext} from "~/components/page_designer/PageDesignerContext";
 import {LayoutDragAndDrop} from "~/components/page_designer/Layout_DragAndDrop";
 
-export default function admin() {
+export default function FormEdit() {
   const params = useParams();
   const [graph, setGraph] = useContext(GraphContext)!;
 

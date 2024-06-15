@@ -70,7 +70,6 @@ import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 
 export interface DynamicFormProps {
   meta?: Vertex;
-  form: IFormMetaData;
   id?: Id;
   isDialogContext?: boolean;
   buttonAlign?: string;
