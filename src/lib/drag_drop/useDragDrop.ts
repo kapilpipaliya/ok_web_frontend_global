@@ -31,6 +31,7 @@ import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
 import { PageDesignerLabels } from "./constant";
 import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
+import { Setter } from "solid-js";
 
 export function useDragDrop(
   graph: Store<GraphInterface>,
@@ -280,21 +281,7 @@ export function useDragDrop(
   };
 
   const deleteLayout = (name: string) => {
-    batch(() => {
-      if (selectedId() === layoutVertex.id) {
-        setSelectedId(-1);
-        setSelectedComponent({ vertexId: -1 });
-        setSelectedColl({ vertexId: -1 });
-      }
-      if (hoverId() === layoutVertex.id) {
-        setHoverId(-1);
-      }
-    });
-
-    deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
-    if (name) {
-      showSuccessToast(`${name} deleted successfully`);
-    }
+    deleteLayoutGlobal(selectedId, layoutVertex, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, txnId, name, showSuccessToast);
   };
 
   function resetDragDropState() {
@@ -319,3 +306,21 @@ export function useDragDrop(
     deleteLayout,
   };
 }
+export function deleteLayoutGlobal(selectedId: Accessor<string | number>, layoutVertex: Vertex, setSelectedId: Setter<Id | number>, setSelectedComponent: Setter<{ vertexId: Id | number }>, setSelectedColl: Setter<{ vertexId: Id | number }>, hoverId: Accessor<string | number>, setHoverId: Setter<Id | number>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
+  batch(() => {
+    if (selectedId() === layoutVertex.id) {
+      setSelectedId(-1);
+      setSelectedComponent({ vertexId: -1 });
+      setSelectedColl({ vertexId: -1 });
+    }
+    if (hoverId() === layoutVertex.id) {
+      setHoverId(-1);
+    }
+  });
+
+  deleteNestedLayout(graph, setGraph, txnId, [layoutVertex]);
+  if (name) {
+    showSuccessToast(`${name} deleted successfully`);
+  }
+}
+

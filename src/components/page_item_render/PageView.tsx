@@ -1,15 +1,17 @@
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { createMemo, Match, Show, Switch, useContext } from "solid-js";
 import {
- PageItemRender
-} from "~/components/page_item_render/PageItemRender";
-import { PageContext } from "~/lib/contexts";
+ PageItemAttrRender
+} from "~/components/page_item_render/PageItemAttrRender";
+import { FormSettingsContext, PageContext } from "~/lib/contexts";
 import {
  getCollection
 } from "~/components/page_item_render/utils/getCollection";
 import {
  getDataVertex
 } from "~/components/page_item_render/utils/getDataVertex";
+import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { FormWrapper } from "../fields/FormWrapper";
 
 export function PageView(props: {
  metaVertex?: Vertex;
@@ -17,12 +19,19 @@ export function PageView(props: {
  isPreview?: boolean
 }) {
  const [graph, setGraph] = useContext(GraphContext)!;
+ const [formSettings, setFormSettings] = useContext(FormSettingsContext);
  const collection = createMemo(() =>
   getCollection(graph, props.metaVertex)
  );
  const dataVertex = createMemo(() =>
   getDataVertex(graph, props.metaVertex)
  );
+
+const isFormRootVertetx = () => props.metaVertex?.L?.[0] === "Form";
+const selectedFormVertex = () => {
+    const steps = getChildrenAttrs(graph, setGraph, props.metaVertex!);
+    return graph.vertexes[formSettings.activeStep] ? graph.vertexes[formSettings.activeStep] : steps[0];
+};
 
  return (
   <PageContext.Provider value={{ events: {} }}>
@@ -49,8 +58,11 @@ export function PageView(props: {
      {/* <Match when={collection() && dataVertex()}>
             <PageItemRender metaVertex={props.vertex!} />
           </Match> */}
+      <Match when={isFormRootVertetx()}>
+        <FormWrapper meta={selectedFormVertex()!} data={props.data} />
+      </Match>
      <Match when={true}>
-      <PageItemRender metaVertex={props.metaVertex!} data={props.data} />
+      <PageItemAttrRender metaVertex={props.metaVertex!} data={props.data} />
      </Match>
     </Switch>
    </Show>

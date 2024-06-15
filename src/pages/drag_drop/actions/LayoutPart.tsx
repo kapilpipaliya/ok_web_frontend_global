@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For, Show, onMount } from "solid-js";
+import { useContext, createSignal, createSelector, For, Show, onMount, createMemo } from "solid-js";
 import Drawer from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
@@ -11,6 +11,7 @@ import {
   IndicatorPositionContext,
   ShowDrawerContext,
   DraggedVertexContext,
+  FormSettingsContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
@@ -23,8 +24,10 @@ import { nameExpr } from "~/pages/drag_drop/actions/utils/nameExpr";
 import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
+import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 
 export function LayoutPart(props: {}) {
+  const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -352,13 +355,15 @@ export function LayoutPart(props: {}) {
     );
   };
 
-  const rootChildren = () => evaluate(jsep("->Attr"), { vertexes: [pageConfig.formData?.formData], graph, setGraph }) || []
+  const steps = createMemo<Vertex[]>(() =>
+    getChildrenAttrs(graph, setGraph, pageConfig.formData?.formData)
+  );
   const isFormRootVertetx = () => pageConfig.formData?.formData?.L?.[0] === "Form";
   const rootVertexes = () => {
     if (isFormRootVertetx()) {
-      return rootChildren();
+      return graph.vertexes[formSettings.activeStep] ? [graph.vertexes[formSettings.activeStep]] : (steps()[0] ? [steps()[0]] : [])
     }
-    return pageConfig.formData?.formData ? [pageConfig.formData.formData] : [];
+    return pageConfig.formData?.formData ? [pageConfig.formData.formData!] : [];
   }; // Starting point(s)
 
   return (

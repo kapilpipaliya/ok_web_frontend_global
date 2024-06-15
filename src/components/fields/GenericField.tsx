@@ -14,7 +14,7 @@ import {
   Spinner,
   Tabs
 } from "~/components/solid_blocks";
-import { PageItemRender,  } from "~/components/page_item_render/PageItemRender";
+import { PageItemAttrRender,  } from "~/components/page_item_render/PageItemAttrRender";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import TreeView from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
@@ -125,7 +125,7 @@ export function GenericField(
                 repeaterContext,
               )}
               {props.children}
-              <PageItemRender metaVertex={props.meta} />
+              <PageItemAttrRender metaVertex={props.meta} />
             </Dynamic>
           </Show>
         </Match>
@@ -150,7 +150,7 @@ export function GenericField(
                     )}
                   >
                     {props.children}
-                    <PageItemRender metaVertex={props.meta} />
+                    <PageItemAttrRender metaVertex={props.meta} />
                   </Show>
                 </A>
               )}
@@ -178,14 +178,14 @@ export function GenericField(
                   )}
                 >
                   {props.children}
-                  <PageItemRender metaVertex={props.meta} />
+                  <PageItemAttrRender metaVertex={props.meta} />
                 </Show>
               </A>
             </Match>
             <Match when={true}>
               <a draggable>
                 {props.children}
-                <PageItemRender metaVertex={props.meta} />
+                <PageItemAttrRender metaVertex={props.meta} />
               </a>
             </Match>
           </Switch>
@@ -217,14 +217,14 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
@@ -267,7 +267,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-             <PageItemRender metaVertex={props.meta} />
+             <PageItemAttrRender metaVertex={props.meta} />
           </button>
         </Match>
         <Match when={component() === "Table"}>
@@ -280,7 +280,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </Table>
         </Match>
         <Match
@@ -290,12 +290,12 @@ export function GenericField(
           }
         >
           <TableHeadCell class={"p:10 text:center h:5"}>
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
           <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
@@ -305,7 +305,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
@@ -339,11 +339,11 @@ export function GenericField(
             title={props.meta.P?.title ?? "MenuItem"}
             meta={props.meta}
           >
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <PageItemRender metaVertex={props.meta} />
+          <PageItemAttrRender metaVertex={props.meta} />
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
@@ -363,7 +363,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
@@ -409,7 +409,7 @@ export function GenericField(
             class={props.meta.P.class}
           >
             {props.children}
-            <PageItemRender metaVertex={props.meta} />
+            <PageItemAttrRender metaVertex={props.meta} />
           </Dynamic>
         </Match>
       </Switch>

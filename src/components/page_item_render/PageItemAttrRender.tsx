@@ -24,8 +24,9 @@ import {
 } from "~/components/page_item_render/utils/getDataVertex";
 import { getId } from "~/components/page_item_render/utils/getID";
 import { getLastItem } from "~/components/page_item_render/utils/getLastItem";
+import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 
-export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
+export function PageItemAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
@@ -61,11 +62,11 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
 
   return (
     <For
-      each={getChildVertexes(
+      each={getChildrenAttrs(
         graph,
-        ["Attr"],
-        [props.metaVertex],
-      ).vertexes?.sort((a, b) => a.P.pos - b.P.pos)}
+        setGraph,
+        props.metaVertex,
+      )}
     >
       {(item, index) => {
         const {

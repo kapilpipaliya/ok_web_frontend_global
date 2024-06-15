@@ -787,17 +787,15 @@ label {
 
 .annualbill {
   border-radius: 5px;
-  background: var(--info, #0d5dd3);
-  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.12);
   padding: 7px 26px;
-  color: var(--white, #fff);
+  color: var(--grey-300);
   font-family: Poppins, serif;
   font-size: 16px;
   font-style: normal;
   font-weight: 400;
   border: none;
+  cursor: pointer;
 }
-
 .monthbill {
   border-radius: 5px;
   padding: 7px 26px;
@@ -807,6 +805,14 @@ label {
   font-style: normal;
   font-weight: 400;
   border: none;
+  cursor: pointer;
+}
+
+.annualbill.active,
+.monthbill.active {
+  background: var(--info, #0d5dd3);
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.12);
+  color: var(--white, #fff);
 }
 
 .plan {

@@ -1,10 +1,73 @@
 import "~/pages/website/style.css";
 import "~/pages/website/krd.css";
+import { Icon } from "@iconify-icon/solid";
+import { For } from "solid-js";
+
+interface FooterLinkProps {
+  href: string;
+  children: string;
+}
+
+interface SocialIconProps {
+  href: string;
+  icon: string;
+}
+
+interface FooterSectionProps {
+  title: string;
+  links: { href: string; text: string }[];
+}
+
+const FooterLink = (props: FooterLinkProps) => (
+  <li>
+    <a href={props.href}>{props.children}</a>
+  </li>
+);
+
+const SocialIcon = (props: SocialIconProps) => (
+  <a href={props.href}>
+    <Icon icon={props.icon} height={30} width={30} />
+  </a>
+);
+
+const FooterSection = (props: FooterSectionProps) => (
+  <div class="company">
+    <h5>{props.title}</h5>
+    <ul>
+      <For each={props.links}>
+        {(link) => (
+          <FooterLink href={link.href}>{link.text}</FooterLink>
+        )}
+      </For>
+    </ul>
+  </div>
+);
 
 export function Footer() {
+  const companyLinks = [
+    { href: "#", text: "About Us" },
+    { href: "#", text: "Testimonials" },
+    { href: "#", text: "My Account" },
+    { href: "#", text: "Blogs" },
+  ];
+
+  const links = [
+    { href: "#", text: "Site maps" },
+    { href: "#", text: "Blogs" },
+    { href: "#", text: "Documentation" },
+    { href: "#", text: "Return" },
+  ];
+
+  const socialIcons = [
+    { href: "#", icon: "fa-brands:facebook-square" },
+    { href: "#", icon: "fa-brands:twitter-square" },
+    { href: "#", icon: "fa-brands:linkedin" },
+    { href: "#", icon: "fa-brands:youtube-square" },
+  ];
+
   return (
     <section class="footer">
-      <div class=" pb-3 flex jc:space-around ai:center flex-direction:row">
+      <div class="pb-3 flex jc:space-around ai:center flex-direction:row">
         <div class="info d-grid align-content-spacebetween">
           <div>
             <a href="">
@@ -14,75 +77,19 @@ export function Footer() {
           </div>
 
           <a class="pb-1 btn-underline" href="#">
-            Get Easy Form Forge <i class="fa-solid fa-arrow-right" />
+            Get Easy Form Forge <Icon icon="fa-solid:arrow-right" />
           </a>
           <div class="footericon">
-            <a href="#">
-              <i class="fa-brands fa-square-facebook" />
-            </a>
-            <a href="#">
-              <i class="fa-brands fa-square-x-twitter" />
-            </a>
-            <a href="#">
-              <i class="fa-brands fa-linkedin" />
-            </a>
-            <a href="#">
-              <i class="fa-brands fa-youtube" />
-            </a>
+            <For each={socialIcons}>
+              {(icon) => (
+                <SocialIcon href={icon.href} icon={icon.icon} />
+              )}
+            </For>
           </div>
         </div>
-        <div class="company">
-          <h5>Company</h5>
-          <ul>
-            <li>
-              <a href="#">About Us</a>
-            </li>
-            <li>
-              <a href="#">Testimonials</a>
-            </li>
-            <li>
-              <a href="#">My Account</a>
-            </li>
-            <li>
-              <a href="#">Blogs</a>
-            </li>
-          </ul>
-        </div>
-        <div class="company">
-          <h5>Links</h5>
-          <ul>
-            <li>
-              <a href="#">Site maps</a>
-            </li>
-            <li>
-              <a href="#">Blogs</a>
-            </li>
-            <li>
-              <a href="#">Documentation</a>
-            </li>
-            <li>
-              <a href="#">Return</a>
-            </li>
-          </ul>
-        </div>
-
-        <div class="company">
-          <h5>Privacy</h5>
-          <ul>
-            <li>
-              <a href="#">About Us</a>
-            </li>
-            <li>
-              <a href="#">Testimonials</a>
-            </li>
-            <li>
-              <a href="#">My Account</a>
-            </li>
-            <li>
-              <a href="#">Blogs</a>
-            </li>
-          </ul>
-        </div>
+        <FooterSection title="Company" links={companyLinks} />
+        <FooterSection title="Links" links={links} />
+        <FooterSection title="Privacy" links={companyLinks} />
       </div>
       <div class="copyrightandsocial container d-flex pt-2 justify-content-center">
         <div>
@@ -91,10 +98,11 @@ export function Footer() {
           </h6>
         </div>
         <div>
-          <i class="fa-brands fa-square-facebook" />
-          <i class="fa-brands fa-square-x-twitter" />
-          <i class="fa-brands fa-linkedin" />
-          <i class="fa-brands fa-youtube" />
+          <For each={socialIcons}>
+            {(icon) => (
+              <Icon icon={icon.icon} height={30} width={30} />
+            )}
+          </For>
         </div>
       </div>
     </section>

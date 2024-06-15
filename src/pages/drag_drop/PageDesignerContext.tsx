@@ -11,6 +11,7 @@ import {
   IndicatorPositionContext,
   FormSettingsContext,
   ShowDrawerContext,
+  FormSettings,
 } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
@@ -28,13 +29,14 @@ export default function PageDesignerContext(props: any) {
   });
   const indicatorPosition = createSignal<{
     activeItem: Id | null;
-    position: "before" | "after" | "center" | null;
+    position: "before" | "after" | "center" | "left" | "right" | null;
   }>({ activeItem: null, position: null });
   const formSetting = createStore({
     labelPosition: "top", // Default position
     labelColor: "black", // Default label color
     inputBackground: "white",
-  } as { labelPosition: string; labelColor: string; inputBackground: string });
+    activeStep: 0,
+  } as FormSettings);
   const draggedVertices = createSignal<Vertex[] | []>([]);
   return (
     <FormSettingsContext.Provider value={formSetting}>

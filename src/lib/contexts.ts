@@ -22,14 +22,15 @@ export const ShowDrawerContext = createContext(createSignal<boolean>(false));
 
 export const HiddenNodesContext = createContext(createSignal([] as Id[]));
 
+export interface FormSettings {
+  labelPosition: string;
+  labelColor: string;
+  inputBackground: string;
+  activeStep: Id | number;
+}
+
 export const FormSettingsContext = createContext(
-  createStore(
-    {} as {
-      labelPosition: string;
-      labelColor: string;
-      inputBackground: string;
-    },
-  ),
+  createStore( {} as FormSettings ),
 );
 
 export const SelectedComponentContext = createContext(

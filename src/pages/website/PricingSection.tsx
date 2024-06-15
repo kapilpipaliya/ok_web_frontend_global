@@ -1,10 +1,12 @@
-import { createSignal } from "solid-js";
+import { For, createSignal } from "solid-js";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 import SiteTitle from "./SiteTitle";
 import { Icon } from "@iconify-icon/solid";
 
 function PricingContent() {
+  const [isMonthlyBilling, setIsMonthlyBilling] = createSignal(true);
+
   const plans = [
     {
       title: "Silver",
@@ -67,6 +69,10 @@ function PricingContent() {
     },
   ];
 
+  const toggleBilling = () => {
+    setIsMonthlyBilling(!isMonthlyBilling());
+  };
+
   return (
     <section class="pricingContent mb-5 pt-100">
       <div class="container d-grid justify-content-center justify-item-center">
@@ -99,10 +105,10 @@ function PricingContent() {
         </div>
 
         <div class="billing mt-5">
-          <a class="monthbill" href="#">
+          <a class={isMonthlyBilling() ? "monthbill active" : "monthbill"} onClick={toggleBilling}>
             Month Billing
           </a>
-          <a class="annualbill" href="#">
+          <a class={!isMonthlyBilling() ? "annualbill active" : "annualbill"} onClick={toggleBilling}>
             Annual Billing
           </a>
         </div>
@@ -112,14 +118,16 @@ function PricingContent() {
         <div
           class={"mt-5 grid grid-template-columns:repeat(1,auto)@xs grid-template-columns:repeat(2,auto)@md grid-template-columns:repeat(4,auto)@lg gap:20px"}
         >
-          {plans.map((plan) => (
-            <PricingPlan
-              title={plan.title}
-              price={plan.price}
-              features={plan.features}
-              recommended={plan.recommended}
-            />
-          ))}
+          <For each={plans}>
+            {(plan) => (
+              <PricingPlan
+                title={plan.title}
+                price={plan.price}
+                features={plan.features}
+                recommended={plan.recommended}
+              />
+            )}
+          </For>
         </div>
       </div>
     </section>

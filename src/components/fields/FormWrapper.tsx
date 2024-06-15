@@ -9,7 +9,7 @@ import {FormContext} from "~/lib/contexts";
 import {createStore} from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import {submitDataCall} from "~/lib/api/api_functions";
-import {PageItemRender} from "~/components/page_item_render/PageItemRender";
+import {PageItemAttrRender} from "~/components/page_item_render/PageItemAttrRender";
 import {GenericField} from "~/components/fields/GenericField";
 import CustomButton from "../solid_blocks/button/buttons";
 
@@ -87,7 +87,7 @@ export function FormWrapper(
     >
       <FormContext.Provider value={formData}>
         <div class="">
-          <PageItemRender metaVertex={props.meta} data={formData.formData}/>
+          <PageItemAttrRender metaVertex={props.meta} data={formData.formData}/>
         </div>
         <div/>
 

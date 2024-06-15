@@ -128,7 +128,7 @@ export function DynamicForm(props: AbstractSingleFormProps) {
     txnId,
     cleanUpConfig: () => cleanUpConfig,
   } as FormData);
-  const [activeTab, setActiveTab] = createSignal("main");debugger
+  const [activeTab, setActiveTab] = createSignal("main");
   let form =
   FormMetaData[props.formId] ||
   (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
@@ -189,7 +189,7 @@ export function DynamicForm(props: AbstractSingleFormProps) {
           // if new form then add a form component in the layout
           if (dataVertex?.L[0] === "Form") {
             // add form component
-            const labelVertex = findVertexByLabelAndUniqueId(
+            const formVertex = findVertexByLabelAndUniqueId(
               graph,
               "Comp",
               IdAttr,
@@ -197,7 +197,7 @@ export function DynamicForm(props: AbstractSingleFormProps) {
             );
             const layoutRowId = componentDrop(
               txnId,
-              labelVertex!,
+              formVertex!,
               dataVertex!,
               graph,
               setGraph,

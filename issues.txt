@@ -19,6 +19,8 @@ which step user select display that step form only.
 (fix extra padding below textarea component.)
 
 in the stepper user can change the order of pages too
+textarea looks different in the form designer and preview.
+
 Kapil -> when parent has display:flex, support indicator postion on left and right too.
 when drag and drop 'text' component, display some default text like "Text"
 Label Properties, Position is not comming as select. add support for specifying select options
@@ -33,6 +35,9 @@ Add Form Category in Form Setting, It will display the form on homepage.
 Bug:
 drag and drop layout issue.
 page and component drag and drop not working(kapil)
+- Make Multi Stage Form design preview link woring(kapil)
+
+right drawer should close when we click outside the drawer.
 
 (for label, use name property, instead of label property for changing the label.)
 
@@ -49,25 +54,21 @@ Dependent field:
 add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
 make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
 
-when we change width, height the textbox should be resized.
-when droping the component over content area, the icon is constaly coming and going, try to fix it as much as possible.
+when we change width the textbox and textarea should be resized.
 Add query parameter in grid url for pagination,
 
-
-
 - fix when drag and drop page or template, it is not working. ⌛
-- flex rules are generated like: 'flex:1 1 0%', but it should be generated like: flex:1|1|0%
 - Test all css properties applying properly.
-- Make sure all inputs are working, make video of all the inputs using drag and drop.
-- textbox extra padding at bottom. ⌛
+- Make sure all inputs are working.
 - delete extra properties from components. make sure each property is working. note not working properties.
-- make drag and drop working on ipad or mobile working.
+
 - make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
 - (Kapil) write a table routes to see all the form entries.
-- Make Multi Stage Form design possible.
 
 css issue:
  box-shadow 
+
+kapil:  - make drag and drop working on ipad or mobile working.
 
 Refactor all cypher functions, use eval function whenever possible.
 
