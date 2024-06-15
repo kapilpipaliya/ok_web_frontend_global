@@ -63,21 +63,10 @@ import {
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
-import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 import CustomButton from "../solid_blocks/button/buttons";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-
-interface AbstractSingleFormProps
-  extends Omit<DynamicFormProps, "form" | "id"> {
-  formId: string;
-  graph: Store<GraphInterface>;
-  setGraph: SetStoreFunction<GraphInterface>;
-  id: string | number;
-  buttonAlign?: string;
-  isDialogContext?: boolean;
-}
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -91,6 +80,9 @@ export interface DynamicFormProps {
   showSubmitButtonOnTop?: boolean;
   isLoginRegister?: string;
   doMount?: boolean;
+  formId: string;
+  graph: Store<GraphInterface>;
+  setGraph: SetStoreFunction<GraphInterface>;
 }
 type FormData = {
   cleanUpConfig: () => {
@@ -107,7 +99,7 @@ type FormData = {
   };
 };
 
-export function DynamicForm(props: AbstractSingleFormProps) {
+export function DynamicForm(props: DynamicFormProps) {
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
   const id = createMemo(() => (p.id === "new" ? undefined : p.id));
