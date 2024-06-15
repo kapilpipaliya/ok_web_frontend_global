@@ -10,6 +10,7 @@ import {
   SelectedIdContext,
   IndicatorPositionContext,
   ShowDrawerContext,
+  DraggedVertexContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
@@ -21,6 +22,7 @@ import { iconMap } from "~/lib/constants";
 import { nameExpr } from "~/pages/drag_drop/actions/utils/nameExpr";
 import { getRowProps } from "~/lib/graph/get/sync/graph_functions";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 
 export function LayoutPart(props: {}) {
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
@@ -35,6 +37,7 @@ export function LayoutPart(props: {}) {
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
+  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
@@ -55,9 +58,10 @@ export function LayoutPart(props: {}) {
       children,
       isActiveTargetItem,
       handleDragStart,
-      handleDragEnter,
-      handleDragOver,
-      handleDragLeave,
+      // handleDragEnter,
+      handleDragOverAndSetDropPosition,
+      // handleDragOver,
+      // handleDragLeave,
       handleDrop,
       onLayoutItemClick,
       clone,
@@ -86,6 +90,65 @@ export function LayoutPart(props: {}) {
       }
     });
 
+    let startTime = 0;
+    let endTime = 0;
+    const handleDragEnter = (e: DragEvent) => {
+      startTime = Date.now();
+      // e.stopPropagation();
+      handleDragOverAndSetDropPosition(e);
+    };
+
+    const handleDragOver = (e: DragEvent) => {
+      e.stopPropagation();
+      handleDragOverAndSetDropPosition(e);
+  
+      const position = indicatorPosition().position;
+      if (!position) {
+        // Don't allow drag and drop
+        return;
+      }
+      if (position === "center") {
+        if (Date.now() - startTime > 1000) {
+          if (collapsedKeys().includes(props.metaVertex.id)) {
+            toggleExpand(props.metaVertex.id);
+          }
+        }
+      }
+  
+      for (const vertex of draggedVertex()) {
+        const fromVertex = vertex;
+        const toVertexId = indicatorPosition().activeItem!;
+        if (!fromVertex) {
+          // Don't allow drag and drop
+          return;
+        }
+  
+        if (
+          !validateDragOver(
+            graph,
+            setGraph,
+            fromVertex,
+            toVertexId,
+            pageConfig.formData.formData,
+            position,
+          )
+        ) {
+          // Don't allow drag and drop
+          return;
+        }
+      }
+  
+      // This is necessary to allow the drop action to proceed
+      e.preventDefault();
+    };
+    const handleDragLeave = (e: DragEvent) => {
+      // e.stopPropagation();
+      setIndicatorPosition({ activeItem: null, position: null });
+      // console.log('leave',layoutVertex.id)
+      // Do not uncomment this, because drag is called before on drop
+      // setDraggedVertex(null);
+      // resetDragDropState();
+    };
     return (
       <div>
         <div
@@ -137,7 +200,7 @@ export function LayoutPart(props: {}) {
               <button
                 class="cursor:pointer"
                 style={{
-                  "z-index": "-1",
+                  "z-index": "1",
                 }}
                 onClick={(e) => {
                   e.stopPropagation();

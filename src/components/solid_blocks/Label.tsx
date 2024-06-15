@@ -1,5 +1,8 @@
-import {type JSX, Show, useContext} from "solid-js";
-import { FormSettingsContext } from "~/lib/contexts";
+import { type JSX, Show, useContext, splitProps, createSignal, onMount } from "solid-js";
+import { FormContext, FormSettingsContext } from "~/lib/contexts";
+import { GraphContext } from "~/lib/graph/graph";
+import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
+import { ComponentProps } from "../fields/ComponentType";
 
 interface LabeledFieldProps {
   label?: string;
@@ -7,15 +10,16 @@ interface LabeledFieldProps {
   children: JSX.Element;
 }
 
-export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & LabeledFieldProps) => {
-  const [formSettingContext, setFormSettingContext] =
-    useContext(FormSettingsContext);
+export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) => {
+  const [formSettingContext, setFormSettingContext] = useContext(FormSettingsContext);
+  // TODO: is txnId is correct?
+  const { txnId, formData: pageDesignerFormVertex, cleanUpConfig } = useContext(FormContext);
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const [isEditing, setIsEditing] = createSignal(false);
+  const [inputValue, setInputValue] = createSignal(props.label || "");
 
   const getFlexDirection = () => {
-    const position =
-      props.position === "system"
-        ? formSettingContext.labelPosition
-        : props.position;
+    const position = props.position === "system" ? formSettingContext.labelPosition : props.position;
     switch (position) {
       case "top":
         return "column";
@@ -33,10 +37,7 @@ export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
   const containerStyle = () => ({
     display: "flex",
     "flex-direction": getFlexDirection(),
-    "align-items":
-      props.position === "left" || props.position === "right"
-        ? "center"
-        : "flex-start",
+    "align-items": props.position === "left" || props.position === "right" ? "center" : "flex-start",
     margin: "10px 0",
     padding: "0px 10px",
     width: "100%",
@@ -49,12 +50,38 @@ export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
     "margin-left": props.position === "right" ? "5px" : "0",
   });
 
+  const handleBlur = (e: FocusEvent) => {
+    setIsEditing(false);
+    mergeVertexProperties(txnId, props.meta.id, graph, setGraph, { label: (e.currentTarget as HTMLInputElement).value });
+  };
+
+  const handleLabelClick = (e: MouseEvent) => {
+    setInputValue(props.label || "");
+    setIsEditing(true);
+  };
+
+  const [local, restProps] = splitProps(props, ["label", "position", "children"]);
   return (
     <div style={containerStyle()}>
       <Show when={props.label}>
-        <label style={labelStyle()} {...props}>
-          {props.label}
-        </label>
+        <Show when={!isEditing()} fallback={
+          <input
+            type="text"
+            ref={el => {
+              onMount(() => {
+                el.focus();
+              })
+            }}
+            value={inputValue()}
+            onInput={(e) => setInputValue(e.currentTarget.value)}
+            onBlur={handleBlur}
+            style={{ border: "none", outline: "none", background: "transparent", width: "100%" }}
+          />
+        }>
+          <label style={labelStyle()} {...restProps} onClick={handleLabelClick}>
+            {props.label}
+          </label>
+        </Show>
       </Show>
       {props.children}
     </div>

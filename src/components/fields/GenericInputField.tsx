@@ -323,6 +323,7 @@ export function GenericInputField(
           </Match>
           <Match when={component() === "Label"}>
             <Label
+            meta={props.meta}
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}

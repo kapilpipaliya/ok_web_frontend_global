@@ -126,40 +126,8 @@ export function addNewRow(
   fromVertex: Vertex,
   toVertex: Vertex
 ) {
-  const propRows = getChildVertexes(graph, ["$0Prop"], [fromVertex]).vertexes || [];
-
-  const attrPropMetaVertex = newVertex(getNewGraphId(), [], {
-    name: "Prop",
-  });
-  const attrNameVertex = newVertex(getNewGraphId(), [], {
-    name: "Name",
-    component: "SelectBox",
-  });
-
-  for (const propRow of propRows) {
-    const nameVertex = getChildVertex(graph, ["$0Name"], propRow);
-    if (nameVertex.vertex) {
-      const rowResult = addNewRow(
-        txnId,
-        attrPropMetaVertex,
-        graph,
-        setGraph,
-        toVertex,
-        klona(propRow.P),
-        false,
-        {} as any
-      );
-      const rowVertex = graph.vertexes[rowResult.vertexId!];
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrNameVertex,
-        nameVertex.vertex.id
-      );
-    }
-  }
+  mergeVertexProperties(txnId, toVertex.id, graph, setGraph, JSON.parse(JSON.stringify(fromVertex.P)));
+  return;
 }
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,

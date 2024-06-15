@@ -252,13 +252,22 @@ export function GenericField(
             )}
           </Dynamic>
         </Match>
-        <Match when={component() === "Button"}>
+        <Match when={component() === "Button" && (props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children)}>
           <button
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
             {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
+          </button>
+        </Match>
+        <Match when={component() === "Button"}>
+        <button
+            {...defaultValues()}
+            {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
+          >
+             <PageItemRender metaVertex={props.meta} />
           </button>
         </Match>
         <Match when={component() === "Table"}>

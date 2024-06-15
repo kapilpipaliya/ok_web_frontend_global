@@ -310,6 +310,7 @@ export function useDragDrop(
     isActiveTargetItem,
     handleDragStart,
     handleDragEnter,
+    handleDragOverAndSetDropPosition,
     handleDragOver,
     handleDragLeave,
     handleDrop,

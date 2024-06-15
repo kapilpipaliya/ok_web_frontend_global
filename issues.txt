@@ -10,9 +10,7 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-when we apply font 'Courier New' it apply     font-family: Courier class, when space in font name, generate css like: font-family:Courier|New ✅
-instead of using loader in CSSRuntimeProvider use rc.css.master.co/guide/flash-of-unstyled-content ✅ 
-In form designer, root vertex when hover over it display properties icon. ✅
+In form designer, root vertex when hover over it display properties icon. (Do after steper is done)
 
 add a steeper component in the form builder, by default first step(1) is active. user can add new step too. like, step 1, step 2, step 3, step 4 etc,
 which step user select display that step form only.
@@ -20,18 +18,8 @@ which step user select display that step form only.
 (Add a option to 'delete all' steps.)
 (fix extra padding below textarea component.)
 
-when user drag and drop over a layout and wait for 1 second, if it is collpased, expand it. make a global state for it.
-Fix Layout tree, it is not displaying children nodes properly.
-Fix bug when opening box propertiy css is gone in book edit page.✅
-when applying color in button css properties it is not working.
-
 in the stepper user can change the order of pages too
-Bug: when user customize css properties, close properties drawer and open again then it is not visisble all css✅
-on Properties drawer, display title like "Button Properties"✅
-Kapil -> Form to Form Elements. When user change Form Category, label is not dropped✅
-KAPIL -> Add space in component names. user can add label NAME in components.✅
 Kapil -> when parent has display:flex, support indicator postion on left and right too.
-Bug: when cloning a component, css properties are not cloned.
 when drag and drop 'text' component, display some default text like "Text"
 Label Properties, Position is not comming as select. add support for specifying select options
 user can change label inline, make it content editable.
