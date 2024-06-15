@@ -19,17 +19,17 @@ which step user select display that step form only.
 
 (Add a option to 'delete all' steps.)
 (fix extra padding below textarea component.)
-when user drag and drop over a layout and wait for 1 second, if it is collpased, expand it. make a global state for it.
 
+when user drag and drop over a layout and wait for 1 second, if it is collpased, expand it. make a global state for it.
 Fix Layout tree, it is not displaying children nodes properly.
-Fix bug when opening box propertiy css is gone in book edit page.
+Fix bug when opening box propertiy css is gone in book edit page.✅
 when applying color in button css properties it is not working.
 
 in the stepper user can change the order of pages too
-Bug: when user customize css properties, close properties drawer and open again then it is not visisble all css
-on Properties drawer, display title like "Button Properties"
-Kapil -> Form to Form Elements. When user change Form Category, label is not dropped
-KAPIL -> Add space in component names. user can add label NAME in components.
+Bug: when user customize css properties, close properties drawer and open again then it is not visisble all css✅
+on Properties drawer, display title like "Button Properties"✅
+Kapil -> Form to Form Elements. When user change Form Category, label is not dropped✅
+KAPIL -> Add space in component names. user can add label NAME in components.✅
 Kapil -> when parent has display:flex, support indicator postion on left and right too.
 Bug: when cloning a component, css properties are not cloned.
 when drag and drop 'text' component, display some default text like "Text"

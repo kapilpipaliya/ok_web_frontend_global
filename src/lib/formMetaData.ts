@@ -271,6 +271,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
     isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
+      { name: "label", component: "TextBox" },
       { name: "description", component: "TextArea" },
     ],
   },
@@ -289,6 +290,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
      
       },
       { name: "name", component: "TextBox" },
+      { name: "label", component: "TextBox" },
       {
         name: "parent",
         displayName: "Parent Component",

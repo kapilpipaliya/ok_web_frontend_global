@@ -11,6 +11,7 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import {submitDataCall} from "~/lib/api/api_functions";
 import {PageItemRender} from "~/components/page_item_render/PageItemRender";
 import {GenericField} from "~/components/fields/GenericField";
+import CustomButton from "../solid_blocks/button/buttons";
 
 export function FormWrapper(
   props: ComponentProps & {
@@ -94,35 +95,12 @@ export function FormWrapper(
           <Show
             when={props.submitButton}
             fallback={
-              <GenericField
-                meta={
-                  {
-                    P: {
-                      component: "Button",
-                        children: "Submit",
-                        onClick: () => onSubmit(),
-                    },
-                  } as any
-                }
-              />
+              <CustomButton onClick={onSubmit}>Submit</CustomButton>
             }
           >
             {props.submitButton}
           </Show>
-
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "Button",
-                    onClick: () => onCancel(),
-                    variant: "outlined",
-                    class: "border-color:#FF0000 color:#FF0000",
-                    children: "Cancel",
-                },
-              } as any
-            }
-          />
+          <CustomButton variant={"outlined"} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
         </div>
       </FormContext.Provider>
     </div>

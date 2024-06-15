@@ -127,6 +127,7 @@ export function useDragDrop(
   };
 
   const handleDragOver = (e: DragEvent) => {
+    // when dragOver more than 1 second, if it is layout and collapsed layout, expand it.
     e.stopPropagation();
     handleDragOverAndSetDropPosition(e);
 

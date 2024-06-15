@@ -123,24 +123,24 @@ export function LayoutPart(props: {}) {
             "font-size": "14px",
             height: "25px",
             "font-weight": children().length ? "bold" : "normal",
-
             "box-shadow": !(isActiveTargetItem() && indicatorPosition().position === "center") && children().length
               ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
               : undefined,
-            "border-left": children().length ? "" : "1px dashed black",
             "align-items": "center",
             "justify-content": "space-between",
             display: "flex",
           }}
         >
-          <div style="display: flex;align-items: center;">
+          <div style="display: flex;align-items: center;" class={`${!children().length ? "bl:1px|dashed|black pl:10" : ""}`}>
             &nbsp;
             <Show when={children().length}>
               <button
-                class="cursor: pointer;"
+                class="cursor:pointer"
+                style={{
+                  "z-index": "-1",
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
-
                   toggleExpand(props.metaVertex.id);
                 }}
               >

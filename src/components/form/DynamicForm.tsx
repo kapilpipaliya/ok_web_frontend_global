@@ -64,6 +64,7 @@ import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
 import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
+import CustomButton from "../solid_blocks/button/buttons";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -143,6 +144,7 @@ export function DynamicForm(props: AbstractSingleFormProps) {
       <Match when={formData.form}>
         <DynamicFormBase
           form={formData.form!}
+          submitButton={props.submitButton}
           id={id() as Id}
           isDialogContext={props.isDialogContext}
           {...customProps}
@@ -411,39 +413,12 @@ function DynamicFormBase(props: DynamicFormProps) {
         display: "flex",
       }}
     >
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-
-                variant: "outlined",
-                class: "border-color:#FF0000 color:#FF0000 danger",
-                children: "Cancel",
-                onClick: () => onCancel(),
-            
-            },
-          } as any
-        }
-      />
+      <CustomButton variant={"outlined"} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</CustomButton>
+      
       <Show
         when={props.submitButton}
         fallback={
-          <GenericField
-            // useSubmitBehavior is required: https://js.devexpress.com/Demos/WidgetsGallery/Demo/Validation/Overview/jQuery/Light/
-            meta={
-              {
-                P: {
-                  component: "Button",
-           
-                    type: "primary",
-                    children: "Submit",
-                    onClick: () => onSubmit(),
-                  
-                },
-              } as any
-            }
-          />
+          <CustomButton onClick={onSubmit}>Submit</CustomButton>
         }
       >
         {props.submitButton}

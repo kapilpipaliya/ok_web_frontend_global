@@ -249,7 +249,7 @@ export function ComponentPart() {
             width={24}
             height={24}
           />
-          <span style={{ "font-size": "14px" }}>{props.child?.P.name}</span>
+          <span style={{ "font-size": "14px" }}>{props.child?.P.label || props.child?.P.name}</span>
         </div>
       </div>
     );
@@ -294,7 +294,7 @@ export function ComponentPart() {
           >
             {(item) => (
               <div class="m:20px|0px">
-                <div style={titleStyle}>{item.name}</div>
+                <div style={titleStyle}>{item.P.label || item.P.name}</div>
                 <ul style={{ ...listBoxStyle, ...listStyle }}>
                   <For each={item.children}>
                     {(child) => <ListItemComponent child={child} />}

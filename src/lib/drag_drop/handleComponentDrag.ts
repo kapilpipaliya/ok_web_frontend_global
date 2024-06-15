@@ -48,7 +48,7 @@ export async function handleComponentDrag(
     if (layoutRowId === -1) return;
 
     mergeVertexProperties(txnId, layoutRowId, graph, setGraph, {
-      label: fromVertex.P.name
+      label: fromVertex.P.label ||  fromVertex.P.name
     })
 
     // add component inside the label

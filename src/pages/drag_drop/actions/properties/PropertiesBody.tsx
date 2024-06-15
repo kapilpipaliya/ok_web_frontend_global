@@ -16,128 +16,94 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { transactions, getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
+import CustomButton from "~/components/solid_blocks/button/buttons";
 
 export function PropertiesBody(props: any) {
-    const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
-    const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
-    const [graph, setGraph] = useContext(GraphContext)!;
-    const [pageConfig, setPageConfig] = useContext(PageConfigContext);
-    const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-    const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
-    const setPropertyValue = (meta: Vertex, value: any) => {
-        if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
-            return setPropertyValueGlobal(
-                graph,
-                setGraph,
-                pageConfig.formData.txnId,
-                meta,
-                graph.vertexes[selectedId()],
-                graph.vertexes[selectedComponent().vertexId],
-                value,
-            );
-        }
-        return;
-    };
-     let prevTxnIndex = -1;
-      const { RulesModalBody, ImportModalBody } = ModalBody();
-    // Add all necessary signal, function and context logic here
+  const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
+  const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
+  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
+  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const setPropertyValue = (meta: Vertex, value: any) => {
+    if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
+      return setPropertyValueGlobal(
+        graph,
+        setGraph,
+        pageConfig.formData.txnId,
+        meta,
+        graph.vertexes[selectedId()],
+        graph.vertexes[selectedComponent().vertexId],
+        value,
+      );
+    }
+    return;
+  };
+  let prevTxnIndex = -1;
+  const { RulesModalBody, ImportModalBody } = ModalBody();
+  // Add all necessary signal, function and context logic here
 
-    const selectedComponentProperties = () => {
-        const selectedComp = graph.vertexes[selectedComponent().vertexId];
-        if (!selectedComp) return { error: true };
-        return getChildVertexes(graph, ["$0Prop"], [selectedComp]);
-    };
+  const selectedComponentProperties = () => {
+    const selectedComp = graph.vertexes[selectedComponent().vertexId];
+    if (!selectedComp) return { error: true };
+    return getChildVertexes(graph, ["$0Prop"], [selectedComp]);
+  };
 
-    const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);
-    const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
+  const toggleRulesModal = () => setIsRulesModalOpen(prev => !prev);
+  const toggleImportsModal = () => setIsImportModalOpen(prev => !prev);
 
-    // Modal Body components and other necessary logic
+  // Modal Body components and other necessary logic
 
-    return (
-        <>
-            <Show when={selectedId() !== -1}>
-                <div class="flex jc:start">
-                    <GenericField
-                        meta={{
-                            P: {
-                                component: "Button",
-                                children: "Rules",
-                                class: "mb:5",
-                                onClick: toggleRulesModal,
-                            },
-                        }}
-                    />
-                    &nbsp;&nbsp;
-                    <GenericField
-                        meta={{
-                            P: {
-                                component: "Button",
-                                children: "Import",
-                                onClick: toggleImportsModal,
-                            },
-                        }}
-                    />
+  return (
+    <>
+      <Show when={selectedId() !== -1}>
+        <div class="flex jc:start">
+          <CustomButton class="mb:5" onClick={toggleRulesModal}>Rules</CustomButton>
+          &nbsp;&nbsp;
+          <CustomButton onClick={toggleImportsModal}>Import</CustomButton>
+        </div>
+        <CollAndData />
+        <FormGroupProperties
+          txnId={pageConfig.formData.txnId}
+          metaAttributes={selectedComponentProperties().vertexes ?? []}
+          setValue={setPropertyValue}
+          selectedLayout={graph.vertexes[selectedId()]}
+        />
+      </Show>
+      <Show when={isRulesModalOpen()}>
+        <Portal>
+          <div role="dialog" tabIndex={-1} class="sb-modal">
+            <ModalContent>
+              <ModalHeader>
+                Header
+                <button onclick={toggleRulesModal} style={{ float: "right" }}>
+                  ✕
+                </button>
+              </ModalHeader>
+              <ModalBody>
+                <RulesModalBody />
+              </ModalBody>
+              <ModalFooter>
+                <div
+                  style={{
+                    display: "flex",
+                    "justify-content": "center",
+                    "align-items": "center",
+                  }}
+                >
+                  <CustomButton onClick={() => toggleRulesModal()}>Submit</CustomButton>
+                  <CustomButton variant={"outlined"} class="border-color:#FF0000 color:#FF0000" onClick={() => toggleRulesModal()}>Cancel</CustomButton>
                 </div>
-                <CollAndData />
-                <FormGroupProperties
-                    txnId={pageConfig.formData.txnId}
-                    metaAttributes={selectedComponentProperties().vertexes ?? []}
-                    setValue={setPropertyValue}
-                    selectedLayout={graph.vertexes[selectedId()]}
-                />
-            </Show>
-            <Show when={isRulesModalOpen()}>
-                <Portal>
-                    <div role="dialog" tabIndex={-1} class="sb-modal">
-                        <ModalContent>
-                            <ModalHeader>
-                                Header
-                                <button onclick={toggleRulesModal} style={{ float: "right" }}>
-                                    ✕
-                                </button>
-                            </ModalHeader>
-                            <ModalBody>
-                                <RulesModalBody />
-                            </ModalBody>
-                            <ModalFooter>
-                                <div
-                                    style={{
-                                        display: "flex",
-                                        "justify-content": "center",
-                                        "align-items": "center",
-                                    }}
-                                >
-                                    <GenericField
-                                        meta={{
-                                            P: {
-                                                component: "Button",
-                                                children: "Submit",
-                                                onClick: () => {},
-                                            },
-                                        }}
-                                    />
-                                    <GenericField
-                                        meta={{
-                                            P: {
-                                                component: "Button",
-                                                variant: "outlined",
-                                                class: "border-color:#FF0000 color:#FF0000",
-                                                children: "Cancel",
-                                                onClick: () => {},
-                                            },
-                                        }}
-                                    />
-                                </div>
-                            </ModalFooter>
-                        </ModalContent>
-                    </div>
-                </Portal>
-            </Show>
-            <Show when={isImportModalOpen()}>
-                <ImportModalBody />
-            </Show>
-        </>
-    );
+              </ModalFooter>
+            </ModalContent>
+          </div>
+        </Portal>
+      </Show>
+      <Show when={isImportModalOpen()}>
+        <ImportModalBody />
+      </Show>
+    </>
+  );
 
   function ModalBody() {
     const RulesModalBody = () => {
