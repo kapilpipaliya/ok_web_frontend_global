@@ -81,21 +81,24 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
         const getBorder = () => {
           if (!isPreview()) {
             if (isActiveTargetItem()) {
+              if (indicatorPosition().position === "center") {
+                return "box-shadow:inset|0|0|0|2px|rgb(0,255,0)>*";
+              }
               if (indicatorPosition().position === "before") {
-                return "bt:rgb(0,0,255)|2.5px|solid>*";
+                return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)>*";
               }
               if (indicatorPosition().position === "after") {
-                return "bb:rgb(0,0,255)|2.5px|solid>*";
+                return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)>*";
               }
             }
             if (
               isSelectedLayoutId(item.id) ||
               isSelectedDragOverTargetId(item.id)
             ) {
-              return "b:#3996E1|1.5px|solid>* r:5>*";
+              return "box-shadow:inset|0|0|0|2px|#3996E1>*";
             }
             if (isSelectedHoverId(item.id)) {
-              return "b:#3996E1|1.5px|dashed>* r:5>*";
+              return "box-shadow:inset|0|0|0|2px|#3996E1AA>*";
             }
           }
         }
