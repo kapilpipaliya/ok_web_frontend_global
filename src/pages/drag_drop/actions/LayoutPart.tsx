@@ -103,8 +103,12 @@ export function LayoutPart(props: {}) {
             } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
             }`}
           classList={{
-            "b:1px":
+            "box-shadow:inset|0|0|0|2px|rgb(0,255,0)":
               isActiveTargetItem() && indicatorPosition().position === "center",
+            "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
+              isActiveTargetItem() && indicatorPosition().position === "before",
+            "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
+              isActiveTargetItem() && indicatorPosition().position === "after",
           }}
           onClick={() => onLayoutItemClick(props.metaVertex)}
           onMouseOver={(e) => {
@@ -120,17 +124,9 @@ export function LayoutPart(props: {}) {
             height: "25px",
             "font-weight": children().length ? "bold" : "normal",
 
-            "box-shadow": children().length
+            "box-shadow": !(isActiveTargetItem() && indicatorPosition().position === "center") && children().length
               ? "rgba(0, 0, 0, 0.2) 0.15px -1px 5.15px -0.9px"
-              : "0px",
-            "border-top":
-              isActiveTargetItem() && indicatorPosition().position === "before"
-                ? "2px solid green"
-                : "",
-            "border-bottom":
-              isActiveTargetItem() && indicatorPosition().position === "after"
-                ? "2px solid green"
-                : "",
+              : undefined,
             "border-left": children().length ? "" : "1px dashed black",
             "align-items": "center",
             "justify-content": "space-between",

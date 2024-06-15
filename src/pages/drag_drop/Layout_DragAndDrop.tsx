@@ -175,7 +175,7 @@ const LayoutDragAndDrop = (): JSX.Element => {
           when={!isSmallScreen()}
           fallback={
             <Drawer
-              customButton={false}
+              customButton={()=>false}
               drawerStyle={'padding: 10px'}
               open={isLeftOpen}
               setIsOpen={toggleIsLeftOpen}
