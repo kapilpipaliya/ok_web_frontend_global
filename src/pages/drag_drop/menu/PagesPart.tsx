@@ -10,20 +10,23 @@ import {
   Show,
 } from "solid-js";
 import { useToast } from "~/components/Toast";
-import { DraggedVertexContext } from "~/lib/contexts";
-import { GraphContext, Id } from "~/lib/graph/graph";
+import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
+import { GraphContext, Id, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/ws_events";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import {getTreeDataMGCall} from "~/cypher/get/getTreeDataMGCall";
+import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import Popover from "~/components/PopOver";
 import CustomPopover from "~/components/PopOver";
 import { PageViewBase } from "~/pages/PageView";
+import { onClickAddComponent } from "../CommonCompUtils";
 
 export function PagesPart(props: { coll: string }) {
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const { showErrorToast } = useToast();
   let originalData: any[] = [];
@@ -33,7 +36,9 @@ export function PagesPart(props: { coll: string }) {
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
   const [tooltip, setTooltip] = createSignal<HTMLElement | null>(null);
   const [openPopoverId, setOpenPopoverId] = createSignal<Id | null>(null);
-
+  const [selectedComponents, setSelectedComponents] = createSignal(
+    new Set<Vertex>(),
+  );
   // Fetch data function
   async function fetchData(): Promise<{
     graph?: any;
@@ -127,7 +132,9 @@ export function PagesPart(props: { coll: string }) {
           trigger={<div
             ref={el => setTooltip(el)}
             style={itemStyle()}
+            onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => {
+              setIsHovered(false);
               setIsHovered(false);
               setPreviewPageId(null);
               setTooltip(null);
@@ -135,29 +142,31 @@ export function PagesPart(props: { coll: string }) {
             draggable={true}
             onDragStart={(e) => {
               e.stopPropagation();
-
-              setDraggedVertex((prev) => [
-                ...prev,
-                graph.vertexes[props.child.id],
-              ]);
+              setDraggedVertex([]);
+              const dataTransfer =
+                selectedComponents().size > 0
+                  ? Array.from(selectedComponents())
+                  : [graph.vertexes[props.child.id]];
+              setDraggedVertex((prev) => [...prev, ...dataTransfer]);
+              setSelectedComponents(new Set());
+            }}
+            ondblclick={(e) => {
+              setDraggedVertex([graph.vertexes[props.child.id]]);
+              onClickAddComponent(
+                graph,
+                setGraph,
+                pageConfig.formData.txnId,
+                draggedVertex()[0],
+                pageConfig.formData || {},
+                selectedId() !== -1
+                  ? selectedId()
+                  : pageConfig.formData.formData.id,
+              );
+              setDraggedVertex([]);
             }}
           >
             <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
             <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
-            <Show when={tooltip()}>
-              <div
-                class="tooltip"
-                style={{
-                  "z-index": 1000,
-                  "background-color": "white",
-                  "border-radius": "0.2rem",
-                  padding: "5px",
-                  "font-size": "12px",
-                }}
-              >
-                {props.child.preview}
-              </div>
-            </Show>
           </div>
           }
           title={`${toTitle(props.child.name)} Preview`}

@@ -20,12 +20,6 @@ interface MenuProps {
 export function MenuDragAndDrop(props: MenuProps) {
   return (
     <nav
-      style={{
-        "grid-area": "menu",
-        width: "55%",
-        "min-width": "318px",
-        "justify-self": "left",
-      }}
     >
       <div class={"rel"}>
         <div

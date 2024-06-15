@@ -42,8 +42,7 @@ export const TextFieldWithSelect = (props: {
     setOption(determineSelectedOption());
   });
   const determineSelectedOption = () => {
-    if (!selected()) return '';
-    return sizeTypes.find((unit) => selected().includes(unit));
+    return sizeTypes.find((unit) => selected().includes(unit)) || 'px';
   };
 
   const [selectedOption, setOption] = createSignal(determineSelectedOption());
@@ -56,7 +55,11 @@ export const TextFieldWithSelect = (props: {
     }
     const numericValue = Number.parseFloat(value);
     if (props.isAddToClass) {
-      setCssState(state(),{[props.name]: `${numericValue}${selectedOption()}`});
+      if(props.options) {
+        setCssState(state(),{[props.name]: `${value}${selectedOption()}`});
+      }else{
+        setCssState(state(),{[props.name]: `${numericValue}`});
+      }
     }
     if (props.onChangeInput) {
       props.onChangeInput(`${numericValue}${selectedOption()}`);

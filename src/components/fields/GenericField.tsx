@@ -311,11 +311,11 @@ export function GenericField(
         <Match when={component() === "Select"}>
           <Select
             {...defaultValues()}
-            {...props.props.meta.P}
+            {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            {props.props.data?.P[props.props.meta.P[IdAttr]] ??
-              props.props.meta.P.children}
+            {props.data?.P[props.meta.P[IdAttr]] ??
+              props.meta.P.children}
           </Select>
         </Match>
         <Match when={component() === "LoadIndicator"}>
@@ -327,7 +327,7 @@ export function GenericField(
         </Match>
         <Match when={component() === "TreeViewItem"}>
           <TreeView
-            title={props.meta.P?.props.title ?? "MenuItem"}
+            title={props.meta.P?.title ?? "MenuItem"}
             meta={props.meta}
           >
             <PageItemRender metaVertex={props.meta} />

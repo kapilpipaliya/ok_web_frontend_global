@@ -1,4 +1,4 @@
-import {createSignal, JSX} from "solid-js";
+import { createSignal, JSX } from "solid-js";
 import { sizeTypes, timesTypes } from "./context";
 
 const Icons = {
@@ -154,56 +154,58 @@ const LayoutSection = {
   },
 };
 
-const SizeSection = createGridOptions("size Grid", "Size", [
-  {
-    name: "height",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Height",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-  {
-    name: "width",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Width",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-  {
-    name: "min-height",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Min height",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-  {
-    name: "min-width",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Min width",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-  {
-    name: "max-height",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Max height",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-  {
-    name: "max-width",
-    type: "number",
-    isLabelOnTop: true,
-    label: "Max width",
-    component: "textFieldOptions",
-    options: sizeTypes,
-  },
-]);
+const SizeSection = {
+  size: createGridOptions("size Grid", "Size", [
+    {
+      name: "height",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Height",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+    {
+      name: "width",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Width",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+    {
+      name: "min-height",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Min height",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+    {
+      name: "min-width",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Min width",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+    {
+      name: "max-height",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Max height",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+    {
+      name: "max-width",
+      type: "number",
+      isLabelOnTop: true,
+      label: "Max width",
+      component: "textFieldOptions",
+      options: sizeTypes,
+    },
+  ])
+};
 
 const SpaceSection = {
   padding: createGridOptions("padding", "Padding", [
@@ -284,13 +286,14 @@ const SpaceSection = {
   ]),
 };
 
-const PositionSection = createSelectOptions("position", "Position", [
+const PositionSection = {
+  position: createSelectOptions("position", "Position", [
   "static",
   "relative",
   "absolute",
   "fixed",
   "sticky",
-]);
+])};
 
 const TypographySection = {
   fontFamily: createSelectOptions(

@@ -25,6 +25,8 @@ export async function evalGlobalColl(
   } catch (error: any) {
     throw new Error(error.message);
   } finally {
-    await context.session?.close();
+    if (!context.session) {
+      await session.close();
+    }
   }
 }

@@ -61,6 +61,8 @@ export async function evalGetParents(
     );
     return;
   } finally {
-    await context.session?.close();
+    if (!context.session) {
+      await session.close();
+    }
   }
 }

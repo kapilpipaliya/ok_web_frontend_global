@@ -10,25 +10,39 @@
 
 📝 Todo 📝------------------------------------------------------------------------------------------
 Savan:
-when we apply font 'Courier New' it apply     font-family: Courier class, when space in font name, generate css like: font-family:Courier|New
-flex rules are generated like: 'flex:1 1 0%', but it should be generated like: flex:1|1|0%
-Test all css properties applying properly.
-Make sure all inputs are working, make video of all the inputs using drag and drop.
-
-
+when we apply font 'Courier New' it apply     font-family: Courier class, when space in font name, generate css like: font-family:Courier|New ✅
 instead of using loader in CSSRuntimeProvider use rc.css.master.co/guide/flash-of-unstyled-content ✅ 
 In form designer, root vertex when hover over it display properties icon. ✅
 
+add a steeper component in the form builder, by default first step(1) is active. user can add new step too. like, step 1, step 2, step 3, step 4 etc,
+which step user select display that step form only.
+add validation Tab on properties if validations are configured on the component, validations will run on fiel value change.
+when validation is failed, display error message below the component, if custom message is not provided display common message.
+add Upload Video component, it will upload video in the server and return video url.
+add Upload Image component, it will upload image in the server and return image url.
+add a Take a Picture component, it will open camera, take a picture from the camara and return image url.
+add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
+make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
+for label, use name property, instead of label property for changing the label.
+when we change width, height the textbox should be resized.
+when droping the component over content area, the icon is constaly coming and going, try to fix it as much as possible.
 
-make drag and drop working on ipad or mobile working.
 
-make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
-(Kapil) write a table routes to see all the form entries.
-Make Multi Stage Form design possible.
+
+
+- fix when drag and drop page or template, it is not working. ⌛
+- flex rules are generated like: 'flex:1 1 0%', but it should be generated like: flex:1|1|0%
+- Test all css properties applying properly.
+- Make sure all inputs are working, make video of all the inputs using drag and drop.
+- textbox extra padding at bottom. ⌛
+- delete extra properties from components. make sure each property is working. note not working properties.
+- make drag and drop working on ipad or mobile working.
+- make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
+- (Kapil) write a table routes to see all the form entries.
+- Make Multi Stage Form design possible.
 
 css issue:
- box-shadow
- not merge css working
+ box-shadow 
 
 Refactor all cypher functions, use eval function whenever possible.
 
@@ -85,3 +99,7 @@ expression-eval => jsep (for +,-) => jsonata(filter, projection)
 
 To find all files in your codebase whose line count is greater than 400, you can use the following command:
 find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
+
+
+bugs:
+when both sidebar are collapsed, it display the horizontal scrollbar.

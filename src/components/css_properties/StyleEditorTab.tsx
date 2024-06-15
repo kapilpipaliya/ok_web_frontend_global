@@ -136,7 +136,7 @@ export const StyleEditorTab = () => {
         </nav>
         <For each={Object.entries(filteredSections())} fallback={""}>
           {(section, index) => {
-            const [sectionName, { properties, isOpen }] = section;
+            const [sectionName, { properties, isOpen }] = section;            
 
             return (
               <Show when={Object.keys(properties).length > 0}>

@@ -19,7 +19,11 @@
   border-style: solid;
   /* 2 */
 }
-
+/* Added */
+* {
+  margin: 0;
+  padding: 0;
+}
 .login {
   height: 97vh;
 }

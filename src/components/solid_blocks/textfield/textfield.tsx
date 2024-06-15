@@ -70,17 +70,11 @@ export function TextField(props: TextFieldProps) {
     "leading",
   ]);
   const mergedClassList = mergeProps(
-    { textfield: true },
+    // { textfield: true },
     local.classList ?? {},
   );
 
   return (
-    <label
-      classList={mergedClassList}
-      class={local.labelClass}
-      aria-orientation={props["aria-orientation"]}
-    >
-      {/* <span class="sb-textfield-label">{local.label}</span> */}
       <Switch>
         <Match when={local.isNumber}>
           <div class="textInputWrapper">
@@ -101,12 +95,12 @@ export function TextField(props: TextFieldProps) {
           <textarea
             {...(fieldProps as JSX.HTMLAttributes<HTMLTextAreaElement>)}
             style={{
-              resize: "horizontal",
+              resize: "both",
               width: "100%",
               "max-width": "-webkit-fit-available",
             }}
             placeholder={local.placeholder ? local.placeholder : ""}
-            class={`${local.class ?? ""}  global-style max-w:100% h:50px `}
+            class={`${local.class ?? ""}  global-style max-w:100% `}
             onInput={(ev) => {
               runEvent(ev, local.onInput);
               local.setValue?.(ev.currentTarget.value);
@@ -136,7 +130,5 @@ export function TextField(props: TextFieldProps) {
           </div>
         </Match>
       </Switch>
-      {local.children}
-    </label>
   );
 }

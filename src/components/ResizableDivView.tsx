@@ -9,13 +9,13 @@ const ResizableContainer = (props: {
 
   createEffect(() => {
     if (props.view() === "Mobile") {
-      setWidth("400px");
+      // setWidth("400px");
       setHeight("570px");
     } else if (props.view() === "Tablet") {
-      setWidth("30vw");
+      // setWidth("30vw");
       setHeight("1026px");
     } else {
-      setWidth("55vw");
+      // setWidth("55vw");
       setHeight("889px");
     }
   });
@@ -50,7 +50,7 @@ const ResizableContainer = (props: {
   return (
     <div
       class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"
-      style={`width: ${width()}; height: ${height()};max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
+      style={`${width() ? `${width()};` : ""} height: ${height()}; max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
     >
       {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}

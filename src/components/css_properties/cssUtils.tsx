@@ -25,9 +25,11 @@ export function cssStateToString(cssState: CSSStore) {
   return Object.entries(cssState)
     .map(([state, value]) => {
       if (!value || state===undefined) return;
-      if (!isObject(value)) return `${state}:${value}`;
+      const stateValue = value.toString().replaceAll(" ", "|");
+      if (!isObject(value)) return `${state}:${stateValue}`;
       return Object.entries(value).map(([key, value]) => {
-        return `${key}:${value}${state && state !== 'undefined' ? `:${state}` : ""}`;
+        const stateValue = value.toString().replaceAll(" ", "|");
+        return `${key}:${stateValue}${state && state !== 'undefined' ? `:${state}` : ""}`;
       }).join("\n");
     })
     .join("\n");

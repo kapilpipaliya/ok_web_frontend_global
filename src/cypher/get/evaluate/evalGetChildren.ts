@@ -66,6 +66,8 @@ export async function evalGetChildren(
     );
     return;
   } finally {
-    await context.session?.close();
+    if (!context.session) {
+      await session.close();
+    }
   }
 }

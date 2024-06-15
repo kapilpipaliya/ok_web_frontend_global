@@ -14,12 +14,6 @@ interface ActionsProps {
 export function ActionsDragAndDrops(props: ActionsProps) {
   return (
     <aside
-      style={{
-        "grid-area": "callToAction",
-        width: "75%",
-        "min-width": "400px",
-        "justify-self": "right",
-      }}
       classList={{ "display:none": !props.isRightOpen() }}
     >
       <div

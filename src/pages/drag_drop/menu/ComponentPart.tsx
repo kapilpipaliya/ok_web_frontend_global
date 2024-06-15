@@ -231,7 +231,6 @@ export function ComponentPart() {
         >
           <Checkbox
             wrapperStyle={{ height: "19px", width: "19px" }}
-            type="checkbox"
             style={{ position: "absolute", top: "-2px", left: "7px" }}
             onChange={(e) => handleCheckboxChange(e, props.child.id)}
             // @ts-ignore

@@ -6,6 +6,7 @@ function Drawer(props: {
     isOpen: boolean;
   }) => JSX.Element;
   children: JSX.Element;
+  drawerStyle: string;
   width?: string;
   open?: any;
   setIsOpen?: any;
@@ -65,7 +66,7 @@ function Drawer(props: {
           border-left: ${mainDivHover()?"2px solid #37c":"none"};
         `}
       >
-        <div style="padding: 20px;scrollbar-width: thin;" class="overflow:auto  h:100%">{props.children}</div>
+        <div style={`padding: 20px;scrollbar-width: thin; ${props.drawerStyle}`} class="overflow:auto  h:100%">{props.children}</div>
         <div
           onMouseEnter={() => setMainDivHover(true)}
           onMouseLeave={() => setMainDivHover(false)}
