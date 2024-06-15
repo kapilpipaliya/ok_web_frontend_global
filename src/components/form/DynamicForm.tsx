@@ -50,7 +50,7 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import { FormContext, PageConfigContext } from "~/lib/contexts";
+import { FormContext, FormSettingsContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { LoaderNew } from "~/components/LoaderSimple";
@@ -65,6 +65,9 @@ import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
 import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
 import CustomButton from "../solid_blocks/button/buttons";
+import { FormMetaData } from "~/lib/formMetaData";
+import { AdminAttrKeys } from "~/lib/constants";
+import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 
 interface AbstractSingleFormProps
   extends Omit<DynamicFormProps, "form" | "id"> {
@@ -105,57 +108,12 @@ type FormData = {
 };
 
 export function DynamicForm(props: AbstractSingleFormProps) {
-  const [formData, setFormData] = createStore(
-    {} as {
-      form: IFormMetaData;
-    },
-  );
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
   const id = createMemo(() => (p.id === "new" ? undefined : p.id));
+  
   // TODO: add validation on form that AttrsTableData keys should not available.
-  // Note: When the page is loaded server side, the client side will not run this again,
-  // so set state inside it will not set when page is reloaded.
-  const [data]: any = createResource(async () => {
-    const form = await getFormMetaDataAsync(
-      props.formId,
-    );
-    if (form.error) return "Error";
 
-    return { formData: JSON.stringify(form) };
-  });
-  createEffect(() => {
-    if (data() && data() !== "Error") {
-      const result = JSON.parse(data().formData );
-      if (result && !(result as { error: string }).error) {
-        setFormData({ form: result.form as IFormMetaData });
-      }
-    }
-  });
-
-  return (
-    <Switch>
-      <Match when={data.loading}>
-        <LoaderNew />
-      </Match>
-
-      <Match when={data.error}>Error</Match>
-
-      <Match when={formData.form}>
-        <DynamicFormBase
-          form={formData.form!}
-          submitButton={props.submitButton}
-          id={id() as Id}
-          isDialogContext={props.isDialogContext}
-          {...customProps}
-          buttonAlign={props.buttonAlign}
-        />
-      </Match>
-    </Switch>
-  );
-}
-
-function DynamicFormBase(props: DynamicFormProps) {
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -164,30 +122,34 @@ function DynamicFormBase(props: DynamicFormProps) {
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
+  const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
 
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
   } as FormData);
-  const [activeTab, setActiveTab] = createSignal("main");
+  const [activeTab, setActiveTab] = createSignal("main");debugger
+  let form =
+  FormMetaData[props.formId] ||
+  (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
 
-  const fetchData = async () => {
+    const fetchData = async () => {
     try {
-      if (!props.id) {
+      if (!id()) {
         // Load Form Meta from API
         return "new";
       }
       // Load vertex from server
-      const loadResult = await findVertexesMGCall({ id: props.id });
+      const loadResult = await findVertexesMGCall({ id: id() as Id });
       if (loadResult.error) {
         return { error: loadResult.error };
       }
 
       const { incoming, outgoing }: { incoming: any; outgoing: any } =
-        getEdgesFromRowsAttr(props.form.attributes);
+        getEdgesFromRowsAttr(form!.attributes);
 
       const result = await getDataMGCall({
-        expression: `id:'${props.id}'`,
+        expression: `id:'${id() as Id}'`,
         incoming,
         outgoing,
       });
@@ -204,10 +166,12 @@ function DynamicFormBase(props: DynamicFormProps) {
     }
   };
 
-  const [data, { refetch }] = createResource(fetchData);
+   // Note: When the page is loaded server side, the client side will not run this again,
+  // so set state inside it will not set when page is reloaded.
+  const [dataResource, { refetch }] = createResource(fetchData);
 
   createEffect(
-    on(data, (data) => {
+    on(dataResource, (data) => {
       if (data) {
         const result = data;
         let dataVertex: Vertex;
@@ -217,7 +181,7 @@ function DynamicFormBase(props: DynamicFormProps) {
             setGraph,
             txnId,
             Ws,
-            props.form[IdAttr],
+            form[IdAttr],
           );
 
           dataVertex = createResult.vertex!;
@@ -238,6 +202,8 @@ function DynamicFormBase(props: DynamicFormProps) {
               graph,
               setGraph,
             );
+            setFormSettings('activeStep', layoutRowId);
+
             if (layoutRowId === -1) return;
           }
         }
@@ -252,7 +218,7 @@ function DynamicFormBase(props: DynamicFormProps) {
           }
           // Load Form Meta and Data from API
           const metaVertexResult = untrack(() =>
-            createMeta(props.form, graph, setGraph),
+            createMeta(form, graph, setGraph),
           );
 
           if (metaVertexResult.error) {
@@ -296,7 +262,7 @@ function DynamicFormBase(props: DynamicFormProps) {
           setFormData({
             txnId,
             formMeta: metaVertexResult.vertex!,
-            formData: graph.vertexes[props.id!] ?? dataVertex!,
+            formData: graph.vertexes[id() as Id] ?? dataVertex!,
             tabs,
             groupByTabsAndGroup,
           });
@@ -346,9 +312,9 @@ function DynamicFormBase(props: DynamicFormProps) {
         const name = formData?.formData?.P.name;
 
         const res = await checkIfNameExistsMGCall(
-          props.form[IdAttr],
+          form[IdAttr],
           name,
-          props.id,
+          id() as Id,
         );
 
         if (res.error === true) {
@@ -428,11 +394,11 @@ function DynamicFormBase(props: DynamicFormProps) {
 
   return (
     <Switch>
-      <Match when={data.loading}>
+      <Match when={dataResource.loading}>
         <LoaderNew />
       </Match>
 
-      <Match when={data.error}>Error</Match>
+      <Match when={dataResource.error}>Error</Match>
 
       <Match when={formData.formData}>
         <RepeaterVertexContext.Provider
@@ -615,3 +581,4 @@ function DynamicFormBase(props: DynamicFormProps) {
     );
   }
 }
+
