@@ -10,13 +10,22 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   } else {
     bounds = node.getBoundingClientRect();
   }
-  const offset = e.clientY - bounds.top;
+  const offsetY = e.clientY - bounds.top;
+  const offsetX = e.clientX - bounds.left;
   const height = bounds.bottom - bounds.top;
-  if (offset < height * 0.25) {
+  const width = bounds.right - bounds.left;
+
+  if (offsetY < height * 0.25) {
     return "before";
   }
-  if (offset > height * 0.75) {
+  if (offsetY > height * 0.75) {
     return "after";
+  }
+  if (offsetX < width * 0.25) {
+    return "left";
+  }
+  if (offsetX > width * 0.75) {
+    return "right";
   }
   return "center";
   // if (offset < (height + 10)) {
@@ -27,3 +36,4 @@ export function getIndicatorPosition(e: MouseEvent, node: HTMLElement) {
   //  return 'center';
   // }
 }
+

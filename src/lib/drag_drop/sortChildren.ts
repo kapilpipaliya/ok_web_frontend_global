@@ -24,14 +24,14 @@ export function sortChildren(
     // }
     if (child.id === toVertex.id) {
       // childIndex === toIndex, childIndex may be undefined.
-      if (position === "before") {
+      if (position === "before" || position === "left") {
         mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
           pos,
         });
         pos++;
         mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
         pos++;
-      } else if (position === "after") {
+      } else if (position === "after" || position === "right") {
         mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
         pos++;
         mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {

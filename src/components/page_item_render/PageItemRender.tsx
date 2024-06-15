@@ -84,13 +84,19 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           if (!isPreview()) {
             if (isActiveTargetItem()) {
               if (indicatorPosition().position === "center") {
-                return "box-shadow:inset|0|0|0|2px|rgb(0,255,0)>*";
+                return "box-shadow:inset|0|0|0|2px|rgb(0,255,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
               }
               if (indicatorPosition().position === "before") {
-                return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)>*";
+                return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
               }
               if (indicatorPosition().position === "after") {
-                return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)>*";
+                return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+              }
+              if (indicatorPosition().position === "left") {
+                return "box-shadow:inset|8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+              }
+              if (indicatorPosition().position === "right") {
+                return "box-shadow:inset|-8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
               }
             }
             if (
@@ -200,59 +206,59 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                               >
                                 {getComponentName()}
                               </div>
-                            </Tooltip>    
-                              <PropertyDrawer itemId={item.id} />
-                              <Tooltip content={"Move"} nowrap>
-                                <Icon
-                                  draggable={true}
-                                  onDragStart={handleDragStart}
-                                  icon={
-                                    "material-symbols-light:drag-pan-rounded"
+                            </Tooltip>
+                            <PropertyDrawer itemId={item.id} />
+                            <Tooltip content={"Move"} nowrap>
+                              <Icon
+                                draggable={true}
+                                onDragStart={handleDragStart}
+                                icon={
+                                  "material-symbols-light:drag-pan-rounded"
+                                }
+                                height={20}
+                                width={20}
+                                class="cursor:pointer flex"
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Parent"} nowrap>
+                              <Icon
+                                icon={"mdi:arrow-up"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  flex "
+                                onClick={(e) => {
+                                  const parentResult = getParentVertex(
+                                    ["Attr"],
+                                    item,
+                                    graph,
+                                  );
+                                  if (parentResult.error) {
+                                    return;
                                   }
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer flex"
-                                />
-                              </Tooltip>
-                              <Tooltip content={"Parent"} nowrap>
-                                <Icon
-                                  icon={"mdi:arrow-up"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex "
-                                  onClick={(e) => {
-                                    const parentResult = getParentVertex(
-                                      ["Attr"],
-                                      item,
-                                      graph,
-                                    );
-                                    if (parentResult.error) {
-                                      return;
-                                    }
 
-                                    onLayoutItemClick(parentResult.vertex!);
-                                  }}
-                                />
-                              </Tooltip>
-                              <Tooltip content={"Duplicate"}>
-                                <Icon
-                                  icon={"mage:copy"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex "
-                                  onClick={clone}
-                                />
-                              </Tooltip>
-                              <Tooltip content={"Delete"}>
-                                <Icon
-                                  onClick={() => deleteLayout(getComponentName())}
-                                  icon={"fluent:delete-20-regular"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex "
-                                />
-                              </Tooltip>
-                          
+                                  onLayoutItemClick(parentResult.vertex!);
+                                }}
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Duplicate"}>
+                              <Icon
+                                icon={"mage:copy"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  flex "
+                                onClick={clone}
+                              />
+                            </Tooltip>
+                            <Tooltip content={"Delete"}>
+                              <Icon
+                                onClick={() => deleteLayout(getComponentName())}
+                                icon={"fluent:delete-20-regular"}
+                                height={20}
+                                width={20}
+                                class="cursor:pointer  flex "
+                              />
+                            </Tooltip>
+
                           </div>
                         </span>
                       </Show>

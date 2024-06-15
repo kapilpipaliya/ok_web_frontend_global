@@ -75,6 +75,8 @@ export function useDragDrop(
       | "before"
       | "after"
       | "center"
+      | "left"
+      | "right"
       | null;
     if (!position) {
       setIndicatorPosition({ activeItem: null, position: null });
@@ -83,9 +85,9 @@ export function useDragDrop(
     }
 
     let activeItem: Id;
-    if (position === "before") {
+    if (position === "before" || position === "left") {
       activeItem = layoutVertex.id;
-    } else if (position === "after") {
+    } else if (position === "after" || position === "right") {
       if (isPreview || collapsedKeys?.().includes(layoutVertex.id)) {
         // collapsed state
         activeItem = layoutVertex.id;

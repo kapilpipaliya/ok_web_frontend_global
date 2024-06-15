@@ -57,7 +57,7 @@ export const PageConfigContext = createContext(
 export const IndicatorPositionContext = createContext(
   createSignal({
     activeItem: null as null | Id,
-    position: null as "before" | "after" | "center" | null,
+    position: null as "before" | "after" | "center" | "left" | "right" | null,
   }),
 );
 

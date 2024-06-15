@@ -63,7 +63,7 @@ make Preview working(eye icon on top right), it will display page preview in the
 
 when we change width, height the textbox should be resized.
 when droping the component over content area, the icon is constaly coming and going, try to fix it as much as possible.
-
+Add query parameter in grid url for pagination,
 
 
 
