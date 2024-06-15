@@ -28,15 +28,18 @@ export function ClassDesignTab(props: {
   const defaultValues = createMemo(() => props.meta.P.value || "");
   const cssValue = createMemo(() => (props.data?.P[props.meta.P.name] as string) ?? "");
 
+  const [isMonted, setIsMonted] = createSignal(false);
   onMount(() => {
-    setCssState(reconcile(parseAndApplyCssRules(cssValue())));
     setCssDefaultCssState(reconcile(parseAndApplyCssRules(defaultValues())));
+    setCssState(reconcile(parseAndApplyCssRules(cssValue())));
+    setIsMonted(true);
   });
 
   // Merge null key into the default state and update setValue prop
+  // first time, call this function and it clear the value in vertex.
   const memoizedCssValue = createMemo(() => {
+    if (!isMonted()) return "";
     const value = cssStateToString(cssState);
-
     props.setValue?.(value);
     // setCssState(cssState);
     // setCssDefaultCssState(cssDefaultState);
