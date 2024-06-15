@@ -6,22 +6,22 @@ export type FileUploaderProps = JSX.HTMLAttributes<HTMLLabelElement> & {
   meta?: any;
   data?: any;
   label?: string;
-  image?: string;
+  media?: string;
 };
 
 export function FileUploader(props: FileUploaderProps) {
   const [inputProps, content, labelProps] = splitProps(
     props,
     [],
-    ["setValue", "meta", "data", "label"],
+    ["setValue", "meta", "data", "label"]
   );
   const [file, setFile] = createSignal<File | null | any>(null);
-  const [fullBoxImage, setFullBoxImage] = createSignal("");
+  const [fullBoxMedia, setFullBoxMedia] = createSignal("");
 
   createEffect(() => {
-    if (props.image) {
-      setFile(props.image);
-      setFullBoxImage(props.image);
+    if (props.media) {
+      setFile(props.media);
+      setFullBoxMedia(props.media);
     }
   });
 
@@ -30,7 +30,7 @@ export function FileUploader(props: FileUploaderProps) {
     const droppedFile = event.dataTransfer.files[0];
     if (droppedFile) {
       setFile(droppedFile);
-      setFullBoxImage(URL.createObjectURL(droppedFile));
+      setFullBoxMedia(URL.createObjectURL(droppedFile));
       props.setValue?.(props.meta, props.data, droppedFile);
     }
   };
@@ -43,7 +43,7 @@ export function FileUploader(props: FileUploaderProps) {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setFullBoxImage(URL.createObjectURL(selectedFile));
+      setFullBoxMedia(URL.createObjectURL(selectedFile));
       props.setValue?.(props.meta, props.data, selectedFile);
     }
   };
@@ -63,7 +63,7 @@ export function FileUploader(props: FileUploaderProps) {
       draggable={false}
       style={{
         position: "relative",
-        border: fullBoxImage() === "" ? "2px dashed #ccc" : "",
+        border: fullBoxMedia() === "" ? "2px dashed #ccc" : "",
         padding: "20px",
         "border-radius": "10px",
         "text-align": "center",
@@ -75,6 +75,7 @@ export function FileUploader(props: FileUploaderProps) {
       <label {...labelProps}>
         <input
           type="file"
+          accept="image/*, video/*"
           style={{ display: "none" }}
           {...inputProps}
           onChange={(event) => {
@@ -83,18 +84,32 @@ export function FileUploader(props: FileUploaderProps) {
         />
         {file() !== null ? (
           <>
-            <img
-              src={fullBoxImage()}
-              alt="Image"
-              style={{
-                "max-width": "100%",
-                "max-height": "100%",
-                "border-radius": "10px",
-              }}
-            />
+            {file().type.startsWith("image/") ? (
+              <img
+                {...(props as JSX.HTMLAttributes<HTMLInputElement>)}
+                src={fullBoxMedia()}
+                alt="Media"
+                style={{
+                  "max-width": "100%",
+                  "max-height": "100%",
+                  "border-radius": "10px",
+                }}
+              />
+            ) : (
+              <video
+                  {...(props as JSX.HTMLAttributes<HTMLVideoElement>)}
+                controls
+                src={fullBoxMedia()}
+                style={{
+                  "max-width": "100%",
+                  "max-height": "100%",
+                  "border-radius": "10px",
+                }}
+              />
+            )}
           </>
         ) : (
-          <span>{props.label || "Click to select an image"}</span>
+          <span>{props.label || "Click to select a media file"}</span>
         )}
       </label>
     </div>

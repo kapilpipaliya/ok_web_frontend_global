@@ -16,9 +16,33 @@ In form designer, root vertex when hover over it display properties icon. ✅
 
 add a steeper component in the form builder, by default first step(1) is active. user can add new step too. like, step 1, step 2, step 3, step 4 etc,
 which step user select display that step form only.
-Add gap in the properties icons.
-add save button on top.
-display steeper only on forms.
+Add gap in the properties icons. ✅
+add save button on top. ✅
+display steeper only on forms. ✅
+Add a option to 'delete all' steps.
+fix extra padding below textarea component.
+when we first configure normal css properties, and then we configure hover css properties, normal css properties are removed.
+
+when user drag and drop over a layout and wait for 1 second, if it is collpased, expand it.
+Fix Layout tree, it is not displaying children nodes properly.
+Fix bug when opening box propertiy css is gone in book edit page.
+when applying color in button css properties it is not working.
+in the stepper user can change the order of pages too
+Bug: when user customize css properties, close properties drawer and open again then it is not visisble all css
+on Properties drawer, display title like "Button Properties"
+Kapil -> Form to Form Elements. When user change Form Category, label is not dropped
+KAPIL -> Add space in component names. user can add label NAME in components.
+Kapil -> when parent has display:flex, support indicator postion on left and right too.
+Bug: when cloning a component, css properties are not cloned.
+when drag and drop 'text' component, display some default text like "Text"
+Label Properties, Position is not comming as select. add support for specifying select options
+user can change label inline, make it content editable.
+It is not flexible to drop a component below the component, because of the label.
+In form designer, rename submit to save. on save dispaly loader and then display message 'form successfully saved'
+FormSetting move to form properties.
+SEO
+https://easyformforge.com not working.
+Add Form Category in Form Setting, It will display the form on homepage.
 
 Bug:
 drag and drop layout issue.
@@ -117,3 +141,4 @@ find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
 
 
 bugs:
+when table is not visible user cant drop above or  below the table from canvas.

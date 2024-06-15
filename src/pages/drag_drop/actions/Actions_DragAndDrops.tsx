@@ -1,5 +1,5 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, For, type Accessor, createSignal } from "solid-js";
+import { useContext, For, type Accessor, createSignal, Setter } from "solid-js";
 import { PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { LayoutPart } from "./LayoutPart";
 import { FormConfig } from "./FormConfig";
@@ -9,7 +9,7 @@ import { FormSetting } from "./FormSetting";
 interface ActionsProps {
   rightColumns: any;
   isRightOpen: Accessor<boolean>;
-  toggleIsRightOpen: Accessor<boolean>;
+  toggleIsRightOpen: Setter<boolean>;
 }
 export function ActionsDragAndDrops(props: ActionsProps) {
   return (
@@ -21,7 +21,7 @@ export function ActionsDragAndDrops(props: ActionsProps) {
           "h:100vh flex-col overflow-x:auto border:1|solid|lightgrey m:5 r:5|5|5|5"
         }
         style={{
-          "max-height": "calc(100vh - 70px)",
+          "max-height": "calc(100vh - 120px)",
           "scrollbar-width": "thin",
           "scrollbar-color": "lightgrey",
         }}
@@ -48,7 +48,7 @@ const Column = (props: { datas: any; toggleIsRightOpen: any }) => {
             <div class="font-weight:600">Form Layout</div>
             <Icon
               class="cursor:pointer bg:white:hover r:50%"
-              onClick={props.toggleIsRightOpen}
+              onClick={()=>props.toggleIsRightOpen(false)}
               icon={"iconamoon:close-duotone"}
               height={30}
               width={30}

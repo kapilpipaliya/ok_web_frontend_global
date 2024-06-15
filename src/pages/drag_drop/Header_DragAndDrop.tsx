@@ -1,11 +1,19 @@
 import { Icon } from "@iconify-icon/solid";
-import { type Accessor, For, type Setter, createSignal, Show } from "solid-js";
+import { type Accessor, For, type Setter, createSignal, Show, useContext } from "solid-js";
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import CustomModal from "~/components/CommonDialog";
 import CustomButton from "~/components/solid_blocks/button/buttons";
 import ShareSection from "./PageShare";
 import { useNavigate } from "@solidjs/router";
+import { useToast } from "~/components/Toast";
+import { ProcessStatus, commitTxn, getNewTxnId, transactions } from "~/lib/graph/transaction";
+import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { submitDataCall } from "~/lib/api/api_functions";
+import { GenericField } from "~/components/fields/GenericField";
+import { PageConfigContext } from "~/lib/contexts";
+import { GraphContext, IdAttr } from "~/lib/graph/graph";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 
 export function HeaderDragAndDrop(props: {
   view: Accessor<string>;
@@ -14,6 +22,12 @@ export function HeaderDragAndDrop(props: {
   setSelectedSection: Setter<string>;
 }) {
   const [openDialog, setOpenDialog] = createSignal(false);
+  const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
+  const { Ws } = useContext(WsContext);
+  const [graph, setGraph] = useContext(GraphContext)!;
+  const cleanUpConfig = {} as { [key: string]: any };
+  const txnId = getNewTxnId(graph, setGraph);
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const views = [
     { key: "prime:mobile", value: "Mobile", icon: true },
     { key: "uil:tablet", value: "Tablet", icon: true },
@@ -28,12 +42,65 @@ export function HeaderDragAndDrop(props: {
     const newPathname = segments.join("/");
     return newPathname;
   }
+  let submit: boolean;
+  const onSubmit = async () => {
+    // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
+    // const result = validationGroup.validate();
+    const isValid = true;
+    const isRealTime = false;
+    let data;
+    if (isValid) {
+      // !!!TODO!!! Handle Error Received From server when commit
+      if (!isRealTime) {
+        data = commitTxn(txnId, Ws);
+        if (!data) {
+          setTimeout(() => navigate(-1), 0);
+          showWarningToast("Internal Server Error");
+          return;
+        }
+
+        const name = pageConfig.formData.formData.P[IdAttr];
+
+        const res = await checkIfNameExistsMGCall(
+          pageConfig.formData.formData.P[IdAttr],
+          name,
+          pageConfig.formData.formData.id, 
+        );
+
+        if (res.error === true) {
+          showErrorToast(res.message);
+          return;
+        }
+
+        await showLoadingToast({
+          promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
+          loadMessage: "Submitting Data...",
+          successMessage: "Data submitted successfully",
+          onSuccess: (value) => {
+            transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+            // currently we are navigating back.
+            setTimeout(() => navigate(-1), 500);
+          },
+          onError: (error) => { },
+        });
+      }
+      submit = true;
+    } else {
+      showWarningToast("please fix all errors");
+    }
+    if (!data) {
+      setTimeout(() => navigate(-1), 0);
+      return;
+    }
+
+    return isValid;
+  };
   return (
     <header class="h:50px" style={{ "grid-area": "header" }}>
       <div class="flex-grow:1 min-w:400 grid ji:center">
         <div
           class={
-            "ai:center align-items:center bg:#f3f3f4 display:flex flex h:50px jc:space-between mb:5 p:10 r:7 w:99%"
+            "ai:center align-items:center bg:#f3f3f4 display:flex flex h:49px jc:space-between mb:5 p:10 r:7 w:99%"
           }
         >
           <div class="flex ai:center">
@@ -59,7 +126,7 @@ export function HeaderDragAndDrop(props: {
           </div>
           <div>
             <Show when={props.selectedSection() === "build"}>
-              <div class="flex ai:center w:150">
+              <div class="flex ai:center w:150 ml:38%">
                 <For each={views}>
                   {(view, index) => {
                     return (
@@ -133,6 +200,20 @@ export function HeaderDragAndDrop(props: {
           </div>
 
           <div class={"ai:center justify-content:space-between flex gap:5"}>
+            <GenericField
+              meta={
+                {
+                  P: {
+                    component: "Button",
+                    variant: "soft",
+                    type: "primary",
+                    children: "Save",
+                    onClick: () => onSubmit(),
+
+                  },
+                } as any
+              }
+            />
             <PreviewSection
               setOpenDialog={setOpenDialog}
               openDialog={openDialog}
@@ -158,7 +239,7 @@ const ExportSection = (props: {
       title={"Code"}
       openButton={false}
       buttonLabel={
-        <Tooltip content={"Share"} position={"n"}>
+        <Tooltip content={"Share"} position={"s"}>
           <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
             <Icon icon={"basil:share-box-outline"} height={22} width={22} />
           </div>
@@ -192,7 +273,7 @@ const PreviewSection = (props: {
       title={"Preview"}
       openButton={false}
       buttonLabel={
-        <Tooltip content={"Preview"} position={"n"}>
+        <Tooltip content={"Preview"} position={"s"}>
           <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
             <Icon icon={"ph:eye"} height={22} width={22} />
           </div>

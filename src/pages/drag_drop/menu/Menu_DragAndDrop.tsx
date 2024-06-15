@@ -6,6 +6,7 @@ import {
   Switch,
   createSignal,
   Show,
+  Setter,
 } from "solid-js";
 import { ComponentPart } from "./ComponentPart";
 import { PagesPart } from "./PagesPart";
@@ -14,7 +15,7 @@ import { capitalizeFirstLetter } from "~/lib/utils";
 interface MenuProps {
   leftColumns: any;
   isLeftOpen: Accessor<boolean>;
-  toggleIsLeftOpen: Accessor<boolean>;
+  toggleIsLeftOpen: Setter<boolean>;
 }
 
 export function MenuDragAndDrop(props: MenuProps) {
@@ -27,7 +28,7 @@ export function MenuDragAndDrop(props: MenuProps) {
             "h:100vh  flex-col overflow:auto border:1|solid|lightgrey m:5 r:5|5|5|5 direction:rtl"
           }
           style={{
-            "max-height": "calc(100vh - 70px)",
+            "max-height": "calc(100vh - 120px)",
             "scrollbar-width": "thin",
             "scrollbar-color": "lightgrey",
           }}
@@ -44,7 +45,7 @@ export function MenuDragAndDrop(props: MenuProps) {
   );
 }
 
-const Column = (props: { datas: any; toggleLeftOpen: Accessor<boolean> }) => {
+const Column = (props: { datas: any; toggleLeftOpen: any }) => {
   const [selectedTab, setSelectedTab] = createSignal("components");
 
   return (
@@ -55,7 +56,7 @@ const Column = (props: { datas: any; toggleLeftOpen: Accessor<boolean> }) => {
             <div class="font-weight:600">Form Elements</div>
             <Icon
               class="cursor:pointer bg:white:hover r:50%"
-              onClick={props.toggleLeftOpen}
+              onClick={()=>props.toggleLeftOpen(false)}
               icon={"iconamoon:close-duotone"}
               height={30}
               width={30}

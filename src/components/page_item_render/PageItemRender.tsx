@@ -52,7 +52,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
             }}
             height={22}
             width={22}
-            class="cursor:pointer"
+            class="cursor:pointer flex ai:center"
           />
         </Tooltip>
       </Show>
@@ -100,7 +100,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
               return "box-shadow:inset|0|0|0|2px|#3996E1>*";
             }
             if (isSelectedHoverId(item.id)) {
-              return "box-shadow:inset|0|0|0|2px|#3996E1AA>*";
+              return "box-shadow:inset|0|0|0|2px|#d2dbfc>*";
             }
           }
         }
@@ -159,7 +159,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
           >
             <Show when={!isPreview()} fallback={<Content />}>
               <span
-                class={`contents ${getBorder() || ""}`}
+                class={`contents ${getBorder() || ""} `}
                 onMouseOver={(e) => {
                   e.stopPropagation();
                   setHoverId(item.id);
@@ -188,7 +188,7 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     <Popover.Content class="popover__content">
                       <Show when={isSelectedLayoutId(item.id)}>
                         <span class="position:relative ">
-                          <div class="position:absolute color:white bottom:100% flex gap:2 bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center">
+                          <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
                             <Tooltip content={"Name"} nowrap>
                               <div
                                 style={{
@@ -200,89 +200,61 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                               >
                                 {getComponentName()}
                               </div>
-                            </Tooltip>
-                            <div
-                              class="mr:0.5rem f:0.875rem lh:1.25rem"
-                              style={{ display: "flex" }}
-                            >
+                            </Tooltip>    
                               <PropertyDrawer itemId={item.id} />
-                            </div>
-
-                            <Tooltip content={"Move"} nowrap>
-                              <Icon
-                                draggable={true}
-                                onDragStart={handleDragStart}
-                                icon={
-                                  "material-symbols-light:drag-pan-rounded"
-                                }
-                                height={20}
-                                width={20}
-                                class="cursor:pointer flex"
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Parent"} nowrap>
-                              <Icon
-                                icon={"mdi:arrow-up"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                                onClick={(e) => {
-                                  const parentResult = getParentVertex(
-                                    ["Attr"],
-                                    item,
-                                    graph,
-                                  );
-                                  if (parentResult.error) {
-                                    return;
+                              <Tooltip content={"Move"} nowrap>
+                                <Icon
+                                  draggable={true}
+                                  onDragStart={handleDragStart}
+                                  icon={
+                                    "material-symbols-light:drag-pan-rounded"
                                   }
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer flex"
+                                />
+                              </Tooltip>
+                              <Tooltip content={"Parent"} nowrap>
+                                <Icon
+                                  icon={"mdi:arrow-up"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex "
+                                  onClick={(e) => {
+                                    const parentResult = getParentVertex(
+                                      ["Attr"],
+                                      item,
+                                      graph,
+                                    );
+                                    if (parentResult.error) {
+                                      return;
+                                    }
 
-                                  onLayoutItemClick(parentResult.vertex!);
-                                }}
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Duplicate"}>
-                              <Icon
-                                icon={"mage:copy"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                                onClick={clone}
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Delete"}>
-                              <Icon
-                                onClick={() => deleteLayout(getComponentName())}
-                                icon={"fluent:delete-20-regular"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                              />
-                            </Tooltip>
+                                    onLayoutItemClick(parentResult.vertex!);
+                                  }}
+                                />
+                              </Tooltip>
+                              <Tooltip content={"Duplicate"}>
+                                <Icon
+                                  icon={"mage:copy"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex "
+                                  onClick={clone}
+                                />
+                              </Tooltip>
+                              <Tooltip content={"Delete"}>
+                                <Icon
+                                  onClick={() => deleteLayout(getComponentName())}
+                                  icon={"fluent:delete-20-regular"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex "
+                                />
+                              </Tooltip>
+                          
                           </div>
                         </span>
-                        {/* <span class="position:relative  flex justify-content:flex-end ">
-                          <div
-                            class="@fade|.3s z:50"
-                            style={{
-                              "border-radius": "0.25rem",
-                              position: "absolute",
-                              "background-color": "rgb(37,99,235)",
-                              color: "rgb(255,255,255)",
-                              padding: "3px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                "z-index": 50,
-                                display: "flex",
-                                gap: "3px",
-                                margin: "2px 6px",
-                              }}
-                            >
-                             
-                            </div>
-                          </div>
-                        </span> */}
                       </Show>
                       <Show
                         when={
@@ -291,13 +263,13 @@ export function PageItemRender(props: { metaVertex: Vertex; data?: Vertex }) {
                         }
                       >
                         <span class="position:relative ">
-                          <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:0.25rem  z:50 p:0.25rem ai:center right:0">
+                          <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center right:0">
                             <Icon
                               icon={iconMap[getComponentName()]}
                               class=" flex"
                             />
                             <Tooltip content={"Name"} nowrap>
-                              <div class="ml:2px mr:5px   f:0.875rem lh:1.25rem">
+                              <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
                                 {getComponentName()}
                               </div>
                             </Tooltip>

@@ -19,6 +19,9 @@ function Drawer(props: {
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
+    if (props.setIsOpen) {
+      props.setIsOpen(!isOpen());
+    }
   };
 
 
