@@ -7,9 +7,9 @@ import {
   getChatsSupportCall,
   deleteSupportTicketCall,
 } from "~/lib/api/api_functions";
-import postAPI from "~/lib/api/postApi";
+import {postAPI} from "~/lib/api/postApi";
 import { ChipDropDown } from "~/components/Chip";
-import CustomModal from "~/components/CommonDialog";
+import {CustomModal} from "~/components/CommonDialog";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { Table, TableHeadCell, TableBodyCell } from "~/components/Table";
 import { useToast } from "~/components/Toast";

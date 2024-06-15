@@ -1,14 +1,14 @@
 import { type JSX, splitProps } from "solid-js";
 
-const Heading = (
+export function Heading(
   props: JSX.IntrinsicAttributes &
     JSX.HTMLAttributes<HTMLDivElement> & {
-      etc: any;
-      heading?: string;
-      subheading?: string;
-      divider?: boolean;
-    },
-) => {
+    etc: any;
+    heading?: string;
+    subheading?: string;
+    divider?: boolean;
+  },
+) {
   const [local, customProps] = splitProps(props, [
     "heading",
     "subheading",
@@ -24,10 +24,8 @@ const Heading = (
         <p class="text-base f:13 color:lightgrey mr:auto">{local.subheading}</p>
       )}
       {local.divider !== false && (
-        <hr class="mt:2 mb:2 h:0.5 color:lightgrey w:full" />
+        <hr class="mt:2 mb:2 h:0.5 color:lightgrey w:full"/>
       )}
     </div>
   );
-};
-
-export default Heading;
+}

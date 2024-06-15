@@ -4,7 +4,7 @@ import { Tooltip } from "~/components/solid_blocks";
 import { PageConfigContext } from "~/lib/contexts";
 import { useNavigate } from "@solidjs/router";
 
-const ShareSection = () => {
+export function ShareSection() {
   const [pageConfig, setPageConfig] = useContext(PageConfigContext) || [];
   const navigate = useNavigate();
   const [access, setAccess] = createSignal("everyone");
@@ -90,7 +90,7 @@ const ShareSection = () => {
           readOnly
           class={"w:full bg:rgb(245,245,245) r:5|0|0|5 p:10"}
         />
-        <Tooltip content={"Preview link"}   >
+        <Tooltip content={"Preview link"}>
           <button
             onClick={previewLink}
             style={inlineStyles.button}
@@ -116,7 +116,7 @@ const ShareSection = () => {
           }}
           style={
             access() === "everyone"
-              ? { ...inlineStyles.accessButton, ...inlineStyles.activeButton }
+              ? {...inlineStyles.accessButton, ...inlineStyles.activeButton}
               : inlineStyles.accessButton
           }
         >
@@ -126,7 +126,7 @@ const ShareSection = () => {
           onClick={() => setAccess("invite")}
           style={
             access() === "invite"
-              ? { ...inlineStyles.accessButton, ...inlineStyles.activeButton }
+              ? {...inlineStyles.accessButton, ...inlineStyles.activeButton}
               : inlineStyles.accessButton
           }
         >
@@ -135,7 +135,7 @@ const ShareSection = () => {
       </div>
       <div style={inlineStyles.shareLink}>
         <button onClick={copyToClipboard} class={"r:5|0|0|5 p:10 bg:#F5F5F5"}>
-          <Icon icon={"system-uicons:mail"} height={25} width={25} />
+          <Icon icon={"system-uicons:mail"} height={25} width={25}/>
         </button>
 
         <input
@@ -156,7 +156,4 @@ const ShareSection = () => {
       </div>
     </div>
   );
-};
-
-export default ShareSection;
-
+}

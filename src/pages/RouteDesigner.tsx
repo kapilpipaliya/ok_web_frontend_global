@@ -1,13 +1,13 @@
 import { createSignal, For, Show, Match, Switch } from "solid-js";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
-import CustomButton from "~/components/solid_blocks/button/buttons";
+import {CustomButton} from "~/components/solid_blocks/button/buttons";
 
-const RouteDesigner = () => {
+export function RouteDesigner() {
   const [elements, setElements]: any = createSignal([]);
   const [showModal, setShowModal] = createSignal(false);
 
   const addElement = (type: any) => {
-    setElements([...elements(), { type, id: Date.now() }]);
+    setElements([...elements(), {type, id: Date.now()}]);
   };
   const getFormFields = (event: any) => {
     event.preventDefault();
@@ -47,7 +47,8 @@ const RouteDesigner = () => {
       </form>
 
       <Show when={showModal()}>
-        <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
+        <div
+          style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
           <div style="background: white; padding: 20px; border-radius: 5px;">
             <p>This is a modal</p>
             <CustomButton
@@ -61,7 +62,7 @@ const RouteDesigner = () => {
       </Show>
     </div>
   );
-};
+}
 
 const DynamicElement = (props: {
   element: any;
@@ -107,5 +108,3 @@ const DynamicElement = (props: {
     </Switch>
   );
 };
-
-export default RouteDesigner;

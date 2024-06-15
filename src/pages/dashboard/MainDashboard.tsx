@@ -22,7 +22,7 @@ import "~/css/modal.css";
 import { LoadingContext, PageContext } from "~/lib/contexts";
 import { useToast } from "~/components/Toast";
 import { signOutCall } from "~/lib/api/api_functions";
-import getAPI from "~/lib/api/getApi";
+import {getAPI} from "~/lib/api/getApi";
 import { API } from "~/lib/api/endpoints";
 import { APP_BASE_URL } from "~/lib/constants";
 import { isPageDesignerPath } from "~/lib/utils";

@@ -6,7 +6,7 @@ import { LoadingContext } from "~/lib/contexts";
 import logo from "~/assets/graphics/logo.png";
 import { signInCall } from "~/lib/api/api_functions";
 import "~/css/base.css";
-import postAPI from "~/lib/api/postApi";
+import {postAPI} from "~/lib/api/postApi";
 import { validateEmail, validatePassword } from "~/lib/validations";
 import { APP_BASE_URL } from "~/lib/constants";
 

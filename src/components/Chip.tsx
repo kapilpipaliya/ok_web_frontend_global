@@ -1,6 +1,6 @@
 import { createSignal, For } from "solid-js";
 
-const StatusChip = (props: { status: string }) => {
+export function StatusChip(props: { status: string }) {
   const [status] = createSignal(props.status);
 
   const getStatusStyles = () => {
@@ -23,7 +23,7 @@ const StatusChip = (props: { status: string }) => {
       {status()}
     </span>
   );
-};
+}
 
 export function ChipDropDown(props: {
   selectedItem: string;
@@ -68,5 +68,3 @@ export function ChipDropDown(props: {
     </select>
   );
 }
-
-export default StatusChip;

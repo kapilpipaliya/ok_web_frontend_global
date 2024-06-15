@@ -1,6 +1,6 @@
 import { createSignal, type JSX, Show, } from "solid-js";
 
-function Drawer(props: {
+export function Drawer(props: {
   customButton?: (props: {
     onClick: () => void;
     isOpen: boolean;
@@ -99,5 +99,3 @@ function Drawer(props: {
     </>
   );
 }
-
-export default Drawer;

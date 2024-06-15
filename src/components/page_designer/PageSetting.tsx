@@ -1,6 +1,6 @@
 import { Match, createMemo } from "solid-js";
 import { For, Switch, createSignal } from "solid-js";
-import MultiSelectField from "~/components/MultiSelect";
+import {MultiSelectField} from "~/components/MultiSelect";
 
 export function PageSetting() {
   const [selected, setSelected] = createSignal("thank-you-page");

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For } from "solid-js";
 
-const FeaturesSection = () => {
+export function FeaturesSection() {
   const featureData = [
     {
       icon: "ri:spam-line",
@@ -56,10 +56,10 @@ const FeaturesSection = () => {
     <section class="features container pb-5 pt-5">
       <div class="featureHeadingsec d-flex">
         <h2 class="text-left">
-          Experience a whole new & <br /> quicker way of making forms!
+          Experience a whole new & <br/> quicker way of making forms!
         </h2>
         <button class="btn-small-icon-filled bg-black">
-          View All Features <i class="fa-solid fa-chevron-right" />
+          View All Features <i class="fa-solid fa-chevron-right"/>
         </button>
       </div>
       <p class="font-600 mt-3">
@@ -81,9 +81,7 @@ const FeaturesSection = () => {
       </div>
     </section>
   );
-};
-
-export default FeaturesSection;
+}
 
 const FeatureBox = (props: {
   icon: string;

@@ -26,7 +26,7 @@ const toggleExpansion = (id: Id) => {
   setExpandedItems(expandedSet);
 };
 
-const TreeView = (props: { title: string; meta: Vertex; children: JSX.Element }) => {
+export function TreeView(props: { title: string; meta: Vertex; children: JSX.Element }) {
   let parentValues = useContext(treeContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   // Recursive function to render tree nodes
@@ -71,9 +71,7 @@ const TreeView = (props: { title: string; meta: Vertex; children: JSX.Element })
 
   return (
     <treeContext.Provider value={parentValues}>
-      <RenderTreeNode title={props.title} />
+      <RenderTreeNode title={props.title}/>
     </treeContext.Provider>
   );
-};
-
-export default TreeView;
+}

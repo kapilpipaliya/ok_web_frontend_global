@@ -1,6 +1,6 @@
 import { createSignal } from "solid-js";
 
-const SubscribeSection = () => {
+export function SubscribeSection() {
   return (
     <section class="subscribe d-flex">
       <div class="subscribeinner container">
@@ -8,13 +8,13 @@ const SubscribeSection = () => {
         <p class="color-white text-center">
           Subscribe for latest news and exclusive deals!
         </p>
-        <SubscribeForm />
+        <SubscribeForm/>
       </div>
     </section>
   );
-};
+}
 
-export default SubscribeSection;
+
 const SubscribeForm = () => {
   const [email, setEmail] = createSignal("");
 

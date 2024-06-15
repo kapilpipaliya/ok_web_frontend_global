@@ -8,7 +8,7 @@ import {
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import CustomButton from "~/components/solid_blocks/button/buttons";
+import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 type TableProps<T> = {

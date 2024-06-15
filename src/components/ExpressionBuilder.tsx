@@ -1,15 +1,15 @@
 import { For, Show, useContext } from "solid-js";
 import { TextField } from "~/components/solid_blocks";
-import CustomButton from "~/components/solid_blocks/button/buttons";
+import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { binops, unops } from "~/lib/expression_eval";
 import { createStore } from "solid-js/store";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { NestedExpressionBuilder } from "./NestedExpressionBuilder";
-import CustomModal from "./CommonDialog";
+import {CustomModal} from "./CommonDialog";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
-import MultiSelectField from "./MultiSelect";
+import {MultiSelectField} from "./MultiSelect";
 
 type Option =
   | Record<string, string | number | boolean | unknown>

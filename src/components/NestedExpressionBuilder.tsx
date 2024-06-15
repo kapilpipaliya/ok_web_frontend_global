@@ -1,4 +1,4 @@
-import CustomModal from "./CommonDialog";
+import {CustomModal} from "./CommonDialog";
 
 export function NestedExpressionBuilder(props: {
   content: string;

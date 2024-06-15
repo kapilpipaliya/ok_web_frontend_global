@@ -25,7 +25,7 @@ export interface navbarDataI {
   name: string;
 }
 
-function Sidebar() {
+export function Sidebar() {
   const [searchData, setSearchData] = createSignal<any>([]);
   const [navData, setNavData] = createSignal<any>([]);
   const [activeSection, setActiveSection] = createSignal("Home");
@@ -204,5 +204,3 @@ function Sidebar() {
     </div>
   );
 }
-
-export default Sidebar;

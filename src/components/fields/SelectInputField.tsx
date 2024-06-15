@@ -33,7 +33,7 @@ import type { Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { getNameKeyForCollection } from "~/lib/graph/get/sync/graph_functions";
 import { setGraphData } from "~/lib/websocket/ws_events";
-import MultiSelectField from "~/components/MultiSelect";
+import {MultiSelectField} from "~/components/MultiSelect";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
 import { FormContext } from "~/lib/contexts";

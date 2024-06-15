@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Define an async function to send emails
-async function sendEmail(to: string, username: any) {
+export async function sendEmail(to: string, username: any) {
   "use server";
   const transporter = nodemailer.createTransport({
     host: "mail.easyformforge.com", // Your SMTP server
@@ -50,5 +50,3 @@ async function sendEmail(to: string, username: any) {
     throw error; // Rethrow or handle error as needed
   }
 }
-
-export default sendEmail;

@@ -1,6 +1,6 @@
 import { createSignal } from 'solid-js';
 
-const UploadVideo = () => {
+export function UploadVideo() {
     const [videoUrl, setVideoUrl] = createSignal('');
     const [uploading, setUploading] = createSignal(false);
     const [error, setError] = createSignal('');
@@ -35,20 +35,19 @@ const UploadVideo = () => {
     };
 
     return (
-        <div style="display: flex; flex-direction: column; align-items: center; padding: 16px; border: 1px solid #ccc; border-radius: 8px; width: 300px;">
-            <input
-                type="file"
-                accept="video/*"
-                onChange={handleUpload}
-                style="margin-bottom: 16px;"
-            />
-            {uploading() && <p style="color: blue;">Uploading...</p>}
-            {error() && <p style="color: red;">{error()}</p>}
-            {videoUrl() && (
-                <video controls src={videoUrl()} style="width: 100%; height: auto;"></video>
-            )}
-        </div>
+      <div
+        style="display: flex; flex-direction: column; align-items: center; padding: 16px; border: 1px solid #ccc; border-radius: 8px; width: 300px;">
+          <input
+            type="file"
+            accept="video/*"
+            onChange={handleUpload}
+            style="margin-bottom: 16px;"
+          />
+          {uploading() && <p style="color: blue;">Uploading...</p>}
+          {error() && <p style="color: red;">{error()}</p>}
+          {videoUrl() && (
+            <video controls src={videoUrl()} style="width: 100%; height: auto;"></video>
+          )}
+      </div>
     );
-};
-
-export default UploadVideo;
+}

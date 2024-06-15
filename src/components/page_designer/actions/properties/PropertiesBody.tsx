@@ -16,7 +16,7 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { transactions, getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
-import CustomButton from "~/components/solid_blocks/button/buttons";
+import {CustomButton} from "~/components/solid_blocks/button/buttons";
 
 export function PropertiesBody(props: any) {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);

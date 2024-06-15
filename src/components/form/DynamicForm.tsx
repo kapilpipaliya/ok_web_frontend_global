@@ -63,7 +63,7 @@ import {
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
-import CustomButton from "../solid_blocks/button/buttons";
+import {CustomButton} from "../solid_blocks/button/buttons";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";

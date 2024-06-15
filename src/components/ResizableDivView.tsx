@@ -1,9 +1,9 @@
 import { type Accessor, type JSX, createEffect, createSignal } from "solid-js";
 
-const ResizableContainer = (props: {
+export function ResizableContainer(props: {
   view: Accessor<string>;
   children: JSX.Element;
-}) => {
+}) {
   const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(100vh - 70px)");
 
@@ -63,6 +63,4 @@ const ResizableContainer = (props: {
                 />*/}
     </div>
   );
-};
-
-export default ResizableContainer;
+}

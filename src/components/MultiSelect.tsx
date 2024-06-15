@@ -10,8 +10,9 @@ import {
 import { useToast } from "./Toast";
 import Dismiss from "solid-dismiss";
 import { isServer } from "solid-js/web";
+
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
-const MultiSelectField = (props: {
+export function MultiSelectField(props: {
   selectedValues: () => any;
   options: any[];
   onRemove: (arg0: any, arg1: any) => void;
@@ -22,8 +23,8 @@ const MultiSelectField = (props: {
   displayValueChild?: string | undefined;
   selectionLimit?: number | undefined;
   renderLabel?: ((arg0: any) => JSX.Element) | undefined;
-}) => {
-  const { showErrorToast } = useToast();
+}) {
+  const {showErrorToast} = useToast();
   let isClickFromOption = false;
   let containerRef: HTMLDivElement | undefined;
   let btnEl: any;
@@ -39,7 +40,7 @@ const MultiSelectField = (props: {
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
 
   createEffect(() => {
-    if(isServer) return;
+    if (isServer) return;
     if (dropdownVisible()) {
       const mainContent = document.getElementById("main-content");
       const bodyContent = document.getElementById("body");
@@ -173,8 +174,8 @@ const MultiSelectField = (props: {
 
   createEffect(() => {
     if (dropdownVisible() && containerRef) {
-      const { bottom, left, width } = containerRef.getBoundingClientRect();
-      const { scrollX, scrollY } = window;
+      const {bottom, left, width} = containerRef.getBoundingClientRect();
+      const {scrollX, scrollY} = window;
 
       dropdownEl.style.position = "absolute";
       dropdownEl.style.top = `${bottom + scrollY}px`;
@@ -185,7 +186,7 @@ const MultiSelectField = (props: {
   });
 
   onCleanup(() => {
-    if(isServer) return;
+    if (isServer) return;
     const mainContent = document.getElementById("main-content");
     if (mainContent) {
       mainContent.style.overflow = ""; // Ensure scrolling is enabled
@@ -206,7 +207,7 @@ const MultiSelectField = (props: {
                   return handleRemoveTag(getOptionValue(tag));
                 }}
               >
-                <Icon icon="ic:round-close" height={21} width={21} />
+                <Icon icon="ic:round-close" height={21} width={21}/>
               </span>
             </div>
           )}
@@ -226,7 +227,7 @@ const MultiSelectField = (props: {
         class="dropdown"
         menuButton={btnEl}
         open={dropdownVisible}
-        animation={{ name: "fade", appendToElement: "menuPopup" }}
+        animation={{name: "fade", appendToElement: "menuPopup"}}
         setOpen={setDropdownVisible}
         mount="body"
         cursorKeys
@@ -262,8 +263,6 @@ const MultiSelectField = (props: {
       </Dismiss>
     </div>
   );
-};
-
-export default MultiSelectField;
+}
 
 // TODO: USE https://github.com/lxsmnsyc/solid-floating-ui/blob/main/packages/solid-floating-ui/src/index.ts for options menu

@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 
-const FormInActionSection = () => {
+export function FormInActionSection() {
   return (
     <section class="forminaction pt-100 pb-100 bg-info-300">
       <div class="container">
@@ -12,15 +12,14 @@ const FormInActionSection = () => {
         </p>
 
         <div class="formsecparent mt-5">
-          <FormTypes />
-          <FormSection />
+          <FormTypes/>
+          <FormSection/>
         </div>
       </div>
     </section>
   );
-};
+}
 
-export default FormInActionSection;
 
 const FormSection = () => {
   return (

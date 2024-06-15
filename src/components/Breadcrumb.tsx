@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, Show } from "solid-js";
-import SiteTitle from "~/pages/website/SiteTitle";
+import {SiteTitle} from "~/pages/website/SiteTitle";
 
 export type PageHeaderProps = {
   title: string;
@@ -9,7 +9,7 @@ export type PageHeaderProps = {
   children?: JSX.Element;
 };
 
-export default function Breadcrumb(props: PageHeaderProps) {
+export function Breadcrumb(props: PageHeaderProps) {
   const headerStyle = {
     margin: "10px",
     "margin-bottom": "1rem",

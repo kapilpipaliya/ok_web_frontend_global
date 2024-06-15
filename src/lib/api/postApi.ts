@@ -37,5 +37,3 @@ export async function postAPI(
 
   return responseData;
 }
-
-export default postAPI;

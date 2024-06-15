@@ -1,5 +1,5 @@
 import { WebSocket } from "isows";
-import atom from "~/lib/dom_utils";
+import {atom} from "~/lib/dom_utils";
 
 export class WSBase {
   socket?: WebSocket | null;

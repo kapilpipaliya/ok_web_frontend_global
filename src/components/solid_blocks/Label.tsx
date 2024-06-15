@@ -10,10 +10,10 @@ interface LabeledFieldProps {
   children: JSX.Element;
 }
 
-export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) => {
+export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) {
   const [formSettingContext, setFormSettingContext] = useContext(FormSettingsContext);
   // TODO: is txnId is correct?
-  const { txnId, formData: pageDesignerFormVertex, cleanUpConfig } = useContext(FormContext);
+  const {txnId, formData: pageDesignerFormVertex, cleanUpConfig} = useContext(FormContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label || "");
@@ -52,7 +52,7 @@ export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
 
   const handleBlur = (e: FocusEvent) => {
     setIsEditing(false);
-    mergeVertexProperties(txnId, props.meta.id, graph, setGraph, { label: (e.currentTarget as HTMLInputElement).value });
+    mergeVertexProperties(txnId, props.meta.id, graph, setGraph, {label: (e.currentTarget as HTMLInputElement).value});
   };
 
   const handleLabelClick = (e: MouseEvent) => {
@@ -75,7 +75,7 @@ export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
             value={inputValue()}
             onInput={(e) => setInputValue(e.currentTarget.value)}
             onBlur={handleBlur}
-            style={{ border: "none", outline: "none", background: "transparent", width: "100%" }}
+            style={{border: "none", outline: "none", background: "transparent", width: "100%"}}
           />
         }>
           <label style={labelStyle()} {...restProps} onClick={handleLabelClick}>
@@ -86,6 +86,4 @@ export const Label = (props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
       {props.children}
     </div>
   );
-};
-
-export default Label;
+}

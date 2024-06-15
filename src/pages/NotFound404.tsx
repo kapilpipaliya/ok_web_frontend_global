@@ -1,6 +1,6 @@
 import "~/css/base.css";
 
-export default function NotFound404() {
+export function NotFound404() {
   return (
     <main class="position:relative  isolation:isolate  height:100vh ">
       <img

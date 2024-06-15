@@ -3,14 +3,14 @@ import "~/pages/website/style.css";
 import "~/pages/website/krd.css";
 import { createSignal, useContext } from "solid-js";
 import { Header } from "./Header";
-import SiteTitle from "./SiteTitle";
+import {SiteTitle} from "./SiteTitle";
 import { contactUsCall } from "~/lib/api/api_functions";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
-export default function ContactUs() {
+export function ContactUs() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
   const [formData, setFormData] = createSignal({

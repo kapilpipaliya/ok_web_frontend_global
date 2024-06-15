@@ -43,12 +43,12 @@ interface DataGridProps {
   tableId: string;
 }
 
-const DataGrid = (props: DataGridProps) => {
+export function DataGrid(props: DataGridProps) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const navigate = useNavigate();
   const datas = useLocation();
-  const { events } = useContext(PageContext);
-  const { showErrorToast, showLoadingToast } = useToast();
+  const {events} = useContext(PageContext);
+  const {showErrorToast, showLoadingToast} = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal(null);
   const [tableStore, setTableStore]: any = createStore({
     data: [],
@@ -56,7 +56,7 @@ const DataGrid = (props: DataGridProps) => {
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
-  const { Ws } = useContext(WsContext);
+  const {Ws} = useContext(WsContext);
 
   const deleteObject = async (id: any) => {
     const txnId = getNewTxnId(graph, setGraph);
@@ -102,7 +102,7 @@ const DataGrid = (props: DataGridProps) => {
   return (
     <Switch>
       <Match when={data.loading}>
-        <LoaderNew loaderHeight="55vh" />
+        <LoaderNew loaderHeight="55vh"/>
       </Match>
       <Match when={data.error}>Error {data.error}</Match>
       <Match when={tableStore.data}>
@@ -113,21 +113,21 @@ const DataGrid = (props: DataGridProps) => {
                 P: {
                   component: "Button",
                   [IdAttr]: "meta",
-           
-                    onClick: () => navigate("new"),
-                    variant: "soft",
-                    style: { padding: "7px 10px", "margin-bottom": "10px" },
-                    leading:
-                      // TO solve Hydration error passed a function
-                      () => (
-                        <Icon
-                          icon={"lets-icons:add-round"}
-                          height={22}
-                          width={22}
-                        />
-                      ),
-                    children: "Add New",
-                 
+
+                  onClick: () => navigate("new"),
+                  variant: "soft",
+                  style: {padding: "7px 10px", "margin-bottom": "10px"},
+                  leading:
+                  // TO solve Hydration error passed a function
+                    () => (
+                      <Icon
+                        icon={"lets-icons:add-round"}
+                        height={22}
+                        width={22}
+                      />
+                    ),
+                  children: "Add New",
+
                 },
               } as unknown as Vertex
             }
@@ -137,7 +137,7 @@ const DataGrid = (props: DataGridProps) => {
               <Icon
                 class="icon"
                 icon="iconamoon:search"
-                style={{ color: "#9e9ea7" }}
+                style={{color: "#9e9ea7"}}
               />
 
               <form autocomplete="off" method="post" action="">
@@ -213,7 +213,7 @@ const DataGrid = (props: DataGridProps) => {
     //  return;
     // }
 
-    const { incoming, outgoing }: { incoming: any; outgoing: any } =
+    const {incoming, outgoing}: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(formNew.attributes);
     // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
     const expression = paginationExpression({
@@ -242,7 +242,7 @@ const DataGrid = (props: DataGridProps) => {
     const nodes: any = tableStore.data
       ? [...tableStore.data, ...resultData]
       : resultData;
-    setTableStore({ data: nodes, tableColumns });
+    setTableStore({data: nodes, tableColumns});
     setSearch("");
     setFilteredData(nodes);
   }
@@ -251,7 +251,7 @@ const DataGrid = (props: DataGridProps) => {
     const tableColumns = [] as ColumnDef<any>[];
 
     for (const attribute of formNew?.attributes) {
-      const column = { ...attribute } as unknown as ColumnDef<any>;
+      const column = {...attribute} as unknown as ColumnDef<any>;
       if (attribute.component === "Table") continue;
       // if (attribute.props?.skip) continue;
       // @ts-ignore
@@ -367,6 +367,4 @@ const DataGrid = (props: DataGridProps) => {
     });
     return tableColumns;
   }
-};
-
-export default DataGrid;
+}

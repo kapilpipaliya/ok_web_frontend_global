@@ -36,5 +36,3 @@ export async function getAPI(url: string): Promise<{ [key: string]: any }> {
 
   return responseData;
 }
-
-export default getAPI;

@@ -15,14 +15,14 @@ import {
   Tabs
 } from "~/components/solid_blocks";
 import { PageAttrRender,  } from "~/components/page_attr_render/PageAttrRender";
-import CustomButton from "~/components/solid_blocks/button/buttons";
-import TreeView from "~/components/solid_blocks/TreeView";
+import {CustomButton} from "~/components/solid_blocks/button/buttons";
+import {TreeView} from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { Repeater } from "~/components/page_attr_render/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
-import Heading from "~/components/solid_blocks/Heading";
-import StarRating from "~/components/solid_blocks/Rating";
+import {Heading} from "~/components/solid_blocks/Heading";
+import {StarRating} from "~/components/solid_blocks/Rating";
 import { PageView } from "~/components/page_attr_render/PageView";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 

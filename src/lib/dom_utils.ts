@@ -14,7 +14,7 @@ export interface Atom<T> {
 }
 
 // import atom from "solid-use/src/atom";
-export default function atom<T>(value: T, equals = Object.is): Atom<T> {
+export function atom<T>(value: T, equals = Object.is): Atom<T> {
   const [state, setState] = createSignal(value, {
     equals,
   });

@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { type Accessor, Show, useContext } from "solid-js";
-import ResizableContainer from "~/components/ResizableDivView";
+import {ResizableContainer} from "~/components/ResizableDivView";
 import { Tooltip } from "~/components/solid_blocks";
 import { FormContext, PageConfigContext } from "~/lib/contexts";
 import { PageView } from "~/components/page_attr_render/PageView";

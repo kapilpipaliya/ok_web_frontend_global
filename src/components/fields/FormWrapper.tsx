@@ -11,7 +11,7 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import {submitDataCall} from "~/lib/api/api_functions";
 import {PageAttrRender} from "~/components/page_attr_render/PageAttrRender";
 import {GenericField} from "~/components/fields/GenericField";
-import CustomButton from "../solid_blocks/button/buttons";
+import {CustomButton} from "../solid_blocks/button/buttons";
 
 export function FormWrapper(
   props: ComponentProps & {

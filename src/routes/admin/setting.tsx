@@ -1,4 +1,4 @@
-import Settings from "~/pages/form/profile/Setting";
+import {Settings} from "~/pages/form/profile/Setting";
 
 export default function setting() {
   return <Settings />;

@@ -1,7 +1,7 @@
 import { createSignal, splitProps } from "solid-js";
 import "./button.css";
 
-const CustomButton = (props) => {
+export function CustomButton(props: {[key: string]: any}) {
   const [local, field] = splitProps(props, ["class"]);
   const [variant] = createSignal(props.variant || "contained");
 
@@ -23,6 +23,4 @@ const CustomButton = (props) => {
       {props.trailing ? <>&nbsp;{props.trailing}</> : ""}
     </button>
   );
-};
-
-export default CustomButton;
+}

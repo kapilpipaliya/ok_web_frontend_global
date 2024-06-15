@@ -1,6 +1,6 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext, createSignal, createSelector, For, Show, onMount, createMemo } from "solid-js";
-import Drawer from "~/components/Drawer";
+import {Drawer} from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
 import {

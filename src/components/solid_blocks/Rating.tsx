@@ -1,10 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, type JSX, createSignal, } from "solid-js";
 
-const StarRating = (
+export function StarRating(
   props: JSX.IntrinsicAttributes &
     JSX.HTMLAttributes<HTMLDivElement> & { etc: any; heading?: string },
-) => {
+) {
   const [rating, setRating] = createSignal(0);
   const [hover, setHover] = createSignal(0);
 
@@ -37,6 +37,4 @@ const StarRating = (
       </div>
     </div>
   );
-};
-
-export default StarRating;
+}

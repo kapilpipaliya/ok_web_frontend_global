@@ -1,7 +1,7 @@
 import { createMemo, createSignal, For, Show } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
 import { Icon } from "@iconify-icon/solid";
-import JSONSchema from "./CssPropertiesMap";
+import {JSONSchema} from "./CssPropertiesMap";
 
 export const StyleEditorTab = () => {
   const filterSections = (query: string) => {

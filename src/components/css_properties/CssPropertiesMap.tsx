@@ -958,7 +958,7 @@ const EffectsSection = {
   ]),
 };
 
-const JSONSchema = {
+export const JSONSchema = {
   General: GeneralSection,
   Layout: LayoutSection,
   Size: SizeSection,
@@ -970,4 +970,3 @@ const JSONSchema = {
   Effects: EffectsSection,
 };
 
-export default JSONSchema;

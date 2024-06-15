@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { Show, createSignal } from "solid-js";
 
-const FAQSection = () => {
+export function FAQSection() {
   const faqData = [
     {
       question: "Do I need knowledge of coding to Use EasyFormForge?",
@@ -34,21 +34,19 @@ const FAQSection = () => {
       <div>
         <h2>Frequently Asked Questions & Resources</h2>
         <p class="text-center p-12">
-          We get it - Here're some frequently asked questions <br /> to help you
+          We get it - Here're some frequently asked questions <br/> to help you
           along the way
         </p>
 
         <div class="accordionParent d-grid justify-content-center pt-5 gap:10px">
           {faqData.map((faq: any) => (
-            <AccordionItem question={faq.question} answer={faq.answer} />
+            <AccordionItem question={faq.question} answer={faq.answer}/>
           ))}
         </div>
       </div>
     </section>
   );
-};
-
-export default FAQSection;
+}
 
 const AccordionItem = (props: { question: string; answer: string }) => {
   const [isOpen, setIsOpen] = createSignal(false);

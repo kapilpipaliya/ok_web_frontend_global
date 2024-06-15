@@ -18,8 +18,8 @@ import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import Popover from "~/components/PopOver";
-import CustomPopover from "~/components/PopOver";
+import {Popover} from "~/components/PopOver";
+import {CustomPopover} from "~/components/PopOver";
 import { PageViewBase } from "~/pages/PageView";
 import { onClickAddComponent } from "../CommonCompUtils";
 

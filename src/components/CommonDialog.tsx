@@ -20,7 +20,7 @@ interface CustomModalProps {
   setOpen?: (open: boolean) => void;
 }
 
-const CustomModal = (props: CustomModalProps) => {
+export function CustomModal(props: CustomModalProps) {
   const [open, setOpen] = createSignal(props.open ?? false);
   let btnEl: any;
 
@@ -79,13 +79,13 @@ const CustomModal = (props: CustomModalProps) => {
                   title={"Close"}
                   onClick={onClickOverlay}
                   class={"bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5"}
-                  style={{ float: "right" }}
+                  style={{float: "right"}}
                 >
                   ✕
                 </button>
               )}
             </div>
-            <hr class={"fg:lightgrey"} />
+            <hr class={"fg:lightgrey"}/>
             <div class={"p:3 max-h:50vh overflow:auto"} style={props.bodyStyle}>
               {props.body}
             </div>
@@ -95,6 +95,4 @@ const CustomModal = (props: CustomModalProps) => {
       </Dismiss>
     </>
   );
-};
-
-export default CustomModal;
+}

@@ -1,7 +1,7 @@
 import { Icon } from "@iconify-icon/solid";
 import { For, } from "solid-js";
 
-function TestimonialSection() {
+export function TestimonialSection() {
   const testimonials = [
     {
       rating: 5,
@@ -47,8 +47,7 @@ function TestimonialSection() {
   );
 }
 
-export default TestimonialSection;
-function Testimonial(props: {
+export function Testimonial(props: {
   rating: number;
   title: string;
   feedback: string;

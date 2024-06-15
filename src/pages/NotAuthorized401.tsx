@@ -1,6 +1,6 @@
 import "~/css/base.css";
 
-export default function NotAuthorized401() {
+export function NotAuthorized401() {
   return (
     <main class="display:grid min-height:100vh  place-items:center  bg:rgb(255,255,255)  px:1.5rem py:6rem py:8rem@sm px:2rem@lg">
       <div class="text-align:center ">

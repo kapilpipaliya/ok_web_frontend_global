@@ -15,7 +15,7 @@ import {
 } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
-export default function PageDesignerContext(props: any) {
+export  function PageDesignerContext(props: any) {
   const hoverId = createSignal<Id | number>(-1);
   const selectedColl = createSignal<{ vertexId: Id | number }>({
     vertexId: -1,

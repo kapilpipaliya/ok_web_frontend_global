@@ -7,7 +7,7 @@ import {LoadingContext} from "~/lib/contexts";
 import {CSSRuntimeProvider} from "./components/CSSRuntimeProvider";
 import {LoaderNew} from "./components/LoaderSimple";
 import type {Config} from "@master/css";
-import Sidebar from "~/pages/dashboard/sidebar/SidebarLayout";
+import {Sidebar} from "~/pages/dashboard/sidebar/SidebarLayout";
 import {type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap,} from "./lib/graph/graph";
 import {createStore} from "solid-js/store";
 import {getInitialDataAndSetToGraph} from "~/getInitialDataAndSetToGraph";
