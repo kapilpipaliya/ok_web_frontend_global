@@ -1,15 +1,15 @@
 
+import { clientOnly } from "@solidjs/start";
 import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
-import { PageView } from "~/components/page_attr_render/PageView";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { IsPreviewContext, FormContext } from "~/lib/contexts";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getNewTxnId } from "~/lib/graph/transaction";
 import { setGraphData } from "~/lib/websocket/ws_events";
+const PageView = clientOnly(() => import("~/components/page_attr_render/PageView"));
 
-export function PageViewBase(props: {
+export function PageViewWrapper(props: {
     pageVertexLabel?: string,
     pageVertexName?: string,
     pageId?: string,
@@ -54,7 +54,6 @@ export function PageViewBase(props: {
     onMount(() => {
       setMounted(true);
       
-      console.log('On Mout');
       loadFormDesignerMetaData();
     });
     const [count, setCount] = createSignal(1);
@@ -72,14 +71,15 @@ export function PageViewBase(props: {
     return (
       <Show when={count()} keyed>
         <Show when={mounted() && metaVertex()}>
-          <IsPreviewContext.Provider value={createSignal(true)}>
+          
             {/* Pass Dummy Values */}
-            <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}>
+            {/* <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}> */}
               <PageView
                 metaVertex={metaVertex()}
+                data={dataVertex()}
+                isPreview={true}
               />
-            </FormContext.Provider>
-          </IsPreviewContext.Provider>
+            {/* </FormContext.Provider> */}
         </Show>
       </Show>
     );

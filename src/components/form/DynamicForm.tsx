@@ -199,7 +199,7 @@ export function DynamicForm(props: DynamicFormProps) {
               graph,
               setGraph,
             );
-            setFormSettings('activeStep', layoutRowId);
+            setFormSettings('activeStepId', layoutRowId);
 
             if (layoutRowId === -1) return;
           }
@@ -578,3 +578,6 @@ export function DynamicForm(props: DynamicFormProps) {
     );
   }
 }
+
+// export default to make it client only
+export default DynamicForm;

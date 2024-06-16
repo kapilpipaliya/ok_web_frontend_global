@@ -19,7 +19,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import {CustomPopover} from "~/components/PopOver";
-import { PageViewBase } from "~/pages/PageView";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { onClickAddComponent } from "../CommonCompUtils";
 
 export function PagesPart(props: { coll: string }) {
@@ -147,7 +147,7 @@ export function PagesPart(props: { coll: string }) {
                   ? Array.from(selectedComponents())
                   : [graph.vertexes[props.child.id]];
               setDraggedVertex((prev) => [...prev, ...dataTransfer]);
-              setSelectedComponents(new Set());
+              setSelectedComponents(new Set<Vertex>());
             }}
             ondblclick={(e) => {
               setDraggedVertex([graph.vertexes[props.child.id]]);
@@ -170,7 +170,7 @@ export function PagesPart(props: { coll: string }) {
           }
           title={`${toTitle(props.child.name)} Preview`}
           description="This is a description inside the popover."
-        ><PageViewBase formId={props.child.id} /></CustomPopover>
+        ><PageViewWrapper formId={props.child.id} /></CustomPopover>
       </Show>
     );
   }

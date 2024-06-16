@@ -15,6 +15,8 @@ import {CustomButton} from "../solid_blocks/button/buttons";
 export function FormWrapper(
   props: ComponentProps & {
     submitButton?: any;
+    // For Root Level Forms we use Parent vertex label as form name
+    label?: string;
   },
 ) {
   const {Ws} = useContext(WsContext);
@@ -24,7 +26,6 @@ export function FormWrapper(
 
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
-  const {formMeta: formDesignerMeta, formData: formDesignerData} = useContext(FormContext)!;
 
   // const [dataVertex, setDataVertex] = createSignal<Vertex>();
   // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
@@ -49,7 +50,7 @@ export function FormWrapper(
 
   // if (!props.data?.id) {
 
-  const createResult = createForm(graph, setGraph, txnId, Ws, formDesignerMeta.P[IdAttr]);
+  const createResult = createForm(graph, setGraph, txnId, Ws, props.label ?? props.meta!.P[IdAttr]);
   if (createResult.error) return createResult.error;
   setFormData('formData', createResult.vertex!);
 

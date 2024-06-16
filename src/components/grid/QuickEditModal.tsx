@@ -1,7 +1,6 @@
 import type {GraphInterface} from "~/lib/graph/graph";
 import {createStore, SetStoreFunction} from "solid-js/store";
 import {createSignal, Show} from "solid-js";
-import type {IFormContext} from "~/lib/contexts";
 import {Icon} from "@iconify-icon/solid";
 import Dismiss from "solid-dismiss";
 import {DynamicForm} from "~/components/form/DynamicForm";
@@ -13,7 +12,7 @@ export const QuickEditModal = (p: {
   info: any;
 }) => {
   const [open, setOpen] = createSignal(false);
-  const config = createStore({} as { formData: IFormContext });
+
   let btnEl;
   let btnPopUp;
 

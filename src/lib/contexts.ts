@@ -26,7 +26,7 @@ export interface FormSettings {
   labelPosition: string;
   labelColor: string;
   inputBackground: string;
-  activeStep: Id | number;
+  activeStepId: Id | number;
 }
 
 export const FormSettingsContext = createContext(

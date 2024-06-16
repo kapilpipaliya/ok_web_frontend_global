@@ -360,7 +360,7 @@ export function LayoutPart(props: {}) {
   const isFormRootVertetx = () => pageConfig.formData?.formData?.L?.[0] === "Form";
   const rootVertexes = () => {
     if (isFormRootVertetx()) {
-      return graph.vertexes[formSettings.activeStep] ? [graph.vertexes[formSettings.activeStep]] : (steps()[0] ? [steps()[0]] : [])
+      return formSettings.activeStepId ? [graph.vertexes[formSettings.activeStepId]] : (steps()[0] ? [steps()[0]] : [])
     }
     return pageConfig.formData?.formData ? [pageConfig.formData.formData!] : [];
   }; // Starting point(s)

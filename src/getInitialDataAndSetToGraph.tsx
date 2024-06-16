@@ -27,5 +27,5 @@ export function getInitialDataAndSetToGraph(graph: [get: GraphInterface, set: Se
       throw error;
     }
   };
-  getData();
+  return getData();
 }

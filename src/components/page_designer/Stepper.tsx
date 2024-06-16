@@ -11,7 +11,6 @@ import { deleteLayoutGlobal, } from "~/lib/drag_drop/useDragDrop";
 import { useToast } from "~/components/Toast";
 
 export const Stepper = () => {
-  // const {formData} = useContext(FormContext)!;
   const [pageConfigStore] = useContext(PageConfigContext)!;
   const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -60,7 +59,7 @@ export const Stepper = () => {
       "before",
     );
 
-    setFormSettings('activeStep', layoutRowId);
+    setFormSettings('activeStepId', layoutRowId);
   };
 
   const addStepAfter = (toVertex: Vertex) => {
@@ -93,7 +92,7 @@ export const Stepper = () => {
       "after",
     );
 
-    setFormSettings('activeStep', layoutRowId);
+    setFormSettings('activeStepId', layoutRowId);
   };
 
   const deleteStep = (item: Vertex) => {
@@ -104,9 +103,9 @@ export const Stepper = () => {
     const currentStep = steps().findIndex(step => step.id === item.id);
     if (currentStep) {
       if (currentStep === 0) {
-        setFormSettings('activeStep', steps()[currentStep + 1].id);
+        setFormSettings('activeStepId', steps()[currentStep + 1].id);
       } else {
-        setFormSettings('activeStep', steps()[currentStep - 1].id);
+        setFormSettings('activeStepId', steps()[currentStep - 1].id);
       }
     }
     deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfigStore.formData.txnId, item.P.name, showSuccessToast);
@@ -128,13 +127,13 @@ export const Stepper = () => {
                   addStepBefore(step);
                 }} />
               <li
-                style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${formSettings.activeStep === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
-                onClick={() => setFormSettings('activeStep', step.id)}
+                style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${formSettings.activeStepId === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
+                onClick={() => setFormSettings('activeStepId', step.id)}
               >
                 <span style="display:flex; align-items:center;">
                   <Tooltip content={step.P.name}>
                     <span
-                      style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${formSettings.activeStep === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+                      style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${formSettings.activeStepId === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
                     >
                       {index() + 1}
                     </span>

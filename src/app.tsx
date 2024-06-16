@@ -24,6 +24,7 @@ export default function App() {
   };
 
   const loadingSite = createSignal(false);
+  const [initialDataLoading, setInitialDataLoading] = createSignal(true);
 
   const graph = createStore<GraphInterface>({
     vertexes: {} as VertexMap,
@@ -36,8 +37,11 @@ export default function App() {
     isSubSideBarOpen: true,
     componentIdMap: {},
   });
-  onMount(() => {
-    getInitialDataAndSetToGraph(graph);
+  onMount(async () => {
+    const data = await getInitialDataAndSetToGraph(graph);
+    if (data) {
+      setInitialDataLoading(false);
+    }
   });
 
   return (
@@ -53,12 +57,13 @@ export default function App() {
                     <Show when={graph[0].isSideBarOpen}>
                       <Sidebar />
                     </Show>
-
                     <Suspense fallback={<LoaderNew />}>
                       {/* <ErrorBoundary fallback={(error) => {
                         return <div>Something went wrong: {error.message}</div>;
                       }}> */}
+                      <Show when={!initialDataLoading()} fallback={<LoaderNew />}>
                         {props.children}
+                      </Show>
                       {/* </ErrorBoundary> */}
                     </Suspense>
                   </div>

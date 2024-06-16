@@ -35,7 +35,7 @@ export  function PageDesignerContext(props: any) {
     labelPosition: "top", // Default position
     labelColor: "black", // Default label color
     inputBackground: "white",
-    activeStep: 0,
+    activeStepId: 0,
   } as FormSettings);
   const draggedVertices = createSignal<Vertex[] | []>([]);
   return (
@@ -66,3 +66,6 @@ export  function PageDesignerContext(props: any) {
     </FormSettingsContext.Provider>
   );
 }
+
+// export default to make it client only
+export default PageDesignerContext;

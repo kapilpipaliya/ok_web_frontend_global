@@ -1,5 +1,5 @@
 import { type JSX, Show, useContext, splitProps, createSignal, onMount } from "solid-js";
-import { FormContext, FormSettingsContext } from "~/lib/contexts";
+import { FormSettingsContext, PageConfigContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { ComponentProps } from "../fields/ComponentType";
@@ -12,8 +12,8 @@ interface LabeledFieldProps {
 
 export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) {
   const [formSettingContext, setFormSettingContext] = useContext(FormSettingsContext);
-  // TODO: is txnId is correct?
-  const {txnId, formData: pageDesignerFormVertex, cleanUpConfig} = useContext(FormContext);
+
+  const [pageConfig, setPageConfig] = useContext(PageConfigContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label || "");
@@ -52,10 +52,13 @@ export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<H
 
   const handleBlur = (e: FocusEvent) => {
     setIsEditing(false);
-    mergeVertexProperties(txnId, props.meta.id, graph, setGraph, {label: (e.currentTarget as HTMLInputElement).value});
+    if (pageConfig.formData?.txnId) {
+      mergeVertexProperties(pageConfig.formData.txnId, props.meta.id, graph, setGraph, {label: (e.currentTarget as HTMLInputElement).value});
+    }
   };
 
   const handleLabelClick = (e: MouseEvent) => {
+    if (!pageConfig.formData?.txnId) return;
     setInputValue(props.label || "");
     setIsEditing(true);
   };
