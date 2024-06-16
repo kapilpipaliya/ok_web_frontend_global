@@ -30,7 +30,6 @@ import {
   capitalizeFirstLetter,
   isNumber,
 } from "~/lib/utils";
-import { QuickEditModal, SelectValue, TagValue } from "./GridUtils";
 import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { IFormMetaData } from "~/lib/FormMetadataType";
@@ -41,6 +40,9 @@ import { PageContext } from "~/lib/contexts";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import {QuickEditModal} from "~/components/grid/QuickEditModal";
+import {getSelectValue} from "~/components/grid/getSelectValue";
+import {getTagValue} from "~/components/grid/getTagValue";
 interface DataGridProps {
   tableId: string;
 }
@@ -163,7 +165,7 @@ export function DataGrid(props: DataGridProps) {
                 attribute.component === "SelectBox" && !attribute.props?.items
               }
             >
-              <SelectValue
+              <getSelectValue
                 attribute={attribute}
                 info={info}
                 graph={graph}
@@ -174,7 +176,7 @@ export function DataGrid(props: DataGridProps) {
             <Match
               when={attribute.component === "TagBox" && !attribute.props?.items}
             >
-              <TagValue
+              <getTagValue
                 attribute={attribute}
                 info={info}
                 graph={graph}
