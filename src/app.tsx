@@ -1,5 +1,5 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router } from "@solidjs/router";
+import { Router, useLocation } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 import { createSignal, ErrorBoundary, onMount, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
@@ -24,7 +24,6 @@ export default function App() {
   };
 
   const loadingSite = createSignal(false);
-  const [initialDataLoading, setInitialDataLoading] = createSignal(true);
 
   const graph = createStore<GraphInterface>({
     vertexes: {} as VertexMap,
@@ -36,12 +35,6 @@ export default function App() {
     isSideBarOpen: true,
     isSubSideBarOpen: true,
     componentIdMap: {},
-  });
-  onMount(async () => {
-    const data = await getInitialDataAndSetToGraph(graph);
-    if (data) {
-      setInitialDataLoading(false);
-    }
   });
 
   return (
@@ -61,9 +54,7 @@ export default function App() {
                       {/* <ErrorBoundary fallback={(error) => {
                         return <div>Something went wrong: {error.message}</div>;
                       }}> */}
-                      <Show when={!initialDataLoading()} fallback={<LoaderNew />}>
-                        {props.children}
-                      </Show>
+                      {props.children}
                       {/* </ErrorBoundary> */}
                     </Suspense>
                   </div>
