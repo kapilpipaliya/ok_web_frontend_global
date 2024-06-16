@@ -1,6 +1,6 @@
 import { getDriver } from "~/cypher/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import type { Node } from "neo4j-driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";

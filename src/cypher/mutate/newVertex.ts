@@ -1,6 +1,6 @@
 import { getDriver } from "~/cypher/driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function newVertexDBCall(

@@ -8,7 +8,7 @@ import {
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { getDriver } from "~/cypher/driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
 import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";

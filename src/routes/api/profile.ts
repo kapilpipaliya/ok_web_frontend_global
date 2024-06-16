@@ -3,7 +3,7 @@ import { type Session, int } from "neo4j-driver";
 import { deleteVertexMGCall } from "~/cypher/mutate/deleteVertex";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { newRowMGCall } from "~/cypher/mutate/newRow";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { getDriver, getDriverWithPort } from "~/cypher/driver";
 import { getHttpsSession } from "~/server/getHttpsSession";
 import { getChildVertexesMGCall } from "~/cypher/get/traverse";

@@ -496,8 +496,7 @@ export function DynamicForm(props: DynamicFormProps) {
               </FormContext.Provider>
             </Show>
             <Show when={popup()}>PopOver</Show>
-            {/* TODO: Fix this, this is causing break https://www.easyformforge.com/admin/Comp/20 */}
-            {/* <Show when={discradPopup()}>
+            <Show when={discradPopup()}>
               <DeleteDialog
                 open={discradPopup()}
                 onConfirm={() => {
@@ -507,7 +506,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 title="Discard changes"
                 message="Discard unsaved changes - are you sure?"
               />
-            </Show> */}
+            </Show>
           </div>
         </RepeaterVertexContext.Provider>
       </Match>

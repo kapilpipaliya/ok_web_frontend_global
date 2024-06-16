@@ -1,6 +1,6 @@
-import fetch from "node-fetch";
-import {Agent} from "node:http";
-import {startDockerContainer} from "~/server/docker/startDockerContainer";
+// @ts-ignore
+import Docker from 'dockerode';
+import { startDockerContainer } from '~/server/docker/startDockerContainer';
 
 // Docker API Reference: https://docs.docker.com/engine/api/v1.24/
 
@@ -25,42 +25,32 @@ export async function createDockerContainer(
     const formattedPortBindings: any = {};
     for (const [externalPort, internalPort] of Object.entries(portBindings)) {
       formattedPortBindings[`${internalPort}/tcp`] = [
-        {HostIp: "localhost", HostPort: externalPort},
+        { HostIp: "localhost", HostPort: externalPort },
       ];
       ExposedPorts[`${internalPort}/tcp`] = {};
     }
     hostConfig.PortBindings = formattedPortBindings;
   }
 
-  const url = `http://localhost/containers/create?name=${name}`;
+  const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-// Custom agent for Unix socket
-  const socketPath = "/var/run/docker.sock";
-  const agent = new Agent({ socketPath });
-  const options = {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({Image, HostConfig: hostConfig, ExposedPorts}),
-    agent,
-  };
   try {
-    const response = await fetch(url, options);
-    const data: any = await response.json();
-
-    if (!response.ok) {
-      return Error(data.message || "Failed to create container");
-    }
-    const {Id: containerId} = data;
-
-    startDockerContainer(containerId, (err, message) => {
-      if (err) {
-        console.error(err);
-        throw Error(err.message);
-      }
-      return {message};
+    const container = await docker.createContainer({
+      Image,
+      name,
+      HostConfig: hostConfig,
+      ExposedPorts,
     });
-    return {data};
+
+    const containerId = container.id;
+
+    const { error, message } = await startDockerContainer(containerId);
+    if (error) {
+      throw Error(message);
+    }
+
+    return { data: container };
   } catch (error: any) {
-    throw Error(error.message, {});
+    throw Error(error.message);
   }
 }

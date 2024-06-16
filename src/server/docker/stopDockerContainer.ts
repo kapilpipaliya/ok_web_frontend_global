@@ -1,38 +1,20 @@
-import {Agent} from "node:http";
-import fetch from "node-fetch";
+// @ts-ignore
+import Docker from 'dockerode';
 
 export async function stopDockerContainer(
   containerId: string,
 ): Promise<{ error: boolean; message: string }> {
-  const url = `http://localhost/containers/${containerId}/stop`;
-  // Custom agent for Unix socket
-  const socketPath = "/var/run/docker.sock";
-  const agent = new Agent({socketPath});
+  const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-  const options = {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({containerId: containerId}),
-    agent,
-  };
   try {
-    const response = await fetch(url, options);
-    const data: any = await response.json();
-
-    if (!response.ok) {
-      return {
-        error: false,
-        message: data.message || "Failed to create container",
-      };
-    }
-
+    await docker.getContainer(containerId).stop();
     return {
       error: false,
       message: `Docker container ${containerId} stopped successfully`,
     };
   } catch (error: any) {
     return {
-      error: false,
+      error: true,
       message: `Failed to stop Docker container ${containerId}: ${error.message}`,
     };
   }

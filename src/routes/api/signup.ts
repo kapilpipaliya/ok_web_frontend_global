@@ -1,6 +1,6 @@
 import type {APIEvent} from "@solidjs/start/dist/server";
 import {getDriver} from "~/cypher/driver";
-import {getSubDomain} from "~/server/domain_utils";
+import {getSubDomain} from "~/server/getSubDomain";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
 import {getNewPortsForUser} from "~/routes/api/signup/getNewPortsForUser";
 import {checkUserExistence} from "~/routes/api/signup/checkUserExistence";

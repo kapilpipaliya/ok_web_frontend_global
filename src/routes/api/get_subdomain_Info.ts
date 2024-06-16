@@ -1,5 +1,5 @@
 import type { APIEvent } from "@solidjs/start/server";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { getDriver } from "~/cypher/driver";
 
 export async function POST({ request }: APIEvent) {

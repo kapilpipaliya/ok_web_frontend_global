@@ -2,7 +2,7 @@ import fs from "node:fs";
 import type { APIEvent } from "@solidjs/start/dist/server";
 import path from "node:path";
 import { getQuery, type HTTPEvent, readMultipartFormData } from "vinxi/http";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 
 export async function POST({ request }: APIEvent, event: HTTPEvent) {
   const subdomain = await getSubDomain(request.headers.get("host")!);

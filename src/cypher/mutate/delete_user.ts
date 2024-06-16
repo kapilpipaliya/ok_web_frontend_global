@@ -1,5 +1,5 @@
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { getDriver } from "~/cypher/driver";
 import {stopDockerContainer} from "~/server/docker/stopDockerContainer";
 import {removeDockerContainer} from "~/server/docker/removeDockerContainer";

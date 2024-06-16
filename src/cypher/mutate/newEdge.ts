@@ -1,6 +1,6 @@
 import { getDriver } from "~/cypher/driver";
 import { getRequestURL } from "vinxi/http";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { convertRelationshipToJson } from "~/lib/convertNodeToJson";
 import { int } from "neo4j-driver";
 import type { Id } from "~/lib/graph/graph";

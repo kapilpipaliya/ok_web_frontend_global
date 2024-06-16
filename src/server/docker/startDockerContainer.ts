@@ -1,18 +1,19 @@
-import {exec} from "node:child_process";
+// @ts-ignore
+import Docker from 'dockerode';
 
-export type Callback<T> = (error: Error | null, result?: T) => void;
+export async function startDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
+  const docker = new Docker({ socketPath: '/var/run/docker.sock' });
 
-export function startDockerContainer(containerId: string, callback: Callback<string>) {
-  exec(
-    `curl --unix-socket /var/run/docker.sock -X POST http://localhost/containers/${containerId}/start`,
-    (err, stdout, stderr) => {
-      if (err) {
-        return callback(err);
-      }
-      return callback(
-        null,
-        `Docker container ${containerId} started successfully`,
-      );
-    },
-  );
+  try {
+    await docker.getContainer(containerId).start();
+    return {
+      error: false,
+      message: `Docker container ${containerId} started successfully`,
+    };
+  } catch (error: any) {
+    return {
+      error: true,
+      message: `Failed to start Docker container ${containerId}: ${error.message}`,
+    };
+  }
 }

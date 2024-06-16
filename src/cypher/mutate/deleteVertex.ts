@@ -1,6 +1,6 @@
 import { getRequestURL } from "vinxi/http";
 import { getDriver } from "~/cypher/driver";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { int } from "neo4j-driver";
 
 export async function deleteVertexMGCall(nodeId: string | number | any) {

@@ -165,23 +165,23 @@ export function DataGrid(props: DataGridProps) {
                 attribute.component === "SelectBox" && !attribute.props?.items
               }
             >
-              <getSelectValue
-                attribute={attribute}
-                info={info}
-                graph={graph}
-                setGraph={setGraph}
-              />
+              {getSelectValue({
+                attribute: attribute,
+                info: info,
+                graph: graph,
+                setGraph: setGraph,
+              })}
             </Match>
 
             <Match
               when={attribute.component === "TagBox" && !attribute.props?.items}
             >
-              <getTagValue
-                attribute={attribute}
-                info={info}
-                graph={graph}
-                setGraph={setGraph}
-              />
+              {getTagValue({
+                attribute: attribute,
+                info: info,
+                graph: graph,
+                setGraph: setGraph,
+              })}
             </Match>
 
             <Match when={attribute.component === "CheckBox"}>
@@ -357,15 +357,14 @@ export function DataGrid(props: DataGridProps) {
           onLoadMore={getTableData}
           totalItems={filteredData().length}
         />
-        {/* TODO: Fix this is breaking the page */}
-        {/* <Show when={deleteRowId()}>
+        <Show when={deleteRowId()}>
           <DeleteDialog
             open={true}
             onConfirm={() => deleteObject(deleteRowId())}
             title="Delete Item"
             message="Are you sure you want to delete this item?"
           />
-        </Show> */}
+        </Show>
       </Match>
     </Switch>
   );

@@ -1,6 +1,6 @@
 import { getDriver } from "~/cypher/driver";
 import type { APIEvent } from "@solidjs/start/dist/server";
-import { getSubDomain } from "~/server/domain_utils";
+import { getSubDomain } from "~/server/getSubDomain";
 import { mutateData } from "../../lib/graph/mutate/mutate";
 
 export async function POST({ request }: APIEvent) {
