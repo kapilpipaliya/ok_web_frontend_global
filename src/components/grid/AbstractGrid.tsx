@@ -16,7 +16,7 @@ export function AbstractGrid(props: AbstractGridProps) {
   const [locationData, setLocationData] = createSignal([]);
   const [graph, setGraph] = useContext(GraphContext)!;
   const param = useLocation();
-  const navigate = useNavigate();debugger
+  const navigate = useNavigate();
   
 
   async function getNavData() {
@@ -29,10 +29,9 @@ export function AbstractGrid(props: AbstractGridProps) {
     });
     return data?.[0]?.children || [];
   }
-  console.log('hie', props.tableId)
-  const [tableId, setTableId] = createSignal("");
+
+  const [tableId, setTableId] = createSignal(props.tableId);
   createEffect(() => {
-    console.log('hi2', props.tableId)
     setTableId("");
     props.tableId;
     setTimeout(() => setTableId(props.tableId));

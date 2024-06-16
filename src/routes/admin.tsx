@@ -6,7 +6,7 @@ import {
 } from "~/lib/websocket/ws_events_dispatcher";
 import { MainDashboard } from "~/pages/dashboard/MainDashboard";
 
-export default function UsersLayout(props: RouteSectionProps) {
+export default function AdminLayout(props: RouteSectionProps) {
   const Ws = new ServerEventsDispatcher(WS_PATH);
 
   return (

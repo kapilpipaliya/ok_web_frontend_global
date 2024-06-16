@@ -60,9 +60,9 @@ import {
   RepeaterVertexContext
 } from "~/components/page_attr_render/Context";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
-import {getDataMGCall} from "~/cypher/get/getDataMGCall";
-import {CustomButton} from "../solid_blocks/button/buttons";
+import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { getDataMGCall } from "~/cypher/get/getDataMGCall";
+import { CustomButton } from "../solid_blocks/button/buttons";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
@@ -101,7 +101,7 @@ export function DynamicForm(props: DynamicFormProps) {
 
   const [p, customProps] = splitProps(props, ["formId", "id"]);
   const id = createMemo(() => (p.id === "new" ? undefined : p.id));
-  
+
   // TODO: add validation on form that AttrsTableData keys should not available.
 
   const { Ws } = useContext(WsContext);
@@ -120,10 +120,10 @@ export function DynamicForm(props: DynamicFormProps) {
   } as FormData);
   const [activeTab, setActiveTab] = createSignal("main");
   const form =
-  FormMetaData[props.formId] ||
-  (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
+    FormMetaData[props.formId] ||
+    (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
 
-    const fetchData = async () => {
+  const fetchData = async () => {
     try {
       if (!id()) {
         // Load Form Meta from API
@@ -152,17 +152,24 @@ export function DynamicForm(props: DynamicFormProps) {
 
       return { graph: result.graph };
     } catch (e: any) {
+      console.error("error", e);
+      // when error happen server function doesn't return error message
       return { error: `Error When Loading Form: ${e.message}` };
     }
   };
 
-   // Note: When the page is loaded server side, the client side will not run this again,
+  // Note: When the page is loaded server side, the client side will not run this again,
   // so set state inside it will not set when page is reloaded.
-  const [dataResource, { refetch }] = createResource(fetchData);
+  const [dataResource] = createResource(fetchData);
 
   createEffect(
     on(dataResource, (data) => {
-      if (data) {
+      // @ts-ignore
+      if (data?.error) {
+        // @ts-ignore
+        showErrorToast(data.error);
+        return;
+      } else if (data) {
         const result = data;
         let dataVertex: Vertex;
         if (result === "new") {
@@ -321,7 +328,7 @@ export function DynamicForm(props: DynamicFormProps) {
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },
-          onError: (error) => {},
+          onError: (error) => { },
         });
       }
       submit = true;
@@ -370,7 +377,7 @@ export function DynamicForm(props: DynamicFormProps) {
       }}
     >
       <CustomButton variant={"outlined"} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</CustomButton>
-      
+
       <Show
         when={props.submitButton}
         fallback={
@@ -489,7 +496,8 @@ export function DynamicForm(props: DynamicFormProps) {
               </FormContext.Provider>
             </Show>
             <Show when={popup()}>PopOver</Show>
-            <Show when={discradPopup()}>
+            {/* TODO: Fix this, this is causing break https://www.easyformforge.com/admin/Comp/20 */}
+            {/* <Show when={discradPopup()}>
               <DeleteDialog
                 open={discradPopup()}
                 onConfirm={() => {
@@ -499,7 +507,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 title="Discard changes"
                 message="Discard unsaved changes - are you sure?"
               />
-            </Show>
+            </Show> */}
           </div>
         </RepeaterVertexContext.Provider>
       </Match>
@@ -520,23 +528,23 @@ export function DynamicForm(props: DynamicFormProps) {
             {
               P: {
                 component: "Button",
-              
-                  children: "Import",
-                  variant: "outlined",
-                  style: { display: "flex" },
-                  leading:
-                    // TO solve Hydration error passed a function
-                    () => (
-                      <Icon
-                        icon={"lets-icons:import"}
-                        height={22}
-                        width={22}
-                      />
-                    ),
-                  onClick: () => {
-                    setPopup(true);
-                  },
-                
+
+                children: "Import",
+                variant: "outlined",
+                style: { display: "flex" },
+                leading:
+                  // TO solve Hydration error passed a function
+                  () => (
+                    <Icon
+                      icon={"lets-icons:import"}
+                      height={22}
+                      width={22}
+                    />
+                  ),
+                onClick: () => {
+                  setPopup(true);
+                },
+
               },
             } as any
           }
@@ -546,23 +554,23 @@ export function DynamicForm(props: DynamicFormProps) {
             {
               P: {
                 component: "Button",
-              
-                  children: "Export",
-                  onClick: () => {
-                    setPopup(true);
-                  },
-                  style: { display: "flex" },
-                  leading:
-                    // TO solve Hydration error passed a function
-                    () => (
-                      <Icon
-                        icon={"lets-icons:export"}
-                        height={22}
-                        width={22}
-                      />
-                    ),
-                  class: " b:blue",
-                
+
+                children: "Export",
+                onClick: () => {
+                  setPopup(true);
+                },
+                style: { display: "flex" },
+                leading:
+                  // TO solve Hydration error passed a function
+                  () => (
+                    <Icon
+                      icon={"lets-icons:export"}
+                      height={22}
+                      width={22}
+                    />
+                  ),
+                class: " b:blue",
+
               },
             } as any
           }
@@ -571,4 +579,3 @@ export function DynamicForm(props: DynamicFormProps) {
     );
   }
 }
-

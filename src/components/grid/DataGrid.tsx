@@ -5,6 +5,8 @@ import {
   Show,
   Switch,
   Match,
+  createEffect,
+  on,
 } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
@@ -38,7 +40,7 @@ import { GenericField } from "~/components/fields/GenericField";
 import { PageContext } from "~/lib/contexts";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import {getDataMGCall} from "~/cypher/get/getDataMGCall";
+import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 interface DataGridProps {
   tableId: string;
 }
@@ -47,8 +49,8 @@ export function DataGrid(props: DataGridProps) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const navigate = useNavigate();
   const datas = useLocation();
-  const {events} = useContext(PageContext);
-  const {showErrorToast, showLoadingToast} = useToast();
+  const { events } = useContext(PageContext);
+  const { showErrorToast, showLoadingToast } = useToast();
   const [deleteRowId, setDeleteRowId] = createSignal(null);
   const [tableStore, setTableStore]: any = createStore({
     data: [],
@@ -56,8 +58,15 @@ export function DataGrid(props: DataGridProps) {
   } as { data: any[]; tableColumns: ColumnDef<any>[] });
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
-  const {Ws} = useContext(WsContext);
+  const { Ws } = useContext(WsContext);
+  const form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+  const collection = props.tableId;
+  if (!collection) {
+    return <>Incorrect Configuration</>;
+  }
+  events?.setTitle(form.title);
 
+  const tableColumns = setGridHeaders(form);
   const deleteObject = async (id: any) => {
     const txnId = getNewTxnId(graph, setGraph);
     const deleteResult = deleteVertex(txnId, id, graph, setGraph);
@@ -79,7 +88,43 @@ export function DataGrid(props: DataGridProps) {
     });
   };
 
-  const [data] = createResource(async () => await getTableData());
+  async function getTableData(skip?: number, limit?: number): Promise<{
+    error?: string;
+    result?: any;
+    graph?: {
+      vertexes: {
+        [key: string]: any;
+      };
+      edges: {
+        [key: string]: any;
+      };
+    };
+  }> {
+    try {
+      const { incoming, outgoing }: { incoming: any; outgoing: any } =
+        getEdgesFromRowsAttr(form.attributes);
+      // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
+      const expression = paginationExpression({
+        coll: collection,
+        skip: skip,
+        limit: limit,
+        filter: "",
+      });
+
+      const result = await getDataMGCall({
+        expression,
+        incoming,
+        outgoing,
+      });
+      return result;
+    } catch (e: any) {
+      console.error("error", e);
+      // when error happen server function doesn't return error message
+      return { error: `Error When Loading Form: ${e.message}` };
+    }
+  }
+
+  const [dataResource] = createResource(async () => await getTableData());
   const [search, setSearch] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([]);
 
@@ -99,159 +144,11 @@ export function DataGrid(props: DataGridProps) {
     }
   };
 
-  return (
-    <Switch>
-      <Match when={data.loading}>
-        <LoaderNew loaderHeight="55vh"/>
-      </Match>
-      <Match when={data.error}>Error {data.error}</Match>
-      <Match when={tableStore.data}>
-        <div class="flex jc:space-between ai:center p:5">
-          <GenericField
-            meta={
-              {
-                P: {
-                  component: "Button",
-                  [IdAttr]: "meta",
-
-                  onClick: () => navigate("new"),
-                  variant: "soft",
-                  style: {padding: "7px 10px", "margin-bottom": "10px"},
-                  leading:
-                  // TO solve Hydration error passed a function
-                    () => (
-                      <Icon
-                        icon={"lets-icons:add-round"}
-                        height={22}
-                        width={22}
-                      />
-                    ),
-                  children: "Add New",
-
-                },
-              } as unknown as Vertex
-            }
-          />
-          <nav class="flex ai:center mb:10">
-            <div class="group">
-              <Icon
-                class="icon"
-                icon="iconamoon:search"
-                style={{color: "#9e9ea7"}}
-              />
-
-              <form autocomplete="off" method="post" action="">
-                <input
-                  placeholder="Search Data..."
-                  type="search"
-                  autocomplete="none"
-                  class="inputSearch f:14"
-                  value={search()}
-                  onInput={(e) => {
-                    handleSearch(e.target.value);
-                  }}
-                />
-              </form>
-            </div>
-          </nav>
-        </div>
-        <CommonTable
-          headers={tableStore.tableColumns}
-          data={filteredData()}
-          isSearching={isSearching()}
-          isShowLoadMore={isShowLoadMore()}
-          rowsPerPageOptions={[5, 10, 15]}
-          defaultRowsPerPage={10}
-          onLoadMore={getTableData}
-          totalItems={filteredData().length}
-        />
-        <Show when={deleteRowId()}>
-          <DeleteDialog
-            open={true}
-            onConfirm={() => deleteObject(deleteRowId())}
-            title="Delete Item"
-            message="Are you sure you want to delete this item?"
-          />
-        </Show>
-      </Match>
-    </Switch>
-  );
-
-  async function getTableData(skip?: number, limit?: number) {
-    //const form = await getFormApiFromFormAsync(graph, setGraph, props.tableId);
-    const form = await getFormApiFromFormMGCall(props.tableId);
-    let formNew: IFormMetaData;
-    let collection: string;
-
-    if (form.error) {
-      if (FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId]) {
-        formNew =
-          FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
-        collection = props.tableId;
-      } else {
-        return form.error;
-      }
-    } else {
-      formNew = form.form!;
-      // @ts-ignore
-      collection = form.form.collection as string;
-    }
-    if (!collection) {
-      return <>Incorrect Configuration</>;
-    }
-    events?.setTitle(formNew.title);
-
-    const tableColumns = setGridHeaders(formNew);
-
-    // TODO: If collection is number fetch vertex from the API
-    const coll = isNumber(collection)
-      ? graph.vertexes[collection].P[IdAttr]
-      : collection;
-
-    // if(!graph.vertexLabelIdMap[coll]) {
-    //  alert(`collection not found ${coll}`)
-    //  return;
-    // }
-
-    const {incoming, outgoing}: { incoming: any; outgoing: any } =
-      getEdgesFromRowsAttr(formNew.attributes);
-    // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
-    const expression = paginationExpression({
-      coll: coll,
-      skip: skip,
-      limit: limit,
-      filter: "",
-    });
-
-    const result = await getDataMGCall({
-      expression,
-      incoming,
-      outgoing,
-    });
-
-    const vertexCount = Object.keys(result.graph.vertexes).length;
-    if (vertexCount < (limit ?? 10)! || vertexCount === 0) {
-      setIsShowLoadMore(false);
-    } else {
-      setIsShowLoadMore(true);
-    }
-    setGraphData(graph, setGraph, result.graph);
-    const resultData = Object.values(result.graph.vertexes as Vertex[]).filter(
-      (v) => v.L[0] === coll,
-    );
-    const nodes: any = tableStore.data
-      ? [...tableStore.data, ...resultData]
-      : resultData;
-    setTableStore({data: nodes, tableColumns});
-    setSearch("");
-    setFilteredData(nodes);
-  }
-
   function setGridHeaders(formNew: IFormMetaData) {
     const tableColumns = [] as ColumnDef<any>[];
 
     for (const attribute of formNew?.attributes) {
-      const column = {...attribute} as unknown as ColumnDef<any>;
+      const column = { ...attribute } as unknown as ColumnDef<any>;
       if (attribute.component === "Table") continue;
       // if (attribute.props?.skip) continue;
       // @ts-ignore
@@ -367,4 +264,107 @@ export function DataGrid(props: DataGridProps) {
     });
     return tableColumns;
   }
+
+  createEffect(on(dataResource, (data) => {
+    if (data?.error) {
+      showErrorToast(data.error);
+      return;
+    } else if (data) {
+      const vertexCount = Object.keys(data.graph!.vertexes).length;
+      if (vertexCount < (undefined ?? 10)! || vertexCount === 0) {
+        setIsShowLoadMore(false);
+      } else {
+        setIsShowLoadMore(true);
+      }
+      setGraphData(graph, setGraph, data.graph!);
+      const resultData = Object.values(data.graph!.vertexes as Vertex[]).filter(
+        (v) => v.L[0] === collection,
+      );
+      const nodes: any = tableStore.data
+        ? [...tableStore.data, ...resultData]
+        : resultData;
+      setTableStore({ data: nodes, tableColumns });
+      setSearch("");
+      setFilteredData(nodes);
+    }
+  }))
+
+  return (
+    <Switch>
+      <Match when={dataResource.loading}>
+        <LoaderNew loaderHeight="55vh" />
+      </Match>
+      <Match when={dataResource.error}>Error {dataResource.error}</Match>
+      <Match when={tableStore.data?.length > 0}>
+        <div class="flex jc:space-between ai:center p:5">
+          <GenericField
+            meta={
+              {
+                P: {
+                  component: "Button",
+                  [IdAttr]: "meta",
+
+                  onClick: () => navigate("new"),
+                  variant: "soft",
+                  style: { padding: "7px 10px", "margin-bottom": "10px" },
+                  leading:
+                    // TO solve Hydration error passed a function
+                    () => (
+                      <Icon
+                        icon={"lets-icons:add-round"}
+                        height={22}
+                        width={22}
+                      />
+                    ),
+                  children: "Add New",
+
+                },
+              } as unknown as Vertex
+            }
+          />
+          <nav class="flex ai:center mb:10">
+            <div class="group">
+              <Icon
+                class="icon"
+                icon="iconamoon:search"
+                style={{ color: "#9e9ea7" }}
+              />
+
+              <form autocomplete="off" method="post" action="">
+                <input
+                  placeholder="Search Data..."
+                  type="search"
+                  autocomplete="none"
+                  class="inputSearch f:14"
+                  value={search()}
+                  onInput={(e) => {
+                    handleSearch(e.target.value);
+                  }}
+                />
+              </form>
+            </div>
+          </nav>
+        </div>
+        <CommonTable
+          headers={tableStore.tableColumns}
+          data={filteredData()}
+          isSearching={isSearching()}
+          isShowLoadMore={isShowLoadMore()}
+          rowsPerPageOptions={[5, 10, 15]}
+          defaultRowsPerPage={10}
+          onLoadMore={getTableData}
+          totalItems={filteredData().length}
+        />
+        {/* TODO: Fix this is breaking the page */}
+        {/* <Show when={deleteRowId()}>
+          <DeleteDialog
+            open={true}
+            onConfirm={() => deleteObject(deleteRowId())}
+            title="Delete Item"
+            message="Are you sure you want to delete this item?"
+          />
+        </Show> */}
+      </Match>
+    </Switch>
+  );
 }
