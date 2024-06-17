@@ -111,6 +111,21 @@ export const Stepper = () => {
     deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfigStore.formData.txnId, item.P.name, showSuccessToast);
   };
 
+  const moveStep = (fromIndex: number, toIndex: number) => {
+    const fromVertex = steps()[fromIndex];
+    const toVertex = steps()[toIndex];
+    const position = toIndex < fromIndex ? "before" : "after";
+    sortChildren(
+      graph,
+      setGraph,
+      pageConfigStore.formData.txnId,
+      fromVertex!,
+      pageConfigStore.formData?.formData!,
+      toVertex,
+      position
+    );
+  };
+
   return (
     <>
       <ul style="position:relative; display:flex; flex-direction:row; gap:0.5rem; padding:0.75rem; flex-wrap:wrap" class="w:50%@>md w:100% m:0|10">
@@ -149,6 +164,24 @@ export const Stepper = () => {
                   }}
                 >
                   &times;
+                </button>
+                <button
+                  style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (index() > 0) moveStep(index(), index() - 1);
+                  }}
+                >
+                  ↑
+                </button>
+                <button
+                  style="margin-left:0.5rem; color:rgb(37,99,235); background:none; border:none; cursor:pointer;"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (index() < steps().length - 1) moveStep(index(), index() + 1);
+                  }}
+                >
+                  ↓
                 </button>
                 <span style="position:absolute; top:100%; left:50%; transform:translateX(-50%); display:none; padding:0.5rem; background:rgba(0, 0, 0, 0.75); color:white; border-radius:0.25rem; font-size:0.75rem; white-space:nowrap; pointer-events:none;">
                   {step.P.name}
