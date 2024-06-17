@@ -97,10 +97,10 @@ const Column = (props: { datas: any; toggleLeftOpen: any }) => {
             <PagesPart coll="Form"/>
           </Match>
           <Match when={selectedTab() === "thankyou"}>
-            <PagesPart coll="Thankyou"/>
+            <PagesPart coll="ThankYouPage"/>
           </Match>
           <Match when={selectedTab() === "error"}>
-            <PagesPart coll="Error"/>
+            <PagesPart coll="ErrorPage"/>
           </Match>
           <Match when={selectedTab() === "emailtemplate"}>
             <PagesPart coll="EmailTemplate"/>
