@@ -74,8 +74,7 @@ kapil:  - make drag and drop working on ipad or mobile working.
 
 Refactor all cypher functions, use eval function whenever possible.
 
-make undo redo working
-make same page designer display in thank you page.
+make undo redo working (use prevTxnIds in FormSettings context)
 
 Fix page component data not loaded in page designer
 

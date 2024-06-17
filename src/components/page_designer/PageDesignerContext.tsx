@@ -36,6 +36,7 @@ export  function PageDesignerContext(props: any) {
     labelColor: "black", // Default label color
     inputBackground: "white",
     activeStepId: 0,
+    prevTxnIds: [] as Array<Id | number>
   } as FormSettings);
   const draggedVertices = createSignal<Vertex[] | []>([]);
   return (

@@ -165,15 +165,16 @@ export function LayoutPart(props: {}) {
               : isSelectedHoverId(props.metaVertex.id)
                 ? "bg:#F2EDED"
                 : ""
-            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"} ${children().length ? "box-shadow:1px|1px|1px|1px #F2EDED" : ""
+            } ${children().length ? "r:5|5|5|5" : "r:0|5|5|0"}
             }`}
           classList={{
-            "box-shadow:inset|0|0|0|2px|rgb(0,255,0)":
+            "box-shadow:inset|0|0|0|2px|rgb(0,125,0)":
               isActiveTargetItem() && indicatorPosition().position === "center",
             "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255)":
               isActiveTargetItem() && indicatorPosition().position === "before",
             "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255)":
               isActiveTargetItem() && indicatorPosition().position === "after",
+            "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!indicatorPosition().position,
           }}
           onClick={() => onLayoutItemClick(props.metaVertex)}
           onMouseOver={(e) => {

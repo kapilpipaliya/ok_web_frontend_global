@@ -1,4 +1,4 @@
-import { type JSX, Show, createSignal, onCleanup, onMount } from "solid-js";
+import { type JSX, Show, createSignal, onCleanup, onMount, For } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
 
 import { Icon } from "@iconify-icon/solid";
@@ -6,7 +6,6 @@ import { createStore } from "solid-js/store";
 import {
   type IFormContext,
   PageConfigContext,
-
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
 import {CustomButton} from "~/components/solid_blocks/button/buttons";
@@ -27,7 +26,7 @@ export function LayoutDragAndDrop(): JSX.Element {
   const [selectedSection, setSelectedSection] = createSignal("build");
   const [isSmallScreen, setIsSmallScreen] = createSignal(false);
   const [leftColumns, setLeftColumns] = createSignal(
-    ["components", "pages", "templates", "forms"].map((column) => ({
+    ["components", "pages", "templates", "forms", "thankyou", "error", "emailtemplate"].map((column) => ({
       id: column,
       name: column,
     })),
@@ -72,22 +71,25 @@ export function LayoutDragAndDrop(): JSX.Element {
   });
 
   const UndoRedoIcons = () => {
+    const icons = [
+      { icon: "ci:arrow-undo-up-left", tooltip: "Undo" },
+      { icon: "ci:arrow-undo-up-right", tooltip: "Redo" },
+    ];
+
     return (
       <>
-        <Tooltip content={"Undo"} position={"n"}>
-          <div
-            class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer">
-            <Icon icon={"ci:arrow-undo-up-left"} height={22} width={22}/>
-          </div>
-        </Tooltip>
-        <Tooltip content={"Redo"} position={"n"}>
-          <div
-            class="b:1px|solid|lightgrey color:#000:hover color:grey bg:white flex ai:center jc:center r:7 h:30px w:30px cursor:pointer">
-            <Icon icon={"ci:arrow-undo-up-right"} height={22} width={22}/>
-          </div>
-        </Tooltip>
+        <For each={icons}>
+          {(item) => (
+            <Tooltip content={item.tooltip} position={"n"}>
+              <div
+                class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer">
+                <Icon icon={item.icon} height={22} width={22}/>
+              </div>
+            </Tooltip>
+          )}
+        </For>
       </>
-    )
+    );
   }
 
   return (

@@ -12,6 +12,7 @@ import {
   HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
+  PageConfigContext,
   SelectedIdContext,
   ShowDrawerContext
 } from "~/lib/contexts";
@@ -37,8 +38,8 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
-  // TODO: Fix dont use PageDisnger Txn Id here.
-  const { txnId, formData: pageDesignerFormVertex, cleanUpConfig } = useContext(FormContext);
+  const [pageConfig, __] = useContext(PageConfigContext);
+  const { txnId } = useContext(FormContext);
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);
@@ -80,12 +81,12 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
           onLayoutItemClick,
           clone,
           deleteLayout,
-        } = useDragDrop(graph, setGraph, txnId, pageDesignerFormVertex, item, () => [], true);
+        } = useDragDrop(graph, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData, item, () => [], true);
         const getBorder = () => {
           if (!isPreview()) {
             if (isActiveTargetItem()) {
               if (indicatorPosition().position === "center") {
-                return "box-shadow:inset|0|0|0|2px|rgb(0,255,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                return "box-shadow:inset|0|0|0|2px|rgb(0,125,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
               }
               if (indicatorPosition().position === "before") {
                 return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
@@ -104,10 +105,10 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
               isSelectedLayoutId(item.id) ||
               isSelectedDragOverTargetId(item.id)
             ) {
-              return "box-shadow:inset|0|0|0|2px|#3996E1>*";
+              return "box-shadow:inset|0|0|0|2px|rgb(57,150,225)>*";
             }
             if (isSelectedHoverId(item.id)) {
-              return "box-shadow:inset|0|0|0|2px|#d2dbfc>*";
+              return "box-shadow:inset|0|0|0|2px|rgb(210,219,252)>*";
             }
           }
         }

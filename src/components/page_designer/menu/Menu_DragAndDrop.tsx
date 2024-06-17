@@ -52,10 +52,9 @@ const Column = (props: { datas: any; toggleLeftOpen: any }) => {
     <>
       <div class={"p:5 direction:ltr "}>
         <div class="position:sticky top:0 p:4 bg:white z:1">
-          <div class="p:5|10 flex ai:center jc:space-between bg:#f4f4f4 f:0.875rem r:5">
-            <div class="font-weight:600">Components</div>
+          <div class="flex ai:center jc:space-between position:relative">
             <Icon
-              class="cursor:pointer bg:white:hover r:50%"
+              class="cursor:pointer bg:white:hover position:absolute top:0 right:0"
               onClick={()=>props.toggleLeftOpen(false)}
               icon={"iconamoon:close-duotone"}
               height={30}
@@ -97,8 +96,18 @@ const Column = (props: { datas: any; toggleLeftOpen: any }) => {
           <Match when={selectedTab() === "forms"}>
             <PagesPart coll="Form"/>
           </Match>
+          <Match when={selectedTab() === "thankyou"}>
+            <PagesPart coll="Thankyou"/>
+          </Match>
+          <Match when={selectedTab() === "error"}>
+            <PagesPart coll="Error"/>
+          </Match>
+          <Match when={selectedTab() === "emailtemplate"}>
+            <PagesPart coll="EmailTemplate"/>
+          </Match>
         </Switch>
       </div>
     </>
   );
 };
+ 
