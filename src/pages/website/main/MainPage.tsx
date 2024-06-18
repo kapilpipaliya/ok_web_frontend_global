@@ -29,7 +29,7 @@ export const MainPage = () => {
 const VideoSection = () => {
   return (
     <section class="video container d-grid">
-      <img src="graphics/videohome.png" alt="image" />
+      <img src="graphics/videohome.png" alt="Video Home" title="Video Home" />
 
       <div class="userandreview mt-5 mb-5">
         <div class="activeusers">
@@ -52,7 +52,7 @@ const VideoSection = () => {
             icon={"material-symbols-light:bookmark-star-outline-rounded"}
           />
           <p>
-            4.9/5 Stars <br /> 421 Review
+            4.9/5 Stars <br /> 421 Reviews
           </p>
         </div>
       </div>

@@ -96,7 +96,7 @@ const FeatureBox = (props: {
       <div class="iconsvg d-flex justify-content-center align-item-center">
         <Icon icon={props.icon} height={50} width={50} />
       </div>
-      <h6>{props.title}</h6>
+      <h3>{props.title}</h3>
       <h4 class="text-left">
         {props.subtitle1} <br /> {props.subtitle2}
       </h4>

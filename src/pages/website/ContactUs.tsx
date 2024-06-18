@@ -3,13 +3,14 @@ import "~/pages/website/style.css";
 import "~/pages/website/krd.css";
 import { createSignal, useContext } from "solid-js";
 import { Header } from "./Header";
-import {SiteTitle} from "./SiteTitle";
+import { SiteTitle } from "./SiteTitle";
 import { contactUsCall } from "~/lib/api/api_functions";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
 import "~/css/base.css";
 import { LoadingContext } from "~/lib/contexts";
 import { validateEmail } from "~/lib/validations";
+
 export function ContactUs() {
   const navigate = useNavigate();
   const { showErrorToast, showLoadingToast } = useToast();
@@ -44,6 +45,7 @@ export function ContactUs() {
       setLoadingSite(false);
     }
   };
+
   return (
     <div
       style={{
@@ -52,7 +54,7 @@ export function ContactUs() {
         "background-size": "cover",
       }}
     >
-      <SiteTitle>Contact Us</SiteTitle>
+      <SiteTitle>Contact Us - Get in Touch with EasyFormForge</SiteTitle>
 
       <Header />
       <div
@@ -78,7 +80,7 @@ export function ContactUs() {
           <div class="d:none@<md flex jc:center w:-webkit-fill-available">
             <img
               src={"../../public/graphics/contact-us.jpg"}
-              alt="logo"
+              alt="Contact Us"
               class="w:25rem "
             />
           </div>
@@ -87,7 +89,7 @@ export function ContactUs() {
               Contact Us
             </div>
             <div class="mb:10 f:15 font-weight:medium color:rgb(152,152,153) flex jc:left z:10">
-              We are open or any suggestions, please don't hesitate to contact
+              We are open to any suggestions, please don't hesitate to contact
               us.
             </div>
             <div class="grid grid-template-columns:1fr|50%@>md gap:10 ">
@@ -221,6 +223,7 @@ export function ContactUs() {
     </div>
   );
 }
+
 const ContactForm = () => {
   const [firstName, setFirstName] = createSignal("");
   const [lastName, setLastName] = createSignal("");
@@ -301,6 +304,7 @@ const ContactForm = () => {
     </form>
   );
 };
+
 const ContactWays = () => (
   <div class="contactways pt-5">
     <div class="phone">

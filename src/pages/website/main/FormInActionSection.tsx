@@ -24,22 +24,23 @@ const FormSection = () => {
   return (
     <div class="formsection">
       <div class="formtitle">
-        <a class="btn-mid-icon-filled" href="#">
+        <a class="btn-mid-icon-filled" href="#" aria-label="Demo style 1">
           Demo style 1
         </a>
-        <a class="btn-transperant bg-transperant" href="#">
+        <a class="btn-transperant bg-transperant" href="#" aria-label="Demo style 2">
           Demo style 2
         </a>
       </div>
 
       <div class="actualform">
-        <form action="#">
+        <form action="#" method="post">
           <label for="fname">First Name</label>
           <input
             type="text"
             id="fname"
             name="firstname"
             placeholder="Your name.."
+            aria-label="First Name"
           />
 
           <label for="lname">Last Name</label>
@@ -48,10 +49,11 @@ const FormSection = () => {
             id="lname"
             name="lastname"
             placeholder="Your last name.."
+            aria-label="Last Name"
           />
 
           <label for="country">Country</label>
-          <select id="country" name="country">
+          <select id="country" name="country" aria-label="Country">
             <option value="australia">Australia</option>
             <option value="canada">Canada</option>
             <option value="usa">USA</option>
@@ -63,9 +65,10 @@ const FormSection = () => {
             name="subject"
             placeholder="Write something.."
             style="height:200px"
+            aria-label="Subject"
           />
 
-          <input class="btn-small-icon-filled" type="submit" value="Submit" />
+          <input class="btn-small-icon-filled" type="submit" value="Submit" aria-label="Submit" />
         </form>
       </div>
     </div>
@@ -89,7 +92,7 @@ const FormTypes = () => {
         <For each={formType}>
           {(form) => (
             <li>
-              <a href="#">{form.name}</a> <span>({form.count})</span>
+              <a href="#" aria-label={form.name}>{form.name}</a> <span>({form.count})</span>
             </li>
           )}
         </For>

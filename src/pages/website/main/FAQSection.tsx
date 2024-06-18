@@ -58,7 +58,7 @@ const AccordionItem = (props: { question: string; answer: string }) => {
   return (
     <div class="m:5 bb:1px|solid|lightgray r:10 w:full m:10">
       <div class="flex gap:20% jc:space-between ai:center p:10 r:10">
-        <p class="f:17 font-600 w:60vw">{props.question}</p>
+        <h3 class="f:17 font-600 w:60vw">{props.question}</h3>
         <span
           class="cursor:pointer"
           onClick={(e) => {

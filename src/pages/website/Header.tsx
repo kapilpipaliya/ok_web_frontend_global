@@ -7,14 +7,14 @@ import "~/pages/website/krd.css";
 export function Header() {
   const navigate = useNavigate();
   return (
-    <section class="header flex jc:space-around ai:center flex-direction:row">
+    <header class="header flex jc:space-around ai:center flex-direction:row">
       <div class="logo">
-        <a href="/public">
-          <img class="headerLogo" src={logos} alt="logo" />
+        <a href="/public" aria-label="EasyFormForge Home">
+          <img class="headerLogo" src={logos} alt="EasyFormForge Logo" />
         </a>
       </div>
 
-      <div class="links">
+      <nav class="links" aria-label="Main Navigation">
         <ul>
           <li>
             <a class="bodycopytext-16" href="/public">
@@ -31,23 +31,14 @@ export function Header() {
               Pricing
             </a>
           </li>
-
-          {/*<div class="dropdown">*/}
-          {/*  <button class="dropbtn">Language</button>*/}
-          {/*  <a class="dropbtn bodycopytext-16" href="#" />*/}
-          {/*  <div class="dropdown-content">*/}
-          {/*    <a href="#">Spanish</a>*/}
-          {/*    <a href="#">Russian</a>*/}
-          {/*    <a href="#">Korean</a>*/}
-          {/*  </div>*/}
-          {/*</div>*/}
         </ul>
-      </div>
+      </nav>
       <div class="flex">
         <button
           class="btn-small-icon-filled flex ai:center"
           style={{ cursor: "pointer" }}
           onClick={() => navigate("/auth/login")}
+          aria-label="Get Started"
         >
           Get Started{" "}
           <Icon
@@ -56,6 +47,6 @@ export function Header() {
           />
         </button>
       </div>
-    </section>
+    </header>
   );
 }

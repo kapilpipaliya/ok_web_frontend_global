@@ -25,7 +25,7 @@ const FooterLink = (props: FooterLinkProps) => (
 );
 
 const SocialIcon = (props: SocialIconProps) => (
-  <a href={props.href}>
+  <a href={props.href} aria-label={`Follow us on ${props.icon.split(":")[1]}`}>
     <Icon icon={props.icon} height={30} width={30} />
   </a>
 );
@@ -66,17 +66,18 @@ export function Footer() {
   ];
 
   return (
-    <section class="footer">
+    <section class="footer" aria-labelledby="footer-heading">
+      <h2 id="footer-heading" class="sr-only">Footer</h2>
       <div class="pb-3 flex jc:space-around ai:center flex-direction:row">
         <div class="info d-grid align-content-spacebetween">
           <div>
-            <a href="">
-              <img class="headerLogo" src="graphics/logo.png" alt="logo" />
+            <a href="/" aria-label="EasyFormForge Home">
+              <img class="headerLogo" src="graphics/logo.png" alt="EasyFormForge Logo" />
             </a>
             <p>Design and publish forms faster, smoother</p>
           </div>
 
-          <a class="pb-1 btn-underline" href="#">
+          <a class="pb-1 btn-underline" href="#" aria-label="Get Easy Form Forge">
             Get Easy Form Forge <Icon icon="fa-solid:arrow-right" />
           </a>
           <div class="footericon">
@@ -94,13 +95,13 @@ export function Footer() {
       <div class="copyrightandsocial container d-flex pt-2 justify-content-center">
         <div>
           <h6>
-            © 2024 <b>EasyFromForge </b> All rights reserved
+            © 2024 <b>EasyFormForge </b> All rights reserved
           </h6>
         </div>
         <div>
           <For each={socialIcons}>
             {(icon) => (
-              <Icon icon={icon.icon} height={30} width={30} />
+              <Icon icon={icon.icon} height={30} width={30} aria-label={`Follow us on ${icon.icon.split(":")[1]}`} />
             )}
           </For>
         </div>
