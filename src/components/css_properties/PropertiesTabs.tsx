@@ -76,6 +76,7 @@ export function ClassDesignTab(props: {
                       isLabelOnTop={false}
                       label="Select State"
                       name="state"
+                      infoLink=":target"
                       options={["active", "hover", "focus", "disabled", 'visited', 'focus-within', 'focus-visible', 'target']}
                       onChangeInput={(name, v) => setState(v)} />
                     <StyleEditorTab />

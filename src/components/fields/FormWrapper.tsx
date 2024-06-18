@@ -100,7 +100,7 @@ export function FormWrapper(
           >
             {props.submitButton}
           </Show>
-          <CustomButton variant={"outlined"} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
+          <CustomButton variant={"outlined"} style={{ "margin-left": "7px" }}  class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
         </div>
       </FormContext.Provider>
     </div>

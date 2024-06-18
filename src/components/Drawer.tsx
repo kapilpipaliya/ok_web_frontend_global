@@ -1,4 +1,4 @@
-import { createSignal, type JSX, Show, } from "solid-js";
+import { createSignal, type JSX, Show, onMount, onCleanup, } from "solid-js";
 
 export function Drawer(props: {
   customButton?: (props: {
@@ -6,7 +6,7 @@ export function Drawer(props: {
     isOpen: boolean;
   }) => JSX.Element;
   children: JSX.Element;
-  drawerStyle: string;
+  drawerStyle?: string;
   width?: string;
   open?: any;
   setIsOpen?: any;
@@ -19,9 +19,6 @@ export function Drawer(props: {
 
   const toggleDrawer = () => {
     setIsOpen(!isOpen());
-    if (props.setIsOpen) {
-      props.setIsOpen(!isOpen());
-    }
   };
 
 
@@ -44,6 +41,20 @@ export function Drawer(props: {
     document.removeEventListener("mousemove", handleMouseMove);
     document.removeEventListener("mouseup", handleMouseUp);
   };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === "Escape" && isOpen()) {
+      toggleDrawer();
+    }
+  };
+
+  onMount(() => {
+    document.addEventListener("keydown", handleKeyDown);
+  });
+
+  onCleanup(() => {
+    document.removeEventListener("keydown", handleKeyDown);
+  });
 
   return (
     <>

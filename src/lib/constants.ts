@@ -48,7 +48,8 @@ export const iconMap: any = {
  TabList: "fluent:tab-desktop-20-regular",
  TreeViewItem: "tdesign:tree-list",
  TreeViewChild: "carbon:tree-view-alt",
- Collapsible: "lets-icons:collapse"
+ Collapsible: "lets-icons:collapse",
+    SignatureBox: "fluent:signature-32-regular"
 };
 export const AdminAttrKeys = [
  "User",

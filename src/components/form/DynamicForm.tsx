@@ -376,7 +376,7 @@ export function DynamicForm(props: DynamicFormProps) {
         display: "flex",
       }}
     >
-      <CustomButton variant={"outlined"} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</CustomButton>
+      <CustomButton variant={"outlined"} style={{ "margin-right": "7px" }} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</CustomButton>
 
       <Show
         when={props.submitButton}

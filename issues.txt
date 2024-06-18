@@ -1,47 +1,40 @@
 ✅ 🌟 📝 ⌛
 
 🌟 Project Fetures 🌟-----------------------------------------------------------------------------------------
-
 1. built in component group like address, name, choice option
 2. Make a Route designer where user can add Tables, Buttons, Modals to nav etc.
 
-👨‍💻 Tasks 👨‍💻------------------------------------------------------------------------------------------
+📝 Todo :------------------------------------------------------------------------------------------
 
-
-📝 Todo 📝------------------------------------------------------------------------------------------
-Savan:
-In form designer, root vertex when hover over it display properties icon. (Do after steper is done)
-
-add a steeper component in the form builder, by default first step(1) is active. user can add new step too. like, step 1, step 2, step 3, step 4 etc,
-which step user select display that step form only.
-
-(Add a option to 'delete all' steps.)
-(fix extra padding below textarea component.)
-
-refactor useDragDrop file
-
-in the stepper user can change the order of pages too
 textarea looks different in the form designer and preview.
+textinput 
+when we change width the textbox and textarea should be resized.
+Add query parameter in grid url for pagination,
+Test all css properties applying properly.
+delete extra properties from components. make sure each property is working. note not working properties.
+Make sure all inputs are working.
+add save as template option in tooltip.
+Form builder preview width is not proper.
 
-Kapil -> when parent has display:flex, support indicator postion on left and right too.
+📝 Todo 📝 KAPIL:------------------------------------------------------------------------------------------
+add name property in each input components 
+refactor useDragDrop file
+when parent has display:flex, support indicator postion on left and right too.
 when drag and drop 'text' component, display some default text like "Text"
 Label Properties, Position is not comming as select. add support for specifying select options
-user can change label inline, make it content editable.
 It is not flexible to drop a component below the component, because of the label.
 In form designer, rename submit to save. on save dispaly loader and then display message 'form successfully saved'
 FormSetting move to form properties.
+
 SEO
 https://easyformforge.com not working.
 Add Form Category in Form Setting, It will display the form on homepage.
 
 Bug:
-drag and drop layout issue.
-page and component drag and drop not working(kapil)
-- Make Multi Stage Form design preview link woring(kapil)
-
-right drawer should close when we click outside the drawer.
-
+page and component drag and drop not working
+Make Multi Stage Form design preview link woring
 (for label, use name property, instead of label property for changing the label.)
+fix when drag and drop page or template, it is not working. ⌛
 
 validation:
 add validation Tab on properties if validations are configured on the component, validations will run on fiel value change.
@@ -56,50 +49,29 @@ Dependent field:
 add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
 make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
 
-when we change width the textbox and textarea should be resized.
-Add query parameter in grid url for pagination,
-
-- fix when drag and drop page or template, it is not working. ⌛
-- Test all css properties applying properly.
-- Make sure all inputs are working.
-- delete extra properties from components. make sure each property is working. note not working properties.
-
-- make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
-- (Kapil) write a table routes to see all the form entries.
+make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
+write a table routes to see all the form entries.
 
 css issue:
  box-shadow 
 
-kapil:  - make drag and drop working on ipad or mobile working.
-
+make drag and drop working on ipad or mobile working.
 Refactor all cypher functions, use eval function whenever possible.
-
 make undo redo working (use prevTxnIds in FormSettings context)
-
 Fix page component data not loaded in page designer
-
 (when Submit do not redirect to parent screen?)
-
-remain(kapil);
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
-
 Write a function to get all the fields in the form, make sync of Nav working
-
 Make the forms made using form designer load and save working
 Make a custom forms builder using the original forms.
 Make a table designer using the forms fields.
-
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
-add name property in each input components 
-
 Sorting, Filtering support on the table
 Load table data from server with pagination when form have many rows
 fix import export button on the form
 Make Drag and Drop on touch screen working
-
-Kapil:
 collection edit page is broken.
-on double click add element at last (kapil) - last in selected layout?  ✅ 
+on double click add element at last - last in selected layout?  ✅ 
 Make Nav sync full data. (IMP)
 Make Page working with some async data too.
 Make Working Forms using Page Designer.
@@ -117,8 +89,6 @@ Make Permissions working in DynamicForm component.
 Auth:
 Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are autorized.
 Only super admin can modify permissions data for now.
-
-
 
 Notes:
 we are using two libraries:

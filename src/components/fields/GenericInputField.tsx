@@ -21,6 +21,7 @@ import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify, ifNotNull } from "~/lib/utils";
 import {mergeCSS} from "~/components/css_properties/cssUtils";
+import {Signature} from "../SignatureBox";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -320,6 +321,9 @@ export function GenericInputField(
               }}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
+          </Match>
+          <Match when={component() === "SignatureBox"}>
+              <Signature />
           </Match>
           <Match when={component() === "Label"}>
             <Label

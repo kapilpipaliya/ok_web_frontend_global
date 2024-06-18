@@ -82,9 +82,11 @@ export function HeaderDragAndDrop(props: {
           onSuccess: () => {
             transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
-            setTimeout(() => navigate(-1), 500);
+            // setTimeout(() => navigate(-1), 500);
           },
-          onError: () => { },
+          onError: () => {
+            showErrorToast("Data submission failed");
+           },
         });
       }
     } else {
@@ -186,8 +188,11 @@ export function HeaderDragAndDrop(props: {
                 <Icon icon={"bi:floppy"} height={22} width={22} />
               </div>
             </Tooltip>
-            <PreviewSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
-            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
+            <Tooltip content={"Preview"} position={"s"}>
+              <div onClick={() => window.open(`/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/preview`)} class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
+                <Icon icon={"ph:eye"} height={22} width={22} />
+              </div>
+            </Tooltip>            <ExportSection setOpenDialog={setOpenDialog} openDialog={openDialog} />
           </div>
         </div>
       </div>
@@ -229,38 +234,3 @@ const ExportSection = (props: {
     />
   );
 };
-const PreviewSection = (props: {
-  setOpenDialog: Setter<boolean>;
-  openDialog: Accessor<boolean>;
-}) => {
-  return (
-    <CustomModal
-      dialogClass=""
-      title={"Preview"}
-      openButton={false}
-      buttonLabel={
-        <Tooltip content={"Preview"} position={"s"}>
-          <div class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:35px    w:37px cursor:pointer">
-            <Icon icon={"ph:eye"} height={22} width={22} />
-          </div>
-        </Tooltip>
-      }
-      body={<ShareSection />}
-      footer={(toggle) => (
-        <div class="flex ai:center jc:flex-end">
-          <CustomButton
-            variant="soft"
-            onClick={() => {
-              toggle(false);
-            }}
-          >
-            Close
-          </CustomButton>
-        </div>
-      )}
-      setOpen={props.setOpenDialog}
-      open={props.openDialog()}
-    />
-  );
-};
-

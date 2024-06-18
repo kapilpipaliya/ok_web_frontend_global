@@ -1,5 +1,6 @@
 import { type IconifyIconProps, Icon } from "@iconify-icon/solid";
 import { splitProps, Show, type JSXElement } from "solid-js";
+import { CustomTooltip } from "~/components/Tooltip";
 import "~/css/componentUtilCSS.css";
 
 export const IconifyIcon = (props: IconifyIconProps) => {
@@ -38,6 +39,7 @@ export const ContainerLabel = (props: {
   title: JSXElement;
   showIcon?: boolean;
   onIconClick?: any;
+  info?: any;
   class?: any;
 }) => (
   <span
@@ -47,11 +49,18 @@ export const ContainerLabel = (props: {
     <Show when={props.showIcon ?? false}>
       &nbsp;
       <Icon
-        style={{'color':'purple'}}
+        style={{ 'color': 'purple' }}
         onClick={props.onIconClick}
         icon={"mdi:close"}
         class={"cursor:pointer"}
       />
+    </Show>
+    <Show when={props.info}>
+      <CustomTooltip message={'Click for more Info'} title={props.title} >
+        <div onClick={() => {
+          window.open(`https://developer.mozilla.org/en-US/docs/Web/CSS/${props.info}`, '_blank');
+        }} class={"cursor:pointer flex"}><Icon style={{ 'color': 'lightgray', 'margin-left': '2px' }} height={21} width={21} icon={"mdi:information-outline"} /></div>
+      </CustomTooltip>
     </Show>
   </span>
 );

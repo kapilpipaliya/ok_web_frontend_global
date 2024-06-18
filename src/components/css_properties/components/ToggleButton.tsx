@@ -9,6 +9,7 @@ export const ToggleButton = (props: {
   onChangeInput: any;
   isAddToClass: boolean;
   name: string;
+  infoLink?: string;
   isLabelOnTop: boolean;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
@@ -70,14 +71,14 @@ export const ToggleButton = (props: {
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+            <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
+        <ContainerLabel info={props.name} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[props.name] })} showIcon={isDefaultValue()} title={props.label} />
         <Content />
       </div>
     </Show>

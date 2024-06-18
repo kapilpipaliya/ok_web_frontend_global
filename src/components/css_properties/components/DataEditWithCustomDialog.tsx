@@ -21,6 +21,7 @@ export const DataEditWithCustomDialog = (props: {
   name: string;
   openMenu: Accessor<any>;
   setOpenMenu: Setter<any>;
+  infoLink?: string;
   centerComponent?: JSXElement;
   dialogLabel: any;
   children: JSX.Element;
@@ -336,7 +337,7 @@ export const DataEditWithCustomDialog = (props: {
           "margin-bottom": "6px",
         }}
       >
-        <ContainerLabel title={props.label} onIconClick={resetValues} showIcon={isDefaultValue()} />
+        <ContainerLabel info={props.name} title={props.label} onIconClick={resetValues} showIcon={isDefaultValue()} />
         <Icon
           class={"cursor:pointer"}
           onClick={addOption}

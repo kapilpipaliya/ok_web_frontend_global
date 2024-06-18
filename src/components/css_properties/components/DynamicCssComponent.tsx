@@ -12,6 +12,7 @@ export function DynamicCSSComponent(props: { value: any }) {
     <Switch>
       <Match when={props.value.component === "colorPicker"}>
         <ColorPickerInput
+          infoLink={props.value.infoLink}
           name={props.value.name}
           onChangeInput={props.value.onChangeInput}
           isAddToClass={props.value.isAddToClass ?? true}
@@ -21,6 +22,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "select"}>
         <DisplaySelector
+          infoLink={props.value.infoLink}
           isAddToClass={props.value.isAddToClass ?? true}
           value={props.value.value}
           onRemoveIconClick={props.value.onRemoveIconClick}
@@ -33,6 +35,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "toggleButton"}>
         <ToggleButton
+          infoLink={props.value.infoLink}
           onChangeInput={props.value.onChangeInput}
           isAddToClass={props.value.isAddToClass ?? true}
           isLabelOnTop={props.value.isLabelOnTop}
@@ -44,6 +47,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       <Match when={props.value.component === "textField"}>
         <TextFieldWithSelect
           value={props.value.value}
+          infoLink={props.value.infoLink}
           isAddToClass={props.value.isAddToClass ?? true}
           name={props.value.name}
           isLabelOnTop={props.value.isLabelOnTop}
@@ -58,6 +62,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "textFieldOptions"}>
         <TextFieldWithSelect
+          infoLink={props.value.infoLink}
           value={props.value.value}
           isAddToClass={props.value.isAddToClass ?? true}
           name={props.value.name}
@@ -90,6 +95,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "buttonGroups"}>
         <ButtonGroups
+          infoLink={props.value.infoLink}
           isLabelOnTop={props.value.isLabelOnTop}
           name={props.value.name}
           onChangeInput={props.value.onChangeInput}
@@ -100,6 +106,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "fieldWithCustomProperty"}>
         <FieldWithCustomBox
+        
           isLabelOnTop={props.value.isLabelOnTop}
           customProperty={props.value.customProperty}
           gridType={props.value.gridType}
@@ -113,6 +120,7 @@ export function DynamicCSSComponent(props: { value: any }) {
       </Match>
       <Match when={props.value.component === "dataEditor"}>
         <DataEditWithCustomDialog
+          infoLink={props.value.infoLink}
           dialogLabel={props.value.dialogLabel}
           fallback={props.value.fallback}
           name={props.value.name}

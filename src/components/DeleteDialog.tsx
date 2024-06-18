@@ -36,6 +36,7 @@ export function DeleteDialog(props: {
           <CustomButton
             variant="outlined"
             class="danger"
+            style={{ "margin-right": "7px" }}  
             onClick={() => {
               handleCancel();
               toggle((v) => !v);

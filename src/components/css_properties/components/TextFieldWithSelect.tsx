@@ -19,6 +19,7 @@ export const TextFieldWithSelect = (props: {
   options?: string[];
   value?: () => any;
   onChangeInput?: any;
+  infoLink?: string;
   leftIcon?: JSXElement;
   isLabelOnTop?: boolean;
   label?: string;
@@ -239,7 +240,7 @@ export const TextFieldWithSelect = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <CenterDiv>
-              <ContainerLabel onIconClick={resetValue}
+              <ContainerLabel info={props.name} onIconClick={resetValue}
                 showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </CenterDiv>
@@ -247,7 +248,7 @@ export const TextFieldWithSelect = (props: {
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={resetValue}
+          <ContainerLabel info={props.name} onIconClick={resetValue}
             showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>

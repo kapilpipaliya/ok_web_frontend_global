@@ -1,7 +1,7 @@
 import {createEffect, createSignal, createUniqueId, type JSX, Show} from "solid-js";
 
 export function CustomTooltip(props: {
-  message: string;
+  message: any;
   children: JSX.Element;
   title?: string;
 }) {
@@ -19,7 +19,7 @@ export function CustomTooltip(props: {
   createEffect(() => {
     const element = document.getElementById(id);
     if (element) {
-      if (isHovered()) {
+      if (isHovered() ) {
         element.style.display = "block";
       } else {
         element.style.display = "none";
@@ -35,13 +35,15 @@ export function CustomTooltip(props: {
       <div
         id={id}
         class={
-          "center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
+          "text:nowrap center max-w:fit-content min-w:fit-content z-index:1 f:13 w:full font-weight:300 font-family:poppins abs mt:3 bg:#333 p:3|10 color:#fff r:5"
         }
       >
         <Show when={props.title}>
           <div class={"font-weight:500 f:14"}>{props.title}</div>
         </Show>
-        {props.message}
+        <Show when={props.message}>
+          {props.message}
+        </Show>
       </div>
     </div>
   );

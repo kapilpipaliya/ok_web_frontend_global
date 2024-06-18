@@ -1,6 +1,8 @@
 
+import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
+import PreviewPage from "~/components/PreviewPage";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
@@ -21,7 +23,7 @@ export function PageViewWrapper(props: {
     const [dataVertex, setDataVertex] = createSignal<Vertex>();
     const [metaVertex, setMetaVertex] = createSignal<Vertex>();
     const [mounted, setMounted] = createSignal(false);
-  
+    const [isPreview, setIsPreview] = createSignal(false);
   
     // load form meta data
     async function loadFormDesignerMetaData() {
@@ -35,6 +37,8 @@ export function PageViewWrapper(props: {
         incoming,
         outgoing,
       });
+      setIsPreview(props.pageId === 'preview');
+      
   
       // @ts-ignore
       if (data.error) {
@@ -53,7 +57,6 @@ export function PageViewWrapper(props: {
     }
     onMount(() => {
       setMounted(true);
-      
       loadFormDesignerMetaData();
     });
     const [count, setCount] = createSignal(1);
@@ -65,20 +68,33 @@ export function PageViewWrapper(props: {
         { defer: true },
       ),
     );
+
   
     const cleanUpConfig = {};
   
     return (
       <Show when={count()} keyed>
         <Show when={mounted() && metaVertex()}>
-          
-            {/* Pass Dummy Values */}
-            {/* <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}> */}
+          <Show when={!(isPreview())} fallback={
+            <PreviewPage>
               <PageView
                 metaVertex={metaVertex()}
                 data={dataVertex()}
                 isPreview={true}
               />
+            </PreviewPage>
+          }>
+            {/* <Show when={dataVertex()}> */}
+            <PageView
+              metaVertex={metaVertex()}
+              data={dataVertex()}
+              isPreview={true}
+            />
+            </Show>
+          {/* </Show> */}
+            {/* Pass Dummy Values */}
+            {/* <FormContext.Provider value={{ formData: dataVertex()!, formMeta: metaVertex()!, txnId, cleanUpConfig: () => cleanUpConfig }}> */}
+             
             {/* </FormContext.Provider> */}
         </Show>
       </Show>

@@ -369,7 +369,8 @@ export function LayoutPart(props: {}) {
   return (
     <>
       <Show when={showPropertiesDrawer()}>
-        <Drawer open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer}>
+        <Drawer customButton={() => false}
+          drawerStyle={'padding: 10px'} open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer}>
           <Properties setShowDrawer={setShowPropertiesDrawer} />
         </Drawer>
       </Show>

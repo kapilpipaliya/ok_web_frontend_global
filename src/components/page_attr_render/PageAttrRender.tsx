@@ -70,49 +70,8 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
       )}
     >
       {(item, index) => {
-        const {
-          children,
-          isActiveTargetItem,
-          handleDragStart,
-          handleDragEnter,
-          handleDragOver,
-          handleDragLeave,
-          handleDrop,
-          onLayoutItemClick,
-          clone,
-          deleteLayout,
-        } = useDragDrop(graph, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData, item, () => [], true);
-        const getBorder = () => {
-          if (!isPreview()) {
-            if (isActiveTargetItem()) {
-              if (indicatorPosition().position === "center") {
-                return "box-shadow:inset|0|0|0|2px|rgb(0,125,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
-              }
-              if (indicatorPosition().position === "before") {
-                return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
-              }
-              if (indicatorPosition().position === "after") {
-                return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
-              }
-              if (indicatorPosition().position === "left") {
-                return "box-shadow:inset|8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
-              }
-              if (indicatorPosition().position === "right") {
-                return "box-shadow:inset|-8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
-              }
-            }
-            if (
-              isSelectedLayoutId(item.id) ||
-              isSelectedDragOverTargetId(item.id)
-            ) {
-              return "box-shadow:inset|0|0|0|2px|rgb(57,150,225)>*";
-            }
-            if (isSelectedHoverId(item.id)) {
-              return "box-shadow:inset|0|0|0|2px|rgb(210,219,252)>*";
-            }
-          }
-        }
-
+       
+    
         const component = createMemo(
           () =>
             item.P.component ||
@@ -161,134 +120,175 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
           />
         );
 
-        const PageComponent = () => (
+        const PageComponentWithDND = () => {
+          const {
+            children,
+            isActiveTargetItem,
+            handleDragStart,
+            handleDragEnter,
+            handleDragOver,
+            handleDragLeave,
+            handleDrop,
+            onLayoutItemClick,
+            clone,
+            deleteLayout,
+          } = useDragDrop(graph, setGraph, pageConfig.formData.txnId , pageConfig.formData.formData, item, () => [], true);
+          const getBorder = () => {
+            if (!isPreview()) {
+              if (isActiveTargetItem()) {
+                if (indicatorPosition().position === "center") {
+                  return "box-shadow:inset|0|0|0|2px|rgb(0,125,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                }
+                if (indicatorPosition().position === "before") {
+                  return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                }
+                if (indicatorPosition().position === "after") {
+                  return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                }
+                if (indicatorPosition().position === "left") {
+                  return "box-shadow:inset|8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                }
+                if (indicatorPosition().position === "right") {
+                  return "box-shadow:inset|-8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
+                }
+              }
+              if (
+                isSelectedLayoutId(item.id) ||
+                isSelectedDragOverTargetId(item.id)
+              ) {
+                return "box-shadow:inset|0|0|0|2px|rgb(57,150,225)>*";
+              }
+              if (isSelectedHoverId(item.id)) {
+                return "box-shadow:inset|0|0|0|2px|rgb(210,219,252)>*";
+              }
+            }
+          }
+
+          return (
+            <PageRenderVertexContext.Provider
+              value={[...useContext(PageRenderVertexContext), item]}
+            >
+                <span
+                  class={`contents ${getBorder() || ""} `}
+                  onMouseOver={(e) => {
+                    e.stopPropagation();
+                    setHoverId(item.id);
+                  } }
+                  onmouseleave={(e) => {
+                    e.stopPropagation();
+                    setHoverId(-1);
+                  } }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onLayoutItemClick(item);
+                  } }
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <Popover
+                    placement={`${isSelectedLayoutId(item.id) ? "top-start" : "top-end"}`}
+                    open={isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)}
+                  >
+                    <Popover.Anchor>
+                      <Content />
+                    </Popover.Anchor>
+                    <Popover.Portal>
+                      <Popover.Content class="popover__content">
+                        <Show when={isSelectedLayoutId(item.id)}>
+                          <span class="position:relative ">
+                            <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
+                              <Tooltip content={"Name"} nowrap>
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    "font-size": "0.875rem",
+                                    "line-height": "1.25rem",
+                                    "margin-right": "4px",
+                                  }}
+                                >
+                                  {getComponentName()}
+                                </div>
+                              </Tooltip>
+                              <PropertyDrawer itemId={item.id} />
+                              <Tooltip content={"Move"} nowrap>
+                                <Icon
+                                  draggable={true}
+                                  onDragStart={handleDragStart}
+                                  icon={"material-symbols-light:drag-pan-rounded"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer flex" />
+                              </Tooltip>
+                              <Tooltip content={"Parent"} nowrap>
+                                <Icon
+                                  icon={"mdi:arrow-up"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex "
+                                  onClick={(e) => {
+                                    const parentResult = getParentVertex(
+                                      ["Attr"],
+                                      item,
+                                      graph
+                                    );
+                                    if (parentResult.error) {
+                                      return;
+                                    }
+
+                                    onLayoutItemClick(parentResult.vertex!);
+                                  } } />
+                              </Tooltip>
+                              <Tooltip content={"Duplicate"}>
+                                <Icon
+                                  icon={"mage:copy"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex "
+                                  onClick={clone} />
+                              </Tooltip>
+                              <Tooltip content={"Delete"}>
+                                <Icon
+                                  onClick={() => deleteLayout(getComponentName())}
+                                  icon={"fluent:delete-20-regular"}
+                                  height={20}
+                                  width={20}
+                                  class="cursor:pointer  flex " />
+                              </Tooltip>
+
+                            </div>
+                          </span>
+                        </Show>
+                        <Show
+                          when={!isSelectedLayoutId(item.id) &&
+                            isSelectedHoverId(item.id)}
+                        >
+                          <span class="position:relative ">
+                            <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center right:0">
+                              <Icon
+                                icon={iconMap[getComponentName()]}
+                                class=" flex" />
+                              <Tooltip content={"Name"} nowrap>
+                                <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
+                                  {getComponentName()}
+                                </div>
+                              </Tooltip>
+                            </div>
+                          </span>
+                        </Show>
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover>
+                </span>
+            </PageRenderVertexContext.Provider>
+          );
+        };
+        const PageComponentWithPreview = () => (
           <PageRenderVertexContext.Provider
             value={[...useContext(PageRenderVertexContext), item]}
           >
-            <Show when={!isPreview()} fallback={<Content />}>
-              <span
-                class={`contents ${getBorder() || ""} `}
-                onMouseOver={(e) => {
-                  e.stopPropagation();
-                  setHoverId(item.id);
-                }}
-                onmouseleave={(e) => {
-                  e.stopPropagation();
-                  setHoverId(-1);
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onLayoutItemClick(item);
-                }}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <Popover
-                  placement={`${isSelectedLayoutId(item.id) ? "top-start" : "top-end"}`}
-                  open={isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)}
-                >
-                  <Popover.Anchor>
-                    <Content />
-                  </Popover.Anchor>
-                  <Popover.Portal>
-                    <Popover.Content class="popover__content">
-                      <Show when={isSelectedLayoutId(item.id)}>
-                        <span class="position:relative ">
-                          <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
-                            <Tooltip content={"Name"} nowrap>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  "font-size": "0.875rem",
-                                  "line-height": "1.25rem",
-                                  "margin-right": "4px",
-                                }}
-                              >
-                                {getComponentName()}
-                              </div>
-                            </Tooltip>
-                            <PropertyDrawer itemId={item.id} />
-                            <Tooltip content={"Move"} nowrap>
-                              <Icon
-                                draggable={true}
-                                onDragStart={handleDragStart}
-                                icon={
-                                  "material-symbols-light:drag-pan-rounded"
-                                }
-                                height={20}
-                                width={20}
-                                class="cursor:pointer flex"
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Parent"} nowrap>
-                              <Icon
-                                icon={"mdi:arrow-up"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                                onClick={(e) => {
-                                  const parentResult = getParentVertex(
-                                    ["Attr"],
-                                    item,
-                                    graph,
-                                  );
-                                  if (parentResult.error) {
-                                    return;
-                                  }
-
-                                  onLayoutItemClick(parentResult.vertex!);
-                                }}
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Duplicate"}>
-                              <Icon
-                                icon={"mage:copy"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                                onClick={clone}
-                              />
-                            </Tooltip>
-                            <Tooltip content={"Delete"}>
-                              <Icon
-                                onClick={() => deleteLayout(getComponentName())}
-                                icon={"fluent:delete-20-regular"}
-                                height={20}
-                                width={20}
-                                class="cursor:pointer  flex "
-                              />
-                            </Tooltip>
-
-                          </div>
-                        </span>
-                      </Show>
-                      <Show
-                        when={
-                          !isSelectedLayoutId(item.id) &&
-                          isSelectedHoverId(item.id)
-                        }
-                      >
-                        <span class="position:relative ">
-                          <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center right:0">
-                            <Icon
-                              icon={iconMap[getComponentName()]}
-                              class=" flex"
-                            />
-                            <Tooltip content={"Name"} nowrap>
-                              <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
-                                {getComponentName()}
-                              </div>
-                            </Tooltip>
-                          </div>
-                        </span>
-                      </Show>
-                    </Popover.Content>
-                  </Popover.Portal>
-                </Popover>
-              </span>
-            </Show>
+              <Content />
           </PageRenderVertexContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
@@ -296,21 +296,32 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
           <Switch>
             <Match when={parentComponent() === "TabList"}>
               <Tab style={item.P}>
-                <PageComponent />
+                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+                <PageComponentWithDND />
+                </Show>
               </Tab>
             </Match>
             <Match when={parentComponent() === "TabContainer"}>
               <TabContainer>
-                <PageComponent />
+                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+
+                <PageComponentWithDND />
+                </Show>
               </TabContainer>
             </Match>
             <Match when={parentComponent() === "TreeViewChild"}>
               <li>
-                <PageComponent />
+                <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+
+                <PageComponentWithDND />
+              </Show>
               </li>
             </Match>
             <Match when={true}>
-              <PageComponent />
+              <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
+
+              <PageComponentWithDND />
+              </Show>
             </Match>
           </Switch>
         );

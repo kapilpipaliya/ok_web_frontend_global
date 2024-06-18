@@ -14,6 +14,7 @@ export const ButtonGroups = (props: {
   name: string;
   label: any;
   isLabelOnTop: boolean;
+  infoLink?: string;
   isAddToClass?: boolean;
   onChangeInput?: any;
 }) => {
@@ -68,14 +69,14 @@ export const ButtonGroups = (props: {
       fallback={
         <Show when={props.label} fallback={<Content />}>
           <CenterDiv>
-            <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
+            <ContainerLabel info={props.name} title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
             <Content />
           </CenterDiv>
         </Show>
       }
     >
       <div class={"w:full"}>
-        <ContainerLabel title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
+        <ContainerLabel info={props.name} title={props.label} showIcon={isDefaultValue()} onIconClick={() => setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })} />
         <Content />
       </div>
     </Show>

@@ -8,6 +8,7 @@ export const ColorPickerInput = (props: {
   name: string;
   onChangeInput: any;
   isAddToClass: boolean;
+  infoLink?: string;
   label: any;
 }) => {
   const [cssState, setCssState] = useContext(CssEditorContext);
@@ -50,14 +51,14 @@ export const ColorPickerInput = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
+              <ContainerLabel info={props.name} onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
               <Content />
             </div>
           </Show>
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
+          <ContainerLabel info={props.name} onIconClick={() => setCssState(state(),{ [props.name]: cssDefault[state() ?? '']?.[props.name]})} showIcon={isDefaultValue()} title={props.label} />
           <Content />
         </div>
       </Show>

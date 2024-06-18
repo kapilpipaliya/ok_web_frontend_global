@@ -15,6 +15,7 @@ import "~/css/componentUtilCSS.css";
 export const DisplaySelector = (props: {
   name: string;
   options: any;
+  infoLink?: string;
   isLabelOnTop: boolean;
   label: string;
   isAddToClass: boolean;
@@ -70,7 +71,7 @@ export const DisplaySelector = (props: {
         fallback={
           <Show when={props.label} fallback={<Content />}>
             <div class={"w:100% flex jc:space-between ai:center"}>
-              <ContainerLabel onIconClick={() => {
+              <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
                 setCssState(state(), { [props.name]: cssDefault[state() ?? '']?.[props.name] })
                 if (props.value) {
                   props.onRemoveIconClick?.();
@@ -82,7 +83,7 @@ export const DisplaySelector = (props: {
         }
       >
         <div class={"w:full"}>
-          <ContainerLabel onIconClick={() => {
+          <ContainerLabel info={props.infoLink || props.name} onIconClick={() => {
             if (props.value) {
               props.onRemoveIconClick?.();
             }
