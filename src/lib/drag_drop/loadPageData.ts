@@ -1,6 +1,6 @@
 import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "../websocket/setGraphData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
 import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";

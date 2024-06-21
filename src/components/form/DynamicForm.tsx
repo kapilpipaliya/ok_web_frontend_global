@@ -48,7 +48,7 @@ import { TableTabs } from "~/components/TableTabs";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
 import { DeleteDialog } from "~/components/DeleteDialog";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 import { FormContext, FormSettingsContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";

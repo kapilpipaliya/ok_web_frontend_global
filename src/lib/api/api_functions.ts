@@ -1,7 +1,7 @@
 import { postAPI } from "~/lib/api/postApi";
 import { API } from "~/lib/api/endpoints";
 import { ProcessStatus, transactions } from "~/lib/graph/transaction";
-import { onMutatDataGet } from "~/lib/websocket/ws_events";
+import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
 import type { GraphInterface } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
@@ -34,7 +34,7 @@ export async function registerUserCall(formData: any) {
 // Sign in a user with email and password
 export async function signInCall(formData: any) {
   return await makeAPICall(API.loginUrl, {
-    email: formData().email.toLowerCase(),
+    email: formData().email.toLowerCase() ,
     password: formData().password,
   });
 }

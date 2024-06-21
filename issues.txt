@@ -56,35 +56,42 @@ css issue:
  box-shadow 
 
 make drag and drop working on ipad or mobile working.
-Refactor all cypher functions, use eval function whenever possible.
+
 make undo redo working (use prevTxnIds in FormSettings context)
 Fix page component data not loaded in page designer
 (when Submit do not redirect to parent screen?)
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
-Write a function to get all the fields in the form, make sync of Nav working
+
 Make the forms made using form designer load and save working
 Make a custom forms builder using the original forms.
 Make a table designer using the forms fields.
 Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
-Sorting, Filtering support on the table
-Load table data from server with pagination when form have many rows
+
+
 fix import export button on the form
 Make Drag and Drop on touch screen working
 collection edit page is broken.
 on double click add element at last - last in selected layout?  ✅ 
-Make Nav sync full data. (IMP)
 Make Page working with some async data too.
 Make Working Forms using Page Designer.
 Make Page Share working.
 Refactor duplicate code between cyper api and lib folder.
-Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with samee files.
-When user upload a file, also save entry in the database.
 make automatic backup for all the users everyday
 Fix Inline Editing Modal not close in list page.
 Use async everywhere, it will load data from server. Only few places use sync API.
 make a file upload component in page builder.
 Make Permissions working in DynamicForm component.
 ------------------------------------------------------------------------------------------
+
+Backend:
+Fix File upload not working. when file upload is done save file upload is done, save a entry in 'Media' label. https://www.easyformforge.com/admin/setting
+Refactor all cypher functions, use eval function whenever possible.
+Write a function to get all the fields in the form, make sync of Nav working
+Sorting, Filtering support on the table
+Load table data from server with pagination when form have many rows
+Make Nav sync full data. (IMP)
+Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with samee files.
+When user upload a file, also save entry in the database.
 
 Auth:
 Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are autorized.

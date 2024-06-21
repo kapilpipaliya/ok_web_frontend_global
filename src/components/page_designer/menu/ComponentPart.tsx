@@ -16,7 +16,7 @@ import {
 } from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 import { onClickAddComponent } from "../CommonCompUtils";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { iconMap } from "~/lib/constants";

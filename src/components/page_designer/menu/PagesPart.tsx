@@ -12,7 +12,7 @@ import {
 import { useToast } from "~/components/Toast";
 import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";

@@ -1,6 +1,7 @@
 import {int, type Session} from "neo4j-driver";
 import type {Edge, Vertex} from "~/lib/graph/graph";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
+import { ContextType } from "./evaluate/ContextType";
 
 export async function findVertexMGCallId(
   session: Session,
@@ -17,13 +18,7 @@ export async function findVertexMGCallId(
     limit?: number;
     name?: string;
   },
-  {
-    nodes,
-    relationships,
-  }: {
-    nodes?: { [key: string]: Vertex };
-    relationships?: { [key: string]: Edge };
-  } = {},
+  context: ContextType = {},
 ) {
   let query: string | undefined;
   const params = {} as { name?: string; id: any };
@@ -56,8 +51,8 @@ export async function findVertexMGCallId(
   const result = await session.run(query, params);
   return result.records.map((record) => {
     const vertex = convertNodeToJson(record.get("n"));
-    if (nodes) {
-      nodes[vertex.id] = vertex;
+    if (context.nodes) {
+      context.nodes[vertex.id] = vertex;
     }
     return vertex;
   });

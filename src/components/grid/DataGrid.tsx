@@ -19,7 +19,7 @@ import {
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex, } from "~/lib/graph/graph";
 import { getFormApiFromFormMGCall } from "~/cypher/get/getFormApiFromFormMGCall";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 import { CommonTable } from "~/components/Table";
 import { Icon } from "@iconify-icon/solid";
 import { createStore } from "solid-js/store";

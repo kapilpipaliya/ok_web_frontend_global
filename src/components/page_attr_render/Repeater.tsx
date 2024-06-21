@@ -11,7 +11,7 @@ import {
 } from "~/components/page_attr_render/PageAttrRender";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { GraphContext } from "~/lib/graph/graph";
-import { setGraphData } from "~/lib/websocket/ws_events";
+import { setGraphData } from "~/lib/websocket/setGraphData";
 import {
   RepeaterVertexContext, PageRenderVertexContext
 } from "~/components/page_attr_render/Context";

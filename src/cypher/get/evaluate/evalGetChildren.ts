@@ -2,19 +2,17 @@
 import type {Edge, Vertex} from "~/lib/graph/graph";
 import {int, type Session} from "neo4j-driver";
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
-import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
+import { ContextType } from "./ContextType";
+import { processResult } from "./processResult";
 
 export async function evalGetChildren(
   vertexes: Vertex[],
   edgeType: string,
-  context: {
-    nodes?: { [key: string]: Vertex };
-    relationships?: { [key: string]: Edge };
-    session?: Session
-  } = {},
+  context: ContextType = {},
 ) {
   "use server";
   if (!vertexes || vertexes.length === 0) return;
+
   const session = context.session || await getSessionForSubdomain();
   let type;
   if (edgeType.includes("$0")) {
@@ -22,7 +20,7 @@ export async function evalGetChildren(
   } else {
     type = edgeType;
   }
-
+  
   let query;
   let params;
   if (type.includes("|")) {
@@ -46,17 +44,7 @@ export async function evalGetChildren(
 
   try {
     const result = await session.run(query, params);
-    return result.records.map((record) => {
-      const vertex = convertNodeToJson(record.get("child"));
-      if (context.nodes) {
-        context.nodes[vertex.id] = vertex;
-      }
-      if (context.relationships) {
-        const relationship = convertRelationshipToJson(record.get("r"));
-        context.relationships[relationship.id] = relationship;
-      }
-      return vertex;
-    });
+    return processResult(result.records, context, "child", "r", false);
   } catch (error) {
     console.error(
       `Error fetching children for vertex ${vertexes

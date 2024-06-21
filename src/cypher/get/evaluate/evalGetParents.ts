@@ -3,15 +3,13 @@ import type {Edge, Vertex} from "~/lib/graph/graph";
 import {int, type Session} from "neo4j-driver";
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
+import { ContextType } from "./ContextType";
+import { processResult } from "./processResult";
 
 export async function evalGetParents(
   vertexes: Vertex[],
   edgeType: string,
-  context: {
-    nodes?: { [key: string]: Vertex };
-    relationships?: { [key: string]: Edge };
-    session?: Session
-  } = {},
+  context: ContextType = {},
 ) {
   "use server";
   if (!vertexes || vertexes.length === 0) return;
@@ -41,17 +39,7 @@ export async function evalGetParents(
 
   try {
     const result = await session.run(query, params);
-    return result.records.map((record) => {
-      const vertex = convertNodeToJson(record.get("parent"));
-      if (context.nodes) {
-        context.nodes[vertex.id] = vertex;
-      }
-      if (context.relationships) {
-        const relationship = convertRelationshipToJson(record.get("r"));
-        context.relationships[relationship.id] = relationship;
-      }
-      return vertex;
-    });
+    return processResult(result.records, context, "parent", "r", true);
   } catch (error) {
     console.error(
       `Error fetching parents for vertex ${vertexes

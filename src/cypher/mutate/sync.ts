@@ -1,11 +1,11 @@
 import neo4j, { type Session, type Node, int } from "neo4j-driver";
-import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
-import {evalAsync} from "~/lib/expression_eval";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { evalAsync } from "~/lib/expression_eval";
 import jsep from "jsep";
-import type {Vertex} from "~/lib/graph/graph";
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
-import type {Expression, } from "~/cypher/get/getDataMGCall";
-import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
+import type { Edge, EdgeMap, Vertex, VertexMap } from "~/lib/graph/graph";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
+import type { Expression, } from "~/cypher/get/getDataMGCall";
+import { getFormMetaDataAsync } from "~/lib/graph/get/async/getFormMetaDataAsync";
 
 // Main function to initiate the migration process.
 export async function syncNodesMGCall(args: { userport: string; nodesToTransfer: string[]; }) {
@@ -59,20 +59,11 @@ async function transferNodeTypes(
     const { incoming, outgoing }: { incoming: any; outgoing: any } =
       getEdgesFromRowsAttr(form.form!.attributes);
 
-    const result = await processNodeSync({
+    const result = await processNodeSync(sessionSource, sessionTarget, {
       expression: `g:'${nodeType}'`,
       incoming,
       outgoing,
-    });
-
-/*    const readResult = await sessionSource.run(
-      `MATCH (n:${nodeType}) RETURN n;`,
-    );
-    // console.log(`Retrieved ${readResult.records.length} ${nodeType} nodes from admin database.`);
-
-    for (const record of readResult.records) {
-      await findOrCreateNodeAndProcessEdges(sessionSource, sessionTarget, record.get("n"), nodeType);
-    }*/
+    }, [], false);
   }
 }
 
@@ -80,32 +71,42 @@ export async function processNodeSync(
   sessionSource: Session,
   sessionTarget: Session,
   expression: Expression,
+  vertexes: Vertex[],
+  inward: boolean,
+  createdVertex?: Vertex,
 ) {
   const context = {
-    nodes: {} as { [key: string]: any },
-    relationships: {} as { [key: string]: any },
-    vertexes: undefined as any,
+    nodes: {} as VertexMap,
+    relationships: {} as EdgeMap,
+    vertexes,
+    session: sessionSource,
+    setChildren: true,
   }
   const mainResult = await evalAsync(jsep(expression.expression), context);
+
   if (mainResult && mainResult.length > 0) {
-      for (const vertex of mainResult) {
-        const createdVertex = findOrCreateNodeAndProcessEdges(sessionSource, sessionTarget, vertex, vertex.L[0]);
-        if (expression.incoming && mainResult && mainResult.length > 0) {
-          for (const exp of expression.incoming) {
-            context.vertexes = [createdVertex];
-            await processNodeSync(sessionSource, sessionTarget, exp);
-          }
-        }
-        if (expression.outgoing && mainResult && mainResult.length > 0) {
-          for (const exp of expression.outgoing) {
-            context.vertexes = [createdVertex];
-            await processNodeSync(sessionSource, sessionTarget, exp);
-          }
+    let children: Vertex[] = [];
+    if (createdVertex && mainResult.length > 0) {
+      const edge = Object.values(context.relationships)[0];
+      const outLabel = mainResult[0].L[0];
+      children = await addNodeEdges(sessionSource, sessionTarget, createdVertex, mainResult, edge.T, outLabel, inward);
+    }
+
+    for (let vertex of mainResult) {
+      const newCreatedVertex = children.find(child => child.P.name === vertex.P.name) || await findOrCreateNodeAndUpdateProperties(sessionSource, sessionTarget, vertex, vertex.L[0]);
+      if (expression.incoming && expression.incoming.length > 0) {
+        for (const exp of expression.incoming) {
+          await processNodeSync(sessionSource, sessionTarget, exp, [vertex], true, newCreatedVertex);
         }
       }
+      if (expression.outgoing && expression.outgoing.length > 0) {
+        for (const exp of expression.outgoing) {
+          await processNodeSync(sessionSource, sessionTarget, exp, [vertex], false, newCreatedVertex);
+
+        }
+      }
+    }
   }
-
-
 
   return {
     result: mainResult,
@@ -117,7 +118,7 @@ export async function processNodeSync(
 }
 
 // Function to handle transfer of a single node.
-async function findOrCreateNodeAndProcessEdges( // transferNode
+async function findOrCreateNodeAndUpdateProperties( // transferNode
   sessionSource: Session,
   sessionTarget: Session,
   node: Vertex,
@@ -151,85 +152,103 @@ async function findOrCreateNodeAndProcessEdges( // transferNode
 // Function to update properties of an existing node.
 async function updateNodeProperties(
   session: Session,
-  node: Node,
-  properties: {[key: string]: any},
+  node: Vertex,
+  properties: { [key: string]: any },
 ) {
   const result = await session.run(
     "MATCH (n) WHERE id(n) = $id SET n += $properties SET n.updatedAt = localDateTime() RETURN n;",
-    { id: int(node.elementId), properties },
+    { id: int(node.id), properties },
   );
-  return result.records[0].get("n");
+  return convertNodeToJson(result.records[0].get("n"));
 }
 
 // Function to create a new node.
 async function createNode(
   session: Session,
   nodeType: string,
-  properties: {[key: string]: any},
+  properties: { [key: string]: any },
 ) {
   const result = await session.run(
     `CREATE (n:${nodeType}) SET n = $properties SET n.createdAt = localDateTime() RETURN n;`,
     { properties },
   );
-  return result.records[0].get("n");
+  return convertNodeToJson(result.records[0].get("n"));
 }
 
 // Function to add edges between nodes based on certain conditions.
 async function addNodeEdges(
   sessionSource: Session,
   sessionTarget: Session,
-
+  parentVertex: Vertex,
   superChildrenVertexes: Vertex[],
-  createdNode: Node,
+  type: string,
+  outLabel: string,
   inward: boolean
 ) {
+  // Find children with same name in target database if not exists create a node and edge.
+  const userChildrenVertexes = await getChildrenOrParentVertex(
+    sessionTarget,
+    parentVertex.id,
+    type,
+    outLabel,
+    inward
+  );
+  const results = [] as Vertex[];
+  const globalCollections = ['Nav', 'DataType', 'Comp', 'CompCategory', 'Page'];
 
-    const superChildrenVertexes = await getChildrenOrParentVertex(
-      sessionSource,
-      node.elementId,
-      "CompProp",
-      inward
-    );
-    const userChildrenVertexes = await getChildrenOrParentVertex(
-      sessionTarget,
-      createdNode.elementId,
-      "CompProp",
-      inward
-    );
+  for (const superVertex of superChildrenVertexes) {
+    const superProperties = { ...superVertex.P };
+    let isPropertyExist = false;
 
-    for (const superVertex of superChildrenVertexes) {
-      const superProperties = { ...superVertex.P };
-      let isPropertyExist = false;
-
-      for (const childVertex of userChildrenVertexes) {
-        const userProperties = { ...childVertex.P };
-        if (superProperties.name === userProperties.name) {
-          const query =
-            "MATCH (a) WHERE id(a) = $compPropNodeId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
-          await sessionTarget.run(query, {
-            compPropNodeId: int(childVertex.get("m").elementId),
-            props: superProperties,
-          });
-          isPropertyExist = true;
-        }
-      }
-      if (!isPropertyExist) {
+    for (const childVertex of userChildrenVertexes) {
+      if (superProperties.name === childVertex.P.name) {
         const query =
-          "MATCH (a) WHERE id(a) = $compNodeId CREATE (a)-[:CompProp]->(b) SET b = $props SET b.createdAt = localDateTime() RETURN b;";
-        await sessionTarget.run(query, {
-          compNodeId: int(createdNode.elementId),
+          "MATCH (a) WHERE id(a) = $childId SET a += $props SET a.updatedAt = localDateTime() RETURN a;";
+        const result = await sessionTarget.run(query, {
+          childId: int(childVertex.id),
           props: superProperties,
         });
+        result.records.forEach(v => results.push(convertNodeToJson(v.get('a'))))
+        isPropertyExist = true;
+        continue;
       }
     }
 
+    if (!isPropertyExist) {
+      let query: string;
+      let props: { [key: string]: any } = {};
+      if (globalCollections.includes(superVertex.L[0])) {
+        const targetNode = await findOrCreateNodeAndUpdateProperties(sessionSource, sessionTarget, superVertex, superVertex.L[0]);
+        query = `MATCH (a),(b)
+         WHERE id(a) = $parentNodeId
+         AND id(b) = $targetNodeId
+         CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b) RETURN b;`;
+        props = {
+          parentNodeId: int(parentVertex.id),
+          targetNodeId: int(targetNode.id),
+          props: superProperties,
+        }
+      } else {
+        query = `MATCH (a) WHERE id(a) = $parentNodeId
+         CREATE (a)${inward ? "<-" : "-"}[:${type}]${inward ? "-" : "->"}(b:${superVertex.L[0]})
+         SET b = $props SET b.createdAt = localDateTime() RETURN b;`;
+        props = {
+          parentNodeId: int(parentVertex.id),
+          props: superProperties,
+        }
+      }
+      const result = await sessionTarget.run(query, props);
+      result.records.forEach(v => results.push(convertNodeToJson(v.get('b'))))
+    }
+  }
+  return results;
 }
 
 // Function to retrieve child vertices of a node based on a specific edge type.
-const getChildrenOrParentVertex = async (session: Session, elementId: string, edgeType: string, inward: boolean) => {
+const getChildrenOrParentVertex = async (session: Session, id: string, edgeType: string, endLabel: string, inward: boolean) => {
   const result = await session.run(
-    !inward ? `MATCH (n)-[r:${edgeType}]->(m) WHERE id(n) = $id RETURN m;` : `MATCH (n)<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`,
-    { id: int(elementId) },
+    !inward ? `MATCH (n)-[r:${edgeType}]->(m:${endLabel}) WHERE id(n) = $id RETURN m;` : `MATCH (n${endLabel})<-[r:${edgeType}]-(m) WHERE id(n) = $id RETURN m;`,
+    { id: int(id) },
   );
   return result.records.map(v => convertNodeToJson(v.get('m')))
 };
@@ -244,5 +263,5 @@ async function findExistingNode(
     `MATCH (n:${nodeType} {name: $name}) RETURN n;`,
     { name: name },
   );
-  return result.records.length > 0 ? result.records[0].get("n") : null;
+  return result.records.length > 0 ? convertNodeToJson(result.records[0].get("n")) : null;
 }
