@@ -7,45 +7,19 @@ export async function checkUserExistence(
   email: string,
   subdomain: string,
 ) {
-  // Check if the subdomain already exists
-  if (
-    subdomain &&
-    !(
-      await findVertexesMGCall({
-        label: "User",
-        attribute: "subdomain",
-        value: subdomain,
-      })
-    ).error
-  ) {
+  const checkIfExists = async (label: string, attribute: string, value: string) => {
+    return !(await findVertexesMGCall({ label, attribute, value })).error;
+  };
+
+  if (subdomain && !(await checkIfExists("User", "subdomain", subdomain))) {
     throw new Error("Sub Domain already exists");
   }
 
-  // Check if the username already exists
-  if (
-    username &&
-    !(
-      await findVertexesMGCall({
-        label: "User",
-        attribute: "username",
-        value: username,
-      })
-    ).error
-  ) {
+  if (username && !(await checkIfExists("User", "username", username))) {
     throw new Error("Username already exists");
   }
 
-  // Check if the email already exists
-  if (
-    email &&
-    !(
-      await findVertexesMGCall({
-        label: "User",
-        attribute: "email",
-        value: email,
-      })
-    ).error
-  ) {
+  if (email && !(await checkIfExists("User", "email", email))) {
     throw new Error("Email address already exists");
   }
 }

@@ -40,7 +40,7 @@ async function signupAdmin(request: APIEvent["request"]) {
       labPort,
     );
     console.log("FetchCSVData");
-    // todo run sync here
+
     syncNodesMGCall({
       userport: driverPort,
       nodesToTransfer: ["DataType", "CompCategory", "Comp", "Nav"]
