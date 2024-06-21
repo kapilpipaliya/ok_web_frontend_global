@@ -12,15 +12,15 @@ export let uniqueId = -50000;
 export type Revert = { revert: () => any };
 export type InsertFn = {
   [key in
-    | "insert"
-    | "replace"
-    | "merge"
-    | "deleteVertex"
-    | "insertEdge"
-    | "replaceEdge"
-    | "replaceEdgeStart"
-    | "replaceEdgeEnd"
-    | "deleteEdge"]?: () => any;
+  | "insert"
+  | "replace"
+  | "merge"
+  | "deleteVertex"
+  | "insertEdge"
+  | "replaceEdge"
+  | "replaceEdgeStart"
+  | "replaceEdgeEnd"
+  | "deleteEdge"]?: () => any;
 };
 
 export enum ProcessStatus {
@@ -34,19 +34,40 @@ export enum ProcessStatus {
 export type TransactionValue = InsertFn & Revert & { data: any };
 export const transactions = new Map<
   number,
-  { status: ProcessStatus; steps: TransactionValue[] }
+  {
+    status: ProcessStatus;
+    steps: TransactionValue[];
+    undoStep: number;
+    submittedStep: number;
+    revertSteps: TransactionValue[];
+    undoPoints: number[];
+  }
 >();
+
+
+
 // @ts-ignore
 export function transactionDetailAdd(
   txnId: number,
   txnValue: TransactionValue,
 ) {
   if (!txnId) return;
-  const existingTxnValue = transactions.get(txnId) || {
-    status: ProcessStatus.Unset,
-    steps: [],
-  };
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+
+  if (existingTxnValue.undoStep < existingTxnValue.steps.length - 1) {
+    if (existingTxnValue.submittedStep < existingTxnValue.undoStep) {
+      // delete steps after undoStep
+      existingTxnValue.steps = existingTxnValue.steps.slice(0, existingTxnValue.undoStep + 1);
+    } else {
+      // remove steps after undoStep to submittedStep and add to revertSteps, descard steps after submittedStep
+      const removedSteps = existingTxnValue.steps.slice(existingTxnValue.undoStep + 1, existingTxnValue.submittedStep + 1);
+      existingTxnValue.steps = existingTxnValue.steps.slice(0, existingTxnValue.undoStep + 1);
+      existingTxnValue.revertSteps = [...removedSteps, ...existingTxnValue.revertSteps];
+    }
+  }
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
+  existingTxnValue.undoStep = existingTxnValue.steps.length - 1;
+
   transactions.set(txnId, existingTxnValue);
 }
 
@@ -62,27 +83,22 @@ export function getExistingOrDefaultTxnValue(txnId: number) {
   return (
     transactions.get(txnId) || {
       status: ProcessStatus.Unset,
+      undoStep: 0,
+      submittedStep: 0,
       steps: [],
+      revertSteps: [],
+      undoPoints: [],
     }
   );
 }
 
-export function revertOneTransactionUnSafe(txnId: number, txnIndex: number) {
-  if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
-  // todo dont use splice
-  const newTxnValue = existingTxnValue.steps.splice(txnIndex, 1);
-  newTxnValue[0]?.revert();
-}
 export function revertTransactionUpTo(txnId: number, txnIndex: number) {
   if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = transactions.get(txnId) || {
-    status: ProcessStatus.Unset,
-    steps: [],
-  };
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
   const newTxnValue = existingTxnValue.steps.splice(txnIndex);
   newTxnValue.reverse().forEach((x) => x.revert());
 }
+
 export function revertTransaction(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return;
   const existingTxnValue = [...(transactions.get(txnId)?.steps || [])];
@@ -91,6 +107,34 @@ export function revertTransaction(txnId: number) {
   });
   transactions.delete(txnId);
 }
+
+export function undo(txnId: number) {
+  debugger;
+  if (!txnId || !transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+  if (existingTxnValue.steps.length <= 1) return;
+  const undoPointIndex = existingTxnValue.undoPoints.findIndex((point) => point === existingTxnValue.undoStep);
+  let newUndoPoint = 0;
+  if (undoPointIndex !== -1 && undoPointIndex > 0) {
+    newUndoPoint = existingTxnValue.undoPoints[undoPointIndex - 1];
+    
+
+    // existingTxnValue.steps = existingTxnValue.steps.slice(0, newUndoPoint + 1);
+    // existingTxnValue.revertSteps = existingTxnValue.revertSteps.slice(0, newUndoPoint + 1);
+  } else {
+    newUndoPoint = existingTxnValue.undoStep - 1;
+  }
+
+  existingTxnValue.steps.slice(newUndoPoint + 1, existingTxnValue.undoStep + 1).forEach((txn) => txn.revert());
+  existingTxnValue.undoStep = newUndoPoint;
+  // existingTxnValue.revertSteps.reverse().forEach((txn) => txn.redo());
+}
+export function redo(txnId: number) {
+  if (!txnId || !transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+  // existingTxnValue.revertSteps.reverse().forEach((txn) => txn.redo());
+}
+
 export function txnHasSteps(txnId: number) {
   if (!txnId || !transactions.has(txnId)) return false;
   const existingTxnValue = transactions.get(txnId)?.steps || [];
@@ -169,7 +213,7 @@ export function commitTxn(txnId: number, Ws: ServerEventsDispatcher) {
 }
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 
-export function getNewGraphId(): Id {
+export function getNewGraphId() {
   uniqueId = uniqueId + 1;
   return uniqueId;
   // Muration Actor Exception Error : Integer overflow -
@@ -207,8 +251,4 @@ export function isAllTxnProcessed() {
     }
   }
   return allTxnProcessed;
-}
-
-export function isValidId(startVertexId: Id) {
-  return true;
 }

@@ -64,6 +64,7 @@ export function addNewVertex(
   transactionDetailAdd(txnId, {
     data,
     insert: () => data,
+    redo: () => addNewVertex(0, data, graph, setGraph),
     revert: () => deleteVertex(0, vertex.id, graph, setGraph),
   });
   return {
@@ -89,6 +90,7 @@ export function replaceVertexProperties(
   transactionDetailAdd(txnId, {
     data,
     replace: () => klona(graph.vertexes[vertexId]),
+    redo: () => replaceVertexProperties(0, vertexId, graph, setGraph, data.P),
     revert: () =>
       replaceVertexProperties(0, vertexId, graph, setGraph, originalProperties),
   });
@@ -121,6 +123,7 @@ export function mergeVertexProperties(
   transactionDetailAdd(txnId, {
     data: properties,
     merge: () => Object.assign({}, vertex, { properties }),
+    redo: () => mergeVertexProperties(0, vertexId, graph, setGraph, properties),
     revert: () =>
       mergeVertexProperties(0, vertexId, graph, setGraph, originalProperties),
   });
@@ -207,6 +210,7 @@ export function deleteVertex(
   transactionDetailAdd(txnId, {
     data,
     deleteVertex: () => data,
+    redo: () => deleteVertex(0, vertexId, graph, setGraph),
     revert: () => addNewVertex(0, vertex, graph, setGraph),
   });
   return {

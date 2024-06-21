@@ -3,7 +3,7 @@ import { batch } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 import { pipe } from "@mobily/ts-belt";
 import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
-import { isValidId, transactionDetailAdd, transactions } from "../transaction";
+import { transactionDetailAdd, transactions } from "../transaction";
 
 export function newEdge(
   edgeId: Id,
@@ -12,13 +12,13 @@ export function newEdge(
   startVertexId: Id,
   endVertexId: Id,
 ): Edge {
-  !isValidId(startVertexId) &&
+  !(startVertexId) &&
     console.error(
-      `edge startId should be string, but received ${startVertexId}`,
+      `edge startId should not be empty`,
     );
-  !isValidId(endVertexId) &&
+  !(endVertexId) &&
     console.error(
-      `edge endId and endId should be string, but received ${endVertexId}`,
+      `edge endId should not be empty`,
     );
   return {
     id: edgeId,
@@ -27,21 +27,6 @@ export function newEdge(
     S: startVertexId,
     E: endVertexId,
   };
-}
-
-export function addNewEdgeUnSafe(
-  edge: Edge,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  batch(() => {
-    setGraph("edges", edge.id, edge);
-    setGraph("vertexes", edge.S, "OUT", edge.T, (out_edges: any) =>
-      Array.isArray(out_edges) ? [...out_edges, edge.id] : [edge.id],
-    );
-    setGraph("vertexes", edge.E, "IN", edge.T, (in_edges: any) =>
-      Array.isArray(in_edges) ? [...in_edges, edge.id] : [edge.id],
-    );
-  });
 }
 
 export function addNewEdge(
@@ -96,6 +81,7 @@ export function addNewEdge(
   transactionDetailAdd(txnId, {
     data,
     insertEdge: () => data,
+    redo: () => addNewEdge(0, data, graph, setGraph),
     revert: () => deleteEdge(0, edge.id, graph, setGraph),
   });
   return {
@@ -120,6 +106,7 @@ export function replaceEdgeProperties(
   transactionDetailAdd(txnId, {
     data,
     replaceEdge: () => data,
+    redo: () => replaceEdgeProperties(0, edgeId, graph, setGraph, data.P),
     revert: () =>
       replaceEdgeProperties(0, edgeId, graph, setGraph, originalProperties),
   });
@@ -164,6 +151,7 @@ export function replaceEdgeStart(
   transactionDetailAdd(txnId, {
     data,
     replaceEdgeStart: () => data,
+    redo: () => replaceEdgeStart(0, edgeId, graph, setGraph, data.S),
     revert: () =>
       replaceEdgeStart(0, edgeId, graph, setGraph, oldStartVertexId),
   });
@@ -207,6 +195,7 @@ export function replaceEdgeEnd(
   transactionDetailAdd(txnId, {
     data,
     replaceEdgeEnd: () => data,
+    redo: () => replaceEdgeEnd(0, edgeId, graph, setGraph, data.E),
     revert: () => replaceEdgeEnd(0, edgeId, graph, setGraph, oldEndVertexId),
   });
   return {
@@ -255,6 +244,7 @@ export function deleteEdge(
   transactionDetailAdd(txnId, {
     data: edge,
     deleteEdge: () => edge,
+    redo: () => deleteEdge(0, edgeId, graph, setGraph),
     revert: () => addNewEdge(0, edge, graph, setGraph),
   });
   return {

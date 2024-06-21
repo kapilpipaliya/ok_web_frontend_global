@@ -1,4 +1,4 @@
-import { type JSX, Show, createSignal, onCleanup, onMount, For } from "solid-js";
+import { type JSX, Show, createSignal, onCleanup, onMount, For, useContext } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
 
 import { Icon } from "@iconify-icon/solid";
@@ -17,6 +17,7 @@ import { Stepper } from "./Stepper";
 import { useLocation } from "@solidjs/router";
 import { ActionsDragAndDrops } from "./actions/Actions_DragAndDrops";
 import { MenuDragAndDrop } from "./menu/Menu_DragAndDrop";
+import { redo, undo } from "~/lib/graph/transaction";
 
 export function LayoutDragAndDrop(): JSX.Element {
   const location = useLocation();
@@ -71,9 +72,10 @@ export function LayoutDragAndDrop(): JSX.Element {
   });
 
   const UndoRedoIcons = () => {
+    const [pageConfig, __] = useContext(PageConfigContext);
     const icons = [
-      { icon: "ci:arrow-undo-up-left", tooltip: "Undo" },
-      { icon: "ci:arrow-undo-up-right", tooltip: "Redo" },
+      { icon: "ci:arrow-undo-up-left", tooltip: "Undo", onClick: () => undo(pageConfig.formData.txnId) },
+      { icon: "ci:arrow-undo-up-right", tooltip: "Redo", onClick: () => redo(pageConfig.formData.txnId) },
     ];
 
     return (
@@ -82,7 +84,9 @@ export function LayoutDragAndDrop(): JSX.Element {
           {(item) => (
             <Tooltip content={item.tooltip} position={"n"}>
               <div
-                class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer">
+                class="b:1px|solid|lightgrey bg:white color:#000:hover color:grey flex ai:center jc:center r:7 h:30px w:30px cursor:pointer"
+                onClick={item.onClick}
+              >
                 <Icon icon={item.icon} height={22} width={22}/>
               </div>
             </Tooltip>
