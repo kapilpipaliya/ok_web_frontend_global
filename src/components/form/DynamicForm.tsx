@@ -356,6 +356,8 @@ export function DynamicForm(props: DynamicFormProps) {
   const [popup, setPopup] = createSignal(false);
   const [discradPopup, setDiscradPopup] = createSignal(false);
 
+
+  let onConfirmExit: () => void;
   // https://github.com/solidjs/solid-router
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
     if (submit || !txnHasSteps(formData.txnId)) {
@@ -367,6 +369,10 @@ export function DynamicForm(props: DynamicFormProps) {
     setTimeout(() => {
       setDiscradPopup(true);
     }, 100);
+    onConfirmExit = () => {
+      // user wants to proceed anyway so retry with force=true
+      e.retry(true);
+    };
   });
 
   const SubmitButton = () => (
@@ -502,6 +508,7 @@ export function DynamicForm(props: DynamicFormProps) {
                 onConfirm={() => {
                   revertTransaction(formData.txnId);
                   setDiscradPopup(false);
+                  onConfirmExit();
                 }}
                 title="Discard changes"
                 message="Discard unsaved changes - are you sure?"
