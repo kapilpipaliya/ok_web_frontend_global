@@ -1,5 +1,5 @@
 import { For, Show, useContext } from "solid-js";
-import { TextField } from "~/components/solid_blocks";
+
 import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
@@ -192,8 +192,7 @@ export function ExpressionBuilder(props: {
                         selectionLimit={1}
                       />
                     </div>
-                    <TextField
-                      labelClass={"w:100% mr:.5rem ml:.5rem"}
+                    <input
                       style={`border: ${item.error ? "1px solid red " : ""}`}
                       class={"global-style flex-col"}
                       {...props.meta?.P}
@@ -201,16 +200,14 @@ export function ExpressionBuilder(props: {
                       onchange={(e: any) => handleChange(index(), e)}
                       value={item.value}
                       title={item.error ? "Please fill in this field" : ""}
-                      trailing={
-                        <NestedExpressionBuilder
-                          content={item.value}
-                          meta={props.meta}
-                          data={props.data}
-                          txnId={props.txnId}
-                          setValue={props.setValue}
-                          onClose={handleCancel}
-                        />
-                      }
+                    />
+                    <NestedExpressionBuilder
+                      content={item.value}
+                      meta={props.meta}
+                      data={props.data}
+                      txnId={props.txnId}
+                      setValue={props.setValue}
+                      onClose={handleCancel}
                     />
                     <div class={"flex"}>
                       <MultiSelectField

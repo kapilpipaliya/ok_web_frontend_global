@@ -9,7 +9,6 @@ import {
   type JSXElement,
   createMemo,
 } from "solid-js";
-import { TextField } from "~/components/solid_blocks";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext, sizeTypes } from "../context";
 import { Container, CenterDiv, ContainerLabel } from "./CssUtils";
 import "~/css/componentUtilCSS.css";
@@ -158,9 +157,8 @@ export const TextFieldWithSelect = (props: {
         <Show
           when={props.showInside}
           fallback={
-            <TextField
+            <label>{props.label}<input
               step="any"
-              label={props.label}
               type={props.inputType || "text"}
               placeholder={`${
                 props.inputType === "number" ? "0" : props.placeholder
@@ -169,7 +167,7 @@ export const TextFieldWithSelect = (props: {
               onInput={handleChange}
               class={"f:14"}
               style={{ width: "100%" }} // Set width to 100%
-            />
+            /></label>
           }
         >
           <input

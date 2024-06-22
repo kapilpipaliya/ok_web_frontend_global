@@ -5,7 +5,6 @@ import { API } from "~/lib/api/endpoints";
 import {getAPI} from "~/lib/api/getApi";
 import {postAPI} from "~/lib/api/postApi";
 import { useToast } from "~/components/Toast";
-import { TextField } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
 import { validateEmail } from "~/lib/validations";
 
@@ -172,10 +171,9 @@ export const GeneralSection = (props: GenralProps) => {
         <div class="p:10 gap:10 grid-template-columns:repeat(2,50%) justify-self:center grid@>lg">
           <div>
             <span class={"font-weight:500 font:15 color:dimgrey"}>User Id</span>
-            <TextField
-              labelClass={"w:40%"}
+            <input
               name={"id"}
-              label={"Id"}
+              placeholder={"Id"}
               disabled={true}
               value={props.profileData.id}
               onChange={handleInputChange}
@@ -185,11 +183,10 @@ export const GeneralSection = (props: GenralProps) => {
             <span class={"font-weight:500 font:15 color:dimgrey"}>
               UserName
             </span>
-            <TextField
+            <input
               name={"username"}
               disabled={!isEdit()}
-              labelClass={"w:40%"}
-              label={"Username"}
+              placeholder={"Username"}
               value={props.profileData.username}
               onChange={handleInputChange}
             />
@@ -198,11 +195,10 @@ export const GeneralSection = (props: GenralProps) => {
             <span class={"font-weight:500 font:15 color:dimgrey"}>
               Email Address
             </span>
-            <TextField
+            <input
               name={"email"}
               disabled={!isEdit()}
-              labelClass={"w:40%"}
-              label={"Email Address"}
+              placeholder={"Email Address"}
               value={props.profileData.email}
               onChange={handleInputChange}
             />
@@ -285,7 +281,7 @@ export const GeneralSection = (props: GenralProps) => {
                 }
               >
                 <span class={"font-weight:600"}>Email Address</span>
-                <TextField
+                <input
                   name={"email"}
                   disabled={!isEdit()}
                   labelClass={"w:40%"}

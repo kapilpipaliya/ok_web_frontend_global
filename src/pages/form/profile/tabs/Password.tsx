@@ -3,7 +3,6 @@ import { useContext } from "solid-js";
 import { createStore } from "solid-js/store";
 import { resetPasswordCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
-import { TextField } from "~/components/solid_blocks";
 import { GraphContext } from "~/lib/graph/graph";
 import { validatePassword } from "~/lib/validations";
 
@@ -99,12 +98,11 @@ export const PasswordSection = (props: { profileData: any }) => {
         >
           <span class={"font-weight:600"}>Current User</span>
 
-          <TextField
+          <input
             name={"username"}
             readOnly
-            label={"username"}
+            placeholder={"username"}
             type={"text"}
-            labelClass={"w:40%"}
             value={props.profileData.username}
           />
         </div>
@@ -115,10 +113,9 @@ export const PasswordSection = (props: { profileData: any }) => {
         >
           <span class={"font-weight:600"}>Current Password</span>
 
-          <TextField
+          <input
             name={"currentPassword"}
             type={`${showPassword.currentPassword ? "text" : "password"}`}
-            labelClass={"w:40%"}
             placeholder={"Enter Current Password"}
             value={passwordData.currentPassword}
             onChange={handleInputChange}
@@ -136,10 +133,9 @@ export const PasswordSection = (props: { profileData: any }) => {
         </div>
         <div class={"flex@md rel ai:center jc:space-between p:5|20|20|20 mb:5"}>
           <span class={"font-weight:600"}>New Password</span>
-          <TextField
+          <input
             name={"newPassword"}
             type={`${showPassword.newPassword ? "text" : "password"}`}
-            labelClass={"w:40%"}
             placeholder={"Enter New Password"}
             value={passwordData.newPassword}
             onChange={handleInputChange}
@@ -161,10 +157,9 @@ export const PasswordSection = (props: { profileData: any }) => {
           }
         >
           <span class={"font-weight:600"}>Confirm Password</span>
-          <TextField
+          <input
             name={"confirmPassword"}
             type={`${showPassword.confirmPassword ? "text" : "password"}`}
-            labelClass={"w:40%"}
             placeholder={"Enter Confirm Password"}
             value={passwordData.confirmPassword}
             onChange={handleInputChange}
