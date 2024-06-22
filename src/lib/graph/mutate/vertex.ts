@@ -5,7 +5,6 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import {
   getNewGraphId,
   transactionDetailAdd,
-  transactions,
 } from "../transaction";
 import { pipe } from "@mobily/ts-belt";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
@@ -69,7 +68,7 @@ export function addNewVertex(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -96,7 +95,7 @@ export function replaceVertexProperties(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -129,7 +128,7 @@ export function mergeVertexProperties(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -215,7 +214,7 @@ export function deleteVertex(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 

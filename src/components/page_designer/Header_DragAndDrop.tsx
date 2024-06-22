@@ -7,7 +7,7 @@ import { CustomButton } from "~/components/solid_blocks/button/buttons";
 import { ShareSection } from "./PageShare";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
-import { ProcessStatus, commitTxn, getNewTxnId, transactions } from "~/lib/graph/transaction";
+import { ProcessStatus, commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { PageConfigContext } from "~/lib/contexts";
@@ -79,7 +79,7 @@ export function HeaderDragAndDrop(props: {
           loadMessage: "Submitting Data...",
           successMessage: "Data submitted successfully",
           onSuccess: () => {
-            transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+            graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
             // setTimeout(() => navigate(-1), 500);
           },

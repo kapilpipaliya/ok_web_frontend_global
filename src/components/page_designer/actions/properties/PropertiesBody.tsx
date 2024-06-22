@@ -211,7 +211,7 @@ export function PropertiesBody(props: any) {
     };
     const ImportModalBody = () => {
       prevTxnIndex =
-        transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
+        graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
       const dataVertexId = getNewGraphId();

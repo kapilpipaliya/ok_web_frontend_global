@@ -126,7 +126,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 
 //     // const RulesModalBody = () => {
 //     //   prevTxnIndex =
-//     //     transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
+//     //     graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
 
 //     //   const metaVertexId = getNewGraphId();
 //     //   const txnId = getNewTxnId(graph, setGraph);

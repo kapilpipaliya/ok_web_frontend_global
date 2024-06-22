@@ -3,7 +3,7 @@ import { batch } from "solid-js";
 import { reconcile, type SetStoreFunction, type Store } from "solid-js/store";
 import { pipe } from "@mobily/ts-belt";
 import type { Edge, GraphInterface, Id } from "~/lib/graph/graph";
-import { transactionDetailAdd, transactions } from "../transaction";
+import { transactionDetailAdd } from "../transaction";
 
 export function newEdge(
   edgeId: Id,
@@ -86,7 +86,7 @@ export function addNewEdge(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)?.steps.length - 1 : -1,
   };
 }
 
@@ -112,7 +112,7 @@ export function replaceEdgeProperties(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
 
@@ -157,7 +157,7 @@ export function replaceEdgeStart(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
 //private
@@ -200,7 +200,7 @@ export function replaceEdgeEnd(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
 
@@ -249,7 +249,7 @@ export function deleteEdge(
   }, graph);
   return {
     error: false,
-    txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
+    txnDetailIndex: txnId ? graph.transactions.get(txnId)!.steps.length - 1 : -1,
   };
 }
 

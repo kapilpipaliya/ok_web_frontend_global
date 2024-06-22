@@ -8,7 +8,6 @@ import {
   edgeOldIdToNewIdMap,
   isAllTxnProcessed,
   ProcessStatus,
-  transactions,
   vertexOldIdToNewIdMap,
 } from "../graph/transaction";
 import { updateVertexId } from "~/lib/graph/mutate/vertex";
@@ -40,16 +39,16 @@ export function onMutatDataGet(
     if (Array.isArray(d.txnIds)) {
       for (const txnId of d.txnIds as number[]) {
         // what if ack is not received?
-        if (transactions.has(txnId))
-          transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+        if (graph.transactions.has(txnId))
+          graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
       }
     }
   }
   batch(() => {
     if (Array.isArray(d)) {
       for (const [txnId, txnResult] of d) {
-        if (transactions.has(txnId))
-          transactions.get(txnId)!.status = ProcessStatus.Processed;
+        if (graph.transactions.has(txnId))
+          graph.transactions.get(txnId)!.status = ProcessStatus.Processed;
         for (const txnObject of txnResult) {
           // Vertexes and edges are interlinked.
           // It's complicated to insert replace without error.

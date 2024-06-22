@@ -14,7 +14,6 @@ import {
   commitTransaction,
   getNewTxnId,
   ProcessStatus,
-  transactions,
 } from "~/lib/graph/transaction";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex, } from "~/lib/graph/graph";
@@ -74,9 +73,8 @@ export function DataGrid(props: DataGridProps) {
       showErrorToast(deleteResult?.error.toString());
       return;
     }
-    // @ts-ignore
-    transactions.get(txnId).status = ProcessStatus.Ready;
-    const data = commitTransaction(Ws);
+    graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
+    const data = commitTransaction(Ws, graph);
     if (!data) {
       return;
     }
