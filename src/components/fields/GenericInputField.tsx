@@ -2,11 +2,10 @@ import {createMemo, Match, Show, Switch, useContext} from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import {
-  Checkbox,
-  Progress,
+ 
+  
   Radio,
   RadioGroup,
-  TextField,
 } from "~/components/solid_blocks";
 import { FileUploader } from "~/components/solid_blocks/FileUploader";
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
@@ -49,7 +48,8 @@ export function GenericInputField(
       >
         <Switch>
           <Match when={component() === "CheckBox"}>
-            <Checkbox
+            <input
+              type="checkbox"
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
@@ -67,14 +67,12 @@ export function GenericInputField(
                     false,
                   );
               }}
-              align="left"
               checked={
                 props.data?.P[props.meta.P[IdAttr]] ??
                 props.meta?.P.checked
               }
-            >
-              {<PageAttrRender metaVertex={props.meta} />}
-            </Checkbox>
+            />
+            <PageAttrRender metaVertex={props.meta} />
           </Match>
           <Match when={component() === "ColorBox"}>
             <input
@@ -112,7 +110,7 @@ export function GenericInputField(
             {props.data?.P[props.meta.P[IdAttr]]}
           </Match>
           <Match when={component() === "NumberBox"}>
-            <TextField
+            <input
               placeholder={props.meta?.P.label ?? ""}
               onchange={(e: any) => {
                 props.setValue
@@ -131,7 +129,7 @@ export function GenericInputField(
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
-              isNumber
+              type="number"
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
@@ -162,7 +160,8 @@ export function GenericInputField(
             </Radio>
           </Match>
           <Match when={component() === "ProgressBar"}>
-            <Progress
+            <input 
+              type="progress"
               style={{ ...props.meta?.P }}
               {...defaultValues()}
               {...deNullify(props.meta.P)}
@@ -216,7 +215,7 @@ export function GenericInputField(
           </Match>
 
           <Match when={component() === "TextArea"}>
-            <TextField
+            <textarea
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
@@ -235,7 +234,7 @@ export function GenericInputField(
                   );
               }}
               placeholder={props.meta?.P.label ?? props.title}
-              multiline
+              rows={props.meta?.P.rows ?? 4}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
           </Match>
@@ -252,7 +251,8 @@ export function GenericInputField(
               props.data.P[props.meta.P[IdAttr]].toString().includes(")+(")
             }
           >
-            <TextField
+            <input
+              type="text"
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
@@ -272,10 +272,10 @@ export function GenericInputField(
               }}
               placeholder={props.meta?.P.label ?? props.title}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
-              trailing={
-                <ExpressionBuilder
-                  content={props.data?.P[props.meta.P[IdAttr]]}
-                  meta={props.meta}
+            />
+            <ExpressionBuilder
+              content={props.data?.P[props.meta.P[IdAttr]]}
+              meta={props.meta}
                   data={props.data}
                   title={props.title}
                   txnId={props.txnId}
@@ -296,11 +296,10 @@ export function GenericInputField(
                         )
                   }
                 />
-              }
-            />
           </Match>
           <Match when={component() === "TextBox"}>
-            <TextField
+            <input
+              type="text"
               {...defaultValues()}
               {...deNullify(props.meta.P)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
