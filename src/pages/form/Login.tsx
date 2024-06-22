@@ -7,7 +7,7 @@ import logo from "~/assets/graphics/logo.png";
 import { signInCall } from "~/lib/api/api_functions";
 import "~/css/base.css";
 import {postAPI} from "~/lib/api/postApi";
-import { validateEmail, validatePassword } from "~/lib/validations";
+import { validateEmail, validatePassword, validateUsername } from "~/lib/validations";
 import { APP_BASE_URL } from "~/lib/constants";
 
 export function Login() {
@@ -43,12 +43,23 @@ export function Login() {
 
   const handleSubmit = async (event: MouseEvent) => {
     event.preventDefault();
-    const emailError = validateEmail(formData().email);
+    if (formData().email.includes("@")) {
+      const emailError = validateEmail(formData().email);
+      if (emailError) {
+          showErrorToast("Please enter a valid email address or username");
+          return;
+      }
+    } else {
+      const usernameError = validateUsername(formData().email);
+      if (usernameError) {
+        showErrorToast("Please enter a valid email address or username"); 
+        return;
+      }
+    }
+    
     const passwordError = validatePassword(formData().password);
-    if (emailError) {
-      showErrorToast(emailError); // Show the error message if validation fails
-    } else if (passwordError) {
-      showErrorToast(passwordError); // Show the error message if validation fails
+    if (passwordError) {
+      showErrorToast(passwordError);
     } else {
       setLoadingSite(true);
       await showLoadingToast({
@@ -136,7 +147,7 @@ export function Login() {
             class="f:14"
             style={{ display: "block", "margin-bottom": "5px" }}
           >
-            Email Address
+            Email Address or Username
           </label>
           <input
             name="email"
@@ -152,7 +163,7 @@ export function Login() {
               "border-radius": "4px",
             }}
             autocomplete="email"
-            placeholder="Your email"
+            placeholder="Your email or username"
             required
           />
           <label

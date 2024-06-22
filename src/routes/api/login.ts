@@ -39,11 +39,11 @@ async function authenticateUser(
   const session = (await getDriver(subdomain)).session();
 
   try {
-    const query = "MATCH (u:User {email: $email}) RETURN u";
+    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await session.run(query, { email });
 
     if (result.records.length === 0) {
-      throw new Error("Not Authorized Email!");
+      throw new Error("Not Authorized Email or Username!!!");
     }
 
     const user = result.records[0].get("u");
@@ -60,7 +60,7 @@ async function authenticateUser(
 // Function to authenticate regular user
 function authenticateRegularUser(user: Node, password: string) {
   if (user.properties.password !== password) {
-    throw new Error("Not Authorized Email!");
+    throw new Error("Not Authorized Email or Username!");
   }
 
   return user;
@@ -77,18 +77,18 @@ async function authenticateSuperUser(
   ).session();
 
   try {
-    const query = "MATCH (u:User {email: $email}) RETURN u";
+    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await session.run(query, { email });
     const res = result.records[0].get("u");
 
     if (result.records.length === 0) {
-      throw new Error("Not Authorized Email!");
+      throw new Error("Not Authorized Email or Username!!!!");
     }
 
     if (res.properties.password === password) {
       return result.records[0].get("u") as Node;
     }
-    throw new Error("Not Authorized Email!");
+    throw new Error("Not Authorized Email or Username!!!!!!");
   } finally {
     await session.close();
   }

@@ -28,3 +28,4 @@ gitignore
 .DS_Store
 Thumbs.db
 .history
+public/profile_images/

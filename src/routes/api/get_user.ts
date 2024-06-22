@@ -17,13 +17,13 @@ export async function GET({ request }: APIEvent) {
     // session only works with https
     const email = httpSession.data.email;
     if (email === undefined) {
-      return { error: "Not Authorized Email" };
+      return { error: "Not Authorized Email or username" };
     }
-    const query = "MATCH (u:User {email: $email}) return u;";
+    const query = "MATCH (u:User) WHERE u.email = $email OR u.username = $email RETURN u";
     const result = await neo4jSession.run(query, { email: email });
 
     if (result.records.length === 0) {
-      return { error: `Not Authorized Email ${email}` };
+      return { error: `Not Authorized Email or username ${email}` };
     }
     const user = result.records[0].get("u") as Node;
     const { password, ...properties } = convertNodeToJson(user).P;
