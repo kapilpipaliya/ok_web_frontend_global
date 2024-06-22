@@ -1,11 +1,13 @@
-import { Show, createMemo, For, Match, Switch, useContext } from "solid-js";
+import { Show, createMemo, For, Match, Switch, useContext, } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 import { ClassDesignTab } from "~/components/css_properties/PropertiesTabs";
 import { Icon } from "@iconify-icon/solid";
-import {getComponentForCollRow} from "~/components/form/getComponentForCollRow";
+import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
+import { ValidationConfig } from "./ValidationConfig";
+import { SelectedComponentContext } from "~/lib/contexts";
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -18,6 +20,8 @@ interface FormGroupPropertiesProps {
 export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+
   function moveClassToLast(vertices: Vertex[]) {
     const nameVertices = vertices.filter(vertex => vertex.P.name === 'name');
     const classVertices = vertices.filter(vertex => vertex.P.name === 'class');
@@ -30,6 +34,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
 
   return (
     <>
+
       {/*<div class="dx-field">*/}
       {/*  <div class="dx-field-label">*/}
       {/*    Data*/}
@@ -50,6 +55,15 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
       {/*    />*/}
       {/*  </div>*/}
       {/*</div>*/}
+
+      <div class="">
+        <ValidationConfig
+          meta={{ P: { name: "validation" } as unknown as Vertex }}
+          data={props.selectedLayout}
+          componentMeta={graph.vertexes[selectedComponent()?.vertexId]}
+          setValue={props.setValue}
+        />
+      </div>
 
       <For each={moveClassToLast(props.metaAttributes)}>
         {(metaVertex) => {
@@ -85,7 +99,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
           );
 
           return (
-            <Switch>
+            <div><Switch>
               <Match when={metaVertex.P.name === "class"}>
                 <ClassDesignTab
                   component={component()}
@@ -143,7 +157,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                   </Show>
                 </div>
               </Match>
-            </Switch>
+            </Switch></div>
           );
         }}
       </For>

@@ -1,9 +1,9 @@
-import {createMemo, Match, Show, Switch, useContext} from "solid-js";
+import { createMemo, Match, Show, splitProps, Switch, useContext } from "solid-js";
 
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import {
- 
-  
+
+
   Radio,
   RadioGroup,
 } from "~/components/solid_blocks";
@@ -14,13 +14,13 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
-import {Label} from "~/components/solid_blocks/Label";
-import {MultiSelectField} from "~/components/MultiSelect";
+import { Label } from "~/components/solid_blocks/Label";
+import { MultiSelectField } from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify, ifNotNull } from "~/lib/utils";
-import {mergeCSS} from "~/components/css_properties/cssUtils";
-import {Signature} from "../SignatureBox";
+import { mergeCSS } from "~/components/css_properties/cssUtils";
+import { Signature } from "../SignatureBox";
 
 export function GenericInputField(
   props: ComponentProps & {
@@ -34,8 +34,15 @@ export function GenericInputField(
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const component = () => props.component;
+
   // todo: make a common onChange if possible.
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[props.component]]) : {});
+  const Error = () => <Show when={props.meta.P.error}>
+    <div class="fg:rgb(255,0,0)">{props.meta.P.error}</div>
+  </Show>
+
+  const [select, customMetaProps] = splitProps(props.meta.P, ['validation'])
+
   return (
     <div
       classList={{
@@ -51,7 +58,7 @@ export function GenericInputField(
             <input
               type="checkbox"
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
               onchange={(e: any) => {
                 props.setValue
@@ -72,13 +79,14 @@ export function GenericInputField(
                 props.meta?.P.checked
               }
             />
-            <PageAttrRender metaVertex={props.meta} />
+            <Error />
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Match>
           <Match when={component() === "ColorBox"}>
             <input
               type="color"
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
               onInput={(e) => {
@@ -96,18 +104,21 @@ export function GenericInputField(
                   );
               }}
             />
+            <Error />
           </Match>
           <Match when={component() === "DropDownBox"}>Dropdown</Match>
           <Match when={component() === "FileUploader"}>
             <FileUploader
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
               image={props.meta?.P.image}
             />
+            <Error />
           </Match>
           <Match when={component() === "HtmlEditor"}>
             {props.data?.P[props.meta.P[IdAttr]]}
+            <Error />
           </Match>
           <Match when={component() === "NumberBox"}>
             <input
@@ -127,16 +138,17 @@ export function GenericInputField(
                   );
               }}
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
               type="number"
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
+            <Error />
           </Match>
           <Match when={component() === "Radio"}>
             <Radio
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
               // value={props.data?.P[props.meta.P[IdAttr]] ?? ""}
               onchange={(e: any) => {
@@ -158,15 +170,17 @@ export function GenericInputField(
             >
               {props.meta?.P.label ?? "radio"}
             </Radio>
+            <Error />
           </Match>
           <Match when={component() === "ProgressBar"}>
-            <input 
+            <input
               type="progress"
               style={{ ...props.meta?.P }}
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
             />
+            <Error />
           </Match>
           <Match when={component() === "SelectBox"}>
             <MultiSelectField
@@ -207,17 +221,19 @@ export function GenericInputField(
               displayValueChild="name"
               selectionLimit={1}
             />
+            <Error />
           </Match>
           <Match when={component() === "RadioGroup"}>
             <RadioGroup>
-              <PageAttrRender metaVertex={props.meta} />
+              <PageAttrRender metaVertex={props.meta} data={props.data} />
             </RadioGroup>
+            <Error />
           </Match>
 
           <Match when={component() === "TextArea"}>
             <textarea
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
@@ -237,6 +253,7 @@ export function GenericInputField(
               rows={props.meta?.P.rows ?? 4}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
+            <Error />
           </Match>
           {/* Expression Builder */}
           <Match
@@ -254,7 +271,7 @@ export function GenericInputField(
             <input
               type="text"
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
@@ -273,35 +290,36 @@ export function GenericInputField(
               placeholder={props.meta?.P.label ?? props.title}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
+            <Error />
             <ExpressionBuilder
               content={props.data?.P[props.meta.P[IdAttr]]}
               meta={props.meta}
-                  data={props.data}
-                  title={props.title}
-                  txnId={props.txnId}
-                  component={component()}
-                  setValue={
-                    props.setValue
-                      ? props.setValue
-                      : (value) =>
-                        setValueGlobal(
-                          graph,
-                          setGraph,
-                          props.txnId!,
-                          props.meta,
-                          props.data!,
-                          value,
-                          Ws,
-                          false,
-                        )
-                  }
-                />
+              data={props.data}
+              title={props.title}
+              txnId={props.txnId}
+              component={component()}
+              setValue={
+                props.setValue
+                  ? props.setValue
+                  : (value) =>
+                    setValueGlobal(
+                      graph,
+                      setGraph,
+                      props.txnId!,
+                      props.meta,
+                      props.data!,
+                      value,
+                      Ws,
+                      false,
+                    )
+              }
+            />
           </Match>
           <Match when={component() === "TextBox"}>
             <input
               type="text"
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
@@ -320,18 +338,21 @@ export function GenericInputField(
               }}
               value={ifNotNull(props.data?.P[props.meta.P[IdAttr]])}
             />
+            <Error />
           </Match>
           <Match when={component() === "SignatureBox"}>
-              <Signature />
+            <Signature />
+            <Error />
           </Match>
           <Match when={component() === "Label"}>
             <Label
-            meta={props.meta}
+              meta={props.meta}
               {...defaultValues()}
-              {...deNullify(props.meta.P)}
+              {...deNullify(customMetaProps)}
               class={mergeCSS(defaultValues().class, props.meta.P.class)}
             >
-              <PageAttrRender metaVertex={props.meta} />
+              <PageAttrRender metaVertex={props.meta} data={props.data} />
+              <Error />
             </Label>
           </Match>
         </Switch>

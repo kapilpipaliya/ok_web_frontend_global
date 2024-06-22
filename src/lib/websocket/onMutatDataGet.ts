@@ -103,7 +103,7 @@ export function onMutatDataGet(
       }
     }
 
-    if (isAllTxnProcessed()) {
+    if (isAllTxnProcessed(graph)) {
       vertexOldIdToNewIdMap.clear();
       edgeOldIdToNewIdMap.clear();
     } else {

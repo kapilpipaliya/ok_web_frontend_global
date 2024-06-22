@@ -581,7 +581,7 @@ export function onDataDirectoryImportClick(
         processRows(rows, label);
       }
 
-      if (!dry) commitTxn(txnId, Ws);
+      if (!dry) commitTxn(txnId, Ws, graph);
       showErrorToast("finished import");
     });
 }

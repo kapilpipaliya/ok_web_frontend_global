@@ -116,7 +116,7 @@ export function addNewRow(
     type,
     properties
   );
-  if (isRealTime) commitTxn(txnId, Ws);
+  if (isRealTime) commitTxn(txnId, Ws, graph);
   return newRowResult;
 }export function cloneRowProps(
   graph: Store<GraphInterface>,
@@ -204,7 +204,7 @@ export function rowMetaInitialize(
       // remove all AttrInst vertex.
       // TODO: This is breaking when new row is added, its interesting to fix this.
       // console.log('called', metaTxnId)
-      // revertTransaction(metaTxnId);
+      // revertTransaction(metaTxnId, graph);
     });
     return metaTxnId;
   }
@@ -253,7 +253,7 @@ export function rowMetaInitialize(
     // remove all AttrInst vertex.
     // TODO: This is breaking when new row is added, its interesting to fix this.
     // console.log('called', metaTxnId)
-    // revertTransaction(metaTxnId);
+    // revertTransaction(metaTxnId, graph);
   });
   return metaTxnId;
 }

@@ -43,6 +43,6 @@ export function deleteRow(
     // delete vertex:
     const deleteResult = deleteVertex(txnId, vertex.id, graph, setGraph);
     if (deleteResult.error) showErrorToast(deleteResult.error.toString());
-    if (isRealTime) commitTxn(txnId, Ws);
+    if (isRealTime) commitTxn(txnId, Ws, graph);
   });
 }

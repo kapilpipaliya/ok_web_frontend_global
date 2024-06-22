@@ -77,7 +77,6 @@ const Column = (props: { datas: any; toggleIsRightOpen: any }) => {
         </div>
 
         <div classList={{ "display:none": selectedTab() !== "layout" }}>
-          
           <LayoutPart />
         </div>
         <div

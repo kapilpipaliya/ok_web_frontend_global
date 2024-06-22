@@ -298,7 +298,7 @@ export function DynamicForm(props: DynamicFormProps) {
     if (isValid) {
       // !!!TODO!!! Handle Error Received From server when commit
       if (!isRealTime) {
-        data = commitTxn(txnId, Ws);
+        data = commitTxn(txnId, Ws, graph);
         if (!data) {
           setTimeout(() => navigate(-1), 0);
           showWarningToast("Internal Server Error");
@@ -323,7 +323,7 @@ export function DynamicForm(props: DynamicFormProps) {
           loadMessage: "Submitting Data...",
           successMessage: "Data submitted successfully",
           onSuccess: (value) => {
-            transactions.get(txnId)!.status = ProcessStatus.AckReceived;
+            graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
             setTimeout(() => navigate(-1), 500);
           },

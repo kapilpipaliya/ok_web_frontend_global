@@ -293,7 +293,7 @@ export function SelectInputField(
           graph,
           setGraph,
         );
-        if (field.isRealTime) commitTxn(field.txnId || 0, Ws);
+        if (field.isRealTime) commitTxn(field.txnId || 0, Ws, graph);
       });
     });
   };

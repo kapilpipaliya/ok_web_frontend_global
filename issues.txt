@@ -107,3 +107,5 @@ find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
 
 bugs:
 when table is not visible user cant drop above or  below the table from canvas.
+
+in page designer, form has no txn context set, so setGlobalValue will not work and so validations will not work.

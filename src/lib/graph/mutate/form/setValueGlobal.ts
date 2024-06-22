@@ -7,19 +7,20 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { onChangeHandler } from "./onChangeHandler";
+import { validateInput } from "~/components/page_designer/actions/validateInput";
 
 
 export function setValueGlobal(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   txnId: number,
-  attribute: Vertex,
-  vertex: Vertex,
+  metaVertex: Vertex,
+  dataVertex: Vertex,
   data: any,
   ws: ServerEventsDispatcher,
   isRealTime: boolean
 ) {
-  if (!vertex) {
+  if (!dataVertex) {
     return;
   }
 
@@ -27,17 +28,27 @@ export function setValueGlobal(
   if (isRealTime) {
     txnId = getNewTxnId(graph, setGraph);
   }
+  let error = "" as string | undefined;
+  if (metaVertex.P.validation) {
+    error = validateInput(data, metaVertex.P.validation);
+    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+      error: error || ""
+    });
+    if (error) {
+      return error;
+    }
+  }
 
-  mergeVertexProperties(txnId, vertex.id, graph, setGraph, {
-    [attribute.P[IdAttr]]: data,
+  mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {
+    [metaVertex.P[IdAttr]]: data,
   });
 
   // we directly save the dataType on vertex:
   // @ts-ignore
-  setGraph("vertexes", vertex.id, "D", {
-    [attribute.P[IdAttr]]: attribute.P.dataType,
+  setGraph("vertexes", dataVertex.id, "D", {
+    [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
   });
 
-  onChangeHandler(txnId, vertex, vertex, attribute, graph, setGraph);
-  if (isRealTime) commitTxn(txnId, ws);
+  onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
+  if (isRealTime) commitTxn(txnId, ws, graph);
 }

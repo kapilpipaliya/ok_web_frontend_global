@@ -103,7 +103,7 @@ export function addMetaVertexes(
 
   addMetaVertexes(graph, setGraph, metaTxnId, metaVertex, attributes);
   onCleanup(() => {
-    revertTransaction(metaTxnId);
+    revertTransaction(metaTxnId, graph);
   });
   onCleanup(() => {
     // TODO: Remove all the meta

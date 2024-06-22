@@ -1,16 +1,16 @@
-import type {ComponentProps} from "~/components/fields/ComponentType";
-import {Show, useContext} from "solid-js";
-import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
-import {GraphContext, IdAttr, type Vertex} from "~/lib/graph/graph";
-import {useToast} from "~/components/Toast";
-import {useNavigate} from "@solidjs/router";
-import {commitTxn, getNewTxnId, revertTransaction} from "~/lib/graph/transaction";
-import {FormContext} from "~/lib/contexts";
-import {createStore} from "solid-js/store";
+import type { ComponentProps } from "~/components/fields/ComponentType";
+import { Show, useContext } from "solid-js";
+import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
+import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { useToast } from "~/components/Toast";
+import { useNavigate } from "@solidjs/router";
+import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+import { FormContext } from "~/lib/contexts";
+import { createStore } from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
-import {submitDataCall} from "~/lib/api/api_functions";
-import {PageAttrRender} from "~/components/page_attr_render/PageAttrRender";
-import {CustomButton} from "../solid_blocks/button/buttons";
+import { submitDataCall } from "~/lib/api/api_functions";
+import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { CustomButton } from "../solid_blocks/button/buttons";
 
 export function FormWrapper(
   props: ComponentProps & {
@@ -19,9 +19,9 @@ export function FormWrapper(
     label?: string;
   },
 ) {
-  const {Ws} = useContext(WsContext);
+  const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const {showLoadingToast} = useToast();
+  const { showLoadingToast } = useToast();
   const navigate = useNavigate();
 
   const cleanUpConfig = {} as { [key: string]: any };
@@ -62,21 +62,38 @@ export function FormWrapper(
 
   // const [divRef, setDivRef] = createSignal<HTMLDivElement>();
 
-  const onSubmit = async () => {
-    const data = commitTxn(txnId, Ws);
-    await showLoadingToast({
-      promise: submitDataCall(data, graph, setGraph, txnId),
-      loadMessage: "Submitting Data...",
-      successMessage: "Data submitted successfully",
-      onSuccess: (value) => {
-        setTimeout(() => navigate(-1), 0);
-      },
-    });
-  };
 
-  const onCancel = () => {
-    revertTransaction(txnId, graph);
-    setTimeout(() => navigate(-1));
+
+  const SubmitCancelButtons = () => {
+    const onSubmit = async () => {
+      const data = commitTxn(txnId, Ws, graph);
+      await showLoadingToast({
+        promise: submitDataCall(data, graph, setGraph, txnId),
+        loadMessage: "Submitting Data...",
+        successMessage: "Data submitted successfully",
+        onSuccess: (value) => {
+          setTimeout(() => navigate(-1), 0);
+        },
+      });
+    };
+
+    const onCancel = () => {
+      revertTransaction(txnId, graph);
+      setTimeout(() => navigate(-1));
+    };
+    return (
+      <div class="flex gap:1">
+        <Show
+          when={props.submitButton}
+          fallback={
+            <CustomButton onClick={onSubmit}>Submit</CustomButton>
+          }
+        >
+          {props.submitButton}
+        </Show>
+        <CustomButton variant={"outlined"} style={{ "margin-left": "7px" }} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
+      </div>
+    );
   };
 
   return (
@@ -87,21 +104,11 @@ export function FormWrapper(
     >
       <FormContext.Provider value={formData}>
         <div class="">
-          <PageAttrRender metaVertex={props.meta} data={formData.formData}/>
+          <PageAttrRender metaVertex={props.meta} data={formData.formData} />
         </div>
-        <div/>
+        <div />
+        <SubmitCancelButtons />
 
-        <div class="flex gap:1">
-          <Show
-            when={props.submitButton}
-            fallback={
-              <CustomButton onClick={onSubmit}>Submit</CustomButton>
-            }
-          >
-            {props.submitButton}
-          </Show>
-          <CustomButton variant={"outlined"} style={{ "margin-left": "7px" }}  class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
-        </div>
       </FormContext.Provider>
     </div>
   );

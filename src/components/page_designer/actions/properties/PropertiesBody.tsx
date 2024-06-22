@@ -27,7 +27,7 @@ export function PropertiesBody(props: any) {
   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
   const setPropertyValue = (meta: Vertex, value: any) => {
-    if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
+   if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
       return setPropertyValueGlobal(
         graph,
         setGraph,
@@ -109,7 +109,7 @@ export function PropertiesBody(props: any) {
   function ModalBody() {
     const RulesModalBody = () => {
       prevTxnIndex =
-        transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
+        graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
       const txnId = getNewTxnId(graph, setGraph);
