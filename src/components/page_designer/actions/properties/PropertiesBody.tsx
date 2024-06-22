@@ -14,7 +14,7 @@ import type { FieldAttribute } from "~/lib/FormMetadataType";
 import { FormMetaData } from "~/lib/formMetaData";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
-import { transactions, getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
+import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
 import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { FormGroupProperties } from "../FormGroupProperties";
@@ -198,7 +198,7 @@ export function PropertiesBody(props: any) {
         attributes
       );
       onCleanup(() => {
-        revertTransaction(txnId);
+        revertTransaction(txnId, graph);
       });
 
       return (

@@ -138,7 +138,7 @@ export function TableInputField(
           const txnId = getNewTxnId(graph, setGraph);
           addMetaVertexes(graph, setGraph, txnId, props.meta, attrs);
           onCleanup(() => {
-            revertTransaction(txnId);
+            revertTransaction(txnId, graph);
           });
         }
       }

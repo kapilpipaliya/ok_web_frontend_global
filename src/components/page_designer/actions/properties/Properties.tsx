@@ -42,7 +42,6 @@ export function Properties(props: { setShowDrawer?: any }) {
 // import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 // import {
 //   revertTransactionUpTo,
-//   transactions,
 //   getNewGraphId,
 //   getNewTxnId,
 //   revertTransaction,
@@ -105,7 +104,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     // };
 //     // const onRulesCancel = () => {
 //     //   if (prevTxnIndex !== -1)
-//     //     revertTransactionUpTo(pageConfig.formData.txnId, prevTxnIndex);
+//     //     revertTransactionUpTo(pageConfig.formData.txnId, prevTxnIndex, graph);
 //     //   toggleRulesModal();
 //     // };
 //     // const onImportsSubmit = () => {
@@ -119,7 +118,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     // };
 //     // const onImportsCancel = () => {
 //     //   if (prevTxnIndex !== -1)
-//     //     revertTransactionUpTo(pageConfig.formData.txnId, prevTxnIndex);
+//     //     revertTransactionUpTo(pageConfig.formData.txnId, prevTxnIndex, graph);
 //     //   // reset layout
 //     //   // layoutTreeViewInstance.option("items", getLayoutTreeData());
 //     //   toggleImportsModal();
@@ -218,7 +217,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     //     attributes,
 //     //   );
 //     //   onCleanup(() => {
-//     //     revertTransaction(txnId);
+//     //     revertTransaction(txnId, graph);
 //     //   });
 
 //     //   return (
@@ -390,7 +389,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //         attributes,
 //       );
 //       onCleanup(() => {
-//         revertTransaction(txnId);
+//         revertTransaction(txnId, graph);
 //       });
 //       const metaVertex = graph.vertexes[metaVertexId];
 //       const collMetaVertex = getChildVertexes(

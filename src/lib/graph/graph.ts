@@ -1,5 +1,6 @@
 import { createContext } from "solid-js";
 import type { createStore } from "solid-js/store";
+import {ProcessStatus, TransactionValue} from "~/lib/graph/transaction";
 
 export type Id = string;
 
@@ -43,6 +44,17 @@ export interface GraphInterface {
   isSideBarOpen?: boolean;
   isSubSideBarOpen?: boolean;
   componentIdMap: { [key: string]: string };
+  transactions: Map<
+    number,
+    {
+      status: ProcessStatus;
+      steps: TransactionValue[];
+      undoStep: number;
+      submittedStep: number;
+      revertSteps: TransactionValue[];
+      undoPoints: number[];
+    }
+  >
 }
 
 export const GraphContext = createContext<

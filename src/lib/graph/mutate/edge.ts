@@ -83,7 +83,7 @@ export function addNewEdge(
     insertEdge: () => data,
     redo: () => addNewEdge(0, data, graph, setGraph),
     revert: () => deleteEdge(0, edge.id, graph, setGraph),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -109,7 +109,7 @@ export function replaceEdgeProperties(
     redo: () => replaceEdgeProperties(0, edgeId, graph, setGraph, data.P),
     revert: () =>
       replaceEdgeProperties(0, edgeId, graph, setGraph, originalProperties),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -154,7 +154,7 @@ export function replaceEdgeStart(
     redo: () => replaceEdgeStart(0, edgeId, graph, setGraph, data.S),
     revert: () =>
       replaceEdgeStart(0, edgeId, graph, setGraph, oldStartVertexId),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -197,7 +197,7 @@ export function replaceEdgeEnd(
     replaceEdgeEnd: () => data,
     redo: () => replaceEdgeEnd(0, edgeId, graph, setGraph, data.E),
     revert: () => replaceEdgeEnd(0, edgeId, graph, setGraph, oldEndVertexId),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -246,7 +246,7 @@ export function deleteEdge(
     deleteEdge: () => edge,
     redo: () => deleteEdge(0, edgeId, graph, setGraph),
     revert: () => addNewEdge(0, edge, graph, setGraph),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,

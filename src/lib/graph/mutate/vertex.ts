@@ -66,7 +66,7 @@ export function addNewVertex(
     insert: () => data,
     redo: () => addNewVertex(0, data, graph, setGraph),
     revert: () => deleteVertex(0, vertex.id, graph, setGraph),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -93,7 +93,7 @@ export function replaceVertexProperties(
     redo: () => replaceVertexProperties(0, vertexId, graph, setGraph, data.P),
     revert: () =>
       replaceVertexProperties(0, vertexId, graph, setGraph, originalProperties),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -126,7 +126,7 @@ export function mergeVertexProperties(
     redo: () => mergeVertexProperties(0, vertexId, graph, setGraph, properties),
     revert: () =>
       mergeVertexProperties(0, vertexId, graph, setGraph, originalProperties),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,
@@ -212,7 +212,7 @@ export function deleteVertex(
     deleteVertex: () => data,
     redo: () => deleteVertex(0, vertexId, graph, setGraph),
     revert: () => addNewVertex(0, vertex, graph, setGraph),
-  });
+  }, graph);
   return {
     error: false,
     txnDetailIndex: txnId ? transactions.get(txnId)?.steps.length - 1 : -1,

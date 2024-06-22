@@ -50,7 +50,7 @@ export function CollAndData(props: any) {
     addMetaVertexes(graph, setGraph, txnId, graph.vertexes[metaVertexId], attributes);
 
     onCleanup(() => {
-        revertTransaction(txnId);
+        revertTransaction(txnId,graph);
     });
 
     const metaVertex = graph.vertexes[metaVertexId];

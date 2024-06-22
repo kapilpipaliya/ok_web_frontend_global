@@ -75,7 +75,7 @@ export function FormWrapper(
   };
 
   const onCancel = () => {
-    revertTransaction(txnId);
+    revertTransaction(txnId, graph);
     setTimeout(() => navigate(-1));
   };
 

@@ -34,6 +34,7 @@ export default function App() {
     isSideBarOpen: true,
     isSubSideBarOpen: true,
     componentIdMap: {},
+    transactions: new Map(),
   });
 
   return (

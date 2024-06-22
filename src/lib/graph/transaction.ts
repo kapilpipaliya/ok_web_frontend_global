@@ -32,27 +32,14 @@ export enum ProcessStatus {
 }
 
 export type TransactionValue = InsertFn & Revert & { data: any };
-export const transactions = new Map<
-  number,
-  {
-    status: ProcessStatus;
-    steps: TransactionValue[];
-    undoStep: number;
-    submittedStep: number;
-    revertSteps: TransactionValue[];
-    undoPoints: number[];
-  }
->();
-
-
 
 // @ts-ignore
 export function transactionDetailAdd(
   txnId: number,
-  txnValue: TransactionValue,
+  txnValue: TransactionValue,graph: Store<GraphInterface>,
 ) {
   if (!txnId) return;
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
 
   if (existingTxnValue.undoStep < existingTxnValue.steps.length - 1) {
     if (existingTxnValue.submittedStep < existingTxnValue.undoStep) {
@@ -68,7 +55,7 @@ export function transactionDetailAdd(
   existingTxnValue.steps = [...existingTxnValue.steps, txnValue];
   existingTxnValue.undoStep = existingTxnValue.steps.length - 1;
 
-  transactions.set(txnId, existingTxnValue);
+  graph.transactions.set(txnId, existingTxnValue);
 }
 
 export function getNewTxnId(
@@ -79,9 +66,9 @@ export function getNewTxnId(
   return graph.txnId;
 }
 
-export function getExistingOrDefaultTxnValue(txnId: number) {
+export function getExistingOrDefaultTxnValue(txnId: number, graph: Store<GraphInterface>) {
   return (
-    transactions.get(txnId) || {
+    graph.transactions.get(txnId) || {
       status: ProcessStatus.Unset,
       undoStep: 0,
       submittedStep: 0,
@@ -92,26 +79,25 @@ export function getExistingOrDefaultTxnValue(txnId: number) {
   );
 }
 
-export function revertTransactionUpTo(txnId: number, txnIndex: number) {
-  if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+export function revertTransactionUpTo(txnId: number, txnIndex: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   const newTxnValue = existingTxnValue.steps.splice(txnIndex);
   newTxnValue.reverse().forEach((x) => x.revert());
 }
 
-export function revertTransaction(txnId: number) {
-  if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = [...(transactions.get(txnId)?.steps || [])];
+export function revertTransaction(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  const existingTxnValue = [...(graph.transactions.get(txnId)?.steps || [])];
   batch(() => {
     existingTxnValue.reverse().forEach((txn) => txn.revert());
   });
-  transactions.delete(txnId);
+  graph.transactions.delete(txnId);
 }
 
-export function undo(txnId: number) {
-  debugger;
-  if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+export function undo(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   if (existingTxnValue.steps.length <= 1) return;
   const undoPointIndex = existingTxnValue.undoPoints.findIndex((point) => point === existingTxnValue.undoStep);
   let newUndoPoint = 0;
@@ -129,21 +115,21 @@ export function undo(txnId: number) {
   existingTxnValue.undoStep = newUndoPoint;
   // existingTxnValue.revertSteps.reverse().forEach((txn) => txn.redo());
 }
-export function redo(txnId: number) {
-  if (!txnId || !transactions.has(txnId)) return;
-  const existingTxnValue = getExistingOrDefaultTxnValue(txnId);
+export function redo(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return;
+  const existingTxnValue = getExistingOrDefaultTxnValue(txnId, graph);
   // existingTxnValue.revertSteps.reverse().forEach((txn) => txn.redo());
 }
 
-export function txnHasSteps(txnId: number) {
-  if (!txnId || !transactions.has(txnId)) return false;
-  const existingTxnValue = transactions.get(txnId)?.steps || [];
+export function txnHasSteps(txnId: number, graph: Store<GraphInterface>) {
+  if (!txnId || !graph.transactions.has(txnId)) return false;
+  const existingTxnValue = graph.transactions.get(txnId)?.steps || [];
   return existingTxnValue.length > 0;
 }
 
-export function getTransactionData(txnId: number) {
-  if (!transactions.has(txnId)) return [];
-  const existingTxnValue = [...(transactions.get(txnId)?.steps || [])].map(
+export function getTransactionData(txnId: number, graph: Store<GraphInterface>) {
+  if (!graph.transactions.has(txnId)) return [];
+  const existingTxnValue = [...(graph.transactions.get(txnId)?.steps || [])].map(
     (txnDetail) => ({
       insert: txnDetail.insert?.(),
       replace: txnDetail.replace?.(),
@@ -161,10 +147,10 @@ export function getTransactionData(txnId: number) {
 export const vertexOldIdToNewIdMap = new Map<Id, Id>();
 export const edgeOldIdToNewIdMap = new Map<Id, Id>();
 
-export function commitTransaction(Ws: ServerEventsDispatcher) {
+export function commitTransaction(Ws: ServerEventsDispatcher, graph: Store<GraphInterface>) {
   let firstReadyTxn = 0;
   // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
-  for (const [txnId, value] of transactions.entries()) {
+  for (const [txnId, value] of graph.transactions.entries()) {
     if (value.status === ProcessStatus.Ready) {
       if (!firstReadyTxn) firstReadyTxn = txnId;
       break;
@@ -177,8 +163,8 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
     // }
   }
   if (firstReadyTxn) {
-    const existingTxnValue = getTransactionData(firstReadyTxn);
-    transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
+    const existingTxnValue = getTransactionData(firstReadyTxn, graph);
+    graph.transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
     if (existingTxnValue.length) {
       const data = [
         [
@@ -202,30 +188,30 @@ export function commitTransaction(Ws: ServerEventsDispatcher) {
 // Bug: if commitTxn is called many times it is sending event many times.
 // TODO: currently we can only run this function once.
 // we need to set seperate txnId once commited. Fix this.
-export function commitTxn(txnId: number, Ws: ServerEventsDispatcher) {
+export function commitTxn(txnId: number, Ws: ServerEventsDispatcher, graph: Store<GraphInterface>) {
   console.log("In commitTxn");
 
-  if (transactions.has(txnId)) {
+  if (graph.transactions.has(txnId)) {
     console.log("In transactions commitTxn");
-    transactions.get(txnId)!.status = ProcessStatus.Ready;
-    return commitTransaction(Ws);
+    graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
+    return commitTransaction(Ws, graph);
   }
 }
 // TODO: future plan: once committed current system should be able to revert and sync to server too.
 
-export function getNewGraphId() {
+export function getNewGraphId(): Id {
   uniqueId = uniqueId + 1;
   return uniqueId;
   // Muration Actor Exception Error : Integer overflow -
   // return `${new Date().getTime()}`;
 }
 
-export async function waitTillAllEventsAreProcessed() {
-  if (isAllTxnProcessed()) return true;
+export async function waitTillAllEventsAreProcessed(graph: Store<GraphInterface>) {
+  if (isAllTxnProcessed(graph)) return true;
   return await new Promise((resolve, reject) => {
     const checkAllTxnCompleted = () => {
       const checkTxnCompletedTimeout = setTimeout(() => {
-        if (isAllTxnProcessed()) {
+        if (isAllTxnProcessed(graph)) {
           vertexOldIdToNewIdMap.clear();
           edgeOldIdToNewIdMap.clear();
           resolve(true);
@@ -239,9 +225,9 @@ export async function waitTillAllEventsAreProcessed() {
   });
 }
 
-export function isAllTxnProcessed() {
+export function isAllTxnProcessed(graph: Store<GraphInterface>) {
   let allTxnProcessed = true;
-  for (const [_txnId, value] of transactions.entries()) {
+  for (const [_txnId, value] of graph.transactions.entries()) {
     if (
       value.status !== ProcessStatus.Processed &&
       value.status !== ProcessStatus.Unset

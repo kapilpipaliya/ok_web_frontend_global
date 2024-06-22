@@ -33,7 +33,6 @@ import {
   commitTxn,
   getNewTxnId,
   revertTransaction,
-  transactions,
   txnHasSteps,
 } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
@@ -286,7 +285,7 @@ export function DynamicForm(props: DynamicFormProps) {
 
   onCleanup(() => {
     for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
-      revertTransaction(rowMetaTxnId);
+      revertTransaction(rowMetaTxnId, graph);
   });
 
   let submit: boolean;
@@ -344,7 +343,7 @@ export function DynamicForm(props: DynamicFormProps) {
   };
 
   const onCancel = () => {
-    revertTransaction(txnId);
+    revertTransaction(txnId, graph);
     if (props.isDialogContext) {
     } else {
       setTimeout(() => {
@@ -506,7 +505,7 @@ export function DynamicForm(props: DynamicFormProps) {
               <DeleteDialog
                 open={discradPopup()}
                 onConfirm={() => {
-                  revertTransaction(formData.txnId);
+                  revertTransaction(formData.txnId, graph);
                   setDiscradPopup(false);
                   onConfirmExit();
                 }}
