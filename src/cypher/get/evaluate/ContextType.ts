@@ -1,5 +1,5 @@
-import { Session } from "neo4j-driver";
-import { Edge, Vertex } from "~/lib/graph/graph";
+import type { Session } from "neo4j-driver";
+import type { Edge, Vertex } from "~/lib/graph/graph";
 
 export interface ContextType{
     nodes?: { [key: string]: Vertex };

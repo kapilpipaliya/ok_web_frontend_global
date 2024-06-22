@@ -30,7 +30,7 @@ export async function processNodeSync(
       children = await addNodeEdges(sessionSource, sessionTarget, createdVertex, mainResult, edge.T, outLabel, inward);
     }
 
-    for (let vertex of mainResult) {
+    for (const vertex of mainResult) {
       const newCreatedVertex = children.find(child => child.P.name === vertex.P.name) || await findOrCreateNodeAndUpdateProperties(sessionSource, sessionTarget, vertex, vertex.L[0]);
       if (expression.incoming && expression.incoming.length > 0) {
         for (const exp of expression.incoming) {

@@ -1,6 +1,5 @@
 import { useParams } from "@solidjs/router";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import { useLocation, type RouteSectionProps } from "@solidjs/router";
 import { Show, createSignal, onMount, useContext } from "solid-js";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";

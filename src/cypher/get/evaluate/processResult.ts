@@ -1,6 +1,6 @@
-import { Record } from "neo4j-driver";
+import type { Record } from "neo4j-driver";
 import { convertNodeToJson, convertRelationshipToJson } from "~/lib/convertNodeToJson";
-import { ContextType } from "./ContextType";
+import type { ContextType } from "./ContextType";
 
 export function processResult(records: Record[], context: ContextType, nodeLabel: string, typeLabel: string, inward?: boolean) {
   return records.map((record) => {

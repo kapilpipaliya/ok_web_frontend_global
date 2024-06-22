@@ -10,9 +10,8 @@ import { useToast } from "~/components/Toast";
 import { ProcessStatus, commitTxn, getNewTxnId, transactions } from "~/lib/graph/transaction";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
-import { GenericField } from "~/components/fields/GenericField";
 import { PageConfigContext } from "~/lib/contexts";
-import { GraphContext, IdAttr, Vertex } from "~/lib/graph/graph";
+import { GraphContext, IdAttr, } from "~/lib/graph/graph";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 
 export function HeaderDragAndDrop(props: {

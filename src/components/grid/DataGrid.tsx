@@ -18,7 +18,6 @@ import {
 } from "~/lib/graph/transaction";
 import { deleteVertex } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex, } from "~/lib/graph/graph";
-import { getFormApiFromFormMGCall } from "~/cypher/get/getFormApiFromFormMGCall";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 import { CommonTable } from "~/components/Table";
 import { Icon } from "@iconify-icon/solid";
@@ -28,7 +27,6 @@ import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import {
   capitalizeFirstLetter,
-  isNumber,
 } from "~/lib/utils";
 import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";

@@ -1,5 +1,4 @@
 
-import { useParams } from "@solidjs/router";
 import { clientOnly } from "@solidjs/start";
 import { createSignal, onMount, createEffect, on, Show, useContext } from "solid-js";
 import PreviewPage from "~/components/PreviewPage";

@@ -1,7 +1,7 @@
 import { MetaProvider } from "@solidjs/meta";
-import { Router, useLocation } from "@solidjs/router";
+import { Router, } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
-import { createSignal, ErrorBoundary, onMount, Show, Suspense } from "solid-js";
+import { createSignal, Show, Suspense } from "solid-js";
 import { Toaster } from "solid-toast";
 import { LoadingContext } from "~/lib/contexts";
 import { CSSRuntimeProvider } from "./components/CSSRuntimeProvider";
@@ -10,7 +10,6 @@ import type { Config } from "@master/css";
 import { Sidebar } from "~/pages/dashboard/sidebar/SidebarLayout";
 import { type EdgeMap, GraphContext, type GraphInterface, type Id, type VertexMap, } from "./lib/graph/graph";
 import { createStore } from "solid-js/store";
-import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 
 // Note: When we use createResource, it will temporary display Suspense fallback
 export default function App() {

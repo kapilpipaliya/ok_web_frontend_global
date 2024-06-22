@@ -1,8 +1,6 @@
-import { For, createMemo, createSignal } from "solid-js";
+import { For, createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
-import { CustomButton } from "./solid_blocks/button/buttons";
 import { Tooltip } from "./solid_blocks";
-import { props } from "rambda";
 
 const PreviewPage = (props: any) => {
     const [view, setView] = createSignal("Desktop");

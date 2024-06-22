@@ -1,5 +1,5 @@
 // src/components/Signature.tsx
-import { Component, createSignal, onCleanup, onMount } from 'solid-js';
+import { createSignal, onCleanup, onMount } from 'solid-js';
 
 export function Signature() {
     let canvasRef: HTMLCanvasElement | undefined;

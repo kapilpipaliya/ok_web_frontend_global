@@ -1,4 +1,4 @@
-import {GraphInterface, IdAttr, Vertex} from "~/lib/graph/graph";
+import {type GraphInterface, IdAttr, type Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction} from "solid-js/store";
 import type {FieldAttribute} from "~/lib/FormMetadataType";
 import type {CellContext} from "@tanstack/solid-table";

@@ -1,4 +1,4 @@
-import { type Session} from "neo4j-driver";
+import type { Session} from "neo4j-driver";
 import {getFormMetaDataAsync} from "~/cypher/get/getFormMetaDataAsync";
 import {getEdgesFromRowsAttr} from "~/lib/getEdgesFromRowsAttr";
 

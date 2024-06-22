@@ -1,6 +1,5 @@
-import { JSX, createSignal, splitProps } from "solid-js";
+import { type JSX, createSignal, splitProps } from "solid-js";
 import "./button.css";
-import { ComponentProps } from "~/components/fields/ComponentType";
 
 export function CustomButton(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLButtonElement> &  {class?: string, variant?: string, leading?: string, trailing?: string, text?: string, children?: any}) {
   const [local, field] = splitProps(props, ["class"]);

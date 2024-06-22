@@ -1,5 +1,5 @@
 import type {GraphInterface} from "~/lib/graph/graph";
-import {createStore, SetStoreFunction} from "solid-js/store";
+import type {SetStoreFunction} from "solid-js/store";
 import {createSignal, Show} from "solid-js";
 import {Icon} from "@iconify-icon/solid";
 import Dismiss from "solid-dismiss";

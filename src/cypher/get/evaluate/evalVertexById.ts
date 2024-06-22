@@ -1,8 +1,7 @@
-import type {Edge, Vertex} from "~/lib/graph/graph";
-import type {Session} from "neo4j-driver";
+
 import {getSessionForSubdomain} from "~/cypher/get/getSessionForSubdomain";
 import {findVertexMGCallId} from "~/cypher/get/findVertexMGCallId";
-import { ContextType } from "./ContextType";
+import type { ContextType } from "./ContextType";
 
 export async function evalVertexById(
   id: string,

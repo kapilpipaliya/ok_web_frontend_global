@@ -1,7 +1,6 @@
 import {int, type Session} from "neo4j-driver";
-import type {Edge, Vertex} from "~/lib/graph/graph";
 import {convertNodeToJson} from "~/lib/convertNodeToJson";
-import { ContextType } from "./evaluate/ContextType";
+import type { ContextType } from "./evaluate/ContextType";
 
 export async function findVertexMGCallId(
   session: Session,
