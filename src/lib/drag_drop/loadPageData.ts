@@ -3,7 +3,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { setGraphData } from "../websocket/setGraphData";
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import {getDataMGCall} from "~/cypher/get/getDataMGCall";
-import {getFormMetaDataAsync} from "~/lib/graph/get/async/getFormMetaDataAsync";
+import {getFormMetaDataAsync} from "~/cypher/get/getFormMetaDataAsync";
 
 export async function loadPageData(
   graph: Store<GraphInterface>,
