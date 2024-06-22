@@ -95,6 +95,10 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                   txnId={props.txnId}
                 />
               </Match>
+              add case for name
+              when user change it, run validation that value is not unique
+              use label: unique name
+              display inline error for it (value will not saved if the field has error)
               <Match when={component() === "Table"}>
                 <h3>
                   <Label />
