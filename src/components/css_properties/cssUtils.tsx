@@ -34,6 +34,7 @@ export const parseAndApplyCssRules = (valueString: string) => {
 };
 
 export function cssStateToString(cssState: CSSStore) {
+  if(!cssState) return "";
   return Object.entries(cssState)
     .map(([state, value]) => {
       if (!value || state===undefined) return;
@@ -47,19 +48,21 @@ export function cssStateToString(cssState: CSSStore) {
     .join("\n");
 }
 
-export function mergeCSS(input1: string, input2: string) {
-  
-  if (!input1) {
-    return input2;
+export function mergeCSS(input1: string | CSSStore, input2: string | CSSStore ) {
+  const css1 = typeof input1 === 'string' ? parseAndApplyCssRules(input1) : input1;
+  const css2 = typeof input2 === 'string' ? parseAndApplyCssRules(input2) : input2;
+
+  if (!css1) {
+    return cssStateToString(css2);
   }
-  if (!input2) {
-    return input1;
+  if (!css2) {
+    return "";
   }
 
   
   const mergedState = recursive(
-    parseAndApplyCssRules(input1),
-    parseAndApplyCssRules(input2),
+    css1,
+    css2,
   ) as CSSStore;
   
   return cssStateToString(mergedState);

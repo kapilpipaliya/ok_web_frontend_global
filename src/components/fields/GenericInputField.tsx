@@ -234,7 +234,7 @@ export function GenericInputField(
             <textarea
               {...defaultValues()}
               {...deNullify(customMetaProps)}
-              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+              class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -272,7 +272,7 @@ export function GenericInputField(
               type="text"
               {...defaultValues()}
               {...deNullify(customMetaProps)}
-              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+              class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               onchange={(e: any) => {
                 props.setValue
                   ? props.setValue(e.target.value)
@@ -320,7 +320,7 @@ export function GenericInputField(
               type="text"
               {...defaultValues()}
               {...deNullify(customMetaProps)}
-              class={`global-style ${mergeCSS(defaultValues().class, props.meta.P.class)}`}
+              class={`${mergeCSS(defaultValues().class, props.meta.P.class)}`}
               placeholder={props.meta?.P.label ?? props.title}
               onchange={(e: any) => {
                 props.setValue

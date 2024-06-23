@@ -1,8 +1,8 @@
 import { Tab, TabContainer, TabList, Tabs, } from "~/components/solid_blocks";
 import { Icon } from "@iconify-icon/solid";
 import type { Vertex } from "~/lib/graph/graph";
-import { Show, createMemo, createSignal, onMount } from "solid-js";
-import { createStore, reconcile } from "solid-js/store";
+import { Show, createSignal } from "solid-js";
+import { SetStoreFunction, createStore, reconcile } from "solid-js/store";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
@@ -24,36 +24,38 @@ export function CSSPropertiesEditor(props: {
   const [cssDefaultState, setCssDefaultCssState] = createStore({} as CSSStore);
   const [state, setState] = createSignal('');
 
-  const defaultValues = createMemo(() => props.meta.P.value || "");
-  const cssValue = createMemo(() => (props.data?.P[props.meta.P.name] as string) ?? "");
+  const defaultValues = props.meta.P.value || "";
+  const cssValue = props.data?.P[props.meta.P.name] as string || "";
 
-  const [isMonted, setIsMonted] = createSignal(false);
-  onMount(() => {
-    setCssDefaultCssState(reconcile(parseAndApplyCssRules(defaultValues())));
-    setCssState(reconcile(parseAndApplyCssRules(cssValue())));
-    setIsMonted(true);
-  });
-
-  // Merge null key into the default state and update setValue prop
-  // first time, call this function and it clear the value in vertex.
-  const memoizedCssValue = createMemo(() => {
-    if (!isMonted()) return "";
-    const value = cssStateToString(cssState);
-    props.setValue?.(value);
-    // setCssState(cssState);
-    // setCssDefaultCssState(cssDefaultState);
-    return value;
-  });
+  if (defaultValues) {
+    if (typeof defaultValues === 'string') {
+      setCssDefaultCssState(reconcile(parseAndApplyCssRules(defaultValues)));
+    } else {
+      setCssDefaultCssState(defaultValues);
+    }
+  }
+  if (cssValue) {
+    if (typeof cssValue === 'string') {
+      setCssState(reconcile(parseAndApplyCssRules(cssValue)));
+    } else {
+      setCssState(cssValue);
+    }
+  }
+  const onCSSStateChange = (...args: Parameters<SetStoreFunction<CSSStore>>) => {
+    // @ts-ignore
+    setCssState(...args);
+    props.setValue?.(cssState);
+  }
 
   return (
-    <CssEditorContext.Provider value={[cssState, setCssState]}>
+    <CssEditorContext.Provider value={[cssState, onCSSStateChange as SetStoreFunction<CSSStore>]}>
       <CssDefaultEditorContext.Provider value={[cssDefaultState, setCssDefaultCssState]}>
         <CssStateContext.Provider value={[state, setState]}>
           <Show when={Object.entries(cssState).length}>
             <div class="flex jc:end p:10|0">
               <button
                 onClick={() => setCssState(reconcile({}))}
-                style={{ display:"flex" }}
+                style={{ display: "flex" }}
               ><Icon icon="mdi:close" /> Reset</button>
             </div>
           </Show>
@@ -85,12 +87,12 @@ export function CSSPropertiesEditor(props: {
                   <div class="content mt:5">
                     Default Value(Read only)
                     <TextEditorTab
-                      getCssValue={defaultValues()}
+                      getCssValue={cssStateToString(cssDefaultState)}
                       parseAndApplyCssRules={parseAndApplyCssRules}
                     />
                     Property value
                     <TextEditorTab
-                      getCssValue={memoizedCssValue()}
+                      getCssValue={cssStateToString(cssState)}
                       parseAndApplyCssRules={parseAndApplyCssRules}
                     />
                   </div>

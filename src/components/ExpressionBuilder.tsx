@@ -193,7 +193,7 @@ export function ExpressionBuilder(props: {
                     </div>
                     <input
                       style={`border: ${item.error ? "1px solid red " : ""}`}
-                      class={"global-style flex-col"}
+                      class={"flex-col"}
                       {...props.meta?.P}
                       placeholder={"Write Expression..."}
                       onchange={(e: any) => handleChange(index(), e)}

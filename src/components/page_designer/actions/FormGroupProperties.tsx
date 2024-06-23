@@ -3,7 +3,7 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { toTitle } from "case-switcher-js";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { CSSPropertiesEditor } from "~/components/css_properties/PropertiesEditor";
+import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEditor";
 import { Icon } from "@iconify-icon/solid";
 import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
 import { ValidationConfig } from "./ValidationConfig";
