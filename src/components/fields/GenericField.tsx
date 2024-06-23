@@ -36,6 +36,8 @@ import {
   getDataVertex
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
+import { PageViewWrapper } from "~/pages/PageViewWrapper";
+import { PageDesignerLabels } from "~/lib/drag_drop/constant";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -190,9 +192,9 @@ export function GenericField(
           </Switch>
         </Match>
 
-        <Match when={component() === "Page"}>
+        <Match when={PageDesignerLabels.filter(label => label !== "Form").includes(component())}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageView metaVertex={props.data} />
+          <PageViewWrapper pageVertexLabel={component()}  expression={props.meta.P.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img

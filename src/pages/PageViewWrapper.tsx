@@ -15,6 +15,7 @@ export function PageViewWrapper(props: {
     pageVertexName?: string,
     pageId?: string,
     formId?: string,
+    expression?: string,
 }) {
     const [graph, setGraph] = useContext(GraphContext)!;
     const txnId = getNewTxnId(graph, setGraph);
@@ -26,13 +27,13 @@ export function PageViewWrapper(props: {
   
     // load form meta data
     async function loadFormDesignerMetaData() {
-      const form = FormMetaData.Form;
+      const form = FormMetaData[props.pageVertexLabel!] || FormMetaData.Form;
   
       const { incoming, outgoing }: { incoming: any; outgoing: any } =
         getEdgesFromRowsAttr(form.attributes);
   
       const data = await getDataMGCall({
-        expression: props.formId ? `id:'${props.formId}'` : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`,
+        expression: props.expression ?? (props.formId ? `id:'${props.formId}'` : `g:'${props.pageVertexLabel}[${props.pageVertexName}]'`),
         incoming,
         outgoing,
       });
@@ -51,8 +52,10 @@ export function PageViewWrapper(props: {
         data.graph,
       );
   
-      const metaVertex = graph.vertexes[data.result[0].id];
-      setMetaVertex(metaVertex);      
+      if (data.result.length > 0) {
+        const metaVertex = graph.vertexes[data.result[0].id];
+        setMetaVertex(metaVertex);      
+      }
     }
     onMount(() => {
       setMounted(true);
@@ -67,7 +70,18 @@ export function PageViewWrapper(props: {
         { defer: true },
       ),
     );
-
+  
+    createEffect(
+      on(
+        () => props.expression ?? "new",
+        (v) => {
+          setMetaVertex(undefined);
+          setDataVertex(undefined);
+          loadFormDesignerMetaData();
+        },
+        { defer: true },
+      ),
+    );
   
     const cleanUpConfig = {};
   
