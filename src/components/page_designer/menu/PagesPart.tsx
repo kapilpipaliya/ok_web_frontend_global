@@ -68,11 +68,14 @@ export function PagesPart(props: { coll: string }) {
         showErrorToast(result.error);
       } else {
         if (result?.graph) {
+          if (result.graph.vertexes[pageConfig.formData.formData.id]) {
+            delete result.graph.vertexes[pageConfig.formData.formData.id];
+          }
           setGraphData(graph, setGraph, result.graph);
 
           const data2 = getTreeData(graph, setGraph, {
             collection: paginationExpression({ coll: props.coll }),
-          });
+          }).filter((item) => item.id !== pageConfig.formData.formData.id);
           originalData = data2;
           setFilteredData(data2);
           setIsFetchingData(false);

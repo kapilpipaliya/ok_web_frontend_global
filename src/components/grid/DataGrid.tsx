@@ -58,14 +58,13 @@ export function DataGrid(props: DataGridProps) {
   const [isSearching, setIsSearching] = createSignal(false);
   const [isShowLoadMore, setIsShowLoadMore] = createSignal(true);
   const { Ws } = useContext(WsContext);
-  const form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+
   const collection = props.tableId;
   if (!collection) {
     return <>Incorrect Configuration</>;
   }
-  events?.setTitle(form.title);
 
-  const tableColumns = setGridHeaders(form);
+
   const deleteObject = async (id: any) => {
     const txnId = getNewTxnId(graph, setGraph);
     const deleteResult = deleteVertex(txnId, id, graph, setGraph);
@@ -97,8 +96,13 @@ export function DataGrid(props: DataGridProps) {
         [key: string]: any;
       };
     };
+    form?: IFormMetaData;
   }> {
     try {
+      const form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+      if (!form) {
+        return { error: "Form not found" };
+      }
       const { incoming, outgoing }: { incoming: any; outgoing: any } =
         getEdgesFromRowsAttr(form.attributes);
       // `g:'${coll}[filterdfghj skip=${skip ?? 0} limit=${limit ?? 10}]'`
@@ -114,7 +118,7 @@ export function DataGrid(props: DataGridProps) {
         incoming,
         outgoing,
       });
-      return result;
+      return { ...result, form: JSON.parse(JSON.stringify(form)) };
     } catch (e: any) {
       console.error("error", e);
       // when error happen server function doesn't return error message
@@ -281,6 +285,8 @@ export function DataGrid(props: DataGridProps) {
       const nodes: any = tableStore.data
         ? [...tableStore.data, ...resultData]
         : resultData;
+      events?.setTitle(data.form!.title);
+      const tableColumns = setGridHeaders(data.form!);
       setTableStore({ data: nodes, tableColumns });
       setSearch("");
       setFilteredData(nodes);

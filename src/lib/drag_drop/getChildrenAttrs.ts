@@ -4,6 +4,9 @@ import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { mergeVertexProperties } from "../graph/mutate/vertex";
 import { validateInput } from "~/components/page_designer/actions/validateInput";
+import { FieldAttribute, IFormMetaData } from "../FormMetadataType";
+import attributeNames from "../jsx_parser/constants/attributeNames";
+import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,
@@ -18,18 +21,20 @@ export function getChildrenAttrs(
   ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
-interface Item {
-  name: string;
-  type: string;
-  children?: Item[];
-}
-export function getAllFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): Item {
+
+export function getAllFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): FieldAttribute[] {
   const children = getChildrenAttrs(graph, setGraph, vertex);
-  if (children.length === 0) {
+  return children.map((child) => ({
+      name: vertex.P.name,
+      component: getComponent(graph, vertex)?.P.name,
+      attributes: getAllFields(graph, setGraph, child),
+    }));
+}
+export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): IFormMetaData {
   return {
     name: vertex.P.name,
-    type: vertex.P.type,
-    children: children.length === 0 ? undefined : children.map((child) => getAllFields(graph, setGraph, child)),
+    title: vertex.P.title,
+    attributes: getAllFields(graph, setGraph, vertex),
   };
 }
 // use it when new field is drag and drop.
@@ -47,12 +52,12 @@ export function getUniqueName(txnId: number, graph: Store<GraphInterface>, setGr
   return `unique_${uniqueId}`;
 }
 
-export function isUniqueIdUsed(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex,layoutVertex: Vertex, name: string) {
+export function isUniqueIdUsed(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, layoutVertex: Vertex, name: string) {
   function checkVertex(attrVertex: Vertex) {
     if (attrVertex.P.name === name && attrVertex.id !== layoutVertex.id) {
       return true;
     }
- 
+
     return getChildrenAttrs(
       graph,
       setGraph,
@@ -70,18 +75,18 @@ export function isUniqueIdUsed(graph: Store<GraphInterface>, setGraph: SetStoreF
 export function isAnyFieldInvalid(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, data: Vertex) {
   function checkVertex(attrVertex: Vertex) {
 
-  if (attrVertex.P.validation) {
-    const value = data.P[attrVertex.P.name];
-    const error = validateInput(attrVertex.P.validation, value);
-    mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
-      error: error || ""
-    });
-    if (error) {
-      return true;
+    if (attrVertex.P.validation) {
+      const value = data.P[attrVertex.P.name];
+      const error = validateInput(attrVertex.P.validation, value);
+      mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
+        error: error || ""
+      });
+      if (error) {
+        return true;
+      }
     }
-  }
 
- 
+
     return getChildrenAttrs(
       graph,
       setGraph,
