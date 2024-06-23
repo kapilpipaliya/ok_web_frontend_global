@@ -157,7 +157,7 @@ export function ValidationConfig(props: ValidationProps) {
     </div>
   );
 }
-export const ValidationConfigTest = (props: ValidationConfigType) => {
+export const ValidationConfigTest = (validations: ValidationConfigType) => {
   const [values, setValues] = createSignal("");
   const [error, setError] = createSignal("");
 
@@ -167,7 +167,7 @@ export const ValidationConfigTest = (props: ValidationConfigType) => {
     const value = target.value;
     setValues(value);
     setError("");
-    const error = validateInput(value, props);
+    const error = validateInput(validations, value);
     if (error) {
       setError(error);
     }

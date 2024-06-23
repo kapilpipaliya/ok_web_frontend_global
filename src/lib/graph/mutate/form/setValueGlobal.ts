@@ -30,13 +30,10 @@ export function setValueGlobal(
   }
   let error = "" as string | undefined;
   if (metaVertex.P.validation) {
-    error = validateInput(data, metaVertex.P.validation);
+    error = validateInput(metaVertex.P.validation, data);
     mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
       error: error || ""
     });
-    if (error) {
-      return error;
-    }
   }
 
   mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {
@@ -50,5 +47,6 @@ export function setValueGlobal(
   });
 
   onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
+
   if (isRealTime) commitTxn(txnId, ws, graph);
 }

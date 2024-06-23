@@ -10,6 +10,7 @@ import { createStore } from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
+import { isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
 
 export function FormWrapper(
   props: ComponentProps & {
@@ -65,6 +66,9 @@ export function FormWrapper(
 
   const SubmitCancelButtons = () => {
     const onSubmit = async () => {
+      if (isAnyFieldInvalid(graph, setGraph, props.meta, formData.formData)) {
+        return;
+      }
       const data = commitTxn(txnId, Ws, graph);
       await showLoadingToast({
         promise: submitDataCall(data, graph, setGraph, txnId),
