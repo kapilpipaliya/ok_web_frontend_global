@@ -10,7 +10,6 @@ import { createStore } from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { CustomButton } from "../solid_blocks/button/buttons";
 
 export function FormWrapper(
   props: ComponentProps & {
@@ -86,12 +85,12 @@ export function FormWrapper(
         <Show
           when={props.submitButton}
           fallback={
-            <CustomButton onClick={onSubmit}>Submit</CustomButton>
+            <button onClick={onSubmit}>Submit</button>
           }
         >
           {props.submitButton}
         </Show>
-        <CustomButton variant={"outlined"} style={{ "margin-left": "7px" }} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</CustomButton>
+        <button style={{ "margin-left": "7px" }} class="danger border-color:#FF0000 color:#FF0000" onClick={onCancel}>Cancel</button>
       </div>
     );
   };

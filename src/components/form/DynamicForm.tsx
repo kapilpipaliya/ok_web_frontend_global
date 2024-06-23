@@ -61,7 +61,6 @@ import {
 import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
-import { CustomButton } from "../solid_blocks/button/buttons";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
@@ -359,7 +358,7 @@ export function DynamicForm(props: DynamicFormProps) {
   let onConfirmExit: () => void;
   // https://github.com/solidjs/solid-router
   useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (submit || !txnHasSteps(formData.txnId)) {
+    if (submit || !txnHasSteps(formData.txnId, graph)) {
       return;
     }
     // if (form.isDirty && !e.defaultPrevented) {
@@ -381,12 +380,12 @@ export function DynamicForm(props: DynamicFormProps) {
         display: "flex",
       }}
     >
-      <CustomButton variant={"outlined"} style={{ "margin-right": "7px" }} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</CustomButton>
+      <button style={{ "margin-right": "7px" }} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</button>
 
       <Show
         when={props.submitButton}
         fallback={
-          <CustomButton onClick={onSubmit}>Submit</CustomButton>
+          <button onClick={onSubmit}>Submit</button>
         }
       >
         {props.submitButton}

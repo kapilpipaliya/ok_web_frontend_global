@@ -8,7 +8,6 @@ import {
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { capitalizeFirstLetter } from "~/lib/utils";
 
 type TableProps<T> = {
@@ -138,12 +137,12 @@ export function CommonTable<T>(props: TableProps<T>) {
         }
       >
         <div style="display: flex; justify-content: end; padding: 5px 10px;">
-          <CustomButton
-            variant="soft"
+          <button
+            // variant="soft"
             onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
           >
             Load More
-          </CustomButton>
+          </button>
         </div>
       </Show>
     </div>

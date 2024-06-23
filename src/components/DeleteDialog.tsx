@@ -1,4 +1,4 @@
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
+
 import {CustomModal} from "./CommonDialog";
 import type { JSX } from "solid-js";
 
@@ -33,8 +33,7 @@ export function DeleteDialog(props: {
       }
       footer={(toggle) => (
         <div class={"flex ai:center jc:end"}>
-          <CustomButton
-            variant="outlined"
+          <button
             class="danger"
             style={{ "margin-right": "7px" }}  
             onClick={() => {
@@ -43,9 +42,8 @@ export function DeleteDialog(props: {
             }}
           >
             Cancel
-          </CustomButton>
-          <CustomButton
-            variant="contained"
+          </button>
+          <button
             onClick={() => {
               handleConfirm();
               toggle((v) => !v);
@@ -53,7 +51,7 @@ export function DeleteDialog(props: {
             style="margin-right: 10px;"
           >
             Confirm
-          </CustomButton>
+          </button>
         </div>
       )}
       dialogClass="min-w:20% r:10px p:0"

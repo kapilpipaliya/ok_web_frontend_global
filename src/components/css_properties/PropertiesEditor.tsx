@@ -9,9 +9,8 @@ import { TextEditorTab } from "~/components/css_properties/TextEditorTab";
 import { StyleEditorTab } from "~/components/css_properties/StyleEditorTab";
 import { DisplaySelector } from "./components/DisplaySelector";
 import { cssStateToString, type CSSStore, parseAndApplyCssRules } from "~/components/css_properties/cssUtils";
-import {CustomButton} from "../solid_blocks/button/buttons";
 
-export function ClassDesignTab(props: {
+export function CSSPropertiesEditor(props: {
   component: string;
   meta: Vertex;
   title?: string;
@@ -52,12 +51,10 @@ export function ClassDesignTab(props: {
         <CssStateContext.Provider value={[state, setState]}>
           <Show when={Object.entries(cssState).length}>
             <div class="flex jc:end p:10|0">
-              <CustomButton
-                variant="outlined"
+              <button
                 onClick={() => setCssState(reconcile({}))}
-                leading={<Icon icon="mdi:close" />}
                 style={{ display:"flex" }}
-              >Reset</CustomButton>
+              ><Icon icon="mdi:close" /> Reset</button>
             </div>
           </Show>
           <span class={"m:10|0"}>

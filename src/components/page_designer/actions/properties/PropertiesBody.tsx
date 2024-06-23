@@ -16,7 +16,6 @@ import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import JsxParser from "~/lib/jsx_parser/components/JsxParser";
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { FormGroupProperties } from "../FormGroupProperties";
 
 export function PropertiesBody(props: any) {
@@ -59,9 +58,9 @@ export function PropertiesBody(props: any) {
     <>
       <Show when={selectedId() !== -1}>
         <div class="flex jc:start">
-          <CustomButton class="mb:5" onClick={toggleRulesModal}>Rules</CustomButton>
+          <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
           &nbsp;&nbsp;
-          <CustomButton onClick={toggleImportsModal}>Import</CustomButton>
+          <button onClick={toggleImportsModal}>Import</button>
         </div>
         <CollAndData />
         <FormGroupProperties
@@ -92,8 +91,8 @@ export function PropertiesBody(props: any) {
                     "align-items": "center",
                   }}
                 >
-                  <CustomButton onClick={() => toggleRulesModal()}>Submit</CustomButton>
-                  <CustomButton variant={"outlined"} class="border-color:#FF0000 color:#FF0000" onClick={() => toggleRulesModal()}>Cancel</CustomButton>
+                  <button onClick={() => toggleRulesModal()}>Submit</button>
+                  <button class="border-color:#FF0000 color:#FF0000" onClick={() => toggleRulesModal()}>Cancel</button>
                 </div>
               </ModalFooter>
             </ModalContent>

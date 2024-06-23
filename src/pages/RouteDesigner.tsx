@@ -1,6 +1,5 @@
 import { createSignal, For, Show, Match, Switch } from "solid-js";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 
 export function RouteDesigner() {
   const [elements, setElements]: any = createSignal([]);
@@ -23,15 +22,15 @@ export function RouteDesigner() {
     <div style="padding: 20px;">
       <form onSubmit={getFormFields}>
         <div style="margin-bottom: 20px;">
-          <CustomButton onClick={() => addElement("table")}>
+          <button onClick={() => addElement("table")}>
             Add Table
-          </CustomButton>
-          <CustomButton onClick={() => addElement("button")}>
+          </button>
+          <button onClick={() => addElement("button")}>
             Add Button
-          </CustomButton>
-          <CustomButton onClick={() => addElement("modal")}>
+          </button>
+          <button onClick={() => addElement("modal")}>
             Add Modal
-          </CustomButton>
+          </button>
         </div>
         <div>
           <For each={elements()}>
@@ -51,12 +50,12 @@ export function RouteDesigner() {
           style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center;">
           <div style="background: white; padding: 20px; border-radius: 5px;">
             <p>This is a modal</p>
-            <CustomButton
-              variant="outlined"
+            <button
+              // variant="outlined"
               onClick={() => setShowModal(false)}
             >
               Close
-            </CustomButton>
+            </button>
           </div>
         </div>
       </Show>
@@ -88,18 +87,18 @@ const DynamicElement = (props: {
         </Table>
       </Match>
       <Match when={props.element.type === "button"}>
-        <CustomButton style="margin-bottom: 20px; padding: 10px;">
+        <button style="margin-bottom: 20px; padding: 10px;">
           Button
-        </CustomButton>
+        </button>
       </Match>
       <Match when={props.element.type === "modal"}>
         <div style="position: relative; margin-bottom: 20px;">
-          <CustomButton
+          <button
             style="padding: 10px;"
             onClick={() => props.setShowModal(true)}
           >
             Open Modal
-          </CustomButton>
+          </button>
         </div>
       </Match>
       <Match when={true}>

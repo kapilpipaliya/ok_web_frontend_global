@@ -3,7 +3,6 @@ import { type Accessor, For, type Setter, createSignal, Show, useContext } from 
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { CustomModal } from "~/components/CommonDialog";
-import { CustomButton } from "~/components/solid_blocks/button/buttons";
 import { ShareSection } from "./PageShare";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
@@ -218,14 +217,13 @@ const ExportSection = (props: {
       body={<ShareSection />}
       footer={(toggle) => (
         <div class="flex ai:center jc:flex-end">
-          <CustomButton
-            variant="soft"
+          <button
             onClick={() => {
               toggle(false);
             }}
           >
             Close
-          </CustomButton>
+          </button>
         </div>
       )}
       setOpen={props.setOpenDialog}

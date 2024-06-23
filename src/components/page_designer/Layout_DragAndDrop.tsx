@@ -8,7 +8,6 @@ import {
   PageConfigContext,
 } from "~/lib/contexts";
 import { ContentDragAndDrop } from "./Content_DragAndDrop";
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { PageSetting } from "./PageSetting";
 import { Tooltip } from "~/components/solid_blocks";
 import {Drawer} from "~/components/Drawer";
@@ -117,7 +116,7 @@ export function LayoutDragAndDrop(): JSX.Element {
             <div
               class={`rel flex jc:start h:50px r:0|15|15|0 p:2 cursor:pointer`}
             >
-              <CustomButton
+              <button
                 style={{
                   cursor: "pointer",
                   padding: "15px",
@@ -126,7 +125,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   gap: "10px",
                   'align-items': "center",
                 }}
-                variant="soft"
+                // variant="soft"
                 onClick={setIsLeftOpen}
                 class="outline:2px|solid|transparent outline:offset|2px:focus"
               >
@@ -139,7 +138,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                 />
 
                 <span class={`font:14 cursor:pointer d:none@<sm`}>Add Form Element</span>
-              </CustomButton>
+              </button>
             </div>
           </Show>
           <div class="ai:center flex gap:5 p:8 jc:center">
@@ -153,7 +152,7 @@ export function LayoutDragAndDrop(): JSX.Element {
             <div
               class={`rel flex jc:end h:50px r:0|15|15|0 p:2 cursor:pointer`}
             >
-              <CustomButton
+              <button
                 style={{
                   cursor: "pointer",
                   padding: "15px",
@@ -162,7 +161,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   gap: "10px",
                   'align-items': "center",
                 }}
-                variant="soft"
+                // variant="soft"
                 onClick={setIsRightOpen}
                 class="p:15 jc:center outline:2px|solid|transparent outline:offset|2px:focus"
               >
@@ -174,7 +173,7 @@ export function LayoutDragAndDrop(): JSX.Element {
                   width={22}
                   style={{color: "#37c"}}
                 />
-              </CustomButton>
+              </button>
             </div>
           </Show>
 

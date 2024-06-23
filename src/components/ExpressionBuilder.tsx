@@ -1,6 +1,5 @@
 import { For, Show, useContext } from "solid-js";
 
-import {CustomButton} from "~/components/solid_blocks/button/buttons";
 import { Icon } from "@iconify-icon/solid";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { binops, unops } from "~/lib/expression_eval";
@@ -232,24 +231,23 @@ export function ExpressionBuilder(props: {
         }
         footer={(toggle) => (
           <div class={"flex ai:center jc:end"}>
-            <CustomButton
-              variant={"soft"}
+            <button
               onclick={handleInsert}
               {...props.meta.P}
             >
               Add
-            </CustomButton>
-            <CustomButton
-              variant={"outlined"}
+            </button>
+            <button
+              // variant={"outlined"}
               class="border-color:#FF0000 color:#FF0000 ml:5"
               onclick={toggle}
               {...props.meta.P}
             >
               Cancel
-            </CustomButton>
+            </button>
 
-            <CustomButton
-              variant="contained"
+            <button
+              // variant="contained"
               onclick={() => {
                 handleSubmit();
                 toggle((v) => !v);
@@ -257,7 +255,7 @@ export function ExpressionBuilder(props: {
               {...props.meta.P}
             >
               Submit
-            </CustomButton>
+            </button>
           </div>
         )}
         dialogClass="min-w:30% r:10px p:0"
