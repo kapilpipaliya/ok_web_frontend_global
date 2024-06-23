@@ -197,6 +197,7 @@ export function PagesPart(props: { coll: string }) {
           onDragStart={(e) => {
             e.stopPropagation();
             setDraggedVertex([]);
+            clearTimeout(timeoutId);
             setPreviewPageId(null);
             const dataTransfer =
               selectedComponents().size > 0

@@ -184,7 +184,7 @@ export function ComponentPart() {
               ? Array.from(selectedComponents())
               : [graph.vertexes[props.child.id]];
           setDraggedVertex((prev) => [...prev, ...dataTransfer]);
-          setSelectedComponents(new Set());
+          setSelectedComponents(new Set<Vertex>());
         }}
         ondblclick={(e) => {
           setDraggedVertex([graph.vertexes[props.child.id]]);
@@ -193,7 +193,7 @@ export function ComponentPart() {
             setGraph,
             pageConfig.formData.txnId,
             draggedVertex()[0],
-            pageConfig.formData || {},
+            pageConfig.formData.formData || {},
             selectedId() !== -1
               ? selectedId()
               : pageConfig.formData.formData.id,
