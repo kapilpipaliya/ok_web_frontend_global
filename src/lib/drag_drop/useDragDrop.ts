@@ -245,6 +245,7 @@ export function useDragDrop(
     }
 
     const layoutRowId = componentDrop(
+      formData,
       txnId,
       fromVertex,
       toParentVertex || formData,

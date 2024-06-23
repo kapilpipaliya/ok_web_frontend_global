@@ -8,12 +8,15 @@ import {createAttrMetaVertex} from "~/lib/drag_drop/component_drop/createAttrMet
 import {processChildren} from "~/lib/drag_drop/component_drop/processChildren";
 import {handleAttrVertex} from "~/lib/drag_drop/component_drop/handleAttrVertex";
 import {handleCompOrCollVertex} from "~/lib/drag_drop/component_drop/handleCompOrCollVertex";
+import { getUniqueName } from "../getChildrenAttrs";
+import { IPageConfig } from "~/lib/contexts";
 
 // @Note:
 // From Component To Layout drag:
 // 1. Create a Row to proper parent.
 // 2. Sort properly
 export function componentDrop(
+  pageDesignerVertex: Vertex,
   txnId: number,
   fromVertex: Vertex,
   toParentVertex: Vertex,
@@ -31,6 +34,7 @@ export function componentDrop(
   if(PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
       processChildren(
+        pageDesignerVertex,
         fromVertex,
         toParentVertex,
         txnId,
@@ -42,16 +46,18 @@ export function componentDrop(
     );
   }
 
+  const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
   const rowResult = addNewRow(
     txnId,
     attrMetaVertex,
     graph,
     setGraph,
     toParentVertex,
-    toIndex ? { pos: toIndex } : {},
+    toIndex ? { pos: toIndex, name: uniqueName } : {name: uniqueName},
     false,
-    {} as any,
+    {} as any
   );
+  
   const rowVertex = graph.vertexes[rowResult.vertexId!];
 
   if (["Comp", "Coll"].includes(fromVertex.L[0])) {
@@ -66,6 +72,7 @@ export function componentDrop(
     );
   } else if (fromVertex.L[0] === "Attr") {
     handleAttrVertex(
+      pageDesignerVertex,
       fromVertex,
       rowVertex,
       txnId,

@@ -35,6 +35,10 @@ export type TProps = {
   renderError?: (props: { error: string }) => JSX.Element | null;
   renderInWrapper?: boolean;
   renderUnrecognized?: (tagName: string) => JSX.Element | null;
+  // added props
+  formData: Vertex,
+  txnId: number,
+  parent: Vertex
 };
 type Scope = Record<string, any>;
 
@@ -60,8 +64,9 @@ export default class JsxParser {
     renderUnrecognized: () => null,
   };
   private ParsedChildren: ParsedTree = null;
+  props: TProps;
 
-  constructor(props) {
+  constructor(props: TProps) {
     const newProps = Object.assign({}, JsxParser.defaultProps, props);
     this.props = {};
     for (const property in newProps) {
@@ -504,6 +509,7 @@ export default class JsxParser {
       )!;
     }
     const rowId = componentDrop(
+      this.props.formData,
       this.props.txnId,
       componentVertex!,
       scope.parent,
@@ -654,6 +660,7 @@ export default class JsxParser {
             "Text",
           )!;
           const rowId = componentDrop(
+            this.props.formData,
             this.props.txnId,
             componentVertex!,
             parentVertex,

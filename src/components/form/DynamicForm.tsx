@@ -184,15 +184,16 @@ export function DynamicForm(props: DynamicFormProps) {
           // if new form then add a form component in the layout
           if (dataVertex?.L[0] === "Form") {
             // add form component
-            const formVertex = findVertexByLabelAndUniqueId(
+            const formCompVertex = findVertexByLabelAndUniqueId(
               graph,
               "Comp",
               IdAttr,
               "Form",
             );
             const layoutRowId = componentDrop(
+              dataVertex,
               txnId,
-              formVertex!,
+              formCompVertex!,
               dataVertex!,
               graph,
               setGraph,

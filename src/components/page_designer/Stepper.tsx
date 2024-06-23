@@ -37,6 +37,7 @@ export const Stepper = () => {
       "Form",
     );
     const layoutRowId = componentDrop(
+      pageConfigStore.formData.formData,
       pageConfigStore.formData.txnId,
       formVertex!,
       pageConfigStore.formData?.formData!,
@@ -71,6 +72,7 @@ export const Stepper = () => {
       "Form",
     );
     const layoutRowId = componentDrop(
+      pageConfigStore.formData.formData,
       pageConfigStore.formData.txnId,
       formVertex!,
       pageConfigStore.formData?.formData!,

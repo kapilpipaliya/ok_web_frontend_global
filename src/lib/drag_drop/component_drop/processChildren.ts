@@ -6,6 +6,7 @@ import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getCompo
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 
 export function processChildren(
+  formVertex: Vertex,
   fromVertex: Vertex,
   toVertex: Vertex,
   txnId: number,
@@ -37,8 +38,9 @@ export function processChildren(
       attrCompMetaVertex,
       compVertex.id,
     );
-    cloneRowProps(graph, setGraph, txnId, child, rowVertex);
+    cloneRowProps(graph, setGraph, formVertex, txnId, child, rowVertex);
     processChildren(
+      formVertex,
       child,
       rowVertex,
       txnId,

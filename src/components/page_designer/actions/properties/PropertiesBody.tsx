@@ -236,6 +236,7 @@ export function PropertiesBody(props: any) {
 
               onClick: () => {
                 const jsxParser = new JsxParser({
+                  formData: pageConfig.formData.formData,
                   showWarnings: true,
                   txnId: pageConfig.formData.txnId,
                   jsx: graph.vertexes[dataVertexId].P.jsx || "",

@@ -39,6 +39,7 @@ export async function handleComponentDrag(
       "Label",
     );
     const layoutRowId = componentDrop(
+      formData,
       txnId,
       labelVertex!,
       toParentVertex || formData,
@@ -53,6 +54,7 @@ export async function handleComponentDrag(
 
     // add component inside the label
     const layoutRowId2 = componentDrop(
+      formData,
       txnId,
       fromVertex,
       graph.vertexes[layoutRowId] || formData,
@@ -74,6 +76,7 @@ export async function handleComponentDrag(
     );
   } else {
     const layoutRowId = componentDrop(
+      formData,
       txnId,
       fromVertex,
       toParentVertex || formData,

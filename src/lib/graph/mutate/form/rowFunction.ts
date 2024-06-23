@@ -18,6 +18,7 @@ import { getToEdge } from "../../get/sync/traverse";
 import { newEdge, addNewEdge } from "../edge";
 import { klona } from "klona/json";
 import { getCollAttrComp } from "../../get/sync/graph_functions";
+import { getUniqueName } from "~/lib/drag_drop/getChildrenAttrs";
 
 
 export function getSublistRowsForType(
@@ -118,14 +119,18 @@ export function addNewRow(
   );
   if (isRealTime) commitTxn(txnId, Ws, graph);
   return newRowResult;
-}export function cloneRowProps(
+}
+export function cloneRowProps(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
+  formVertex: Vertex,
   txnId: number,
   fromVertex: Vertex,
   toVertex: Vertex
 ) {
-  mergeVertexProperties(txnId, toVertex.id, graph, setGraph, JSON.parse(JSON.stringify(fromVertex.P)));
+  const props = JSON.parse(JSON.stringify(fromVertex.P));
+  const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {id: 0} as unknown as Vertex);
+  mergeVertexProperties(txnId, toVertex.id, graph, setGraph, {...props, name: uniqueName});
   return;
 }
 export function rowMetaInitialize(

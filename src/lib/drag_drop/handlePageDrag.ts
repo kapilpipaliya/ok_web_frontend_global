@@ -14,6 +14,7 @@ export async function handlePageDrag(
   position: string,
 ) {
   const layoutRowId = componentDrop(
+    formData,
     txnId,
     fromVertex,
     toParentVertex || formData,

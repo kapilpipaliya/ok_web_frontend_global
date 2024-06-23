@@ -6,6 +6,7 @@ import {cloneRowProps} from "~/lib/graph/mutate/form/rowFunction";
 import {processChildren} from "~/lib/drag_drop/component_drop/processChildren";
 
 export function handleAttrVertex(
+  formVertex: Vertex,
   fromVertex: Vertex,
   rowVertex: Vertex,
   txnId: number,
@@ -23,8 +24,9 @@ export function handleAttrVertex(
     attrCompMetaVertex,
     compVertex.id,
   );
-  cloneRowProps(graph, setGraph, txnId, fromVertex, rowVertex);
+  cloneRowProps(graph, setGraph,formVertex, txnId, fromVertex, rowVertex);
   processChildren(
+    formVertex,
     fromVertex,
     rowVertex,
     txnId,

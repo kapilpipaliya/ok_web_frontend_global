@@ -2,6 +2,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
+import { mergeVertexProperties } from "../graph/mutate/vertex";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,
@@ -36,29 +37,36 @@ export function getAllFields(graph: Store<GraphInterface>, setGraph: SetStoreFun
   };
 }
 // use it when new field is drag and drop.
-export function getUniqueName(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>) {
-  const meta = graph.meta || { lastUniqueId: 0 };
-  let uniqueId = meta.lastUniqueId + 1;
+export function getUniqueName(txnId: number, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex, layoutVertex: Vertex) {
+  let uniqueId = (formVertex.P.lastUniqueId || 0) + 1;
 
-  while (isUniqueIdUsed(graph, `unique_${uniqueId}`)) {
+  while (isUniqueIdUsed(graph, setGraph, formVertex, layoutVertex, `unique_${uniqueId}`)) {
     uniqueId++;
   }
 
-  setGraph("meta", { lastUniqueId: uniqueId });
+  // setGraph('vertexes', formVertex.id, { P: { lastUniqueId: uniqueId } });
+  mergeVertexProperties(txnId, formVertex.id, graph, setGraph, {
+    lastUniqueId: uniqueId,
+  });
   return `unique_${uniqueId}`;
 }
 
-//  traverse all the nodes and check if it is used or not?
-export function isUniqueIdUsed(graph: Store<GraphInterface>, name: string) {
-  function checkVertex(vertex: Vertex) {
-    if (vertex.P.name === name) {
+export function isUniqueIdUsed(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, formVertex: Vertex,layoutVertex: Vertex, name: string) {
+  function checkVertex(attrVertex: Vertex) {
+    if (attrVertex.P.name === name && attrVertex.id !== layoutVertex.id) {
       return true;
     }
-    if (vertex.children) {
-      return vertex.children.some(checkVertex);
-    }
-    return false;
+ 
+    return getChildrenAttrs(
+      graph,
+      setGraph,
+      attrVertex,
+    ).some(checkVertex);
   }
 
-  return graph.vertexes.some(checkVertex);
+  return getChildrenAttrs(
+    graph,
+    setGraph,
+    formVertex,
+  ).some(checkVertex);
 }

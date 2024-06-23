@@ -52,8 +52,10 @@ export interface IFormContext {
  formData: Vertex;
 }
 
+export interface IPageConfig { formData: IFormContext }
+
 export const PageConfigContext = createContext(
-  createStore({} as { formData: IFormContext }),
+  createStore({} as IPageConfig),
 );
 
 export const IndicatorPositionContext = createContext(

@@ -1,4 +1,4 @@
-import { Show, createMemo, For, Match, Switch, useContext, } from "solid-js";
+import { Show, createMemo, For, Match, Switch, useContext, createUniqueId, onCleanup } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { toTitle } from "case-switcher-js";
@@ -7,7 +7,10 @@ import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEd
 import { Icon } from "@iconify-icon/solid";
 import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
 import { ValidationConfig } from "./ValidationConfig";
-import { SelectedComponentContext } from "~/lib/contexts";
+import { PageConfigContext, SelectedComponentContext } from "~/lib/contexts";
+import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
+import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
+
 
 interface FormGroupPropertiesProps {
   metaAttributes: Vertex[];
@@ -21,16 +24,26 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const [pageConfig, __] = useContext(PageConfigContext);
+
+  const nameVertexId = `nameVertex${createUniqueId()}`;
+  const classVertexId = `classVertex${createUniqueId()}`;
+
+  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { name: 'name', displayName: 'Unique Name', class: 'border:1px|solid|#ccc p:2' }), graph, setGraph);
+  addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { name: 'class', displayName: 'Class' }), graph, setGraph);
 
   function moveClassToLast(vertices: Vertex[]) {
-    const nameVertices = vertices.filter(vertex => vertex.P.name === 'name');
-    const classVertices = vertices.filter(vertex => vertex.P.name === 'class');
+    // const nameVertex = vertices.filter(vertex => vertex.P.name === 'name');
+    // const classVertex = vertices.filter(vertex => vertex.P.name === 'class');
     const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class');
 
-    // Concatenate nameVertices, otherVertices, and classVertices
-    //     return [{P: {name: 'name'}}, ...otherVertices, {P: {name: 'class'}}];
-    return [...nameVertices, ...otherVertices, ...classVertices];
+    return [graph.vertexes[nameVertexId], ...otherVertices, graph.vertexes[classVertexId]];
   }
+
+  onCleanup(() => {
+    deleteVertex(0, nameVertexId, graph, setGraph);
+    deleteVertex(0, classVertexId, graph, setGraph);
+  });
 
   return (
     <>
@@ -58,7 +71,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
 
       <div class="">
         <ValidationConfig
-          meta={{ P: { name: "validation" } as unknown as Vertex }}
+          meta={{ P: { name: "validation" } } as unknown as Vertex}
           data={props.selectedLayout}
           componentMeta={graph.vertexes[selectedComponent()?.vertexId]}
           setValue={props.setValue}
@@ -98,6 +111,46 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
             />
           );
 
+          const UniqueNameField = () => (
+            <div class={`flex gap:2 mt:6 justify-content:space-between ai:center ${props.selectedLayout?.P[metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 p:2|3 r:5 bt:none bb:none' : ''}`}>
+              <span class="flex:.5 f:15" id={id}>
+                <Label />
+              </span>
+              <span class="flex:1 f:15">
+                <DynamicComponent
+                  component={component()}
+                  meta={metaVertex}
+                  data={props.selectedLayout}
+                  setValue={(data: string) => {
+                    if (metaVertex.P.name === "name") {
+                      if (data.length) {
+                        if (isUniqueIdUsed(graph, setGraph, pageConfig.formData.formData, props.selectedLayout, data)) {
+                          return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+                            error: "Name is not unique",
+                          });
+                        }
+                        mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+                          error: null,
+                        });
+                        return props.setValue(metaVertex, data);
+                      } else {
+                        return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+                          error: "Name is required",
+                        });
+                      }
+                    }
+                    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+                      error: null,
+                    });
+                    return props.setValue(metaVertex, data);
+                  }}
+                  txnId={0}
+                  isRealTime={false}
+                />
+              </span>
+            </div>
+          );
+
           return (
             <div><Switch>
               <Match when={metaVertex.P.name === "class"}>
@@ -109,10 +162,6 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                   txnId={props.txnId}
                 />
               </Match>
-              add case for name
-              when user change it, run validation that value is not unique
-              use label: unique name
-              display inline error for it (value will not saved if the field has error)
               <Match when={component() === "Table"}>
                 <h3>
                   <Label />
@@ -121,6 +170,9 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
               </Match>
               <Match when={component() === "CollectionOption"}>
                 <Content />
+              </Match>
+              <Match when={metaVertex.P.name === "name"}>
+                <UniqueNameField />
               </Match>
               <Match when={props.selectedLayout}>
                 <div class={`flex gap:2 mt:6 justify-content:space-between ai:center ${props.selectedLayout?.P[metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 p:2|3 r:5 bt:none bb:none' : ''}`}>
