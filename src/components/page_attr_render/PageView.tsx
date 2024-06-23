@@ -75,7 +75,7 @@ export function PageView(props: {
                 <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
               </div>
             </Show>
-            <FormWrapper meta={selectedFormVertex()!} data={props.data} label={props.metaVertex?.L?.[0]} />
+            <FormWrapper meta={selectedFormVertex()!} data={props.data} label={props.metaVertex?.P.name} />
           </Match>
           <Match when={true}>
             <PageAttrRender metaVertex={props.metaVertex!} data={props.data} />

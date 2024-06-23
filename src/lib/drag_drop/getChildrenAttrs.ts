@@ -26,15 +26,10 @@ interface Item {
 export function getAllFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): Item {
   const children = getChildrenAttrs(graph, setGraph, vertex);
   if (children.length === 0) {
-    return {
-      name: vertex.P.name,
-      type: vertex.P.type,
-    };
-  }
   return {
     name: vertex.P.name,
     type: vertex.P.type,
-    children: children.map((child) => getAllFields(graph, setGraph, child)),
+    children: children.length === 0 ? undefined : children.map((child) => getAllFields(graph, setGraph, child)),
   };
 }
 // use it when new field is drag and drop.

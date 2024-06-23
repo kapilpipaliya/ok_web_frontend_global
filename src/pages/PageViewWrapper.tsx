@@ -45,7 +45,9 @@ export function PageViewWrapper(props: {
         // @ts-ignore
         return { error: data.error };
       } 
-      delete data.graph.vertexes[props.formId!]
+      if(props.formId) {
+        delete data.graph.vertexes[props.formId!]
+      }
       setGraphData(
         graph,
         setGraph,
