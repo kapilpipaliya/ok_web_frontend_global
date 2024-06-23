@@ -8,10 +8,10 @@ import {
 } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { capitalizeFirstLetter } from "~/lib/utils";
+import type { ColumnDef } from "@tanstack/solid-table";
 
 type TableProps<T> = {
-  headers: any[];
+  headers: ColumnDef<any>[];
   data: T[];
   rowsPerPageOptions?: number[];
   defaultRowsPerPage?: number;
@@ -75,7 +75,7 @@ export function CommonTable<T>(props: TableProps<T>) {
         <For each={props.headers}>
           {(header) => (
             <TableHeadCell>
-              {capitalizeFirstLetter(header.name || "Actions")}
+              {header.header}
             </TableHeadCell>
           )}
         </For>

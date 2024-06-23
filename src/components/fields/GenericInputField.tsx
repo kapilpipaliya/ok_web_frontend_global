@@ -14,7 +14,6 @@ import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { SelectedIdContext } from "~/lib/contexts";
-import { Label } from "~/components/solid_blocks/Label";
 import { MultiSelectField } from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
@@ -344,17 +343,7 @@ export function GenericInputField(
             <Signature />
             <Error />
           </Match>
-          <Match when={component() === "Label"}>
-            <Label
-              meta={props.meta}
-              {...defaultValues()}
-              {...deNullify(customMetaProps)}
-              class={mergeCSS(defaultValues().class, props.meta.P.class)}
-            >
-              <PageAttrRender metaVertex={props.meta} data={props.data} />
-              <Error />
-            </Label>
-          </Match>
+
         </Switch>
       </Show>
     </div>

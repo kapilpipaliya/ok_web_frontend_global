@@ -17,7 +17,6 @@ export const genericInputComponents = [
   "FileUploader",
   "HtmlEditor",
   "NumberBox",
-  "Label",
   "ProgressBar",
   "Radio",
   "RadioGroup",
@@ -28,6 +27,7 @@ export const genericInputComponents = [
   // "TextInput",
 ];
 export const genericComponents2 = [
+  "Label",
   "Box",
   "Breadcrumb",
   "Table",

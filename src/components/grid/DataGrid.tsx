@@ -1,12 +1,10 @@
 import {
   useContext,
   createSignal,
-  createResource,
   Show,
   Switch,
   Match,
-  createEffect,
-  on,
+  onMount,
 } from "solid-js";
 import { useLocation, useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
@@ -40,6 +38,7 @@ import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import {QuickEditModal} from "~/components/grid/QuickEditModal";
 import {getSelectValue} from "~/components/grid/getSelectValue";
 import {getTagValue} from "~/components/grid/getTagValue";
+import { getFormMetaData } from "~/lib/drag_drop/getChildrenAttrs";
 interface DataGridProps {
   tableId: string;
 }
@@ -85,7 +84,7 @@ export function DataGrid(props: DataGridProps) {
     });
   };
 
-  async function getTableData(skip?: number, limit?: number): Promise<{
+  type TableData = {
     error?: string;
     result?: any;
     graph?: {
@@ -97,11 +96,27 @@ export function DataGrid(props: DataGridProps) {
       };
     };
     form?: IFormMetaData;
-  }> {
+  } | undefined;
+  const [tableData, setTableData] = createSignal<TableData>(undefined);
+
+  async function getTableData(skip?: number, limit?: number): Promise<TableData> {
     try {
-      const form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
+      let form = FormMetaData[props.tableId] || FormMetaDataAuth[props.tableId];
       if (!form) {
-        return { error: "Form not found" };
+        form = FormMetaData.Form;
+        const { incoming, outgoing }: { incoming: any; outgoing: any } =
+        getEdgesFromRowsAttr(form.attributes);
+        const data = await getDataMGCall({
+          expression: `g:'Form[${props.tableId}]'`,
+          incoming,
+          outgoing,
+        });
+        if (data.result.length > 0) {
+          form = getFormMetaData(data.graph, () => {}, data.result[0]);
+        }
+        if (!form) {
+          return { error: "Form not found" };
+        }
       }
       const { incoming, outgoing }: { incoming: any; outgoing: any } =
         getEdgesFromRowsAttr(form.attributes);
@@ -126,7 +141,18 @@ export function DataGrid(props: DataGridProps) {
     }
   }
 
-  const [dataResource] = createResource(async () => await getTableData());
+  // createResource called Two times making API Calles two times, so used onMount
+  // const [dataResource] = createResource(async () => await getTableData());
+  const [isLoading, setIsLoading] = createSignal(false);
+  onMount(async () => {
+    setIsLoading(true);
+    const data = await getTableData();
+    setTableData(data);
+    onTableDataGet(data);
+    setIsLoading(false);
+  })
+
+
   const [search, setSearch] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([]);
 
@@ -200,13 +226,11 @@ export function DataGrid(props: DataGridProps) {
       };
       column.header = (info) =>
         capitalizeFirstLetter(
-          // @ts-ignore
-          info.column.columnDef.displayName || info.column.columnDef.name,
+          attribute.title || attribute.displayName || attribute.name,
         );
       column.footer = (info) =>
         capitalizeFirstLetter(
-          // @ts-ignore
-          info.column.columnDef.displayName || info.column.columnDef.name,
+          attribute.title || attribute.displayName || attribute.name,
         );
       tableColumns.push(column);
     }
@@ -267,7 +291,7 @@ export function DataGrid(props: DataGridProps) {
     return tableColumns;
   }
 
-  createEffect(on(dataResource, (data) => {
+ function onTableDataGet(data: TableData) {
     if (data?.error) {
       showErrorToast(data.error);
       return;
@@ -280,7 +304,7 @@ export function DataGrid(props: DataGridProps) {
       }
       setGraphData(graph, setGraph, data.graph!);
       const resultData = Object.values(data.graph!.vertexes as Vertex[]).filter(
-        (v) => v.L[0] === collection,
+        (v) => v.L[0] === collection
       );
       const nodes: any = tableStore.data
         ? [...tableStore.data, ...resultData]
@@ -291,14 +315,14 @@ export function DataGrid(props: DataGridProps) {
       setSearch("");
       setFilteredData(nodes);
     }
-  }))
+  }
 
   return (
     <Switch>
-      <Match when={dataResource.loading}>
+      <Match when={isLoading()}>
         <LoaderNew loaderHeight="55vh" />
       </Match>
-      <Match when={dataResource.error}>Error {dataResource.error}</Match>
+      <Match when={tableData()?.error}>Error {tableData()?.error}</Match>
       <Match when={tableStore.data?.length > 0}>
         <div class="flex jc:space-between ai:center p:5">
           <GenericField

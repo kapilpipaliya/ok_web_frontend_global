@@ -22,7 +22,6 @@ import { Repeater } from "~/components/page_attr_render/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
 import {Heading} from "~/components/solid_blocks/Heading";
 import {StarRating} from "~/components/solid_blocks/Rating";
-import { PageView } from "~/components/page_attr_render/PageView";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 
 import { APP_BASE_URL } from "~/lib/constants";
@@ -38,6 +37,7 @@ import {
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { PageDesignerLabels } from "~/lib/drag_drop/constant";
+import { Label } from "../solid_blocks/Label";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
@@ -404,6 +404,16 @@ export function GenericField(
             heading={props.meta.P.heading ?? "Rating"}
           />
         </Match>
+        <Match when={component() === "Label"}>
+            <Label
+              meta={props.meta}
+              {...defaultValues()}
+              {...deNullify(props.meta.P)}
+              class={mergeCSS(defaultValues().class, props.meta.P.class)}
+            >
+              <PageAttrRender metaVertex={props.meta} data={props.data} />
+            </Label>
+          </Match>
         <Match when={true}>
           <Dynamic
             component={props.meta.P.as || "div"}

@@ -12,6 +12,20 @@ export function processResult(records: Record[], context: ContextType, nodeLabel
     }
 
     if (context.relationships) {
+      if(context.nodes![relationship.S]) {
+        if(context.nodes![relationship.S].OUT[relationship.T]) {
+          context.nodes![relationship.S].OUT[relationship.T].push(relationship.id);
+        } else {
+          context.nodes![relationship.S].OUT[relationship.T] = [relationship.id];
+        }
+      }
+      if(context.nodes![relationship.E]) {
+        if(context.nodes![relationship.E].IN[relationship.T]) {
+          context.nodes![relationship.E].IN[relationship.T].push(relationship.id);
+        } else {
+          context.nodes![relationship.E].IN[relationship.T] = [relationship.id];
+        }
+      }
       context.relationships[relationship.id] = relationship;
     }
 

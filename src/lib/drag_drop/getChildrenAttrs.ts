@@ -4,9 +4,9 @@ import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { mergeVertexProperties } from "../graph/mutate/vertex";
 import { validateInput } from "~/components/page_designer/actions/validateInput";
-import { FieldAttribute, IFormMetaData } from "../FormMetadataType";
-import attributeNames from "../jsx_parser/constants/attributeNames";
+import type { FieldAttribute, IFormMetaData } from "../FormMetadataType";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
+import { genericInputComponents } from "~/components/form/DynamicComponent";
 
 export function getChildrenAttrs(
   graph: Store<GraphInterface>,
@@ -21,20 +21,34 @@ export function getChildrenAttrs(
   ).sort((a: Vertex, b: Vertex) => a.P.pos - b.P.pos);
 }
 
-
-export function getAllFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): FieldAttribute[] {
-  const children = getChildrenAttrs(graph, setGraph, vertex);
-  return children.map((child) => ({
-      name: vertex.P.name,
-      component: getComponent(graph, vertex)?.P.name,
-      attributes: getAllFields(graph, setGraph, child),
-    }));
-}
 export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex): IFormMetaData {
+  const result: FieldAttribute[] = [];
+  function getAllInputFields(graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, vertex: Vertex, parent: Vertex, parentComponent: string): FieldAttribute[] {
+    const children = getChildrenAttrs(graph, setGraph, vertex);
+    const component = getComponent(graph, vertex)?.P.name;
+    if (genericInputComponents.includes(component)) {
+      result.push({
+        name: vertex.P.name,
+        title: parentComponent === "Label" ? parent.P.label : vertex.P.title,
+        component: component,
+      });
+    }
+    return children.map((child) => {
+      const childComponent = getComponent(graph, child)?.P.name;
+      return ({
+        name: child.P.name,
+        //title: component === "Label" ? vertex.P.label : child.P.title,
+        component: childComponent,
+        attributes: getAllInputFields(graph, setGraph, child, vertex, component),
+      });
+    });
+  }
+  getAllInputFields(graph, setGraph, vertex, vertex, "");
+
   return {
     name: vertex.P.name,
     title: vertex.P.title,
-    attributes: getAllFields(graph, setGraph, vertex),
+    attributes: result,
   };
 }
 // use it when new field is drag and drop.
