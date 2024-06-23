@@ -8,6 +8,8 @@ import {
   For,
   Switch,
   Show,
+  onCleanup,
+  onMount,
 } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { DraggedVertexContext, PageConfigContext, SelectedIdContext } from "~/lib/contexts";
@@ -18,9 +20,9 @@ import { Icon } from "@iconify-icon/solid";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
-import {CustomPopover} from "~/components/PopOver";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { onClickAddComponent } from "../CommonCompUtils";
+import { Portal } from "solid-js/web";
 
 export function PagesPart(props: { coll: string }) {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -33,7 +35,7 @@ export function PagesPart(props: { coll: string }) {
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal<any[]>([]);
   const [previewPageId, setPreviewPageId] = createSignal<Id | null>(null);
-  const [tooltip, setTooltip] = createSignal<HTMLElement | null>(null);
+  const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [openPopoverId, setOpenPopoverId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>(),
@@ -92,13 +94,8 @@ export function PagesPart(props: { coll: string }) {
   };
 
   function ListItemComponent(props: { child: any, openPopoverId: Id | null, setOpenPopoverId: (id: Id | null) => void }) {
-    const [isHovered, setIsHovered] = createSignal(false);
-    const handleHover = (el: HTMLElement) => {
-      setIsHovered(true);
-      if (previewPageId() !== props.child.id) {
-        setPreviewPageId(props.child.id);
-      }
-    };
+
+    let menuRef: HTMLDivElement;
 
     const baseStyle = {
       "border-radius": ".2rem",
@@ -121,56 +118,115 @@ export function PagesPart(props: { coll: string }) {
     };
 
     const itemStyle: any = () =>
-      isHovered() ? { ...baseStyle, ...hoverStyle } : baseStyle;
+      hoverPageId() === props.child.id ? { ...baseStyle, ...hoverStyle } : baseStyle;
 
+    const PreviewMenu = () => {
+      let dropdownRef: HTMLDivElement;
+      let resizeObserver: ResizeObserver;
+      const handleResize = () => {
+        const menuEntryRect = menuRef!.getBoundingClientRect();
+        const menuEntryBottom = menuEntryRect.bottom;
+        const menuEntryLeft = menuEntryRect.left;
+        const scrollY = window.scrollY;
+        const scrollX = window.scrollX;
+
+        dropdownRef!.style.top = `${menuEntryBottom + scrollY}px`;
+        dropdownRef!.style.left = `${menuEntryLeft + scrollX}px`;
+      }
+      onMount(() => {
+        handleResize();
+        resizeObserver = new ResizeObserver(handleResize);
+        resizeObserver.observe(dropdownRef!);
+      });
+
+      onCleanup(() => {
+        resizeObserver?.disconnect();
+      });
+
+      return (
+        <Portal mount={document.body}>
+          <div
+            ref={dropdownRef!}
+            // used inline style because master css is not working!
+            style={{
+              position: "absolute",
+              padding: "0.25rem",
+              "max-height": "13rem",
+              "overflow-y": "auto",
+              "box-shadow": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+              "z-index": "999",
+              "background-color": "white",
+              "border": "1px solid #D1D5DB",
+              "display": "flex",
+              "flex-direction": "column",
+              gap: "0.25rem",
+              "align-items": "flex-start",
+              "min-width": "12rem"
+            }}
+            onMouseLeave={() => setPreviewPageId(null)}
+          >
+            {toTitle(props.child.name)} Preview
+            <PageViewWrapper formId={props.child.id} />
+          </div>
+        </Portal>
+      );
+    };
+
+    let timeoutId: NodeJS.Timeout;
     return (
       <Show when={props.child.name}>
-        <CustomPopover
-          isOpen={props.openPopoverId === props.child.id}
-          setIsOpen={(isOpen) => props.setOpenPopoverId(isOpen ? props.child.id : null)}
-          trigger={<div
-            ref={el => setTooltip(el)}
-            style={itemStyle()}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => {
-              setIsHovered(false);
-              setIsHovered(false);
+        <div
+          ref={menuRef!}
+          class="relative"
+          style={itemStyle()}
+          onMouseEnter={() => {
+            if (previewPageId() !== props.child.id) {
               setPreviewPageId(null);
-              setTooltip(null);
-            }}
-            draggable={true}
-            onDragStart={(e) => {
-              e.stopPropagation();
-              setDraggedVertex([]);
-              const dataTransfer =
-                selectedComponents().size > 0
-                  ? Array.from(selectedComponents())
-                  : [graph.vertexes[props.child.id]];
-              setDraggedVertex((prev) => [...prev, ...dataTransfer]);
-              setSelectedComponents(new Set<Vertex>());
-            }}
-            ondblclick={(e) => {
-              setDraggedVertex([graph.vertexes[props.child.id]]);
-              onClickAddComponent(
-                graph,
-                setGraph,
-                pageConfig.formData.txnId,
-                draggedVertex()[0],
-                pageConfig.formData || {},
-                selectedId() !== -1
-                  ? selectedId()
-                  : pageConfig.formData.formData.id,
-              );
-              setDraggedVertex([]);
-            }}
-          >
-            <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
-            <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
-          </div>
-          }
-          title={`${toTitle(props.child.name)} Preview`}
-          description="This is a description inside the popover."
-        ><PageViewWrapper formId={props.child.id} /></CustomPopover>
+            }
+            setHoverPageId(props.child.id);
+            timeoutId = setTimeout(() => {
+              setPreviewPageId(props.child.id);
+            }, 1000);
+          }}
+          onMouseLeave={() => {
+            clearTimeout(timeoutId);
+
+            setHoverPageId(null);
+          }}
+          draggable={true}
+          onDragStart={(e) => {
+            e.stopPropagation();
+            setDraggedVertex([]);
+            setPreviewPageId(null);
+            const dataTransfer =
+              selectedComponents().size > 0
+                ? Array.from(selectedComponents())
+                : [graph.vertexes[props.child.id]];
+            setDraggedVertex((prev) => [...prev, ...dataTransfer]);
+            setSelectedComponents(new Set<Vertex>());
+          }}
+          ondblclick={(e) => {
+            setDraggedVertex([graph.vertexes[props.child.id]]);
+            onClickAddComponent(
+              graph,
+              setGraph,
+              pageConfig.formData.txnId,
+              draggedVertex()[0],
+              pageConfig.formData || {},
+              selectedId() !== -1
+                ? selectedId()
+                : pageConfig.formData.formData.id,
+            );
+            setDraggedVertex([]);
+          }}
+        >
+          <Icon icon={"iconoir:multiple-pages"} height={22} width={22} />
+          <div style={{ "font-size": "14px" }}>{toTitle(props.child.name)}</div>
+          <Show when={previewPageId() === props.child.id}>
+            <PreviewMenu />
+          </Show>
+        </div>
+
       </Show>
     );
   }

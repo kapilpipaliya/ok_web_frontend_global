@@ -9,7 +9,6 @@ import {processChildren} from "~/lib/drag_drop/component_drop/processChildren";
 import {handleAttrVertex} from "~/lib/drag_drop/component_drop/handleAttrVertex";
 import {handleCompOrCollVertex} from "~/lib/drag_drop/component_drop/handleCompOrCollVertex";
 import { getUniqueName } from "../getChildrenAttrs";
-import { IPageConfig } from "~/lib/contexts";
 
 // @Note:
 // From Component To Layout drag:

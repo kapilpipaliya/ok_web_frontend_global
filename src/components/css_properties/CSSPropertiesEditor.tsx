@@ -2,7 +2,7 @@ import { Tab, TabContainer, TabList, Tabs, } from "~/components/solid_blocks";
 import { Icon } from "@iconify-icon/solid";
 import type { Vertex } from "~/lib/graph/graph";
 import { Show, createSignal } from "solid-js";
-import { SetStoreFunction, createStore, reconcile } from "solid-js/store";
+import { type SetStoreFunction, createStore, reconcile } from "solid-js/store";
 import { CssDefaultEditorContext, CssEditorContext, CssStateContext } from "./context";
 import { Container } from "~/components/css_properties/components/CssUtils";
 import { TextEditorTab } from "~/components/css_properties/TextEditorTab";

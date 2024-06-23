@@ -1,4 +1,4 @@
-import { ValidationConfigType } from "./ValidationConfig";
+import type { ValidationConfigType } from "./ValidationConfig";
 
 export function validateInput(validation: ValidationConfigType, value?: string, ) {
   // Clear previous error

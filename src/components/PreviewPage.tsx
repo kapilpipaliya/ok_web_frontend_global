@@ -1,4 +1,4 @@
-import { For, Show, createSignal } from "solid-js";
+import { For, createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "./solid_blocks";
 

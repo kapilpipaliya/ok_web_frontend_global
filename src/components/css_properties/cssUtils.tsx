@@ -24,7 +24,7 @@ export const parseAndApplyCssRules = (valueString: string) => {
       property top, has no value
       property var(--tw-gradient-stops)) has no value
 */
-      console.log(`property ${property} has no value`);
+      console.log(`property '${property}' has no value`);
       continue;
     };
     cssRules[state][property] = value.replaceAll("|", " ");;

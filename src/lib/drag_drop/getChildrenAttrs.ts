@@ -77,7 +77,7 @@ export function isAnyFieldInvalid(graph: Store<GraphInterface>, setGraph: SetSto
 
   if (attrVertex.P.validation) {
     const value = data.P[attrVertex.P.name];
-    let error = validateInput(attrVertex.P.validation, value);
+    const error = validateInput(attrVertex.P.validation, value);
     mergeVertexProperties(0, attrVertex.id, graph, setGraph, {
       error: error || ""
     });
