@@ -5,7 +5,7 @@ import {addNewRow, cloneRowProps} from "~/lib/graph/mutate/form/rowFunction";
 import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 
-export function processChildren(
+export function processChildrenAttrs(
   formVertex: Vertex,
   fromVertex: Vertex,
   toVertex: Vertex,
@@ -24,7 +24,7 @@ export function processChildren(
       graph,
       setGraph,
       toVertex,
-      {pos: child.P.pos},
+      {}, //{pos: child.P.pos}, // ont set position property
       false,
       {} as any,
     );
@@ -39,7 +39,7 @@ export function processChildren(
       compVertex.id,
     );
     cloneRowProps(graph, setGraph, formVertex, txnId, child, rowVertex);
-    processChildren(
+    processChildrenAttrs(
       formVertex,
       child,
       rowVertex,

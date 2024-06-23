@@ -129,6 +129,7 @@ export function cloneRowProps(
   toVertex: Vertex
 ) {
   const props = JSON.parse(JSON.stringify(fromVertex.P));
+  delete props.pos;
   const uniqueName = getUniqueName(txnId, graph, setGraph, formVertex, {id: 0} as unknown as Vertex);
   mergeVertexProperties(txnId, toVertex.id, graph, setGraph, {...props, name: uniqueName});
   return;

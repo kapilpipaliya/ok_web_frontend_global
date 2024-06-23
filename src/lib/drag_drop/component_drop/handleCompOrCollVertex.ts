@@ -25,35 +25,5 @@ export function handleCompOrCollVertex(
       fromVertex.id,
     );
     addPropsToLayoutRow(graph, txnId, rowVertex.id, fromVertex);
-  } else if (fromVertex.L[0] === "Coll") {
-    // set Collection to the row
-    const attrCollMetaVertex = createAttrCollMetaVertex();
-    setSelectionValue(
-      txnId,
-      rowVertex,
-      graph,
-      setGraph,
-      attrCollMetaVertex,
-      fromVertex.id,
-    );
-    const formVertex = findVertexByLabelAndUniqueId(
-      graph,
-      "Comp",
-      IdAttr,
-      "Form",
-    );
-    if (!formVertex) {
-      showErrorToast("Can't find form");
-    } else {
-      setSelectionValue(
-        txnId,
-        rowVertex,
-        graph,
-        setGraph,
-        attrCompMetaVertex,
-        formVertex.id,
-      );
-      addPropsToLayoutRow(graph, txnId, rowVertex.id, formVertex);
-    }
   }
 }

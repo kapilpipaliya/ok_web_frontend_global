@@ -3,7 +3,7 @@ import type {SetStoreFunction, Store} from "solid-js/store";
 import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 import {cloneRowProps} from "~/lib/graph/mutate/form/rowFunction";
-import {processChildren} from "~/lib/drag_drop/component_drop/processChildren";
+import {processChildrenAttrs} from "~/lib/drag_drop/component_drop/processChildrenAttrs";
 
 export function handleAttrVertex(
   formVertex: Vertex,
@@ -25,7 +25,7 @@ export function handleAttrVertex(
     compVertex.id,
   );
   cloneRowProps(graph, setGraph,formVertex, txnId, fromVertex, rowVertex);
-  processChildren(
+  processChildrenAttrs(
     formVertex,
     fromVertex,
     rowVertex,

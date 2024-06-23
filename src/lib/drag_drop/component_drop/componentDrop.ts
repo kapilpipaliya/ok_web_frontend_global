@@ -5,7 +5,7 @@ import {addNewRow} from "../../graph/mutate/form/rowFunction";
 import {PageDesignerLabels} from "../constant";
 import {createAttrCompMetaVertex} from "~/lib/drag_drop/component_drop/createAttrCompMetaVertex";
 import {createAttrMetaVertex} from "~/lib/drag_drop/component_drop/createAttrMetaVertex";
-import {processChildren} from "~/lib/drag_drop/component_drop/processChildren";
+import {processChildrenAttrs} from "~/lib/drag_drop/component_drop/processChildrenAttrs";
 import {handleAttrVertex} from "~/lib/drag_drop/component_drop/handleAttrVertex";
 import {handleCompOrCollVertex} from "~/lib/drag_drop/component_drop/handleCompOrCollVertex";
 import { getUniqueName } from "../getChildrenAttrs";
@@ -32,7 +32,7 @@ export function componentDrop(
 
   if(PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
-      processChildren(
+      processChildrenAttrs(
         pageDesignerVertex,
         fromVertex,
         toParentVertex,
@@ -59,7 +59,7 @@ export function componentDrop(
   
   const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-  if (["Comp", "Coll"].includes(fromVertex.L[0])) {
+  if (["Comp"].includes(fromVertex.L[0])) {
     handleCompOrCollVertex(
       fromVertex,
       txnId,
