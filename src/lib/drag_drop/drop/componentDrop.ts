@@ -3,11 +3,11 @@ import type {SetStoreFunction, Store} from "solid-js/store";
 import {useToast} from "~/components/Toast";
 import {addNewRow} from "../../graph/mutate/form/rowFunction";
 import {PageDesignerLabels} from "../constant";
-import {createAttrCompMetaVertex} from "~/lib/drag_drop/component_drop/createAttrCompMetaVertex";
-import {createAttrMetaVertex} from "~/lib/drag_drop/component_drop/createAttrMetaVertex";
-import {processChildrenAttrs} from "~/lib/drag_drop/component_drop/processChildrenAttrs";
-import {handleAttrVertex} from "~/lib/drag_drop/component_drop/handleAttrVertex";
-import {handleCompOrCollVertex} from "~/lib/drag_drop/component_drop/handleCompOrCollVertex";
+import {createAttrCompMetaVertex} from "~/lib/drag_drop/drop/createAttrCompMetaVertex";
+import {createAttrMetaVertex} from "~/lib/drag_drop/drop/createAttrMetaVertex";
+import {processChildrenAttrs} from "~/lib/drag_drop/drop/processChildrenAttrs";
+import {handleAttrVertex} from "~/lib/drag_drop/drop/handleAttrVertex";
+import {handleCompOrCollVertex} from "~/lib/drag_drop/drop/handleCompOrCollVertex";
 import { getUniqueName } from "../getChildrenAttrs";
 
 // @Note:

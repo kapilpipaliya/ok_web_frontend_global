@@ -1,7 +1,7 @@
 import type {GraphInterface, Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
-import {addPropsToLayoutRow} from "~/lib/drag_drop/component_drop/addPropsToLayoutRow";
+import {addPropsToLayoutRow} from "~/lib/drag_drop/drop/addPropsToLayoutRow";
 
 export function handleCompOrCollVertex(
   fromVertex: Vertex,

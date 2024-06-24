@@ -3,7 +3,7 @@ import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { evaluate } from "../expression_eval";
 import jsep from "jsep";
-import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
+import {getComponentFromLayoutRow} from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
 
 export function validateDragOver(
   graph: Store<GraphInterface>,

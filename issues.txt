@@ -14,7 +14,6 @@ Form builder preview width is not proper.
 
 📝 Todo 📝 KAPIL:------------------------------------------------------------------------------------------
 
-refactor useDragDrop file
 when drag and drop 'text' component, display some default text like "Text"
 Label Properties, Position is not comming as select. add support for specifying select options
 It is not flexible to drop a component below the component, because of the label.
@@ -61,7 +60,7 @@ fix import export button on the form
 Make Drag and Drop on touch screen working
 collection edit page is broken.
 on double click add element at last - last in selected layout?  ✅ 
-Make Page working with some async data too.
+Make sure all path expression are working in page designer.
 Make Working Forms using Page Designer.
 Make Page Share working.
 Refactor duplicate code between cyper api and lib folder.

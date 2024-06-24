@@ -58,11 +58,16 @@ export const PageConfigContext = createContext(
   createStore({} as IPageConfig),
 );
 
+export interface IIndicatorPosition {
+  activeItem: null | Id;
+  position: null | "before" | "after" | "center" | "left" | "right";
+}
+
 export const IndicatorPositionContext = createContext(
   createSignal({
-    activeItem: null as null | Id,
-    position: null as "before" | "after" | "center" | "left" | "right" | null,
-  }),
+    activeItem: null,
+    position: null,
+  } as IIndicatorPosition),
 );
 
 export const FormContext = createContext({} as IFormContext);

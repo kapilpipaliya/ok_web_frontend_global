@@ -11,11 +11,17 @@ import {
   IndicatorPositionContext,
   ShowDrawerContext,
   DraggedVertexContext,
-  FormSettingsContext,
+  FormSettingsContext, SelectedCollContext, DragOverTargetIdContext, SelectedComponentContext,
+  IsPreviewContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
-import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
+import { handleDragStart } from "~/lib/drag_drop/event_handler/handleDragStart";
+import { handleDragOverAndSetDropPosition } from "~/lib/drag_drop/event_handler/handleDragOverAndSetDropPosition";
+import { handleDrop } from "~/lib/drag_drop/event_handler/handleDrop";
+import { clone } from "~/lib/drag_drop/event_handler/clone";
+import { onLayoutItemClick } from "~/lib/drag_drop/event_handler/onLayoutItemClick";
+import { resetDragDropState } from "~/lib/drag_drop/resetDragDropState";
 import { Properties } from "./properties/Properties";
 import { iconMap } from "~/lib/constants";
 
@@ -24,6 +30,8 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { nameExpr } from "./utils/nameExpr";
+import {deleteLayoutGlobal} from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
+import {useToast} from "~/components/Toast";
 
 export function LayoutPart(props: {}) {
   const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
@@ -40,6 +48,13 @@ export function LayoutPart(props: {}) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedHoverId = createSelector(hoverId);
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  const [, setSelectedColl] = useContext(SelectedCollContext);
+  const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
+  const [selectedComponent, setSelectedComponent] = useContext(
+    SelectedComponentContext,
+  );
+  const { showErrorToast, showSuccessToast } = useToast()
+    const [isPreview, setIsPreview] = useContext(IsPreviewContext);
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
@@ -56,26 +71,16 @@ export function LayoutPart(props: {}) {
     );
   }
   const TreeView = (props: { metaVertex: Vertex }) => {
-    const {
-      children,
-      isActiveTargetItem,
-      handleDragStart,
-      // handleDragEnter,
-      handleDragOverAndSetDropPosition,
-      // handleDragOver,
-      // handleDragLeave,
-      handleDrop,
-      onLayoutItemClick,
-      clone,
-      deleteLayout,
-    } = useDragDrop(
-      graph,
-      setGraph,
-      pageConfig.formData.txnId,
-      pageConfig.formData.formData,
-      props.metaVertex,
-      collapsedKeys,
+    const activeItemChanged = createSelector<any, Vertex>(
+      indicatorPosition,
+      (a, b) => a.id === b.activeItem,
     );
+    const isActiveTargetItem = () => activeItemChanged(props.metaVertex);
+
+    const children = createMemo(() =>
+      getChildrenAttrs(graph, setGraph, props.metaVertex),
+    );
+
     const getComponent: any = () =>
       getChildVertex(graph, ["$0Comp"], props.metaVertex).vertex?.P.name;
 
@@ -97,12 +102,14 @@ export function LayoutPart(props: {}) {
     const handleDragEnter = (e: DragEvent) => {
       startTime = Date.now();
       // e.stopPropagation();
-      handleDragOverAndSetDropPosition(e);
+      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
+
     };
 
     const handleDragOver = (e: DragEvent) => {
       e.stopPropagation();
-      handleDragOverAndSetDropPosition(e);
+      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
+
   
       const position = indicatorPosition().position;
       if (!position) {
@@ -155,11 +162,14 @@ export function LayoutPart(props: {}) {
       <div>
         <div
           draggable={true}
-          onDragStart={handleDragStart}
+          onDragStart={(e)=>handleDragStart(e, setDraggedVertex, props.metaVertex)}
           onDragOver={handleDragOver}
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
+          onDrop={async (e)=>{
+            await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData);
+            resetDragDropState(setDraggedVertex, setIndicatorPosition, setDragOverTargetId);
+          }}
           class={`${isSelectedLayoutId(props.metaVertex.id)
               ? "bg:rgb(197,221,255)"
               : isSelectedHoverId(props.metaVertex.id)
@@ -176,7 +186,10 @@ export function LayoutPart(props: {}) {
               isActiveTargetItem() && indicatorPosition().position === "after",
             "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!indicatorPosition().position,
           }}
-          onClick={() => onLayoutItemClick(props.metaVertex)}
+          onClick={() => {
+            onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, props.metaVertex, graph, setGraph);
+
+          }}
           onMouseOver={(e) => {
             e.stopPropagation();
             setHoverId(props.metaVertex.id);
@@ -270,7 +283,9 @@ export function LayoutPart(props: {}) {
                   width={18}
                   color={"black"}
                   class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
-                  onclick={clone}
+                  onclick={e=>{
+                    clone(props.metaVertex, undefined, undefined, pageConfig.formData.txnId, graph, setGraph, pageConfig.formData.formData);
+                  }}
                 />
               </Tooltip>
               <Tooltip content={"Delete"} nowrap>
@@ -283,7 +298,8 @@ export function LayoutPart(props: {}) {
                         style: { color: "red" },
                         onClick: () => {
                           const name = getComponent();
-                          deleteLayout(name);
+                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfig.formData.txnId, name, showSuccessToast);
+
                         },
                         width: 18,
                         height: 18,

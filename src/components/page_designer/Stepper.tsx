@@ -4,10 +4,10 @@ import { Tooltip } from "~/components/solid_blocks";
 import { FormSettingsContext, HoverIdContext, PageConfigContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
+import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
-import { deleteLayoutGlobal, } from "~/lib/drag_drop/useDragDrop";
+import { deleteLayoutGlobal } from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
 import { useToast } from "~/components/Toast";
 
 export const Stepper = () => {

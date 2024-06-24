@@ -53,7 +53,7 @@ import { FormGroup } from "./FormGroup";
 import { findVertexesMGCall } from "~/cypher/get/findVertex";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
-import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
+import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   RepeaterVertexContext

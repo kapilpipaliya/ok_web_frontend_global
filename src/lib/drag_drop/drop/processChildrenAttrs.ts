@@ -2,7 +2,7 @@ import type {GraphInterface, Vertex} from "~/lib/graph/graph";
 import type {SetStoreFunction, Store} from "solid-js/store";
 import {getChildrenAttrs} from "~/lib/drag_drop/getChildrenAttrs";
 import {addNewRow, cloneRowProps} from "~/lib/graph/mutate/form/rowFunction";
-import {getComponentFromLayoutRow} from "~/lib/drag_drop/component_drop/getComponentFromLayoutRow";
+import {getComponentFromLayoutRow} from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
 import {setSelectionValue} from "~/lib/graph/mutate/setSelectionValue";
 
 export function processChildrenAttrs(

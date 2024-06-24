@@ -13,7 +13,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import attributeNames from "~/lib/jsx_parser/constants/attributeNames";
-import { componentDrop } from "~/lib/drag_drop/component_drop/componentDrop";
+import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 
 type ParsedJSX = JSX.Element | boolean | string;

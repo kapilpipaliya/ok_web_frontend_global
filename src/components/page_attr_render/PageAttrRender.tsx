@@ -3,16 +3,24 @@ import { toTitle } from "case-switcher-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex, getParentVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
-import { useDragDrop } from "~/lib/drag_drop/useDragDrop";
+import { handleDragOver } from "~/lib/drag_drop/event_handler/handleDragOver";
+import { handleDragStart } from "~/lib/drag_drop/event_handler/handleDragStart";
+import { handleDragOverAndSetDropPosition } from "~/lib/drag_drop/event_handler/handleDragOverAndSetDropPosition";
+import { handleDragLeave } from "~/lib/drag_drop/event_handler/handleDragLeave";
+import { handleDrop } from "~/lib/drag_drop/event_handler/handleDrop";
+import { clone } from "~/lib/drag_drop/event_handler/clone";
+import { onLayoutItemClick } from "~/lib/drag_drop/event_handler/onLayoutItemClick";
+import { resetDragDropState } from "~/lib/drag_drop/resetDragDropState";
 import { Icon } from "@iconify-icon/solid";
 import { Tab, TabContainer, Tooltip } from "~/components/solid_blocks";
 import {
+  DraggedVertexContext,
   DragOverTargetIdContext,
   FormContext,
   HoverIdContext,
   IndicatorPositionContext,
   IsPreviewContext,
-  PageConfigContext,
+  PageConfigContext, SelectedCollContext, SelectedComponentContext,
   SelectedIdContext,
   ShowDrawerContext
 } from "~/lib/contexts";
@@ -32,6 +40,7 @@ import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { useToast } from "../Toast";
 import { submitDataCall } from "~/lib/api/api_functions";
+import {deleteLayoutGlobal} from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
 
 export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
@@ -49,6 +58,14 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const isSelectedLayoutId = createSelector(selectedId);
   const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
   const isSelectedHoverId = createSelector(hoverId);
+  const [, setSelectedColl] = useContext(SelectedCollContext);
+  const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
+  const [selectedComponent, setSelectedComponent] = useContext(
+    SelectedComponentContext,
+  );
+  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  const { showErrorToast, showSuccessToast } = useToast()
+
   const PropertyDrawer = (props: { itemId: any }) => {
     return (
       <Show when={isSelectedLayoutId(props.itemId)}>
@@ -125,18 +142,12 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
         );
 
         const PageComponentWithDND = () => {
-          const {
-            children,
-            isActiveTargetItem,
-            handleDragStart,
-            handleDragEnter,
-            handleDragOver,
-            handleDragLeave,
-            handleDrop,
-            onLayoutItemClick,
-            clone,
-            deleteLayout,
-          } = useDragDrop(graph, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData, item, () => [], true);
+          const activeItemChanged = createSelector< any, Vertex>(indicatorPosition, (a, b) => a.id === b.activeItem);
+          const isActiveTargetItem = () => activeItemChanged(item);
+          const children = createMemo(() =>
+            getChildrenAttrs(graph, setGraph, item),
+          );
+
           let saveAsTemplateRef: HTMLElement;
           const [showModal, setShowModal] = createSignal(false);
 
@@ -146,12 +157,12 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
             const [error, setError] = createSignal("");
             const { showSuccessToast, showWarningToast, showErrorToast } = useToast();
             const saveTemplate = async () => {
-              const txnId = getNewTxnId(graph, setGraph);
-              console.log(txnId)
+              const newFormTxnId = getNewTxnId(graph, setGraph);
+              console.log(newFormTxnId)
               const createResult = createForm(
                 graph,
                 setGraph,
-                txnId,
+                newFormTxnId,
                 {} as any,
                 "TemplatePage",
                 { name: templateName() },
@@ -159,16 +170,17 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
 
               const dataVertex = createResult.vertex!;
 
-              clone(txnId, dataVertex);
+              clone(item, dataVertex, newFormTxnId, txnId, graph, setGraph, pageConfig.formData.formData);
 
-              const data = commitTxn(txnId, {} as any, graph);
+
+              const data = commitTxn(newFormTxnId, {} as any, graph);
               if (!data) {
                 showWarningToast("Internal Server Error");
                 return;
               }
 
               try {
-                await submitDataCall({ ...data }, graph, setGraph, txnId);
+                await submitDataCall({ ...data }, graph, setGraph, newFormTxnId);
                 showSuccessToast("Template Saved Successfully");
                 setShowModal(false);
               } catch (error) {
@@ -218,7 +230,7 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 <Tooltip content={"Move"} nowrap>
                   <Icon
                     draggable={true}
-                    onDragStart={handleDragStart}
+                    onDragStart={(e)=>handleDragStart(e, setDraggedVertex, item)}
                     icon={"material-symbols-light:drag-pan-rounded"}
                     height={20}
                     width={20}
@@ -240,7 +252,9 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                         return;
                       }
 
-                      onLayoutItemClick(parentResult.vertex!);
+
+                      onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, parentResult.vertex!, graph, setGraph);
+
                     }} />
                 </Tooltip>
                 <Tooltip content={"Duplicate"}>
@@ -249,7 +263,10 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     height={20}
                     width={20}
                     class="cursor:pointer  flex "
-                    onClick={clone} />
+                    onClick={e=>{
+                      clone(item, undefined, undefined, txnId, graph, setGraph, pageConfig.formData.formData);
+
+                    }} />
                 </Tooltip>
                 <Tooltip content={"Save as Template"}>
                   <Icon
@@ -262,7 +279,9 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 </Tooltip>
                 <Tooltip content={"Delete"}>
                   <Icon
-                    onClick={() => deleteLayout(getComponentName())}
+                    onClick={() => {
+                      deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, txnId, getComponentName(), showSuccessToast);
+                    }}
                     icon={"fluent:delete-20-regular"}
                     height={20}
                     width={20}
@@ -348,12 +367,20 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                 }}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onLayoutItemClick(item);
+                  onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, item, graph, setGraph);
+
                 }}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
+                onDragOver={e=> handleDragOver(e, setIndicatorPosition, setDragOverTargetId, item, isPreview(), ()=>[], draggedVertex,children, graph, setGraph, pageConfig.formData.formData, indicatorPosition)}
+                onDragEnter={e=>{
+                  // e.stopPropagation();
+                  handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, item, isPreview(), ()=>[], children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
+
+                }}
+                onDragLeave={e=>handleDragLeave(setIndicatorPosition)}
+                onDrop={async (e)=>{
+                  await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, txnId, pageConfig.formData.formData);
+                  resetDragDropState(setDraggedVertex, setIndicatorPosition, setDragOverTargetId);
+                }}
               >
                 <Popover
                   placement={`${isSelectedLayoutId(item.id) ? "top-start" : "top-end"}`}
