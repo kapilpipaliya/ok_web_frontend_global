@@ -91,7 +91,7 @@ const Column = (props: { datas: any; toggleLeftOpen: any }) => {
             <PagesPart coll="Page" />
           </Match>
           <Match when={selectedTab() === "templates"}>
-            <PagesPart coll="Template"/>
+            <PagesPart coll="TemplatePage"/>
           </Match>
           <Match when={selectedTab() === "forms"}>
             <PagesPart coll="Form"/>

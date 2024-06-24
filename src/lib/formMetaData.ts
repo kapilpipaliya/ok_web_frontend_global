@@ -949,6 +949,6 @@ FormMetaData.ErrorPage = {
 };
 FormMetaData.TemplatePage = {
   title: "Templates",
-  name: "Template",
+  name: "TemplatePage",
   attributes: [...FormMetaData.Page.attributes],
 };

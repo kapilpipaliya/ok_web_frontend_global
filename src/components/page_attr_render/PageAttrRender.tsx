@@ -27,6 +27,11 @@ import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { DropdownMenu } from "../DropdownMenu";
+import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
+import { createForm } from "~/lib/graph/mutate/form/createForm";
+import { commitTxn, getNewTxnId } from "~/lib/graph/transaction";
+import { useToast } from "../Toast";
+import { submitDataCall } from "~/lib/api/api_functions";
 
 export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
@@ -136,22 +141,64 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
           const [showModal, setShowModal] = createSignal(false);
 
           const SaveAsTemplateMenu = () => {
+            let nameInputRef: HTMLInputElement;
             const [templateName, setTemplateName] = createSignal("");
             const [error, setError] = createSignal("");
-            const saveAsTemplate = (name: string) => {
-              console.log(name);
-              setShowModal(false);
+            const { showSuccessToast, showWarningToast, showErrorToast } = useToast();
+            const saveTemplate = async () => {
+              const txnId = getNewTxnId(graph, setGraph);
+              console.log(txnId)
+              const createResult = createForm(
+                graph,
+                setGraph,
+                txnId,
+                {} as any,
+                "TemplatePage",
+                { name: templateName() },
+              );
+
+              const dataVertex = createResult.vertex!;
+
+              clone(txnId, dataVertex);
+
+              const data = commitTxn(txnId, {} as any, graph);
+              if (!data) {
+                showWarningToast("Internal Server Error");
+                return;
+              }
+
+              try {
+                await submitDataCall({ ...data }, graph, setGraph, txnId);
+                showSuccessToast("Template Saved Successfully");
+                setShowModal(false);
+              } catch (error) {
+                setError("An unexpected error occurred");
+              }
             }
+            const saveAsTemplate = async (name: string) => {
+              const res = await checkIfNameExistsMGCall("TemplatePage", name);
+              if (res.error) {
+                setError(res.message);
+                return;
+              }
+              saveTemplate();
+            }
+            onMount(() => {
+              nameInputRef.focus();
+            });
 
             return (
               <DropdownMenu parentRef={saveAsTemplateRef as any} onMouseLeave={() => setShowModal(false)}>
                 Save As Template
-                <input type="text" value={templateName()} onChange={(e) => setTemplateName(e.target.value)} />
-                <button type="button" onClick={() => saveAsTemplate(templateName())}>Save</button>
+                <input type="text" value={templateName()} onChange={(e) => setTemplateName(e.target.value)} ref={nameInputRef!} />
+                <Show when={error()}>
+                  <div style={{ color: 'red' }}>{error()}</div>
+                </Show>
+                <button type="button" disabled={!templateName()} onClick={() => saveAsTemplate(templateName())}>Save</button>
               </DropdownMenu>
             )
           }
-          
+
           const SelectedAttrConfigPopOver = () => {
             return <span class="position:relative ">
               <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">

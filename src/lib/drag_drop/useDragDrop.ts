@@ -212,13 +212,14 @@ export function useDragDrop(
     resetDragDropState();
   };
 
-  const clone = () => {
+  const clone = (externalTxnId: number, toExternalVertex?: Vertex) => {
     let fromVertex = layoutVertex;
-    const toVertex = layoutVertex;
+    const toVertex = toExternalVertex ?? layoutVertex;
+    const txnId2 = externalTxnId ?? txnId;
 
-    const position = "after";
+    const position = toExternalVertex ? "center" : "after";
 
-    const toParentVertex = getParentVertex(["Attr"], toVertex, graph).vertex;
+    const toParentVertex = toExternalVertex ?? getParentVertex(["Attr"], toVertex, graph).vertex;
 
     function sortChildren() {
       let pos = 1;
@@ -230,15 +231,15 @@ export function useDragDrop(
 
         if (child.id === toVertex.id) {
           if (position === "after") {
-            mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+            mergeVertexProperties(txnId2, child.id, graph, setGraph, { pos });
             pos++;
-            mergeVertexProperties(txnId, fromVertex?.id, graph, setGraph, {
+            mergeVertexProperties(txnId2, fromVertex?.id, graph, setGraph, {
               pos,
             });
             pos++;
           }
         } else {
-          mergeVertexProperties(txnId, child.id, graph, setGraph, { pos });
+          mergeVertexProperties(txnId2, child.id, graph, setGraph, { pos });
           pos++;
         }
       }
@@ -246,7 +247,7 @@ export function useDragDrop(
 
     const layoutRowId = componentDrop(
       formData,
-      txnId,
+      txnId2,
       fromVertex,
       toParentVertex || formData,
       graph,

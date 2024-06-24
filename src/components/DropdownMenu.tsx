@@ -6,7 +6,6 @@ export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { paren
     let resizeObserver: ResizeObserver;
     const handleResize = () => {
         const menuEntryRect = props.parentRef.getBoundingClientRect();
-        debugger;
         const menuEntryBottom = menuEntryRect.bottom;
         const menuEntryLeft = menuEntryRect.left;
         const scrollY = window.scrollY;

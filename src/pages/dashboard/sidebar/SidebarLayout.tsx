@@ -96,8 +96,10 @@ export function Sidebar() {
     "/admin/CollCategory": "ic:outline-collections-bookmark",
     "/admin/Page": "iconoir:multiple-pages",
     "/admin/Dashboard": "mage:dashboard-2",
-    "/admin/Template": "eos-icons:templates-outlined",
-    "/admin/ThankYou": "icon-park-outline:doc-success",
+    "/admin/TemplatePage": "eos-icons:templates-outlined",
+    "/admin/ThankYouPage": "icon-park-outline:doc-success",
+    "/admin/ErrorPage": "icon-park-outline:error",
+    "/admin/EmailTemplatePage": "mdi:email-outline",
   };
 
   const toggleSectionCollapse = () => {
