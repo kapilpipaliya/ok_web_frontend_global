@@ -6,3 +6,11 @@ By default, `npm run build` will generate a Node app that you can run with `npm 
 
 
 // Circular dependency : npx madge --circular  --extensions ts,tsx src
+
+Notes:
+we are using two libraries:
+expression-eval => jsep (for +,-) => jsonata(filter, projection)
+
+To find all files in your codebase whose line count is greater than 400, you can use the following command:
+find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
+

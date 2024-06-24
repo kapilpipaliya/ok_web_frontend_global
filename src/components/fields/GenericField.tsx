@@ -54,7 +54,7 @@ export function getText(
   repeaterContext: Vertex[]
 ) {
   return getSelectionOptions(graph, setGraph, repeaterContext, projection)
-    .vertexes as string;
+    .vertexes as string || projection;
 }
 
 export function getUrl(

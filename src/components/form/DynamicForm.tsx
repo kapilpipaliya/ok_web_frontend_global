@@ -318,10 +318,11 @@ export function DynamicForm(props: DynamicFormProps) {
           return;
         }
 
+        const label = formData.formData.L[0].replace(/([A-Z])/g, ' $1').trim();
         await showLoadingToast({
           promise: submitDataCall({ ...data, name }, graph, setGraph, txnId),
-          loadMessage: "Submitting Data...",
-          successMessage: "Data submitted successfully",
+          loadMessage: `Saving ${label}...`,
+          successMessage: `${label} Saved Successfully`,
           onSuccess: (value) => {
             graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
@@ -386,7 +387,7 @@ export function DynamicForm(props: DynamicFormProps) {
       <Show
         when={props.submitButton}
         fallback={
-          <button onClick={onSubmit}>Submit</button>
+          <button onClick={onSubmit}>Save</button>
         }
       >
         {props.submitButton}

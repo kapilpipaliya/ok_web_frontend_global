@@ -255,6 +255,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
     isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
+      { name: "label", component: "TextBox" },
       {
         name: "default",
         displayName: "Default Component",
@@ -334,8 +335,8 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
             component: "TextBox",
           },
           {
-            name: "need",
-            component: "CheckBox",
+            name: "label",
+            component: "TextBox",
           },
           {
             name: "required",
@@ -416,6 +417,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
             component: "TextBox",
           },
           {
+            name: "label",
+            component: "TextBox",
+          },
+          {
             name: "description",
             component: "TextArea",
             
@@ -433,6 +438,17 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
     isInlineEditable: true,
     attributes: [
       { name: "name", component: "TextBox" },
+      { name: "label", component: "TextBox" },
+      { name: "description", component: "TextArea" },
+    ],
+  },
+  FormCategory: {
+    title: "Form Category",
+    name: "FormCategory",
+    isInlineEditable: true,
+    attributes: [
+      { name: "name", component: "TextBox" },
+      { name: "label", component: "TextBox" },
       { name: "description", component: "TextArea" },
     ],
   },
@@ -558,6 +574,10 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
             name: "name",
             component: "TextBox",
   
+          },
+          {
+            name: "label",
+            component: "TextBox",
           },
           {
             name: "Rule",
@@ -935,7 +955,13 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 FormMetaData.Form = {
   title: "Form",
   name: "Form",
-  attributes: [...FormMetaData.Page.attributes],
+  attributes: [...FormMetaData.Page.attributes, {
+    name: "form",
+    component: "SelectBox",
+    collection: "g:'Form'",
+    parentLabel: "FormCategory",
+    inward: true,
+  }],
 };
 FormMetaData.ThankYouPage = {
   title: "Thank You Page",

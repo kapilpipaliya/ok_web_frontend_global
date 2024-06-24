@@ -1,14 +1,15 @@
-import type {GraphInterface, Vertex} from "~/lib/graph/graph";
-import type {SetStoreFunction, Store} from "solid-js/store";
-import {useToast} from "~/components/Toast";
-import {addNewRow} from "../../graph/mutate/form/rowFunction";
-import {PageDesignerLabels} from "../constant";
-import {createAttrCompMetaVertex} from "~/lib/drag_drop/drop/createAttrCompMetaVertex";
-import {createAttrMetaVertex} from "~/lib/drag_drop/drop/createAttrMetaVertex";
-import {processChildrenAttrs} from "~/lib/drag_drop/drop/processChildrenAttrs";
-import {handleAttrVertex} from "~/lib/drag_drop/drop/handleAttrVertex";
-import {handleCompOrCollVertex} from "~/lib/drag_drop/drop/handleCompOrCollVertex";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
+import type { SetStoreFunction, Store } from "solid-js/store";
+import { useToast } from "~/components/Toast";
+import { addNewRow } from "../../graph/mutate/form/rowFunction";
+import { PageDesignerLabels } from "../constant";
+import { createAttrCompMetaVertex } from "~/lib/drag_drop/drop/createAttrCompMetaVertex";
+import { createAttrMetaVertex } from "~/lib/drag_drop/drop/createAttrMetaVertex";
+import { processChildrenAttrs } from "~/lib/drag_drop/drop/processChildrenAttrs";
+import { handleAttrVertex } from "~/lib/drag_drop/drop/handleAttrVertex";
+import { handleCompVertex } from "~/lib/drag_drop/drop/handleCompVertex";
 import { getUniqueName } from "../getChildrenAttrs";
+import { batch } from "solid-js";
 
 // @Note:
 // From Component To Layout drag:
@@ -30,7 +31,7 @@ export function componentDrop(
   const attrMetaVertex = createAttrMetaVertex();
   const attrCompMetaVertex = createAttrCompMetaVertex();
 
-  if(PageDesignerLabels.includes(fromVertex.L[0])) {
+  if (PageDesignerLabels.includes(fromVertex.L[0])) {
     return (
       processChildrenAttrs(
         pageDesignerVertex,
@@ -46,42 +47,46 @@ export function componentDrop(
   }
 
   const uniqueName = getUniqueName(txnId, graph, setGraph, pageDesignerVertex, attrMetaVertex);
-  const rowResult = addNewRow(
-    txnId,
-    attrMetaVertex,
-    graph,
-    setGraph,
-    toParentVertex,
-    toIndex ? { pos: toIndex, name: uniqueName } : {name: uniqueName},
-    false,
-    {} as any
-  );
-  
-  const rowVertex = graph.vertexes[rowResult.vertexId!];
 
-  if (["Comp"].includes(fromVertex.L[0])) {
-    handleCompOrCollVertex(
-      fromVertex,
+  let rowResult: { error: boolean; vertexId?: string | undefined; edgeId?: string | undefined; }
+  batch(() => {
+    rowResult = addNewRow(
       txnId,
-      rowVertex,
-      graph,
-      setGraph,
-      attrCompMetaVertex,
-      showErrorToast,
-    );
-  } else if (fromVertex.L[0] === "Attr") {
-    handleAttrVertex(
-      pageDesignerVertex,
-      fromVertex,
-      rowVertex,
-      txnId,
-      graph,
-      setGraph,
       attrMetaVertex,
-      attrCompMetaVertex,
+      graph,
+      setGraph,
+      toParentVertex,
+      toIndex ? { pos: toIndex, name: uniqueName } : { name: uniqueName },
+      false,
+      {} as any
     );
-  }
 
-  return rowResult.vertexId!;
+    const rowVertex = graph.vertexes[rowResult.vertexId!];
+
+    if (["Comp"].includes(fromVertex.L[0])) {
+      handleCompVertex(
+        fromVertex,
+        txnId,
+        rowVertex,
+        graph,
+        setGraph,
+        attrCompMetaVertex,
+        showErrorToast,
+      );
+    } else if (fromVertex.L[0] === "Attr") {
+      handleAttrVertex(
+        pageDesignerVertex,
+        fromVertex,
+        rowVertex,
+        txnId,
+        graph,
+        setGraph,
+        attrMetaVertex,
+        attrCompMetaVertex,
+      );
+    }
+  })
+
+  return rowResult!.vertexId!;
 }
 
