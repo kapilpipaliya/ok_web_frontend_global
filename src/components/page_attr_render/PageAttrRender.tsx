@@ -1,4 +1,4 @@
-import { createMemo, createSelector, For, Match, Show, Switch, useContext } from "solid-js";
+import { createMemo, createSelector, For, Match, Show, Switch, useContext, createSignal, onMount, onCleanup } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex, getParentVertex, getSelectionOptions } from "~/lib/graph/get/sync/traverse";
@@ -26,6 +26,7 @@ import {
 import { getId } from "~/components/page_attr_render/utils/getID";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
+import { DropdownMenu } from "../DropdownMenu";
 
 export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
   const parentItems = useContext(PageRenderVertexContext);
@@ -131,8 +132,26 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
             clone,
             deleteLayout,
           } = useDragDrop(graph, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData, item, () => [], true);
+          let saveAsTemplateRef: HTMLElement;
+          const [showModal, setShowModal] = createSignal(false);
 
+          const SaveAsTemplateMenu = () => {
+            const [templateName, setTemplateName] = createSignal("");
+            const [error, setError] = createSignal("");
+            const saveAsTemplate = (name: string) => {
+              console.log(name);
+              setShowModal(false);
+            }
 
+            return (
+              <DropdownMenu parentRef={saveAsTemplateRef as any} onMouseLeave={() => setShowModal(false)}>
+                Save As Template
+                <input type="text" value={templateName()} onChange={(e) => setTemplateName(e.target.value)} />
+                <button type="button" onClick={() => saveAsTemplate(templateName())}>Save</button>
+              </DropdownMenu>
+            )
+          }
+          
           const SelectedAttrConfigPopOver = () => {
             return <span class="position:relative ">
               <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
@@ -185,6 +204,15 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     class="cursor:pointer  flex "
                     onClick={clone} />
                 </Tooltip>
+                <Tooltip content={"Save as Template"}>
+                  <Icon
+                    ref={el => saveAsTemplateRef = el}
+                    icon={"fluent:save-as-24-regular"}
+                    height={20}
+                    width={20}
+                    class="cursor:pointer  flex "
+                    onClick={() => setShowModal(true)} />
+                </Tooltip>
                 <Tooltip content={"Delete"}>
                   <Icon
                     onClick={() => deleteLayout(getComponentName())}
@@ -193,7 +221,9 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
                     width={20}
                     class="cursor:pointer  flex " />
                 </Tooltip>
-
+                <Show when={showModal()}>
+                  <SaveAsTemplateMenu />
+                </Show>
               </div>
             </span>
           };
