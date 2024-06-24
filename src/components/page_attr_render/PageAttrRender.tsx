@@ -70,8 +70,6 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
       )}
     >
       {(item, index) => {
-       
-    
         const component = createMemo(
           () =>
             item.P.component ||
@@ -132,7 +130,100 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
             onLayoutItemClick,
             clone,
             deleteLayout,
-          } = useDragDrop(graph, setGraph, pageConfig.formData.txnId , pageConfig.formData.formData, item, () => [], true);
+          } = useDragDrop(graph, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData, item, () => [], true);
+
+
+          const SelectedAttrConfigPopOver = () => {
+            return <span class="position:relative ">
+              <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
+                <Tooltip content={"Name"} nowrap>
+                  <div
+                    style={{
+                      display: "flex",
+                      "font-size": "0.875rem",
+                      "line-height": "1.25rem",
+                      "margin-right": "4px",
+                    }}
+                  >
+                    {getComponentName()}
+                  </div>
+                </Tooltip>
+                <PropertyDrawer itemId={item.id} />
+                <Tooltip content={"Move"} nowrap>
+                  <Icon
+                    draggable={true}
+                    onDragStart={handleDragStart}
+                    icon={"material-symbols-light:drag-pan-rounded"}
+                    height={20}
+                    width={20}
+                    class="cursor:pointer flex" />
+                </Tooltip>
+                <Tooltip content={"Parent"} nowrap>
+                  <Icon
+                    icon={"mdi:arrow-up"}
+                    height={20}
+                    width={20}
+                    class="cursor:pointer  flex "
+                    onClick={(e) => {
+                      const parentResult = getParentVertex(
+                        ["Attr"],
+                        item,
+                        graph
+                      );
+                      if (parentResult.error) {
+                        return;
+                      }
+
+                      onLayoutItemClick(parentResult.vertex!);
+                    }} />
+                </Tooltip>
+                <Tooltip content={"Duplicate"}>
+                  <Icon
+                    icon={"mage:copy"}
+                    height={20}
+                    width={20}
+                    class="cursor:pointer  flex "
+                    onClick={clone} />
+                </Tooltip>
+                <Tooltip content={"Delete"}>
+                  <Icon
+                    onClick={() => deleteLayout(getComponentName())}
+                    icon={"fluent:delete-20-regular"}
+                    height={20}
+                    width={20}
+                    class="cursor:pointer  flex " />
+                </Tooltip>
+
+              </div>
+            </span>
+          };
+
+          const HoverAttrConfigPopOver = () => {
+            return <span class="position:relative ">
+              <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center right:0">
+                <Icon
+                  icon={iconMap[getComponentName()]}
+                  class=" flex" />
+                <Tooltip content={"Name"} nowrap>
+                  <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
+                    {getComponentName()}
+                  </div>
+                </Tooltip>
+              </div>
+            </span>
+          };
+
+          const AttrConfigPopOver = () => {
+            return <Switch>
+              <Match when={isSelectedLayoutId(item.id)}>
+                <SelectedAttrConfigPopOver />
+              </Match>
+              <Match when={isSelectedHoverId(item.id)}>
+                <HoverAttrConfigPopOver />
+              </Match>
+            </Switch>
+          };
+
           const getBorder = () => {
             if (!isPreview()) {
               if (isActiveTargetItem()) {
@@ -168,119 +259,39 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
             <PageRenderVertexContext.Provider
               value={[...useContext(PageRenderVertexContext), item]}
             >
-                <span
-                  class={`contents ${getBorder() || ""} `}
-                  onMouseOver={(e) => {
-                    e.stopPropagation();
-                    setHoverId(item.id);
-                  } }
-                  onmouseleave={(e) => {
-                    e.stopPropagation();
-                    setHoverId(-1);
-                  } }
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onLayoutItemClick(item);
-                  } }
-                  onDragOver={handleDragOver}
-                  onDragEnter={handleDragEnter}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
+              <span
+                class={`contents ${getBorder() || ""} `}
+                onMouseOver={(e) => {
+                  e.stopPropagation();
+                  setHoverId(item.id);
+                }}
+                onmouseleave={(e) => {
+                  e.stopPropagation();
+                  setHoverId(-1);
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onLayoutItemClick(item);
+                }}
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <Popover
+                  placement={`${isSelectedLayoutId(item.id) ? "top-start" : "top-end"}`}
+                  open={isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)}
                 >
-                  <Popover
-                    placement={`${isSelectedLayoutId(item.id) ? "top-start" : "top-end"}`}
-                    open={isSelectedLayoutId(item.id) || isSelectedHoverId(item.id)}
-                  >
-                    <Popover.Anchor>
-                      <Content />
-                    </Popover.Anchor>
-                    <Popover.Portal>
-                      <Popover.Content class="popover__content">
-                        <Show when={isSelectedLayoutId(item.id)}>
-                          <span class="position:relative ">
-                            <div class="position:absolute color:white bottom:100% flex gap:5px ai:center bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center">
-                              <Tooltip content={"Name"} nowrap>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    "font-size": "0.875rem",
-                                    "line-height": "1.25rem",
-                                    "margin-right": "4px",
-                                  }}
-                                >
-                                  {getComponentName()}
-                                </div>
-                              </Tooltip>
-                              <PropertyDrawer itemId={item.id} />
-                              <Tooltip content={"Move"} nowrap>
-                                <Icon
-                                  draggable={true}
-                                  onDragStart={handleDragStart}
-                                  icon={"material-symbols-light:drag-pan-rounded"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer flex" />
-                              </Tooltip>
-                              <Tooltip content={"Parent"} nowrap>
-                                <Icon
-                                  icon={"mdi:arrow-up"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex "
-                                  onClick={(e) => {
-                                    const parentResult = getParentVertex(
-                                      ["Attr"],
-                                      item,
-                                      graph
-                                    );
-                                    if (parentResult.error) {
-                                      return;
-                                    }
-
-                                    onLayoutItemClick(parentResult.vertex!);
-                                  } } />
-                              </Tooltip>
-                              <Tooltip content={"Duplicate"}>
-                                <Icon
-                                  icon={"mage:copy"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex "
-                                  onClick={clone} />
-                              </Tooltip>
-                              <Tooltip content={"Delete"}>
-                                <Icon
-                                  onClick={() => deleteLayout(getComponentName())}
-                                  icon={"fluent:delete-20-regular"}
-                                  height={20}
-                                  width={20}
-                                  class="cursor:pointer  flex " />
-                              </Tooltip>
-
-                            </div>
-                          </span>
-                        </Show>
-                        <Show
-                          when={!isSelectedLayoutId(item.id) &&
-                            isSelectedHoverId(item.id)}
-                        >
-                          <span class="position:relative ">
-                            <div class="position:absolute color:white bottom:100% flex bg:rgb(37,99,235)  r:5px|5px|0px|0px  z:50 p:0.25rem ai:center right:0">
-                              <Icon
-                                icon={iconMap[getComponentName()]}
-                                class=" flex" />
-                              <Tooltip content={"Name"} nowrap>
-                                <div class="ml:5px mr:5px f:0.875rem lh:1.25rem">
-                                  {getComponentName()}
-                                </div>
-                              </Tooltip>
-                            </div>
-                          </span>
-                        </Show>
-                      </Popover.Content>
-                    </Popover.Portal>
-                  </Popover>
-                </span>
+                  <Popover.Anchor>
+                    <Content />
+                  </Popover.Anchor>
+                  <Popover.Portal>
+                    <Popover.Content class="popover__content">
+                      <AttrConfigPopOver />
+                    </Popover.Content>
+                  </Popover.Portal>
+                </Popover>
+              </span>
             </PageRenderVertexContext.Provider>
           );
         };
@@ -288,7 +299,7 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
           <PageRenderVertexContext.Provider
             value={[...useContext(PageRenderVertexContext), item]}
           >
-              <Content />
+            <Content />
           </PageRenderVertexContext.Provider>
         );
         // currently context is not reactive, but we are assuming it will work.
@@ -297,7 +308,7 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
             <Match when={parentComponent() === "TabList"}>
               <Tab style={item.P}>
                 <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
-                <PageComponentWithDND />
+                  <PageComponentWithDND />
                 </Show>
               </Tab>
             </Match>
@@ -305,7 +316,7 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
               <TabContainer>
                 <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
 
-                <PageComponentWithDND />
+                  <PageComponentWithDND />
                 </Show>
               </TabContainer>
             </Match>
@@ -313,14 +324,14 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
               <li>
                 <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
 
-                <PageComponentWithDND />
-              </Show>
+                  <PageComponentWithDND />
+                </Show>
               </li>
             </Match>
             <Match when={true}>
               <Show when={!isPreview()} fallback={<PageComponentWithPreview />}>
 
-              <PageComponentWithDND />
+                <PageComponentWithDND />
               </Show>
             </Match>
           </Switch>
@@ -329,4 +340,5 @@ export function PageAttrRender(props: { metaVertex: Vertex; data?: Vertex }) {
     </For>
   );
 }
+
 

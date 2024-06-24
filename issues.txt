@@ -5,10 +5,6 @@
 2. Make a Route designer where user can add Tables, Buttons, Modals to nav etc.
 
 📝 Todo :------------------------------------------------------------------------------------------
-
-textarea looks different in the form designer and preview.
-textinput 
-when we change width the textbox and textarea should be resized.
 Add query parameter in grid url for pagination,
 Test all css properties applying properly.
 delete extra properties from components. make sure each property is working. note not working properties.
@@ -17,9 +13,8 @@ add save as template option in tooltip.
 Form builder preview width is not proper.
 
 📝 Todo 📝 KAPIL:------------------------------------------------------------------------------------------
-add name property in each input components 
+
 refactor useDragDrop file
-when parent has display:flex, support indicator postion on left and right too.
 when drag and drop 'text' component, display some default text like "Text"
 Label Properties, Position is not comming as select. add support for specifying select options
 It is not flexible to drop a component below the component, because of the label.
@@ -31,14 +26,9 @@ https://easyformforge.com not working.
 Add Form Category in Form Setting, It will display the form on homepage.
 
 Bug:
-page and component drag and drop not working
 Make Multi Stage Form design preview link woring
 (for label, use name property, instead of label property for changing the label.)
 fix when drag and drop page or template, it is not working. ⌛
-
-validation:
-add validation Tab on properties if validations are configured on the component, validations will run on fiel value change.
-when validation is failed, display error message below the component, if custom message is not provided display common message.
 
 New component:
 add Upload Video component, it will upload video in the server and return video url.
@@ -58,7 +48,6 @@ css issue:
 make drag and drop working on ipad or mobile working.
 
 make undo redo working (use prevTxnIds in FormSettings context)
-Fix page component data not loaded in page designer
 (when Submit do not redirect to parent screen?)
 i refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
 

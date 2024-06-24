@@ -11,7 +11,7 @@ export function ContentDragAndDrop(props: { view: Accessor<string> }) {
     <div class="grid jc:center overflow:auto">
       <Show when={pageConfig.formData}>
         <ResizableContainer view={props.view}>
-          <PageView metaVertex={pageConfig.formData?.formData} />
+          <PageView metaVertex={pageConfig.formData?.formData} isPreview={false} />
         </ResizableContainer>
       </Show>
     </div>

@@ -3,7 +3,7 @@ import { createMemo, createSignal, Match, Show, Switch, useContext } from "solid
 import {
   PageAttrRender
 } from "~/components/page_attr_render/PageAttrRender";
-import { IsPreviewContext, } from "~/lib/contexts";
+import { FormSettingsContext, IsPreviewContext, } from "~/lib/contexts";
 import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
@@ -19,6 +19,8 @@ export function PageView(props: {
   isPreview?: boolean
 }) {
   const [graph, setGraph] = useContext(GraphContext)!;
+  const [formSettings, setFormSettings] = useContext(FormSettingsContext);
+  
   const collection = createMemo(() =>
     getCollection(graph, props.metaVertex)
   );
@@ -33,7 +35,11 @@ export function PageView(props: {
   const [activeStepId, setActiveStepId] = createSignal<string>(steps()[0]?.id);
 
   const selectedFormVertex = () => {
-    return activeStepId() ? graph.vertexes[activeStepId()] : steps()[0];
+    if (props.isPreview) {
+      return activeStepId() ? graph.vertexes[activeStepId()] : steps()[0];
+    } else {
+      return formSettings.activeStepId ? graph.vertexes[formSettings.activeStepId] : steps()[0];
+    }
   };
 
 
@@ -69,7 +75,7 @@ export function PageView(props: {
             <PageItemRender metaVertex={props.vertex!} />
           </Match> */}
           <Match when={isFormRootVertetx()}>
-            <Show when={steps().length > 1}>
+            <Show when={props.isPreview && steps().length > 1}>
               <div>
                 <button onClick={() => changeActiveStep(steps()[Math.max(steps().indexOf(selectedFormVertex()) - 1, 0)].id)}>Previous Step</button>
                 <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>

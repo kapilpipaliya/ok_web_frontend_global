@@ -28,11 +28,11 @@ export function validateInput(validation: ValidationConfigType, value?: string, 
       const regexRule = validation.regex[i];
       if (regexRule.enabled) {
         if (!value) {
-          return regexRule.message;
+          return regexRule.message || "Input does not match the required pattern";
         }
         const regex = new RegExp(regexRule.value);
         if (!regex.test(value)) {
-          return regexRule.message;
+          return regexRule.message || "Input does not match the required pattern";
         }
       }
     }
