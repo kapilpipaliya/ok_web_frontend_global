@@ -8,18 +8,11 @@ import {
 } from "solid-js";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
-import {
-  commitTransaction,
-  getNewTxnId,
-  ProcessStatus,
-} from "~/lib/graph/transaction";
-import { deleteVertex } from "~/lib/graph/mutate/vertex";
-import { GraphContext, GraphInterface, Id, type Vertex, } from "~/lib/graph/graph";
+import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
 import { CommonTable } from "~/components/Table";
 import { Icon } from "@iconify-icon/solid";
-import { SetStoreFunction, Store, createStore } from "solid-js/store";
-import { submitDataCall } from "~/lib/api/api_functions";
+import { type SetStoreFunction, type Store, createStore } from "solid-js/store";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { LoaderNew } from "~/components/LoaderSimple";
 import {
@@ -28,16 +21,13 @@ import {
 import type { ColumnDef } from "@tanstack/solid-table";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import type { IFormMetaData } from "~/lib/FormMetadataType";
-import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import { FormMetaData } from "~/lib/formMetaData";
 import { PageContext } from "~/lib/contexts";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
-import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import {QuickEditModal} from "~/components/grid/QuickEditModal";
 import {getSelectValue} from "~/components/grid/getSelectValue";
 import {getTagValue} from "~/components/grid/getTagValue";
-import { getFormMetaData } from "~/lib/drag_drop/getChildrenAttrs";
+
+import { deleteRowConfirm } from "./deleteRow";
+import { getTableData } from "./getTableData";
 interface DataGridProps {
   tableId: string;
 }
@@ -60,10 +50,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     return <>Incorrect Configuration</>;
   }
 
-  const deleteObject = async (id: any) => {
-    await DeleteObject(id, graph, setGraph, showErrorToast, showLoadingToast, navigate, Ws);
-  };
-
   type TableData = {
     error?: string;
     result?: any;
@@ -79,15 +65,11 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   } | undefined;
   const [tableData, setTableData] = createSignal<TableData>(undefined);
 
-  async function getTableData(skip?: number, limit?: number): Promise<TableData> {
-    return await GetTableData(props.tableId, props.tableId, graph, setGraph, showErrorToast, skip, limit);
-  }
-
   // createdResource caled Two times, making API Calles two times, so used onMount
   const [isLoading, setIsLoading] = createSignal(false);
   onMount(async () => {
     setIsLoading(true);
-    const data = await getTableData();
+    const data = await getTableData(props.tableId);
     setTableData(data);
     onTableDataGet(data);
     setIsLoading(false);
@@ -191,13 +173,13 @@ export function DataGrid(props: Readonly<DataGridProps>) {
           isShowLoadMore={isShowLoadMore()}
           rowsPerPageOptions={[5, 10, 15]}
           defaultRowsPerPage={10}
-          onLoadMore={getTableData}
+          onLoadMore={(skip, limit)=> getTableData(props.tableId, skip, limit)}
           totalItems={filteredData().length}
         />
         <Show when={deleteRowId()}>
           <DeleteDialog
             open={true}
-            onConfirm={() => deleteObject(deleteRowId())}
+            onConfirm={() => deleteRowConfirm(deleteRowId()!, graph, setGraph, showErrorToast, showLoadingToast, navigate, Ws)}
             title="Delete Item"
             message="Are you sure you want to delete this item?"
           />
@@ -205,66 +187,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       </Match>
     </Switch>
   );
-}
-
-async function DeleteObject(id: any, graph: any, setGraph: any, showErrorToast: any, showLoadingToast: any, navigate: any, Ws: any) {
-  const txnId = getNewTxnId(graph, setGraph);
-  const deleteResult = deleteVertex(txnId, id, graph, setGraph);
-  if (deleteResult?.error) {
-    showErrorToast(deleteResult?.error.toString());
-    return;
-  }
-  graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
-  const data = commitTransaction(Ws, graph);
-  if (!data) {
-    return;
-  }
-  await showLoadingToast({
-    promise: submitDataCall(data, graph, setGraph, txnId),
-    loadMessage: "Submitting Data...",
-    successMessage: "Data submitted successfully",
-    onSuccess: () => setTimeout(() => navigate(-1), 0),
-  });
-}
-
-async function GetTableData(tableId: string, collection: string, graph: any, setGraph: any, showErrorToast: any, skip?: number, limit?: number): Promise<any> {
-  try {
-    let form = FormMetaData[tableId] || FormMetaDataAuth[tableId];
-    if (!form) {
-      form = FormMetaData.Form;
-      const { incoming, outgoing }: { incoming: any; outgoing: any } =
-      getEdgesFromRowsAttr(form.attributes);
-      const data = await getDataMGCall({
-        expression: `g:'Form[${tableId}]'`,
-        incoming,
-        outgoing,
-      });
-      if (data.result.length > 0) {
-        form = getFormMetaData(data.graph, () => {}, data.result[0]);
-      }
-      if (!form) {
-        return { error: "Form not found" };
-      }
-    }
-    const { incoming, outgoing }: { incoming: any; outgoing: any } =
-      getEdgesFromRowsAttr(form.attributes);
-    const expression = paginationExpression({
-      coll: collection,
-      skip: skip,
-      limit: limit,
-      filter: "",
-    });
-
-    const result = await getDataMGCall({
-      expression,
-      incoming,
-      outgoing,
-    });
-    return { ...result, form: JSON.parse(JSON.stringify(form)) };
-  } catch (e: any) {
-    console.error("error", e);
-    return { error: `Error When Loading Form: ${e.message}` };
-  }
 }
 
 function SetGridHeaders(formNew: IFormMetaData, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, setDeleteRowId: (id:Id)=>void, navigate: (path:string)=>void, tableId: string) {
