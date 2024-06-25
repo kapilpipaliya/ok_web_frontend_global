@@ -1,4 +1,4 @@
-import { batch, Setter } from "solid-js";
+import { batch, type Setter } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getChildVertex } from "../../graph/get/sync/traverse";

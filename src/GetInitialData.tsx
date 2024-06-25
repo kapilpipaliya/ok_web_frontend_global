@@ -1,4 +1,4 @@
-import { JSX, createSignal, onMount, useContext, Show, Switch, Match } from "solid-js";
+import { type JSX, createSignal, onMount, useContext, Switch, Match } from "solid-js";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { getInitialDataAndSetToGraph } from "~/getInitialDataAndSetToGraph";
 import { GraphContext } from "~/lib/graph/graph";

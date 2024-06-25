@@ -1,4 +1,4 @@
-import { createMemo, For, Match, Show, Switch, useContext, onCleanup } from "solid-js";
+import { createMemo, For, Match, Show, Switch, useContext, } from "solid-js";
 import { toTitle } from "case-switcher-js";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { getSelectionOptions } from "~/lib/graph/get/sync/traverse";

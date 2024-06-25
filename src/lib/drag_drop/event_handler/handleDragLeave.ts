@@ -1,5 +1,5 @@
-import { Setter } from "solid-js";
-import { IIndicatorPosition } from "../../contexts";
+import type { Setter } from "solid-js";
+import type { IIndicatorPosition } from "../../contexts";
 
 
 export function handleDragLeave(setIndicatorPosition: Setter<IIndicatorPosition>) {

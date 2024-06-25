@@ -1,9 +1,9 @@
-import { type Accessor, Setter } from "solid-js";
+import type { Accessor, Setter } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
-import { IIndicatorPosition } from "../../contexts";
+import type { IIndicatorPosition } from "../../contexts";
 
 
 export function handleDragOverAndSetDropPosition(e: DragEvent, setIndicatorPosition: Setter<IIndicatorPosition>, setDragOverTargetId: Setter<string | number>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], draggedVertex: () => (Vertex[] | []), graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {

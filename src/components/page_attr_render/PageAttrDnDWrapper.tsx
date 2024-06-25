@@ -1,4 +1,4 @@
-import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, JSX } from "solid-js";
+import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX } from "solid-js";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { handleDragOver } from "~/lib/drag_drop/event_handler/handleDragOver";

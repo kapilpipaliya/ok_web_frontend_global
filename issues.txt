@@ -5,78 +5,82 @@
 2. Make a Route designer where user can add Tables, Buttons, Modals to nav etc.
 
 Test:--------------------------
-Test all css properties applying properly.
-3. [High] Make sure all inputs are working.
+1. [Obvious] Test all css properties applying properly.
+2. [Obvious] Make sure all inputs are working.
+ [Obvious] Delete extra properties from components. make sure each property is working. note not working properties.
 
 📝 Todo :------------------------------------------------------------------------------------------
-1. [High] Add query parameter in grid url for pagination
-2. [High] Delete extra properties from components. make sure each property is working. note not working properties.
-4. [Medium] Form builder preview width is not proper.
-5. [High] Label Properties, Position is not coming as select. add support for specifying select options
-6. [Medium] FormSetting move to form properties.
+1. [Obvious] Add query parameter in grid url for pagination
+2. [Not Obvious] I refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
+3. [Obvious] Fix import export button on the form
+4. [Obvious] Collection edit page is broken.
+5. [Obvious] Make automatic backup for all the users everyday
+6. [Obvious] Fix Inline Editing Modal not close in list page.
+7. [Obvious] Make Permissions working in DynamicForm component.
+
+http://localhost:3001/admin/Comp/28 cant delete name, display proper error on ui.
+http://localhost:3001/admin/Comp/36
+http://localhost:3001/admin/Comp/1494
+http://localhost:3001/admin/Comp/1544
+Sometimes empty form is displayed
+
+Fix add button is not visible on http://localhost:3001/admin/Comp/24
+
+
+Depend On Select:------------------
+3. [Obvious] Label Properties, Position is not coming as select. add support for specifying select options
+
+
+Page Designer:
+
+2. [Not Obvious] Form builder preview width is not proper.
+4. [Not Obvious] FormSetting move to form properties.
    Need to make select with simple options working.
    Add to Form Properties.
    Get Form Properties Using Context and use it.
-7. [High] When table is not visible user cant drop above or below the table from canvas.
-8. [High] Make CSS State for Responsive states. Add More options in the state.
-
+5. [Obvious] When table is not visible user cant drop above or below the table from canvas.
+6. [Obvious] Make CSS State for Responsive states. Add More options in the state.
+7. css issue: [Not Obvious] box-shadow 
+8. [Obvious] Make drag and drop working on ipad or mobile working.
+9. [Obvious] Make undo redo working, save undoPoints at drop, clone etc..
+10. [Not Obvious] (when Submit do not redirect to parent screen?)
+11. [Obvious] Make the forms made using form designer load and save working
+12. [Obvious] Make a custom forms builder using the original forms.
+13. [Obvious] Make a table designer using the forms fields.
+14. [Obvious] Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
+15. [Not Obvious] On double click add element at last - last in selected layout?  ✅ 
+16. [Obvious] Make sure all path expression are working in page designer.
+17. [Obvious] Make Working Forms using Page Designer.
+18. [Obvious] Make Page Share working.
+19. [Obvious] Use async everywhere, it will load data from server. Only few places use sync API.
 New component:
-1. [High] Add Upload Video component, it will upload video in the server and return video url.
-2. [High] Add Upload Image component, it will upload image in the server and return image url.
-3. [High] Add a Take a Picture component, it will open camera, take a picture from the camera and return image url.
-
+1. [Obvious] Add Upload Video component, it will upload video in the server and return video url.
+2. [Obvious] Add Upload Image component, it will upload image in the server and return image url.
+3. [Obvious] Add a Take a Picture component, it will open camera, take a picture from the camera and return image url.
+4. [Obvious] Make a file upload component in page builder.
 Dependent field:
-1. [High] Add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
-2. [High] Make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
-
-3. [High] Make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
-4. [High] Write a table routes to see all the form entries.
-
-css issue:
-1. [Medium] box-shadow 
-
-2. [High] Make drag and drop working on ipad or mobile working.
-
-3. [High] Make undo redo working, save undoPoints at drop, clone etc..
-4. [Medium] (when Submit do not redirect to parent screen?)
-5. [Medium] I refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
-
-6. [High] Make the forms made using form designer load and save working
-7. [High] Make a custom forms builder using the original forms.
-8. [High] Make a table designer using the forms fields.
-9. [High] Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
-
-
-10. [High] Fix import export button on the form
-11. [High] Collection edit page is broken.
-12. [Medium] On double click add element at last - last in selected layout?  ✅ 
-13. [High] Make sure all path expression are working in page designer.
-14. [High] Make Working Forms using Page Designer.
-15. [High] Make Page Share working.
-
-17. [High] Make automatic backup for all the users everyday
-18. [High] Fix Inline Editing Modal not close in list page.
-19. [High] Use async everywhere, it will load data from server. Only few places use sync API.
-20. [High] Make a file upload component in page builder.
-21. [High] Make Permissions working in DynamicForm component.
+1. [Obvious] Add 'dependent field' in each field properties, if user select dependent fields from the properties, it will display that field only when that field value is selected in the dropdown. It will only work on the preview.
+2. [Obvious] Make Preview working(eye icon on top right), it will display page preview in the preview tab. dont display top icon when hover over it.
+3. [Obvious] Make sure form share link -> form submit is working and on submit save it and display any thank you page for now letter we will customize it.
 
 
 Backend:
-1. [High] Fix File upload not working. when file upload is done save file upload is done, save a entry in 'Media' label. https://www.easyformforge.com/admin/setting
-2. [High] Refactor all cypher functions, use eval function whenever possible.
-3. [High] Write a function to get all the fields in the form, make sync of Nav working
-4. [High] Sorting, Filtering support on the table
-5. [High] Load table data from server with pagination when form have many rows
-6. [High] Make Nav sync full data. (IMP)
-7. [High] Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with same files.
-8. [High] When user upload a file, also save entry in the database.
+1. [Obvious] Fix File upload not working. when file upload is done save file upload is done, save a entry in 'Media' label. https://www.easyformforge.com/admin/setting
+2. [Obvious] Refactor all cypher functions, use eval function whenever possible.
+3. [Obvious] Write a function to get all the fields in the form, make sync of Nav working
+4. [Obvious] Sorting, Filtering support on the table
+5. [Obvious] Load table data from server with pagination when form have many rows
+6. [Obvious] Make Nav sync full data. (IMP)
+7. [Obvious] Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with same files.
+8. [Obvious] When user upload a file, also save entry in the database.
 
 Auth:
-1. [High] Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are authorized.
-2. [High] Only super admin can modify permissions data for now.
+1. [Obvious] Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are authorized.
+2. [Obvious] Only super admin can modify permissions data for now.
 
 SEO
-1. [High] https://easyformforge.com not working. Fix SSL Certificate.
+1. [Obvious] https://easyformforge.com not working. Fix SSL Certificate.
 
 Design issue:
-1. [High] It is not flexible to drop a component below the component, because of the label.
+1. [Obvious] It is not flexible to drop a component below the component, because of the label.
+

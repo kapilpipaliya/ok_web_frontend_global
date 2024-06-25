@@ -1,10 +1,10 @@
-import { type Accessor } from "solid-js";
+import type { Accessor } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { loadPageData } from "~/lib/drag_drop/loadPageData";
 import { handleDropAtPosition } from "~/lib/drag_drop/handleDropAtPosition";
 import { PageDesignerLabels } from "../constant";
-import { IIndicatorPosition } from "../../contexts";
+import type { IIndicatorPosition } from "../../contexts";
 
 
 export async function handleDrop(e: DragEvent, draggedVertex: () => (Vertex[] | []), indicatorPosition: Accessor<IIndicatorPosition>, graph: GraphInterface, showErrorToast: (message: string) => void, setGraph: SetStoreFunction<GraphInterface>, txnId: number, formData: Vertex) {

@@ -1,6 +1,6 @@
-import { batch, Setter } from "solid-js";
+import { batch, type Setter } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
-import { IIndicatorPosition } from "../contexts";
+import type { IIndicatorPosition } from "../contexts";
 
 
 export function resetDragDropState(setDraggedVertex: Setter<Vertex[] | []>, setIndicatorPosition: Setter<IIndicatorPosition>, setDragOverTargetId: Setter<string | number>) {

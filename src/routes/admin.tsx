@@ -1,5 +1,4 @@
 import type { RouteSectionProps } from "@solidjs/router";
-import { useContext } from "solid-js";
 import { WsContext, ServerEventsDispatcher, WS_PATH } from "~/lib/websocket/ws_events_dispatcher";
 import { MainDashboard } from "~/pages/dashboard/MainDashboard";
 import { GetInitialData } from "~/GetInitialData";

@@ -1,8 +1,8 @@
-import { type Accessor, Setter } from "solid-js";
+import type { Accessor, Setter } from "solid-js";
 import type { SetStoreFunction } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
-import { IIndicatorPosition } from "../../contexts";
+import type { IIndicatorPosition } from "../../contexts";
 import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosition";
 
 

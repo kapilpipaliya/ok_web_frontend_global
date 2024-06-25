@@ -3,29 +3,27 @@ import {
   type JSX,
   createSignal,
   For,
-  createEffect,
   createMemo,
   onCleanup,
-  onMount,
   Show,
 } from "solid-js";
 import { useToast } from "./Toast";
-import { Portal, isServer } from "solid-js/web";
+import { Portal, } from "solid-js/web";
 import { useFloating } from 'solid-floating-ui';
 import { autoUpdate } from '@floating-ui/dom';
 
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: {
-  selectedValues: () => any;
-  options: any[];
-  onRemove: (arg0: any, arg1: any) => void;
-  onSelect: (arg0: any, arg1: any) => void;
-  placeholder: string | undefined;
-  disable?: boolean | undefined;
-  displayValueParent?: string | undefined;
-  displayValueChild?: string | undefined;
-  selectionLimit?: number | undefined;
-  renderLabel?: ((arg0: any) => JSX.Element) | undefined;
+  readonly selectedValues: () => any;
+  readonly options: any[];
+  readonly onRemove: (arg0: any, arg1: any) => void;
+  readonly onSelect: (arg0: any, arg1: any) => void;
+  readonly placeholder?: string;
+  readonly disable?: boolean;
+  readonly displayValueParent?: string;
+  readonly displayValueChild?: string;
+  readonly selectionLimit?: number;
+  readonly renderLabel?: ((arg0: any) => JSX.Element);
 }) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
@@ -78,8 +76,6 @@ export function MultiSelectField(props: {
       newSelected = [...selected(), selectedOption];
       // setSelected(newSelected);
       props.onSelect?.(newSelected, value);
-
-      isClickFromOption = true;
     }
     if (props.selectionLimit === 1) {
       setDropdownVisible(false);

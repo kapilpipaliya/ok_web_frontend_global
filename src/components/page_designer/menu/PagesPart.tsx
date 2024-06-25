@@ -20,7 +20,6 @@ import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression"
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
 import { onClickAddComponent } from "../CommonCompUtils";
-import { Portal } from "solid-js/web";
 import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function PagesPart(props: { coll: string }) {

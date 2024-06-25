@@ -1,4 +1,4 @@
-import { JSX, onCleanup, onMount, splitProps } from "solid-js";
+import { type JSX, onCleanup, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
 export function handleResize(dropdownRef: HTMLDivElement, parentRef: HTMLDivElement) {

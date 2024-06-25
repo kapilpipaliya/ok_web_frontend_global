@@ -1,4 +1,4 @@
-import { Setter } from "solid-js";
+import type { Setter } from "solid-js";
 import type { Vertex } from "~/lib/graph/graph";
 
 
