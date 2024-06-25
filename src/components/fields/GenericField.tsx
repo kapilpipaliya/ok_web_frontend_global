@@ -14,14 +14,14 @@ import {
   Spinner,
   Tabs
 } from "~/components/solid_blocks";
-import { PageAttrRender,  } from "~/components/page_attr_render/PageAttrRender";
-import {TreeView} from "~/components/solid_blocks/TreeView";
+import { PageAttrRender, } from "~/components/page_attr_render/PageAttrRender";
+import { TreeView } from "~/components/solid_blocks/TreeView";
 import { Collapsible } from "~/components/solid_blocks/Collapsible";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import { Repeater } from "~/components/page_attr_render/Repeater";
 import { Table, TableBodyCell, TableHeadCell } from "~/components/Table";
-import {Heading} from "~/components/solid_blocks/Heading";
-import {StarRating} from "~/components/solid_blocks/Rating";
+import { Heading } from "~/components/solid_blocks/Heading";
+import { StarRating } from "~/components/solid_blocks/Rating";
 import { PageRenderVertexContext, RepeaterVertexContext } from "~/components/page_attr_render/Context";
 
 import { APP_BASE_URL } from "~/lib/constants";
@@ -29,7 +29,7 @@ import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { FormWrapper } from "~/components/fields/FormWrapper";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
 import { deNullify } from "~/lib/utils";
-import {mergeCSS} from "~/components/css_properties/cssUtils";
+import { mergeCSS } from "~/components/css_properties/cssUtils";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import {
   getDataVertex
@@ -41,10 +41,7 @@ import { Label } from "../solid_blocks/Label";
 
 // This component support rendering Child Themselves by calling PageRender.
 function getAttrs(meta: Vertex) {
-  if (meta.P.attr) {
-    return JSON.parse(meta.P.attr);
-  }
-  return {};
+  return meta.P.attr ? JSON.parse(meta.P.attr) : {};
 }
 
 export function getText(
@@ -65,10 +62,7 @@ export function getUrl(
 ) {
   const url = getSelectionOptions(graph, setGraph, repeaterContext, projection)
     .vertexes as string | undefined;
-  if (typeof url === "string" && url.startsWith("/")) {
-    // url = (showNav() ? '/nav' : '') + url;
-  }
-  return url;
+  return typeof url === "string" && url.startsWith("/") ? url : undefined;
 }
 
 export function GenericField(
@@ -81,21 +75,13 @@ export function GenericField(
     applyDefaults?: boolean;
   },
 ) {
-
   const [graph, setGraph] = useContext(GraphContext)!;
   const parentItems = useContext(PageRenderVertexContext);
   const component = createMemo(() => props.component || props.meta.P.component);
-
-  const parentComponent = createMemo(() => {
-    return getComponent(graph, getLastItem(parentItems, 2))?.P[
-      IdAttr
-    ];
-  });
-
+  const parentComponent = createMemo(() => getComponent(graph, getLastItem(parentItems, 2))?.P[IdAttr]);
   const repeaterContext = useContext(RepeaterVertexContext);
-  
   const defaultValues = createMemo(() => props.applyDefaults && graph.componentIdMap[component()] ? getCompProps(graph, graph.vertexes[graph.componentIdMap[component()]]) : {});
-  
+
   return (
     <Show
       when={!props.disabled}
@@ -108,23 +94,10 @@ export function GenericField(
         <Match when={component() === "Text"}>
           <Show
             when={props.meta.P.as}
-            fallback={getText(
-              graph,
-              setGraph,
-              props.meta.P.text,
-              repeaterContext,
-            )}
+            fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
           >
-            <Dynamic
-              component={props.meta.P.as}
-              class={props.meta.P.class}
-            >
-              {getText(
-                graph,
-                setGraph,
-                props.meta.P.text,
-                repeaterContext,
-              )}
+            <Dynamic component={props.meta.P.as} class={props.meta.P.class}>
+              {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
               {props.children}
               <PageAttrRender metaVertex={props.meta} data={props.data} />
             </Dynamic>
@@ -143,15 +116,10 @@ export function GenericField(
                 >
                   <Show
                     when={!props.meta.P.text}
-                    fallback={getText(
-                      graph,
-                      setGraph,
-                      props.meta.P.text,
-                      repeaterContext,
-                    )}
+                    fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
                   >
                     {props.children}
-                    <PageAttrRender metaVertex={props.meta} data={props.data}/>
+                    <PageAttrRender metaVertex={props.meta} data={props.data} />
                   </Show>
                 </A>
               )}
@@ -161,40 +129,29 @@ export function GenericField(
                 {...defaultValues()}
                 {...deNullify(props.meta.P)}
                 class={mergeCSS(defaultValues().class, props.meta.P.class)}
-                href={getUrl(
-                  graph,
-                  setGraph,
-                  props.meta.P.href,
-                  repeaterContext,
-                ) || "#"}
+                href={getUrl(graph, setGraph, props.meta.P.href, repeaterContext) || "#"}
                 draggable
               >
                 <Show
                   when={!props.meta.P.text}
-                  fallback={getText(
-                    graph,
-                    setGraph,
-                    props.meta.P.text,
-                    repeaterContext,
-                  )}
+                  fallback={getText(graph, setGraph, props.meta.P.text, repeaterContext)}
                 >
                   {props.children}
-                  <PageAttrRender metaVertex={props.meta} data={props.data}/>
+                  <PageAttrRender metaVertex={props.meta} data={props.data} />
                 </Show>
               </A>
             </Match>
             <Match when={true}>
               <a draggable>
                 {props.children}
-                  <PageAttrRender metaVertex={props.meta} data={props.data}/>
+                <PageAttrRender metaVertex={props.meta} data={props.data} />
               </a>
             </Match>
           </Switch>
         </Match>
-
         <Match when={PageDesignerLabels.filter(label => label !== "Form").includes(component())}>
           {/* g:'Page':-'*[P.name="book"]' */}
-          <PageViewWrapper pageVertexLabel={component()}  expression={props.meta.P.data} />
+          <PageViewWrapper pageVertexLabel={component()} expression={props.meta.P.data} />
         </Match>
         <Match when={component() === "Image"}>
           <img
@@ -202,12 +159,7 @@ export function GenericField(
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
-            src={getText(
-              graph,
-              setGraph,
-              props.meta.P.src,
-              repeaterContext,
-            )}
+            src={getText(graph, setGraph, props.meta.P.src, repeaterContext)}
             draggable={true}
             alt={"img"}
           />
@@ -218,14 +170,14 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Tabs>
         </Match>
         <Match when={component() === "TabContainer"}>
-          <PageAttrRender metaVertex={props.meta} data={props.data}/>
+          <PageAttrRender metaVertex={props.meta} data={props.data} />
         </Match>
         <Match when={component() === "TabList"}>
-          <PageAttrRender metaVertex={props.meta} data={props.data}/>
+          <PageAttrRender metaVertex={props.meta} data={props.data} />
         </Match>
         <Match when={component() === "Icon"}>
           <Icon
@@ -245,58 +197,43 @@ export function GenericField(
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
             {...getAttrs(props.meta)}
           >
-            {getText(
-              graph,
-              setGraph,
-              props.meta.P.text,
-              repeaterContext,
-            )}
+            {getText(graph, setGraph, props.meta.P.text, repeaterContext)}
           </Dynamic>
         </Match>
-        <Match when={component() === "Button" && (props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children)}>
+        <Match when={component() === "Button"}>
           <button
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
-          </button>
-        </Match>
-        <Match when={component() === "Button"}>
-        <button
-            {...defaultValues()}
-            {...deNullify(props.meta.P)}
-            class={mergeCSS(defaultValues().class, props.meta.P.class)}
-          >
-             <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <Switch>
+              <Match when={props.data?.P[props.meta.P.name] ?? props.meta.P.children}>
+                {props.data?.P[props.meta.P.name]}
+              </Match>
+              <Match when={true}>
+                <PageAttrRender metaVertex={props.meta} data={props.data} />
+              </Match>
+            </Switch>
           </button>
         </Match>
         <Match when={component() === "Table"}>
           <Table
-            headers={
-              getChildVertexes(graph, ["Attr"], [props.meta]).vertexes
-                ?.length || 0
-            }
+            headers={getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length || 0}
             {...defaultValues()}
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Table>
         </Match>
-        <Match
-          when={
-            component() === "TableHeader" &&
-            getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length
-          }
-        >
+        <Match when={component() === "TableHeader" && getChildVertexes(graph, ["Attr"], [props.meta]).vertexes?.length}>
           <TableHeadCell class={"p:10 text:center h:5"}>
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </TableHeadCell>
         </Match>
         <Match when={component() === "TableRow"}>
           <TableBodyCell class={"h:50 text:center bg:#ffffff b:1px|solid|#000"}>
-              <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </TableBodyCell>
         </Match>
         <Match when={component() === "Collapsible"}>
@@ -306,7 +243,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Collapsible>
         </Match>
         <Match when={component() === "Avtar"}>
@@ -324,8 +261,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            {props.data?.P[props.meta.P[IdAttr]] ??
-              props.meta.P.children}
+            {props.data?.P[props.meta.P[IdAttr]] ?? props.meta.P.children}
           </Select>
         </Match>
         <Match when={component() === "LoadIndicator"}>
@@ -333,18 +269,17 @@ export function GenericField(
             {...defaultValues()}
             {...props.meta?.P}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
-          >{props.meta.P.children}</Spinner>
+          >
+            {props.meta.P.children}
+          </Spinner>
         </Match>
         <Match when={component() === "TreeViewItem"}>
-          <TreeView
-            title={props.meta.P?.title ?? "MenuItem"}
-            meta={props.meta}
-          >
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+          <TreeView title={props.meta.P?.title ?? "MenuItem"} meta={props.meta}>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </TreeView>
         </Match>
         <Match when={component() === "TreeViewChild"}>
-          <PageAttrRender metaVertex={props.meta} data={props.data}/>
+          <PageAttrRender metaVertex={props.meta} data={props.data} />
         </Match>
         <Match when={component() === "Accordion"}>
           <Accordion
@@ -364,7 +299,7 @@ export function GenericField(
             {...deNullify(props.meta.P)}
             class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Breadcrumbs>
         </Match>
         <Match when={component() === "ProgressBar"}>
@@ -405,22 +340,19 @@ export function GenericField(
           />
         </Match>
         <Match when={component() === "Label"}>
-            <Label
-              meta={props.meta}
-              {...defaultValues()}
-              {...deNullify(props.meta.P)}
-              class={mergeCSS(defaultValues().class, props.meta.P.class)}
-            >
-              <PageAttrRender metaVertex={props.meta} data={props.data} />
-            </Label>
-          </Match>
-        <Match when={true}>
-          <Dynamic
-            component={props.meta.P.as || "div"}
-            class={props.meta.P.class}
+          <Label
+            meta={props.meta}
+            {...defaultValues()}
+            {...deNullify(props.meta.P)}
+            class={mergeCSS(defaultValues().class, props.meta.P.class)}
           >
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
+          </Label>
+        </Match>
+        <Match when={true}>
+          <Dynamic component={props.meta.P.as || "div"} class={props.meta.P.class}>
             {props.children}
-            <PageAttrRender metaVertex={props.meta} data={props.data}/>
+            <PageAttrRender metaVertex={props.meta} data={props.data} />
           </Dynamic>
         </Match>
       </Switch>

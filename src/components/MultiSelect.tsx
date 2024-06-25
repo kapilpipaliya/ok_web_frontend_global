@@ -64,32 +64,23 @@ export function MultiSelectField(props: {
     }
   });
 
-  // Helper function to get value and label
-  const getOptionValue = (option: {
-    [x: string]: { [x: string]: any };
-    value: any;
-  }) => {
+  const getOptionProperty = (option: {
+    [x: string]: { [x: string]: any }; // Vertex
+    value?: any;
+    label?: any;
+  }, property: 'value' | 'label') => {
     if (props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
         option[props.displayValueParent]?.name
       );
     }
-    return typeof option === "object" ? option.value : option;
+    return typeof option === "object" ? option[property] : option;
   };
-  // todo; label and value has same logic
-  const getOptionLabel = (option: {
-    [x: string]: { [x: string]: any };
-    label: any;
-  }) => {
-    if (props.displayValueParent && props.displayValueChild) {
-      return (
-        option[props.displayValueParent]?.[props.displayValueChild] ||
-        option[props.displayValueParent]?.name
-      );
-    }
-    return typeof option === "object" ? option.label : option;
-  };
+
+  const getOptionValue = (option: {[x: string]: { [x: string]: any }; value: any;}) => getOptionProperty(option, 'value');
+  const getOptionLabel = (option: {[x: string]: { [x: string]: any }; label: any;}) => getOptionProperty(option, 'label');
+
   // Handle changes in selection
   const handleSelectChange = (value: any) => {
     let newSelected: any[];

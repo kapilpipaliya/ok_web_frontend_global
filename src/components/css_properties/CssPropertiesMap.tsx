@@ -678,6 +678,7 @@ const EffectsSection = {
     dialogLabel: "Adjust Shadow",
     fallback: "No Shadow Effects",
     children: {
+      // TODO: Fix duplicate code
       shadow: createGridOptions("Shadow Grid", "Text Shadow", [
         {
           name: "X Offset",
@@ -757,6 +758,7 @@ const EffectsSection = {
     openMenu: createSignal(null),
     dialogLabel: "Backdrop Filter",
     children: {
+      // TODO: Fix duplicate code
       shadow: createGridOptions("Shadow Grid", "Backdrop Filter", [
         {
           name: "type",

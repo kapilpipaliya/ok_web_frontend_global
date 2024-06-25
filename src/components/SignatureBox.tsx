@@ -8,6 +8,31 @@ export function Signature() {
     const [signatureImage, setSignatureImage] = createSignal<string | null>(null);
     const [isEditing, setIsEditing] = createSignal(false);
 
+    const initializeCanvas = () => {
+        if (canvasRef) {
+            context = canvasRef.getContext('2d');
+            if (context) {
+                context.strokeStyle = 'black';
+                context.lineWidth = 2;
+                context.lineCap = 'round'; // Make the line round at the ends to avoid spaces
+            }
+
+            canvasRef.addEventListener('mousedown', startDrawing);
+            canvasRef.addEventListener('mousemove', draw);
+            canvasRef.addEventListener('mouseup', stopDrawing);
+            canvasRef.addEventListener('mouseout', stopDrawing);
+        }
+    };
+
+    const cleanupCanvas = () => {
+        if (canvasRef) {
+            canvasRef.removeEventListener('mousedown', startDrawing);
+            canvasRef.removeEventListener('mousemove', draw);
+            canvasRef.removeEventListener('mouseup', stopDrawing);
+            canvasRef.removeEventListener('mouseout', stopDrawing);
+        }
+    };
+
     const startDrawing = (event: MouseEvent) => {
         if (!canvasRef) return;
         isDrawing = true;
@@ -40,44 +65,15 @@ export function Signature() {
 
     const editSignature = () => {
         setIsEditing(true);
-        if (canvasRef) {
-            context = canvasRef.getContext('2d');
-            if (context) {
-                context.strokeStyle = 'black';
-                context.lineWidth = 2;
-                context.lineCap = 'round'; // Make the line round at the ends to avoid spaces
-            }
-
-            canvasRef.addEventListener('mousedown', startDrawing);
-            canvasRef.addEventListener('mousemove', draw);
-            canvasRef.addEventListener('mouseup', stopDrawing);
-            canvasRef.addEventListener('mouseout', stopDrawing);
-        }
+        initializeCanvas();
     };
 
     onMount(() => {
-        if (canvasRef) {
-            context = canvasRef.getContext('2d');
-            if (context) {
-                context.strokeStyle = 'black';
-                context.lineWidth = 2;
-                context.lineCap = 'round'; // Make the line round at the ends to avoid spaces
-            }
-
-            canvasRef.addEventListener('mousedown', startDrawing);
-            canvasRef.addEventListener('mousemove', draw);
-            canvasRef.addEventListener('mouseup', stopDrawing);
-            canvasRef.addEventListener('mouseout', stopDrawing);
-        }
+        initializeCanvas();
     });
 
     onCleanup(() => {
-        if (canvasRef) {
-            canvasRef.removeEventListener('mousedown', startDrawing);
-            canvasRef.removeEventListener('mousemove', draw);
-            canvasRef.removeEventListener('mouseup', stopDrawing);
-            canvasRef.removeEventListener('mouseout', stopDrawing);
-        }
+        cleanupCanvas();
     });
 
     return (
