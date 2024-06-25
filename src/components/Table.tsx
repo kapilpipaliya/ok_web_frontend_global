@@ -10,9 +10,9 @@ import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
 import type { ColumnDef } from "@tanstack/solid-table";
 
-type TableProps<T> = {
+type TableProps = {
   headers: ColumnDef<any>[];
-  data: T[];
+  data: any[];
   rowsPerPageOptions?: number[];
   defaultRowsPerPage?: number;
   onLoadMore: (skip: number, limit: number) => void;
@@ -21,31 +21,22 @@ type TableProps<T> = {
   isShowLoadMore?: boolean;
 };
 
-export function CommonTable<T>(props: TableProps<T>) {
+export function CommonTable(props: Readonly<TableProps>) {
   const [currentPage, setCurrentPage] = createSignal(0);
   const [rowsPerPage, setRowsPerPage] = createSignal(
-    props.defaultRowsPerPage || 10,
+    props.defaultRowsPerPage ?? 10,
   );
 
   const totalPages = () => Math.ceil(props.totalItems / rowsPerPage());
 
-  const handleNextPage = () => {
-    // handlePageChange(Math.min(currentPage() + 1, totalPages() - 1));
-    setCurrentPage(Math.min(currentPage() + 1));
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(Math.max(0, Math.min(newPage, totalPages() - 1)));
   };
 
-  const handlePreviousPage = () => {
-    // handlePageChange(Math.max(currentPage() - 1, 0));
-    setCurrentPage(Math.min(currentPage() - 1));
-  };
-
-  const handleFirstPage = () => {
-    setCurrentPage(0);
-  };
-
-  const handleLastPage = () => {
-    setCurrentPage(totalPages() - 1);
-  };
+  const handleNextPage = () => handlePageChange(currentPage() + 1);
+  const handlePreviousPage = () => handlePageChange(currentPage() - 1);
+  const handleFirstPage = () => handlePageChange(0);
+  const handleLastPage = () => handlePageChange(totalPages() - 1);
 
   const displayedRows = () => {
     const startIndex = currentPage() * rowsPerPage();
@@ -92,26 +83,24 @@ export function CommonTable<T>(props: TableProps<T>) {
         >
           {(row, index) => (
             <For each={props.headers}>
-              {(header: any) => {
-                return (
-                  <TableBodyCell index={index()}>
-                    <Switch>
-                      <Match when={header === "Edit"}>
-                        {header.cell?.({
-                          row: { original: row },
-                          getValue: () => getValue(header, row),
-                        })}
-                      </Match>
-                      <Match when={true}>
-                        {header.cell?.({
-                          row: { original: row },
-                          getValue: () => getValue(header, row),
-                        })}
-                      </Match>
-                    </Switch>
-                  </TableBodyCell>
-                );
-              }}
+              {(header: any) => (
+                <TableBodyCell index={index()}>
+                  <Switch>
+                    <Match when={header === "Edit"}>
+                      {header.cell?.({
+                        row: { original: row },
+                        getValue: () => getValue(header, row),
+                      })}
+                    </Match>
+                    <Match when={true}>
+                      {header.cell?.({
+                        row: { original: row },
+                        getValue: () => getValue(header, row),
+                      })}
+                    </Match>
+                  </Switch>
+                </TableBodyCell>
+              )}
             </For>
           )}
         </For>
@@ -127,6 +116,7 @@ export function CommonTable<T>(props: TableProps<T>) {
         handleLastPage={handleLastPage}
         data={props.data}
         rowsPerPage={rowsPerPage}
+        rowsPerPageOptions={props.rowsPerPageOptions}
       />
       <Show
         when={
@@ -138,7 +128,6 @@ export function CommonTable<T>(props: TableProps<T>) {
       >
         <div style="display: flex; justify-content: end; padding: 5px 10px;">
           <button
-            // variant="soft"
             onClick={() => props.onLoadMore(props.data.length, rowsPerPage())}
           >
             Load More
@@ -150,6 +139,7 @@ export function CommonTable<T>(props: TableProps<T>) {
 }
 
 const TableActions = (props: {
+  rowsPerPageOptions?: number[];
   data: any;
   displayedRows: Accessor<any[]>;
   currentPage: Accessor<number>;
@@ -165,17 +155,16 @@ const TableActions = (props: {
     <Show when={props.displayedRows().length > 0}>
       <div style="display: flex; align-items: center; justify-content: space-between; padding: .5rem 1rem;">
         <div style="margin-right: 1rem;">
-          <label for="rowsPerPage">Rows per page:</label>
+          <label html-for="rowsPerPage">Rows per page:</label>
           <select
-            name="page"
-            id="page"
+            id="rowsPerPage"
             onChange={props.handleRowsPerPageChange}
             value={props.rowsPerPage()}
             style="margin-left: 0.5rem;"
           >
-            <option value="5">5</option>
-            <option value="10">10</option>
-            <option value="15">15</option>
+            <For each={props.rowsPerPageOptions || [10,20,50,100]}>
+              {(option) => <option value={option}>{option}</option>}
+            </For>
           </select>
         </div>
         <div style="margin-right: 1rem;" class="font-weight:500">
@@ -249,7 +238,7 @@ const TableActions = (props: {
   );
 };
 
-export function Table(props: { headers: number; children: JSX.Element; class?: string }) {
+export function Table(props: Readonly<{ headers: number; children: JSX.Element; class?: string }>) {
   return (
     <div
       class="overflow:visible rel r:10"
@@ -276,11 +265,11 @@ export function TableHeadCell(props: any) {
   );
 }
 
-export function TableBodyCell(props: {
+export function TableBodyCell(props: Readonly<{
   index?: number;
   children: JSX.Element;
   class?: string;
-}) {
+}>) {
   return (
     <div
       style="padding: 7px; align-content: center;"
