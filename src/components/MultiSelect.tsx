@@ -6,10 +6,13 @@ import {
   createEffect,
   createMemo,
   onCleanup,
+  onMount,
+  Show,
 } from "solid-js";
 import { useToast } from "./Toast";
-import Dismiss from "solid-dismiss";
-import { isServer } from "solid-js/web";
+import { Portal, isServer } from "solid-js/web";
+import { useFloating } from 'solid-floating-ui';
+import { autoUpdate } from '@floating-ui/dom';
 
 // similar like this: https://www.npmjs.com/package/druthers?activeTab=code
 export function MultiSelectField(props: {
@@ -24,11 +27,9 @@ export function MultiSelectField(props: {
   selectionLimit?: number | undefined;
   renderLabel?: ((arg0: any) => JSX.Element) | undefined;
 }) {
-  const {showErrorToast} = useToast();
-  let isClickFromOption = false;
-  let containerRef: HTMLDivElement | undefined;
-  let btnEl: any;
-  let dropdownEl: any;
+  const { showErrorToast } = useToast();
+  let inputRef: HTMLInputElement | undefined;
+
   const [isRefetch, setIsRefetch] = createSignal(1);
 
   // Define signals for managing state
@@ -38,31 +39,6 @@ export function MultiSelectField(props: {
 
   const [inputValue, setInputValue] = createSignal("");
   const [dropdownVisible, setDropdownVisible] = createSignal(false);
-
-  createEffect(() => {
-    if (isServer) return;
-    if (dropdownVisible()) {
-      const mainContent = document.getElementById("main-content");
-      const bodyContent = document.getElementById("body");
-      if (bodyContent) {
-        bodyContent.style.overflow = "hidden"; // Disable scrolling
-      }
-
-      if (mainContent) {
-        mainContent.style.overflow = "hidden"; // Ensure scrolling is enabled
-      }
-    } else {
-      const mainContent = document.getElementById("main-content");
-      const bodyContent = document.getElementById("body");
-      if (bodyContent) {
-        bodyContent.style.overflow = "auto"; // Ensure scrolling is enabled
-      }
-
-      if (mainContent) {
-        mainContent.style.overflow = "auto"; // Ensure scrolling is enabled
-      }
-    }
-  });
 
   const getOptionProperty = (option: {
     [x: string]: { [x: string]: any }; // Vertex
@@ -78,8 +54,8 @@ export function MultiSelectField(props: {
     return typeof option === "object" ? option[property] : option;
   };
 
-  const getOptionValue = (option: {[x: string]: { [x: string]: any }; value: any;}) => getOptionProperty(option, 'value');
-  const getOptionLabel = (option: {[x: string]: { [x: string]: any }; label: any;}) => getOptionProperty(option, 'label');
+  const getOptionValue = (option: { [x: string]: { [x: string]: any }; value: any; }) => getOptionProperty(option, 'value');
+  const getOptionLabel = (option: { [x: string]: { [x: string]: any }; label: any; }) => getOptionProperty(option, 'label');
 
   // Handle changes in selection
   const handleSelectChange = (value: any) => {
@@ -121,7 +97,7 @@ export function MultiSelectField(props: {
 
   // Inline styles
   const containerStyle =
-    "position: relative; display: inline-block; width: 100%; padding: 0px 3px; border: 1px solid #ccc; border-radius: 4px; background: white;";
+    "position:relative; display: inline-block; width: 100%; padding: 0px 3px; border: 1px solid #ccc; border-radius: 4px; background: white;";
   const inputContainerStyle =
     "padding:4px 0px;display: flex; flex-wrap: wrap; align-items: center; gap: 5px; width: 100%;";
   const tagStyle =
@@ -138,20 +114,8 @@ export function MultiSelectField(props: {
     border: "none",
     outline: "none",
   });
-  const dropdownStyle: any = () => ({
-    // position: 'absolute',
-    // top: '100%',
-    // left: 0,
-    // width: '100%',
-    border: "1px solid #ccc",
-    background: "white",
-    "max-height": "200px",
-    "overflow-y": "auto",
-    "z-index": 1,
-    "box-shadow": "darkgrey 1px 2px 3px 0px",
-    display: dropdownVisible() ? "block" : "none",
-  });
-  const optionStyle = "padding: 8px; cursor: pointer;";
+
+  const optionStyle = "padding: 8px; cursor: pointer; width: 100%;";
   const optionSelectedStyle = "background: #ddd;opacity: 0.5;";
 
   // Filter options based on input value
@@ -163,29 +127,72 @@ export function MultiSelectField(props: {
     );
   });
 
-  createEffect(() => {
-    if (dropdownVisible() && containerRef) {
-      const {bottom, left, width} = containerRef.getBoundingClientRect();
-      const {scrollX, scrollY} = window;
+  const handleInputFocus = () => {
+    setDropdownVisible(true);
+  };
 
-      dropdownEl.style.position = "absolute";
-      dropdownEl.style.top = `${bottom + scrollY}px`;
-      dropdownEl.style.left = `${left + scrollX}px`;
-      dropdownEl.style.width = `${width}px`;
-      dropdownEl.style.zIndex = "99999";
-    }
-  });
+  const [reference, setReference] = createSignal<HTMLElement | null>(null);
 
-  onCleanup(() => {
-    if (isServer) return;
-    const mainContent = document.getElementById("main-content");
-    if (mainContent) {
-      mainContent.style.overflow = ""; // Ensure scrolling is enabled
-    }
-  });
+  const Options = () => {
+    const [floating, setFloating] = createSignal<HTMLElement | null>(null);
+
+    const position = useFloating(reference, floating, {
+      placement: 'bottom-start', // By default, this is 'bottom'
+      strategy: 'fixed',
+      whileElementsMounted: autoUpdate,
+    });
+    const handleClickOutside = (event: MouseEvent) => {
+      const path = event.composedPath();
+      if (path.includes(reference()!) || path.includes(floating()!)) {
+        return;
+      }
+      setDropdownVisible(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    onCleanup(() => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    });
+
+    return (
+      <Portal mount={document.body}>
+        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto" style={{
+          position: position.strategy,
+          top: `${position.y ?? 0}px`,
+          left: `${position.x ?? 0}px`,
+        }}>
+          <For
+            each={filteredOptions()}
+            fallback={<div style={optionStyle}>No item found </div>}
+          >
+            {(option, index) => (
+              <div
+                class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
+                  } f:14 m:3 r:5 w:full bg:#e0e0e0:hover`}
+                style={`${optionStyle} ${selected().some(
+                  (item: { value: any }) =>
+                    getOptionValue(item) === getOptionValue(option),
+                )
+                  ? optionSelectedStyle
+                  : ""
+                  }`}
+                onMouseDown={() => handleSelectChange(getOptionValue(option))}
+              >
+                {props.renderLabel
+                  ? props.renderLabel(option)
+                  : getOptionLabel(option)}
+              </div>
+            )}
+          </For>
+        </div>
+      </Portal>
+    )
+  }
+
   return (
-    <div style={containerStyle} class="grid text-align:left">
-      <div ref={containerRef} style={inputContainerStyle}>
+    <div ref={setReference} style={containerStyle} class="grid text-align:left">
+      <div style={inputContainerStyle}>
         <For each={selected()}>
           {(tag) => (
             <div style={tagStyle} class="f:14">
@@ -198,62 +205,25 @@ export function MultiSelectField(props: {
                   return handleRemoveTag(getOptionValue(tag));
                 }}
               >
-                <Icon icon="ic:round-close" height={21} width={21}/>
+                <Icon icon="ic:round-close" height={21} width={21} />
               </span>
             </div>
           )}
         </For>
         <input
-          ref={btnEl}
+          ref={inputRef}
           type="text"
           style={inputStyle()}
           value={inputValue()}
           onInput={(e) => setInputValue(e.target.value)}
-          // onFocus={handleInputFocus}
+          onFocus={handleInputFocus}
           placeholder={props.placeholder ?? "Select options"}
           disabled={props.disable}
         />
       </div>
-      <Dismiss
-        class="dropdown"
-        menuButton={btnEl}
-        open={dropdownVisible}
-        animation={{name: "fade", appendToElement: "menuPopup"}}
-        setOpen={setDropdownVisible}
-        mount="body"
-        cursorKeys
-        ref={dropdownEl}
-      >
-        <div style={dropdownStyle()} class="r:5">
-          <For
-            each={filteredOptions()}
-            fallback={<div style={optionStyle}>No item found </div>}
-          >
-            {(option, index) => (
-              <div
-                class={`bg:#f4f4f4:hover ${
-                  index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
-                } f:14 m:3 r:5`}
-                style={`${optionStyle} ${
-                  selected().some(
-                    (item: { value: any }) =>
-                      getOptionValue(item) === getOptionValue(option),
-                  )
-                    ? optionSelectedStyle
-                    : ""
-                }`}
-                onMouseDown={() => handleSelectChange(getOptionValue(option))}
-              >
-                {props.renderLabel
-                  ? props.renderLabel(option)
-                  : getOptionLabel(option)}
-              </div>
-            )}
-          </For>
-        </div>
-      </Dismiss>
+      <Show when={dropdownVisible()}>
+        <Options />
+      </Show>
     </div>
   );
 }
-
-// TODO: USE https://github.com/lxsmnsyc/solid-floating-ui/blob/main/packages/solid-floating-ui/src/index.ts for options menu

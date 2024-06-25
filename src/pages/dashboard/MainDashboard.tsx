@@ -61,7 +61,7 @@ export function MainDashboard(props: { children?: JSX.Element }) {
   };
 
   return (
-    <div id="main-content" style={mainContentStyle as any}>
+    <div style={mainContentStyle as any}>
       <PageContext.Provider
         value={{
           events: {

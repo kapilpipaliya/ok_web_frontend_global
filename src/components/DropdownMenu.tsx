@@ -1,28 +1,46 @@
 import { JSX, onCleanup, onMount, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
-export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { parentRef: HTMLDivElement }) {
+export function handleResize(dropdownRef: HTMLDivElement, parentRef: HTMLDivElement) {
+    console.log('resizeobj')
+    const menuEntryRect = parentRef.getBoundingClientRect();
+    const menuEntryBottom = menuEntryRect.bottom;
+    const menuEntryLeft = menuEntryRect.left;
+    const menuEntryWidth = menuEntryRect.width;
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+
+    dropdownRef!.style.top = `${menuEntryBottom + scrollY}px`;
+    dropdownRef!.style.left = `${menuEntryLeft + scrollX}px`;
+    dropdownRef!.style.width = `${menuEntryWidth}px`;
+}
+
+export function DropdownMenu(props: JSX.HTMLAttributes<HTMLDivElement> & { parentRef: HTMLDivElement, onClickOutside: () => void }) {
     let dropdownRef: HTMLDivElement;
     let resizeObserver: ResizeObserver;
-    const handleResize = () => {
-        const menuEntryRect = props.parentRef.getBoundingClientRect();
-        const menuEntryBottom = menuEntryRect.bottom;
-        const menuEntryLeft = menuEntryRect.left;
-        const scrollY = window.scrollY;
-        const scrollX = window.scrollX;
 
-        dropdownRef!.style.top = `${menuEntryBottom + scrollY}px`;
-        dropdownRef!.style.left = `${menuEntryLeft + scrollX}px`;
-    };
     onMount(() => {
-        handleResize();
-        resizeObserver = new ResizeObserver(handleResize);
+        handleResize(dropdownRef, props.parentRef);
+        resizeObserver = new ResizeObserver(() => handleResize(dropdownRef, props.parentRef));
         resizeObserver.observe(dropdownRef!);
     });
 
     onCleanup(() => {
         resizeObserver?.disconnect();
     });
+
+    const handleClickOutside = (event: MouseEvent) => {
+        const path = event.composedPath();
+        if (!path.includes(dropdownRef) && !path.includes(props.parentRef)) {
+          props.onClickOutside?.();
+        }
+      };
+    
+      document.addEventListener('mousedown', handleClickOutside);
+    
+      onCleanup(() => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      });
 
     return (
         <Portal mount={document.body}>
