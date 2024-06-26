@@ -1,4 +1,4 @@
-import type {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
+import type {EdgeMap, VertexMap} from "~/lib/graph/graph";
 
 export interface ServerResult {
   result: any, //Vertex[],

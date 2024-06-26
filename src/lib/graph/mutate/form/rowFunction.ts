@@ -171,6 +171,11 @@ export function rowMetaInitialize(
           const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
           if (component) P.component = component;
         }
+        // fix code leter
+        // if (attrColumn.P.meta) {
+        //   const metaData = componentProps(graph, setGraph, attrColumn, joinVertex);
+        //   const metaDataVal = removeUndefinedProperties(metaData, false, 10);
+        // } 
         const AttrRowResult = newRow(
           graph,
           setGraph,

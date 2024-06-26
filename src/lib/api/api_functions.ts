@@ -1,6 +1,5 @@
 import { postAPI } from "~/lib/api/postApi";
 import { API } from "~/lib/api/endpoints";
-import { ProcessStatus } from "~/lib/graph/transaction";
 import { onMutatDataGet } from "~/lib/websocket/onMutatDataGet";
 import type { GraphInterface } from "~/lib/graph/graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
@@ -13,11 +12,8 @@ async function makeAPICall(url: string, payload: object) {
 // Submit generic data to the server
 export async function submitDataCall(data: any, graph: Store<GraphInterface>, setGraph: SetStoreFunction<GraphInterface>, txnId: number) {
   const result = await makeAPICall(API.submitDataUrl, data);
-  if (graph.transactions.has(txnId))
-    graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
-  for (const oneResult of result.result) {
-    onMutatDataGet(undefined as any, graph, setGraph, oneResult[1]);
-  }
+  // @ts-ignore
+  onMutatDataGet(graph, setGraph, result);
   return result;
 }
 
@@ -34,7 +30,7 @@ export async function registerUserCall(formData: any) {
 // Sign in a user with email and password
 export async function signInCall(formData: any) {
   return await makeAPICall(API.loginUrl, {
-    email: formData().email.toLowerCase() ,
+    email: formData().email.toLowerCase(),
     password: formData().password,
   });
 }

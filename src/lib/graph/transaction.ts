@@ -1,8 +1,4 @@
 import { batch } from "solid-js";
-import type {
-  ServerEventsDispatcher,
-  WSEvent,
-} from "~/lib/websocket/ws_events_dispatcher";
 import type { GraphInterface, Id } from "./graph";
 import type { SetStoreFunction, Store } from "solid-js/store";
 
@@ -130,71 +126,53 @@ export function txnHasSteps(txnId: number, graph: Store<GraphInterface>) {
 export function getTransactionData(txnId: number, graph: Store<GraphInterface>) {
   if (!graph.transactions.has(txnId)) return [];
   const existingTxnValue = [...(graph.transactions.get(txnId)?.steps || [])].map(
-    (txnDetail) => ({
-      insert: txnDetail.insert?.(),
-      replace: txnDetail.replace?.(),
-      merge: txnDetail.merge?.(),
-      deleteVertex: txnDetail.deleteVertex?.(),
-      insertEdge: txnDetail.insertEdge?.(),
-      replaceEdge: txnDetail.replaceEdge?.(),
-      replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
-      replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
-      deleteEdge: txnDetail.deleteEdge?.(),
-    }),
+    (txnDetail) => {
+      const txnData = {
+        insert: txnDetail.insert?.(),
+        replace: txnDetail.replace?.(),
+        merge: txnDetail.merge?.(),
+        deleteVertex: txnDetail.deleteVertex?.(),
+        insertEdge: txnDetail.insertEdge?.(),
+        replaceEdge: txnDetail.replaceEdge?.(),
+        replaceEdgeStart: txnDetail.replaceEdgeStart?.(),
+        replaceEdgeEnd: txnDetail.replaceEdgeEnd?.(),
+        deleteEdge: txnDetail.deleteEdge?.(),
+      };
+      return Object.keys(txnData).reduce((acc, key) => {
+        // @ts-ignore
+        if (txnData[key] !== undefined) {
+          // @ts-ignore
+          acc[key] = txnData[key];
+        }
+        return acc;
+      }, {});
+    },
   );
   return existingTxnValue;
 }
 export const vertexOldIdToNewIdMap = new Map<Id, Id>();
 export const edgeOldIdToNewIdMap = new Map<Id, Id>();
 
-export function commitTransaction(Ws: ServerEventsDispatcher, graph: Store<GraphInterface>) {
-  let firstReadyTxn = 0;
-  // If any pending transaction exist don't send it. // we will clear the previous txn on txn mutation result receive.
-  for (const [txnId, value] of graph.transactions.entries()) {
-    if (value.status === ProcessStatus.Ready) {
-      if (!firstReadyTxn) firstReadyTxn = txnId;
-      break;
-    }
-    // if (
-    //   value.status === ProcessStatus.AckReceived ||
-    //   value.status === ProcessStatus.Sent
-    // ) {
-    //   return;
-    // }
-  }
-  if (firstReadyTxn) {
-    const existingTxnValue = getTransactionData(firstReadyTxn, graph);
-    graph.transactions.get(firstReadyTxn)!.status = ProcessStatus.Sent;
+export function commitTransaction(txnId: number, graph: Store<GraphInterface>) {
+    const existingTxnValue = getTransactionData(txnId, graph);
     if (existingTxnValue.length) {
-      const data = [
-        [
-          firstReadyTxn,
-          [...vertexOldIdToNewIdMap],
-          [...edgeOldIdToNewIdMap],
-          existingTxnValue,
-        ],
-      ];
-      const event = ["post", "mutate", 0] as WSEvent;
-      // Ws.trigger([
-      //   [
-      //     event,
-      //     data,
-      //   ],
-      // ]);
-      return { event, data };
+      const data =  {
+          txnId: txnId,
+          vertexIdMap: [...vertexOldIdToNewIdMap],
+          edgeIdMap: [...edgeOldIdToNewIdMap],
+          transactions: existingTxnValue,
+        }
+      return data;
     }
-  }
 }
 // Bug: if commitTxn is called many times it is sending event many times.
 // TODO: currently we can only run this function once.
 // we need to set seperate txnId once commited. Fix this.
-export function commitTxn(txnId: number, Ws: ServerEventsDispatcher, graph: Store<GraphInterface>) {
+export function commitTxn(txnId: number, graph: Store<GraphInterface>) {
   console.log("In commitTxn");
-
   if (graph.transactions.has(txnId)) {
     console.log("In transactions commitTxn");
-    graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
-    return commitTransaction(Ws, graph);
+    return commitTransaction(txnId, graph);
   }
 }
 // TODO: future plan: once committed current system should be able to revert and sync to server too.

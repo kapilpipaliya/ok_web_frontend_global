@@ -37,7 +37,6 @@ import { Icon } from "@iconify-icon/solid";
 import {
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
-import { addMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 import { useToast } from "~/components/Toast";
 import { FormContext, } from "~/lib/contexts";
@@ -144,9 +143,6 @@ export function TableInputField(
         {(column) => {
           const metaVertex = createMemo(() => getMetaVertex(column.id));
           const component = createMemo(() => getComponent(column.id));
-
-          // if mergeProps not keep reactivity use memo
-          createEffect(() => addMeta(graph, setGraph, metaVertex(), p.joinVertex));
 
           const DefaultValue = () => (
             <Show when={metaVertex().P.defaultValue}>

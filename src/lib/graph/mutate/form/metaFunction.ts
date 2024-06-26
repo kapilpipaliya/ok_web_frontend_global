@@ -1,45 +1,13 @@
-import { onCleanup, untrack, useContext } from "solid-js";
+import { onCleanup, } from "solid-js";
 import type { Store, SetStoreFunction } from "solid-js/store";
-import { NewTxnIdContext } from "~/lib/contexts";
-import { removeUndefinedProperties } from "~/lib/removeUndefinedProperties";
-import { componentProps } from "../../get/sync/graph_functions";
 import type { GraphInterface, Vertex } from "../../graph";
-import { addNewVertex, mergeVertexProperties, newVertex } from "../vertex";
+import { addNewVertex, newVertex } from "../vertex";
 import { klona } from "klona/json";
 import { useToast } from "~/components/Toast";
 import type { FieldAttribute, IFormMetaData } from "~/lib/FormMetadataType";
 import { newRow } from "./rowFunction";
 import { getNewTxnId, getNewGraphId, revertTransaction } from "../../transaction";
 
-// add meta from vertex value:
-export function addMeta(
-  graph: Store<GraphInterface>,
-  setGraph: SetStoreFunction<GraphInterface>,
-  metaVertex: Vertex,
-  data: Vertex
-) {
-  if (metaVertex.P.meta) {
-    const metaData = componentProps(graph, setGraph, metaVertex, data);
-    const metaDataVal = removeUndefinedProperties(metaData, false, 10);
-    untrack(() => {
-      const newMetaData = Object.assign(
-        {},
-        // when component is rendered dynamically graph.vertexes[metaVertex.P.templateId] value is undefined
-        graph.vertexes[metaVertex.P.templateId]?.P?.props || {},
-        metaDataVal
-      );
-      mergeVertexProperties(
-        useContext(NewTxnIdContext),
-        metaVertex.id,
-        graph,
-        setGraph,
-        {
-          props: newMetaData,
-        }
-      );
-    });
-  }
-}
 export function addMetaVertexes(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,

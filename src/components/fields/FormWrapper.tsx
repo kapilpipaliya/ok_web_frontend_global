@@ -69,7 +69,7 @@ export function FormWrapper(
       if (isAnyFieldInvalid(graph, setGraph, props.meta, formData.formData)) {
         return;
       }
-      const data = commitTxn(txnId, Ws, graph);
+      const data = commitTxn(txnId, graph);
       await showLoadingToast({
         promise: submitDataCall(data, graph, setGraph, txnId),
         loadMessage: "Submitting Data...",

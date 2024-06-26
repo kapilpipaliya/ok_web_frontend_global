@@ -18,7 +18,7 @@ export async function deleteRowConfirm(id: Id, graph: Store<GraphInterface>, set
     return;
   }
   graph.transactions.get(txnId)!.status = ProcessStatus.Ready;
-  const data = commitTransaction(Ws, graph);
+  const data = commitTransaction(txnId, graph);
   if (!data) {
     return;
   }

@@ -4,7 +4,7 @@ import { createStore } from "solid-js/store";
 
 export const LoadingContext = createContext(createSignal(false));
 export const IsPreviewContext = createContext(createSignal(false));
-export const NewTxnIdContext = createContext(1);
+
 
 export const HoverIdContext = createContext(createSignal<Id | number>(-1));
 

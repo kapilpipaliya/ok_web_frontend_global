@@ -54,7 +54,7 @@ export function HeaderDragAndDrop(props: {
     if (isValid) {
       // !!!TODO!!! Handle Error Received From server when commit
       if (!isRealTime) {
-        data = commitTxn(txnId, Ws, graph);
+        data = commitTxn(txnId, graph);
         if (!data) {
           showWarningToast("Internal Server Error");
           setTimeout(() => navigate(-1), 0);

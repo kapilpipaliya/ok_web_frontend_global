@@ -18,7 +18,7 @@ Test:--------------------------
 6. [Obvious] Fix Inline Editing Modal not close in list page.
 7. [Obvious] Make Permissions working in DynamicForm component.
 
-http://localhost:3001/admin/Comp/28 cant delete name, display proper error on ui.
+http://localhost:3001/admin/Comp/28 cant delete name
 http://localhost:3001/admin/Comp/36
 http://localhost:3001/admin/Comp/1494
 http://localhost:3001/admin/Comp/1544
