@@ -54,7 +54,7 @@ export const genericComponents2 = [
 ];
 
 // Dynamic Component used in the form
-export function DynamicComponent(props: {
+export function DynamicComponent(props: Readonly<{
   // component is required, cant refactor it to remove it, because parent component needs it too.
   component: string;
   meta: Vertex;
@@ -66,7 +66,7 @@ export function DynamicComponent(props: {
   isRealTime?: boolean;
   txnId?: number;
   applyDefaults?: boolean;
-}) {
+}>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
 

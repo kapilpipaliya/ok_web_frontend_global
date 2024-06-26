@@ -1,6 +1,7 @@
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
-import type { NestedExpression } from "./NestedExpression";
+import type {NestedExpression} from "./NestedExpression";
+import {ServerResult} from "~/cypher/get/ServerResult";
 
 export async function getDataMGCall(
   expression: NestedExpression,
@@ -9,7 +10,7 @@ export async function getDataMGCall(
     relationships: {} as { [key: string]: any },
     vertexes: undefined as any,
   },
-) {
+): Promise<ServerResult> {
   "use server";
   const mainResult = await evalAsync(jsep(expression.expression), context);
 

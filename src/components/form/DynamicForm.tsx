@@ -7,57 +7,35 @@ import {
   onCleanup,
   onMount,
   Show,
-  splitProps,
   Switch,
   untrack,
   useContext,
 } from "solid-js";
-import { createStore, type SetStoreFunction, type Store } from "solid-js/store";
-import { groupBy, isPageDesignerPath } from "~/lib/utils";
-import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
-import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
-import { createForm } from "~/lib/graph/mutate/form/createForm";
-import {
-  GraphContext,
-  type GraphInterface,
-  type Id,
-  IdAttr,
-  type Vertex,
-} from "~/lib/graph/graph";
-import {
-  ProcessStatus,
-  commitTxn,
-  getNewTxnId,
-  revertTransaction,
-  txnHasSteps,
-} from "~/lib/graph/transaction";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import {
-  type BeforeLeaveEventArgs,
-  useBeforeLeave,
-  useLocation,
-  useNavigate,
-} from "@solidjs/router";
-import { TableTabs } from "~/components/TableTabs";
+import {createStore, type SetStoreFunction, type Store} from "solid-js/store";
+import {groupBy, isPageDesignerPath} from "~/lib/utils";
+import {getChildVertexes} from "~/lib/graph/get/sync/traverse";
+import {createMeta} from "~/lib/graph/mutate/form/metaFunction";
+import {createForm} from "~/lib/graph/mutate/form/createForm";
+import {GraphContext, type GraphInterface, type Id, type Vertex,} from "~/lib/graph/graph";
+import {commitTxn, getNewTxnId, ProcessStatus, revertTransaction, txnHasSteps,} from "~/lib/graph/transaction";
+import {WsContext} from "~/lib/websocket/ws_events_dispatcher";
+import {type BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate,} from "@solidjs/router";
+import {TableTabs} from "~/components/TableTabs";
 
-import { submitDataCall } from "~/lib/api/api_functions";
-import { useToast } from "~/components/Toast";
-import { DeleteDialog } from "~/components/DeleteDialog";
-import { setGraphData } from "~/lib/websocket/setGraphData";
-import { FormContext, FormSettingsContext, PageConfigContext } from "~/lib/contexts";
-import { FormGroup } from "./FormGroup";
-import { LoaderNew } from "~/components/LoaderSimple";
-import { Icon } from "@iconify-icon/solid";
-import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
-import {
-  RepeaterVertexContext
-} from "~/components/page_attr_render/Context";
-import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
-import { FormMetaData } from "~/lib/formMetaData";
-import { AdminAttrKeys } from "~/lib/constants";
-import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
-import { getFormData } from "./getFormData";
+import {submitDataCall} from "~/lib/api/api_functions";
+import {useToast} from "~/components/Toast";
+import {DeleteDialog} from "~/components/DeleteDialog";
+import {setGraphData} from "~/lib/websocket/setGraphData";
+import {FormContext, FormSettingsContext, PageConfigContext} from "~/lib/contexts";
+import {FormGroup} from "./FormGroup";
+import {LoaderNew} from "~/components/LoaderSimple";
+import {Icon} from "@iconify-icon/solid";
+import {RepeaterVertexContext} from "~/components/page_attr_render/Context";
+import {checkIfNameExistsMGCall} from "~/cypher/get/checkIfNameExists";
+import {FormMetaData} from "~/lib/formMetaData";
+import {FormMetaDataAuth} from "~/lib/formMetaDataAuth";
+import {getFormData} from "./getFormData";
+import {addFormComponentAttr} from "~/components/form/addFormComponentAttr";
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -127,26 +105,10 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
       dataVertex = createResult.vertex!;
 
-      // if new form then add a form component in the layout
       if (dataVertex?.L[0] === "Form") {
-        // add form component
-        const formCompVertex = findVertexByLabelAndUniqueId(
-          graph,
-          "Comp",
-          IdAttr,
-          "Form",
-        );
-        const layoutRowId = componentDrop(
-          dataVertex,
-          txnId,
-          formCompVertex!,
-          dataVertex!,
-          graph,
-          setGraph,
-        );
-        setFormSettings('activeStepId', layoutRowId);
-
+        const layoutRowId = addFormComponentAttr(graph, dataVertex, txnId, setGraph);
         if (layoutRowId === -1) return;
+        setFormSettings('activeStepId', layoutRowId);
       }
     }
     const form =
@@ -231,7 +193,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           id() as Id,
         );
 
-        if (res.error === true) {
+        if (res.error) {
           showErrorToast(res.message);
           return;
         }
@@ -331,15 +293,14 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       const data = await getFormData(props.formId, id()!);
       if (data.error) {
         setError(data.error);
-      } else if ((data as { graph?: GraphInterface }).graph) {
+      } else if (data.graph) {
         setGraphData(
           graph,
           setGraph,
-          (data as { graph: GraphInterface }).graph,
+          data.graph,
         );
       }
     }
-    setIsLoading(false);
     initFormState();
     setIsLoading(false);
   });

@@ -16,11 +16,11 @@ interface FormGroupProps {
 }
 
 // group of the fields
-export function FormGroup(props: FormGroupProps) {
+export function FormGroup(props: Readonly<FormGroupProps>) {
   return (
     <For each={props.metaAttributes}>
       {(metaVertex) => {
-        const id = `${`${props.vertex.id + metaVertex.P[IdAttr]}Label`}`;
+        const id = `${props.vertex.id}${metaVertex.P[IdAttr]}Label`;
         const component = createMemo(() =>
           getComponentForCollRow(
             metaVertex,
@@ -69,15 +69,11 @@ export function FormGroup(props: FormGroupProps) {
               <Content />
             </Match>
 
-            <Match when={component() === "CollectionOption"}>
-              <Content />
-            </Match>
-
             <Match when={true}>
               <div class="align-content:center">
                 <div class="grid-cols:2 " style={{ "padding-top": "5px" }}>
                   <div id={id}>
-                    {props.labelPrefix as string} <Label />
+                    {props.labelPrefix} <Label />
                   </div>
                 </div>
                 <div>
