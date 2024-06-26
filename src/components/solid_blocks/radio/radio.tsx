@@ -14,7 +14,6 @@ import {
 } from "solid-js";
 import { runEvent } from "../tools";
 
-import "../base.css";
 import "./radio.css";
 
 export const radioContext = createContext<

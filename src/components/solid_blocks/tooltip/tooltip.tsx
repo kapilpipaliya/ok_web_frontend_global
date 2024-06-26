@@ -7,7 +7,7 @@ import {
   createSignal,
   splitProps,
 } from "solid-js";
-import "../base.css";
+
 import "./tooltip.css";
 
 export type TooltipTrigger =

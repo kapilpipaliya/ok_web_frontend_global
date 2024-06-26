@@ -14,7 +14,6 @@ import {
 
 import { getElements } from "../tools";
 
-import "../base.css";
 import "./menu.css";
 import { isServer } from "solid-js/web";
 

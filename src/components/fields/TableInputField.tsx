@@ -13,7 +13,7 @@ import {
   Switch,
   useContext,
 } from "solid-js";
-import "~/components/fields/table.css";
+
 import { toTitle } from "case-switcher-js";
 import {
   mergeVertexProperties,
@@ -40,7 +40,7 @@ import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Icon } from "@iconify-icon/solid";
 import { GenericField } from "~/components/fields/GenericField";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
-import "~/css/base.css";
+
 import {
   componentProps,
   getCollAttrs,
@@ -236,14 +236,14 @@ export function TableInputField(
           return (
             <Switch>
               <Match when={metaVertex().P.hidden}>
-                <td>
+                <td class="align-content:center">
                   <div class={`flex ai:center jc:center ${getComponentClass(component())}`}>
                     <DefaultValue />
                   </div>
                 </td>
               </Match>
               <Match when={component() === "Table2"}>
-                <td>
+                <td class="align-content:center">
                   <Show when={!disabled()}>
                     <div class={`flex ai:center jc:center ${getComponentClass(component())}`}>
                       <DefaultValue />
@@ -253,7 +253,7 @@ export function TableInputField(
                 </td>
               </Match>
               <Match when={true}>
-                <td class={`padding:1px ${getComponentClass(component())}`}>
+                <td class={`padding:1px align-content:center ${getComponentClass(component())}`}>
                   <div class="align-items:center">
                     <DefaultValue />
                     <Content />
@@ -274,6 +274,7 @@ export function TableInputField(
           onDragOver={(event) => event.preventDefault()}
           onDragEnter={() => setDragToIndex(p.index)}
           onDrop={handleDrop}
+          class="border-radius:10px border-bottom:1px|solid|#dddddd"
           style={{
             "text-align": "center",
             width: "50px",
@@ -304,7 +305,7 @@ export function TableInputField(
         {/* Limitation: Cant Disable Expanded table if it has 0 rows */}
         {/*{getSelectionOptions([p.joinVertex], expandVertex.P.collection).vertexes?.length}*/}
         <Show when={expandVertex() && expanded()}>
-          <tr>
+          <tr class="border-radius:10px border-bottom:1px|solid|#dddddd">
             <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
                 component={"Table2"}
@@ -362,11 +363,11 @@ export function TableInputField(
         </Show>
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <div class={"overflow:auto r:10 m:2"} style={{ 'border': sortedVertexes().length ? '1px solid #37c' : '', "scrollbar-width": "thin" }}>
-          <table class="styled-table b:none" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
+          <table class="border-collapse:collapse font-size:0.9em b:none box-shadow:0|0|20px|rgba(0,0,0,0.15) border-radius:0.4rem" style={{ width: props.isTableInside ? '-webkit-fill-available' : '' }}>
             <Show when={sortedVertexes().length}>
               <thead>
-                <tr style={{ width: "max-content" }}>
-                  <td class={"font-weight:medium p:0px|10px"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
+                <tr style={{ width: "max-content" }} class="background-color:#37c   height:35px color:#ffffff text-align:center ">
+                  <td class={"font-weight:medium p:0px|10px color:#ffffff text-align:left align-items:center align-content:center"} style={{ "text-align-last": "center" }}>&nbsp;Actions</td>
                   <For each={tableColumnsTemplate()}>
                     {(attribute) => (
                       <Switch>

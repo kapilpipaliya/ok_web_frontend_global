@@ -1,6 +1,5 @@
 import { createMemo, type JSX, splitProps } from "solid-js";
 
-import "../base.css";
 import "./message.css";
 
 export type MessageProps = {

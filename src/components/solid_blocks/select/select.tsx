@@ -2,7 +2,6 @@ import { type JSX, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
 
-import "../base.css";
 import "./select.css";
 
 export type SelectProps = JSX.SelectHTMLAttributes<HTMLSelectElement> & {

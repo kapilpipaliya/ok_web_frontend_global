@@ -10,7 +10,6 @@ import {
   useContext,
 } from "solid-js";
 
-import "../base.css";
 import "./tabs.css";
 
 export type TabsProps = Omit<JSX.HTMLAttributes<HTMLElement>, "onchange"> & {

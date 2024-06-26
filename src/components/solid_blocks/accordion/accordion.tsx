@@ -11,7 +11,6 @@ import {
 } from "solid-js";
 import { runEvent } from "../tools";
 
-import "../base.css";
 import "./accordion.css";
 
 declare module "solid-js" {

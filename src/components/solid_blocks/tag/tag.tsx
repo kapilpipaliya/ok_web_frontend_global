@@ -2,7 +2,6 @@ import { type JSX, mergeProps, Show, splitProps } from "solid-js";
 
 import { getRandom } from "../tools";
 
-import "../base.css";
 import "./tag.css";
 
 export type TagProps = (JSX.HTMLAttributes<HTMLSpanElement> &

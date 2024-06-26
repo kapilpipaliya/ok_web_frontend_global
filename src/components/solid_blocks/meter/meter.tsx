@@ -1,6 +1,5 @@
 import type { JSX } from "solid-js";
 
-import "../base.css";
 import "./meter.css";
 
 export type MeterProps = JSX.HTMLAttributes<HTMLDivElement> & {

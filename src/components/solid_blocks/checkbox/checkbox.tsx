@@ -2,7 +2,6 @@ import { type JSX, Show, splitProps } from "solid-js";
 
 import { runEvent } from "../tools";
 
-import "../base.css";
 import "./checkbox.css";
 
 export type CheckboxProps = JSX.HTMLAttributes<HTMLInputElement> & {

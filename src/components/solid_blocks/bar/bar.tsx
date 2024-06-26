@@ -1,7 +1,6 @@
 import { type JSX, mergeProps, splitProps } from "solid-js";
 import { Portal } from "solid-js/web";
 
-import "../base.css";
 import "./bar.css";
 
 export type BarProps = JSX.HTMLAttributes<HTMLDivElement> & {

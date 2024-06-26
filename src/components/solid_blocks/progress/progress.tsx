@@ -1,6 +1,5 @@
 import type { JSX } from "solid-js";
 
-import "../base.css";
 import "./progress.css";
 
 export type ProgressProps = JSX.ProgressHTMLAttributes<HTMLProgressElement>;

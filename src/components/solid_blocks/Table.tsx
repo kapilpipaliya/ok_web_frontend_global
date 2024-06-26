@@ -1,6 +1,5 @@
 import { createContext, type JSX, useContext } from "solid-js";
 
-import "./base.css";
 import "./radio/radio.css";
 
 export const tableContext = createContext<[] | []>([]);
