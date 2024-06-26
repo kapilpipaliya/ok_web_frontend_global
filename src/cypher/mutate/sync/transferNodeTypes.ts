@@ -14,7 +14,7 @@ export async function transferNodeTypes(
       nodeType,
     );
     if (form.error) return "Error";
-    const {incoming, outgoing}: { incoming: any; outgoing: any } =
+    const {incoming, outgoing} =
       getEdgesFromRowsAttr(form.form!.attributes);
 
     const result = await processNodeSync(sessionSource, sessionTarget, {

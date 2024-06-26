@@ -1,14 +1,9 @@
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
-
-export interface Expression {
-  expression: string;
-  incoming?: Expression[];
-  outgoing?: Expression[];
-}
+import type { NestedExpression } from "./NestedExpression";
 
 export async function getDataMGCall(
-  expression: Expression,
+  expression: NestedExpression,
   context = {
     nodes: {} as { [key: string]: any },
     relationships: {} as { [key: string]: any },

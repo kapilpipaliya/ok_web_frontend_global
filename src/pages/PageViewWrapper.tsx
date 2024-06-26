@@ -29,7 +29,7 @@ export function PageViewWrapper(props: {
     async function loadFormDesignerMetaData() {
       const form = FormMetaData[props.pageVertexLabel!] || FormMetaData.Form;
   
-      const { incoming, outgoing }: { incoming: any; outgoing: any } =
+      const { incoming, outgoing } =
         getEdgesFromRowsAttr(form.attributes);
   
       const data = await getDataMGCall({
@@ -46,7 +46,7 @@ export function PageViewWrapper(props: {
         return { error: data.error };
       } 
       if(props.formId) {
-        delete data.graph.vertexes[props.formId!]
+        delete data.graph.vertexes[props.formId]
       }
       setGraphData(
         graph,

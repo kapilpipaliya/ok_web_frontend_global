@@ -57,16 +57,19 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       };
     };
     form?: IFormMetaData;
-  } | undefined;
-  const [tableData, setTableData] = createSignal<TableData>(undefined);
+  };
+  const [error, setError] = createSignal<string | null>(null);
 
   // createdResource caled Two times, making API Calles two times, so used onMount
   const [isLoading, setIsLoading] = createSignal(false);
   onMount(async () => {
     setIsLoading(true);
     const data = await getTableData(props.tableId);
-    setTableData(data);
-    onTableDataGet(data);
+    if (data.error) {
+      setError(data.error);
+    } else {
+      onTableDataGet(data);
+    }
     setIsLoading(false);
   })
 
@@ -92,9 +95,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
   };
 
   function onTableDataGet(data: TableData) {
-    if (data?.error) {
-      showErrorToast(data.error);
-    } else if (data) {
       const vertexCount = Object.keys(data.graph!.vertexes).length;
       if (vertexCount < 10 || vertexCount === 0) {
         setIsShowLoadMore(false);
@@ -113,7 +113,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setTableStore({ data: nodes, tableColumns });
       setSearch("");
       setFilteredData(nodes);
-    }
+ 
   }
 
   const AddNew = () => <button
@@ -152,7 +152,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       <Match when={isLoading()}>
         <LoaderNew loaderHeight="55vh" />
       </Match>
-      <Match when={tableData()?.error}>Error {tableData()?.error}</Match>
+      <Match when={error()}>Error {error()}</Match>
       <Match when={tableStore.data?.length > 0}>
         <div class="flex jc:space-between ai:center p:5">
           <AddNew />

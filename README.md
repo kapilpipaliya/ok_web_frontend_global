@@ -14,3 +14,6 @@ expression-eval => jsep (for +,-) => jsonata(filter, projection)
 To find all files in your codebase whose line count is greater than 400, you can use the following command:
 find . -type f -exec sh -c 'wc -l "$0" | awk "{if (\$1 > 400) print \$0}"' {} \;
 
+
+Note: When the page is loaded server side, the client side will not run this again,
+so set state inside it will not set when page is reloaded.

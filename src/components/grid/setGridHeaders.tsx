@@ -2,9 +2,9 @@ import {
   Switch,
   Match
 } from "solid-js";
-import { type GraphInterface, type Id } from "~/lib/graph/graph";
+import type { GraphInterface, Id } from "~/lib/graph/graph";
 import { Icon } from "@iconify-icon/solid";
-import { type SetStoreFunction, type Store } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { capitalizeFirstLetter } from "~/lib/utils";
 import type { ColumnDef } from "@tanstack/solid-table";
 import type { IFormMetaData } from "~/lib/FormMetadataType";

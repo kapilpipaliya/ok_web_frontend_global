@@ -1,13 +1,14 @@
-import type { Expression } from "jsep";
+
+import type { NestedExpression } from "~/cypher/get/NestedExpression";
 import { getInEdge, getToEdge } from "~/lib/graph/get/sync/traverse";
 import type { Vertex } from "~/lib/graph/graph";
 
 export function getEdgesFromRowsAttr(attrs: any): {
- incoming: Expression[];
- outgoing: Expression[];
+ incoming: NestedExpression[];
+ outgoing: NestedExpression[];
 } {
- const outgoing = [] as Expression[];
- const incoming = [] as Expression[];
+ const outgoing = [] as NestedExpression[];
+ const incoming = [] as NestedExpression[];
 
  for (const attribute of attrs) {
   if (
@@ -20,7 +21,6 @@ export function getEdgesFromRowsAttr(attrs: any): {
       { P: attribute } as Vertex,
       { L: ["$0"] } as Vertex
      )}`,
-     type: ""
     }); // `<-${capitalizedName}$0`
    } else {
     outgoing.push({
@@ -28,19 +28,17 @@ export function getEdgesFromRowsAttr(attrs: any): {
       { P: attribute } as Vertex,
       { L: ["$0"] } as Vertex
      )}`,
-     type: ""
     }); // `->$0${capitalizedName}`
    }
   } else if (
    attribute.component === "Table" ||
    attribute.component === "Table2"
   ) {
-   const expression: Expression = {
+   const expression: NestedExpression = {
     expression: `->${getToEdge(
      { P: attribute } as Vertex,
      { L: ["$0"] } as Vertex
     )}`,
-    type: ""
    };
 
    if (attribute.attributes) {

@@ -18,7 +18,7 @@ export async function loadPageData(
     showErrorToast(form.error);
     return;
   }
-  const { incoming, outgoing }: { incoming: any; outgoing: any } =
+  const { incoming, outgoing } =
     getEdgesFromRowsAttr(form.form.attributes);
   const result = await getDataMGCall({
     expression: `id:'${fromVertex.id}'`,

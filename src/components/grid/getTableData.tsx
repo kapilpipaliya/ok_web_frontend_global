@@ -6,26 +6,36 @@ import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { getFormMetaData } from "~/lib/drag_drop/getChildrenAttrs";
+import type { IFormMetaData } from "~/lib/FormMetadataType";
+
+async function getFormAttr(tableId: string): Promise<{ error: string, form?: IFormMetaData }> {
+  let form = FormMetaData[tableId] || FormMetaDataAuth[tableId];
+  if (!form) {
+    form = FormMetaData.Form;
+    const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+    const data = await getDataMGCall({
+      expression: `g:'Form[${tableId}]'`,
+      incoming,
+      outgoing,
+    });
+    if (data.result.length > 0) {
+      form = getFormMetaData(data.graph as Store<GraphInterface>, () => { }, data.result[0]);
+    }
+    if (!form) {
+      return { error: "Form not found" };
+    }
+  }
+  return { error: "", form};
+}
 
 export async function getTableData(tableId: string, skip?: number, limit?: number) {
   try {
-    let form = FormMetaData[tableId] || FormMetaDataAuth[tableId];
-    if (!form) {
-      form = FormMetaData.Form;
-      const { incoming, outgoing }: { incoming: any; outgoing: any; } = getEdgesFromRowsAttr(form.attributes);
-      const data = await getDataMGCall({
-        expression: `g:'Form[${tableId}]'`,
-        incoming,
-        outgoing,
-      });
-      if (data.result.length > 0) {
-        form = getFormMetaData(data.graph as Store<GraphInterface>, () => { }, data.result[0]);
-      }
-      if (!form) {
-        return { error: "Form not found" };
-      }
+    const formAttrResult = await getFormAttr(tableId);
+    if (formAttrResult.error) {
+      return { error: formAttrResult.error };
     }
-    const { incoming, outgoing }: { incoming: any; outgoing: any; } = getEdgesFromRowsAttr(form.attributes);
+
+    const { incoming, outgoing } = getEdgesFromRowsAttr(formAttrResult.form!.attributes);
     const expression = paginationExpression({
       coll: tableId,
       skip: skip,
@@ -38,7 +48,7 @@ export async function getTableData(tableId: string, skip?: number, limit?: numbe
       incoming,
       outgoing,
     });
-    return { ...result, form: JSON.parse(JSON.stringify(form)) };
+    return { ...result, form: JSON.parse(JSON.stringify(formAttrResult.form)) };
   } catch (e: any) {
     console.error("error", e);
     return { error: `Error When Loading Form: ${e.message}` };

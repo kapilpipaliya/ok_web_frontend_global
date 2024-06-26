@@ -1,5 +1,5 @@
 import type {Session} from "neo4j-driver";
-import type {Expression} from "~/cypher/get/getDataMGCall";
+import type { NestedExpression } from "~/cypher/get/NestedExpression";
 import type {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
@@ -8,7 +8,7 @@ import {addNodeEdges} from "~/cypher/mutate/sync/addNodeEdges";
 export async function processNodeSync(
   sessionSource: Session,
   sessionTarget: Session,
-  expression: Expression,
+  expression: NestedExpression,
   vertexes: Vertex[],
   inward: boolean,
   createdVertex?: Vertex,

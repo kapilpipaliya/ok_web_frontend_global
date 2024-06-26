@@ -3,9 +3,7 @@ import type { Vertex } from "~/lib/graph/graph";
 export interface ComponentProps {
   meta: Vertex;
   data?: Vertex;
-
   disabled?: boolean;
-
   setValue?(data: any): void;
 }
 
