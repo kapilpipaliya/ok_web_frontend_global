@@ -2,7 +2,7 @@
 import Docker from 'dockerode';
 
 export async function startDockerContainer(containerId: string): Promise<{ error: boolean; message: string }> {
-  const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+  const docker = new Docker();
 
   try {
     await docker.getContainer(containerId).start();

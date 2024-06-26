@@ -25,14 +25,14 @@ export async function createDockerContainer(
     const formattedPortBindings: any = {};
     for (const [externalPort, internalPort] of Object.entries(portBindings)) {
       formattedPortBindings[`${internalPort}/tcp`] = [
-        { HostIp: "localhost", HostPort: externalPort },
+        { HostIp: "0.0.0.0", HostPort: externalPort },
       ];
       ExposedPorts[`${internalPort}/tcp`] = {};
     }
     hostConfig.PortBindings = formattedPortBindings;
   }
 
-  const docker = new Docker({ socketPath: '/var/run/docker.sock' });
+  const docker = new Docker();
 
   try {
     const container = await docker.createContainer({
