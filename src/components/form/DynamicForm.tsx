@@ -92,7 +92,6 @@ type FormData = {
 };
 
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
-
   const [p, customProps] = splitProps(props, ["formId", "id"]);
   const id = createMemo(() => (p.id === "new" ? undefined : p.id));
 
@@ -117,11 +116,17 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     FormMetaData[props.formId] ||
     (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
 
+  const [error, setError] = createSignal<string | null>(null);
+  const [isLoading, setIsLoading] = createSignal(false);
+  const [divRef, setDivRef] = createSignal<HTMLDivElement>();
+  const [popup, setPopup] = createSignal(false);
+  const [discradPopup, setDiscradPopup] = createSignal(false);
+  let submit: boolean;
+  let onConfirmExit: () => void;
+
   const fetchData = async (id: Id) => {
     try {
-      const { incoming, outgoing } =
-        getEdgesFromRowsAttr(form.attributes);
-
+      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
       const result = await getDataMGCall({
         expression: `id:'${id}'`,
         incoming,
@@ -137,34 +142,9 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       return { graph: result.graph };
     } catch (e: any) {
       console.error("error", e);
-      // when error happen server function doesn't return error message
       return { error: `Error When Loading Form: ${e.message}` };
     }
   };
-
-  const [error, setError] = createSignal<string | null>(null);
-
-  // createdResource caled Two times, making API Calles two times, so used onMount
-  const [isLoading, setIsLoading] = createSignal(false);
-
-  onMount(async () => {
-    setIsLoading(true);
-    if (id()) {
-      const data = await fetchData(id()!);
-      if (data.error) {
-        setError(data.error);
-      } else if ((data as { graph?: GraphInterface }).graph) {
-        setGraphData(
-          graph,
-          setGraph,
-          (data as { graph: GraphInterface }).graph,
-        );
-      }
-    }
-    setIsLoading(false);
-    onFormDataGet();
-    setIsLoading(false);
-  });
 
   const onFormDataGet = () => {
     let dataVertex: Vertex;
@@ -210,6 +190,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       setError("Meta Vertex Error");
       return;
     }
+
     const groupByTabsAndGroupFn = () => {
       const mainAttributes = getChildVertexes(
         graph,
@@ -238,6 +219,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       }
       return groupByTabsAndGroup;
     };
+
     const groupByTabsAndGroup = groupByTabsAndGroupFn();
     const tabs = Object.keys(groupByTabsAndGroup).filter(
       (tab) => tab !== "main",
@@ -254,28 +236,8 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
     setPageConfig?.("formData", formData);
   }
-  // focus first input
-  const [divRef, setDivRef] = createSignal<HTMLDivElement>();
-  onMount(() => {
-    // @ts-ignore
-    if (props.doMount === null || props.doMount !== false)
-      divRef()?.querySelector?.("input")?.focus();
-  });
 
-  onCleanup(() => {
-    // @ts-ignore
-    setPageConfig?.("formData", undefined);
-  });
-
-  onCleanup(() => {
-    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
-      revertTransaction(rowMetaTxnId, graph);
-  });
-
-  let submit: boolean;
   const onSubmit = async () => {
-    // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
-    // const result = validationGroup.validate();
     const isValid = true;
     const isRealTime = false;
     let data;
@@ -329,35 +291,67 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
   const onCancel = () => {
     revertTransaction(txnId, graph);
-    if (props.isDialogContext) {
-    } else {
+    if (!props.isDialogContext) {
       setTimeout(() => {
         navigate(-1);
       }, 0);
     }
   };
 
-  const [popup, setPopup] = createSignal(false);
-  const [discradPopup, setDiscradPopup] = createSignal(false);
-
-
-  let onConfirmExit: () => void;
-  // https://github.com/solidjs/solid-router
-  useBeforeLeave((e: BeforeLeaveEventArgs) => {
-    if (submit || !txnHasSteps(formData.txnId, graph)) {
-      return;
-    }
-    // if (form.isDirty && !e.defaultPrevented) {
-    // preventDefault to block immediately and prompt user async
-    e.preventDefault();
-    setTimeout(() => {
-      setDiscradPopup(true);
-    }, 100);
-    onConfirmExit = () => {
-      // user wants to proceed anyway so retry with force=true
-      e.retry(true);
-    };
-  });
+  const ImportExportButtons = () => (
+    <div
+      style={{
+        "justify-content": "end",
+        "margin-bottom": "10px",
+        display: "flex",
+      }}
+    >
+      <GenericField
+        meta={
+          {
+            P: {
+              component: "Button",
+              children: "Import",
+              variant: "outlined",
+              style: { display: "flex" },
+              leading: () => (
+                <Icon
+                  icon={"lets-icons:import"}
+                  height={22}
+                  width={22}
+                />
+              ),
+              onClick: () => {
+                setPopup(true);
+              },
+            },
+          } as any
+        }
+      />
+      <GenericField
+        meta={
+          {
+            P: {
+              component: "Button",
+              children: "Export",
+              onClick: () => {
+                setPopup(true);
+              },
+              style: { display: "flex" },
+              leading: () => (
+                <Icon
+                  icon={"lets-icons:export"}
+                  height={22}
+                  width={22}
+                />
+              ),
+              class: " b:blue",
+            },
+          } as any
+        }
+      />
+    </div>
+  );
 
   const SubmitButton = () => (
     <div
@@ -367,7 +361,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       }}
     >
       <button style={{ "margin-right": "7px" }} class="border-color:#FF0000 color:#FF0000 danger" onClick={onCancel}>Cancel</button>
-
       <Show
         when={props.submitButton}
         fallback={
@@ -378,6 +371,52 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       </Show>
     </div>
   );
+
+  onMount(async () => {
+    setIsLoading(true);
+    if (id()) {
+      const data = await fetchData(id()!);
+      if (data.error) {
+        setError(data.error);
+      } else if ((data as { graph?: GraphInterface }).graph) {
+        setGraphData(
+          graph,
+          setGraph,
+          (data as { graph: GraphInterface }).graph,
+        );
+      }
+    }
+    setIsLoading(false);
+    onFormDataGet();
+    setIsLoading(false);
+  });
+
+  onMount(() => {
+    if (props.doMount === null || props.doMount !== false)
+      divRef()?.querySelector?.("input")?.focus();
+  });
+
+  onCleanup(() => {
+    setPageConfig?.("formData", undefined);
+  });
+
+  onCleanup(() => {
+    for (const rowMetaTxnId of cleanUpConfig.rowMetaTxnIds || [])
+      revertTransaction(rowMetaTxnId, graph);
+  });
+
+  useBeforeLeave((e: BeforeLeaveEventArgs) => {
+    if (submit || !txnHasSteps(formData.txnId, graph)) {
+      return;
+    }
+    e.preventDefault();
+    setTimeout(() => {
+      setDiscradPopup(true);
+    }, 100);
+    onConfirmExit = () => {
+      e.retry(true);
+    };
+  });
 
   return (
     <Switch>
@@ -394,7 +433,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           <div
             ref={(el) => {
               setDivRef(el);
-              // validationGroup = new dxValidationGroup(divRef()!);
             }}
           >
             <Show when={props.showSubmitButtonOnTop ?? false}>
@@ -500,71 +538,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       </Match>
     </Switch>
   );
-
-  function ImportExportButtons() {
-    return (
-      <div
-        style={{
-          "justify-content": "end",
-          "margin-bottom": "10px",
-          display: "flex",
-        }}
-      >
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-
-                children: "Import",
-                variant: "outlined",
-                style: { display: "flex" },
-                leading:
-                  // TO solve Hydration error passed a function
-                  () => (
-                    <Icon
-                      icon={"lets-icons:import"}
-                      height={22}
-                      width={22}
-                    />
-                  ),
-                onClick: () => {
-                  setPopup(true);
-                },
-
-              },
-            } as any
-          }
-        />
-        <GenericField
-          meta={
-            {
-              P: {
-                component: "Button",
-
-                children: "Export",
-                onClick: () => {
-                  setPopup(true);
-                },
-                style: { display: "flex" },
-                leading:
-                  // TO solve Hydration error passed a function
-                  () => (
-                    <Icon
-                      icon={"lets-icons:export"}
-                      height={22}
-                      width={22}
-                    />
-                  ),
-                class: " b:blue",
-
-              },
-            } as any
-          }
-        />
-      </div>
-    );
-  }
 }
 
 // export default to make it client only
