@@ -17,7 +17,6 @@ import { groupBy, isPageDesignerPath } from "~/lib/utils";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
-import { GenericField } from "~/components/fields/GenericField";
 import {
   GraphContext,
   type GraphInterface,
@@ -54,12 +53,11 @@ import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import {
   RepeaterVertexContext
 } from "~/components/page_attr_render/Context";
-import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
-import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 import { FormMetaData } from "~/lib/formMetaData";
 import { AdminAttrKeys } from "~/lib/constants";
 import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
+import { getFormData } from "./getFormData";
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -92,11 +90,7 @@ type FormData = {
 };
 
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
-  const [p, customProps] = splitProps(props, ["formId", "id"]);
-  const id = createMemo(() => (p.id === "new" ? undefined : p.id));
-
-  // TODO: add validation on form that AttrsTableData keys should not available.
-
+  const id = createMemo(() => (props.id === "new" ? undefined : props.id));
   const { Ws } = useContext(WsContext);
   const navigate = useNavigate();
   const location = useLocation();
@@ -112,10 +106,6 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     cleanUpConfig: () => cleanUpConfig,
   } as FormData);
   const [activeTab, setActiveTab] = createSignal("main");
-  const form =
-    FormMetaData[props.formId] ||
-    (AdminAttrKeys.includes(props.formId) && FormMetaDataAuth[props.formId]);
-
   const [error, setError] = createSignal<string | null>(null);
   const [isLoading, setIsLoading] = createSignal(false);
   const [divRef, setDivRef] = createSignal<HTMLDivElement>();
@@ -124,29 +114,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   let submit: boolean;
   let onConfirmExit: () => void;
 
-  const fetchData = async (id: Id) => {
-    try {
-      const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
-      const result = await getDataMGCall({
-        expression: `id:'${id}'`,
-        incoming,
-        outgoing,
-      });
-
-      // @ts-ignore
-      if (result.error || !result.graph) {
-        // @ts-ignore
-        return { error: result.error || "Error When Loading Form" };
-      }
-
-      return { graph: result.graph };
-    } catch (e: any) {
-      console.error("error", e);
-      return { error: `Error When Loading Form: ${e.message}` };
-    }
-  };
-
-  const onFormDataGet = () => {
+  const initFormState = () => {
     let dataVertex: Vertex;
     if (!id()) {
       const createResult = createForm(
@@ -154,7 +122,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         setGraph,
         txnId,
         Ws,
-        form[IdAttr],
+        props.formId,
       );
 
       dataVertex = createResult.vertex!;
@@ -181,6 +149,9 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         if (layoutRowId === -1) return;
       }
     }
+    const form =
+      FormMetaData[props.formId] || (FormMetaDataAuth[props.formId]);
+
     // Load Form Meta and Data from API
     const metaVertexResult = untrack(() =>
       createMeta(form, graph, setGraph),
@@ -242,6 +213,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
     const isRealTime = false;
     let data;
     if (isValid) {
+      // TODO: add validation on form that AttrsTableData keys should not available.
       // !!!TODO!!! Handle Error Received From server when commit
       if (!isRealTime) {
         data = commitTxn(txnId, Ws, graph);
@@ -254,7 +226,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         const name = formData?.formData?.P.name;
 
         const res = await checkIfNameExistsMGCall(
-          form[IdAttr],
+          props.formId,
           name,
           id() as Id,
         );
@@ -306,50 +278,31 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
         display: "flex",
       }}
     >
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              children: "Import",
-              variant: "outlined",
-              style: { display: "flex" },
-              leading: () => (
-                <Icon
-                  icon={"lets-icons:import"}
-                  height={22}
-                  width={22}
-                />
-              ),
-              onClick: () => {
-                setPopup(true);
-              },
-            },
-          } as any
-        }
-      />
-      <GenericField
-        meta={
-          {
-            P: {
-              component: "Button",
-              children: "Export",
-              onClick: () => {
-                setPopup(true);
-              },
-              style: { display: "flex" },
-              leading: () => (
-                <Icon
-                  icon={"lets-icons:export"}
-                  height={22}
-                  width={22}
-                />
-              ),
-              class: " b:blue",
-            },
-          } as any
-        }
-      />
+      <button
+        type="button"
+        style={{ display: "flex" }}
+        onClick={() => setPopup(true)}
+      >
+        <Icon
+          icon={"lets-icons:import"}
+          height={22}
+          width={22}
+        />
+        Import
+      </button>
+      <button
+        type="button"
+        style={{ display: "flex" }}
+        onClick={() => setPopup(true)}
+        class="b:blue"
+      >
+        <Icon
+          icon={"lets-icons:export"}
+          height={22}
+          width={22}
+        />
+        Export
+      </button>
     </div>
   );
 
@@ -375,7 +328,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   onMount(async () => {
     setIsLoading(true);
     if (id()) {
-      const data = await fetchData(id()!);
+      const data = await getFormData(props.formId, id()!);
       if (data.error) {
         setError(data.error);
       } else if ((data as { graph?: GraphInterface }).graph) {
@@ -387,7 +340,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       }
     }
     setIsLoading(false);
-    onFormDataGet();
+    initFormState();
     setIsLoading(false);
   });
 
