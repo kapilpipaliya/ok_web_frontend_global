@@ -94,7 +94,7 @@ export async function getCollAttrsMGCall(
     async (acc, curr) => {
       const key = (
         await getSelectionOptionsMGCall([curr], "->$0Name::'P.name'")
-      ).vertexes;
+      ).result;
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
       }

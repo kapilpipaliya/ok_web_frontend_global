@@ -25,7 +25,7 @@ import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatche
 import csvtojson from "csvtojson";
 import { getToEdge } from "../get/sync/traverse";
 import { A, D } from "@mobily/ts-belt";
-import { isSimpleCollection } from "~/components/fields/SelectInputField";
+import { isSimpleCollection } from "~/components/fields/isSimpleCollection";
 import { parse } from "yaml";
 import { deleteEdge } from "~/lib/graph/mutate/edge";
 import { FormMetaData } from "~/lib/formMetaData";

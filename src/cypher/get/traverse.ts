@@ -151,7 +151,7 @@ export async function replaceExpressionToLabel(
           [vertex],
           collection.match(/{{(.*)}}/)?.[1]! || "",
         )
-      ).vertexes || "",
+      ).result || "",
     );
   }
   return collection;

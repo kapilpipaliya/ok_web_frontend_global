@@ -6,12 +6,13 @@ import type {Edge, Vertex} from "~/lib/graph/graph";
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
 import {replaceExpressionToLabel} from "~/cypher/get/traverse";
+import type { ServerResult } from "./ServerResult";
 
 export async function getSelectionOptionsMGCall(
   vertex: Vertex[],
   collection: string,
   strict?: boolean,
-): Promise<{ error: boolean; vertexes?: any; graph?: any }> {
+): Promise<Partial<ServerResult> & { error: boolean }> {
   "use server";
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
@@ -26,7 +27,7 @@ export async function getSelectionOptionsMGCall(
     if (value) {
       return {
         error: false,
-        vertexes: value,
+        result: value,
         graph: {
           vertexes: nodes,
           edges: relationships,

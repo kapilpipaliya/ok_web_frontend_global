@@ -7,7 +7,6 @@ import {
   getOwner,
   Match,
   on,
-  onCleanup,
   runWithOwner,
   Show,
   Switch,
@@ -17,12 +16,9 @@ import {
 import { toTitle } from "case-switcher-js";
 import {
   mergeVertexProperties,
-  replaceVertexProperties,
 } from "~/lib/graph/mutate/vertex";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
-import { getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { klona } from "klona";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
 import {
@@ -30,7 +26,6 @@ import {
   getChildVertexes,
   getSelectionOptions,
 } from "~/lib/graph/get/sync/traverse";
-import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import {
   addNewRow,
   getSublistRows
@@ -38,19 +33,14 @@ import {
 import { deleteRow } from "~/lib/graph/mutate/deleteRow";
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Icon } from "@iconify-icon/solid";
-import { GenericField } from "~/components/fields/GenericField";
-import type { FieldAttribute } from "~/lib/FormMetadataType";
 
 import {
-  componentProps,
-  getCollAttrs,
   getStringComponent,
 } from "~/lib/graph/get/sync/graph_functions";
-import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { addMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { rowMetaInitialize } from "~/lib/graph/mutate/form/rowFunction";
 import { useToast } from "~/components/Toast";
-import { FormContext, NewTxnIdContext } from "~/lib/contexts";
+import { FormContext, } from "~/lib/contexts";
 import {
   PageRenderVertexContext, RepeaterVertexContext
 } from "~/components/page_attr_render/Context";

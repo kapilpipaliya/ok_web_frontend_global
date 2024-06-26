@@ -42,7 +42,7 @@ export const Repeater = (props: { data: any; meta: any }) => {
       const result = data();
 
       if (result?.mgData) {
-        setGraphData(graph, setGraph, result.mgData.graph);
+        setGraphData(graph, setGraph, result.mgData.graph!);
         setOptions(
           props.data ||
             getSelectionOptions(

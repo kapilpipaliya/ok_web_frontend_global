@@ -1,7 +1,7 @@
-import {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
+import type {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
 
 export interface ServerResult {
-  result: Vertex[],
+  result: any, //Vertex[],
   graph: {
     vertexes: VertexMap,
     edges: EdgeMap
