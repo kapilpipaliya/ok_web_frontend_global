@@ -24,9 +24,6 @@ http://localhost:3001/admin/Comp/1494
 http://localhost:3001/admin/Comp/1544
 Sometimes empty form is displayed
 
-Fix add button is not visible on http://localhost:3001/admin/Comp/24
-
-
 Depend On Select:------------------
 3. [Obvious] Label Properties, Position is not coming as select. add support for specifying select options
 

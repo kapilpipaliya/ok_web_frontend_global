@@ -4,6 +4,7 @@ import type {EdgeMap, Vertex, VertexMap} from "~/lib/graph/graph";
 import {evalAsync} from "~/lib/expression_eval";
 import jsep from "jsep";
 import {addNodeEdges} from "~/cypher/mutate/sync/addNodeEdges";
+import { findOrCreateNodeAndUpdateProperties } from "./findOrCreateNodeAndUpdateProperties";
 
 export async function processNodeSync(
   sessionSource: Session,

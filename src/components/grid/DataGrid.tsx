@@ -23,6 +23,7 @@ import { PageContext } from "~/lib/contexts";
 import { deleteRowConfirm } from "./deleteRow";
 import { getTableData } from "./getTableData";
 import { setGridHeaders } from "./setGridHeaders";
+import { AddNewButton } from "./AddNew";
 interface DataGridProps {
   tableId: string;
 }
@@ -115,19 +116,6 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       setFilteredData(nodes);
  
   }
-
-  const AddNew = () => <button
-    onClick={() => navigate("new")}
-    class="flex ai:center jc:center p:7px|10px mb:10 bg:#f0f0f0 border:1px|solid|#ccc r:5 bg:#e0e0e0:hover border:#bbb:hover"
-  >
-    <Icon
-      icon={"lets-icons:add-round"}
-      height={22}
-      width={22}
-      class="mr:5"
-    />
-    <span>Add New</span>
-  </button>
   
   const Search = () => <div class="group">
     <Icon
@@ -155,7 +143,7 @@ export function DataGrid(props: Readonly<DataGridProps>) {
       <Match when={error()}>Error {error()}</Match>
       <Match when={tableStore.data?.length > 0}>
         <div class="flex jc:space-between ai:center p:5">
-          <AddNew />
+          <AddNewButton onClick={() => navigate("new")} />
           <nav class="flex ai:center mb:10">
             <Search />
           </nav>
@@ -182,4 +170,3 @@ export function DataGrid(props: Readonly<DataGridProps>) {
     </Switch>
   );
 }
-

@@ -147,38 +147,23 @@ export function rowMetaInitialize(
   if (rowMetaAttrInst.error) {
     const rows = {} as { [key: Id]: Id; };
     const metaTxnId = getNewTxnId(graph, setGraph);
+    const P = klona(meta.P);
+    P.templateId = meta.id;
     batch(() => {
       const metaInstanceResult = newRow(
         graph,
         setGraph,
         metaTxnId,
         joinVertex,
-        "AttrInst"
+        "AttrInst",
+        undefined,
+        P
       );
       if (metaInstanceResult.error) {
         showErrorToast("Error creating a row for attribute instance");
       }
-      mergeVertexProperties(
-        metaTxnId,
-        metaInstanceResult.vertexId!,
-        graph,
-        setGraph,
-        {
-          templateId: meta.id,
-        }
-      );
 
       for (const attrColumn of tableColumnsTemplate) {
-        const AttrRowResult = newRow(
-          graph,
-          setGraph,
-          metaTxnId,
-          graph.vertexes[metaInstanceResult.vertexId!],
-          "MetaAttr"
-        );
-        if (AttrRowResult.error) {
-          showErrorToast(AttrRowResult.error.toString());
-        }
         const P = klona(attrColumn.P);
         P.templateId = attrColumn.id;
 
@@ -186,15 +171,22 @@ export function rowMetaInitialize(
           const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
           if (component) P.component = component;
         }
-        mergeVertexProperties(
-          metaTxnId,
-          AttrRowResult.vertexId!,
+        const AttrRowResult = newRow(
           graph,
           setGraph,
+          metaTxnId,
+          graph.vertexes[metaInstanceResult.vertexId!],
+          "MetaAttr",
+          undefined,
           P
         );
+        if (AttrRowResult.error) {
+          showErrorToast(AttrRowResult.error.toString());
+        }
+
         rows[attrColumn.id] = AttrRowResult.vertexId!;
       }
+      
       mergeVertexProperties(
         metaTxnId,
         metaInstanceResult.vertexId!,
