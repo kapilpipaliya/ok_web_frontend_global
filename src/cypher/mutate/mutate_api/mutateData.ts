@@ -30,7 +30,7 @@ export async function mutateData(
       await handleMutationObject(mutationObject, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
     }
 
-    tx.commit();
+    await tx.commit();
 
     return {txnId: args.txnId, data:txnResult};
   } catch (error: any) {
@@ -38,7 +38,7 @@ export async function mutateData(
     console.error('Transaction failed:', error);
     return { error: 'Transaction failed: ' + error.message };
   } finally {
-    // Transaction close will close session too.
-    // await tx.close();
+    await tx.close();
+    session.close();
   }
 }

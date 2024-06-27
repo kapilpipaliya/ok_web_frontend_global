@@ -1,8 +1,8 @@
 import {
   batch,
+  createSignal,
   For,
   getOwner,
-  onMount,
   runWithOwner,
   Show,
   useContext,
@@ -23,8 +23,6 @@ import {
 import { setValueGlobal } from "~/lib/graph/mutate/form/setValueGlobal";
 import { onChangeHandler } from "~/lib/graph/mutate/form/onChangeHandler";
 import type { ComponentProps } from "~/components/fields/ComponentType";
-
-import { setGraphData } from "~/lib/websocket/setGraphData";
 import { MultiSelectField } from "~/components/MultiSelect";
 import { setSelectionValue } from "~/lib/graph/mutate/setSelectionValue";
 import { setParentValue } from "~/lib/graph/mutate/setParentValue";
@@ -45,6 +43,8 @@ export function SelectInputField(
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const formData = useContext(FormContext);
+  const [loading, setLoading] = createSignal(false);
+  const [options, setOptions] = createSignal([] as any[]);
 
   const getCollection = () => (
     getChildVertex(graph, ["$0Coll"], props.meta).vertex?.P?.name ||
@@ -52,11 +52,9 @@ export function SelectInputField(
   );
 
   const getStaticOptions = (value: any) => {
-    return typeof value === "string"
-      ? value.split("\n")
-      : Array.isArray(value)
-      ? value
-      : value ? [value] : [];
+    if (typeof value === "string") return value.split("\n");
+    if (Array.isArray(value)) return value;
+    return value ? [value] : [];
   };
 
   const getSelectedOptions = () => {
@@ -66,25 +64,26 @@ export function SelectInputField(
   };
 
   const getDynamicOptions = () => {
-    if (props.disabled) return getSelectedOptions();
-    if (!getCollection()) return [];
     return getSelectionOptions(graph, setGraph, [props.data as Vertex], getCollection())
-          .vertexes || [];
+      .vertexes || [];
   };
 
-  const selectOptions = () => {
-    return props.meta.P.items ? getStaticOptions(props.meta.P.items) : getDynamicOptions();
+  const loadOptions = async () => {
+    let options = [];
+    if (props.meta.P.items) {
+      options = getStaticOptions(props.meta.P.items);
+    } else if (props.disabled) {
+      options = getSelectedOptions();
+    } else if (getCollection()) {
+      setLoading(true);
+      const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection());
+      if (isValidResponse(res)) {
+        options = res.result || [];
+      }
+      setLoading(false);
+    }
+    setOptions(options);
   };
-
-  onMount(() => {
-    getSelectionOptionsMGCall([props.data as Vertex], getCollection()).then(
-      (res) => {
-        if (isValidResponse(res)) {
-          setGraphData(graph, setGraph, res.graph!);
-        }
-      },
-    );
-  });
 
   function getComponent() {
     const direction = props.meta.P.dir;
@@ -115,27 +114,27 @@ export function SelectInputField(
           props.setValue
             ? props.setValue(data)
             : setValueGlobal(
-                graph,
-                setGraph,
-                props.txnId!,
-                props.meta,
-                props.data!,
-                data,
-                Ws,
-                false,
-              );
+              graph,
+              setGraph,
+              props.txnId!,
+              props.meta,
+              props.data!,
+              data,
+              Ws,
+              false,
+            );
         } else if (props.meta.P.inward) {
           setParentValue(
             graph,
             setGraph,
-            props.txnId || 0,
+            props.txnId ?? 0,
             props.data!,
             props.meta,
             data,
           );
         } else {
           setSelectionValue(
-            props.txnId || 0,
+            props.txnId ?? 0,
             props.data!,
             graph,
             setGraph,
@@ -144,14 +143,14 @@ export function SelectInputField(
           );
         }
         onChangeHandler(
-          props.txnId || 0,
+          props.txnId ?? 0,
           formData?.formData,
           props.data!,
           props.meta,
           graph,
           setGraph,
         );
-        if (props.isRealTime) commitTxn(props.txnId || 0, Ws, graph);
+        if (props.isRealTime) commitTxn(props.txnId ?? 0, graph);
       });
     });
   };
@@ -186,11 +185,13 @@ export function SelectInputField(
               return graph.vertexes[id];
             })
           }
-          disable={props.disabled!}
-          options={selectOptions()}
+          disable={props.disabled}
+          options={options()}
           onRemove={(e) => onChangeSelect(e, true)}
           onSelect={(e) => onChangeSelect(e, false)}
           placeholder={`${props.title}`}
+          loadOptions={loadOptions}
+          isLoadingOptions={loading()}
         />
       </Show>
       {/* Todo: think about validations */}

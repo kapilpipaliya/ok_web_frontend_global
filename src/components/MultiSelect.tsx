@@ -24,6 +24,8 @@ export function MultiSelectField(props: {
   readonly displayValueChild?: string;
   readonly selectionLimit?: number;
   readonly renderLabel?: ((arg0: any) => JSX.Element);
+  readonly isLoadingOptions?: boolean;
+  readonly loadOptions?: () => Promise<void>;
 }) {
   const { showErrorToast } = useToast();
   let inputRef: HTMLInputElement | undefined;
@@ -62,7 +64,7 @@ export function MultiSelectField(props: {
       newSelected = selected().filter(
         (item: any) => getOptionValue(item) !== value,
       );
-      // setSelected(newSelected);
+      
       props.onRemove?.(newSelected, value);
     } else {
       if (props.selectionLimit && selected().length >= props.selectionLimit) {
@@ -74,7 +76,7 @@ export function MultiSelectField(props: {
         (option: any) => getOptionValue(option) === value,
       );
       newSelected = [...selected(), selectedOption];
-      // setSelected(newSelected);
+      
       props.onSelect?.(newSelected, value);
     }
     if (props.selectionLimit === 1) {
@@ -87,7 +89,7 @@ export function MultiSelectField(props: {
     const newSelected = selected().filter(
       (item: any) => getOptionValue(item) !== value,
     );
-    // setSelected(newSelected);
+    
     props.onRemove?.(newSelected, value);
   };
 
@@ -123,8 +125,11 @@ export function MultiSelectField(props: {
     );
   });
 
-  const handleInputFocus = () => {
+  const handleInputFocus = (e: Event) => {
     setDropdownVisible(true);
+    if (!props.isLoadingOptions) {
+      props.loadOptions?.();
+    }
   };
 
   const [reference, setReference] = createSignal<HTMLElement | null>(null);
@@ -158,29 +163,31 @@ export function MultiSelectField(props: {
           top: `${position.y ?? 0}px`,
           left: `${position.x ?? 0}px`,
         }}>
-          <For
-            each={filteredOptions()}
-            fallback={<div style={optionStyle}>No item found </div>}
-          >
-            {(option, index) => (
-              <div
-                class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
-                  } f:14 m:3 r:5 w:full bg:#e0e0e0:hover`}
-                style={`${optionStyle} ${selected().some(
-                  (item: { value: any }) =>
-                    getOptionValue(item) === getOptionValue(option),
-                )
-                  ? optionSelectedStyle
-                  : ""
-                  }`}
-                onMouseDown={() => handleSelectChange(getOptionValue(option))}
-              >
-                {props.renderLabel
-                  ? props.renderLabel(option)
-                  : getOptionLabel(option)}
-              </div>
-            )}
-          </For>
+          <Show when={!props.isLoadingOptions} fallback={<div style={optionStyle}>Loading...</div>}>
+            <For
+              each={filteredOptions()}
+              fallback={<div style={optionStyle}>No item found </div>}
+            >
+              {(option, index) => (
+                <div
+                  class={`bg:#f4f4f4:hover ${index() === filteredOptions().length - 1 ? "r:0|0|5|5" : ""
+                    } f:14 m:3 r:5 w:full bg:#e0e0e0:hover`}
+                  style={`${optionStyle} ${selected().some(
+                    (item: { value: any }) =>
+                      getOptionValue(item) === getOptionValue(option),
+                  )
+                    ? optionSelectedStyle
+                    : ""
+                    }`}
+                  onMouseDown={() => handleSelectChange(getOptionValue(option))}
+                >
+                  {props.renderLabel
+                    ? props.renderLabel(option)
+                    : getOptionLabel(option)}
+                </div>
+              )}
+            </For>
+          </Show>
         </div>
       </Portal>
     )
