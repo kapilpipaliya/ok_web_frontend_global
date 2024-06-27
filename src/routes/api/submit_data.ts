@@ -7,11 +7,18 @@ export async function POST({ request }: APIEvent) {
   const data = await request.json();
   const subdomain = await getSubDomain(request.headers.get("host")!);
   const session = (await getDriver(subdomain)).session();
-
+  // const session = getSessionForSubdomain();
+  const tx = session.beginTransaction();
   try {
-    return await mutateData(data, session);
+    const res = await mutateData(data, tx);
+    await tx.commit();
+    return res;
   } catch (error) {
+    await tx.rollback();
     console.error("Failed to save data:", error);
-    return new Error("Internal Server Error");
+    return { error: 'Transaction failed: ' + error.message };
+  } finally {
+    await tx.close();
+    await session.close();
   }
 }

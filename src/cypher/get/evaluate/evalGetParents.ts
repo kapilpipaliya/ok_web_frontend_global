@@ -12,7 +12,7 @@ export async function evalGetParents(
 ) {
   "use server";
   if (!vertexes || vertexes.length === 0) return;
-  const session = context.session || await getSessionForSubdomain();
+  const session = context.tx ? null : (context.session || await getSessionForSubdomain());
   const type = edgeType.replaceAll("$0", vertexes[0].L[0]);
   let query;
   let params;
@@ -37,7 +37,7 @@ export async function evalGetParents(
   }
 
   try {
-    const result = await session.run(query, params);
+    const result = await (context.tx ? context.tx!.run(query, params) : session!.run(query, params));
     return processResult(result.records, context, "parent", "r", true);
   } catch (error) {
     console.error(
@@ -48,7 +48,7 @@ export async function evalGetParents(
     );
     return;
   } finally {
-    if (!context.session) {
+    if (!context.session && session) {
       await session.close();
     }
   }

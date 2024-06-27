@@ -39,7 +39,7 @@ export async function getDriver(
     } else {
       throw new Error("Subdomain Not Found!");
     }
-    session.close();
+    await session.close();
   }
 
   return getDriverWithPort(port, username, password);

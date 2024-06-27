@@ -76,7 +76,8 @@ export function SelectInputField(
       options = getSelectedOptions();
     } else if (getCollection()) {
       setLoading(true);
-      const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection());
+      const mutationData = props.txnId ? commitTxn(props.txnId, graph) : undefined;
+      const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection(), mutationData);
       if (isValidResponse(res)) {
         options = res.result || [];
       }

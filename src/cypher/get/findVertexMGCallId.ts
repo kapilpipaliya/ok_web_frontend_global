@@ -1,9 +1,9 @@
-import {int, type Session} from "neo4j-driver";
-import {convertNodeToJson} from "~/lib/convertNodeToJson";
+import { int, } from "neo4j-driver";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 import type { ContextType } from "./evaluate/ContextType";
+import { getSessionForSubdomain } from "./getSessionForSubdomain";
 
 export async function findVertexMGCallId(
-  session: Session,
   {
     id,
     label,
@@ -44,15 +44,23 @@ export async function findVertexMGCallId(
     }
   }
   if (!query) {
-    throw new Error("Either 'id' or 'label' must be provided.");
+    return { error: "Either 'id' or 'label' must be provided." };
   }
-
-  const result = await session.run(query, params);
-  return result.records.map((record) => {
-    const vertex = convertNodeToJson(record.get("n"));
-    if (context.nodes) {
-      context.nodes[vertex.id] = vertex;
+  const session = context.tx ? null : (context.session || await getSessionForSubdomain());
+  try {
+    const result = await (context.tx ? context.tx!.run(query, params) : session!.run(query, params));
+    return result.records.map((record) => {
+      const vertex = convertNodeToJson(record.get("n"));
+      if (context.nodes) {
+        context.nodes[vertex.id] = vertex;
+      }
+      return vertex;
+    });
+  } catch (error: any) {
+    return { error: error.message };
+  } finally {
+    if (!context.session && session) {
+      await session.close();
     }
-    return vertex;
-  });
+  }
 }
