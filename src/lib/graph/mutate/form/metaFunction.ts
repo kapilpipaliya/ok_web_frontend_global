@@ -25,7 +25,7 @@ export function addMetaVertexes(
     if (!attr.tab) attr.tab = "main";
     // @ts-ignore
     if (!attr.group) attr.group = "main";
-    // if(attribute.component === "Table2") attribute.group = attribute.id;
+    // if(attribute.component === "DynamicTable") attribute.group = attribute.id;
     const addAttributeResult = newRow(
       graph,
       setGraph,
@@ -39,7 +39,7 @@ export function addMetaVertexes(
       showErrorToast(addAttributeResult.error.toString());
     }
     // todo discard transaction
-    // if (attribute.component === "Table2" && attribute.attributes) {
+    // if (attribute.component === "DynamicTable" && attribute.attributes) {
     if (attribute.attributes) {
       addMetaVertexes(
         graph,

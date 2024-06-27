@@ -158,7 +158,7 @@ export function TableInputField(
                 isTableInside={false}
                 component={component()}
                 // When we have a Table we pass original Table Meta Vertex
-                meta={component() === "Table2" || component() === "Table" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
+                meta={component() === "DynamicTable" || component() === "Table" ? graph.vertexes[metaVertex().P.templateId] : metaVertex()}
                 data={p.joinVertex}
                 setValue={props.setValue}
                 disabled={disabled()}
@@ -177,7 +177,7 @@ export function TableInputField(
                   </div>
                 </td>
               </Match>
-              <Match when={component() === "Table2"}>
+              <Match when={component() === "DynamicTable"}>
                 <td class="align-content:center">
                   <Show when={!disabled()}>
                     <div class={`flex ai:center jc:center ${getComponentClass(component())}`}>
@@ -243,7 +243,7 @@ export function TableInputField(
           <tr class="border-radius:10px border-bottom:1px|solid|#dddddd">
             <td class="pl:15" colspan={rowColumnsMetaAttrs().length + 2}>
               <DynamicComponent
-                component={"Table2"}
+                component={"DynamicTable"}
                 // When we have a Table we pass original Table Meta Vertex
                 meta={expandVertex()!}
                 isTableInside={false}

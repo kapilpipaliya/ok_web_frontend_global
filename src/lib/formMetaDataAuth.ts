@@ -61,7 +61,7 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
       { name: "lookupChild", component: "TextBox" },
       {
         name: "meta",
-        component: "Table2",
+        component: "DynamicTable",
         attributes: [
           { name: "column", component: "TextBox" },
           // {
@@ -157,7 +157,7 @@ export const FormMetaDataAuth: { [key: string]: IFormMetaData } = {
       { name: "description", component: "TextArea" },
       {
         name: "Attr",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Attributes",
         
           type: "NavAttr",
@@ -206,7 +206,7 @@ Url`,
           },
           {
             name: "Role",
-            component: "Table2",
+            component: "DynamicTable",
             tab: "Permission",
             attributes: [
               {
@@ -218,7 +218,7 @@ Url`,
               },
               {
                 name: "Perm",
-                component: "Table2",
+                component: "DynamicTable",
                 attributes: [
                   {
                     name: "perm",
@@ -233,7 +233,7 @@ Url`,
           },
           {
             name: "Attr",
-            component: "Table2",
+            component: "DynamicTable",
             tab: "expand",
             
               type: "NavAttr",
@@ -282,7 +282,7 @@ Url`,
               },
               {
                 name: "Role",
-                component: "Table2",
+                component: "DynamicTable",
                 tab: "Permission",
                 attributes: [
                   {
@@ -294,7 +294,7 @@ Url`,
                   },
                   {
                     name: "Perm",
-                    component: "Table2",
+                    component: "DynamicTable",
                     attributes: [
                       {
                         name: "perm",
@@ -309,7 +309,7 @@ Url`,
               },
               {
                 name: "Attr",
-                component: "Table2",
+                component: "DynamicTable",
                 tab: "expand",
                 
                   type: "NavAttr",
@@ -358,7 +358,7 @@ Url`,
                   },
                   {
                     name: "Role",
-                    component: "Table2",
+                    component: "DynamicTable",
                     tab: "Permission",
                     attributes: [
                       {
@@ -370,7 +370,7 @@ Url`,
                       },
                       {
                         name: "Perm",
-                        component: "Table2",
+                        component: "DynamicTable",
                         attributes: [
                           {
                             name: "perm",
@@ -385,7 +385,7 @@ Url`,
                   },
                   {
                     name: "Attr",
-                    component: "Table2",
+                    component: "DynamicTable",
                     tab: "expand",
                     
                       type: "NavAttr",
@@ -434,7 +434,7 @@ Url`,
                       },
                       {
                         name: "Role",
-                        component: "Table2",
+                        component: "DynamicTable",
                         tab: "Permission",
                         attributes: [
                           {
@@ -446,7 +446,7 @@ Url`,
                           },
                           {
                             name: "Perm",
-                            component: "Table2",
+                            component: "DynamicTable",
                             attributes: [
                               {
                                 name: "perm",

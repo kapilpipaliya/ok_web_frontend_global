@@ -64,7 +64,7 @@ export function FormGroup(props: Readonly<FormGroupProps>) {
 
         return (
           <Switch>
-            <Match when={component() === "Table2"}>
+            <Match when={component() === "DynamicTable"}>
               {/* <h3><Label/></h3> */}
               <Content />
             </Match>

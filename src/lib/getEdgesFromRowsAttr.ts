@@ -32,7 +32,7 @@ export function getEdgesFromRowsAttr(attrs: any): {
    }
   } else if (
    attribute.component === "Table" ||
-   attribute.component === "Table2"
+   attribute.component === "DynamicTable"
   ) {
    const expression: NestedExpression = {
     expression: `->${getToEdge(

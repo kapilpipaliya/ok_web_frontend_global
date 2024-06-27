@@ -92,7 +92,7 @@ export function DynamicComponent(props: Readonly<{
           />
         </Show>
       </Match>
-      <Match when={props.component === "Table2"}>
+      <Match when={props.component === "DynamicTable"}>
         <Show when={!hiddenNodes().includes(props.meta?.id)}>
           
             <TableInputField

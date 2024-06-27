@@ -57,7 +57,7 @@ const collectionAttr = [
   {
     name: "Prop",
     displayName: "Properties",
-    component: "Table2",
+    component: "DynamicTable",
     attributes: [
       {
         name: "name",
@@ -78,7 +78,7 @@ const collectionAttr = [
   {
     name: "Role",
     displayName: "Permissions",
-    component: "Table2",
+    component: "DynamicTable",
     attributes: [
       {
         name: "role",
@@ -89,7 +89,7 @@ const collectionAttr = [
       },
       {
         name: "Perm",
-        component: "Table2",
+        component: "DynamicTable",
         attributes: [
           {
             name: "perm",
@@ -108,7 +108,7 @@ const collectionAttr = [
   },
   {
     name: "Attr",
-    component: "Table2",
+    component: "DynamicTable",
     tab: "expand",
     
       type: "Attr",
@@ -179,7 +179,7 @@ const pageAttr = [
   {
     name: "Prop",
     displayName: "Property",
-    component: "Table2",
+    component: "DynamicTable",
     attributes: [
       {
         name: "name",
@@ -199,7 +199,7 @@ const pageAttr = [
   },
   {
     name: "Role",
-    component: "Table2",
+    component: "DynamicTable",
     attributes: [
       {
         name: "role",
@@ -210,7 +210,7 @@ const pageAttr = [
       },
       {
         name: "Perm",
-        component: "Table2",
+        component: "DynamicTable",
         attributes: [
           {
             name: "perm",
@@ -225,7 +225,7 @@ const pageAttr = [
   },
   {
     name: "Attr",
-    component: "Table2",
+    component: "DynamicTable",
     tab: "expand",
     
       type: "Attr",
@@ -327,7 +327,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       // TODO: add validation, duplicate row with same name is not allowed.
       {
         name: "Prop",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Properties",
         attributes: [
           {
@@ -362,7 +362,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           //   // TODO: Be sure the name is ok, it will not change in production.
           //   name: "valueProp",
           //   displayName: "Value Property",
-          //   component: "Table2",
+          //   component: "DynamicTable",
           //   tab: "Properties",
           //   attributes: [
           //     {
@@ -409,7 +409,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "Event",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Events",
         attributes: [
           {
@@ -553,7 +553,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 
       {
         name: "Attr",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Attribute",
    
           type: "Attr",
@@ -563,7 +563,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "Rules",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Rules",
 
           type: "Rules",
@@ -581,7 +581,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           },
           {
             name: "Rule",
-            component: "Table2",
+            component: "DynamicTable",
             tab: "Rule",
 
               type: "Rule",
@@ -591,7 +591,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
               {
                 name: "cond",
                 displayName: "Conditions",
-                component: "Table2",
+                component: "DynamicTable",
                 attributes: [
                   {
                     name: "left",
@@ -670,7 +670,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
 
       /*      {
                     name: "Child",
-                    component: "Table2",
+                    component: "DynamicTable",
                     tab: "Child",
                     attributes: [
                       {
@@ -711,7 +711,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                       {
                         name: "Prop",
                         displayName: "Property",
-                        component: "Table2",
+                        component: "DynamicTable",
                         attributes: [
                           {
                             name: "name",
@@ -732,7 +732,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
                   },*/
       {
         name: "Transform",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Transform",
         attributes: [
           {
@@ -753,7 +753,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           {
             name: "Prop",
             displayName: "Property",
-            component: "Table2",
+            component: "DynamicTable",
             attributes: [
               {
                 name: "name",
@@ -775,7 +775,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "Role",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Permission",
         attributes: [
           {
@@ -800,7 +800,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "uniqueConstrain",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Unique Constrain",
         attributes: [
           {
@@ -914,7 +914,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "Attr",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Attribute",
         
           type: "Attr",
@@ -924,7 +924,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
       },
       {
         name: "Role",
-        component: "Table2",
+        component: "DynamicTable",
         tab: "Permission",
         attributes: [
           {
@@ -936,7 +936,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
           },
           {
             name: "Perm",
-            component: "Table2",
+            component: "DynamicTable",
             attributes: [
               {
                 name: "perm",
