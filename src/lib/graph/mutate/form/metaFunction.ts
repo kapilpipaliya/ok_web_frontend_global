@@ -55,7 +55,7 @@ export function addMetaVertexes(
   form: IFormMetaData,
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>
-): { error: boolean; vertex?: Vertex; } {
+): { error: boolean; vertex?: Vertex; txnId?: number; } {
   const { attributes, ...custom } = form;
 
   // save attributes to vertexes
@@ -77,6 +77,6 @@ export function addMetaVertexes(
     // TODO: Remove all the meta
   });
 
-  return { error: false, vertex: metaVertex };
+  return { error: false, vertex: metaVertex, txnId: metaTxnId };
 }
 

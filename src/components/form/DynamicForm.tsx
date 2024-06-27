@@ -17,7 +17,7 @@ import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { createMeta } from "~/lib/graph/mutate/form/metaFunction";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { GraphContext, type GraphInterface, type Id, type Vertex, } from "~/lib/graph/graph";
-import { commitTxn, getNewTxnId, ProcessStatus, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
+import { commitTxn, getChangedIds, getNewTxnId, ProcessStatus, revertTransaction, txnHasSteps, } from "~/lib/graph/transaction";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { type BeforeLeaveEventArgs, useBeforeLeave, useLocation, useNavigate, } from "@solidjs/router";
 import { TableTabs } from "~/components/TableTabs";
@@ -26,7 +26,7 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { FormContext, FormSettingsContext, PageConfigContext } from "~/lib/contexts";
+import { FormContext, FormSettingsContext, IFormContext, PageConfigContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
@@ -52,20 +52,6 @@ export interface DynamicFormProps {
   graph: Store<GraphInterface>;
   setGraph: SetStoreFunction<GraphInterface>;
 }
-type FormData = {
-  cleanUpConfig: () => {
-    [key: string]: any;
-  };
-  txnId: number;
-  formMeta: Vertex;
-  formData: Vertex;
-  tabs: string[];
-  groupByTabsAndGroup: {
-    [tab: string]: {
-      [group: string]: Vertex[];
-    };
-  };
-};
 
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const id = createMemo(() => (props.id === "new" ? undefined : props.id));
@@ -82,7 +68,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [formData, setFormData] = createStore({
     txnId,
     cleanUpConfig: () => cleanUpConfig,
-  } as FormData);
+  } as IFormContext);
   const [activeTab, setActiveTab] = createSignal("main");
   const [error, setError] = createSignal<string | null>(null);
   const [isLoading, setIsLoading] = createSignal(false);
@@ -165,6 +151,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       formData: graph.vertexes[id() as Id] ?? dataVertex!,
       tabs,
       groupByTabsAndGroup,
+      metaTxnId: metaVertexResult.txnId,
     });
 
     setPageConfig?.("formData", formData);

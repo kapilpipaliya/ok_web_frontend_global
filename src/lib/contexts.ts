@@ -48,8 +48,16 @@ export interface IFormContext {
  cleanUpConfig: () => { [key: string]: any };
  validationGroup?: {};
  txnId: number;
+ metaTxnId: number;
  formMeta: Vertex;
  formData: Vertex;
+ tabs: string[];
+  groupByTabsAndGroup: {
+    [tab: string]: {
+      [group: string]: Vertex[];
+    };
+  };
+  changedIds: { vertexIds: Id[], edgeIds: Id[] };
 }
 
 export interface IPageConfig { formData: IFormContext }

@@ -358,26 +358,26 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
               collection: "->$0DataType->$0Comp",
             
           },
-          // {
-          //   // TODO: Be sure the name is ok, it will not change in production.
-          //   name: "valueProp",
-          //   displayName: "Value Property",
-          //   component: "DynamicTable",
-          //   tab: "Properties",
-          //   attributes: [
-          //     {
-          //       name: "name",
-          //       component: "SelectBox",
-          //         displayExpr: "::'P.name'",
-          //         collection: "<-$0->$0Comp->$0Prop",
-          //     },
-          //     {
-          //       name: "value",
-          //       meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
-          //       component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P[IdAttr]'",
-          //     },
-          //   ],
-          // },
+          {
+            // TODO: Be sure the name is ok, it will not change in production.
+            name: "valueProp",
+            displayName: "Value Property",
+            component: "DynamicTable",
+            tab: "Properties",
+            attributes: [
+              {
+                name: "name",
+                component: "SelectBox",
+                  displayExpr: "::'P.name'",
+                  collection: "<-$0->$0Comp->$0Prop",
+              },
+              {
+                name: "value",
+                meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
+                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P[IdAttr]'",
+              },
+            ],
+          },
           {
             name: "value",
             meta: "->$0Comp<-CompChild->$0Prop++->$0Comp->$0Prop++->$0ValueProp",
