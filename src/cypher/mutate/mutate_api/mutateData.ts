@@ -2,7 +2,7 @@ import { mutateArgsValidation } from "./mutateArgsValidation";
 import { handleMutationObject } from "./handleMutationObject";
 import { mapIds } from "./mapIds";
 import type { MutationArgs } from "./MutationArgs";
-import type {TransactionPromise} from "neo4j-driver-core";
+import type { TransactionPromise } from "neo4j-driver-core";
 
 export async function mutateData(
   args: MutationArgs,
@@ -24,8 +24,8 @@ export async function mutateData(
   mapIds(args.edgeIdMap, clientToServerEdgeIdMap);
 
   const txnResult = [] as any[];
-    for (const mutationObject of args.transactions) {
-      await handleMutationObject(mutationObject, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
-    }
-    return {txnId: args.txnId, data:txnResult};
+  for (const mutationObject of args.transactions) {
+    await handleMutationObject(mutationObject, tx, clientToServerVertexIdMap, clientToServerEdgeIdMap, txnResult);
+  }
+  return { txnId: args.txnId, data: txnResult, clientToServerVertexIdMap, clientToServerEdgeIdMap };
 }

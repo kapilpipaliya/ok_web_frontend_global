@@ -81,3 +81,10 @@ SEO
 Design issue:
 1. [Obvious] It is not flexible to drop a component below the component, because of the label.
 
+
+Theme solution:
+https://primitives.solidjs.community/package/start
+Use Marker in regex validations: https://primitives.solidjs.community/package/marker
+
+Great hooks:
+https://primitives.solidjs.community/package/memo#createLatest

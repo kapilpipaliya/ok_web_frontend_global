@@ -9,6 +9,8 @@ import { replaceExpressionToLabel } from "~/cypher/get/traverse";
 import type { ServerResult } from "./ServerResult";
 import { mutateData } from "../mutate/mutate_api/mutateData";
 import { getSessionForSubdomain } from "./getSessionForSubdomain";
+import { int } from "neo4j-driver";
+import { convertNodeToJson } from "~/lib/convertNodeToJson";
 
 export async function getSelectionOptionsMGCall(
   vertex: Vertex[],
@@ -20,7 +22,22 @@ export async function getSelectionOptionsMGCall(
   const session = await getSessionForSubdomain();
   const tx = session.beginTransaction();
   if (mutationData) {
-    await mutateData(mutationData, tx);
+    const mutationResult = await mutateData(mutationData, tx);
+    if (mutationResult.error) {
+      return { error: true };
+    }
+    const newId = mutationResult.clientToServerVertexIdMap.get(vertex[0].id);
+    if (newId) {
+      const query = "MATCH (v) WHERE id(v) = $id RETURN v";
+      const params = { id: int(newId) };
+      const result = await tx.run(query, params);
+      if (result.records.length === 0) {
+        return {
+          error: true,
+        };
+      }
+      vertex[0] = convertNodeToJson(result.records[0].get("v"));
+    }
   }
   const nodes: { [key: string]: Vertex } = {};
   const relationships: { [key: string]: Edge } = {};
