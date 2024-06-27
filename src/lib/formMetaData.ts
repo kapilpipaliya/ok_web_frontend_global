@@ -374,7 +374,7 @@ export const FormMetaData: { [key: string]: IFormMetaData } = {
               {
                 name: "value",
                 meta: "->$0Name->$0Comp<-CompChild->$0Prop++->$0Name->$0Comp->$0Prop",
-                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P[IdAttr]'",
+                component: "->$0Name->$0Comp<-CompChild::'P.name'||->$0Name->$0Comp::'P.name'",
               },
             ],
           },

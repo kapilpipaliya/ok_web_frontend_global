@@ -12,12 +12,12 @@ import {
   Switch,
   useContext,
 } from "solid-js";
-
+import { createWritableMemo } from "@solid-primitives/memo";
 import { toTitle } from "case-switcher-js";
 import {
   mergeVertexProperties,
 } from "~/lib/graph/mutate/vertex";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, Id, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { DynamicComponent } from "~/components/form/DynamicComponent";
 
@@ -47,6 +47,9 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getLastItem } from "~/components/page_attr_render/utils/getLastItem";
 import { AddNewButton } from "../grid/AddNew";
+import { commitTxn } from "~/lib/graph/transaction";
+import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
+import { isValidResponse } from "./isValidResponse";
 
 export function TableInputField(
   props: ComponentProps & {
@@ -59,7 +62,7 @@ export function TableInputField(
   const { showErrorToast } = useToast();
   const [graph, setGraph] = useContext(GraphContext)!;
   // if there is no parent FormContext, it should still work.
-  const { cleanUpConfig } = useContext(FormContext);
+  const { txnId: formTxnId, cleanUpConfig } = useContext(FormContext);
   const outerOwner = getOwner();
   const [sortedVertexes, setSortedVertexes] = createSignal([] as Vertex[]);
 
@@ -122,15 +125,6 @@ export function TableInputField(
         }
     };
 
-    const getComponent = (columnId: any) => {
-        const metaVertex = getMetaVertex(columnId);
-        if (metaVertex.P.component.includes("-")) {
-          return getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex.P.component).vertexes || getStringComponent(graph)?.P.name;
-        } else {
-          return metaVertex.P.component;
-      }
-    };
-
     // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
     const rowColumnsMetaAttrs = createMemo(() => tableColumnsTemplate().filter((vertex) => vertex.P.tab !== "expand"));
     const expandVertex = createMemo(() => tableColumnsTemplate()?.find((vertex) => vertex.P.tab === "expand"));
@@ -140,8 +134,25 @@ export function TableInputField(
     const DisplayProperties = () => (
       <For each={rowColumnsMetaAttrs()}>
         {(column) => {
+              const getComponent = (columnId: Id) => {
+                const metaVertex = getMetaVertex(columnId);
+                if (metaVertex.P.component.includes("-")) {
+                  createComputed(on(() => getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex.P.component).vertexes, async (vertexes) => {
+                    const mutationData = formTxnId ? commitTxn(formTxnId, graph) : undefined;
+                    const res = await getSelectionOptionsMGCall([p.joinVertex], metaVertex.P.component, mutationData);
+                    console.log("res", res);
+                    if (isValidResponse(res) && typeof res.result === "string") {
+                      setComponent(res.result);
+                    } else {
+                      setComponent(getStringComponent(graph)?.P.name);
+                    }
+                  }));
+                } else {
+                  return metaVertex.P.component;
+              }
+            };
           const metaVertex = createMemo(() => getMetaVertex(column.id));
-          const component = createMemo(() => getComponent(column.id));
+          const [component, setComponent] = createWritableMemo(() => getComponent(column.id));
 
           const DefaultValue = () => (
             <Show when={metaVertex().P.defaultValue}>
