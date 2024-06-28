@@ -12,8 +12,6 @@ export async function handleInsert(insert: any, tx: any, clientToServerVertexIdM
       txnResult.push({ insert: [oldId, id] });
     }
   } catch (error) {
-    tx.rollback();
-    console.error("Failed to execute insert query:", error);
     throw new Error(`Can't insert due to an internal server error: ${error}`);
   }
 }

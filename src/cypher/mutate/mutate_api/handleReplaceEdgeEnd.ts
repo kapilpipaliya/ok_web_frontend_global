@@ -28,8 +28,6 @@ export async function handleReplaceEdgeEnd(replaceEdgeEnd: any, tx: any, clientT
       txnResult.push({ replaceEdgeEnd: { error: false } });
     }
   } catch (error) {
-    tx.rollback();
-    console.error("Failed to execute replace edge end query:", error);
     throw new Error(`Can't replace edge end due to an internal server error: ${error}`);
   }
 }

@@ -44,7 +44,7 @@ Page Designer:
 11. [Obvious] Make the forms made using form designer load and save working
 12. [Obvious] Make a custom forms builder using the original forms.
 13. [Obvious] Make a table designer using the forms fields.
-14. [Obvious] Fix Sublist not visible in this page: https://www.easyformforge.com/admin/Book/2179 also it is not visible in this page: https://www.easyformforge.com/admin/Comp/29 
+14. [Obvious] Fix Now collection edit page is broken: https://www.easyformforge.com/admin/Book/2179
 15. [Not Obvious] On double click add element at last - last in selected layout?  ✅ 
 16. [Obvious] Make sure all path expression are working in page designer.
 17. [Obvious] Make Working Forms using Page Designer.

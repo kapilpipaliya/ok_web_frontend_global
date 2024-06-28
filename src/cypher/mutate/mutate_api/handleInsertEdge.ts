@@ -28,8 +28,6 @@ export async function handleInsertEdge(insertEdge: any, tx: any, clientToServerV
       txnResult.push({ insertEdge: [oldId, edgeId] });
     }
   } catch (error) {
-    tx.rollback();
-    console.error("Failed to execute insert edge query:", error);
     throw new Error(`Can't insert edge due to an internal server error: ${error}`);
   }
 }

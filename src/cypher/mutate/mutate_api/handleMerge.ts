@@ -14,8 +14,6 @@ export async function handleMerge(merge: any, tx: any, clientToServerVertexIdMap
       txnResult.push({ merge: { id, error: false } });
     }
   } catch (error: any) {
-    tx.rollback();
-    console.error("Failed to execute merge query:", error);
     throw new Error(`Can't merge due to an internal server error: ${error.message}`);
   }
 }

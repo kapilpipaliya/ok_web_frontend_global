@@ -13,9 +13,8 @@ export async function POST({ request }: APIEvent) {
     const res = await mutateData(data, tx);
     await tx.commit();
     return res;
-  } catch (error) {
+  } catch (error: any) {
     await tx.rollback();
-    console.error("Failed to save data:", error);
     return { error: 'Transaction failed: ' + error.message };
   } finally {
     await tx.close();

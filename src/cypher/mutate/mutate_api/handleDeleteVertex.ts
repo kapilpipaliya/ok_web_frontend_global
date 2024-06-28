@@ -9,8 +9,6 @@ export async function handleDeleteVertex(deleteVertex: any, tx: any, clientToSer
     await tx.run(query, { id: int(id) });
     txnResult.push({ deleteVertex: { id, error: false } });
   } catch (error: any) {
-    tx.rollback();
-    console.error("Failed to execute delete vertex query:", error);
     throw new Error(`Can't delete vertex due to an internal server error: ${error.message}`);
   }
 }

@@ -14,8 +14,6 @@ export async function handleReplace(replace: any, tx: any, clientToServerVertexI
       txnResult.push({ replace: { id, error: false } });
     }
   } catch (error: any) {
-    tx.rollback();
-    console.error("Failed to execute replace query:", error);
     throw new Error(`Can't replace due to an internal server error: ${error.message}`);
   }
 }

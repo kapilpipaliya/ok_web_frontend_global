@@ -16,33 +16,35 @@ export async function getSelectionOptionsMGCall(
   vertex: Vertex[],
   collection: string,
   mutationData?: any,
+  maxRetries?: number,
   strict?: boolean,
 ): Promise<Partial<ServerResult> & { error: boolean }> {
   "use server";
   const session = await getSessionForSubdomain();
   const tx = session.beginTransaction();
-  if (mutationData) {
-    const mutationResult = await mutateData(mutationData, tx);
-    if (mutationResult.error) {
-      return { error: true };
-    }
-    const newId = mutationResult.clientToServerVertexIdMap.get(vertex[0].id);
-    if (newId) {
-      const query = "MATCH (v) WHERE id(v) = $id RETURN v";
-      const params = { id: int(newId) };
-      const result = await tx.run(query, params);
-      if (result.records.length === 0) {
-        return {
-          error: true,
-        };
-      }
-      vertex[0] = convertNodeToJson(result.records[0].get("v"));
-    }
-  }
-  const nodes: { [key: string]: Vertex } = {};
-  const relationships: { [key: string]: Edge } = {};
-  collection = await replaceExpressionToLabel(collection, vertex[0]);
   try {
+    if (mutationData) {
+      const mutationResult = await mutateData(mutationData, tx, maxRetries);
+      if (mutationResult.error) {
+        return { error: true };
+      }
+      const newId = mutationResult.clientToServerVertexIdMap.get(vertex[0].id);
+      if (newId) {
+        const query = "MATCH (v) WHERE id(v) = $id RETURN v";
+        const params = { id: int(newId) };
+        const result = await tx.run(query, params);
+        if (result.records.length === 0) {
+          return {
+            error: true,
+          };
+        }
+        vertex[0] = convertNodeToJson(result.records[0].get("v"));
+      }
+    }
+    const nodes: { [key: string]: Vertex } = {};
+    const relationships: { [key: string]: Edge } = {};
+    collection = await replaceExpressionToLabel(collection, vertex[0]);
+
     const value = await evalAsync(jsep(collection), {
       vertexes: vertex,
       nodes,

@@ -28,8 +28,6 @@ export async function handleReplaceEdgeStart(replaceEdgeStart: any, tx: any, cli
       txnResult.push({ replaceEdgeStart: { error: false } });
     }
   } catch (error) {
-    tx.rollback();
-    console.error("Failed to execute replace edge start query:", error);
     throw new Error(`Can't replace edge start due to an internal server error: ${error}`);
   }
 }

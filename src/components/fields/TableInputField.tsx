@@ -85,19 +85,19 @@ export function TableInputField(
   const [dragToIndex, setDragToIndex] = createSignal<number | null>(null);
   const [dragFromIndex, setDragFromIndex] = createSignal<number | null>(null);
 
-    const handleDrop = () => {
-      if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
-        const updatedRows = [...sortedVertexes()];
-        const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
-        updatedRows.splice(dragToIndex()!, 0, draggedRow);
-        setSortedVertexes(updatedRows);
-        updatedRows.forEach((vertex, index) => {
-          mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, { pos: index + 1 });
-        });
-      }
-      setDragFromIndex(null);
-      setDragToIndex(null);
-    };
+  const handleDrop = () => {
+    if (dragFromIndex() !== null && dragToIndex() !== null && dragFromIndex() !== dragToIndex()) {
+      const updatedRows = [...sortedVertexes()];
+      const [draggedRow] = updatedRows.splice(dragFromIndex()!, 1);
+      updatedRows.splice(dragToIndex()!, 0, draggedRow);
+      setSortedVertexes(updatedRows);
+      updatedRows.forEach((vertex, index) => {
+        mergeVertexProperties(props.txnId!, vertex.id, graph, setGraph, { pos: index + 1 });
+      });
+    }
+    setDragFromIndex(null);
+    setDragToIndex(null);
+  };
 
   // Todo dont allow duplicate value in the select field
   const SortableRow = (p: { joinVertex: Vertex; index: number }) => {
@@ -118,11 +118,11 @@ export function TableInputField(
     const getMetaVertex = (columnId: any) => {
       const instRes = instResult();
       const rowId = instRes?.P?.rows[columnId];
-        if (rowId !== undefined && graph.vertexes[rowId]) {
-          return graph.vertexes[rowId];
-        } else {
-          return { P: { component: "Error" } } as unknown as Vertex;
-        }
+      if (rowId !== undefined && graph.vertexes[rowId]) {
+        return graph.vertexes[rowId];
+      } else {
+        return { P: { component: "Error" } } as unknown as Vertex;
+      }
     };
 
     // const attributesResult = createMemo(() => getChildVertexes(["AttrInst", "MetaAttr"], [p.joinVertex]));
@@ -134,23 +134,27 @@ export function TableInputField(
     const DisplayProperties = () => (
       <For each={rowColumnsMetaAttrs()}>
         {(column) => {
-              const getComponent = (columnId: Id) => {
-                const metaVertex = getMetaVertex(columnId);
-                if (metaVertex.P.component.includes("-")) {
-                  createComputed(on(() => getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex.P.component).vertexes, async (vertexes) => {
-                    const mutationData = formTxnId ? commitTxn(formTxnId, graph) : undefined;
-                    const res = await getSelectionOptionsMGCall([p.joinVertex], metaVertex.P.component, mutationData);
-                    console.log("res", res);
-                    if (isValidResponse(res) && typeof res.result === "string") {
-                      setComponent(res.result);
-                    } else {
-                      setComponent(getStringComponent(graph)?.P.name);
-                    }
-                  }));
-                } else {
-                  return metaVertex.P.component;
-              }
-            };
+          const outerOwner = getOwner();
+          const getComponent = (columnId: Id) => {
+            const metaVertex = getMetaVertex(columnId);
+            if (metaVertex.P.component.includes("-")) {
+              createComputed(on(() => getSelectionOptions(graph, setGraph, [p.joinVertex], metaVertex.P.component).vertexes, async (vertexes) => {
+                const mutationData = formTxnId ? commitTxn(formTxnId, graph) : undefined;
+                const res = await getSelectionOptionsMGCall([p.joinVertex], metaVertex.P.component, mutationData, 10);
+                console.log("res", res);
+
+                runWithOwner(outerOwner, () => {
+                  if (isValidResponse(res) && typeof res.result === "string") {
+                    setComponent(res.result);
+                  } else {
+                    setComponent(getStringComponent(graph)?.P.name);
+                  }
+                });
+              }));
+            } else {
+              return metaVertex.P.component;
+            }
+          };
           const metaVertex = createMemo(() => getMetaVertex(column.id));
           const [component, setComponent] = createWritableMemo(() => getComponent(column.id));
 
@@ -291,7 +295,7 @@ export function TableInputField(
         {/*  <FormGroup form={{title: '', label: props.meta.P.title || props.meta.P[IdAttr], attributes: props.meta.P.attributes}} vertex={vertex}/>*/}
         {/*</Show>*/}
         {/* <Show when={props.isTableInside}> */}
-          <AddNewButton onClick={() => insertNewRow()} />
+        <AddNewButton onClick={() => insertNewRow()} />
         {/* </Show> */}
         {/*<DataTable rows={sortedVertexes()} headers={tableColumnsTemplate()}/>*/}
         <div class={"overflow:auto r:10 m:2"} style={{ 'border': sortedVertexes().length ? '1px solid #37c' : '', "scrollbar-width": "thin" }}>

@@ -23,8 +23,6 @@ export async function handleDeleteEdge(deleteEdge: any, tx: any, clientToServerV
       txnResult.push({ deleteEdge: { error: false } });
     }
   } catch (error) {
-    tx.rollback();
-    console.error("Failed to execute delete edge query:", error);
     throw new Error(`Can't delete edge due to an internal server error: ${error}`);
   }
 }
