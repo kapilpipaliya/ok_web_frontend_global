@@ -3,6 +3,9 @@ import {getSubDomain} from "~/server/getSubDomain";
 import {getDriver} from "~/cypher/driver";
 import {type Session, types} from "neo4j-driver";
 import {convertNodeToJson, convertRelationshipToJson} from "~/lib/convertNodeToJson";
+import { FormMetaData } from "~/lib/formMetaData";
+import { getEdgesFromRowsAttr } from "~/lib/getEdgesFromRowsAttr";
+import { getDataMGCall } from "~/cypher/get/getDataMGCall";
 
 type JsonData = Record<string, any>;
 // exporting this function breaks the api
@@ -31,16 +34,17 @@ async function getInitialData(args: {
     nodeObj,
     relationshipObj,
   );
-  await fetchFromMGAndSaveToArray(
-    session,
-    `MATCH (n:Comp)
-      OPTIONAL MATCH (n)-[r]->(m)
-      OPTIONAL MATCH (m)-[o]->(p)
-      RETURN n, r, m, o, p`,
-    {},
-    nodeObj,
-    relationshipObj,
-  );
+  const form = FormMetaData.Comp;
+  const { incoming, outgoing } = getEdgesFromRowsAttr(form.attributes);
+  const result = await getDataMGCall({
+    expression: `g:'Comp'`,
+    incoming,
+    outgoing,
+  });
+  if (result.graph) {
+    Object.assign(nodeObj, result.graph.vertexes);
+    Object.assign(relationshipObj, result.graph.edges);
+  }
 
   await session.close();
   return {

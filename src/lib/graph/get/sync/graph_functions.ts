@@ -287,14 +287,13 @@ export function getMetaProps(
     const metaData = getComponentProperties(graph, setGraph, metaRows);
     results.push(metaData);
   }
-  const a = results.reduce(
+  return results.reduce(
     (acc, curr) => {
       Object.assign(acc, curr);
       return acc;
     },
     {} as { [key: string]: any },
   );
-  return a;
 }
 
 export function getPkForCollection(
