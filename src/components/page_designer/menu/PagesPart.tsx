@@ -19,7 +19,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
 import { PageViewWrapper } from "~/pages/PageViewWrapper";
-import { onClickAddComponent } from "../CommonCompUtils";
+import { onClickAddComponent } from "../../../lib/drag_drop/onClickAddComponent";
 import { DropdownMenu } from "~/components/DropdownMenu";
 
 export function PagesPart(props: { coll: string }) {

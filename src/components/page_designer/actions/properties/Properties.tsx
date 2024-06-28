@@ -47,12 +47,17 @@ export function Properties(props: { setShowDrawer?: any }) {
 //   revertTransaction,
 // } from "~/lib/graph/transaction";
 // import JsxParser from "~/lib/jsx_parser/components/JsxParser";
-// import { useExpansion } from "../../CommonCompUtils";
 // import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 // import { getTreeData } from "~/lib/graph/get/sync/traverse";
 // import { FormMetaData } from "~/lib/formMetaData";
 // import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
 // import {FormGroupProperties} from "~/pages/drag_drop/actions/FormGroupProperties";
+
+// export function useExpansion(defaultValue = true) {
+//   const [expanded, setExpanded] = createSignal(defaultValue);
+//   const toggleExpansion = () => setExpanded(!expanded());
+//   return [expanded, toggleExpansion];
+// }
 
 // export function Properties(props: { setShowDrawer?: any }) {
 //   const [pageConfig, setPageConfig] = useContext(PageConfigContext);

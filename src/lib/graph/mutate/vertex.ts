@@ -20,18 +20,6 @@ export function newVertex(
   return { id, L: labels, P: properties || {}, IN: {}, OUT: {} };
 }
 
-export function addNewVertexUnSafe(
-  vertex: Vertex,
-  setGraph: SetStoreFunction<GraphInterface>,
-) {
-  setGraph("vertexes", vertex.id, vertex);
-  vertex.L.forEach((label) =>
-    setGraph("vertexLabelIdMap", label, (vertexIds: any) =>
-      Array.isArray(vertexIds) ? [...vertexIds, vertex.id] : [vertex.id],
-    ),
-  );
-}
-
 // add a new vertex to the graph
 export function addNewVertex(
   txnId: number,

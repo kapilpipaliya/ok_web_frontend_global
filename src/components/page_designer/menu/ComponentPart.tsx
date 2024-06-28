@@ -17,7 +17,7 @@ import {
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { onClickAddComponent } from "../CommonCompUtils";
+import { onClickAddComponent } from "../../../lib/drag_drop/onClickAddComponent";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { iconMap } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
