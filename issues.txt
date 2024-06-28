@@ -10,6 +10,7 @@ Test:--------------------------
  [Obvious] Delete extra properties from components. make sure each property is working. note not working properties.
 
 📝 Todo :------------------------------------------------------------------------------------------
+add support for options with ,
 1. [Obvious] Add query parameter in grid url for pagination
 2. [Not Obvious] I refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
 3. [Obvious] Fix import export button on the form

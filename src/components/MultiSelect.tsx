@@ -45,7 +45,7 @@ export function MultiSelectField(props: {
     value?: any;
     label?: any;
   }, property: 'value' | 'label') => {
-    if (props.displayValueParent && props.displayValueChild) {
+    if (typeof option === "object" && props.displayValueParent && props.displayValueChild) {
       return (
         option[props.displayValueParent]?.[props.displayValueChild] ||
         option[props.displayValueParent]?.name
@@ -158,7 +158,8 @@ export function MultiSelectField(props: {
 
     return (
       <Portal mount={document.body}>
-        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto" style={{
+        {/* z-index greater than drawers z-index */}
+        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:21" style={{
           position: position.strategy,
           top: `${position.y ?? 0}px`,
           left: `${position.x ?? 0}px`,

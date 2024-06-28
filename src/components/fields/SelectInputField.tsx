@@ -30,6 +30,8 @@ import { FormContext } from "~/lib/contexts";
 import { getSelectionOptionsMGCall } from "~/cypher/get/getSelectionOptionsMGCall";
 import { selectedValue } from "./selectedValue";
 import { isValidResponse } from "./isValidResponse";
+import { ifNotNull } from "~/lib/utils";
+import { ensureArray } from "./ensureArray";
 
 // displayExpr is required when meta.P.collection is complex
 export function SelectInputField(
@@ -69,21 +71,21 @@ export function SelectInputField(
   };
 
   const loadOptions = async () => {
-    let options = [];
-    if (props.meta.P.items) {
-      options = getStaticOptions(props.meta.P.items);
+    let parsedOptions = [];
+    if (props.meta.P.options) {
+      parsedOptions = getStaticOptions(props.meta.P.options);
     } else if (props.disabled) {
-      options = getSelectedOptions();
+      parsedOptions = getSelectedOptions();
     } else if (getCollection()) {
       setLoading(true);
       const mutationData = props.txnId ? commitTxn(props.txnId, graph) : undefined;
       const res = await getSelectionOptionsMGCall([props.data as Vertex], getCollection(), mutationData, 10);
       if (isValidResponse(res)) {
-        options = res.result || [];
+        parsedOptions = res.result || [];
       }
       setLoading(false);
     }
-    setOptions(options);
+    setOptions(parsedOptions);
   };
 
   function getComponent() {
@@ -96,52 +98,55 @@ export function SelectInputField(
 
   const outerOwner = getOwner();
 
-  const onChangeSelect = (e: Vertex[], isRemove: any) => {
-    let data: Id[] | Id;
-    if (isRemove && getComponent() === "SelectBox") {
-      data = [];
-    } else if (getComponent() === "SelectBox") {
-      data = e[0].id;
-    } else {
-      data = e.map((e) => e.id);
-    }
+  const onChangeSelect = (value: Vertex[], isRemove: any) => {
     runWithOwner(outerOwner, () => {
       batch(() => {
-        if (!data) return;
+        if (!value) return;
         if (props.isRealTime) {
           props.txnId = getNewTxnId(graph, setGraph);
         }
-        if (props.meta.P.stringValue || props.meta.P.items) {
+        if (props.meta.P.options) {
+          const parsedValue = getComponent() === "SelectBox" ? value[0] : value;
           props.setValue
-            ? props.setValue(data)
+            ? props.setValue(parsedValue)
             : setValueGlobal(
               graph,
               setGraph,
               props.txnId!,
               props.meta,
               props.data!,
-              data,
+              parsedValue,
               Ws,
               false,
             );
-        } else if (props.meta.P.inward) {
-          setParentValue(
-            graph,
-            setGraph,
-            props.txnId ?? 0,
-            props.data!,
-            props.meta,
-            data,
-          );
         } else {
-          setSelectionValue(
-            props.txnId ?? 0,
-            props.data!,
-            graph,
-            setGraph,
-            props.meta,
-            data,
-          );
+          let data: Id[] | Id;
+          if (isRemove && getComponent() === "SelectBox") {
+            data = [];
+          } else if (getComponent() === "SelectBox") {
+            data = value[0].id;
+          } else {
+            data = value.map((e) => e.id);
+          }
+          if (props.meta.P.inward) {
+            setParentValue(
+              graph,
+              setGraph,
+              props.txnId ?? 0,
+              props.data!,
+              props.meta,
+              data,
+            );
+          } else {
+            setSelectionValue(
+              props.txnId ?? 0,
+              props.data!,
+              graph,
+              setGraph,
+              props.meta,
+              data,
+            );
+          }
         }
         onChangeHandler(
           props.txnId ?? 0,
@@ -181,10 +186,15 @@ export function SelectInputField(
           selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
           displayValueChild="displayName"
           displayValueParent="P"
-          selectedValues={() =>
-            selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
-              return graph.vertexes[id];
-            })
+          selectedValues={() => {
+            if (!props.meta.P.options) {
+              return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
+                return graph.vertexes[id];
+              });
+            } else {
+              return ensureArray(ifNotNull(props.data?.P[props.meta.P[IdAttr]]));
+            }
+          }
           }
           disable={props.disabled}
           options={options()}

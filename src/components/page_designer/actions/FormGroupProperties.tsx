@@ -10,6 +10,9 @@ import { ValidationConfig } from "./ValidationConfig";
 import { PageConfigContext, SelectedComponentContext } from "~/lib/contexts";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
+import {getMetaProps} from "~/lib/graph/get/sync/graph_functions";
+import { FormMetaData } from "~/lib/formMetaData";
+import { createWritableMemo } from "@solid-primitives/memo";
 
 
 interface FormGroupPropertiesProps {
@@ -81,14 +84,35 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
       <For each={moveClassToLast(props.metaAttributes)}>
         {(metaVertex) => {
           const id = `${props.selectedLayout.id + metaVertex.P[IdAttr]}Label`;
+          const form = FormMetaData.Comp;
+          const propAttribute = form.attributes.find(attr => attr.name === "Prop")!;
+          const valueAttribute = propAttribute.attributes!.find(attr => attr.name === "value")!;
+          const [meta, setMeta] = createWritableMemo(() => {
+            const P = {
+              ...metaVertex.P,
+              meta: valueAttribute.meta,
+              component: valueAttribute.component
+            }
+            return { ...metaVertex, P };
+          });
+
+
           const component = createMemo(() =>
             getComponentForCollRow(
-              metaVertex,
-              props.selectedLayout,
+              meta(),
+              meta(),
               graph,
               setGraph,
             ),
           );
+          const metaProps = getMetaProps(graph, setGraph, meta(), meta());
+          const P = {
+            ...meta().P,
+            ...metaProps
+          }
+         const v = { ...metaVertex, P };
+         setMeta(v);
+
           const Label = () => (
             <>
               {toTitle(
@@ -102,9 +126,9 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
           const Content = () => (
             <DynamicComponent
               component={component()}
-              meta={metaVertex}
+              meta={meta()}
               data={props.selectedLayout}
-              setValue={(data) => props.setValue(metaVertex, data)}
+              setValue={(data) => props.setValue(meta(), data)}
               // disabled={props.d}
               txnId={props.txnId}
               isRealTime={false}
@@ -119,7 +143,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
               <span class="flex:1 f:15">
                 <DynamicComponent
                   component={component()}
-                  meta={metaVertex}
+                  meta={meta()}
                   data={props.selectedLayout}
                   setValue={(data: string) => {
                     if (metaVertex.P.name === "name") {
