@@ -53,10 +53,21 @@ export function SelectInputField(
     props.meta.P.collection
   );
 
-  const getStaticOptions = (value: any) => {
-    if (typeof value === "string") return value.split("\n");
-    if (Array.isArray(value)) return value;
-    return value ? [value] : [];
+  const isCommaSeparated = () => props.meta.P.options?.includes(",");
+
+  const getStaticOptions = (options: string | { label: string; value: string; }[]) => {
+    if (typeof options === "string") {
+      const lines = options.split("\n");
+      return lines.map((item) => {
+        const [label, val] = item.split(",");
+        if (val === undefined) {
+          return !isCommaSeparated() ? label.trim() : { label: label.trim(), value: label.trim() };
+        }
+        return { label: label.trim(), value: val.trim() };
+      });
+    }
+    if (Array.isArray(options)) return options;
+    return options ? [options] : [];
   };
 
   const getSelectedOptions = () => {
@@ -106,7 +117,15 @@ export function SelectInputField(
           props.txnId = getNewTxnId(graph, setGraph);
         }
         if (props.meta.P.options) {
-          const parsedValue = getComponent() === "SelectBox" ? value[0] : value;
+          let parsedValue;
+          if (isRemove) {
+            parsedValue = null;
+          } else if (getComponent() === "SelectBox") {
+            // @ts-ignore
+            parsedValue = isCommaSeparated() ? value[0]["value"] : value[0];
+          } else {
+            parsedValue = value;
+          }
           props.setValue
             ? props.setValue(parsedValue)
             : setValueGlobal(
@@ -184,15 +203,21 @@ export function SelectInputField(
       >
         <MultiSelectField
           selectionLimit={getComponent() === "SelectBox" ? 1 : undefined}
-          displayValueChild="displayName"
-          displayValueParent="P"
+          displayValueChild={!isCommaSeparated() ? "displayName" : undefined}
+          displayValueParent={!isCommaSeparated() ? "P" : undefined}
           selectedValues={() => {
             if (!props.meta.P.options) {
               return selectedValue(props.meta, props.data as Vertex, graph).map((id) => {
                 return graph.vertexes[id];
               });
             } else {
-              return ensureArray(ifNotNull(props.data?.P[props.meta.P[IdAttr]]));
+              const value = props.data?.P[props.meta.P[IdAttr]];
+              if(!value) return [];
+              if (!Array.isArray(value) && isCommaSeparated() && getComponent() === "SelectBox") {
+                const option = getStaticOptions(props.meta.P.options).find((option) => (value?.value || value) === option.value);
+                return option ? [option] : [{label: value, value}];
+              }
+              return ensureArray(value);
             }
           }
           }
