@@ -10,14 +10,14 @@ Test:--------------------------
  [Obvious] Delete extra properties from components. make sure each property is working. note not working properties.
 
 📝 Todo :------------------------------------------------------------------------------------------
+Major Feature:
+1. [Obvious] Make Permissions working in DynamicForm component.
+
 add support for options with ,
 1. [Obvious] Add query parameter in grid url for pagination
-2. [Not Obvious] I refactor components/dynamic/fields/input/SelectInputField.tsx but in this page  https://www.easyformforge.com/admin/Comp/13  in the table data type is not now selected, i will fix it latter.
-3. [Obvious] Fix import export button on the form
-4. [Obvious] Collection edit page is broken.
-5. [Obvious] Make automatic backup for all the users everyday
 6. [Obvious] Fix Inline Editing Modal not close in list page.
-7. [Obvious] Make Permissions working in DynamicForm component.
+3. [Low] Fix import export button on the form
+
 
 http://localhost:3001/admin/Comp/28 cant delete name
 http://localhost:3001/admin/Comp/36
@@ -70,6 +70,7 @@ Backend:
 6. [Obvious] Make Nav sync full data. (IMP)
 7. [Obvious] Make two copies of website always working .com will always run and .in will be used for development. Both copy should work together with same files.
 8. [Obvious] When user upload a file, also save entry in the database.
+5. [Obvious] Make automatic backup for all the users everyday
 
 Auth:
 1. [Obvious] Only display List Page if user has permissions. only return attributes that has permissions. Send joins only if both endpoints are authorized.

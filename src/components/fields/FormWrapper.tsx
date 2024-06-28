@@ -1,16 +1,16 @@
 import type { ComponentProps } from "~/components/fields/ComponentType";
 import { Show, useContext } from "solid-js";
 import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
+import { GraphContext, GraphInterface, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { useToast } from "~/components/Toast";
 import { useNavigate } from "@solidjs/router";
 import { commitTxn, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import { FormContext } from "~/lib/contexts";
-import { createStore } from "solid-js/store";
+import { Store, createStore } from "solid-js/store";
 import { createForm } from "~/lib/graph/mutate/form/createForm";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
-import { isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
+import { getFormMetaData, isAnyFieldInvalid } from "~/lib/drag_drop/getChildrenAttrs";
 
 export function FormWrapper(
   props: ComponentProps & {
@@ -29,7 +29,6 @@ export function FormWrapper(
 
   // const [dataVertex, setDataVertex] = createSignal<Vertex>();
   // const [metaVertex, setMetaVertex] = createSignal<Vertex>();
-
 
   const [formData, setFormData] = createStore({
     txnId,
@@ -50,7 +49,12 @@ export function FormWrapper(
 
   // if (!props.data?.id) {
 
-  const createResult = createForm(graph, setGraph, txnId, Ws, props.label ?? props.meta!.P[IdAttr]);
+  const form = getFormMetaData(graph as Store<GraphInterface>, () => { }, props.meta!);
+  const defaultValues = form.attributes.reduce((acc, attr) => {
+    acc[attr.name] = attr.defaultValue;
+    return acc;
+  }, {} as { [key: string]: any });
+  const createResult = createForm(graph, setGraph, txnId, Ws, props.label ?? props.meta!.P[IdAttr], defaultValues);
   if (createResult.error) return createResult.error;
   setFormData('formData', createResult.vertex!);
 

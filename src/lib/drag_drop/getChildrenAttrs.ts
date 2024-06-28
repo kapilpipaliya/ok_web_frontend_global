@@ -28,6 +28,7 @@ export function getFormMetaData(graph: Store<GraphInterface>, setGraph: SetStore
     const component = getComponent(graph, vertex)?.P.name;
     if (genericInputComponents.includes(component)) {
       result.push({
+        ...vertex.P,
         name: vertex.P.name,
         title: parentComponent === "Label" ? parent.P.label : vertex.P.title,
         component: component,

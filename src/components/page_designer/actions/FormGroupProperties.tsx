@@ -10,7 +10,7 @@ import { ValidationConfig } from "./ValidationConfig";
 import { PageConfigContext, SelectedComponentContext } from "~/lib/contexts";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
-import {getMetaProps} from "~/lib/graph/get/sync/graph_functions";
+import { getMetaProps } from "~/lib/graph/get/sync/graph_functions";
 import { FormMetaData } from "~/lib/formMetaData";
 import { createWritableMemo } from "@solid-primitives/memo";
 
@@ -31,21 +31,22 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
 
   const nameVertexId = `nameVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;
+  const defaultValueVertexId = `defaultValueVertex${createUniqueId()}`;
 
-  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { name: 'name', displayName: 'Unique Name', class: 'border:1px|solid|#ccc p:2' }), graph, setGraph);
+  addNewVertex(0, newVertex(nameVertexId, ["MetaTemp"], { name: 'name', displayName: 'Unique Name', class: 'border:1px|solid|#ccc p:2', component :"TextBox" }), graph, setGraph);
   addNewVertex(0, newVertex(classVertexId, ["MetaTemp"], { name: 'class', displayName: 'Class' }), graph, setGraph);
+  addNewVertex(0, newVertex(defaultValueVertexId, ["MetaTemp"], { name: 'defaultValue', displayName: 'Default Value' }), graph, setGraph);
 
   function moveClassToLast(vertices: Vertex[]) {
-    // const nameVertex = vertices.filter(vertex => vertex.P.name === 'name');
-    // const classVertex = vertices.filter(vertex => vertex.P.name === 'class');
-    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class');
+    const otherVertices = vertices.filter(vertex => vertex.P.name !== 'name' && vertex.P.name !== 'class' && vertex.P.name !== 'defaultValue');
 
-    return [graph.vertexes[nameVertexId], ...otherVertices, graph.vertexes[classVertexId]];
+    return [graph.vertexes[nameVertexId], graph.vertexes[defaultValueVertexId], ...otherVertices, graph.vertexes[classVertexId]];
   }
 
   onCleanup(() => {
     deleteVertex(0, nameVertexId, graph, setGraph);
     deleteVertex(0, classVertexId, graph, setGraph);
+    deleteVertex(0, defaultValueVertexId, graph, setGraph);
   });
 
   return (
@@ -110,8 +111,8 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
             ...meta().P,
             ...metaProps
           }
-         const v = { ...metaVertex, P };
-         setMeta(v);
+          const v = { ...metaVertex, P };
+          setMeta(v);
 
           const Label = () => (
             <>
@@ -135,6 +136,18 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
             />
           );
 
+          const DefaultValueContent = () => (
+            <DynamicComponent
+              component={graph.vertexes[selectedComponent()!.vertexId].P.name}
+              meta={graph.vertexes[selectedComponent()!.vertexId]}
+              data={props.selectedLayout}
+              setValue={(data) => props.setValue(meta(), data)}
+              // disabled={props.d}
+              txnId={props.txnId}
+              isRealTime={false}
+            />
+          );
+
           const UniqueNameField = () => (
             <div class={`flex gap:2 mt:6 justify-content:space-between ai:center ${props.selectedLayout?.P[metaVertex.P[IdAttr]] !== undefined && props.selectedLayout?.P[metaVertex.P[IdAttr]] !== null ? 'b:2px|solid|#008000 p:2|3 r:5 bt:none bb:none' : ''}`}>
               <span class="flex:.5 f:15" id={id}>
@@ -142,7 +155,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
               </span>
               <span class="flex:1 f:15">
                 <DynamicComponent
-                  component={component()}
+                  component={"TextBox"}
                   meta={meta()}
                   data={props.selectedLayout}
                   setValue={(data: string) => {
@@ -204,7 +217,14 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                     <Label />
                   </span>
                   <span class="flex:1 f:15">
-                    <Content />
+                    <Switch>
+                      <Match when={metaVertex.P.name === "defaultValue"}>
+                        <DefaultValueContent />
+                      </Match>
+                      <Match when={true}>
+                        <Content />
+                      </Match>
+                    </Switch>
                     {/* Select Rules: */}
                     {/*<SelectInputField*/}
                     {/* component={"SelectBox"}*/}
