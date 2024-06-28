@@ -12,14 +12,13 @@ Test:--------------------------
 📝 Todo :------------------------------------------------------------------------------------------
 Major Feature:
 1. [Obvious] Make Permissions working in DynamicForm component.
-
-add support for options with ,
 1. [Obvious] Add query parameter in grid url for pagination
 3. [Low] Fix import export button on the form
+
+Legacy Form:
 14. [Obvious] Fix Now collection edit page is broken: https://www.easyformforge.com/admin/Book/2179
 
 Page Designer:
-2. [Not Obvious] Form builder preview width is not proper.
 4. [Not Obvious] Make Position working from form configuration, instead of global settings.
    Get Form Properties Using Context and use it.
 5. [Obvious] When table is not visible user cant drop above or below the table from canvas.

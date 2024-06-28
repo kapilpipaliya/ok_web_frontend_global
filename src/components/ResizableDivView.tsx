@@ -6,17 +6,22 @@ export function ResizableContainer(props: {
 }) {
   const [width, setWidth] = createSignal("");
   const [height, setHeight] = createSignal("calc(100vh - 70px)");
+  const DIMENSIONS = {
+    mobile: { width: "360px", height: "570px" },
+    tablet: { width: "768px", height: "1026px" },
+    desktop: { width: "100%", height: "1200px" }
+  };
 
   createEffect(() => {
     if (props.view() === "Mobile") {
-      setWidth("400px");
-      setHeight("570px");
+      setWidth(DIMENSIONS.mobile.width);
+      setHeight(DIMENSIONS.mobile.height);
     } else if (props.view() === "Tablet") {
-      setWidth("75%");
-      setHeight("1026px");
+      setWidth(DIMENSIONS.tablet.width);
+      setHeight(DIMENSIONS.tablet.height);
     } else {
-      setWidth("");
-      setHeight("889px");
+      setWidth(DIMENSIONS.desktop.width);
+      setHeight(DIMENSIONS.desktop.height);
     }
   });
 
@@ -48,19 +53,26 @@ export function ResizableContainer(props: {
   // };
 
   return (
-    <div
-      class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"
-      style={`${width() ? `width:${width()};` : ""} height: ${height()}; max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
-    >
-      {/*<div
+    <div class="grid overflow:auto"
+      classList={{
+        "jc:center": props.view() !== "Desktop",
+        "min-h:80%": props.view() === "Mobile",
+        "min-h:100%": props.view() === "Tablet"
+      }}>
+      <div
+        class="r:10|10|10|10 min-h:80% min-w:30% justify-self:center"
+        style={`${width() ? `width:${width()};` : ""} height: ${height()}; max-height:80vh;border: 2px solid lightgray; overflow: auto; position: relative;scrollbar-width:thin;scrollbar-color:lightgrey;`}
+      >
+        {/*<div
                     style={`width: 2px; height: ${height()}px; z-index:1; background-color: lightgrey; cursor: col-resize; position: absolute; right: 0;`}
                     onMouseDown={(e) => handleMouseDown(e, "horizontal")}
                 />*/}
-      {props.children}
-      {/*<div
+        {props.children}
+        {/*<div
                     style={`width: 100%; height: 2px; background-color: lightgrey; cursor: row-resize; position: absolute; bottom: 0;`}
                     onMouseDown={(e) => handleMouseDown(e, "vertical")}
                 />*/}
+      </div>
     </div>
   );
 }
