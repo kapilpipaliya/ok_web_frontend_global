@@ -159,7 +159,7 @@ export function MultiSelectField(props: {
     return (
       <Portal mount={document.body}>
         {/* z-index greater than drawers z-index */}
-        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:21" style={{
+        <div ref={setFloating} class="radius:5 bg:#f4f4f4 max-h:200px overflow:auto z-index:1001" style={{
           position: position.strategy,
           top: `${position.y ?? 0}px`,
           left: `${position.x ?? 0}px`,

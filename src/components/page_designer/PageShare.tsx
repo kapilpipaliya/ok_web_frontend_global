@@ -18,7 +18,10 @@ export function ShareSection() {
 
   const getLink = () => {
     if (pageConfig) {
-      return `https://www.easyformforge.com/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
+      const hostname = window.location.hostname;
+      const protocol = window.location.protocol;
+      const port = window.location.port ? `:${window.location.port}` : '';
+      return `${protocol}//${hostname}${port}/view/${pageConfig.formData.formData.L[0]}/${pageConfig.formData.formData.P.name}/new`;
     }
     return ""
   };

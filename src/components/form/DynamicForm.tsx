@@ -40,7 +40,6 @@ import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
 export interface DynamicFormProps {
   meta?: Vertex;
   id?: Id;
-  isDialogContext?: boolean;
   buttonAlign?: string;
   submitButton?: JSXElement;
   importExportButtons?: boolean;
@@ -51,6 +50,7 @@ export interface DynamicFormProps {
   formId: string;
   graph: Store<GraphInterface>;
   setGraph: SetStoreFunction<GraphInterface>;
+  closePopUp?: () => void;
 }
 
 export function DynamicForm(props: Readonly<DynamicFormProps>) {
@@ -167,7 +167,11 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       if (!isRealTime) {
         data = commitTxn(txnId, graph);
         if (!data) {
-          setTimeout(() => navigate(-1), 0);
+          if (props.closePopUp) {
+            props.closePopUp();
+          } else {
+            setTimeout(() => navigate(-1), 0);
+          }
           showWarningToast("Internal Server Error");
           return;
         }
@@ -193,7 +197,11 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           onSuccess: (value) => {
             graph.transactions.get(txnId)!.status = ProcessStatus.AckReceived;
             // currently we are navigating back.
-            setTimeout(() => navigate(-1), 500);
+            if (props.closePopUp) {
+              props.closePopUp();
+            } else {
+              setTimeout(() => navigate(-1), 500);
+            }
           },
         });
       }
@@ -202,7 +210,11 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       showWarningToast("please fix all errors");
     }
     if (!data) {
-      setTimeout(() => navigate(-1), 0);
+      if (props.closePopUp) {
+        props.closePopUp();
+      } else {
+        setTimeout(() => navigate(-1), 0);
+      }
       return;
     }
 
@@ -211,10 +223,12 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
 
   const onCancel = () => {
     revertTransaction(txnId, graph);
-    if (!props.isDialogContext) {
+    if (!props.closePopUp) {
       setTimeout(() => {
         navigate(-1);
       }, 0);
+    } else {
+      props.closePopUp();
     }
   };
 

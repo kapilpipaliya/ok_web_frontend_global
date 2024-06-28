@@ -15,26 +15,12 @@ Major Feature:
 
 add support for options with ,
 1. [Obvious] Add query parameter in grid url for pagination
-6. [Obvious] Fix Inline Editing Modal not close in list page.
 3. [Low] Fix import export button on the form
-
-
-http://localhost:3001/admin/Comp/28 cant delete name
-http://localhost:3001/admin/Comp/36
-http://localhost:3001/admin/Comp/1494
-http://localhost:3001/admin/Comp/1544
-Sometimes empty form is displayed
-
-Depend On Select:------------------
-3. [Obvious] Label Properties, Position is not coming as select. add support for specifying select options
-
 14. [Obvious] Fix Now collection edit page is broken: https://www.easyformforge.com/admin/Book/2179
 
 Page Designer:
 2. [Not Obvious] Form builder preview width is not proper.
-4. [Not Obvious] FormSetting move to form properties.
-   Need to make select with simple options working.
-   Add to Form Properties.
+4. [Not Obvious] Make Position working from form configuration, instead of global settings.
    Get Form Properties Using Context and use it.
 5. [Obvious] When table is not visible user cant drop above or below the table from canvas.
 6. [Obvious] Make CSS State for Responsive states. Add More options in the state.

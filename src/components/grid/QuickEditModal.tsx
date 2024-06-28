@@ -52,30 +52,29 @@ export const QuickEditModal = (p: {
             aria-modal="true"
             tabindex="-1"
           >
-            <div class={"mb:4 font-weight:bold"}>
+            <div class="mb:4 font-weight:bold">
               Quick Edit
               <button
-                title={"Close"}
+                title="Close"
                 onClick={closePopUp}
-                class={"bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5"}
-                style={{float: "right"}}
+                class="bg:lightgrey:hover r:5|5|5|5 p:0|5|0|5 float:right"
               >
                 ✕
               </button>
             </div>
-            <hr class={"fg:lightgrey"}/>
+            <hr class="fg:lightgrey"/>
 
-            <div class={"p:3 mt:10 max-h:50vh overflow:auto"}>
+            <div class="p:3 mt:10 max-h:50vh overflow:auto">
               <DynamicForm
                 formId={p.tableId}
                 graph={p.graph}
                 id={p.info.row.original.id}
                 buttonAlign="end"
-                isDialogContext={true}
                 showMainFieldsOnly={true}
                 importExportButtons={false}
                 doMount={false}
                 setGraph={p.setGraph}
+                closePopUp={closePopUp}
               />
             </div>
           </div>

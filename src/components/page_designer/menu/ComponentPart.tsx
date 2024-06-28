@@ -22,6 +22,7 @@ import { LoaderNew } from "~/components/LoaderSimple";
 import { iconMap } from "~/lib/constants";
 import { paginationExpression } from "~/lib/graph/get/sync/paginationExpression";
 import { getTreeDataMGCall } from "~/cypher/get/getTreeDataMGCall";
+import { OpenComponentSettings } from "../OpenComponentSettings";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
@@ -202,25 +203,7 @@ export function ComponentPart() {
         }}
       >
         <Show when={isHovered()}>
-          <Icon
-            onClick={() => {
-              const currentURL = window.location.href;
-              const navigateUrl = `${currentURL
-                .split("/")
-                .slice(0, -2)
-                .join("/")}/Comp/${props.child.id}`;
-              window.open(navigateUrl, "_blank");
-            }}
-            style={{
-              cursor: "pointer",
-              position: "absolute",
-              right: "3px",
-              top: "3px",
-            }}
-            icon={"solar:settings-linear"}
-            width={21}
-            height={21}
-          />
+          <OpenComponentSettings id={props.child.id} class="cursor:pointer position:absolute right:3px top:3px" />
         </Show>
         {/* @ts-ignore  */}
         <Show
