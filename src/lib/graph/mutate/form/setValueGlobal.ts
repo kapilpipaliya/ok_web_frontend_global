@@ -8,6 +8,7 @@ import type { SetStoreFunction, Store } from "solid-js/store";
 import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { onChangeHandler } from "./onChangeHandler";
 import { validateInput } from "~/components/page_designer/actions/validateInput";
+import { batch } from "solid-js";
 
 
 export function setValueGlobal(
@@ -29,24 +30,26 @@ export function setValueGlobal(
     txnId = getNewTxnId(graph, setGraph);
   }
   let error = "" as string | undefined;
-  if (metaVertex.P.validation) {
-    error = validateInput(metaVertex.P.validation, data);
-    mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
-      error: error || ""
+  batch(() => {
+    if (metaVertex.P.validation) {
+      error = validateInput(metaVertex.P.validation, data);
+      mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
+        error: error || ""
+      });
+    }
+  
+    mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {
+      [metaVertex.P[IdAttr]]: data,
     });
-  }
+  
+    // we directly save the dataType on vertex:
+    // @ts-ignore
+    setGraph("vertexes", dataVertex.id, "D", {
+      [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
+    });
+  
+    onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
+  })
 
-  mergeVertexProperties(txnId, dataVertex.id, graph, setGraph, {
-    [metaVertex.P[IdAttr]]: data,
-  });
-
-  // we directly save the dataType on vertex:
-  // @ts-ignore
-  setGraph("vertexes", dataVertex.id, "D", {
-    [metaVertex.P[IdAttr]]: metaVertex.P.dataType,
-  });
-
-  onChangeHandler(txnId, dataVertex, dataVertex, metaVertex, graph, setGraph);
-
-  if (isRealTime) commitTxn(txnId, ws, graph);
+  if (isRealTime) commitTxn(txnId, graph);
 }

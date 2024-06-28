@@ -134,6 +134,18 @@ export function cloneRowProps(
   mergeVertexProperties(txnId, toVertex.id, graph, setGraph, {...props, name: uniqueName});
   return;
 }
+
+export function getColumnProps(attrColumn: Vertex, graph: GraphInterface) {
+  const P = klona(attrColumn.P);
+  P.templateId = attrColumn.id;
+
+  if (!P.component) {
+    const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
+    if (component) P.component = component;
+  }
+  return P;
+}
+
 export function rowMetaInitialize(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
@@ -164,18 +176,8 @@ export function rowMetaInitialize(
       }
 
       for (const attrColumn of tableColumnsTemplate) {
-        const P = klona(attrColumn.P);
-        P.templateId = attrColumn.id;
+        const P = getColumnProps(attrColumn, graph);
 
-        if (!P.component) {
-          const component = getCollAttrComp(attrColumn, graph)?.P[IdAttr];
-          if (component) P.component = component;
-        }
-        // fix code leter
-        // if (attrColumn.P.meta) {
-        //   const metaData = componentProps(graph, setGraph, attrColumn, joinVertex);
-        //   const metaDataVal = removeUndefinedProperties(metaData, false, 10);
-        // } 
         const AttrRowResult = newRow(
           graph,
           setGraph,

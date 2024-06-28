@@ -1,6 +1,6 @@
 
 import {calculateFilter} from "~/lib/graph/get/sync/traverse";
-import {findVertexMGCallId} from "~/cypher/get/findVertexMGCallId";
+import {findVertexMGCallId} from "~/cypher/get/evaluate/findVertexMGCallId";
 import type { ContextType } from "./ContextType";
 
 export async function evalGlobalColl(

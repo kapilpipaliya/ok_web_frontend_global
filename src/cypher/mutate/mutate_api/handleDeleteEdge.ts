@@ -22,7 +22,7 @@ export async function handleDeleteEdge(deleteEdge: any, tx: any, clientToServerV
       clientToServerEdgeIdMap.set(oldId, edgeId);
       txnResult.push({ deleteEdge: { error: false } });
     }
-  } catch (error) {
-    throw new Error(`Can't delete edge due to an internal server error: ${error}`);
+  } catch (error: any) {
+    throw new Error(`Can't delete edge due to an internal server error: ${error.message}`);
   }
 }

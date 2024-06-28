@@ -11,7 +11,7 @@ export async function handleInsert(insert: any, tx: any, clientToServerVertexIdM
       clientToServerVertexIdMap.set(oldId, id);
       txnResult.push({ insert: [oldId, id] });
     }
-  } catch (error) {
-    throw new Error(`Can't insert due to an internal server error: ${error}`);
+  } catch (error: any) {
+    throw new Error(`Can't insert due to an internal server error: ${error.message}`);
   }
 }

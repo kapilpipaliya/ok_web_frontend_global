@@ -52,7 +52,7 @@ export async function evalGetChildren(
         .join(",")}:`,
       error,
     );
-    return;
+    throw error;
   } finally {
     if (!context.session && session) {
       await session.close();

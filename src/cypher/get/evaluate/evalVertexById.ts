@@ -1,5 +1,5 @@
 
-import {findVertexMGCallId} from "~/cypher/get/findVertexMGCallId";
+import {findVertexMGCallId} from "~/cypher/get/evaluate/findVertexMGCallId";
 import type { ContextType } from "./ContextType";
 
 export async function evalVertexById(

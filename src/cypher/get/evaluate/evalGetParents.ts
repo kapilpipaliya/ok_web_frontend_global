@@ -46,7 +46,7 @@ export async function evalGetParents(
         .join(", ")}:`,
       error,
     );
-    return;
+    throw error;
   } finally {
     if (!context.session && session) {
       await session.close();

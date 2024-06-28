@@ -1,6 +1,7 @@
 import {getOutEdges} from "~/cypher/get/getOutEdges";
 import type {Id, Vertex} from "~/lib/graph/graph";
-import {getSelectionOptionsMGCall} from "~/cypher/get/getSelectionOptionsMGCall";
+import type {TransactionPromise} from "neo4j-driver-core";
+import {getSelectionOptionsBase} from "~/cypher/get/getSelectionOptionsBase";
 
 
 export async function getChildVertexMGCall(
@@ -140,6 +141,7 @@ export async function getChildVertexesMGCall(
 export async function replaceExpressionToLabel(
   collection: string,
   vertex: Vertex,
+  tx: TransactionPromise
 ) {
   if (!collection) return "";
   // example: `{->$0Coll::'P.${IdAttr}'}` will get a collection from expression
@@ -147,9 +149,10 @@ export async function replaceExpressionToLabel(
     collection = collection.replace(
       /{{.*}}/,
       (
-        await getSelectionOptionsMGCall(
+        await getSelectionOptionsBase(
           [vertex],
           collection.match(/{{(.*)}}/)?.[1]! || "",
+          tx
         )
       ).result || "",
     );

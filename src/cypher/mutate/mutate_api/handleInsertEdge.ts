@@ -1,7 +1,8 @@
 import { int } from "neo4j-driver";
+import type { TransactionPromise } from "neo4j-driver-core";
 
 
-export async function handleInsertEdge(insertEdge: any, tx: any, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
+export async function handleInsertEdge(insertEdge: any, tx: TransactionPromise, clientToServerVertexIdMap: Map<number, number>, clientToServerEdgeIdMap: Map<number, number>, txnResult: any[]) {
   // if user has no permission to insert row vertex, do not allow and return error.
   // if user has no permission to insert select, dont allow it.
   //
@@ -27,7 +28,7 @@ export async function handleInsertEdge(insertEdge: any, tx: any, clientToServerV
       clientToServerEdgeIdMap.set(oldId, edgeId);
       txnResult.push({ insertEdge: [oldId, edgeId] });
     }
-  } catch (error) {
-    throw new Error(`Can't insert edge due to an internal server error: ${error}`);
+  } catch (error: any) {
+    throw new Error(`Can't insert edge due to an internal server error: ${error.message}`);
   }
 }

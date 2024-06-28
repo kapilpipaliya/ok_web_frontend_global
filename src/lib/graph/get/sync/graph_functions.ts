@@ -76,8 +76,8 @@ function getComponentProperties(
         graph,
         setGraph,
         [curr],
-        "::'P.name'",
-      ).vertexes; // ->$0Name:P.name||:P.name
+        "->$0Name::'P.name'||::'P.name'",
+      ).vertexes;
       if (key && curr.P.value !== undefined) {
         acc[key] = curr.P.value;
       }
@@ -272,14 +272,14 @@ export function getFormApiFromForm(
   };
 }
 
-// TODO: when meta changed realtime its not updating.
-export function componentProps(
+export function getMetaProps(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   metaVertex: Vertex,
   data: Vertex,
 ) {
-  const meta = metaVertex.P.meta.split("+");
+  if(!metaVertex.P.meta) return {};
+  const meta = metaVertex.P.meta.split("++");
   const results = [] as { [key: string]: any }[];
   for (const metaPart of meta) {
     const metaRows =
@@ -287,13 +287,14 @@ export function componentProps(
     const metaData = getComponentProperties(graph, setGraph, metaRows);
     results.push(metaData);
   }
-  return results.reduce(
+  const a = results.reduce(
     (acc, curr) => {
       Object.assign(acc, curr);
       return acc;
     },
     {} as { [key: string]: any },
   );
+  return a;
 }
 
 export function getPkForCollection(

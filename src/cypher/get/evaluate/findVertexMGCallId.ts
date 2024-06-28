@@ -1,7 +1,7 @@
 import { int, } from "neo4j-driver";
 import { convertNodeToJson } from "~/lib/convertNodeToJson";
-import type { ContextType } from "./evaluate/ContextType";
-import { getSessionForSubdomain } from "./getSessionForSubdomain";
+import type { ContextType } from "./ContextType";
+import { getSessionForSubdomain } from "../getSessionForSubdomain";
 
 export async function findVertexMGCallId(
   {
@@ -57,7 +57,7 @@ export async function findVertexMGCallId(
       return vertex;
     });
   } catch (error: any) {
-    return { error: error.message };
+    throw error;
   } finally {
     if (!context.session && session) {
       await session.close();
