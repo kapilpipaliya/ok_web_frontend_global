@@ -78,6 +78,12 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   let submit: boolean;
   let onConfirmExit: () => void;
 
+  const navigateToParentRoute = () => {
+    const segments = location.pathname.split('/');
+    segments.pop();
+    navigate(segments.join('/'));
+  };
+
   const initFormState = () => {
     let dataVertex: Vertex;
     if (!id()) {
@@ -170,7 +176,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
           if (props.closePopUp) {
             props.closePopUp();
           } else {
-            setTimeout(() => navigate(-1), 0);
+            navigateToParentRoute();
           }
           showWarningToast("Internal Server Error");
           return;
@@ -200,7 +206,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
             if (props.closePopUp) {
               props.closePopUp();
             } else {
-              setTimeout(() => navigate(-1), 500);
+              navigateToParentRoute();
             }
           },
         });
@@ -213,7 +219,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       if (props.closePopUp) {
         props.closePopUp();
       } else {
-        setTimeout(() => navigate(-1), 0);
+        navigateToParentRoute();
       }
       return;
     }
@@ -224,9 +230,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const onCancel = () => {
     revertTransaction(txnId, graph);
     if (!props.closePopUp) {
-      setTimeout(() => {
-        navigate(-1);
-      }, 0);
+      navigateToParentRoute();
     } else {
       props.closePopUp();
     }
