@@ -7,7 +7,6 @@ import { CSSPropertiesEditor } from "~/components/css_properties/CSSPropertiesEd
 import { Icon } from "@iconify-icon/solid";
 import { getComponentForCollRow } from "~/components/form/getComponentForCollRow";
 import { ValidationConfig } from "./ValidationConfig";
-import { SelectedComponentContext } from "~/lib/contexts";
 import { addNewVertex, deleteVertex, mergeVertexProperties, newVertex } from "~/lib/graph/mutate/vertex";
 import { isUniqueIdUsed } from "~/lib/drag_drop/getChildrenAttrs";
 import { getMetaProps } from "~/lib/graph/get/sync/graph_functions";
@@ -27,8 +26,7 @@ interface FormGroupPropertiesProps {
 export function FormGroupProperties(props: FormGroupPropertiesProps) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
-  const [pageConfig, __] = useDesignerLayoutStore();
+  const [layoutStore, __] = useDesignerLayoutStore();
 
   const nameVertexId = `nameVertex${createUniqueId()}`;
   const classVertexId = `classVertex${createUniqueId()}`;
@@ -78,7 +76,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
         <ValidationConfig
           meta={{ P: { name: "validation" } } as unknown as Vertex}
           data={props.selectedLayout}
-          componentMeta={graph.vertexes[selectedComponent()?.vertexId]}
+          componentMeta={graph.vertexes[layoutStore.selectedComponent]}
           setValue={props.setValue}
         />
       </div>
@@ -139,8 +137,8 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
 
           const DefaultValueContent = () => (
             <DynamicComponent
-              component={graph.vertexes[selectedComponent()!.vertexId].P.name}
-              meta={graph.vertexes[selectedComponent()!.vertexId]}
+              component={graph.vertexes[layoutStore.selectedComponent].P.name}
+              meta={graph.vertexes[layoutStore.selectedComponent]}
               data={props.selectedLayout}
               setValue={(data) => props.setValue(meta(), data)}
               // disabled={props.d}
@@ -162,7 +160,7 @@ export function FormGroupProperties(props: FormGroupPropertiesProps) {
                   setValue={(data: string) => {
                     if (metaVertex.P.name === "name") {
                       if (data.length) {
-                        if (isUniqueIdUsed(graph, setGraph, pageConfig.formData.formData, props.selectedLayout, data)) {
+                        if (isUniqueIdUsed(graph, setGraph, layoutStore.formData.formData, props.selectedLayout, data)) {
                           return mergeVertexProperties(0, metaVertex.id, graph, setGraph, {
                             error: "Name is not unique",
                           });

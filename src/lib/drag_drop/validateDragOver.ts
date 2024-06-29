@@ -9,7 +9,7 @@ export function validateDragOver(
   graph: Store<GraphInterface>,
   setGraph: SetStoreFunction<GraphInterface>,
   fromVertex: Vertex,
-  toVertexId: Id,
+  toVertexId: Id | number,
   formData: Vertex,
   position: string,
 ) {

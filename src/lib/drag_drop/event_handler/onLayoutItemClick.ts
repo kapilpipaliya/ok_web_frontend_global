@@ -1,32 +1,29 @@
-import { batch, type Setter } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import { batch, } from "solid-js";
+import type { SetStoreFunction, } from "solid-js/store";
 import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { getChildVertex } from "../../graph/get/sync/traverse";
 import { getComponentFromLayoutRow } from "~/lib/drag_drop/drop/getComponentFromLayoutRow";
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
 
-export function onLayoutItemClick(setSelectedId: Setter<string | number>, setSelectedComponent: Setter<{
-  vertexId: string | number;
-}>, setSelectedColl: Setter<{
-  vertexId: string | number;
-}>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
+export function onLayoutItemClick( setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>) {
   batch(() => {
-    setSelectedId(-1);
-    setSelectedComponent({ vertexId: -1 });
-    setSelectedColl({ vertexId: -1 });
+    setLayoutStore('selectedId', -1);
+    setLayoutStore('selectedComponent', -1);
+    setLayoutStore('selectedColl', -1);
 
-    setSelectedId(layoutVertex.id);
+    setLayoutStore('selectedId', layoutVertex.id);
     const collVertex = getChildVertex(
       graph,
       ["$0Coll"],
-      graph.vertexes[(layoutVertex?.id)!]
+      graph.vertexes[(layoutVertex.id)]
     );
-    setSelectedColl({ vertexId: collVertex?.vertex?.id || -1 });
+    setLayoutStore('selectedColl', collVertex?.vertex?.id ?? -1);
     const componentVertex = getComponentFromLayoutRow(
-      (layoutVertex?.id)!,
+      (layoutVertex.id),
       graph,
       setGraph
     );
-    setSelectedComponent({ vertexId: componentVertex?.id || -1 });
+    setLayoutStore('selectedComponent', componentVertex?.id ?? -1);
   });
 }

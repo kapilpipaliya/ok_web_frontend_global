@@ -9,10 +9,6 @@ import {
 } from "solid-js";
 import { useToast } from "~/components/Toast";
 import { Checkbox } from "~/components/solid_blocks";
-import {
-  DraggedVertexContext,
-  SelectedIdContext,
-} from "~/lib/contexts";
 import { getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, type Vertex, type Id } from "~/lib/graph/graph";
 import { setGraphData } from "~/lib/websocket/setGraphData";
@@ -26,9 +22,8 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function ComponentPart() {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [pageConfig, setPageConfig] = useDesignerLayoutStore() || [];
+
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [searchQuery, setSearchQuery] = createSignal("");
   const [filteredData, setFilteredData] = createSignal([] as any[]); // Initialize filteredData with the same type as
   const [isFetchingData, setIsFetchingData] = createSignal(true);
@@ -179,27 +174,27 @@ export function ComponentPart() {
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
-          setDraggedVertex([]);
+          setLayoutStore('draggedVertices', []);
           const dataTransfer =
             selectedComponents().size > 0
               ? Array.from(selectedComponents())
               : [graph.vertexes[props.child.id]];
-          setDraggedVertex((prev) => [...prev, ...dataTransfer]);
+          setLayoutStore('draggedVertices', (prev) => [...prev, ...dataTransfer]);
           setSelectedComponents(new Set<Vertex>());
         }}
         ondblclick={(e) => {
-          setDraggedVertex([graph.vertexes[props.child.id]]);
+          setLayoutStore('draggedVertices', [graph.vertexes[props.child.id]]);
           onClickAddComponent(
             graph,
             setGraph,
-            pageConfig.formData.txnId,
-            draggedVertex()[0],
-            pageConfig.formData.formData || {},
-            selectedId() !== -1
-              ? selectedId()
-              : pageConfig.formData.formData.id,
+            layoutStore.formData.txnId,
+            layoutStore.draggedVertices[0],
+            layoutStore.formData.formData || {},
+            layoutStore.selectedId !== -1
+              ? layoutStore.selectedId
+              : layoutStore.formData.formData.id,
           );
-          setDraggedVertex([]);
+          setLayoutStore('draggedVertices', []);
         }}
       >
         <Show when={isHovered()}>

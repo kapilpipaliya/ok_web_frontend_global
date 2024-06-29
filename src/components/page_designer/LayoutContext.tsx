@@ -1,7 +1,7 @@
 import {createContext, useContext} from "solid-js";
 import type { createStore } from "solid-js/store";
 import type { IFormContext } from "~/lib/contexts";
-import { Id } from "~/lib/graph/graph";
+import type { Id, Vertex } from "~/lib/graph/graph";
 
 export function getInitialDesignerLayoutStore() {
   return ({
@@ -31,13 +31,18 @@ export function getInitialDesignerLayoutStore() {
     prevTxnIds: [] as Array<Id | number>,
     hoverId: -1 as Id | number,
     selectedId: -1 as Id | number,
-    selectedColl: "Comp" as "Comp" | "Page" | "TemplatePage" | "Form" | "ThankYouPage" | "ErrorPages" | "EmailTemplate",
-    selectedComponent: "Text" as "Text" | "Image" | "Button" | "Form" | "Stepper" | "Step",
+    selectedColl: -1 as Id | number,
+    selectedComponent: -1 as Id | number,
     dragOverTargetId: -1 as Id | number,
+    showDrawer: false, // properties drawer
+    hiddenNodes: [] as Array<Id | number>,
+    draggedVertices: [] as Array<Vertex>,
+    activeItem: null as Id | number | null,
+    position: null as "before" | "after" | "center" | "left" | "right" | null,
   });
 }
 
-type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
+export type PageLayoutObject = ReturnType<typeof getInitialDesignerLayoutStore>;
 type PageLayoutStore = ReturnType<typeof createStore<PageLayoutObject>>
 export const DesignerLayoutStoreContext = createContext<PageLayoutStore>();
 

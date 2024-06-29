@@ -1,12 +1,12 @@
-import type { Accessor, Setter } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { Accessor, } from "solid-js";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
 import { getIndicatorPosition } from "~/lib/drag_drop/getIndicatorPosition";
-import type { IIndicatorPosition } from "../../contexts";
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
 
-export function handleDragOverAndSetDropPosition(e: DragEvent, setIndicatorPosition: Setter<IIndicatorPosition>, setDragOverTargetId: Setter<string | number>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], draggedVertex: () => (Vertex[] | []), graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
+export function handleDragOverAndSetDropPosition(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: boolean | undefined, collapsedKeys: Accessor<Id[]>, children: () => Vertex[], graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex) {
   let position = getIndicatorPosition(e, e.currentTarget as HTMLElement) as "before" |
     "after" |
     "center" |
@@ -14,8 +14,8 @@ export function handleDragOverAndSetDropPosition(e: DragEvent, setIndicatorPosit
     "right" |
     null;
   if (!position) {
-    setIndicatorPosition({ activeItem: null, position: null });
-    setDragOverTargetId(-1);
+    setLayoutStore({ activeItem: null, position: null });
+    setLayoutStore('dragOverTargetId', -1);
     return;
   }
 
@@ -40,7 +40,7 @@ export function handleDragOverAndSetDropPosition(e: DragEvent, setIndicatorPosit
     activeItem = layoutVertex.id;
   }
 
-  const fromVertex = draggedVertex()[0];
+  const fromVertex = layoutStore.draggedVertices[0];
   const toVertexId = activeItem;
   if (!validateDragOver(
     graph,
@@ -52,6 +52,6 @@ export function handleDragOverAndSetDropPosition(e: DragEvent, setIndicatorPosit
   )) {
     return;
   }
-  setIndicatorPosition({ activeItem, position });
-  setDragOverTargetId(layoutVertex.id);
+  setLayoutStore({ activeItem, position });
+  setLayoutStore('dragOverTargetId', layoutVertex.id);
 }

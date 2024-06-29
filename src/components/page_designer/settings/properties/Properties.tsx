@@ -30,10 +30,6 @@ export function Properties(props: { setShowDrawer?: any }) {
 // } from "~/components/solid_blocks";
 // import type { FieldAttribute } from "~/lib/FormMetadataType";
 // import {
-//   SelectedIdContext,
-//   SelectedComponentContext,
-// } from "~/lib/contexts";
-// import {
 //   getChildVertex,
 //   getChildVertexes,
 // } from "~/lib/graph/get/sync/traverse";
@@ -61,10 +57,6 @@ export function Properties(props: { setShowDrawer?: any }) {
 // export function Properties(props: { setShowDrawer?: any }) {
 //   const [pageConfig, setPageConfig] = useDesignerLayoutStore();
 //   const [graph, setGraph] = useContext(GraphContext)!;
-//   const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-//   const [selectedComponent, setSelectedComponent] = useContext(
-//     SelectedComponentContext,
-//   );
 //   const [isPropertiesExpanded, togglePropertiesExpansion] = useExpansion();
 
 //   const PropertiesPart = () => {
@@ -72,14 +64,14 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
 
 //     const setPropertyValue = (meta: Vertex, value: any) => {
-//       if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
+//       if (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) {
 //         return setPropertyValueGlobal(
 //           graph,
 //           setGraph,
 //           pageConfig.formData.txnId,
 //           meta,
-//           graph.vertexes[selectedId()],
-//           graph.vertexes[selectedComponent().vertexId],
+//           graph.vertexes[layoutStore.selectedId],
+//           graph.vertexes[layoutStore.selectedComponent],
 //           value,
 //         );
 //       }
@@ -101,7 +93,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     let prevTxnIndex = -1;
 //     // const onRulesSubmit = () => {
 //     //   // hack to refresh the select fields. no option is refereshing the label.
-//     //   setGraph("vertexes", selectedId(), "OUT", "Rules", (v) =>
+//     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
 //     //     v ? [...v] : v,
 //     //   );
 //     //   toggleRulesModal();
@@ -115,7 +107,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     //   // reset layout
 //     //   // layoutTreeViewInstance.option("items", getLayoutTreeData());
 //     //   // hack to refresh the select fields. no option is refereshing the label.
-//     //   setGraph("vertexes", selectedId(), "OUT", "Rules", (v) =>
+//     //   setGraph("vertexes", layoutStore.selectedId, "OUT", "Rules", (v) =>
 //     //     v ? [...v] : v,
 //     //   );
 //     //   toggleImportsModal();
@@ -264,7 +256,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //     //                 showWarnings: true,
 //     //                 txnId: pageConfig.formData.txnId,
 //     //                 jsx: graph.vertexes[dataVertexId].P.jsx || "",
-//     //                 parent: graph.vertexes[selectedId()],
+//     //                 parent: graph.vertexes[layoutStore.selectedId],
 //     //               });
 //     //               jsxParser.render(graph, setGraph);
 //     //               // reset layout
@@ -417,7 +409,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //           />
 //           {/*<span>Data:</span>*/}
 //           <SelectInputField
-//             data={graph.vertexes[selectedId()!]}
+//             data={graph.vertexes[layoutStore.selectedId]}
 //             meta={collMetaVertex.vertexes?.[1]!}
 //             disabled={false}
 //             title={"Data:"}
@@ -430,7 +422,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //           <GenericInputField
 //             txnId={txnId}
 //             title={""}
-//             data={graph.vertexes[selectedId()!]}
+//             data={graph.vertexes[layoutStore.selectedId]}
 //             meta={collMetaVertex.vertexes?.[2]!}
 //             disabled={false}
 //             component={"TextBox"}
@@ -441,7 +433,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 
 //     return (
 //       <>
-//         <Show when={selectedId() !== -1}>
+//         <Show when={layoutStore.selectedId !== -1}>
 //           <div class="flex jc:start">
 //             <GenericField
 //               meta={
@@ -477,7 +469,7 @@ export function Properties(props: { setShowDrawer?: any }) {
 //             txnId={pageConfig.formData.txnId}
 //             metaAttributes={selectedComponentProperties().vertexes ?? []}
 //             setValue={setPropertyValue}
-//             selectedLayout={graph.vertexes[selectedId()]}
+//             selectedLayout={graph.vertexes[layoutStore.selectedId]}
 //           />
 //         </Show>
 //         <Show when={isRulesModalOpen()}>

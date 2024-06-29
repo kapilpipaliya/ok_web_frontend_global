@@ -1,14 +1,13 @@
-import type { Accessor, Setter } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { Accessor, } from "solid-js";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
 import { validateDragOver } from "~/lib/drag_drop/validateDragOver";
-import type { IIndicatorPosition } from "../../contexts";
 import { handleDragOverAndSetDropPosition } from "./handleDragOverAndSetDropPosition";
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
-
-export function handleDragOver(e: DragEvent, setIndicatorPosition: Setter<IIndicatorPosition>, setDragOverTargetId: Setter<string | number>, layoutVertex: Vertex, isPreview: undefined | boolean, collapsedKeys: (() => Id[]), draggedVertex: () => (Vertex[] | []), children: Accessor<Vertex[]>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex, indicatorPosition: Accessor<IIndicatorPosition>) {
+export function handleDragOver(e: DragEvent, layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, isPreview: undefined | boolean, collapsedKeys: (() => Id[]), children: Accessor<Vertex[]>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, formData: Vertex, indicatorPosition: Accessor<IIndicatorPosition>) {
   e.stopPropagation();
-  handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, layoutVertex, isPreview, collapsedKeys, children, draggedVertex, graph, setGraph, formData);
+  handleDragOverAndSetDropPosition(e, layoutStore, setLayoutStore, layoutVertex, isPreview, collapsedKeys, children, graph, setGraph, formData);
 
 
   const position = indicatorPosition().position;
@@ -17,9 +16,9 @@ export function handleDragOver(e: DragEvent, setIndicatorPosition: Setter<IIndic
     return;
   }
 
-  for (const vertex of draggedVertex()) {
+  for (const vertex of layoutStore.draggedVertices) {
     const fromVertex = vertex;
-    const toVertexId = indicatorPosition().activeItem!;
+    const toVertexId = layoutStore.activeItem!;
     if (!fromVertex) {
       // Don't allow drag and drop
       return;

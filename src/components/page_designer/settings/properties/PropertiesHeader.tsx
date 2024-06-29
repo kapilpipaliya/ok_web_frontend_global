@@ -1,16 +1,15 @@
 import { Icon } from "@iconify-icon/solid";
 import { useContext } from "solid-js";
-import { SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { OpenComponentSettings } from "../../OpenComponentSettings";
+import { useDesignerLayoutStore } from "../../LayoutContext";
 
-export function PropertiesHeader(props: { setShowDrawer: (show: boolean) => void }) {
+export function PropertiesHeader(props: Readonly<{ setShowDrawer: (show: boolean) => void }>) {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-    const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+    const [layoutStore] = useDesignerLayoutStore();
     
     const getComponentName = () =>
-        (selectedId() !== -1 && selectedComponent().vertexId !== -1) ? graph.vertexes[selectedComponent().vertexId].P.name || "" : "";
+        (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) ? graph.vertexes[layoutStore.selectedComponent].P.name || "" : "";
     return (
         <div
             style={{
@@ -24,7 +23,7 @@ export function PropertiesHeader(props: { setShowDrawer: (show: boolean) => void
                 class="mb:2px ml:5px p:3|0 f:16"
                 style="flex-grow: 1; font-weight: bold;text-align-last: left;"
             >
-                {getComponentName()} Properties <OpenComponentSettings id={selectedComponent().vertexId as string} />
+                {getComponentName()} Properties <OpenComponentSettings id={layoutStore.selectedComponent as string} />
             </div>
             <Icon
                 onclick={() => props.setShowDrawer(false)}

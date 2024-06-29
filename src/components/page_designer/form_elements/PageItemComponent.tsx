@@ -3,7 +3,6 @@ import {
   createSignal,
   useContext, Show, onCleanup
 } from "solid-js";
-import { DraggedVertexContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, type Id, type Vertex } from "~/lib/graph/graph";
 import type { NavItem } from "~/lib/graph/get/sync/traverse";
 import { Icon } from "@iconify-icon/solid";
@@ -14,9 +13,7 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageId: Id | null, setPreviewPageId: (id: Id | null) => void }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [selectedId,] = useContext(SelectedIdContext);
-  const [pageConfig,] = useDesignerLayoutStore() || [];
-  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore() || [];
   const [hoverPageId, setHoverPageId] = createSignal<Id | null>(null);
   const [selectedComponents, setSelectedComponents] = createSignal(
     new Set<Vertex>()
@@ -65,29 +62,29 @@ export function PageItemComponent(props: Readonly<{ child: NavItem; previewPageI
 
   const handleDragStart = (e: DragEvent) => {
     e.stopPropagation();
-    setDraggedVertex([]);
+    setLayoutStore('draggedVertices', []);
     clearTimeout(timeoutId);
     props.setPreviewPageId(null);
     const dataTransfer = selectedComponents().size > 0
       ? Array.from(selectedComponents())
       : [graph.vertexes[props.child.id]];
-    setDraggedVertex((prev) => [...prev, ...dataTransfer]);
+    setLayoutStore('draggedVertices', (prev) => [...prev, ...dataTransfer]);
     setSelectedComponents(new Set<Vertex>());
   };
 
   const handleDoubleClick = () => {
-    setDraggedVertex([graph.vertexes[props.child.id]]);
+    setLayoutStore('draggedVertices', [graph.vertexes[props.child.id]]);
     onClickAddComponent(
       graph,
       setGraph,
-      pageConfig.formData.txnId,
-      draggedVertex()[0],
-      pageConfig.formData || {},
-      selectedId() !== -1
-        ? selectedId()
-        : pageConfig.formData.formData.id
+      layoutStore.formData.txnId,
+      layoutStore.draggedVertices[0],
+      layoutStore.formData || {},
+      layoutStore.selectedId !== -1
+        ? layoutStore.selectedId
+        : layoutStore.formData.formData.id
     );
-    setDraggedVertex([]);
+    setLayoutStore('draggedVertices', []);
   };
 
   onCleanup(() => {

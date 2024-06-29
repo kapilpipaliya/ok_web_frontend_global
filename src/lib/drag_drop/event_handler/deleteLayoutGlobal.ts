@@ -1,21 +1,22 @@
 import {
-  type Accessor,
   batch
 } from "solid-js";
-import type { SetStoreFunction } from "solid-js/store";
+import type { SetStoreFunction, Store } from "solid-js/store";
 import { deleteNestedLayout } from "../../graph/mutate/deleteNestedLayout";
-import type { GraphInterface, Id, Vertex } from "~/lib/graph/graph";
-import type { Setter } from "solid-js";
+import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 
-export function deleteLayoutGlobal(selectedId: Accessor<string | number>, layoutVertex: Vertex, setSelectedId: Setter<Id | number>, setSelectedComponent: Setter<{ vertexId: Id | number; }>, setSelectedColl: Setter<{ vertexId: Id | number; }>, hoverId: Accessor<string | number>, setHoverId: Setter<Id | number>, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
+
+export function deleteLayoutGlobal(layoutStore: Store<PageLayoutObject>, setLayoutStore: SetStoreFunction<PageLayoutObject>, layoutVertex: Vertex, graph: GraphInterface, setGraph: SetStoreFunction<GraphInterface>, txnId: number, name: string, showSuccessToast: (message: string) => void) {
   batch(() => {
-    if (selectedId() === layoutVertex.id) {
-      setSelectedId(-1);
-      setSelectedComponent({ vertexId: -1 });
-      setSelectedColl({ vertexId: -1 });
+    if (layoutStore.selectedId === layoutVertex.id) {
+
+      setLayoutStore('selectedId', -1);
+      setLayoutStore('selectedComponent', -1);
+      setLayoutStore('selectedColl', -1);
     }
-    if (hoverId() === layoutVertex.id) {
-      setHoverId(-1);
+    if (layoutStore.hoverId === layoutVertex.id) {
+      setLayoutStore('hoverId', -1);
     }
   });
 

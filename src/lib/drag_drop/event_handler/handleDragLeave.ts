@@ -1,10 +1,10 @@
-import type { Setter } from "solid-js";
-import type { IIndicatorPosition } from "../../contexts";
+import type { SetStoreFunction } from "solid-js/store";
+import type { PageLayoutObject } from "~/components/page_designer/LayoutContext";
 
 
-export function handleDragLeave(setIndicatorPosition: Setter<IIndicatorPosition>) {
+export function handleDragLeave(setLayoutStore: SetStoreFunction<PageLayoutObject>) {
   // e.stopPropagation();
-  setIndicatorPosition({ activeItem: null, position: null });
+  setLayoutStore({ activeItem: null, position: null });
   // console.log('leave',layoutVertex.id)
   // Do not uncomment this, because drag is called before on drop
   // setDraggedVertex(null);

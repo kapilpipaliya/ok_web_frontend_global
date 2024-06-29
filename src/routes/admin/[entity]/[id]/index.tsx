@@ -7,7 +7,6 @@ import { GraphContext } from "~/lib/graph/graph";
 import { PageDesignerLabels } from "~/lib/drag_drop/constant";
 import { LayoutDragAndDrop } from "~/components/page_designer/layout/Layout_DragAndDrop";
 
-const PageDesignerContext = clientOnly(() => import("~/components/page_designer/PageDesignerContext"));
 const DynamicForm = clientOnly(() => import("~/components/form/DynamicForm"));
 
 export default function FormEdit() {
@@ -17,9 +16,7 @@ export default function FormEdit() {
   return (
     <Switch>
       <Match when={PageDesignerLabels.includes(params.entity)}>
-        <PageDesignerContext>
-          <LayoutDragAndDrop />
-        </PageDesignerContext>
+        <LayoutDragAndDrop />
       </Match>
       <Match when={true}>
         <DynamicForm

@@ -1,15 +1,10 @@
 import { Icon } from "@iconify-icon/solid";
-import { useContext, createSignal, createSelector, For, Show, onMount, createMemo, Setter } from "solid-js";
+import { useContext, createSignal, createSelector, For, Show, onMount, createMemo, type Setter } from "solid-js";
 import {Drawer} from "~/components/Drawer";
 import { GenericField } from "~/components/fields/GenericField";
 import { Tooltip } from "~/components/solid_blocks";
 import {
-  HiddenNodesContext,
-  SelectedIdContext,
   IndicatorPositionContext,
-  ShowDrawerContext,
-  DraggedVertexContext,
-  SelectedCollContext, DragOverTargetIdContext, SelectedComponentContext,
   IsPreviewContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
@@ -34,22 +29,14 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function LayoutPart(props: {}) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
-  const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
-  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const [indicatorPosition, setIndicatorPosition] = useContext(
     IndicatorPositionContext,
   );
   const [collapsedKeys, setCollapsedKeys] = createSignal([] as Id[]);
-  const isSelectedLayoutId = createSelector(selectedId);
+  const isSelectedLayoutId = createSelector(()=>layoutStore.selectedId);
   const isSelectedHoverId = createSelector(()=>layoutStore.hoverId);
-  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
-  const [, setSelectedColl] = useContext(SelectedCollContext);
-  const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
-  const [_, setSelectedComponent] = useContext(
-    SelectedComponentContext,
-  );
+
   const { showErrorToast, showSuccessToast } = useToast()
     const [isPreview] = useContext(IsPreviewContext);
 
@@ -61,7 +48,7 @@ export function LayoutPart(props: {}) {
     );
   }
   function toggleHidden(itemId: Id) {
-    setHiddenNodes((prev) =>
+    setLayoutStore('hiddenNodes', (prev) =>
       prev.includes(itemId)
         ? prev.filter((item) => item !== itemId)
         : [...prev, itemId],
@@ -184,8 +171,7 @@ export function LayoutPart(props: {}) {
             "box-shadow:1px|1px|1px|1px#F2EDED": !!children().length && !isActiveTargetItem() && !!indicatorPosition().position,
           }}
           onClick={() => {
-            onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, props.metaVertex, graph, setGraph);
-
+            onLayoutItemClick(setLayoutStore, props.metaVertex, graph, setGraph);
           }}
           onMouseOver={(e) => {
             e.stopPropagation();
@@ -295,8 +281,7 @@ export function LayoutPart(props: {}) {
                         style: { color: "red" },
                         onClick: () => {
                           const name = getComponent();
-                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, ()=> layoutStore.hoverId, ((id: Id)=> setLayoutStore('hoverId', id)) as Setter<Id | number>, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
-
+                          deleteLayoutGlobal(layoutStore, setLayoutStore, props.metaVertex, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
                         },
                         width: 18,
                         height: 18,
@@ -381,10 +366,10 @@ export function LayoutPart(props: {}) {
 
   return (
     <>
-      <Show when={showPropertiesDrawer()}>
+      <Show when={layoutStore.showDrawer}>
         <Drawer customButton={() => false}
-          drawerStyle={'padding: 10px'} open={showPropertiesDrawer} setIsOpen={setShowPropertiesDrawer}>
-          <Properties setShowDrawer={setShowPropertiesDrawer} />
+          drawerStyle={'padding: 10px'} open={() => layoutStore.showDrawer} setIsOpen={((v:boolean)=>setLayoutStore('showDrawer', v)) as Setter<boolean>}>
+          <Properties setShowDrawer={()=>setLayoutStore('showDrawer', !layoutStore.showDrawer)} />
         </Drawer>
       </Show>
       <For each={rootVertexes()}>

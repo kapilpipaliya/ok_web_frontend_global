@@ -5,14 +5,12 @@ import { addNewVertex, newVertex } from "~/lib/graph/mutate/vertex";
 import { addMetaVertexes } from "~/lib/graph/mutate/form/metaFunction";
 import { getNewGraphId, getNewTxnId, revertTransaction } from "~/lib/graph/transaction";
 import type { FieldAttribute } from "~/lib/FormMetadataType";
-import { SelectedIdContext } from "~/lib/contexts";
 import { getChildVertexes } from "~/lib/graph/get/sync/traverse";
 import { GraphContext, IdAttr } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../../LayoutContext";
 
 export function CollAndData(props: any) {
     const [graph, setGraph] = useContext(GraphContext)!;
-    const [selectedId] = useContext(SelectedIdContext);
     const [pageConfig] = useDesignerLayoutStore();
 
     const metaVertexId = getNewGraphId();

@@ -4,8 +4,8 @@ import { SelectInputField } from "~/components/fields/SelectInputField";
 import { TableInputField } from "~/components/fields/TableInputField";
 import { GenericInputField } from "~/components/fields/GenericInputField";
 import { GenericField } from "~/components/fields/GenericField";
-import { HiddenNodesContext } from "~/lib/contexts";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
+import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export const genericInputComponents = [
   // "Autocomplete",
@@ -68,7 +68,7 @@ export function DynamicComponent(props: Readonly<{
   applyDefaults?: boolean;
 }>) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
+  const [layoutStore] = useDesignerLayoutStore();
 
   return (
     <Switch>
@@ -77,7 +77,7 @@ export function DynamicComponent(props: Readonly<{
         when={props.component === "SelectBox" || props.component === "TagBox"}
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id)}>
+        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
           <SelectInputField
             {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
             data={props.data}
@@ -93,7 +93,7 @@ export function DynamicComponent(props: Readonly<{
         </Show>
       </Match>
       <Match when={props.component === "DynamicTable"}>
-        <Show when={!hiddenNodes().includes(props.meta?.id)}>
+        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
           
             <TableInputField
              {...(props.applyDefaults && graph.componentIdMap[props.component] ? getCompProps(graph,graph.vertexes[graph.componentIdMap[props.component]]) : {})}
@@ -113,7 +113,7 @@ export function DynamicComponent(props: Readonly<{
         }
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id)}>
+        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
           <GenericInputField
             applyDefaults={props.applyDefaults}
             data={props.data}
@@ -130,7 +130,7 @@ export function DynamicComponent(props: Readonly<{
         when={genericComponents2.includes(props.component) && props.component}
         keyed
       >
-        <Show when={!hiddenNodes().includes(props.meta?.id)}>
+        <Show when={!layoutStore.hiddenNodes.includes(props.meta?.id)}>
           <GenericField
             applyDefaults={props.applyDefaults}
             data={props.data}

@@ -1,5 +1,5 @@
-import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX, Setter } from "solid-js";
-import { GraphContext, Id, type Vertex } from "~/lib/graph/graph";
+import { createMemo, createSelector, Match, Show, Switch, useContext, createSignal, onMount, type JSX, } from "solid-js";
+import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { getChildVertex, getParentVertex } from "~/lib/graph/get/sync/traverse";
 import { handleDragOver } from "~/lib/drag_drop/event_handler/handleDragOver";
 import { handleDragStart } from "~/lib/drag_drop/event_handler/handleDragStart";
@@ -12,14 +12,10 @@ import { resetDragDropState } from "~/lib/drag_drop/resetDragDropState";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
 import {
-  DraggedVertexContext,
-  DragOverTargetIdContext,
   FormContext,
-  IndicatorPositionContext,
   IsPreviewContext,
-  SelectedCollContext, SelectedComponentContext,
-  SelectedIdContext,
-  ShowDrawerContext
+
+
 } from "~/lib/contexts";
 import { Popover } from "@kobalte/core/popover";
 import { PageRenderVertexContext } from "~/components/page_attr_render/Context";
@@ -37,30 +33,21 @@ import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX.Element; }>) {
   const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const { txnId } = useContext(FormContext);
-  const isSelectedLayoutId = createSelector(selectedId);
-  const [dragOverTargetId] = useContext(DragOverTargetIdContext);
-  const [showDrawer, setShowDrawer] = useContext(ShowDrawerContext);
+  const isSelectedLayoutId = createSelector(() => layoutStore.selectedId);
+
+
   const [isPreview] = useContext(IsPreviewContext);
-  const [indicatorPosition, setIndicatorPosition] = useContext(
-    IndicatorPositionContext
-  );
+
   const [pageConfig, __] = useDesignerLayoutStore();
 
-  const isSelectedDragOverTargetId = createSelector(dragOverTargetId);
+  const isSelectedDragOverTargetId = createSelector(()=>layoutStore.dragOverTargetId);
   const isSelectedHoverId = createSelector(()=>pageConfig.hoverId);
-  const [, setSelectedColl] = useContext(SelectedCollContext);
-  const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
-  const [_, setSelectedComponent] = useContext(
-    SelectedComponentContext
-  );
-  const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const { showErrorToast, showSuccessToast } = useToast();
 
   const getComponentName = () => getChildVertex(graph, ["$0Comp"], props.item).vertex?.P.name;
-  const activeItemChanged = createSelector<any, Vertex>(indicatorPosition, (a, b) => a.id === b.activeItem);
-  const isActiveTargetItem = () => activeItemChanged(props.item);
+  const activeItemChanged = createSelector(() => layoutStore.activeItem);
+  const isActiveTargetItem = () => activeItemChanged(props.item.id);
   const children = createMemo(() => getChildrenAttrs(graph, setGraph, props.item)
   );
 
@@ -133,7 +120,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
           <Icon
             icon={"mingcute:settings-5-line"}
             onclick={() => {
-              setShowDrawer(!showDrawer());
+              setLayoutStore('showDrawer', !layoutStore.showDrawer);
             }}
             height={22}
             width={22}
@@ -183,7 +170,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
               if (parentResult.error) {
                 return;
               }
-              onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, parentResult.vertex!, graph, setGraph);
+              onLayoutItemClick(setLayoutStore, parentResult.vertex!, graph, setGraph);
             }} />
         </Tooltip>
         <Tooltip content={"Duplicate"}>
@@ -209,7 +196,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
         <Tooltip content={"Delete"}>
           <Icon
             onClick={() => {
-              deleteLayoutGlobal(selectedId, props.item, setSelectedId, setSelectedComponent, setSelectedColl, ()=> layoutStore.hoverId, ((id: Id)=> setLayoutStore('hoverId', id)) as Setter<Id | number>, graph, setGraph, txnId, getComponentName(), showSuccessToast);
+              deleteLayoutGlobal(layoutStore, setLayoutStore, props.item, graph, setGraph, txnId, getComponentName(), showSuccessToast);
             }}
             icon={"fluent:delete-20-regular"}
             height={20}
@@ -252,19 +239,19 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
   const getBorder = () => {
     if (!isPreview()) {
       if (isActiveTargetItem()) {
-        if (indicatorPosition().position === "center") {
+        if (layoutStore.position === "center") {
           return "box-shadow:inset|0|0|0|2px|rgb(0,125,0),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
         }
-        if (indicatorPosition().position === "before") {
+        if (layoutStore.position === "before") {
           return "box-shadow:inset|0|8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
         }
-        if (indicatorPosition().position === "after") {
+        if (layoutStore.position === "after") {
           return "box-shadow:inset|0|-8px|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
         }
-        if (indicatorPosition().position === "left") {
+        if (layoutStore.position === "left") {
           return "box-shadow:inset|8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
         }
-        if (indicatorPosition().position === "right") {
+        if (layoutStore.position === "right") {
           return "box-shadow:inset|-8px|0|0|-6px|rgb(0,0,255),inset|0|0|0|1px|rgba(0,0,0,0.1)>*";
         }
       }
@@ -294,7 +281,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
         }}
         onClick={(e) => {
           e.stopPropagation();
-          onLayoutItemClick(setSelectedId, setSelectedComponent, setSelectedColl, props.item, graph, setGraph);
+          onLayoutItemClick(setLayoutStore, props.item, graph, setGraph);
 
         }}
         onDragOver={e => handleDragOver(e, setIndicatorPosition, setDragOverTargetId, props.item, isPreview(), () => [], draggedVertex, children, graph, setGraph, pageConfig.formData.formData, indicatorPosition)}
@@ -303,7 +290,7 @@ export function PageAttrDnDWrapper(props: Readonly<{ item: Vertex; children: JSX
           handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.item, isPreview(), () => [], children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
 
         }}
-        onDragLeave={e => handleDragLeave(setIndicatorPosition)}
+        onDragLeave={e => handleDragLeave(setLayoutStore)}
         onDrop={async (e) => {
           await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, txnId, pageConfig.formData.formData);
           resetDragDropState(setDraggedVertex, setIndicatorPosition, setDragOverTargetId);

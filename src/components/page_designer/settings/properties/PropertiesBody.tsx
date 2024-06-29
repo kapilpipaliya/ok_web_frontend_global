@@ -3,8 +3,6 @@ import { Portal } from "solid-js/web";
 import { getChildVertex, getChildVertexes, getTreeData } from "~/lib/graph/get/sync/traverse";
 import { GenericField } from "~/components/fields/GenericField";
 import { ModalContent, ModalFooter, ModalHeader } from "~/components/solid_blocks";
-
-import { SelectedIdContext, SelectedComponentContext } from "~/lib/contexts";
 import { GraphContext, type Vertex } from "~/lib/graph/graph";
 import { CollAndData } from "./CollAndData";
 import { setPropertyValueGlobal } from "~/lib/drag_drop/setPropertyValueGlobal";
@@ -23,18 +21,16 @@ export function PropertiesBody(props: any) {
   const [isRulesModalOpen, setIsRulesModalOpen] = createSignal(false);
   const [isImportModalOpen, setIsImportModalOpen] = createSignal(false);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [pageConfig, setPageConfig] = useDesignerLayoutStore();
-  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
-  const [selectedComponent, setSelectedComponent] = useContext(SelectedComponentContext);
+  const [layoutStore] = useDesignerLayoutStore();
   const setPropertyValue = (meta: Vertex, value: any) => {
-   if (selectedId() !== -1 && selectedComponent().vertexId !== -1) {
+   if (layoutStore.selectedId !== -1 && layoutStore.selectedComponent !== -1) {
       return setPropertyValueGlobal(
         graph,
         setGraph,
-        pageConfig.formData.txnId,
+        layoutStore.formData.txnId,
         meta,
-        graph.vertexes[selectedId()],
-        graph.vertexes[selectedComponent().vertexId],
+        graph.vertexes[layoutStore.selectedId],
+        graph.vertexes[layoutStore.selectedComponent],
         value,
       );
     }
@@ -45,7 +41,7 @@ export function PropertiesBody(props: any) {
   // Add all necessary signal, function and context logic here
 
   const selectedComponentProperties = () => {
-    const selectedComp = graph.vertexes[selectedComponent().vertexId];
+    const selectedComp = graph.vertexes[layoutStore.selectedComponent];
     if (!selectedComp) return { error: true };
     return getChildVertexes(graph, ["$0Prop"], [selectedComp]);
   };
@@ -57,7 +53,7 @@ export function PropertiesBody(props: any) {
 
   return (
     <>
-      <Show when={selectedId() !== -1}>
+      <Show when={layoutStore.selectedId !== -1}>
         <div class="flex jc:start">
           <button class="mb:5" onClick={toggleRulesModal}>Rules</button>
           &nbsp;&nbsp;
@@ -65,10 +61,10 @@ export function PropertiesBody(props: any) {
         </div>
         <CollAndData />
         <FormGroupProperties
-          txnId={pageConfig.formData.txnId}
+          txnId={layoutStore.formData.txnId}
           metaAttributes={selectedComponentProperties().vertexes ?? []}
           setValue={setPropertyValue}
-          selectedLayout={graph.vertexes[selectedId()]}
+          selectedLayout={graph.vertexes[layoutStore.selectedId]}
         />
       </Show>
       <Show when={isRulesModalOpen()}>
@@ -109,7 +105,7 @@ export function PropertiesBody(props: any) {
   function ModalBody() {
     const RulesModalBody = () => {
       prevTxnIndex =
-        graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
+        graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
       const txnId = getNewTxnId(graph, setGraph);
@@ -152,8 +148,8 @@ export function PropertiesBody(props: any) {
                         },
                       },
                     },
-                    pageConfig.formData?.formData
-                      ? [pageConfig.formData.formData]
+                    layoutStore.formData?.formData
+                      ? [layoutStore.formData.formData]
                       : [],
                     {
                       nameExpr: (v: Vertex) => {
@@ -204,14 +200,14 @@ export function PropertiesBody(props: any) {
       return (
         <TableInputField
           meta={graph.vertexes[metaVertexId]}
-          data={graph.vertexes[selectedId()!]}
-          txnId={pageConfig.formData.txnId}
+          data={graph.vertexes[layoutStore.selectedId]}
+          txnId={layoutStore.formData.txnId}
           isRealTime={false} />
       );
     };
     const ImportModalBody = () => {
       prevTxnIndex =
-        graph.transactions.get(pageConfig.formData.txnId)?.steps?.length || 0;
+        graph.transactions.get(layoutStore.formData.txnId)?.steps?.length || 0;
 
       const metaVertexId = getNewGraphId();
       const dataVertexId = getNewGraphId();
@@ -237,11 +233,11 @@ export function PropertiesBody(props: any) {
 
               onClick: () => {
                 const jsxParser = new JsxParser({
-                  formData: pageConfig.formData.formData,
+                  formData: layoutStore.formData.formData,
                   showWarnings: true,
-                  txnId: pageConfig.formData.txnId,
+                  txnId: layoutStore.formData.txnId,
                   jsx: graph.vertexes[dataVertexId].P.jsx || "",
-                  parent: graph.vertexes[selectedId()],
+                  parent: graph.vertexes[layoutStore.selectedId],
                 });
                 jsxParser.render(graph, setGraph);
                 // reset layout
@@ -291,7 +287,7 @@ export function PropertiesBody(props: any) {
                 </ModalHeader>
                 <ModalContent class={"mt:1rem"}>
                   <GenericInputField
-                    txnId={pageConfig.formData.txnId}
+                    txnId={layoutStore.formData.txnId}
                     title={"Write HTML"}
                     component="TextArea"
                     meta={graph.vertexes[metaVertexId]}

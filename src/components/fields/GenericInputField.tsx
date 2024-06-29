@@ -13,7 +13,6 @@ import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
 import { ExpressionBuilder } from "~/components/ExpressionBuilder";
 import { PageAttrRender } from "~/components/page_attr_render/PageAttrRender";
 import type { ComponentProps } from "~/components/fields/ComponentType";
-import { SelectedIdContext } from "~/lib/contexts";
 import { MultiSelectField } from "~/components/MultiSelect";
 import { getViewValue } from "~/lib/graph/get/sync/getViewValue";
 import { getCompProps } from "~/lib/graph/get/sync/graph_functions";
@@ -31,7 +30,6 @@ export function GenericInputField(
 ) {
   const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [selectedId, setSelectedId] = useContext(SelectedIdContext);
   const component = () => props.component;
 
   // todo: make a common onChange if possible.
