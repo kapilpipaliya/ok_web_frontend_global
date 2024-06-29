@@ -160,6 +160,13 @@ export function calculateFilter(input: string) {
 
   return { type, filter, skip, limit, isMultiple };
 }
+export interface NavItem {
+  name: string;
+  expanded: boolean;
+  id: string;
+  P: any;
+  children?: NavItem[];
+}
 
 export function getTreeData(
   graph: Store<GraphInterface>,
@@ -170,9 +177,9 @@ export function getTreeData(
     nameExpr?: (child: Vertex) => string;
     addChild?: (child: Vertex) => boolean;
   },
-) {
-  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]) => {
-    const result = [] as any[];
+): NavItem[] {
+  const getChildren = (levels: { [key: string]: any }, vertexes: Vertex[]): NavItem[] => {
+    const result: NavItem[] = [];
     if (!levels.collection) return result;
     const children = evaluate(jsep(levels.collection), {
       vertexes: vertexes,
@@ -184,11 +191,12 @@ export function getTreeData(
     )) {
       const name =
         levels?.nameExpr?.(child) || options?.nameExpr?.(child) || child.P.name;
-      const navItem = {} as any;
-      navItem.name = name;
-      navItem.expanded = true;
-      navItem.id = child.id;
-      navItem.P = child.P;
+      const navItem: NavItem = {
+        name: name,
+        expanded: true,
+        id: child.id,
+        P: child.P,
+      };
       if (
         levels.child &&
         ((levels?.addChild?.(child) || options?.addChild?.(child)) ?? true)
