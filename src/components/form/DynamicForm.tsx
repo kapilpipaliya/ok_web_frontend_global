@@ -37,6 +37,7 @@ import { FormMetaDataAuth } from "~/lib/formMetaDataAuth";
 import { getFormData } from "./getFormData";
 import { addFormComponentAttr } from "~/components/form/addFormComponentAttr";
 import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
+import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 
 export interface DynamicFormProps {
   meta?: Vertex;
@@ -79,9 +80,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   let onConfirmExit: () => void;
 
   const navigateToParentRoute = () => {
-    const segments = location.pathname.split('/');
-    segments.pop();
-    navigate(segments.join('/'));
+    navigate(removeLastPathSegment());
   };
 
   const initFormState = () => {

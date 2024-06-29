@@ -3,7 +3,7 @@ import { type Accessor, For, type Setter, createSignal, Show, useContext } from 
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { CustomModal } from "~/components/CommonDialog";
-import { ShareSection } from "../PageShare";
+import { ShareSection } from "./PageShare";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
 import { ProcessStatus, commitTxn, getNewTxnId } from "~/lib/graph/transaction";
@@ -11,7 +11,7 @@ import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, IdAttr, } from "~/lib/graph/graph";
 import { useDesignerLayoutStore } from "../LayoutContext";
-
+import { removeLastPathSegment } from "~/lib/removeLastPathSegment";
 export function HeaderRow() {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
@@ -25,17 +25,6 @@ export function HeaderRow() {
   ];
 
   const navigate = useNavigate();
-
-  const removeLastPathSegment = () => {
-    if (window.history.state === 1) {
-      const pathname = window.location.pathname;
-      const segments = pathname.split("/");
-      segments.pop();
-      return segments.join("/");
-    } else {
-      return -1
-    }
-  };
 
   const handleSubmit = async () => {
     // we cant have validationGroup when doing code. can we register components on the fly to enable validations?
@@ -93,7 +82,7 @@ export function HeaderRow() {
   const LeftIcons = () => (<div class="flex ai:center">
     <div
       class="bg:rgb(255,253,253,.5) flex ai:center jc:center bg:rgb(232,229,229):hover r:5|5|5|5 h:30px w:30px cursor:pointer"
-      onclick={() => navigate(removeLastPathSegment() as any)}
+      onclick={() => navigate(removeLastPathSegment())}
       title="Back"
     >
       <Icon

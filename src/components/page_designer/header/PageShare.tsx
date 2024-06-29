@@ -1,7 +1,7 @@
 import { createEffect, createSignal } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { useDesignerLayoutStore } from "./LayoutContext";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function ShareSection() {
   const [pageConfig] = useDesignerLayoutStore() || [];

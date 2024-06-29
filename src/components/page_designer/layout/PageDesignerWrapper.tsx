@@ -1,11 +1,11 @@
 import { type JSX, onMount, } from "solid-js";
-import { HeaderRow } from "./HeaderRow";
+import { HeaderRow } from "../header/HeaderRow";
 import { createStore } from "solid-js/store";
-import { PageSetting } from "../PageSetting";
+import { PageSetting } from "./PageSetting";
 import { isServer } from "solid-js/web";
 import { getInitialDesignerLayoutStore, DesignerLayoutStoreContext } from "~/components/page_designer/LayoutContext";
 import { RenderMainContent } from "./RenderMainContent";
-import { LayoutGridRowOne } from "./LayoutGridRowOne";
+import { LayoutGridRowOne } from "../row_one/LayoutGridRowOne";
 import { debounce } from "@solid-primitives/scheduled";
 import { makeEventListener } from "@solid-primitives/event-listener";
 
