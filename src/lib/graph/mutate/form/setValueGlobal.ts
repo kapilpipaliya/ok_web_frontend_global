@@ -7,7 +7,7 @@ import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { SetStoreFunction, Store } from "solid-js/store";
 import type { ServerEventsDispatcher } from "~/lib/websocket/ws_events_dispatcher";
 import { onChangeHandler } from "./onChangeHandler";
-import { validateInput } from "~/components/page_designer/actions/validateInput";
+import { validateInput } from "~/components/page_designer/settings/validateInput";
 import { batch } from "solid-js";
 
 

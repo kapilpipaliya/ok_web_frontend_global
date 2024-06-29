@@ -1,7 +1,7 @@
 import { type JSX, onMount, type Setter } from "solid-js";
 import { HeaderDragAndDrop } from "./Header_DragAndDrop";
 import { createStore } from "solid-js/store";
-import { PageSetting } from "./PageSetting";
+import { PageSetting } from "../PageSetting";
 import { isServer } from "solid-js/web";
 import { getInitialDesignerLayoutStore, DesignerLayoutStoreContext } from "~/components/page_designer/LayoutContext";
 import { RenderMainContent } from "./RenderMainContent";

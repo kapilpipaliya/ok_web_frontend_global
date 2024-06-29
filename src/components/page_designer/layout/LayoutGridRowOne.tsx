@@ -6,7 +6,7 @@ import { RenderLeftToggleButton } from "./RenderLeftToggleButton";
 import { RenderRightToggleButton } from "./RenderRightToggleButton";
 
 export function LayoutGridRowOne(): JSX.Element {
-  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
+  const [layoutStore] = useDesignerLayoutStore();
   return (
     <div class={`grid ${(layoutStore.isLeftOpen && layoutStore.isRightOpen)
       ? 'grid-cols:1'

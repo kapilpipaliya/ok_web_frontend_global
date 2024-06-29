@@ -9,7 +9,7 @@ import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { sortChildren } from "~/lib/drag_drop/sortChildren";
 import { deleteLayoutGlobal } from "~/lib/drag_drop/event_handler/deleteLayoutGlobal";
 import { useToast } from "~/components/Toast";
-import { useDesignerLayoutStore } from "./LayoutContext";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export const Stepper = () => {
   const [pageConfigStore] = useDesignerLayoutStore();

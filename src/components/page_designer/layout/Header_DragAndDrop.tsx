@@ -3,15 +3,14 @@ import { type Accessor, For, type Setter, createSignal, Show, useContext } from 
 import { Tooltip } from "~/components/solid_blocks/tooltip/tooltip";
 import logo from "~/assets/graphics/sidebarLogo.svg";
 import { CustomModal } from "~/components/CommonDialog";
-import { ShareSection } from "./PageShare";
+import { ShareSection } from "../PageShare";
 import { useNavigate } from "@solidjs/router";
 import { useToast } from "~/components/Toast";
 import { ProcessStatus, commitTxn, getNewTxnId } from "~/lib/graph/transaction";
 import { checkIfNameExistsMGCall } from "~/cypher/get/checkIfNameExists";
 import { submitDataCall } from "~/lib/api/api_functions";
 import { GraphContext, IdAttr, } from "~/lib/graph/graph";
-import { WsContext } from "~/lib/websocket/ws_events_dispatcher";
-import { useDesignerLayoutStore } from "./LayoutContext";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function HeaderDragAndDrop(props: Readonly<{
   view: Accessor<string>;
@@ -21,7 +20,6 @@ export function HeaderDragAndDrop(props: Readonly<{
 }>) {
   const [openDialog, setOpenDialog] = createSignal(false);
   const { showWarningToast, showLoadingToast, showErrorToast } = useToast();
-  const { Ws } = useContext(WsContext);
   const [graph, setGraph] = useContext(GraphContext)!;
   const txnId = getNewTxnId(graph, setGraph);
   const [pageConfig] = useDesignerLayoutStore() || [];

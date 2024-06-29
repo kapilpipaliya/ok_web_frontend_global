@@ -1,8 +1,8 @@
 import { type Setter, Show } from "solid-js";
-import { ContentDragAndDrop } from "./Content_DragAndDrop";
+import { ContentDragAndDrop } from "../Content_DragAndDrop";
 import { Drawer } from "~/components/Drawer";
-import { SettingsWrapper } from "./actions/SettingsWrapper";
-import { FormElementsWrapper } from "./menu/FormElementsWrapper";
+import { SettingsWrapper } from "../settings/SettingsWrapper";
+import { FormElementsWrapper } from "../form_elements/FormElementsWrapper";
 import { useDesignerLayoutStore } from "~/components/page_designer/LayoutContext";
 
 export function RenderMainContent() {

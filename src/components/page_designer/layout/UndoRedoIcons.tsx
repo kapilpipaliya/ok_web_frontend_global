@@ -2,7 +2,7 @@ import { For, } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
 import { redo, undo } from "~/lib/graph/transaction";
-import { useDesignerLayoutStore } from "./LayoutContext";
+import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function UndoRedoIcons() {
   const [pageConfig, __] = useDesignerLayoutStore();

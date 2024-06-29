@@ -3,7 +3,7 @@ import type { GraphInterface, Vertex } from "~/lib/graph/graph";
 import { evaluate } from "~/lib/expression_eval";
 import jsep from "jsep";
 import { mergeVertexProperties } from "../graph/mutate/vertex";
-import { validateInput } from "~/components/page_designer/actions/validateInput";
+import { validateInput } from "~/components/page_designer/settings/validateInput";
 import type { FieldAttribute, IFormMetaData } from "../FormMetadataType";
 import { getComponent } from "~/components/page_attr_render/utils/getComponent";
 import { genericInputComponents } from "~/components/form/DynamicComponent";
