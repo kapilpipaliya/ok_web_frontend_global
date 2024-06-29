@@ -1,5 +1,4 @@
 import { createSignal } from "solid-js";
-import { createStore } from "solid-js/store";
 import {
   HoverIdContext,
   SelectedCollContext,
@@ -9,9 +8,7 @@ import {
   DraggedVertexContext,
   SelectedComponentContext,
   IndicatorPositionContext,
-  FormSettingsContext,
   ShowDrawerContext,
-  type FormSettings,
 } from "~/lib/contexts";
 import type { Id, Vertex } from "~/lib/graph/graph";
 
@@ -31,16 +28,9 @@ export  function PageDesignerContext(props: any) {
     activeItem: Id | null;
     position: "before" | "after" | "center" | "left" | "right" | null;
   }>({ activeItem: null, position: null });
-  const formSetting = createStore({
-    labelPosition: "top", // Default position
-    labelColor: "black", // Default label color
-    inputBackground: "white",
-    activeStepId: 0,
-    prevTxnIds: [] as Array<Id | number>
-  } as FormSettings);
   const draggedVertices = createSignal<Vertex[] | []>([]);
   return (
-    <FormSettingsContext.Provider value={formSetting}>
+
       <HoverIdContext.Provider value={hoverId}>
         <SelectedCollContext.Provider value={selectedColl}>
           <SelectedIdContext.Provider value={selectedId}>
@@ -64,7 +54,6 @@ export  function PageDesignerContext(props: any) {
           </SelectedIdContext.Provider>
         </SelectedCollContext.Provider>
       </HoverIdContext.Provider>
-    </FormSettingsContext.Provider>
   );
 }
 

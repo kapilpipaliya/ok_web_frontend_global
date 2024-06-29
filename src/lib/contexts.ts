@@ -22,18 +22,6 @@ export const ShowDrawerContext = createContext(createSignal<boolean>(false));
 
 export const HiddenNodesContext = createContext(createSignal([] as Id[]));
 
-export interface FormSettings {
-  labelPosition: string;
-  labelColor: string;
-  inputBackground: string;
-  activeStepId: Id | number;
-  prevTxnIds: Array<Id | number>;
-}
-
-export const FormSettingsContext = createContext(
-  createStore( {} as FormSettings ),
-);
-
 export const SelectedComponentContext = createContext(
   createSignal({
     vertexId: -1 as Id | number,

@@ -1,5 +1,4 @@
 import { type JSX, Show, useContext, splitProps, createSignal, onMount } from "solid-js";
-import { FormSettingsContext } from "~/lib/contexts";
 import { GraphContext } from "~/lib/graph/graph";
 import { mergeVertexProperties } from "~/lib/graph/mutate/vertex";
 import type { ComponentProps } from "../fields/ComponentType";
@@ -12,15 +11,13 @@ interface LabeledFieldProps {
 }
 
 export function Label(props: JSX.IntrinsicAttributes & JSX.LabelHTMLAttributes<HTMLLabelElement> & ComponentProps & LabeledFieldProps) {
-  const [formSettingContext] = useContext(FormSettingsContext);
-
   const [pageConfig] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const [isEditing, setIsEditing] = createSignal(false);
   const [inputValue, setInputValue] = createSignal(props.label ?? "");
 
   const getFlexDirection = () => {
-    const position = props.position === "system" ? formSettingContext.labelPosition : props.position;
+    const position = props.position === "system" ? pageConfig.labelPosition : props.position;
     switch (position) {
       case "top":
         return "column";

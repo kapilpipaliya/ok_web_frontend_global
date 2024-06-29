@@ -1,7 +1,7 @@
 import { createMemo, For, Show, useContext } from "solid-js";
 import { Icon } from "@iconify-icon/solid";
 import { Tooltip } from "~/components/solid_blocks";
-import { FormSettingsContext, HoverIdContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
+import {  HoverIdContext, SelectedCollContext, SelectedComponentContext, SelectedIdContext } from "~/lib/contexts";
 import { GraphContext, IdAttr, type Vertex } from "~/lib/graph/graph";
 import { findVertexByLabelAndUniqueId } from "~/lib/graph/get/sync/findVertex";
 import { componentDrop } from "~/lib/drag_drop/drop/componentDrop";
@@ -13,7 +13,7 @@ import { useDesignerLayoutStore } from "../LayoutContext";
 
 export const Stepper = () => {
   const [pageConfigStore] = useDesignerLayoutStore();
-  const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
+  const [layoutStore, setLayoutStore] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
 
   const steps = createMemo<Vertex[]>(() =>
@@ -61,7 +61,7 @@ export const Stepper = () => {
       "before",
     );
 
-    setFormSettings('activeStepId', layoutRowId);
+    setLayoutStore('activeStepId', layoutRowId);
   };
 
   const addStepAfter = (toVertex: Vertex) => {
@@ -95,7 +95,7 @@ export const Stepper = () => {
       "after",
     );
 
-    setFormSettings('activeStepId', layoutRowId);
+    setLayoutStore('activeStepId', layoutRowId);
   };
 
   const deleteStep = (item: Vertex) => {
@@ -106,9 +106,9 @@ export const Stepper = () => {
     const currentStep = steps().findIndex(step => step.id === item.id);
     if (currentStep) {
       if (currentStep === 0) {
-        setFormSettings('activeStepId', steps()[currentStep + 1].id);
+        setLayoutStore('activeStepId', steps()[currentStep + 1].id);
       } else {
-        setFormSettings('activeStepId', steps()[currentStep - 1].id);
+        setLayoutStore('activeStepId', steps()[currentStep - 1].id);
       }
     }
     deleteLayoutGlobal(selectedId, item, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfigStore.formData.txnId, item.P.name, showSuccessToast);
@@ -145,13 +145,13 @@ export const Stepper = () => {
                 addStepBefore(step);
               }} />
             <li
-              style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${formSettings.activeStepId === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
-              onClick={() => setFormSettings('activeStepId', step.id)}
+              style={`display:flex; align-items:center; gap:0.5rem; flex-shrink:1; flex-basis:0; flex-grow:1; cursor:pointer; ${layoutStore.activeStepId === step.id ? "color:rgb(37,99,235);" : ""} position:relative;`}
+              onClick={() => setLayoutStore('activeStepId', step.id)}
             >
               <span style="display:flex; align-items:center;">
                 <Tooltip content={step.P.name}>
                   <span
-                    style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${formSettings.activeStepId === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
+                    style={`min-width:1.75rem; min-height:1.75rem; width:1.75rem; height:1.75rem; display:flex; justify-content:center; align-items:center; flex-shrink:0; background-color:rgb(243,244,246); font-weight:500; color:rgb(31,41,55); border-radius:9999px; ${layoutStore.activeStepId === step.id ? "background-color:rgb(37,99,235); color:white;" : ""}`}
                   >
                     {index() + 1}
                   </span>

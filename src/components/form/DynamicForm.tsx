@@ -26,7 +26,7 @@ import { submitDataCall } from "~/lib/api/api_functions";
 import { useToast } from "~/components/Toast";
 import { DeleteDialog } from "~/components/DeleteDialog";
 import { setGraphData } from "~/lib/websocket/setGraphData";
-import { FormContext, FormSettingsContext, type IFormContext } from "~/lib/contexts";
+import { FormContext, type IFormContext } from "~/lib/contexts";
 import { FormGroup } from "./FormGroup";
 import { LoaderNew } from "~/components/LoaderSimple";
 import { Icon } from "@iconify-icon/solid";
@@ -63,8 +63,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   const [graph, setGraph] = useContext(GraphContext)!;
   const cleanUpConfig = {} as { [key: string]: any };
   const txnId = getNewTxnId(graph, setGraph);
-  const [pageConfig, setPageConfig] = useDesignerLayoutStore() || [];
-  const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
+  const [_, setLayoutStore] = useDesignerLayoutStore();
 
   const [formData, setFormData] = createStore({
     txnId,
@@ -101,7 +100,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       if (dataVertex?.L[0] === "Form") {
         const layoutRowId = addFormComponentAttr(graph, dataVertex, txnId, setGraph);
         if (layoutRowId === -1) return;
-        setFormSettings('activeStepId', layoutRowId);
+        setLayoutStore('activeStepId', layoutRowId);
       }
     }
     const form =
@@ -161,7 +160,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
       metaTxnId: metaVertexResult.txnId,
     });
 
-    setPageConfig?.("formData", formData);
+    setLayoutStore?.("formData", formData);
   }
 
   const onSubmit = async () => {
@@ -316,7 +315,7 @@ export function DynamicForm(props: Readonly<DynamicFormProps>) {
   });
 
   onCleanup(() => {
-    setPageConfig?.("formData", undefined);
+    setLayoutStore?.("formData", undefined);
   });
 
   onCleanup(() => {

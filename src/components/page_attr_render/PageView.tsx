@@ -3,7 +3,7 @@ import { createMemo, createSignal, Match, Show, Switch, useContext } from "solid
 import {
   PageAttrRender
 } from "~/components/page_attr_render/PageAttrRender";
-import { FormSettingsContext, IsPreviewContext, } from "~/lib/contexts";
+import {  IsPreviewContext, } from "~/lib/contexts";
 import {
   getCollection
 } from "~/components/page_attr_render/utils/getCollection";
@@ -12,6 +12,7 @@ import {
 } from "~/components/page_attr_render/utils/getDataVertex";
 import { getChildrenAttrs } from "~/lib/drag_drop/getChildrenAttrs";
 import { FormWrapper } from "../fields/FormWrapper";
+import { useDesignerLayoutStore } from "../page_designer/LayoutContext";
 
 export function PageView(props: {
   metaVertex?: Vertex;
@@ -19,7 +20,7 @@ export function PageView(props: {
   isPreview?: boolean
 }) {
   const [graph, setGraph] = useContext(GraphContext)!;
-  const [formSettings, setFormSettings] = useContext(FormSettingsContext);
+  const [layoutStore] = useDesignerLayoutStore();
   
   const collection = createMemo(() =>
     getCollection(graph, props.metaVertex)
@@ -38,7 +39,7 @@ export function PageView(props: {
     if (props.isPreview) {
       return activeStepId() ? graph.vertexes[activeStepId()] : steps()[0];
     } else {
-      return formSettings.activeStepId ? graph.vertexes[formSettings.activeStepId] : steps()[0];
+      return layoutStore.activeStepId ? graph.vertexes[layoutStore.activeStepId] : steps()[0];
     }
   };
 
@@ -81,7 +82,7 @@ export function PageView(props: {
                 <button onClick={() => changeActiveStep(steps()[Math.min(steps().indexOf(selectedFormVertex()) + 1, steps().length - 1)].id)}>Next Step</button>
               </div>
             </Show>
-            <FormWrapper meta={selectedFormVertex()!} data={props.data} label={props.metaVertex?.P.name} />
+            <FormWrapper meta={selectedFormVertex()} data={props.data} label={props.metaVertex?.P.name} />
           </Match>
           <Match when={true}>
             <PageAttrRender metaVertex={props.metaVertex!} data={props.data} />

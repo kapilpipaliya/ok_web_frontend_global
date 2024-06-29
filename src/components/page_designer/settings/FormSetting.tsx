@@ -1,6 +1,6 @@
-import { For, useContext } from "solid-js";
+import { For } from "solid-js";
 import { DynamicCSSComponent } from "~/components/css_properties/components/DynamicCssComponent";
-import { FormSettingsContext } from "~/lib/contexts";
+import { useDesignerLayoutStore } from "../LayoutContext";
 const createSelectOptions = (
   name: string,
   label: string,
@@ -16,8 +16,7 @@ const createSelectOptions = (
   onChangeInput,
 });
 export const FormSetting = () => {
-  const [formSettingContext, setFormSettingContext] =
-    useContext(FormSettingsContext);
+  const [_, setLayoutStore] = useDesignerLayoutStore();
   const properties = {
     labelPosition: createSelectOptions(
       "labelPosition",
@@ -30,7 +29,7 @@ export const FormSetting = () => {
     ),
   };
   const onChangeInput = (label: any, value: any) => {
-    setFormSettingContext(label, value);
+    setLayoutStore(label, value);
   };
   return (
     <div>

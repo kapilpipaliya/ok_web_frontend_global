@@ -10,7 +10,7 @@ import {
   IndicatorPositionContext,
   ShowDrawerContext,
   DraggedVertexContext,
-  FormSettingsContext, SelectedCollContext, DragOverTargetIdContext, SelectedComponentContext,
+  SelectedCollContext, DragOverTargetIdContext, SelectedComponentContext,
   IsPreviewContext,
 } from "~/lib/contexts";
 import { getChildVertex } from "~/lib/graph/get/sync/traverse";
@@ -34,9 +34,8 @@ import {useToast} from "~/components/Toast";
 import { useDesignerLayoutStore } from "../LayoutContext";
 
 export function LayoutPart(props: {}) {
-  const [formSettings, setFormSettings] = useContext(FormSettingsContext) || [];
+  const [layoutStore] = useDesignerLayoutStore();
   const [showPropertiesDrawer, setShowPropertiesDrawer] = useContext(ShowDrawerContext);
-  const [pageConfig, setPageConfig] = useDesignerLayoutStore();
   const [graph, setGraph] = useContext(GraphContext)!;
   const [hoverId, setHoverId] = useContext(HoverIdContext);
   const [hiddenNodes, setHiddenNodes] = useContext(HiddenNodesContext);
@@ -50,11 +49,11 @@ export function LayoutPart(props: {}) {
   const [draggedVertex, setDraggedVertex] = useContext(DraggedVertexContext);
   const [, setSelectedColl] = useContext(SelectedCollContext);
   const [, setDragOverTargetId] = useContext(DragOverTargetIdContext);
-  const [selectedComponent, setSelectedComponent] = useContext(
+  const [_, setSelectedComponent] = useContext(
     SelectedComponentContext,
   );
   const { showErrorToast, showSuccessToast } = useToast()
-    const [isPreview, setIsPreview] = useContext(IsPreviewContext);
+    const [isPreview] = useContext(IsPreviewContext);
 
   function toggleExpand(itemId: Id) {
     setCollapsedKeys((prev) =>
@@ -93,7 +92,7 @@ export function LayoutPart(props: {}) {
       );
       // console.log("adding old properties", getComponent(), layoutPropRows);
       if (Object.keys(layoutPropRows).length) {
-        mergeVertexProperties(pageConfig.formData.txnId, props.metaVertex.id, graph, setGraph, layoutPropRows);
+        mergeVertexProperties(layoutStore.formData.txnId, props.metaVertex.id, graph, setGraph, layoutPropRows);
       }
     });
 
@@ -102,13 +101,13 @@ export function LayoutPart(props: {}) {
     const handleDragEnter = (e: DragEvent) => {
       startTime = Date.now();
       // e.stopPropagation();
-      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
+      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, layoutStore.formData.formData);
 
     };
 
     const handleDragOver = (e: DragEvent) => {
       e.stopPropagation();
-      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, pageConfig.formData.formData);
+      handleDragOverAndSetDropPosition(e, setIndicatorPosition, setDragOverTargetId, props.metaVertex, isPreview(), collapsedKeys, children, draggedVertex, graph, setGraph, layoutStore.formData.formData);
 
   
       const position = indicatorPosition().position;
@@ -138,7 +137,7 @@ export function LayoutPart(props: {}) {
             setGraph,
             fromVertex,
             toVertexId,
-            pageConfig.formData.formData,
+            layoutStore.formData.formData,
             position,
           )
         ) {
@@ -167,7 +166,7 @@ export function LayoutPart(props: {}) {
           onDragEnter={handleDragEnter}
           onDragLeave={handleDragLeave}
           onDrop={async (e)=>{
-            await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, pageConfig.formData.txnId, pageConfig.formData.formData);
+            await handleDrop(e, draggedVertex, indicatorPosition, graph, showErrorToast, setGraph, layoutStore.formData.txnId, layoutStore.formData.formData);
             resetDragDropState(setDraggedVertex, setIndicatorPosition, setDragOverTargetId);
           }}
           class={`${isSelectedLayoutId(props.metaVertex.id)
@@ -284,7 +283,7 @@ export function LayoutPart(props: {}) {
                   color={"black"}
                   class={"cursor:pointer mr:5px opacity:.5 opacity:1:hover"}
                   onclick={e=>{
-                    clone(props.metaVertex, undefined, undefined, pageConfig.formData.txnId, graph, setGraph, pageConfig.formData.formData);
+                    clone(props.metaVertex, undefined, undefined, layoutStore.formData.txnId, graph, setGraph, layoutStore.formData.formData);
                   }}
                 />
               </Tooltip>
@@ -298,7 +297,7 @@ export function LayoutPart(props: {}) {
                         style: { color: "red" },
                         onClick: () => {
                           const name = getComponent();
-                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, pageConfig.formData.txnId, name, showSuccessToast);
+                          deleteLayoutGlobal(selectedId, props.metaVertex, setSelectedId, setSelectedComponent, setSelectedColl, hoverId, setHoverId, graph, setGraph, layoutStore.formData.txnId, name, showSuccessToast);
 
                         },
                         width: 18,
@@ -360,7 +359,7 @@ export function LayoutPart(props: {}) {
           <ul class="pl:8 pt:3 pb:5">
             <For each={children()}>
               {(vertex) => (
-                <Show when={pageConfig.formData}>
+                <Show when={layoutStore.formData}>
                   <TreeView metaVertex={vertex} />
                 </Show>
               )}
@@ -372,14 +371,14 @@ export function LayoutPart(props: {}) {
   };
 
   const steps = createMemo<Vertex[]>(() =>
-    getChildrenAttrs(graph, setGraph, pageConfig.formData?.formData)
+    getChildrenAttrs(graph, setGraph, layoutStore.formData?.formData)
   );
-  const isFormRootVertetx = () => pageConfig.formData?.formData?.L?.[0] === "Form";
+  const isFormRootVertetx = () => layoutStore.formData?.formData?.L?.[0] === "Form";
   const rootVertexes = () => {
     if (isFormRootVertetx()) {
-      return formSettings.activeStepId ? [graph.vertexes[formSettings.activeStepId]] : (steps()[0] ? [steps()[0]] : [])
+      return layoutStore.activeStepId ? [graph.vertexes[layoutStore.activeStepId]] : (steps()[0] ? [steps()[0]] : [])
     }
-    return pageConfig.formData?.formData ? [pageConfig.formData.formData!] : [];
+    return layoutStore.formData?.formData ? [layoutStore.formData.formData!] : [];
   }; // Starting point(s)
 
   return (
@@ -392,7 +391,7 @@ export function LayoutPart(props: {}) {
       </Show>
       <For each={rootVertexes()}>
         {(item) => (
-          <Show when={pageConfig.formData}>
+          <Show when={layoutStore.formData}>
             <TreeView metaVertex={item} />
           </Show>
         )}

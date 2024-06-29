@@ -1,6 +1,7 @@
 import {createContext, useContext} from "solid-js";
 import type { createStore } from "solid-js/store";
 import type { IFormContext } from "~/lib/contexts";
+import { Id } from "~/lib/graph/graph";
 
 export function getInitialDesignerLayoutStore() {
   return ({
@@ -22,7 +23,12 @@ export function getInitialDesignerLayoutStore() {
     })),
     isLeftOpen: true,
     isRightOpen: true,
-    formData: {} as IFormContext
+    formData: {} as IFormContext,
+    labelPosition: "top", // Default position
+    labelColor: "black", // Default label color
+    inputBackground: "white",
+    activeStepId: 0 as Id | number,
+    prevTxnIds: [] as Array<Id | number>
   });
 }
 
